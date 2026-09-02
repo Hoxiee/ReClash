@@ -72,7 +72,7 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 1;
+  static const currentVersion = 2;
 
   Future<Config> run() async {
     final configMap = await _store.getConfigMap();
@@ -126,6 +126,9 @@ class Migration {
         shouldClearClashConfig = true;
       }
     }
+    if (oldVersion < 2) {
+      data = data.copyWith(configMap: _withFlClashXUa(data.configMap));
+    }
 
     config = Config.realFromJson(data.configMap);
     await _store.restore(data);
@@ -147,6 +150,20 @@ class Migration {
 
 bool _isV0(Map<String, Object?>? configMap) =>
     configMap?['proxiesStyle'] != null;
+
+// v1→v2: an unset global-ua becomes the FlClashX compat preset; a value the
+// user picked, including an explicit default, is kept.
+Map<String, Object?>? _withFlClashXUa(Map<String, Object?>? configMap) {
+  final patch = configMap?['patchClashConfig'];
+  if (configMap == null || patch is! Map || patch['global-ua'] != null) {
+    return configMap;
+  }
+  final map = Map<String, Object?>.from(configMap);
+  final patchCopy = Map<String, Object?>.from(patch);
+  patchCopy['global-ua'] = flClashXCompatUa;
+  map['patchClashConfig'] = patchCopy;
+  return map;
+}
 
 String? _getStoredDavPassword(Map<String, Object?>? configMap) {
   final dav = configMap?['davProps'] ?? configMap?['dav'];

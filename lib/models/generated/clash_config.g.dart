@@ -441,7 +441,7 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
       geodataLoader:
           $enumDecodeNullable(_$GeodataLoaderEnumMap, json['geodata-loader']) ??
           GeodataLoader.memconservative,
-      globalUa: json['global-ua'] as String?,
+      globalUa: json['global-ua'] as String? ?? flClashXCompatUa,
       externalController:
           $enumDecodeNullable(
             _$ExternalControllerStatusEnumMap,

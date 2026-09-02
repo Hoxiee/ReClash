@@ -175,6 +175,8 @@ void main() {
 
     await tester.tap(find.text('User-Agent'));
     await tester.pumpAndSettle();
+    // The preset string shows both in the item subtitle and the dialog row.
+    expect(find.text(flClashXCompatUa), findsNWidgets(2));
     expect(find.text('clash-verge/v2.4.2'), findsOneWidget);
 
     await tester.tap(find.text('clash-verge/v2.4.2'));

@@ -198,6 +198,25 @@ void main() {
     expect(overridden['find-process-mode'], 'always');
   });
 
+  test('makeRealProfileTask falls back to the app UA when default is chosen', () async {
+    final result = await makeRealProfileTask(
+      MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: 7,
+        rawConfig: {},
+        realPatchConfig: const PatchClashConfig().copyWith(globalUa: null),
+        overrideDns: false,
+        appendSystemDns: false,
+        proxyGroups: const [],
+        rules: const [],
+        addedRules: const [],
+        defaultUA: 'ReClash-Test',
+      ),
+    );
+
+    expect((loadYaml(result.yaml) as YamlMap)['global-ua'], 'ReClash-Test');
+  });
+
   test('makeRealProfileTask fills missing network keys from the patch', () async {
     final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
       await encodeJSONTask(<String, dynamic>{}),
@@ -282,7 +301,7 @@ void main() {
       expect(result.md5, hasLength(32));
       expect(config['mixed-port'], 7893);
       expect(config['allow-lan'], true);
-      expect(config['global-ua'], 'ReClash-Test');
+      expect(config['global-ua'], flClashXCompatUa);
       expect(config['profile']['store-selected'], false);
       expect(
         config['dns']['nameserver'],

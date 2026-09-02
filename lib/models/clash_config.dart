@@ -523,6 +523,11 @@ Map<String, String> _geoXUrlToJson(Map<GeoResource, String> value) {
   return value.raw;
 }
 
+/// Subscription panels pick the payload format by User-Agent, and an unknown
+/// client gets share links instead of clash YAML, so until panels recognize
+/// the ReClash identity it ships as the default User-Agent choice.
+const flClashXCompatUa = 'FlClashX/v0.4.2';
+
 @freezed
 abstract class PatchClashConfig with _$PatchClashConfig {
   const factory PatchClashConfig({
@@ -565,7 +570,7 @@ abstract class PatchClashConfig with _$PatchClashConfig {
     @Default(GeodataLoader.memconservative)
     @JsonKey(name: 'geodata-loader')
     GeodataLoader geodataLoader,
-    @JsonKey(name: 'global-ua') String? globalUa,
+    @Default(flClashXCompatUa) @JsonKey(name: 'global-ua') String? globalUa,
     @Default(ExternalControllerStatus.close)
     @JsonKey(name: 'external-controller')
     ExternalControllerStatus externalController,

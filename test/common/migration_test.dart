@@ -37,7 +37,10 @@ void main() {
         );
         final davProps = configMap['davProps']! as Map<String, Object?>;
         davProps['password'] = 'secret';
-        final store = _FakeMigrationStore(configMap: configMap, version: 1);
+        final store = _FakeMigrationStore(
+          configMap: configMap,
+          version: Migration.currentVersion,
+        );
 
         final config = await Migration(store: store).run();
 
@@ -202,6 +205,40 @@ void main() {
 
       expect(store.events, ['getConfigMap', 'getVersion', 'saveConfig']);
       expect(store.version, Migration.currentVersion);
+    });
+
+    test('v1 to v2 defaults an unset global-ua to the FlClashX preset', () async {
+      final configMap = _createConfigMap();
+      final patch = configMap['patchClashConfig']! as Map<String, Object?>;
+      patch['global-ua'] = null;
+      final store = _FakeMigrationStore(configMap: configMap, version: 1);
+
+      final config = await Migration(store: store).run();
+
+      expect(config.patchClashConfig.globalUa, flClashXCompatUa);
+      expect(
+        store.savedConfig?.patchClashConfig.globalUa,
+        flClashXCompatUa,
+      );
+      expect(store.version, Migration.currentVersion);
+      expect(store.events, [
+        'getConfigMap',
+        'getVersion',
+        'restore',
+        'saveConfig',
+        'setVersion',
+      ]);
+    });
+
+    test('v1 to v2 keeps a user-chosen global-ua', () async {
+      final configMap = _createConfigMap();
+      final patch = configMap['patchClashConfig']! as Map<String, Object?>;
+      patch['global-ua'] = 'clash-verge/v2.4.2';
+      final store = _FakeMigrationStore(configMap: configMap, version: 1);
+
+      final config = await Migration(store: store).run();
+
+      expect(config.patchClashConfig.globalUa, 'clash-verge/v2.4.2');
     });
   });
 }

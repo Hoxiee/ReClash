@@ -46,9 +46,7 @@ class DeviceIdentity {
     return sha256.convert(utf8.encode('reclash-device:$source')).toString();
   }
 
-  Future<DeviceIdentityInfo> get info => _pendingInfo ??= _loadInfo();
-
-  Future<DeviceIdentityInfo> _loadInfo() async {
+  Future<DeviceIdentityInfo> get info => _pendingInfo ??= _loadInfo();  Future<DeviceIdentityInfo> _loadInfo() async {
     try {
       final deviceInfo = await DeviceInfoPlugin().deviceInfo;
       final (source, model) = switch (deviceInfo) {
@@ -143,8 +141,7 @@ class DeviceIdentity {
     try {
       return await coreController.getVersion().timeout(_coreVersionTimeout);
     } catch (error) {
-      // A subscription update must not block on core liveness; the UA simply
-      // ships without the core segment until the core answers once.
+      // The UA ships without the core segment until the core answers once.
       commonPrint.log(
         'Failed to read core version: ${compactError(error)}',
         logLevel: LogLevel.warning,
@@ -167,7 +164,7 @@ class DeviceIdentity {
     required bool includeDeviceIdentity,
   }) async {
     final headers = <String, String>{
-      'User-Agent': await subscriptionUserAgent(),
+      'User-Agent': globalState.configuredUa ?? await subscriptionUserAgent(),
     };
     if (includeDeviceIdentity) {
       final identity = await info;

@@ -43,9 +43,10 @@ class GlobalState {
     return _instance!;
   }
 
-  String get ua => container
-      .read(patchClashConfigProvider.select((state) => state.globalUa))
-      .takeFirstValid([packageInfo.ua]);
+  String? get configuredUa => container
+      .read(patchClashConfigProvider.select((state) => state.globalUa));
+
+  String get ua => configuredUa.takeFirstValid([packageInfo.ua]);
 
   Future<T?> loadingRun<T>(
     FutureOr<T> Function() futureFunction, {

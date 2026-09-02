@@ -1,5 +1,6 @@
 import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
@@ -40,7 +41,12 @@ void main() {
   }
 
   group('user agent', () {
-    test('falls back to the package user agent when none is configured', () {
+    test('defaults to the FlClashX compat preset', () {
+      expect(globalState.ua, flClashXCompatUa);
+      expect(globalState.configuredUa, flClashXCompatUa);
+    });
+
+    test('falls back to the package user agent when unset', () {
       setGlobalUa('');
 
       expect(globalState.ua, _packageInfo.ua);
@@ -56,6 +62,16 @@ void main() {
     test('treats a blank configured user agent as unset', () {
       setGlobalUa('   ');
 
+      expect(globalState.ua, _packageInfo.ua);
+    });
+
+    test('an explicit default clears the preset', () {
+      setGlobalUa('custom-agent/1.0');
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(globalUa: null));
+
+      expect(globalState.configuredUa, isNull);
       expect(globalState.ua, _packageInfo.ua);
     });
   });

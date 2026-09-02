@@ -2,7 +2,11 @@ part of '../general.dart';
 
 const _defaultUaValue = '';
 const _customUaValue = '__custom_ua__';
-const _presetUas = ['clash-verge/v2.4.2', 'ClashforWindows/0.19.23'];
+const _presetUas = [
+  flClashXCompatUa,
+  'clash-verge/v2.4.2',
+  'ClashforWindows/0.19.23',
+];
 
 class _UaDialogResult {
   final String value;
