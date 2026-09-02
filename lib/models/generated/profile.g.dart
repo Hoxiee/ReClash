@@ -56,6 +56,16 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   scriptId: (json['scriptId'] as num?)?.toInt(),
   matchTarget: json['matchTarget'] as String?,
   order: (json['order'] as num?)?.toInt(),
+  clientEmulation:
+      $enumDecodeNullable(
+        _$SubscriptionClientEnumMap,
+        json['clientEmulation'],
+      ) ??
+      SubscriptionClient.auto,
+  customUserAgent: json['customUserAgent'] as String? ?? '',
+  skippedNodes: json['skippedNodes'] == null
+      ? const []
+      : const SkippedNodesConverter().fromJson(json['skippedNodes'] as List),
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
@@ -74,12 +84,25 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'scriptId': instance.scriptId,
   'matchTarget': instance.matchTarget,
   'order': instance.order,
+  'clientEmulation': _$SubscriptionClientEnumMap[instance.clientEmulation]!,
+  'customUserAgent': instance.customUserAgent,
+  'skippedNodes': const SkippedNodesConverter().toJson(instance.skippedNodes),
 };
 
 const _$OverwriteTypeEnumMap = {
   OverwriteType.standard: 'standard',
   OverwriteType.script: 'script',
   OverwriteType.custom: 'custom',
+};
+
+const _$SubscriptionClientEnumMap = {
+  SubscriptionClient.auto: 'auto',
+  SubscriptionClient.clash: 'clash',
+  SubscriptionClient.happ: 'happ',
+  SubscriptionClient.incy: 'incy',
+  SubscriptionClient.singbox: 'singbox',
+  SubscriptionClient.v2rayng: 'v2rayng',
+  SubscriptionClient.custom: 'custom',
 };
 
 _StandardOverwrite _$StandardOverwriteFromJson(Map<String, dynamic> json) =>

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -32,10 +33,13 @@ void main() {
       selectedMap: const {'Select': 'DIRECT'},
       unfoldSet: const {'Select'},
       order: 3,
+      clientEmulation: SubscriptionClient.happ,
+      customUserAgent: 'Custom/1.0',
+      skippedNodes: <SkippedNode>[],
     );
 
-    expect(profile.toColumns(true), hasLength(15));
-    expect(profile.toCompanion(true).toColumns(true), hasLength(15));
+    expect(profile.toColumns(true), hasLength(18));
+    expect(profile.toCompanion(true).toColumns(true), hasLength(18));
     expect(RawProfile.fromJson(profile.toJson()).toJson(), profile.toJson());
     expect(profile.copyWith(label: 'Next').label, 'Next');
     expect(
@@ -63,10 +67,13 @@ void main() {
       autoUpdate: false,
       selectedMap: {},
       unfoldSet: {},
+      clientEmulation: SubscriptionClient.auto,
+      customUserAgent: '',
+      skippedNodes: <SkippedNode>[],
     );
-    expect(emptyProfile.toColumns(true), hasLength(8));
-    expect(emptyProfile.toColumns(false), hasLength(15));
-    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(8));
+    expect(emptyProfile.toColumns(true), hasLength(11));
+    expect(emptyProfile.toColumns(false), hasLength(18));
+    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(11));
 
     final insertedProfile = ProfilesCompanion.insert(
       label: 'Inserted',

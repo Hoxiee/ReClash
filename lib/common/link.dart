@@ -29,6 +29,12 @@ class LinkManager {
         if (url != null) {
           installConfigCallBack(url);
         }
+        return;
+      }
+      // Resolved locally by the subscription pipeline; the scheme
+      // registration itself lives in the platform manifests.
+      if (uri.scheme == 'incy' || uri.scheme == 'happ') {
+        installConfigCallBack(uri.toString());
       }
     });
   }

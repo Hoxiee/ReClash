@@ -161,6 +161,38 @@ class $ProfilesTable extends Profiles
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<SubscriptionClient, String>
+  clientEmulation = GeneratedColumn<String>(
+    'client_emulation',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('auto'),
+  ).withConverter<SubscriptionClient>($ProfilesTable.$converterclientEmulation);
+  static const VerificationMeta _customUserAgentMeta = const VerificationMeta(
+    'customUserAgent',
+  );
+  @override
+  late final GeneratedColumn<String> customUserAgent = GeneratedColumn<String>(
+    'custom_user_agent',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<SkippedNode>, String>
+  skippedNodes = GeneratedColumn<String>(
+    'skipped_nodes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  ).withConverter<List<SkippedNode>>($ProfilesTable.$converterskippedNodes);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     label,
@@ -177,6 +209,9 @@ class $ProfilesTable extends Profiles
     selectedMap,
     unfoldSet,
     order,
+    clientEmulation,
+    customUserAgent,
+    skippedNodes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -267,6 +302,15 @@ class $ProfilesTable extends Profiles
         order.isAcceptableOrUnknown(data['order']!, _orderMeta),
       );
     }
+    if (data.containsKey('custom_user_agent')) {
+      context.handle(
+        _customUserAgentMeta,
+        customUserAgent.isAcceptableOrUnknown(
+          data['custom_user_agent']!,
+          _customUserAgentMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -346,6 +390,22 @@ class $ProfilesTable extends Profiles
         DriftSqlType.int,
         data['${effectivePrefix}order'],
       ),
+      clientEmulation: $ProfilesTable.$converterclientEmulation.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}client_emulation'],
+        )!,
+      ),
+      customUserAgent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_user_agent'],
+      )!,
+      skippedNodes: $ProfilesTable.$converterskippedNodes.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}skipped_nodes'],
+        )!,
+      ),
     );
   }
 
@@ -366,6 +426,12 @@ class $ProfilesTable extends Profiles
       const StringMapConverter();
   static TypeConverter<Set<String>, String> $converterunfoldSet =
       const StringSetConverter();
+  static JsonTypeConverter2<SubscriptionClient, String, String>
+  $converterclientEmulation = const EnumNameConverter<SubscriptionClient>(
+    SubscriptionClient.values,
+  );
+  static TypeConverter<List<SkippedNode>, String> $converterskippedNodes =
+      const SkippedNodesSqlConverter();
 }
 
 class RawProfile extends DataClass implements Insertable<RawProfile> {
@@ -384,6 +450,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final Map<String, String> selectedMap;
   final Set<String> unfoldSet;
   final int? order;
+  final SubscriptionClient clientEmulation;
+  final String customUserAgent;
+  final List<SkippedNode> skippedNodes;
   const RawProfile({
     required this.id,
     required this.label,
@@ -400,6 +469,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.selectedMap,
     required this.unfoldSet,
     this.order,
+    required this.clientEmulation,
+    required this.customUserAgent,
+    required this.skippedNodes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -451,6 +523,17 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     if (!nullToAbsent || order != null) {
       map['order'] = Variable<int>(order);
     }
+    {
+      map['client_emulation'] = Variable<String>(
+        $ProfilesTable.$converterclientEmulation.toSql(clientEmulation),
+      );
+    }
+    map['custom_user_agent'] = Variable<String>(customUserAgent);
+    {
+      map['skipped_nodes'] = Variable<String>(
+        $ProfilesTable.$converterskippedNodes.toSql(skippedNodes),
+      );
+    }
     return map;
   }
 
@@ -485,6 +568,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       order: order == null && nullToAbsent
           ? const Value.absent()
           : Value(order),
+      clientEmulation: Value(clientEmulation),
+      customUserAgent: Value(customUserAgent),
+      skippedNodes: Value(skippedNodes),
     );
   }
 
@@ -517,6 +603,13 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       unfoldSet: serializer.fromJson<Set<String>>(json['unfoldSet']),
       order: serializer.fromJson<int?>(json['order']),
+      clientEmulation: $ProfilesTable.$converterclientEmulation.fromJson(
+        serializer.fromJson<String>(json['clientEmulation']),
+      ),
+      customUserAgent: serializer.fromJson<String>(json['customUserAgent']),
+      skippedNodes: serializer.fromJson<List<SkippedNode>>(
+        json['skippedNodes'],
+      ),
     );
   }
   @override
@@ -544,6 +637,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       'selectedMap': serializer.toJson<Map<String, String>>(selectedMap),
       'unfoldSet': serializer.toJson<Set<String>>(unfoldSet),
       'order': serializer.toJson<int?>(order),
+      'clientEmulation': serializer.toJson<String>(
+        $ProfilesTable.$converterclientEmulation.toJson(clientEmulation),
+      ),
+      'customUserAgent': serializer.toJson<String>(customUserAgent),
+      'skippedNodes': serializer.toJson<List<SkippedNode>>(skippedNodes),
     };
   }
 
@@ -563,6 +661,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     Map<String, String>? selectedMap,
     Set<String>? unfoldSet,
     Value<int?> order = const Value.absent(),
+    SubscriptionClient? clientEmulation,
+    String? customUserAgent,
+    List<SkippedNode>? skippedNodes,
   }) => RawProfile(
     id: id ?? this.id,
     label: label ?? this.label,
@@ -586,6 +687,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     selectedMap: selectedMap ?? this.selectedMap,
     unfoldSet: unfoldSet ?? this.unfoldSet,
     order: order.present ? order.value : this.order,
+    clientEmulation: clientEmulation ?? this.clientEmulation,
+    customUserAgent: customUserAgent ?? this.customUserAgent,
+    skippedNodes: skippedNodes ?? this.skippedNodes,
   );
   RawProfile copyWithCompanion(ProfilesCompanion data) {
     return RawProfile(
@@ -620,6 +724,15 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           : this.selectedMap,
       unfoldSet: data.unfoldSet.present ? data.unfoldSet.value : this.unfoldSet,
       order: data.order.present ? data.order.value : this.order,
+      clientEmulation: data.clientEmulation.present
+          ? data.clientEmulation.value
+          : this.clientEmulation,
+      customUserAgent: data.customUserAgent.present
+          ? data.customUserAgent.value
+          : this.customUserAgent,
+      skippedNodes: data.skippedNodes.present
+          ? data.skippedNodes.value
+          : this.skippedNodes,
     );
   }
 
@@ -640,7 +753,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('clientEmulation: $clientEmulation, ')
+          ..write('customUserAgent: $customUserAgent, ')
+          ..write('skippedNodes: $skippedNodes')
           ..write(')'))
         .toString();
   }
@@ -662,6 +778,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     selectedMap,
     unfoldSet,
     order,
+    clientEmulation,
+    customUserAgent,
+    skippedNodes,
   );
   @override
   bool operator ==(Object other) =>
@@ -681,7 +800,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.autoUpdate == this.autoUpdate &&
           other.selectedMap == this.selectedMap &&
           other.unfoldSet == this.unfoldSet &&
-          other.order == this.order);
+          other.order == this.order &&
+          other.clientEmulation == this.clientEmulation &&
+          other.customUserAgent == this.customUserAgent &&
+          other.skippedNodes == this.skippedNodes);
 }
 
 class ProfilesCompanion extends UpdateCompanion<RawProfile> {
@@ -700,6 +822,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<Map<String, String>> selectedMap;
   final Value<Set<String>> unfoldSet;
   final Value<int?> order;
+  final Value<SubscriptionClient> clientEmulation;
+  final Value<String> customUserAgent;
+  final Value<List<SkippedNode>> skippedNodes;
   const ProfilesCompanion({
     this.id = const Value.absent(),
     this.label = const Value.absent(),
@@ -716,6 +841,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.selectedMap = const Value.absent(),
     this.unfoldSet = const Value.absent(),
     this.order = const Value.absent(),
+    this.clientEmulation = const Value.absent(),
+    this.customUserAgent = const Value.absent(),
+    this.skippedNodes = const Value.absent(),
   });
   ProfilesCompanion.insert({
     this.id = const Value.absent(),
@@ -733,6 +861,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     required Map<String, String> selectedMap,
     required Set<String> unfoldSet,
     this.order = const Value.absent(),
+    this.clientEmulation = const Value.absent(),
+    this.customUserAgent = const Value.absent(),
+    this.skippedNodes = const Value.absent(),
   }) : label = Value(label),
        url = Value(url),
        overwriteType = Value(overwriteType),
@@ -756,6 +887,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? selectedMap,
     Expression<String>? unfoldSet,
     Expression<int>? order,
+    Expression<String>? clientEmulation,
+    Expression<String>? customUserAgent,
+    Expression<String>? skippedNodes,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -774,6 +908,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (selectedMap != null) 'selected_map': selectedMap,
       if (unfoldSet != null) 'unfold_set': unfoldSet,
       if (order != null) 'order': order,
+      if (clientEmulation != null) 'client_emulation': clientEmulation,
+      if (customUserAgent != null) 'custom_user_agent': customUserAgent,
+      if (skippedNodes != null) 'skipped_nodes': skippedNodes,
     });
   }
 
@@ -793,6 +930,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<Map<String, String>>? selectedMap,
     Value<Set<String>>? unfoldSet,
     Value<int?>? order,
+    Value<SubscriptionClient>? clientEmulation,
+    Value<String>? customUserAgent,
+    Value<List<SkippedNode>>? skippedNodes,
   }) {
     return ProfilesCompanion(
       id: id ?? this.id,
@@ -811,6 +951,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       selectedMap: selectedMap ?? this.selectedMap,
       unfoldSet: unfoldSet ?? this.unfoldSet,
       order: order ?? this.order,
+      clientEmulation: clientEmulation ?? this.clientEmulation,
+      customUserAgent: customUserAgent ?? this.customUserAgent,
+      skippedNodes: skippedNodes ?? this.skippedNodes,
     );
   }
 
@@ -874,6 +1017,19 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     if (order.present) {
       map['order'] = Variable<int>(order.value);
     }
+    if (clientEmulation.present) {
+      map['client_emulation'] = Variable<String>(
+        $ProfilesTable.$converterclientEmulation.toSql(clientEmulation.value),
+      );
+    }
+    if (customUserAgent.present) {
+      map['custom_user_agent'] = Variable<String>(customUserAgent.value);
+    }
+    if (skippedNodes.present) {
+      map['skipped_nodes'] = Variable<String>(
+        $ProfilesTable.$converterskippedNodes.toSql(skippedNodes.value),
+      );
+    }
     return map;
   }
 
@@ -894,7 +1050,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('clientEmulation: $clientEmulation, ')
+          ..write('customUserAgent: $customUserAgent, ')
+          ..write('skippedNodes: $skippedNodes')
           ..write(')'))
         .toString();
   }
@@ -3585,6 +3744,9 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       required Map<String, String> selectedMap,
       required Set<String> unfoldSet,
       Value<int?> order,
+      Value<SubscriptionClient> clientEmulation,
+      Value<String> customUserAgent,
+      Value<List<SkippedNode>> skippedNodes,
     });
 typedef $$ProfilesTableUpdateCompanionBuilder =
     ProfilesCompanion Function({
@@ -3603,6 +3765,9 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<Map<String, String>> selectedMap,
       Value<Set<String>> unfoldSet,
       Value<int?> order,
+      Value<SubscriptionClient> clientEmulation,
+      Value<String> customUserAgent,
+      Value<List<SkippedNode>> skippedNodes,
     });
 
 final class $$ProfilesTableReferences
@@ -3741,6 +3906,23 @@ class $$ProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<SubscriptionClient, SubscriptionClient, String>
+  get clientEmulation => $composableBuilder(
+    column: $table.clientEmulation,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get customUserAgent => $composableBuilder(
+    column: $table.customUserAgent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<SkippedNode>, List<SkippedNode>, String>
+  get skippedNodes => $composableBuilder(
+    column: $table.skippedNodes,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   Expression<bool> profileRuleLinksRefs(
     Expression<bool> Function($$ProfileRuleLinksTableFilterComposer f) f,
   ) {
@@ -3875,6 +4057,21 @@ class $$ProfilesTableOrderingComposer
     column: $table.order,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get clientEmulation => $composableBuilder(
+    column: $table.clientEmulation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customUserAgent => $composableBuilder(
+    column: $table.customUserAgent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get skippedNodes => $composableBuilder(
+    column: $table.skippedNodes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProfilesTableAnnotationComposer
@@ -3949,6 +4146,23 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<int> get order =>
       $composableBuilder(column: $table.order, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SubscriptionClient, String>
+  get clientEmulation => $composableBuilder(
+    column: $table.clientEmulation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customUserAgent => $composableBuilder(
+    column: $table.customUserAgent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<SkippedNode>, String>
+  get skippedNodes => $composableBuilder(
+    column: $table.skippedNodes,
+    builder: (column) => column,
+  );
 
   Expression<T> profileRuleLinksRefs<T extends Object>(
     Expression<T> Function($$ProfileRuleLinksTableAnnotationComposer a) f,
@@ -4048,6 +4262,10 @@ class $$ProfilesTableTableManager
                 Value<Map<String, String>> selectedMap = const Value.absent(),
                 Value<Set<String>> unfoldSet = const Value.absent(),
                 Value<int?> order = const Value.absent(),
+                Value<SubscriptionClient> clientEmulation =
+                    const Value.absent(),
+                Value<String> customUserAgent = const Value.absent(),
+                Value<List<SkippedNode>> skippedNodes = const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
                 label: label,
@@ -4064,6 +4282,9 @@ class $$ProfilesTableTableManager
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
                 order: order,
+                clientEmulation: clientEmulation,
+                customUserAgent: customUserAgent,
+                skippedNodes: skippedNodes,
               ),
           createCompanionCallback:
               ({
@@ -4083,6 +4304,10 @@ class $$ProfilesTableTableManager
                 required Map<String, String> selectedMap,
                 required Set<String> unfoldSet,
                 Value<int?> order = const Value.absent(),
+                Value<SubscriptionClient> clientEmulation =
+                    const Value.absent(),
+                Value<String> customUserAgent = const Value.absent(),
+                Value<List<SkippedNode>> skippedNodes = const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
                 label: label,
@@ -4099,6 +4324,9 @@ class $$ProfilesTableTableManager
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
                 order: order,
+                clientEmulation: clientEmulation,
+                customUserAgent: customUserAgent,
+                skippedNodes: skippedNodes,
               ),
           withReferenceMapper: (p0) => p0
               .map(

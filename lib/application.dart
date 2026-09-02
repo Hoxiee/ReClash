@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -89,20 +90,33 @@ class ApplicationState extends ConsumerState<Application> {
   }
 
   void _initLink() {
+    final color = context.colorScheme.primary;
     linkManager.initAppLinksListen((url) async {
-      final message = currentAppLocalizations.createProfileFromUrlTip(url);
-      final parts = message.split(url);
+      ResolvedExternalLink? resolved;
+      try {
+        resolved = await resolveExternalLink(url);
+      } on IncyLinkException catch (e) {
+        await dialogs.showMessage(
+          title: currentAppLocalizations.addProfile,
+          message: TextSpan(text: e.message),
+        );
+        return;
+      }
+      final target = resolved?.url ?? url;
+      final name = resolved?.name;
+      final message = currentAppLocalizations.createProfileFromUrlTip(target);
+      final parts = message.split(target);
       final res = await dialogs.showMessage(
         title: currentAppLocalizations.addProfile,
         message: TextSpan(
           children: [
             TextSpan(text: parts.first),
             TextSpan(
-              text: url,
+              text: target,
               style: TextStyle(
-                color: context.colorScheme.primary,
+                color: color,
                 decoration: TextDecoration.underline,
-                decorationColor: context.colorScheme.primary,
+                decorationColor: color,
               ),
             ),
             if (parts.length > 1) TextSpan(text: parts.last),
@@ -111,7 +125,9 @@ class ApplicationState extends ConsumerState<Application> {
       );
       if (res != true) return;
       unawaited(
-        ref.read(profilesActionProvider.notifier).addProfileFormURL(url),
+        ref
+            .read(profilesActionProvider.notifier)
+            .addProfileFormURL(target, client: resolved?.preset ?? SubscriptionClient.auto, name: name),
       );
     });
   }

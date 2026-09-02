@@ -34,7 +34,7 @@ class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -58,6 +58,11 @@ class Database extends _$Database {
         }
         if (from < 4) {
           await m.addColumn(profiles, profiles.panelMeta);
+        }
+        if (from < 5) {
+          await m.addColumn(profiles, profiles.clientEmulation);
+          await m.addColumn(profiles, profiles.customUserAgent);
+          await m.addColumn(profiles, profiles.skippedNodes);
         }
       },
     );

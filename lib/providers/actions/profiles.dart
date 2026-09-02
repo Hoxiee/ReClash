@@ -149,7 +149,32 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<void> addProfileFormURL(String url) async {
+  Future<void> addProfileFromLocalContent(String content) async {
+    if (globalState.navigatorKey.currentState?.canPop() ?? false) {
+      globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    }
+    ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
+    final profile = await globalState.loadingRun(
+      tag: LoadingTag.profiles,
+      () async {
+        return Profile.normal().saveFileWithString(
+          content,
+          validate: (path) => _core.validateConfig(path),
+        );
+      },
+      title: currentAppLocalizations.addProfile,
+    );
+    if (profile != null) {
+      putProfile(profile);
+    }
+  }
+
+  Future<void> addProfileFormURL(
+    String url, {
+    SubscriptionClient client = SubscriptionClient.auto,
+    String? name,
+    String customUserAgent = '',
+  }) async {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
@@ -159,6 +184,9 @@ class ProfilesAction extends _$ProfilesAction {
       () async {
         return Profile.normal(
           url: url,
+          label: name,
+          clientEmulation: client,
+          customUserAgent: customUserAgent,
         ).update(
           validate: (path) => _core.validateConfig(path),
           requestHeaders: await deviceIdentity.subscriptionHeaders(

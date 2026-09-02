@@ -670,6 +670,116 @@ class AppLocalizations {
     );
   }
 
+  /// `Client format`
+  String get subscriptionClientLabel {
+    return Intl.message(
+      'Client format',
+      name: 'subscriptionClientLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app requests the subscription pretending to be this client`
+  String get subscriptionClientDesc {
+    return Intl.message(
+      'The app requests the subscription pretending to be this client',
+      name: 'subscriptionClientDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto`
+  String get subscriptionClientAuto {
+    return Intl.message(
+      'Auto',
+      name: 'subscriptionClientAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash`
+  String get subscriptionClientClash {
+    return Intl.message(
+      'Clash',
+      name: 'subscriptionClientClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happ`
+  String get subscriptionClientHapp {
+    return Intl.message(
+      'Happ',
+      name: 'subscriptionClientHapp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `INCY`
+  String get subscriptionClientIncy {
+    return Intl.message(
+      'INCY',
+      name: 'subscriptionClientIncy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sing-box`
+  String get subscriptionClientSingbox {
+    return Intl.message(
+      'Sing-box',
+      name: 'subscriptionClientSingbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `v2rayNG`
+  String get subscriptionClientV2rayNG {
+    return Intl.message(
+      'v2rayNG',
+      name: 'subscriptionClientV2rayNG',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom`
+  String get subscriptionClientCustom {
+    return Intl.message(
+      'Custom',
+      name: 'subscriptionClientCustom',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `User-Agent`
+  String get customUserAgentLabel {
+    return Intl.message(
+      'User-Agent',
+      name: 'customUserAgentLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste`
+  String get pasteFromClipboard {
+    return Intl.message(
+      'Paste',
+      name: 'pasteFromClipboard',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Submit`
   String get submit {
     return Intl.message('Submit', name: 'submit', desc: '', args: []);

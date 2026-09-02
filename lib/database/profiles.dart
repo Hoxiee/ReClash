@@ -36,6 +36,18 @@ class Profiles extends Table {
 
   IntColumn get order => integer().nullable()();
 
+  TextColumn get clientEmulation =>
+      textEnum<SubscriptionClient>().withDefault(
+        const Constant('auto'),
+      )();
+
+  TextColumn get customUserAgent => text().withDefault(const Constant(''))();
+
+  TextColumn get skippedNodes =>
+      text().map(const SkippedNodesSqlConverter()).withDefault(
+        const Constant('[]'),
+      )();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -71,6 +83,25 @@ class PanelMetaConverter extends TypeConverter<PanelMeta?, String?> {
     if (value == null) return null;
     return json.encode(value.toJson());
   }
+}
+
+class SkippedNodesSqlConverter extends TypeConverter<List<SkippedNode>, String> {
+  const SkippedNodesSqlConverter();
+
+  @override
+  List<SkippedNode> fromSql(String fromDb) {
+    final decoded = json.decode(fromDb);
+    if (decoded is! List) return const <SkippedNode>[];
+    return [
+      for (final entry in decoded)
+        if (entry is Map<String, Object?>) SkippedNode.fromJson(entry),
+    ];
+  }
+
+  @override
+  String toSql(List<SkippedNode> value) => json.encode(
+    [for (final node in value) node.toJson()],
+  );
 }
 
 @DriftAccessor(tables: [Profiles])
@@ -142,6 +173,9 @@ extension RawProfilExt on RawProfile {
       scriptId: scriptId,
       matchTarget: matchTarget,
       order: order,
+      clientEmulation: clientEmulation,
+      customUserAgent: customUserAgent,
+      skippedNodes: skippedNodes,
     );
   }
 }
@@ -164,6 +198,9 @@ extension ProfilesCompanionExt on Profile {
       scriptId: Value(scriptId),
       matchTarget: Value(matchTarget),
       order: Value(order ?? this.order),
+      clientEmulation: Value(clientEmulation),
+      customUserAgent: Value(customUserAgent),
+      skippedNodes: Value(skippedNodes),
     );
   }
 }

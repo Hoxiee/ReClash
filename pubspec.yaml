@@ -63,6 +63,7 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
   crypto: ^3.0.3
+  cryptography: ^2.7.0
   yaml_writer:
     git:
       url: https://github.com/chen08209/yaml_writer

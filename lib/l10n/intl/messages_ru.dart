@@ -363,6 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfileFromUrlTip": m3,
     "creationTime": MessageLookupByLibrary.simpleMessage("Время создания"),
     "custom": MessageLookupByLibrary.simpleMessage("Вручную"),
+    "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("Вырезать"),
     "dark": MessageLookupByLibrary.simpleMessage("Тёмная"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Панель"),
@@ -828,6 +829,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "palette": MessageLookupByLibrary.simpleMessage("Палитра"),
     "password": MessageLookupByLibrary.simpleMessage("Пароль"),
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
+    "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Вставить"),
     "pause": MessageLookupByLibrary.simpleMessage("Пауза"),
     "pauseVpn": MessageLookupByLibrary.simpleMessage("Приостанавливаем VPN..."),
     "paused": MessageLookupByLibrary.simpleMessage("Приостановлено"),
@@ -1212,6 +1214,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "submit": MessageLookupByLibrary.simpleMessage("Отправить"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Подписка"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Авто"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Свой"),
+    "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
+      "Приложение запросит подписку, представившись этим клиентом",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
+      "Формат подписки",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "Sing-box",
+    ),
+    "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),

@@ -355,6 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfileFromUrlTip": m3,
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
+    "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
     "dashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
@@ -806,6 +807,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "palette": MessageLookupByLibrary.simpleMessage("Palette"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
+    "pasteFromClipboard": MessageLookupByLibrary.simpleMessage("Paste"),
     "pause": MessageLookupByLibrary.simpleMessage("Pause"),
     "pauseVpn": MessageLookupByLibrary.simpleMessage("Pausing VPN..."),
     "paused": MessageLookupByLibrary.simpleMessage("Paused"),
@@ -1166,6 +1168,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
     "subscriptionCaption": MessageLookupByLibrary.simpleMessage("Subscription"),
+    "subscriptionClientAuto": MessageLookupByLibrary.simpleMessage("Auto"),
+    "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Custom"),
+    "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
+      "The app requests the subscription pretending to be this client",
+    ),
+    "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
+    "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
+    "subscriptionClientLabel": MessageLookupByLibrary.simpleMessage(
+      "Client format",
+    ),
+    "subscriptionClientSingbox": MessageLookupByLibrary.simpleMessage(
+      "Sing-box",
+    ),
+    "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
+      "v2rayNG",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),

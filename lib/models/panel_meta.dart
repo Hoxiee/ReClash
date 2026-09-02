@@ -23,6 +23,8 @@ abstract class PanelMeta with _$PanelMeta {
     List<String>? widgets,
     @Default(PanelWidgetsApplyMode.add) PanelWidgetsApplyMode widgetsApplyMode,
     List<String>? settings,
+    String? newDomain,
+    String? profileTitle,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
@@ -60,6 +62,8 @@ abstract class PanelMeta with _$PanelMeta {
           ? PanelWidgetsApplyMode.update
           : PanelWidgetsApplyMode.add,
       settings: settings.isNotEmpty ? settings : null,
+      newDomain: map['newDomain'],
+      profileTitle: map['profileTitle'],
     );
   }
 }
@@ -77,5 +81,7 @@ extension PanelMetaExt on PanelMeta {
       buyPlanUrl != null ||
       buyTrafficUrl != null ||
       widgets != null ||
+      newDomain != null ||
+      profileTitle != null ||
       settings != null;
 }

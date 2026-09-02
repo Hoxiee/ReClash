@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -60,17 +62,31 @@ abstract class Profile with _$Profile {
     int? scriptId,
     String? matchTarget,
     int? order,
+    @Default(SubscriptionClient.auto) SubscriptionClient clientEmulation,
+    @Default('') String customUserAgent,
+    @JsonKey(includeToJson: false, includeFromJson: false)
+    SubscriptionClient? lastWorkingClient,
+    @Default([])
+    @SkippedNodesConverter()
+    List<SkippedNode> skippedNodes,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
       _$ProfileFromJson(json);
 
-  factory Profile.normal({String? label, String url = ''}) {
+  factory Profile.normal({
+    String? label,
+    String url = '',
+    SubscriptionClient clientEmulation = SubscriptionClient.auto,
+    String customUserAgent = '',
+  }) {
     final id = snowflake.id;
     return Profile(
       label: label ?? '',
       url: url,
       id: id,
+      clientEmulation: clientEmulation,
+      customUserAgent: customUserAgent,
       autoUpdateDuration: defaultUpdateDuration,
     );
   }
@@ -183,17 +199,65 @@ extension ProfileExtension on Profile {
     required ValidateConfig validate,
     Map<String, String>? requestHeaders,
   }) async {
-    final response = await request.getFileResponseForUrl(
-      url,
-      headers: requestHeaders,
-    );
+    var lastError = 'subscription fetch failed';
+    for (final candidate in probeOrder(
+      clientEmulation,
+      lastWorking: lastWorkingClient,
+    )) {
+      final headers = buildSubscriptionHeaders(
+        candidate,
+        deviceDetails: await deviceIdentity.info,
+        defaultUa: requestHeaders?['User-Agent'],
+        identityUserAgent: requestHeaders?['User-Agent'],
+        customUserAgent: customUserAgent,
+        sendDeviceHeaders: requestHeaders != null,
+      );
+      final response = await request.getFileResponseForUrl(
+        url,
+        headers: headers,
+      );
+      final data = response.data;
+      if (data == null) {
+        lastError = 'empty response body';
+        continue;
+      }
+      try {
+        return await _updateFromResponse(
+          response,
+          data,
+          validate: validate,
+          workingClient: candidate,
+        );
+      } on MessageException catch (e) {
+        lastError = e.message;
+      }
+    }
+    throw MessageException(lastError);
+  }
+
+  Future<Profile> _updateFromResponse(
+    Response<Uint8List> response,
+    Uint8List data, {
+    required ValidateConfig validate,
+    required SubscriptionClient workingClient,
+  }) async {
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
     final panelMeta = PanelMeta.fromHeaders(response.headers.map);
     final updateInterval = panelMeta.updateIntervalMinutes;
+    var updatedUrl = url;
+    final newDomain = panelMeta.newDomain;
+    if (newDomain != null && newDomain.isNotEmpty) {
+      final currentUri = Uri.tryParse(url);
+      if (currentUri != null && currentUri.host != newDomain) {
+        updatedUrl = currentUri.replace(host: newDomain).toString();
+      }
+    }
     return copyWith(
+      url: updatedUrl,
       label: label.takeFirstValid([
         getFileNameForDisposition(disposition),
+        panelMeta.profileTitle,
         id.toString(),
       ]),
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
@@ -201,16 +265,23 @@ extension ProfileExtension on Profile {
       autoUpdateDuration: updateInterval != null
           ? Duration(minutes: updateInterval)
           : autoUpdateDuration,
-    ).saveFile(response.data ?? Uint8List.fromList([]), validate: validate);
+      lastWorkingClient: clientEmulation == SubscriptionClient.auto
+          ? workingClient
+          : clientEmulation,
+    ).saveFile(data, validate: validate);
   }
 
   Future<Profile> saveFile(
     Uint8List bytes, {
     required ValidateConfig validate,
   }) async {
+    final (content, skipped) = await _validatedConfig(
+      utf8.decode(bytes, allowMalformed: true),
+      validate: validate,
+    );
     final path = await appPath.tempFilePath;
     final tempFile = File(path);
-    await tempFile.safeWriteAsBytes(bytes);
+    await tempFile.safeWriteAsString(content);
     final message = await validate(path);
     if (message.isNotEmpty) {
       throw MessageException(message);
@@ -218,6 +289,67 @@ extension ProfileExtension on Profile {
     final mFile = await file;
     await tempFile.copy(mFile.path);
     await tempFile.safeDelete();
-    return copyWith(lastUpdateDate: DateTime.now());
+    return copyWith(lastUpdateDate: DateTime.now(), skippedNodes: skipped);
+  }
+
+  Future<Profile> saveFileWithString(
+    String value, {
+    required ValidateConfig validate,
+  }) async {
+    final (content, skipped) = await _validatedConfig(
+      value,
+      validate: validate,
+    );
+    final path = await appPath.tempFilePath;
+    final tempFile = File(path);
+    await tempFile.safeWriteAsString(content);
+    final message = await validate(path);
+    if (message.isNotEmpty) {
+      throw MessageException(message);
+    }
+    final mFile = await file;
+    await tempFile.copy(mFile.path);
+    await tempFile.safeDelete();
+    return copyWith(lastUpdateDate: DateTime.now(), skippedNodes: skipped);
+  }
+
+  Future<(String, List<SkippedNode>)> _validatedConfig(
+    String content, {
+    required ValidateConfig validate,
+  }) async {
+    final message = await validateData(content, validate);
+    if (message.isEmpty) return (content, const <SkippedNode>[]);
+
+    final converters = <ConvertedSubscription? Function()>[
+      () => tryConvertShareLinks(content),
+      () => tryConvertXrayConfig(content),
+      () => tryConvertSingboxConfig(content),
+    ];
+    for (final convert in converters) {
+      final converted = convert();
+      if (converted == null) continue;
+      final convertedMessage = await validateData(
+        converted.config,
+        validate,
+      );
+      if (convertedMessage.isEmpty) return (converted.config, converted.skipped);
+    }
+    throw MessageException(
+      message.isEmpty ? 'invalid config' : message,
+    );
+  }
+
+  Future<String> validateData(
+    String data,
+    ValidateConfig validate,
+  ) async {
+    final path = await appPath.tempFilePath;
+    final tempFile = File(path);
+    try {
+      await tempFile.safeWriteAsString(data);
+      return await validate(path);
+    } finally {
+      await tempFile.safeDelete();
+    }
   }
 }

@@ -55,6 +55,17 @@ void main() {
         expect(map, isEmpty, reason: 'interval "$value" must not apply');
       }
     });
+
+    test('maps newdomain and profile-title', () {
+      final map = normalizePanelHeaders({
+        'reclash-newdomain': ['new.example.com'],
+        'flclashx-newdomain': ['old.example.com'],
+        'profile-title': ['My Subscription'],
+      });
+
+      expect(map['newDomain'], 'new.example.com');
+      expect(map['profileTitle'], 'My Subscription');
+    });
   });
 
   group('PanelMeta.fromHeaders', () {
@@ -146,6 +157,17 @@ void main() {
 
       expect(meta, const PanelMeta());
       expect(meta.hasContent, isFalse);
+    });
+
+    test('parses newdomain and profile-title', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-newdomain': ['new.example.com'],
+        'profile-title': ['My Subscription'],
+      });
+
+      expect(meta.newDomain, 'new.example.com');
+      expect(meta.profileTitle, 'My Subscription');
+      expect(meta.hasContent, isTrue);
     });
   });
 }

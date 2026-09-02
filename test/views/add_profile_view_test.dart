@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/add.dart';
@@ -53,7 +54,7 @@ void main() {
     tester,
   ) async {
     final container = _containerFor(tester);
-    String? popped;
+    URLFormDialogResult? popped;
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -63,7 +64,7 @@ void main() {
             body: Builder(
               builder: (context) => TextButton(
                 onPressed: () async {
-                  popped = await showDialog<String>(
+                  popped = await showDialog<URLFormDialogResult>(
                     context: context,
                     builder: (_) => const URLFormDialog(),
                   );
@@ -95,7 +96,7 @@ void main() {
 
   testWidgets('URL import dialog returns the entered value', (tester) async {
     final container = _containerFor(tester);
-    String? popped;
+    URLFormDialogResult? popped;
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -105,7 +106,7 @@ void main() {
             body: Builder(
               builder: (context) => TextButton(
                 onPressed: () async {
-                  popped = await showDialog<String>(
+                  popped = await showDialog<URLFormDialogResult>(
                     context: context,
                     builder: (_) => const URLFormDialog(),
                   );
@@ -123,14 +124,63 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.byType(TextField),
+      find.byType(TextField).first,
       'https://example.com/profile',
     );
     await tester.tap(find.text(currentAppLocalizations.submit));
     await tester.pumpAndSettle();
 
     expect(find.byType(URLFormDialog), findsNothing);
-    expect(popped, 'https://example.com/profile');
+    expect(popped?.url, 'https://example.com/profile');
+    expect(popped?.client, SubscriptionClient.auto);
+    expect(popped?.customUserAgent, '');
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('URL import dialog follows the picked preset', (tester) async {
+    final container = _containerFor(tester);
+    URLFormDialogResult? popped;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  popped = await showDialog<URLFormDialogResult>(
+                    context: context,
+                    builder: (_) => const URLFormDialog(),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextField).first,
+      'https://example.com/profile',
+    );
+    await tester.tap(find.text(currentAppLocalizations.subscriptionClientHapp));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text(currentAppLocalizations.submit), findsOne);
+
+    await tester.tap(find.text(currentAppLocalizations.submit));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(URLFormDialog), findsNothing);
+    expect(popped?.client, SubscriptionClient.happ);
     expect(tester.takeException(), null);
   });
 }

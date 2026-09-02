@@ -170,6 +170,11 @@ enum AccessSortType { none, name, time }
 
 enum ProfileType { file, url }
 
+/// Which client a subscription request imitates. Panels serve the body by
+/// User-Agent, so a profile pins the client whose format it wants — or stays
+/// [auto] and lets the fetch use the plain app UA.
+enum SubscriptionClient { auto, clash, happ, incy, singbox, v2rayng, custom }
+
 enum ResultType {
   @JsonValue(0)
   success,

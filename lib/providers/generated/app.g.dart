@@ -2043,7 +2043,7 @@ final class NativePauseProvider extends $NotifierProvider<NativePause, bool?> {
   }
 }
 
-String _$nativePauseHash() => r'5fe837994883a42915a24e7aab472045f266e10d';
+String _$nativePauseHash() => r'836447f1a2d2bca3e2169de4c600868a6dd26a36';
 
 /// The Android service's own pause flag; null until the first report lands.
 

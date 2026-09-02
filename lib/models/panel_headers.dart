@@ -82,6 +82,14 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     sourceKeys: ['reclash-settings'],
     canonicalKey: 'panelSettings',
   ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-newdomain', 'flclashx-newdomain'],
+    canonicalKey: 'newDomain',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['profile-title'],
+    canonicalKey: 'profileTitle',
+  ),
 ];
 
 Map<String, String> normalizePanelHeaders(Map<String, List<String>> headers) {

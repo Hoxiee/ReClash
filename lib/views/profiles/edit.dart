@@ -14,6 +14,8 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'client_preset_selector.dart';
+
 class EditProfileView extends ConsumerStatefulWidget {
   final Profile profile;
   final BuildContext context;
@@ -32,7 +34,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late final TextEditingController _labelController;
   late final TextEditingController _urlController;
   late final TextEditingController _autoUpdateDurationController;
+  late final TextEditingController _customUserAgentController;
   late bool _autoUpdate;
+  late SubscriptionClient _clientEmulation;
   String? _rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _fileInfoNotifier = ValueNotifier<FileInfo?>(null);
@@ -45,6 +49,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _labelController = TextEditingController(text: widget.profile.label);
     _urlController = TextEditingController(text: widget.profile.url);
     _autoUpdate = widget.profile.autoUpdate;
+    _clientEmulation = widget.profile.clientEmulation;
+    _customUserAgentController = TextEditingController(
+      text: widget.profile.customUserAgent,
+    );
     _autoUpdateDurationController = TextEditingController(
       text: widget.profile.autoUpdateDuration.inMinutes.toString(),
     );
@@ -67,6 +75,8 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       url: _urlController.text,
       label: _labelController.text,
       autoUpdate: _autoUpdate,
+      clientEmulation: _clientEmulation,
+      customUserAgent: _customUserAgentController.text.trim(),
       autoUpdateDuration: Duration(
         minutes: int.parse(_autoUpdateDurationController.text),
       ),
@@ -110,6 +120,13 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     if (mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  void _setClientEmulation(SubscriptionClient value) {
+    if (_clientEmulation == value) return;
+    setState(() {
+      _clientEmulation = value;
+    });
   }
 
   void _setAutoUpdate(bool value) {
@@ -221,6 +238,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _labelController.dispose();
     _urlController.dispose();
     _fileInfoNotifier.dispose();
+    _customUserAgentController.dispose();
     _autoUpdateDurationController.dispose();
     super.dispose();
     _setupAction.autoApplyProfile();
@@ -240,6 +258,11 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ),
         if (_autoUpdate)
           _AutoUpdateIntervalField(controller: _autoUpdateDurationController),
+        _ClientEmulationItem(
+          selected: _clientEmulation,
+          onChanged: _setClientEmulation,
+          customUserAgentController: _customUserAgentController,
+        ),
       ],
       _ProfileFileItem(
         fileInfoNotifier: _fileInfoNotifier,
@@ -377,6 +400,30 @@ class _AutoUpdateIntervalField extends StatelessWidget {
           }
           return null;
         },
+      ),
+    );
+  }
+}
+
+class _ClientEmulationItem extends StatelessWidget {
+  const _ClientEmulationItem({
+    required this.selected,
+    required this.onChanged,
+    required this.customUserAgentController,
+  });
+
+  final SubscriptionClient selected;
+  final ValueChanged<SubscriptionClient> onChanged;
+  final TextEditingController customUserAgentController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ClientPresetSelector(
+        selected: selected,
+        onChanged: onChanged,
+        customUserAgentController: customUserAgentController,
       ),
     );
   }
