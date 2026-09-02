@@ -78,14 +78,40 @@ class SmartPausePolicyTest {
     }
 
     @Test
-    fun `trusted network does not pause a young session`() {
+    fun `trusted network defers the pause for a young session`() {
+        assertEquals(
+            SmartPauseDecision.DEFER,
+            evaluateSmartPause(
+                config,
+                session(ageMs = SmartPausePolicy.STARTUP_GUARD_MS - 1),
+                true,
+                trusted = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `trusted network pauses exactly at the guard`() {
+        assertEquals(
+            SmartPauseDecision.PAUSE,
+            evaluateSmartPause(
+                config,
+                session(ageMs = SmartPausePolicy.STARTUP_GUARD_MS),
+                true,
+                trusted = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `untrusted young session does not defer`() {
         assertEquals(
             SmartPauseDecision.NONE,
             evaluateSmartPause(
                 config,
                 session(ageMs = SmartPausePolicy.STARTUP_GUARD_MS - 1),
                 true,
-                trusted = true,
+                trusted = false,
             ),
         )
     }

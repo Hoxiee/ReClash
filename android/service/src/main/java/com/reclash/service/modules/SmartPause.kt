@@ -11,7 +11,7 @@ object SmartPausePolicy {
     const val DECISION_DEBOUNCE_MS = 2_000L
 }
 
-enum class SmartPauseDecision { NONE, PAUSE, RESUME }
+enum class SmartPauseDecision { NONE, PAUSE, DEFER, RESUME }
 
 data class SmartPauseConfig(
     val enabled: Boolean = false,
@@ -38,11 +38,12 @@ fun evaluateSmartPause(
     if (session.paused) {
         return if (trusted) SmartPauseDecision.NONE else SmartPauseDecision.RESUME
     }
-    if (!session.running) return SmartPauseDecision.NONE
-    if (trusted && session.sessionAgeMs >= SmartPausePolicy.STARTUP_GUARD_MS) {
-        return SmartPauseDecision.PAUSE
+    if (!session.running || !trusted) return SmartPauseDecision.NONE
+    return if (session.sessionAgeMs >= SmartPausePolicy.STARTUP_GUARD_MS) {
+        SmartPauseDecision.PAUSE
+    } else {
+        SmartPauseDecision.DEFER
     }
-    return SmartPauseDecision.NONE
 }
 
 // The retry plan schedules a fresh evaluation event instead of replaying the

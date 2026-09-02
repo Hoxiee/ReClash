@@ -87,16 +87,17 @@ internal class SmartPauseModule(
         val trusted = isTrusted(config)
         when (evaluateSmartPause(config, session, networkKnown, trusted)) {
             SmartPauseDecision.PAUSE -> {
-                val guardLeft = SmartPausePolicy.STARTUP_GUARD_MS - session.sessionAgeMs
-                if (guardLeft > 0) {
-                    scope.launch {
-                        delay(guardLeft)
-                        events.trySend(EVENT_GUARD)
-                    }
-                    return
-                }
                 log("SmartPause ($reason): trusted network, pausing")
                 runTransition("pause") { applyPause() }
+            }
+
+            SmartPauseDecision.DEFER -> {
+                val guardLeft = SmartPausePolicy.STARTUP_GUARD_MS - session.sessionAgeMs
+                log("SmartPause ($reason): trusted network, pausing in ${guardLeft}ms")
+                scope.launch {
+                    delay(guardLeft)
+                    events.trySend(EVENT_GUARD)
+                }
             }
 
             SmartPauseDecision.RESUME -> {

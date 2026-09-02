@@ -108,12 +108,13 @@ class SmartPauseModuleTest {
         val module = module({ clock })
         module.start()
         module.onPhysicalNetworksChanged(listOf("192.168.1.55"), emptyList())
-        advanceTimeBy(SmartPausePolicy.DECISION_DEBOUNCE_MS)
+        // Every startup event drains here, leaving only the deferral to pause the session.
+        advanceTimeBy(SmartPausePolicy.STARTUP_GUARD_MS)
         runCurrent()
         assertEquals(0, actions.pauseCalls)
 
-        clock = SmartPausePolicy.STARTUP_GUARD_MS + 1
-        advanceTimeBy(60_000)
+        clock = SmartPausePolicy.STARTUP_GUARD_MS
+        advanceTimeBy(SmartPausePolicy.STARTUP_GUARD_MS + SmartPausePolicy.DECISION_DEBOUNCE_MS)
         runCurrent()
         assertEquals(1, actions.pauseCalls)
     }
