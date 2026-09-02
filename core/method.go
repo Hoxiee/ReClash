@@ -267,6 +267,12 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	stopListenerMethod: withoutArguments(func(response MethodResponse) {
 		response.success(handleStopListener())
 	}),
+	pauseTunMethod: withoutArguments(func(response MethodResponse) {
+		response.success(handlePauseTun())
+	}),
+	resumeTunMethod: withoutArguments(func(response MethodResponse) {
+		response.success(handleResumeTun())
+	}),
 	getMemoryMethod: withoutArguments(func(response MethodResponse) {
 		safeGo(response, func() {
 			response.success(handleGetMemory())

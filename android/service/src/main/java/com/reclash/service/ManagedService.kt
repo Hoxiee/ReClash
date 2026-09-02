@@ -9,6 +9,11 @@ interface ManagedService {
     fun start()
 
     fun stop()
+
+    // Only the TUN service can pause; the proxy-only service inherits no-ops.
+    fun pause(manual: Boolean) {}
+
+    fun resume() {}
 }
 
 internal fun Service.notifyVpnStartRequested() {

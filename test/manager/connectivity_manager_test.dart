@@ -24,8 +24,15 @@ void main() {
     container.dispose();
   });
 
-  Future<void> excludeNetworks(List<String> ssids) async {
-    container.read(excludeSSIDsProvider.notifier).value = ssids;
+  Future<void> setNetworks(List<String> networks) async {
+    container
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: networks,
+          ),
+        );
     await Future<void>.value();
   }
 
@@ -33,7 +40,7 @@ void main() {
     WidgetTester tester, {
     required SsidReader readSsid,
     void Function(List<ConnectivityResult>)? onConnectivityChanged,
-    List<String> excludeSSIDs = const ['Home'],
+    List<String> networks = const ['Home'],
   }) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -46,7 +53,7 @@ void main() {
         ),
       ),
     );
-    await excludeNetworks(excludeSSIDs);
+    await setNetworks(networks);
   }
 
   String? currentSsid() => container.read(currentSSIDProvider);
@@ -87,13 +94,13 @@ void main() {
     expect(reads, 0);
   });
 
-  testWidgets('does not read the SSID while no network is excluded', (
+  testWidgets('does not read the SSID while no network rule exists', (
     tester,
   ) async {
     var reads = 0;
     await pumpManager(
       tester,
-      excludeSSIDs: const [],
+      networks: const [],
       readSsid: () async {
         reads++;
         return 'Home';
@@ -107,12 +114,30 @@ void main() {
     expect(currentSsid(), isNull);
   });
 
-  testWidgets('reads the SSID as soon as the first network is excluded', (
+  testWidgets('a subnet-only rule list never reads the SSID', (tester) async {
+    var reads = 0;
+    await pumpManager(
+      tester,
+      networks: const ['192.168.1.0/24'],
+      readSsid: () async {
+        reads++;
+        return 'Home';
+      },
+    );
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+
+    expect(reads, 0);
+    expect(currentSsid(), isNull);
+  });
+
+  testWidgets('reads the SSID as soon as the first network rule appears', (
     tester,
   ) async {
     await pumpManager(
       tester,
-      excludeSSIDs: const [],
+      networks: const [],
       readSsid: () async => 'Home',
     );
 
@@ -120,13 +145,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(currentSsid(), isNull);
 
-    await excludeNetworks(const ['Office']);
+    await setNetworks(const ['Office']);
     await tester.pumpAndSettle();
 
     expect(currentSsid(), 'Home');
   });
 
-  testWidgets('drops the SSID when the last excluded network is removed', (
+  testWidgets('picks up rules that exist before the manager starts', (
+    tester,
+  ) async {
+    await setNetworks(const ['Home']);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: ConnectivityManager(
+          connectivityStream: connectivity.stream,
+          readSsid: () async => 'Home',
+          child: const SizedBox.shrink(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+
+    expect(currentSsid(), 'Home');
+  });
+
+  testWidgets('drops the SSID when the last network rule is removed', (
     tester,
   ) async {
     var reads = 0;
@@ -142,7 +189,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(currentSsid(), 'Home');
 
-    await excludeNetworks(const []);
+    await setNetworks(const []);
     await tester.pumpAndSettle();
 
     expect(currentSsid(), isNull);
@@ -164,7 +211,7 @@ void main() {
     expect(currentSsid(), isNull);
   });
 
-  testWidgets('a failure clears a previously published SSID', (tester) async {
+  testWidgets('a failure keeps the last known SSID while on Wi-Fi', (tester) async {
     var shouldFail = false;
     await pumpManager(
       tester,
@@ -182,7 +229,7 @@ void main() {
     connectivity.add([ConnectivityResult.wifi]);
     await tester.pumpAndSettle();
 
-    expect(currentSsid(), isNull);
+    expect(currentSsid(), 'Home');
   });
 
   testWidgets('a slow read cannot overwrite a newer one', (tester) async {

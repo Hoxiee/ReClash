@@ -200,6 +200,14 @@ class CoreController {
     return _interface.stopListener();
   }
 
+  Future<bool> pauseTun() async {
+    return _interface.pauseTun();
+  }
+
+  Future<bool> resumeTun() async {
+    return _interface.resumeTun();
+  }
+
   Future<Delay?> getDelay(String url, String proxyName) async {
     return _interface.asyncTestDelay(url, proxyName);
   }

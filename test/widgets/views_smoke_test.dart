@@ -9,7 +9,7 @@ import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/config/network.dart';
-import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/views/config/rules.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/hotkey.dart';
@@ -49,7 +49,7 @@ void main() {
     'dns config': const Scaffold(body: DnsListView()),
     'network config': const Scaffold(body: NetworkListView()),
     'advanced config': const AdvancedConfigView(),
-    'on demand config': const OnDemandView(),
+    'smart pause config': const SmartPauseView(),
     'theme': const ThemeView(),
     'application settings': const ApplicationSettingView(),
     'backup and restore': const BackupAndRestore(),

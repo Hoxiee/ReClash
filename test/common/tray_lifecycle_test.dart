@@ -19,6 +19,7 @@ TrayState _trayState({bool isStart = false}) {
     systemProxy: false,
     tunEnable: false,
     isStart: isStart,
+    paused: false,
     groups: const [],
     selectedMap: const {},
     showTrayTitle: false,

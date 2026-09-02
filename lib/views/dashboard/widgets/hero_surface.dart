@@ -1,9 +1,9 @@
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-const double heroPillRadius = 22;
-const double heroCardRadius = 18;
-const double heroInlayRadius = 8;
+const double heroPillRadius = AppCorner.full;
+const double heroCardRadius = AppCorner.lg;
+const double heroInlayRadius = AppCorner.sm;
 const double heroBoardMaxWidth = 560;
 
 BoxDecoration heroSurfaceDecoration(
@@ -25,9 +25,9 @@ class HeroCardDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 1,
-        color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
-      );
+    height: 1,
+    color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
+  );
 }
 
 class HeroSurface extends StatelessWidget {
@@ -50,11 +50,11 @@ class HeroSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        padding: padding,
-        alignment: alignment,
-        decoration: heroSurfaceDecoration(context, radius: radius),
-        child: child,
-      );
+    width: width,
+    height: height,
+    padding: padding,
+    alignment: alignment,
+    decoration: heroSurfaceDecoration(context, radius: radius),
+    child: child,
+  );
 }

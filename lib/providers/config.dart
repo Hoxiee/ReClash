@@ -95,14 +95,6 @@ class _PatchClashConfig extends _$PatchClashConfig
   }
 }
 
-@riverpod
-class ExcludeSSIDs extends _$ExcludeSSIDs with AutoDisposeNotifierMixin {
-  @override
-  List<String> build() {
-    return [];
-  }
-}
-
 @Riverpod(name: 'configProvider')
 Config _config(Ref ref) {
   final appSettingProps = ref.watch(appSettingProvider);
@@ -116,7 +108,6 @@ Config _config(Ref ref) {
   final hotKeyActions = ref.watch(hotKeyActionsProvider);
   final proxiesStyleProps = ref.watch(proxiesStyleSettingProvider);
   final patchClashConfig = ref.watch(patchClashConfigProvider);
-  final excludeSSIDs = ref.watch(excludeSSIDsProvider);
   return Config(
     appSettingProps: appSettingProps,
     windowProps: windowProps,
@@ -129,7 +120,6 @@ Config _config(Ref ref) {
     hotKeyActions: hotKeyActions,
     proxiesStyleProps: proxiesStyleProps,
     patchClashConfig: patchClashConfig,
-    excludeSSIDs: excludeSSIDs,
   );
 }
 
@@ -152,6 +142,5 @@ List<Override> buildConfigOverrides(Config config) {
     patchClashConfigProvider.overrideWithBuild(
       (_, _) => config.patchClashConfig,
     ),
-    excludeSSIDsProvider.overrideWithBuild((_, _) => config.excludeSSIDs),
   ];
 }

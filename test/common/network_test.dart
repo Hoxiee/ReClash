@@ -128,4 +128,96 @@ void main() {
       expect(asked, isFalse);
     });
   });
+
+  group('getLocalIPv4s', () {
+    test('drops the mihomo TUN address from the enumeration', () async {
+      listing([
+        _FakeInterface('wlan0', [_v4('192.168.1.20')]),
+        _FakeInterface('ReClash', [_v4('198.18.0.1')]),
+      ]);
+
+      expect(await getLocalIPv4s(), ['192.168.1.20']);
+    });
+
+    test('keeps IPv6 and duplicate interfaces out of the list', () async {
+      listing([
+        _FakeInterface('wlan0', [_v6('fe80::1'), _v4('192.168.1.20')]),
+        _FakeInterface('eth0', [_v4('10.0.0.2')]),
+      ]);
+
+      expect(await getLocalIPv4s(), ['192.168.1.20', '10.0.0.2']);
+    });
+  });
+
+  group('smartPauseMatches', () {
+    test('matches an SSID case-insensitively', () {
+      expect(
+        smartPauseMatches(['Office Wi-Fi'], ssid: 'office wi-fi'),
+        isTrue,
+      );
+      expect(smartPauseMatches(['Office Wi-Fi'], ssid: 'Cafe'), isFalse);
+    });
+
+    test('trims the SSID before comparing', () {
+      expect(smartPauseMatches([' Office '], ssid: ' Office '), isTrue);
+      expect(smartPauseMatches(['Office'], ssid: '  '), isFalse);
+    });
+
+    test('matches a subnet rule against the local IPv4s', () {
+      expect(
+        smartPauseMatches(
+          ['192.168.1.0/24'],
+          ssid: 'Cafe',
+          ipv4s: ['192.168.1.20'],
+        ),
+        isTrue,
+      );
+      expect(
+        smartPauseMatches(['192.168.2.0/24'], ipv4s: ['192.168.1.20']),
+        isFalse,
+      );
+    });
+
+    test('treats a bare IPv4 rule as a /32 host rule', () {
+      expect(smartPauseMatches(['10.1.2.3'], ipv4s: ['10.1.2.3']), isTrue);
+      expect(smartPauseMatches(['10.1.2.3'], ipv4s: ['10.1.2.4']), isFalse);
+    });
+
+    test('never matches a /0 rule', () {
+      expect(smartPauseMatches(['0.0.0.0/0'], ipv4s: ['10.0.0.1']), isFalse);
+    });
+
+    test('an SSID rule never matches by address', () {
+      expect(smartPauseMatches(['192.168.1.0/24 Home'], ipv4s: [
+        '192.168.1.5',
+      ]), isFalse);
+    });
+  });
+
+  group('isSubnetRule', () {
+    test('accepts IPv4 CIDRs and bare IPv4s', () {
+      expect(isSubnetRule('192.168.1.0/24'), isTrue);
+      expect(isSubnetRule('10.1.2.3'), isTrue);
+      expect(isSubnetRule(' 10.1.2.3/32 '), isTrue);
+    });
+
+    test('rejects SSIDs and malformed CIDRs', () {
+      expect(isSubnetRule('Home'), isFalse);
+      expect(isSubnetRule('192.168.1.0/33'), isFalse);
+      expect(isSubnetRule('192.168.1.0/abc'), isFalse);
+      expect(isSubnetRule('192.168.1.2.3'), isFalse);
+      expect(isSubnetRule(''), isFalse);
+    });
+  });
+
+  group('ipv4ToSubnetCidr', () {
+    test('reduces an address to its /24', () {
+      expect(ipv4ToSubnetCidr('192.168.1.20'), '192.168.1.0/24');
+      expect(ipv4ToSubnetCidr('10.0.0.1'), '10.0.0.0/24');
+    });
+
+    test('passes a non-IPv4 string through untouched', () {
+      expect(ipv4ToSubnetCidr('fe80::1'), 'fe80::1');
+    });
+  });
 }

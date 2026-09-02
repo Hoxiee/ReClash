@@ -46,7 +46,7 @@ class Permissions {
 
   bool _isRequestingLocation = false;
   bool _autoRequestedLocation = false;
-  bool _hadExcludeSSIDs = false;
+  bool _hadSsidRules = false;
   bool needWaitingBatteryOptimizationSettings = false;
 
   void check(ProviderReader read) {
@@ -91,12 +91,16 @@ class Permissions {
       read(locationPermissionsProvider.notifier).value = res;
     }
     final needRequestPermission = read(
-      excludeSSIDsProvider.select((state) => state.isNotEmpty),
+      vpnSettingProvider.select(
+        (state) =>
+            state.smartPauseEnabled &&
+            state.smartPauseNetworks.any((network) => !isSubnetRule(network)),
+      ),
     );
-    if (needRequestPermission && !_hadExcludeSSIDs) {
+    if (needRequestPermission && !_hadSsidRules) {
       _autoRequestedLocation = false;
     }
-    _hadExcludeSSIDs = needRequestPermission;
+    _hadSsidRules = needRequestPermission;
     if (res == WifiSsidPermission.denied &&
         needRequestPermission &&
         !_autoRequestedLocation &&

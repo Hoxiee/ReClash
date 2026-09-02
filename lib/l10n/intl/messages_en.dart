@@ -133,6 +133,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
     "actionView": MessageLookupByLibrary.simpleMessage("Show/Hide"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Add network"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Add profile"),
     "addProxies": MessageLookupByLibrary.simpleMessage("Add proxies"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("Add proxy group"),
@@ -140,7 +141,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Add proxy providers",
     ),
     "addRule": MessageLookupByLibrary.simpleMessage("Add rule"),
-    "addSsid": MessageLookupByLibrary.simpleMessage("Add SSID"),
     "addWidget": MessageLookupByLibrary.simpleMessage("Add widget"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Added rules"),
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
@@ -287,6 +287,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Close connections",
     ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "Drop every open connection when the VPN pauses",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("Color"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Color schemes"),
     "columns": MessageLookupByLibrary.simpleMessage("Columns"),
@@ -430,10 +433,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Edit global rules",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Edit network"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Edit proxy"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage("Edit proxy group"),
     "editRule": MessageLookupByLibrary.simpleMessage("Edit rule"),
-    "editSsid": MessageLookupByLibrary.simpleMessage("Edit SSID"),
     "emptyTip": m9,
     "en": MessageLookupByLibrary.simpleMessage("English"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
@@ -444,10 +447,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Exclude proxy filter",
-    ),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("Exclude SSIDs"),
-    "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
-      "When connected to Wi-Fi with an excluded SSID, the app\'s running state switches automatically",
     ),
     "excludeType": MessageLookupByLibrary.simpleMessage("Exclude type"),
     "existsTip": m11,
@@ -733,11 +732,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "networkDetection": MessageLookupByLibrary.simpleMessage(
       "Network detection",
     ),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Home Wi-Fi) or subnet (192.168.1.0/24)",
+    ),
     "networkException": MessageLookupByLibrary.simpleMessage(
       "Network error, please check your connection and try again",
     ),
     "networkSpeed": MessageLookupByLibrary.simpleMessage("Network speed"),
     "networkType": MessageLookupByLibrary.simpleMessage("Network type"),
+    "networksEmpty": MessageLookupByLibrary.simpleMessage(
+      "No trusted networks yet",
+    ),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("New look"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),
@@ -759,15 +764,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "The current proxy group cannot be selected",
     ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Current network is not trusted",
+    ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "No profiles yet, please add one first",
     ),
     "nullTip": m25,
     "numberTip": m26,
-    "onDemand": MessageLookupByLibrary.simpleMessage("On demand"),
-    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Configure the app\'s running state for specific scenarios",
-    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon only"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Only count proxy traffic",
@@ -802,6 +806,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "palette": MessageLookupByLibrary.simpleMessage("Palette"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
     "paste": MessageLookupByLibrary.simpleMessage("Paste"),
+    "pause": MessageLookupByLibrary.simpleMessage("Pause"),
+    "pauseVpn": MessageLookupByLibrary.simpleMessage("Pausing VPN..."),
+    "paused": MessageLookupByLibrary.simpleMessage("Paused"),
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Perpetual subscription",
     ),
@@ -958,6 +965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Restore successful",
     ),
+    "resume": MessageLookupByLibrary.simpleMessage("Resume"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route addresses"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the listened route addresses",
@@ -1119,6 +1127,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Start in the background",
     ),
     "size": MessageLookupByLibrary.simpleMessage("Size"),
+    "smartPause": MessageLookupByLibrary.simpleMessage("Smart pause"),
+    "smartPauseCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Close connections",
+    ),
+    "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
+      "Pause the VPN automatically on trusted networks",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -1130,7 +1145,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "splitStrategyNotEmpty": MessageLookupByLibrary.simpleMessage(
       "Split strategy cannot be empty",
     ),
-    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("SSIDs are empty"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Stack mode"),
     "standard": MessageLookupByLibrary.simpleMessage("Standard"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1156,7 +1170,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription info",
     ),
     "support": MessageLookupByLibrary.simpleMessage("Support"),
-    "suspended": MessageLookupByLibrary.simpleMessage("Suspended..."),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
     "systemApp": MessageLookupByLibrary.simpleMessage("System apps"),
@@ -1197,6 +1210,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "trafficFreeOfTotal": m32,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("Trusted networks"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "The VPN pauses while connected to any of these networks",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Current network is trusted — VPN paused here",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Only effective in administrator mode",

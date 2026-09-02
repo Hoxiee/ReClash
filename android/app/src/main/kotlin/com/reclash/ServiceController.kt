@@ -115,6 +115,25 @@ object ServiceController {
         runTimeMillis = 0L
     }
 
+    // A pause keeps the binding and run time; only the service knows it is paused.
+    suspend fun pause(manual: Boolean) {
+        lock.withLock {
+            binding?.useService { service -> service.pause(manual) }
+                ?.onFailure { error ->
+                    GlobalState.log("Unable to pause background service: $error")
+                }
+        }
+    }
+
+    suspend fun resume() {
+        lock.withLock {
+            binding?.useService { service -> service.resume() }
+                ?.onFailure { error ->
+                    GlobalState.log("Unable to resume background service: $error")
+                }
+        }
+    }
+
     // A service the system started itself — always-on VPN, or the sticky restart
     // after :remote was killed — outlives every binding this process holds, so
     // unbinding alone leaves the tunnel up while the app reports it stopped.

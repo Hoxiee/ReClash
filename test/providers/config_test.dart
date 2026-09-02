@@ -56,6 +56,8 @@ void main() {
       final value = container.read(vpnSettingProvider);
       expect(value.enable, true);
       expect(value.systemProxy, true);
+      expect(value.smartPauseEnabled, false);
+      expect(value.smartPauseNetworks, isEmpty);
     });
 
     test('can update state', () {
@@ -63,6 +65,31 @@ void main() {
           .read(vpnSettingProvider.notifier)
           .update((_) => const VpnProps(enable: false));
       expect(container.read(vpnSettingProvider).enable, false);
+    });
+
+    test('smart pause networks reorder with final insertion index semantics',
+        () {
+      container
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (_) => const VpnProps(
+              smartPauseEnabled: true,
+              smartPauseNetworks: ['Home', 'Office', 'Cafe', 'Hotel'],
+            ),
+          );
+
+      container.read(vpnSettingProvider.notifier).update((value) {
+        return value.copyWith(
+          smartPauseNetworks: value.smartPauseNetworks.copyAndReorder(1, 3),
+        );
+      });
+
+      expect(container.read(vpnSettingProvider).smartPauseNetworks, [
+        'Home',
+        'Cafe',
+        'Hotel',
+        'Office',
+      ]);
     });
   });
 
@@ -136,25 +163,6 @@ void main() {
     });
   });
 
-  group('ExcludeSSIDs provider', () {
-    test('reorders with final insertion index semantics', () {
-      container
-          .read(excludeSSIDsProvider.notifier)
-          .update((_) => ['Home', 'Office', 'Cafe', 'Hotel']);
-
-      container.read(excludeSSIDsProvider.notifier).update((value) {
-        return value.copyAndReorder(1, 3);
-      });
-
-      expect(container.read(excludeSSIDsProvider), [
-        'Home',
-        'Cafe',
-        'Hotel',
-        'Office',
-      ]);
-    });
-  });
-
   group('HotKeyActions provider', () {
     test('default is empty list', () {
       expect(container.read(hotKeyActionsProvider), isEmpty);
@@ -200,12 +208,12 @@ void main() {
       expect(config.appSettingProps.onlyStatisticsProxy, false);
       expect(config.windowProps.width, 0);
       expect(config.vpnProps.enable, true);
+      expect(config.vpnProps.smartPauseNetworks, isEmpty);
       expect(config.networkProps.systemProxy, true);
       expect(config.currentProfileId, null);
       expect(config.overrideDns, false);
       expect(config.hotKeyActions, isEmpty);
       expect(config.patchClashConfig, const PatchClashConfig());
-      expect(config.excludeSSIDs, isEmpty);
     });
 
     test('reflects updated sub-provider values', () {
@@ -215,14 +223,19 @@ void main() {
           .read(patchClashConfigProvider.notifier)
           .update((_) => const PatchClashConfig(mixedPort: 7890));
       container
-          .read(excludeSSIDsProvider.notifier)
-          .update((_) => ['Office Wi-Fi']);
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (_) => const VpnProps(
+              smartPauseEnabled: true,
+              smartPauseNetworks: ['Office Wi-Fi'],
+            ),
+          );
 
       final config = container.read(configProvider);
       expect(config.currentProfileId, 99);
       expect(config.overrideDns, true);
       expect(config.patchClashConfig.mixedPort, 7890);
-      expect(config.excludeSSIDs, ['Office Wi-Fi']);
+      expect(config.vpnProps.smartPauseNetworks, ['Office Wi-Fi']);
     });
   });
 
@@ -234,7 +247,7 @@ void main() {
         overrideDns: true,
       );
       final overrides = buildConfigOverrides(config);
-      expect(overrides.length, 12);
+      expect(overrides.length, 11);
 
       final overrideContainer = ProviderContainer(overrides: overrides);
       addTearDown(overrideContainer.dispose);
@@ -245,7 +258,10 @@ void main() {
         overrideContainer.read(patchClashConfigProvider),
         config.patchClashConfig,
       );
-      expect(overrideContainer.read(excludeSSIDsProvider), config.excludeSSIDs);
+      expect(
+        overrideContainer.read(vpnSettingProvider),
+        config.vpnProps,
+      );
       expect(
         overrideContainer.read(appSettingProvider).onlyStatisticsProxy,
         false,

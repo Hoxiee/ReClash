@@ -27,6 +27,14 @@ class TilePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         channel.invokeMethodOnMainThread("stop")
     }
 
+    fun handlePause() {
+        channel.invokeMethodOnMainThread("pause")
+    }
+
+    fun handleResume() {
+        channel.invokeMethodOnMainThread("resume")
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         result.notImplemented()
     }

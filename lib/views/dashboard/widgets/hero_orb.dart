@@ -51,10 +51,15 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   void initState() {
     super.initState();
     final isStart = ref.read(runTimeProvider) != null;
-    _phase = isStart ? HeroOrbPhase.on : HeroOrbPhase.off;
+    final isPaused = isStart && ref.read(pausedProvider);
+    _phase = isPaused
+        ? HeroOrbPhase.paused
+        : isStart
+        ? HeroOrbPhase.on
+        : HeroOrbPhase.off;
     _draw = AnimationController(
       vsync: this,
-      value: isStart ? 1 : 0,
+      value: isStart && !isPaused ? 1 : 0,
       duration: const Duration(milliseconds: 450),
     );
     _breathe = AnimationController(
@@ -69,18 +74,23 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       vsync: this,
       duration: const Duration(milliseconds: 1150),
     );
-    ref.listenManual(
-      runTimeProvider.select((value) => value != null),
-      (prev, next) {
-        if (!mounted) return;
-        if (next) {
-          _setPhase(HeroOrbPhase.on);
-        } else if (_phase != HeroOrbPhase.off) {
-          _setPhase(HeroOrbPhase.off);
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual(runTimeProvider.select((value) => value != null), (
+      prev,
+      next,
+    ) {
+      if (!mounted) return;
+      if (next) {
+        _setPhase(
+          ref.read(pausedProvider) ? HeroOrbPhase.paused : HeroOrbPhase.on,
+        );
+      } else if (_phase != HeroOrbPhase.off) {
+        _setPhase(HeroOrbPhase.off);
+      }
+    }, fireImmediately: true);
+    ref.listenManual(pausedProvider, (prev, next) {
+      if (!mounted || ref.read(runTimeProvider) == null) return;
+      _setPhase(next ? HeroOrbPhase.paused : HeroOrbPhase.on);
+    }, fireImmediately: true);
   }
 
   @override
@@ -120,6 +130,10 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     if (defaultTargetPlatform == TargetPlatform.android) {
       HapticFeedback.mediumImpact();
     }
+    if (_phase == HeroOrbPhase.paused) {
+      ref.read(commonActionProvider.notifier).togglePaused();
+      return;
+    }
     if (_phase == HeroOrbPhase.on) {
       _setPhase(HeroOrbPhase.off);
       ref.read(commonActionProvider.notifier).toggleRunning();
@@ -152,98 +166,107 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final size = widget.size;
     final core = size - _coreInset * 2;
 
-    return RepaintBoundary(
-      child: Listener(
-        onPointerDown: (_) => _press.forward(),
-        onPointerUp: (_) => _press.reverse(),
-        onPointerCancel: (_) => _press.reverse(),
-        child: FocusableTap(
-          autofocus: true,
-          borderRadius: size / 2,
-          onTap: _handleTap,
-          child: AnimatedBuilder(
-            animation: Listenable.merge([_draw, _breathe, _press, _sweep]),
-            builder: (_, _) {
-              final breatheScale =
-                  disableAnimations || _phase != HeroOrbPhase.on
-                      ? 1.0
-                      : 1.0 + 0.022 * Curves.easeInOut.transform(_breathe.value);
-              final pressScale = 1.0 - 0.03 * _press.value;
-              return Transform.scale(
-                scale: pressScale,
-                child: Opacity(
-                  opacity: widget.enabled ? 1 : 0.55,
-                  child: SizedBox(
-                    width: size,
-                    height: size,
-                    child: Transform.scale(
-                      scale: breatheScale,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (_draw.value > 0)
-                            IgnorePointer(
-                              child: Opacity(
-                                opacity:
-                                    Curves.easeOut.transform(_draw.value),
-                                child: Container(
-                                  width: size + 60,
-                                  height: size + 60,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: RadialGradient(
-                                      colors: [
-                                        heroRingColors[1]
-                                            .withValues(alpha: 0.30),
-                                        heroRingColors[2]
-                                            .withValues(alpha: 0.10),
-                                        Colors.transparent,
-                                      ],
-                                      stops: const [0, 0.6, 0.75],
+    return Tooltip(
+      message: switch (_phase) {
+        HeroOrbPhase.paused => context.appLocalizations.resume,
+        HeroOrbPhase.on => context.appLocalizations.stop,
+        _ => context.appLocalizations.start,
+      },
+      child: RepaintBoundary(
+        child: Listener(
+          onPointerDown: (_) => _press.forward(),
+          onPointerUp: (_) => _press.reverse(),
+          onPointerCancel: (_) => _press.reverse(),
+          child: FocusableTap(
+            autofocus: true,
+            borderRadius: size / 2,
+            onTap: _handleTap,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([_draw, _breathe, _press, _sweep]),
+              builder: (_, _) {
+                final breatheScale =
+                    disableAnimations || _phase != HeroOrbPhase.on
+                    ? 1.0
+                    : 1.0 + 0.022 * Curves.easeInOut.transform(_breathe.value);
+                final pressScale = 1.0 - 0.03 * _press.value;
+                return Transform.scale(
+                  scale: pressScale,
+                  child: Opacity(
+                    opacity: widget.enabled ? 1 : 0.55,
+                    child: SizedBox(
+                      width: size,
+                      height: size,
+                      child: Transform.scale(
+                        scale: breatheScale,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            if (_draw.value > 0)
+                              IgnorePointer(
+                                child: Opacity(
+                                  opacity: Curves.easeOut.transform(
+                                    _draw.value,
+                                  ),
+                                  child: Container(
+                                    width: size + 60,
+                                    height: size + 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        colors: [
+                                          heroRingColors[1].withValues(
+                                            alpha: 0.30,
+                                          ),
+                                          heroRingColors[2].withValues(
+                                            alpha: 0.10,
+                                          ),
+                                          Colors.transparent,
+                                        ],
+                                        stops: const [0, 0.6, 0.75],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          CustomPaint(
-                            size: Size.square(size),
-                            painter: _HeroOrbPainter(
-                              phase: _phase,
-                              drawProgress:
-                                  Curves.easeOut.transform(_draw.value),
-                              sweepAngle: _sweep.value * 2 * math.pi,
-                              baseColor: colorScheme.outlineVariant
-                                  .withValues(alpha: 0.6),
-                              coreColor: colorScheme.surfaceContainerHigh
-                                  .withValues(alpha: 0.6),
-                              coreBorder: colorScheme.outlineVariant
-                                  .withValues(alpha: 0.6),
-                              stroke: _ringStroke,
-                              coreInset: _coreInset,
-                            ),
-                            child: SizedBox(
-                              width: core,
-                              height: core,
-                              child: Icon(
-                                _phase == HeroOrbPhase.on
-                                    ? Icons.power_settings_new_rounded
-                                    : _phase == HeroOrbPhase.paused
-                                        ? Icons.pause_rounded
-                                        : Icons.power_settings_new_rounded,
-                                size: core * 0.46,
-                                color: _phase == HeroOrbPhase.on
-                                    ? colorScheme.primary
-                                    : colorScheme.onSurfaceVariant,
+                            CustomPaint(
+                              size: Size.square(size),
+                              painter: _HeroOrbPainter(
+                                phase: _phase,
+                                drawProgress: Curves.easeOut.transform(
+                                  _draw.value,
+                                ),
+                                sweepAngle: _sweep.value * 2 * math.pi,
+                                baseColor: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.6),
+                                coreColor: colorScheme.surfaceContainerHigh
+                                    .withValues(alpha: 0.6),
+                                coreBorder: colorScheme.outlineVariant
+                                    .withValues(alpha: 0.6),
+                                stroke: _ringStroke,
+                                coreInset: _coreInset,
+                              ),
+                              child: SizedBox(
+                                width: core,
+                                height: core,
+                                child: Icon(
+                                  _phase == HeroOrbPhase.paused
+                                      ? Icons.play_arrow_rounded
+                                      : Icons.power_settings_new_rounded,
+                                  size: core * 0.46,
+                                  color: _phase == HeroOrbPhase.on
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -309,11 +332,7 @@ class _HeroOrbPainter extends CustomPainter {
     }
 
     if (phase == HeroOrbPhase.paused) {
-      canvas.drawCircle(
-        center,
-        radius,
-        gradientPaint(0)..strokeWidth = 3,
-      );
+      canvas.drawCircle(center, radius, gradientPaint(0)..strokeWidth = 3);
     }
 
     if (phase == HeroOrbPhase.connecting) {

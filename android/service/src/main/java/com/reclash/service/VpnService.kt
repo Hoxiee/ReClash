@@ -7,6 +7,7 @@ import android.net.ProxyInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.getSystemService
 import com.reclash.common.AccessControlMode
@@ -249,12 +250,41 @@ class VpnService : SystemVpnService(), ManagedService {
 
     override fun start() {
         try {
+            ServiceConfig.updateSessionStartedAt(SystemClock.uptimeMillis())
             modules.start()
             handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
         } catch (error: Exception) {
             stop()
             throw error
         }
+    }
+
+    // Tears only the TUN down; never marks paused a service whose TUN a stop already removed.
+    override fun pause(manual: Boolean) {
+        val hadTun = synchronized(tunLock) {
+            val wasRunning = tunRunning
+            stopTunLocked()
+            wasRunning
+        }
+        if (!hadTun) {
+            return
+        }
+        if (ServiceConfig.vpnOptions?.smartPauseCloseConnections == true) {
+            Core.resetConnections()
+            Core.closeConnections()
+        }
+        val previous = ServiceConfig.pauseState.value
+        ServiceConfig.updatePauseState(
+            PauseState(paused = true, manual = manual || previous.manual),
+        )
+    }
+
+    override fun resume() {
+        if (!ServiceConfig.pauseState.value.paused) {
+            return
+        }
+        handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
+        ServiceConfig.updatePauseState(PauseState())
     }
 
     override fun stop() {
@@ -267,6 +297,7 @@ class VpnService : SystemVpnService(), ManagedService {
 
     private fun cleanup() {
         try {
+            ServiceConfig.updatePauseState(PauseState())
             modules.stop()
         } finally {
             stopTun()

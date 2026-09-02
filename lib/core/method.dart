@@ -31,6 +31,8 @@ enum CoreMethod {
   stopLog,
   startListener,
   stopListener,
+  pauseTun,
+  resumeTun,
   getMemory,
   crash,
   setupConfig,

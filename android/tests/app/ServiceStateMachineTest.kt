@@ -3,18 +3,21 @@ package com.reclash
 import com.reclash.common.AccessControlMode
 import com.reclash.models.SetupParams
 import com.reclash.models.SharedState
+import com.reclash.service.PauseState
 import com.reclash.service.models.AccessControlProps
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.VpnOptions
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -44,6 +47,8 @@ private fun configuredState(enable: Boolean = true) = SharedState(
 private class FakeTile : TileGateway {
     var startCount = 0
     var stopCount = 0
+    var pauseCount = 0
+    var resumeCount = 0
 
     override fun handleStart() {
         startCount++
@@ -51,6 +56,14 @@ private class FakeTile : TileGateway {
 
     override fun handleStop() {
         stopCount++
+    }
+
+    override fun handlePause() {
+        pauseCount++
+    }
+
+    override fun handleResume() {
+        resumeCount++
     }
 }
 
@@ -97,14 +110,19 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     override var runTimeMillis = 0L
     override val homeDirPath = "/data/user/0/com.reclash/files"
     override val sdkInt = 34
+    override val pauseState = MutableStateFlow(PauseState())
 
     val toasts = mutableListOf<String>()
     val logs = mutableListOf<String>()
     val notificationParams = mutableListOf<NotificationParams>()
+    val vpnOptionsUpdates = mutableListOf<VpnOptions>()
     val crashlytics = mutableListOf<Boolean>()
     var setupCalls = 0
     var startCalls = 0
     var stopCalls = 0
+    var pauseCalls = 0
+    var resumeCalls = 0
+    var lastPauseManual: Boolean? = null
     var lastInitParams: String? = null
     var lastSetupParams: String? = null
 
@@ -122,6 +140,10 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
 
     override fun updateNotificationParams(params: NotificationParams) {
         notificationParams += params
+    }
+
+    override fun updateVpnOptions(options: VpnOptions) {
+        vpnOptionsUpdates += options
     }
 
     override fun loadSharedState(): SharedState = storedSharedState
@@ -151,6 +173,17 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
         runTimeMillis = 0L
     }
 
+    override suspend fun pauseService(manual: Boolean) {
+        pauseCalls++
+        lastPauseManual = manual
+        pauseState.value = PauseState(paused = true, manual = manual)
+    }
+
+    override suspend fun resumeService() {
+        resumeCalls++
+        pauseState.value = PauseState()
+    }
+
     override suspend fun isVpnServiceActive(): Boolean = vpnServiceActive
 }
 
@@ -171,10 +204,12 @@ class ServiceStateMachineTest {
                 currentProfileName = "Work",
                 stopText = "Disconnect",
                 onlyStatisticsProxy = true,
+                pauseText = "Пауза",
+                resumeText = "Продолжить",
             ),
         )
 
-        assertEquals(NotificationParams("Work", "Disconnect", true), params)
+        assertEquals(NotificationParams("Work", "Disconnect", true, "Пауза", "Продолжить"), params)
     }
 
     @Test
@@ -645,5 +680,256 @@ class ServiceStateMachineTest {
         assertFalse(machine.requestStart().await())
         assertTrue(host.logs.any { it.contains("binder died") })
         assertFalse(machine.captureRequestToken().running)
+    }
+
+    @Test
+    fun `a pause request drives the service to PAUSED without dropping the run time`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        assertTrue(machine.requestPause().await())
+        assertEquals(RunState.PAUSED, machine.runState.value)
+        assertEquals(1, host.pauseCalls)
+        assertTrue(host.lastPauseManual!!)
+        assertNotEquals(0L, host.runTimeMillis)
+    }
+
+    @Test
+    fun `a pause request on a stopped service touches nothing`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+
+        assertFalse(machine.requestPause().await())
+        assertEquals(0, host.pauseCalls)
+    }
+
+    @Test
+    fun `a pause request on an already paused service is a no-op`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        assertFalse(machine.requestPause().await())
+        assertEquals(1, host.pauseCalls)
+    }
+
+    @Test
+    fun `a proxy-only service cannot be paused`() = runTest {
+        val host = FakeHost(backgroundScope)
+        host.vpnServiceActive = false
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        assertFalse(machine.requestPause().await())
+        assertEquals(0, host.pauseCalls)
+    }
+
+    @Test
+    fun `a resume request drives a paused service back to STARTED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        assertTrue(machine.requestResume().await())
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(1, host.resumeCalls)
+    }
+
+    @Test
+    fun `a resume request on a running service is a no-op`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        assertFalse(machine.requestResume().await())
+        assertEquals(0, host.resumeCalls)
+    }
+
+    @Test
+    fun `a stop request while paused stops the service`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        assertTrue(machine.requestStop().await())
+        assertEquals(RunState.STOPPED, machine.runState.value)
+        assertEquals(1, host.stopCalls)
+    }
+
+    @Test
+    fun `a toggle while paused resumes instead of stopping`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        machine.handleToggleAction()
+
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(1, host.resumeCalls)
+        assertEquals(0, host.stopCalls)
+    }
+
+    @Test
+    fun `a start action while paused resumes`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        machine.handleStartAction()
+
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(1, host.resumeCalls)
+        assertEquals(1, host.startCalls)
+    }
+
+    @Test
+    fun `a start request landing on a paused service resumes it`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        assertTrue(machine.requestStart().await())
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(1, host.resumeCalls)
+        assertEquals(1, host.startCalls)
+    }
+
+    @Test
+    fun `a service that pauses itself natively projects PAUSED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        host.pauseState.value = PauseState(paused = true)
+        testScheduler.runCurrent()
+
+        assertEquals(RunState.PAUSED, machine.runState.value)
+    }
+
+    @Test
+    fun `a service that resumes itself natively projects STARTED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        host.pauseState.value = PauseState(paused = true)
+        testScheduler.runCurrent()
+        assertEquals(RunState.PAUSED, machine.runState.value)
+
+        host.pauseState.value = PauseState()
+        testScheduler.runCurrent()
+
+        assertEquals(RunState.STARTED, machine.runState.value)
+    }
+
+    @Test
+    fun `refresh keeps a paused service PAUSED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+
+        machine.refresh()
+
+        assertEquals(RunState.PAUSED, machine.runState.value)
+    }
+
+    @Test
+    fun `handlePauseAction hands the pause to the tile when one is attached`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        val tile = FakeTile()
+        host.tile = tile
+
+        machine.handlePauseAction()
+
+        assertEquals(1, tile.pauseCount)
+        assertEquals(0, host.pauseCalls)
+    }
+
+    @Test
+    fun `handlePauseAction announces itself before pausing`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        machine.handlePauseAction()
+
+        assertEquals(listOf("Pausing VPN..."), host.toasts)
+        assertEquals(1, host.pauseCalls)
+    }
+
+    @Test
+    fun `handlePauseAction is a no-op while not started`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+
+        machine.handlePauseAction()
+
+        assertEquals(0, host.pauseCalls)
+        assertTrue(host.toasts.isEmpty())
+    }
+
+    @Test
+    fun `handleResumeAction hands the resume to the tile when one is attached`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+        val tile = FakeTile()
+        host.tile = tile
+
+        machine.handleResumeAction()
+
+        assertEquals(1, tile.resumeCount)
+        assertEquals(0, host.resumeCalls)
+    }
+
+    @Test
+    fun `handleResumeAction is a no-op while not paused`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        machine.handleResumeAction()
+
+        assertEquals(0, host.resumeCalls)
+    }
+
+    @Test
+    fun `a pause that a stop overtakes never marks the service paused`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        val pause = machine.requestPause()
+        assertTrue(machine.requestStop().await())
+
+        assertFalse(pause.await())
+        assertEquals(RunState.STOPPED, machine.runState.value)
     }
 }

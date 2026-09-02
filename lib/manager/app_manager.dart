@@ -49,18 +49,54 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(proxiesActionProvider.notifier).updateGroupsDebounce();
       }
     });
-    ref.listenManual(suspendProvider, (prev, next) {
-      final isStart = ref.read(isStartProvider);
-      if (prev != next && isStart) {
-        debouncer.call(FunctionTag.suspend, () async {
+    if (system.isDesktop) {
+      void syncPause() {
+        final isStart = ref.read(isStartProvider);
+        if (!isStart) {
+          return;
+        }
+        debouncer.call(FunctionTag.smartPause, () async {
           final core = ref.read(coreHandlerProvider);
-          if (next == true) {
-            await core.stopListener();
-          } else {
-            await core.startListener();
+          try {
+            if (ref.read(pausedProvider)) {
+              await core.pauseTun();
+              if (ref.read(vpnSettingProvider).smartPauseCloseConnections) {
+                await core.closeConnections();
+              }
+            } else {
+              await core.resumeTun();
+            }
+          } catch (error) {
+            commonPrint.log(
+              'Smart pause transition failed: $error',
+              logLevel: LogLevel.warning,
+            );
           }
           ref.read(checkIpNumProvider.notifier).add();
         });
+      }
+
+      // On Android the native module owns the transition; on desktop this is the enforcement.
+      ref.listenManual(pausedProvider, (prev, next) {
+        if (prev != next) {
+          syncPause();
+        }
+      });
+      // A start while already paused never sees a pausedProvider change, so the pause is re-issued.
+      ref.listenManual(isStartProvider, (prev, next) {
+        if (prev != next && next) {
+          syncPause();
+        }
+      });
+    }
+    ref.listenManual(networkAnchorProvider, (prev, next) {
+      if (prev != next && next.isNotEmpty) {
+        ref.read(manualPauseProvider.notifier).clear();
+      }
+    });
+    ref.listenManual(isStartProvider, (prev, next) {
+      if (prev != next && !next) {
+        ref.read(manualPauseProvider.notifier).clear();
       }
     });
     final systemDns = systemDnsCoordinator;

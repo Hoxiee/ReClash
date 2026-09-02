@@ -12,6 +12,9 @@ const _sharedState = SharedState(
   startTip: 'start',
   currentProfileName: 'profile',
   stopText: 'stopped',
+  pauseTip: 'pauseTip',
+  pauseText: 'pause',
+  resumeText: 'resume',
   onlyStatisticsProxy: true,
   crashlytics: false,
 );
@@ -49,7 +52,10 @@ void main() {
         themeProps: defaultThemeProps,
         currentProfileId: 42,
         overrideDns: true,
-        excludeSSIDs: ['home'],
+        vpnProps: VpnProps(
+          smartPauseEnabled: true,
+          smartPauseNetworks: ['home'],
+        ),
       );
 
       expect(await preferences.saveConfig(config), isTrue);
@@ -58,7 +64,8 @@ void main() {
       expect(restored, isNotNull);
       expect(restored!.currentProfileId, 42);
       expect(restored.overrideDns, isTrue);
-      expect(restored.excludeSSIDs, ['home']);
+      expect(restored.vpnProps.smartPauseEnabled, isTrue);
+      expect(restored.vpnProps.smartPauseNetworks, ['home']);
     });
 
     test('getConfigMap returns null for malformed JSON', () async {

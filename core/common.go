@@ -55,6 +55,7 @@ var (
 	isInit      atomic.Bool
 	isRunning   atomic.Bool
 	isSuspended atomic.Bool
+	tunPaused   atomic.Bool
 	sdkVersion  atomic.Int32
 	testURL     atomic.Pointer[string]
 
@@ -154,7 +155,13 @@ func updateListeners(cfg *config.Config) {
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
 	if !features.Android {
-		listener.ReCreateTun(general.Tun, tunnel.Tunnel)
+		// general is a *General pointer; disabling TUN on it directly would
+		// corrupt currentConfig, so the pause flag applies to a local copy.
+		tunConf := general.Tun
+		if tunPaused.Load() {
+			tunConf.Enable = false
+		}
+		listener.ReCreateTun(tunConf, tunnel.Tunnel)
 	}
 }
 

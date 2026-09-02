@@ -244,8 +244,8 @@ void main() {
     });
   });
 
-  group('suspend', () {
-    test('skips starting the core on an excluded SSID', () async {
+  group('pause', () {
+    test('a start while paused still starts the core on desktop', () async {
       container.dispose();
       action = TestSetupAction();
       container = ProviderContainer(
@@ -253,7 +253,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => action),
           commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          pausedProvider.overrideWith((ref) => true),
         ],
       );
       globalState.container = container;
@@ -262,10 +262,10 @@ void main() {
 
       await container.read(setupActionProvider.notifier).setRunning(true);
 
-      expect(action.coreRunningCalls, isEmpty);
+      expect(action.coreRunningCalls, [true]);
     });
 
-    test('still stops the core on an excluded SSID', () async {
+    test('still stops the core while paused', () async {
       container.dispose();
       action = TestSetupAction();
       container = ProviderContainer(
@@ -273,7 +273,7 @@ void main() {
           profilesProvider.overrideWith(TestProfiles.new),
           setupActionProvider.overrideWith(() => action),
           commonActionProvider.overrideWith(TestCommonAction.new),
-          excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
+          pausedProvider.overrideWith((ref) => true),
         ],
       );
       globalState.container = container;

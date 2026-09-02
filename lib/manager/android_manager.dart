@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
@@ -44,6 +46,18 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       }
     });
     service?.addListener(this);
+    unawaited(_syncPauseState());
+  }
+
+  Future<void> _syncPauseState() async {
+    final cached = service?.nativePaused;
+    if (cached != null) {
+      ref.read(nativePauseProvider.notifier).value = cached;
+    }
+    final paused = await service?.getPauseState();
+    if (paused != null) {
+      ref.read(nativePauseProvider.notifier).value = paused;
+    }
   }
 
   @override
@@ -56,6 +70,11 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   void onServiceEvent(CoreEvent event) {
     coreEventManager.sendEvent(event);
     super.onServiceEvent(event);
+  }
+
+  @override
+  void onPauseStateChanged(bool paused) {
+    ref.read(nativePauseProvider.notifier).value = paused;
   }
 
   @override

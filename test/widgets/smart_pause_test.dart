@@ -1,8 +1,9 @@
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,13 +12,13 @@ import 'package:wifi_ssid/wifi_ssid.dart';
 
 import '../helpers/test_app.dart';
 
-class _TestExcludeSSIDs extends ExcludeSSIDs {
-  _TestExcludeSSIDs(this._initial);
+class _TestVpnSetting extends VpnSetting {
+  _TestVpnSetting(this._initial);
 
-  final List<String> _initial;
+  final VpnProps _initial;
 
   @override
-  List<String> build() => _initial;
+  VpnProps build() => _initial;
 }
 
 class _TestLocationPermissions extends LocationPermissions {
@@ -34,7 +35,8 @@ void main() {
 
   Future<void> pumpView(
     WidgetTester tester, {
-    List<String> ssids = const [],
+    List<String> networks = const [],
+    bool enabled = true,
     WifiSsidPermission permission = WifiSsidPermission.denied,
     bool isAndroid = false,
     bool isMacOS = false,
@@ -48,7 +50,14 @@ void main() {
 
     container = ProviderContainer(
       overrides: [
-        excludeSSIDsProvider.overrideWith(() => _TestExcludeSSIDs(ssids)),
+        vpnSettingProvider.overrideWith(
+          () => _TestVpnSetting(
+            VpnProps(
+              smartPauseEnabled: enabled,
+              smartPauseNetworks: networks,
+            ),
+          ),
+        ),
         locationPermissionsProvider.overrideWith(
           () => _TestLocationPermissions(permission),
         ),
@@ -62,7 +71,7 @@ void main() {
         container: container,
         child: TestApp(
           locale: locale,
-          child: OnDemandView(isAndroid: isAndroid, isMacOS: isMacOS),
+          child: SmartPauseView(isAndroid: isAndroid, isMacOS: isMacOS),
         ),
       ),
     );
@@ -74,24 +83,46 @@ void main() {
   ) async {
     await pumpView(tester);
 
-    expect(find.text('SSIDs are empty'), findsOneWidget);
+    expect(find.text('No trusted networks yet'), findsOneWidget);
     expect(find.text('Add'), findsOneWidget);
     expect(find.text('Select all'), findsNothing);
     expect(find.byIcon(Icons.delete), findsNothing);
   });
 
-  testWidgets('every excluded SSID is rendered', (tester) async {
-    await pumpView(tester, ssids: ['Home', 'Office']);
+  testWidgets('every trusted network is rendered', (tester) async {
+    await pumpView(tester, networks: ['Home', '192.168.1.0/24']);
 
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Office'), findsOneWidget);
-    expect(find.text('SSIDs are empty'), findsNothing);
+    expect(find.text('192.168.1.0/24'), findsOneWidget);
+    expect(find.text('No trusted networks yet'), findsNothing);
+  });
+
+  testWidgets('subnets and SSIDs get their own leading icons', (tester) async {
+    await pumpView(tester, networks: ['Home', '192.168.1.0/24']);
+
+    expect(find.byIcon(Icons.wifi_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.router_rounded), findsOneWidget);
+  });
+
+  testWidgets('the trusted-now status appears only with rules', (tester) async {
+    await pumpView(tester, networks: ['Home']);
+    expect(find.text('Current network is not trusted'), findsOneWidget);
+  });
+
+  testWidgets('the trusted-now status hides without rules', (tester) async {
+    await pumpView(tester, networks: const []);
+    expect(find.text('Current network is not trusted'), findsNothing);
+  });
+
+  testWidgets('the trusted-now status hides while disabled', (tester) async {
+    await pumpView(tester, networks: ['Home'], enabled: false);
+    expect(find.text('Current network is not trusted'), findsNothing);
   });
 
   testWidgets('selecting an item swaps the header into selection mode', (
     tester,
   ) async {
-    await pumpView(tester, ssids: ['Home', 'Office']);
+    await pumpView(tester, networks: ['Home', 'Office']);
     expect(find.byIcon(Icons.delete), findsNothing);
 
     await tester.tap(find.byType(CommonCheckBox).first);
@@ -102,10 +133,10 @@ void main() {
     expect(find.text('Add'), findsNothing);
   });
 
-  testWidgets('select all takes every SSID, and pressing it again clears', (
+  testWidgets('select all takes every network, and pressing it again clears', (
     tester,
   ) async {
-    await pumpView(tester, ssids: ['Home', 'Office']);
+    await pumpView(tester, networks: ['Home', 'Office']);
     await tester.tap(find.byType(CommonCheckBox).first);
     await tester.pumpAndSettle();
 
@@ -118,19 +149,43 @@ void main() {
     expect(find.text('Add'), findsOneWidget, reason: 'selection was cleared');
   });
 
-  testWidgets('deleting removes the selected SSIDs and clears the selection', (
+  testWidgets('deleting removes the selected networks and clears the selection', (
     tester,
   ) async {
-    await pumpView(tester, ssids: ['Home', 'Office']);
+    await pumpView(tester, networks: ['Home', 'Office']);
     await tester.tap(find.byType(CommonCheckBox).first);
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.delete));
     await tester.pumpAndSettle();
 
-    expect(container.read(excludeSSIDsProvider), ['Office']);
+    expect(
+      container.read(vpnSettingProvider).smartPauseNetworks,
+      ['Office'],
+    );
     expect(find.text('Home'), findsNothing);
     expect(find.text('Add'), findsOneWidget, reason: 'selection was cleared');
+  });
+
+  testWidgets('the switches toggle smart pause and connection closing', (
+    tester,
+  ) async {
+    await pumpView(tester, networks: ['Home']);
+
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
+    expect(container.read(vpnSettingProvider).smartPauseEnabled, isFalse);
+
+    await tester.tap(find.byType(Switch).first);
+    await tester.pumpAndSettle();
+    expect(container.read(vpnSettingProvider).smartPauseEnabled, isTrue);
+
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(vpnSettingProvider).smartPauseCloseConnections,
+      isTrue,
+    );
   });
 
   testWidgets('the location prerequisite reflects a denied permission', (
@@ -174,7 +229,7 @@ void main() {
     await pumpView(tester, isMacOS: true, locale: const Locale('ru'));
 
     final appLocalizations = AppLocalizations.of(
-      tester.element(find.byType(OnDemandView)),
+      tester.element(find.byType(SmartPauseView)),
     );
     final desc = find.text(appLocalizations.locationPermissionDesc);
     final button = find
@@ -211,6 +266,6 @@ void main() {
 /// The view keys its shared selection notifier by [UniqueKeyStateMixin.key], so
 /// a test has to read the same id off the mounted state.
 String _viewKey(WidgetTester tester) {
-  final state = tester.state(find.byType(OnDemandView)) as dynamic;
+  final state = tester.state(find.byType(SmartPauseView)) as dynamic;
   return state.key as String;
 }

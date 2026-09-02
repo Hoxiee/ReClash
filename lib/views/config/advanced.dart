@@ -3,7 +3,7 @@ import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
-import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/widgets/list.dart';
 import 'package:reclash/widgets/scaffold.dart';
@@ -30,10 +30,10 @@ class AdvancedConfigView extends StatelessWidget {
         ),
       ),
       ListItem.open(
-        title: Text(appLocalizations.onDemand),
-        subtitle: Text(appLocalizations.onDemandDesc),
+        title: Text(appLocalizations.smartPause),
+        subtitle: Text(appLocalizations.smartPauseDesc),
         leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
-        widget: const OnDemandView(),
+        widget: const SmartPauseView(),
         blur: false,
       ),
       ListItem.open(

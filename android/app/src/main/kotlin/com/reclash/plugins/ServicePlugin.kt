@@ -4,6 +4,7 @@ import com.reclash.ServiceController
 import com.reclash.ServiceState
 import com.reclash.common.Components
 import com.reclash.models.SharedState
+import com.reclash.service.ServiceConfig
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -23,6 +24,12 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         channel = MethodChannel(binding.binaryMessenger, "${Components.PACKAGE_NAME}/service")
         channel.setMethodCallHandler(this)
+        // The service pauses itself natively; Flutter only projects that state.
+        scope.launch {
+            ServiceConfig.pauseState.collect { state ->
+                sendPauseState(state.paused)
+            }
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -44,6 +51,9 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "syncState" -> syncState(call, result)
             "start" -> start(result)
             "stop" -> stop(result)
+            "pause" -> pause(result)
+            "resume" -> resume(result)
+            "getPauseState" -> result.success(ServiceConfig.pauseState.value.paused)
             else -> result.notImplemented()
         }
     }
@@ -107,9 +117,25 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         result.success(true)
     }
 
+    private fun pause(result: MethodChannel.Result) {
+        ServiceState.requestPause()
+        result.success(true)
+    }
+
+    private fun resume(result: MethodChannel.Result) {
+        ServiceState.requestResume()
+        result.success(true)
+    }
+
     private fun sendEvent(value: String?) {
         scope.launch(Dispatchers.Main) {
             channel.invokeMethod("event", value)
+        }
+    }
+
+    private fun sendPauseState(paused: Boolean) {
+        scope.launch(Dispatchers.Main) {
+            channel.invokeMethod("pauseState", paused)
         }
     }
 }

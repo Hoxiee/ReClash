@@ -14,6 +14,8 @@ class QuickActionActivity : Activity() {
         when (intent.action) {
             QuickAction.START.action -> GlobalState.launch { ServiceState.handleStartAction() }
             QuickAction.STOP.action -> GlobalState.launch { ServiceState.handleStopAction() }
+            QuickAction.PAUSE.action -> GlobalState.launch { ServiceState.handlePauseAction() }
+            QuickAction.RESUME.action -> GlobalState.launch { ServiceState.handleResumeAction() }
             QuickAction.TOGGLE.action -> {
                 ShortcutManagerCompat.reportShortcutUsed(this, SHORTCUT_ID)
                 GlobalState.launch { ServiceState.handleToggleAction() }

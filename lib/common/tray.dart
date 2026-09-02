@@ -43,11 +43,16 @@ class AppTray implements TrayPort {
     return isWindows ? 'ico' : 'png';
   }
 
-  String getTrayIcon({required bool isStart, required bool tunEnable}) {
+  String getTrayIcon({
+    required bool isStart,
+    required bool tunEnable,
+    required bool paused,
+  }) {
     if (isMacOS || !isStart) {
       return 'assets/images/icon/status_1.$trayIconSuffix';
     }
-    if (!tunEnable) {
+    // A paused core still runs unprotected traffic, matching a disabled TUN.
+    if (paused || !tunEnable) {
       return 'assets/images/icon/status_2.$trayIconSuffix';
     }
     return 'assets/images/icon/status_3.$trayIconSuffix';
@@ -74,6 +79,7 @@ class AppTray implements TrayPort {
           getTrayIcon(
             isStart: trayState.isStart,
             tunEnable: trayState.tunEnable,
+            paused: trayState.paused,
           ),
           isTemplate: isMacOS,
         ),
@@ -117,6 +123,14 @@ class AppTray implements TrayPort {
         checked: false,
         onSelected: commonAction.toggleRunning,
       ),
+      if (trayState.isStart && (trayState.tunEnable || trayState.paused))
+        TrayMenuCheckbox(
+          label: trayState.paused
+              ? appLocalizations.resume
+              : appLocalizations.pause,
+          checked: trayState.paused,
+          onSelected: commonAction.togglePaused,
+        ),
       if (isMacOS)
         TrayMenuCheckbox(
           label: appLocalizations.speedStatistics,

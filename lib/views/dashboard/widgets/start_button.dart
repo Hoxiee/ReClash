@@ -75,7 +75,7 @@ class _StartButtonState extends ConsumerState<StartButton>
   late Animation<double> _animation;
   double? _twoDigitTextWidth;
   double? _threeDigitTextWidth;
-  double? _suspendedTextWidth;
+  double? _pausedTextWidth;
   int? _displayRunTime;
 
   @override
@@ -105,7 +105,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     super.didChangeDependencies();
     _twoDigitTextWidth = null;
     _threeDigitTextWidth = null;
-    _suspendedTextWidth = null;
+    _pausedTextWidth = null;
   }
 
   @override
@@ -116,6 +116,10 @@ class _StartButtonState extends ConsumerState<StartButton>
   }
 
   void handleSwitchStart() {
+    if (ref.read(pausedProvider)) {
+      ref.read(commonActionProvider.notifier).togglePaused();
+      return;
+    }
     ref.read(commonActionProvider.notifier).toggleRunning();
   }
 
@@ -167,11 +171,11 @@ class _StartButtonState extends ConsumerState<StartButton>
     );
   }
 
-  double _getSuspendedTextWidth(BuildContext context, String suspendedText) {
-    return _suspendedTextWidth ??=
+  double _getPausedTextWidth(BuildContext context, String pausedText) {
+    return _pausedTextWidth ??=
         globalState.measure
             .computeTextSize(
-              Text(suspendedText, style: context.textTheme.titleMedium),
+              Text(pausedText, style: context.textTheme.titleMedium),
             )
             .width +
         24;
@@ -185,78 +189,110 @@ class _StartButtonState extends ConsumerState<StartButton>
     if (!hasProfile) {
       return Container();
     }
-    final suspend = ref.watch(suspendProvider);
+    final paused = ref.watch(pausedProvider);
+    final isStart = ref.watch(isStartProvider);
+    final showPauseButton = isStart && !paused && ref.watch(tunEnabledProvider);
     final hasThreeDigitHours =
         (_displayRunTime ?? 0) >= _threeDigitHourThreshold;
     final theme = Theme.of(context);
     final appLocalizations = context.appLocalizations;
-    final textWidth = suspend
-        ? _getSuspendedTextWidth(context, appLocalizations.suspended)
+    final textWidth = paused
+        ? _getPausedTextWidth(context, appLocalizations.paused)
         : _getRunTimeTextWidth(context, hasThreeDigitHours: hasThreeDigitHours);
+    // While paused the service still runs, so the text panel stays open but
+    // the glyph flips to play — the next tap resumes.
+    final iconAnimation = paused
+        ? const AlwaysStoppedAnimation<double>(0)
+        : _animation;
     return RepaintBoundary(
-      child: Theme(
-        data: theme.copyWith(
-          floatingActionButtonTheme: theme.floatingActionButtonTheme.copyWith(
-            sizeConstraints: const BoxConstraints(
-              minWidth: 56,
-              maxWidth: 220,
-              minHeight: _buttonHeight,
-              maxHeight: _buttonHeight,
-            ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedSize(
+            duration: _widthAnimationDuration,
+            curve: Curves.easeOut,
+            alignment: Alignment.centerRight,
+            child: showPauseButton
+                ? FloatingActionButton.small(
+                    heroTag: null,
+                    tooltip: appLocalizations.pause,
+                    onPressed: () {
+                      ref.read(commonActionProvider.notifier).togglePaused();
+                    },
+                    child: const Icon(Icons.pause_rounded),
+                  )
+                : const SizedBox(width: 8),
           ),
-        ),
-        child: FloatingActionButton(
-          clipBehavior: Clip.antiAlias,
-          materialTapTargetSize: MaterialTapTargetSize.padded,
-          heroTag: null,
-          onPressed: () {
-            handleSwitchStart();
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (_, child) {
-                  return Container(
-                    height: _buttonHeight,
-                    padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16 - 8 * _animation.value,
+          Theme(
+            data: theme.copyWith(
+              floatingActionButtonTheme: theme.floatingActionButtonTheme
+                  .copyWith(
+                    sizeConstraints: const BoxConstraints(
+                      minWidth: 56,
+                      maxWidth: 220,
+                      minHeight: _buttonHeight,
+                      maxHeight: _buttonHeight,
                     ),
+                  ),
+            ),
+            child: FloatingActionButton(
+              clipBehavior: Clip.antiAlias,
+              materialTapTargetSize: MaterialTapTargetSize.padded,
+              heroTag: null,
+              tooltip: paused
+                  ? appLocalizations.resume
+                  : isStart
+                  ? appLocalizations.stop
+                  : appLocalizations.start,
+              onPressed: () {
+                handleSwitchStart();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBuilder(
+                    animation: iconAnimation,
+                    builder: (_, child) {
+                      return Container(
+                        height: _buttonHeight,
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16 - 8 * iconAnimation.value,
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: child,
+                      );
+                    },
+                    child: AnimatedIcon(
+                      icon: AnimatedIcons.play_pause,
+                      progress: iconAnimation,
+                    ),
+                  ),
+                  SizeTransition(
+                    axis: Axis.horizontal,
                     alignment: Alignment.centerLeft,
-                    child: child,
-                  );
-                },
-                child: AnimatedIcon(
-                  icon: AnimatedIcons.play_pause,
-                  progress: _animation,
-                ),
-              ),
-              SizeTransition(
-                axis: Axis.horizontal,
-                alignment: Alignment.centerLeft,
-                sizeFactor: _animation,
-                child: AnimatedContainer(
-                  width: textWidth,
-                  duration: _widthAnimationDuration,
-                  curve: Curves.easeOut,
-                  child: suspend
-                      ? Text(
-                          appLocalizations.suspended,
-                          maxLines: 1,
-                          overflow: TextOverflow.visible,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
+                    sizeFactor: _animation,
+                    child: AnimatedContainer(
+                      width: textWidth,
+                      duration: _widthAnimationDuration,
+                      curve: Curves.easeOut,
+                      child: paused
+                          ? Text(
+                              appLocalizations.paused,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
+                              style: context.textTheme.titleMedium?.copyWith(
                                 color: context.colorScheme.onPrimaryContainer,
                               ),
-                        )
-                      : RunTimeText(timeStamp: _displayRunTime),
-                ),
+                            )
+                          : RunTimeText(timeStamp: _displayRunTime),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

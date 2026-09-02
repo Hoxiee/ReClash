@@ -22,6 +22,25 @@ class CommonAction extends _$CommonAction {
     );
   }
 
+  void togglePaused() {
+    final paused = ref.read(pausedProvider);
+    if (!paused && !ref.read(isStartProvider)) {
+      return;
+    }
+    if (system.isAndroid) {
+      final core = ref.read(coreHandlerProvider);
+      unawaited(
+        globalState.safeRun(
+          () async => paused ? core.resumeTun() : core.pauseTun(),
+        ),
+      );
+      return;
+    }
+    final anchor = ref.read(networkAnchorProvider);
+    final notifier = ref.read(manualPauseProvider.notifier);
+    paused ? notifier.resume(anchor) : notifier.pause(anchor);
+  }
+
   void updateSpeedStatistics() {
     ref
         .read(appSettingProvider.notifier)

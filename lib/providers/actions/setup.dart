@@ -178,7 +178,9 @@ class SetupAction extends _$SetupAction {
       if (!_isCurrent(request)) {
         return;
       }
-      if (request.running && ref.read(suspendProvider)) {
+      // A start request that lands on a paused Android service would resume
+      // it, so the already-running service is left paused.
+      if (request.running && system.isAndroid && ref.read(pausedProvider)) {
         return;
       }
       await setCoreRunning(request.running);

@@ -561,6 +561,23 @@ class CurrentSSID extends _$CurrentSSID with AutoDisposeNotifierMixin {
 }
 
 @Riverpod(keepAlive: true)
+class CurrentIPv4s extends _$CurrentIPv4s with AutoDisposeNotifierMixin {
+  @override
+  List<String> build() {
+    return const [];
+  }
+}
+
+/// The Android service's own pause flag; null until the first report lands.
+@Riverpod(keepAlive: true)
+class NativePause extends _$NativePause with AutoDisposeNotifierMixin {
+  @override
+  bool? build() {
+    return null;
+  }
+}
+
+@Riverpod(keepAlive: true)
 class BatteryOptimizationDisable extends _$BatteryOptimizationDisable
     with AutoDisposeNotifierMixin {
   @override

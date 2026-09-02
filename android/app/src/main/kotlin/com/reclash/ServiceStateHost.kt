@@ -5,11 +5,13 @@ import com.reclash.common.GlobalState
 import com.reclash.models.SharedState
 import com.reclash.plugins.AppPlugin
 import com.reclash.plugins.TilePlugin
+import com.reclash.service.PauseState
 import com.reclash.service.ServiceConfig
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.VpnOptions
 import io.flutter.embedding.engine.FlutterEngine
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * The machine owns the arbitration and the transitions; this is only the part that cannot run on a
@@ -20,6 +22,7 @@ internal interface ServiceStateHost {
     val runTimeMillis: Long
     val homeDirPath: String
     val sdkInt: Int
+    val pauseState: StateFlow<PauseState>
 
     fun log(message: String)
 
@@ -28,6 +31,8 @@ internal interface ServiceStateHost {
     fun setCrashlytics(enabled: Boolean)
 
     fun updateNotificationParams(params: NotificationParams)
+
+    fun updateVpnOptions(options: VpnOptions)
 
     fun loadSharedState(): SharedState
 
@@ -43,6 +48,10 @@ internal interface ServiceStateHost {
 
     suspend fun stopService()
 
+    suspend fun pauseService(manual: Boolean)
+
+    suspend fun resumeService()
+
     suspend fun isVpnServiceActive(): Boolean
 }
 
@@ -50,6 +59,10 @@ internal interface TileGateway {
     fun handleStart()
 
     fun handleStop()
+
+    fun handlePause()
+
+    fun handleResume()
 }
 
 internal interface AppGateway {
@@ -76,6 +89,9 @@ internal object AndroidServiceStateHost : ServiceStateHost {
     override val sdkInt: Int
         get() = android.os.Build.VERSION.SDK_INT
 
+    override val pauseState: StateFlow<PauseState>
+        get() = ServiceConfig.pauseState
+
     fun attachFlutterEngine(engine: FlutterEngine) {
         flutterEngine = engine
     }
@@ -95,6 +111,9 @@ internal object AndroidServiceStateHost : ServiceStateHost {
     override fun updateNotificationParams(params: NotificationParams) =
         ServiceConfig.updateNotificationParams(params)
 
+    override fun updateVpnOptions(options: VpnOptions) =
+        ServiceConfig.updateVpnOptions(options)
+
     override fun loadSharedState(): SharedState = GlobalState.application.sharedState
 
     override fun isVpnPermissionGranted(): Boolean =
@@ -105,6 +124,10 @@ internal object AndroidServiceStateHost : ServiceStateHost {
             override fun handleStart() = plugin.handleStart()
 
             override fun handleStop() = plugin.handleStop()
+
+            override fun handlePause() = plugin.handlePause()
+
+            override fun handleResume() = plugin.handleResume()
         }
     }
 
@@ -128,6 +151,10 @@ internal object AndroidServiceStateHost : ServiceStateHost {
         ServiceController.start(options)
 
     override suspend fun stopService() = ServiceController.stop()
+
+    override suspend fun pauseService(manual: Boolean) = ServiceController.pause(manual)
+
+    override suspend fun resumeService() = ServiceController.resume()
 
     override suspend fun isVpnServiceActive(): Boolean = ServiceController.isVpnServiceActive()
 }

@@ -161,6 +161,9 @@ abstract class VpnProps with _$VpnProps {
     @Default(false) bool ipv6,
     @Default(true) bool allowBypass,
     @Default(false) bool dnsHijacking,
+    @Default(false) bool smartPauseEnabled,
+    @Default([]) List<String> smartPauseNetworks,
+    @Default(false) bool smartPauseCloseConnections,
     @Default(defaultAccessControlProps) AccessControlProps accessControlProps,
   }) = _VpnProps;
 
@@ -251,7 +254,6 @@ abstract class Config with _$Config {
     @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
     @Default(defaultWindowProps) WindowProps windowProps,
     @Default(defaultClashConfig) PatchClashConfig patchClashConfig,
-    @Default([]) List<String> excludeSSIDs,
   }) = _Config;
 
   factory Config.fromJson(Map<String, Object?> json) => _$ConfigFromJson(json);
@@ -260,6 +262,24 @@ abstract class Config with _$Config {
     if (json == null) {
       return const Config(themeProps: defaultThemeProps);
     }
-    return _$ConfigFromJson(json);
+    return _$ConfigFromJson(migrateExcludeSSIDs(json));
+  }
+
+  static Map<String, Object?> migrateExcludeSSIDs(Map<String, Object?> json) {
+    final legacy = json['excludeSSIDs'];
+    if (legacy is! List || legacy.isEmpty) {
+      return json;
+    }
+    final migrated = Map<String, Object?>.of(json)..remove('excludeSSIDs');
+    final props = Map<String, Object?>.of(
+      (migrated['vpnProps'] as Map?)?.cast<String, Object?>() ?? {},
+    );
+    final networks = props['smartPauseNetworks'];
+    if (networks is! List || networks.isEmpty) {
+      props['smartPauseEnabled'] = true;
+      props['smartPauseNetworks'] = legacy.whereType<String>().toList();
+      migrated['vpnProps'] = props;
+    }
+    return migrated;
   }
 }

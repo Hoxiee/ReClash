@@ -89,7 +89,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'25b5b6e8120d605a1b7729e0e74eb1bccafdb2fe';
+String _$trayStateHash() => r'4792c9d67109ebc34a5b13914a7e92fb787d2018';
 
 @ProviderFor(trayTitleState)
 final trayTitleStateProvider = TrayTitleStateProvider._();
@@ -431,7 +431,7 @@ final class ShouldPatchSystemDnsProvider
 }
 
 String _$shouldPatchSystemDnsHash() =>
-    r'73e86e60067acc55dd1cce0ea7f2d09899bbf119';
+    r'6984f3229427348333b2780d0da107ee37f7de4d';
 
 @ProviderFor(sharedState)
 final sharedStateProvider = SharedStateProvider._();
@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'7e30ceeff05348ad8fba1c862bfa52ce7bb00da6';
+String _$sharedStateHash() => r'fd2eec7f157c6170b7921b4b32e7645b8612875a';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -527,24 +527,135 @@ abstract class _$AccessControlState extends $Notifier<AccessControlProps> {
   }
 }
 
-@ProviderFor(suspend)
-final suspendProvider = SuspendProvider._();
+@ProviderFor(ManualPause)
+final manualPauseProvider = ManualPauseProvider._();
 
-final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
-    with $Provider<bool> {
-  SuspendProvider._()
+final class ManualPauseProvider
+    extends
+        $NotifierProvider<
+          ManualPause,
+          ({List<String> anchor, bool paused, bool resumed})
+        > {
+  ManualPauseProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'suspendProvider',
+        name: r'manualPauseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$manualPauseHash();
+
+  @$internal
+  @override
+  ManualPause create() => ManualPause();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    ({List<String> anchor, bool paused, bool resumed}) value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<
+            ({List<String> anchor, bool paused, bool resumed})
+          >(value),
+    );
+  }
+}
+
+String _$manualPauseHash() => r'fdaafe2fb9d39a3c19497a5e5d82c98255a74396';
+
+abstract class _$ManualPause
+    extends $Notifier<({List<String> anchor, bool paused, bool resumed})> {
+  ({List<String> anchor, bool paused, bool resumed}) build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({List<String> anchor, bool paused, bool resumed}),
+              ({List<String> anchor, bool paused, bool resumed})
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({List<String> anchor, bool paused, bool resumed}),
+                ({List<String> anchor, bool paused, bool resumed})
+              >,
+              ({List<String> anchor, bool paused, bool resumed}),
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(networkAnchor)
+final networkAnchorProvider = NetworkAnchorProvider._();
+
+final class NetworkAnchorProvider
+    extends $FunctionalProvider<List<String>, List<String>, List<String>>
+    with $Provider<List<String>> {
+  NetworkAnchorProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'networkAnchorProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$suspendHash();
+  String debugGetCreateSourceHash() => _$networkAnchorHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<String>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<String> create(Ref ref) {
+    return networkAnchor(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<String>>(value),
+    );
+  }
+}
+
+String _$networkAnchorHash() => r'3a92214e3be02f4f1221367bed0c52a7db7f7275';
+
+@ProviderFor(paused)
+final pausedProvider = PausedProvider._();
+
+final class PausedProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  PausedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pausedProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pausedHash();
 
   @$internal
   @override
@@ -553,7 +664,7 @@ final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
 
   @override
   bool create(Ref ref) {
-    return suspend(ref);
+    return paused(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -565,7 +676,47 @@ final class SuspendProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$suspendHash() => r'9ab9210f4f3c70f63d9858d492a9c09b3fb24bf1';
+String _$pausedHash() => r'1ddddb6c61d12a7d3407d22cec5e1e24fe7bded5';
+
+@ProviderFor(tunEnabled)
+final tunEnabledProvider = TunEnabledProvider._();
+
+final class TunEnabledProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  TunEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tunEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tunEnabledHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return tunEnabled(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$tunEnabledHash() => r'a4c40ddd8d0ae4a7b1f9e2163054229239b1663b';
 
 @ProviderFor(DynamicColor)
 final dynamicColorProvider = DynamicColorProvider._();
@@ -1436,7 +1587,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'76a71ab5da07dca9aeb351282c5c03ab222d0760';
+String _$proxyStateHash() => r'832d373c19f7666664c566b5dde103868f1cec9f';
 
 @ProviderFor(proxiesActionsState)
 final proxiesActionsStateProvider = ProxiesActionsStateProvider._();

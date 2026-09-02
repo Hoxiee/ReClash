@@ -61,8 +61,35 @@ func handleStopListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
 	isRunning.Store(false)
+	tunPaused.Store(false)
 	listener.StopListener()
 	resolver.ResetConnection()
+	return true
+}
+
+func handlePauseTun() bool {
+	if features.Android {
+		return true
+	}
+	configMu.Lock()
+	defer configMu.Unlock()
+	if tunPaused.Swap(true) {
+		return true
+	}
+	updateListeners(currentConfig)
+	return true
+}
+
+func handleResumeTun() bool {
+	if features.Android {
+		return true
+	}
+	configMu.Lock()
+	defer configMu.Unlock()
+	if !tunPaused.Swap(false) {
+		return true
+	}
+	updateListeners(currentConfig)
 	return true
 }
 
@@ -84,6 +111,7 @@ func handleShutdown() bool {
 
 	configMu.Lock()
 	isRunning.Store(false)
+	tunPaused.Store(false)
 	listener.StopListener()
 	updater.StopGeoUpdater()
 	executor.Shutdown()

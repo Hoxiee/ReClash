@@ -20,9 +20,9 @@ class ReClashHttpOverrides extends HttpOverrides {
       return 'DIRECT';
     }
     final isStart = read(isStartProvider);
-    final suspend = read(suspendProvider);
+    final paused = read(pausedProvider);
     commonPrint.log('find $url proxy: $isStart');
-    if (!isStart || suspend) return 'DIRECT';
+    if (!isStart || paused) return 'DIRECT';
     final mixedPort = read(
       patchClashConfigProvider.select((state) => state.mixedPort),
     );

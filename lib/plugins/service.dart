@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 
 abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
+
+  void onPauseStateChanged(bool paused) {}
 }
 
 class Service {
@@ -19,6 +21,11 @@ class Service {
 
   final ObserverList<ServiceListener> _listeners =
       ObserverList<ServiceListener>();
+
+  bool? _nativePaused;
+
+  /// The service's own pause flag, or null before the first report.
+  bool? get nativePaused => _nativePaused;
 
   factory Service() {
     _instance ??= Service._internal();
@@ -29,6 +36,13 @@ class Service {
     methodChannel = const MethodChannel('$packageName/service');
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
+        case 'pauseState':
+          final paused = call.arguments as bool? ?? false;
+          _nativePaused = paused;
+          for (final listener in List.of(_listeners)) {
+            listener.onPauseStateChanged(paused);
+          }
+          break;
         case 'event':
           final data = call.arguments as String? ?? '';
           final methodCall = CoreMethodCall.fromJson(
@@ -72,6 +86,18 @@ class Service {
 
   Future<bool> stop() async {
     return await methodChannel.invokeMethod<bool>('stop') ?? false;
+  }
+
+  Future<bool> pause() async {
+    return await methodChannel.invokeMethod<bool>('pause') ?? false;
+  }
+
+  Future<bool> resume() async {
+    return await methodChannel.invokeMethod<bool>('resume') ?? false;
+  }
+
+  Future<bool?> getPauseState() async {
+    return methodChannel.invokeMethod<bool>('getPauseState');
   }
 
   Future<String> init() async {

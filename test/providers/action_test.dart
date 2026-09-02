@@ -690,31 +690,28 @@ void main() {
         expect(container.read(isStartProvider), isFalse);
       });
 
-      test(
-        'keeps suspended startup local until the listener resumes',
-        () async {
-          final container = ProviderContainer(
-            overrides: [
-              initProvider.overrideWithBuild((_, _) => true),
-              suspendProvider.overrideWithValue(true),
-              commonActionProvider.overrideWith(_RaceCommonAction.new),
-              setupActionProvider.overrideWith(_RaceSetupAction.new),
-            ],
-          );
-          addTearDown(container.dispose);
-          final action =
-              container.read(setupActionProvider.notifier) as _RaceSetupAction;
+      test('a paused start is only skipped on Android', () async {
+        final container = ProviderContainer(
+          overrides: [
+            initProvider.overrideWithBuild((_, _) => true),
+            pausedProvider.overrideWith((ref) => true),
+            commonActionProvider.overrideWith(_RaceCommonAction.new),
+            setupActionProvider.overrideWith(_RaceSetupAction.new),
+          ],
+        );
+        addTearDown(container.dispose);
+        final action =
+            container.read(setupActionProvider.notifier) as _RaceSetupAction;
 
-          await action.setRunning(true);
+        await action.setRunning(true);
 
-          expect(action.transitions, isEmpty);
-          expect(container.read(isStartProvider), isTrue);
-          expect(action.applyProfileDebounceCount, 1);
+        expect(action.transitions, [true]);
+        expect(container.read(isStartProvider), isTrue);
+        expect(action.applyProfileDebounceCount, 1);
 
-          await action.setRunning(false);
-          expect(action.transitions, [false]);
-        },
-      );
+        await action.setRunning(false);
+        expect(action.transitions, [true, false]);
+      });
     });
 
     test(

@@ -38,16 +38,22 @@ void main() {
   ProviderContainer buildContainer({
     bool running = true,
     String? currentSsid,
-    List<String> excludeSSIDs = const [],
+    List<String> trustedNetworks = const [],
     int mixedPort = 7890,
     bool checkCertificate = true,
   }) {
-    final container = ProviderContainer(
-      overrides: [excludeSSIDsProvider.overrideWithValue(excludeSSIDs)],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     container.read(runTimeProvider.notifier).value = running ? 1 : null;
     container.read(currentSSIDProvider.notifier).value = currentSsid;
+    if (trustedNetworks.isNotEmpty) {
+      container.read(vpnSettingProvider.notifier).update(
+        (_) => const VpnProps().copyWith(
+          smartPauseEnabled: true,
+          smartPauseNetworks: trustedNetworks,
+        ),
+      );
+    }
     container.read(patchClashConfigProvider.notifier).value =
         const PatchClashConfig().copyWith(mixedPort: mixedPort);
     container.read(appSettingProvider.notifier).value = const AppSettingProps()
@@ -84,19 +90,19 @@ void main() {
     expect(ReClashHttpOverrides.findProxyFor(container, remote), 'DIRECT');
   });
 
-  test('bypasses the proxy on an excluded SSID', () {
+  test('bypasses the proxy on a trusted network', () {
     final container = buildContainer(
       currentSsid: 'Office Wi-Fi',
-      excludeSSIDs: const ['Office Wi-Fi'],
+      trustedNetworks: const ['Office Wi-Fi'],
     );
 
     expect(ReClashHttpOverrides.findProxyFor(container, remote), 'DIRECT');
   });
 
-  test('keeps proxying when the current SSID is not excluded', () {
+  test('keeps proxying when the current network is not trusted', () {
     final container = buildContainer(
       currentSsid: 'Home Wi-Fi',
-      excludeSSIDs: const ['Office Wi-Fi'],
+      trustedNetworks: const ['Office Wi-Fi'],
     );
 
     expect(

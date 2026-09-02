@@ -1956,6 +1956,115 @@ abstract class _$CurrentSSID extends $Notifier<String?> {
   }
 }
 
+@ProviderFor(CurrentIPv4s)
+final currentIPv4sProvider = CurrentIPv4sProvider._();
+
+final class CurrentIPv4sProvider
+    extends $NotifierProvider<CurrentIPv4s, List<String>> {
+  CurrentIPv4sProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentIPv4sProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentIPv4sHash();
+
+  @$internal
+  @override
+  CurrentIPv4s create() => CurrentIPv4s();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<String>>(value),
+    );
+  }
+}
+
+String _$currentIPv4sHash() => r'3aedc15e8cad100db2c644653c03f94aac9865ad';
+
+abstract class _$CurrentIPv4s extends $Notifier<List<String>> {
+  List<String> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<List<String>, List<String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<String>, List<String>>,
+              List<String>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// The Android service's own pause flag; null until the first report lands.
+
+@ProviderFor(NativePause)
+final nativePauseProvider = NativePauseProvider._();
+
+/// The Android service's own pause flag; null until the first report lands.
+final class NativePauseProvider extends $NotifierProvider<NativePause, bool?> {
+  /// The Android service's own pause flag; null until the first report lands.
+  NativePauseProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'nativePauseProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$nativePauseHash();
+
+  @$internal
+  @override
+  NativePause create() => NativePause();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool?>(value),
+    );
+  }
+}
+
+String _$nativePauseHash() => r'5fe837994883a42915a24e7aab472045f266e10d';
+
+/// The Android service's own pause flag; null until the first report lands.
+
+abstract class _$NativePause extends $Notifier<bool?> {
+  bool? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool?, bool?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool?, bool?>,
+              bool?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(BatteryOptimizationDisable)
 final batteryOptimizationDisableProvider =
     BatteryOptimizationDisableProvider._();

@@ -248,9 +248,16 @@ void main() {
         .update((_) => TunAuthorizationState.unauthorized);
     expect(container.read(shouldPatchSystemDnsProvider), isFalse);
 
-    container.read(excludeSSIDsProvider.notifier).update((_) => ['Office']);
+    container
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: ['Office'],
+          ),
+        );
     container.read(currentSSIDProvider.notifier).update((_) => 'Office');
-    expect(container.read(suspendProvider), isTrue);
+    expect(container.read(pausedProvider), isTrue);
     expect(container.read(proxyStateProvider).isStart, isFalse);
   });
 
@@ -426,6 +433,89 @@ void main() {
     expect(zh.stopText, isNot(en.stopText));
     expect(zh.stopTip, isNot(en.stopTip));
     expect(zh.startTip, isNot(en.startTip));
+  });
+
+  group('pausedProvider', () {
+    void trust({
+      String? ssid,
+      List<String> networks = const ['Office Wi-Fi', '192.168.1.0/24'],
+    }) {
+      container
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              smartPauseEnabled: true,
+              smartPauseNetworks: networks,
+            ),
+          );
+      container.read(currentSSIDProvider.notifier).value = ssid;
+    }
+
+    test('stays off while smart pause is disabled', () {
+      trust(ssid: 'Office Wi-Fi');
+      container
+          .read(vpnSettingProvider.notifier)
+          .update((state) => state.copyWith(smartPauseEnabled: false));
+
+      expect(container.read(pausedProvider), isFalse);
+    });
+
+    test('stays off with no trusted networks', () {
+      trust(ssid: 'Cafe', networks: const []);
+
+      expect(container.read(pausedProvider), isFalse);
+    });
+
+    test('engages on a trusted SSID', () {
+      trust(ssid: 'office wi-fi');
+
+      expect(container.read(pausedProvider), isTrue);
+    });
+
+    test('engages on a trusted subnet', () {
+      trust(ssid: null);
+      container.read(currentIPv4sProvider.notifier).value = ['192.168.1.20'];
+
+      expect(container.read(pausedProvider), isTrue);
+    });
+
+    test('a manual pause holds on an untrusted network', () {
+      trust(ssid: 'Cafe');
+      container.read(manualPauseProvider.notifier).pause(['Cafe']);
+
+      expect(container.read(pausedProvider), isTrue);
+    });
+
+    test('a manual resume holds while the anchor network stays', () {
+      trust(ssid: 'Office Wi-Fi');
+      final anchor = container.read(networkAnchorProvider);
+      final manual = container.read(manualPauseProvider.notifier);
+      manual.pause(anchor);
+      manual.resume(anchor);
+
+      expect(container.read(pausedProvider), isFalse);
+
+      container
+          .read(manualPauseProvider.notifier)
+          .clear();
+      expect(container.read(pausedProvider), isTrue);
+    });
+
+    test('networkAnchor prefers the SSID and falls back to /24 subnets', () {
+      expect(container.read(networkAnchorProvider), isEmpty);
+
+      container.read(currentIPv4sProvider.notifier).value = [
+        '192.168.1.20',
+        '10.0.0.5',
+      ];
+      expect(container.read(networkAnchorProvider), [
+        '10.0.0.0/24',
+        '192.168.1.0/24',
+      ]);
+
+      container.read(currentSSIDProvider.notifier).value = 'Cafe';
+      expect(container.read(networkAnchorProvider), ['Cafe']);
+    });
   });
 }
 

@@ -22,6 +22,8 @@ import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	cp "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/listener"
+	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 )
@@ -149,6 +151,53 @@ func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	handleSuspend(false)
 	if got := refreshes.Load(); got != 1 {
 		t.Errorf("refreshes = %d, want no probe while the listeners are stopped", got)
+	}
+}
+
+func TestHandlePauseTunLeavesTheStoredConfigUntouched(t *testing.T) {
+	cfg := &config.Config{
+		General: &config.General{
+			Inbound: config.Inbound{Tun: LC.Tun{Enable: true}},
+		},
+		Controller: &config.Controller{},
+	}
+	withCurrentConfig(t, cfg)
+	previousRunning := isRunning.Load()
+	t.Cleanup(func() {
+		isRunning.Store(previousRunning)
+		tunPaused.Store(false)
+	})
+	isRunning.Store(true)
+	tunPaused.Store(false)
+
+	if !handlePauseTun() {
+		t.Fatal("handlePauseTun() = false, want true")
+	}
+	if !tunPaused.Load() {
+		t.Error("the pause flag was not set")
+	}
+	if !cfg.General.Tun.Enable {
+		t.Error("the stored config's TUN flag was cleared")
+	}
+	if listener.LastTunConf.Enable {
+		t.Error("the listener kept TUN enabled after a pause")
+	}
+
+	if !handlePauseTun() {
+		t.Fatal("a repeated pause was not accepted")
+	}
+	if !cfg.General.Tun.Enable {
+		t.Error("a repeated pause corrupted the stored config")
+	}
+
+	if !handleStopListener() {
+		t.Fatal("handleStopListener() = false, want true")
+	}
+	if tunPaused.Load() {
+		t.Error("the pause flag survived a stop")
+	}
+	if !cfg.General.Tun.Enable {
+		t.Error("a stop must not rewrite the stored config")
 	}
 }
 

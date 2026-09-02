@@ -15,8 +15,11 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
       : VpnOptions.fromJson(json['vpnOptions'] as Map<String, dynamic>),
   stopTip: json['stopTip'] as String,
   startTip: json['startTip'] as String,
+  pauseTip: json['pauseTip'] as String,
   currentProfileName: json['currentProfileName'] as String,
   stopText: json['stopText'] as String,
+  pauseText: json['pauseText'] as String,
+  resumeText: json['resumeText'] as String,
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool,
   crashlytics: json['crashlytics'] as bool,
 );
@@ -27,8 +30,11 @@ Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
       'vpnOptions': instance.vpnOptions,
       'stopTip': instance.stopTip,
       'startTip': instance.startTip,
+      'pauseTip': instance.pauseTip,
       'currentProfileName': instance.currentProfileName,
       'stopText': instance.stopText,
+      'pauseText': instance.pauseText,
+      'resumeText': instance.resumeText,
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
       'crashlytics': instance.crashlytics,
     };

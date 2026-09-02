@@ -71,7 +71,6 @@ void main() {
         profilesProvider.overrideWithValue([
           const Profile(id: 1, autoUpdateDuration: Duration.zero),
         ]),
-        suspendProvider.overrideWithValue(false),
       ],
     );
     addTearDown(container.dispose);
@@ -115,7 +114,6 @@ void main() {
         profilesProvider.overrideWithValue([
           const Profile(id: 1, autoUpdateDuration: Duration.zero),
         ]),
-        suspendProvider.overrideWithValue(false),
       ],
     );
     addTearDown(container.dispose);

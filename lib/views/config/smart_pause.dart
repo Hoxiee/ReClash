@@ -11,18 +11,18 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
-class OnDemandView extends ConsumerStatefulWidget {
-  const OnDemandView({super.key, this.isAndroid, this.isMacOS});
+class SmartPauseView extends ConsumerStatefulWidget {
+  const SmartPauseView({super.key, this.isAndroid, this.isMacOS});
 
   final bool? isAndroid;
   final bool? isMacOS;
 
   @override
-  ConsumerState createState() => _OnDemandViewState();
+  ConsumerState createState() => _SmartPauseViewState();
 }
 
-class _OnDemandViewState extends ConsumerState<OnDemandView>
-    with UniqueKeyStateMixin {
+class _SmartPauseViewState extends ConsumerState<SmartPauseView>
+  with UniqueKeyStateMixin {
   static const _authorizeButtonPadding = 12.0;
   static const _minAuthorizeButtonWidth = 80.0;
 
@@ -91,47 +91,62 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     app?.openBatteryOptimizationSettings();
   }
 
-  Future<void> _handleAddOrUpdate([String? ssid]) async {
-    final ssids = ref.read(excludeSSIDsProvider);
+  Future<void> _handleAddOrUpdate([String? network]) async {
+    final networks = ref.read(
+      vpnSettingProvider.select((state) => state.smartPauseNetworks),
+    );
     final appLocalizations = context.appLocalizations;
-    final newSSID = await dialogs.showCommonDialog<String>(
+    final newNetwork = await dialogs.showCommonDialog<String>(
       child: InputDialog(
-        title: ssid == null
-            ? appLocalizations.addSsid
-            : appLocalizations.editSsid,
-        value: ssid ?? '',
-        maxLength: 32,
+        title: network == null
+            ? appLocalizations.addNetwork
+            : appLocalizations.editNetwork,
+        value: network ?? '',
+        maxLength: 64,
+        hintText: appLocalizations.networkEntryHint,
         validator: (value) {
-          if (value == null || value.isEmpty) {
-            return appLocalizations.emptyTip('SSID').trim();
+          if (value == null || value.trim().isEmpty) {
+            return appLocalizations.emptyTip(
+              appLocalizations.trustedNetworks,
+            ).trim();
           }
-          if (ssids.contains(value) && ssid != value) {
-            return appLocalizations.existsTip('SSID').trim();
+          if (networks.contains(value.trim()) && network != value.trim()) {
+            return appLocalizations.existsTip(
+              appLocalizations.trustedNetworks,
+            ).trim();
           }
           return null;
         },
       ),
     );
-    if (newSSID == null || ssid == newSSID) {
+    if (newNetwork == null) {
       return;
     }
-    ref.read(excludeSSIDsProvider.notifier).update((state) {
-      final newSSIDS = state.toSet();
-      if (ssid != null) {
-        newSSIDS.remove(ssid);
-      }
-      return [...newSSIDS, newSSID];
+    final trimmed = newNetwork.trim();
+    if (trimmed.isEmpty || trimmed == network) {
+      return;
+    }
+    ref.read(vpnSettingProvider.notifier).update((state) {
+      final networks = state.smartPauseNetworks.where((item) {
+        return item != network && item != trimmed;
+      }).toList();
+      return state.copyWith(smartPauseNetworks: [...networks, trimmed]);
     });
   }
 
-  void _handleReorder(int oldIndex, newIndex) {
-    ref.read(excludeSSIDsProvider.notifier).update((value) {
-      return value.copyAndReorder(oldIndex, newIndex);
+  void _handleReorder(int oldIndex, int newIndex) {
+    ref.read(vpnSettingProvider.notifier).update((state) {
+      return state.copyWith(
+        smartPauseNetworks: state.smartPauseNetworks.copyAndReorder(
+          oldIndex,
+          newIndex,
+        ),
+      );
     });
   }
 
   Widget _buildItem({
-    required String ssid,
+    required String network,
     required int index,
     required int length,
     required bool isSelected,
@@ -139,7 +154,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
   }) {
     final position = ItemPosition.get(index, length);
     return ReorderableDelayedDragStartListener(
-      key: ValueKey(ssid),
+      key: ValueKey(network),
       index: index,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -148,18 +163,24 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
           child: SelectedDecorationListItem(
             isEditing: isEditing,
             minVerticalPadding: 8,
+            leading: Icon(
+              isSubnetRule(network)
+                  ? Icons.router_rounded
+                  : Icons.wifi_rounded,
+              color: context.colorScheme.onSurfaceVariant,
+            ),
             title: TooltipText(
-              text: Text(ssid, maxLines: 2, overflow: TextOverflow.ellipsis),
+              text: Text(network, maxLines: 2, overflow: TextOverflow.ellipsis),
             ),
             isSelected: isSelected,
             onSelected: () {
               ref.read(itemsProvider(key).notifier).update((state) {
-                final newState = Set<String>.from(state)..addOrRemove(ssid);
+                final newState = Set<String>.from(state)..addOrRemove(network);
                 return newState;
               });
             },
             onPressed: () {
-              _handleAddOrUpdate(ssid);
+              _handleAddOrUpdate(network);
             },
           ),
         ),
@@ -168,18 +189,22 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
   }
 
   void _handleSelectAll() {
-    final excludeSSIDs = ref.read(excludeSSIDsProvider).toSet();
+    final networks = ref.read(
+      vpnSettingProvider.select((state) => state.smartPauseNetworks),
+    ).toSet();
     ref.read(itemsProvider(key).notifier).update((selected) {
-      return selected.containsAll(excludeSSIDs) ? {} : excludeSSIDs;
+      return selected.containsAll(networks) ? {} : networks;
     });
   }
 
   void _handleDelete() {
     final selectedItems = ref.read(itemsProvider(key));
-    ref.read(excludeSSIDsProvider.notifier).update((excludeSSIDs) {
-      return excludeSSIDs
-          .where((item) => !selectedItems.contains(item))
-          .toList();
+    ref.read(vpnSettingProvider.notifier).update((state) {
+      return state.copyWith(
+        smartPauseNetworks: state.smartPauseNetworks
+            .where((item) => !selectedItems.contains(item))
+            .toList(),
+      );
     });
     ref.read(itemsProvider(key).notifier).value = {};
   }
@@ -309,12 +334,120 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     );
   }
 
-  Widget _buildExcludeSsidsHeader() {
+  Widget _buildSwitches() {
+    final appLocalizations = context.appLocalizations;
+    final vpnSetting = ref.watch(vpnSettingProvider);
+    return generateSectionV3(
+      items: [
+        DecorationListItem(
+          minVerticalPadding: 8,
+          contentPadding: const EdgeInsets.only(left: 16, right: 8),
+          title: Text(appLocalizations.smartPause),
+          subtitle: Text(appLocalizations.smartPauseDesc),
+          onPressed: () {
+            _updateSmartPauseEnabled(!vpnSetting.smartPauseEnabled);
+          },
+          trailing: Switch(
+            value: vpnSetting.smartPauseEnabled,
+            onChanged: _updateSmartPauseEnabled,
+          ),
+        ),
+        if (vpnSetting.smartPauseEnabled)
+          DecorationListItem(
+            minVerticalPadding: 8,
+            contentPadding: const EdgeInsets.only(left: 16, right: 8),
+            title: Text(appLocalizations.smartPauseCloseConnections),
+            subtitle: Text(appLocalizations.closeConnectionsDesc),
+            onPressed: () {
+              ref.read(vpnSettingProvider.notifier).update((state) {
+                return state.copyWith(
+                  smartPauseCloseConnections: !state.smartPauseCloseConnections,
+                );
+              });
+            },
+            trailing: Switch(
+              value: vpnSetting.smartPauseCloseConnections,
+              onChanged: (value) {
+                ref.read(vpnSettingProvider.notifier).update((state) {
+                  return state.copyWith(smartPauseCloseConnections: value);
+                });
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _updateSmartPauseEnabled(bool value) {
+    ref.read(vpnSettingProvider.notifier).update((state) {
+      return state.copyWith(smartPauseEnabled: value);
+    });
+  }
+
+  Widget _buildStatus() {
+    final appLocalizations = context.appLocalizations;
+    final vpnSetting = ref.watch(vpnSettingProvider);
+    final enabled = vpnSetting.smartPauseEnabled;
+    final networks = vpnSetting.smartPauseNetworks;
+    if (!enabled || networks.isEmpty) {
+      return const SliverPadding(padding: EdgeInsets.zero);
+    }
+    final colorScheme = context.colorScheme;
+    final matched = smartPauseMatches(
+      networks,
+      ssid: ref.watch(currentSSIDProvider),
+      ipv4s: ref.watch(currentIPv4sProvider),
+    );
+    return SliverPadding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      sliver: SliverToBoxAdapter(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: AppShape.xl,
+            color: matched
+                ? colorScheme.primary.withValues(alpha: 0.10)
+                : colorScheme.surfaceContainerHigh,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                Icon(
+                  matched
+                      ? Icons.pause_circle_rounded
+                      : Icons.location_searching_rounded,
+                  size: 18,
+                  color: matched
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    matched
+                        ? appLocalizations.trustedNow
+                        : appLocalizations.notTrustedNow,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: matched
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNetworksHeader() {
     final appLocalizations = context.appLocalizations;
     final hasSelection = ref.watch(itemsProvider(key)).isNotEmpty;
     return ListHeader(
-      title: appLocalizations.excludeSsids,
-      subTitle: appLocalizations.excludeSsidsDesc,
+      title: appLocalizations.trustedNetworks,
+      subTitle: appLocalizations.trustedNetworksDesc,
       actions: [
         const SizedBox(width: 8),
         if (hasSelection)
@@ -341,27 +474,27 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
     );
   }
 
-  Widget _buildExcludeSsidsList(
-    List<String> excludeSSIDs,
+  Widget _buildNetworksList(
+    List<String> networks,
     Set<dynamic> selectedItems,
   ) {
-    if (excludeSSIDs.isEmpty) {
+    if (networks.isEmpty) {
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
         sliver: SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 48),
-            child: NullStatus(label: context.appLocalizations.ssidsEmpty),
+            child: NullStatus(label: context.appLocalizations.networksEmpty),
           ),
         ),
       );
     }
     Widget itemAt(int index) => _buildItem(
       isEditing: selectedItems.isNotEmpty,
-      ssid: excludeSSIDs[index],
+      network: networks[index],
       index: index,
-      isSelected: selectedItems.contains(excludeSSIDs[index]),
-      length: excludeSSIDs.length,
+      isSelected: selectedItems.contains(networks[index]),
+      length: networks.length,
     );
     return SliverPadding(
       padding: const EdgeInsets.only(top: 12),
@@ -369,7 +502,7 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
         itemBuilder: (_, index) => itemAt(index),
         proxyDecorator: (child, index, animation) =>
             commonProxyDecorator(itemAt(index), index, animation),
-        itemCount: excludeSSIDs.length,
+        itemCount: networks.length,
         onReorderItem: _handleReorder,
       ),
     );
@@ -377,7 +510,9 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
 
   @override
   Widget build(BuildContext context) {
-    final excludeSSIDs = ref.watch(excludeSSIDsProvider);
+    final networks = ref.watch(
+      vpnSettingProvider.select((state) => state.smartPauseNetworks),
+    );
     final selectedItems = ref.watch(itemsProvider(key));
     return CommonScaffold(
       body: CustomScrollView(
@@ -386,14 +521,20 @@ class _OnDemandViewState extends ConsumerState<OnDemandView>
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(child: _buildExcludeSsidsHeader()),
+            sliver: SliverToBoxAdapter(child: _buildSwitches()),
           ),
-          _buildExcludeSsidsList(excludeSSIDs, selectedItems),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(child: _buildNetworksHeader()),
+          ),
+          _buildStatus(),
+          _buildNetworksList(networks, selectedItems),
         ],
       ),
-      title: context.appLocalizations.onDemand,
+      title: context.appLocalizations.smartPause,
     );
   }
 }

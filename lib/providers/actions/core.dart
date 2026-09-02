@@ -114,6 +114,11 @@ class CoreAction extends _$CoreAction {
         }
         appliedRevision = revision;
       }
+      if (applied && ref.read(pausedProvider)) {
+        // A fresh core process starts unpaused; the policy listener will not
+        // refire for an unchanged value, so the pause must be re-issued.
+        await ref.read(coreHandlerProvider).pauseTun();
+      }
       return applied;
     } catch (_) {
       ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;

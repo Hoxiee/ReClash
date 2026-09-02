@@ -41,6 +41,10 @@ mixin CoreInterface {
 
   Future<bool> stopListener();
 
+  Future<bool> pauseTun();
+
+  Future<bool> resumeTun();
+
   Future<List<ExternalProvider>> getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(String externalProviderName);
@@ -346,6 +350,16 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> stopListener() async {
     return await _invokeMethod<bool>(method: CoreMethod.stopListener) ?? false;
+  }
+
+  @override
+  Future<bool> pauseTun() async {
+    return await _invokeMethod<bool>(method: CoreMethod.pauseTun) ?? false;
+  }
+
+  @override
+  Future<bool> resumeTun() async {
+    return await _invokeMethod<bool>(method: CoreMethod.resumeTun) ?? false;
   }
 
   @override

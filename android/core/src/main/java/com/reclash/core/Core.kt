@@ -83,6 +83,14 @@ object Core {
         )
     }
 
+    private fun invokeWithoutArguments(method: String) {
+        invokeMethod("""{"method":"$method"}""") {}
+    }
+
+    fun resetConnections() = invokeWithoutArguments("resetConnections")
+
+    fun closeConnections() = invokeWithoutArguments("closeConnections")
+
     private external fun setEventListener(cb: InvokeInterface?)
 
     fun updateEventListener(

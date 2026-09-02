@@ -109,6 +109,8 @@ const (
 	stopLogMethod                  CoreMethod = "stopLog"
 	startListenerMethod            CoreMethod = "startListener"
 	stopListenerMethod             CoreMethod = "stopListener"
+	pauseTunMethod                 CoreMethod = "pauseTun"
+	resumeTunMethod                CoreMethod = "resumeTun"
 	updateDnsMethod                CoreMethod = "updateDns"
 	crashMethod                    CoreMethod = "crash"
 	setupConfigMethod              CoreMethod = "setupConfig"

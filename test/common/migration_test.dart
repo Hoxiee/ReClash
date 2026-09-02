@@ -240,6 +240,37 @@ void main() {
 
       expect(config.patchClashConfig.globalUa, 'clash-verge/v2.4.2');
     });
+
+    test('moves a legacy excludeSSIDs list into smart pause', () async {
+      final configMap = _createConfigMap();
+      configMap['excludeSSIDs'] = ['Home', 'Office'];
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.vpnProps.smartPauseEnabled, isTrue);
+      expect(config.vpnProps.smartPauseNetworks, ['Home', 'Office']);
+    });
+
+    test('keeps explicit smart pause networks over a legacy list', () async {
+      final configMap = _createConfigMap();
+      final vpnProps = configMap['vpnProps']! as Map<String, Object?>;
+      vpnProps['smartPauseEnabled'] = true;
+      vpnProps['smartPauseNetworks'] = ['Cafe'];
+      configMap['excludeSSIDs'] = ['Home'];
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.vpnProps.smartPauseEnabled, isTrue);
+      expect(config.vpnProps.smartPauseNetworks, ['Cafe']);
+    });
   });
 }
 

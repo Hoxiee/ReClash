@@ -32,7 +32,7 @@ class EnumsTest {
     @Test
     fun `quick action names back the intent action suffixes`() {
         assertEquals(
-            listOf("STOP", "START", "TOGGLE"),
+            listOf("STOP", "START", "TOGGLE", "PAUSE", "RESUME"),
             QuickAction.entries.map { it.name },
         )
     }

@@ -23,6 +23,9 @@ data class VpnOptions(
     val bypassDomain: List<String>,
     val stack: String,
     val routeAddress: List<String>,
+    val smartPauseEnabled: Boolean = false,
+    val smartPauseNetworks: List<String> = emptyList(),
+    val smartPauseCloseConnections: Boolean = false,
 )
 
 data class CIDR(

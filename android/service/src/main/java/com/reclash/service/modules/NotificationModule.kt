@@ -33,22 +33,27 @@ import kotlinx.coroutines.launch
 private data class ExtendedNotificationParams(
     val title: String,
     val stopText: String,
+    val pauseText: String,
+    val resumeText: String,
+    val paused: Boolean,
     val contentText: String,
 )
 
-private val NotificationParams.extended: ExtendedNotificationParams
-    get() = ExtendedNotificationParams(
-        title,
-        stopText,
-        Core.getSpeedTrafficText(onlyStatisticsProxy),
-    )
+private fun NotificationParams.extended(paused: Boolean) = ExtendedNotificationParams(
+    title,
+    stopText,
+    pauseText,
+    resumeText,
+    paused,
+    if (paused) pauseText else Core.getSpeedTrafficText(onlyStatisticsProxy),
+)
 
 internal class NotificationModule(
     private val service: Service,
     private val scope: CoroutineScope,
 ) : ServiceModule {
     override fun start() {
-        update(ServiceConfig.notificationParams.value.extended)
+        update(ServiceConfig.notificationParams.value.extended(ServiceConfig.pauseState.value.paused))
         scope.launch {
             val screenFlow = service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -68,8 +73,9 @@ internal class NotificationModule(
                 },
                 ServiceConfig.notificationParams,
                 screenFlow,
-            ) { _, params, screenOn ->
-                params.takeIf { screenOn }?.extended
+                ServiceConfig.pauseState,
+            ) { _, params, screenOn, pauseState ->
+                params.takeIf { screenOn }?.extended(pauseState.paused)
             }.filterNotNull()
                 .distinctUntilChanged()
                 .collect(::update)
@@ -101,16 +107,16 @@ internal class NotificationModule(
     }
 
     private fun update(params: ExtendedNotificationParams) {
+        val toggleAction = if (params.paused) QuickAction.RESUME else QuickAction.PAUSE
+        val toggleText = if (params.paused) params.resumeText else params.pauseText
         service.startForeground(
             with(notificationBuilder) {
                 setContentTitle(params.title)
                 setContentText(params.contentText)
                 clearActions()
-                addAction(
-                    0,
-                    params.stopText,
-                    QuickAction.STOP.quickIntent.toPendingIntent,
-                ).build()
+                addAction(0, toggleText, toggleAction.quickIntent.toPendingIntent)
+                addAction(0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent)
+                    .build()
             },
         )
     }

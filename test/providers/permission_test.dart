@@ -12,12 +12,20 @@ void main() {
   const channel = MethodChannel('wifi_ssid');
   late ProviderContainer container;
 
+  void setSsidRules(List<String> networks) {
+    container
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: networks,
+          ),
+        );
+  }
+
   setUp(() {
-    container = ProviderContainer(
-      overrides: [
-        excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-      ],
-    );
+    container = ProviderContainer();
+    setSsidRules(const ['Office Wi-Fi']);
   });
 
   tearDown(() async {
@@ -105,7 +113,7 @@ void main() {
   });
 
   test(
-    're-arms the auto-request when excludeSSIDs goes from empty to non-empty',
+    're-arms the auto-request when SSID rules go from empty to non-empty',
     () async {
       container = ProviderContainer();
       final calls = <String>[];
@@ -119,15 +127,30 @@ void main() {
       await permissions.checkLocationPermissions(container.read);
       expect(calls.where((call) => call == 'requestPermission'), isEmpty);
 
-      container.read(excludeSSIDsProvider.notifier).value = const [
-        'Office Wi-Fi',
-      ];
+      setSsidRules(const ['Office Wi-Fi']);
       await permissions.checkLocationPermissions(container.read);
       await permissions.checkLocationPermissions(container.read);
 
       expect(calls.where((call) => call == 'requestPermission').length, 1);
     },
   );
+
+  test('subnet-only rules never trigger the location auto-request', () async {
+    container = ProviderContainer();
+    setSsidRules(const ['192.168.1.0/24']);
+    final calls = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          calls.add(call.method);
+          return 1;
+        });
+
+    final permissions = Permissions.test(supportsLocationPermissions: true);
+    await permissions.checkLocationPermissions(container.read);
+    await permissions.checkLocationPermissions(container.read);
+
+    expect(calls.where((call) => call == 'requestPermission'), isEmpty);
+  });
 
   test('re-arms the auto-request and does not throw when requestPermission '
       'fails', () async {

@@ -124,6 +124,17 @@ class CoreLib extends CoreHandlerInterface {
     return serviceStopped && listenerStopped;
   }
 
+  // Android pause is the ServiceState machine's; the desktop RPC must not run there.
+  @override
+  Future<bool> pauseTun() async {
+    return await _service?.pause() ?? false;
+  }
+
+  @override
+  Future<bool> resumeTun() async {
+    return await _service?.resume() ?? false;
+  }
+
   @override
   Future<T?> invokeMethod<T>({
     required CoreMethod method,

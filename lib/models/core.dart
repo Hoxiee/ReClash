@@ -52,6 +52,9 @@ abstract class VpnOptions with _$VpnOptions {
     required List<String> bypassDomain,
     required String stack,
     @Default([]) List<String> routeAddress,
+    @Default(false) bool smartPauseEnabled,
+    @Default([]) List<String> smartPauseNetworks,
+    @Default(false) bool smartPauseCloseConnections,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>

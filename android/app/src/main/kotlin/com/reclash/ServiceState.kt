@@ -21,6 +21,10 @@ object ServiceState {
 
     suspend fun handleStopAction() = machine.handleStopAction()
 
+    suspend fun handlePauseAction() = machine.handlePauseAction()
+
+    suspend fun handleResumeAction() = machine.handleResumeAction()
+
     suspend fun handleVpnRevokeAction() = machine.handleVpnRevokeAction()
 
     suspend fun refresh(): Long = machine.refresh()
@@ -28,6 +32,10 @@ object ServiceState {
     fun requestStart(): Deferred<Boolean> = machine.requestStart()
 
     fun requestStop(): Deferred<Boolean> = machine.requestStop()
+
+    fun requestPause(): Deferred<Boolean> = machine.requestPause()
+
+    fun requestResume(): Deferred<Boolean> = machine.requestResume()
 
     fun syncSharedState(state: SharedState) = machine.syncSharedState(state)
 

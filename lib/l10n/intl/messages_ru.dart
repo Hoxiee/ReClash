@@ -133,6 +133,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
     "actionView": MessageLookupByLibrary.simpleMessage("Показать/Скрыть"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
+    "addNetwork": MessageLookupByLibrary.simpleMessage("Добавить сеть"),
     "addProfile": MessageLookupByLibrary.simpleMessage("Добавить профиль"),
     "addProxies": MessageLookupByLibrary.simpleMessage("Добавить прокси"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage(
@@ -142,7 +143,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Добавить провайдеров прокси",
     ),
     "addRule": MessageLookupByLibrary.simpleMessage("Добавить правило"),
-    "addSsid": MessageLookupByLibrary.simpleMessage("Добавить SSID"),
     "addWidget": MessageLookupByLibrary.simpleMessage("Добавить виджет"),
     "addedRules": MessageLookupByLibrary.simpleMessage("Добавленные правила"),
     "additionalParameters": MessageLookupByLibrary.simpleMessage(
@@ -295,6 +295,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeConnections": MessageLookupByLibrary.simpleMessage(
       "Закрыть соединения",
     ),
+    "closeConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+      "Разрывать все открытые соединения при паузе VPN",
+    ),
     "color": MessageLookupByLibrary.simpleMessage("Цвет"),
     "colorSchemes": MessageLookupByLibrary.simpleMessage("Цветовые схемы"),
     "columns": MessageLookupByLibrary.simpleMessage("Столбцы"),
@@ -440,12 +443,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Редактировать глобальные правила",
     ),
+    "editNetwork": MessageLookupByLibrary.simpleMessage("Изменить сеть"),
     "editProxy": MessageLookupByLibrary.simpleMessage("Редактировать прокси"),
     "editProxyGroup": MessageLookupByLibrary.simpleMessage(
       "Редактировать группу прокси",
     ),
     "editRule": MessageLookupByLibrary.simpleMessage("Редактировать правило"),
-    "editSsid": MessageLookupByLibrary.simpleMessage("Изменить SSID"),
     "emptyTip": m9,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
@@ -456,10 +459,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "excludeProxyFilter": MessageLookupByLibrary.simpleMessage(
       "Фильтр исключения узлов",
-    ),
-    "excludeSsids": MessageLookupByLibrary.simpleMessage("Исключённые SSID"),
-    "excludeSsidsDesc": MessageLookupByLibrary.simpleMessage(
-      "При подключении к Wi-Fi с исключённым SSID состояние работы приложения переключается автоматически",
     ),
     "excludeType": MessageLookupByLibrary.simpleMessage("Исключаемые типы"),
     "existsTip": m11,
@@ -749,11 +748,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "Настройки, связанные с сетью",
     ),
     "networkDetection": MessageLookupByLibrary.simpleMessage("Проверка сети"),
+    "networkEntryHint": MessageLookupByLibrary.simpleMessage(
+      "SSID (Home Wi-Fi) или подсеть (192.168.1.0/24)",
+    ),
     "networkException": MessageLookupByLibrary.simpleMessage(
       "Ошибка сети. Проверьте подключение и повторите попытку",
     ),
     "networkSpeed": MessageLookupByLibrary.simpleMessage("Скорость сети"),
     "networkType": MessageLookupByLibrary.simpleMessage("Тип сети"),
+    "networksEmpty": MessageLookupByLibrary.simpleMessage("Список сетей пуст"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Нейтральная"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("Новый вид"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),
@@ -775,15 +778,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(
       "Текущую группу прокси нельзя выбрать",
     ),
+    "notTrustedNow": MessageLookupByLibrary.simpleMessage(
+      "Текущая сеть не доверенная",
+    ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профилей пока нет. Сначала добавьте профиль",
     ),
     "nullTip": m25,
     "numberTip": m26,
-    "onDemand": MessageLookupByLibrary.simpleMessage("По условию"),
-    "onDemandDesc": MessageLookupByLibrary.simpleMessage(
-      "Настройте состояние работы приложения для определённых сценариев",
-    ),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Только значок"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Учитывать только прокси",
@@ -826,6 +828,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "palette": MessageLookupByLibrary.simpleMessage("Палитра"),
     "password": MessageLookupByLibrary.simpleMessage("Пароль"),
     "paste": MessageLookupByLibrary.simpleMessage("Вставить"),
+    "pause": MessageLookupByLibrary.simpleMessage("Пауза"),
+    "pauseVpn": MessageLookupByLibrary.simpleMessage("Приостанавливаем VPN..."),
+    "paused": MessageLookupByLibrary.simpleMessage("Приостановлено"),
     "perpetualSubscription": MessageLookupByLibrary.simpleMessage(
       "Бессрочная подписка",
     ),
@@ -996,6 +1001,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreSuccess": MessageLookupByLibrary.simpleMessage(
       "Восстановление выполнено",
     ),
+    "resume": MessageLookupByLibrary.simpleMessage("Продолжить"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Адреса маршрутов"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Настроить прослушиваемые адреса маршрутов",
@@ -1163,6 +1169,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Запускаться в фоновом режиме",
     ),
     "size": MessageLookupByLibrary.simpleMessage("Размер"),
+    "smartPause": MessageLookupByLibrary.simpleMessage("Умная пауза"),
+    "smartPauseCloseConnections": MessageLookupByLibrary.simpleMessage(
+      "Закрывать соединения",
+    ),
+    "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
+      "Автоматически приостанавливать VPN в доверенных сетях",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("Порт SOCKS"),
     "sort": MessageLookupByLibrary.simpleMessage("Сортировка"),
     "source": MessageLookupByLibrary.simpleMessage("Источник"),
@@ -1178,7 +1191,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "splitStrategyNotEmpty": MessageLookupByLibrary.simpleMessage(
       "Стратегия распределения не может быть пустой",
     ),
-    "ssidsEmpty": MessageLookupByLibrary.simpleMessage("Список SSID пуст"),
     "stackMode": MessageLookupByLibrary.simpleMessage("Режим стека"),
     "standard": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
@@ -1204,7 +1216,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Информация о подписке",
     ),
     "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
-    "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено..."),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
     "system": MessageLookupByLibrary.simpleMessage("Система"),
     "systemApp": MessageLookupByLibrary.simpleMessage("Системные приложения"),
@@ -1251,6 +1262,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "trafficFreeOfTotal": m32,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
+    "trustedNetworks": MessageLookupByLibrary.simpleMessage("Доверенные сети"),
+    "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN приостанавливается в этих сетях",
+    ),
+    "trustedNow": MessageLookupByLibrary.simpleMessage(
+      "Текущая сеть доверенная — VPN в ней приостанавливается",
+    ),
     "tun": MessageLookupByLibrary.simpleMessage("TUN"),
     "tunDesc": MessageLookupByLibrary.simpleMessage(
       "Работает только в режиме администратора",

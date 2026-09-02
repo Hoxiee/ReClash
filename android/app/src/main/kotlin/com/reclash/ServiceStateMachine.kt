@@ -20,6 +20,7 @@ enum class RunState {
     STARTING,
     STOPPING,
     STOPPED,
+    PAUSED,
 }
 
 internal typealias RunRequest = RunIntentArbiter.Token
@@ -51,17 +52,29 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     private val runTimeMillis: Long
         get() = host.runTimeMillis
 
+    init {
+        // The service pauses itself natively (smart pause policy), so the machine
+        // projects the service's own flag instead of owning it.
+        host.scope.launch {
+            host.pauseState.collect { state -> syncPaused(state.paused) }
+        }
+    }
+
     suspend fun handleToggleAction() {
-        if (isRunningRequested()) {
-            handleStopAction()
-        } else {
-            handleStartAction()
+        when {
+            runState.value == RunState.PAUSED -> handleResumeAction()
+            isRunningRequested() -> handleStopAction()
+            else -> handleStartAction()
         }
     }
 
     suspend fun refresh(): Long = transitionLock.withLock {
         val current = runTimeMillis
-        mutableRunState.value = if (current == 0L) RunState.STOPPED else RunState.STARTED
+        mutableRunState.value = when {
+            current == 0L -> RunState.STOPPED
+            host.pauseState.value.paused -> RunState.PAUSED
+            else -> RunState.STARTED
+        }
         current
     }
 
@@ -82,6 +95,10 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     }
 
     suspend fun handleStartAction() {
+        if (runState.value == RunState.PAUSED) {
+            handleResumeAction()
+            return
+        }
         if (isRunningRequested()) {
             return
         }
@@ -104,6 +121,31 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         }
         host.showToast(sharedState.stopTip)
         requestStop().await()
+    }
+
+    suspend fun handlePauseAction() {
+        if (runState.value != RunState.STARTED) {
+            return
+        }
+        val tile = host.tile()
+        if (tile != null) {
+            tile.handlePause()
+            return
+        }
+        host.showToast(sharedState.pauseTip)
+        requestPause().await()
+    }
+
+    suspend fun handleResumeAction() {
+        if (runState.value != RunState.PAUSED) {
+            return
+        }
+        val tile = host.tile()
+        if (tile != null) {
+            tile.handleResume()
+            return
+        }
+        requestResume().await()
     }
 
     suspend fun handleVpnRevokeAction() {
@@ -158,6 +200,36 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         return result
     }
 
+    fun requestPause(): Deferred<Boolean> {
+        val request = createRequest(running = true, paused = true)
+        val result = CompletableDeferred<Boolean>()
+        host.scope.launch {
+            result.complete(
+                runCatching { pause(request) }
+                    .onFailure { error ->
+                        host.log("Unable to process service pause request: $error")
+                    }
+                    .getOrDefault(false),
+            )
+        }
+        return result
+    }
+
+    fun requestResume(): Deferred<Boolean> {
+        val request = createRequest(running = true, paused = false)
+        val result = CompletableDeferred<Boolean>()
+        host.scope.launch {
+            result.complete(
+                runCatching { resume(request) }
+                    .onFailure { error ->
+                        host.log("Unable to process service resume request: $error")
+                    }
+                    .getOrDefault(false),
+            )
+        }
+        return result
+    }
+
     fun syncSharedState(state: SharedState) {
         sharedState = state
         applySharedState()
@@ -179,6 +251,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     private fun applySharedState() {
         host.setCrashlytics(sharedState.crashlytics)
         host.updateNotificationParams(notificationParams(sharedState))
+        sharedState.vpnOptions?.let(host::updateVpnOptions)
     }
 
     private suspend fun setupCore(): Boolean {
@@ -242,6 +315,10 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
                 return@transition false
             }
             if (runTimeMillis != 0L && host.isVpnServiceActive() == options.enable) {
+                // A start that lands on a paused service is a resume.
+                if (host.pauseState.value.paused) {
+                    host.resumeService()
+                }
                 mutableRunState.value = RunState.STARTED
                 return@transition true
             }
@@ -283,6 +360,38 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         isCurrent(request)
     }
 
+    private suspend fun pause(request: RunRequest): Boolean = transitionLock.withLock {
+        if (!isCurrent(request)) {
+            return@withLock false
+        }
+        if (runState.value != RunState.STARTED || runTimeMillis == 0L || !host.isVpnServiceActive()) {
+            return@withLock false
+        }
+        host.pauseService(manual = true)
+        mutableRunState.value = RunState.PAUSED
+        isCurrent(request)
+    }
+
+    private suspend fun resume(request: RunRequest): Boolean = transitionLock.withLock {
+        if (!isCurrent(request)) {
+            return@withLock false
+        }
+        if (runState.value != RunState.PAUSED) {
+            return@withLock false
+        }
+        host.resumeService()
+        mutableRunState.value = RunState.STARTED
+        isCurrent(request)
+    }
+
+    private suspend fun syncPaused(paused: Boolean) = transitionLock.withLock {
+        mutableRunState.value = when {
+            paused && runState.value == RunState.STARTED && runTimeMillis != 0L -> RunState.PAUSED
+            !paused && runState.value == RunState.PAUSED -> RunState.STARTED
+            else -> runState.value
+        }
+    }
+
     private suspend fun prepareVpn(options: VpnOptions): Boolean {
         val app = host.app()
             ?: return !options.enable || host.isVpnPermissionGranted()
@@ -311,7 +420,8 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         abandon()
     }
 
-    private fun createRequest(running: Boolean): RunRequest = arbiter.request(running)
+    private fun createRequest(running: Boolean, paused: Boolean = false): RunRequest =
+        arbiter.request(running, paused)
 
     private fun isRunningRequested(): Boolean = arbiter.isRunningRequested
 
@@ -337,6 +447,8 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             title = state.currentProfileName,
             stopText = state.stopText,
             onlyStatisticsProxy = state.onlyStatisticsProxy,
+            pauseText = state.pauseText,
+            resumeText = state.resumeText,
         )
     }
 }

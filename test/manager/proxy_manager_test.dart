@@ -95,16 +95,18 @@ void main() {
     expect(state.port, 7892);
   });
 
-  test('an excluded SSID suspends the system proxy', () {
-    final suspended = ProviderContainer(
-      overrides: [
-        excludeSSIDsProvider.overrideWithValue(const ['Office Wi-Fi']),
-      ],
+  test('a trusted network pauses the system proxy', () {
+    final paused = ProviderContainer();
+    addTearDown(paused.dispose);
+    paused.read(runTimeProvider.notifier).value = 1;
+    paused.read(vpnSettingProvider.notifier).update(
+      (_) => const VpnProps().copyWith(
+        smartPauseEnabled: true,
+        smartPauseNetworks: ['Office Wi-Fi'],
+      ),
     );
-    addTearDown(suspended.dispose);
-    suspended.read(runTimeProvider.notifier).value = 1;
-    suspended.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
+    paused.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
 
-    expect(suspended.read(proxyStateProvider).isStart, isFalse);
+    expect(paused.read(proxyStateProvider).isStart, isFalse);
   });
 }

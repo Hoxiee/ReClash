@@ -298,7 +298,9 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
   void initState() {
     super.initState();
     if (ref.read(runTimeProvider) != null) {
-      _phase = HeroOrbPhase.on;
+      _phase = ref.read(pausedProvider)
+          ? HeroOrbPhase.paused
+          : HeroOrbPhase.on;
     }
   }
 
@@ -1042,6 +1044,9 @@ class _HeroActionRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final hasSupport = supportUrl != null && supportUrl!.isNotEmpty;
+    final showPauseChip =
+        ref.watch(isStartProvider) &&
+        (ref.watch(tunEnabledProvider) || ref.watch(pausedProvider));
     return Row(
       children: [
         Expanded(
@@ -1062,9 +1067,42 @@ class _HeroActionRow extends ConsumerWidget {
             ),
           ),
         ],
+        if (showPauseChip) ...[
+          const SizedBox(width: 10),
+          const _PauseChip(),
+        ],
         const SizedBox(width: 10),
         const _ModeChip(),
       ],
+    );
+  }
+}
+
+class _PauseChip extends ConsumerWidget {
+  const _PauseChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = context.colorScheme;
+    final appLocalizations = context.appLocalizations;
+    final paused = ref.watch(pausedProvider);
+    return Tooltip(
+      message: paused ? appLocalizations.resume : appLocalizations.pause,
+      child: FocusableTap(
+        borderRadius: heroPillRadius,
+        onTap: () => ref.read(commonActionProvider.notifier).togglePaused(),
+        child: HeroSurface(
+          radius: heroPillRadius,
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Icon(
+            paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+            size: 18,
+            color: colorScheme.primary,
+          ),
+        ),
+      ),
     );
   }
 }

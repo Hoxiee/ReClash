@@ -48,6 +48,7 @@ TrayState trayState(Ref ref) {
   );
   final groups = ref.watch(currentGroupsStateProvider).value;
   final selectedMap = ref.watch(selectedMapProvider);
+  final paused = ref.watch(pausedProvider);
 
   return TrayState(
     mode: clashConfig.mode,
@@ -56,6 +57,7 @@ TrayState trayState(Ref ref) {
     systemProxy: systemProxy,
     tunEnable: clashConfig.tunEnable,
     isStart: isStart,
+    paused: paused,
     groups: groups,
     selectedMap: selectedMap,
     showTrayTitle: appSetting.showTrayTitle,
@@ -141,6 +143,7 @@ bool shouldPatchSystemDns(Ref ref) {
   final authorizationState = ref.watch(authorizedTunEnableProvider);
   return isStart &&
       tunEnable &&
+      !ref.watch(pausedProvider) &&
       authorizationState == TunAuthorizationState.authorized;
 }
 
@@ -190,9 +193,12 @@ SharedState sharedState(Ref ref) {
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
     stopText: currentAppLocalizations.stop,
+    pauseText: currentAppLocalizations.pause,
+    resumeText: currentAppLocalizations.resume,
     crashlytics: crashlytics,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,
+    pauseTip: currentAppLocalizations.pauseVpn,
     setupParams: SetupParams(selectedMap: selectedMap, testUrl: testUrl),
     vpnOptions: VpnOptions(
       enable: vpnSetting.enable,
@@ -205,6 +211,9 @@ SharedState sharedState(Ref ref) {
       allowBypass: vpnSetting.allowBypass,
       bypassDomain: networkSetting.bypassDomain,
       routeAddress: clashConfig.routeAddress,
+      smartPauseEnabled: vpnSetting.smartPauseEnabled,
+      smartPauseNetworks: vpnSetting.smartPauseNetworks,
+      smartPauseCloseConnections: vpnSetting.smartPauseCloseConnections,
     ),
   );
 }
@@ -216,9 +225,76 @@ class AccessControlState extends _$AccessControlState
   AccessControlProps build() => const AccessControlProps();
 }
 
+@Riverpod(keepAlive: true)
+class ManualPause extends _$ManualPause with AutoDisposeNotifierMixin {
+  @override
+  ({bool paused, bool resumed, List<String> anchor}) build() {
+    return (paused: false, resumed: false, anchor: const []);
+  }
+
+  void pause(List<String> anchor) {
+    state = (paused: true, resumed: false, anchor: anchor);
+  }
+
+  void resume(List<String> anchor) {
+    state = (paused: false, resumed: true, anchor: anchor);
+  }
+
+  void clear() {
+    state = (paused: false, resumed: false, anchor: const []);
+  }
+}
+
 @riverpod
-bool suspend(Ref ref) {
-  final currentSSID = ref.watch(currentSSIDProvider);
-  final excludeSSIDs = ref.watch(excludeSSIDsProvider);
-  return excludeSSIDs.contains(currentSSID);
+List<String> networkAnchor(Ref ref) {
+  final ssid = ref.watch(currentSSIDProvider);
+  if (ssid != null && ssid.isNotEmpty) {
+    return [ssid];
+  }
+  final anchors = ref
+      .watch(currentIPv4sProvider)
+      .map(ipv4ToSubnetCidr)
+      .toList()
+    ..sort();
+  return anchors;
+}
+
+@riverpod
+bool paused(Ref ref) {
+  // On Android the native SmartPause module owns the transition; Dart only
+  // projects the service's own flag.
+  if (system.isAndroid) {
+    return ref.watch(nativePauseProvider) ?? false;
+  }
+  final manual = ref.watch(manualPauseProvider);
+  if (manual.paused) {
+    return true;
+  }
+  final smartPause = ref.watch(
+    vpnSettingProvider.select(
+      (state) => (
+        enabled: state.smartPauseEnabled,
+        networks: state.smartPauseNetworks,
+      ),
+    ),
+  );
+  if (!smartPause.enabled || smartPause.networks.isEmpty) {
+    return false;
+  }
+  if (manual.resumed) {
+    return false;
+  }
+  return smartPauseMatches(
+    smartPause.networks,
+    ssid: ref.watch(currentSSIDProvider),
+    ipv4s: ref.watch(currentIPv4sProvider),
+  );
+}
+
+@riverpod
+bool tunEnabled(Ref ref) {
+  if (system.isAndroid) {
+    return ref.watch(vpnSettingProvider.select((state) => state.enable));
+  }
+  return ref.watch(patchClashConfigProvider.select((state) => state.tun.enable));
 }

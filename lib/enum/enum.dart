@@ -271,7 +271,7 @@ enum FunctionTag {
   loadedProvider,
   saveSharedFile,
   removeProxy,
-  suspend,
+  smartPause,
   coreErrorNotifier,
 }
 

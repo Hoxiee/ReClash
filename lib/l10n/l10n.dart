@@ -850,6 +850,21 @@ class AppLocalizations {
     );
   }
 
+  /// `Pausing VPN...`
+  String get pauseVpn {
+    return Intl.message('Pausing VPN...', name: 'pauseVpn', desc: '', args: []);
+  }
+
+  /// `Pause`
+  String get pause {
+    return Intl.message('Pause', name: 'pause', desc: '', args: []);
+  }
+
+  /// `Resume`
+  String get resume {
+    return Intl.message('Resume', name: 'resume', desc: '', args: []);
+  }
+
   /// `Stopping VPN...`
   String get stopVpn {
     return Intl.message('Stopping VPN...', name: 'stopVpn', desc: '', args: []);
@@ -4707,56 +4722,126 @@ class AppLocalizations {
     );
   }
 
+  /// `Smart pause`
+  String get smartPause {
+    return Intl.message('Smart pause', name: 'smartPause', desc: '', args: []);
+  }
+
+  /// `Pause the VPN automatically on trusted networks`
+  String get smartPauseDesc {
+    return Intl.message(
+      'Pause the VPN automatically on trusted networks',
+      name: 'smartPauseDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paused`
+  String get paused {
+    return Intl.message('Paused', name: 'paused', desc: '', args: []);
+  }
+
+  /// `Trusted networks`
+  String get trustedNetworks {
+    return Intl.message(
+      'Trusted networks',
+      name: 'trustedNetworks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The VPN pauses while connected to any of these networks`
+  String get trustedNetworksDesc {
+    return Intl.message(
+      'The VPN pauses while connected to any of these networks',
+      name: 'trustedNetworksDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No trusted networks yet`
+  String get networksEmpty {
+    return Intl.message(
+      'No trusted networks yet',
+      name: 'networksEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add network`
+  String get addNetwork {
+    return Intl.message('Add network', name: 'addNetwork', desc: '', args: []);
+  }
+
+  /// `Edit network`
+  String get editNetwork {
+    return Intl.message(
+      'Edit network',
+      name: 'editNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `SSID (Home Wi-Fi) or subnet (192.168.1.0/24)`
+  String get networkEntryHint {
+    return Intl.message(
+      'SSID (Home Wi-Fi) or subnet (192.168.1.0/24)',
+      name: 'networkEntryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close connections`
+  String get smartPauseCloseConnections {
+    return Intl.message(
+      'Close connections',
+      name: 'smartPauseCloseConnections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Drop every open connection when the VPN pauses`
+  String get closeConnectionsDesc {
+    return Intl.message(
+      'Drop every open connection when the VPN pauses',
+      name: 'closeConnectionsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current network is trusted — VPN paused here`
+  String get trustedNow {
+    return Intl.message(
+      'Current network is trusted — VPN paused here',
+      name: 'trustedNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current network is not trusted`
+  String get notTrustedNow {
+    return Intl.message(
+      'Current network is not trusted',
+      name: 'notTrustedNow',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The system requires location permission to read the Wi-Fi name. On Android choose "Allow all the time", otherwise the Wi-Fi name cannot be read while the app is in the background.`
   String get locationPermissionDesc {
     return Intl.message(
       'The system requires location permission to read the Wi-Fi name. On Android choose "Allow all the time", otherwise the Wi-Fi name cannot be read while the app is in the background.',
       name: 'locationPermissionDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Exclude SSIDs`
-  String get excludeSsids {
-    return Intl.message(
-      'Exclude SSIDs',
-      name: 'excludeSsids',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `When connected to Wi-Fi with an excluded SSID, the app's running state switches automatically`
-  String get excludeSsidsDesc {
-    return Intl.message(
-      'When connected to Wi-Fi with an excluded SSID, the app\'s running state switches automatically',
-      name: 'excludeSsidsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `SSIDs are empty`
-  String get ssidsEmpty {
-    return Intl.message(
-      'SSIDs are empty',
-      name: 'ssidsEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `On demand`
-  String get onDemand {
-    return Intl.message('On demand', name: 'onDemand', desc: '', args: []);
-  }
-
-  /// `Configure the app's running state for specific scenarios`
-  String get onDemandDesc {
-    return Intl.message(
-      'Configure the app\'s running state for specific scenarios',
-      name: 'onDemandDesc',
       desc: '',
       args: [],
     );
@@ -4772,16 +4857,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Add SSID`
-  String get addSsid {
-    return Intl.message('Add SSID', name: 'addSsid', desc: '', args: []);
-  }
-
-  /// `Edit SSID`
-  String get editSsid {
-    return Intl.message('Edit SSID', name: 'editSsid', desc: '', args: []);
-  }
-
   /// `Authorized`
   String get authorized {
     return Intl.message('Authorized', name: 'authorized', desc: '', args: []);
@@ -4795,11 +4870,6 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
-  }
-
-  /// `Suspended...`
-  String get suspended {
-    return Intl.message('Suspended...', name: 'suspended', desc: '', args: []);
   }
 
   /// `Geo options`

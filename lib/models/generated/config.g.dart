@@ -159,6 +159,14 @@ _VpnProps _$VpnPropsFromJson(Map<String, dynamic> json) => _VpnProps(
   ipv6: json['ipv6'] as bool? ?? false,
   allowBypass: json['allowBypass'] as bool? ?? true,
   dnsHijacking: json['dnsHijacking'] as bool? ?? false,
+  smartPauseEnabled: json['smartPauseEnabled'] as bool? ?? false,
+  smartPauseNetworks:
+      (json['smartPauseNetworks'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  smartPauseCloseConnections:
+      json['smartPauseCloseConnections'] as bool? ?? false,
   accessControlProps: json['accessControlProps'] == null
       ? defaultAccessControlProps
       : AccessControlProps.fromJson(
@@ -172,6 +180,9 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'ipv6': instance.ipv6,
   'allowBypass': instance.allowBypass,
   'dnsHijacking': instance.dnsHijacking,
+  'smartPauseEnabled': instance.smartPauseEnabled,
+  'smartPauseNetworks': instance.smartPauseNetworks,
+  'smartPauseCloseConnections': instance.smartPauseCloseConnections,
   'accessControlProps': instance.accessControlProps,
 };
 
@@ -357,11 +368,6 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       : PatchClashConfig.fromJson(
           json['patchClashConfig'] as Map<String, dynamic>,
         ),
-  excludeSSIDs:
-      (json['excludeSSIDs'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
 );
 
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
@@ -376,5 +382,4 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'proxiesStyleProps': instance.proxiesStyleProps,
   'windowProps': instance.windowProps,
   'patchClashConfig': instance.patchClashConfig,
-  'excludeSSIDs': instance.excludeSSIDs,
 };

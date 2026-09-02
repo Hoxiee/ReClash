@@ -1,6 +1,7 @@
 package com.reclash.service.modules
 
 import android.app.Service
+import com.reclash.service.VpnService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,11 +22,19 @@ internal class ServiceModules(private val service: Service) {
         if (scope != null) return
 
         val nextScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        val nextModules = listOf(
-            NotificationModule(service, nextScope),
-            NetworkObserveModule(service),
-            SuspendModule(service, nextScope),
-        )
+        val networkModule = NetworkObserveModule(service)
+        // Only the VPN can pause: tearing a proxy listener down has no meaning here.
+        val pauseModule = (service as? VpnService)?.let { vpn ->
+            SmartPauseModule(nextScope, VpnPauseActions(vpn)).also { module ->
+                networkModule.onPhysicalNetworksChanged = module::onPhysicalNetworksChanged
+            }
+        }
+        val nextModules = buildList {
+            add(NotificationModule(service, nextScope))
+            add(networkModule)
+            add(SuspendModule(service, nextScope))
+            if (pauseModule != null) add(pauseModule)
+        }
         val startedModules = mutableListOf<ServiceModule>()
 
         try {
@@ -56,4 +65,10 @@ internal class ServiceModules(private val service: Service) {
             runCatching { module.stop() }
         }
     }
+}
+
+private class VpnPauseActions(private val vpn: VpnService) : SmartPauseModule.Actions {
+    override fun pause() = vpn.pause(manual = false)
+
+    override fun resume() = vpn.resume()
 }
