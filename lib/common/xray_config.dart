@@ -4,6 +4,7 @@ library;
 
 import 'dart:convert';
 
+import 'amnezia_config.dart';
 import 'skipped_node.dart';
 import 'subscription_links.dart';
 
@@ -42,27 +43,44 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
     skipped.putIfAbsent('${node.kind}|${handle ?? node.name}', () => node);
   }
 
+  void record(
+    Map<String, Object?> proxy,
+    String name, {
+    bool generic = false,
+  }) {
+    final entry = groups[_fingerprint(proxy)];
+    if (entry == null) {
+      groups[_fingerprint(proxy)] = (proxy, [(name: name, generic: generic)]);
+    } else {
+      entry.$2.add((name: name, generic: generic));
+    }
+  }
+
   for (final config in configs) {
-    // An INCY amneziawg container is skipped wholesale, each server named.
     if (config['type'] == 'amneziawg') {
       final servers = config['servers'];
-      if (servers is List && servers.isNotEmpty) {
+      if (servers is List) {
         for (final server in servers) {
-          final name = server is Map<String, Object?>
-              ? (server['name'] ?? server['remark'])?.toString() ?? ''
-              : '';
-          recordSkipped(SkippedNode(
-            name: name.isEmpty ? 'amneziawg' : name,
-            kind: 'amneziawg',
-            reason: SkippedNodeReason.protocol,
-          ));
+          if (server is! Map<String, Object?>) continue;
+          final name = (server['name'] ?? server['remark'])?.toString();
+          final conf = tryBase64Decode(server['config']?.toString() ?? '');
+          final proxy = conf == null
+              ? null
+              : parseAwgConf(
+                  conf,
+                  name: name == null || name.isEmpty ? null : name,
+                );
+          if (proxy == null) {
+            // One bad location must not take the rest of the subscription down.
+            recordSkipped(SkippedNode(
+              name: name == null || name.isEmpty ? 'amneziawg' : name,
+              kind: 'amneziawg',
+              reason: SkippedNodeReason.protocol,
+            ));
+            continue;
+          }
+          record(proxy, proxy['name']! as String);
         }
-      } else {
-        recordSkipped(const SkippedNode(
-          name: 'amneziawg',
-          kind: 'amneziawg',
-          reason: SkippedNodeReason.protocol,
-        ));
       }
       continue;
     }
@@ -95,16 +113,11 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
         continue;
       }
       final tag = outbound['tag']?.toString() ?? '';
-      final candidate = (
-        name: proxy['name']! as String,
+      record(
+        proxy,
+        proxy['name']! as String,
         generic: _isGenericTag(tag),
       );
-      final entry = groups[_fingerprint(proxy)];
-      if (entry == null) {
-        groups[_fingerprint(proxy)] = (proxy, [candidate]);
-      } else {
-        entry.$2.add(candidate);
-      }
     }
   }
 
@@ -169,7 +182,8 @@ String _canon(Object? value) {
 // Shape walking.
 
 List<Map<String, Object?>> _configsOf(Object? decoded) {
-  if (decoded is Map<String, Object?> && decoded['outbounds'] is List) {
+  if (decoded is Map<String, Object?> &&
+      (decoded['outbounds'] is List || decoded['type'] == 'amneziawg')) {
     return [decoded];
   }
   if (decoded is List) {

@@ -1,10 +1,10 @@
 /// Share-link import: bare proxy URIs and base64 node lists in, a complete
-/// Clash config out, entirely locally. Undialable schemes (ssr, amneziawg)
-/// are recognized but skipped.
+/// Clash config out, entirely locally; amnezia converts via amnezia_config.dart.
 library;
 
 import 'dart:convert';
 
+import 'amnezia_config.dart';
 import 'skipped_node.dart';
 
 const _schemes = [
@@ -21,6 +21,9 @@ const _schemes = [
   'socks5://',
   'wireguard://',
   'wg://',
+  'amneziawg://',
+  'awg://',
+  'vpn://',
 ];
 
 abstract interface class ConvertedSubscription {
@@ -41,8 +44,6 @@ class ShareLinksResult implements ConvertedSubscription {
 
 /// Link input mihomo cannot dial — routed to the converter, not the network.
 const _unsupportedSchemes = [
-  'amneziawg://',
-  'awg://',
   'ssr://',
 ];
 
@@ -58,7 +59,7 @@ bool isShareLinkInput(String input) {
         .split(RegExp(r'[\r\n]+'))
         .any((line) => _isLinkLine(line.trim()));
   }
-  final decoded = _tryBase64Decode(trimmed);
+  final decoded = tryBase64Decode(trimmed);
   return decoded != null && isShareLinkInput(decoded);
 }
 
@@ -78,6 +79,20 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   final skipped = <SkippedNode>[];
   final seen = <String>{};
 
+  void addProxy(Map<String, Object?>? proxy) {
+    if (proxy == null) return;
+    var name = proxy['name']! as String;
+    // Duplicates would collapse into one entry in any group; number them.
+    var suffix = 2;
+    while (seen.contains(name)) {
+      name = '${proxy['name']} $suffix';
+      suffix++;
+    }
+    proxy['name'] = name;
+    seen.add(name);
+    proxies.add(proxy);
+  }
+
   void addFrom(String text) {
     for (final line in text.split(RegExp(r'[\r\n]+'))) {
       final trimmed = line.trim();
@@ -86,27 +101,27 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
         skipped.add(_unsupportedSchemeNode(trimmed));
         continue;
       }
+      if (trimmed.startsWith('vpn://')) {
+        final (vpnProxies, vpnSkipped) = parseVpnLink(
+          trimmed.substring('vpn://'.length),
+        );
+        skipped.addAll(vpnSkipped);
+        vpnProxies.forEach(addProxy);
+        continue;
+      }
       // Parsers walk arbitrary provider text; a throw costs one line only.
-      final Map<String, Object?>? proxy;
       try {
-        proxy = _parseUri(trimmed);
+        if (trimmed.startsWith('amneziawg://') ||
+            trimmed.startsWith('awg://')) {
+          addProxy(_parseAmneziaWgLink(trimmed));
+          continue;
+        }
+        addProxy(_parseUri(trimmed));
       } on _UnsupportedLink catch (e) {
         skipped.add(e.node);
-        continue;
       } catch (_) {
         continue;
       }
-      if (proxy == null) continue;
-      var name = proxy['name']! as String;
-      // Duplicates would collapse into one entry in any group; number them.
-      var suffix = 2;
-      while (seen.contains(name)) {
-        name = '${proxy['name']} $suffix';
-        suffix++;
-      }
-      proxy['name'] = name;
-      seen.add(name);
-      proxies.add(proxy);
     }
   }
 
@@ -114,7 +129,7 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   if (_isLinkLine(trimmed)) {
     addFrom(trimmed);
   } else {
-    final decoded = _tryBase64Decode(trimmed);
+    final decoded = tryBase64Decode(trimmed);
     if (decoded != null && isShareLinkInput(decoded)) {
       addFrom(decoded);
     } else {
@@ -156,7 +171,7 @@ String? _tryDecodeFragment(String fragment) {
   try {
     return Uri.decodeComponent(fragment);
   } catch (_) {}
-  final decoded = _tryBase64Decode(fragment);
+  final decoded = tryBase64Decode(fragment);
   if (decoded == null) return null;
   final printable = decoded.replaceAll(RegExp(r'[^\x20-\x7eЀ-ӿ]'), '');
   return printable.length >= 2 ? printable : null;
@@ -235,12 +250,6 @@ Map<String, Object?>? _parseWireguard(String uri) {
   if (parts == null) return null;
   final (privateKey, server, port, params, name) = parts;
 
-  String withCidr(String address) {
-    // v2rayN links carry the CIDR plain; add /32 or /128 only when missing.
-    if (address.contains('/')) return address;
-    return address.contains(':') ? '$address/128' : '$address/32';
-  }
-
   final reservedValue = params['reserved'] ?? '';
   final reserved =
       reservedValue.isEmpty ? null : _parseReserved(reservedValue);
@@ -266,7 +275,7 @@ Map<String, Object?>? _parseWireguard(String uri) {
     'ip': '',
     'ipv6': '',
     if ((params['address'] ?? '').isNotEmpty)
-      ..._splitWireguardAddresses(params['address']!, withCidr),
+      ...splitWireguardAddresses(params['address']!),
     'peers': [peers],
     'udp': true,
   };
@@ -280,10 +289,12 @@ Map<String, Object?>? _parseWireguard(String uri) {
   return proxy;
 }
 
-Map<String, Object?> _splitWireguardAddresses(
-  String address,
-  String Function(String) withCidr,
-) {
+String withCidr(String address) {
+  if (address.contains('/')) return address;
+  return address.contains(':') ? '$address/128' : '$address/32';
+}
+
+Map<String, Object?> splitWireguardAddresses(String address) {
   var ip = '';
   var ipv6 = '';
   for (final entry in address.split(',')) {
@@ -313,8 +324,25 @@ List<int>? _parseReserved(String value) {
   return parts.length == 3 ? parts : null;
 }
 
+Map<String, Object?>? _parseAmneziaWgLink(String uri) {
+  final schemeLen = uri.startsWith('amneziawg://')
+      ? 'amneziawg://'.length
+      : 'awg://'.length;
+  final noScheme = uri.substring(schemeLen);
+  final hashIdx = noScheme.indexOf('#');
+  final fragment = hashIdx >= 0 ? noScheme.substring(hashIdx + 1) : '';
+  final body = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
+  final conf = tryBase64Decode(body);
+  if (conf == null) return null;
+  final decoded = fragment.length > 1 ? _tryDecodeFragment(fragment) : null;
+  return parseAwgConf(
+    conf,
+    name: decoded == null || decoded.isEmpty ? null : decoded,
+  );
+}
+
 Map<String, Object?>? _parseVmess(String uri) {
-  final decoded = _tryBase64Decode(uri.substring('vmess://'.length));
+  final decoded = tryBase64Decode(uri.substring('vmess://'.length));
   if (decoded == null) return null;
   final Map<String, Object?> j;
   try {
@@ -457,19 +485,19 @@ Map<String, Object?>? _parseShadowsocks(String uri) {
   String method, password, server;
   int port;
   if (atIdx > 0) {
-    final credential = _tryBase64Decode(payload.substring(0, atIdx)) ??
+    final credential = tryBase64Decode(payload.substring(0, atIdx)) ??
         _decodeComponent(payload.substring(0, atIdx));
     final colonIdx = credential.indexOf(':');
     if (colonIdx < 0) return null;
     method = credential.substring(0, colonIdx);
     password = credential.substring(colonIdx + 1);
     final hostPort = payload.substring(atIdx + 1);
-    final split = _splitHostPort(hostPort);
+    final split = splitHostPort(hostPort);
     if (split == null) return null;
     (server, port) = split;
   } else {
     // Legacy shape: the base64 covers credentials AND host:port.
-    final decoded = _tryBase64Decode(payload);
+    final decoded = tryBase64Decode(payload);
     if (decoded == null) return null;
     final atIdx = decoded.lastIndexOf('@');
     if (atIdx < 0) return null;
@@ -478,7 +506,7 @@ Map<String, Object?>? _parseShadowsocks(String uri) {
     if (colonIdx < 0) return null;
     method = credential.substring(0, colonIdx);
     password = credential.substring(colonIdx + 1);
-    final split = _splitHostPort(decoded.substring(atIdx + 1));
+    final split = splitHostPort(decoded.substring(atIdx + 1));
     if (split == null) return null;
     (server, port) = split;
   }
@@ -661,7 +689,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   final params = queryIdx >= 0
       ? _splitQuery(withoutName.substring(queryIdx + 1))
       : const <String, String>{};
-  final split = _splitHostPort(hostPort);
+  final split = splitHostPort(hostPort);
   if (split == null) return null;
   final (server, port) = split;
 
@@ -730,7 +758,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   if (atIdx < 0) return null;
   final userinfo = _decodeComponent(hostPort.substring(0, atIdx));
   if (userinfo.isEmpty) return null;
-  final split = _splitHostPort(hostPort.substring(atIdx + 1));
+  final split = splitHostPort(hostPort.substring(atIdx + 1));
   if (split == null) return null;
   final (server, port) = split;
   return (
@@ -742,7 +770,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   );
 }
 
-(String, int)? _splitHostPort(String hostPort) {
+(String, int)? splitHostPort(String hostPort) {
   final bracketIdx = hostPort.lastIndexOf(']');
   // IPv6 literals carry colons; the port separator is the first past `]`.
   final colonIdx = bracketIdx >= 0
@@ -872,7 +900,7 @@ bool _applyPlugin(Map<String, Object?> proxy, String pluginParam) {
 }
 
 /// Lenient: share links arrive with missing padding and URL-safe chars.
-String? _tryBase64Decode(String input) {
+String? tryBase64Decode(String input) {
   final clean = input.replaceAll(RegExp(r'\s'), '');
   if (clean.isEmpty) return null;
   final padded = clean.padRight((clean.length + 3) ~/ 4 * 4, '=');

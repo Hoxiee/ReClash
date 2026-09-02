@@ -218,7 +218,7 @@ void main() {
       expect(result.config, isNot(contains('blackhole')));
     });
 
-    test('an amneziawg container is skipped wholesale', () {
+    test('a malformed amneziawg server skips alone, siblings still load', () {
       final result = tryConvertXrayConfig(_json([
         {
           'remarks': 'proxy node',
@@ -234,7 +234,6 @@ void main() {
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['proxy node']);
       expect(result.config, isNot(contains('wireguard')));
-      // The container's servers are named nodes to the user — each counts.
       expect(result.skipped, hasLength(1));
       expect(result.skipped.single.name, 'awg');
       expect(result.skipped.single.kind, 'amneziawg');

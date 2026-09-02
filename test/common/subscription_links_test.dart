@@ -14,6 +14,18 @@ List<String> _proxiesNames(String config) {
   ];
 }
 
+const _awgConf = '''
+[Interface]
+PrivateKey = 6FYeSwQ3LHkaHK7XR/yM4CBrLr46tr6d4lSCBdOJvlw=
+Address = 10.8.0.2/32
+Jc = 4
+S1 = 86
+
+[Peer]
+PublicKey = 2RbYMI7eFt4OEEnHfil3Idn4HmRmc3hBQvR1ysYzQWc=
+Endpoint = wg.example.com:51820
+''';
+
 void main() {
   group('isShareLinkInput', () {
     test('accepts each scheme', () {
@@ -31,6 +43,9 @@ void main() {
         'socks5://',
         'wireguard://',
         'wg://',
+        'amneziawg://',
+        'awg://',
+        'vpn://',
       ]) {
         expect(isShareLinkInput('$scheme anything'), isTrue,
             reason: scheme);
@@ -528,31 +543,26 @@ void main() {
       expect(result.config, contains('ipv6: ""'));
     });
 
-    test('amneziawg and other unsupported schemes are skipped, siblings live',
+    test('amneziawg links convert, undialable ssr is skipped, siblings live',
         () {
-      const input = 'vless://u@h:443#keep\n'
-          'amneziawg://AAECAwQF@wg:51820#awg\n'
-          'awg://AAECAwQF@wg2:51820#awg2\n'
+      final input = 'vless://u@h:443#keep\n'
+          'amneziawg://${base64Url.encode(utf8.encode(_awgConf))}#awg\n'
+          'awg://${base64Url.encode(utf8.encode(_awgConf))}#awg2\n'
           'ssr://abc@h:1#ssr\n'
           'tuic://uuid-tuic:pw@h:1#tuic-now-supported\n';
       // The body IS recognized as link input — it must never go to the network.
       expect(isShareLinkInput(input), isTrue);
       final result = tryConvertShareLinks(input);
       expect(result, isNotNull);
-      expect(_proxiesNames(result!.config), ['keep', 'tuic-now-supported']);
-      expect(result.config, isNot(contains('amnezia')));
-      // Every dropped line is accounted for, with its scheme as the kind.
-      expect(result.skipped, hasLength(3));
       expect(
-        result.skipped.map((n) => '${n.kind}:${n.name}'),
-        containsAll(['amneziawg:awg', 'awg:awg2', 'ssr:ssr']),
+        _proxiesNames(result!.config),
+        ['keep', 'awg', 'awg2', 'tuic-now-supported'],
       );
-      expect(
-        result.skipped.every(
-          (n) => n.reason == SkippedNodeReason.protocol,
-        ),
-        isTrue,
-      );
+      expect(result.config, contains('amnezia-wg-option'));
+      expect(result.skipped, hasLength(1));
+      expect(result.skipped.single.kind, 'ssr');
+      expect(result.skipped.single.name, 'ssr');
+      expect(result.skipped.single.reason, SkippedNodeReason.protocol);
     });
 
     test('an ssr line without a fragment uses its raw head as the name', () {
@@ -571,8 +581,8 @@ void main() {
     test('probe reports the skipped nodes of an all-unsupported body', () {
       final skipped =
           probeUnsupportedShareLinks('ssr://abc@h:1#ssr\namneziawg://k@h:2#awg');
-      expect(skipped.length, 2);
-      expect(skipped.map((n) => n.kind), containsAll(['ssr', 'amneziawg']));
+      // The awg line carries no base64 conf — it imports nothing, skips nothing.
+      expect(skipped.map((n) => n.kind), ['ssr']);
     });
 
     test('probe is empty once anything imports', () {
