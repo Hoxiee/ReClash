@@ -126,6 +126,55 @@ void main() {
       expect(container.read(profilesProvider), [current, other]);
       expect(container.read(currentProfileIdProvider), current.id);
     });
+
+    test('panel widgets take over the default dashboard', () {
+      final current = Profile.normal(
+        label: 'Current',
+      ).copyWith(panelMeta: const PanelMeta(widgets: ['announce', 'metaInfo']));
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => current.id),
+          profilesProvider.overrideWith(() => TestProfiles([current])),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container
+          .read(profilesActionProvider.notifier)
+          .applyPanelWidgetsOnProfileSwitch(null);
+
+      expect(
+        container.read(appSettingProvider).dashboardWidgets,
+        [DashboardWidget.announce, DashboardWidget.metaInfo],
+      );
+    });
+
+    test('panel widgets append to a user-customized dashboard', () {
+      final current = Profile.normal(
+        label: 'Current',
+      ).copyWith(panelMeta: const PanelMeta(widgets: ['announce']));
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => current.id),
+          profilesProvider.overrideWith(() => TestProfiles([current])),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(appSettingProvider.notifier).update(
+            (state) => state.copyWith(
+              dashboardWidgets: [DashboardWidget.networkSpeed],
+            ),
+          );
+
+      container
+          .read(profilesActionProvider.notifier)
+          .applyPanelWidgetsOnProfileSwitch(null);
+
+      expect(
+        container.read(appSettingProvider).dashboardWidgets,
+        [DashboardWidget.networkSpeed, DashboardWidget.announce],
+      );
+    });
   });
 
   group('GeoResourceAction', () {

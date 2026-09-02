@@ -50,9 +50,31 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
         .map((item) => item.widget)
         .toSet();
     _addedWidgetsNotifier.value = DashboardWidget.values
-        .where((item) => onThisPlatform(item) && !shown.contains(item.widget))
+        .where(
+          (item) =>
+              onThisPlatform(item) &&
+              _isPanelDataAvailable(item) &&
+              !shown.contains(item.widget),
+        )
         .map((item) => item.widget)
         .toList();
+  }
+
+  bool _isPanelDataAvailable(DashboardWidget item) {
+    final profile = ref.read(currentProfileProvider);
+    final panelMeta = profile?.panelMeta;
+    final subscriptionInfo = profile?.subscriptionInfo;
+    return switch (item) {
+      DashboardWidget.metaInfo =>
+        subscriptionInfo != null &&
+        (subscriptionInfo.total > 0 || subscriptionInfo.expire != 0),
+      DashboardWidget.announce => panelMeta?.announce != null,
+      DashboardWidget.serviceInfo =>
+        panelMeta?.serviceName != null || panelMeta?.serviceLogo != null,
+      DashboardWidget.changeServerButton =>
+        panelMeta?.serverInfoGroup != null,
+      _ => true,
+    };
   }
 
   @override

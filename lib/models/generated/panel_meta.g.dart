@@ -12,6 +12,18 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   announce: json['announce'] as String?,
   supportUrl: json['supportUrl'] as String?,
   updateIntervalMinutes: (json['updateIntervalMinutes'] as num?)?.toInt(),
+  serviceName: json['serviceName'] as String?,
+  serviceLogo: json['serviceLogo'] as String?,
+  serverInfoGroup: json['serverInfoGroup'] as String?,
+  widgets: (json['widgets'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  widgetsApplyMode:
+      $enumDecodeNullable(
+        _$PanelWidgetsApplyModeEnumMap,
+        json['widgetsApplyMode'],
+      ) ??
+      PanelWidgetsApplyMode.add,
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -21,4 +33,15 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'announce': instance.announce,
       'supportUrl': instance.supportUrl,
       'updateIntervalMinutes': instance.updateIntervalMinutes,
+      'serviceName': instance.serviceName,
+      'serviceLogo': instance.serviceLogo,
+      'serverInfoGroup': instance.serverInfoGroup,
+      'widgets': instance.widgets,
+      'widgetsApplyMode':
+          _$PanelWidgetsApplyModeEnumMap[instance.widgetsApplyMode]!,
     };
+
+const _$PanelWidgetsApplyModeEnumMap = {
+  PanelWidgetsApplyMode.add: 'add',
+  PanelWidgetsApplyMode.update: 'update',
+};

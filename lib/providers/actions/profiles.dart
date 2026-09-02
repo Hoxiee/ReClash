@@ -87,6 +87,10 @@ class ProfilesAction extends _$ProfilesAction {
       ref.read(profilesProvider.notifier).put(newProfile);
       unawaited(handlePanelVerdicts(newProfile.panelMeta));
       if (profile.id == ref.read(currentProfileIdProvider)) {
+        applyPanelWidgetsFromMeta(
+          newProfile.panelMeta,
+          previousMeta: profile.panelMeta,
+        );
         ref
             .read(setupActionProvider.notifier)
             .applyProfileDebounce(silence: true);
@@ -166,8 +170,42 @@ class ProfilesAction extends _$ProfilesAction {
     );
     if (profile != null) {
       putProfile(profile);
+      applyPanelWidgetsFromMeta(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta));
     }
+  }
+
+  void applyPanelWidgetsFromMeta(PanelMeta? meta, {PanelMeta? previousMeta}) {
+    final names = meta?.widgets;
+    if (names == null || names.isEmpty) return;
+    final panelWidgets = parsePanelWidgets(names);
+    if (panelWidgets.isEmpty) return;
+    final previousNames = previousMeta?.widgets;
+    final previousPanelWidgets = previousNames == null || previousNames.isEmpty
+        ? const <DashboardWidget>[]
+        : parsePanelWidgets(previousNames);
+    final current = ref.read(appSettingProvider).dashboardWidgets;
+    final next = applyPanelWidgets(
+      panelWidgets: panelWidgets,
+      mode: meta!.widgetsApplyMode,
+      current: current,
+      previousPanelWidgets: previousPanelWidgets,
+    );
+    if (sameWidgets(next, current)) return;
+    ref.read(appSettingProvider.notifier).update(
+          (state) => state.copyWith(dashboardWidgets: next),
+        );
+  }
+
+  void applyPanelWidgetsOnProfileSwitch(int? previousProfileId) {
+    final previousMeta = ref
+        .read(profilesProvider)
+        .getProfile(previousProfileId)
+        ?.panelMeta;
+    applyPanelWidgetsFromMeta(
+      ref.read(currentProfileProvider)?.panelMeta,
+      previousMeta: previousMeta,
+    );
   }
 
   void setProfileAndAutoApply(Profile profile) {

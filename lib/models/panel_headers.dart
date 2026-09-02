@@ -50,6 +50,26 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'updateIntervalMinutes',
     convertValue: _hoursToMinutes,
   ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-servicename'],
+    canonicalKey: 'serviceName',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-servicelogo'],
+    canonicalKey: 'serviceLogo',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-serverinfo'],
+    canonicalKey: 'serverInfoGroup',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-widgets'],
+    canonicalKey: 'panelWidgets',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-custom'],
+    canonicalKey: 'widgetsApplyMode',
+  ),
 ];
 
 Map<String, String> normalizePanelHeaders(Map<String, List<String>> headers) {

@@ -33,6 +33,12 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(networkDetectionProvider.notifier).startCheck();
       }
     });
+    ref.listenManual(currentProfileIdProvider, (prev, next) {
+      if (prev == next) return;
+      ref
+          .read(profilesActionProvider.notifier)
+          .applyPanelWidgetsOnProfileSwitch(prev);
+    });
     ref.listenManual(configProvider, (prev, next) {
       if (prev != next) {
         ref.read(storeActionProvider.notifier).savePreferencesDebounce();

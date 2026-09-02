@@ -1950,6 +1950,73 @@ class AppLocalizations {
     );
   }
 
+  /// `Subscription`
+  String get metaInfo {
+    return Intl.message('Subscription', name: 'metaInfo', desc: '', args: []);
+  }
+
+  /// `Announcements`
+  String get announce {
+    return Intl.message('Announcements', name: 'announce', desc: '', args: []);
+  }
+
+  /// `Service`
+  String get serviceInfo {
+    return Intl.message('Service', name: 'serviceInfo', desc: '', args: []);
+  }
+
+  /// `Change server`
+  String get changeServer {
+    return Intl.message(
+      'Change server',
+      name: 'changeServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No announcements`
+  String get noAnnouncements {
+    return Intl.message(
+      'No announcements',
+      name: 'noAnnouncements',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Perpetual subscription`
+  String get perpetualSubscription {
+    return Intl.message(
+      'Perpetual subscription',
+      name: 'perpetualSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining`
+  String get remainingTraffic {
+    return Intl.message(
+      'Remaining',
+      name: 'remainingTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 day left} other{{count} days left}}`
+  String daysLeft(num count) {
+    return Intl.plural(
+      count,
+      one: '1 day left',
+      other: '$count days left',
+      name: 'daysLeft',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Disclaimer`
   String get disclaimer {
     return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);

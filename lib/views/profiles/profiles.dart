@@ -327,6 +327,7 @@ class ProfileItem extends ConsumerWidget {
     final subscriptionInfo = profile.subscriptionInfo;
     final hasSubscriptionInfo =
         isUrl && subscriptionInfo != null && subscriptionInfo.total > 0;
+    final supportUrl = profile.panelMeta?.supportUrl;
     return [
       CommonPopupMenuItem(
         icon: Icons.edit_outlined,
@@ -335,6 +336,14 @@ class ProfileItem extends ConsumerWidget {
           _handleShowEditExtendPage(context);
         },
       ),
+      if (supportUrl != null)
+        CommonPopupMenuItem(
+          icon: Icons.support_agent_outlined,
+          label: appLocalizations.support,
+          onPressed: () {
+            dialogs.openUrl(supportUrl);
+          },
+        ),
       CommonPopupMenuItem(
         icon: Icons.visibility_outlined,
         label: appLocalizations.preview,

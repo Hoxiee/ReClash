@@ -44,6 +44,22 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 4,
       child: MemoryInfo(),
     ),
+    DashboardWidget.metaInfo => const GridItem(
+      crossAxisCellCount: 4,
+      child: MetaInfo(),
+    ),
+    DashboardWidget.announce => const GridItem(
+      crossAxisCellCount: 4,
+      child: Announce(),
+    ),
+    DashboardWidget.serviceInfo => const GridItem(
+      crossAxisCellCount: 4,
+      child: ServiceInfo(),
+    ),
+    DashboardWidget.changeServerButton => const GridItem(
+      crossAxisCellCount: 4,
+      child: ChangeServerButton(),
+    ),
   };
 }
 

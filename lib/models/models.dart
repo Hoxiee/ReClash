@@ -6,5 +6,6 @@ export 'config.dart';
 export 'core.dart';
 export 'panel_headers.dart';
 export 'panel_meta.dart';
+export 'panel_widgets.dart';
 export 'profile.dart';
 export 'state.dart';

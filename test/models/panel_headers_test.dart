@@ -75,6 +75,31 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('parses service and widget headers', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-servicename': ['Example VPN'],
+        'reclash-servicelogo': ['https://example.com/logo.svg'],
+        'reclash-serverinfo': ['Selector'],
+        'reclash-widgets': ['announce, metainfo, outboundModeV2'],
+        'reclash-custom': ['update'],
+      });
+
+      expect(meta.serviceName, 'Example VPN');
+      expect(meta.serviceLogo, 'https://example.com/logo.svg');
+      expect(meta.serverInfoGroup, 'Selector');
+      expect(meta.widgets, ['announce', 'metainfo', 'outboundModeV2']);
+      expect(meta.widgetsApplyMode, PanelWidgetsApplyMode.update);
+      expect(meta.hasContent, isTrue);
+    });
+
+    test('widgets apply mode defaults to add', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-widgets': ['announce'],
+      });
+
+      expect(meta.widgetsApplyMode, PanelWidgetsApplyMode.add);
+    });
+
     test('empty response yields inert meta', () {
       final meta = PanelMeta.fromHeaders({
         'content-type': ['application/yaml'],
