@@ -73,6 +73,11 @@ func handlePauseTun() bool {
 	}
 	configMu.Lock()
 	defer configMu.Unlock()
+	// Only a stop clears the flag, so arming it while the listeners are down
+	// would leave the next start without TUN.
+	if !isRunning.Load() {
+		return true
+	}
 	if tunPaused.Swap(true) {
 		return true
 	}

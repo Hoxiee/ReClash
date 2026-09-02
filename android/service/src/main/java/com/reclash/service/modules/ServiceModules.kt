@@ -70,5 +70,5 @@ internal class ServiceModules(private val service: Service) {
 private class VpnPauseActions(private val vpn: VpnService) : SmartPauseModule.Actions {
     override fun pause() = vpn.pause(manual = false)
 
-    override fun resume() = vpn.resume()
+    override fun resume() = vpn.resume(manual = false)
 }

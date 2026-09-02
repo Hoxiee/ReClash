@@ -63,20 +63,20 @@ internal class SmartPauseModule(
     }
 
     private fun onPauseStateChanged(state: PauseState) {
-        if (state.paused && state.manual && manualAnchor == null) {
-            manualAnchor = currentAnchor()
-        }
-        if (!state.paused) {
+        if (!state.manual) {
             manualAnchor = null
+            return
+        }
+        if (manualAnchor == null) {
+            manualAnchor = currentAnchor()
         }
     }
 
     private suspend fun evaluate(reason: String) {
-        val pauseState = ServiceConfig.pauseState.value
-        if (pauseState.paused && pauseState.manual) {
-            evaluateManualAnchor()
+        if (ServiceConfig.pauseState.value.manual && evaluateManualAnchor()) {
             return
         }
+        val pauseState = ServiceConfig.pauseState.value
         val config = currentConfig()
         val session = SmartPauseSessionState(
             running = !pauseState.paused,
@@ -109,24 +109,29 @@ internal class SmartPauseModule(
         }
     }
 
-    // A manual pause holds until its anchor network is left: trusted
-    // destination keeps the pause as a policy one, anything else resumes.
-    private suspend fun evaluateManualAnchor() {
-        val anchor = manualAnchor ?: return
+    // A manual pause or resume owns the decision until its anchor network is left.
+    private suspend fun evaluateManualAnchor(): Boolean {
+        val anchor = manualAnchor ?: return false
         val current = currentAnchor()
-        if (current.isEmpty() || current == anchor) return
+        if (current.isEmpty() || current == anchor) return true
         if (anchor.isEmpty()) {
             manualAnchor = current
-            return
+            return true
+        }
+        if (!ServiceConfig.pauseState.value.paused) {
+            log("SmartPause: manual resume anchor changed, policy takes over")
+            ServiceConfig.updatePauseState(PauseState())
+            return false
         }
         val config = currentConfig()
         if (config.enabled && config.networks.isNotEmpty() && isTrusted(config)) {
             manualAnchor = null
             ServiceConfig.updatePauseState(PauseState(paused = true, manual = false))
-            return
+            return true
         }
         log("SmartPause: manual pause anchor changed, resuming")
         runTransition("resume") { applyResume() }
+        return true
     }
 
     private fun runTransition(what: String, action: () -> Boolean): Boolean {

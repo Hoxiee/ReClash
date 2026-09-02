@@ -195,6 +195,7 @@ SharedState sharedState(Ref ref) {
     stopText: currentAppLocalizations.stop,
     pauseText: currentAppLocalizations.pause,
     resumeText: currentAppLocalizations.resume,
+    pausedText: currentAppLocalizations.paused,
     crashlytics: crashlytics,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,
@@ -265,6 +266,11 @@ bool paused(Ref ref) {
   // projects the service's own flag.
   if (system.isAndroid) {
     return ref.watch(nativePauseProvider) ?? false;
+  }
+  // A stopped core has nothing to pause, and a paused start button resumes
+  // instead of starting.
+  if (!ref.watch(isStartProvider)) {
+    return false;
   }
   final manual = ref.watch(manualPauseProvider);
   if (manual.paused) {

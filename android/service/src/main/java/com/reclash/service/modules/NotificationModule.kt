@@ -45,7 +45,7 @@ private fun NotificationParams.extended(paused: Boolean) = ExtendedNotificationP
     pauseText,
     resumeText,
     paused,
-    if (paused) pauseText else Core.getSpeedTrafficText(onlyStatisticsProxy),
+    if (paused) pausedText else Core.getSpeedTrafficText(onlyStatisticsProxy),
 )
 
 internal class NotificationModule(

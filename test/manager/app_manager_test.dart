@@ -104,6 +104,30 @@ void main() {
     expect(calls, ['pause', 'close', 'resume']);
   });
 
+  testWidgets('a re-addressed interface keeps the manual pause', (
+    tester,
+  ) async {
+    final container = await pumpManager(tester);
+    container.read(currentIPv4sProvider.notifier).value = ['192.168.1.55'];
+    await tester.pump();
+    container.read(manualPauseProvider.notifier).pause(['192.168.1.0/24']);
+
+    container.read(currentIPv4sProvider.notifier).value = ['192.168.1.90'];
+    await tester.pump();
+    expect(container.read(manualPauseProvider).paused, isTrue);
+  });
+
+  testWidgets('a new address clears the manual pause', (tester) async {
+    final container = await pumpManager(tester);
+    container.read(currentIPv4sProvider.notifier).value = ['192.168.1.55'];
+    await tester.pump();
+    container.read(manualPauseProvider.notifier).pause(['192.168.1.0/24']);
+
+    container.read(currentIPv4sProvider.notifier).value = ['10.0.0.2'];
+    await tester.pump();
+    expect(container.read(manualPauseProvider).paused, isFalse);
+  });
+
   testWidgets('a manual pause on an untrusted network holds until stop', (
     tester,
   ) async {

@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -565,6 +566,12 @@ class CurrentIPv4s extends _$CurrentIPv4s with AutoDisposeNotifierMixin {
   @override
   List<String> build() {
     return const [];
+  }
+
+  // The poll republishes an equal list every 25s, and a List compares by identity.
+  @override
+  bool updateShouldNotify(List<String> previous, List<String> next) {
+    return !listEquals(previous, next);
   }
 }
 

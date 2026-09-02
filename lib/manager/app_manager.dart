@@ -90,7 +90,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       });
     }
     ref.listenManual(networkAnchorProvider, (prev, next) {
-      if (prev != next && next.isNotEmpty) {
+      if (!listEquals(prev, next) && next.isNotEmpty) {
         ref.read(manualPauseProvider.notifier).clear();
       }
     });

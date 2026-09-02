@@ -8,23 +8,16 @@ import java.util.concurrent.atomic.AtomicReference
  * [resetToStopped], which only wins while the token is still the latest one.
  */
 class RunIntentArbiter(initialRunning: Boolean = false) {
-    class Token internal constructor(
-        val running: Boolean,
-        val paused: Boolean = false,
-    )
+    class Token internal constructor(val running: Boolean)
 
     private val latest = AtomicReference(Token(initialRunning))
 
     val isRunningRequested: Boolean
         get() = latest.get().running
 
-    val isPausedRequested: Boolean
-        get() = latest.get().paused
-
     fun current(): Token = latest.get()
 
-    fun request(running: Boolean, paused: Boolean = false): Token =
-        Token(running, paused).also(latest::set)
+    fun request(running: Boolean): Token = Token(running).also(latest::set)
 
     fun isCurrent(token: Token): Boolean = latest.get() === token
 

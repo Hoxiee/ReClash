@@ -13,11 +13,15 @@ typedef SsidReader = Future<String?> Function();
 
 typedef ConnectivityReader = Future<List<ConnectivityResult>> Function();
 
+typedef Ipv4sReader = Future<List<String>> Function();
+
 class ConnectivityManager extends ConsumerStatefulWidget {
   final Function(List<ConnectivityResult> results)? onConnectivityChanged;
   final Stream<List<ConnectivityResult>>? connectivityStream;
   final SsidReader? readSsid;
   final ConnectivityReader? readConnectivity;
+  final Ipv4sReader? readIpv4s;
+  final bool? isDesktop;
   final Widget child;
 
   const ConnectivityManager({
@@ -26,6 +30,8 @@ class ConnectivityManager extends ConsumerStatefulWidget {
     this.connectivityStream,
     this.readSsid,
     this.readConnectivity,
+    this.readIpv4s,
+    this.isDesktop,
     required this.child,
   });
 
@@ -38,6 +44,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   late final StreamSubscription subscription;
   late final SsidReader _readSsid =
       widget.readSsid ?? WifiSsidManager.instance.getSsid;
+  late final Ipv4sReader _readIpv4s = widget.readIpv4s ?? getLocalIPv4s;
+
+  bool get _isDesktop => widget.isDesktop ?? system.isDesktop;
   Timer? _pollTimer;
 
   int _ssidRequestId = 0;
@@ -91,8 +100,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
     unawaited(_updateSsid());
     unawaited(_updateIpv4s());
     // A Wi-Fi-to-Wi-Fi roam can pass without a connectivity event, so the
-    // rules are re-read on a timer while any rule exists.
-    if (next) {
+    // rules are re-read on a timer while any rule exists. Android decides
+    // natively off its own network callbacks and needs no poll.
+    if (next && _isDesktop) {
       _pollTimer ??= Timer.periodic(_pollInterval, (_) {
         unawaited(_updateSsid());
         unawaited(_updateIpv4s());
@@ -127,9 +137,7 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
         'Unable to read the Wi-Fi SSID: $error',
         logLevel: LogLevel.warning,
       );
-      if (!_onWifi) {
-        _publishSsid(requestId, null);
-      }
+      _publishSsid(requestId, null);
     }
   }
 
@@ -144,8 +152,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   Future<void> _updateIpv4s() async {
     final requestId = ++_ipv4RequestId;
     try {
-      final ipv4s = await getLocalIPv4s();
-      if (ipv4s.isEmpty || requestId != _ipv4RequestId || !mounted) {
+      // An empty list is a result: going offline has to drop the last addresses.
+      final ipv4s = await _readIpv4s();
+      if (requestId != _ipv4RequestId || !mounted) {
         return;
       }
       ref.read(currentIPv4sProvider.notifier).value = ipv4s;

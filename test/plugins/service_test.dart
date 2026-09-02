@@ -120,6 +120,7 @@ void main() {
             pauseTip: 'pauseTip',
             pauseText: 'pause',
             resumeText: 'resume',
+            pausedText: 'paused',
             onlyStatisticsProxy: false,
             crashlytics: false,
           ),
@@ -138,6 +139,7 @@ void main() {
         pauseTip: 'pauseTip',
         pauseText: 'pause',
         resumeText: 'resume',
+        pausedText: 'paused',
         onlyStatisticsProxy: true,
         crashlytics: false,
       );

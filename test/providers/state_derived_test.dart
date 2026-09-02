@@ -449,7 +449,15 @@ void main() {
             ),
           );
       container.read(currentSSIDProvider.notifier).value = ssid;
+      container.read(runTimeProvider.notifier).update((_) => 1);
     }
+
+    test('stays off while the core is stopped', () {
+      trust(ssid: 'Office Wi-Fi');
+      container.read(runTimeProvider.notifier).update((_) => null);
+
+      expect(container.read(pausedProvider), isFalse);
+    });
 
     test('stays off while smart pause is disabled', () {
       trust(ssid: 'Office Wi-Fi');

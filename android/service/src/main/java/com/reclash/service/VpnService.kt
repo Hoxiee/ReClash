@@ -279,12 +279,13 @@ class VpnService : SystemVpnService(), ManagedService {
         )
     }
 
-    override fun resume() {
+    // A manual resume stays manual: the policy has to see the override to respect it.
+    override fun resume(manual: Boolean) {
         if (!ServiceConfig.pauseState.value.paused) {
             return
         }
         handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
-        ServiceConfig.updatePauseState(PauseState())
+        ServiceConfig.updatePauseState(PauseState(paused = false, manual = manual))
     }
 
     override fun stop() {

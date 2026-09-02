@@ -1988,7 +1988,7 @@ final class CurrentIPv4sProvider
   }
 }
 
-String _$currentIPv4sHash() => r'3aedc15e8cad100db2c644653c03f94aac9865ad';
+String _$currentIPv4sHash() => r'b847da121ad0814122bfddf69f68e30271348b3a';
 
 abstract class _$CurrentIPv4s extends $Notifier<List<String>> {
   List<String> build();

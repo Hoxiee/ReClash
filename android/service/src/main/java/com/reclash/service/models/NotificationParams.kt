@@ -6,4 +6,5 @@ data class NotificationParams(
     val onlyStatisticsProxy: Boolean = false,
     val pauseText: String = "Pause",
     val resumeText: String = "Resume",
+    val pausedText: String = "Paused",
 )

@@ -321,6 +321,7 @@ abstract class SharedState with _$SharedState {
     required String stopText,
     required String pauseText,
     required String resumeText,
+    required String pausedText,
     required bool onlyStatisticsProxy,
     required bool crashlytics,
   }) = _SharedState;

@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'fd2eec7f157c6170b7921b4b32e7645b8612875a';
+String _$sharedStateHash() => r'0a3f24020951f1ef168c0630ee0b7420e2dcecb8';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -676,7 +676,7 @@ final class PausedProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$pausedHash() => r'1ddddb6c61d12a7d3407d22cec5e1e24fe7bded5';
+String _$pausedHash() => r'43d09d78697075bb6873aac9b2fe9c282546baec';
 
 @ProviderFor(tunEnabled)
 final tunEnabledProvider = TunEnabledProvider._();

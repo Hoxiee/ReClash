@@ -200,6 +200,42 @@ class SmartPauseModuleTest {
     }
 
     @Test
+    fun `manual resume holds on the trusted network`() = runTest {
+        val module = module({ 60_000L })
+        module.start()
+        module.onPhysicalNetworksChanged(listOf("192.168.1.55"), emptyList())
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, actions.pauseCalls)
+
+        ServiceConfig.updatePauseState(PauseState(paused = false, manual = true))
+        runCurrent()
+        module.onPhysicalNetworksChanged(listOf("192.168.1.55"), emptyList())
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(1, actions.pauseCalls)
+        assertFalse(ServiceConfig.pauseState.value.paused)
+    }
+
+    @Test
+    fun `manual resume hands the next network back to the policy`() = runTest {
+        val module = module({ 60_000L })
+        module.start()
+        module.onPhysicalNetworksChanged(listOf("192.168.1.55"), emptyList())
+        advanceTimeBy(60_000)
+        runCurrent()
+        ServiceConfig.updatePauseState(PauseState(paused = false, manual = true))
+        runCurrent()
+
+        module.onPhysicalNetworksChanged(listOf("10.0.0.2"), listOf("Home Wi-Fi"))
+        advanceTimeBy(60_000)
+        runCurrent()
+        assertEquals(2, actions.pauseCalls)
+        assertTrue(ServiceConfig.pauseState.value.paused)
+        assertFalse(ServiceConfig.pauseState.value.manual)
+    }
+
+    @Test
     fun `unknown network does not act`() = runTest {
         val module = module({ 60_000L })
         module.start()

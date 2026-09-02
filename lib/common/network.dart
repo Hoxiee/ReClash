@@ -73,6 +73,7 @@ Future<List<String>> getLocalIPv4s() async {
 }
 
 /// SSID rules match exactly; subnet rules accept bare IPv4s as /32.
+/// Hand-mirrored by Kotlin's TrustedNetworkMatcher in SmartPause.kt.
 bool smartPauseMatches(
   List<String> networks, {
   String? ssid,

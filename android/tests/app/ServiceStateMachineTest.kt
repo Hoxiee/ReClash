@@ -125,6 +125,7 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     var pauseCalls = 0
     var resumeCalls = 0
     var lastPauseManual: Boolean? = null
+    var lastResumeManual: Boolean? = null
     var lastInitParams: String? = null
     var lastSetupParams: String? = null
 
@@ -184,12 +185,13 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
         pauseState.value = PauseState(paused = true, manual = manual)
     }
 
-    override suspend fun resumeService() {
+    override suspend fun resumeService(manual: Boolean) {
         resumeCalls++
+        lastResumeManual = manual
         if (!resumeSucceeds) {
             return
         }
-        pauseState.value = PauseState()
+        pauseState.value = PauseState(paused = false, manual = manual)
     }
 
     override suspend fun isVpnServiceActive(): Boolean = vpnServiceActive
@@ -214,10 +216,14 @@ class ServiceStateMachineTest {
                 onlyStatisticsProxy = true,
                 pauseText = "Пауза",
                 resumeText = "Продолжить",
+                pausedText = "На паузе",
             ),
         )
 
-        assertEquals(NotificationParams("Work", "Disconnect", true, "Пауза", "Продолжить"), params)
+        assertEquals(
+            NotificationParams("Work", "Disconnect", true, "Пауза", "Продолжить", "На паузе"),
+            params,
+        )
     }
 
     @Test
@@ -761,6 +767,7 @@ class ServiceStateMachineTest {
         assertTrue(machine.requestResume().await())
         assertEquals(RunState.STARTED, machine.runState.value)
         assertEquals(1, host.resumeCalls)
+        assertTrue(host.lastResumeManual!!)
     }
 
     @Test

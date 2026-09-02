@@ -201,6 +201,30 @@ func TestHandlePauseTunLeavesTheStoredConfigUntouched(t *testing.T) {
 	}
 }
 
+func TestHandlePauseTunIgnoresAPauseWithTheListenersDown(t *testing.T) {
+	cfg := &config.Config{
+		General: &config.General{
+			Inbound: config.Inbound{Tun: LC.Tun{Enable: true}},
+		},
+		Controller: &config.Controller{},
+	}
+	withCurrentConfig(t, cfg)
+	previousRunning := isRunning.Load()
+	t.Cleanup(func() {
+		isRunning.Store(previousRunning)
+		tunPaused.Store(false)
+	})
+	isRunning.Store(false)
+	tunPaused.Store(false)
+
+	if !handlePauseTun() {
+		t.Fatal("handlePauseTun() = false, want true")
+	}
+	if tunPaused.Load() {
+		t.Error("a pause with the listeners down armed the flag, costing the next start its TUN")
+	}
+}
+
 func TestShouldPublishDelayDropsFailuresMeasuredInDoze(t *testing.T) {
 	t.Cleanup(func() { isSuspended.Store(false) })
 

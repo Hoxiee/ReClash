@@ -125,9 +125,9 @@ object ServiceController {
         }
     }
 
-    suspend fun resume() {
+    suspend fun resume(manual: Boolean) {
         lock.withLock {
-            binding?.useService { service -> service.resume() }
+            binding?.useService { service -> service.resume(manual) }
                 ?.onFailure { error ->
                     GlobalState.log("Unable to resume background service: $error")
                 }

@@ -201,7 +201,9 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     }
 
     fun requestPause(): Deferred<Boolean> {
-        val request = createRequest(running = true, paused = true)
+        // Pause modifies the running intent rather than replacing it: a fresh token would
+        // cancel an in-flight start or stop through isCurrent.
+        val request = captureRequestToken()
         val result = CompletableDeferred<Boolean>()
         host.scope.launch {
             result.complete(
@@ -216,7 +218,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
     }
 
     fun requestResume(): Deferred<Boolean> {
-        val request = createRequest(running = true, paused = false)
+        val request = captureRequestToken()
         val result = CompletableDeferred<Boolean>()
         host.scope.launch {
             result.complete(
@@ -317,7 +319,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             if (runTimeMillis != 0L && host.isVpnServiceActive() == options.enable) {
                 // A start that lands on a paused service is a resume.
                 if (host.pauseState.value.paused) {
-                    host.resumeService()
+                    host.resumeService(manual = true)
                 }
                 mutableRunState.value = RunState.STARTED
                 return@transition true
@@ -384,7 +386,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         if (runState.value != RunState.PAUSED) {
             return@withLock false
         }
-        host.resumeService()
+        host.resumeService(manual = true)
         if (host.pauseState.value.paused) {
             return@withLock false
         }
@@ -428,8 +430,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
         abandon()
     }
 
-    private fun createRequest(running: Boolean, paused: Boolean = false): RunRequest =
-        arbiter.request(running, paused)
+    private fun createRequest(running: Boolean): RunRequest = arbiter.request(running)
 
     private fun isRunningRequested(): Boolean = arbiter.isRunningRequested
 
@@ -457,6 +458,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             onlyStatisticsProxy = state.onlyStatisticsProxy,
             pauseText = state.pauseText,
             resumeText = state.resumeText,
+            pausedText = state.pausedText,
         )
     }
 }

@@ -15,6 +15,7 @@ const _sharedState = SharedState(
   pauseTip: 'pauseTip',
   pauseText: 'pause',
   resumeText: 'resume',
+  pausedText: 'paused',
   onlyStatisticsProxy: true,
   crashlytics: false,
 );

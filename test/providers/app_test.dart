@@ -125,6 +125,25 @@ void main() {
     });
   });
 
+  group('CurrentIPv4s provider', () {
+    test('an equal address list notifies nobody', () {
+      final notifier = container.read(currentIPv4sProvider.notifier);
+      notifier.value = ['192.168.1.20'];
+      var notifications = 0;
+      final subscription = container.listen(
+        currentIPv4sProvider,
+        (_, _) => notifications++,
+      );
+      addTearDown(subscription.close);
+
+      notifier.value = ['192.168.1.20'];
+      expect(notifications, 0);
+
+      notifier.value = ['10.0.0.5'];
+      expect(notifications, 1);
+    });
+  });
+
   group('RunTime provider', () {
     test('default is null', () {
       expect(container.read(runTimeProvider), null);

@@ -50,7 +50,7 @@ internal interface ServiceStateHost {
 
     suspend fun pauseService(manual: Boolean)
 
-    suspend fun resumeService()
+    suspend fun resumeService(manual: Boolean)
 
     suspend fun isVpnServiceActive(): Boolean
 }
@@ -154,7 +154,7 @@ internal object AndroidServiceStateHost : ServiceStateHost {
 
     override suspend fun pauseService(manual: Boolean) = ServiceController.pause(manual)
 
-    override suspend fun resumeService() = ServiceController.resume()
+    override suspend fun resumeService(manual: Boolean) = ServiceController.resume(manual)
 
     override suspend fun isVpnServiceActive(): Boolean = ServiceController.isVpnServiceActive()
 }

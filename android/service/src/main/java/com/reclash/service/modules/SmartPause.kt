@@ -52,6 +52,7 @@ fun transitionRetryPlan(attempts: Int): Long? =
     if (attempts >= SmartPausePolicy.TRANSITION_RETRIES) null
     else SmartPausePolicy.TRANSITION_BACKOFF_MS shl attempts
 
+// Hand-mirrored by Dart's smartPauseMatches in lib/common/network.dart.
 object TrustedNetworkMatcher {
 
     fun parseIpv4(text: String): Int? {

@@ -40,6 +40,8 @@ void main() {
     WidgetTester tester, {
     required SsidReader readSsid,
     void Function(List<ConnectivityResult>)? onConnectivityChanged,
+    Ipv4sReader? readIpv4s,
+    bool? isDesktop,
     List<String> networks = const ['Home'],
   }) async {
     await tester.pumpWidget(
@@ -48,6 +50,8 @@ void main() {
         child: ConnectivityManager(
           connectivityStream: connectivity.stream,
           readSsid: readSsid,
+          readIpv4s: readIpv4s,
+          isDesktop: isDesktop,
           onConnectivityChanged: onConnectivityChanged,
           child: const SizedBox.shrink(),
         ),
@@ -211,7 +215,7 @@ void main() {
     expect(currentSsid(), isNull);
   });
 
-  testWidgets('a failure keeps the last known SSID while on Wi-Fi', (tester) async {
+  testWidgets('a failed read drops the last known SSID', (tester) async {
     var shouldFail = false;
     await pumpManager(
       tester,
@@ -229,7 +233,73 @@ void main() {
     connectivity.add([ConnectivityResult.wifi]);
     await tester.pumpAndSettle();
 
+    expect(
+      currentSsid(),
+      isNull,
+      reason: 'a kept SSID keeps a trusted network matching after a roam',
+    );
+  });
+
+  testWidgets('going offline drops the last known addresses', (tester) async {
+    var addresses = ['192.168.1.55'];
+    await pumpManager(
+      tester,
+      readSsid: () async => 'Home',
+      readIpv4s: () async => addresses,
+    );
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+    expect(container.read(currentIPv4sProvider), ['192.168.1.55']);
+
+    addresses = [];
+    connectivity.add([ConnectivityResult.none]);
+    await tester.pumpAndSettle();
+
+    expect(container.read(currentIPv4sProvider), isEmpty);
+  });
+
+  testWidgets('off desktop nothing is polled, but events still land', (
+    tester,
+  ) async {
+    var reads = 0;
+    await pumpManager(
+      tester,
+      isDesktop: false,
+      readSsid: () async {
+        reads++;
+        return 'Home';
+      },
+    );
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
     expect(currentSsid(), 'Home');
+    expect(reads, 1);
+
+    await tester.pump(const Duration(seconds: 60));
+
+    expect(reads, 1, reason: 'the native module decides off its own callbacks');
+  });
+
+  testWidgets('desktop re-reads the network on a timer', (tester) async {
+    var reads = 0;
+    await pumpManager(
+      tester,
+      isDesktop: true,
+      readSsid: () async {
+        reads++;
+        return 'Home';
+      },
+    );
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+    expect(reads, 1);
+
+    await tester.pump(const Duration(seconds: 26));
+
+    expect(reads, greaterThan(1));
   });
 
   testWidgets('a slow read cannot overwrite a newer one', (tester) async {
