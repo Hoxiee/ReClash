@@ -142,6 +142,8 @@
   "general": "General",
   "systemProxyDesc": "Set the system proxy",
   "userAgent": "User-Agent",
+  "sendDeviceIdentity": "Send HWID",
+  "sendDeviceIdentityDesc": "Send device identifier, app version and device name to proxy provider server",
   "unifiedDelay": "Unified delay",
   "unifiedDelayDesc": "Remove extra delays such as handshakes",
   "tcpConcurrent": "TCP concurrent",
@@ -622,5 +624,44 @@
   "authorize": "Authorize",
   "installedAppsPermissionRequired": "App list permission required",
   "installedAppsPermissionDesc": "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
-  "installedAppsPermissionDeniedMessage": "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings."
+  "installedAppsPermissionDeniedMessage": "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+  "newDashboard": "New look",
+  "heroProtected": "You are protected",
+  "heroNotProtected": "Not protected",
+  "heroConnecting": "Connecting…",
+  "heroTapToConnect": "Tap to turn protection on",
+  "heroPaused": "Paused — trusted network",
+  "heroTapToResume": "Tap to resume protection",
+  "heroJustNow": "just now",
+  "heroRoutingAgo": "{time} ago",
+  "heroRoutingStub": "Smart routing is off",
+  "connectedFor": "Connected {time}",
+  "trafficFreeOfTotal": "free of {total}",
+  "subscriptionCaption": "Subscription",
+  "renewSubscription": "Renew subscription",
+  "remaining": "Remaining",
+  "determiningIp": "Determining IP...",
+  "day": "day",
+  "days": "days",
+  "daysGenitive": "days",
+  "hour": "hour",
+  "hoursPlural": "hours",
+  "hoursGenitive": "hours",
+  "minute": "minute",
+  "minutesPlural": "minutes",
+  "minutesGenitive": "minutes",
+  "@connectedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@trafficFreeOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -81,7 +81,7 @@ class ProfilesAction extends _$ProfilesAction {
       final newProfile = await profile.update(
         validate: (path) => _core.validateConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
-          includeDeviceIdentity: true,
+          includeDeviceIdentity: ref.read(appSettingProvider).sendDeviceIdentity,
         ),
       );
       ref.read(profilesProvider.notifier).put(newProfile);

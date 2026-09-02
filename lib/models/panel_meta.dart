@@ -18,6 +18,8 @@ abstract class PanelMeta with _$PanelMeta {
     String? serviceName,
     String? serviceLogo,
     String? serverInfoGroup,
+    String? buyPlanUrl,
+    String? buyTrafficUrl,
     List<String>? widgets,
     @Default(PanelWidgetsApplyMode.add) PanelWidgetsApplyMode widgetsApplyMode,
     List<String>? settings,
@@ -51,6 +53,8 @@ abstract class PanelMeta with _$PanelMeta {
       serviceName: map['serviceName'],
       serviceLogo: map['serviceLogo'],
       serverInfoGroup: map['serverInfoGroup'],
+      buyPlanUrl: map['buyPlanUrl'],
+      buyTrafficUrl: map['buyTrafficUrl'],
       widgets: widgets.isNotEmpty ? widgets : null,
       widgetsApplyMode: map['widgetsApplyMode'] == 'update'
           ? PanelWidgetsApplyMode.update
@@ -70,6 +74,8 @@ extension PanelMetaExt on PanelMeta {
       serviceName != null ||
       serviceLogo != null ||
       serverInfoGroup != null ||
+      buyPlanUrl != null ||
+      buyTrafficUrl != null ||
       widgets != null ||
       settings != null;
 }

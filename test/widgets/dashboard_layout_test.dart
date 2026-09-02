@@ -20,6 +20,7 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
+        newDashboardEnabledProvider.overrideWithValue(false),
         dashboardStateProvider.overrideWithValue(
           const DashboardState(dashboardWidgets: []),
         ),
@@ -58,6 +59,7 @@ void main() {
 
     final container = ProviderContainer(
       overrides: [
+        newDashboardEnabledProvider.overrideWithValue(false),
         dashboardStateProvider.overrideWithValue(
           const DashboardState(dashboardWidgets: []),
         ),

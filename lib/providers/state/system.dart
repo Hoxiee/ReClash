@@ -105,7 +105,12 @@ HotKeyAction getHotKeyAction(Ref ref, HotAction hotAction) {
 }
 
 @riverpod
-({bool isInit, int checkIpNum, bool containsDetection}) checkIp(Ref ref) {
+bool newDashboardEnabled(Ref ref) {
+  return ref.watch(appSettingProvider.select((state) => state.newDashboard));
+}
+
+@riverpod
+({bool isInit, int checkIpNum, bool needsIpCheck}) checkIp(Ref ref) {
   final isInit = ref.watch(initProvider);
   final checkIpNum = ref.watch(checkIpNumProvider);
   final containsDetection = ref.watch(
@@ -117,7 +122,7 @@ HotKeyAction getHotKeyAction(Ref ref, HotAction hotAction) {
   return (
     isInit: isInit,
     checkIpNum: checkIpNum,
-    containsDetection: containsDetection,
+    needsIpCheck: containsDetection || ref.watch(newDashboardEnabledProvider),
   );
 }
 

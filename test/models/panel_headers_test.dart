@@ -92,6 +92,32 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('flclashx compatibility spellings map to the same fields', () {
+      final meta = PanelMeta.fromHeaders({
+        'flclashx-servicename': ['Example VPN'],
+        'flclashx-servicelogo': ['https://example.com/logo.svg'],
+        'flclashx-serverinfo': ['Selector'],
+        'flclashx-buyplan': ['https://example.com/buy/plan'],
+        'flclashx-buytraffic': ['https://example.com/buy/traffic'],
+      });
+
+      expect(meta.serviceName, 'Example VPN');
+      expect(meta.serviceLogo, 'https://example.com/logo.svg');
+      expect(meta.serverInfoGroup, 'Selector');
+      expect(meta.buyPlanUrl, 'https://example.com/buy/plan');
+      expect(meta.buyTrafficUrl, 'https://example.com/buy/traffic');
+      expect(meta.hasContent, isTrue);
+    });
+
+    test('buy links fall back from buyplan to buytraffic', () {
+      final meta = PanelMeta.fromHeaders({
+        'flclashx-buytraffic': ['https://example.com/buy/traffic'],
+      });
+
+      expect(meta.buyPlanUrl, isNull);
+      expect(meta.buyTrafficUrl, 'https://example.com/buy/traffic');
+    });
+
     test('widgets apply mode defaults to add', () {
       final meta = PanelMeta.fromHeaders({
         'reclash-widgets': ['announce'],

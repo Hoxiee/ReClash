@@ -1115,6 +1115,26 @@ class AppLocalizations {
     return Intl.message('User-Agent', name: 'userAgent', desc: '', args: []);
   }
 
+  /// `Send HWID`
+  String get sendDeviceIdentity {
+    return Intl.message(
+      'Send HWID',
+      name: 'sendDeviceIdentity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send device identifier, app version and device name to proxy provider server`
+  String get sendDeviceIdentityDesc {
+    return Intl.message(
+      'Send device identifier, app version and device name to proxy provider server',
+      name: 'sendDeviceIdentityDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unified delay`
   String get unifiedDelay {
     return Intl.message(
@@ -5150,6 +5170,196 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `New look`
+  String get newDashboard {
+    return Intl.message('New look', name: 'newDashboard', desc: '', args: []);
+  }
+
+  /// `You are protected`
+  String get heroProtected {
+    return Intl.message(
+      'You are protected',
+      name: 'heroProtected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not protected`
+  String get heroNotProtected {
+    return Intl.message(
+      'Not protected',
+      name: 'heroNotProtected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connecting…`
+  String get heroConnecting {
+    return Intl.message(
+      'Connecting…',
+      name: 'heroConnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to turn protection on`
+  String get heroTapToConnect {
+    return Intl.message(
+      'Tap to turn protection on',
+      name: 'heroTapToConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paused — trusted network`
+  String get heroPaused {
+    return Intl.message(
+      'Paused — trusted network',
+      name: 'heroPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to resume protection`
+  String get heroTapToResume {
+    return Intl.message(
+      'Tap to resume protection',
+      name: 'heroTapToResume',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `just now`
+  String get heroJustNow {
+    return Intl.message('just now', name: 'heroJustNow', desc: '', args: []);
+  }
+
+  /// `{time} ago`
+  String heroRoutingAgo(Object time) {
+    return Intl.message(
+      '$time ago',
+      name: 'heroRoutingAgo',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `Smart routing is off`
+  String get heroRoutingStub {
+    return Intl.message(
+      'Smart routing is off',
+      name: 'heroRoutingStub',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected {time}`
+  String connectedFor(String time) {
+    return Intl.message(
+      'Connected $time',
+      name: 'connectedFor',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `free of {total}`
+  String trafficFreeOfTotal(String total) {
+    return Intl.message(
+      'free of $total',
+      name: 'trafficFreeOfTotal',
+      desc: '',
+      args: [total],
+    );
+  }
+
+  /// `Subscription`
+  String get subscriptionCaption {
+    return Intl.message(
+      'Subscription',
+      name: 'subscriptionCaption',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Renew subscription`
+  String get renewSubscription {
+    return Intl.message(
+      'Renew subscription',
+      name: 'renewSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remaining`
+  String get remaining {
+    return Intl.message('Remaining', name: 'remaining', desc: '', args: []);
+  }
+
+  /// `Determining IP...`
+  String get determiningIp {
+    return Intl.message(
+      'Determining IP...',
+      name: 'determiningIp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `day`
+  String get day {
+    return Intl.message('day', name: 'day', desc: '', args: []);
+  }
+
+  /// `days`
+  String get days {
+    return Intl.message('days', name: 'days', desc: '', args: []);
+  }
+
+  /// `days`
+  String get daysGenitive {
+    return Intl.message('days', name: 'daysGenitive', desc: '', args: []);
+  }
+
+  /// `hour`
+  String get hour {
+    return Intl.message('hour', name: 'hour', desc: '', args: []);
+  }
+
+  /// `hours`
+  String get hoursPlural {
+    return Intl.message('hours', name: 'hoursPlural', desc: '', args: []);
+  }
+
+  /// `hours`
+  String get hoursGenitive {
+    return Intl.message('hours', name: 'hoursGenitive', desc: '', args: []);
+  }
+
+  /// `minute`
+  String get minute {
+    return Intl.message('minute', name: 'minute', desc: '', args: []);
+  }
+
+  /// `minutes`
+  String get minutesPlural {
+    return Intl.message('minutes', name: 'minutesPlural', desc: '', args: []);
+  }
+
+  /// `minutes`
+  String get minutesGenitive {
+    return Intl.message('minutes', name: 'minutesGenitive', desc: '', args: []);
   }
 }
 

@@ -69,10 +69,26 @@ set_target_properties(${BINARY_NAME}
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/intermediates_do_not_run"
 )
 
+# Plugin sources below inherit the -Werror from APPLY_STANDARD_SETTINGS, so a
+# warning newer compilers emit but the plugin author never saw fails the whole
+# build: clang rejects hotkey_manager_linux over two -Wsometimes-uninitialized
+# paths, and libayatana 0.6 deprecates app_indicator_new used by tray. Downgraded
+# to warnings from here down — the app target above is already configured and
+# keeps a strict -Werror. A specific -Wno-error=<name> outranks -Werror whatever
+# the option ordering; a blanket -Wno-error would be overridden instead.
+# sometimes-uninitialized is a clang-only spelling GCC rejects outright, hence
+# the compiler-id gate.
+add_compile_options(-Wno-error=deprecated-declarations)
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
 include(flutter/generated_plugins.cmake)
+
+if(TARGET hotkey_manager_linux_plugin)
+  target_compile_options(hotkey_manager_linux_plugin PRIVATE
+    "$<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wno-error=sometimes-uninitialized>"
+  )
+endif()
 
 
 # === Installation ===

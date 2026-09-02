@@ -119,6 +119,80 @@ expect_pass 'a human co-author' \
 expect_stderr 'a user facing commit without a trailer' 'Changelog:' \
   'feat(profiles): support override scripts'
 
+expect_fail 'a sprawling body' 'lines; keep it at or under' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- header drives composition' \
+  '- add semantics' \
+  '- update semantics' \
+  '- new widgets' \
+  '- panel meta fields' \
+  '- application timing' \
+  '- support url' \
+  '- fallback order' \
+  '- retry policy'
+expect_fail 'an overlong line' 'words; keep every line' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- panels pick the payload format by user agent and an unknown identity gets base64'
+expect_pass 'a tight body' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- add wins only over the app default' \
+  '- update always replaces' \
+  '' \
+  'Changelog: Panel-driven dashboard widgets'
+# Blank lines and changelog trailers do not count toward either cap.
+expect_pass 'trailers and blank lines are free' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- add wins over app default' \
+  '- update always replaces' \
+  '- switch re-applies' \
+  '' \
+  'Changelog: Panel-driven dashboard widgets'
+# A big change may carry eight terse bullets.
+expect_pass 'an eight line body' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- add wins over app default' \
+  '- update always replaces' \
+  '- switch re-applies' \
+  '- card menu grows support' \
+  '- expiry past 2099 is perpetual' \
+  '- traffic tiers color the card' \
+  '- meta fields persist per profile' \
+  '- verdicts surface dialogs' \
+  '' \
+  'Changelog: Panel-driven dashboard widgets'
+
+if ! printf '%s\n' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- one two three four' \
+  '- five six seven eight nine ten eleven twelve' \
+  >"$message_file"; then
+  echo 'FAIL: could not write the override message' >&2
+  failures=$((failures + 1))
+elif ! COMMIT_BODY_MAX_WORDS=20 bash "$checker" "$message_file" \
+  >"$temp_dir/out" 2>"$temp_dir/err"; then
+  echo 'FAIL: COMMIT_BODY_MAX_WORDS should raise the per-line cap' >&2
+  failures=$((failures + 1))
+fi
+
+if ! printf '%s\n' \
+  'feat(panel): apply reclash-widgets' \
+  '' \
+  '- one' '- two' '- three' '- four' '- five' '- six' '- seven' '- eight' '- nine' \
+  >"$message_file"; then
+  echo 'FAIL: could not write the override message' >&2
+  failures=$((failures + 1))
+elif ! COMMIT_BODY_MAX_LINES=12 bash "$checker" "$message_file" \
+  >"$temp_dir/out" 2>"$temp_dir/err"; then
+  echo 'FAIL: COMMIT_BODY_MAX_LINES should raise the line cap' >&2
+  failures=$((failures + 1))
+fi
+
 if ((failures > 0)); then
   echo "$failures check(s) failed" >&2
   exit 1

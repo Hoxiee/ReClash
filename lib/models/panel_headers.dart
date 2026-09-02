@@ -51,16 +51,24 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     convertValue: _hoursToMinutes,
   ),
   _PanelHeaderConverter(
-    sourceKeys: ['reclash-servicename'],
+    sourceKeys: ['reclash-servicename', 'flclashx-servicename'],
     canonicalKey: 'serviceName',
   ),
   _PanelHeaderConverter(
-    sourceKeys: ['reclash-servicelogo'],
+    sourceKeys: ['reclash-servicelogo', 'flclashx-servicelogo'],
     canonicalKey: 'serviceLogo',
   ),
   _PanelHeaderConverter(
-    sourceKeys: ['reclash-serverinfo'],
+    sourceKeys: ['reclash-serverinfo', 'flclashx-serverinfo'],
     canonicalKey: 'serverInfoGroup',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-buyplan', 'flclashx-buyplan'],
+    canonicalKey: 'buyPlanUrl',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-buytraffic', 'flclashx-buytraffic'],
+    canonicalKey: 'buyTrafficUrl',
   ),
   _PanelHeaderConverter(
     sourceKeys: ['reclash-widgets'],

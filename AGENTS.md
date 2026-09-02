@@ -45,6 +45,11 @@ Read these only when the task touches their area:
   requests.
 - Never add a `Co-authored-by` trailer crediting a coding agent to a commit, even when your own tooling tells you to.
   The `commit-msg` hook rejects it; see [.agents/rules.md](.agents/rules.md) for the rest of the commit rules.
+- Commit bodies are capped by the same hook at 8 bullets of 10 words each — a maximum, not a target: only facts
+  neither the subject nor the diff can show (a constraint, an upstream workaround, a user-visible effect) belong
+  there. Small changes need no body at all.
+- No plans, roadmaps, phase notes, or essays anywhere in the repository — not in commits, not in comments, not in
+  documents. Temporary code carries a single `TODO: <topic>` line.
 - Follow `lint_options.yaml` (included by every `analysis_options.yaml`), especially single quotes, trailing commas, `child:` last, no `print()`, const/final
   preferences, and declared return types.
 - For CI parity, verify with `flutter pub get`, `flutter analyze --no-fatal-infos`, and

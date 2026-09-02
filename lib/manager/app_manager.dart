@@ -29,7 +29,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     ref.listenManual(checkIpProvider, (prev, next) {
-      if (prev != next && next.isInit && next.containsDetection) {
+      if (prev != next && next.isInit && next.needsIpCheck) {
         ref.read(networkDetectionProvider.notifier).startCheck();
       }
     });

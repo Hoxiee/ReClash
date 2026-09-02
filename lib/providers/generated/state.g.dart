@@ -298,17 +298,59 @@ final class GetHotKeyActionFamily extends $Family
   String toString() => r'getHotKeyActionProvider';
 }
 
+@ProviderFor(newDashboardEnabled)
+final newDashboardEnabledProvider = NewDashboardEnabledProvider._();
+
+final class NewDashboardEnabledProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  NewDashboardEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'newDashboardEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$newDashboardEnabledHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return newDashboardEnabled(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$newDashboardEnabledHash() =>
+    r'e83ae815dad4e4f07383887783a19f0e0a130c79';
+
 @ProviderFor(checkIp)
 final checkIpProvider = CheckIpProvider._();
 
 final class CheckIpProvider
     extends
         $FunctionalProvider<
-          ({int checkIpNum, bool containsDetection, bool isInit}),
-          ({int checkIpNum, bool containsDetection, bool isInit}),
-          ({int checkIpNum, bool containsDetection, bool isInit})
+          ({int checkIpNum, bool isInit, bool needsIpCheck}),
+          ({int checkIpNum, bool isInit, bool needsIpCheck}),
+          ({int checkIpNum, bool isInit, bool needsIpCheck})
         >
-    with $Provider<({int checkIpNum, bool containsDetection, bool isInit})> {
+    with $Provider<({int checkIpNum, bool isInit, bool needsIpCheck})> {
   CheckIpProvider._()
     : super(
         from: null,
@@ -325,29 +367,29 @@ final class CheckIpProvider
 
   @$internal
   @override
-  $ProviderElement<({int checkIpNum, bool containsDetection, bool isInit})>
+  $ProviderElement<({int checkIpNum, bool isInit, bool needsIpCheck})>
   $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
 
   @override
-  ({int checkIpNum, bool containsDetection, bool isInit}) create(Ref ref) {
+  ({int checkIpNum, bool isInit, bool needsIpCheck}) create(Ref ref) {
     return checkIp(ref);
   }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    ({int checkIpNum, bool containsDetection, bool isInit}) value,
+    ({int checkIpNum, bool isInit, bool needsIpCheck}) value,
   ) {
     return $ProviderOverride(
       origin: this,
       providerOverride:
           $SyncValueProvider<
-            ({int checkIpNum, bool containsDetection, bool isInit})
+            ({int checkIpNum, bool isInit, bool needsIpCheck})
           >(value),
     );
   }
 }
 
-String _$checkIpHash() => r'0e28032041d80297dcd12e8d659dbac741874073';
+String _$checkIpHash() => r'3e22ff6354436703c29b667b67e2cac06b871970';
 
 @ProviderFor(shouldPatchSystemDns)
 final shouldPatchSystemDnsProvider = ShouldPatchSystemDnsProvider._();

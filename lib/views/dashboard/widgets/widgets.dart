@@ -1,5 +1,11 @@
 export 'announce.dart';
 export 'change_server_button.dart';
+export 'focusable_tap.dart';
+export 'hero_connect.dart';
+export 'hero_orb.dart';
+export 'hero_routing.dart';
+export 'hero_surface.dart';
+export 'hero_words.dart';
 export 'intranet_ip.dart';
 export 'meta_info.dart';
 export 'memory_info.dart';

@@ -15,6 +15,8 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   serviceName: json['serviceName'] as String?,
   serviceLogo: json['serviceLogo'] as String?,
   serverInfoGroup: json['serverInfoGroup'] as String?,
+  buyPlanUrl: json['buyPlanUrl'] as String?,
+  buyTrafficUrl: json['buyTrafficUrl'] as String?,
   widgets: (json['widgets'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -39,6 +41,8 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'serviceName': instance.serviceName,
       'serviceLogo': instance.serviceLogo,
       'serverInfoGroup': instance.serverInfoGroup,
+      'buyPlanUrl': instance.buyPlanUrl,
+      'buyTrafficUrl': instance.buyTrafficUrl,
       'widgets': instance.widgets,
       'widgetsApplyMode':
           _$PanelWidgetsApplyModeEnumMap[instance.widgetsApplyMode]!,

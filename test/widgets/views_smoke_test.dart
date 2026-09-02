@@ -189,6 +189,40 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('send device identity toggle flips the app setting', (tester) async {
+    tester.view.physicalSize = const Size(1000, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(1000, 800));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(body: ListView(children: generalItems)),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+
+    await tester.tap(find.text('Send HWID'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('port dialog validates the fields the expander hides', (
     tester,
   ) async {

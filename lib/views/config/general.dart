@@ -229,6 +229,15 @@ final generalItems = <Widget>[
   const TestUrlItem(),
   const PortItem(),
   const HostsItem(),
+  ConfigToggleItem(
+    leading: const Icon(Icons.perm_device_information_outlined),
+    title: (l) => l.sendDeviceIdentity,
+    subtitle: (l) => l.sendDeviceIdentityDesc,
+    selector: appSettingProvider.select((state) => state.sendDeviceIdentity),
+    onChanged: (ref, value) => ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(sendDeviceIdentity: value)),
+  ),
   _clashToggle(
     icon: Icons.water_outlined,
     title: (l) => 'IPv6',

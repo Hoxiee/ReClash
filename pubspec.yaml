@@ -60,6 +60,7 @@ dependencies:
   material_color_utilities: ^0.13.0
   material_new_shapes: ^1.0.0
   flutter_svg: ^2.1.0
+  cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
   crypto: ^3.0.3
   yaml_writer:

@@ -455,7 +455,7 @@ class SetupAction extends _$SetupAction {
       () async => profile?.checkAndUpdateAndCopy(
         validate: (path) => _core.validateConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
-          includeDeviceIdentity: true,
+          includeDeviceIdentity: ref.read(appSettingProvider).sendDeviceIdentity,
         ),
       ),
     );

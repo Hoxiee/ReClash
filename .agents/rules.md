@@ -421,6 +421,15 @@ Subjects follow Conventional Commits and are enforced by the `commit-msg` hook i
 - No `Co-authored-by` trailer crediting a coding agent, whatever that tool's own convention says. The history
   records who owns the change, not which tool typed it; human co-authors are still fine. The hook rejects the
   known agent identities.
+- The body is bullets, capped at 8 lines of 10 words each by the same `commit-msg` hook (bullet markers, blank lines
+  and `Changelog:`/`BREAKING CHANGE:`/`Co-authored-by` trailers do not count). Each bullet is a fact neither the
+  subject nor the diff can show — a constraint, an upstream behavior being worked around, a user-visible effect.
+  Size follows the change: a small one gets no body at all or a couple of bullets; only a genuinely large one
+  justifies all 8. A rare change that needs more raises the caps for that commit with
+  `COMMIT_BODY_MAX_WORDS=<n>` / `COMMIT_BODY_MAX_LINES=<n> git commit`.
+- Plans, roadmaps, phase notes ("we will do this in phase 2") and essays belong nowhere in the repository — not in
+  a commit body, not in code comments, not in checked-in documents. What is temporary in code is a single
+  `TODO: <topic>` line and nothing else.
 
 Write what the change does, not that something changed: `perf(views): stop redoing per-frame work in build`, not
 `Optimize more details`.

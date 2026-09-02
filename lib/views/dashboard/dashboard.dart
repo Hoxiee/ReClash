@@ -9,6 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'widget_registry.dart';
 import 'widgets/core_status_button.dart';
+import 'widgets/hero_connect.dart';
+import 'widgets/hero_surface.dart';
 import 'widgets/start_button.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
@@ -222,6 +224,26 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
+    final newDashboard = ref.watch(newDashboardEnabledProvider);
+    if (newDashboard) {
+      final isMobileView = ref.watch(isMobileViewProvider);
+      return Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isMobileView ? double.infinity : heroBoardMaxWidth,
+                ),
+                child: const HeroConnect(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     final dashboardState = ref.watch(dashboardStateProvider);
     final spacing = 14.mAp;
     final children = [

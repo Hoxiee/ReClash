@@ -142,6 +142,8 @@
   "general": "Общие",
   "systemProxyDesc": "Настроить системный прокси",
   "userAgent": "User-Agent",
+  "sendDeviceIdentity": "Отправлять HWID",
+  "sendDeviceIdentityDesc": "Отправлять идентификатор устройства, версию приложения и название устройства на сервер прокси-провайдера",
   "unifiedDelay": "Единая задержка",
   "unifiedDelayDesc": "Убирает лишние задержки, например рукопожатие",
   "tcpConcurrent": "Параллельный TCP",
@@ -622,5 +624,44 @@
   "authorize": "Разрешить",
   "installedAppsPermissionRequired": "Требуется разрешение на список приложений",
   "installedAppsPermissionDesc": "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
-  "installedAppsPermissionDeniedMessage": "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках."
+  "installedAppsPermissionDeniedMessage": "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+  "newDashboard": "Новый вид",
+  "heroProtected": "Вы защищены",
+  "heroNotProtected": "Не защищено",
+  "heroConnecting": "Подключение…",
+  "heroTapToConnect": "Нажмите, чтобы включить",
+  "heroPaused": "Пауза — доверенная сеть",
+  "heroTapToResume": "Нажмите, чтобы возобновить защиту",
+  "heroJustNow": "только что",
+  "heroRoutingAgo": "{time} назад",
+  "heroRoutingStub": "Умная маршрутизация выключена",
+  "connectedFor": "Подключено {time}",
+  "trafficFreeOfTotal": "свободно из {total}",
+  "subscriptionCaption": "Подписка",
+  "renewSubscription": "Продлить подписку",
+  "remaining": "Осталось",
+  "determiningIp": "Определяю IP..",
+  "day": "день",
+  "days": "дней",
+  "daysGenitive": "дня",
+  "hour": "час",
+  "hoursPlural": "часа",
+  "hoursGenitive": "часов",
+  "minute": "минута",
+  "minutesPlural": "минуты",
+  "minutesGenitive": "минут",
+  "@connectedFor": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@trafficFreeOfTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

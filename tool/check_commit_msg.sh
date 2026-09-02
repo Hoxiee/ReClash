@@ -93,6 +93,53 @@ while IFS= read -r line; do
   fi
 done <<<"$body"
 
+# The body is only for what neither the subject nor the diff can say: a
+# constraint, an upstream behavior being worked around, a user-visible effect.
+# Lines the changelog reads as trailers are exempt, as are blank lines.
+# Each line is capped in words and the whole body in lines, so a big change
+# may carry a few terse bullets while a small one needs none.
+prose="$(grep -vE '^(Changelog|Changelog-Type|Changelog-|Breaking-|BREAKING[ -]CHANGE|Co-[Aa]uthored-[Bb]y)' <<<"$body" |
+  grep -vE '^[[:space:]]*$' || true)"
+max_body_words="${COMMIT_BODY_MAX_WORDS:-10}"
+max_body_lines="${COMMIT_BODY_MAX_LINES:-8}"
+
+# "<line number>:<word count>" of the first line over the word cap.
+overlong_line="$(awk -v max="$max_body_words" '
+  { sub(/^[[:space:]]*[-*+][[:space:]]+/, ""); sub(/^[[:space:]]+/, "")
+    if (NF > max) { print NR ":" NF; exit } }' <<<"$prose")"
+prose_lines="$(grep -c . <<<"$prose" || true)"
+
+if [[ -n "$overlong_line" ]]; then
+  line_no="${overlong_line%%:*}"
+  line_words="${overlong_line##*:}"
+  cat >&2 <<EOF
+Commit body line ${line_no} is ${line_words} words; keep every line at or under ${max_body_words}.
+
+A body line is a terse bullet carrying one fact the subject and the diff
+cannot show — a constraint, an upstream behavior being worked around, a
+user-visible effect. It is not a sentence, a plan, or an essay. A small
+change needs no body at all.
+
+A rare change that genuinely needs more raises the caps for that commit:
+  COMMIT_BODY_MAX_WORDS=${line_words} git commit
+EOF
+  exit 1
+fi
+
+if (( prose_lines > max_body_lines )); then
+  cat >&2 <<EOF
+Commit body is ${prose_lines} lines; keep it at or under ${max_body_lines}.
+
+Each line is already a terse bullet, so a body this size reads as a summary
+of the diff. Keep only the few facts the subject and the diff cannot show;
+a small change needs no body at all.
+
+A rare change that genuinely needs more raises the caps for that commit:
+  COMMIT_BODY_MAX_LINES=${prose_lines} git commit
+EOF
+  exit 1
+fi
+
 agents='anthropic|claude|codex|copilot|cursor|devin|gemini|openai|\[bot\]'
 
 if grep -qiE "^Co-authored-by:.*($agents)" <<<"$body"; then
