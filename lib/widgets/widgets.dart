@@ -1,6 +1,7 @@
 export 'activate_box.dart';
 export 'active_polling.dart';
 export 'animated_visibility.dart';
+export 'app_nav_bar.dart';
 export 'builder.dart';
 export 'button.dart';
 export 'card.dart';

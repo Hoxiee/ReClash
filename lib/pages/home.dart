@@ -62,13 +62,13 @@ class _HomeShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(navigationStateProvider);
     final isMobile = state.viewMode == ViewMode.mobile;
-    final navigationItems = state.navigationItems;
+    // The bar is only collapsed in desktop view, never unmounted: one tree
+    // shape across view modes.
     return Material(
       color: context.colorScheme.surface,
-      child: Column(
+      child: Stack(
         children: [
-          Flexible(
-            flex: 1,
+          Positioned.fill(
             child: FocusTraversalGroup(
               policy: PageTraversalPolicy(),
               child: MediaQuery.removePadding(
@@ -77,32 +77,27 @@ class _HomeShell extends ConsumerWidget {
                 removeLeft: isMobile,
                 removeRight: isMobile,
                 context: context,
-                child: child,
+                child: BottomInsetScope(
+                  inset: isMobile ? NavBarMetrics.reservedHeight : 0,
+                  child: child,
+                ),
               ),
             ),
           ),
-          AnimatedVisibility.bottomNavigation(
-            visible: isMobile,
-            child: MediaQuery.removePadding(
-              removeTop: true,
-              removeBottom: false,
-              removeLeft: true,
-              removeRight: true,
-              context: context,
-              child: NavigationBarTheme(
-                data: _NavigationBarDefaultsM3(context),
-                child: NavigationBar(
-                  destinations: [
-                    for (final item in navigationItems)
-                      NavigationDestination(
-                        icon: item.icon,
-                        label: item.label.label,
-                      ),
-                  ],
-                  onDestinationSelected: (index) {
-                    _handleToPage(navigationItems[index].label, ref);
-                  },
-                  selectedIndex: state.currentIndex,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AnimatedVisibility.bottomNavigation(
+              visible: isMobile,
+              child: MediaQuery.removePadding(
+                removeTop: true,
+                removeBottom: false,
+                removeLeft: true,
+                removeRight: true,
+                context: context,
+                child: AppNavBar(
+                  onToPage: (label) => _handleToPage(label, ref),
                 ),
               ),
             ),
@@ -167,26 +162,35 @@ class _HomePageView extends ConsumerStatefulWidget {
   ConsumerState createState() => _HomePageViewState();
 }
 
-class _HomePageViewState extends ConsumerState<_HomePageView> {
+class _HomePageViewState extends ConsumerState<_HomePageView>
+    with SingleTickerProviderStateMixin {
   late PageController _pageController;
+  late final AnimationController _fadeController;
+  late final Animation<double> _fade;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _pageIndex);
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: NavBarMetrics.motionDuration,
+      value: 1,
+    );
+    _fade = CurvedAnimation(
+      parent: _fadeController,
+      curve: NavBarMetrics.motionCurve,
+    );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {
         _toPage(next);
       }
     });
-  }
-
-  @override
-  void didUpdateWidget(covariant _HomePageView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.navigationItems.length != widget.navigationItems.length) {
-      _updatePageController();
-    }
+    ref.listenManual(currentNavigationItemsStateProvider, (prev, next) {
+      if (prev?.value.length != next.value.length) {
+        _reconcilePage();
+      }
+    });
   }
 
   int get _pageIndex {
@@ -194,10 +198,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
   }
 
-  Future<void> _toPage(
-    PageLabel pageLabel, [
-    bool ignoreAnimateTo = false,
-  ]) async {
+  Future<void> _toPage(PageLabel pageLabel) async {
     if (!mounted) {
       return;
     }
@@ -207,26 +208,42 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     if (index == -1) {
       return;
     }
-    final isAnimateToPage = ref.read(appSettingProvider).isAnimateToPage;
-    final isMobile = ref.read(isMobileViewProvider);
-    if (isAnimateToPage && isMobile && !ignoreAnimateTo) {
-      await _pageController.animateToPage(
-        index,
-        duration: kTabScrollDuration,
-        curve: Curves.easeOut,
-      );
-    } else {
-      _pageController.jumpToPage(index);
+    if (_pageController.hasClients &&
+        _pageController.page != null &&
+        _pageController.page!.round() == index) {
+      return;
     }
+    // A jump, never a scroll: scrolling would build every intermediate tab.
+    if (ref.read(appSettingProvider).isAnimateToPage) {
+      _fadeController.forward(from: 0);
+    } else {
+      _fadeController.value = 1;
+    }
+    _pageController.jumpToPage(index);
   }
 
-  void _updatePageController() {
-    final pageLabel = ref.read(currentPageLabelProvider);
-    _toPage(pageLabel, true);
+  void _reconcilePage() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final pageLabel = ref.read(currentPageLabelProvider);
+      final index = widget.navigationItems.indexWhere(
+        (item) => item.label == pageLabel,
+      );
+      if (index == -1) {
+        ref
+            .read(currentPageLabelProvider.notifier)
+            .toPage(widget.navigationItems.first.label);
+        return;
+      }
+      _toPage(pageLabel);
+    });
   }
 
   @override
   void dispose() {
+    _fadeController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -236,80 +253,26 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     final itemCount = ref.watch(
       currentNavigationItemsStateProvider.select((state) => state.value.length),
     );
-    return PageView.builder(
-      controller: _pageController,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: itemCount,
-      findChildIndexCallback: (key) {
-        if (key is! ValueKey<PageLabel>) {
-          return null;
-        }
-        final index = widget.navigationItems.indexWhere(
-          (item) => item.label == key.value,
-        );
-        return index == -1 ? null : index;
-      },
-      itemBuilder: (context, index) {
-        return widget.pageBuilder(context, index);
-      },
+    return FadeTransition(
+      opacity: _fade,
+      child: PageView.builder(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemCount,
+        findChildIndexCallback: (key) {
+          if (key is! ValueKey<PageLabel>) {
+            return null;
+          }
+          final index = widget.navigationItems.indexWhere(
+            (item) => item.label == key.value,
+          );
+          return index == -1 ? null : index;
+        },
+        itemBuilder: (context, index) {
+          return widget.pageBuilder(context, index);
+        },
+      ),
     );
-  }
-}
-
-class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
-  _NavigationBarDefaultsM3(this.context)
-    : super(
-        height: 80.0,
-        elevation: 3.0,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      );
-
-  final BuildContext context;
-  late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final TextTheme _textTheme = Theme.of(context).textTheme;
-
-  @override
-  Color? get backgroundColor => _colors.surfaceContainer;
-
-  @override
-  Color? get shadowColor => Colors.transparent;
-
-  @override
-  Color? get surfaceTintColor => Colors.transparent;
-
-  @override
-  WidgetStateProperty<IconThemeData?>? get iconTheme {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      return IconThemeData(
-        size: 24.0,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-            ? _colors.onSecondaryContainer
-            : _colors.onSurfaceVariant,
-      );
-    });
-  }
-
-  @override
-  Color? get indicatorColor => _colors.secondaryContainer;
-
-  @override
-  ShapeBorder? get indicatorShape => AppShape.full;
-
-  @override
-  WidgetStateProperty<TextStyle?>? get labelTextStyle {
-    return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
-      final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(
-        overflow: TextOverflow.ellipsis,
-        color: states.contains(WidgetState.disabled)
-            ? _colors.onSurfaceVariant.opacity38
-            : states.contains(WidgetState.selected)
-            ? _colors.onSurface
-            : _colors.onSurfaceVariant,
-      );
-    });
   }
 }
 

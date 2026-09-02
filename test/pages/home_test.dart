@@ -66,16 +66,16 @@ void main() {
 
     expect(globalState.navigatorKey.currentContext, isNotNull);
     expect(container.read(viewSizeProvider), const Size(1200, 800));
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(AppNavBar), findsNothing);
 
     await tester.pump();
 
     expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(AppNavBar), findsNothing);
 
     await tester.pump(const Duration(milliseconds: 150));
 
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byType(AppNavBar), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -141,7 +141,7 @@ void main() {
       await tester.pump();
       expect(find.text('count: 1'), findsOneWidget);
       expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(AppNavBar), findsNothing);
 
       for (var width = 1180.0; width >= 500; width -= 20) {
         tester.view.physicalSize = Size(width, 800);
@@ -152,7 +152,7 @@ void main() {
 
       expect(find.text('count: 1'), findsOneWidget);
       expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppNavBar), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 150));
       expect(tester.takeException(), isNull);
 
@@ -166,7 +166,7 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 301));
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppNavBar), findsOneWidget);
 
       tester.view.physicalSize = const Size(1200, 800);
       container.read(viewSizeProvider.notifier).value = const Size(1200, 800);
@@ -174,11 +174,11 @@ void main() {
 
       expect(find.text('count: 1'), findsOneWidget);
       expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppNavBar), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 301));
       expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(AppNavBar), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
@@ -294,7 +294,7 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(ToolsView), findsOneWidget);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(AppNavBar), findsOneWidget);
 
       for (var width = 520.0; width <= 1200; width += 20) {
         tester.view.physicalSize = Size(width, 800);
@@ -589,20 +589,27 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(AppNavBar), findsOneWidget);
 
-    NavigationBar navBar() =>
-        tester.widget<NavigationBar>(find.byType(NavigationBar));
+    Finder segmentIcon(IconData icon) => find
+        .descendant(
+          of: find.byType(AppNavBar),
+          matching: find.byIcon(icon),
+        )
+        .first;
 
-    await tester.tap(find.byIcon(Icons.construction));
+    double highlightX() =>
+        tester.getTopLeft(find.byKey(AppNavBar.highlightKey)).dx;
+
+    await tester.tap(segmentIcon(Icons.construction));
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
-    expect(navBar().selectedIndex, 2);
     expect(find.text('page:tools'), findsOneWidget);
 
     bool focusInNav() {
       final context = FocusManager.instance.primaryFocus?.context;
-      return context?.findAncestorWidgetOfExactType<NavigationBar>() != null;
+      return context?.findAncestorWidgetOfExactType<InkWell>() != null &&
+          context?.findAncestorWidgetOfExactType<AppNavBar>() != null;
     }
 
     for (var i = 0; i < 20 && !focusInNav(); i++) {
@@ -611,24 +618,24 @@ void main() {
     }
     expect(focusInNav(), isTrue);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.profiles);
-    expect(navBar().selectedIndex, 1);
     expect(find.text('page:profiles'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.construction));
+    await tester.tap(segmentIcon(Icons.construction));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byIcon(Icons.article));
+    await tester.tap(segmentIcon(Icons.article));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(find.byIcon(Icons.folder));
+    await tester.tap(segmentIcon(Icons.folder));
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.profiles);
-    expect(navBar().selectedIndex, 1);
     expect(find.text('page:profiles'), findsOneWidget);
-    expect(focusInNav(), isTrue);
+    final profilesX = highlightX();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(highlightX(), closeTo(profilesX, 1.0));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
@@ -697,10 +704,24 @@ void main() {
     await tester.enterText(find.byType(TextField), 'needle');
     expect(query, 'needle');
 
-    await tester.tap(find.byIcon(Icons.construction));
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(AppNavBar),
+            matching: find.byIcon(Icons.construction),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
     expect(query, isEmpty);
-    await tester.tap(find.byIcon(Icons.space_dashboard));
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(AppNavBar),
+            matching: find.byIcon(Icons.space_dashboard),
+          )
+          .first,
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(TextField), findsNothing);
