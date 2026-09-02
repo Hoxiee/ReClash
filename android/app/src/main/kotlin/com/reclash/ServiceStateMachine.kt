@@ -368,6 +368,11 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             return@withLock false
         }
         host.pauseService(manual = true)
+        // Only the service knows whether there was a TUN to tear down, so a refused
+        // transition must leave the run state where it was.
+        if (!host.pauseState.value.paused) {
+            return@withLock false
+        }
         mutableRunState.value = RunState.PAUSED
         isCurrent(request)
     }
@@ -380,6 +385,9 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             return@withLock false
         }
         host.resumeService()
+        if (host.pauseState.value.paused) {
+            return@withLock false
+        }
         mutableRunState.value = RunState.STARTED
         isCurrent(request)
     }

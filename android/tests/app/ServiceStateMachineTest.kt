@@ -103,6 +103,8 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     var startResult = 1_700_000_000_000L
     var vpnPermissionGranted = true
     var vpnServiceActive = true
+    var pauseSucceeds = true
+    var resumeSucceeds = true
     var tile: TileGateway? = null
     var app: AppGateway? = null
     var beforeStartService: (() -> Unit)? = null
@@ -176,11 +178,17 @@ private class FakeHost(override val scope: CoroutineScope) : ServiceStateHost {
     override suspend fun pauseService(manual: Boolean) {
         pauseCalls++
         lastPauseManual = manual
+        if (!pauseSucceeds) {
+            return
+        }
         pauseState.value = PauseState(paused = true, manual = manual)
     }
 
     override suspend fun resumeService() {
         resumeCalls++
+        if (!resumeSucceeds) {
+            return
+        }
         pauseState.value = PauseState()
     }
 
@@ -730,6 +738,19 @@ class ServiceStateMachineTest {
     }
 
     @Test
+    fun `a pause the service refuses keeps the run state STARTED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        host.pauseSucceeds = false
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+
+        assertFalse(machine.requestPause().await())
+        assertEquals(RunState.STARTED, machine.runState.value)
+        assertEquals(1, host.pauseCalls)
+    }
+
+    @Test
     fun `a resume request drives a paused service back to STARTED`() = runTest {
         val host = FakeHost(backgroundScope)
         val machine = ServiceStateMachine(host)
@@ -751,6 +772,20 @@ class ServiceStateMachineTest {
 
         assertFalse(machine.requestResume().await())
         assertEquals(0, host.resumeCalls)
+    }
+
+    @Test
+    fun `a resume the service refuses keeps the run state PAUSED`() = runTest {
+        val host = FakeHost(backgroundScope)
+        val machine = ServiceStateMachine(host)
+        machine.syncSharedState(configuredState())
+        machine.requestStart().await()
+        machine.requestPause().await()
+        host.resumeSucceeds = false
+
+        assertFalse(machine.requestResume().await())
+        assertEquals(RunState.PAUSED, machine.runState.value)
+        assertEquals(1, host.resumeCalls)
     }
 
     @Test
