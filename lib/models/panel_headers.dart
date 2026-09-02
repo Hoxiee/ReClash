@@ -70,6 +70,10 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     sourceKeys: ['reclash-custom'],
     canonicalKey: 'widgetsApplyMode',
   ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-settings'],
+    canonicalKey: 'panelSettings',
+  ),
 ];
 
 Map<String, String> normalizePanelHeaders(Map<String, List<String>> headers) {

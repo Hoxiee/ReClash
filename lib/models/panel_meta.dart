@@ -20,6 +20,7 @@ abstract class PanelMeta with _$PanelMeta {
     String? serverInfoGroup,
     List<String>? widgets,
     @Default(PanelWidgetsApplyMode.add) PanelWidgetsApplyMode widgetsApplyMode,
+    List<String>? settings,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
@@ -32,6 +33,11 @@ abstract class PanelMeta with _$PanelMeta {
     final widgets = (map['panelWidgets'] ?? '')
         .split(',')
         .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList();
+    final settings = (map['panelSettings'] ?? '')
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
         .where((item) => item.isNotEmpty)
         .toList();
     return PanelMeta(
