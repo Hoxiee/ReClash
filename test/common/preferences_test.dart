@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fl_clash/common/boot_record.dart';
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/preferences.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:reclash/common/boot_record.dart';
+import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/preferences.dart';
+import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

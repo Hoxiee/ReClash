@@ -1,5 +1,5 @@
 name: tray
-description: System tray integration for FlClash on Linux, macOS and Windows.
+description: System tray integration for ReClash on Linux, macOS and Windows.
 version: 0.0.1
 
 environment:

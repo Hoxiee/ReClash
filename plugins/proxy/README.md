@@ -1,6 +1,6 @@
 # proxy
 
-FlClash's desktop system-proxy integration.
+ReClash's desktop system-proxy integration.
 
 - Windows uses a Flutter method channel and WinINet settings.
 - macOS uses `/usr/sbin/networksetup` for each active network service.

@@ -1,6 +1,6 @@
 # Project Context
 
-FlClash is a multi-platform proxy client based on ClashMeta (mihomo), built with Flutter. It supports Android, Windows, macOS, and Linux, using a Material You design with Surfboard-like UI.
+ReClash is a multi-platform proxy client based on ClashMeta (mihomo), built with Flutter. It supports Android, Windows, macOS, and Linux, using a Material You design with Surfboard-like UI.
 
 ## Version Notes
 
@@ -54,7 +54,7 @@ commits of its own rather than a single patch on top of a release.
 - Migrates `win32_registry` from `^2.0.0` to `^3.0.3`, which is a breaking rename
   across the whole Windows implementation (`Registry.openPath` → `CURRENT_USER.open`,
   `createValue` → `setValue`, `getStringValue` → `getString`).
-- This one is not optional while it lasts: FlClash depends on `win32_registry: ^3.0.3`
+- This one is not optional while it lasts: ReClash depends on `win32_registry: ^3.0.3`
   directly, and upstream's `^2.0.0` constraint cannot co-resolve with it.
 - Drop the fork when upstream publishes a release that accepts `win32_registry` 3.x.
 

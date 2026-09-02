@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fl_clash/core/desktop/lifecycle.dart';
-import 'package:fl_clash/core/desktop/model.dart';
-import 'package:fl_clash/core/desktop/rpc_client.dart';
-import 'package:fl_clash/core/event.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/core/service.dart';
+import 'package:reclash/core/desktop/lifecycle.dart';
+import 'package:reclash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/rpc_client.dart';
+import 'package:reclash/core/event.dart';
+import 'package:reclash/core/method.dart';
+import 'package:reclash/core/service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_test/flutter_test.dart';
 

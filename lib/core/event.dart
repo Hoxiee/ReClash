@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
 import 'package:flutter/foundation.dart';
 
 List<CoreEvent> coreEventsFromData(Object? data) {

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:rust_api/rust_api.dart';
 
 const _typeReady = 0x00;

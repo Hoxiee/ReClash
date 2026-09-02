@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:fl_clash/manager/android_manager.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/manager/android_manager.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

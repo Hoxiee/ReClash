@@ -1,4 +1,4 @@
-import 'package:fl_clash/widgets/open_container.dart';
+import 'package:reclash/widgets/open_container.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

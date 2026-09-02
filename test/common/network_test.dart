@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/network.dart';
+import 'package:reclash/common/network.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeAddress implements InterfaceAddress {

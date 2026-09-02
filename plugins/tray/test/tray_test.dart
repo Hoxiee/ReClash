@@ -11,7 +11,7 @@ const StandardMethodCodec _codec = StandardMethodCodec();
 TraySpec _spec({List<TrayMenuItem> menu = const []}) {
   return TraySpec(
     icon: const TrayIcon.asset('assets/icon.ico'),
-    toolTip: 'FlClash',
+    toolTip: 'ReClash',
     menu: menu,
   );
 }

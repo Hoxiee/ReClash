@@ -1,4 +1,4 @@
-import 'package:fl_clash/state.dart';
+import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

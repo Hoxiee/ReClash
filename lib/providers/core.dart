@@ -1,4 +1,4 @@
-import 'package:fl_clash/core/controller.dart';
+import 'package:reclash/core/controller.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/core.g.dart';

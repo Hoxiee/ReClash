@@ -12,13 +12,13 @@ const changelogFrozenNote =
     '<!-- Entries below predate the structured pipeline. Their wording is kept as '
     'written; only the heading and list style were normalized. -->';
 
-const releaseBeginMarker = '<!-- flclash:changelog:begin -->';
-const releaseEndMarker = '<!-- flclash:changelog:end -->';
+const releaseBeginMarker = '<!-- reclash:changelog:begin -->';
+const releaseEndMarker = '<!-- reclash:changelog:end -->';
 
 /// Opens the HTML comment that carries the structured entries to the app. The
 /// update dialog reads them from the release GitHub already returns, so the
 /// notes cost no request of their own and stay invisible on the release page.
-const releaseJsonBeginMarker = '<!-- flclash:changelog:json';
+const releaseJsonBeginMarker = '<!-- reclash:changelog:json';
 const releaseJsonEndMarker = '-->';
 
 const telegramLimit = 900;

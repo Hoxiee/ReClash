@@ -125,7 +125,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
 
 - `core/Clash.Meta` is a fork of mihomo, and changes to it are budgeted for features, not repairs. Fixing a bug there is
   low priority even when the bug is real and the fix is small: every patch is one more thing to carry across an upstream
-  rebase. Solve it on the FlClash side of the boundary and note the mihomo behaviour you are working around. Reach into
+  rebase. Solve it on the ReClash side of the boundary and note the mihomo behaviour you are working around. Reach into
   the submodule only for a feature that has nowhere else to live, or when the problem is one the FlClash patches
   themselves introduced — and say which of the two it is in the commit message.
 - Do not expose direct filesystem deletion APIs through Core or helper IPC; use
@@ -172,7 +172,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   `invalidateAllProxies` on `tunnel.UpdateProxies` and validated against each provider's `Version()`, so a rebuild
   costs one read per provider rather than one per proxy. Anything else added to `tunnel/patch.go` that derives from the
   proxy set needs both signals: the external controller can reload the config through `hub/route/configs.go` without
-  going through FlClash's `applyConfig`, so a hook on the FlClash side alone would miss a profile switch.
+  going through FlClash's `applyConfig`, so a hook on the ReClash side alone would miss a profile switch.
 - Core state that mirrors mihomo state goes stale at the next `applyConfig`, which replaces every proxy, provider and
   rule. Read the tunnel instead of caching a snapshot of it: `lookupExternalProvider` kept one that was rebuilt only
   when the host asked for the provider list, and the host asks after a successful setup and not after a failed one, so
@@ -195,7 +195,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   forever when the Core restarted. The run owns its keys and releases them in a `finally`, so nothing depends on a
   reply arriving; core status leaving `connected` cancels every run in flight.
 - Anything on the mihomo side that is reached from both a user-triggered core method and mihomo's own background
-  scheduler needs its in-flight guard on the FlClash side. `updater.UpdateMMDB` and its siblings have none — only the
+  scheduler needs its in-flight guard on the ReClash side. `updater.UpdateMMDB` and its siblings have none — only the
   batch `UpdateGeoDatabases` does — and two concurrent runs close the mmap'd database twice, so `handleUpdateGeoData`
   claims per resource and `updater.GeoUpdateHook` releases.
 - A failed `applyConfig` rolls the tunnel back to the default config, and that rollback is the whole recovery:
@@ -231,7 +231,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   Firebase uninitialized until the user consents.
 - Recovery is graded: the first failed launch only skips `initStatus`, and `currentProfileId` is cleared only from
   `crashRecoveryClearThreshold` consecutive failures on. Do not let a single interrupted launch write to the config.
-- Desktop process ownership belongs to `DesktopCoreLifecycle`; do not start/kill `FlClashCore` from providers, widgets,
+- Desktop process ownership belongs to `DesktopCoreLifecycle`; do not start/kill `ReClashCore` from providers, widgets,
   managers, or ad hoc exit callbacks. Acquire and release it through a `CoreProcessLease`.
 - `CoreController.close()` and platform `close()` implementations are terminal and idempotent. Application shutdown must
   stay centralized in `SystemAction`/`SystemExitCoordinator`.

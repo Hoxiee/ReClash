@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/core.dart';
-import 'package:fl_clash/views/dashboard/widgets/memory_info.dart';
-import 'package:fl_clash/widgets/inherited.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/core.dart';
+import 'package:reclash/views/dashboard/widgets/memory_info.dart';
+import 'package:reclash/widgets/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

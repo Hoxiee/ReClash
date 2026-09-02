@@ -1,9 +1,9 @@
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/core.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/core/core.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

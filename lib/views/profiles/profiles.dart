@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/profiles/overwrite/overwrite.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/profiles/overwrite/overwrite.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';

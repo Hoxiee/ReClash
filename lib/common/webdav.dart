@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/string.dart';
+import 'package:reclash/common/string.dart';
 
 final class DAVException implements Exception {
   final String method;

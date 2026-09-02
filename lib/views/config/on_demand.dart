@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/permission.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/plugins/app.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/views/profiles/overwrite/custom/widgets.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/permission.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/plugins/app.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/profiles/overwrite/custom/widgets.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';

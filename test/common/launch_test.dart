@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/launch.dart';
+import 'package:reclash/common/launch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';

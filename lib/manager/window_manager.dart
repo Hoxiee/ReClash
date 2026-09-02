@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/launch.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/config.dart';
-import 'package:fl_clash/providers/providers.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/launch.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/config.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';

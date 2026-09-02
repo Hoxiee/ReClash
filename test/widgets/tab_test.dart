@@ -1,4 +1,4 @@
-import 'package:fl_clash/widgets/tab.dart';
+import 'package:reclash/widgets/tab.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

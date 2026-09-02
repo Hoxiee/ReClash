@@ -1,5 +1,5 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/hotkey_manager.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:fl_clash/common/exception.dart';
-import 'package:fl_clash/common/javascript.dart';
+import 'package:reclash/common/exception.dart';
+import 'package:reclash/common/javascript.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -1,5 +1,5 @@
-import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:reclash/database/database.dart';
+import 'package:reclash/models/models.dart';
 
 import 'preferences.dart';
 import 'task.dart';

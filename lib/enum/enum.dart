@@ -2,8 +2,8 @@
 
 import 'dart:io';
 
-import 'package:fl_clash/common/context.dart';
-import 'package:fl_clash/common/system.dart';
+import 'package:reclash/common/context.dart';
+import 'package:reclash/common/system.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';

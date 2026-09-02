@@ -1,9 +1,9 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/manager/tile_manager.dart';
-import 'package:fl_clash/plugins/tile.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/manager/tile_manager.dart';
+import 'package:reclash/plugins/tile.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

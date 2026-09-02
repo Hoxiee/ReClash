@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:fl_clash/enum/enum.dart';
+import 'package:reclash/enum/enum.dart';
 
 import 'print.dart';
 

@@ -1,6 +1,6 @@
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

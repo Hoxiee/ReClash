@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/measure.dart';
+import 'package:reclash/common/measure.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,10 +20,10 @@ Future<Measure> _measureIn(WidgetTester tester, {double scale = 1}) async {
 void main() {
   testWidgets('sizes grow with the text scale factor', (tester) async {
     final single = await _measureIn(tester);
-    final baseline = single.computeTextSize(const Text('FlClash'));
+    final baseline = single.computeTextSize(const Text('ReClash'));
 
     final doubled = await _measureIn(tester, scale: 2);
-    final scaled = doubled.computeTextSize(const Text('FlClash'));
+    final scaled = doubled.computeTextSize(const Text('ReClash'));
 
     expect(scaled.width, greaterThan(baseline.width));
     expect(scaled.height, greaterThan(baseline.height));
@@ -34,11 +34,11 @@ void main() {
   ) async {
     final measure = await _measureIn(tester);
     final small = measure.computeTextSize(
-      const Text('FlClash'),
+      const Text('ReClash'),
       style: const TextStyle(fontSize: 10),
     );
     final large = measure.computeTextSize(
-      const Text('FlClash'),
+      const Text('ReClash'),
       style: const TextStyle(fontSize: 40),
     );
     expect(large.width, greaterThan(small.width));

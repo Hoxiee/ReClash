@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/providers/state.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 

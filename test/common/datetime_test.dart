@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/common.dart';
+import 'package:reclash/common/common.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

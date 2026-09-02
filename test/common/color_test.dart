@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/color.dart';
+import 'package:reclash/common/color.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

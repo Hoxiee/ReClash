@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/providers/state.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FlClashHttpOverrides extends HttpOverrides {
+class ReClashHttpOverrides extends HttpOverrides {
   final ProviderContainer _container;
 
-  FlClashHttpOverrides(this._container);
+  ReClashHttpOverrides(this._container);
 
   static String findProxyFor(ProviderContainer container, Uri url) {
     return findProxyForReader(container.read, url);

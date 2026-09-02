@@ -1,6 +1,6 @@
-import 'package:fl_clash/common/permission.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
+import 'package:reclash/common/permission.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';

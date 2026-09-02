@@ -1,6 +1,6 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/widgets/inherited.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/models/common.dart';
+import 'package:reclash/widgets/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 

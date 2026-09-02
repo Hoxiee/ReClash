@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/widgets/activate_box.dart';
-import 'package:fl_clash/widgets/grid.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/widgets/activate_box.dart';
+import 'package:reclash/widgets/grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/physics.dart';
 

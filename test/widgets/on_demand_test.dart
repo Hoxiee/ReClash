@@ -1,9 +1,9 @@
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/config/on_demand.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/config/on_demand.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

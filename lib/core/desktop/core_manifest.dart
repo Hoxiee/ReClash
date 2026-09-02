@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/common/constant.dart';
+import 'package:reclash/common/constant.dart';
 import 'package:path/path.dart' as p;
 
 final class CoreManifest {

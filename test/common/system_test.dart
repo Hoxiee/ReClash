@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
+import 'package:reclash/common/common.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
@@ -133,7 +133,7 @@ void main() {
     });
 
     test('passes a path containing spaces through untouched', () {
-      const path = '/Users/a b/FlClash.app/Contents/MacOS/FlClashCore';
+      const path = '/Users/a b/ReClash.app/Contents/MacOS/ReClashCore';
       for (final isMacOS in [true, false]) {
         final arguments = System.statArguments(path, isMacOS: isMacOS);
         expect(arguments.last, path);
@@ -173,7 +173,7 @@ void main() {
     });
 
     test('passes a path containing spaces through untouched', () {
-      const path = '/Users/a b/Library/Application Support/com.follow.clash';
+      const path = '/Users/a b/Library/Application Support/com.reclash';
 
       final arguments = System.aclArguments(path, 'alice');
 

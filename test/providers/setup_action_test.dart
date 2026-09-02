@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/providers/core.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/providers/state.dart';
+import 'package:reclash/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -613,8 +613,8 @@ void main() {
           return '';
         });
         globalState.packageInfo = PackageInfo(
-          appName: 'FlClash',
-          packageName: 'com.follow.clash',
+          appName: 'ReClash',
+          packageName: 'com.reclash',
           version: '0.0.0',
           buildNumber: '0',
         );

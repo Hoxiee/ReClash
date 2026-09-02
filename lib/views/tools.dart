@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/views/about.dart';
-import 'package:fl_clash/views/access.dart';
-import 'package:fl_clash/views/application_setting.dart';
-import 'package:fl_clash/views/backup_and_restore.dart';
-import 'package:fl_clash/views/config/config.dart';
-import 'package:fl_clash/views/hotkey.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/about.dart';
+import 'package:reclash/views/access.dart';
+import 'package:reclash/views/application_setting.dart';
+import 'package:reclash/views/backup_and_restore.dart';
+import 'package:reclash/views/config/config.dart';
+import 'package:reclash/views/hotkey.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;

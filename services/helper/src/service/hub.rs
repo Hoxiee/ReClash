@@ -21,8 +21,8 @@ use warp::{Filter, Rejection, Reply};
 use windows_sys::Win32::Storage::FileSystem::FILE_SHARE_READ;
 
 const LISTEN_PORT: u16 = 47890;
-const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
-const PROTOCOL_VERSION_HEADER: &str = "x-flclash-helper-protocol";
+const CORE_PIPE_PREFIX: &str = r"\\.\pipe\ReClashCore_";
+const PROTOCOL_VERSION_HEADER: &str = "x-reclash-helper-protocol";
 const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
@@ -662,7 +662,7 @@ mod tests {
 
     #[tokio::test]
     async fn ping_returns_running_helper_path_for_verified_core() {
-        let response = ping_response(Ok(PathBuf::from("FlClashHelperService.exe")));
+        let response = ping_response(Ok(PathBuf::from("ReClashHelperService.exe")));
 
         assert_eq!(response.status(), StatusCode::OK);
         assert_eq!(
@@ -673,7 +673,7 @@ mod tests {
             warp::hyper::body::to_bytes(response.into_body())
                 .await
                 .unwrap(),
-            "FlClashHelperService.exe"
+            "ReClashHelperService.exe"
         );
     }
 
@@ -800,7 +800,7 @@ mod tests {
             .path("/start")
             .header("content-type", "application/json")
             .body(
-                r#"{"address":"\\\\.\\pipe\\FlClashCore_0123456789abcdef0123456789abcdef","sessionId":"0123456789abcdef0123456789abcdef","path":"attacker.exe"}"#,
+                r#"{"address":"\\\\.\\pipe\\ReClashCore_0123456789abcdef0123456789abcdef","sessionId":"0123456789abcdef0123456789abcdef","path":"attacker.exe"}"#,
             )
             .reply(&routes())
             .await;
@@ -823,7 +823,7 @@ mod tests {
             .method("POST")
             .path("/start")
             .json(&StartParams {
-                address: r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdef".to_string(),
+                address: r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef".to_string(),
                 session_id: "0123456789abcdef0123456789abcdef".to_string(),
             })
             .reply(&routes())
@@ -903,7 +903,7 @@ mod tests {
             .method("POST")
             .path("/start")
             .json(&StartParams {
-                address: r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdef".to_string(),
+                address: r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef".to_string(),
                 session_id: "ABCDEF0123456789abcdef0123456789".to_string(),
             })
             .reply(&routes())
@@ -917,7 +917,7 @@ mod tests {
     #[test]
     fn verifies_core_sha256_in_all_build_modes() {
         let path =
-            std::env::temp_dir().join(format!("flclash-helper-core-sha256-{}", std::process::id()));
+            std::env::temp_dir().join(format!("reclash-helper-core-sha256-{}", std::process::id()));
         let mut file = File::create(&path).unwrap();
         file.write_all(b"test").unwrap();
         drop(file);
@@ -995,20 +995,20 @@ mod tests {
     #[test]
     fn only_accepts_random_core_pipe_namespace() {
         assert!(is_allowed_core_pipe(
-            r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdef"
+            r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef"
         ));
-        assert!(!is_allowed_core_pipe(r"\\.\pipe\FlClashCore"));
+        assert!(!is_allowed_core_pipe(r"\\.\pipe\ReClashCore"));
         assert!(!is_allowed_core_pipe(
             r"\\.\pipe\Other_0123456789abcdef0123456789abcdef"
         ));
         assert!(!is_allowed_core_pipe(
-            r"\\.\pipe\FlClashCore_0123456789abcdef"
+            r"\\.\pipe\ReClashCore_0123456789abcdef"
         ));
         assert!(!is_allowed_core_pipe(
-            r"\\.\pipe\FlClashCore_0123456789abcdef0123456789abcdeg"
+            r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdeg"
         ));
         assert!(!is_allowed_core_pipe(
-            r"\\.\pipe\FlClashCore_ABCDEF0123456789abcdef0123456789"
+            r"\\.\pipe\ReClashCore_ABCDEF0123456789abcdef0123456789"
         ));
     }
 

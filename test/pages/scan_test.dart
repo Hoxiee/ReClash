@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_clash/pages/scan.dart';
+import 'package:reclash/pages/scan.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

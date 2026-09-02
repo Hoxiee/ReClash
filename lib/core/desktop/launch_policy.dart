@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/model.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/model.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 /// CreateProcess reports these when a policy, not the file, refused the image:

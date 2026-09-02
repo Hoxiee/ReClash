@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -68,7 +68,7 @@ void main() {
         proxyGroups: const [],
         rules: const [],
         addedRules: const [],
-        defaultUA: 'FlClash',
+        defaultUA: 'ReClash',
       ),
     );
     final config = loadYaml(result.yaml) as YamlMap;
@@ -116,7 +116,7 @@ void main() {
         proxyGroups: const [],
         rules: const [],
         addedRules: const [],
-        defaultUA: 'FlClash',
+        defaultUA: 'ReClash',
       ),
     );
     final config = loadYaml(result.yaml) as YamlMap;
@@ -153,7 +153,7 @@ void main() {
         proxyGroups: const [],
         rules: const [],
         addedRules: const [],
-        defaultUA: 'FlClash',
+        defaultUA: 'ReClash',
       ),
     );
 

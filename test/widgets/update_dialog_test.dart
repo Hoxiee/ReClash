@@ -1,7 +1,7 @@
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,12 +20,12 @@ const _payload =
     '"Override scripts"}]}]}]}';
 
 const _bulletsOnly =
-    '<!-- flclash:changelog:begin -->\n'
+    '<!-- reclash:changelog:begin -->\n'
     '- Override scripts\n'
-    '<!-- flclash:changelog:end -->\n';
+    '<!-- reclash:changelog:end -->\n';
 
 String _bodyWith(String payload) =>
-    '$_bulletsOnly\n<!-- flclash:changelog:json\n$payload\n-->\n';
+    '$_bulletsOnly\n<!-- reclash:changelog:json\n$payload\n-->\n';
 
 Map<String, dynamic> release(String? body) => <String, dynamic>{
   'tag_name': 'v0.8.96',
@@ -66,8 +66,8 @@ Future<void> tapCancel(WidgetTester tester) async {
 void main() {
   setUpAll(() {
     globalState.packageInfo = PackageInfo(
-      appName: 'FlClash',
-      packageName: 'com.follow.clash',
+      appName: 'ReClash',
+      packageName: 'com.reclash',
       version: _runningVersion,
       buildNumber: '1',
     );

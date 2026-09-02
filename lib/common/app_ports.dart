@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/provider_reader.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:reclash/common/provider_reader.dart';
+import 'package:reclash/models/models.dart';
 
 abstract interface class WindowPort {
   Future<WindowProps?> captureNormalGeometry(WindowProps current);

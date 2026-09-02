@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/window.dart';
-import 'package:fl_clash/models/config.dart';
+import 'package:reclash/common/window.dart';
+import 'package:reclash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

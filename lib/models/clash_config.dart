@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'generated/clash_config.freezed.dart';

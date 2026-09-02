@@ -48,7 +48,7 @@ generated profile. With `allow-lan` off, mihomo's `genAddr` binds each listener 
 
 The loopback listener takes local connections without authentication on every platform, Android included. That is the
 design, not an oversight: the app reaches the network through its own mixed port, and credentials on that port would lock
-out both FlClash and every other local consumer, which is the reason a local proxy client exists. The boundary the binding
+out both ReClash and every other local consumer, which is the reason a local proxy client exists. The boundary the binding
 does enforce is that traffic must originate on the device; it does not isolate programs already running there, so on
 Android any app holding `INTERNET` can use the proxy and learn the outbound IP. Reports treating that as a vulnerability
 (#1934) are answered by this paragraph. Do not add authentication, per-UID filtering, or a random local credential to this
@@ -489,8 +489,8 @@ Responsibilities are deliberately split:
 Platform outputs remain explicit:
 
 - Android builds the Go core as `c-shared`, then copies `libclash.so` and generated headers into the `:core` Android module.
-- macOS and Linux build a standalone `FlClashCore` process used by the desktop socket integration.
-- Windows builds `FlClashCore.exe`, the Rust `FlClashHelperService.exe` privileged helper, and a
+- macOS and Linux build a standalone `ReClashCore` process used by the desktop socket integration.
+- Windows builds `ReClashCore.exe`, the Rust `ReClashHelperService.exe` privileged helper, and a
   `manifest.json` containing only `coreSha256`.
 
 The hooks follow rust_api/Cargokit's phony-output scheduling pattern, but setup uses its own cache because it builds both a
@@ -517,7 +517,7 @@ Windows helper integrity/version check:
 - Flutter reads the Core SHA256 from the bundled `manifest.json` and sends it with `/ping`. Debug, Profile, and Release
   builds use the same Helper protocol and may use TUN through the same flow.
 - `/ping` is loopback-only and requires no request token. The Helper compares the requested SHA256 with its embedded value
-  and checks that the fixed `FlClashCore.exe` beside it exists; `/start` performs the actual Core SHA256 verification before
+  and checks that the fixed `ReClashCore.exe` beside it exists; `/start` performs the actual Core SHA256 verification before
   every launch. The response includes the running Helper path and protocol header; Dart checks both against the current
   installation. The launcher selects the Helper only when `/ping` reports ready; any other readiness (missing manifest,
   unavailable Helper, or a Helper built for a different Core) falls back to the direct Core without requesting elevation.
@@ -532,7 +532,7 @@ Windows helper integrity/version check:
   launch path did not already have. `manifestMissing` is the one readiness that is surfaced to the user, because it
   means the installation itself is incomplete.
 - Flutter creates a 128-bit lowercase-hex session ID and uses it as the random named-pipe suffix. `/start` receives only
-  that address and session ID, validates the fixed `FlClashCore_<session>` namespace, starts the fixed Core beside the
+  that address and session ID, validates the fixed `ReClashCore_<session>` namespace, starts the fixed Core beside the
   Helper, and returns the same session ID plus the spawned PID. Flutter verifies both the session and named-pipe peer PID.
 - `/stop` requires the same session ID. A missing process returns `notRunning`; a different owner returns
   `sessionMismatch` without terminating that process. Session IDs are ownership tokens for lifecycle safety, not a claim
@@ -544,7 +544,7 @@ Windows helper integrity/version check:
 
 Build configuration defaults live in `build_tool/lib/src/options.dart` and can be overridden via a root `build_config.yaml`.
 
-Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `FlClash-0.8.93-macos-arm64.dmg`.
+Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `ReClash-0.8.93-macos-arm64.dmg`.
 
 ## Local Plugins
 
@@ -605,9 +605,9 @@ the SHA256 of the Core produced for the active Flutter configuration.
 
 The helper owns its Windows Service Control Manager lifecycle through two elevated commands:
 
-- `FlClashHelperService.exe install` stops and removes any stale registration, creates the auto-start service for the
+- `ReClashHelperService.exe install` stops and removes any stale registration, creates the auto-start service for the
   current executable path, starts it, and waits for the running state.
-- `FlClashHelperService.exe uninstall` stops the service, waits for shutdown, removes its registration, and is also used
+- `ReClashHelperService.exe uninstall` stops the service, waits for shutdown, removes its registration, and is also used
   by the Windows package uninstaller.
 
 The Dart layer only launches the helper's `install` command through `ShellExecuteW`; it does not compose `sc.exe`,
@@ -618,7 +618,7 @@ validates it against the SHA256 embedded only in the Helper, and keeps that hand
 `/ping` only compares the requested `coreSha256` with the Helper's embedded value and checks the fixed Core path exists;
 it never hashes the Core. Protocol version 6 uses 32-character lowercase-hex session ownership:
 
-- `GET /ping?coreSha256=...` returns the current Helper executable path with `x-flclash-helper-protocol` when the
+- `GET /ping?coreSha256=...` returns the current Helper executable path with `x-reclash-helper-protocol` when the
   requested SHA matches.
 - `POST /start` rejects unknown JSON fields, validates `{address, sessionId}`, then releases any previously managed Core
   before verifying the Core — so every outcome, including a rejected one, leaves the Helper owning no Core — and returns

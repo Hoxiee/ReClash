@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/widgets/scroll.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/widgets/scroll.dart';
 import 'package:material_ui/material_ui.dart';
 
 class BaseScrollBehavior extends MaterialScrollBehavior {

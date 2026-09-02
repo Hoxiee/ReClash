@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/system.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/core.dart';
+import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/system.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/core.dart';
 import 'package:flutter/foundation.dart';
 
 import 'desktop/helper_client.dart';

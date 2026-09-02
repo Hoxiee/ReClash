@@ -1,10 +1,10 @@
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/connection/connections.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/connection/connections.dart';
+import 'package:reclash/widgets/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

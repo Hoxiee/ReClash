@@ -149,7 +149,7 @@ The changelog is derived from Conventional Commits by `tool/changelog.dart` and 
 that decide the wording.
 
 The app ships no changelog of its own. `render release` appends the released version as JSON inside an HTML comment
-(`<!-- flclash:changelog:json … -->`), so the release body GitHub already returns to `checkForUpdate` carries the
+(`<!-- reclash:changelog:json … -->`), so the release body GitHub already returns to `checkForUpdate` carries the
 notes shown in the update dialog. `parseReleaseChangelog` reads that block and falls back to the English
 bullets when a release predates it.
 

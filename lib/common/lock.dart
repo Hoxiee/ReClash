@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' show basename;
 

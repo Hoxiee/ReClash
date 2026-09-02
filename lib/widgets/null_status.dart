@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/common.dart';
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';

@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/common/app_ports.dart';
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/tray.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/common/app_localizations.dart';
+import 'package:reclash/common/app_ports.dart';
+import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/tray.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';

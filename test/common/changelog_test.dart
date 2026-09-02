@@ -1,12 +1,12 @@
-import 'package:fl_clash/common/changelog.dart';
-import 'package:fl_clash/models/changelog.dart';
+import 'package:reclash/common/changelog.dart';
+import 'package:reclash/models/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String _body(String payload) =>
-    '<!-- flclash:changelog:begin -->\n'
+    '<!-- reclash:changelog:begin -->\n'
     '### Features\n'
     '- Override scripts\n'
-    '<!-- flclash:changelog:end -->\n'
+    '<!-- reclash:changelog:end -->\n'
     '\n'
     '$releaseChangelogJsonMarker\n'
     '$payload\n'

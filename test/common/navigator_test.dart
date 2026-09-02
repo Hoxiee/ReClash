@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/navigator.dart';
-import 'package:fl_clash/providers/app.dart';
+import 'package:reclash/common/navigator.dart';
+import 'package:reclash/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

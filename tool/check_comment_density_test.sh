@@ -102,7 +102,7 @@ expect_under 'analyzer directives do not count' "$repo/directives.dart" \
   )"
 expect_under 'a license header does not count' "$repo/license.dart" \
   "$(
-    for i in $(seq 1 8); do echo '// Copyright 2026 The FlClash Authors.'; done
+    for i in $(seq 1 8); do echo '// Copyright 2026 The ReClash Authors.'; done
     for i in $(seq 1 24); do echo "final v$i = $i;"; done
   )"
 expect_under 'go pointer dereferences are not comments' "$repo/deref.go" \

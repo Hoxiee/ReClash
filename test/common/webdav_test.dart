@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/webdav.dart';
+import 'package:reclash/common/webdav.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _ScriptedAdapter implements HttpClientAdapter {

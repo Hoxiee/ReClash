@@ -1,6 +1,6 @@
 import 'dart:ui' show PictureRecorder;
 
-import 'package:fl_clash/widgets/wave.dart';
+import 'package:reclash/widgets/wave.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

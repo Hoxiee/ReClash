@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:fl_clash/common/boot_record.dart';
+import 'package:reclash/common/boot_record.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _startedAt = 1000;

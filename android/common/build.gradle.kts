@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.follow.clash.common"
+    namespace = "com.reclash.common"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/shape.dart';
+import 'package:reclash/common/shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';

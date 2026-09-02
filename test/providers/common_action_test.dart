@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/providers/core.dart';
-import 'package:fl_clash/state.dart';
+import 'package:reclash/core/controller.dart';
+import 'package:reclash/core/interface.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/core.dart';
+import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -26,8 +26,8 @@ void main() {
   setUpAll(() {
     core = MockCoreHandlerInterface();
     globalState.packageInfo = PackageInfo(
-      appName: 'FlClash',
-      packageName: 'com.follow.clash',
+      appName: 'ReClash',
+      packageName: 'com.reclash',
       version: runningVersion,
       buildNumber: '1',
     );

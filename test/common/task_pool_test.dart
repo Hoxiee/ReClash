@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
+import 'package:reclash/common/common.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

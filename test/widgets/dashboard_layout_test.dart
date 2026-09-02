@@ -1,8 +1,8 @@
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/dashboard/dashboard.dart';
-import 'package:fl_clash/widgets/grid.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/state.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/dashboard.dart';
+import 'package:reclash/widgets/grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

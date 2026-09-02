@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:fl_clash/common/color.dart';
-import 'package:fl_clash/common/shape.dart';
+import 'package:reclash/common/color.dart';
+import 'package:reclash/common/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 

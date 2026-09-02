@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:fl_clash/common/exception.dart';
+import 'package:reclash/common/exception.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rust_api/rust_api.dart';
 
