@@ -4,7 +4,7 @@ abstract final class NavBarMetrics {
   static const double pillHeight = 64;
 
   static const double gapTop = 8;
-  static const double gapBottom = 16;
+  static const double gapBottom = 12;
   static const double gapSide = 12;
   static const EdgeInsets padding = EdgeInsets.fromLTRB(
     gapSide,
