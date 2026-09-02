@@ -6,6 +6,7 @@ enum CoreMethod {
   message,
   initClash,
   getIsInit,
+  getVersion,
   forceGc,
   shutdown,
   validateConfig,

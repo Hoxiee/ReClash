@@ -268,6 +268,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Очистить поиск"),
+    "clientNotSupported": MessageLookupByLibrary.simpleMessage(
+      "Клиент не поддерживается",
+    ),
+    "clientNotSupportedTip": MessageLookupByLibrary.simpleMessage(
+      "Панель не поддерживает этот клиент.",
+    ),
     "clipboardExport": MessageLookupByLibrary.simpleMessage(
       "Экспорт в буфер обмена",
     ),
@@ -387,6 +393,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerMode": MessageLookupByLibrary.simpleMessage("Режим разработчика"),
     "developerModeEnableTip": MessageLookupByLibrary.simpleMessage(
       "Режим разработчика включён.",
+    ),
+    "deviceLimitReached": MessageLookupByLibrary.simpleMessage(
+      "Достигнут лимит устройств",
+    ),
+    "deviceLimitReachedTip": MessageLookupByLibrary.simpleMessage(
+      "Панель сообщает, что лимит устройств для этой подписки достигнут. Подписка всё равно обновлена.",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
@@ -1126,6 +1138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Информация о подписке",
     ),
+    "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
     "suspended": MessageLookupByLibrary.simpleMessage("Приостановлено..."),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
     "system": MessageLookupByLibrary.simpleMessage("Система"),

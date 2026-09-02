@@ -260,6 +260,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear data"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
+    "clientNotSupported": MessageLookupByLibrary.simpleMessage(
+      "Client not supported",
+    ),
+    "clientNotSupportedTip": MessageLookupByLibrary.simpleMessage(
+      "The provider does not support this client.",
+    ),
     "clipboardExport": MessageLookupByLibrary.simpleMessage(
       "Export to clipboard",
     ),
@@ -379,6 +385,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerMode": MessageLookupByLibrary.simpleMessage("Developer mode"),
     "developerModeEnableTip": MessageLookupByLibrary.simpleMessage(
       "Developer mode is enabled.",
+    ),
+    "deviceLimitReached": MessageLookupByLibrary.simpleMessage(
+      "Device limit reached",
+    ),
+    "deviceLimitReachedTip": MessageLookupByLibrary.simpleMessage(
+      "The provider reports the device limit for this subscription as reached. The subscription was still updated.",
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
@@ -1080,6 +1092,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
+    "support": MessageLookupByLibrary.simpleMessage("Support"),
     "suspended": MessageLookupByLibrary.simpleMessage("Suspended..."),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),

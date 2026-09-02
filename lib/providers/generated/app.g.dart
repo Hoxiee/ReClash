@@ -93,7 +93,7 @@ final class LogsProvider extends $NotifierProvider<Logs, FixedList<Log>> {
   }
 }
 
-String _$logsHash() => r'c23da391e9662e863990fc68039fbaf126f85b83';
+String _$logsHash() => r'aefb14ef2c0a3c7a4e27f2ac4188a5b2943e60b5';
 
 abstract class _$Logs extends $Notifier<FixedList<Log>> {
   FixedList<Log> build();
@@ -145,7 +145,7 @@ final class RequestsProvider
   }
 }
 
-String _$requestsHash() => r'281a3333f8eca333d513e09b34cf5e568c44e07b';
+String _$requestsHash() => r'ceb041f2418513a5307b64bc9b5b58cae41e6eec';
 
 abstract class _$Requests extends $Notifier<FixedList<TrackerInfo>> {
   FixedList<TrackerInfo> build();
@@ -1500,7 +1500,7 @@ final class LoadingProvider extends $NotifierProvider<Loading, bool> {
   }
 }
 
-String _$loadingHash() => r'f4c58da7e5869c3e114b76439f3169b31d2e5b71';
+String _$loadingHash() => r'0e92aaf1ff26aeba3fb3dc196bbf2ab0a061b720';
 
 final class LoadingFamily extends $Family
     with $ClassFamilyOverride<Loading, bool, bool, bool, LoadingTag> {

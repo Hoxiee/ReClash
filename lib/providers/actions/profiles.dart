@@ -80,8 +80,12 @@ class ProfilesAction extends _$ProfilesAction {
       ref.read(profilesProvider.notifier).put(profile);
       final newProfile = await profile.update(
         validate: (path) => _core.validateConfig(path),
+        requestHeaders: await deviceIdentity.subscriptionHeaders(
+          includeDeviceIdentity: true,
+        ),
       );
       ref.read(profilesProvider.notifier).put(newProfile);
+      unawaited(handlePanelVerdicts(newProfile.panelMeta));
       if (profile.id == ref.read(currentProfileIdProvider)) {
         ref
             .read(setupActionProvider.notifier)
@@ -93,6 +97,31 @@ class ProfilesAction extends _$ProfilesAction {
             .read(updatingKeysProvider.notifier)
             .stop(profile.updatingKey, operation);
       }
+    }
+  }
+
+  Future<void> handlePanelVerdicts(PanelMeta? panelMeta) async {
+    if (panelMeta == null) return;
+    if (panelMeta.hwidMaxDevicesReached) {
+      final confirmed = await dialogs.showMessage(
+        title: currentAppLocalizations.deviceLimitReached,
+        message: TextSpan(
+          text: panelMeta.announce.takeFirstValid(
+            [currentAppLocalizations.deviceLimitReachedTip],
+          ),
+        ),
+        confirmText: panelMeta.supportUrl != null
+            ? currentAppLocalizations.support
+            : null,
+      );
+      if (confirmed == true && panelMeta.supportUrl != null) {
+        await dialogs.openUrl(panelMeta.supportUrl!);
+      }
+    } else if (panelMeta.hwidNotSupported) {
+      await dialogs.showMessage(
+        title: currentAppLocalizations.clientNotSupported,
+        message: TextSpan(text: currentAppLocalizations.clientNotSupportedTip),
+      );
     }
   }
 
@@ -126,12 +155,18 @@ class ProfilesAction extends _$ProfilesAction {
       () async {
         return Profile.normal(
           url: url,
-        ).update(validate: (path) => _core.validateConfig(path));
+        ).update(
+          validate: (path) => _core.validateConfig(path),
+          requestHeaders: await deviceIdentity.subscriptionHeaders(
+            includeDeviceIdentity: false,
+          ),
+        );
       },
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
       putProfile(profile);
+      unawaited(handlePanelVerdicts(profile.panelMeta));
     }
   }
 

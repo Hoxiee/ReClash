@@ -26,10 +26,15 @@ void _downgradeToV1(Database raw) {
   raw.execute('PRAGMA user_version = 1');
 }
 
-/// Schema version 2 had no `match_target` on `profiles`.
 void _downgradeToV2(Database raw) {
   raw.execute('ALTER TABLE profiles DROP COLUMN match_target');
+  raw.execute('ALTER TABLE profiles DROP COLUMN panel_meta');
   raw.execute('PRAGMA user_version = 2');
+}
+
+void _downgradeToV3(Database raw) {
+  raw.execute('ALTER TABLE profiles DROP COLUMN panel_meta');
+  raw.execute('PRAGMA user_version = 3');
 }
 
 Set<String> _columnsOf(Database raw, String table) => {
@@ -76,7 +81,7 @@ void main() {
 
     await openAndMigrate();
 
-    expect(_userVersion(raw), 3);
+    expect(_userVersion(raw), 4);
   });
 
   test('the v3 upgrade adds match_target to profiles', () async {
@@ -86,7 +91,17 @@ void main() {
     await openAndMigrate();
 
     expect(_columnsOf(raw, 'profiles'), contains('match_target'));
-    expect(_userVersion(raw), 3);
+    expect(_userVersion(raw), 4);
+  });
+
+  test('the v4 upgrade adds panel_meta to profiles', () async {
+    _downgradeToV3(raw);
+    expect(_columnsOf(raw, 'profiles'), isNot(contains('panel_meta')));
+
+    await openAndMigrate();
+
+    expect(_columnsOf(raw, 'profiles'), contains('panel_meta'));
+    expect(_userVersion(raw), 4);
   });
 
   test('the upgrade creates the tables v2 added', () async {
@@ -160,7 +175,7 @@ void main() {
 
     final database = await openAndMigrate();
 
-    expect(_userVersion(raw), 3);
+    expect(_userVersion(raw), 4);
     expect(await database.customSelect('SELECT * FROM rules').get(), isEmpty);
   });
 
@@ -170,7 +185,7 @@ void main() {
     await openAndMigrate();
 
     expect(_columnsOf(raw, 'rules'), before);
-    expect(_userVersion(raw), 3);
+    expect(_userVersion(raw), 4);
     expect(_hasTable(raw, 'proxy_groups'), isTrue);
   });
 }

@@ -110,6 +110,15 @@ class $ProfilesTable extends Profiles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   ).withConverter<SubscriptionInfo?>($ProfilesTable.$convertersubscriptionInfo);
+  @override
+  late final GeneratedColumnWithTypeConverter<PanelMeta?, String> panelMeta =
+      GeneratedColumn<String>(
+        'panel_meta',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<PanelMeta?>($ProfilesTable.$converterpanelMeta);
   static const VerificationMeta _autoUpdateMeta = const VerificationMeta(
     'autoUpdate',
   );
@@ -163,6 +172,7 @@ class $ProfilesTable extends Profiles
     matchTarget,
     autoUpdateDurationMillis,
     subscriptionInfo,
+    panelMeta,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -310,6 +320,12 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}subscription_info'],
         ),
       ),
+      panelMeta: $ProfilesTable.$converterpanelMeta.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}panel_meta'],
+        ),
+      ),
       autoUpdate: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}auto_update'],
@@ -344,6 +360,8 @@ class $ProfilesTable extends Profiles
   );
   static TypeConverter<SubscriptionInfo?, String?> $convertersubscriptionInfo =
       const SubscriptionInfoConverter();
+  static TypeConverter<PanelMeta?, String?> $converterpanelMeta =
+      const PanelMetaConverter();
   static TypeConverter<Map<String, String>, String> $converterselectedMap =
       const StringMapConverter();
   static TypeConverter<Set<String>, String> $converterunfoldSet =
@@ -361,6 +379,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final String? matchTarget;
   final int autoUpdateDurationMillis;
   final SubscriptionInfo? subscriptionInfo;
+  final PanelMeta? panelMeta;
   final bool autoUpdate;
   final Map<String, String> selectedMap;
   final Set<String> unfoldSet;
@@ -376,6 +395,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     this.matchTarget,
     required this.autoUpdateDurationMillis,
     this.subscriptionInfo,
+    this.panelMeta,
     required this.autoUpdate,
     required this.selectedMap,
     required this.unfoldSet,
@@ -410,6 +430,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     if (!nullToAbsent || subscriptionInfo != null) {
       map['subscription_info'] = Variable<String>(
         $ProfilesTable.$convertersubscriptionInfo.toSql(subscriptionInfo),
+      );
+    }
+    if (!nullToAbsent || panelMeta != null) {
+      map['panel_meta'] = Variable<String>(
+        $ProfilesTable.$converterpanelMeta.toSql(panelMeta),
       );
     }
     map['auto_update'] = Variable<bool>(autoUpdate);
@@ -451,6 +476,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: subscriptionInfo == null && nullToAbsent
           ? const Value.absent()
           : Value(subscriptionInfo),
+      panelMeta: panelMeta == null && nullToAbsent
+          ? const Value.absent()
+          : Value(panelMeta),
       autoUpdate: Value(autoUpdate),
       selectedMap: Value(selectedMap),
       unfoldSet: Value(unfoldSet),
@@ -482,6 +510,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: serializer.fromJson<SubscriptionInfo?>(
         json['subscriptionInfo'],
       ),
+      panelMeta: serializer.fromJson<PanelMeta?>(json['panelMeta']),
       autoUpdate: serializer.fromJson<bool>(json['autoUpdate']),
       selectedMap: serializer.fromJson<Map<String, String>>(
         json['selectedMap'],
@@ -510,6 +539,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       'subscriptionInfo': serializer.toJson<SubscriptionInfo?>(
         subscriptionInfo,
       ),
+      'panelMeta': serializer.toJson<PanelMeta?>(panelMeta),
       'autoUpdate': serializer.toJson<bool>(autoUpdate),
       'selectedMap': serializer.toJson<Map<String, String>>(selectedMap),
       'unfoldSet': serializer.toJson<Set<String>>(unfoldSet),
@@ -528,6 +558,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     Value<String?> matchTarget = const Value.absent(),
     int? autoUpdateDurationMillis,
     Value<SubscriptionInfo?> subscriptionInfo = const Value.absent(),
+    Value<PanelMeta?> panelMeta = const Value.absent(),
     bool? autoUpdate,
     Map<String, String>? selectedMap,
     Set<String>? unfoldSet,
@@ -550,6 +581,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     subscriptionInfo: subscriptionInfo.present
         ? subscriptionInfo.value
         : this.subscriptionInfo,
+    panelMeta: panelMeta.present ? panelMeta.value : this.panelMeta,
     autoUpdate: autoUpdate ?? this.autoUpdate,
     selectedMap: selectedMap ?? this.selectedMap,
     unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -579,6 +611,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       subscriptionInfo: data.subscriptionInfo.present
           ? data.subscriptionInfo.value
           : this.subscriptionInfo,
+      panelMeta: data.panelMeta.present ? data.panelMeta.value : this.panelMeta,
       autoUpdate: data.autoUpdate.present
           ? data.autoUpdate.value
           : this.autoUpdate,
@@ -603,6 +636,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('matchTarget: $matchTarget, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
+          ..write('panelMeta: $panelMeta, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
@@ -623,6 +657,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     matchTarget,
     autoUpdateDurationMillis,
     subscriptionInfo,
+    panelMeta,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -642,6 +677,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.matchTarget == this.matchTarget &&
           other.autoUpdateDurationMillis == this.autoUpdateDurationMillis &&
           other.subscriptionInfo == this.subscriptionInfo &&
+          other.panelMeta == this.panelMeta &&
           other.autoUpdate == this.autoUpdate &&
           other.selectedMap == this.selectedMap &&
           other.unfoldSet == this.unfoldSet &&
@@ -659,6 +695,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<String?> matchTarget;
   final Value<int> autoUpdateDurationMillis;
   final Value<SubscriptionInfo?> subscriptionInfo;
+  final Value<PanelMeta?> panelMeta;
   final Value<bool> autoUpdate;
   final Value<Map<String, String>> selectedMap;
   final Value<Set<String>> unfoldSet;
@@ -674,6 +711,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.matchTarget = const Value.absent(),
     this.autoUpdateDurationMillis = const Value.absent(),
     this.subscriptionInfo = const Value.absent(),
+    this.panelMeta = const Value.absent(),
     this.autoUpdate = const Value.absent(),
     this.selectedMap = const Value.absent(),
     this.unfoldSet = const Value.absent(),
@@ -690,6 +728,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.matchTarget = const Value.absent(),
     required int autoUpdateDurationMillis,
     this.subscriptionInfo = const Value.absent(),
+    this.panelMeta = const Value.absent(),
     required bool autoUpdate,
     required Map<String, String> selectedMap,
     required Set<String> unfoldSet,
@@ -712,6 +751,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? matchTarget,
     Expression<int>? autoUpdateDurationMillis,
     Expression<String>? subscriptionInfo,
+    Expression<String>? panelMeta,
     Expression<bool>? autoUpdate,
     Expression<String>? selectedMap,
     Expression<String>? unfoldSet,
@@ -729,6 +769,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (autoUpdateDurationMillis != null)
         'auto_update_duration_millis': autoUpdateDurationMillis,
       if (subscriptionInfo != null) 'subscription_info': subscriptionInfo,
+      if (panelMeta != null) 'panel_meta': panelMeta,
       if (autoUpdate != null) 'auto_update': autoUpdate,
       if (selectedMap != null) 'selected_map': selectedMap,
       if (unfoldSet != null) 'unfold_set': unfoldSet,
@@ -747,6 +788,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<String?>? matchTarget,
     Value<int>? autoUpdateDurationMillis,
     Value<SubscriptionInfo?>? subscriptionInfo,
+    Value<PanelMeta?>? panelMeta,
     Value<bool>? autoUpdate,
     Value<Map<String, String>>? selectedMap,
     Value<Set<String>>? unfoldSet,
@@ -764,6 +806,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       autoUpdateDurationMillis:
           autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
+      panelMeta: panelMeta ?? this.panelMeta,
       autoUpdate: autoUpdate ?? this.autoUpdate,
       selectedMap: selectedMap ?? this.selectedMap,
       unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -810,6 +853,11 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         $ProfilesTable.$convertersubscriptionInfo.toSql(subscriptionInfo.value),
       );
     }
+    if (panelMeta.present) {
+      map['panel_meta'] = Variable<String>(
+        $ProfilesTable.$converterpanelMeta.toSql(panelMeta.value),
+      );
+    }
     if (autoUpdate.present) {
       map['auto_update'] = Variable<bool>(autoUpdate.value);
     }
@@ -842,6 +890,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('matchTarget: $matchTarget, ')
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
+          ..write('panelMeta: $panelMeta, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
@@ -3531,6 +3580,7 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<String?> matchTarget,
       required int autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
+      Value<PanelMeta?> panelMeta,
       required bool autoUpdate,
       required Map<String, String> selectedMap,
       required Set<String> unfoldSet,
@@ -3548,6 +3598,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<String?> matchTarget,
       Value<int> autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
+      Value<PanelMeta?> panelMeta,
       Value<bool> autoUpdate,
       Value<Map<String, String>> selectedMap,
       Value<Set<String>> unfoldSet,
@@ -3657,6 +3708,12 @@ class $$ProfilesTableFilterComposer
     column: $table.subscriptionInfo,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<PanelMeta?, PanelMeta, String> get panelMeta =>
+      $composableBuilder(
+        column: $table.panelMeta,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
@@ -3794,6 +3851,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get panelMeta => $composableBuilder(
+    column: $table.panelMeta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
     builder: (column) => ColumnOrderings(column),
@@ -3867,6 +3929,9 @@ class $$ProfilesTableAnnotationComposer
     column: $table.subscriptionInfo,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<PanelMeta?, String> get panelMeta =>
+      $composableBuilder(column: $table.panelMeta, builder: (column) => column);
 
   GeneratedColumn<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
@@ -3978,6 +4043,7 @@ class $$ProfilesTableTableManager
                 Value<int> autoUpdateDurationMillis = const Value.absent(),
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
+                Value<PanelMeta?> panelMeta = const Value.absent(),
                 Value<bool> autoUpdate = const Value.absent(),
                 Value<Map<String, String>> selectedMap = const Value.absent(),
                 Value<Set<String>> unfoldSet = const Value.absent(),
@@ -3993,6 +4059,7 @@ class $$ProfilesTableTableManager
                 matchTarget: matchTarget,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
+                panelMeta: panelMeta,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
@@ -4011,6 +4078,7 @@ class $$ProfilesTableTableManager
                 required int autoUpdateDurationMillis,
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
+                Value<PanelMeta?> panelMeta = const Value.absent(),
                 required bool autoUpdate,
                 required Map<String, String> selectedMap,
                 required Set<String> unfoldSet,
@@ -4026,6 +4094,7 @@ class $$ProfilesTableTableManager
                 matchTarget: matchTarget,
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
+                panelMeta: panelMeta,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,

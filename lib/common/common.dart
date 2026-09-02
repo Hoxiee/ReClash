@@ -7,6 +7,7 @@ export 'constant.dart';
 export 'context.dart';
 export 'converter.dart';
 export 'datetime.dart';
+export 'device_identity.dart';
 export 'dialog.dart';
 export 'exception.dart';
 export 'file.dart';

@@ -190,6 +190,20 @@ class App {
       return null;
     }
   }
+
+  Future<String?> getAndroidId() async {
+    try {
+      return await methodChannel
+          .invokeMethod<String>('getAndroidId')
+          .timeout(_platformProbeTimeout);
+    } catch (error) {
+      commonPrint.log(
+        'Failed to read ANDROID_ID: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return null;
+    }
+  }
 }
 
 final app = system.isAndroid ? App() : null;

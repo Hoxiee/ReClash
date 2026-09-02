@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
+import 'panel_meta.dart';
 
 part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
@@ -51,6 +52,7 @@ abstract class Profile with _$Profile {
     DateTime? lastUpdateDate,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
+    PanelMeta? panelMeta,
     @Default(true) bool autoUpdate,
     @Default({}) Map<String, String> selectedMap,
     @Default({}) Set<String> unfoldSet,
@@ -153,13 +155,14 @@ extension ProfileExtension on Profile {
 
   Future<Profile?> checkAndUpdateAndCopy({
     required ValidateConfig validate,
+    Map<String, String>? requestHeaders,
   }) async {
     final mFile = await _getFile(false);
     final isExists = await mFile.exists();
     if (isExists || url.isEmpty) {
       return null;
     }
-    return update(validate: validate);
+    return update(validate: validate, requestHeaders: requestHeaders);
   }
 
   Future<File> _getFile([bool autoCreate = true]) async {
@@ -176,16 +179,28 @@ extension ProfileExtension on Profile {
     return _getFile();
   }
 
-  Future<Profile> update({required ValidateConfig validate}) async {
-    final response = await request.getFileResponseForUrl(url);
+  Future<Profile> update({
+    required ValidateConfig validate,
+    Map<String, String>? requestHeaders,
+  }) async {
+    final response = await request.getFileResponseForUrl(
+      url,
+      headers: requestHeaders,
+    );
     final disposition = response.headers.value('content-disposition');
     final userinfo = response.headers.value('subscription-userinfo');
+    final panelMeta = PanelMeta.fromHeaders(response.headers.map);
+    final updateInterval = panelMeta.updateIntervalMinutes;
     return copyWith(
       label: label.takeFirstValid([
         getFileNameForDisposition(disposition),
         id.toString(),
       ]),
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
+      panelMeta: panelMeta.hasContent ? panelMeta : null,
+      autoUpdateDuration: updateInterval != null
+          ? Duration(minutes: updateInterval)
+          : autoUpdateDuration,
     ).saveFile(response.data ?? Uint8List.fromList([]), validate: validate);
   }
 

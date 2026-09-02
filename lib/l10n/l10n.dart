@@ -1905,6 +1905,51 @@ class AppLocalizations {
     return Intl.message('TUN', name: 'actionTun', desc: '', args: []);
   }
 
+  /// `Support`
+  String get support {
+    return Intl.message('Support', name: 'support', desc: '', args: []);
+  }
+
+  /// `Device limit reached`
+  String get deviceLimitReached {
+    return Intl.message(
+      'Device limit reached',
+      name: 'deviceLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The provider reports the device limit for this subscription as reached. The subscription was still updated.`
+  String get deviceLimitReachedTip {
+    return Intl.message(
+      'The provider reports the device limit for this subscription as reached. The subscription was still updated.',
+      name: 'deviceLimitReachedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Client not supported`
+  String get clientNotSupported {
+    return Intl.message(
+      'Client not supported',
+      name: 'clientNotSupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The provider does not support this client.`
+  String get clientNotSupportedTip {
+    return Intl.message(
+      'The provider does not support this client.',
+      name: 'clientNotSupportedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Disclaimer`
   String get disclaimer {
     return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);

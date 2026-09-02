@@ -449,8 +449,11 @@ class SetupAction extends _$SetupAction {
     var profile = ref.read(currentProfileProvider) ?? recoverMissingProfile();
     // A refresh failure is surfaced by safeRun; setup keeps the old profile.
     final nextProfile = await globalState.safeRun(
-      () => profile?.checkAndUpdateAndCopy(
+      () async => profile?.checkAndUpdateAndCopy(
         validate: (path) => _core.validateConfig(path),
+        requestHeaders: await deviceIdentity.subscriptionHeaders(
+          includeDeviceIdentity: true,
+        ),
       ),
     );
     if (nextProfile != null) {

@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"sync/atomic"
 	"unsafe"
+
+	"github.com/metacubex/mihomo/constant"
 )
 
 type MethodCall struct {
@@ -161,6 +163,9 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	}),
 	getIsInitMethod: withoutArguments(func(response MethodResponse) {
 		response.success(handleGetIsInit())
+	}),
+	getVersionMethod: withoutArguments(func(response MethodResponse) {
+		response.success(constant.Version)
 	}),
 	forceGcMethod: withoutArguments(func(response MethodResponse) {
 		handleForceGC()
