@@ -171,8 +171,27 @@ class ProfilesAction extends _$ProfilesAction {
     if (profile != null) {
       putProfile(profile);
       applyPanelWidgetsFromMeta(profile.panelMeta);
+      applyPanelSettingsDefaults(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta));
     }
+  }
+
+  // Add-time only: afterwards the settings are the user's to change.
+  void applyPanelSettingsDefaults(PanelMeta? meta) {
+    final tokens = meta?.settings;
+    if (tokens == null || tokens.isEmpty) return;
+    final set = tokens.toSet();
+    ref.read(appSettingProvider.notifier).update(
+          (state) => state.copyWith(
+            minimizeOnExit: set.contains('minimize'),
+            autoRun: set.contains('autorun'),
+            silentLaunch: set.contains('shadowstart'),
+            autoLaunch: set.contains('autostart'),
+            autoCheckUpdate: set.contains('autoupdate'),
+            openLogs: set.contains('openlogs'),
+            closeConnections: set.contains('closeconnections'),
+          ),
+        );
   }
 
   void applyPanelWidgetsFromMeta(PanelMeta? meta, {PanelMeta? previousMeta}) {

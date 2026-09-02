@@ -61,7 +61,7 @@ void main() {
         supportedLocales: AppLocalizations.delegate.supportedLocales,
         home: const Scaffold(
           body: SizedBox(
-            width: 300,
+            width: 500,
             child: SubscriptionInfoView(
               subscriptionInfo: SubscriptionInfo(
                 upload: 1024,
@@ -82,6 +82,33 @@ void main() {
       ),
       findsNWidgets(2),
     );
+  });
+
+  testWidgets('marks a 2099 subscription as perpetual', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        home: const Scaffold(
+          body: SizedBox(
+            width: 500,
+            child: SubscriptionInfoView(
+              subscriptionInfo: SubscriptionInfo(
+                upload: 1024,
+                total: 1073741824,
+                expire: 4102444800,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Perpetual subscription'), findsOneWidget);
   });
 
   testWidgets('shows full subscription details in information rows', (

@@ -167,18 +167,24 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['external-ui-url'] = '';
   rawConfig['tcp-concurrent'] = realPatchConfig.tcpConcurrent;
   rawConfig['unified-delay'] = realPatchConfig.unifiedDelay;
-  rawConfig['ipv6'] = realPatchConfig.ipv6;
   rawConfig['log-level'] = realPatchConfig.logLevel.name;
-  rawConfig['port'] = 0;
-  rawConfig['socks-port'] = 0;
   rawConfig['keep-alive-interval'] = realPatchConfig.keepAliveInterval;
-  rawConfig['mixed-port'] = realPatchConfig.mixedPort;
-  rawConfig['port'] = realPatchConfig.port;
-  rawConfig['socks-port'] = realPatchConfig.socksPort;
-  rawConfig['redir-port'] = realPatchConfig.redirPort;
-  rawConfig['tproxy-port'] = realPatchConfig.tproxyPort;
-  rawConfig['find-process-mode'] = realPatchConfig.findProcessMode.name;
-  rawConfig['allow-lan'] = realPatchConfig.allowLan;
+  // Keys the provider owns: a subscription value survives unless the user
+  // opted into overriding it; the patch value only fills a missing key.
+  void patchNetwork(String key, Object? value) {
+    if (data.overrideNetwork || !rawConfig.containsKey(key)) {
+      rawConfig[key] = value;
+    }
+  }
+
+  patchNetwork('ipv6', realPatchConfig.ipv6);
+  patchNetwork('mixed-port', realPatchConfig.mixedPort);
+  patchNetwork('port', realPatchConfig.port);
+  patchNetwork('socks-port', realPatchConfig.socksPort);
+  patchNetwork('redir-port', realPatchConfig.redirPort);
+  patchNetwork('tproxy-port', realPatchConfig.tproxyPort);
+  patchNetwork('find-process-mode', realPatchConfig.findProcessMode.name);
+  patchNetwork('allow-lan', realPatchConfig.allowLan);
   rawConfig['mode'] = realPatchConfig.mode.name;
   if (rawConfig['tun'] == null) {
     rawConfig['tun'] = {};
@@ -186,7 +192,9 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['tun']['enable'] = realPatchConfig.tun.enable;
   rawConfig['tun']['device'] = realPatchConfig.tun.device;
   rawConfig['tun']['dns-hijack'] = realPatchConfig.tun.dnsHijack;
-  rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
+  if (data.overrideNetwork || rawConfig['tun']['stack'] == null) {
+    rawConfig['tun']['stack'] = realPatchConfig.tun.stack.name;
+  }
   rawConfig['tun']['route-address'] = realPatchConfig.tun.routeAddress;
   rawConfig['tun']['auto-route'] = realPatchConfig.tun.autoRoute;
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;

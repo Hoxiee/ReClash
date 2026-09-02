@@ -260,6 +260,8 @@
   "perpetualSubscription": "永久订阅",
   "remainingTraffic": "剩余",
   "daysLeft": "{count} 天",
+  "overrideNetworkSettings": "覆盖网络设置",
+  "overrideNetworkSettingsDesc": "使用应用的端口、IPv6、allow-lan、find-process-mode 和 TUN 栈，替代订阅中的值",
   "disclaimer": "免责声明",
   "disclaimerDesc": "本软件仅供学习交流、科研等非商业性质的用途，严禁将本软件用于商业目的。如有任何商业行为，均与本软件无关。",
   "agree": "同意",

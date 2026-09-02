@@ -260,6 +260,8 @@
   "perpetualSubscription": "Perpetual subscription",
   "remainingTraffic": "Remaining",
   "daysLeft": "{count, plural, =1{1 day left} other{{count} days left}}",
+  "overrideNetworkSettings": "Override network settings",
+  "overrideNetworkSettingsDesc": "Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values",
   "disclaimer": "Disclaimer",
   "disclaimerDesc": "This software is intended only for non-commercial uses such as learning and research. Using it for any commercial purpose is strictly prohibited; any commercial activity is unrelated to this software.",
   "agree": "Agree",

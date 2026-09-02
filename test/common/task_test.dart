@@ -150,6 +150,78 @@ void main() {
     expect(groups, isEmpty);
   });
 
+  test('makeRealProfileTask keeps provider network values by default', () async {
+    Future<YamlMap> build({required bool overrideNetwork}) async {
+      final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+        await encodeJSONTask({
+          'mixed-port': 1234,
+          'allow-lan': true,
+          'ipv6': false,
+          'find-process-mode': 'off',
+          'tun': {'enable': false, 'stack': 'system'},
+        }),
+      );
+      final result = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 7,
+          rawConfig: rawConfig,
+          realPatchConfig: const PatchClashConfig(
+            mixedPort: 7893,
+            allowLan: false,
+            ipv6: true,
+            findProcessMode: FindProcessMode.always,
+          ),
+          overrideDns: false,
+          appendSystemDns: false,
+          overrideNetwork: overrideNetwork,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules: const [],
+          defaultUA: 'ReClash-Test',
+        ),
+      );
+      return loadYaml(result.yaml) as YamlMap;
+    }
+
+    final kept = await build(overrideNetwork: false);
+    expect(kept['mixed-port'], 1234);
+    expect(kept['allow-lan'], true);
+    expect(kept['ipv6'], false);
+    expect(kept['find-process-mode'], 'off');
+    expect(kept['tun']['stack'], 'system');
+
+    final overridden = await build(overrideNetwork: true);
+    expect(overridden['mixed-port'], 7893);
+    expect(overridden['allow-lan'], false);
+    expect(overridden['ipv6'], true);
+    expect(overridden['find-process-mode'], 'always');
+  });
+
+  test('makeRealProfileTask fills missing network keys from the patch', () async {
+    final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+      await encodeJSONTask(<String, dynamic>{}),
+    );
+    final result = await makeRealProfileTask(
+      MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: 7,
+        rawConfig: rawConfig,
+        realPatchConfig: const PatchClashConfig(mixedPort: 7893),
+        overrideDns: false,
+        appendSystemDns: false,
+        proxyGroups: const [],
+        rules: const [],
+        addedRules: const [],
+        defaultUA: 'ReClash-Test',
+      ),
+    );
+    final config = loadYaml(result.yaml) as YamlMap;
+
+    expect(config['mixed-port'], 7893);
+    expect(config['tun']['stack'], TunStack.mixed.name);
+  });
+
   test(
     'makeRealProfileTask normalizes runtime config and added rules',
     () async {

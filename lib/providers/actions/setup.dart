@@ -324,13 +324,15 @@ class SetupAction extends _$SetupAction {
         (state) => (
           appendSystemDns: state.appendSystemDns,
           routeMode: state.routeMode,
+          overrideNetwork: state.overrideSubscriptionNetwork,
         ),
       ),
     );
+    final configMap = await _core.getConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
     final routeMode = networkSetting.routeMode;
-    final configMap = await _core.getConfig(profileId);
+    final overrideNetwork = networkSetting.overrideNetwork;
     String? scriptContent;
     final List<Rule> addedRules = [];
     final List<ProxyGroup> proxyGroups = [];
@@ -361,6 +363,7 @@ class SetupAction extends _$SetupAction {
         realPatchConfig: realPatchConfig,
         overrideDns: overrideDns,
         appendSystemDns: appendSystemDns,
+        overrideNetwork: overrideNetwork,
         addedRules: addedRules,
         defaultUA: defaultUA,
         matchTarget: setupState.matchTarget,

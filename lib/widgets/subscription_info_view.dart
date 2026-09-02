@@ -6,6 +6,9 @@ import 'list.dart';
 import 'text.dart';
 
 const _expireGap = 12.0;
+const _perpetualExpireYear = 2099;
+const _trafficWarnRatio = 0.75;
+const _trafficCriticalRatio = 0.95;
 
 class SubscriptionInfoView extends StatelessWidget {
   final SubscriptionInfo? subscriptionInfo;
@@ -25,6 +28,16 @@ class SubscriptionInfoView extends StatelessWidget {
     return width;
   }
 
+  Color _trafficColor(BuildContext context, double progress) {
+    if (progress >= _trafficCriticalRatio) {
+      return context.colorScheme.error;
+    }
+    if (progress >= _trafficWarnRatio) {
+      return const Color(0xFFC57F0A);
+    }
+    return context.colorScheme.primary;
+  }
+
   @override
   Widget build(BuildContext context) {
     final info = subscriptionInfo;
@@ -37,9 +50,15 @@ class SubscriptionInfoView extends StatelessWidget {
 
     final useShow = use.traffic.show;
     final totalShow = total.traffic.show;
-    final expireShow = info.expire != 0
-        ? DateTime.fromMillisecondsSinceEpoch(info.expire * 1000).show
-        : context.appLocalizations.infiniteTime;
+    final expireDate = info.expire == 0
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
+    final isPerpetual = (expireDate?.year ?? 0) >= _perpetualExpireYear;
+    final expireShow = isPerpetual
+        ? context.appLocalizations.perpetualSubscription
+        : expireDate == null
+        ? context.appLocalizations.infiniteTime
+        : expireDate.show;
     final valueStyle = context.textTheme.bodyMedium?.toSoftBold.copyWith(
       color: context.colorScheme.onSurfaceVariant,
     );
@@ -82,7 +101,11 @@ class SubscriptionInfoView extends StatelessWidget {
         LinearProgressIndicator(
           minHeight: 4,
           value: progress,
-          backgroundColor: context.colorScheme.primary.opacity15,
+          color: _trafficColor(context, progress),
+          backgroundColor: _trafficColor(
+            context,
+            progress,
+          ).opacity15,
         ),
       ],
     );
@@ -105,11 +128,14 @@ class SubscriptionInfoDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final used = subscriptionInfo.upload + subscriptionInfo.download;
-    final expire = subscriptionInfo.expire != 0
-        ? DateTime.fromMillisecondsSinceEpoch(
-            subscriptionInfo.expire * 1000,
-          ).show
-        : appLocalizations.infiniteTime;
+    final expireDate = subscriptionInfo.expire == 0
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
+    final expire = (expireDate?.year ?? 0) >= _perpetualExpireYear
+        ? appLocalizations.perpetualSubscription
+        : expireDate == null
+        ? appLocalizations.infiniteTime
+        : expireDate.show;
     return SelectionArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,

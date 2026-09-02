@@ -100,6 +100,18 @@ void main() {
       expect(meta.widgetsApplyMode, PanelWidgetsApplyMode.add);
     });
 
+    test('parses app setting tokens lowercased', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-settings': ['Minimize, AUTORUN, closeconnections'],
+      });
+
+      expect(meta.settings, [
+        'minimize',
+        'autorun',
+        'closeconnections',
+      ]);
+    });
+
     test('empty response yields inert meta', () {
       final meta = PanelMeta.fromHeaders({
         'content-type': ['application/yaml'],

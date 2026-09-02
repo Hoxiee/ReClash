@@ -773,6 +773,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideMode": MessageLookupByLibrary.simpleMessage(
       "Режим переопределения",
     ),
+    "overrideNetworkSettings": MessageLookupByLibrary.simpleMessage(
+      "Переопределить сетевые настройки",
+    ),
+    "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Применять порты, IPv6, allow-lan, find-process-mode и стек TUN из приложения вместо значений подписки",
+    ),
     "overrideScript": MessageLookupByLibrary.simpleMessage(
       "Скрипт переопределения",
     ),

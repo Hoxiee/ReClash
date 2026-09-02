@@ -55,6 +55,7 @@ abstract class PanelMeta with _$PanelMeta {
       widgetsApplyMode: map['widgetsApplyMode'] == 'update'
           ? PanelWidgetsApplyMode.update
           : PanelWidgetsApplyMode.add,
+      settings: settings.isNotEmpty ? settings : null,
     );
   }
 }
@@ -69,5 +70,6 @@ extension PanelMetaExt on PanelMeta {
       serviceName != null ||
       serviceLogo != null ||
       serverInfoGroup != null ||
-      widgets != null;
+      widgets != null ||
+      settings != null;
 }

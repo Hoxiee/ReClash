@@ -753,6 +753,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "When enabled, the DNS options in the profile are overridden",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("Override mode"),
+    "overrideNetworkSettings": MessageLookupByLibrary.simpleMessage(
+      "Override network settings",
+    ),
+    "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values",
+    ),
     "overrideScript": MessageLookupByLibrary.simpleMessage("Override script"),
     "overwriteTypeCustom": MessageLookupByLibrary.simpleMessage("Custom"),
     "overwriteTypeCustomDesc": MessageLookupByLibrary.simpleMessage(

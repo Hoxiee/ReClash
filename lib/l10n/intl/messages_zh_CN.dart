@@ -528,6 +528,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideDns": MessageLookupByLibrary.simpleMessage("覆写DNS"),
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage("开启后将覆盖配置中的DNS选项"),
     "overrideMode": MessageLookupByLibrary.simpleMessage("覆写模式"),
+    "overrideNetworkSettings": MessageLookupByLibrary.simpleMessage("覆盖网络设置"),
+    "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "使用应用的端口、IPv6、allow-lan、find-process-mode 和 TUN 栈，替代订阅中的值",
+    ),
     "overrideScript": MessageLookupByLibrary.simpleMessage("覆写脚本"),
     "overwriteTypeCustom": MessageLookupByLibrary.simpleMessage("自定义"),
     "overwriteTypeCustomDesc": MessageLookupByLibrary.simpleMessage(

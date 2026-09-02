@@ -175,6 +175,31 @@ void main() {
         [DashboardWidget.networkSpeed, DashboardWidget.announce],
       );
     });
+
+    test('panel settings become app defaults at add time', () {
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => null),
+          profilesProvider.overrideWith(() => TestProfiles(const [])),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container
+          .read(profilesActionProvider.notifier)
+          .applyPanelSettingsDefaults(
+            const PanelMeta(settings: ['minimize', 'autorun', 'openlogs']),
+          );
+
+      final state = container.read(appSettingProvider);
+      expect(state.minimizeOnExit, isTrue);
+      expect(state.autoRun, isTrue);
+      expect(state.openLogs, isTrue);
+      expect(state.silentLaunch, isFalse);
+      expect(state.autoLaunch, isFalse);
+      expect(state.autoCheckUpdate, isFalse);
+      expect(state.closeConnections, isFalse);
+    });
   });
 
   group('GeoResourceAction', () {

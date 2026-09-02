@@ -2017,6 +2017,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Override network settings`
+  String get overrideNetworkSettings {
+    return Intl.message(
+      'Override network settings',
+      name: 'overrideNetworkSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values`
+  String get overrideNetworkSettingsDesc {
+    return Intl.message(
+      'Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values',
+      name: 'overrideNetworkSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Disclaimer`
   String get disclaimer {
     return Intl.message('Disclaimer', name: 'disclaimer', desc: '', args: []);

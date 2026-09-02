@@ -24,6 +24,9 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
         json['widgetsApplyMode'],
       ) ??
       PanelWidgetsApplyMode.add,
+  settings: (json['settings'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -39,6 +42,7 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'widgets': instance.widgets,
       'widgetsApplyMode':
           _$PanelWidgetsApplyModeEnumMap[instance.widgetsApplyMode]!,
+      'settings': instance.settings,
     };
 
 const _$PanelWidgetsApplyModeEnumMap = {

@@ -252,6 +252,21 @@ class RouteModeItem extends ConsumerWidget {
   }
 }
 
+class OverrideSubscriptionNetworkItem extends ConsumerWidget {
+  const OverrideSubscriptionNetworkItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return _networkToggle(
+      title: (l) => l.overrideNetworkSettings,
+      subtitle: (l) => l.overrideNetworkSettingsDesc,
+      select: (state) => state.overrideSubscriptionNetwork,
+      update: (state, value) =>
+          state.copyWith(overrideSubscriptionNetwork: value),
+    );
+  }
+}
+
 class BypassDomainItem extends ConsumerWidget {
   const BypassDomainItem({super.key});
 
@@ -305,6 +320,7 @@ List<Widget> networkOptionsItems({
     if (isDesktop) const TUNItem(),
     if (isMacOS) const AutoSetSystemDnsItem(),
     const TunStackItem(),
+    const OverrideSubscriptionNetworkItem(),
     // mihomo's DefaultSocketHook ignores interface-name on Android
     // (core/lib.go installHooks, vendored dialer.go), so these rows only
     // apply on desktop.

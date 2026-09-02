@@ -616,6 +616,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効にすると、プロファイル内のDNS設定を上書きします",
     ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("上書きモード"),
+    "overrideNetworkSettings": MessageLookupByLibrary.simpleMessage(
+      "ネットワーク設定を上書き",
+    ),
+    "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションの値ではなく、アプリのポート、IPv6、allow-lan、find-process-mode、TUN スタックを適用する",
+    ),
     "overrideScript": MessageLookupByLibrary.simpleMessage("上書きスクリプト"),
     "overwriteTypeCustom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "overwriteTypeCustomDesc": MessageLookupByLibrary.simpleMessage(

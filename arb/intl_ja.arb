@@ -260,6 +260,8 @@
   "perpetualSubscription": "無期限サブスクリプション",
   "remainingTraffic": "残り",
   "daysLeft": "{count} 日",
+  "overrideNetworkSettings": "ネットワーク設定を上書き",
+  "overrideNetworkSettingsDesc": "サブスクリプションの値ではなく、アプリのポート、IPv6、allow-lan、find-process-mode、TUN スタックを適用する",
   "disclaimer": "免責事項",
   "disclaimerDesc": "本ソフトウェアは、学習・交流や研究などの非商用目的でのみ使用できます。商用目的での使用は固く禁じられています。いかなる商業行為も本ソフトウェアとは一切関係ありません。",
   "agree": "同意する",
