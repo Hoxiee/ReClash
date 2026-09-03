@@ -22,9 +22,18 @@ class CoreAction extends _$CoreAction {
     }
     // The engine keeps its own persisted copy; every start re-syncs it to
     // what the app saved, covering changes made while the core was down.
-    await _core.configureSmartRouting(
-      ref.read(smartRoutingSettingProvider).rcxParams,
-    );
+    // A core binary without the rcx methods must still tunnel, so the sync
+    // is best-effort, never a gate on startup.
+    try {
+      await _core.configureSmartRouting(
+        ref.read(smartRoutingSettingProvider).rcxParams,
+      );
+    } on CoreMethodException catch (error) {
+      commonPrint.log(
+        'smart routing sync skipped: $error',
+        logLevel: LogLevel.warning,
+      );
+    }
   }
 
   Future<void> startCore() async {

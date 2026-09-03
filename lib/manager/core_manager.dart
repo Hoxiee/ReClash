@@ -53,7 +53,17 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         return;
       }
       if (ref.read(coreStatusProvider) == CoreStatus.connected) {
-        unawaited(_core.configureSmartRouting(next.rcxParams));
+        unawaited(
+          _core.configureSmartRouting(next.rcxParams).then(
+            (_) {},
+            // An older core without the rcx methods keeps tunneling; the
+            // next start re-syncs the engine when a matching core returns.
+            onError: (Object error) => commonPrint.log(
+              'smart routing sync skipped: $error',
+              logLevel: LogLevel.warning,
+            ),
+          ),
+        );
       }
       // The RCX groups only exist in profiles built while enabled, so the
       // flip has to rebuild the whole profile, not just the engine config.
