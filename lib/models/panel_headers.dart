@@ -102,6 +102,14 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'buyTrafficUrl',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-view', 'flclashx-view'],
+    canonicalKey: 'proxiesView',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-hex', 'flclashx-hex'],
+    canonicalKey: 'themeHex',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-widgets'],
     canonicalKey: 'panelWidgets',
   ),

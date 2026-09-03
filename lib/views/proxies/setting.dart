@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/providers/config.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +69,7 @@ class ProxiesSetting extends StatelessWidget {
           child: Consumer(
             builder: (_, ref, _) {
               final proxiesType = ref.watch(
-                proxiesStyleSettingProvider.select((state) => state.type),
+                effectiveProxiesStyleProvider.select((state) => state.type),
               );
               return Wrap(
                 spacing: 16,
@@ -84,7 +85,9 @@ class ProxiesSetting extends StatelessWidget {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
-                          return state.copyWith(type: item);
+                          return state
+                              .claim(ProxiesStyleField.type)
+                              .copyWith(type: item);
                         });
                       },
                     ),
@@ -108,7 +111,7 @@ class ProxiesSetting extends StatelessWidget {
           child: Consumer(
             builder: (_, ref, _) {
               final sortType = ref.watch(
-                proxiesStyleSettingProvider.select((state) => state.sortType),
+                effectiveProxiesStyleProvider.select((state) => state.sortType),
               );
               return Wrap(
                 spacing: 16,
@@ -124,7 +127,9 @@ class ProxiesSetting extends StatelessWidget {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
-                          return state.copyWith(sortType: item);
+                          return state
+                              .claim(ProxiesStyleField.sortType)
+                              .copyWith(sortType: item);
                         });
                       },
                     ),
@@ -148,7 +153,7 @@ class ProxiesSetting extends StatelessWidget {
           child: Consumer(
             builder: (_, ref, _) {
               final cardType = ref.watch(
-                proxiesStyleSettingProvider.select((state) => state.cardType),
+                effectiveProxiesStyleProvider.select((state) => state.cardType),
               );
               return Wrap(
                 spacing: 16,
@@ -161,7 +166,9 @@ class ProxiesSetting extends StatelessWidget {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
-                          return state.copyWith(cardType: item);
+                          return state
+                              .claim(ProxiesStyleField.cardType)
+                              .copyWith(cardType: item);
                         });
                       },
                     ),
@@ -185,7 +192,7 @@ class ProxiesSetting extends StatelessWidget {
           child: Consumer(
             builder: (_, ref, _) {
               final layout = ref.watch(
-                proxiesStyleSettingProvider.select((state) => state.layout),
+                effectiveProxiesStyleProvider.select((state) => state.layout),
               );
               return Wrap(
                 spacing: 16,
@@ -195,10 +202,12 @@ class ProxiesSetting extends StatelessWidget {
                       getTextForProxiesLayout(context, item),
                       isSelected: item == layout,
                       onPressed: () {
-                        ref.watch(proxiesStyleSettingProvider.notifier).update((
+                        ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
-                          return state.copyWith(layout: item);
+                          return state
+                              .claim(ProxiesStyleField.layout)
+                              .copyWith(layout: item);
                         });
                       },
                     ),
@@ -222,7 +231,9 @@ class ProxiesSetting extends StatelessWidget {
           child: Consumer(
             builder: (_, ref, _) {
               final iconStyle = ref.watch(
-                proxiesStyleSettingProvider.select((state) => state.iconStyle),
+                effectiveProxiesStyleProvider.select(
+                  (state) => state.iconStyle,
+                ),
               );
               return Wrap(
                 spacing: 16,
@@ -235,7 +246,9 @@ class ProxiesSetting extends StatelessWidget {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
                           state,
                         ) {
-                          return state.copyWith(iconStyle: item);
+                          return state
+                              .claim(ProxiesStyleField.iconStyle)
+                              .copyWith(iconStyle: item);
                         });
                       },
                     ),
@@ -245,6 +258,51 @@ class ProxiesSetting extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPanelSetting(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return Consumer(
+      builder: (_, ref, _) {
+        final hasPanelView = ref.watch(
+          currentProfileProvider.select(
+            (state) =>
+                parsePanelProxiesView(state?.panelMeta?.proxiesView) != null,
+          ),
+        );
+        if (!hasPanelView) return const SizedBox.shrink();
+        final followPanel = ref.watch(
+          proxiesStyleSettingProvider.select((state) => state.followPanel),
+        );
+        void update(bool value) {
+          ref
+              .read(proxiesStyleSettingProvider.notifier)
+              .update(
+                (state) => state.copyWith(
+                  followPanel: value,
+                  userOwned: value ? const {} : state.userOwned,
+                ),
+              );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: generateSection(
+            items: [
+              DecorationListItem(
+                minVerticalPadding: 8,
+                contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                title: Text(appLocalizations.providerView),
+                subtitle: Text(appLocalizations.providerViewDesc),
+                onPressed: () => update(!followPanel),
+                trailing: Switch(value: followPanel, onChanged: update),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -263,7 +321,7 @@ class ProxiesSetting extends StatelessWidget {
           Consumer(
             builder: (_, ref, child) {
               final isList = ref.watch(
-                proxiesStyleSettingProvider.select(
+                effectiveProxiesStyleProvider.select(
                   (state) => state.type == ProxiesType.list,
                 ),
               );
@@ -278,6 +336,7 @@ class ProxiesSetting extends StatelessWidget {
               children: [..._buildGroupStyleSetting(context)],
             ),
           ),
+          _buildPanelSetting(context),
         ],
       ),
     );

@@ -659,6 +659,8 @@
   "subscriptionCaption": "Подписка",
   "renewSubscription": "Продлить подписку",
   "topUpTraffic": "Докупить трафик",
+  "providerView": "Вид от провайдера",
+  "providerViewDesc": "Разрешить подписке задавать вид страницы прокси. Ваши изменения сохраняются.",
   "remaining": "Осталось",
   "determiningIp": "Определяю IP..",
   "day": "день",

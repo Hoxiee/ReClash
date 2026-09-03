@@ -708,6 +708,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("プロファイルの並べ替え"),
     "project": MessageLookupByLibrary.simpleMessage("プロジェクト"),
+    "providerView": MessageLookupByLibrary.simpleMessage("プロバイダーのビュー"),
+    "providerViewDesc": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションにプロキシ画面の外観を任せます。自分で変更した項目は保持されます。",
+    ),
     "providers": MessageLookupByLibrary.simpleMessage("外部リソース"),
     "proxies": MessageLookupByLibrary.simpleMessage("プロキシ"),
     "proxiesCount": m28,

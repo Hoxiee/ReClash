@@ -235,6 +235,12 @@ _ProxiesStyleProps _$ProxiesStylePropsFromJson(Map<String, dynamic> json) =>
       cardType:
           $enumDecodeNullable(_$ProxyCardTypeEnumMap, json['cardType']) ??
           ProxyCardType.expand,
+      followPanel: json['followPanel'] as bool? ?? true,
+      userOwned:
+          (json['userOwned'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$ProxiesStyleFieldEnumMap, e))
+              .toSet() ??
+          const <ProxiesStyleField>{},
     );
 
 Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
@@ -244,6 +250,10 @@ Map<String, dynamic> _$ProxiesStylePropsToJson(_ProxiesStyleProps instance) =>
       'layout': _$ProxiesLayoutEnumMap[instance.layout]!,
       'iconStyle': _$ProxiesIconStyleEnumMap[instance.iconStyle]!,
       'cardType': _$ProxyCardTypeEnumMap[instance.cardType]!,
+      'followPanel': instance.followPanel,
+      'userOwned': instance.userOwned
+          .map((e) => _$ProxiesStyleFieldEnumMap[e]!)
+          .toList(),
     };
 
 const _$ProxiesTypeEnumMap = {ProxiesType.tab: 'tab', ProxiesType.list: 'list'};
@@ -270,6 +280,14 @@ const _$ProxyCardTypeEnumMap = {
   ProxyCardType.expand: 'expand',
   ProxyCardType.shrink: 'shrink',
   ProxyCardType.min: 'min',
+};
+
+const _$ProxiesStyleFieldEnumMap = {
+  ProxiesStyleField.type: 'type',
+  ProxiesStyleField.sortType: 'sortType',
+  ProxiesStyleField.layout: 'layout',
+  ProxiesStyleField.iconStyle: 'iconStyle',
+  ProxiesStyleField.cardType: 'cardType',
 };
 
 _TextScale _$TextScaleFromJson(Map<String, dynamic> json) => _TextScale(

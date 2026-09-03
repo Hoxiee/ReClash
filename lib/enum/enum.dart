@@ -237,6 +237,8 @@ enum HotAction { start, view, mode, proxy, tun }
 
 enum ProxiesIconStyle { none, standard, icon }
 
+enum ProxiesStyleField { type, sortType, layout, iconStyle, cardType }
+
 enum FontFamily {
   twEmoji('Twemoji'),
   jetBrainsMono('JetBrainsMono'),

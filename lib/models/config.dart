@@ -194,6 +194,8 @@ abstract class ProxiesStyleProps with _$ProxiesStyleProps {
     @Default(ProxiesLayout.standard) ProxiesLayout layout,
     @Default(ProxiesIconStyle.standard) ProxiesIconStyle iconStyle,
     @Default(ProxyCardType.expand) ProxyCardType cardType,
+    @Default(true) bool followPanel,
+    @Default(<ProxiesStyleField>{}) Set<ProxiesStyleField> userOwned,
   }) = _ProxiesStyleProps;
 
   factory ProxiesStyleProps.fromJson(Map<String, Object?>? json) => json == null

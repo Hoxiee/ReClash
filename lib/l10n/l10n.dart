@@ -5492,6 +5492,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Provider view`
+  String get providerView {
+    return Intl.message(
+      'Provider view',
+      name: 'providerView',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Let this subscription dress the proxies page. What you change stays yours.`
+  String get providerViewDesc {
+    return Intl.message(
+      'Let this subscription dress the proxies page. What you change stays yours.',
+      name: 'providerViewDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remaining`
   String get remaining {
     return Intl.message('Remaining', name: 'remaining', desc: '', args: []);

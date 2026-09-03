@@ -189,7 +189,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     ref.watch(themeSettingProvider.select((state) => state.textScale));
     final state = ref.watch(proxiesTabStateProvider.select((state) => state));
     final proxiesLayout = ref.watch(
-      proxiesStyleSettingProvider.select((state) => state.layout),
+      effectiveProxiesStyleProvider.select((state) => state.layout),
     );
     final groups = state.groups;
     if (groups.isEmpty || _tabController == null) {

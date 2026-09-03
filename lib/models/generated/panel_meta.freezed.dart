@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PanelMeta {
 
- bool get hwidMaxDevicesReached; bool get hwidNotSupported; String? get announce; String? get supportUrl; int? get updateIntervalMinutes; String? get serviceName; String? get serviceLogo; String? get serverInfoGroup; String? get buyPlanUrl; String? get buyTrafficUrl; List<String>? get widgets; PanelWidgetsApplyMode get widgetsApplyMode; List<String>? get settings; String? get newDomain; String? get profileTitle;
+ bool get hwidMaxDevicesReached; bool get hwidNotSupported; String? get announce; String? get supportUrl; int? get updateIntervalMinutes; String? get serviceName; String? get serviceLogo; String? get serverInfoGroup; String? get buyPlanUrl; String? get buyTrafficUrl; List<String>? get widgets; PanelWidgetsApplyMode get widgetsApplyMode; List<String>? get settings; String? get newDomain; String? get profileTitle; String? get proxiesView; String? get themeHex;
 /// Create a copy of PanelMeta
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $PanelMetaCopyWith<PanelMeta> get copyWith => _$PanelMetaCopyWithImpl<PanelMeta>
 @override
 bool operator ==(Object other) {
   final _this = this as PanelMeta;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PanelMeta&&(identical(other.hwidMaxDevicesReached, _this.hwidMaxDevicesReached) || other.hwidMaxDevicesReached == _this.hwidMaxDevicesReached)&&(identical(other.hwidNotSupported, _this.hwidNotSupported) || other.hwidNotSupported == _this.hwidNotSupported)&&(identical(other.announce, _this.announce) || other.announce == _this.announce)&&(identical(other.supportUrl, _this.supportUrl) || other.supportUrl == _this.supportUrl)&&(identical(other.updateIntervalMinutes, _this.updateIntervalMinutes) || other.updateIntervalMinutes == _this.updateIntervalMinutes)&&(identical(other.serviceName, _this.serviceName) || other.serviceName == _this.serviceName)&&(identical(other.serviceLogo, _this.serviceLogo) || other.serviceLogo == _this.serviceLogo)&&(identical(other.serverInfoGroup, _this.serverInfoGroup) || other.serverInfoGroup == _this.serverInfoGroup)&&(identical(other.buyPlanUrl, _this.buyPlanUrl) || other.buyPlanUrl == _this.buyPlanUrl)&&(identical(other.buyTrafficUrl, _this.buyTrafficUrl) || other.buyTrafficUrl == _this.buyTrafficUrl)&&const DeepCollectionEquality().equals(other.widgets, _this.widgets)&&(identical(other.widgetsApplyMode, _this.widgetsApplyMode) || other.widgetsApplyMode == _this.widgetsApplyMode)&&const DeepCollectionEquality().equals(other.settings, _this.settings)&&(identical(other.newDomain, _this.newDomain) || other.newDomain == _this.newDomain)&&(identical(other.profileTitle, _this.profileTitle) || other.profileTitle == _this.profileTitle));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PanelMeta&&(identical(other.hwidMaxDevicesReached, _this.hwidMaxDevicesReached) || other.hwidMaxDevicesReached == _this.hwidMaxDevicesReached)&&(identical(other.hwidNotSupported, _this.hwidNotSupported) || other.hwidNotSupported == _this.hwidNotSupported)&&(identical(other.announce, _this.announce) || other.announce == _this.announce)&&(identical(other.supportUrl, _this.supportUrl) || other.supportUrl == _this.supportUrl)&&(identical(other.updateIntervalMinutes, _this.updateIntervalMinutes) || other.updateIntervalMinutes == _this.updateIntervalMinutes)&&(identical(other.serviceName, _this.serviceName) || other.serviceName == _this.serviceName)&&(identical(other.serviceLogo, _this.serviceLogo) || other.serviceLogo == _this.serviceLogo)&&(identical(other.serverInfoGroup, _this.serverInfoGroup) || other.serverInfoGroup == _this.serverInfoGroup)&&(identical(other.buyPlanUrl, _this.buyPlanUrl) || other.buyPlanUrl == _this.buyPlanUrl)&&(identical(other.buyTrafficUrl, _this.buyTrafficUrl) || other.buyTrafficUrl == _this.buyTrafficUrl)&&const DeepCollectionEquality().equals(other.widgets, _this.widgets)&&(identical(other.widgetsApplyMode, _this.widgetsApplyMode) || other.widgetsApplyMode == _this.widgetsApplyMode)&&const DeepCollectionEquality().equals(other.settings, _this.settings)&&(identical(other.newDomain, _this.newDomain) || other.newDomain == _this.newDomain)&&(identical(other.profileTitle, _this.profileTitle) || other.profileTitle == _this.profileTitle)&&(identical(other.proxiesView, _this.proxiesView) || other.proxiesView == _this.proxiesView)&&(identical(other.themeHex, _this.themeHex) || other.themeHex == _this.themeHex));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PanelMeta;
-  return Object.hash(runtimeType,_this.hwidMaxDevicesReached,_this.hwidNotSupported,_this.announce,_this.supportUrl,_this.updateIntervalMinutes,_this.serviceName,_this.serviceLogo,_this.serverInfoGroup,_this.buyPlanUrl,_this.buyTrafficUrl,const DeepCollectionEquality().hash(_this.widgets),_this.widgetsApplyMode,const DeepCollectionEquality().hash(_this.settings),_this.newDomain,_this.profileTitle);
+  return Object.hash(runtimeType,_this.hwidMaxDevicesReached,_this.hwidNotSupported,_this.announce,_this.supportUrl,_this.updateIntervalMinutes,_this.serviceName,_this.serviceLogo,_this.serverInfoGroup,_this.buyPlanUrl,_this.buyTrafficUrl,const DeepCollectionEquality().hash(_this.widgets),_this.widgetsApplyMode,const DeepCollectionEquality().hash(_this.settings),_this.newDomain,_this.profileTitle,_this.proxiesView,_this.themeHex);
 }
 
 @override
 String toString() {
   final _this = this as PanelMeta;
-  return 'PanelMeta(hwidMaxDevicesReached: ${_this.hwidMaxDevicesReached}, hwidNotSupported: ${_this.hwidNotSupported}, announce: ${_this.announce}, supportUrl: ${_this.supportUrl}, updateIntervalMinutes: ${_this.updateIntervalMinutes}, serviceName: ${_this.serviceName}, serviceLogo: ${_this.serviceLogo}, serverInfoGroup: ${_this.serverInfoGroup}, buyPlanUrl: ${_this.buyPlanUrl}, buyTrafficUrl: ${_this.buyTrafficUrl}, widgets: ${_this.widgets}, widgetsApplyMode: ${_this.widgetsApplyMode}, settings: ${_this.settings}, newDomain: ${_this.newDomain}, profileTitle: ${_this.profileTitle})';
+  return 'PanelMeta(hwidMaxDevicesReached: ${_this.hwidMaxDevicesReached}, hwidNotSupported: ${_this.hwidNotSupported}, announce: ${_this.announce}, supportUrl: ${_this.supportUrl}, updateIntervalMinutes: ${_this.updateIntervalMinutes}, serviceName: ${_this.serviceName}, serviceLogo: ${_this.serviceLogo}, serverInfoGroup: ${_this.serverInfoGroup}, buyPlanUrl: ${_this.buyPlanUrl}, buyTrafficUrl: ${_this.buyTrafficUrl}, widgets: ${_this.widgets}, widgetsApplyMode: ${_this.widgetsApplyMode}, settings: ${_this.settings}, newDomain: ${_this.newDomain}, profileTitle: ${_this.profileTitle}, proxiesView: ${_this.proxiesView}, themeHex: ${_this.themeHex})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $PanelMetaCopyWith<$Res>  {
   factory $PanelMetaCopyWith(PanelMeta value, $Res Function(PanelMeta) _then) = _$PanelMetaCopyWithImpl;
 @useResult
 $Res call({
- bool hwidMaxDevicesReached, bool hwidNotSupported, String? announce, String? supportUrl, int? updateIntervalMinutes, String? serviceName, String? serviceLogo, String? serverInfoGroup, String? buyPlanUrl, String? buyTrafficUrl, List<String>? widgets, PanelWidgetsApplyMode widgetsApplyMode, List<String>? settings, String? newDomain, String? profileTitle
+ bool hwidMaxDevicesReached, bool hwidNotSupported, String? announce, String? supportUrl, int? updateIntervalMinutes, String? serviceName, String? serviceLogo, String? serverInfoGroup, String? buyPlanUrl, String? buyTrafficUrl, List<String>? widgets, PanelWidgetsApplyMode widgetsApplyMode, List<String>? settings, String? newDomain, String? profileTitle, String? proxiesView, String? themeHex
 });
 
 
@@ -71,7 +71,7 @@ class _$PanelMetaCopyWithImpl<$Res>
 
 /// Create a copy of PanelMeta
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? hwidMaxDevicesReached = null,Object? hwidNotSupported = null,Object? announce = freezed,Object? supportUrl = freezed,Object? updateIntervalMinutes = freezed,Object? serviceName = freezed,Object? serviceLogo = freezed,Object? serverInfoGroup = freezed,Object? buyPlanUrl = freezed,Object? buyTrafficUrl = freezed,Object? widgets = freezed,Object? widgetsApplyMode = null,Object? settings = freezed,Object? newDomain = freezed,Object? profileTitle = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? hwidMaxDevicesReached = null,Object? hwidNotSupported = null,Object? announce = freezed,Object? supportUrl = freezed,Object? updateIntervalMinutes = freezed,Object? serviceName = freezed,Object? serviceLogo = freezed,Object? serverInfoGroup = freezed,Object? buyPlanUrl = freezed,Object? buyTrafficUrl = freezed,Object? widgets = freezed,Object? widgetsApplyMode = null,Object? settings = freezed,Object? newDomain = freezed,Object? profileTitle = freezed,Object? proxiesView = freezed,Object? themeHex = freezed,}) {
   return _then(PanelMeta(
 hwidMaxDevicesReached: null == hwidMaxDevicesReached ? _self.hwidMaxDevicesReached : hwidMaxDevicesReached // ignore: cast_nullable_to_non_nullable
 as bool,hwidNotSupported: null == hwidNotSupported ? _self.hwidNotSupported : hwidNotSupported // ignore: cast_nullable_to_non_nullable
@@ -88,6 +88,8 @@ as List<String>?,widgetsApplyMode: null == widgetsApplyMode ? _self.widgetsApply
 as PanelWidgetsApplyMode,settings: freezed == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as List<String>?,newDomain: freezed == newDomain ? _self.newDomain : newDomain // ignore: cast_nullable_to_non_nullable
 as String?,profileTitle: freezed == profileTitle ? _self.profileTitle : profileTitle // ignore: cast_nullable_to_non_nullable
+as String?,proxiesView: freezed == proxiesView ? _self.proxiesView : proxiesView // ignore: cast_nullable_to_non_nullable
+as String?,themeHex: freezed == themeHex ? _self.themeHex : themeHex // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -173,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle,  String? proxiesView,  String? themeHex)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PanelMeta() when $default != null:
-return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle);case _:
+return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle,_that.proxiesView,_that.themeHex);case _:
   return orElse();
 
 }
@@ -194,10 +196,10 @@ return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle,  String? proxiesView,  String? themeHex)  $default,) {final _that = this;
 switch (_that) {
 case _PanelMeta():
-return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle);case _:
+return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle,_that.proxiesView,_that.themeHex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +216,10 @@ return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool hwidMaxDevicesReached,  bool hwidNotSupported,  String? announce,  String? supportUrl,  int? updateIntervalMinutes,  String? serviceName,  String? serviceLogo,  String? serverInfoGroup,  String? buyPlanUrl,  String? buyTrafficUrl,  List<String>? widgets,  PanelWidgetsApplyMode widgetsApplyMode,  List<String>? settings,  String? newDomain,  String? profileTitle,  String? proxiesView,  String? themeHex)?  $default,) {final _that = this;
 switch (_that) {
 case _PanelMeta() when $default != null:
-return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle);case _:
+return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announce,_that.supportUrl,_that.updateIntervalMinutes,_that.serviceName,_that.serviceLogo,_that.serverInfoGroup,_that.buyPlanUrl,_that.buyTrafficUrl,_that.widgets,_that.widgetsApplyMode,_that.settings,_that.newDomain,_that.profileTitle,_that.proxiesView,_that.themeHex);case _:
   return null;
 
 }
@@ -229,7 +231,7 @@ return $default(_that.hwidMaxDevicesReached,_that.hwidNotSupported,_that.announc
 @JsonSerializable()
 
 class _PanelMeta implements PanelMeta {
-  const _PanelMeta({this.hwidMaxDevicesReached = false, this.hwidNotSupported = false, this.announce, this.supportUrl, this.updateIntervalMinutes, this.serviceName, this.serviceLogo, this.serverInfoGroup, this.buyPlanUrl, this.buyTrafficUrl,  List<String>? widgets, this.widgetsApplyMode = PanelWidgetsApplyMode.add,  List<String>? settings, this.newDomain, this.profileTitle}): _widgets = widgets,_settings = settings;
+  const _PanelMeta({this.hwidMaxDevicesReached = false, this.hwidNotSupported = false, this.announce, this.supportUrl, this.updateIntervalMinutes, this.serviceName, this.serviceLogo, this.serverInfoGroup, this.buyPlanUrl, this.buyTrafficUrl,  List<String>? widgets, this.widgetsApplyMode = PanelWidgetsApplyMode.add,  List<String>? settings, this.newDomain, this.profileTitle, this.proxiesView, this.themeHex}): _widgets = widgets,_settings = settings;
   factory _PanelMeta.fromJson(Map<String, dynamic> json) => _$PanelMetaFromJson(json);
 
 @override@JsonKey() final  bool hwidMaxDevicesReached;
@@ -263,6 +265,8 @@ class _PanelMeta implements PanelMeta {
 
 @override final  String? newDomain;
 @override final  String? profileTitle;
+@override final  String? proxiesView;
+@override final  String? themeHex;
 
 /// Create a copy of PanelMeta
 /// with the given fields replaced by the non-null parameter values.
@@ -277,18 +281,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PanelMeta&&(identical(other.hwidMaxDevicesReached, hwidMaxDevicesReached) || other.hwidMaxDevicesReached == hwidMaxDevicesReached)&&(identical(other.hwidNotSupported, hwidNotSupported) || other.hwidNotSupported == hwidNotSupported)&&(identical(other.announce, announce) || other.announce == announce)&&(identical(other.supportUrl, supportUrl) || other.supportUrl == supportUrl)&&(identical(other.updateIntervalMinutes, updateIntervalMinutes) || other.updateIntervalMinutes == updateIntervalMinutes)&&(identical(other.serviceName, serviceName) || other.serviceName == serviceName)&&(identical(other.serviceLogo, serviceLogo) || other.serviceLogo == serviceLogo)&&(identical(other.serverInfoGroup, serverInfoGroup) || other.serverInfoGroup == serverInfoGroup)&&(identical(other.buyPlanUrl, buyPlanUrl) || other.buyPlanUrl == buyPlanUrl)&&(identical(other.buyTrafficUrl, buyTrafficUrl) || other.buyTrafficUrl == buyTrafficUrl)&&const DeepCollectionEquality().equals(other.widgets, _widgets)&&(identical(other.widgetsApplyMode, widgetsApplyMode) || other.widgetsApplyMode == widgetsApplyMode)&&const DeepCollectionEquality().equals(other.settings, _settings)&&(identical(other.newDomain, newDomain) || other.newDomain == newDomain)&&(identical(other.profileTitle, profileTitle) || other.profileTitle == profileTitle));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PanelMeta&&(identical(other.hwidMaxDevicesReached, hwidMaxDevicesReached) || other.hwidMaxDevicesReached == hwidMaxDevicesReached)&&(identical(other.hwidNotSupported, hwidNotSupported) || other.hwidNotSupported == hwidNotSupported)&&(identical(other.announce, announce) || other.announce == announce)&&(identical(other.supportUrl, supportUrl) || other.supportUrl == supportUrl)&&(identical(other.updateIntervalMinutes, updateIntervalMinutes) || other.updateIntervalMinutes == updateIntervalMinutes)&&(identical(other.serviceName, serviceName) || other.serviceName == serviceName)&&(identical(other.serviceLogo, serviceLogo) || other.serviceLogo == serviceLogo)&&(identical(other.serverInfoGroup, serverInfoGroup) || other.serverInfoGroup == serverInfoGroup)&&(identical(other.buyPlanUrl, buyPlanUrl) || other.buyPlanUrl == buyPlanUrl)&&(identical(other.buyTrafficUrl, buyTrafficUrl) || other.buyTrafficUrl == buyTrafficUrl)&&const DeepCollectionEquality().equals(other.widgets, _widgets)&&(identical(other.widgetsApplyMode, widgetsApplyMode) || other.widgetsApplyMode == widgetsApplyMode)&&const DeepCollectionEquality().equals(other.settings, _settings)&&(identical(other.newDomain, newDomain) || other.newDomain == newDomain)&&(identical(other.profileTitle, profileTitle) || other.profileTitle == profileTitle)&&(identical(other.proxiesView, proxiesView) || other.proxiesView == proxiesView)&&(identical(other.themeHex, themeHex) || other.themeHex == themeHex));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,hwidMaxDevicesReached,hwidNotSupported,announce,supportUrl,updateIntervalMinutes,serviceName,serviceLogo,serverInfoGroup,buyPlanUrl,buyTrafficUrl,const DeepCollectionEquality().hash(_widgets),widgetsApplyMode,const DeepCollectionEquality().hash(_settings),newDomain,profileTitle);
+    return Object.hash(runtimeType,hwidMaxDevicesReached,hwidNotSupported,announce,supportUrl,updateIntervalMinutes,serviceName,serviceLogo,serverInfoGroup,buyPlanUrl,buyTrafficUrl,const DeepCollectionEquality().hash(_widgets),widgetsApplyMode,const DeepCollectionEquality().hash(_settings),newDomain,profileTitle,proxiesView,themeHex);
 }
 
 @override
 String toString() {
-    return 'PanelMeta(hwidMaxDevicesReached: $hwidMaxDevicesReached, hwidNotSupported: $hwidNotSupported, announce: $announce, supportUrl: $supportUrl, updateIntervalMinutes: $updateIntervalMinutes, serviceName: $serviceName, serviceLogo: $serviceLogo, serverInfoGroup: $serverInfoGroup, buyPlanUrl: $buyPlanUrl, buyTrafficUrl: $buyTrafficUrl, widgets: $widgets, widgetsApplyMode: $widgetsApplyMode, settings: $settings, newDomain: $newDomain, profileTitle: $profileTitle)';
+    return 'PanelMeta(hwidMaxDevicesReached: $hwidMaxDevicesReached, hwidNotSupported: $hwidNotSupported, announce: $announce, supportUrl: $supportUrl, updateIntervalMinutes: $updateIntervalMinutes, serviceName: $serviceName, serviceLogo: $serviceLogo, serverInfoGroup: $serverInfoGroup, buyPlanUrl: $buyPlanUrl, buyTrafficUrl: $buyTrafficUrl, widgets: $widgets, widgetsApplyMode: $widgetsApplyMode, settings: $settings, newDomain: $newDomain, profileTitle: $profileTitle, proxiesView: $proxiesView, themeHex: $themeHex)';
 }
 
 
@@ -299,7 +303,7 @@ abstract mixin class _$PanelMetaCopyWith<$Res> implements $PanelMetaCopyWith<$Re
   factory _$PanelMetaCopyWith(_PanelMeta value, $Res Function(_PanelMeta) _then) = __$PanelMetaCopyWithImpl;
 @override @useResult
 $Res call({
- bool hwidMaxDevicesReached, bool hwidNotSupported, String? announce, String? supportUrl, int? updateIntervalMinutes, String? serviceName, String? serviceLogo, String? serverInfoGroup, String? buyPlanUrl, String? buyTrafficUrl, List<String>? widgets, PanelWidgetsApplyMode widgetsApplyMode, List<String>? settings, String? newDomain, String? profileTitle
+ bool hwidMaxDevicesReached, bool hwidNotSupported, String? announce, String? supportUrl, int? updateIntervalMinutes, String? serviceName, String? serviceLogo, String? serverInfoGroup, String? buyPlanUrl, String? buyTrafficUrl, List<String>? widgets, PanelWidgetsApplyMode widgetsApplyMode, List<String>? settings, String? newDomain, String? profileTitle, String? proxiesView, String? themeHex
 });
 
 
@@ -316,7 +320,7 @@ class __$PanelMetaCopyWithImpl<$Res>
 
 /// Create a copy of PanelMeta
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? hwidMaxDevicesReached = null,Object? hwidNotSupported = null,Object? announce = freezed,Object? supportUrl = freezed,Object? updateIntervalMinutes = freezed,Object? serviceName = freezed,Object? serviceLogo = freezed,Object? serverInfoGroup = freezed,Object? buyPlanUrl = freezed,Object? buyTrafficUrl = freezed,Object? widgets = freezed,Object? widgetsApplyMode = null,Object? settings = freezed,Object? newDomain = freezed,Object? profileTitle = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? hwidMaxDevicesReached = null,Object? hwidNotSupported = null,Object? announce = freezed,Object? supportUrl = freezed,Object? updateIntervalMinutes = freezed,Object? serviceName = freezed,Object? serviceLogo = freezed,Object? serverInfoGroup = freezed,Object? buyPlanUrl = freezed,Object? buyTrafficUrl = freezed,Object? widgets = freezed,Object? widgetsApplyMode = null,Object? settings = freezed,Object? newDomain = freezed,Object? profileTitle = freezed,Object? proxiesView = freezed,Object? themeHex = freezed,}) {
   return _then(_PanelMeta(
 hwidMaxDevicesReached: null == hwidMaxDevicesReached ? _self.hwidMaxDevicesReached : hwidMaxDevicesReached // ignore: cast_nullable_to_non_nullable
 as bool,hwidNotSupported: null == hwidNotSupported ? _self.hwidNotSupported : hwidNotSupported // ignore: cast_nullable_to_non_nullable
@@ -333,6 +337,8 @@ as List<String>?,widgetsApplyMode: null == widgetsApplyMode ? _self.widgetsApply
 as PanelWidgetsApplyMode,settings: freezed == settings ? _self._settings : settings // ignore: cast_nullable_to_non_nullable
 as List<String>?,newDomain: freezed == newDomain ? _self.newDomain : newDomain // ignore: cast_nullable_to_non_nullable
 as String?,profileTitle: freezed == profileTitle ? _self.profileTitle : profileTitle // ignore: cast_nullable_to_non_nullable
+as String?,proxiesView: freezed == proxiesView ? _self.proxiesView : proxiesView // ignore: cast_nullable_to_non_nullable
+as String?,themeHex: freezed == themeHex ? _self.themeHex : themeHex // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

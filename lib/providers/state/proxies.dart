@@ -1,6 +1,15 @@
 part of '../state.dart';
 
 @riverpod
+ProxiesStyleProps effectiveProxiesStyle(Ref ref) {
+  final user = ref.watch(proxiesStyleSettingProvider);
+  final view = ref.watch(
+    currentProfileProvider.select((state) => state?.panelMeta?.proxiesView),
+  );
+  return applyPanelProxiesView(user, parsePanelProxiesView(view));
+}
+
+@riverpod
 GroupsState currentGroupsState(Ref ref) {
   final mode = ref.watch(
     patchClashConfigProvider.select((state) => state.mode),
@@ -57,7 +66,7 @@ ProxiesActionsState proxiesActionsState(Ref ref) {
     providersProvider.select((state) => state.isNotEmpty),
   );
   final type = ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.type),
+    effectiveProxiesStyleProvider.select((state) => state.type),
   );
   return ProxiesActionsState(
     pageLabel: pageLabel,
@@ -92,7 +101,7 @@ ProxiesListState proxiesListState(Ref ref) {
   final currentGroups = ref.watch(filterGroupsStateProvider(query));
   final currentUnfoldSet = ref.watch(unfoldSetProvider);
   final cardType = ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.cardType),
+    effectiveProxiesStyleProvider.select((state) => state.cardType),
   );
   return ProxiesListState(
     groups: currentGroups.value,
@@ -109,7 +118,7 @@ ProxiesTabState proxiesTabState(Ref ref) {
     currentProfileProvider.select((state) => state?.currentGroupName),
   );
   final cardType = ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.cardType),
+    effectiveProxiesStyleProvider.select((state) => state.cardType),
   );
   return ProxiesTabState(
     groups: currentGroups.value,
@@ -141,7 +150,7 @@ ProxyGroupSelectorState proxyGroupSelectorState(
   String groupName,
   String query,
 ) {
-  final proxiesStyle = ref.watch(proxiesStyleSettingProvider);
+  final proxiesStyle = ref.watch(effectiveProxiesStyleProvider);
   final group = ref.watch(
     currentGroupsStateProvider.select(
       (state) => state.value.getGroup(groupName),
@@ -261,7 +270,7 @@ String proxyDesc(Ref ref, Proxy proxy) {
   );
   final sortNum = ref.watch(sortNumProvider);
   final sortType = ref.watch(
-    proxiesStyleSettingProvider.select((state) => state.sortType),
+    effectiveProxiesStyleProvider.select((state) => state.sortType),
   );
   return (isProxies: isProxies, sortNum: sortNum, sortType: sortType);
 }

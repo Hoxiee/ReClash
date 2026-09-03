@@ -862,6 +862,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Profiles"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Sort profiles"),
     "project": MessageLookupByLibrary.simpleMessage("Project"),
+    "providerView": MessageLookupByLibrary.simpleMessage("Provider view"),
+    "providerViewDesc": MessageLookupByLibrary.simpleMessage(
+      "Let this subscription dress the proxies page. What you change stays yours.",
+    ),
     "providers": MessageLookupByLibrary.simpleMessage("External resources"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
     "proxiesCount": m28,

@@ -614,6 +614,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("配置"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("配置排序"),
     "project": MessageLookupByLibrary.simpleMessage("项目"),
+    "providerView": MessageLookupByLibrary.simpleMessage("服务商视图"),
+    "providerViewDesc": MessageLookupByLibrary.simpleMessage(
+      "允许此订阅设置代理页面外观，你自己更改的项目会保留。",
+    ),
     "providers": MessageLookupByLibrary.simpleMessage("外部资源"),
     "proxies": MessageLookupByLibrary.simpleMessage("代理"),
     "proxiesCount": m28,

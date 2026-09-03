@@ -25,6 +25,8 @@ abstract class PanelMeta with _$PanelMeta {
     List<String>? settings,
     String? newDomain,
     String? profileTitle,
+    String? proxiesView,
+    String? themeHex,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
@@ -50,8 +52,7 @@ abstract class PanelMeta with _$PanelMeta {
       hwidNotSupported: map['hwidNotSupported']?.toLowerCase() == 'true',
       announce: map['announce'],
       supportUrl: map['supportUrl'],
-      updateIntervalMinutes:
-          interval != null && interval > 0 ? interval : null,
+      updateIntervalMinutes: interval != null && interval > 0 ? interval : null,
       serviceName: map['serviceName'],
       serviceLogo: map['serviceLogo'],
       serverInfoGroup: map['serverInfoGroup'],
@@ -64,6 +65,8 @@ abstract class PanelMeta with _$PanelMeta {
       settings: settings.isNotEmpty ? settings : null,
       newDomain: map['newDomain'],
       profileTitle: map['profileTitle'],
+      proxiesView: map['proxiesView'],
+      themeHex: map['themeHex'],
     );
   }
 }
@@ -83,5 +86,7 @@ extension PanelMetaExt on PanelMeta {
       widgets != null ||
       newDomain != null ||
       profileTitle != null ||
+      proxiesView != null ||
+      themeHex != null ||
       settings != null;
 }

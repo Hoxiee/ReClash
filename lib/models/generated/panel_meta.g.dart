@@ -31,6 +31,8 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
       .toList(),
   newDomain: json['newDomain'] as String?,
   profileTitle: json['profileTitle'] as String?,
+  proxiesView: json['proxiesView'] as String?,
+  themeHex: json['themeHex'] as String?,
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -51,6 +53,8 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'settings': instance.settings,
       'newDomain': instance.newDomain,
       'profileTitle': instance.profileTitle,
+      'proxiesView': instance.proxiesView,
+      'themeHex': instance.themeHex,
     };
 
 const _$PanelWidgetsApplyModeEnumMap = {

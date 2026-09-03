@@ -81,7 +81,9 @@ class ProfilesAction extends _$ProfilesAction {
       final newProfile = await profile.update(
         validate: (path) => _core.validateConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
-          includeDeviceIdentity: ref.read(appSettingProvider).sendDeviceIdentity,
+          includeDeviceIdentity: ref
+              .read(appSettingProvider)
+              .sendDeviceIdentity,
         ),
       );
       ref.read(profilesProvider.notifier).put(newProfile);
@@ -110,9 +112,9 @@ class ProfilesAction extends _$ProfilesAction {
       final confirmed = await dialogs.showMessage(
         title: currentAppLocalizations.deviceLimitReached,
         message: TextSpan(
-          text: panelMeta.announce.takeFirstValid(
-            [currentAppLocalizations.deviceLimitReachedTip],
-          ),
+          text: panelMeta.announce.takeFirstValid([
+            currentAppLocalizations.deviceLimitReachedTip,
+          ]),
         ),
         confirmText: panelMeta.supportUrl != null
             ? currentAppLocalizations.support
@@ -200,6 +202,7 @@ class ProfilesAction extends _$ProfilesAction {
       putProfile(profile);
       applyPanelWidgetsFromMeta(profile.panelMeta);
       applyPanelSettingsDefaults(profile.panelMeta);
+      applyPanelThemeDefaults(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta));
     }
   }
@@ -209,7 +212,9 @@ class ProfilesAction extends _$ProfilesAction {
     final tokens = meta?.settings;
     if (tokens == null || tokens.isEmpty) return;
     final set = tokens.toSet();
-    ref.read(appSettingProvider.notifier).update(
+    ref
+        .read(appSettingProvider.notifier)
+        .update(
           (state) => state.copyWith(
             minimizeOnExit: set.contains('minimize'),
             autoRun: set.contains('autorun'),
@@ -220,6 +225,23 @@ class ProfilesAction extends _$ProfilesAction {
             closeConnections: set.contains('closeconnections'),
           ),
         );
+  }
+
+  // Add-time only, like the settings above.
+  void applyPanelThemeDefaults(PanelMeta? meta) {
+    final theme = parsePanelTheme(meta?.themeHex);
+    if (theme == null) return;
+    ref.read(themeSettingProvider.notifier).update((state) {
+      final color = theme.primaryColor;
+      return state.copyWith(
+        primaryColor: color ?? state.primaryColor,
+        primaryColors: color == null || state.primaryColors.contains(color)
+            ? state.primaryColors
+            : [...state.primaryColors, color],
+        schemeVariant: theme.schemeVariant ?? state.schemeVariant,
+        pureBlack: theme.pureBlack ?? state.pureBlack,
+      );
+    });
   }
 
   void applyPanelWidgetsFromMeta(PanelMeta? meta, {PanelMeta? previousMeta}) {
@@ -239,9 +261,9 @@ class ProfilesAction extends _$ProfilesAction {
       previousPanelWidgets: previousPanelWidgets,
     );
     if (sameWidgets(next, current)) return;
-    ref.read(appSettingProvider.notifier).update(
-          (state) => state.copyWith(dashboardWidgets: next),
-        );
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(dashboardWidgets: next));
   }
 
   void applyPanelWidgetsOnProfileSwitch(int? previousProfileId) {

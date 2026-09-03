@@ -659,6 +659,8 @@
   "subscriptionCaption": "サブスクリプション",
   "renewSubscription": "サブスクリプションを更新",
   "topUpTraffic": "データ量を追加",
+  "providerView": "プロバイダーのビュー",
+  "providerViewDesc": "このサブスクリプションにプロキシ画面の外観を任せます。自分で変更した項目は保持されます。",
   "remaining": "残り",
   "determiningIp": "IPを確認中...",
   "day": "日",

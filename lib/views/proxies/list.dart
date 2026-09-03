@@ -284,7 +284,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
         final state = ref.watch(proxiesListStateProvider);
         ref.watch(themeSettingProvider.select((state) => state.textScale));
         final proxiesLayout = ref.watch(
-          proxiesStyleSettingProvider.select((state) => state.layout),
+          effectiveProxiesStyleProvider.select((state) => state.layout),
         );
         if (state.groups.isEmpty) {
           return NullStatus(
@@ -441,7 +441,7 @@ class _GroupIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final iconStyle = ref.watch(
-      proxiesStyleSettingProvider.select((state) => state.iconStyle),
+      effectiveProxiesStyleProvider.select((state) => state.iconStyle),
     );
     return switch (iconStyle) {
       ProxiesIconStyle.standard => LayoutBuilder(

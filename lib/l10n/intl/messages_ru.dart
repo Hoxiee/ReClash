@@ -888,6 +888,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "profiles": MessageLookupByLibrary.simpleMessage("Профили"),
     "profilesSort": MessageLookupByLibrary.simpleMessage("Сортировка профилей"),
     "project": MessageLookupByLibrary.simpleMessage("Проект"),
+    "providerView": MessageLookupByLibrary.simpleMessage("Вид от провайдера"),
+    "providerViewDesc": MessageLookupByLibrary.simpleMessage(
+      "Разрешить подписке задавать вид страницы прокси. Ваши изменения сохраняются.",
+    ),
     "providers": MessageLookupByLibrary.simpleMessage("Внешние ресурсы"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
     "proxiesCount": m28,
