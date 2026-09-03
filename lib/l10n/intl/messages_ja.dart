@@ -87,11 +87,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(count) => "${count} 件選択中";
 
-  static String m32(total) => "残り（${total} 中）";
+  static String m32(minutes) => "${minutes} 分";
 
-  static String m33(label) => "${label}はURLである必要があります";
+  static String m33(total) => "残り（${total} 中）";
 
-  static String m34(count) => "${count} 年前";
+  static String m34(label) => "${label}はURLである必要があります";
+
+  static String m35(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -264,6 +266,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "グローバル追加ルールを管理",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("コピー"),
+    "copyDiagnostics": MessageLookupByLibrary.simpleMessage("バージョン情報をコピー"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("環境変数をコピー"),
     "copyLink": MessageLookupByLibrary.simpleMessage("リンクをコピー"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("コピーしました"),
@@ -285,6 +288,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("プロファイルを作成"),
     "createProfileFromUrlTip": m3,
     "creationTime": MessageLookupByLibrary.simpleMessage("作成日時"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — 本アプリの基盤クライアント",
+    ),
+    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
+      "FlClash コントリビューター",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — プロバイダ機能とアイデア",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("mihomo — プロキシコア"),
     "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("切り取り"),
@@ -316,7 +329,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m6,
     "deleteTip": m7,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "ClashMetaベースのマルチプラットフォーム対応プロキシクライアント。シンプルで使いやすく、オープンソースで広告もありません。",
+      "マルチプラットフォーム mihomo クライアント。作り直したダッシュボード、賢いルーティング、充実したサブスクリプション対応。オープンソースで広告もテレメトリもありません。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("宛先"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("宛先GeoIP"),
@@ -422,12 +435,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("開く"),
     "goDownload": MessageLookupByLibrary.simpleMessage("ダウンロードへ"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("スクリプト設定へ移動"),
+    "gratitude": MessageLookupByLibrary.simpleMessage("感謝"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
+      "彼らの成果の上に ReClash があります",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper サービスが利用できないため、TUN モードを有効にできません。ReClash を再インストールしてください。",
     ),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("接続中…"),
     "heroJustNow": MessageLookupByLibrary.simpleMessage("たった今"),
+    "heroLinkBroken": MessageLookupByLibrary.simpleMessage("接続が機能していません"),
+    "heroLinkDown": MessageLookupByLibrary.simpleMessage("ノードが応答しません"),
+    "heroLinkPaused": MessageLookupByLibrary.simpleMessage(
+      "通信は一時停止中、保護は待機しています",
+    ),
+    "heroLinkSlow": MessageLookupByLibrary.simpleMessage("ノードの応答が遅いです"),
     "heroNotProtected": MessageLookupByLibrary.simpleMessage("保護されていません"),
     "heroPaused": MessageLookupByLibrary.simpleMessage("一時停止 — 信頼済みネットワーク"),
     "heroProtected": MessageLookupByLibrary.simpleMessage("保護されています"),
@@ -526,6 +549,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "前回、アプリは起動中に予期せず終了しました。今回の自動セットアップはスキップしました。手動で起動して再試行できます。",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
+    "license": MessageLookupByLibrary.simpleMessage("ライセンス"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),
     "listen": MessageLookupByLibrary.simpleMessage("リッスン"),
@@ -555,6 +579,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loopback": MessageLookupByLibrary.simpleMessage("ループバック解除ツール"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("UWPのループバック解除に使用します"),
     "loose": MessageLookupByLibrary.simpleMessage("ゆったり"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("制作"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage("送信元IPにマッチ"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
@@ -797,6 +822,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategyOverride": MessageLookupByLibrary.simpleMessage("上書き"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("復元が完了しました"),
     "resume": MessageLookupByLibrary.simpleMessage("再開"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("作者・メンテナー"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("ルートアドレス"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "リッスンするルートアドレスを設定します",
@@ -947,9 +973,61 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "信頼できるネットワークで自動的にVPNを一時停止します",
     ),
+    "smartRouting": MessageLookupByLibrary.simpleMessage("スマートルーティング"),
+    "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
+      "アプリを開かなくても、ネットワークごとに使えるサーバーを選び続けます",
+    ),
+    "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
+      "遮断中は国内サーバーを使う",
+    ),
+    "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
+      "ホワイトリスト網での最後の手段。国内サービスだけは使えます",
+    ),
+    "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
+      "手動の選択を尊重する",
+    ),
+    "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
+      "自分で選んだサーバーをどれだけ維持するか",
+    ),
+    "smartRoutingManualHoldMinutes": m32,
+    "smartRoutingManualHoldOff": MessageLookupByLibrary.simpleMessage("尊重しない"),
+    "smartRoutingNoServers": MessageLookupByLibrary.simpleMessage(
+      "利用できるサーバーがありません",
+    ),
+    "smartRoutingOn": MessageLookupByLibrary.simpleMessage("スマートルーティングは有効です"),
+    "smartRoutingPortal": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi へのサインインが必要です",
+    ),
+    "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("プリセット"),
+    "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("中国"),
+    "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("イラン"),
+    "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("オフ"),
+    "smartRoutingPresetRuHome": MessageLookupByLibrary.simpleMessage(
+      "ロシア — 自宅",
+    ),
+    "smartRoutingPresetRuMobile": MessageLookupByLibrary.simpleMessage(
+      "ロシア — モバイル",
+    ),
+    "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
+      "制限されたネットワーク · 国内サービスは直接接続",
+    ),
+    "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
+      "サーバーが応答しません。別のサーバーを探しています",
+    ),
+    "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
+      "ルールモードでのみ利用できます",
+    ),
+    "smartRoutingSaveData": MessageLookupByLibrary.simpleMessage("モバイルデータを節約"),
+    "smartRoutingSaveDataDesc": MessageLookupByLibrary.simpleMessage(
+      "従量制の回線では検査を絞ります",
+    ),
+    "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
+      "サーバーを選んでいます…",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKSポート"),
     "sort": MessageLookupByLibrary.simpleMessage("並べ替え"),
     "source": MessageLookupByLibrary.simpleMessage("ソース"),
+    "sourceCode": MessageLookupByLibrary.simpleMessage("ソースコード"),
     "sourceIp": MessageLookupByLibrary.simpleMessage("送信元IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("特殊プロキシ"),
     "specialRules": MessageLookupByLibrary.simpleMessage("特殊ルール"),
@@ -1025,7 +1103,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("ライト"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("合計トラフィック"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
-    "trafficFreeOfTotal": m32,
+    "trafficFreeOfTotal": m33,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("信頼できるネットワーク"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -1052,7 +1130,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URLからプロファイルを取得します"),
-    "urlTip": m33,
+    "urlTip": m34,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("使用済みトラフィック"),
@@ -1069,7 +1147,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPNの再起動後に有効になります"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m34,
+    "yearsAgo": m35,
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

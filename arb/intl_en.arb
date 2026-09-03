@@ -14,6 +14,7 @@
   "resourcesDesc": "Information about external resources",
   "trafficUsage": "Traffic usage",
   "networkSpeed": "Network speed",
+  "otherContributors": "Other contributors",
   "outboundMode": "Outbound mode",
   "networkDetection": "Network detection",
   "upload": "Upload",
@@ -116,8 +117,19 @@
   "systemProxy": "System proxy",
   "project": "Project",
   "core": "Core",
+  "madeBy": "Made by",
+  "roleAuthor": "Author and maintainer",
+  "gratitude": "Gratitude",
+  "gratitudeDesc": "ReClash exists because of their work",
+  "creditFlClash": "FlClash — the client this is built on",
+  "creditFlClashX": "FlClashX — provider features and ideas",
+  "creditMihomo": "mihomo — the proxy core",
+  "creditFlClashContributor": "FlClash contributor",
+  "license": "License",
+  "sourceCode": "Source code",
+  "copyDiagnostics": "Copy version info",
   "tabAnimation": "Tab animation",
-  "desc": "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
+  "desc": "A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.",
   "startVpn": "Starting VPN...",
   "pauseVpn": "Pausing VPN...",
   "pause": "Pause",
@@ -193,7 +205,6 @@
   "proxyGroup": "Proxy group",
   "go": "Go",
   "externalLink": "External link",
-  "otherContributors": "Other contributors",
   "autoCloseConnections": "Auto close connections",
   "autoCloseConnectionsDesc": "Close connections automatically after switching nodes",
   "onlyStatisticsProxy": "Only count proxy traffic",
@@ -654,6 +665,10 @@
   "heroJustNow": "just now",
   "heroRoutingAgo": "{time} ago",
   "heroRoutingStub": "Smart routing is off",
+  "heroLinkBroken": "Connection is not working",
+  "heroLinkSlow": "The node is responding slowly",
+  "heroLinkDown": "The node is not responding",
+  "heroLinkPaused": "Traffic is paused, protection is on hold",
   "connectedFor": "Connected {time}",
   "trafficFreeOfTotal": "free of {total}",
   "subscriptionCaption": "Subscription",
@@ -685,5 +700,35 @@
         "type": "String"
       }
     }
-  }
+  },
+  "smartRouting": "Smart routing",
+  "smartRoutingDesc": "Keeps a working server picked for every network, without opening the app",
+  "smartRoutingRuleOnly": "Available in Rule mode only",
+  "smartRoutingSearching": "Picking a server…",
+  "smartRoutingOn": "Smart routing is on",
+  "smartRoutingRestricted": "Restricted network · local services stay direct",
+  "smartRoutingPortal": "Wi-Fi sign-in required",
+  "smartRoutingRetrying": "Server is not answering, looking for another",
+  "smartRoutingNoServers": "No reachable servers",
+  "smartRoutingPreset": "Preset",
+  "smartRoutingPresetOff": "Off",
+  "smartRoutingPresetRuMobile": "Russia — mobile",
+  "smartRoutingPresetRuHome": "Russia — home",
+  "smartRoutingPresetIran": "Iran",
+  "smartRoutingPresetChina": "China",
+  "smartRoutingDomestic": "Local servers during a shutdown",
+  "smartRoutingDomesticDesc": "A last resort on a whitelist network, so local services keep working",
+  "smartRoutingSaveData": "Save mobile data",
+  "smartRoutingSaveDataDesc": "Narrow the probe burst on a metered link",
+  "smartRoutingManualHold": "Respect a manual pick",
+  "smartRoutingManualHoldDesc": "How long a server you chose yourself is left alone",
+  "smartRoutingManualHoldMinutes": "{minutes} min",
+  "@smartRoutingManualHoldMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingManualHoldOff": "Not respected"
 }

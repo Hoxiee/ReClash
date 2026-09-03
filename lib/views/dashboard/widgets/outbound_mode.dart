@@ -11,8 +11,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class OutboundMode extends ConsumerWidget {
   const OutboundMode({super.key});
 
-  void _handleChangeMode(Mode mode, WidgetRef ref) {
-    ref.read(setupActionProvider.notifier).changeMode(mode);
+  void _handleChangeMode(UiOutboundMode mode, WidgetRef ref) {
+    ref.read(setupActionProvider.notifier).changeUiMode(mode);
   }
 
   @override
@@ -23,9 +23,7 @@ class OutboundMode extends ConsumerWidget {
       height: height,
       child: Consumer(
         builder: (_, ref, _) {
-          final mode = ref.watch(
-            patchClashConfigProvider.select((state) => state.mode),
-          );
+          final mode = ref.watch(uiOutboundModeProvider);
           return Theme(
             data: Theme.of(context).copyWith(
               splashColor: Colors.transparent,
@@ -42,7 +40,7 @@ class OutboundMode extends ConsumerWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 12),
-                child: RadioGroup<Mode>(
+                child: RadioGroup<UiOutboundMode>(
                   groupValue: mode,
                   onChanged: (value) {
                     if (value == null) {
@@ -68,14 +66,14 @@ class OutboundMode extends ConsumerWidget {
 class _ModeRadioList extends StatelessWidget {
   const _ModeRadioList({required this.onSelect});
 
-  final void Function(Mode mode) onSelect;
+  final void Function(UiOutboundMode mode) onSelect;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, constraints) {
         final minTileHeight = min(
-          constraints.maxHeight / 3,
+          constraints.maxHeight / UiOutboundMode.values.length,
           globalState.measure.bodyMediumHeight + 16,
         );
         return Column(
@@ -83,7 +81,7 @@ class _ModeRadioList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            for (final item in Mode.values)
+            for (final item in UiOutboundMode.values)
               ListItem.radio(
                 horizontalTitleGap: 8,
                 tileTitleAlignment: ListTileTitleAlignment.center,
@@ -109,15 +107,16 @@ class _ModeRadioList extends StatelessWidget {
 class OutboundModeV2 extends StatelessWidget {
   const OutboundModeV2({super.key});
 
-  void _handleChangeMode(Mode mode, WidgetRef ref) {
-    ref.read(setupActionProvider.notifier).changeMode(mode);
+  void _handleChangeMode(UiOutboundMode mode, WidgetRef ref) {
+    ref.read(setupActionProvider.notifier).changeUiMode(mode);
   }
 
-  Color _getTextColor(BuildContext context, Mode mode) {
+  Color _getTextColor(BuildContext context, UiOutboundMode mode) {
     return switch (mode) {
-      Mode.rule => context.colorScheme.onSecondaryContainer,
-      Mode.global => context.colorScheme.onPrimaryContainer,
-      Mode.direct => context.colorScheme.onTertiaryContainer,
+      UiOutboundMode.auto => context.colorScheme.onPrimaryContainer,
+      UiOutboundMode.rule => context.colorScheme.onSecondaryContainer,
+      UiOutboundMode.global => context.colorScheme.onPrimaryContainer,
+      UiOutboundMode.direct => context.colorScheme.onTertiaryContainer,
     };
   }
 
@@ -130,13 +129,12 @@ class OutboundModeV2 extends StatelessWidget {
         radius: AppCorner.lg,
         child: Consumer(
           builder: (_, ref, _) {
-            final mode = ref.watch(
-              patchClashConfigProvider.select((state) => state.mode),
-            );
+            final mode = ref.watch(uiOutboundModeProvider);
             final thumbColor = switch (mode) {
-              Mode.rule => context.colorScheme.secondaryContainer,
-              Mode.global => globalState.theme.darken3PrimaryContainer,
-              Mode.direct => context.colorScheme.tertiaryContainer,
+              UiOutboundMode.auto => context.colorScheme.primaryContainer,
+              UiOutboundMode.rule => context.colorScheme.secondaryContainer,
+              UiOutboundMode.global => globalState.theme.darken3PrimaryContainer,
+              UiOutboundMode.direct => context.colorScheme.tertiaryContainer,
             };
             return LayoutBuilder(
               builder: (_, constraints) {
@@ -147,9 +145,9 @@ class OutboundModeV2 extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         constraints: const BoxConstraints.expand(),
-                        child: CommonTabBar<Mode>(
+                        child: CommonTabBar<UiOutboundMode>(
                           children: {
-                            for (final item in Mode.values)
+                            for (final item in UiOutboundMode.values)
                               item: _ModeTab(
                                 label: item.label,
                                 height: height - 8.ap - 24,
@@ -208,6 +206,8 @@ class _ModeTab extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       child: Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: Theme.of(
           context,
         ).textTheme.titleSmall?.adjustSize(1).copyWith(color: color),

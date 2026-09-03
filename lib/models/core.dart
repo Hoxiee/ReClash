@@ -196,6 +196,18 @@ abstract class RcxConfigParams with _$RcxConfigParams {
       _$RcxConfigParamsFromJson(json);
 }
 
+extension SmartRoutingPropsRcx on SmartRoutingProps {
+  // The preset wire value comes from the serialization map, so the enum's
+  // @JsonValue annotations stay the single source of it.
+  RcxConfigParams get rcxParams => RcxConfigParams(
+    enabled: enabled,
+    preset: toJson()['preset'] as String,
+    allowDomesticLastResort: allowDomesticLastResort,
+    saveMobileData: saveMobileData,
+    manualHoldMinutes: manualHoldMinutes,
+  );
+}
+
 @freezed
 abstract class RcxStatus with _$RcxStatus {
   const factory RcxStatus({

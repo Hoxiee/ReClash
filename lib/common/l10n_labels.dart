@@ -44,6 +44,31 @@ extension ModeL10n on Mode {
   }
 }
 
+extension UiOutboundModeL10n on UiOutboundMode {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      UiOutboundMode.auto => appLocalizations.auto,
+      UiOutboundMode.rule => appLocalizations.rule,
+      UiOutboundMode.global => appLocalizations.global,
+      UiOutboundMode.direct => appLocalizations.direct,
+    };
+  }
+}
+
+extension SmartRoutingPresetL10n on SmartRoutingPreset {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      SmartRoutingPreset.off => appLocalizations.smartRoutingPresetOff,
+      SmartRoutingPreset.ruMobile => appLocalizations.smartRoutingPresetRuMobile,
+      SmartRoutingPreset.ruHome => appLocalizations.smartRoutingPresetRuHome,
+      SmartRoutingPreset.iran => appLocalizations.smartRoutingPresetIran,
+      SmartRoutingPreset.china => appLocalizations.smartRoutingPresetChina,
+    };
+  }
+}
+
 extension ProxiesTypeL10n on ProxiesType {
   String get label {
     final appLocalizations = currentAppLocalizations;

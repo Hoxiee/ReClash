@@ -4,6 +4,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/smart_pause.dart';
+import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/widgets/list.dart';
 import 'package:reclash/widgets/scaffold.dart';
@@ -34,6 +35,13 @@ class AdvancedConfigView extends StatelessWidget {
         subtitle: Text(appLocalizations.smartPauseDesc),
         leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
         widget: const SmartPauseView(),
+        blur: false,
+      ),
+      ListItem.open(
+        title: Text(appLocalizations.smartRouting),
+        subtitle: Text(appLocalizations.smartRoutingDesc),
+        leading: const Icon(Icons.alt_route_rounded),
+        widget: const SmartRoutingView(),
         blur: false,
       ),
       ListItem.open(

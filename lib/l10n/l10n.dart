@@ -150,6 +150,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Other contributors`
+  String get otherContributors {
+    return Intl.message(
+      'Other contributors',
+      name: 'otherContributors',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Outbound mode`
   String get outboundMode {
     return Intl.message(
@@ -930,6 +940,96 @@ class AppLocalizations {
     return Intl.message('Core', name: 'core', desc: '', args: []);
   }
 
+  /// `Made by`
+  String get madeBy {
+    return Intl.message('Made by', name: 'madeBy', desc: '', args: []);
+  }
+
+  /// `Author and maintainer`
+  String get roleAuthor {
+    return Intl.message(
+      'Author and maintainer',
+      name: 'roleAuthor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gratitude`
+  String get gratitude {
+    return Intl.message('Gratitude', name: 'gratitude', desc: '', args: []);
+  }
+
+  /// `ReClash exists because of their work`
+  String get gratitudeDesc {
+    return Intl.message(
+      'ReClash exists because of their work',
+      name: 'gratitudeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClash — the client this is built on`
+  String get creditFlClash {
+    return Intl.message(
+      'FlClash — the client this is built on',
+      name: 'creditFlClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClashX — provider features and ideas`
+  String get creditFlClashX {
+    return Intl.message(
+      'FlClashX — provider features and ideas',
+      name: 'creditFlClashX',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `mihomo — the proxy core`
+  String get creditMihomo {
+    return Intl.message(
+      'mihomo — the proxy core',
+      name: 'creditMihomo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `FlClash contributor`
+  String get creditFlClashContributor {
+    return Intl.message(
+      'FlClash contributor',
+      name: 'creditFlClashContributor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `License`
+  String get license {
+    return Intl.message('License', name: 'license', desc: '', args: []);
+  }
+
+  /// `Source code`
+  String get sourceCode {
+    return Intl.message('Source code', name: 'sourceCode', desc: '', args: []);
+  }
+
+  /// `Copy version info`
+  String get copyDiagnostics {
+    return Intl.message(
+      'Copy version info',
+      name: 'copyDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Tab animation`
   String get tabAnimation {
     return Intl.message(
@@ -940,10 +1040,10 @@ class AppLocalizations {
     );
   }
 
-  /// `A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.`
+  /// `A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.`
   String get desc {
     return Intl.message(
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.',
+      'A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.',
       name: 'desc',
       desc: '',
       args: [],
@@ -1495,16 +1595,6 @@ class AppLocalizations {
     return Intl.message(
       'External link',
       name: 'externalLink',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Other contributors`
-  String get otherContributors {
-    return Intl.message(
-      'Other contributors',
-      name: 'otherContributors',
       desc: '',
       args: [],
     );
@@ -5442,6 +5532,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Connection is not working`
+  String get heroLinkBroken {
+    return Intl.message(
+      'Connection is not working',
+      name: 'heroLinkBroken',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The node is responding slowly`
+  String get heroLinkSlow {
+    return Intl.message(
+      'The node is responding slowly',
+      name: 'heroLinkSlow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The node is not responding`
+  String get heroLinkDown {
+    return Intl.message(
+      'The node is not responding',
+      name: 'heroLinkDown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic is paused, protection is on hold`
+  String get heroLinkPaused {
+    return Intl.message(
+      'Traffic is paused, protection is on hold',
+      name: 'heroLinkPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Connected {time}`
   String connectedFor(String time) {
     return Intl.message(
@@ -5570,6 +5700,236 @@ class AppLocalizations {
   /// `minutes`
   String get minutesGenitive {
     return Intl.message('minutes', name: 'minutesGenitive', desc: '', args: []);
+  }
+
+  /// `Smart routing`
+  String get smartRouting {
+    return Intl.message(
+      'Smart routing',
+      name: 'smartRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keeps a working server picked for every network, without opening the app`
+  String get smartRoutingDesc {
+    return Intl.message(
+      'Keeps a working server picked for every network, without opening the app',
+      name: 'smartRoutingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available in Rule mode only`
+  String get smartRoutingRuleOnly {
+    return Intl.message(
+      'Available in Rule mode only',
+      name: 'smartRoutingRuleOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Picking a server…`
+  String get smartRoutingSearching {
+    return Intl.message(
+      'Picking a server…',
+      name: 'smartRoutingSearching',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing is on`
+  String get smartRoutingOn {
+    return Intl.message(
+      'Smart routing is on',
+      name: 'smartRoutingOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restricted network · local services stay direct`
+  String get smartRoutingRestricted {
+    return Intl.message(
+      'Restricted network · local services stay direct',
+      name: 'smartRoutingRestricted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wi-Fi sign-in required`
+  String get smartRoutingPortal {
+    return Intl.message(
+      'Wi-Fi sign-in required',
+      name: 'smartRoutingPortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server is not answering, looking for another`
+  String get smartRoutingRetrying {
+    return Intl.message(
+      'Server is not answering, looking for another',
+      name: 'smartRoutingRetrying',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No reachable servers`
+  String get smartRoutingNoServers {
+    return Intl.message(
+      'No reachable servers',
+      name: 'smartRoutingNoServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preset`
+  String get smartRoutingPreset {
+    return Intl.message(
+      'Preset',
+      name: 'smartRoutingPreset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get smartRoutingPresetOff {
+    return Intl.message(
+      'Off',
+      name: 'smartRoutingPresetOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Russia — mobile`
+  String get smartRoutingPresetRuMobile {
+    return Intl.message(
+      'Russia — mobile',
+      name: 'smartRoutingPresetRuMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Russia — home`
+  String get smartRoutingPresetRuHome {
+    return Intl.message(
+      'Russia — home',
+      name: 'smartRoutingPresetRuHome',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Iran`
+  String get smartRoutingPresetIran {
+    return Intl.message(
+      'Iran',
+      name: 'smartRoutingPresetIran',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `China`
+  String get smartRoutingPresetChina {
+    return Intl.message(
+      'China',
+      name: 'smartRoutingPresetChina',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local servers during a shutdown`
+  String get smartRoutingDomestic {
+    return Intl.message(
+      'Local servers during a shutdown',
+      name: 'smartRoutingDomestic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A last resort on a whitelist network, so local services keep working`
+  String get smartRoutingDomesticDesc {
+    return Intl.message(
+      'A last resort on a whitelist network, so local services keep working',
+      name: 'smartRoutingDomesticDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save mobile data`
+  String get smartRoutingSaveData {
+    return Intl.message(
+      'Save mobile data',
+      name: 'smartRoutingSaveData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Narrow the probe burst on a metered link`
+  String get smartRoutingSaveDataDesc {
+    return Intl.message(
+      'Narrow the probe burst on a metered link',
+      name: 'smartRoutingSaveDataDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Respect a manual pick`
+  String get smartRoutingManualHold {
+    return Intl.message(
+      'Respect a manual pick',
+      name: 'smartRoutingManualHold',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How long a server you chose yourself is left alone`
+  String get smartRoutingManualHoldDesc {
+    return Intl.message(
+      'How long a server you chose yourself is left alone',
+      name: 'smartRoutingManualHoldDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{minutes} min`
+  String smartRoutingManualHoldMinutes(num minutes) {
+    return Intl.message(
+      '$minutes min',
+      name: 'smartRoutingManualHoldMinutes',
+      desc: '',
+      args: [minutes],
+    );
+  }
+
+  /// `Not respected`
+  String get smartRoutingManualHoldOff {
+    return Intl.message(
+      'Not respected',
+      name: 'smartRoutingManualHoldOff',
+      desc: '',
+      args: [],
+    );
   }
 }
 

@@ -120,8 +120,8 @@ void main() {
     final trail = await walk(tester, LogicalKeyboardKey.arrowDown);
 
     expect(
-      trail.take(4),
-      <String>['Rule', 'Global', 'Direct', 'below'],
+      trail.take(5),
+      <String>['Auto', 'Rule', 'Global', 'Direct', 'below'],
       reason:
           'arrow down should step through the modes without the card itself '
           'taking a turn, got $trail',
@@ -138,7 +138,7 @@ void main() {
 
     expect(
       trail.first,
-      anyOf('Rule', 'Global', 'Direct'),
+      anyOf('Auto', 'Rule', 'Global', 'Direct'),
       reason: 'arrow right should land on a mode row, got $trail',
     );
     expect(

@@ -246,6 +246,13 @@ class SetupAction extends _$SetupAction {
     }, args: [silence, force]);
   }
 
+  void changeUiMode(UiOutboundMode mode) {
+    ref
+        .read(smartRoutingSettingProvider.notifier)
+        .update((state) => state.copyWith(enabled: mode.smartRouting));
+    changeMode(mode.coreMode);
+  }
+
   void changeMode(Mode mode) {
     ref
         .read(patchClashConfigProvider.notifier)

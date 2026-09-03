@@ -633,6 +633,55 @@ abstract class _$PatchClashConfig extends $Notifier<PatchClashConfig> {
   }
 }
 
+/// The selector's own vocabulary: smart routing on top of Rule reads as Auto, so
+/// the pair can never disagree with what the core was told.
+
+@ProviderFor(_uiOutboundMode)
+final uiOutboundModeProvider = _UiOutboundModeProvider._();
+
+/// The selector's own vocabulary: smart routing on top of Rule reads as Auto, so
+/// the pair can never disagree with what the core was told.
+
+final class _UiOutboundModeProvider
+    extends $FunctionalProvider<UiOutboundMode, UiOutboundMode, UiOutboundMode>
+    with $Provider<UiOutboundMode> {
+  /// The selector's own vocabulary: smart routing on top of Rule reads as Auto, so
+  /// the pair can never disagree with what the core was told.
+  _UiOutboundModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'uiOutboundModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$_uiOutboundModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<UiOutboundMode> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UiOutboundMode create(Ref ref) {
+    return _uiOutboundMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UiOutboundMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UiOutboundMode>(value),
+    );
+  }
+}
+
+String _$_uiOutboundModeHash() => r'ab6f66e5530556a738ba0c3e056b112e7d514fa3';
+
 @ProviderFor(_config)
 final configProvider = _ConfigProvider._();
 

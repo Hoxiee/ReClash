@@ -9,13 +9,21 @@ const double heroBoardMaxWidth = 560;
 BoxDecoration heroSurfaceDecoration(
   BuildContext context, {
   double radius = heroCardRadius,
+  Color? accent,
 }) {
   final colorScheme = context.colorScheme;
   return BoxDecoration(
     borderRadius: BorderRadius.circular(radius),
-    color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+    color: accent == null
+        ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.6)
+        : Color.alphaBlend(
+            accent.withValues(alpha: 0.06),
+            colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+          ),
     border: Border.all(
-      color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+      color:
+          accent?.withValues(alpha: 0.42) ??
+          colorScheme.outlineVariant.withValues(alpha: 0.6),
     ),
   );
 }
@@ -39,6 +47,7 @@ class HeroSurface extends StatelessWidget {
     this.width = double.infinity,
     this.height,
     this.alignment,
+    this.accent,
   });
 
   final Widget child;
@@ -47,14 +56,17 @@ class HeroSurface extends StatelessWidget {
   final double? width;
   final double? height;
   final AlignmentGeometry? alignment;
+  final Color? accent;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AnimatedContainer(
+    duration: const Duration(milliseconds: 420),
+    curve: Curves.easeOutCubic,
     width: width,
     height: height,
     padding: padding,
     alignment: alignment,
-    decoration: heroSurfaceDecoration(context, radius: radius),
+    decoration: heroSurfaceDecoration(context, radius: radius, accent: accent),
     child: child,
   );
 }

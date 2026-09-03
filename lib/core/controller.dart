@@ -208,6 +208,14 @@ class CoreController {
     return _interface.resumeTun();
   }
 
+  Future<bool> configureSmartRouting(RcxConfigParams params) {
+    return _interface.configureSmartRouting(params);
+  }
+
+  Future<RcxStatus?> smartRoutingStatus() {
+    return _interface.smartRoutingStatus();
+  }
+
   Future<Delay?> getDelay(String url, String proxyName) async {
     return _interface.asyncTestDelay(url, proxyName);
   }

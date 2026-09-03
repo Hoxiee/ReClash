@@ -9,6 +9,7 @@ import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
+import 'package:reclash/views/dashboard/widgets/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
 import 'package:reclash/views/profiles/add.dart';
@@ -162,11 +163,26 @@ _HeroServerInfo _selectServerInfo(
   );
 }
 
-class HeroConnect extends ConsumerWidget {
+class HeroConnect extends ConsumerStatefulWidget {
   const HeroConnect({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HeroConnect> createState() => _HeroConnectState();
+}
+
+class _HeroConnectState extends ConsumerState<HeroConnect> {
+  HeroOrbPhase _phase = HeroOrbPhase.off;
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(runTimeProvider) != null) {
+      _phase = ref.read(pausedProvider) ? HeroOrbPhase.paused : HeroOrbPhase.on;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final hasProfile = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
     );
@@ -210,17 +226,38 @@ class HeroConnect extends ConsumerWidget {
     final isUpdating =
         profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
 
+    final delay = serverName.isEmpty
+        ? null
+        : ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl));
+    final measuring =
+        serverName.isNotEmpty &&
+        ref.watch(
+          delayTestPendingProvider(proxyName: serverName, testUrl: testUrl),
+        );
+    final health = heroHealthOf(delay: delay, measuring: measuring);
+    final status = heroStatusOf(_phase, health);
+    final palette = heroPaletteOf(context, status);
+    final accent = status.isAlert ? palette.accent : null;
+
     return SingleChildScrollView(
       child: Column(
         children: [
           const SizedBox(height: 8),
-          _OrbSection(isReady: isReady, displayName: displayName),
+          _OrbSection(
+            isReady: isReady,
+            displayName: displayName,
+            status: status,
+            health: health,
+            palette: palette,
+            onPhaseChanged: (phase) => setState(() => _phase = phase),
+          ),
           const SizedBox(height: 16),
           _ServerPanel(
-            serverName: serverName,
             displayName: displayName,
             nameCountryCode: nameCountryCode,
-            testUrl: testUrl,
+            delay: delay,
+            status: status,
+            accent: accent,
             otherCodes: otherCodes,
             otherLocations: otherLocations,
           ),
@@ -255,50 +292,48 @@ class HeroConnect extends ConsumerWidget {
   }
 }
 
-class _OrbSection extends ConsumerStatefulWidget {
-  const _OrbSection({required this.isReady, required this.displayName});
+class _OrbSection extends ConsumerWidget {
+  const _OrbSection({
+    required this.isReady,
+    required this.displayName,
+    required this.status,
+    required this.health,
+    required this.palette,
+    required this.onPhaseChanged,
+  });
 
   final bool isReady;
   final String displayName;
+  final HeroStatus status;
+  final HeroHealth health;
+  final HeroPalette palette;
+  final ValueChanged<HeroOrbPhase> onPhaseChanged;
 
   @override
-  ConsumerState<_OrbSection> createState() => _OrbSectionState();
-}
-
-class _OrbSectionState extends ConsumerState<_OrbSection> {
-  HeroOrbPhase _phase = HeroOrbPhase.off;
-
-  @override
-  void initState() {
-    super.initState();
-    if (ref.read(runTimeProvider) != null) {
-      _phase = ref.read(pausedProvider) ? HeroOrbPhase.paused : HeroOrbPhase.on;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final runMinutes = ref.watch(
       runTimeProvider.select((value) => value == null ? null : value ~/ 60000),
     );
-    final isConnected = runMinutes != null && _phase != HeroOrbPhase.paused;
+    final isConnected = runMinutes != null && status != HeroStatus.paused;
 
-    final title = switch (_phase) {
-      HeroOrbPhase.on => appLocalizations.heroProtected,
-      HeroOrbPhase.connecting => appLocalizations.heroConnecting,
-      HeroOrbPhase.paused => appLocalizations.heroPaused,
-      HeroOrbPhase.off => appLocalizations.heroNotProtected,
+    final title = switch (status) {
+      HeroStatus.off => appLocalizations.heroNotProtected,
+      HeroStatus.connecting => appLocalizations.heroConnecting,
+      HeroStatus.paused => appLocalizations.heroPaused,
+      HeroStatus.broken => appLocalizations.heroLinkBroken,
+      HeroStatus.secured || HeroStatus.degraded =>
+        appLocalizations.heroProtected,
     };
-    final subtitle = switch (_phase) {
-      HeroOrbPhase.on => appLocalizations.connectedFor(
-        heroDurationWords(runMinutes),
-      ),
-      HeroOrbPhase.connecting => widget.displayName,
-      HeroOrbPhase.paused => appLocalizations.heroTapToResume,
-      HeroOrbPhase.off => appLocalizations.heroTapToConnect,
+    final subtitle = switch (status) {
+      HeroStatus.off => appLocalizations.heroTapToConnect,
+      HeroStatus.connecting => displayName,
+      HeroStatus.paused => appLocalizations.heroTapToResume,
+      HeroStatus.secured || HeroStatus.degraded || HeroStatus.broken =>
+        appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
     };
+    final accent = status.isAlert ? palette.accent : null;
 
     final lastTraffic = isConnected
         ? ref.watch(
@@ -313,16 +348,22 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
         const SizedBox(height: 18),
         HeroOrb(
           size: 220,
-          enabled: widget.isReady,
-          onPhaseChanged: (phase) => setState(() => _phase = phase),
+          enabled: isReady,
+          health: health,
+          activity: heroActivityOf(lastTraffic),
+          onPhaseChanged: onPhaseChanged,
         ),
         const SizedBox(height: 18),
-        Text(
-          title,
+        AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutCubic,
           textAlign: TextAlign.center,
-          style: context.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+          style: (context.textTheme.headlineSmall ?? const TextStyle())
+              .copyWith(
+                fontWeight: FontWeight.w700,
+                color: accent ?? colorScheme.onSurface,
+              ),
+          child: Text(title, textAlign: TextAlign.center),
         ),
         const SizedBox(height: 3),
         Text(
@@ -345,9 +386,14 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
                 _SpeedEntry(
                   icon: Icons.south_rounded,
                   value: lastTraffic?.down,
+                  accent: accent,
                 ),
                 const SizedBox(width: 22),
-                _SpeedEntry(icon: Icons.north_rounded, value: lastTraffic?.up),
+                _SpeedEntry(
+                  icon: Icons.north_rounded,
+                  value: lastTraffic?.up,
+                  accent: accent,
+                ),
               ],
             ),
           ),
@@ -358,10 +404,11 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
 }
 
 class _SpeedEntry extends StatelessWidget {
-  const _SpeedEntry({required this.icon, required this.value});
+  const _SpeedEntry({required this.icon, required this.value, this.accent});
 
   final IconData icon;
   final num? value;
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
@@ -370,7 +417,7 @@ class _SpeedEntry extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: colorScheme.onSurfaceVariant),
+        Icon(icon, size: 15, color: accent ?? colorScheme.onSurfaceVariant),
         const SizedBox(width: 6),
         Text(
           show != null ? show.value : '—',
@@ -613,54 +660,75 @@ class _BuyChip extends StatelessWidget {
 
 class _ServerPanel extends StatelessWidget {
   const _ServerPanel({
-    required this.serverName,
     required this.displayName,
     required this.nameCountryCode,
-    required this.testUrl,
+    required this.status,
+    this.delay,
+    this.accent,
     this.otherCodes = const [],
     this.otherLocations = 0,
   });
 
-  final String serverName;
   final String displayName;
   final String? nameCountryCode;
-  final String? testUrl;
+  final HeroStatus status;
+  final int? delay;
+  final Color? accent;
   final List<String> otherCodes;
   final int otherLocations;
 
   @override
   Widget build(BuildContext context) => HeroSurface(
+    accent: accent,
     child: Column(
       children: [
         _ServerZone(
-          serverName: serverName,
           displayName: displayName,
           nameCountryCode: nameCountryCode,
-          testUrl: testUrl,
+          delay: delay,
           otherCodes: otherCodes,
           otherLocations: otherLocations,
         ),
         const HeroCardDivider(),
-        const HeroRoutingRow(),
+        _HeroInfoRow(
+          status: status,
+          accent: accent ?? context.colorScheme.onSurfaceVariant,
+        ),
       ],
     ),
   );
 }
 
+/// The line under the divider belongs to smart routing while it runs; the
+/// tunnel's own faults keep the old link line so they are never hidden.
+class _HeroInfoRow extends ConsumerWidget {
+  const _HeroInfoRow({required this.status, required this.accent});
+
+  final HeroStatus status;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(smartRoutingSettingProvider).enabled;
+    if (enabled && status.isLive && status != HeroStatus.paused) {
+      return HeroRoutingRow(accent: accent);
+    }
+    return HeroLinkRow(status: status, accent: accent);
+  }
+}
+
 class _ServerZone extends ConsumerWidget {
   const _ServerZone({
-    required this.serverName,
     required this.displayName,
     required this.nameCountryCode,
-    required this.testUrl,
+    this.delay,
     this.otherCodes = const [],
     this.otherLocations = 0,
   });
 
-  final String serverName;
   final String displayName;
   final String? nameCountryCode;
-  final String? testUrl;
+  final int? delay;
   final List<String> otherCodes;
   final int otherLocations;
 
@@ -668,12 +736,10 @@ class _ServerZone extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
+    final delay = this.delay;
     final isConnected = ref.watch(
       runTimeProvider.select((value) => value != null),
     );
-    final delay = serverName.isNotEmpty
-        ? ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl))
-        : null;
     final networkState = ref.watch(networkDetectionProvider);
     final ipInfo = networkState.ipInfo;
 

@@ -20,6 +20,11 @@ class CoreAction extends _$CoreAction {
     } else {
       await ref.read(proxiesActionProvider.notifier).updateGroups();
     }
+    // The engine keeps its own persisted copy; every start re-syncs it to
+    // what the app saved, covering changes made while the core was down.
+    await _core.configureSmartRouting(
+      ref.read(smartRoutingSettingProvider).rcxParams,
+    );
   }
 
   Future<void> startCore() async {

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -102,6 +103,15 @@ class _PatchClashConfig extends _$PatchClashConfig
   PatchClashConfig build() {
     return const PatchClashConfig();
   }
+}
+
+/// The selector's own vocabulary: smart routing on top of Rule reads as Auto, so
+/// the pair can never disagree with what the core was told.
+@Riverpod(name: 'uiOutboundModeProvider')
+UiOutboundMode _uiOutboundMode(Ref ref) {
+  final mode = ref.watch(patchClashConfigProvider).mode;
+  final smartRouting = ref.watch(smartRoutingSettingProvider).enabled;
+  return mode.uiMode(smartRouting: smartRouting);
 }
 
 @Riverpod(name: 'configProvider')

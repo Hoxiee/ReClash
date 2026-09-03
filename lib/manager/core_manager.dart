@@ -48,6 +48,21 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         ref.read(setupActionProvider.notifier).updateConfigDebounce();
       }
     });
+    ref.listenManual(smartRoutingSettingProvider, (prev, next) {
+      if (prev == next) {
+        return;
+      }
+      if (ref.read(coreStatusProvider) == CoreStatus.connected) {
+        unawaited(_core.configureSmartRouting(next.rcxParams));
+      }
+      // The RCX groups only exist in profiles built while enabled, so the
+      // flip has to rebuild the whole profile, not just the engine config.
+      if (prev?.enabled != next.enabled) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+        });
+      }
+    });
     ref.listenManual(appSettingProvider.select((state) => state.openLogs), (
       prev,
       next,

@@ -87,11 +87,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(count) => "已选择 ${count} 项";
 
-  static String m32(total) => "剩余（共 ${total}）";
+  static String m32(minutes) => "${minutes} 分钟";
 
-  static String m33(label) => "${label}必须为URL";
+  static String m33(total) => "剩余（共 ${total}）";
 
-  static String m34(count) => "${count} 年前";
+  static String m34(label) => "${label}必须为URL";
+
+  static String m35(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -234,6 +236,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "contentScheme": MessageLookupByLibrary.simpleMessage("内容主题"),
     "controlGlobalAddedRules": MessageLookupByLibrary.simpleMessage("控制全局附加规则"),
     "copy": MessageLookupByLibrary.simpleMessage("复制"),
+    "copyDiagnostics": MessageLookupByLibrary.simpleMessage("复制版本信息"),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage("复制环境变量"),
     "copyLink": MessageLookupByLibrary.simpleMessage("复制链接"),
     "copySuccess": MessageLookupByLibrary.simpleMessage("复制成功"),
@@ -255,6 +258,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("创建配置"),
     "createProfileFromUrlTip": m3,
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — 本应用的基础客户端",
+    ),
+    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
+      "FlClash 贡献者",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — 机场功能与思路",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage("mihomo — 代理内核"),
     "custom": MessageLookupByLibrary.simpleMessage("自定义"),
     "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
@@ -282,7 +295,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m6,
     "deleteTip": m7,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "基于ClashMeta的多平台代理客户端，简单易用，开源无广告。",
+      "多平台 mihomo 客户端：重构的仪表盘、更聪明的分流以及完善的订阅支持。开源，无广告，无遥测。",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("目标地址"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage("目标地理定位"),
@@ -370,12 +383,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("前往"),
     "goDownload": MessageLookupByLibrary.simpleMessage("前往下载"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("前往配置脚本"),
+    "gratitude": MessageLookupByLibrary.simpleMessage("致谢"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage("ReClash 建立在他们的工作之上"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper 服务不可用，无法启用 TUN 模式，请重新安装 ReClash。",
     ),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("连接中…"),
     "heroJustNow": MessageLookupByLibrary.simpleMessage("刚刚"),
+    "heroLinkBroken": MessageLookupByLibrary.simpleMessage("连接不可用"),
+    "heroLinkDown": MessageLookupByLibrary.simpleMessage("节点无响应"),
+    "heroLinkPaused": MessageLookupByLibrary.simpleMessage("流量已暂停，保护处于等待状态"),
+    "heroLinkSlow": MessageLookupByLibrary.simpleMessage("节点响应缓慢"),
     "heroNotProtected": MessageLookupByLibrary.simpleMessage("未受保护"),
     "heroPaused": MessageLookupByLibrary.simpleMessage("已暂停 — 受信任网络"),
     "heroProtected": MessageLookupByLibrary.simpleMessage("已受保护"),
@@ -456,6 +475,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "应用上次在启动过程中意外退出。已跳过本次自动配置，你可以手动启动重试。",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("布局"),
+    "license": MessageLookupByLibrary.simpleMessage("许可证"),
     "light": MessageLookupByLibrary.simpleMessage("浅色"),
     "list": MessageLookupByLibrary.simpleMessage("列表"),
     "listen": MessageLookupByLibrary.simpleMessage("监听"),
@@ -483,6 +503,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "loopback": MessageLookupByLibrary.simpleMessage("回环解锁工具"),
     "loopbackDesc": MessageLookupByLibrary.simpleMessage("用于UWP回环解锁"),
     "loose": MessageLookupByLibrary.simpleMessage("宽松"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("作者"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage("匹配来源IP"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
@@ -687,6 +708,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "restoreStrategyOverride": MessageLookupByLibrary.simpleMessage("覆盖"),
     "restoreSuccess": MessageLookupByLibrary.simpleMessage("恢复成功"),
     "resume": MessageLookupByLibrary.simpleMessage("恢复"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("作者与维护者"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("路由地址"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage("配置监听路由地址"),
     "routeMode": MessageLookupByLibrary.simpleMessage("路由模式"),
@@ -809,9 +831,49 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPause": MessageLookupByLibrary.simpleMessage("智能暂停"),
     "smartPauseCloseConnections": MessageLookupByLibrary.simpleMessage("断开连接"),
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage("在受信任的网络中自动暂停 VPN"),
+    "smartRouting": MessageLookupByLibrary.simpleMessage("智能路由"),
+    "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
+      "无需打开应用，为每个网络自动保持可用的服务器",
+    ),
+    "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage("断网期间使用本地服务器"),
+    "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
+      "白名单网络下的最后手段，让本地服务仍可使用",
+    ),
+    "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage("尊重手动选择"),
+    "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
+      "手动选择的服务器保持多久",
+    ),
+    "smartRoutingManualHoldMinutes": m32,
+    "smartRoutingManualHoldOff": MessageLookupByLibrary.simpleMessage("不尊重"),
+    "smartRoutingNoServers": MessageLookupByLibrary.simpleMessage("没有可用的服务器"),
+    "smartRoutingOn": MessageLookupByLibrary.simpleMessage("智能路由已开启"),
+    "smartRoutingPortal": MessageLookupByLibrary.simpleMessage("需要登录 Wi-Fi"),
+    "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("预设"),
+    "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("中国"),
+    "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("伊朗"),
+    "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("关闭"),
+    "smartRoutingPresetRuHome": MessageLookupByLibrary.simpleMessage(
+      "俄罗斯 — 家庭网络",
+    ),
+    "smartRoutingPresetRuMobile": MessageLookupByLibrary.simpleMessage(
+      "俄罗斯 — 移动网络",
+    ),
+    "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
+      "受限网络 · 本地服务直连",
+    ),
+    "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
+      "服务器无响应，正在寻找替代",
+    ),
+    "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage("仅在规则模式下可用"),
+    "smartRoutingSaveData": MessageLookupByLibrary.simpleMessage("节省移动流量"),
+    "smartRoutingSaveDataDesc": MessageLookupByLibrary.simpleMessage(
+      "在计费网络上减少探测数量",
+    ),
+    "smartRoutingSearching": MessageLookupByLibrary.simpleMessage("正在挑选服务器…"),
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
     "sort": MessageLookupByLibrary.simpleMessage("排序"),
     "source": MessageLookupByLibrary.simpleMessage("来源"),
+    "sourceCode": MessageLookupByLibrary.simpleMessage("源代码"),
     "sourceIp": MessageLookupByLibrary.simpleMessage("源IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("特殊代理"),
     "specialRules": MessageLookupByLibrary.simpleMessage("特殊规则"),
@@ -883,7 +945,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("手电筒"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("总流量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
-    "trafficFreeOfTotal": m32,
+    "trafficFreeOfTotal": m33,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("受信任的网络"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -908,7 +970,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("通过URL获取配置文件"),
-    "urlTip": m33,
+    "urlTip": m34,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -925,7 +987,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "vpnTip": MessageLookupByLibrary.simpleMessage("重启VPN后改变生效"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m34,
+    "yearsAgo": m35,
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

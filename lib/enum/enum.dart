@@ -94,6 +94,23 @@ enum Mode { rule, global, direct }
 /// with smart routing on, so an inconsistent pair cannot be expressed.
 enum UiOutboundMode { auto, rule, global, direct }
 
+extension UiOutboundModeExt on UiOutboundMode {
+  Mode get coreMode => switch (this) {
+    UiOutboundMode.auto || UiOutboundMode.rule => Mode.rule,
+    UiOutboundMode.global => Mode.global,
+    UiOutboundMode.direct => Mode.direct,
+  };
+
+  bool get smartRouting => this == UiOutboundMode.auto;
+}
+
+extension ModeUiExt on Mode {
+  UiOutboundMode uiMode({required bool smartRouting}) =>
+      smartRouting && this == Mode.rule
+      ? UiOutboundMode.auto
+      : UiOutboundMode.values.byName(name);
+}
+
 enum SmartRoutingPreset {
   @JsonValue('off')
   off,

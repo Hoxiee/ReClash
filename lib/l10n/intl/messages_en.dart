@@ -99,11 +99,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(count) => "${count} selected";
 
-  static String m32(total) => "free of ${total}";
+  static String m32(minutes) => "${minutes} min";
 
-  static String m33(label) => "${label} must be a URL";
+  static String m33(total) => "free of ${total}";
 
-  static String m34(count) =>
+  static String m34(label) => "${label} must be a URL";
+
+  static String m35(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -331,6 +333,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Control global added rules",
     ),
     "copy": MessageLookupByLibrary.simpleMessage("Copy"),
+    "copyDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Copy version info",
+    ),
     "copyEnvVar": MessageLookupByLibrary.simpleMessage(
       "Copy environment variables",
     ),
@@ -354,6 +359,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "createProfile": MessageLookupByLibrary.simpleMessage("Create profile"),
     "createProfileFromUrlTip": m3,
     "creationTime": MessageLookupByLibrary.simpleMessage("Creation time"),
+    "creditFlClash": MessageLookupByLibrary.simpleMessage(
+      "FlClash — the client this is built on",
+    ),
+    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
+      "FlClash contributor",
+    ),
+    "creditFlClashX": MessageLookupByLibrary.simpleMessage(
+      "FlClashX — provider features and ideas",
+    ),
+    "creditMihomo": MessageLookupByLibrary.simpleMessage(
+      "mihomo — the proxy core",
+    ),
     "custom": MessageLookupByLibrary.simpleMessage("Custom"),
     "customUserAgentLabel": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
@@ -389,7 +406,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteMultipTip": m6,
     "deleteTip": m7,
     "desc": MessageLookupByLibrary.simpleMessage(
-      "A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.",
+      "A multi-platform mihomo client: a rebuilt dashboard, smarter routing and first-class subscription support. Open source, no ads, no telemetry.",
     ),
     "destination": MessageLookupByLibrary.simpleMessage("Destination"),
     "destinationGeoIP": MessageLookupByLibrary.simpleMessage(
@@ -517,6 +534,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Go to script configuration",
     ),
+    "gratitude": MessageLookupByLibrary.simpleMessage("Gratitude"),
+    "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash exists because of their work",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Cache the changes?",
     ),
@@ -525,6 +546,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("Connecting…"),
     "heroJustNow": MessageLookupByLibrary.simpleMessage("just now"),
+    "heroLinkBroken": MessageLookupByLibrary.simpleMessage(
+      "Connection is not working",
+    ),
+    "heroLinkDown": MessageLookupByLibrary.simpleMessage(
+      "The node is not responding",
+    ),
+    "heroLinkPaused": MessageLookupByLibrary.simpleMessage(
+      "Traffic is paused, protection is on hold",
+    ),
+    "heroLinkSlow": MessageLookupByLibrary.simpleMessage(
+      "The node is responding slowly",
+    ),
     "heroNotProtected": MessageLookupByLibrary.simpleMessage("Not protected"),
     "heroPaused": MessageLookupByLibrary.simpleMessage(
       "Paused — trusted network",
@@ -591,9 +624,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Enter the rule content",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -646,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The app exited unexpectedly while it was starting up last time. Automatic setup was skipped for this launch; you can start it manually to retry.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
+    "license": MessageLookupByLibrary.simpleMessage("License"),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
     "listen": MessageLookupByLibrary.simpleMessage("Listen"),
@@ -681,6 +716,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Used for UWP loopback exemption",
     ),
     "loose": MessageLookupByLibrary.simpleMessage("Loose"),
+    "madeBy": MessageLookupByLibrary.simpleMessage("Made by"),
     "matchSourceIp": MessageLookupByLibrary.simpleMessage("Match source IP"),
     "matchTarget": MessageLookupByLibrary.simpleMessage("MATCH-TARGET"),
     "matchTargetDesc": MessageLookupByLibrary.simpleMessage(
@@ -971,6 +1007,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Restore successful",
     ),
     "resume": MessageLookupByLibrary.simpleMessage("Resume"),
+    "roleAuthor": MessageLookupByLibrary.simpleMessage("Author and maintainer"),
     "routeAddress": MessageLookupByLibrary.simpleMessage("Route addresses"),
     "routeAddressDesc": MessageLookupByLibrary.simpleMessage(
       "Configure the listened route addresses",
@@ -1139,9 +1176,67 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartPauseDesc": MessageLookupByLibrary.simpleMessage(
       "Pause the VPN automatically on trusted networks",
     ),
+    "smartRouting": MessageLookupByLibrary.simpleMessage("Smart routing"),
+    "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
+      "Keeps a working server picked for every network, without opening the app",
+    ),
+    "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
+      "Local servers during a shutdown",
+    ),
+    "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
+      "A last resort on a whitelist network, so local services keep working",
+    ),
+    "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
+      "Respect a manual pick",
+    ),
+    "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
+      "How long a server you chose yourself is left alone",
+    ),
+    "smartRoutingManualHoldMinutes": m32,
+    "smartRoutingManualHoldOff": MessageLookupByLibrary.simpleMessage(
+      "Not respected",
+    ),
+    "smartRoutingNoServers": MessageLookupByLibrary.simpleMessage(
+      "No reachable servers",
+    ),
+    "smartRoutingOn": MessageLookupByLibrary.simpleMessage(
+      "Smart routing is on",
+    ),
+    "smartRoutingPortal": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi sign-in required",
+    ),
+    "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Preset"),
+    "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("China"),
+    "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Iran"),
+    "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Off"),
+    "smartRoutingPresetRuHome": MessageLookupByLibrary.simpleMessage(
+      "Russia — home",
+    ),
+    "smartRoutingPresetRuMobile": MessageLookupByLibrary.simpleMessage(
+      "Russia — mobile",
+    ),
+    "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
+      "Restricted network · local services stay direct",
+    ),
+    "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
+      "Server is not answering, looking for another",
+    ),
+    "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
+      "Available in Rule mode only",
+    ),
+    "smartRoutingSaveData": MessageLookupByLibrary.simpleMessage(
+      "Save mobile data",
+    ),
+    "smartRoutingSaveDataDesc": MessageLookupByLibrary.simpleMessage(
+      "Narrow the probe burst on a metered link",
+    ),
+    "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
+      "Picking a server…",
+    ),
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
+    "sourceCode": MessageLookupByLibrary.simpleMessage("Source code"),
     "sourceIp": MessageLookupByLibrary.simpleMessage("Source IP"),
     "specialProxy": MessageLookupByLibrary.simpleMessage("Special proxy"),
     "specialRules": MessageLookupByLibrary.simpleMessage("Special rules"),
@@ -1231,7 +1326,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Flashlight"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m32,
+    "trafficFreeOfTotal": m33,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Trusted networks"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -1264,7 +1359,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",
     ),
-    "urlTip": m33,
+    "urlTip": m34,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -1285,7 +1380,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m34,
+    "yearsAgo": m35,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }
