@@ -10,14 +10,14 @@ import 'dart:io' show ZLibDecoder;
 import 'skipped_node.dart';
 import 'subscription_links.dart';
 
-class WireguardConfResult implements ConvertedSubscription {
-  const WireguardConfResult({required this.config, this.skipped = const []});
+class _WireguardConfResult implements ConvertedSubscription {
+  const _WireguardConfResult({required this.config});
 
   @override
   final String config;
 
   @override
-  final List<SkippedNode> skipped;
+  List<SkippedNode> get skipped => const [];
 }
 
 bool isWireguardConfInput(String body) {
@@ -28,7 +28,7 @@ bool isWireguardConfInput(String body) {
   return decoded != null && _looksLikeConf(decoded);
 }
 
-WireguardConfResult? tryConvertWireguardConf(String body) {
+ConvertedSubscription? tryConvertWireguardConf(String body) {
   final trimmed = body.trim();
   var conf = trimmed;
   if (!_looksLikeConf(conf)) {
@@ -36,7 +36,7 @@ WireguardConfResult? tryConvertWireguardConf(String body) {
   }
   final proxy = _looksLikeConf(conf) ? parseAwgConf(conf) : null;
   if (proxy == null) return null;
-  return WireguardConfResult(config: emitProxiesConfig([proxy]));
+  return _WireguardConfResult(config: emitProxiesConfig([proxy]));
 }
 
 bool _looksLikeConf(String text) {
@@ -99,7 +99,9 @@ Map<String, Object?>? parseAwgConf(String conf, {String? name}) {
 
 /// `[Interface]` and `[Device]` describe the same device and merge; only the
 /// first `[Peer]` is kept.
-(Map<String, String>, Map<String, String>, List<String>) _parseIni(String text) {
+(Map<String, String>, Map<String, String>, List<String>) _parseIni(
+  String text,
+) {
   final interface = <String, String>{};
   final peer = <String, String>{};
   final comments = <String>[];
@@ -126,8 +128,9 @@ Map<String, Object?>? parseAwgConf(String conf, {String? name}) {
     }
     final eq = line.indexOf('=');
     if (eq <= 0 || section == null) continue;
-    section[line.substring(0, eq).trim().toLowerCase()] =
-        line.substring(eq + 1).trim();
+    section[line.substring(0, eq).trim().toLowerCase()] = line
+        .substring(eq + 1)
+        .trim();
   }
   return (interface, peer, comments);
 }
@@ -177,9 +180,7 @@ const _v3BoolKeys = {
 
 Map<String, Object?>? _amneziaOption(Map<String, String> fields) {
   final option = <String, Object?>{};
-  for (final key in const [
-    'jc', 'jmin', 'jmax', 's1', 's2', 's3', 's4',
-  ]) {
+  for (final key in const ['jc', 'jmin', 'jmax', 's1', 's2', 's3', 's4']) {
     final value = int.tryParse(fields[key] ?? '');
     if (value != null && value != 0) option[key] = value;
   }
@@ -275,9 +276,14 @@ String _normalizeKey(String value) {
   for (final entry in share['containers']! as List) {
     if (entry is! Map<String, Object?>) continue;
     final containerName = entry['container']?.toString();
-    final isWireguardFamily = containerName != null &&
-        const ['amnezia-awg', 'amnezia-wg', 'wireguard', 'awg']
-            .contains(containerName);
+    final isWireguardFamily =
+        containerName != null &&
+        const [
+          'amnezia-awg',
+          'amnezia-wg',
+          'wireguard',
+          'awg',
+        ].contains(containerName);
     Map<String, Object?>? protocolConfig;
     for (final key in const ['amnezia-awg', 'wireguard']) {
       if (entry[key] is Map<String, Object?>) {
@@ -291,11 +297,9 @@ String _normalizeKey(String value) {
     }
     if (protocolConfig == null) {
       final kind = containerName ?? 'container';
-      skipped.add(SkippedNode(
-        name: kind,
-        kind: kind,
-        reason: SkippedNodeReason.protocol,
-      ));
+      skipped.add(
+        SkippedNode(name: kind, kind: kind, reason: SkippedNodeReason.protocol),
+      );
       continue;
     }
     final proxy = _convertAmneziaContainer(share, protocolConfig);
@@ -309,8 +313,9 @@ Map<String, Object?>? _convertAmneziaContainer(
   Map<String, Object?> protocolConfig,
 ) {
   final lastConfig = _tryJson(protocolConfig['last_config']?.toString() ?? '');
-  final source =
-      lastConfig is Map<String, Object?> ? lastConfig : protocolConfig;
+  final source = lastConfig is Map<String, Object?>
+      ? lastConfig
+      : protocolConfig;
   final client = source['clientConfig'] is Map<String, Object?>
       ? source['clientConfig']! as Map<String, Object?>
       : source;
@@ -333,8 +338,12 @@ Map<String, Object?>? _convertAmneziaContainer(
       host.isEmpty ||
       port == null ||
       // The values ride through an INI round-trip; a newline would inject.
-      [privateKey, serverPublicKey, host, psk]
-          .any((value) => value.contains(RegExp(r'[\r\n]')))) {
+      [
+        privateKey,
+        serverPublicKey,
+        host,
+        psk,
+      ].any((value) => value.contains(RegExp(r'[\r\n]')))) {
     return null;
   }
   final buffer = StringBuffer('[Interface]\n')
@@ -366,11 +375,31 @@ String? _flatAddress(Map<String, Object?> client) {
 }
 
 const _awgConfKeys = [
-  'Jc', 'Jmin', 'Jmax', 'S1', 'S2', 'S3', 'S4',
-  'H1', 'H2', 'H3', 'H4', 'I1', 'I2', 'I3', 'I4', 'I5',
-  'HeaderProtectionKey', 'ContentPaddingAddition', 'RekeyAfterTime',
-  'RekeyTimeout', 'RejectAfterTime', 'KeepaliveTimeout',
-  'MaxHandshakeAttempts', 'RandomTrailers', 'DisableCookies',
+  'Jc',
+  'Jmin',
+  'Jmax',
+  'S1',
+  'S2',
+  'S3',
+  'S4',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'I1',
+  'I2',
+  'I3',
+  'I4',
+  'I5',
+  'HeaderProtectionKey',
+  'ContentPaddingAddition',
+  'RekeyAfterTime',
+  'RekeyTimeout',
+  'RejectAfterTime',
+  'KeepaliveTimeout',
+  'MaxHandshakeAttempts',
+  'RandomTrailers',
+  'DisableCookies',
 ];
 
 Object? _tryJson(String body) {
