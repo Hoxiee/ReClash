@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -161,7 +162,32 @@ func updateListeners(cfg *config.Config) {
 		if tunPaused.Load() {
 			tunConf.Enable = false
 		}
-		listener.ReCreateTun(tunConf, tunnel.Tunnel)
+		if tunConf.Enable && tunConf.Device != "" && !listener.GetTunConf().Enable {
+			recreateTunWhenNameFree(tunConf)
+		} else {
+			listener.ReCreateTun(tunConf, tunnel.Tunnel)
+		}
+	}
+}
+
+// A closed TUN netdevice unregisters asynchronously (~2s on Linux); creating while the dying device still holds the name attaches to it and wedges netlink — create only on a free name, and treat a free-name failure as a real error.
+func recreateTunWhenNameFree(tunConf LC.Tun) {
+	deadline := time.Now().Add(8 * time.Second)
+	for {
+		if _, err := net.InterfaceByName(tunConf.Device); err != nil {
+			listener.ReCreateTun(tunConf, tunnel.Tunnel)
+			if listener.GetTunConf().Enable {
+				return
+			}
+			if _, err := net.InterfaceByName(tunConf.Device); err != nil {
+				return
+			}
+		}
+		if !time.Now().Before(deadline) {
+			log.Warnln("[APP] TUN %s still holds its name after 8s, giving up recreate", tunConf.Device)
+			return
+		}
+		time.Sleep(250 * time.Millisecond)
 	}
 }
 
