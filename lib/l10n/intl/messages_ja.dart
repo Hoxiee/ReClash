@@ -291,9 +291,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — 本アプリの基盤クライアント",
     ),
-    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
-      "FlClash コントリビューター",
-    ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
       "FlClashX — プロバイダ機能とアイデア",
     ),

@@ -1000,16 +1000,6 @@ class AppLocalizations {
     );
   }
 
-  /// `FlClash contributor`
-  String get creditFlClashContributor {
-    return Intl.message(
-      'FlClash contributor',
-      name: 'creditFlClashContributor',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `License`
   String get license {
     return Intl.message('License', name: 'license', desc: '', args: []);

@@ -261,9 +261,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — 本应用的基础客户端",
     ),
-    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
-      "FlClash 贡献者",
-    ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
       "FlClashX — 机场功能与思路",
     ),

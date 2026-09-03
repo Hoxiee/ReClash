@@ -362,9 +362,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — the client this is built on",
     ),
-    "creditFlClashContributor": MessageLookupByLibrary.simpleMessage(
-      "FlClash contributor",
-    ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
       "FlClashX — provider features and ideas",
     ),

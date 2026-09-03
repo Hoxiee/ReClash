@@ -2,23 +2,24 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/list.dart';
-import 'package:reclash/widgets/scaffold.dart';
+import 'package:reclash/widgets/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 @immutable
-class Contributor {
+class Credit {
   final String avatar;
   final String name;
+  final String role;
   final String link;
 
-  const Contributor({
+  const Credit({
     required this.avatar,
     required this.name,
+    required this.role,
     required this.link,
   });
 }
@@ -35,74 +36,19 @@ class AboutView extends ConsumerWidget {
     unawaited(commonAction.checkUpdateResultHandle(data: data, isUser: true));
   }
 
-  List<Widget> _buildMoreSection(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    return generateSection(
-      separated: false,
-      title: appLocalizations.more,
-      items: [
-        ListItem(
-          title: Text(appLocalizations.checkUpdate),
-          onTap: () {
-            _checkUpdate(context, ref);
-          },
-        ),
-        ListItem(
-          title: const Text('Telegram'),
-          onTap: () {
-            dialogs.openUrl('https://t.me/FlClash');
-          },
-          trailing: const Icon(Icons.launch),
-        ),
-        ListItem(
-          title: Text(appLocalizations.project),
-          onTap: () {
-            dialogs.openUrl('https://github.com/$repository');
-          },
-          trailing: const Icon(Icons.launch),
-        ),
-        ListItem(
-          title: Text(appLocalizations.core),
-          onTap: () {
-            dialogs.openUrl(
-              'https://github.com/chen08209/Clash.Meta/tree/FlClash',
-            );
-          },
-          trailing: const Icon(Icons.launch),
-        ),
-      ],
-    );
-  }
-
-  List<Widget> _buildContributorsSection(AppLocalizations appLocalizations) {
-    const contributors = [
-      Contributor(
-        avatar: 'assets/images/avatar/june2.jpg',
-        name: 'June2',
-        link: 'https://t.me/Jibadong',
-      ),
-      Contributor(
-        avatar: 'assets/images/avatar/arue.jpg',
-        name: 'Arue',
-        link: 'https://t.me/xrcm6868',
-      ),
-    ];
-    return generateSection(
-      separated: false,
-      title: appLocalizations.otherContributors,
-      items: [
-        ListItem(
-          title: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Wrap(
-              spacing: 24,
-              children: [
-                for (final contributor in contributors)
-                  Avatar(contributor: contributor),
-              ],
-            ),
-          ),
-        ),
+  Widget _buildCreditSection({
+    required String title,
+    String? subTitle,
+    required List<Credit> credits,
+  }) {
+    final items = [for (final credit in credits) _CreditItem(credit: credit)];
+    if (subTitle == null) {
+      return generateSectionV3(title: title, items: items);
+    }
+    return Column(
+      children: [
+        ListHeader(title: title, subTitle: subTitle),
+        generateSectionV3(items: items),
       ],
     );
   }
@@ -110,96 +56,227 @@ class AboutView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final items = [
-      ListTile(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Consumer(
-              builder: (_, ref, _) {
-                return _DeveloperModeDetector(
-                  child: Wrap(
-                    spacing: 16,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Image.asset(
-                          'assets/images/icon.png',
-                          width: 64,
-                          height: 64,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appName,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          Text(
-                            globalState.packageInfo.version,
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  onEnterDeveloperMode: () {
-                    ref
-                        .read(appSettingProvider.notifier)
-                        .update((state) => state.copyWith(developerMode: true));
-                    context.showNotifier(
-                      appLocalizations.developerModeEnableTip,
-                      level: MessageLevel.success,
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            Text(
-              appLocalizations.desc,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
+    final author = Credit(
+      avatar: 'assets/images/avatar/hoxiee.jpg',
+      name: 'Hoxiee',
+      role: appLocalizations.roleAuthor,
+      link: 'https://github.com/Hoxiee',
+    );
+    final gratitude = [
+      Credit(
+        avatar: 'assets/images/avatar/chen08209.jpg',
+        name: 'chen08209',
+        role: appLocalizations.creditFlClash,
+        link: 'https://github.com/chen08209/FlClash',
       ),
-      const SizedBox(height: 12),
-      ..._buildContributorsSection(appLocalizations),
-      ..._buildMoreSection(context, ref),
+      Credit(
+        avatar: 'assets/images/avatar/pluralplay.jpg',
+        name: 'pluralplay',
+        role: appLocalizations.creditFlClashX,
+        link: 'https://github.com/pluralplay/FlClashX',
+      ),
+      Credit(
+        avatar: 'assets/images/avatar/metacubex.jpg',
+        name: 'MetaCubeX',
+        role: appLocalizations.creditMihomo,
+        link: 'https://github.com/MetaCubeX/mihomo',
+      ),
     ];
     return BaseScaffold(
       title: appLocalizations.about,
-      body: Padding(
-        padding: kMaterialListPadding.copyWith(top: 16, bottom: 16),
-        child: generateListView(items),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        children: [
+          const _IdentityCard(),
+          _buildCreditSection(
+            title: appLocalizations.madeBy,
+            credits: [author],
+          ),
+          _buildCreditSection(
+            title: appLocalizations.gratitude,
+            subTitle: appLocalizations.gratitudeDesc,
+            credits: gratitude,
+          ),
+          generateSectionV3(
+            title: appLocalizations.more,
+            items: [
+              DecorationListItem(
+                title: Text(appLocalizations.checkUpdate),
+                leading: const Icon(Icons.update),
+                onPressed: () {
+                  _checkUpdate(context, ref);
+                },
+              ),
+              DecorationListItem(
+                title: Text(appLocalizations.sourceCode),
+                subtitle: const Text(repository),
+                leading: const Icon(Icons.code),
+                trailing: const Icon(Icons.launch, size: 20),
+                onPressed: () {
+                  dialogs.openUrl('https://github.com/$repository');
+                },
+              ),
+              DecorationListItem(
+                title: Text(appLocalizations.core),
+                subtitle: const Text('mihomo'),
+                leading: const Icon(Icons.memory),
+                trailing: const Icon(Icons.launch, size: 20),
+                onPressed: () {
+                  dialogs.openUrl(
+                    'https://github.com/chen08209/Clash.Meta/tree/FlClash',
+                  );
+                },
+              ),
+              DecorationListItem(
+                title: const Text('Telegram'),
+                leading: const Icon(Icons.telegram),
+                trailing: const Icon(Icons.launch, size: 20),
+                onPressed: () {
+                  dialogs.openUrl('https://t.me/FlClash');
+                },
+              ),
+              DecorationListItem(
+                title: Text(appLocalizations.license),
+                subtitle: const Text('GPL-3.0'),
+                leading: const Icon(Icons.balance),
+                trailing: const Icon(Icons.launch, size: 20),
+                onPressed: () {
+                  dialogs.openUrl(
+                    'https://github.com/$repository/blob/main/LICENSE',
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class Avatar extends StatelessWidget {
-  final Contributor contributor;
+class _IdentityCard extends ConsumerWidget {
+  const _IdentityCard();
 
-  const Avatar({super.key, required this.contributor});
+  /// Only asks the core while it is up: a stopped core would burn the 2s
+  /// timeout and leave a pending timer behind.
+  Widget _buildCoreChip(WidgetRef ref) {
+    final isConnected =
+        ref.watch(coreStatusProvider) == CoreStatus.connected;
+    if (!isConnected) return const SizedBox.shrink();
+    return FutureBuilder<String?>(
+      future: deviceIdentity.coreVersion,
+      builder: (_, snapshot) {
+        final version = snapshot.data;
+        if (version == null) return const SizedBox.shrink();
+        return MetaChip(label: 'core $version');
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final textTheme = context.textTheme;
+    final version = globalState.packageInfo.version;
+    final platform = SupportPlatform.currentPlatform.name;
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: const EdgeInsets.all(20),
+      onLongPress: () {
+        Clipboard.setData(
+          ClipboardData(
+            text: '$appName $version '
+                '(${globalState.packageInfo.buildNumber}) · $platform',
+          ),
+        );
+        context.showNotifier(appLocalizations.copySuccess);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16,
+        children: [
+          Row(
+            spacing: 16,
+            children: [
+              _DeveloperModeDetector(
+                onEnterDeveloperMode: () {
+                  ref
+                      .read(appSettingProvider.notifier)
+                      .update((state) => state.copyWith(developerMode: true));
+                  context.showNotifier(
+                    appLocalizations.developerModeEnableTip,
+                    level: MessageLevel.success,
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  width: 64,
+                  height: 64,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 6,
+                  children: [
+                    Text(
+                      appName,
+                      style: textTheme.headlineSmall?.copyWith(
+                        color: context.colorScheme.onSurface,
+                      ),
+                    ),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        MetaChip(label: 'v$version'),
+                        MetaChip(label: platform),
+                        _buildCoreChip(ref),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Text(
+            appLocalizations.desc,
+            style: textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            appLocalizations.copyDiagnostics,
+            style: textTheme.labelSmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant.opacity60,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CreditItem extends StatelessWidget {
+  final Credit credit;
+
+  const _CreditItem({required this.credit});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      child: Column(
-        children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: CircleAvatar(
-              foregroundImage: AssetImage(contributor.avatar),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(contributor.name, style: context.textTheme.bodySmall),
-        ],
+    return DecorationListItem(
+      leading: SizedBox(
+        width: 40,
+        height: 40,
+        child: CircleAvatar(foregroundImage: AssetImage(credit.avatar)),
       ),
+      title: Text(credit.name),
+      subtitle: Text(credit.role),
+      trailing: const Icon(Icons.launch, size: 20),
+      onPressed: () {
+        dialogs.openUrl(credit.link);
+      },
     );
   }
 }
@@ -209,8 +286,8 @@ class _DeveloperModeDetector extends StatefulWidget {
   final VoidCallback onEnterDeveloperMode;
 
   const _DeveloperModeDetector({
-    required this.child,
     required this.onEnterDeveloperMode,
+    required this.child,
   });
 
   @override
