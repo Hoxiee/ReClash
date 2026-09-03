@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -17,23 +18,28 @@ class MetaInfo extends StatelessWidget {
     return SizedBox(
       height: getWidgetHeight(2),
       child: RepaintBoundary(
-        child: CommonCard(
-          radius: AppCorner.lg,
-          info: Info(
-            label: appLocalizations.metaInfo,
-            iconData: Icons.event_available,
-          ),
-          onPressed: () {},
-          child: Consumer(
-            builder: (_, ref, _) {
-              final profile = ref.watch(currentProfileProvider);
-              final subscriptionInfo = profile?.subscriptionInfo;
-              return _MetaInfoBody(
+        child: Consumer(
+          builder: (_, ref, _) {
+            final profile = ref.watch(currentProfileProvider);
+            final subscriptionInfo = profile?.subscriptionInfo;
+            return CommonCard(
+              radius: AppCorner.lg,
+              info: Info(
+                label: appLocalizations.metaInfo,
+                iconData: Icons.event_available,
+              ),
+              infoActions: profile != null && profile.type == ProfileType.url
+                  ? [_UpdateAction(profile: profile)]
+                  : null,
+              onPressed: subscriptionInfo == null
+                  ? null
+                  : () => showSubscriptionInfoDialog(context, subscriptionInfo),
+              child: _MetaInfoBody(
                 profileLabel: profile?.realLabel ?? '',
                 subscriptionInfo: subscriptionInfo,
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -58,14 +64,12 @@ class _MetaInfoBody extends StatelessWidget {
         : DateTime.fromMillisecondsSinceEpoch(expire * 1000);
     final isPerpetual =
         expire == 0 || (expireDate?.year ?? 0) >= _perpetualExpireYear;
-    final now = DateTime.now();
-    final daysLeft = expireDate?.difference(now).inDays;
-    final remaining = subscriptionInfo == null || subscriptionInfo!.total == 0
-        ? null
-        : subscriptionInfo!.total -
-              subscriptionInfo!.upload -
-              subscriptionInfo!.download;
-    final expireStyle = isPerpetual || daysLeft == null || daysLeft > _expiringSoonDays
+    var daysLeft = expireDate?.difference(DateTime.now()).inDays;
+    if (daysLeft != null && daysLeft < 0) {
+      daysLeft = 0;
+    }
+    final expireStyle =
+        isPerpetual || daysLeft == null || daysLeft > _expiringSoonDays
         ? context.textTheme.titleMedium?.toLight.adjustSize(4)
         : context.textTheme.titleMedium?.toLight
               .adjustSize(4)
@@ -96,18 +100,53 @@ class _MetaInfoBody extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: expireStyle,
           ),
-          const SizedBox(height: 4),
-          Text(
-            remaining == null
-                ? appLocalizations.infiniteTime
-                : '${appLocalizations.remainingTraffic}: '
-                      '${remaining.traffic.show}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.toLighter,
-          ),
+          if (subscriptionInfo != null && subscriptionInfo!.total > 0) ...[
+            const SizedBox(height: 6),
+            SubscriptionInfoView(subscriptionInfo: subscriptionInfo!),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _UpdateAction extends ConsumerWidget {
+  const _UpdateAction({required this.profile});
+
+  final Profile profile;
+
+  Future<void> _handleUpdate(WidgetRef ref) async {
+    try {
+      await ref
+          .read(profilesActionProvider.notifier)
+          .updateProfile(profile, showLoading: true);
+    } catch (e) {
+      dialogs.showNotifier(
+        userFacingErrorMessage(e, currentAppLocalizations),
+        level: MessageLevel.error,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isUpdating = ref.watch(isUpdatingProvider(profile.updatingKey));
+    return FadeThroughBox(
+      child: isUpdating
+          ? const Padding(
+              key: ValueKey('loading'),
+              padding: EdgeInsets.all(8),
+              child: CommonCircleLoading(),
+            )
+          : IconButton(
+              key: const ValueKey('update'),
+              style: IconButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              tooltip: context.appLocalizations.update,
+              onPressed: () => _handleUpdate(ref),
+              icon: const Icon(Icons.sync),
+            ),
     );
   }
 }

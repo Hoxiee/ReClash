@@ -658,6 +658,7 @@
   "trafficFreeOfTotal": "剩余（共 {total}）",
   "subscriptionCaption": "订阅",
   "renewSubscription": "续订订阅",
+  "topUpTraffic": "购买流量",
   "remaining": "剩余",
   "determiningIp": "正在获取 IP...",
   "day": "天",

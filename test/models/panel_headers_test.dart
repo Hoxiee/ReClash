@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:reclash/models/models.dart';
 import 'package:test/test.dart';
 
@@ -35,6 +37,59 @@ void main() {
       });
 
       expect(map['updateIntervalMinutes'], '300');
+    });
+
+    test('decodes prefixed base64 announcements', () {
+      for (final prefix in ['base64,', 'base64:']) {
+        final encoded = base64Encode(utf8.encode('Maintenance at 3am'));
+        final map = normalizePanelHeaders({
+          'announce': ['$prefix$encoded'],
+        });
+
+        expect(map['announce'], 'Maintenance at 3am');
+      }
+    });
+
+    test('decodes well-formed unprefixed base64 announcements', () {
+      final encoded = base64Encode(utf8.encode('Скидка 50%'));
+      final map = normalizePanelHeaders({
+        'announce': [encoded],
+      });
+
+      expect(map['announce'], 'Скидка 50%');
+    });
+
+    test('keeps plain announcements and invalid base64 as-is', () {
+      for (final value in [
+        'Maintenance at 3am',
+        'Плановые работы',
+        'base64,',
+        'not~base64',
+        'abcd',
+      ]) {
+        final map = normalizePanelHeaders({
+          'announce': [value],
+        });
+
+        expect(map['announce'], value, reason: '"$value" must stay as-is');
+      }
+    });
+
+    test('decodes base64 service names and keeps plain ones', () {
+      final encoded = base64Encode(utf8.encode('Полярный VPN'));
+      final map = normalizePanelHeaders({
+        'reclash-servicename': ['base64:$encoded'],
+      });
+
+      expect(map['serviceName'], 'Полярный VPN');
+
+      for (final value in ['Kiwi', 'Star', 'Example VPN', 'Selector']) {
+        final plain = normalizePanelHeaders({
+          'reclash-servicename': [value],
+        });
+
+        expect(plain['serviceName'], value, reason: '"$value" must stay as-is');
+      }
     });
 
     test('drops unknown and empty headers', () {
@@ -142,11 +197,7 @@ void main() {
         'reclash-settings': ['Minimize, AUTORUN, closeconnections'],
       });
 
-      expect(meta.settings, [
-        'minimize',
-        'autorun',
-        'closeconnections',
-      ]);
+      expect(meta.settings, ['minimize', 'autorun', 'closeconnections']);
     });
 
     test('empty response yields inert meta', () {

@@ -658,6 +658,7 @@
   "trafficFreeOfTotal": "свободно из {total}",
   "subscriptionCaption": "Подписка",
   "renewSubscription": "Продлить подписку",
+  "topUpTraffic": "Докупить трафик",
   "remaining": "Осталось",
   "determiningIp": "Определяю IP..",
   "day": "день",

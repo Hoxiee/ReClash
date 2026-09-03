@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
@@ -29,8 +31,13 @@ class InfoHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     EdgeInsetsGeometry nextPadding = (padding ?? baseInfoEdgeInsets);
-    if (actions.isNotEmpty) {
-      nextPadding = nextPadding.subtract(EdgeInsets.symmetric(vertical: 8.mAp));
+    if (actions.isNotEmpty && nextPadding is EdgeInsets) {
+      nextPadding = EdgeInsets.only(
+        left: nextPadding.left,
+        right: nextPadding.right,
+        top: max(0, nextPadding.top - 8.mAp),
+        bottom: max(0, nextPadding.bottom - 8.mAp),
+      );
     }
     return Padding(
       padding: nextPadding,
@@ -93,6 +100,7 @@ class CommonCard extends StatelessWidget {
     this.padding,
     this.enterAnimated = false,
     this.info,
+    this.infoActions,
     this.onLongPress,
     this.shape,
     this.isError = false,
@@ -112,6 +120,7 @@ class CommonCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
   final Info? info;
+  final List<Widget>? infoActions;
   final CommonCardType type;
   final double? radius;
   final OutlinedBorder? shape;
@@ -258,6 +267,7 @@ class CommonCard extends StatelessWidget {
           InfoHeader(
             padding: baseInfoEdgeInsets.copyWith(bottom: 0),
             info: info!,
+            actions: infoActions,
           ),
           Flexible(flex: 1, child: child),
         ],

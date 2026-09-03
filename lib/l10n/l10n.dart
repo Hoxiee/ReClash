@@ -5482,6 +5482,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Top up traffic`
+  String get topUpTraffic {
+    return Intl.message(
+      'Top up traffic',
+      name: 'topUpTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remaining`
   String get remaining {
     return Intl.message('Remaining', name: 'remaining', desc: '', args: []);

@@ -658,6 +658,7 @@
   "trafficFreeOfTotal": "free of {total}",
   "subscriptionCaption": "Subscription",
   "renewSubscription": "Renew subscription",
+  "topUpTraffic": "Top up traffic",
   "remaining": "Remaining",
   "determiningIp": "Determining IP...",
   "day": "day",

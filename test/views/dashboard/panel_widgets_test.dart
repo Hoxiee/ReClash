@@ -5,6 +5,7 @@ import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/change_server_button.dart';
 import 'package:reclash/views/dashboard/widgets/meta_info.dart';
 import 'package:reclash/views/dashboard/widgets/service_info.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,8 +30,9 @@ void main() {
   late ProviderContainer container;
 
   void setProfile(Profile profile) {
-    (container.read(profilesProvider.notifier) as TestProfiles)
-        .replace([profile]);
+    (container.read(profilesProvider.notifier) as TestProfiles).replace([
+      profile,
+    ]);
   }
 
   setUp(() {
@@ -53,7 +55,9 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: TestApp(child: Scaffold(body: ListView(children: [widget]))),
+        child: TestApp(
+          child: Scaffold(body: ListView(children: [widget])),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -74,6 +78,18 @@ void main() {
       await pumpWidget(tester, const Announce());
 
       expect(find.text('No announcements'), findsOneWidget);
+    });
+
+    testWidgets('opens the full announcement on tap', (tester) async {
+      const text = 'Maintenance at 3am https://example.com/status';
+      setProfile(_profile(panelMeta: const PanelMeta(announce: text)));
+      await pumpWidget(tester, const Announce());
+
+      await tester.tap(find.byType(Announce));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+      expect(find.text(text), findsNWidgets(2));
     });
   });
 
@@ -96,15 +112,86 @@ void main() {
         _profile(
           subscriptionInfo: SubscriptionInfo(
             total: 100,
-            expire: DateTime.now()
-                .add(const Duration(days: 5, hours: 1))
-                .millisecondsSinceEpoch ~/ 1000,
+            expire:
+                DateTime.now()
+                    .add(const Duration(days: 5, hours: 1))
+                    .millisecondsSinceEpoch ~/
+                1000,
           ),
         ),
       );
       await pumpWidget(tester, const MetaInfo());
 
       expect(find.text('5 days left'), findsOneWidget);
+    });
+
+    testWidgets('shows the traffic progress for metered subscriptions', (
+      tester,
+    ) async {
+      setProfile(
+        _profile(
+          subscriptionInfo: const SubscriptionInfo(
+            upload: 25,
+            download: 25,
+            total: 100,
+          ),
+        ),
+      );
+      await pumpWidget(tester, const MetaInfo());
+
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.text('50B / 100B'), findsOneWidget);
+    });
+
+    testWidgets('hides the traffic progress for unlimited subscriptions', (
+      tester,
+    ) async {
+      setProfile(
+        _profile(
+          subscriptionInfo: SubscriptionInfo(
+            expire:
+                DateTime.now()
+                    .add(const Duration(days: 30))
+                    .millisecondsSinceEpoch ~/
+                1000,
+          ),
+        ),
+      );
+      await pumpWidget(tester, const MetaInfo());
+
+      expect(find.byType(LinearProgressIndicator), findsNothing);
+    });
+
+    testWidgets('opens the subscription info on tap', (tester) async {
+      setProfile(
+        _profile(
+          subscriptionInfo: const SubscriptionInfo(
+            upload: 25,
+            total: 100,
+            expire: 1893456000,
+          ),
+        ),
+      );
+      await pumpWidget(tester, const MetaInfo());
+
+      await tester.tap(find.byType(MetaInfo));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Subscription info'), findsOneWidget);
+    });
+
+    testWidgets('offers a sync action for url profiles', (tester) async {
+      setProfile(
+        _profile(
+          subscriptionInfo: const SubscriptionInfo(
+            total: 100,
+            expire: 1893456000,
+          ),
+        ),
+      );
+      await pumpWidget(tester, const MetaInfo());
+
+      expect(find.byIcon(Icons.sync), findsOneWidget);
     });
   });
 

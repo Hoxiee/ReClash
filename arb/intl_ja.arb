@@ -658,6 +658,7 @@
   "trafficFreeOfTotal": "残り（{total} 中）",
   "subscriptionCaption": "サブスクリプション",
   "renewSubscription": "サブスクリプションを更新",
+  "topUpTraffic": "データ量を追加",
   "remaining": "残り",
   "determiningIp": "IPを確認中...",
   "day": "日",

@@ -219,31 +219,7 @@ class ProfileItem extends ConsumerWidget {
   }
 
   void _handleShowSubscriptionInfo(BuildContext context) {
-    unawaited(
-      dialogs.showCommonDialog<void>(
-        context: context,
-        child: Builder(
-          builder: (context) {
-            return CommonDialog(
-              backgroundColor: context.colorScheme.surfaceContainerLow,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              title: context.appLocalizations.subscriptionInfo,
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(context.appLocalizations.confirm),
-                ),
-              ],
-              child: SubscriptionInfoDetailView(
-                subscriptionInfo: profile.subscriptionInfo!,
-              ),
-            );
-          },
-        ),
-      ),
-    );
+    showSubscriptionInfoDialog(context, profile.subscriptionInfo!);
   }
 
   Future updateProfile(WidgetRef ref) async {

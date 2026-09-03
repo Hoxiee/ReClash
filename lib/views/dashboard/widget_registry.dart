@@ -49,7 +49,7 @@ extension DashboardWidgetView on DashboardWidget {
       child: MetaInfo(),
     ),
     DashboardWidget.announce => const GridItem(
-      crossAxisCellCount: 4,
+      crossAxisCellCount: 8,
       child: Announce(),
     ),
     DashboardWidget.serviceInfo => const GridItem(

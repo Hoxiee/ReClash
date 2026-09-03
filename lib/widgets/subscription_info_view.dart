@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'dialog.dart';
 import 'list.dart';
 import 'text.dart';
 
@@ -102,14 +105,42 @@ class SubscriptionInfoView extends StatelessWidget {
           minHeight: 4,
           value: progress,
           color: _trafficColor(context, progress),
-          backgroundColor: _trafficColor(
-            context,
-            progress,
-          ).opacity15,
+          backgroundColor: _trafficColor(context, progress).opacity15,
         ),
       ],
     );
   }
+}
+
+void showSubscriptionInfoDialog(
+  BuildContext context,
+  SubscriptionInfo subscriptionInfo,
+) {
+  unawaited(
+    dialogs.showCommonDialog<void>(
+      context: context,
+      child: Builder(
+        builder: (context) {
+          return CommonDialog(
+            backgroundColor: context.colorScheme.surfaceContainerLow,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            title: context.appLocalizations.subscriptionInfo,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(context.appLocalizations.confirm),
+              ),
+            ],
+            child: SubscriptionInfoDetailView(
+              subscriptionInfo: subscriptionInfo,
+            ),
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class SubscriptionInfoDetailView extends StatelessWidget {

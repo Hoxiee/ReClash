@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:reclash/common/common.dart';
@@ -7,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
+import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
@@ -63,7 +63,8 @@ String _stripLeadingEmoji(String text) {
     final isFlag = r >= 0x1F1E6 && r <= 0x1F1FF;
     final isModifier =
         r == 0x200D || r == 0xFE0F || (r >= 0x1F3FB && r <= 0x1F3FF);
-    final isPictograph = (r >= 0x1F000 && r <= 0x1FAFF) ||
+    final isPictograph =
+        (r >= 0x1F000 && r <= 0x1FAFF) ||
         (r >= 0x2600 && r <= 0x27BF) ||
         (r >= 0x2190 && r <= 0x21FF) ||
         (r >= 0x2B00 && r <= 0x2BFF) ||
@@ -80,9 +81,9 @@ String _stripLeadingEmoji(String text) {
       (isEmojiRune(runes[start]) || isSpace(runes[start]))) {
     start++;
   }
-  return String.fromCharCodes(runes.sublist(start))
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  return String.fromCharCodes(
+    runes.sublist(start),
+  ).replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
 String _formatBytes(int bytes) {
@@ -95,29 +96,6 @@ String _formatBytes(int bytes) {
     i++;
   }
   return '${value.toStringAsFixed(1)} ${units[i]}';
-}
-
-String? _decodeAnnounce(String? value) {
-  if (value == null) return null;
-  final trimmed = value.trim();
-  if (trimmed.isEmpty) return null;
-  final decoded = _decodeBase64(trimmed);
-  if (decoded == null || decoded.trim().isEmpty) return null;
-  return decoded.trim();
-}
-
-String? _decodeBase64(String? value) {
-  if (value == null || value.trim().isEmpty) return null;
-  var text = value.trim();
-  if (text.startsWith('base64:')) text = text.substring(7).trim();
-  if (text.isEmpty) return null;
-  try {
-    final normalized = base64.normalize(text);
-    final decoded = utf8.decode(base64.decode(normalized)).trim();
-    return decoded.isEmpty ? null : decoded;
-  } catch (_) {
-    return value.trim().isEmpty ? null : value.trim();
-  }
 }
 
 String _resolveToDisplayName(List<Group> groups, String proxyName) {
@@ -143,9 +121,7 @@ _HeroServerInfo _selectServerInfo(
   String? testUrl;
   Group? activeGroup;
   if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-    final groupName =
-        _decodeBase64(serverInfoHeader) ?? serverInfoHeader.trim();
-    final group = groups.getGroup(groupName);
+    final group = groups.getGroup(serverInfoHeader.trim());
     if (group != null) {
       activeGroup = group;
       serverName = _resolveToDisplayName(groups, group.name);
@@ -168,8 +144,9 @@ _HeroServerInfo _selectServerInfo(
       ? _collectGroupFlags(groups, activeGroup)
       : const <String>[];
   final activeUpper = nameCountryCode?.toUpperCase();
-  final otherCodes =
-      groupFlagCodes.where((c) => c.toUpperCase() != activeUpper).toList();
+  final otherCodes = groupFlagCodes
+      .where((c) => c.toUpperCase() != activeUpper)
+      .toList();
   final rawOther = otherCodes.isNotEmpty
       ? otherCodes.length
       : (activeGroup != null ? activeGroup.all.length - 1 : 0);
@@ -198,17 +175,12 @@ class HeroConnect extends ConsumerWidget {
     final isReady = ref.watch(initProvider);
     final profile = ref.watch(currentProfileProvider);
     final panelMeta = profile?.panelMeta;
-    final announce = _decodeAnnounce(panelMeta?.announce);
+    final announce = panelMeta?.announce?.trim();
     final sub = profile?.subscriptionInfo;
     final hasSub = sub != null && (sub.total > 0 || sub.expire > 0);
 
     final buyPlanUrl = panelMeta?.buyPlanUrl;
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
-    final buyUrl = (buyPlanUrl != null && buyPlanUrl.isNotEmpty)
-        ? buyPlanUrl
-        : (buyTrafficUrl != null && buyTrafficUrl.isNotEmpty)
-            ? buyTrafficUrl
-            : null;
 
     final serverInfoHeader = panelMeta?.serverInfoGroup;
     final mode = ref.watch(
@@ -216,17 +188,15 @@ class HeroConnect extends ConsumerWidget {
     );
     final serverInfo = ref.watch(
       groupsProvider.select(
-        (state) => _selectServerInfo(
-          switch (mode) {
-            Mode.direct => const <Group>[],
-            Mode.global => state.toList(),
-            Mode.rule => state
+        (state) => _selectServerInfo(switch (mode) {
+          Mode.direct => const <Group>[],
+          Mode.global => state.toList(),
+          Mode.rule =>
+            state
                 .where((item) => item.hidden == false)
                 .where((element) => element.name != GroupName.GLOBAL.name)
                 .toList(),
-          },
-          serverInfoHeader,
-        ),
+        }, serverInfoHeader),
       ),
     );
     final serverName = serverInfo.serverName;
@@ -237,8 +207,8 @@ class HeroConnect extends ConsumerWidget {
     final otherLocations = serverInfo.otherLocations;
     final displayName = _stripLeadingEmoji(serverName);
     final nameCountryCode = _flagToCountryCode(serverName);
-    final isUpdating = profile != null &&
-        ref.watch(isUpdatingProvider(profile.updatingKey));
+    final isUpdating =
+        profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
 
     return SingleChildScrollView(
       child: Column(
@@ -256,7 +226,11 @@ class HeroConnect extends ConsumerWidget {
           ),
           if (hasSub) ...[
             const SizedBox(height: 12),
-            _TrafficCard(sub: sub, buyUrl: buyUrl),
+            _TrafficCard(
+              sub: sub,
+              buyPlanUrl: buyPlanUrl,
+              buyTrafficUrl: buyTrafficUrl,
+            ),
           ],
           const SizedBox(height: 12),
           _HeroActionRow(
@@ -264,10 +238,10 @@ class HeroConnect extends ConsumerWidget {
             onUpdate: profile == null
                 ? null
                 : () => unawaited(
-                      ref
-                          .read(profilesActionProvider.notifier)
-                          .updateProfile(profile, showLoading: true),
-                    ),
+                    ref
+                        .read(profilesActionProvider.notifier)
+                        .updateProfile(profile, showLoading: true),
+                  ),
             supportUrl: panelMeta?.supportUrl,
           ),
           if (announce != null && announce.isNotEmpty) ...[
@@ -298,9 +272,7 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
   void initState() {
     super.initState();
     if (ref.read(runTimeProvider) != null) {
-      _phase = ref.read(pausedProvider)
-          ? HeroOrbPhase.paused
-          : HeroOrbPhase.on;
+      _phase = ref.read(pausedProvider) ? HeroOrbPhase.paused : HeroOrbPhase.on;
     }
   }
 
@@ -321,8 +293,8 @@ class _OrbSectionState extends ConsumerState<_OrbSection> {
     };
     final subtitle = switch (_phase) {
       HeroOrbPhase.on => appLocalizations.connectedFor(
-          heroDurationWords(runMinutes),
-        ),
+        heroDurationWords(runMinutes),
+      ),
       HeroOrbPhase.connecting => widget.displayName,
       HeroOrbPhase.paused => appLocalizations.heroTapToResume,
       HeroOrbPhase.off => appLocalizations.heroTapToConnect,
@@ -429,17 +401,22 @@ class _Logo extends StatelessWidget {
     const radius = size * 0.25;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: Image.asset('assets/images/icon.png',
-          width: size, height: size, fit: BoxFit.cover),
+      child: Image.asset(
+        'assets/images/icon.png',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }
 
 class _TrafficCard extends StatelessWidget {
-  const _TrafficCard({required this.sub, this.buyUrl});
+  const _TrafficCard({required this.sub, this.buyPlanUrl, this.buyTrafficUrl});
 
   final SubscriptionInfo sub;
-  final String? buyUrl;
+  final String? buyPlanUrl;
+  final String? buyTrafficUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -452,20 +429,27 @@ class _TrafficCard extends StatelessWidget {
     final barColor = progress > 0.9
         ? Colors.red.shade400
         : progress > 0.7
-            ? Colors.orange.shade400
-            : colorScheme.primary;
+        ? Colors.orange.shade400
+        : colorScheme.primary;
 
     int? daysLeft;
     if (sub.expire > 0) {
-      daysLeft = DateTime.fromMillisecondsSinceEpoch(sub.expire * 1000)
-          .difference(DateTime.now())
-          .inDays;
+      daysLeft = DateTime.fromMillisecondsSinceEpoch(
+        sub.expire * 1000,
+      ).difference(DateTime.now()).inDays;
       if (daysLeft < 0) daysLeft = 0;
     }
 
-    final daysUrgent = daysLeft != null && daysLeft <= 3;
+    final daysUrgent = daysLeft != null && daysLeft <= heroRenewDaysThreshold;
     final daysColor = daysUrgent ? Colors.red.shade400 : colorScheme.primary;
     final free = total > 0 ? (total - used).clamp(0, total) : 0;
+    final offers = heroBuyOffers(
+      hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
+      hasTrafficUrl: buyTrafficUrl?.isNotEmpty ?? false,
+      daysLeft: daysLeft,
+      total: total,
+      used: used,
+    );
 
     return HeroSurface(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
@@ -486,8 +470,10 @@ class _TrafficCard extends StatelessWidget {
               if (daysLeft != null) ...[
                 const SizedBox(width: 10),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(heroPillRadius),
                     color: daysColor.withValues(alpha: 0.14),
@@ -553,7 +539,9 @@ class _TrafficCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Container(
-                      height: 8, color: colorScheme.surfaceContainerHighest),
+                    height: 8,
+                    color: colorScheme.surfaceContainerHighest,
+                  ),
                   FractionallySizedBox(
                     widthFactor: progress <= 0 ? 0.0 : progress,
                     child: Container(
@@ -570,20 +558,55 @@ class _TrafficCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: _ActionChip(
-              icon: Icons.autorenew_rounded,
-              label: appLocalizations.renewSubscription,
-              compact: true,
-              onTap: buyUrl != null && buyUrl!.isNotEmpty
-                  ? () => unawaited(dialogs.openUrl(buyUrl!))
-                  : null,
+          if (offers.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                for (final offer in offers) ...[
+                  if (offer != offers.first) const SizedBox(width: 8),
+                  Flexible(
+                    child: _BuyChip(
+                      offer: offer,
+                      url: offer == HeroBuyOffer.renewPlan
+                          ? buyPlanUrl!
+                          : buyTrafficUrl!,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _BuyChip extends StatelessWidget {
+  const _BuyChip({required this.offer, required this.url});
+
+  final HeroBuyOffer offer;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final (icon, label) = switch (offer) {
+      HeroBuyOffer.renewPlan => (
+        Icons.autorenew_rounded,
+        appLocalizations.renewSubscription,
+      ),
+      HeroBuyOffer.topUpTraffic => (
+        Icons.add_shopping_cart_rounded,
+        appLocalizations.topUpTraffic,
+      ),
+    };
+    return _ActionChip(
+      icon: icon,
+      label: label,
+      compact: true,
+      onTap: () => unawaited(dialogs.openUrl(url)),
     );
   }
 }
@@ -607,21 +630,21 @@ class _ServerPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => HeroSurface(
-        child: Column(
-          children: [
-            _ServerZone(
-              serverName: serverName,
-              displayName: displayName,
-              nameCountryCode: nameCountryCode,
-              testUrl: testUrl,
-              otherCodes: otherCodes,
-              otherLocations: otherLocations,
-            ),
-            const HeroCardDivider(),
-            const HeroRoutingRow(),
-          ],
+    child: Column(
+      children: [
+        _ServerZone(
+          serverName: serverName,
+          displayName: displayName,
+          nameCountryCode: nameCountryCode,
+          testUrl: testUrl,
+          otherCodes: otherCodes,
+          otherLocations: otherLocations,
         ),
-      );
+        const HeroCardDivider(),
+        const HeroRoutingRow(),
+      ],
+    ),
+  );
 }
 
 class _ServerZone extends ConsumerWidget {
@@ -645,8 +668,9 @@ class _ServerZone extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    final isConnected =
-        ref.watch(runTimeProvider.select((value) => value != null));
+    final isConnected = ref.watch(
+      runTimeProvider.select((value) => value != null),
+    );
     final delay = serverName.isNotEmpty
         ? ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl))
         : null;
@@ -680,8 +704,9 @@ class _ServerZone extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: context.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: context.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -747,7 +772,7 @@ class _ServerZone extends ConsumerWidget {
                       style: context.textTheme.labelSmall?.copyWith(
                         color:
                             getDelayColor(delay) ??
-                                colorScheme.onSurfaceVariant,
+                            colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontFamily: FontFamily.jetBrainsMono.value,
                       ),
@@ -790,16 +815,15 @@ class _FlagCircle extends StatelessWidget {
     final cc = countryCode.trim().toLowerCase();
 
     Widget fallback() => Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colorScheme.surfaceContainerHighest,
-          ),
-          alignment: Alignment.center,
-          child:
-              EmojiText(fallbackEmoji, style: TextStyle(fontSize: size * 0.5)),
-        );
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.surfaceContainerHighest,
+      ),
+      alignment: Alignment.center,
+      child: EmojiText(fallbackEmoji, style: TextStyle(fontSize: size * 0.5)),
+    );
 
     final active = cc.length != 2
         ? fallback()
@@ -832,8 +856,7 @@ class _FlagCircle extends StatelessWidget {
             child: Stack(
               children: [
                 CachedNetworkImage(
-                  imageUrl:
-                      'https://flagcdn.com/w80/${code.toLowerCase()}.png',
+                  imageUrl: 'https://flagcdn.com/w80/${code.toLowerCase()}.png',
                   width: s,
                   height: s,
                   fit: BoxFit.cover,
@@ -846,7 +869,8 @@ class _FlagCircle extends StatelessWidget {
                 ),
                 Positioned.fill(
                   child: ColoredBox(
-                      color: Colors.black.withValues(alpha: 0.15 * i)),
+                    color: Colors.black.withValues(alpha: 0.15 * i),
+                  ),
                 ),
               ],
             ),
@@ -887,11 +911,11 @@ class _FlagCircle extends StatelessWidget {
     final topPeek = backs.isEmpty
         ? 0.0
         : (10.0 * backs.length +
-                size * (1 - 0.14 * backs.length) / 2 -
-                size / 2 +
-                2)
-            .clamp(0.0, 40.0)
-            .toDouble();
+                  size * (1 - 0.14 * backs.length) / 2 -
+                  size / 2 +
+                  2)
+              .clamp(0.0, 40.0)
+              .toDouble();
     final bottomPeek = badge != null ? 7.0 : 0.0;
 
     if (topPeek == 0 && bottomPeek == 0) {
@@ -904,7 +928,12 @@ class _FlagCircle extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-              top: topPeek, left: 0, width: size, height: size, child: unit),
+            top: topPeek,
+            left: 0,
+            width: size,
+            height: size,
+            child: unit,
+          ),
         ],
       ),
     );
@@ -934,10 +963,10 @@ class _SignalBars extends StatelessWidget {
       level = delay! < 150
           ? 4
           : delay! < 300
-              ? 3
-              : delay! < 600
-                  ? 2
-                  : 1;
+          ? 3
+          : delay! < 600
+          ? 2
+          : 1;
     }
 
     const heights = [9.0, 13.0, 17.0, 21.0];
@@ -945,18 +974,19 @@ class _SignalBars extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List.generate(
-          4,
-          (i) => Padding(
-                padding: EdgeInsets.only(left: i == 0 ? 0 : 3),
-                child: Container(
-                  width: 4,
-                  height: heights[i],
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(heroInlayRadius),
-                    color: i < level ? color : dim,
-                  ),
-                ),
-              )),
+        4,
+        (i) => Padding(
+          padding: EdgeInsets.only(left: i == 0 ? 0 : 3),
+          child: Container(
+            width: 4,
+            height: heights[i],
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(heroInlayRadius),
+              color: i < level ? color : dim,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -974,8 +1004,9 @@ class _EmptyHero extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           appName,
-          style: context.textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w700),
+          style: context.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -1067,10 +1098,7 @@ class _HeroActionRow extends ConsumerWidget {
             ),
           ),
         ],
-        if (showPauseChip) ...[
-          const SizedBox(width: 10),
-          const _PauseChip(),
-        ],
+        if (showPauseChip) ...[const SizedBox(width: 10), const _PauseChip()],
         const SizedBox(width: 10),
         const _ModeChip(),
       ],
@@ -1111,10 +1139,10 @@ class _ModeChip extends ConsumerWidget {
   const _ModeChip();
 
   IconData _modeIcon(Mode mode) => switch (mode) {
-        Mode.rule => Icons.rule,
-        Mode.global => Icons.public,
-        Mode.direct => Icons.flash_on,
-      };
+    Mode.rule => Icons.rule,
+    Mode.global => Icons.public,
+    Mode.direct => Icons.flash_on,
+  };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1195,10 +1223,11 @@ class _ActionChip extends StatelessWidget {
             Flexible(
               child: Text(
                 label,
-                style: (compact
-                        ? context.textTheme.labelMedium
-                        : context.textTheme.labelLarge)
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style:
+                    (compact
+                            ? context.textTheme.labelMedium
+                            : context.textTheme.labelLarge)
+                        ?.copyWith(fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
