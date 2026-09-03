@@ -98,6 +98,50 @@ func TestShouldReclaimEntrySkipsOwnedLinkedAndSymlinkedEntries(t *testing.T) {
 	}
 }
 
+func TestShouldReclaimEntrySkipsPrivilegedBinaries(t *testing.T) {
+	homeDir := t.TempDir()
+	foreign := os.Getuid() + 1
+
+	binary := filepath.Join(homeDir, "ReClashCore")
+	if err := os.WriteFile(binary, []byte("core"), 0o755); err != nil {
+		t.Fatalf("write error: %v", err)
+	}
+	if err := os.Chmod(binary, 0o755|fs.ModeSetuid); err != nil {
+		t.Fatalf("chmod error: %v", err)
+	}
+	info, err := os.Lstat(binary)
+	if err != nil {
+		t.Fatalf("lstat error: %v", err)
+	}
+	if shouldReclaimEntry(info, foreign) {
+		t.Error("a setuid binary must be skipped: chown would strip the privilege bit")
+	}
+}
+
+func TestIsReclaimableStatSkipsPrivilegedBits(t *testing.T) {
+	uid := os.Getuid()
+	foreign := uid + 1
+
+	plain := &syscall.Stat_t{Mode: syscall.S_IFREG | 0o755, Uid: uint32(foreign)}
+	if !isReclaimableStat(plain, uid) {
+		t.Error("a plain foreign file must stay reclaimable")
+	}
+	setuid := &syscall.Stat_t{
+		Mode: syscall.S_IFREG | syscall.S_ISUID | 0o755,
+		Uid:  uint32(foreign),
+	}
+	if isReclaimableStat(setuid, uid) {
+		t.Error("a setuid file must be refused even after the inode re-check")
+	}
+	setgid := &syscall.Stat_t{
+		Mode: syscall.S_IFREG | syscall.S_ISGID | 0o755,
+		Uid:  uint32(foreign),
+	}
+	if isReclaimableStat(setgid, uid) {
+		t.Error("a setgid file must be refused even after the inode re-check")
+	}
+}
+
 func TestCollectReclaimTargetsWalksWithoutFollowingSymlinks(t *testing.T) {
 	homeDir := t.TempDir()
 	uid := os.Getuid()

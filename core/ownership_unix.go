@@ -44,6 +44,11 @@ func shouldReclaimEntry(info fs.FileInfo, uid int) bool {
 	if info.Mode()&fs.ModeSymlink != 0 {
 		return false
 	}
+	// chown clears the setuid bit, and the elevated core binary carries it
+	// by design; reclaiming it would strip the privilege the app just granted.
+	if info.Mode()&(fs.ModeSetuid|fs.ModeSetgid) != 0 {
+		return false
+	}
 	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
 		return false
@@ -98,6 +103,9 @@ func isReclaimableStat(stat *syscall.Stat_t, uid int) bool {
 			return false
 		}
 	default:
+		return false
+	}
+	if stat.Mode&(syscall.S_ISUID|syscall.S_ISGID) != 0 {
 		return false
 	}
 	return int(stat.Uid) != uid
