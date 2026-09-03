@@ -74,11 +74,13 @@ class System {
   /// [corePath] is handed to `Process.run` as an argv entry, so it must stay
   /// verbatim. Shell-quoting or escaping it here reaches `stat` as part of the
   /// file name and turns every path containing a space into a miss.
+  /// Linux asks for the octal mode: a setuid core without an owner write
+  /// bit (4555, `-r-sr-sr-x`) defeats permission-string matching.
   @visibleForTesting
   static List<String> statArguments(String corePath, {required bool isMacOS}) {
     return isMacOS
         ? ['-f', '%Su:%Sg %Sp', corePath]
-        : ['-c', '%U:%G %A', corePath];
+        : ['-c', '%U %a', corePath];
   }
 
   @visibleForTesting
@@ -88,6 +90,17 @@ class System {
   }) {
     final trimmed = output.trim();
     return trimmed.startsWith(ownerPrefix) && trimmed.contains('rws');
+  }
+
+  @visibleForTesting
+  static bool isPrivilegedLinuxStatOutput(String output) {
+    final parts = output.trim().split(' ');
+    if (parts.length != 2) {
+      return false;
+    }
+    final mode = int.tryParse(parts[1], radix: 8) ?? 0;
+    // 0x800 = setuid (0o4000): Dart has no octal literals.
+    return parts[0] == 'root' && (mode & 0x800) != 0;
   }
 
   Future<bool> checkIsAdmin() async {
@@ -110,10 +123,7 @@ class System {
         'stat',
         statArguments(appPath.corePath, isMacOS: false),
       );
-      return isPrivilegedStatOutput(
-        result.stdout.toString(),
-        ownerPrefix: 'root:',
-      );
+      return isPrivilegedLinuxStatOutput(result.stdout.toString());
     }
     return true;
   }

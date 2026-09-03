@@ -119,7 +119,7 @@ void main() {
   });
 
   group('statArguments', () {
-    test('selects the BSD format on macOS and the GNU one elsewhere', () {
+    test('selects the BSD format on macOS and the octal one elsewhere', () {
       expect(System.statArguments('/a/core', isMacOS: true), [
         '-f',
         '%Su:%Sg %Sp',
@@ -127,7 +127,7 @@ void main() {
       ]);
       expect(System.statArguments('/a/core', isMacOS: false), [
         '-c',
-        '%U:%G %A',
+        '%U %a',
         '/a/core',
       ]);
     });
@@ -219,13 +219,6 @@ void main() {
         ),
         isTrue,
       );
-      expect(
-        System.isPrivilegedStatOutput(
-          'root:root -rwsr-sr-x',
-          ownerPrefix: 'root:',
-        ),
-        isTrue,
-      );
     });
 
     test('rejects a root-owned binary without the setuid bit', () {
@@ -256,16 +249,49 @@ void main() {
     });
   });
 
+  group('isPrivilegedLinuxStatOutput', () {
+    test(
+      'accepts root-owned setuid modes, including ones without a write bit',
+      () {
+        expect(System.isPrivilegedLinuxStatOutput('root 4755'), isTrue);
+        expect(System.isPrivilegedLinuxStatOutput('root 6555\n'), isTrue);
+        expect(System.isPrivilegedLinuxStatOutput('root 4555'), isTrue);
+      },
+    );
+
+    test('rejects a root-owned binary without the setuid bit', () {
+      expect(System.isPrivilegedLinuxStatOutput('root 755'), isFalse);
+      expect(System.isPrivilegedLinuxStatOutput('root 2755'), isFalse);
+    });
+
+    test('rejects a setuid binary owned by somebody else', () {
+      expect(System.isPrivilegedLinuxStatOutput('alice 4755'), isFalse);
+    });
+
+    test('rejects malformed stat output', () {
+      expect(System.isPrivilegedLinuxStatOutput(''), isFalse);
+      expect(System.isPrivilegedLinuxStatOutput('root'), isFalse);
+      expect(System.isPrivilegedLinuxStatOutput('root 4755 extra'), isFalse);
+      expect(System.isPrivilegedLinuxStatOutput('root nosuid'), isFalse);
+    });
+  });
+
   group('checkIsAdmin', () {
     test('stats the core path verbatim', () async {
-      processes.stub('stat', 'root:admin -rwsr-sr-x');
+      processes.stub(
+        'stat',
+        Platform.isMacOS ? 'root:admin -rwsr-sr-x' : 'root 4755',
+      );
 
       expect(await system.checkIsAdmin(), isTrue);
       expect(processes.argumentsFor('stat').last, appPath.corePath);
     });
 
     test('reports a core that is not setuid root', () async {
-      processes.stub('stat', 'alice:staff -rwxr-xr-x');
+      processes.stub(
+        'stat',
+        Platform.isMacOS ? 'alice:staff -rwxr-xr-x' : 'alice 755',
+      );
 
       expect(await system.checkIsAdmin(), isFalse);
     });

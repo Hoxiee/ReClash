@@ -143,10 +143,10 @@ void main() {
           .read(profilesActionProvider.notifier)
           .applyPanelWidgetsOnProfileSwitch(null);
 
-      expect(
-        container.read(appSettingProvider).dashboardWidgets,
-        [DashboardWidget.announce, DashboardWidget.metaInfo],
-      );
+      expect(container.read(appSettingProvider).dashboardWidgets, [
+        DashboardWidget.announce,
+        DashboardWidget.metaInfo,
+      ]);
     });
 
     test('panel widgets append to a user-customized dashboard', () {
@@ -160,7 +160,9 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      container.read(appSettingProvider.notifier).update(
+      container
+          .read(appSettingProvider.notifier)
+          .update(
             (state) => state.copyWith(
               dashboardWidgets: [DashboardWidget.networkSpeed],
             ),
@@ -170,10 +172,10 @@ void main() {
           .read(profilesActionProvider.notifier)
           .applyPanelWidgetsOnProfileSwitch(null);
 
-      expect(
-        container.read(appSettingProvider).dashboardWidgets,
-        [DashboardWidget.networkSpeed, DashboardWidget.announce],
-      );
+      expect(container.read(appSettingProvider).dashboardWidgets, [
+        DashboardWidget.networkSpeed,
+        DashboardWidget.announce,
+      ]);
     });
 
     test('panel settings become app defaults at add time', () {
@@ -811,7 +813,7 @@ void main() {
       );
     });
 
-    test('requests admin authorization once per app lifecycle', () async {
+    test('re-prompts while the core binary stays unauthorized', () async {
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
@@ -833,13 +835,38 @@ void main() {
         TunAuthorizationState.unauthorized,
       );
 
-      expect(await setupAction.requestAdmin(true), isTrue);
-      expect(setupAction.authorizationRequestCount, 1);
+      expect(await setupAction.requestAdmin(true), isFalse);
+      expect(setupAction.authorizationRequestCount, 2);
       expect(
         container.read(authorizedTunEnableProvider),
-        TunAuthorizationState.unauthorized,
+        TunAuthorizationState.authorized,
       );
     });
+
+    test(
+      'skips the prompt when the core binary is already privileged',
+      () async {
+        late _AuthorizationSetupAction setupAction;
+        final container = ProviderContainer(
+          overrides: [
+            setupActionProvider.overrideWith(() {
+              setupAction = _AuthorizationSetupAction([AuthorizeCode.success])
+                ..adminAuthorized = true;
+              return setupAction;
+            }),
+          ],
+        );
+        addTearDown(container.dispose);
+        container.read(setupActionProvider);
+
+        expect(await setupAction.requestAdmin(true), isTrue);
+        expect(setupAction.authorizationRequestCount, 0);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.authorized,
+        );
+      },
+    );
 
     test('keeps tun disabled while authorization stays unauthorized', () async {
       late _AuthorizationSetupAction setupAction;
@@ -944,6 +971,7 @@ final _restartFailure = Exception('restart failed');
 class _AuthorizationSetupAction extends SetupAction {
   final List<AuthorizeCode> authorizationResults;
   int authorizationRequestCount = 0;
+  bool adminAuthorized = false;
 
   _AuthorizationSetupAction(this.authorizationResults);
 
@@ -951,6 +979,9 @@ class _AuthorizationSetupAction extends SetupAction {
   Future<AuthorizeCode> authorizeCore() async {
     return authorizationResults[authorizationRequestCount++];
   }
+
+  @override
+  Future<bool> checkCoreAuthorization() async => adminAuthorized;
 }
 
 class _RaceSetupAction extends SetupAction {

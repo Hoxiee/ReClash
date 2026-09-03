@@ -1,14 +1,65 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:reclash/common/common.dart';
 import 'package:reclash/core/desktop/launcher.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
+class _FakePathProvider extends PathProviderPlatform {
+  @override
+  Future<String?> getTemporaryPath() async =>
+      Directory.systemTemp.createTempSync('launcher_test').path;
+
+  @override
+  Future<String?> getApplicationSupportPath() async =>
+      Directory.systemTemp.createTempSync('launcher_test').path;
+
+  @override
+  Future<String?> getApplicationCachePath() async =>
+      Directory.systemTemp.createTempSync('launcher_test').path;
+}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    PathProviderPlatform.instance = _FakePathProvider();
+  });
+
   test('createCoreSessionId returns lowercase 128-bit hex', () {
     expect(createCoreSessionId(), matches(RegExp(r'^[0-9a-f]{32}$')));
   });
+
+  test(
+    'awaits core-path resolution before spawning the bundled core',
+    () async {
+      final process = _FakeProcess(pid: 42, exitCode: Future.value(0));
+      String? executable;
+      final launcher = DirectCoreLauncher(
+        startProcess: (value, _) async {
+          executable = value;
+          return process;
+        },
+      );
+
+      final startFuture = launcher.start(
+        sessionId: '0123456789abcdef0123456789abcdef',
+        address: 'test-address',
+      );
+      if (Platform.isLinux) {
+        // The gate is pending until ensureWritableCore resolves it.
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(executable, isNull);
+        await appPath.ensureWritableCore();
+      }
+      final lease = await startFuture;
+
+      expect(executable, appPath.corePath);
+      expect(lease.pid, 42);
+    },
+  );
 
   test('direct lease kills and confirms the owned process exit', () async {
     final process = _FakeProcess(pid: 42, exitCode: Future.value(0));

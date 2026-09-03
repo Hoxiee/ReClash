@@ -23,17 +23,18 @@ abstract interface class DesktopCoreLauncherResolver {
 
 final class DirectCoreLauncher implements CoreProcessLauncher {
   final CoreProcessStarter _startProcess;
-  final String corePath;
+  final String? _corePath;
 
   DirectCoreLauncher({CoreProcessStarter? startProcess, String? corePath})
     : _startProcess = startProcess ?? Process.start,
-      corePath = corePath ?? appPath.corePath;
+      _corePath = corePath;
 
   @override
   Future<CoreProcessLease> start({
     required String sessionId,
     required String address,
   }) async {
+    final corePath = await _resolveCorePath();
     final process = await _startProcess(corePath, [address]);
     process.stdout.listen((_) {});
     process.stderr.listen((data) {
@@ -43,6 +44,28 @@ final class DirectCoreLauncher implements CoreProcessLauncher {
       }
     });
     return DirectCoreLease(sessionId: sessionId, process: process);
+  }
+
+  // The read-only bundle binary (nosuid mount) can never create TUN.
+  Future<String> _resolveCorePath() async {
+    final injected = _corePath;
+    if (injected != null) {
+      return injected;
+    }
+    try {
+      await appPath.corePathReady.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          commonPrint.log(
+            'core path resolution timed out, spawning anyway',
+            logLevel: LogLevel.warning,
+          );
+        },
+      );
+    } catch (error) {
+      commonPrint.log('core path resolution failed: $error');
+    }
+    return appPath.corePath;
   }
 }
 

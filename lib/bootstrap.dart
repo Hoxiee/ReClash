@@ -44,6 +44,10 @@ class Bootstrap {
     trayPort = appTray;
     navigationPort = navigation;
     final dynamicColor = await _initDynamicColor();
+    // Before anything can spawn the core or trigger TUN authorization: on a
+    // read-only install the sudo prompt must target the writable copy, and
+    // the spawn must not race the copy either.
+    await appPath.ensureWritableCore();
     return _initData(version, dynamicColor);
   }
 

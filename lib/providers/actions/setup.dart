@@ -410,14 +410,30 @@ class SetupAction extends _$SetupAction {
     return system.authorizeCore();
   }
 
+  @protected
+  Future<bool> checkCoreAuthorization() {
+    return system.checkIsAdmin();
+  }
+
   @visibleForTesting
   Future<bool> requestAdmin(bool enableTun) async {
     if (!enableTun) {
       return true;
     }
-    final authorizationState = ref.read(authorizedTunEnableProvider);
-    if (authorizationState != TunAuthorizationState.none) {
-      return true;
+    // Linux reads the binary, not the in-memory state: a state stuck at
+    // unauthorized (dismissed dialog) suppressed every later prompt, and a
+    // stale authorized state missed a setuid bit lost to a self-update.
+    if (system.isLinux) {
+      if (await checkCoreAuthorization()) {
+        ref.read(authorizedTunEnableProvider.notifier).value =
+            TunAuthorizationState.authorized;
+        return true;
+      }
+    } else {
+      final authorizationState = ref.read(authorizedTunEnableProvider);
+      if (authorizationState != TunAuthorizationState.none) {
+        return true;
+      }
     }
 
     final authorizationNotifier = ref.read(
@@ -468,7 +484,9 @@ class SetupAction extends _$SetupAction {
       () async => profile?.checkAndUpdateAndCopy(
         validate: (path) => _core.validateConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
-          includeDeviceIdentity: ref.read(appSettingProvider).sendDeviceIdentity,
+          includeDeviceIdentity: ref
+              .read(appSettingProvider)
+              .sendDeviceIdentity,
         ),
       ),
     );

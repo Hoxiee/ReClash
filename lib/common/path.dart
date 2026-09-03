@@ -13,6 +13,8 @@ class AppPath {
   Completer<Directory> tempDir = Completer();
   Completer<Directory> cacheDir = Completer();
   late String appDirPath;
+  String? _coreOverridePath;
+  final Completer<void> _corePathResolved = Completer<void>();
 
   @visibleForTesting
   static Future<Directory> Function() supportDirectory =
@@ -32,6 +34,9 @@ class AppPath {
 
   AppPath._internal() {
     appDirPath = join(dirname(Platform.resolvedExecutable));
+    if (!Platform.isLinux) {
+      _corePathResolved.complete();
+    }
     supportDirectory().then((value) {
       dataDir.complete(value);
     });
@@ -52,13 +57,77 @@ class AppPath {
     return system.isWindows ? '.exe' : '';
   }
 
+  @visibleForTesting
+  static String Function() executableDirectory = () =>
+      dirname(Platform.resolvedExecutable);
+
+  @visibleForTesting
+  void debugResetCoreOverride() {
+    _coreOverridePath = null;
+  }
+
   String get executableDirPath {
-    final currentExecutablePath = Platform.resolvedExecutable;
-    return dirname(currentExecutablePath);
+    return executableDirectory();
   }
 
   String get corePath {
-    return join(executableDirPath, 'ReClashCore$executableExtension');
+    return _coreOverridePath ??
+        join(executableDirPath, 'ReClashCore$executableExtension');
+  }
+
+  Future<void> get corePathReady => _corePathResolved.future;
+
+  /// A read-only install (AppImage squashfs, root-owned /opt) cannot hold a
+  /// setuid core, so [corePath] resolves to a writable app-support copy; a
+  /// size/mtime match keeps the existing copy and its setuid bit.
+  Future<void> ensureWritableCore() async {
+    if (!Platform.isLinux) {
+      return _resolveCorePath();
+    }
+    final bundled = File(
+      join(executableDirPath, 'ReClashCore$executableExtension'),
+    );
+    if (!await bundled.exists()) {
+      return _resolveCorePath();
+    }
+    if (_isDirectoryWritable(executableDirPath)) {
+      return _resolveCorePath();
+    }
+    try {
+      final directory = await dataDir.future;
+      final target = File(join(directory.path, 'ReClashCore'));
+      final needsCopy =
+          !await target.exists() ||
+          await target.length() != await bundled.length() ||
+          (await target.lastModified()).isBefore(await bundled.lastModified());
+      if (needsCopy) {
+        final staged = File('${target.path}.staged');
+        await bundled.copy(staged.path);
+        await Process.run('chmod', ['755', staged.path]);
+        await staged.rename(target.path);
+      }
+      _coreOverridePath = target.path;
+    } catch (error) {
+      commonPrint.log('writable core copy failed: $error');
+    }
+    _resolveCorePath();
+  }
+
+  void _resolveCorePath() {
+    if (!_corePathResolved.isCompleted) {
+      _corePathResolved.complete();
+    }
+  }
+
+  bool _isDirectoryWritable(String path) {
+    try {
+      final probe = File(join(path, '.reclash-write-probe'));
+      probe.writeAsStringSync('', flush: true);
+      probe.deleteSync();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   String get helperPath {
