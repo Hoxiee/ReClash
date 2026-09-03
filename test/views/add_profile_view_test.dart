@@ -137,6 +137,50 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('URL import dialog hides presets until expanded', (
+    tester,
+  ) async {
+    final container = _containerFor(tester);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  await showDialog<URLFormDialogResult>(
+                    context: context,
+                    builder: (_) => const URLFormDialog(),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(currentAppLocalizations.subscriptionClientAuto),
+        findsNothing);
+    expect(find.text(currentAppLocalizations.subscriptionClientHapp),
+        findsNothing);
+
+    await tester.tap(find.byTooltip(currentAppLocalizations.showMore));
+    await tester.pumpAndSettle();
+
+    expect(find.text(currentAppLocalizations.subscriptionClientAuto),
+        findsOne);
+    expect(find.byType(TextField), findsOne);
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('URL import dialog follows the picked preset', (tester) async {
     final container = _containerFor(tester);
     URLFormDialogResult? popped;
@@ -164,6 +208,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(currentAppLocalizations.showMore));
     await tester.pumpAndSettle();
 
     await tester.enterText(

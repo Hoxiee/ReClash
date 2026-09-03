@@ -139,6 +139,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
   final _urlController = TextEditingController();
   final _customUserAgentController = TextEditingController();
   SubscriptionClient _client = SubscriptionClient.auto;
+  bool _isMore = false;
 
   @override
   void dispose() {
@@ -166,26 +167,51 @@ class _URLFormDialogState extends State<URLFormDialog> {
     if (text != null && text.isNotEmpty) {
       _urlController.text = text;
     }
-  }  @override
+  }
+
+  void _handleMore() {
+    setState(() {
+      _isMore = !_isMore;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return CommonDialog(
       title: appLocalizations.importFromURL,
       actions: [
-        IconButton(
-          tooltip: appLocalizations.pasteFromClipboard,
-          onPressed: _handlePaste,
-          icon: const Icon(Icons.content_paste),
-        ),
-        TextButton(
-          onPressed: _handleSubmit,
-          child: Text(appLocalizations.submit),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              spacing: 8,
+              children: [
+                IconButton.filledTonal(
+                  tooltip: _isMore
+                      ? appLocalizations.showLess
+                      : appLocalizations.showMore,
+                  onPressed: _handleMore,
+                  icon: CommonExpandIcon(expand: _isMore),
+                ),
+                IconButton.filledTonal(
+                  tooltip: appLocalizations.pasteFromClipboard,
+                  onPressed: _handlePaste,
+                  icon: const Icon(Icons.content_paste),
+                ),
+              ],
+            ),
+            TextButton(
+              onPressed: _handleSubmit,
+              child: Text(appLocalizations.submit),
+            ),
+          ],
         ),
       ],
       child: SizedBox(
         width: 300,
-        child: Wrap(
-          runSpacing: 16,
+        child: Column(
+          spacing: 24,
           children: [
             TextField(
               keyboardType: TextInputType.url,
@@ -195,15 +221,19 @@ class _URLFormDialogState extends State<URLFormDialog> {
               inputFormatters: TextInputLimits.limit(TextInputLimits.url),
               onSubmitted: (_) => _handleSubmit(),
               controller: _urlController,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: appLocalizations.url,
-              ),
+              decoration: InputDecoration(labelText: appLocalizations.url),
             ),
-            ClientPresetSelector(
-              selected: _client,
-              onChanged: (value) => setState(() => _client = value),
-              customUserAgentController: _customUserAgentController,
+            AnimatedSize(
+              duration: midDuration,
+              curve: Curves.easeOutQuad,
+              alignment: Alignment.topCenter,
+              child: _isMore
+                  ? ClientPresetSelector(
+                      selected: _client,
+                      onChanged: (value) => setState(() => _client = value),
+                      customUserAgentController: _customUserAgentController,
+                    )
+                  : const SizedBox(width: double.infinity),
             ),
           ],
         ),

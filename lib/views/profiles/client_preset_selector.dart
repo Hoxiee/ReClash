@@ -46,7 +46,6 @@ class ClientPresetSelector extends StatelessWidget {
             controller: customUserAgentController,
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
               labelText: appLocalizations.customUserAgentLabel,
               helperText: appLocalizations.subscriptionClientDesc,
             ),
