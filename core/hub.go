@@ -39,12 +39,15 @@ var (
 )
 
 func handleInitClash(params *InitParams) bool {
-	configMu.Lock()
-	defer configMu.Unlock()
-	sdkVersion.Store(int32(params.Version))
-	constant.SetHomeDir(params.HomeDir)
-	initOwnership(params.HomeDir)
-	isInit.Store(true)
+	func() {
+		configMu.Lock()
+		defer configMu.Unlock()
+		sdkVersion.Store(int32(params.Version))
+		constant.SetHomeDir(params.HomeDir)
+		initOwnership(params.HomeDir)
+		isInit.Store(true)
+	}()
+	rcxEngineInstance.Start()
 	return true
 }
 
@@ -113,6 +116,7 @@ func handleForceGC() {
 
 func handleShutdown() bool {
 	handleStopLog()
+	rcxEngineInstance.Stop()
 
 	configMu.Lock()
 	isRunning.Store(false)
@@ -221,19 +225,32 @@ func selectableGroup(groupName string) (outboundgroup.SelectAble, error) {
 }
 
 func handleChangeProxy(params *ChangeProxyParams) string {
-	selectMu.Lock()
-	defer selectMu.Unlock()
+	if rcxIsServiceGroup(params.GroupName) {
+		return errGroupNotFound.Error()
+	}
 
-	selector, err := selectableGroup(params.GroupName)
-	if err != nil {
-		return err.Error()
-	}
-	if params.ProxyName == "" {
-		selector.ForceSet(params.ProxyName)
+	if err := func() string {
+		selectMu.Lock()
+		defer selectMu.Unlock()
+
+		selector, err := selectableGroup(params.GroupName)
+		if err != nil {
+			return err.Error()
+		}
+		if params.ProxyName == "" {
+			selector.ForceSet(params.ProxyName)
+			return ""
+		}
+		if err := selector.Set(params.ProxyName); err != nil {
+			return err.Error()
+		}
 		return ""
+	}(); err != "" {
+		return err
 	}
-	if err := selector.Set(params.ProxyName); err != nil {
-		return err.Error()
+
+	if params.GroupName == rcxGroupNode {
+		rcxEngineInstance.NoteManualPick(params.ProxyName)
 	}
 	return ""
 }
@@ -569,6 +586,7 @@ func handleSuspend(suspended bool) bool {
 	wasSuspended := isSuspended.Swap(suspended)
 	if suspended {
 		tunnel.OnSuspend()
+		rcxEngineInstance.OnSuspend(true)
 		return true
 	}
 
@@ -579,10 +597,12 @@ func handleSuspend(suspended bool) bool {
 	// nothing touched it in the meantime, and the whole list stays wrong until
 	// the user tests by hand. Re-check now instead - but not while the
 	// listeners are stopped, since the service also resumes the core on its way
-	// down.
-	if wasSuspended && isRunning.Load() {
+	// down, and not when the routing engine is on: it buys one probe for the
+	// node in use instead of one per provider.
+	if wasSuspended && isRunning.Load() && !rcxEngineInstance.Enabled() {
 		refreshHealthChecks()
 	}
+	rcxEngineInstance.OnSuspend(false)
 	return true
 }
 
@@ -715,6 +735,7 @@ func handleSetupConfig(params *SetupParams) string {
 
 func init() {
 	adapter.UrlTestHook = func(url string, name string, delay uint16) {
+		rcxEngineInstance.NoteHarvestedProbe(name, int(delay))
 		if !shouldPublishDelay(delay) {
 			return
 		}
@@ -735,6 +756,7 @@ func init() {
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()
+		rcxEngineInstance.OnProvidersLoaded()
 		sendMessage(Message{
 			Type: LoadedMessage,
 			Data: providerName,

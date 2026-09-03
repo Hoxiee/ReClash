@@ -180,6 +180,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.loaded: 'loaded',
   CoreEventType.crash: 'crash',
   CoreEventType.geoUpdate: 'geoUpdate',
+  CoreEventType.rcxStatus: 'rcxStatus',
 };
 
 _InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>
@@ -268,3 +269,48 @@ _ProxiesData _$ProxiesDataFromJson(Map<String, dynamic> json) => _ProxiesData(
 
 Map<String, dynamic> _$ProxiesDataToJson(_ProxiesData instance) =>
     <String, dynamic>{'proxies': instance.proxies, 'all': instance.all};
+
+_RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
+    _RcxConfigParams(
+      enabled: json['on'] as bool,
+      preset: json['preset'] as String,
+      allowDomesticLastResort: json['dlr'] as bool,
+      saveMobileData: json['smd'] as bool,
+      manualHoldMinutes: (json['mhm'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
+    <String, dynamic>{
+      'on': instance.enabled,
+      'preset': instance.preset,
+      'dlr': instance.allowDomesticLastResort,
+      'smd': instance.saveMobileData,
+      'mhm': instance.manualHoldMinutes,
+    };
+
+_RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
+  enabled: json['enabled'] as bool? ?? false,
+  preset: json['preset'] as String? ?? 'off',
+  mode: json['mode'] as String? ?? '',
+  terrain: json['terrain'] as String? ?? 'unknown',
+  env: json['env'] as String? ?? '',
+  node: json['node'] as String? ?? '',
+  delay: (json['delay'] as num?)?.toInt() ?? 0,
+  reason: json['reason'] as String? ?? '',
+  searching: json['searching'] as bool? ?? false,
+  candidates: (json['candidates'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
+    <String, dynamic>{
+      'enabled': instance.enabled,
+      'preset': instance.preset,
+      'mode': instance.mode,
+      'terrain': instance.terrain,
+      'env': instance.env,
+      'node': instance.node,
+      'delay': instance.delay,
+      'reason': instance.reason,
+      'searching': instance.searching,
+      'candidates': instance.candidates,
+    };

@@ -38,6 +38,10 @@ enum CoreMethod {
   setupConfig,
   clearEffect,
   updateDns,
+  rcxConfigure,
+  rcxNetwork,
+  rcxStatus,
+  rcxSetEnabled,
 }
 
 class CoreMethodCall {

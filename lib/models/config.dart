@@ -31,6 +31,7 @@ const defaultBypassDomain = [
 const defaultAppSettingProps = AppSettingProps();
 const defaultVpnProps = VpnProps();
 const defaultNetworkProps = NetworkProps();
+const defaultSmartRoutingProps = SmartRoutingProps();
 const defaultProxiesStyleProps = ProxiesStyleProps();
 const defaultWindowProps = WindowProps();
 const defaultAccessControlProps = AccessControlProps();
@@ -171,6 +172,24 @@ abstract class VpnProps with _$VpnProps {
       json == null ? defaultVpnProps : _$VpnPropsFromJson(json);
 }
 
+/// Mirrors what the Go engine persists for itself. Dart owns the user's choice
+/// and pushes it down; the core keeps a copy so it still runs with the UI dead.
+@freezed
+abstract class SmartRoutingProps with _$SmartRoutingProps {
+  const factory SmartRoutingProps({
+    @Default(false) bool enabled,
+    @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,
+    @Default(true) bool allowDomesticLastResort,
+    @Default(true) bool saveMobileData,
+    @Default(60) int manualHoldMinutes,
+  }) = _SmartRoutingProps;
+
+  factory SmartRoutingProps.fromJson(Map<String, Object?>? json) =>
+      json == null
+      ? defaultSmartRoutingProps
+      : _$SmartRoutingPropsFromJson(json);
+}
+
 @freezed
 abstract class NetworkProps with _$NetworkProps {
   const factory NetworkProps({
@@ -252,6 +271,7 @@ abstract class Config with _$Config {
     DAVProps? davProps,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
+    @Default(defaultSmartRoutingProps) SmartRoutingProps smartRoutingProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
     @Default(defaultWindowProps) WindowProps windowProps,

@@ -38,6 +38,8 @@ abstract mixin class CoreEventListener {
     bool skipped,
     String? error,
   ) {}
+
+  void onRcxStatus(RcxStatus status) {}
 }
 
 class CoreEventManager {
@@ -62,6 +64,13 @@ class CoreEventManager {
               break;
             case CoreEventType.crash:
               listener.onCrash(event.data);
+              break;
+            case CoreEventType.rcxStatus:
+              listener.onRcxStatus(
+                RcxStatus.fromJson(
+                  Map<String, Object?>.from(event.data as Map),
+                ),
+              );
               break;
             case CoreEventType.geoUpdate:
               final data = event.data as Map<String, dynamic>;

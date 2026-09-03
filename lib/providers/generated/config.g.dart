@@ -164,6 +164,59 @@ abstract class _$VpnSetting extends $Notifier<VpnProps> {
   }
 }
 
+@ProviderFor(SmartRoutingSetting)
+final smartRoutingSettingProvider = SmartRoutingSettingProvider._();
+
+final class SmartRoutingSettingProvider
+    extends $NotifierProvider<SmartRoutingSetting, SmartRoutingProps> {
+  SmartRoutingSettingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'smartRoutingSettingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$smartRoutingSettingHash();
+
+  @$internal
+  @override
+  SmartRoutingSetting create() => SmartRoutingSetting();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SmartRoutingProps value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SmartRoutingProps>(value),
+    );
+  }
+}
+
+String _$smartRoutingSettingHash() =>
+    r'e863e513340678389ffadc1c2767b193714de7d0';
+
+abstract class _$SmartRoutingSetting extends $Notifier<SmartRoutingProps> {
+  SmartRoutingProps build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<SmartRoutingProps, SmartRoutingProps>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<SmartRoutingProps, SmartRoutingProps>,
+              SmartRoutingProps,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(NetworkSetting)
 final networkSettingProvider = NetworkSettingProvider._();
 
@@ -618,4 +671,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'17dad8563f5727690a7fd484815e7344e6a46ffa';
+String _$_configHash() => r'2595bfffebac2e6f0bd7b2a2de2f8c177cab2fb7';

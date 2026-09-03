@@ -125,6 +125,12 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
+  void onRcxStatus(RcxStatus status) {
+    ref.read(smartRoutingStatusProvider.notifier).value = status;
+    super.onRcxStatus(status);
+  }
+
+  @override
   void onGeoUpdate(String geoType, bool updating, bool skipped, String? error) {
     ref
         .read(geoResourceActionProvider.notifier)

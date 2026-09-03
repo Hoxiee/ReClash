@@ -181,3 +181,36 @@ abstract class ProxiesData with _$ProxiesData {
   factory ProxiesData.fromJson(Map<String, Object?> json) =>
       _$ProxiesDataFromJson(json);
 }
+
+@freezed
+abstract class RcxConfigParams with _$RcxConfigParams {
+  const factory RcxConfigParams({
+    @JsonKey(name: 'on') required bool enabled,
+    @JsonKey(name: 'preset') required String preset,
+    @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
+    @JsonKey(name: 'smd') required bool saveMobileData,
+    @JsonKey(name: 'mhm') required int manualHoldMinutes,
+  }) = _RcxConfigParams;
+
+  factory RcxConfigParams.fromJson(Map<String, Object?> json) =>
+      _$RcxConfigParamsFromJson(json);
+}
+
+@freezed
+abstract class RcxStatus with _$RcxStatus {
+  const factory RcxStatus({
+    @Default(false) bool enabled,
+    @Default('off') String preset,
+    @Default('') String mode,
+    @Default('unknown') String terrain,
+    @Default('') String env,
+    @Default('') String node,
+    @Default(0) int delay,
+    @Default('') String reason,
+    @Default(false) bool searching,
+    @Default(0) int candidates,
+  }) = _RcxStatus;
+
+  factory RcxStatus.fromJson(Map<String, Object?> json) =>
+      _$RcxStatusFromJson(json);
+}

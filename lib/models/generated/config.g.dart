@@ -186,6 +186,34 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'accessControlProps': instance.accessControlProps,
 };
 
+_SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
+    _SmartRoutingProps(
+      enabled: json['enabled'] as bool? ?? false,
+      preset:
+          $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
+          SmartRoutingPreset.off,
+      allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
+      saveMobileData: json['saveMobileData'] as bool? ?? true,
+      manualHoldMinutes: (json['manualHoldMinutes'] as num?)?.toInt() ?? 60,
+    );
+
+Map<String, dynamic> _$SmartRoutingPropsToJson(_SmartRoutingProps instance) =>
+    <String, dynamic>{
+      'enabled': instance.enabled,
+      'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
+      'allowDomesticLastResort': instance.allowDomesticLastResort,
+      'saveMobileData': instance.saveMobileData,
+      'manualHoldMinutes': instance.manualHoldMinutes,
+    };
+
+const _$SmartRoutingPresetEnumMap = {
+  SmartRoutingPreset.off: 'off',
+  SmartRoutingPreset.ruMobile: 'ru-mobile',
+  SmartRoutingPreset.ruHome: 'ru-home',
+  SmartRoutingPreset.iran: 'ir',
+  SmartRoutingPreset.china: 'cn',
+};
+
 _NetworkProps _$NetworkPropsFromJson(Map<String, dynamic> json) =>
     _NetworkProps(
       systemProxy: json['systemProxy'] as bool? ?? true,
@@ -370,6 +398,11 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
   vpnProps: json['vpnProps'] == null
       ? defaultVpnProps
       : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>?),
+  smartRoutingProps: json['smartRoutingProps'] == null
+      ? defaultSmartRoutingProps
+      : SmartRoutingProps.fromJson(
+          json['smartRoutingProps'] as Map<String, dynamic>?,
+        ),
   themeProps: ThemeProps.safeFromJson(
     json['themeProps'] as Map<String, Object?>?,
   ),
@@ -396,6 +429,7 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'davProps': instance.davProps,
   'networkProps': instance.networkProps,
   'vpnProps': instance.vpnProps,
+  'smartRoutingProps': instance.smartRoutingProps,
   'themeProps': instance.themeProps,
   'proxiesStyleProps': instance.proxiesStyleProps,
   'windowProps': instance.windowProps,

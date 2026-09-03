@@ -116,6 +116,10 @@ const (
 	setupConfigMethod              CoreMethod = "setupConfig"
 	getConfigMethod                CoreMethod = "getConfig"
 	clearEffectMethod              CoreMethod = "clearEffect"
+	rcxConfigureMethod             CoreMethod = "rcxConfigure"
+	rcxNetworkMethod               CoreMethod = "rcxNetwork"
+	rcxStatusMethod                CoreMethod = "rcxStatus"
+	rcxSetEnabledMethod            CoreMethod = "rcxSetEnabled"
 )
 
 type CoreMethod string
@@ -139,6 +143,7 @@ const (
 	RequestMessage   MessageType = "request"
 	LoadedMessage    MessageType = "loaded"
 	GeoUpdateMessage MessageType = "geoUpdate"
+	RcxStatusMessage MessageType = "rcxStatus"
 )
 
 type GeoUpdateStatus struct {

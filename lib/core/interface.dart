@@ -58,6 +58,10 @@ mixin CoreInterface {
 
   Future<String> updateExternalProvider(String providerName);
 
+  Future<bool> configureSmartRouting(RcxConfigParams params);
+
+  Future<RcxStatus?> smartRoutingStatus();
+
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
@@ -266,6 +270,26 @@ abstract class CoreHandlerInterface with CoreInterface {
       method: CoreMethod.updateExternalProvider,
       arguments: providerName,
     );
+  }
+
+  @override
+  Future<bool> configureSmartRouting(RcxConfigParams params) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.rcxConfigure,
+          arguments: params.toJson(),
+        ) ??
+        false;
+  }
+
+  @override
+  Future<RcxStatus?> smartRoutingStatus() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.rcxStatus,
+    );
+    if (data == null) {
+      return null;
+    }
+    return RcxStatus.fromJson(data);
   }
 
   @override

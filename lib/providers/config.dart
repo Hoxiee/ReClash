@@ -29,6 +29,15 @@ class VpnSetting extends _$VpnSetting with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class SmartRoutingSetting extends _$SmartRoutingSetting
+    with AutoDisposeNotifierMixin {
+  @override
+  SmartRoutingProps build() {
+    return const SmartRoutingProps();
+  }
+}
+
+@riverpod
 class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   @override
   NetworkProps build() {
@@ -101,6 +110,7 @@ Config _config(Ref ref) {
   final windowProps = ref.watch(windowSettingProvider);
   final vpnProps = ref.watch(vpnSettingProvider);
   final networkProps = ref.watch(networkSettingProvider);
+  final smartRoutingProps = ref.watch(smartRoutingSettingProvider);
   final themeProps = ref.watch(themeSettingProvider);
   final currentProfileId = ref.watch(currentProfileIdProvider);
   final davProps = ref.watch(davSettingProvider);
@@ -113,6 +123,7 @@ Config _config(Ref ref) {
     windowProps: windowProps,
     vpnProps: vpnProps,
     networkProps: networkProps,
+    smartRoutingProps: smartRoutingProps,
     themeProps: themeProps,
     currentProfileId: currentProfileId,
     davProps: davProps,
@@ -129,6 +140,9 @@ List<Override> buildConfigOverrides(Config config) {
     windowSettingProvider.overrideWithBuild((_, _) => config.windowProps),
     vpnSettingProvider.overrideWithBuild((_, _) => config.vpnProps),
     networkSettingProvider.overrideWithBuild((_, _) => config.networkProps),
+    smartRoutingSettingProvider.overrideWithBuild(
+      (_, _) => config.smartRoutingProps,
+    ),
     themeSettingProvider.overrideWithBuild((_, _) => config.themeProps),
     currentProfileIdProvider.overrideWithBuild(
       (_, _) => config.currentProfileId,

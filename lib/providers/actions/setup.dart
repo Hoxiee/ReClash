@@ -330,6 +330,9 @@ class SetupAction extends _$SetupAction {
         ),
       ),
     );
+    final smartRouting = ref.read(
+      smartRoutingSettingProvider.select((state) => state.enabled),
+    );
     final configMap = await _core.getConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
@@ -368,6 +371,7 @@ class SetupAction extends _$SetupAction {
         overrideNetwork: overrideNetwork,
         addedRules: addedRules,
         defaultUA: defaultUA,
+        smartRouting: smartRouting,
         matchTarget: setupState.matchTarget,
       ),
     );

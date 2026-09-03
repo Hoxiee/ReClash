@@ -90,6 +90,23 @@ extension UsedProxyExtension on UsedProxy {
 
 enum Mode { rule, global, direct }
 
+/// What the mode selector offers. [auto] is not a core mode: it is [Mode.rule]
+/// with smart routing on, so an inconsistent pair cannot be expressed.
+enum UiOutboundMode { auto, rule, global, direct }
+
+enum SmartRoutingPreset {
+  @JsonValue('off')
+  off,
+  @JsonValue('ru-mobile')
+  ruMobile,
+  @JsonValue('ru-home')
+  ruHome,
+  @JsonValue('ir')
+  iran,
+  @JsonValue('cn')
+  china,
+}
+
 enum ViewMode { mobile, laptop, desktop }
 
 enum LogLevel { debug, info, warning, error, silent }
@@ -182,7 +199,7 @@ enum ResultType {
   error,
 }
 
-enum CoreEventType { log, delay, request, loaded, crash, geoUpdate }
+enum CoreEventType { log, delay, request, loaded, crash, geoUpdate, rcxStatus }
 
 enum InvokeMessageType { protect, process }
 

@@ -58,6 +58,7 @@ func TestClassOfMessageRoutesEachTier(t *testing.T) {
 		LoadedMessage:    stateMessageClass,
 		GeoUpdateMessage: stateMessageClass,
 		DelayMessage:     priorityMessageClass,
+		RcxStatusMessage: priorityMessageClass,
 		LogMessage:       bulkMessageClass,
 		RequestMessage:   bulkMessageClass,
 	} {

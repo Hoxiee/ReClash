@@ -1363,6 +1363,69 @@ abstract class _$CoreStatus extends $Notifier<CoreStatus> {
   }
 }
 
+/// Last status the routing engine published. The engine keeps deciding while
+/// this is stale or absent, so the UI treats it as a view, never as the truth.
+
+@ProviderFor(_SmartRoutingStatus)
+final smartRoutingStatusProvider = _SmartRoutingStatusProvider._();
+
+/// Last status the routing engine published. The engine keeps deciding while
+/// this is stale or absent, so the UI treats it as a view, never as the truth.
+final class _SmartRoutingStatusProvider
+    extends $NotifierProvider<_SmartRoutingStatus, RcxStatus?> {
+  /// Last status the routing engine published. The engine keeps deciding while
+  /// this is stale or absent, so the UI treats it as a view, never as the truth.
+  _SmartRoutingStatusProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'smartRoutingStatusProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$_smartRoutingStatusHash();
+
+  @$internal
+  @override
+  _SmartRoutingStatus create() => _SmartRoutingStatus();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RcxStatus? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RcxStatus?>(value),
+    );
+  }
+}
+
+String _$_smartRoutingStatusHash() =>
+    r'f2393128aaca781390275a738fe847daa95b4825';
+
+/// Last status the routing engine published. The engine keeps deciding while
+/// this is stale or absent, so the UI treats it as a view, never as the truth.
+
+abstract class _$SmartRoutingStatus extends $Notifier<RcxStatus?> {
+  RcxStatus? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<RcxStatus?, RcxStatus?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<RcxStatus?, RcxStatus?>,
+              RcxStatus?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Query)
 final queryProvider = QueryFamily._();
 

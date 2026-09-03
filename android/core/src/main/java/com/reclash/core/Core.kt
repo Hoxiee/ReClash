@@ -91,6 +91,10 @@ object Core {
 
     fun closeConnections() = invokeWithoutArguments("closeConnections")
 
+    fun rcxNetwork(payload: String) {
+        invokeMethod("""{"method":"rcxNetwork","arguments":$payload}""") {}
+    }
+
     private external fun setEventListener(cb: InvokeInterface?)
 
     fun updateEventListener(

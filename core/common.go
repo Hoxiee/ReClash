@@ -179,6 +179,10 @@ func patchSelectGroup(mapping map[string]string) {
 			continue
 		}
 
+		if rcxIsServiceGroup(name) {
+			continue
+		}
+
 		selected, exist := mapping[name]
 		if !exist {
 			continue
@@ -297,6 +301,7 @@ func updateConfig(params *UpdateParams) error {
 	if params.Mode != nil {
 		general.Mode = *params.Mode
 		tunnel.SetMode(general.Mode)
+		rcxEngineInstance.OnConfigApplied()
 	}
 	if params.LogLevel != nil {
 		general.LogLevel = *params.LogLevel
@@ -386,6 +391,7 @@ func applyConfig(params *SetupParams) error {
 	patchSelectGroup(params.SelectedMap)
 	updateListeners(cfg)
 	reconcileGeoUpdater()
+	rcxEngineInstance.OnConfigApplied()
 	return err
 }
 

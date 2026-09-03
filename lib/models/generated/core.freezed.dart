@@ -3744,4 +3744,583 @@ as List<String>,
 
 }
 
+
+/// @nodoc
+mixin _$RcxConfigParams {
+
+@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'smd') bool get saveMobileData;@JsonKey(name: 'mhm') int get manualHoldMinutes;
+/// Create a copy of RcxConfigParams
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxConfigParamsCopyWith<RcxConfigParams> get copyWith => _$RcxConfigParamsCopyWithImpl<RcxConfigParams>(this as RcxConfigParams, _$identity);
+
+  /// Serializes this RcxConfigParams to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxConfigParams;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxConfigParams;
+  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.allowDomesticLastResort,_this.saveMobileData,_this.manualHoldMinutes);
+}
+
+@override
+String toString() {
+  final _this = this as RcxConfigParams;
+  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, manualHoldMinutes: ${_this.manualHoldMinutes})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxConfigParamsCopyWith<$Res>  {
+  factory $RcxConfigParamsCopyWith(RcxConfigParams value, $Res Function(RcxConfigParams) _then) = _$RcxConfigParamsCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'mhm') int manualHoldMinutes
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxConfigParamsCopyWithImpl<$Res>
+    implements $RcxConfigParamsCopyWith<$Res> {
+  _$RcxConfigParamsCopyWithImpl(this._self, this._then);
+
+  final RcxConfigParams _self;
+  final $Res Function(RcxConfigParams) _then;
+
+/// Create a copy of RcxConfigParams
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+  return _then(RcxConfigParams(
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxConfigParams].
+extension RcxConfigParamsPatterns on RcxConfigParams {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxConfigParams value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxConfigParams() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxConfigParams value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxConfigParams():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxConfigParams value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxConfigParams() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxConfigParams() when $default != null:
+return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)  $default,) {final _that = this;
+switch (_that) {
+case _RcxConfigParams():
+return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxConfigParams() when $default != null:
+return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxConfigParams implements RcxConfigParams {
+  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'smd') required this.saveMobileData, @JsonKey(name: 'mhm') required this.manualHoldMinutes});
+  factory _RcxConfigParams.fromJson(Map<String, dynamic> json) => _$RcxConfigParamsFromJson(json);
+
+@override@JsonKey(name: 'on') final  bool enabled;
+@override@JsonKey(name: 'preset') final  String preset;
+@override@JsonKey(name: 'dlr') final  bool allowDomesticLastResort;
+@override@JsonKey(name: 'smd') final  bool saveMobileData;
+@override@JsonKey(name: 'mhm') final  int manualHoldMinutes;
+
+/// Create a copy of RcxConfigParams
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxConfigParamsCopyWith<_RcxConfigParams> get copyWith => __$RcxConfigParamsCopyWithImpl<_RcxConfigParams>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxConfigParamsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enabled,preset,allowDomesticLastResort,saveMobileData,manualHoldMinutes);
+}
+
+@override
+String toString() {
+    return 'RcxConfigParams(enabled: $enabled, preset: $preset, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, manualHoldMinutes: $manualHoldMinutes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxConfigParamsCopyWith<$Res> implements $RcxConfigParamsCopyWith<$Res> {
+  factory _$RcxConfigParamsCopyWith(_RcxConfigParams value, $Res Function(_RcxConfigParams) _then) = __$RcxConfigParamsCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'mhm') int manualHoldMinutes
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxConfigParamsCopyWithImpl<$Res>
+    implements _$RcxConfigParamsCopyWith<$Res> {
+  __$RcxConfigParamsCopyWithImpl(this._self, this._then);
+
+  final _RcxConfigParams _self;
+  final $Res Function(_RcxConfigParams) _then;
+
+/// Create a copy of RcxConfigParams
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+  return _then(_RcxConfigParams(
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxStatus {
+
+ bool get enabled; String get preset; String get mode; String get terrain; String get env; String get node; int get delay; String get reason; bool get searching; int get candidates;
+/// Create a copy of RcxStatus
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxStatusCopyWith<RcxStatus> get copyWith => _$RcxStatusCopyWithImpl<RcxStatus>(this as RcxStatus, _$identity);
+
+  /// Serializes this RcxStatus to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxStatus;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStatus&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.searching, _this.searching) || other.searching == _this.searching)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxStatus;
+  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.mode,_this.terrain,_this.env,_this.node,_this.delay,_this.reason,_this.searching,_this.candidates);
+}
+
+@override
+String toString() {
+  final _this = this as RcxStatus;
+  return 'RcxStatus(enabled: ${_this.enabled}, preset: ${_this.preset}, mode: ${_this.mode}, terrain: ${_this.terrain}, env: ${_this.env}, node: ${_this.node}, delay: ${_this.delay}, reason: ${_this.reason}, searching: ${_this.searching}, candidates: ${_this.candidates})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxStatusCopyWith<$Res>  {
+  factory $RcxStatusCopyWith(RcxStatus value, $Res Function(RcxStatus) _then) = _$RcxStatusCopyWithImpl;
+@useResult
+$Res call({
+ bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, int candidates
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxStatusCopyWithImpl<$Res>
+    implements $RcxStatusCopyWith<$Res> {
+  _$RcxStatusCopyWithImpl(this._self, this._then);
+
+  final RcxStatus _self;
+  final $Res Function(RcxStatus) _then;
+
+/// Create a copy of RcxStatus
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? candidates = null,}) {
+  return _then(RcxStatus(
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as String,terrain: null == terrain ? _self.terrain : terrain // ignore: cast_nullable_to_non_nullable
+as String,env: null == env ? _self.env : env // ignore: cast_nullable_to_non_nullable
+as String,node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
+as bool,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxStatus].
+extension RcxStatusPatterns on RcxStatus {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxStatus value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxStatus() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxStatus value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxStatus():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxStatus value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxStatus() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxStatus() when $default != null:
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)  $default,) {final _that = this;
+switch (_that) {
+case _RcxStatus():
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxStatus() when $default != null:
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxStatus implements RcxStatus {
+  const _RcxStatus({this.enabled = false, this.preset = 'off', this.mode = '', this.terrain = 'unknown', this.env = '', this.node = '', this.delay = 0, this.reason = '', this.searching = false, this.candidates = 0});
+  factory _RcxStatus.fromJson(Map<String, dynamic> json) => _$RcxStatusFromJson(json);
+
+@override@JsonKey() final  bool enabled;
+@override@JsonKey() final  String preset;
+@override@JsonKey() final  String mode;
+@override@JsonKey() final  String terrain;
+@override@JsonKey() final  String env;
+@override@JsonKey() final  String node;
+@override@JsonKey() final  int delay;
+@override@JsonKey() final  String reason;
+@override@JsonKey() final  bool searching;
+@override@JsonKey() final  int candidates;
+
+/// Create a copy of RcxStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxStatusCopyWith<_RcxStatus> get copyWith => __$RcxStatusCopyWithImpl<_RcxStatus>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxStatusToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStatus&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&(identical(other.node, node) || other.node == node)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.candidates, candidates) || other.candidates == candidates));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enabled,preset,mode,terrain,env,node,delay,reason,searching,candidates);
+}
+
+@override
+String toString() {
+    return 'RcxStatus(enabled: $enabled, preset: $preset, mode: $mode, terrain: $terrain, env: $env, node: $node, delay: $delay, reason: $reason, searching: $searching, candidates: $candidates)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxStatusCopyWith<$Res> implements $RcxStatusCopyWith<$Res> {
+  factory _$RcxStatusCopyWith(_RcxStatus value, $Res Function(_RcxStatus) _then) = __$RcxStatusCopyWithImpl;
+@override @useResult
+$Res call({
+ bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, int candidates
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxStatusCopyWithImpl<$Res>
+    implements _$RcxStatusCopyWith<$Res> {
+  __$RcxStatusCopyWithImpl(this._self, this._then);
+
+  final _RcxStatus _self;
+  final $Res Function(_RcxStatus) _then;
+
+/// Create a copy of RcxStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? candidates = null,}) {
+  return _then(_RcxStatus(
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as String,terrain: null == terrain ? _self.terrain : terrain // ignore: cast_nullable_to_non_nullable
+as String,env: null == env ? _self.env : env // ignore: cast_nullable_to_non_nullable
+as String,node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
+as bool,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
 // dart format on

@@ -339,6 +339,17 @@ class _CoreStatus extends _$CoreStatus with AutoDisposeNotifierMixin {
   }
 }
 
+/// Last status the routing engine published. The engine keeps deciding while
+/// this is stale or absent, so the UI treats it as a view, never as the truth.
+@Riverpod(name: 'smartRoutingStatusProvider', keepAlive: true)
+class _SmartRoutingStatus extends _$SmartRoutingStatus
+    with AutoDisposeNotifierMixin {
+  @override
+  RcxStatus? build() {
+    return null;
+  }
+}
+
 @riverpod
 class Query extends _$Query with AutoDisposeNotifierMixin {
   @override

@@ -97,6 +97,75 @@ ClashConfig buildClashConfig(Map<String, dynamic> configMap) {
   return clashConfig.copyWith(proxyTypeMap: proxyTypeMap);
 }
 
+const _rcxNodeGroupName = 'RCX-NODE';
+const _rcxFinalGroupName = 'RCX-FINAL';
+
+String? _proxyGroupName(Object? group) => switch (group) {
+  final ProxyGroup value => value.name,
+  final Map value => value['name']?.toString(),
+  _ => null,
+};
+
+/// Group membership and rule targets are fixed for the life of a config, so the
+/// skeleton has to be emitted before the first packet. The choice inside
+/// RCX-NODE belongs to the core.
+List<String> injectRcxSkeleton({
+  required Map<dynamic, dynamic> rawConfig,
+  required List<String> rules,
+}) {
+  final groups = rawConfig['proxy-groups'];
+  final existing = groups is List ? groups : const [];
+  final names = existing.map(_proxyGroupName).whereType<String>().toSet();
+  if (names.contains(_rcxNodeGroupName) || names.contains(_rcxFinalGroupName)) {
+    return rules;
+  }
+
+  final providers =
+      (rawConfig['proxy-providers'] as Map?)?.keys
+          .map((key) => key.toString())
+          .toList() ??
+      const <String>[];
+  final inline =
+      (rawConfig['proxies'] as List?)
+          ?.map((proxy) => proxy is Map ? proxy['name']?.toString() : null)
+          .whereType<String>()
+          .toList() ??
+      const <String>[];
+  if (providers.isEmpty && inline.isEmpty) {
+    return rules;
+  }
+
+  // Index 0 is where an unknown selection lands: a node keeps it proxied, and
+  // REJECT stands in while a provider loads because DIRECT would leak.
+  final members = inline.isNotEmpty ? inline : const ['REJECT'];
+  rawConfig['proxy-groups'] = <Object?>[
+    ...existing,
+    <String, Object?>{
+      'name': _rcxNodeGroupName,
+      'type': 'select',
+      'proxies': members,
+      if (providers.isNotEmpty) 'use': providers,
+    },
+    <String, Object?>{
+      'name': _rcxFinalGroupName,
+      'type': 'select',
+      'hidden': true,
+      'proxies': <String>[_rcxNodeGroupName, 'DIRECT'],
+    },
+  ];
+
+  final patched = List<String>.from(rules);
+  for (var i = 0; i < patched.length; i++) {
+    if (patched[i].split(',').first.trim().toUpperCase() != 'MATCH') {
+      continue;
+    }
+    patched[i] = 'MATCH,$_rcxFinalGroupName';
+    return patched;
+  }
+  patched.add('MATCH,$_rcxFinalGroupName');
+  return patched;
+}
+
 Future<({String yaml, String md5})> makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -299,6 +368,9 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   }
   if (data.proxyGroups.isNotEmpty) {
     rawConfig['proxy-groups'] = data.proxyGroups;
+  }
+  if (data.smartRouting) {
+    rules = injectRcxSkeleton(rawConfig: rawConfig, rules: rules);
   }
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));

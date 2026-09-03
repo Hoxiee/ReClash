@@ -11,6 +11,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.telephony.TelephonyManager
 import androidx.core.content.getSystemService
 import com.reclash.core.Core
 import com.reclash.service.WifiSsid
@@ -24,6 +25,12 @@ private data class NetworkInfo(
     @Volatile var dnsList: List<InetAddress> = emptyList(),
     @Volatile var ipv4List: List<String> = emptyList(),
     @Volatile var ssid: String? = null,
+    @Volatile var transport: String = "",
+    @Volatile var validated: Boolean = false,
+    @Volatile var portal: Boolean = false,
+    @Volatile var metered: Boolean = false,
+    @Volatile var gateways: List<String> = emptyList(),
+    @Volatile var dhcpServer: String = "",
 ) {
     val priorityPenalty: Int
         get() = if (losingUntilMillis > System.currentTimeMillis()) 10 else 0
@@ -42,6 +49,10 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     private var currentDnsList = listOf<String>()
     private var lastIpv4Union = emptyList<String>()
     private var lastSsidUnion = emptyList<String>()
+    private var lastRcxFacts: RcxNetworkFacts? = null
+    private val telephony by lazy {
+        service.getSystemService<TelephonyManager>()
+    }
 
     private val request = NetworkRequest.Builder().apply {
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
@@ -100,6 +111,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         networkInfos[network] = NetworkInfo()
         updateDns()
         updatePhysical()
+        updateRouting()
     }
 
     private fun handleLosing(network: Network, maxMsToLive: Int) {
@@ -119,6 +131,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         networkInfos.remove(network)
         updateDns()
         updatePhysical()
+        updateRouting()
     }
 
     private fun handleCapabilitiesChanged(
@@ -131,7 +144,22 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         } else {
             null
         }
+        info.transport = transportName(capabilities)
+        info.validated =
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        info.portal =
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
+        info.metered =
+            !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
         updatePhysical()
+        updateRouting()
+    }
+
+    private fun transportName(capabilities: NetworkCapabilities): String = when {
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+        capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+        else -> "other"
     }
 
     private fun handleLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
@@ -139,9 +167,18 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             info.dnsList = linkProperties.dnsServers
             info.ipv4List = linkProperties.linkAddresses
                 .mapNotNull { (it.address as? Inet4Address)?.hostAddress }
+            info.gateways = linkProperties.routes
+                .filter { it.isDefaultRoute }
+                .mapNotNull { it.gateway?.hostAddress }
+            info.dhcpServer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                linkProperties.dhcpServerAddress?.hostAddress.orEmpty()
+            } else {
+                ""
+            }
         }
         updateDns()
         updatePhysical()
+        updateRouting()
     }
 
     override fun start() {
@@ -196,6 +233,34 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         onPhysicalNetworksChanged?.invoke(ipv4Union, ssidUnion)
     }
 
+    // The routing engine lives in the core, which outlives the Dart isolate, so the
+    // facts it classifies terrain from have to come from here.
+    @Synchronized
+    private fun updateRouting() {
+        val info = networkInfos.asSequence().minByOrNull(::networkPriority)?.value ?: return
+        val facts = RcxNetworkFacts(
+            transport = info.transport,
+            ssid = info.ssid.orEmpty(),
+            carrier = if (info.transport == "cellular") {
+                runCatching { telephony?.simOperator }.getOrNull().orEmpty()
+            } else {
+                ""
+            },
+            gateways = info.gateways,
+            dhcp = info.dhcpServer,
+            dns = info.dnsList.mapNotNull { it.hostAddress },
+            ipv4 = info.ipv4List,
+            validated = info.validated,
+            portal = info.portal,
+            metered = info.metered,
+        )
+        if (facts == lastRcxFacts) {
+            return
+        }
+        lastRcxFacts = facts
+        Core.rcxNetwork(facts.toJson())
+    }
+
     override fun stop() {
         mainHandler.removeCallbacksAndMessages(null)
         try {
@@ -204,6 +269,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             networkInfos.clear()
             lastIpv4Union = emptyList()
             lastSsidUnion = emptyList()
+            lastRcxFacts = null
             updateDns()
         }
     }
