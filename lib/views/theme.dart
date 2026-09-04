@@ -457,7 +457,11 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
       ),
     );
     final primaryColor = themeColors.primaryColor;
-    final primaryColors = [null, ...themeColors.primaryColors];
+    final isDynamic = primaryColor == null;
+    final primaryColors = [
+      if (!isDynamic) null,
+      ...themeColors.primaryColors,
+    ];
     final schemeVariant = themeColors.schemeVariant;
     final isEquals = themeColors.isDefault;
 
@@ -504,17 +508,43 @@ class _PrimaryColorItemState extends ConsumerState<_PrimaryColorItem> {
                 icon: const Icon(Icons.replay),
               ),
           ], space: 8),
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: _PrimaryColorGrid(
-              colors: primaryColors,
-              selectedColor: primaryColor,
-              removableColor: _removablePrimaryColor,
-              onSelect: _handleSelectColor,
-              onRequestRemove: _markRemovable,
-              onDelete: _handleDel,
-              onAdd: _handleAdd,
-            ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _SystemColorTile(
+                  value: isDynamic,
+                  onChanged: (value) {
+                    _clearRemovable();
+                    ref.read(themeSettingProvider.notifier).update(
+                      (state) => state.copyWith(
+                        primaryColor: value
+                            ? null
+                            : (state.primaryColors.contains(defaultPrimaryColor)
+                                  ? defaultPrimaryColor
+                                  : state.primaryColors.firstOrNull),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (isDynamic) const _SystemSeedChip(),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: DisabledMask(
+                  status: isDynamic,
+                  child: _PrimaryColorGrid(
+                    colors: primaryColors,
+                    selectedColor: primaryColor,
+                    removableColor: _removablePrimaryColor,
+                    onSelect: _handleSelectColor,
+                    onRequestRemove: _markRemovable,
+                    onDelete: _handleDel,
+                    onAdd: _handleAdd,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -766,6 +796,63 @@ class _TextScaleFactorItem extends ConsumerWidget {
                   child: Text(process, style: context.textTheme.titleMedium),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SystemColorTile extends ConsumerWidget {
+  const _SystemColorTile({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ListItem.toggle(
+      leading: const Icon(Icons.colorize),
+      horizontalTitleGap: 12,
+      title: Text(
+        context.appLocalizations.systemColor,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: context.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      subtitle: Text(context.appLocalizations.systemColorDesc),
+      value: value,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _SystemSeedChip extends ConsumerWidget {
+  const _SystemSeedChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dynamicColor = ref.watch(dynamicColorProvider);
+    final seed = dynamicColor.accentColor;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: Color(seed.toARGB32()),
+              shape: BoxShape.circle,
+            ),
+          ),
+          Text(
+            context.appLocalizations.systemSeed,
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
