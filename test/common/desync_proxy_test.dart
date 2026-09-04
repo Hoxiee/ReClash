@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -72,6 +73,20 @@ void main() {
 
   test('no category means no rules', () {
     expect(desyncRules(categories: [], forceTcp: true), isEmpty);
+  });
+
+  test('the rule target and the outbound name are the same string', () {
+    expect(RuleTarget.DESYNC.name, desyncOutboundName);
+  });
+
+  test('the target is offered only while the bypass is on', () {
+    expect(RuleTarget.targetNames(desync: false), ['DIRECT', 'REJECT']);
+    expect(RuleTarget.targetNames(desync: true), [
+      'DIRECT',
+      'REJECT',
+      'DESYNC',
+    ]);
+    expect(RuleTarget.baseTargets, {'DIRECT', 'REJECT'});
   });
 
   // The ranker reads membership from RCX-NODE alone and would pick a loopback

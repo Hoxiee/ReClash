@@ -498,13 +498,19 @@ enum OverwriteType { standard, script, custom }
 
 enum RuleTarget {
   DIRECT,
-  REJECT;
+  REJECT,
+  DESYNC;
+
+  static const _always = [RuleTarget.DIRECT, RuleTarget.REJECT];
 
   static final List<String> baseTargetNames = List.unmodifiable(
-    RuleTarget.values.map((item) => item.name),
+    _always.map((item) => item.name),
   );
 
   static final Set<String> baseTargets = Set.unmodifiable(baseTargetNames);
+
+  static List<String> targetNames({required bool desync}) =>
+      desync ? [...baseTargetNames, DESYNC.name] : baseTargetNames;
 }
 
 enum RestoreStrategy { compatible, override }

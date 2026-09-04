@@ -8,6 +8,8 @@ import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/providers/config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final ruleItemHeight =
     globalState.measure.bodyLargeHeight +
@@ -194,16 +196,17 @@ class RuleStatusItem extends StatelessWidget {
   }
 }
 
-class AddOrEditRuleDialog extends StatefulWidget {
+class AddOrEditRuleDialog extends ConsumerStatefulWidget {
   final Rule? rule;
 
   const AddOrEditRuleDialog({super.key, this.rule});
 
   @override
-  State<AddOrEditRuleDialog> createState() => _AddOrEditRuleDialogState();
+  ConsumerState<AddOrEditRuleDialog> createState() =>
+      _AddOrEditRuleDialogState();
 }
 
-class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
+class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
   late RuleAction _ruleAction;
   String _ruleTarget = '';
   final _ruleTargetController = TextEditingController();
@@ -226,9 +229,10 @@ class _AddOrEditRuleDialogState extends State<AddOrEditRuleDialog> {
   }
 
   void _initState() {
+    final desync = ref.read(desyncSettingProvider).enabled;
     _targetItems = [
-      ...RuleTarget.values.map(
-        (item) => DropdownMenuEntry(value: item.name, label: item.name),
+      ...RuleTarget.targetNames(desync: desync).map(
+        (name) => DropdownMenuEntry(value: name, label: name),
       ),
       DropdownMenuEntry(
         value: RuleAction.MATCH.value,
