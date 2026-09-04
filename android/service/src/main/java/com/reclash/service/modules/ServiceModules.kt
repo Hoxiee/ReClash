@@ -1,6 +1,7 @@
 package com.reclash.service.modules
 
 import android.app.Service
+import com.reclash.service.ByeDpiRuntime
 import com.reclash.service.VpnService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,12 +30,21 @@ internal class ServiceModules(private val service: Service) {
                 networkModule.onPhysicalNetworksChanged = module::onPhysicalNetworksChanged
             }
         }
+        val desyncModule = ByeDpiModule(
+            nextScope,
+            ByeDpiRuntime(service, (service as? VpnService)?.let { vpn -> vpn::protect }),
+        ).also { module ->
+            networkModule.onRoutingFactsChanged = { facts ->
+                module.onEnvironmentChanged(byeDpiEnvKey(facts))
+            }
+        }
         val nextModules = buildList {
             add(NotificationModule(service, nextScope))
             add(networkModule)
             add(SuspendModule(service, nextScope))
             add(WakeLockModule(service, nextScope))
             if (pauseModule != null) add(pauseModule)
+            add(desyncModule)
         }
         val startedModules = mutableListOf<ServiceModule>()
 

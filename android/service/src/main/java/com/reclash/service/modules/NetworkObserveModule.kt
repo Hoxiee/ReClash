@@ -56,6 +56,8 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     // Union across all networks: a phone on wifi+cellular belongs to both LANs at once.
     var onPhysicalNetworksChanged: ((ips: List<String>, ssids: List<String>) -> Unit)? = null
 
+    var onRoutingFactsChanged: ((RcxNetworkFacts) -> Unit)? = null
+
     private val networkInfos = ConcurrentHashMap<Network, NetworkInfo>()
     private val connectivity by lazy {
         service.getSystemService<ConnectivityManager>()
@@ -280,6 +282,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         }
         lastRcxFacts = facts
         Core.rcxNetwork(facts.toJson())
+        onRoutingFactsChanged?.invoke(facts)
     }
 
     // Sockets bound to the interface that just went away hang until their own timeouts.
