@@ -42,6 +42,8 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       checkCertificate: json['checkCertificate'] as bool? ?? true,
       customUserAgent: json['customUserAgent'] as String? ?? '',
       sendDeviceIdentity: json['sendDeviceIdentity'] as bool? ?? true,
+      iconVariant: json['iconVariant'] as String? ?? 'default',
+      reduceMotion: json['reduceMotion'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -74,6 +76,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'checkCertificate': instance.checkCertificate,
       'customUserAgent': instance.customUserAgent,
       'sendDeviceIdentity': instance.sendDeviceIdentity,
+      'iconVariant': instance.iconVariant,
+      'reduceMotion': instance.reduceMotion,
     };
 
 const _$RestoreStrategyEnumMap = {
@@ -403,6 +407,9 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
   themeMode:
       $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']) ??
       ThemeMode.dark,
+  scheduledTheme: json['scheduledTheme'] as bool? ?? false,
+  darkAt: json['darkAt'] as String?,
+  lightAt: json['lightAt'] as String?,
   schemeVariant:
       $enumDecodeNullable(
         _$DynamicSchemeVariantEnumMap,
@@ -410,6 +417,7 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
       ) ??
       DynamicSchemeVariant.content,
   pureBlack: json['pureBlack'] as bool? ?? false,
+  contrastLevel: (json['contrastLevel'] as num?)?.toDouble() ?? 0,
   textScale: json['textScale'] == null
       ? const TextScale()
       : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
@@ -420,8 +428,12 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'primaryColor': instance.primaryColor,
       'primaryColors': instance.primaryColors,
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
+      'scheduledTheme': instance.scheduledTheme,
+      'darkAt': instance.darkAt,
+      'lightAt': instance.lightAt,
       'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
       'pureBlack': instance.pureBlack,
+      'contrastLevel': instance.contrastLevel,
       'textScale': instance.textScale,
     };
 

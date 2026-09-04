@@ -93,6 +93,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool checkCertificate,
     @Default('') String customUserAgent,
     @Default(true) bool sendDeviceIdentity,
+    @Default('default') String iconVariant,
+    @Default(false) bool reduceMotion,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>
@@ -271,8 +273,12 @@ abstract class ThemeProps with _$ThemeProps {
     int? primaryColor,
     @Default(defaultPrimaryColors) List<int> primaryColors,
     @Default(ThemeMode.dark) ThemeMode themeMode,
+    @Default(false) bool scheduledTheme,
+    String? darkAt,
+    String? lightAt,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
+    @Default(0) double contrastLevel,
     @Default(TextScale()) TextScale textScale,
   }) = _ThemeProps;
 
@@ -289,6 +295,38 @@ abstract class ThemeProps with _$ThemeProps {
       () => defaultThemeProps,
     );
   }
+}
+
+extension ThemePropsScheduleExt on ThemeProps {
+  ThemeMode get effectiveThemeMode {
+    if (!scheduledTheme || darkAt == null || lightAt == null) {
+      return themeMode;
+    }
+    final dark = _parseDayMinutes(darkAt!);
+    final light = _parseDayMinutes(lightAt!);
+    if (dark == null || light == null) {
+      return themeMode;
+    }
+    final now = DateTime.now();
+    final minutes = now.hour * 60 + now.minute;
+    final isDark = dark < light
+        ? minutes >= dark && minutes < light
+        : minutes >= dark || minutes < light;
+    return isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+}
+
+int? _parseDayMinutes(String value) {
+  final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value);
+  if (match == null) {
+    return null;
+  }
+  final hour = int.parse(match.group(1)!);
+  final minute = int.parse(match.group(2)!);
+  if (hour > 23 || minute > 59) {
+    return null;
+  }
+  return hour * 60 + minute;
 }
 
 @freezed
