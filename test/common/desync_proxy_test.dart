@@ -75,6 +75,31 @@ void main() {
     expect(desyncRules(categories: [], forceTcp: true), isEmpty);
   });
 
+  test('a provider dialer-proxy at the reserved name is stripped', () {
+    final rawConfig = <String, Object?>{
+      'proxies': [
+        {'name': 'DESYNC', 'type': 'vless', 'dialer-proxy': 'DESYNC'},
+        {'name': 'Amsterdam #1', 'type': 'vless', 'dialer-proxy': 'DESYNC'},
+        {'name': 'Berlin #2', 'type': 'vless', 'dialer-proxy': 'other'},
+      ],
+    };
+
+    stripDesyncDialerProxy(rawConfig);
+
+    expect(
+      (rawConfig['proxies'] as List).map(
+        (proxy) => (proxy as Map)['dialer-proxy'],
+      ),
+      [null, null, 'other'],
+    );
+  });
+
+  test('the strip leaves a config without proxies alone', () {
+    final rawConfig = <String, Object?>{'proxies': ['not a map', null]};
+    stripDesyncDialerProxy(rawConfig);
+    expect(rawConfig['proxies'], ['not a map', null]);
+  });
+
   test('the rule target and the outbound name are the same string', () {
     expect(RuleTarget.DESYNC.name, desyncOutboundName);
   });

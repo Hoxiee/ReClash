@@ -256,6 +256,18 @@ void appendDesyncProxy({
   ];
 }
 
+// A provider key pointing at the reserved name breaks that node's every dial
+// while the feature is off: no outbound exists for the dialer to resolve.
+void stripDesyncDialerProxy(Map<dynamic, dynamic> rawConfig) {
+  final proxies = rawConfig['proxies'];
+  if (proxies is! List) return;
+  for (final proxy in proxies) {
+    if (proxy is Map && proxy['dialer-proxy'] == desyncOutboundName) {
+      proxy.remove('dialer-proxy');
+    }
+  }
+}
+
 List<String> desyncRules({
   required List<DesyncCategory> categories,
   required bool forceTcp,
@@ -498,6 +510,8 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
       ),
       ...rules,
     ];
+  } else {
+    stripDesyncDialerProxy(rawConfig);
   }
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
