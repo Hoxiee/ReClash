@@ -78,7 +78,7 @@ func TestStoreDiscardsStateItCannotTrust(t *testing.T) {
 			if snapshot.Version != rcxStoreVersion {
 				t.Errorf("version = %d, want the current schema", snapshot.Version)
 			}
-			if snapshot.Config.Preset != rcxPresetOff {
+			if snapshot.Config.Preset != "off" {
 				t.Errorf("preset = %q, want the shipped default", snapshot.Config.Preset)
 			}
 		})

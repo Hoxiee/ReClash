@@ -155,6 +155,10 @@
   "discoverNewVersion": "New version found",
   "checkUpdateError": "The app is already up to date",
   "goDownload": "Download",
+  "installUpdate": "Install update",
+  "downloadingUpdate": "Downloading update",
+  "updateDownloadFailed": "Could not download the update",
+  "updateVerifyFailed": "The downloaded file is damaged",
   "unknown": "Unknown",
   "country": "Region",
   "search": "Search",
@@ -668,6 +672,11 @@
   "heroLinkSlow": "The node is responding slowly",
   "heroLinkDown": "The node is not responding",
   "heroLinkPaused": "Traffic is paused, protection is on hold",
+  "heroChecking": "Checking the network…",
+  "heroCheckingHint": "Measuring the selected node",
+  "heroReconnecting": "Reconnecting…",
+  "heroReconnectingHint": "Restoring the tunnel",
+  "heroForeignVpn": "Another VPN is active",
   "connectedFor": "Connected {time}",
   "trafficFreeOfTotal": "free of {total}",
   "subscriptionCaption": "Subscription",
@@ -711,8 +720,7 @@
   "smartRoutingNoServers": "No reachable servers",
   "smartRoutingPreset": "Preset",
   "smartRoutingPresetOff": "Off",
-  "smartRoutingPresetRuMobile": "Russia — mobile",
-  "smartRoutingPresetRuHome": "Russia — home",
+  "smartRoutingPresetRussia": "Russia",
   "smartRoutingPresetIran": "Iran",
   "smartRoutingPresetChina": "China",
   "smartRoutingDomestic": "Local servers during a shutdown",
@@ -729,5 +737,298 @@
       }
     }
   },
-  "smartRoutingManualHoldOff": "Not respected"
+  "smartRoutingManualHoldOff": "Not respected",
+  "smartRoutingRegion": "Region",
+  "smartRoutingPresetEdited": "{preset} · adjusted",
+  "@smartRoutingPresetEdited": {
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingBehaviour": "Behaviour",
+  "smartRoutingProbing": "Probing",
+  "smartRoutingRequireUdp": "Require UDP support",
+  "smartRoutingRequireUdpDesc": "Skip servers that cannot carry calls and games",
+  "smartRoutingDwell": "Settle time",
+  "smartRoutingDwellDesc": "How long a working server is kept before a faster one wins",
+  "smartRoutingSeconds": "{seconds} s",
+  "@smartRoutingSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingWave": "Servers per check",
+  "smartRoutingWaveDesc": "How many servers one background check measures",
+  "smartRoutingWaveNodes": "{count} servers",
+  "@smartRoutingWaveNodes": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingOverview": "Routing overview",
+  "smartRoutingDeepScan": "Check every server",
+  "smartRoutingDeepScanRunning": "Checking every server…",
+  "smartRoutingDeepScanHint": "Ignores the probe budget, so it costs traffic",
+  "smartRoutingChosen": "Chosen server",
+  "smartRoutingChosenNone": "No server chosen yet",
+  "smartRoutingWhy": "Why",
+  "smartRoutingReasonColdStart": "First pick on this network",
+  "smartRoutingReasonHold": "Working, nothing better found",
+  "smartRoutingReasonIncumbentDead": "Previous server stopped answering",
+  "smartRoutingReasonVerdictGain": "This one is proven to reach the open internet",
+  "smartRoutingReasonLatencyGain": "This one is a latency band faster",
+  "smartRoutingReasonTerrainChanged": "The network changed",
+  "smartRoutingReasonStranded": "Nothing reachable, keeping the current server",
+  "smartRoutingReasonNoCandidate": "No server passed the checks",
+  "smartRoutingReasonDwellHold": "Waiting out the settle time before switching",
+  "smartRoutingReasonManualHold": "Respecting the server you picked",
+  "smartRoutingNetworkFormat": "Network",
+  "smartRoutingFormatOpen": "Fully open",
+  "smartRoutingFormatOpenDesc": "Nothing blocked between you and the open internet",
+  "smartRoutingFormatRestricted": "Restricted",
+  "smartRoutingFormatRestrictedDesc": "Only local services answer, foreign ones do not",
+  "smartRoutingFormatPortal": "Sign-in required",
+  "smartRoutingFormatPortalDesc": "The network wants you to log in before it passes traffic",
+  "smartRoutingFormatOffline": "No connectivity",
+  "smartRoutingFormatOfflineDesc": "Nothing answers, local or foreign",
+  "smartRoutingFormatUnknown": "Still measuring",
+  "smartRoutingFormatUnknownDesc": "Not enough answers yet to tell",
+  "smartRoutingEvidenceValidated": "The system confirmed internet access",
+  "smartRoutingEvidenceUnvalidated": "The system reports no internet access",
+  "smartRoutingEvidencePortal": "The system flagged a sign-in page",
+  "smartRoutingEvidenceForeignOk": "A foreign address answered",
+  "smartRoutingEvidenceForeignFail": "No foreign address answered",
+  "smartRoutingEvidenceDomesticOk": "A local address answered",
+  "smartRoutingEvidenceDomesticFail": "No local address answered",
+  "smartRoutingMetered": "Metered link",
+  "smartRoutingServers": "Servers",
+  "smartRoutingServersCount": "{eligible} of {total} usable",
+  "@smartRoutingServersCount": {
+    "placeholders": {
+      "eligible": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingHistory": "Recent switches",
+  "smartRoutingHistoryEmpty": "No switches yet",
+  "smartRoutingSwitchLine": "{from} → {to}",
+  "@smartRoutingSwitchLine": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingProbeBudget": "{left} of {cap} probes left this hour",
+  "@smartRoutingProbeBudget": {
+    "placeholders": {
+      "left": {
+        "type": "num"
+      },
+      "cap": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingManualUntil": "Your manual pick is respected for {minutes} min more",
+  "@smartRoutingManualUntil": {
+    "placeholders": {
+      "minutes": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingVerdictPreferred": "Reaches the open internet",
+  "smartRoutingVerdictViable": "Usable",
+  "smartRoutingVerdictLastResort": "Last resort",
+  "smartRoutingVerdictReject": "Not usable",
+  "smartRoutingEvidenceLive": "Confirmed by your own traffic",
+  "smartRoutingEvidenceFresh": "Confirmed by a recent check",
+  "smartRoutingEvidenceStale": "Last confirmed a while ago",
+  "smartRoutingEvidenceNone": "Never confirmed",
+  "smartRoutingBlockAbsent": "Not in the current server list",
+  "smartRoutingBlockNoUdp": "No UDP support",
+  "smartRoutingBlockCooling": "Cooling down after {count} failures",
+  "@smartRoutingBlockCooling": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingBlockDisproven": "Failed its checks here",
+  "smartRoutingBlockLastResort": "Local server, barred on this network",
+  "smartRoutingBlockTerrainUnfit": "Nothing routes on this network yet",
+  "smartRoutingBandLabel": "band {band}",
+  "@smartRoutingBandLabel": {
+    "placeholders": {
+      "band": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingDegraded": "Throttled",
+  "smartRoutingOffHint": "Turn smart routing on to let it pick servers for you",
+  "setupWelcome": "Everything set up in a minute",
+  "setupLanguageTitle": "Choose a language",
+  "setupLanguageDesc": "You can change it later in settings",
+  "setupLegalTitle": "Before we start",
+  "setupDataCollection": "Send crash reports",
+  "setupSubscriptionTitle": "Add a subscription",
+  "setupSubscriptionDesc": "A link from your provider, a QR code, or a config file",
+  "setupSubscriptionReady": "Subscription added",
+  "setupRestore": "Restore from a backup",
+  "setupRestoreDesc": "Move everything from a ReClash, FlClashX, or FlClash backup",
+  "setupFinishTitle": "Almost done",
+  "setupRegionDesc": "Sets the starting point for server selection",
+  "setupRegionNone": "Do not pick",
+  "setupAutoRun": "Connect on launch",
+  "setupAutoRunDesc": "The tunnel comes up as soon as the app opens",
+  "setupPermissionVpn": "VPN permission",
+  "setupPermissionVpnDesc": "The system will ask on the first connection",
+  "setupPermissionNotifications": "Notifications",
+  "setupPermissionNotificationsDesc": "Shows the connection status while running",
+  "setupSkip": "Skip",
+  "setupNext": "Next",
+  "setupDone": "Done",
+  "smartRoutingBreaker": "Whitelist specialist",
+  "smartRoutingBreakerDesc": "Kept for restricted networks, so it is not spent on an open one",
+  "smartRoutingTechnical": "Technical detail",
+  "smartRoutingRecheck": "Check now",
+  "smartRoutingSectionNetwork": "Network",
+  "smartRoutingSectionHealth": "Servers",
+  "smartRoutingSectionRound": "Decision",
+  "smartRoutingSectionHistory": "Earlier switches",
+  "smartRoutingWhatWasTested": "What was tested",
+  "smartRoutingCanariesAnswered": "{answered} of {total} answered",
+  "smartRoutingNoAnswer": "no answer",
+  "smartRoutingUntested": "untested",
+  "smartRoutingCanaryDomestic": "local",
+  "smartRoutingCanaryForeign": "foreign",
+  "smartRoutingAliveCount": "{alive} of {total} servers can be used right now",
+  "smartRoutingHealthUsable": "usable",
+  "smartRoutingHealthBlocked": "blocked",
+  "smartRoutingHealthUnknown": "unchecked",
+  "smartRoutingStepNetwork": "Read the network",
+  "smartRoutingStepAdmit": "Decided who is allowed",
+  "smartRoutingStepRank": "Ranked what was left",
+  "smartRoutingStepDecision": "Landed here",
+  "smartRoutingStepAdmitBody": "{eligible} of {total} servers passed, {blocked} were held back",
+  "smartRoutingStepRankBody": "Verdict first, then specialist fit, then evidence, then latency band",
+  "smartRoutingAllServers": "All servers",
+  "smartRoutingRankOrder": "Ranking order",
+  "smartRoutingKeyVerdict": "Verdict",
+  "smartRoutingKeyMisfit": "Fit for this network",
+  "smartRoutingKeyEvidence": "Evidence",
+  "smartRoutingKeyBand": "Latency band",
+  "smartRoutingBands": "Bands: {bands}",
+  "smartRoutingSwitchedAgo": "Switched {time} ago",
+  "smartRoutingNeverSwitched": "No switch yet on this network",
+  "smartRoutingEnvKey": "Network memory key",
+  "smartRoutingKept": "kept",
+  "smartRoutingSwitched": "switched",
+  "smartRoutingNotBreaker": "General purpose",
+  "smartRoutingCoolFor": "{seconds} s left",
+  "smartRoutingFails": "{count} failures in a row",
+  "smartRoutingNodeUdp": "UDP",
+  "smartRoutingNodeNoUdp": "No UDP",
+  "smartRoutingCanaries": "Canary addresses",
+  "smartRoutingCanariesForeign": "Foreign canaries",
+  "smartRoutingCanariesForeignDesc": "Plain IP:port reached directly, to tell an open network from a shutdown",
+  "smartRoutingCanariesDomestic": "Local canaries",
+  "smartRoutingCanariesDomesticDesc": "Reached directly to tell a whitelist network from no connectivity at all",
+  "smartRoutingMarkers": "Service checks",
+  "smartRoutingMarkersOpen": "Open-internet checks",
+  "smartRoutingMarkersOpenDesc": "A server must return one of these statuses to count as proven",
+  "smartRoutingMarkersDomestic": "Local checks",
+  "smartRoutingMarkersDomesticDesc": "Used for local servers during a shutdown",
+  "smartRoutingMarkerUrl": "URL",
+  "smartRoutingMarkerStatuses": "Accepted statuses",
+  "smartRoutingMarkerStatusesHint": "Comma-separated, e.g. 200, 204, 404",
+  "smartRoutingMarkerStatusesTip": "Enter HTTP status codes separated by commas",
+  "smartRoutingMarkersEmpty": "No checks configured",
+  "smartRoutingCensor": "Censoring countries",
+  "smartRoutingCensorDesc": "A server here counts as local, so it is held back until a shutdown",
+  "smartRoutingBreakerPatterns": "Whitelist specialist names",
+  "smartRoutingBreakerPatternsDesc": "Name fragments that mark a server kept for restricted networks",
+  "smartRoutingDetection": "Detection",
+  "smartRoutingRanking": "Ranking",
+  "smartRoutingRankingDesc": "Latency bands are fixed: a knob here would let milliseconds outrank whether a server works",
+  "smartRoutingResetSection": "Reset to preset",
+  "smartRoutingResetSectionDesc": "Restores the region defaults and keeps smart routing on",
+  "smartRoutingEmpty": "Nothing measured yet",
+  "@smartRoutingCanariesAnswered": {
+    "placeholders": {
+      "answered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingAliveCount": {
+    "placeholders": {
+      "alive": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingStepAdmitBody": {
+    "placeholders": {
+      "eligible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "blocked": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingBands": {
+    "placeholders": {
+      "bands": {
+        "type": "String"
+      }
+    }
+  },
+  "@smartRoutingSwitchedAgo": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@smartRoutingCoolFor": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingFails": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

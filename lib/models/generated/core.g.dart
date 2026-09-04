@@ -270,22 +270,64 @@ _ProxiesData _$ProxiesDataFromJson(Map<String, dynamic> json) => _ProxiesData(
 Map<String, dynamic> _$ProxiesDataToJson(_ProxiesData instance) =>
     <String, dynamic>{'proxies': instance.proxies, 'all': instance.all};
 
+_RcxMarker _$RcxMarkerFromJson(Map<String, dynamic> json) => _RcxMarker(
+  url: json['url'] as String,
+  statuses: (json['statuses'] as List<dynamic>)
+      .map((e) => (e as num).toInt())
+      .toList(),
+);
+
+Map<String, dynamic> _$RcxMarkerToJson(_RcxMarker instance) =>
+    <String, dynamic>{'url': instance.url, 'statuses': instance.statuses};
+
 _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
     _RcxConfigParams(
       enabled: json['on'] as bool,
       preset: json['preset'] as String,
+      defaultsVersion: (json['dv'] as num).toInt(),
+      censorCountries: (json['cc'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      canaryForeign: (json['cf'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      canaryDomestic: (json['cd'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      openMarkers: (json['om'] as List<dynamic>)
+          .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      domesticMarkers: (json['dm'] as List<dynamic>)
+          .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      breakerPatterns: (json['bp'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       allowDomesticLastResort: json['dlr'] as bool,
       saveMobileData: json['smd'] as bool,
+      requireUdp: json['udp'] as bool,
       manualHoldMinutes: (json['mhm'] as num).toInt(),
+      dwellSeconds: (json['dwl'] as num).toInt(),
+      waveWidth: (json['ww'] as num).toInt(),
     );
 
 Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
     <String, dynamic>{
       'on': instance.enabled,
       'preset': instance.preset,
+      'dv': instance.defaultsVersion,
+      'cc': instance.censorCountries,
+      'cf': instance.canaryForeign,
+      'cd': instance.canaryDomestic,
+      'om': instance.openMarkers,
+      'dm': instance.domesticMarkers,
+      'bp': instance.breakerPatterns,
       'dlr': instance.allowDomesticLastResort,
       'smd': instance.saveMobileData,
+      'udp': instance.requireUdp,
       'mhm': instance.manualHoldMinutes,
+      'dwl': instance.dwellSeconds,
+      'ww': instance.waveWidth,
     };
 
 _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
@@ -298,7 +340,10 @@ _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
   delay: (json['delay'] as num?)?.toInt() ?? 0,
   reason: json['reason'] as String? ?? '',
   searching: json['searching'] as bool? ?? false,
+  deep: json['deep'] as bool? ?? false,
   candidates: (json['candidates'] as num?)?.toInt() ?? 0,
+  eligible: (json['eligible'] as num?)?.toInt() ?? 0,
+  switchedAt: (json['switchedAt'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
@@ -312,5 +357,145 @@ Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
       'delay': instance.delay,
       'reason': instance.reason,
       'searching': instance.searching,
+      'deep': instance.deep,
       'candidates': instance.candidates,
+      'eligible': instance.eligible,
+      'switchedAt': instance.switchedAt,
+    };
+
+_RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
+    _RcxCandidateReport(
+      node: json['node'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      origin: json['origin'] as String? ?? 'unknown',
+      verdict: json['verdict'] as String? ?? 'reject',
+      evidence: json['evidence'] as String? ?? 'none',
+      block: json['block'] as String? ?? '',
+      delay: (json['delay'] as num?)?.toInt() ?? 0,
+      band: (json['band'] as num?)?.toInt() ?? 0,
+      degraded: json['degraded'] as bool? ?? false,
+      breaker: json['breaker'] as bool? ?? false,
+      udp: json['udp'] as bool? ?? false,
+      fails: (json['fails'] as num?)?.toInt() ?? 0,
+      coolFor: (json['coolFor'] as num?)?.toInt() ?? 0,
+      current: json['current'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
+    <String, dynamic>{
+      'node': instance.node,
+      'country': instance.country,
+      'origin': instance.origin,
+      'verdict': instance.verdict,
+      'evidence': instance.evidence,
+      'block': instance.block,
+      'delay': instance.delay,
+      'band': instance.band,
+      'degraded': instance.degraded,
+      'breaker': instance.breaker,
+      'udp': instance.udp,
+      'fails': instance.fails,
+      'coolFor': instance.coolFor,
+      'current': instance.current,
+    };
+
+_RcxSwitchReport _$RcxSwitchReportFromJson(Map<String, dynamic> json) =>
+    _RcxSwitchReport(
+      from: json['from'] as String? ?? '',
+      to: json['to'] as String? ?? '',
+      reason: json['reason'] as String? ?? '',
+      at: (json['at'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$RcxSwitchReportToJson(_RcxSwitchReport instance) =>
+    <String, dynamic>{
+      'from': instance.from,
+      'to': instance.to,
+      'reason': instance.reason,
+      'at': instance.at,
+    };
+
+_RcxCanaryReport _$RcxCanaryReportFromJson(Map<String, dynamic> json) =>
+    _RcxCanaryReport(
+      addr: json['addr'] as String? ?? '',
+      domestic: json['domestic'] as bool? ?? false,
+      outcome: json['outcome'] as String? ?? 'unknown',
+      delay: (json['delay'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$RcxCanaryReportToJson(_RcxCanaryReport instance) =>
+    <String, dynamic>{
+      'addr': instance.addr,
+      'domestic': instance.domestic,
+      'outcome': instance.outcome,
+      'delay': instance.delay,
+    };
+
+_RcxLinkReport _$RcxLinkReportFromJson(Map<String, dynamic> json) =>
+    _RcxLinkReport(
+      transport: json['transport'] as String? ?? '',
+      validated: json['validated'] as bool? ?? false,
+      portal: json['portal'] as bool? ?? false,
+      metered: json['metered'] as bool? ?? false,
+      foreign: json['foreign'] as String? ?? 'unknown',
+      domestic: json['domestic'] as String? ?? 'unknown',
+      since: (json['since'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$RcxLinkReportToJson(_RcxLinkReport instance) =>
+    <String, dynamic>{
+      'transport': instance.transport,
+      'validated': instance.validated,
+      'portal': instance.portal,
+      'metered': instance.metered,
+      'foreign': instance.foreign,
+      'domestic': instance.domestic,
+      'since': instance.since,
+    };
+
+_RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
+  status: json['status'] == null
+      ? const RcxStatus()
+      : RcxStatus.fromJson(json['status'] as Map<String, dynamic>),
+  link: json['link'] == null
+      ? const RcxLinkReport()
+      : RcxLinkReport.fromJson(json['link'] as Map<String, dynamic>),
+  canaries:
+      (json['canaries'] as List<dynamic>?)
+          ?.map((e) => RcxCanaryReport.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  candidates:
+      (json['candidates'] as List<dynamic>?)
+          ?.map((e) => RcxCandidateReport.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  history:
+      (json['history'] as List<dynamic>?)
+          ?.map((e) => RcxSwitchReport.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  bands:
+      (json['bands'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+  probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
+  probeCap: (json['probeCap'] as num?)?.toInt() ?? 0,
+  manualTill: (json['manualTill'] as num?)?.toInt() ?? 0,
+  at: (json['at'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+      'link': instance.link,
+      'canaries': instance.canaries,
+      'candidates': instance.candidates,
+      'history': instance.history,
+      'bands': instance.bands,
+      'probesLeft': instance.probesLeft,
+      'probeCap': instance.probeCap,
+      'manualTill': instance.manualTill,
+      'at': instance.at,
     };

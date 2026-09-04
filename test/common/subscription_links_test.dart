@@ -33,6 +33,7 @@ void main() {
         'vmess://',
         'vless://',
         'ss://',
+        'ssr://',
         'trojan://',
         'hysteria2://',
         'hy2://',
@@ -128,6 +129,42 @@ void main() {
       expect(legacy, isNotNull);
       expect(legacy!.config, contains('server: "1.1.1.1"'));
       expect(legacy.config, contains('port: 8388'));
+    });
+
+    test('ss uot flags udp-over-tcp', () {
+      final credential = base64.encode(utf8.encode('aes-128-gcm:pw'));
+      expect(
+        tryConvertShareLinks('ss://$credential@h:8388?uot=1#uot')!.config,
+        contains('udp-over-tcp: true'),
+      );
+      final versioned = tryConvertShareLinks(
+        'ss://$credential@h:8388?udp-over-tcp=true&udp-over-tcp-version=2#v2',
+      );
+      expect(versioned!.config, contains('udp-over-tcp-version: 2'));
+    });
+
+    test('ssr converts with its obfs and protocol params', () {
+      String b64(String value) => base64Url.encode(utf8.encode(value));
+      final body = b64('h.example.com:8388:auth_aes128_md5:aes-256-cfb:tls1.2_ticket_auth:'
+          '${b64('pw')}/?obfsparam=${b64('cdn.example.com')}'
+          '&protoparam=${b64('64')}&remarks=${b64('ssr node')}');
+      final result = tryConvertShareLinks('ssr://$body');
+      expect(result, isNotNull);
+      final config = result!.config;
+      expect(config, contains('name: "ssr node"'));
+      expect(config, contains('type: "ssr"'));
+      expect(config, contains('cipher: "aes-256-cfb"'));
+      expect(config, contains('password: "pw"'));
+      expect(config, contains('obfs: "tls1.2_ticket_auth"'));
+      expect(config, contains('protocol: "auth_aes128_md5"'));
+      expect(config, contains('obfs-param: "cdn.example.com"'));
+      expect(config, contains('protocol-param: "64"'));
+    });
+
+    test('an ssr body with the wrong field count drops that line only', () {
+      final body = base64Url.encode(utf8.encode('h:8388:only:three/?remarks='));
+      final result = tryConvertShareLinks('trojan://p@h:1#keep\nssr://$body');
+      expect(_proxiesNames(result!.config), ['keep']);
     });
 
     test('ss with an unsupported plugin is dropped', () {
@@ -231,6 +268,46 @@ void main() {
       expect(result.config, contains('obfs: "salamander"'));
       expect(result.config, contains('obfs-password: "ob"'));
       expect(result.config, contains('up: "100"'));
+    });
+
+    test('hysteria2 port hopping keeps the node and its range', () {
+      const link = 'hy2://auth@h.example.com:8443,20000-25000'
+          '?sni=h.example.com&hop-interval=60#hop';
+      final result = tryConvertShareLinks(link);
+      expect(result, isNotNull);
+      final config = result!.config;
+      // The port stays dialable on its own; ports carries the whole range.
+      expect(config, contains('port: 8443'));
+      expect(config, contains('ports: "8443,20000-25000"'));
+      expect(config, contains('hop-interval: 60'));
+    });
+
+    test('hysteria2 mport is the range when the host carries one port', () {
+      const link = 'hy2://auth@h.example.com:443?mport=443,8000-9000#mport';
+      final result = tryConvertShareLinks(link);
+      expect(result!.config, contains('ports: "443,8000-9000"'));
+    });
+
+    test('a hop-interval under the core floor is left to the default', () {
+      const link = 'hy2://auth@h.example.com:443,444?hop-interval=1#floor';
+      final result = tryConvertShareLinks(link);
+      expect(result!.config, isNot(contains('hop-interval')));
+    });
+
+    test('an ipv6 hysteria2 host is not read as a port range', () {
+      const link = 'hy2://auth@[2001:db8::1]:8443#v6';
+      final result = tryConvertShareLinks(link);
+      expect(result!.config, contains('server: "2001:db8::1"'));
+      expect(result.config, contains('port: 8443'));
+      expect(result.config, isNot(contains('ports:')));
+    });
+
+    test('hysteria2 pinSHA256 pins the cert, alpn splits', () {
+      const link = 'hy2://auth@h.example.com:443'
+          '?pinSHA256=aa:bb:cc&alpn=h3,h2#pin';
+      final result = tryConvertShareLinks(link);
+      expect(result!.config, contains('fingerprint: "aa:bb:cc"'));
+      expect(result.config, contains('alpn: ["h3", "h2"]'));
     });
 
     test('ws path with ed= becomes max-early-data, path cleaned', () {
@@ -543,14 +620,11 @@ void main() {
       expect(result.config, contains('ipv6: ""'));
     });
 
-    test('amneziawg links convert, undialable ssr is skipped, siblings live',
-        () {
+    test('amneziawg links convert alongside other protocols', () {
       final input = 'vless://u@h:443#keep\n'
           'amneziawg://${base64Url.encode(utf8.encode(_awgConf))}#awg\n'
           'awg://${base64Url.encode(utf8.encode(_awgConf))}#awg2\n'
-          'ssr://abc@h:1#ssr\n'
           'tuic://uuid-tuic:pw@h:1#tuic-now-supported\n';
-      // The body IS recognized as link input — it must never go to the network.
       expect(isShareLinkInput(input), isTrue);
       final result = tryConvertShareLinks(input);
       expect(result, isNotNull);
@@ -559,36 +633,22 @@ void main() {
         ['keep', 'awg', 'awg2', 'tuic-now-supported'],
       );
       expect(result.config, contains('amnezia-wg-option'));
-      expect(result.skipped, hasLength(1));
-      expect(result.skipped.single.kind, 'ssr');
-      expect(result.skipped.single.name, 'ssr');
-      expect(result.skipped.single.reason, SkippedNodeReason.protocol);
+      expect(result.skipped, isEmpty);
     });
 
-    test('an ssr line without a fragment uses its raw head as the name', () {
-      final result = tryConvertShareLinks(
-          'trojan://p@h:1#keep\nssr://aVeryLongBase64BlobWithoutAnyFragmentHere');
-      expect(result, isNotNull);
-      final ssr = result!.skipped.singleWhere((n) => n.kind == 'ssr');
-      expect(ssr.name, startsWith('ssr://'));
-      expect(ssr.name.endsWith('…'), isTrue);
-    });
-
-    test('a body of only unsupported schemes converts to nothing (null)', () {
-      expect(tryConvertShareLinks('ssr://abc@h:1#ssr'), isNull);
-    });
-
-    test('probe reports the skipped nodes of an all-unsupported body', () {
-      final skipped =
-          probeUnsupportedShareLinks('ssr://abc@h:1#ssr\namneziawg://k@h:2#awg');
-      // The awg line carries no base64 conf — it imports nothing, skips nothing.
-      expect(skipped.map((n) => n.kind), ['ssr']);
+    test('an unparsable body converts to nothing (null)', () {
+      expect(tryConvertShareLinks('ssr://not-base64-at-all!!'), isNull);
     });
 
     test('probe is empty once anything imports', () {
       expect(
         probeUnsupportedShareLinks(
-            'ssr://abc@h:1#ssr\ntrojan://p@h:2#alive'),
+            'vmess://${base64.encode(utf8.encode(jsonEncode({
+              'add': 'h',
+              'port': 1,
+              'id': 'u',
+              'net': 'xhttp',
+            })))}\ntrojan://p@h:2#alive'),
         isEmpty,
       );
       // And for input that is not links at all.

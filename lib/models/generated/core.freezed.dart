@@ -3746,9 +3746,288 @@ as List<String>,
 
 
 /// @nodoc
+mixin _$RcxMarker {
+
+@JsonKey(name: 'url') String get url;@JsonKey(name: 'statuses') List<int> get statuses;
+/// Create a copy of RcxMarker
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxMarkerCopyWith<RcxMarker> get copyWith => _$RcxMarkerCopyWithImpl<RcxMarker>(this as RcxMarker, _$identity);
+
+  /// Serializes this RcxMarker to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxMarker;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxMarker&&(identical(other.url, _this.url) || other.url == _this.url)&&const DeepCollectionEquality().equals(other.statuses, _this.statuses));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxMarker;
+  return Object.hash(runtimeType,_this.url,const DeepCollectionEquality().hash(_this.statuses));
+}
+
+@override
+String toString() {
+  final _this = this as RcxMarker;
+  return 'RcxMarker(url: ${_this.url}, statuses: ${_this.statuses})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxMarkerCopyWith<$Res>  {
+  factory $RcxMarkerCopyWith(RcxMarker value, $Res Function(RcxMarker) _then) = _$RcxMarkerCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'url') String url,@JsonKey(name: 'statuses') List<int> statuses
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxMarkerCopyWithImpl<$Res>
+    implements $RcxMarkerCopyWith<$Res> {
+  _$RcxMarkerCopyWithImpl(this._self, this._then);
+
+  final RcxMarker _self;
+  final $Res Function(RcxMarker) _then;
+
+/// Create a copy of RcxMarker
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? url = null,Object? statuses = null,}) {
+  return _then(RcxMarker(
+url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,statuses: null == statuses ? _self.statuses : statuses // ignore: cast_nullable_to_non_nullable
+as List<int>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxMarker].
+extension RcxMarkerPatterns on RcxMarker {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxMarker value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxMarker() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxMarker value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxMarker():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxMarker value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxMarker() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'url')  String url, @JsonKey(name: 'statuses')  List<int> statuses)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxMarker() when $default != null:
+return $default(_that.url,_that.statuses);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'url')  String url, @JsonKey(name: 'statuses')  List<int> statuses)  $default,) {final _that = this;
+switch (_that) {
+case _RcxMarker():
+return $default(_that.url,_that.statuses);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'url')  String url, @JsonKey(name: 'statuses')  List<int> statuses)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxMarker() when $default != null:
+return $default(_that.url,_that.statuses);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxMarker implements RcxMarker {
+  const _RcxMarker({@JsonKey(name: 'url') required this.url, @JsonKey(name: 'statuses') required  List<int> statuses}): _statuses = statuses;
+  factory _RcxMarker.fromJson(Map<String, dynamic> json) => _$RcxMarkerFromJson(json);
+
+@override@JsonKey(name: 'url') final  String url;
+ final  List<int> _statuses;
+@override@JsonKey(name: 'statuses') List<int> get statuses {
+  if (_statuses is EqualUnmodifiableListView) return _statuses;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_statuses);
+}
+
+
+/// Create a copy of RcxMarker
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxMarkerCopyWith<_RcxMarker> get copyWith => __$RcxMarkerCopyWithImpl<_RcxMarker>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxMarkerToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxMarker&&(identical(other.url, url) || other.url == url)&&const DeepCollectionEquality().equals(other.statuses, _statuses));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,url,const DeepCollectionEquality().hash(_statuses));
+}
+
+@override
+String toString() {
+    return 'RcxMarker(url: $url, statuses: $statuses)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxMarkerCopyWith<$Res> implements $RcxMarkerCopyWith<$Res> {
+  factory _$RcxMarkerCopyWith(_RcxMarker value, $Res Function(_RcxMarker) _then) = __$RcxMarkerCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'url') String url,@JsonKey(name: 'statuses') List<int> statuses
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxMarkerCopyWithImpl<$Res>
+    implements _$RcxMarkerCopyWith<$Res> {
+  __$RcxMarkerCopyWithImpl(this._self, this._then);
+
+  final _RcxMarker _self;
+  final $Res Function(_RcxMarker) _then;
+
+/// Create a copy of RcxMarker
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? url = null,Object? statuses = null,}) {
+  return _then(_RcxMarker(
+url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,statuses: null == statuses ? _self._statuses : statuses // ignore: cast_nullable_to_non_nullable
+as List<int>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RcxConfigParams {
 
-@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'smd') bool get saveMobileData;@JsonKey(name: 'mhm') int get manualHoldMinutes;
+@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'dv') int get defaultsVersion;@JsonKey(name: 'cc') List<String> get censorCountries;@JsonKey(name: 'cf') List<String> get canaryForeign;@JsonKey(name: 'cd') List<String> get canaryDomestic;@JsonKey(name: 'om') List<RcxMarker> get openMarkers;@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers;@JsonKey(name: 'bp') List<String> get breakerPatterns;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'smd') bool get saveMobileData;@JsonKey(name: 'udp') bool get requireUdp;@JsonKey(name: 'mhm') int get manualHoldMinutes;@JsonKey(name: 'dwl') int get dwellSeconds;@JsonKey(name: 'ww') int get waveWidth;
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3762,20 +4041,20 @@ $RcxConfigParamsCopyWith<RcxConfigParams> get copyWith => _$RcxConfigParamsCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as RcxConfigParams;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.defaultsVersion, _this.defaultsVersion) || other.defaultsVersion == _this.defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxConfigParams;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.allowDomesticLastResort,_this.saveMobileData,_this.manualHoldMinutes);
+  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.defaultsVersion,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.saveMobileData,_this.requireUdp,_this.manualHoldMinutes,_this.dwellSeconds,_this.waveWidth);
 }
 
 @override
 String toString() {
   final _this = this as RcxConfigParams;
-  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, manualHoldMinutes: ${_this.manualHoldMinutes})';
+  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, defaultsVersion: ${_this.defaultsVersion}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, requireUdp: ${_this.requireUdp}, manualHoldMinutes: ${_this.manualHoldMinutes}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
 }
 
 
@@ -3786,7 +4065,7 @@ abstract mixin class $RcxConfigParamsCopyWith<$Res>  {
   factory $RcxConfigParamsCopyWith(RcxConfigParams value, $Res Function(RcxConfigParams) _then) = _$RcxConfigParamsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'mhm') int manualHoldMinutes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'mhm') int manualHoldMinutes,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth
 });
 
 
@@ -3803,13 +4082,23 @@ class _$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as String,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as String,defaultsVersion: null == defaultsVersion ? _self.defaultsVersion : defaultsVersion // ignore: cast_nullable_to_non_nullable
+as int,censorCountries: null == censorCountries ? _self.censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryForeign: null == canaryForeign ? _self.canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryDomestic: null == canaryDomestic ? _self.canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
+as List<String>,openMarkers: null == openMarkers ? _self.openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self.domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
+as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -3895,10 +4184,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'mhm')  int manualHoldMinutes, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   return orElse();
 
 }
@@ -3916,10 +4205,10 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'mhm')  int manualHoldMinutes, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth)  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams():
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3936,10 +4225,10 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'mhm')  int manualHoldMinutes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'smd')  bool saveMobileData, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'mhm')  int manualHoldMinutes, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   return null;
 
 }
@@ -3951,14 +4240,60 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 @JsonSerializable()
 
 class _RcxConfigParams implements RcxConfigParams {
-  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'smd') required this.saveMobileData, @JsonKey(name: 'mhm') required this.manualHoldMinutes});
+  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'dv') required this.defaultsVersion, @JsonKey(name: 'cc') required  List<String> censorCountries, @JsonKey(name: 'cf') required  List<String> canaryForeign, @JsonKey(name: 'cd') required  List<String> canaryDomestic, @JsonKey(name: 'om') required  List<RcxMarker> openMarkers, @JsonKey(name: 'dm') required  List<RcxMarker> domesticMarkers, @JsonKey(name: 'bp') required  List<String> breakerPatterns, @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'smd') required this.saveMobileData, @JsonKey(name: 'udp') required this.requireUdp, @JsonKey(name: 'mhm') required this.manualHoldMinutes, @JsonKey(name: 'dwl') required this.dwellSeconds, @JsonKey(name: 'ww') required this.waveWidth}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_breakerPatterns = breakerPatterns;
   factory _RcxConfigParams.fromJson(Map<String, dynamic> json) => _$RcxConfigParamsFromJson(json);
 
 @override@JsonKey(name: 'on') final  bool enabled;
 @override@JsonKey(name: 'preset') final  String preset;
+@override@JsonKey(name: 'dv') final  int defaultsVersion;
+ final  List<String> _censorCountries;
+@override@JsonKey(name: 'cc') List<String> get censorCountries {
+  if (_censorCountries is EqualUnmodifiableListView) return _censorCountries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_censorCountries);
+}
+
+ final  List<String> _canaryForeign;
+@override@JsonKey(name: 'cf') List<String> get canaryForeign {
+  if (_canaryForeign is EqualUnmodifiableListView) return _canaryForeign;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_canaryForeign);
+}
+
+ final  List<String> _canaryDomestic;
+@override@JsonKey(name: 'cd') List<String> get canaryDomestic {
+  if (_canaryDomestic is EqualUnmodifiableListView) return _canaryDomestic;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_canaryDomestic);
+}
+
+ final  List<RcxMarker> _openMarkers;
+@override@JsonKey(name: 'om') List<RcxMarker> get openMarkers {
+  if (_openMarkers is EqualUnmodifiableListView) return _openMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_openMarkers);
+}
+
+ final  List<RcxMarker> _domesticMarkers;
+@override@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers {
+  if (_domesticMarkers is EqualUnmodifiableListView) return _domesticMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_domesticMarkers);
+}
+
+ final  List<String> _breakerPatterns;
+@override@JsonKey(name: 'bp') List<String> get breakerPatterns {
+  if (_breakerPatterns is EqualUnmodifiableListView) return _breakerPatterns;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_breakerPatterns);
+}
+
 @override@JsonKey(name: 'dlr') final  bool allowDomesticLastResort;
 @override@JsonKey(name: 'smd') final  bool saveMobileData;
+@override@JsonKey(name: 'udp') final  bool requireUdp;
 @override@JsonKey(name: 'mhm') final  int manualHoldMinutes;
+@override@JsonKey(name: 'dwl') final  int dwellSeconds;
+@override@JsonKey(name: 'ww') final  int waveWidth;
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
@@ -3973,18 +4308,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.defaultsVersion, defaultsVersion) || other.defaultsVersion == defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,allowDomesticLastResort,saveMobileData,manualHoldMinutes);
+    return Object.hash(runtimeType,enabled,preset,defaultsVersion,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,saveMobileData,requireUdp,manualHoldMinutes,dwellSeconds,waveWidth);
 }
 
 @override
 String toString() {
-    return 'RcxConfigParams(enabled: $enabled, preset: $preset, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, manualHoldMinutes: $manualHoldMinutes)';
+    return 'RcxConfigParams(enabled: $enabled, preset: $preset, defaultsVersion: $defaultsVersion, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, requireUdp: $requireUdp, manualHoldMinutes: $manualHoldMinutes, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
 }
 
 
@@ -3995,7 +4330,7 @@ abstract mixin class _$RcxConfigParamsCopyWith<$Res> implements $RcxConfigParams
   factory _$RcxConfigParamsCopyWith(_RcxConfigParams value, $Res Function(_RcxConfigParams) _then) = __$RcxConfigParamsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'mhm') int manualHoldMinutes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'smd') bool saveMobileData,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'mhm') int manualHoldMinutes,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth
 });
 
 
@@ -4012,13 +4347,23 @@ class __$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(_RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as String,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as String,defaultsVersion: null == defaultsVersion ? _self.defaultsVersion : defaultsVersion // ignore: cast_nullable_to_non_nullable
+as int,censorCountries: null == censorCountries ? _self._censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryForeign: null == canaryForeign ? _self._canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryDomestic: null == canaryDomestic ? _self._canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
+as List<String>,openMarkers: null == openMarkers ? _self._openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self._domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self._breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
+as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -4030,7 +4375,7 @@ as int,
 /// @nodoc
 mixin _$RcxStatus {
 
- bool get enabled; String get preset; String get mode; String get terrain; String get env; String get node; int get delay; String get reason; bool get searching; int get candidates;
+ bool get enabled; String get preset; String get mode; String get terrain; String get env; String get node; int get delay; String get reason; bool get searching; bool get deep; int get candidates; int get eligible; int get switchedAt;
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4044,20 +4389,20 @@ $RcxStatusCopyWith<RcxStatus> get copyWith => _$RcxStatusCopyWithImpl<RcxStatus>
 @override
 bool operator ==(Object other) {
   final _this = this as RcxStatus;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStatus&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.searching, _this.searching) || other.searching == _this.searching)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxStatus&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.searching, _this.searching) || other.searching == _this.searching)&&(identical(other.deep, _this.deep) || other.deep == _this.deep)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates)&&(identical(other.eligible, _this.eligible) || other.eligible == _this.eligible)&&(identical(other.switchedAt, _this.switchedAt) || other.switchedAt == _this.switchedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxStatus;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.mode,_this.terrain,_this.env,_this.node,_this.delay,_this.reason,_this.searching,_this.candidates);
+  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.mode,_this.terrain,_this.env,_this.node,_this.delay,_this.reason,_this.searching,_this.deep,_this.candidates,_this.eligible,_this.switchedAt);
 }
 
 @override
 String toString() {
   final _this = this as RcxStatus;
-  return 'RcxStatus(enabled: ${_this.enabled}, preset: ${_this.preset}, mode: ${_this.mode}, terrain: ${_this.terrain}, env: ${_this.env}, node: ${_this.node}, delay: ${_this.delay}, reason: ${_this.reason}, searching: ${_this.searching}, candidates: ${_this.candidates})';
+  return 'RcxStatus(enabled: ${_this.enabled}, preset: ${_this.preset}, mode: ${_this.mode}, terrain: ${_this.terrain}, env: ${_this.env}, node: ${_this.node}, delay: ${_this.delay}, reason: ${_this.reason}, searching: ${_this.searching}, deep: ${_this.deep}, candidates: ${_this.candidates}, eligible: ${_this.eligible}, switchedAt: ${_this.switchedAt})';
 }
 
 
@@ -4068,7 +4413,7 @@ abstract mixin class $RcxStatusCopyWith<$Res>  {
   factory $RcxStatusCopyWith(RcxStatus value, $Res Function(RcxStatus) _then) = _$RcxStatusCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, int candidates
+ bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, bool deep, int candidates, int eligible, int switchedAt
 });
 
 
@@ -4085,7 +4430,7 @@ class _$RcxStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? candidates = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? deep = null,Object? candidates = null,Object? eligible = null,Object? switchedAt = null,}) {
   return _then(RcxStatus(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -4096,7 +4441,10 @@ as String,node: null == node ? _self.node : node // ignore: cast_nullable_to_non
 as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
 as int,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
 as String,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
+as bool,deep: null == deep ? _self.deep : deep // ignore: cast_nullable_to_non_nullable
 as bool,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,eligible: null == eligible ? _self.eligible : eligible // ignore: cast_nullable_to_non_nullable
+as int,switchedAt: null == switchedAt ? _self.switchedAt : switchedAt // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -4182,10 +4530,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  bool deep,  int candidates,  int eligible,  int switchedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxStatus() when $default != null:
-return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.deep,_that.candidates,_that.eligible,_that.switchedAt);case _:
   return orElse();
 
 }
@@ -4203,10 +4551,10 @@ return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  bool deep,  int candidates,  int eligible,  int switchedAt)  $default,) {final _that = this;
 switch (_that) {
 case _RcxStatus():
-return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.deep,_that.candidates,_that.eligible,_that.switchedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4223,10 +4571,10 @@ return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  int candidates)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  String preset,  String mode,  String terrain,  String env,  String node,  int delay,  String reason,  bool searching,  bool deep,  int candidates,  int eligible,  int switchedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxStatus() when $default != null:
-return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.candidates);case _:
+return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_that.node,_that.delay,_that.reason,_that.searching,_that.deep,_that.candidates,_that.eligible,_that.switchedAt);case _:
   return null;
 
 }
@@ -4238,7 +4586,7 @@ return $default(_that.enabled,_that.preset,_that.mode,_that.terrain,_that.env,_t
 @JsonSerializable()
 
 class _RcxStatus implements RcxStatus {
-  const _RcxStatus({this.enabled = false, this.preset = 'off', this.mode = '', this.terrain = 'unknown', this.env = '', this.node = '', this.delay = 0, this.reason = '', this.searching = false, this.candidates = 0});
+  const _RcxStatus({this.enabled = false, this.preset = 'off', this.mode = '', this.terrain = 'unknown', this.env = '', this.node = '', this.delay = 0, this.reason = '', this.searching = false, this.deep = false, this.candidates = 0, this.eligible = 0, this.switchedAt = 0});
   factory _RcxStatus.fromJson(Map<String, dynamic> json) => _$RcxStatusFromJson(json);
 
 @override@JsonKey() final  bool enabled;
@@ -4250,7 +4598,10 @@ class _RcxStatus implements RcxStatus {
 @override@JsonKey() final  int delay;
 @override@JsonKey() final  String reason;
 @override@JsonKey() final  bool searching;
+@override@JsonKey() final  bool deep;
 @override@JsonKey() final  int candidates;
+@override@JsonKey() final  int eligible;
+@override@JsonKey() final  int switchedAt;
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
@@ -4265,18 +4616,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStatus&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&(identical(other.node, node) || other.node == node)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.candidates, candidates) || other.candidates == candidates));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxStatus&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&(identical(other.node, node) || other.node == node)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.searching, searching) || other.searching == searching)&&(identical(other.deep, deep) || other.deep == deep)&&(identical(other.candidates, candidates) || other.candidates == candidates)&&(identical(other.eligible, eligible) || other.eligible == eligible)&&(identical(other.switchedAt, switchedAt) || other.switchedAt == switchedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,mode,terrain,env,node,delay,reason,searching,candidates);
+    return Object.hash(runtimeType,enabled,preset,mode,terrain,env,node,delay,reason,searching,deep,candidates,eligible,switchedAt);
 }
 
 @override
 String toString() {
-    return 'RcxStatus(enabled: $enabled, preset: $preset, mode: $mode, terrain: $terrain, env: $env, node: $node, delay: $delay, reason: $reason, searching: $searching, candidates: $candidates)';
+    return 'RcxStatus(enabled: $enabled, preset: $preset, mode: $mode, terrain: $terrain, env: $env, node: $node, delay: $delay, reason: $reason, searching: $searching, deep: $deep, candidates: $candidates, eligible: $eligible, switchedAt: $switchedAt)';
 }
 
 
@@ -4287,7 +4638,7 @@ abstract mixin class _$RcxStatusCopyWith<$Res> implements $RcxStatusCopyWith<$Re
   factory _$RcxStatusCopyWith(_RcxStatus value, $Res Function(_RcxStatus) _then) = __$RcxStatusCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, int candidates
+ bool enabled, String preset, String mode, String terrain, String env, String node, int delay, String reason, bool searching, bool deep, int candidates, int eligible, int switchedAt
 });
 
 
@@ -4304,7 +4655,7 @@ class __$RcxStatusCopyWithImpl<$Res>
 
 /// Create a copy of RcxStatus
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? candidates = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? mode = null,Object? terrain = null,Object? env = null,Object? node = null,Object? delay = null,Object? reason = null,Object? searching = null,Object? deep = null,Object? candidates = null,Object? eligible = null,Object? switchedAt = null,}) {
   return _then(_RcxStatus(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -4315,12 +4666,1527 @@ as String,node: null == node ? _self.node : node // ignore: cast_nullable_to_non
 as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
 as int,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
 as String,searching: null == searching ? _self.searching : searching // ignore: cast_nullable_to_non_nullable
+as bool,deep: null == deep ? _self.deep : deep // ignore: cast_nullable_to_non_nullable
 as bool,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,eligible: null == eligible ? _self.eligible : eligible // ignore: cast_nullable_to_non_nullable
+as int,switchedAt: null == switchedAt ? _self.switchedAt : switchedAt // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
 
 
+}
+
+
+/// @nodoc
+mixin _$RcxCandidateReport {
+
+ String get node; String get country; String get origin; String get verdict; String get evidence; String get block; int get delay; int get band; bool get degraded; bool get breaker; bool get udp; int get fails; int get coolFor; bool get current;
+/// Create a copy of RcxCandidateReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxCandidateReportCopyWith<RcxCandidateReport> get copyWith => _$RcxCandidateReportCopyWithImpl<RcxCandidateReport>(this as RcxCandidateReport, _$identity);
+
+  /// Serializes this RcxCandidateReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxCandidateReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCandidateReport&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.country, _this.country) || other.country == _this.country)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.evidence, _this.evidence) || other.evidence == _this.evidence)&&(identical(other.block, _this.block) || other.block == _this.block)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.band, _this.band) || other.band == _this.band)&&(identical(other.degraded, _this.degraded) || other.degraded == _this.degraded)&&(identical(other.breaker, _this.breaker) || other.breaker == _this.breaker)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.fails, _this.fails) || other.fails == _this.fails)&&(identical(other.coolFor, _this.coolFor) || other.coolFor == _this.coolFor)&&(identical(other.current, _this.current) || other.current == _this.current));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxCandidateReport;
+  return Object.hash(runtimeType,_this.node,_this.country,_this.origin,_this.verdict,_this.evidence,_this.block,_this.delay,_this.band,_this.degraded,_this.breaker,_this.udp,_this.fails,_this.coolFor,_this.current);
+}
+
+@override
+String toString() {
+  final _this = this as RcxCandidateReport;
+  return 'RcxCandidateReport(node: ${_this.node}, country: ${_this.country}, origin: ${_this.origin}, verdict: ${_this.verdict}, evidence: ${_this.evidence}, block: ${_this.block}, delay: ${_this.delay}, band: ${_this.band}, degraded: ${_this.degraded}, breaker: ${_this.breaker}, udp: ${_this.udp}, fails: ${_this.fails}, coolFor: ${_this.coolFor}, current: ${_this.current})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxCandidateReportCopyWith<$Res>  {
+  factory $RcxCandidateReportCopyWith(RcxCandidateReport value, $Res Function(RcxCandidateReport) _then) = _$RcxCandidateReportCopyWithImpl;
+@useResult
+$Res call({
+ String node, String country, String origin, String verdict, String evidence, String block, int delay, int band, bool degraded, bool breaker, bool udp, int fails, int coolFor, bool current
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxCandidateReportCopyWithImpl<$Res>
+    implements $RcxCandidateReportCopyWith<$Res> {
+  _$RcxCandidateReportCopyWithImpl(this._self, this._then);
+
+  final RcxCandidateReport _self;
+  final $Res Function(RcxCandidateReport) _then;
+
+/// Create a copy of RcxCandidateReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? node = null,Object? country = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? band = null,Object? degraded = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,}) {
+  return _then(RcxCandidateReport(
+node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
+as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
+as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
+as String,verdict: null == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
+as String,evidence: null == evidence ? _self.evidence : evidence // ignore: cast_nullable_to_non_nullable
+as String,block: null == block ? _self.block : block // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,band: null == band ? _self.band : band // ignore: cast_nullable_to_non_nullable
+as int,degraded: null == degraded ? _self.degraded : degraded // ignore: cast_nullable_to_non_nullable
+as bool,breaker: null == breaker ? _self.breaker : breaker // ignore: cast_nullable_to_non_nullable
+as bool,udp: null == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nullable
+as bool,fails: null == fails ? _self.fails : fails // ignore: cast_nullable_to_non_nullable
+as int,coolFor: null == coolFor ? _self.coolFor : coolFor // ignore: cast_nullable_to_non_nullable
+as int,current: null == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxCandidateReport].
+extension RcxCandidateReportPatterns on RcxCandidateReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxCandidateReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxCandidateReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxCandidateReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCandidateReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxCandidateReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCandidateReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String node,  String country,  String origin,  String verdict,  String evidence,  String block,  int delay,  int band,  bool degraded,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxCandidateReport() when $default != null:
+return $default(_that.node,_that.country,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.band,_that.degraded,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String node,  String country,  String origin,  String verdict,  String evidence,  String block,  int delay,  int band,  bool degraded,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)  $default,) {final _that = this;
+switch (_that) {
+case _RcxCandidateReport():
+return $default(_that.node,_that.country,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.band,_that.degraded,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String node,  String country,  String origin,  String verdict,  String evidence,  String block,  int delay,  int band,  bool degraded,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxCandidateReport() when $default != null:
+return $default(_that.node,_that.country,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.band,_that.degraded,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxCandidateReport implements RcxCandidateReport {
+  const _RcxCandidateReport({this.node = '', this.country = '', this.origin = 'unknown', this.verdict = 'reject', this.evidence = 'none', this.block = '', this.delay = 0, this.band = 0, this.degraded = false, this.breaker = false, this.udp = false, this.fails = 0, this.coolFor = 0, this.current = false});
+  factory _RcxCandidateReport.fromJson(Map<String, dynamic> json) => _$RcxCandidateReportFromJson(json);
+
+@override@JsonKey() final  String node;
+@override@JsonKey() final  String country;
+@override@JsonKey() final  String origin;
+@override@JsonKey() final  String verdict;
+@override@JsonKey() final  String evidence;
+@override@JsonKey() final  String block;
+@override@JsonKey() final  int delay;
+@override@JsonKey() final  int band;
+@override@JsonKey() final  bool degraded;
+@override@JsonKey() final  bool breaker;
+@override@JsonKey() final  bool udp;
+@override@JsonKey() final  int fails;
+@override@JsonKey() final  int coolFor;
+@override@JsonKey() final  bool current;
+
+/// Create a copy of RcxCandidateReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxCandidateReportCopyWith<_RcxCandidateReport> get copyWith => __$RcxCandidateReportCopyWithImpl<_RcxCandidateReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxCandidateReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCandidateReport&&(identical(other.node, node) || other.node == node)&&(identical(other.country, country) || other.country == country)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.evidence, evidence) || other.evidence == evidence)&&(identical(other.block, block) || other.block == block)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.band, band) || other.band == band)&&(identical(other.degraded, degraded) || other.degraded == degraded)&&(identical(other.breaker, breaker) || other.breaker == breaker)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.fails, fails) || other.fails == fails)&&(identical(other.coolFor, coolFor) || other.coolFor == coolFor)&&(identical(other.current, current) || other.current == current));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,node,country,origin,verdict,evidence,block,delay,band,degraded,breaker,udp,fails,coolFor,current);
+}
+
+@override
+String toString() {
+    return 'RcxCandidateReport(node: $node, country: $country, origin: $origin, verdict: $verdict, evidence: $evidence, block: $block, delay: $delay, band: $band, degraded: $degraded, breaker: $breaker, udp: $udp, fails: $fails, coolFor: $coolFor, current: $current)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxCandidateReportCopyWith<$Res> implements $RcxCandidateReportCopyWith<$Res> {
+  factory _$RcxCandidateReportCopyWith(_RcxCandidateReport value, $Res Function(_RcxCandidateReport) _then) = __$RcxCandidateReportCopyWithImpl;
+@override @useResult
+$Res call({
+ String node, String country, String origin, String verdict, String evidence, String block, int delay, int band, bool degraded, bool breaker, bool udp, int fails, int coolFor, bool current
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxCandidateReportCopyWithImpl<$Res>
+    implements _$RcxCandidateReportCopyWith<$Res> {
+  __$RcxCandidateReportCopyWithImpl(this._self, this._then);
+
+  final _RcxCandidateReport _self;
+  final $Res Function(_RcxCandidateReport) _then;
+
+/// Create a copy of RcxCandidateReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? node = null,Object? country = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? band = null,Object? degraded = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,}) {
+  return _then(_RcxCandidateReport(
+node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
+as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
+as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
+as String,verdict: null == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
+as String,evidence: null == evidence ? _self.evidence : evidence // ignore: cast_nullable_to_non_nullable
+as String,block: null == block ? _self.block : block // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,band: null == band ? _self.band : band // ignore: cast_nullable_to_non_nullable
+as int,degraded: null == degraded ? _self.degraded : degraded // ignore: cast_nullable_to_non_nullable
+as bool,breaker: null == breaker ? _self.breaker : breaker // ignore: cast_nullable_to_non_nullable
+as bool,udp: null == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nullable
+as bool,fails: null == fails ? _self.fails : fails // ignore: cast_nullable_to_non_nullable
+as int,coolFor: null == coolFor ? _self.coolFor : coolFor // ignore: cast_nullable_to_non_nullable
+as int,current: null == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxSwitchReport {
+
+ String get from; String get to; String get reason; int get at;
+/// Create a copy of RcxSwitchReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxSwitchReportCopyWith<RcxSwitchReport> get copyWith => _$RcxSwitchReportCopyWithImpl<RcxSwitchReport>(this as RcxSwitchReport, _$identity);
+
+  /// Serializes this RcxSwitchReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxSwitchReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxSwitchReport&&(identical(other.from, _this.from) || other.from == _this.from)&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.reason, _this.reason) || other.reason == _this.reason)&&(identical(other.at, _this.at) || other.at == _this.at));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxSwitchReport;
+  return Object.hash(runtimeType,_this.from,_this.to,_this.reason,_this.at);
+}
+
+@override
+String toString() {
+  final _this = this as RcxSwitchReport;
+  return 'RcxSwitchReport(from: ${_this.from}, to: ${_this.to}, reason: ${_this.reason}, at: ${_this.at})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxSwitchReportCopyWith<$Res>  {
+  factory $RcxSwitchReportCopyWith(RcxSwitchReport value, $Res Function(RcxSwitchReport) _then) = _$RcxSwitchReportCopyWithImpl;
+@useResult
+$Res call({
+ String from, String to, String reason, int at
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxSwitchReportCopyWithImpl<$Res>
+    implements $RcxSwitchReportCopyWith<$Res> {
+  _$RcxSwitchReportCopyWithImpl(this._self, this._then);
+
+  final RcxSwitchReport _self;
+  final $Res Function(RcxSwitchReport) _then;
+
+/// Create a copy of RcxSwitchReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? from = null,Object? to = null,Object? reason = null,Object? at = null,}) {
+  return _then(RcxSwitchReport(
+from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxSwitchReport].
+extension RcxSwitchReportPatterns on RcxSwitchReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxSwitchReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxSwitchReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxSwitchReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxSwitchReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxSwitchReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxSwitchReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String from,  String to,  String reason,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxSwitchReport() when $default != null:
+return $default(_that.from,_that.to,_that.reason,_that.at);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String from,  String to,  String reason,  int at)  $default,) {final _that = this;
+switch (_that) {
+case _RcxSwitchReport():
+return $default(_that.from,_that.to,_that.reason,_that.at);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String from,  String to,  String reason,  int at)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxSwitchReport() when $default != null:
+return $default(_that.from,_that.to,_that.reason,_that.at);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxSwitchReport implements RcxSwitchReport {
+  const _RcxSwitchReport({this.from = '', this.to = '', this.reason = '', this.at = 0});
+  factory _RcxSwitchReport.fromJson(Map<String, dynamic> json) => _$RcxSwitchReportFromJson(json);
+
+@override@JsonKey() final  String from;
+@override@JsonKey() final  String to;
+@override@JsonKey() final  String reason;
+@override@JsonKey() final  int at;
+
+/// Create a copy of RcxSwitchReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxSwitchReportCopyWith<_RcxSwitchReport> get copyWith => __$RcxSwitchReportCopyWithImpl<_RcxSwitchReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxSwitchReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxSwitchReport&&(identical(other.from, from) || other.from == from)&&(identical(other.to, to) || other.to == to)&&(identical(other.reason, reason) || other.reason == reason)&&(identical(other.at, at) || other.at == at));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,from,to,reason,at);
+}
+
+@override
+String toString() {
+    return 'RcxSwitchReport(from: $from, to: $to, reason: $reason, at: $at)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxSwitchReportCopyWith<$Res> implements $RcxSwitchReportCopyWith<$Res> {
+  factory _$RcxSwitchReportCopyWith(_RcxSwitchReport value, $Res Function(_RcxSwitchReport) _then) = __$RcxSwitchReportCopyWithImpl;
+@override @useResult
+$Res call({
+ String from, String to, String reason, int at
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxSwitchReportCopyWithImpl<$Res>
+    implements _$RcxSwitchReportCopyWith<$Res> {
+  __$RcxSwitchReportCopyWithImpl(this._self, this._then);
+
+  final _RcxSwitchReport _self;
+  final $Res Function(_RcxSwitchReport) _then;
+
+/// Create a copy of RcxSwitchReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? from = null,Object? to = null,Object? reason = null,Object? at = null,}) {
+  return _then(_RcxSwitchReport(
+from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,reason: null == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxCanaryReport {
+
+ String get addr; bool get domestic; String get outcome; int get delay;
+/// Create a copy of RcxCanaryReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxCanaryReportCopyWith<RcxCanaryReport> get copyWith => _$RcxCanaryReportCopyWithImpl<RcxCanaryReport>(this as RcxCanaryReport, _$identity);
+
+  /// Serializes this RcxCanaryReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxCanaryReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCanaryReport&&(identical(other.addr, _this.addr) || other.addr == _this.addr)&&(identical(other.domestic, _this.domestic) || other.domestic == _this.domestic)&&(identical(other.outcome, _this.outcome) || other.outcome == _this.outcome)&&(identical(other.delay, _this.delay) || other.delay == _this.delay));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxCanaryReport;
+  return Object.hash(runtimeType,_this.addr,_this.domestic,_this.outcome,_this.delay);
+}
+
+@override
+String toString() {
+  final _this = this as RcxCanaryReport;
+  return 'RcxCanaryReport(addr: ${_this.addr}, domestic: ${_this.domestic}, outcome: ${_this.outcome}, delay: ${_this.delay})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxCanaryReportCopyWith<$Res>  {
+  factory $RcxCanaryReportCopyWith(RcxCanaryReport value, $Res Function(RcxCanaryReport) _then) = _$RcxCanaryReportCopyWithImpl;
+@useResult
+$Res call({
+ String addr, bool domestic, String outcome, int delay
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxCanaryReportCopyWithImpl<$Res>
+    implements $RcxCanaryReportCopyWith<$Res> {
+  _$RcxCanaryReportCopyWithImpl(this._self, this._then);
+
+  final RcxCanaryReport _self;
+  final $Res Function(RcxCanaryReport) _then;
+
+/// Create a copy of RcxCanaryReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? addr = null,Object? domestic = null,Object? outcome = null,Object? delay = null,}) {
+  return _then(RcxCanaryReport(
+addr: null == addr ? _self.addr : addr // ignore: cast_nullable_to_non_nullable
+as String,domestic: null == domestic ? _self.domestic : domestic // ignore: cast_nullable_to_non_nullable
+as bool,outcome: null == outcome ? _self.outcome : outcome // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxCanaryReport].
+extension RcxCanaryReportPatterns on RcxCanaryReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxCanaryReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxCanaryReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxCanaryReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCanaryReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxCanaryReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxCanaryReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String addr,  bool domestic,  String outcome,  int delay)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxCanaryReport() when $default != null:
+return $default(_that.addr,_that.domestic,_that.outcome,_that.delay);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String addr,  bool domestic,  String outcome,  int delay)  $default,) {final _that = this;
+switch (_that) {
+case _RcxCanaryReport():
+return $default(_that.addr,_that.domestic,_that.outcome,_that.delay);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String addr,  bool domestic,  String outcome,  int delay)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxCanaryReport() when $default != null:
+return $default(_that.addr,_that.domestic,_that.outcome,_that.delay);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxCanaryReport implements RcxCanaryReport {
+  const _RcxCanaryReport({this.addr = '', this.domestic = false, this.outcome = 'unknown', this.delay = 0});
+  factory _RcxCanaryReport.fromJson(Map<String, dynamic> json) => _$RcxCanaryReportFromJson(json);
+
+@override@JsonKey() final  String addr;
+@override@JsonKey() final  bool domestic;
+@override@JsonKey() final  String outcome;
+@override@JsonKey() final  int delay;
+
+/// Create a copy of RcxCanaryReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxCanaryReportCopyWith<_RcxCanaryReport> get copyWith => __$RcxCanaryReportCopyWithImpl<_RcxCanaryReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxCanaryReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCanaryReport&&(identical(other.addr, addr) || other.addr == addr)&&(identical(other.domestic, domestic) || other.domestic == domestic)&&(identical(other.outcome, outcome) || other.outcome == outcome)&&(identical(other.delay, delay) || other.delay == delay));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,addr,domestic,outcome,delay);
+}
+
+@override
+String toString() {
+    return 'RcxCanaryReport(addr: $addr, domestic: $domestic, outcome: $outcome, delay: $delay)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxCanaryReportCopyWith<$Res> implements $RcxCanaryReportCopyWith<$Res> {
+  factory _$RcxCanaryReportCopyWith(_RcxCanaryReport value, $Res Function(_RcxCanaryReport) _then) = __$RcxCanaryReportCopyWithImpl;
+@override @useResult
+$Res call({
+ String addr, bool domestic, String outcome, int delay
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxCanaryReportCopyWithImpl<$Res>
+    implements _$RcxCanaryReportCopyWith<$Res> {
+  __$RcxCanaryReportCopyWithImpl(this._self, this._then);
+
+  final _RcxCanaryReport _self;
+  final $Res Function(_RcxCanaryReport) _then;
+
+/// Create a copy of RcxCanaryReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? addr = null,Object? domestic = null,Object? outcome = null,Object? delay = null,}) {
+  return _then(_RcxCanaryReport(
+addr: null == addr ? _self.addr : addr // ignore: cast_nullable_to_non_nullable
+as String,domestic: null == domestic ? _self.domestic : domestic // ignore: cast_nullable_to_non_nullable
+as bool,outcome: null == outcome ? _self.outcome : outcome // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxLinkReport {
+
+ String get transport; bool get validated; bool get portal; bool get metered; String get foreign; String get domestic; int get since;
+/// Create a copy of RcxLinkReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxLinkReportCopyWith<RcxLinkReport> get copyWith => _$RcxLinkReportCopyWithImpl<RcxLinkReport>(this as RcxLinkReport, _$identity);
+
+  /// Serializes this RcxLinkReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxLinkReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxLinkReport&&(identical(other.transport, _this.transport) || other.transport == _this.transport)&&(identical(other.validated, _this.validated) || other.validated == _this.validated)&&(identical(other.portal, _this.portal) || other.portal == _this.portal)&&(identical(other.metered, _this.metered) || other.metered == _this.metered)&&(identical(other.foreign, _this.foreign) || other.foreign == _this.foreign)&&(identical(other.domestic, _this.domestic) || other.domestic == _this.domestic)&&(identical(other.since, _this.since) || other.since == _this.since));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxLinkReport;
+  return Object.hash(runtimeType,_this.transport,_this.validated,_this.portal,_this.metered,_this.foreign,_this.domestic,_this.since);
+}
+
+@override
+String toString() {
+  final _this = this as RcxLinkReport;
+  return 'RcxLinkReport(transport: ${_this.transport}, validated: ${_this.validated}, portal: ${_this.portal}, metered: ${_this.metered}, foreign: ${_this.foreign}, domestic: ${_this.domestic}, since: ${_this.since})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxLinkReportCopyWith<$Res>  {
+  factory $RcxLinkReportCopyWith(RcxLinkReport value, $Res Function(RcxLinkReport) _then) = _$RcxLinkReportCopyWithImpl;
+@useResult
+$Res call({
+ String transport, bool validated, bool portal, bool metered, String foreign, String domestic, int since
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxLinkReportCopyWithImpl<$Res>
+    implements $RcxLinkReportCopyWith<$Res> {
+  _$RcxLinkReportCopyWithImpl(this._self, this._then);
+
+  final RcxLinkReport _self;
+  final $Res Function(RcxLinkReport) _then;
+
+/// Create a copy of RcxLinkReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? transport = null,Object? validated = null,Object? portal = null,Object? metered = null,Object? foreign = null,Object? domestic = null,Object? since = null,}) {
+  return _then(RcxLinkReport(
+transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as String,validated: null == validated ? _self.validated : validated // ignore: cast_nullable_to_non_nullable
+as bool,portal: null == portal ? _self.portal : portal // ignore: cast_nullable_to_non_nullable
+as bool,metered: null == metered ? _self.metered : metered // ignore: cast_nullable_to_non_nullable
+as bool,foreign: null == foreign ? _self.foreign : foreign // ignore: cast_nullable_to_non_nullable
+as String,domestic: null == domestic ? _self.domestic : domestic // ignore: cast_nullable_to_non_nullable
+as String,since: null == since ? _self.since : since // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxLinkReport].
+extension RcxLinkReportPatterns on RcxLinkReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxLinkReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxLinkReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxLinkReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxLinkReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxLinkReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxLinkReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String transport,  bool validated,  bool portal,  bool metered,  String foreign,  String domestic,  int since)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxLinkReport() when $default != null:
+return $default(_that.transport,_that.validated,_that.portal,_that.metered,_that.foreign,_that.domestic,_that.since);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String transport,  bool validated,  bool portal,  bool metered,  String foreign,  String domestic,  int since)  $default,) {final _that = this;
+switch (_that) {
+case _RcxLinkReport():
+return $default(_that.transport,_that.validated,_that.portal,_that.metered,_that.foreign,_that.domestic,_that.since);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String transport,  bool validated,  bool portal,  bool metered,  String foreign,  String domestic,  int since)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxLinkReport() when $default != null:
+return $default(_that.transport,_that.validated,_that.portal,_that.metered,_that.foreign,_that.domestic,_that.since);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxLinkReport implements RcxLinkReport {
+  const _RcxLinkReport({this.transport = '', this.validated = false, this.portal = false, this.metered = false, this.foreign = 'unknown', this.domestic = 'unknown', this.since = 0});
+  factory _RcxLinkReport.fromJson(Map<String, dynamic> json) => _$RcxLinkReportFromJson(json);
+
+@override@JsonKey() final  String transport;
+@override@JsonKey() final  bool validated;
+@override@JsonKey() final  bool portal;
+@override@JsonKey() final  bool metered;
+@override@JsonKey() final  String foreign;
+@override@JsonKey() final  String domestic;
+@override@JsonKey() final  int since;
+
+/// Create a copy of RcxLinkReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxLinkReportCopyWith<_RcxLinkReport> get copyWith => __$RcxLinkReportCopyWithImpl<_RcxLinkReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxLinkReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxLinkReport&&(identical(other.transport, transport) || other.transport == transport)&&(identical(other.validated, validated) || other.validated == validated)&&(identical(other.portal, portal) || other.portal == portal)&&(identical(other.metered, metered) || other.metered == metered)&&(identical(other.foreign, foreign) || other.foreign == foreign)&&(identical(other.domestic, domestic) || other.domestic == domestic)&&(identical(other.since, since) || other.since == since));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,transport,validated,portal,metered,foreign,domestic,since);
+}
+
+@override
+String toString() {
+    return 'RcxLinkReport(transport: $transport, validated: $validated, portal: $portal, metered: $metered, foreign: $foreign, domestic: $domestic, since: $since)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxLinkReportCopyWith<$Res> implements $RcxLinkReportCopyWith<$Res> {
+  factory _$RcxLinkReportCopyWith(_RcxLinkReport value, $Res Function(_RcxLinkReport) _then) = __$RcxLinkReportCopyWithImpl;
+@override @useResult
+$Res call({
+ String transport, bool validated, bool portal, bool metered, String foreign, String domestic, int since
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxLinkReportCopyWithImpl<$Res>
+    implements _$RcxLinkReportCopyWith<$Res> {
+  __$RcxLinkReportCopyWithImpl(this._self, this._then);
+
+  final _RcxLinkReport _self;
+  final $Res Function(_RcxLinkReport) _then;
+
+/// Create a copy of RcxLinkReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? transport = null,Object? validated = null,Object? portal = null,Object? metered = null,Object? foreign = null,Object? domestic = null,Object? since = null,}) {
+  return _then(_RcxLinkReport(
+transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as String,validated: null == validated ? _self.validated : validated // ignore: cast_nullable_to_non_nullable
+as bool,portal: null == portal ? _self.portal : portal // ignore: cast_nullable_to_non_nullable
+as bool,metered: null == metered ? _self.metered : metered // ignore: cast_nullable_to_non_nullable
+as bool,foreign: null == foreign ? _self.foreign : foreign // ignore: cast_nullable_to_non_nullable
+as String,domestic: null == domestic ? _self.domestic : domestic // ignore: cast_nullable_to_non_nullable
+as String,since: null == since ? _self.since : since // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxReport {
+
+ RcxStatus get status; RcxLinkReport get link; List<RcxCanaryReport> get canaries; List<RcxCandidateReport> get candidates; List<RcxSwitchReport> get history; List<int> get bands; int get probesLeft; int get probeCap; int get manualTill; int get at;
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxReportCopyWith<RcxReport> get copyWith => _$RcxReportCopyWithImpl<RcxReport>(this as RcxReport, _$identity);
+
+  /// Serializes this RcxReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxReport&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.link, _this.link) || other.link == _this.link)&&const DeepCollectionEquality().equals(other.canaries, _this.canaries)&&const DeepCollectionEquality().equals(other.candidates, _this.candidates)&&const DeepCollectionEquality().equals(other.history, _this.history)&&const DeepCollectionEquality().equals(other.bands, _this.bands)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.probeCap, _this.probeCap) || other.probeCap == _this.probeCap)&&(identical(other.manualTill, _this.manualTill) || other.manualTill == _this.manualTill)&&(identical(other.at, _this.at) || other.at == _this.at));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxReport;
+  return Object.hash(runtimeType,_this.status,_this.link,const DeepCollectionEquality().hash(_this.canaries),const DeepCollectionEquality().hash(_this.candidates),const DeepCollectionEquality().hash(_this.history),const DeepCollectionEquality().hash(_this.bands),_this.probesLeft,_this.probeCap,_this.manualTill,_this.at);
+}
+
+@override
+String toString() {
+  final _this = this as RcxReport;
+  return 'RcxReport(status: ${_this.status}, link: ${_this.link}, canaries: ${_this.canaries}, candidates: ${_this.candidates}, history: ${_this.history}, bands: ${_this.bands}, probesLeft: ${_this.probesLeft}, probeCap: ${_this.probeCap}, manualTill: ${_this.manualTill}, at: ${_this.at})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxReportCopyWith<$Res>  {
+  factory $RcxReportCopyWith(RcxReport value, $Res Function(RcxReport) _then) = _$RcxReportCopyWithImpl;
+@useResult
+$Res call({
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, List<int> bands, int probesLeft, int probeCap, int manualTill, int at
+});
+
+
+$RcxStatusCopyWith<$Res> get status;$RcxLinkReportCopyWith<$Res> get link;
+
+}
+/// @nodoc
+class _$RcxReportCopyWithImpl<$Res>
+    implements $RcxReportCopyWith<$Res> {
+  _$RcxReportCopyWithImpl(this._self, this._then);
+
+  final RcxReport _self;
+  final $Res Function(RcxReport) _then;
+
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manualTill = null,Object? at = null,}) {
+  return _then(RcxReport(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
+as RcxLinkReport,canaries: null == canaries ? _self.canaries : canaries // ignore: cast_nullable_to_non_nullable
+as List<RcxCanaryReport>,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as List<RcxCandidateReport>,history: null == history ? _self.history : history // ignore: cast_nullable_to_non_nullable
+as List<RcxSwitchReport>,bands: null == bands ? _self.bands : bands // ignore: cast_nullable_to_non_nullable
+as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
+as int,manualTill: null == manualTill ? _self.manualTill : manualTill // ignore: cast_nullable_to_non_nullable
+as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxStatusCopyWith<$Res> get status {
+  
+  return $RcxStatusCopyWith<$Res>(_self.status, (value) {
+    return _then(_self.copyWith(status: value));
+  });
+}/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxLinkReportCopyWith<$Res> get link {
+  
+  return $RcxLinkReportCopyWith<$Res>(_self.link, (value) {
+    return _then(_self.copyWith(link: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [RcxReport].
+extension RcxReportPatterns on RcxReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  int manualTill,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxReport() when $default != null:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manualTill,_that.at);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  int manualTill,  int at)  $default,) {final _that = this;
+switch (_that) {
+case _RcxReport():
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manualTill,_that.at);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  int manualTill,  int at)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxReport() when $default != null:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manualTill,_that.at);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxReport implements RcxReport {
+  const _RcxReport({this.status = const RcxStatus(), this.link = const RcxLinkReport(),  List<RcxCanaryReport> canaries = const [],  List<RcxCandidateReport> candidates = const [],  List<RcxSwitchReport> history = const [],  List<int> bands = const [], this.probesLeft = 0, this.probeCap = 0, this.manualTill = 0, this.at = 0}): _canaries = canaries,_candidates = candidates,_history = history,_bands = bands;
+  factory _RcxReport.fromJson(Map<String, dynamic> json) => _$RcxReportFromJson(json);
+
+@override@JsonKey() final  RcxStatus status;
+@override@JsonKey() final  RcxLinkReport link;
+ final  List<RcxCanaryReport> _canaries;
+@override@JsonKey() List<RcxCanaryReport> get canaries {
+  if (_canaries is EqualUnmodifiableListView) return _canaries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_canaries);
+}
+
+ final  List<RcxCandidateReport> _candidates;
+@override@JsonKey() List<RcxCandidateReport> get candidates {
+  if (_candidates is EqualUnmodifiableListView) return _candidates;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_candidates);
+}
+
+ final  List<RcxSwitchReport> _history;
+@override@JsonKey() List<RcxSwitchReport> get history {
+  if (_history is EqualUnmodifiableListView) return _history;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_history);
+}
+
+ final  List<int> _bands;
+@override@JsonKey() List<int> get bands {
+  if (_bands is EqualUnmodifiableListView) return _bands;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bands);
+}
+
+@override@JsonKey() final  int probesLeft;
+@override@JsonKey() final  int probeCap;
+@override@JsonKey() final  int manualTill;
+@override@JsonKey() final  int at;
+
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxReportCopyWith<_RcxReport> get copyWith => __$RcxReportCopyWithImpl<_RcxReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxReport&&(identical(other.status, status) || other.status == status)&&(identical(other.link, link) || other.link == link)&&const DeepCollectionEquality().equals(other.canaries, _canaries)&&const DeepCollectionEquality().equals(other.candidates, _candidates)&&const DeepCollectionEquality().equals(other.history, _history)&&const DeepCollectionEquality().equals(other.bands, _bands)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.probeCap, probeCap) || other.probeCap == probeCap)&&(identical(other.manualTill, manualTill) || other.manualTill == manualTill)&&(identical(other.at, at) || other.at == at));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,status,link,const DeepCollectionEquality().hash(_canaries),const DeepCollectionEquality().hash(_candidates),const DeepCollectionEquality().hash(_history),const DeepCollectionEquality().hash(_bands),probesLeft,probeCap,manualTill,at);
+}
+
+@override
+String toString() {
+    return 'RcxReport(status: $status, link: $link, canaries: $canaries, candidates: $candidates, history: $history, bands: $bands, probesLeft: $probesLeft, probeCap: $probeCap, manualTill: $manualTill, at: $at)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxReportCopyWith<$Res> implements $RcxReportCopyWith<$Res> {
+  factory _$RcxReportCopyWith(_RcxReport value, $Res Function(_RcxReport) _then) = __$RcxReportCopyWithImpl;
+@override @useResult
+$Res call({
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, List<int> bands, int probesLeft, int probeCap, int manualTill, int at
+});
+
+
+@override $RcxStatusCopyWith<$Res> get status;@override $RcxLinkReportCopyWith<$Res> get link;
+
+}
+/// @nodoc
+class __$RcxReportCopyWithImpl<$Res>
+    implements _$RcxReportCopyWith<$Res> {
+  __$RcxReportCopyWithImpl(this._self, this._then);
+
+  final _RcxReport _self;
+  final $Res Function(_RcxReport) _then;
+
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manualTill = null,Object? at = null,}) {
+  return _then(_RcxReport(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
+as RcxLinkReport,canaries: null == canaries ? _self._canaries : canaries // ignore: cast_nullable_to_non_nullable
+as List<RcxCanaryReport>,candidates: null == candidates ? _self._candidates : candidates // ignore: cast_nullable_to_non_nullable
+as List<RcxCandidateReport>,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
+as List<RcxSwitchReport>,bands: null == bands ? _self._bands : bands // ignore: cast_nullable_to_non_nullable
+as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
+as int,manualTill: null == manualTill ? _self.manualTill : manualTill // ignore: cast_nullable_to_non_nullable
+as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxStatusCopyWith<$Res> get status {
+  
+  return $RcxStatusCopyWith<$Res>(_self.status, (value) {
+    return _then(_self.copyWith(status: value));
+  });
+}/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxLinkReportCopyWith<$Res> get link {
+  
+  return $RcxLinkReportCopyWith<$Res>(_self.link, (value) {
+    return _then(_self.copyWith(link: value));
+  });
+}
 }
 
 // dart format on

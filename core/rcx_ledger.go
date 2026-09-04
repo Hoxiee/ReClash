@@ -13,6 +13,7 @@ type rcxSample struct {
 
 type rcxNodeGlobal struct {
 	Origin   rcxOrigin `json:"o"`
+	Country  string    `json:"c"`
 	EverGood bool      `json:"g"`
 }
 
@@ -97,10 +98,18 @@ func (l *rcxLedger) globalState(node string) *rcxNodeGlobal {
 	return state
 }
 
-func (l *rcxLedger) SetOrigin(node string, origin rcxOrigin) {
+func (l *rcxLedger) SetOrigin(node, country string, origin rcxOrigin) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.globalState(node).Origin = origin
+	state := l.globalState(node)
+	state.Origin = origin
+	state.Country = country
+}
+
+func (l *rcxLedger) Country(node string) string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.globalState(node).Country
 }
 
 func (l *rcxLedger) Origin(node string) rcxOrigin {
@@ -351,6 +360,12 @@ func (l *rcxLedger) Facts(node, envKey string, supportsUDP bool, now time.Time) 
 		facts.Transit = rcxProofProven
 	}
 	return facts
+}
+
+func (l *rcxLedger) FailStreak(node, envKey string) int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.envState(envKey, node).FailStreak
 }
 
 func (l *rcxLedger) CoolUntil(node, envKey string) time.Time {

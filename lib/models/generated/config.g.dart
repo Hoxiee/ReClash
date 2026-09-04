@@ -24,6 +24,7 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
       showLabel: json['showLabel'] as bool? ?? false,
       disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
+      setupCompleted: json['setupCompleted'] as bool? ?? false,
       crashlyticsTip: json['crashlyticsTip'] as bool? ?? false,
       crashlytics: json['crashlytics'] as bool? ?? false,
       minimizeOnExit: json['minimizeOnExit'] as bool? ?? true,
@@ -59,6 +60,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'autoCheckUpdate': instance.autoCheckUpdate,
       'showLabel': instance.showLabel,
       'disclaimerAccepted': instance.disclaimerAccepted,
+      'setupCompleted': instance.setupCompleted,
       'crashlyticsTip': instance.crashlyticsTip,
       'crashlytics': instance.crashlytics,
       'minimizeOnExit': instance.minimizeOnExit,
@@ -192,24 +194,65 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
       preset:
           $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
           SmartRoutingPreset.off,
+      censorCountries:
+          (json['censorCountries'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      canaryForeign:
+          (json['canaryForeign'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      canaryDomestic:
+          (json['canaryDomestic'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      openMarkers:
+          (json['openMarkers'] as List<dynamic>?)
+              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      domesticMarkers:
+          (json['domesticMarkers'] as List<dynamic>?)
+              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      breakerPatterns:
+          (json['breakerPatterns'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
       saveMobileData: json['saveMobileData'] as bool? ?? true,
+      requireUdp: json['requireUdp'] as bool? ?? false,
       manualHoldMinutes: (json['manualHoldMinutes'] as num?)?.toInt() ?? 60,
+      dwellSeconds: (json['dwellSeconds'] as num?)?.toInt() ?? 90,
+      waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
     );
 
 Map<String, dynamic> _$SmartRoutingPropsToJson(_SmartRoutingProps instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
       'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
+      'censorCountries': instance.censorCountries,
+      'canaryForeign': instance.canaryForeign,
+      'canaryDomestic': instance.canaryDomestic,
+      'openMarkers': instance.openMarkers,
+      'domesticMarkers': instance.domesticMarkers,
+      'breakerPatterns': instance.breakerPatterns,
       'allowDomesticLastResort': instance.allowDomesticLastResort,
       'saveMobileData': instance.saveMobileData,
+      'requireUdp': instance.requireUdp,
       'manualHoldMinutes': instance.manualHoldMinutes,
+      'dwellSeconds': instance.dwellSeconds,
+      'waveWidth': instance.waveWidth,
     };
 
 const _$SmartRoutingPresetEnumMap = {
   SmartRoutingPreset.off: 'off',
-  SmartRoutingPreset.ruMobile: 'ru-mobile',
-  SmartRoutingPreset.ruHome: 'ru-home',
+  SmartRoutingPreset.russia: 'ru',
   SmartRoutingPreset.iran: 'ir',
   SmartRoutingPreset.china: 'cn',
 };

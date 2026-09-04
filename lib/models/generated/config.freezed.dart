@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettingProps {
 
- String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; bool get newDashboard; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RestoreStrategy get restoreStrategy; bool get showTrayTitle; bool get checkCertificate; String get customUserAgent; bool get sendDeviceIdentity;
+ String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; bool get newDashboard; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get setupCompleted; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RestoreStrategy get restoreStrategy; bool get showTrayTitle; bool get checkCertificate; String get customUserAgent; bool get sendDeviceIdentity;
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $AppSettingPropsCopyWith<AppSettingProps> get copyWith => _$AppSettingPropsCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as AppSettingProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _this.dashboardWidgets)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy)&&(identical(other.autoLaunch, _this.autoLaunch) || other.autoLaunch == _this.autoLaunch)&&(identical(other.silentLaunch, _this.silentLaunch) || other.silentLaunch == _this.silentLaunch)&&(identical(other.autoRun, _this.autoRun) || other.autoRun == _this.autoRun)&&(identical(other.openLogs, _this.openLogs) || other.openLogs == _this.openLogs)&&(identical(other.closeConnections, _this.closeConnections) || other.closeConnections == _this.closeConnections)&&(identical(other.newDashboard, _this.newDashboard) || other.newDashboard == _this.newDashboard)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.isAnimateToPage, _this.isAnimateToPage) || other.isAnimateToPage == _this.isAnimateToPage)&&(identical(other.autoCheckUpdate, _this.autoCheckUpdate) || other.autoCheckUpdate == _this.autoCheckUpdate)&&(identical(other.showLabel, _this.showLabel) || other.showLabel == _this.showLabel)&&(identical(other.disclaimerAccepted, _this.disclaimerAccepted) || other.disclaimerAccepted == _this.disclaimerAccepted)&&(identical(other.crashlyticsTip, _this.crashlyticsTip) || other.crashlyticsTip == _this.crashlyticsTip)&&(identical(other.crashlytics, _this.crashlytics) || other.crashlytics == _this.crashlytics)&&(identical(other.minimizeOnExit, _this.minimizeOnExit) || other.minimizeOnExit == _this.minimizeOnExit)&&(identical(other.hidden, _this.hidden) || other.hidden == _this.hidden)&&(identical(other.developerMode, _this.developerMode) || other.developerMode == _this.developerMode)&&(identical(other.restoreStrategy, _this.restoreStrategy) || other.restoreStrategy == _this.restoreStrategy)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle)&&(identical(other.checkCertificate, _this.checkCertificate) || other.checkCertificate == _this.checkCertificate)&&(identical(other.customUserAgent, _this.customUserAgent) || other.customUserAgent == _this.customUserAgent)&&(identical(other.sendDeviceIdentity, _this.sendDeviceIdentity) || other.sendDeviceIdentity == _this.sendDeviceIdentity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _this.dashboardWidgets)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy)&&(identical(other.autoLaunch, _this.autoLaunch) || other.autoLaunch == _this.autoLaunch)&&(identical(other.silentLaunch, _this.silentLaunch) || other.silentLaunch == _this.silentLaunch)&&(identical(other.autoRun, _this.autoRun) || other.autoRun == _this.autoRun)&&(identical(other.openLogs, _this.openLogs) || other.openLogs == _this.openLogs)&&(identical(other.closeConnections, _this.closeConnections) || other.closeConnections == _this.closeConnections)&&(identical(other.newDashboard, _this.newDashboard) || other.newDashboard == _this.newDashboard)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.isAnimateToPage, _this.isAnimateToPage) || other.isAnimateToPage == _this.isAnimateToPage)&&(identical(other.autoCheckUpdate, _this.autoCheckUpdate) || other.autoCheckUpdate == _this.autoCheckUpdate)&&(identical(other.showLabel, _this.showLabel) || other.showLabel == _this.showLabel)&&(identical(other.disclaimerAccepted, _this.disclaimerAccepted) || other.disclaimerAccepted == _this.disclaimerAccepted)&&(identical(other.setupCompleted, _this.setupCompleted) || other.setupCompleted == _this.setupCompleted)&&(identical(other.crashlyticsTip, _this.crashlyticsTip) || other.crashlyticsTip == _this.crashlyticsTip)&&(identical(other.crashlytics, _this.crashlytics) || other.crashlytics == _this.crashlytics)&&(identical(other.minimizeOnExit, _this.minimizeOnExit) || other.minimizeOnExit == _this.minimizeOnExit)&&(identical(other.hidden, _this.hidden) || other.hidden == _this.hidden)&&(identical(other.developerMode, _this.developerMode) || other.developerMode == _this.developerMode)&&(identical(other.restoreStrategy, _this.restoreStrategy) || other.restoreStrategy == _this.restoreStrategy)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle)&&(identical(other.checkCertificate, _this.checkCertificate) || other.checkCertificate == _this.checkCertificate)&&(identical(other.customUserAgent, _this.customUserAgent) || other.customUserAgent == _this.customUserAgent)&&(identical(other.sendDeviceIdentity, _this.sendDeviceIdentity) || other.sendDeviceIdentity == _this.sendDeviceIdentity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as AppSettingProps;
-  return Object.hashAll([runtimeType,_this.locale,const DeepCollectionEquality().hash(_this.dashboardWidgets),_this.onlyStatisticsProxy,_this.autoLaunch,_this.silentLaunch,_this.autoRun,_this.openLogs,_this.closeConnections,_this.newDashboard,_this.testUrl,_this.isAnimateToPage,_this.autoCheckUpdate,_this.showLabel,_this.disclaimerAccepted,_this.crashlyticsTip,_this.crashlytics,_this.minimizeOnExit,_this.hidden,_this.developerMode,_this.restoreStrategy,_this.showTrayTitle,_this.checkCertificate,_this.customUserAgent,_this.sendDeviceIdentity]);
+  return Object.hashAll([runtimeType,_this.locale,const DeepCollectionEquality().hash(_this.dashboardWidgets),_this.onlyStatisticsProxy,_this.autoLaunch,_this.silentLaunch,_this.autoRun,_this.openLogs,_this.closeConnections,_this.newDashboard,_this.testUrl,_this.isAnimateToPage,_this.autoCheckUpdate,_this.showLabel,_this.disclaimerAccepted,_this.setupCompleted,_this.crashlyticsTip,_this.crashlytics,_this.minimizeOnExit,_this.hidden,_this.developerMode,_this.restoreStrategy,_this.showTrayTitle,_this.checkCertificate,_this.customUserAgent,_this.sendDeviceIdentity]);
 }
 
 @override
 String toString() {
   final _this = this as AppSettingProps;
-  return 'AppSettingProps(locale: ${_this.locale}, dashboardWidgets: ${_this.dashboardWidgets}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy}, autoLaunch: ${_this.autoLaunch}, silentLaunch: ${_this.silentLaunch}, autoRun: ${_this.autoRun}, openLogs: ${_this.openLogs}, closeConnections: ${_this.closeConnections}, newDashboard: ${_this.newDashboard}, testUrl: ${_this.testUrl}, isAnimateToPage: ${_this.isAnimateToPage}, autoCheckUpdate: ${_this.autoCheckUpdate}, showLabel: ${_this.showLabel}, disclaimerAccepted: ${_this.disclaimerAccepted}, crashlyticsTip: ${_this.crashlyticsTip}, crashlytics: ${_this.crashlytics}, minimizeOnExit: ${_this.minimizeOnExit}, hidden: ${_this.hidden}, developerMode: ${_this.developerMode}, restoreStrategy: ${_this.restoreStrategy}, showTrayTitle: ${_this.showTrayTitle}, checkCertificate: ${_this.checkCertificate}, customUserAgent: ${_this.customUserAgent}, sendDeviceIdentity: ${_this.sendDeviceIdentity})';
+  return 'AppSettingProps(locale: ${_this.locale}, dashboardWidgets: ${_this.dashboardWidgets}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy}, autoLaunch: ${_this.autoLaunch}, silentLaunch: ${_this.silentLaunch}, autoRun: ${_this.autoRun}, openLogs: ${_this.openLogs}, closeConnections: ${_this.closeConnections}, newDashboard: ${_this.newDashboard}, testUrl: ${_this.testUrl}, isAnimateToPage: ${_this.isAnimateToPage}, autoCheckUpdate: ${_this.autoCheckUpdate}, showLabel: ${_this.showLabel}, disclaimerAccepted: ${_this.disclaimerAccepted}, setupCompleted: ${_this.setupCompleted}, crashlyticsTip: ${_this.crashlyticsTip}, crashlytics: ${_this.crashlytics}, minimizeOnExit: ${_this.minimizeOnExit}, hidden: ${_this.hidden}, developerMode: ${_this.developerMode}, restoreStrategy: ${_this.restoreStrategy}, showTrayTitle: ${_this.showTrayTitle}, checkCertificate: ${_this.checkCertificate}, customUserAgent: ${_this.customUserAgent}, sendDeviceIdentity: ${_this.sendDeviceIdentity})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $AppSettingPropsCopyWith<$Res>  {
   factory $AppSettingPropsCopyWith(AppSettingProps value, $Res Function(AppSettingProps) _then) = _$AppSettingPropsCopyWithImpl;
 @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity
 });
 
 
@@ -71,7 +71,7 @@ class _$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,}) {
   return _then(AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
@@ -87,6 +87,7 @@ as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isA
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
 as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
+as bool,setupCompleted: null == setupCompleted ? _self.setupCompleted : setupCompleted // ignore: cast_nullable_to_non_nullable
 as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
 as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -182,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
   return orElse();
 
 }
@@ -203,10 +204,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps():
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -223,10 +224,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
+return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity);case _:
   return null;
 
 }
@@ -238,7 +239,7 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, this.customUserAgent = '', this.sendDeviceIdentity = true}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.setupCompleted = false, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, this.customUserAgent = '', this.sendDeviceIdentity = true}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
@@ -261,6 +262,7 @@ class _AppSettingProps implements AppSettingProps {
 @override@JsonKey() final  bool autoCheckUpdate;
 @override@JsonKey() final  bool showLabel;
 @override@JsonKey() final  bool disclaimerAccepted;
+@override@JsonKey() final  bool setupCompleted;
 @override@JsonKey() final  bool crashlyticsTip;
 @override@JsonKey() final  bool crashlytics;
 @override@JsonKey() final  bool minimizeOnExit;
@@ -285,18 +287,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.newDashboard, newDashboard) || other.newDashboard == newDashboard)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle)&&(identical(other.checkCertificate, checkCertificate) || other.checkCertificate == checkCertificate)&&(identical(other.customUserAgent, customUserAgent) || other.customUserAgent == customUserAgent)&&(identical(other.sendDeviceIdentity, sendDeviceIdentity) || other.sendDeviceIdentity == sendDeviceIdentity));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.newDashboard, newDashboard) || other.newDashboard == newDashboard)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.setupCompleted, setupCompleted) || other.setupCompleted == setupCompleted)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle)&&(identical(other.checkCertificate, checkCertificate) || other.checkCertificate == checkCertificate)&&(identical(other.customUserAgent, customUserAgent) || other.customUserAgent == customUserAgent)&&(identical(other.sendDeviceIdentity, sendDeviceIdentity) || other.sendDeviceIdentity == sendDeviceIdentity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,newDashboard,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle,checkCertificate,customUserAgent,sendDeviceIdentity]);
+    return Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,newDashboard,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,setupCompleted,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle,checkCertificate,customUserAgent,sendDeviceIdentity]);
 }
 
 @override
 String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, newDashboard: $newDashboard, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle, checkCertificate: $checkCertificate, customUserAgent: $customUserAgent, sendDeviceIdentity: $sendDeviceIdentity)';
+    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, newDashboard: $newDashboard, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, setupCompleted: $setupCompleted, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle, checkCertificate: $checkCertificate, customUserAgent: $customUserAgent, sendDeviceIdentity: $sendDeviceIdentity)';
 }
 
 
@@ -307,7 +309,7 @@ abstract mixin class _$AppSettingPropsCopyWith<$Res> implements $AppSettingProps
   factory _$AppSettingPropsCopyWith(_AppSettingProps value, $Res Function(_AppSettingProps) _then) = __$AppSettingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity
+ String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity
 });
 
 
@@ -324,7 +326,7 @@ class __$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,}) {
   return _then(_AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
 as String?,dashboardWidgets: null == dashboardWidgets ? _self._dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
@@ -340,6 +342,7 @@ as String,isAnimateToPage: null == isAnimateToPage ? _self.isAnimateToPage : isA
 as bool,autoCheckUpdate: null == autoCheckUpdate ? _self.autoCheckUpdate : autoCheckUpdate // ignore: cast_nullable_to_non_nullable
 as bool,showLabel: null == showLabel ? _self.showLabel : showLabel // ignore: cast_nullable_to_non_nullable
 as bool,disclaimerAccepted: null == disclaimerAccepted ? _self.disclaimerAccepted : disclaimerAccepted // ignore: cast_nullable_to_non_nullable
+as bool,setupCompleted: null == setupCompleted ? _self.setupCompleted : setupCompleted // ignore: cast_nullable_to_non_nullable
 as bool,crashlyticsTip: null == crashlyticsTip ? _self.crashlyticsTip : crashlyticsTip // ignore: cast_nullable_to_non_nullable
 as bool,crashlytics: null == crashlytics ? _self.crashlytics : crashlytics // ignore: cast_nullable_to_non_nullable
 as bool,minimizeOnExit: null == minimizeOnExit ? _self.minimizeOnExit : minimizeOnExit // ignore: cast_nullable_to_non_nullable
@@ -1258,7 +1261,7 @@ $AccessControlPropsCopyWith<$Res> get accessControlProps {
 /// @nodoc
 mixin _$SmartRoutingProps {
 
- bool get enabled; SmartRoutingPreset get preset; bool get allowDomesticLastResort; bool get saveMobileData; int get manualHoldMinutes;
+ bool get enabled; SmartRoutingPreset get preset; List<String> get censorCountries; List<String> get canaryForeign; List<String> get canaryDomestic; List<RcxMarker> get openMarkers; List<RcxMarker> get domesticMarkers; List<String> get breakerPatterns; bool get allowDomesticLastResort; bool get saveMobileData; bool get requireUdp; int get manualHoldMinutes; int get dwellSeconds; int get waveWidth;
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1272,20 +1275,20 @@ $SmartRoutingPropsCopyWith<SmartRoutingProps> get copyWith => _$SmartRoutingProp
 @override
 bool operator ==(Object other) {
   final _this = this as SmartRoutingProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SmartRoutingProps;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.allowDomesticLastResort,_this.saveMobileData,_this.manualHoldMinutes);
+  return Object.hash(runtimeType,_this.enabled,_this.preset,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.saveMobileData,_this.requireUdp,_this.manualHoldMinutes,_this.dwellSeconds,_this.waveWidth);
 }
 
 @override
 String toString() {
   final _this = this as SmartRoutingProps;
-  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, manualHoldMinutes: ${_this.manualHoldMinutes})';
+  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, requireUdp: ${_this.requireUdp}, manualHoldMinutes: ${_this.manualHoldMinutes}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
 }
 
 
@@ -1296,7 +1299,7 @@ abstract mixin class $SmartRoutingPropsCopyWith<$Res>  {
   factory $SmartRoutingPropsCopyWith(SmartRoutingProps value, $Res Function(SmartRoutingProps) _then) = _$SmartRoutingPropsCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, bool allowDomesticLastResort, bool saveMobileData, int manualHoldMinutes
+ bool enabled, SmartRoutingPreset preset, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool saveMobileData, bool requireUdp, int manualHoldMinutes, int dwellSeconds, int waveWidth
 });
 
 
@@ -1313,13 +1316,22 @@ class _$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as SmartRoutingPreset,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as SmartRoutingPreset,censorCountries: null == censorCountries ? _self.censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryForeign: null == canaryForeign ? _self.canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryDomestic: null == canaryDomestic ? _self.canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
+as List<String>,openMarkers: null == openMarkers ? _self.openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self.domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
+as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -1405,10 +1417,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  bool allowDomesticLastResort,  bool saveMobileData,  int manualHoldMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   return orElse();
 
 }
@@ -1426,10 +1438,10 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  bool allowDomesticLastResort,  bool saveMobileData,  int manualHoldMinutes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps():
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1446,10 +1458,10 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  bool allowDomesticLastResort,  bool saveMobileData,  int manualHoldMinutes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)?  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.saveMobileData,_that.manualHoldMinutes);case _:
+return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
   return null;
 
 }
@@ -1461,14 +1473,59 @@ return $default(_that.enabled,_that.preset,_that.allowDomesticLastResort,_that.s
 @JsonSerializable()
 
 class _SmartRoutingProps implements SmartRoutingProps {
-  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off, this.allowDomesticLastResort = true, this.saveMobileData = true, this.manualHoldMinutes = 60});
+  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<String> breakerPatterns = const [], this.allowDomesticLastResort = true, this.saveMobileData = true, this.requireUdp = false, this.manualHoldMinutes = 60, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_breakerPatterns = breakerPatterns;
   factory _SmartRoutingProps.fromJson(Map<String, dynamic> json) => _$SmartRoutingPropsFromJson(json);
 
 @override@JsonKey() final  bool enabled;
 @override@JsonKey() final  SmartRoutingPreset preset;
+ final  List<String> _censorCountries;
+@override@JsonKey() List<String> get censorCountries {
+  if (_censorCountries is EqualUnmodifiableListView) return _censorCountries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_censorCountries);
+}
+
+ final  List<String> _canaryForeign;
+@override@JsonKey() List<String> get canaryForeign {
+  if (_canaryForeign is EqualUnmodifiableListView) return _canaryForeign;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_canaryForeign);
+}
+
+ final  List<String> _canaryDomestic;
+@override@JsonKey() List<String> get canaryDomestic {
+  if (_canaryDomestic is EqualUnmodifiableListView) return _canaryDomestic;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_canaryDomestic);
+}
+
+ final  List<RcxMarker> _openMarkers;
+@override@JsonKey() List<RcxMarker> get openMarkers {
+  if (_openMarkers is EqualUnmodifiableListView) return _openMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_openMarkers);
+}
+
+ final  List<RcxMarker> _domesticMarkers;
+@override@JsonKey() List<RcxMarker> get domesticMarkers {
+  if (_domesticMarkers is EqualUnmodifiableListView) return _domesticMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_domesticMarkers);
+}
+
+ final  List<String> _breakerPatterns;
+@override@JsonKey() List<String> get breakerPatterns {
+  if (_breakerPatterns is EqualUnmodifiableListView) return _breakerPatterns;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_breakerPatterns);
+}
+
 @override@JsonKey() final  bool allowDomesticLastResort;
 @override@JsonKey() final  bool saveMobileData;
+@override@JsonKey() final  bool requireUdp;
 @override@JsonKey() final  int manualHoldMinutes;
+@override@JsonKey() final  int dwellSeconds;
+@override@JsonKey() final  int waveWidth;
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
@@ -1483,18 +1540,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,allowDomesticLastResort,saveMobileData,manualHoldMinutes);
+    return Object.hash(runtimeType,enabled,preset,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,saveMobileData,requireUdp,manualHoldMinutes,dwellSeconds,waveWidth);
 }
 
 @override
 String toString() {
-    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, manualHoldMinutes: $manualHoldMinutes)';
+    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, requireUdp: $requireUdp, manualHoldMinutes: $manualHoldMinutes, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
 }
 
 
@@ -1505,7 +1562,7 @@ abstract mixin class _$SmartRoutingPropsCopyWith<$Res> implements $SmartRoutingP
   factory _$SmartRoutingPropsCopyWith(_SmartRoutingProps value, $Res Function(_SmartRoutingProps) _then) = __$SmartRoutingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, bool allowDomesticLastResort, bool saveMobileData, int manualHoldMinutes
+ bool enabled, SmartRoutingPreset preset, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool saveMobileData, bool requireUdp, int manualHoldMinutes, int dwellSeconds, int waveWidth
 });
 
 
@@ -1522,13 +1579,22 @@ class __$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? manualHoldMinutes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(_SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as SmartRoutingPreset,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as SmartRoutingPreset,censorCountries: null == censorCountries ? _self._censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryForeign: null == canaryForeign ? _self._canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
+as List<String>,canaryDomestic: null == canaryDomestic ? _self._canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
+as List<String>,openMarkers: null == openMarkers ? _self._openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self._domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self._breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
+as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
+as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
+as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

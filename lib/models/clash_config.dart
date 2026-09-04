@@ -318,7 +318,7 @@ abstract class Dns with _$Dns {
     @Default(DnsMode.fakeIp)
     @JsonKey(name: 'enhanced-mode')
     DnsMode enhancedMode,
-    @Default('198.18.0.1/16')
+    @Default(defaultFakeIpRange)
     @JsonKey(name: 'fake-ip-range')
     String fakeIpRange,
     @Default(['*.lan', 'localhost.ptlogin2.qq.com'])

@@ -143,6 +143,7 @@ class CommonAction extends _$CommonAction {
   }) async {
     if (data != null) {
       final context = globalState.navigatorKey.currentContext!;
+      final updater = ref.read(appUpdateActionProvider.notifier);
       final res = await dialogs.showMessage(
         title: currentAppLocalizations.discoverNewVersion,
         message: _releaseSpan(
@@ -150,14 +151,18 @@ class CommonAction extends _$CommonAction {
           data['tag_name'] as String,
           data['body'] as String?,
         ),
-        confirmText: currentAppLocalizations.goDownload,
+        confirmText: updater.isSupported
+            ? currentAppLocalizations.installUpdate
+            : currentAppLocalizations.goDownload,
         cancelText: isUser ? null : currentAppLocalizations.noLongerRemind,
       );
       if (res == true) {
         unawaited(
-          launchUrl(
-            Uri.parse('https://github.com/$repository/releases/latest'),
-          ),
+          updater.isSupported
+              ? updater.install(data)
+              : launchUrl(
+                  Uri.parse('https://github.com/$repository/releases/latest'),
+                ),
         );
       } else if (!isUser && res == false) {
         ref

@@ -304,3 +304,8 @@ bool tunEnabled(Ref ref) {
   }
   return ref.watch(patchClashConfigProvider.select((state) => state.tun.enable));
 }
+
+@riverpod
+bool needsSetup(Ref ref) => !ref.watch(
+  appSettingProvider.select((state) => state.setupCompleted),
+);

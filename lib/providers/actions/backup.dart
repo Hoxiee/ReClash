@@ -44,6 +44,17 @@ class BackupAction extends _$BackupAction {
     }
   }
 
+  /// False when the user picked nothing; a bad archive is thrown to the caller
+  /// the same way `restore` throws it.
+  Future<bool> restorePickedFile(RestoreOption option) async {
+    final file = await globalState.safeRun(picker.pickerFile);
+    final path = file?.path;
+    if (path == null) return false;
+    await File(path).safeCopy(await appPath.backupFilePath);
+    await restore(option);
+    return true;
+  }
+
   @visibleForTesting
   Future<void> applyRestore(MigrationData data, RestoreOption option) async {
     final restoreStrategy = ref.read(

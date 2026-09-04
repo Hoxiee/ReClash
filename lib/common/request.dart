@@ -92,6 +92,43 @@ class Request {
     }
   }
 
+  /// Downloads to a sibling `.tmp` and renames only after the bytes are
+  /// complete, so an interrupted run can never leave a half file where a
+  /// cached artifact is expected. Returns an error message, or null on success.
+  Future<String?> downloadFile(
+    String url,
+    String targetPath, {
+    ProgressCallback? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final tmpPath = '$targetPath.tmp';
+    try {
+      await dio.download(
+        url,
+        tmpPath,
+        onReceiveProgress: onProgress,
+        cancelToken: cancelToken,
+      );
+      final tmpFile = File(tmpPath);
+      if (!await tmpFile.exists()) {
+        return 'download produced no file';
+      }
+      await File(targetPath).safeDelete();
+      await tmpFile.rename(targetPath);
+      return null;
+    } catch (error) {
+      await File(tmpPath).safeDelete();
+      if (error is DioException && CancelToken.isCancel(error)) {
+        return '';
+      }
+      commonPrint.log(
+        'downloadFile error ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return compactError(error);
+    }
+  }
+
   final Map<String, IpInfo Function(Map<String, dynamic>)> _ipInfoSources = {
     'https://ipwho.is': IpInfo.fromIpWhoIsJson,
     'https://api.myip.com': IpInfo.fromMyIpJson,

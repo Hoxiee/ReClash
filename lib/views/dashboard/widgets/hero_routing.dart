@@ -2,9 +2,9 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -116,10 +116,7 @@ class HeroRoutingRow extends ConsumerWidget {
       onTap: () {
         showExtend(
           context,
-          builder: (context) => AdaptiveSheetScaffold(
-            title: appLocalizations.smartRouting,
-            body: const SmartRoutingView(),
-          ),
+          builder: (context) => const RoutingOverviewView(),
         );
       },
       child: Padding(

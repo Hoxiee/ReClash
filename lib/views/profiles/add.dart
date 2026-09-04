@@ -13,11 +13,20 @@ import 'client_preset_selector.dart';
 
 class AddProfileView extends ConsumerWidget {
   final BuildContext context;
+  final bool keepCurrentPage;
 
-  const AddProfileView({super.key, required this.context});
+  const AddProfileView({
+    super.key,
+    required this.context,
+    this.keepCurrentPage = false,
+  });
 
   Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
-    unawaited(ref.read(profilesActionProvider.notifier).addProfileFormFile());
+    unawaited(
+      ref.read(profilesActionProvider.notifier).addProfileFormFile(
+        keepCurrentPage: keepCurrentPage,
+      ),
+    );
   }
 
   Future<void> _handleAddUrl(
@@ -39,7 +48,12 @@ class AddProfileView extends ConsumerWidget {
     }
     final target = resolved?.url ?? url;
     if (target.isEmpty) {
-      unawaited(profilesAction.addProfileFromLocalContent(resolved!.data!));
+      unawaited(
+        profilesAction.addProfileFromLocalContent(
+          resolved!.data!,
+          keepCurrentPage: keepCurrentPage,
+        ),
+      );
       return;
     }
     unawaited(
@@ -48,6 +62,7 @@ class AddProfileView extends ConsumerWidget {
         client: resolved?.preset ?? client,
         name: resolved?.name,
         customUserAgent: customUserAgent,
+        keepCurrentPage: keepCurrentPage,
       ),
     );
   }
@@ -75,7 +90,12 @@ class AddProfileView extends ConsumerWidget {
     final url = result.url.trim();
     if (url.isEmpty) return;
     if (!url.isUrl && !url.startsWith('incy://') && !url.startsWith('happ://')) {
-      unawaited(profilesAction.addProfileFromLocalContent(url));
+      unawaited(
+        profilesAction.addProfileFromLocalContent(
+          url,
+          keepCurrentPage: keepCurrentPage,
+        ),
+      );
       return;
     }
     unawaited(

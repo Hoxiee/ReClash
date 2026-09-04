@@ -62,6 +62,10 @@ mixin CoreInterface {
 
   Future<RcxStatus?> smartRoutingStatus();
 
+  Future<RcxReport?> smartRoutingReport();
+
+  Future<bool> smartRoutingDeepScan();
+
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
@@ -290,6 +294,22 @@ abstract class CoreHandlerInterface with CoreInterface {
       return null;
     }
     return RcxStatus.fromJson(data);
+  }
+
+  @override
+  Future<RcxReport?> smartRoutingReport() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.rcxReport,
+    );
+    if (data == null) {
+      return null;
+    }
+    return RcxReport.fromJson(data);
+  }
+
+  @override
+  Future<bool> smartRoutingDeepScan() async {
+    return await _invokeMethod<bool>(method: CoreMethod.rcxDeepScan) ?? false;
   }
 
   @override

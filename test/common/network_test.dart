@@ -151,10 +151,7 @@ void main() {
 
   group('smartPauseMatches', () {
     test('matches an SSID case-insensitively', () {
-      expect(
-        smartPauseMatches(['Office Wi-Fi'], ssid: 'office wi-fi'),
-        isTrue,
-      );
+      expect(smartPauseMatches(['Office Wi-Fi'], ssid: 'office wi-fi'), isTrue);
       expect(smartPauseMatches(['Office Wi-Fi'], ssid: 'Cafe'), isFalse);
     });
 
@@ -188,9 +185,10 @@ void main() {
     });
 
     test('an SSID rule never matches by address', () {
-      expect(smartPauseMatches(['192.168.1.0/24 Home'], ipv4s: [
-        '192.168.1.5',
-      ]), isFalse);
+      expect(
+        smartPauseMatches(['192.168.1.0/24 Home'], ipv4s: ['192.168.1.5']),
+        isFalse,
+      );
     });
   });
 
@@ -207,6 +205,77 @@ void main() {
       expect(isSubnetRule('192.168.1.0/abc'), isFalse);
       expect(isSubnetRule('192.168.1.2.3'), isFalse);
       expect(isSubnetRule(''), isFalse);
+    });
+  });
+
+  group('hasForeignVpnInterface', () {
+    test('names a third party tunnel that carries an address', () async {
+      listing([
+        _FakeInterface('wlan0', [_v4('192.168.1.20')]),
+        _FakeInterface('nordlynx', [_v4('10.5.0.2')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isTrue);
+    });
+
+    test('never reports our own tunnel', () async {
+      listing([
+        _FakeInterface('wlan0', [_v4('192.168.1.20')]),
+        _FakeInterface('ReClash', [_v4('198.18.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isFalse);
+    });
+
+    test('honours a renamed device', () async {
+      listing([
+        _FakeInterface('utun7', [_v4('10.9.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(ownDevice: 'utun7'), isFalse);
+      expect(await hasForeignVpnInterface(ownDevice: 'ReClash'), isTrue);
+    });
+
+    test('our own Android tunnel is never foreign', () async {
+      listing([
+        _FakeInterface('tun0', [_v4('172.19.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isFalse);
+    });
+
+    test('our own desktop tunnel is named by its address', () async {
+      listing([
+        _FakeInterface('tun0', [_v4('198.18.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isFalse);
+    });
+
+    test('a custom fake-ip range still identifies our tunnel', () async {
+      listing([
+        _FakeInterface('tun0', [_v4('10.44.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isTrue);
+      expect(
+        await hasForeignVpnInterface(fakeIpRange: '10.44.0.1/16'),
+        isFalse,
+      );
+    });
+
+    test('an interface without an address is not an active tunnel', () async {
+      listing([_FakeInterface('tun0', const [])]);
+      expect(await hasForeignVpnInterface(), isFalse);
+    });
+
+    test('ordinary interfaces are not tunnels', () async {
+      listing([
+        _FakeInterface('wlan0', [_v4('192.168.1.20')]),
+        _FakeInterface('eth0', [_v4('10.0.0.5')]),
+        _FakeInterface('docker0', [_v4('172.17.0.1')]),
+      ]);
+      expect(await hasForeignVpnInterface(), isFalse);
+    });
+
+    test('an unreadable listing claims nothing', () async {
+      listNetworkInterfaces = ({bool includeLoopback = false}) async =>
+          throw const SocketException('denied');
+      expect(await hasForeignVpnInterface(), isFalse);
     });
   });
 

@@ -216,6 +216,14 @@ class CoreController {
     return _interface.smartRoutingStatus();
   }
 
+  Future<RcxReport?> smartRoutingReport() {
+    return _interface.smartRoutingReport();
+  }
+
+  Future<bool> smartRoutingDeepScan() {
+    return _interface.smartRoutingDeepScan();
+  }
+
   Future<Delay?> getDelay(String url, String proxyName) async {
     return _interface.asyncTestDelay(url, proxyName);
   }

@@ -43,20 +43,26 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
     skipped.putIfAbsent('${node.kind}|${handle ?? node.name}', () => node);
   }
 
-  void record(
+  String record(
     Map<String, Object?> proxy,
     String name, {
     bool generic = false,
   }) {
-    final entry = groups[_fingerprint(proxy)];
+    final key = _fingerprint(proxy);
+    final entry = groups[key];
     if (entry == null) {
-      groups[_fingerprint(proxy)] = (proxy, [(name: name, generic: generic)]);
+      groups[key] = (proxy, [(name: name, generic: generic)]);
     } else {
       entry.$2.add((name: name, generic: generic));
     }
+    return key;
   }
 
-  for (final config in configs) {
+  // Balancer selectors address outbounds by tag, which dedup does not preserve.
+  final tagKeys = <String, String>{};
+
+  for (var index = 0; index < configs.length; index++) {
+    final config = configs[index];
     if (config['type'] == 'amneziawg') {
       final servers = config['servers'];
       if (servers is List) {
@@ -87,6 +93,7 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
     final remarks = config['remarks']?.toString();
     final outbounds = config['outbounds'];
     if (outbounds is! List) continue;
+    final roles = _roleTags(config);
     for (final outbound in outbounds) {
       if (outbound is! Map<String, Object?>) continue;
       final Map<String, Object?>? proxy;
@@ -102,7 +109,7 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
         final tag = outbound['tag']?.toString() ?? '';
         recordSkipped(
           SkippedNode(
-            name: _isGenericTag(tag)
+            name: _isGenericTag(tag, roles)
                 ? proxy['server']?.toString() ?? tag
                 : tag,
             kind: transport == 'splithttp' ? 'xhttp' : transport,
@@ -113,40 +120,180 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
         continue;
       }
       final tag = outbound['tag']?.toString() ?? '';
-      record(
+      final key = record(
         proxy,
         proxy['name']! as String,
-        generic: _isGenericTag(tag),
+        generic: _isGenericTag(tag, roles),
       );
+      if (tag.isNotEmpty) tagKeys['$index\u0000$tag'] = key;
     }
   }
 
   final proxies = <Map<String, Object?>>[];
   final seen = <String>{};
-  for (final entry in groups.values) {
-    final (proxy, candidates) = entry;
+  final tagNames = <String, String>{};
+  for (final entry in groups.entries) {
+    final (proxy, candidates) = entry.value;
     var name = candidates
         .firstWhere((c) => !c.generic, orElse: () => candidates.first)
         .name;
     if (candidates.every((c) => c.generic)) {
       name = proxy['server']! as String;
     }
-    final base = name;
-    var suffix = 2;
-    while (seen.contains(name)) {
-      name = '$base $suffix';
-      suffix++;
-    }
+    name = _uniqueName(name, seen);
     proxy['name'] = name;
-    seen.add(name);
     proxies.add(proxy);
+    for (final tag in tagKeys.entries) {
+      if (tag.value == entry.key) tagNames[tag.key] = name;
+    }
   }
 
   if (proxies.isEmpty) return null;
   return XrayConfigResult(
-    config: emitProxiesConfig(proxies),
+    config: emitProxiesConfig(
+      proxies,
+      groups: _balancerGroups(configs, tagNames, seen),
+    ),
     skipped: skipped.values.toList(growable: false),
   );
+}
+
+/// A balancer is the panel's real topology: tag prefixes plus a strategy. Each
+/// becomes one group, so the picker offers those instead of every raw node.
+List<Map<String, Object?>> _balancerGroups(
+  List<Map<String, Object?>> configs,
+  Map<String, String> tagNames,
+  Set<String> taken,
+) {
+  final result = <Map<String, Object?>>[];
+  // One balancer tag recurs across mode-configs with different members.
+  final labelled = configs.length > 1;
+  for (var index = 0; index < configs.length; index++) {
+    final config = configs[index];
+    final balancers = _asMap(config['routing'])?['balancers'];
+    if (balancers is! List) continue;
+    final outbounds = config['outbounds'];
+    final tags = <String>[
+      if (outbounds is List)
+        for (final outbound in outbounds)
+          if (outbound is Map<String, Object?>)
+            outbound['tag']?.toString() ?? '',
+    ];
+    final remarks = config['remarks']?.toString() ?? '';
+    for (final balancer in balancers) {
+      if (balancer is! Map<String, Object?>) continue;
+      final group = _balancerGroup(balancer, index, tags, tagNames);
+      if (group == null) continue;
+      final base = labelled && remarks.isNotEmpty
+          ? '$remarks · ${group['name']}'
+          : group['name']! as String;
+      group['name'] = _uniqueName(base, taken);
+      result.add(group);
+    }
+  }
+  return result;
+}
+
+Map<String, Object?>? _balancerGroup(
+  Map<String, Object?> balancer,
+  int index,
+  List<String> tags,
+  Map<String, String> tagNames,
+) {
+  final tag = balancer['tag']?.toString() ?? '';
+  if (tag.isEmpty) return null;
+  final selector = balancer['selector'];
+  final prefixes = <String>[
+    if (selector is List)
+      for (final entry in selector)
+        if (entry.toString().isNotEmpty) entry.toString(),
+  ];
+  if (prefixes.isEmpty) return null;
+
+  final strategy = _asMap(balancer['strategy']);
+  final ranked = _rankPrefixes(prefixes, _asMap(strategy?['settings'])?['costs']);
+
+  final members = <String>[];
+  for (final prefix in ranked.prefixes) {
+    for (final candidate in tags) {
+      if (!candidate.startsWith(prefix)) continue;
+      final name = tagNames['$index\u0000$candidate'];
+      if (name == null || members.contains(name)) continue;
+      members.add(name);
+    }
+  }
+  // The xray fallback is a last resort, and `block` resolves to no node at all.
+  final fallback = tagNames['$index\u0000${balancer['fallbackTag']}'];
+  if (fallback != null && !members.contains(fallback)) members.add(fallback);
+  if (members.isEmpty) return null;
+
+  if (ranked.tiered) {
+    return {'name': tag, 'type': 'fallback', 'proxies': members};
+  }
+  if (strategy?['type']?.toString() == 'random') {
+    return {
+      'name': tag,
+      'type': 'load-balance',
+      'strategy': 'round-robin',
+      'proxies': members,
+    };
+  }
+  return {'name': tag, 'type': 'url-test', 'proxies': members};
+}
+
+/// `costs` tier a balancer: 1e-06 preferred, 1e9 last resort. Distinct costs ask
+/// for an order, which is `fallback`, not a latency race between tiers.
+({List<String> prefixes, bool tiered}) _rankPrefixes(
+  List<String> prefixes,
+  Object? costs,
+) {
+  if (costs is! List || costs.isEmpty) {
+    return (prefixes: prefixes, tiered: false);
+  }
+  final weights = <String, double>{
+    for (final prefix in prefixes) prefix: _costOf(prefix, costs),
+  };
+  if (weights.values.toSet().length < 2) {
+    return (prefixes: prefixes, tiered: false);
+  }
+  final ordered = [...prefixes]
+    ..sort((a, b) {
+      final byCost = weights[a]!.compareTo(weights[b]!);
+      return byCost != 0 ? byCost : prefixes.indexOf(a) - prefixes.indexOf(b);
+    });
+  return (prefixes: ordered, tiered: true);
+}
+
+double _costOf(String prefix, List<Object?> costs) {
+  for (final cost in costs) {
+    if (cost is! Map<String, Object?>) continue;
+    final match = cost['match']?.toString() ?? '';
+    if (match.isEmpty) continue;
+    final hit = cost['regexp'] == true
+        ? (_tryRegExp(match)?.hasMatch(prefix) ?? false)
+        : prefix.contains(match);
+    if (hit) return _toDouble(cost['value']) ?? 1;
+  }
+  return 1;
+}
+
+RegExp? _tryRegExp(String pattern) {
+  try {
+    return RegExp(pattern);
+  } on FormatException {
+    return null;
+  }
+}
+
+String _uniqueName(String base, Set<String> taken) {
+  var name = base;
+  var suffix = 2;
+  while (taken.contains(name)) {
+    name = '$base $suffix';
+    suffix++;
+  }
+  taken.add(name);
+  return name;
 }
 
 /// Thrown for protocols mihomo cannot dial; service outbounds are routing machinery and return null.
@@ -163,7 +310,24 @@ final _genericTagPattern = RegExp(
   caseSensitive: false,
 );
 
-bool _isGenericTag(String tag) => _genericTagPattern.hasMatch(tag.trim());
+bool _isGenericTag(String tag, [Set<String> roles = const {}]) {
+  final trimmed = tag.trim();
+  if (_genericTagPattern.hasMatch(trimmed)) return true;
+  return roles.any(trimmed.startsWith);
+}
+
+/// A selected or fallback tag is a routing role, whatever it is called.
+Set<String> _roleTags(Map<String, Object?> config) {
+  final balancers = _asMap(config['routing'])?['balancers'];
+  if (balancers is! List) return const {};
+  return <String>{
+    for (final balancer in balancers)
+      if (balancer is Map<String, Object?>) ...[
+        ...?(balancer['selector'] as List?)?.map((e) => e.toString()),
+        ?balancer['fallbackTag']?.toString(),
+      ],
+  }..removeWhere((tag) => tag.isEmpty);
+}
 
 String _fingerprint(Map<String, Object?> proxy) {
   final keys = proxy.keys.where((k) => k != 'name').toList()..sort();
@@ -672,6 +836,12 @@ Map<String, Object?>? _firstOf(Object? value) {
     final first = value.first;
     if (first is Map<String, Object?>) return first;
   }
+  return null;
+}
+
+double? _toDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value);
   return null;
 }
 

@@ -183,29 +183,38 @@ abstract class ProxiesData with _$ProxiesData {
 }
 
 @freezed
+abstract class RcxMarker with _$RcxMarker {
+  const factory RcxMarker({
+    @JsonKey(name: 'url') required String url,
+    @JsonKey(name: 'statuses') required List<int> statuses,
+  }) = _RcxMarker;
+
+  factory RcxMarker.fromJson(Map<String, Object?> json) =>
+      _$RcxMarkerFromJson(json);
+}
+
+@freezed
 abstract class RcxConfigParams with _$RcxConfigParams {
   const factory RcxConfigParams({
     @JsonKey(name: 'on') required bool enabled,
     @JsonKey(name: 'preset') required String preset,
+    @JsonKey(name: 'dv') required int defaultsVersion,
+    @JsonKey(name: 'cc') required List<String> censorCountries,
+    @JsonKey(name: 'cf') required List<String> canaryForeign,
+    @JsonKey(name: 'cd') required List<String> canaryDomestic,
+    @JsonKey(name: 'om') required List<RcxMarker> openMarkers,
+    @JsonKey(name: 'dm') required List<RcxMarker> domesticMarkers,
+    @JsonKey(name: 'bp') required List<String> breakerPatterns,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
     @JsonKey(name: 'smd') required bool saveMobileData,
+    @JsonKey(name: 'udp') required bool requireUdp,
     @JsonKey(name: 'mhm') required int manualHoldMinutes,
+    @JsonKey(name: 'dwl') required int dwellSeconds,
+    @JsonKey(name: 'ww') required int waveWidth,
   }) = _RcxConfigParams;
 
   factory RcxConfigParams.fromJson(Map<String, Object?> json) =>
       _$RcxConfigParamsFromJson(json);
-}
-
-extension SmartRoutingPropsRcx on SmartRoutingProps {
-  // The preset wire value comes from the serialization map, so the enum's
-  // @JsonValue annotations stay the single source of it.
-  RcxConfigParams get rcxParams => RcxConfigParams(
-    enabled: enabled,
-    preset: toJson()['preset'] as String,
-    allowDomesticLastResort: allowDomesticLastResort,
-    saveMobileData: saveMobileData,
-    manualHoldMinutes: manualHoldMinutes,
-  );
 }
 
 @freezed
@@ -220,9 +229,98 @@ abstract class RcxStatus with _$RcxStatus {
     @Default(0) int delay,
     @Default('') String reason,
     @Default(false) bool searching,
+    @Default(false) bool deep,
     @Default(0) int candidates,
+    @Default(0) int eligible,
+    @Default(0) int switchedAt,
   }) = _RcxStatus;
 
   factory RcxStatus.fromJson(Map<String, Object?> json) =>
       _$RcxStatusFromJson(json);
+}
+
+/// One row of the overview: why this node sits where it does, in the engine's
+/// own vocabulary rather than a score the UI would have to invent.
+@freezed
+abstract class RcxCandidateReport with _$RcxCandidateReport {
+  const factory RcxCandidateReport({
+    @Default('') String node,
+    @Default('') String country,
+    @Default('unknown') String origin,
+    @Default('reject') String verdict,
+    @Default('none') String evidence,
+    @Default('') String block,
+    @Default(0) int delay,
+    @Default(0) int band,
+    @Default(false) bool degraded,
+    @Default(false) bool breaker,
+    @Default(false) bool udp,
+    @Default(0) int fails,
+    @Default(0) int coolFor,
+    @Default(false) bool current,
+  }) = _RcxCandidateReport;
+
+  factory RcxCandidateReport.fromJson(Map<String, Object?> json) =>
+      _$RcxCandidateReportFromJson(json);
+}
+
+@freezed
+abstract class RcxSwitchReport with _$RcxSwitchReport {
+  const factory RcxSwitchReport({
+    @Default('') String from,
+    @Default('') String to,
+    @Default('') String reason,
+    @Default(0) int at,
+  }) = _RcxSwitchReport;
+
+  factory RcxSwitchReport.fromJson(Map<String, Object?> json) =>
+      _$RcxSwitchReportFromJson(json);
+}
+
+@freezed
+abstract class RcxCanaryReport with _$RcxCanaryReport {
+  const factory RcxCanaryReport({
+    @Default('') String addr,
+    @Default(false) bool domestic,
+    @Default('unknown') String outcome,
+    @Default(0) int delay,
+  }) = _RcxCanaryReport;
+
+  factory RcxCanaryReport.fromJson(Map<String, Object?> json) =>
+      _$RcxCanaryReportFromJson(json);
+}
+
+@freezed
+abstract class RcxLinkReport with _$RcxLinkReport {
+  const factory RcxLinkReport({
+    @Default('') String transport,
+    @Default(false) bool validated,
+    @Default(false) bool portal,
+    @Default(false) bool metered,
+    @Default('unknown') String foreign,
+    @Default('unknown') String domestic,
+    @Default(0) int since,
+  }) = _RcxLinkReport;
+
+  factory RcxLinkReport.fromJson(Map<String, Object?> json) =>
+      _$RcxLinkReportFromJson(json);
+}
+
+@freezed
+abstract class RcxReport with _$RcxReport {
+  const factory RcxReport({
+    @Default(RcxStatus()) RcxStatus status,
+    @Default(RcxLinkReport()) RcxLinkReport link,
+    @Default([]) List<RcxCanaryReport> canaries,
+    @Default([]) List<RcxCandidateReport> candidates,
+    @Default([]) List<RcxSwitchReport> history,
+    @Default([]) List<int> bands,
+    @Default(0) int probesLeft,
+    @Default(0) int probeCap,
+    @Default(0) int manualTill,
+    @Default(0) int at,
+  }) = _RcxReport;
+
+  factory RcxReport.fromJson(Map<String, Object?> json) =>
+      _$RcxReportFromJson(json);
 }

@@ -30,6 +30,13 @@ func init() {
 	registerMethod(rcxStatusMethod, withoutArguments(func(response MethodResponse) {
 		response.success(rcxEngineInstance.Status())
 	}))
+	registerMethod(rcxReportMethod, withoutArguments(func(response MethodResponse) {
+		response.success(rcxEngineInstance.Report())
+	}))
+	registerMethod(rcxDeepScanMethod, withoutArguments(func(response MethodResponse) {
+		rcxEngineInstance.DeepScan()
+		response.success(true)
+	}))
 
 	adapter.DialResultHook = func(name, source string, err error, elapsed time.Duration) {
 		rcxEngineInstance.NoteDial(name, source, err != nil, elapsed, time.Now())

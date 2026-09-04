@@ -17,6 +17,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/navigation.dart';
+import 'package:reclash/views/views.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -153,6 +154,7 @@ class Bootstrap {
       unawaited(window?.hide());
     }
     await _handleFailedPreference();
+    await _handleSetupWizard();
     await _handlerDisclaimer();
     await _showCrashRecoveryTip();
     await _showCrashlyticsTip();
@@ -163,6 +165,19 @@ class Bootstrap {
     _container.read(initProvider.notifier).value = true;
     await bootGuard.markRunning();
     permissions.check(_container.read);
+  }
+
+  /// A degraded launch already tells the user the previous run did not finish;
+  /// a first-run wizard on top of that reads as lost data.
+  Future<void> _handleSetupWizard() async {
+    if (_bootDecision.isDegraded || !_container.read(needsSetupProvider)) {
+      return;
+    }
+    final context = globalState.navigatorKey.currentContext;
+    if (context == null) {
+      return;
+    }
+    await SetupWizard.show(context);
   }
 
   Future<void> _showCrashRecoveryTip() async {

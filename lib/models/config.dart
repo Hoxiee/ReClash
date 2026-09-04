@@ -80,6 +80,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
+    @Default(false) bool setupCompleted,
     @Default(false) bool crashlyticsTip,
     @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,
@@ -179,9 +180,18 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
   const factory SmartRoutingProps({
     @Default(false) bool enabled,
     @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,
+    @Default([]) List<String> censorCountries,
+    @Default([]) List<String> canaryForeign,
+    @Default([]) List<String> canaryDomestic,
+    @Default([]) List<RcxMarker> openMarkers,
+    @Default([]) List<RcxMarker> domesticMarkers,
+    @Default([]) List<String> breakerPatterns,
     @Default(true) bool allowDomesticLastResort,
     @Default(true) bool saveMobileData,
+    @Default(false) bool requireUdp,
     @Default(60) int manualHoldMinutes,
+    @Default(90) int dwellSeconds,
+    @Default(12) int waveWidth,
   }) = _SmartRoutingProps;
 
   factory SmartRoutingProps.fromJson(Map<String, Object?>? json) =>

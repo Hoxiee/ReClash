@@ -131,12 +131,15 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<void> addProfileFormFile() async {
+  /// `keepCurrentPage` is for hosts that are not the profiles screen.
+  Future<void> addProfileFormFile({bool keepCurrentPage = false}) async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
     if (platformFile == null) return;
     final bytes = await platformFile.readBytes();
-    globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
-    ref.read(currentPageLabelProvider.notifier).toProfiles();
+    if (!keepCurrentPage) {
+      globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+      ref.read(currentPageLabelProvider.notifier).toProfiles();
+    }
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
       () async {
@@ -151,11 +154,18 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<void> addProfileFromLocalContent(String content) async {
-    if (globalState.navigatorKey.currentState?.canPop() ?? false) {
-      globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+  Future<void> addProfileFromLocalContent(
+    String content, {
+    bool keepCurrentPage = false,
+  }) async {
+    if (!keepCurrentPage) {
+      if (globalState.navigatorKey.currentState?.canPop() ?? false) {
+        globalState.navigatorKey.currentState?.popUntil(
+          (route) => route.isFirst,
+        );
+      }
+      ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
     }
-    ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
       () async {
@@ -176,11 +186,16 @@ class ProfilesAction extends _$ProfilesAction {
     SubscriptionClient client = SubscriptionClient.auto,
     String? name,
     String customUserAgent = '',
+    bool keepCurrentPage = false,
   }) async {
-    if (globalState.navigatorKey.currentState?.canPop() ?? false) {
-      globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
+    if (!keepCurrentPage) {
+      if (globalState.navigatorKey.currentState?.canPop() ?? false) {
+        globalState.navigatorKey.currentState?.popUntil(
+          (route) => route.isFirst,
+        );
+      }
+      ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
     }
-    ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
       () async {

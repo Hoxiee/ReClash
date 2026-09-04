@@ -1,0 +1,221 @@
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../helpers/test_app.dart';
+
+const _report = RcxReport(
+  status: RcxStatus(
+    enabled: true,
+    mode: 'rule',
+    terrain: 'whitelist',
+    node: 'Amsterdam #3',
+    delay: 112,
+    reason: 'verdict-gain',
+    candidates: 3,
+    eligible: 2,
+  ),
+  link: RcxLinkReport(
+    transport: 'wifi',
+    foreign: 'fail',
+    domestic: 'ok',
+    metered: true,
+  ),
+  canaries: [
+    RcxCanaryReport(addr: '1.1.1.1:443', outcome: 'fail'),
+    RcxCanaryReport(addr: '77.88.8.8:443', domestic: true, outcome: 'ok', delay: 24),
+  ],
+  candidates: [
+    RcxCandidateReport(
+      node: 'Amsterdam #3',
+      country: 'NL',
+      verdict: 'preferred',
+      evidence: 'live',
+      delay: 112,
+      current: true,
+    ),
+    RcxCandidateReport(
+      node: 'Frankfurt #1',
+      verdict: 'viable',
+      evidence: 'fresh',
+      delay: 240,
+    ),
+    RcxCandidateReport(
+      node: 'Paris #7',
+      verdict: 'reject',
+      evidence: 'none',
+      block: 'cooling',
+      fails: 4,
+    ),
+  ],
+  history: [
+    RcxSwitchReport(
+      from: 'Paris #7',
+      to: 'Amsterdam #3',
+      reason: 'incumbent-dead',
+    ),
+  ],
+  probesLeft: 31,
+  probeCap: 40,
+);
+
+Future<void> _pump(
+  WidgetTester tester, {
+  required bool enabled,
+  RcxReport? report,
+}) async {
+  final container = ProviderContainer(
+    overrides: [
+      smartRoutingSettingProvider.overrideWithValue(
+        SmartRoutingProps(enabled: enabled),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: TestApp(
+        includeNavigatorKey: false,
+        setTheme: false,
+        child: RoutingOverviewView(reportReader: () async => report),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  testWidgets('an engine that is off explains itself instead of showing rows', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: false, report: _report);
+
+    expect(
+      find.text('Turn smart routing on to let it pick servers for you'),
+      findsOne,
+    );
+    expect(find.text('Amsterdam #3'), findsNothing);
+  });
+
+  testWidgets('a report the core has not answered yet reads as starting', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true);
+
+    expect(find.text('Picking a server…'), findsOne);
+  });
+
+  testWidgets('the chosen server comes with the reason it was chosen', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+
+    expect(find.text('Amsterdam #3'), findsWidgets);
+    expect(find.text('112 ms'), findsWidgets);
+    expect(
+      find.text('This one is proven to reach the open internet'),
+      findsOne,
+    );
+    expect(find.text('Confirmed by your own traffic'), findsWidgets);
+  });
+
+  testWidgets('the network format names the facts behind it', (tester) async {
+    await _pump(tester, enabled: true, report: _report);
+
+    expect(find.text('Restricted'), findsOne);
+    expect(
+      find.text('Only local services answer, foreign ones do not'),
+      findsOne,
+    );
+    expect(find.text('No foreign address answered'), findsOne);
+    expect(find.text('A local address answered'), findsOne);
+    expect(find.text('Metered link'), findsOne);
+  });
+
+  testWidgets('the park is shown as a whole, not as a list to read', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+
+    expect(
+      find.text('2 of 3 servers can be used right now'),
+      findsOne,
+    );
+    await tester.scrollUntilVisible(
+      find.text('31 of 40 probes left this hour'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('31 of 40 probes left this hour'), findsOne);
+  });
+
+  testWidgets('the canaries that produced the format are one tap away', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+
+    expect(find.text('1 of 2 answered'), findsOne);
+    await tester.tap(find.text('What was tested'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1.1.1.1:443'), findsOne);
+    expect(find.text('no answer'), findsWidgets);
+    expect(find.text('24 ms'), findsOne);
+  });
+
+  testWidgets('a blocked server states its gate, not a score', (tester) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('All servers'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('All servers'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Cooling down after 4 failures'),
+      findsOne,
+    );
+  });
+
+  testWidgets('the decision is told as the sequence that produced it', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('Ranked what was left'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Read the network'), findsOne);
+    expect(
+      find.text('2 of 3 servers passed, 1 were held back'),
+      findsOne,
+    );
+    expect(find.text('Landed here'), findsOne);
+  });
+
+  testWidgets('the last switch keeps its reason', (tester) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('Paris #7 → Amsterdam #3'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Paris #7 → Amsterdam #3'), findsOne);
+    expect(
+      find.textContaining('Previous server stopped answering'),
+      findsOne,
+    );
+  });
+}

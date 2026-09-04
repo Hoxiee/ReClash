@@ -25,39 +25,196 @@ class ListInputPage extends ConsumerStatefulWidget {
 }
 
 class _ListInputPageState extends ConsumerState<ListInputPage> {
-  List<String> _items = [];
-  late List<String> _originItems;
-  final _key = uniqueId;
+  late final ListEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    _items = widget.items;
-    _originItems = List<String>.from(_items);
+    _controller = ListEditingController(
+      items: widget.items,
+      valueLabel: widget.valueLabel,
+      itemMaxLength: widget.itemMaxLength,
+    );
+    _controller.addListener(_handleControllerChange);
   }
 
-  void _handleReorder(int oldIndex, newIndex) {
-    _items = _items.copyAndReorder(oldIndex, newIndex);
-    setState(() {});
+  void _handleControllerChange() {
+    if (mounted) setState(() {});
   }
 
-  void _handleSelected(String value) {
-    ref.read(itemsProvider(_key).notifier).update((state) {
-      final newState = Set<String>.from(state)..addOrRemove(value);
-      return newState;
-    });
+  @override
+  void dispose() {
+    _controller.removeListener(_handleControllerChange);
+    _controller.dispose();
+    super.dispose();
   }
 
-  void _handleSelectAll() {
-    final ids = _items.toSet();
-    ref.read(itemsProvider(_key).notifier).update((selected) {
-      return selected.containsAll(ids) ? {} : ids;
-    });
+  @override
+  Widget build(BuildContext context) {
+    return CommonPopScope(
+      onPop: (_) {
+        if (_controller.selection.isNotEmpty) {
+          _controller.clearSelection();
+          return false;
+        }
+        Navigator.of(context).pop(_controller.items);
+        return false;
+      },
+      child: CommonScaffold(
+        title: widget.title,
+        actions: _controller.actions(context),
+        body: ListInputBody(
+          controller: _controller,
+          titleBuilder: widget.titleBuilder,
+          subtitleBuilder: widget.subtitleBuilder,
+          leadingBuilder: widget.leadingBuilder,
+        ),
+      ),
+    );
   }
+}
+
+/// The editable string list as a bare body: the wrapper — a page's
+/// CommonScaffold or a sheet's AdaptiveSheetScaffold — is the only title bar,
+/// so the actions ride along through [ListEditingController.actions].
+class ListInputBody extends StatelessWidget {
+  // The controller notifies on every edit; a ListenableBuilder at the top
+  // re-renders the list, so the stateless body itself needs no state.
+  final ListEditingController controller;
+  final Widget Function(String item) titleBuilder;
+  final Widget Function(String item)? subtitleBuilder;
+  final Widget Function(String item)? leadingBuilder;
+
+  const ListInputBody({
+    super.key,
+    required this.controller,
+    required this.titleBuilder,
+    this.leadingBuilder,
+    this.subtitleBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final selectedItems = controller.selection;
+        final items = controller.items;
+    return items.isEmpty
+        ? NullStatus(label: appLocalizations.noData)
+        : ReorderableListView.builder(
+            padding: const EdgeInsets.only(
+              bottom: 16 + 64,
+              top: 16,
+              left: 16,
+              right: 16,
+            ),
+            buildDefaultDragHandles: false,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final value = items[index];
+              return controller.buildItem(
+                context: context,
+                value: value,
+                index: index,
+                length: items.length,
+                isSelected: selectedItems.contains(value),
+                isEditing: selectedItems.isNotEmpty,
+                titleBuilder: titleBuilder,
+                subtitleBuilder: subtitleBuilder,
+                leadingBuilder: leadingBuilder,
+              );
+            },
+            proxyDecorator: (child, index, animation) {
+              final value = items[index];
+              return commonProxyDecorator(
+                controller.buildItem(
+                  context: context,
+                  value: value,
+                  index: index,
+                  length: items.length,
+                  isSelected: selectedItems.contains(value),
+                  isEditing: selectedItems.isNotEmpty,
+                  titleBuilder: titleBuilder,
+                  subtitleBuilder: subtitleBuilder,
+                  leadingBuilder: leadingBuilder,
+                ),
+                index,
+                animation,
+              );
+            },
+            onReorderItem: controller.reorder,
+          );
+      },
+    );
+  }
+}
+
+/// Editing state of a string list: the items, the selection set, and the
+/// toolbar actions that act on them. A ChangeNotifier because the body and
+/// the actions live in different subtrees (body vs. the wrapper's app bar).
+class ListEditingController extends ChangeNotifier {
+  ListEditingController({
+    required List<String> items,
+    this.onChanged,
+    this.valueLabel,
+    this.itemMaxLength,
+  }) {
+    _items = items;
+    _originItems = List<String>.from(items);
+  }
+
+  final ValueChanged<List<String>>? onChanged;
+  final String? valueLabel;
+  final int? itemMaxLength;
+
+  List<String> _items = [];
+  late List<String> _originItems;
+  final Set<String> _selection = {};
+
+  List<String> get items => _items;
+  Set<String> get selection => _selection;
 
   static final _separator = RegExp(r'[,，]');
 
-  List<String> _splitValues(String? value) {
+  @override
+  void dispose() {
+    onChanged?.call(_items);
+    super.dispose();
+  }
+
+  void _update(List<String> next) {
+    _items = next;
+    notifyListeners();
+  }
+
+  void reorder(int oldIndex, int newIndex) {
+    _update(_items.copyAndReorder(oldIndex, newIndex));
+  }
+
+  void toggleSelected(String value) {
+    _selection.addOrRemove(value);
+    notifyListeners();
+  }
+
+  void clearSelection() {
+    _selection.clear();
+    notifyListeners();
+  }
+
+  void selectAll() {
+    if (_selection.containsAll(_items.toSet())) {
+      _selection.clear();
+    } else {
+      _selection
+        ..clear()
+        ..addAll(_items);
+    }
+    notifyListeners();
+  }
+
+  List<String> splitValues(String? value) {
     return (value ?? '')
         .split(_separator)
         .map((entry) => entry.trim())
@@ -66,9 +223,14 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
         .toList();
   }
 
-  Future<void> _handleAddOrEdit([String? item]) async {
+  Future<void> addOrEdit(
+    BuildContext context, {
+    String? item,
+    int? itemMaxLength,
+  }) async {
+    final maxLength = itemMaxLength ?? this.itemMaxLength;
     final appLocalizations = context.appLocalizations;
-    final label = widget.valueLabel ?? appLocalizations.value;
+    final label = valueLabel ?? appLocalizations.value;
     final isEdit = item != null;
 
     String? editValidator(String? value) {
@@ -77,11 +239,10 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
     }
 
     String? addValidator(String? value) {
-      final values = _splitValues(value);
+      final values = splitValues(value);
       if (values.isEmpty) {
         return appLocalizations.emptyTip(label);
       }
-      final maxLength = widget.itemMaxLength;
       if (maxLength != null && values.any((v) => v.length > maxLength)) {
         return appLocalizations.maxLengthTip(label, maxLength);
       }
@@ -98,51 +259,50 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
           value: item ?? '',
           validator: isEdit ? editValidator : addValidator,
         ),
-        valueMaxLength: isEdit ? widget.itemMaxLength : null,
+        valueMaxLength: isEdit ? maxLength : null,
         valueHelperText: isEdit ? null : appLocalizations.multipleValuesTip,
         title: isEdit ? appLocalizations.edit : appLocalizations.add,
       ),
     );
 
-    if (!mounted) return;
-    if (value == null) return;
     final nextItems = List<String>.from(_items);
+    if (value == null) {
+      return;
+    }
     if (isEdit) {
       nextItems[_items.indexOf(item)] = value;
     } else {
-      nextItems.addAll(_splitValues(value));
+      nextItems.addAll(splitValues(value));
     }
-    _items = nextItems;
-    setState(() {});
+    _update(nextItems);
   }
 
-  void _handleDelete() {
-    final selectedItems = ref.read(itemsProvider(_key));
-    final newItems = _items
-        .where((item) => !selectedItems.contains(item))
-        .toList();
-    _items = newItems;
-    ref.read(itemsProvider(_key).notifier).value = {};
-    setState(() {});
+  void delete() {
+    _update(_items.where((item) => !_selection.contains(item)).toList());
+    _selection.clear();
+    notifyListeners();
   }
 
-  Future<void> _handleReset() async {
+  Future<void> reset(BuildContext context) async {
     final res = await dialogs.showMessage(
       message: TextSpan(text: context.appLocalizations.resetPageChangesTip),
     );
-    if (!mounted || res != true) {
+    if (res != true) {
       return;
     }
-    _items = _originItems;
-    setState(() {});
+    _update(_originItems);
   }
 
-  Widget _buildItem({
+  Widget buildItem({
+    required BuildContext context,
     required String value,
     required int index,
     required int length,
     required bool isSelected,
     required bool isEditing,
+    required Widget Function(String item) titleBuilder,
+    Widget Function(String item)? subtitleBuilder,
+    Widget Function(String item)? leadingBuilder,
   }) {
     final position = ItemPosition.get(index, length);
     return ReorderableDelayedDragStartListener(
@@ -151,115 +311,79 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
       child: ItemPositionProvider(
         position: position,
         child: SelectedDecorationListItem(
-          title: widget.titleBuilder(value),
+          title: titleBuilder(value),
           isSelected: isSelected,
           isEditing: isEditing,
           onSelected: () {
-            _handleSelected(value);
+            toggleSelected(value);
           },
           onPressed: () {
-            _handleAddOrEdit(value);
+            addOrEdit(context, item: value);
           },
-          leading: widget.leadingBuilder != null
-              ? widget.leadingBuilder!(value)
-              : null,
-          subtitle: widget.subtitleBuilder != null
-              ? widget.subtitleBuilder!(value)
-              : null,
+          leading: leadingBuilder != null ? leadingBuilder(value) : null,
+          subtitle: subtitleBuilder != null ? subtitleBuilder(value) : null,
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  List<Widget> actions(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final selectedItems = ref.watch(itemsProvider(_key));
-    return CommonPopScope(
-      onPop: (_) {
-        if (selectedItems.isNotEmpty) {
-          ref.read(itemsProvider(_key).notifier).value = {};
-          return false;
-        }
-        Navigator.of(context).pop(_items);
-        return false;
-      },
-      child: CommonScaffold(
-        title: widget.title,
-        actions: [
-          if (selectedItems.isNotEmpty) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.delete,
-                onPressed: _handleDelete,
-                icon: const Icon(Icons.delete),
-              ),
-            ),
-            const SizedBox(width: 2),
-          ] else if (!stringListEquality.equals(_items, _originItems)) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.reset,
-                onPressed: _handleReset,
-                icon: const Icon(Icons.replay),
-              ),
-            ),
-            const SizedBox(width: 2),
-          ],
-          CommonMinFilledButtonTheme(
-            child: selectedItems.isNotEmpty
-                ? FilledButton(
-                    onPressed: _handleSelectAll,
-                    child: Text(appLocalizations.selectAll),
-                  )
-                : FilledButton.tonal(
-                    onPressed: () {
-                      _handleAddOrEdit();
-                    },
-                    child: Text(appLocalizations.add),
-                  ),
+    return [
+      if (_selection.isNotEmpty) ...[
+        CommonMinIconButtonTheme(
+          child: IconButton.filledTonal(
+            tooltip: context.appLocalizations.delete,
+            onPressed: delete,
+            icon: const Icon(Icons.delete),
           ),
-          const SizedBox(width: 8),
-        ],
-        body: _items.isEmpty
-            ? NullStatus(label: appLocalizations.noData)
-            : ReorderableListView.builder(
-                padding: const EdgeInsets.only(
-                  bottom: 16 + 64,
-                  top: 16,
-                  left: 16,
-                  right: 16,
-                ),
-                buildDefaultDragHandles: false,
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  final value = _items[index];
-                  return _buildItem(
-                    value: value,
-                    index: index,
-                    length: _items.length,
-                    isSelected: selectedItems.contains(value),
-                    isEditing: selectedItems.isNotEmpty,
-                  );
-                },
-                proxyDecorator: (child, index, animation) {
-                  final value = _items[index];
-                  return commonProxyDecorator(
-                    _buildItem(
-                      value: value,
-                      index: index,
-                      length: _items.length,
-                      isSelected: selectedItems.contains(value),
-                      isEditing: selectedItems.isNotEmpty,
-                    ),
-                    index,
-                    animation,
-                  );
-                },
-                onReorderItem: _handleReorder,
+        ),
+        const SizedBox(width: 2),
+      ] else if (!stringListEquality.equals(_items, _originItems)) ...[
+        CommonMinIconButtonTheme(
+          child: IconButton.filledTonal(
+            tooltip: context.appLocalizations.reset,
+            onPressed: () => reset(context),
+            icon: const Icon(Icons.replay),
+          ),
+        ),
+        const SizedBox(width: 2),
+      ],
+      CommonMinFilledButtonTheme(
+        child: _selection.isNotEmpty
+            ? FilledButton(
+                onPressed: selectAll,
+                child: Text(appLocalizations.selectAll),
+              )
+            : FilledButton.tonal(
+                onPressed: () => addOrEdit(context),
+                child: Text(appLocalizations.add),
               ),
       ),
-    );
+      const SizedBox(width: 8),
+    ];
+  }
+
+  List<IconButtonData> iconActions(BuildContext context) {
+    return [
+      if (_selection.isNotEmpty)
+        IconButtonData(
+          icon: Icons.delete,
+          onPressed: delete,
+          tooltip: context.appLocalizations.delete,
+        )
+      else if (!stringListEquality.equals(_items, _originItems))
+        IconButtonData(
+          icon: Icons.replay,
+          onPressed: () => reset(context),
+          tooltip: context.appLocalizations.reset,
+        ),
+      IconButtonData(
+        icon: Icons.add,
+        onPressed: () => addOrEdit(context),
+        tooltip: context.appLocalizations.add,
+      ),
+    ];
   }
 }
 

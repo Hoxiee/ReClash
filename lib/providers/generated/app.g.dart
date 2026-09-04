@@ -2182,6 +2182,67 @@ abstract class _$BatteryOptimizationDisable extends $Notifier<bool> {
   }
 }
 
+/// Whether a VPN that is not ours holds an interface. Polled, because no
+/// platform offers a change notification for a third party's tunnel.
+
+@ProviderFor(ForeignVpn)
+final foreignVpnProvider = ForeignVpnProvider._();
+
+/// Whether a VPN that is not ours holds an interface. Polled, because no
+/// platform offers a change notification for a third party's tunnel.
+final class ForeignVpnProvider extends $NotifierProvider<ForeignVpn, bool> {
+  /// Whether a VPN that is not ours holds an interface. Polled, because no
+  /// platform offers a change notification for a third party's tunnel.
+  ForeignVpnProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'foreignVpnProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$foreignVpnHash();
+
+  @$internal
+  @override
+  ForeignVpn create() => ForeignVpn();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$foreignVpnHash() => r'f14c85b85cf16ebb5a3e79d7b6f48ae9a6d1ac5c';
+
+/// Whether a VPN that is not ours holds an interface. Polled, because no
+/// platform offers a change notification for a third party's tunnel.
+
+abstract class _$ForeignVpn extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(LocationPermissions)
 final locationPermissionsProvider = LocationPermissionsProvider._();
 

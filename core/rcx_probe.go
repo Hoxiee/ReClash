@@ -30,11 +30,11 @@ type rcxProber struct {
 	sleep       func(ctx context.Context, d time.Duration) bool
 }
 
-func newRcxProber(test rcxTestFunc, preset rcxPreset) *rcxProber {
+func newRcxProber(test rcxTestFunc) *rcxProber {
 	return &rcxProber{
 		test:        test,
-		concurrency: preset.ProbeConcurrency,
-		staggerMs:   preset.ProbeStaggerMs,
+		concurrency: rcxProbeConcurrency,
+		staggerMs:   rcxProbeStaggerMs,
 		timeout:     10 * time.Second,
 	}
 }
@@ -257,10 +257,10 @@ func (b *rcxProbeBudget) prune(now time.Time) {
 
 // A metered link pays for every probe, so scheduled waves stop and only a dead
 // incumbent still buys a narrow one.
-func rcxWavePlan(preset rcxPreset, config rcxConfig, metered, onDemand bool) (int, bool) {
-	width := preset.WaveWidth
+func rcxWavePlan(config rcxConfig, metered, onDemand bool) (int, bool) {
+	width := config.WaveWidth
 	if width <= 0 {
-		width = rcxBaseTuning().WaveWidth
+		width = rcxWaveWidth
 	}
 	if !metered || !config.SaveMobileData {
 		return width, true

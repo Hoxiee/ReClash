@@ -99,13 +99,48 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(count) => "${count} selected";
 
-  static String m32(minutes) => "${minutes} min";
+  static String m32(alive, total) =>
+      "${alive} of ${total} servers can be used right now";
 
-  static String m33(total) => "free of ${total}";
+  static String m33(band) => "band ${band}";
 
-  static String m34(label) => "${label} must be a URL";
+  static String m34(bands) => "Bands: ${bands}";
 
-  static String m35(count) =>
+  static String m35(count) => "Cooling down after ${count} failures";
+
+  static String m36(answered, total) => "${answered} of ${total} answered";
+
+  static String m37(seconds) => "${seconds} s left";
+
+  static String m38(count) => "${count} failures in a row";
+
+  static String m39(minutes) => "${minutes} min";
+
+  static String m40(minutes) =>
+      "Your manual pick is respected for ${minutes} min more";
+
+  static String m41(preset) => "${preset} · adjusted";
+
+  static String m42(left, cap) => "${left} of ${cap} probes left this hour";
+
+  static String m43(seconds) => "${seconds} s";
+
+  static String m44(eligible, total) => "${eligible} of ${total} usable";
+
+  static String m45(eligible, total, blocked) =>
+      "${eligible} of ${total} servers passed, ${blocked} were held back";
+
+  static String m46(from, to) => "${from} → ${to}";
+
+  static String m47(time) => "Switched ${time} ago";
+
+  static String m48(count) => "${count} servers";
+
+  static String m49(total) => "free of ${total}";
+
+  static String m50(label) => "${label} must be a URL";
+
+  static String m51(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -444,6 +479,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS mode"),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
+    "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
+      "Downloading update",
+    ),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
     "editGlobalRules": MessageLookupByLibrary.simpleMessage(
       "Edit global rules",
@@ -541,7 +579,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperCorruptTip": MessageLookupByLibrary.simpleMessage(
       "Helper service unavailable; TUN mode cannot be enabled. Reinstall ReClash to restore it.",
     ),
+    "heroChecking": MessageLookupByLibrary.simpleMessage(
+      "Checking the network…",
+    ),
+    "heroCheckingHint": MessageLookupByLibrary.simpleMessage(
+      "Measuring the selected node",
+    ),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("Connecting…"),
+    "heroForeignVpn": MessageLookupByLibrary.simpleMessage(
+      "Another VPN is active",
+    ),
     "heroJustNow": MessageLookupByLibrary.simpleMessage("just now"),
     "heroLinkBroken": MessageLookupByLibrary.simpleMessage(
       "Connection is not working",
@@ -560,6 +607,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Paused — trusted network",
     ),
     "heroProtected": MessageLookupByLibrary.simpleMessage("You are protected"),
+    "heroReconnecting": MessageLookupByLibrary.simpleMessage("Reconnecting…"),
+    "heroReconnectingHint": MessageLookupByLibrary.simpleMessage(
+      "Restoring the tunnel",
+    ),
     "heroRoutingAgo": m14,
     "heroRoutingStub": MessageLookupByLibrary.simpleMessage(
       "Smart routing is off",
@@ -621,6 +672,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Enter the rule content",
     ),
+    "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
     "installedAppsPermissionDeniedMessage":
         MessageLookupByLibrary.simpleMessage(
           "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
@@ -1156,6 +1208,58 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "serviceInfo": MessageLookupByLibrary.simpleMessage("Service"),
     "settings": MessageLookupByLibrary.simpleMessage("Settings"),
+    "setupAutoRun": MessageLookupByLibrary.simpleMessage("Connect on launch"),
+    "setupAutoRunDesc": MessageLookupByLibrary.simpleMessage(
+      "The tunnel comes up as soon as the app opens",
+    ),
+    "setupDataCollection": MessageLookupByLibrary.simpleMessage(
+      "Send crash reports",
+    ),
+    "setupDone": MessageLookupByLibrary.simpleMessage("Done"),
+    "setupFinishTitle": MessageLookupByLibrary.simpleMessage("Almost done"),
+    "setupLanguageDesc": MessageLookupByLibrary.simpleMessage(
+      "You can change it later in settings",
+    ),
+    "setupLanguageTitle": MessageLookupByLibrary.simpleMessage(
+      "Choose a language",
+    ),
+    "setupLegalTitle": MessageLookupByLibrary.simpleMessage("Before we start"),
+    "setupNext": MessageLookupByLibrary.simpleMessage("Next"),
+    "setupPermissionNotifications": MessageLookupByLibrary.simpleMessage(
+      "Notifications",
+    ),
+    "setupPermissionNotificationsDesc": MessageLookupByLibrary.simpleMessage(
+      "Shows the connection status while running",
+    ),
+    "setupPermissionVpn": MessageLookupByLibrary.simpleMessage(
+      "VPN permission",
+    ),
+    "setupPermissionVpnDesc": MessageLookupByLibrary.simpleMessage(
+      "The system will ask on the first connection",
+    ),
+    "setupRegionDesc": MessageLookupByLibrary.simpleMessage(
+      "Sets the starting point for server selection",
+    ),
+    "setupRegionNone": MessageLookupByLibrary.simpleMessage("Do not pick"),
+    "setupRestore": MessageLookupByLibrary.simpleMessage(
+      "Restore from a backup",
+    ),
+    "setupRestoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Move everything from a ReClash, FlClashX, or FlClash backup",
+    ),
+    "setupSkip": MessageLookupByLibrary.simpleMessage("Skip"),
+    "setupSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
+      "A link from your provider, a QR code, or a config file",
+    ),
+    "setupSubscriptionReady": MessageLookupByLibrary.simpleMessage(
+      "Subscription added",
+    ),
+    "setupSubscriptionTitle": MessageLookupByLibrary.simpleMessage(
+      "Add a subscription",
+    ),
+    "setupWelcome": MessageLookupByLibrary.simpleMessage(
+      "Everything set up in a minute",
+    ),
     "show": MessageLookupByLibrary.simpleMessage("Show"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
@@ -1174,43 +1278,311 @@ class MessageLookup extends MessageLookupByLibrary {
       "Pause the VPN automatically on trusted networks",
     ),
     "smartRouting": MessageLookupByLibrary.simpleMessage("Smart routing"),
+    "smartRoutingAliveCount": m32,
+    "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
+      "All servers",
+    ),
+    "smartRoutingBandLabel": m33,
+    "smartRoutingBands": m34,
+    "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Behaviour"),
+    "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
+      "Not in the current server list",
+    ),
+    "smartRoutingBlockCooling": m35,
+    "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
+      "Failed its checks here",
+    ),
+    "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
+      "Local server, barred on this network",
+    ),
+    "smartRoutingBlockNoUdp": MessageLookupByLibrary.simpleMessage(
+      "No UDP support",
+    ),
+    "smartRoutingBlockTerrainUnfit": MessageLookupByLibrary.simpleMessage(
+      "Nothing routes on this network yet",
+    ),
+    "smartRoutingBreaker": MessageLookupByLibrary.simpleMessage(
+      "Whitelist specialist",
+    ),
+    "smartRoutingBreakerDesc": MessageLookupByLibrary.simpleMessage(
+      "Kept for restricted networks, so it is not spent on an open one",
+    ),
+    "smartRoutingBreakerPatterns": MessageLookupByLibrary.simpleMessage(
+      "Whitelist specialist names",
+    ),
+    "smartRoutingBreakerPatternsDesc": MessageLookupByLibrary.simpleMessage(
+      "Name fragments that mark a server kept for restricted networks",
+    ),
+    "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage(
+      "Canary addresses",
+    ),
+    "smartRoutingCanariesAnswered": m36,
+    "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
+      "Local canaries",
+    ),
+    "smartRoutingCanariesDomesticDesc": MessageLookupByLibrary.simpleMessage(
+      "Reached directly to tell a whitelist network from no connectivity at all",
+    ),
+    "smartRoutingCanariesForeign": MessageLookupByLibrary.simpleMessage(
+      "Foreign canaries",
+    ),
+    "smartRoutingCanariesForeignDesc": MessageLookupByLibrary.simpleMessage(
+      "Plain IP:port reached directly, to tell an open network from a shutdown",
+    ),
+    "smartRoutingCanaryDomestic": MessageLookupByLibrary.simpleMessage("local"),
+    "smartRoutingCanaryForeign": MessageLookupByLibrary.simpleMessage(
+      "foreign",
+    ),
+    "smartRoutingCensor": MessageLookupByLibrary.simpleMessage(
+      "Censoring countries",
+    ),
+    "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
+      "A server here counts as local, so it is held back until a shutdown",
+    ),
+    "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("Chosen server"),
+    "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
+      "No server chosen yet",
+    ),
+    "smartRoutingCoolFor": m37,
+    "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
+      "Check every server",
+    ),
+    "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
+      "Ignores the probe budget, so it costs traffic",
+    ),
+    "smartRoutingDeepScanRunning": MessageLookupByLibrary.simpleMessage(
+      "Checking every server…",
+    ),
+    "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("Throttled"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Keeps a working server picked for every network, without opening the app",
     ),
+    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("Detection"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Local servers during a shutdown",
     ),
     "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
       "A last resort on a whitelist network, so local services keep working",
     ),
+    "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("Settle time"),
+    "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
+      "How long a working server is kept before a faster one wins",
+    ),
+    "smartRoutingEmpty": MessageLookupByLibrary.simpleMessage(
+      "Nothing measured yet",
+    ),
+    "smartRoutingEnvKey": MessageLookupByLibrary.simpleMessage(
+      "Network memory key",
+    ),
+    "smartRoutingEvidenceDomesticFail": MessageLookupByLibrary.simpleMessage(
+      "No local address answered",
+    ),
+    "smartRoutingEvidenceDomesticOk": MessageLookupByLibrary.simpleMessage(
+      "A local address answered",
+    ),
+    "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
+      "No foreign address answered",
+    ),
+    "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
+      "A foreign address answered",
+    ),
+    "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
+      "Confirmed by a recent check",
+    ),
+    "smartRoutingEvidenceLive": MessageLookupByLibrary.simpleMessage(
+      "Confirmed by your own traffic",
+    ),
+    "smartRoutingEvidenceNone": MessageLookupByLibrary.simpleMessage(
+      "Never confirmed",
+    ),
+    "smartRoutingEvidencePortal": MessageLookupByLibrary.simpleMessage(
+      "The system flagged a sign-in page",
+    ),
+    "smartRoutingEvidenceStale": MessageLookupByLibrary.simpleMessage(
+      "Last confirmed a while ago",
+    ),
+    "smartRoutingEvidenceUnvalidated": MessageLookupByLibrary.simpleMessage(
+      "The system reports no internet access",
+    ),
+    "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
+      "The system confirmed internet access",
+    ),
+    "smartRoutingFails": m38,
+    "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage(
+      "No connectivity",
+    ),
+    "smartRoutingFormatOfflineDesc": MessageLookupByLibrary.simpleMessage(
+      "Nothing answers, local or foreign",
+    ),
+    "smartRoutingFormatOpen": MessageLookupByLibrary.simpleMessage(
+      "Fully open",
+    ),
+    "smartRoutingFormatOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Nothing blocked between you and the open internet",
+    ),
+    "smartRoutingFormatPortal": MessageLookupByLibrary.simpleMessage(
+      "Sign-in required",
+    ),
+    "smartRoutingFormatPortalDesc": MessageLookupByLibrary.simpleMessage(
+      "The network wants you to log in before it passes traffic",
+    ),
+    "smartRoutingFormatRestricted": MessageLookupByLibrary.simpleMessage(
+      "Restricted",
+    ),
+    "smartRoutingFormatRestrictedDesc": MessageLookupByLibrary.simpleMessage(
+      "Only local services answer, foreign ones do not",
+    ),
+    "smartRoutingFormatUnknown": MessageLookupByLibrary.simpleMessage(
+      "Still measuring",
+    ),
+    "smartRoutingFormatUnknownDesc": MessageLookupByLibrary.simpleMessage(
+      "Not enough answers yet to tell",
+    ),
+    "smartRoutingHealthBlocked": MessageLookupByLibrary.simpleMessage(
+      "blocked",
+    ),
+    "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage(
+      "unchecked",
+    ),
+    "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("usable"),
+    "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
+      "Recent switches",
+    ),
+    "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
+      "No switches yet",
+    ),
+    "smartRoutingKept": MessageLookupByLibrary.simpleMessage("kept"),
+    "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("Latency band"),
+    "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("Evidence"),
+    "smartRoutingKeyMisfit": MessageLookupByLibrary.simpleMessage(
+      "Fit for this network",
+    ),
+    "smartRoutingKeyVerdict": MessageLookupByLibrary.simpleMessage("Verdict"),
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Respect a manual pick",
     ),
     "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
       "How long a server you chose yourself is left alone",
     ),
-    "smartRoutingManualHoldMinutes": m32,
+    "smartRoutingManualHoldMinutes": m39,
     "smartRoutingManualHoldOff": MessageLookupByLibrary.simpleMessage(
       "Not respected",
     ),
+    "smartRoutingManualUntil": m40,
+    "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
+      "Accepted statuses",
+    ),
+    "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
+      "Comma-separated, e.g. 200, 204, 404",
+    ),
+    "smartRoutingMarkerStatusesTip": MessageLookupByLibrary.simpleMessage(
+      "Enter HTTP status codes separated by commas",
+    ),
+    "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
+      "Service checks",
+    ),
+    "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
+      "Local checks",
+    ),
+    "smartRoutingMarkersDomesticDesc": MessageLookupByLibrary.simpleMessage(
+      "Used for local servers during a shutdown",
+    ),
+    "smartRoutingMarkersEmpty": MessageLookupByLibrary.simpleMessage(
+      "No checks configured",
+    ),
+    "smartRoutingMarkersOpen": MessageLookupByLibrary.simpleMessage(
+      "Open-internet checks",
+    ),
+    "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "A server must return one of these statuses to count as proven",
+    ),
+    "smartRoutingMetered": MessageLookupByLibrary.simpleMessage("Metered link"),
+    "smartRoutingNetworkFormat": MessageLookupByLibrary.simpleMessage(
+      "Network",
+    ),
+    "smartRoutingNeverSwitched": MessageLookupByLibrary.simpleMessage(
+      "No switch yet on this network",
+    ),
+    "smartRoutingNoAnswer": MessageLookupByLibrary.simpleMessage("no answer"),
     "smartRoutingNoServers": MessageLookupByLibrary.simpleMessage(
       "No reachable servers",
     ),
+    "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("No UDP"),
+    "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
+    "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
+      "General purpose",
+    ),
+    "smartRoutingOffHint": MessageLookupByLibrary.simpleMessage(
+      "Turn smart routing on to let it pick servers for you",
+    ),
     "smartRoutingOn": MessageLookupByLibrary.simpleMessage(
       "Smart routing is on",
+    ),
+    "smartRoutingOverview": MessageLookupByLibrary.simpleMessage(
+      "Routing overview",
     ),
     "smartRoutingPortal": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi sign-in required",
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Preset"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("China"),
+    "smartRoutingPresetEdited": m41,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Iran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Off"),
-    "smartRoutingPresetRuHome": MessageLookupByLibrary.simpleMessage(
-      "Russia — home",
+    "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russia"),
+    "smartRoutingProbeBudget": m42,
+    "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Probing"),
+    "smartRoutingRankOrder": MessageLookupByLibrary.simpleMessage(
+      "Ranking order",
     ),
-    "smartRoutingPresetRuMobile": MessageLookupByLibrary.simpleMessage(
-      "Russia — mobile",
+    "smartRoutingRanking": MessageLookupByLibrary.simpleMessage("Ranking"),
+    "smartRoutingRankingDesc": MessageLookupByLibrary.simpleMessage(
+      "Latency bands are fixed: a knob here would let milliseconds outrank whether a server works",
+    ),
+    "smartRoutingReasonColdStart": MessageLookupByLibrary.simpleMessage(
+      "First pick on this network",
+    ),
+    "smartRoutingReasonDwellHold": MessageLookupByLibrary.simpleMessage(
+      "Waiting out the settle time before switching",
+    ),
+    "smartRoutingReasonHold": MessageLookupByLibrary.simpleMessage(
+      "Working, nothing better found",
+    ),
+    "smartRoutingReasonIncumbentDead": MessageLookupByLibrary.simpleMessage(
+      "Previous server stopped answering",
+    ),
+    "smartRoutingReasonLatencyGain": MessageLookupByLibrary.simpleMessage(
+      "This one is a latency band faster",
+    ),
+    "smartRoutingReasonManualHold": MessageLookupByLibrary.simpleMessage(
+      "Respecting the server you picked",
+    ),
+    "smartRoutingReasonNoCandidate": MessageLookupByLibrary.simpleMessage(
+      "No server passed the checks",
+    ),
+    "smartRoutingReasonStranded": MessageLookupByLibrary.simpleMessage(
+      "Nothing reachable, keeping the current server",
+    ),
+    "smartRoutingReasonTerrainChanged": MessageLookupByLibrary.simpleMessage(
+      "The network changed",
+    ),
+    "smartRoutingReasonVerdictGain": MessageLookupByLibrary.simpleMessage(
+      "This one is proven to reach the open internet",
+    ),
+    "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("Check now"),
+    "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Region"),
+    "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
+      "Require UDP support",
+    ),
+    "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
+      "Skip servers that cannot carry calls and games",
+    ),
+    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
+      "Reset to preset",
+    ),
+    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
+      "Restores the region defaults and keeps smart routing on",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Restricted network · local services stay direct",
@@ -1230,6 +1602,65 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Picking a server…",
     ),
+    "smartRoutingSeconds": m43,
+    "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
+      "Servers",
+    ),
+    "smartRoutingSectionHistory": MessageLookupByLibrary.simpleMessage(
+      "Earlier switches",
+    ),
+    "smartRoutingSectionNetwork": MessageLookupByLibrary.simpleMessage(
+      "Network",
+    ),
+    "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage(
+      "Decision",
+    ),
+    "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Servers"),
+    "smartRoutingServersCount": m44,
+    "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
+      "Decided who is allowed",
+    ),
+    "smartRoutingStepAdmitBody": m45,
+    "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
+      "Landed here",
+    ),
+    "smartRoutingStepNetwork": MessageLookupByLibrary.simpleMessage(
+      "Read the network",
+    ),
+    "smartRoutingStepRank": MessageLookupByLibrary.simpleMessage(
+      "Ranked what was left",
+    ),
+    "smartRoutingStepRankBody": MessageLookupByLibrary.simpleMessage(
+      "Verdict first, then specialist fit, then evidence, then latency band",
+    ),
+    "smartRoutingSwitchLine": m46,
+    "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("switched"),
+    "smartRoutingSwitchedAgo": m47,
+    "smartRoutingTechnical": MessageLookupByLibrary.simpleMessage(
+      "Technical detail",
+    ),
+    "smartRoutingUntested": MessageLookupByLibrary.simpleMessage("untested"),
+    "smartRoutingVerdictLastResort": MessageLookupByLibrary.simpleMessage(
+      "Last resort",
+    ),
+    "smartRoutingVerdictPreferred": MessageLookupByLibrary.simpleMessage(
+      "Reaches the open internet",
+    ),
+    "smartRoutingVerdictReject": MessageLookupByLibrary.simpleMessage(
+      "Not usable",
+    ),
+    "smartRoutingVerdictViable": MessageLookupByLibrary.simpleMessage("Usable"),
+    "smartRoutingWave": MessageLookupByLibrary.simpleMessage(
+      "Servers per check",
+    ),
+    "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
+      "How many servers one background check measures",
+    ),
+    "smartRoutingWaveNodes": m48,
+    "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
+      "What was tested",
+    ),
+    "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Why"),
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -1323,7 +1754,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Flashlight"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m33,
+    "trafficFreeOfTotal": m49,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Trusted networks"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -1351,12 +1782,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
+    "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not download the update",
+    ),
+    "updateVerifyFailed": MessageLookupByLibrary.simpleMessage(
+      "The downloaded file is damaged",
+    ),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",
     ),
-    "urlTip": m34,
+    "urlTip": m50,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -1377,7 +1814,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "WebDAV configuration",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m35,
+    "yearsAgo": m51,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

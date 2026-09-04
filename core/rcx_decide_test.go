@@ -61,6 +61,27 @@ func TestAdmitTableEncodesTheDomesticAsymmetry(t *testing.T) {
 	}
 }
 
+func TestAdmitDoesNotCarryADomesticProofOutOfAWhitelist(t *testing.T) {
+	// The only way to earn this proof is a whitelist episode, and it outlives the
+	// episode: an unmeasured network must not inherit it as viability.
+	proven := rcxFacts{
+		Origin:      rcxOriginDomestic,
+		Domestic:    rcxProofProven,
+		Transit:     rcxProofProven,
+		SupportsUDP: true,
+	}
+
+	if got := rcxAdmit(rcxTerrainWhitelist, proven); got != rcxVerdictViable {
+		t.Errorf("whitelist verdict = %v, want viable: domestic services are the point there", got)
+	}
+	if got := rcxAdmit(rcxTerrainUnknown, proven); got != rcxVerdictLastResort {
+		t.Errorf("unknown verdict = %v, want last-resort: it opens nothing on a healthy link", got)
+	}
+	if got := rcxAdmit(rcxTerrainNormal, proven); got != rcxVerdictLastResort {
+		t.Errorf("normal verdict = %v, want last-resort", got)
+	}
+}
+
 func TestAdmitLetsThePresetDeleteTheLastResortRow(t *testing.T) {
 	if rcxAllowsLastResort(rcxTerrainWhitelist, false) {
 		t.Error("allowDomesticLastResort=false must remove the row for regions where it makes no sense")
@@ -491,5 +512,58 @@ func TestDecideIsDeterministicAcrossCandidateOrder(t *testing.T) {
 
 	if forward.To != reverse.To {
 		t.Errorf("picked %s then %s: the declared order must break ties so traces reproduce", forward.To, reverse.To)
+	}
+}
+
+func TestSpecialistNodesSinkOnAnOpenNetworkAndRiseUnderAWhitelist(t *testing.T) {
+	specialist := rcxCandidate{
+		Name:       "LTE обход",
+		Order:      1,
+		Facts:      rcxFacts{Origin: rcxOriginForeign, SupportsUDP: true, Breaker: true},
+		Evidence:   rcxEvidenceFreshProbe,
+		MedianMs:   90,
+		InSkeleton: true,
+	}
+	ordinary := rcxCandidate{
+		Name:       "Amsterdam",
+		Order:      2,
+		Facts:      rcxFacts{Origin: rcxOriginForeign, SupportsUDP: true},
+		Evidence:   rcxEvidenceFreshProbe,
+		MedianMs:   90,
+		InSkeleton: true,
+	}
+	input := rcxDecisionInput{
+		Candidates: []rcxCandidate{specialist, ordinary},
+		Policy:     rcxPolicy{LatencyBands: []int{150, 300}, DwellSeconds: 90},
+		Now:        time.Unix(1_700_000_000, 0),
+	}
+
+	input.Terrain = rcxTerrainNormal
+	if got := rcxDecide(input); got.To != "Amsterdam" {
+		t.Errorf("open network picked %q, want the ordinary node: a specialist is quota spent for nothing", got.To)
+	}
+
+	input.Terrain = rcxTerrainWhitelist
+	if got := rcxDecide(input); got.To != "LTE обход" {
+		t.Errorf("whitelist picked %q, want the specialist", got.To)
+	}
+}
+
+func TestASpecialistIsStillPickedWhenItIsAllThereIs(t *testing.T) {
+	input := rcxDecisionInput{
+		Terrain: rcxTerrainNormal,
+		Candidates: []rcxCandidate{{
+			Name:       "LTE обход",
+			Facts:      rcxFacts{Origin: rcxOriginForeign, SupportsUDP: true, Breaker: true},
+			Evidence:   rcxEvidenceFreshProbe,
+			MedianMs:   90,
+			InSkeleton: true,
+		}},
+		Policy: rcxPolicy{LatencyBands: []int{150, 300}, DwellSeconds: 90},
+		Now:    time.Unix(1_700_000_000, 0),
+	}
+
+	if got := rcxDecide(input); !got.Switch {
+		t.Errorf("decision = %+v, want the specialist: sinking it must never mean barring it", got)
 	}
 }

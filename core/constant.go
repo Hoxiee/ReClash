@@ -120,6 +120,8 @@ const (
 	rcxNetworkMethod               CoreMethod = "rcxNetwork"
 	rcxStatusMethod                CoreMethod = "rcxStatus"
 	rcxSetEnabledMethod            CoreMethod = "rcxSetEnabled"
+	rcxReportMethod                CoreMethod = "rcxReport"
+	rcxDeepScanMethod              CoreMethod = "rcxDeepScan"
 )
 
 type CoreMethod string

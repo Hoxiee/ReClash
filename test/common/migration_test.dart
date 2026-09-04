@@ -230,6 +230,27 @@ void main() {
       ]);
     });
 
+    test('v2 to v3 marks an existing install as already set up', () async {
+      final store = _FakeMigrationStore(
+        configMap: _createConfigMap(),
+        version: 2,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.appSettingProps.setupCompleted, isTrue);
+      expect(store.savedConfig?.appSettingProps.setupCompleted, isTrue);
+      expect(store.version, Migration.currentVersion);
+    });
+
+    test('v2 to v3 leaves a clean install to the wizard', () async {
+      final store = _FakeMigrationStore(configMap: null, version: 2);
+
+      final config = await Migration(store: store).run();
+
+      expect(config.appSettingProps.setupCompleted, isFalse);
+    });
+
     test('v1 to v2 keeps a user-chosen global-ua', () async {
       final configMap = _createConfigMap();
       final patch = configMap['patchClashConfig']! as Map<String, Object?>;

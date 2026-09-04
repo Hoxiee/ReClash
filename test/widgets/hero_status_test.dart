@@ -15,10 +15,7 @@ import '../helpers/test_profiles.dart';
 void main() {
   group('hero health', () {
     test('withholds a verdict while nothing has been measured', () {
-      expect(
-        heroHealthOf(delay: null, measuring: false),
-        HeroHealth.unknown,
-      );
+      expect(heroHealthOf(delay: null, measuring: false), HeroHealth.unknown);
       expect(heroHealthOf(delay: 0, measuring: false), HeroHealth.unknown);
       expect(heroHealthOf(delay: -1, measuring: true), HeroHealth.unknown);
     });
@@ -71,6 +68,94 @@ void main() {
       expect(HeroStatus.degraded.flows, isTrue);
       expect(HeroStatus.broken.flows, isFalse);
     });
+
+    test('a probe is not a live tunnel', () {
+      expect(HeroStatus.checking.isLive, isFalse);
+      expect(HeroStatus.checking.isTransitioning, isFalse);
+      expect(HeroStatus.reconnecting.isLive, isTrue);
+      expect(HeroStatus.reconnecting.isTransitioning, isTrue);
+    });
+
+    test('only a travelling segment sweeps', () {
+      for (final status in HeroStatus.values) {
+        expect(
+          status.isSweeping,
+          status == HeroStatus.checking ||
+              status == HeroStatus.connecting ||
+              status == HeroStatus.reconnecting,
+          reason: '$status',
+        );
+      }
+    });
+
+    test('ON is never the most active ring', () {
+      expect(HeroStatus.secured.isSweeping, isFalse);
+      expect(HeroStatus.secured.isTransitioning, isFalse);
+    });
+  });
+
+  group('hero lifecycle', () {
+    test('a stopped tunnel outranks everything else', () {
+      expect(
+        heroLifecycleOf(isStart: false, paused: true, coreConnecting: true),
+        HeroOrbPhase.off,
+      );
+    });
+
+    test('a core restarting under a live tunnel reads as recovery', () {
+      expect(
+        heroLifecycleOf(isStart: true, paused: false, coreConnecting: true),
+        HeroOrbPhase.reconnecting,
+      );
+      expect(
+        heroLifecycleOf(isStart: true, paused: false, coreConnecting: false),
+        HeroOrbPhase.on,
+      );
+    });
+
+    test('a pause is not a recovery', () {
+      expect(
+        heroLifecycleOf(isStart: true, paused: true, coreConnecting: true),
+        HeroOrbPhase.paused,
+      );
+    });
+
+    test('a probe only shows while the tunnel is down', () {
+      expect(heroPhaseWithProbe(HeroOrbPhase.off, true), HeroOrbPhase.checking);
+      expect(heroPhaseWithProbe(HeroOrbPhase.off, false), HeroOrbPhase.off);
+      for (final phase in [
+        HeroOrbPhase.on,
+        HeroOrbPhase.paused,
+        HeroOrbPhase.connecting,
+        HeroOrbPhase.reconnecting,
+      ]) {
+        expect(heroPhaseWithProbe(phase, true), phase, reason: '$phase');
+      }
+    });
+  });
+
+  group('hero activity band', () {
+    test('holds its band through the gap between the thresholds', () {
+      expect(
+        heroActivityBandOf(HeroOrbActivity.idle, 0.22),
+        HeroOrbActivity.idle,
+      );
+      expect(
+        heroActivityBandOf(HeroOrbActivity.active, 0.22),
+        HeroOrbActivity.active,
+      );
+    });
+
+    test('crosses on the far side of each threshold', () {
+      expect(
+        heroActivityBandOf(HeroOrbActivity.idle, 0.4),
+        HeroOrbActivity.active,
+      );
+      expect(
+        heroActivityBandOf(HeroOrbActivity.active, 0.1),
+        HeroOrbActivity.idle,
+      );
+    });
   });
 
   group('hero activity', () {
@@ -117,6 +202,15 @@ void main() {
           palettes[status]!.accent,
       };
       expect(accents, hasLength(4));
+      // Recovery must not be mistaken for a fault that has settled.
+      expect(
+        palettes[HeroStatus.reconnecting]!.ring,
+        isNot(palettes[HeroStatus.broken]!.ring),
+      );
+      expect(
+        palettes[HeroStatus.checking]!.ring,
+        isNot(palettes[HeroStatus.off]!.ring),
+      );
       expect(palettes[HeroStatus.off]!.ring, hasLength(3));
       expect(
         palettes[HeroStatus.connecting]!.accent,
@@ -177,6 +271,9 @@ void main() {
       int? delay,
       bool paused = false,
       bool running = true,
+      bool foreignVpn = false,
+      CoreStatus coreStatus = CoreStatus.connected,
+      Set<String> pendingTests = const {},
     }) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1;
@@ -200,6 +297,10 @@ void main() {
           groupsProvider.overrideWithValue([group]),
           pausedProvider.overrideWithValue(paused),
           delayProvider(proxyName: 'Node A').overrideWithValue(delay),
+          foreignVpnProvider.overrideWithBuild((_, _) => foreignVpn),
+          coreStatusProvider.overrideWithBuild((_, _) => coreStatus),
+          pendingDelayTestsProvider.overrideWithBuild((_, _) => pendingTests),
+          initProvider.overrideWithBuild((_, _) => true),
         ],
       );
       addTearDown(container.dispose);
@@ -253,10 +354,44 @@ void main() {
     testWidgets('pause outranks the delay verdict', (tester) async {
       await pumpHero(tester, delay: -1, paused: true);
       expect(find.text('Paused — trusted network'), findsOne);
-      expect(
-        find.text('Traffic is paused, protection is on hold'),
-        findsOne,
-      );
+      expect(find.text('Traffic is paused, protection is on hold'), findsOne);
+    });
+
+    testWidgets('a core restarting under a live tunnel reads as recovery', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, coreStatus: CoreStatus.connecting);
+      expect(find.text('Reconnecting…'), findsOne);
+      expect(find.text('You are protected'), findsNothing);
+    });
+
+    testWidgets('a probe on a stopped tunnel reads as a check', (tester) async {
+      await pumpHero(tester, running: false, pendingTests: const {'probe'});
+      expect(find.text('Checking the network…'), findsOne);
+    });
+
+    testWidgets('a probe on a live tunnel leaves the wording alone', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, pendingTests: const {'probe'});
+      expect(find.text('You are protected'), findsOne);
+      expect(find.text('Checking the network…'), findsNothing);
+    });
+
+    testWidgets('another VPN is named without taking over the card', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, foreignVpn: true);
+      // Never settles: the orb's own loops run forever by design.
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Another VPN is active'), findsOne);
+      expect(find.text('You are protected'), findsOne);
+    });
+
+    testWidgets('nothing is claimed while no other VPN is up', (tester) async {
+      await pumpHero(tester, delay: 140);
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Another VPN is active'), findsNothing);
     });
   });
 }

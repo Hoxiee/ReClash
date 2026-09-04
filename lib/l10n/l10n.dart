@@ -1240,6 +1240,46 @@ class AppLocalizations {
     return Intl.message('Download', name: 'goDownload', desc: '', args: []);
   }
 
+  /// `Install update`
+  String get installUpdate {
+    return Intl.message(
+      'Install update',
+      name: 'installUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading update`
+  String get downloadingUpdate {
+    return Intl.message(
+      'Downloading update',
+      name: 'downloadingUpdate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not download the update`
+  String get updateDownloadFailed {
+    return Intl.message(
+      'Could not download the update',
+      name: 'updateDownloadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The downloaded file is damaged`
+  String get updateVerifyFailed {
+    return Intl.message(
+      'The downloaded file is damaged',
+      name: 'updateVerifyFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unknown`
   String get unknown {
     return Intl.message('Unknown', name: 'unknown', desc: '', args: []);
@@ -5562,6 +5602,56 @@ class AppLocalizations {
     );
   }
 
+  /// `Checking the network…`
+  String get heroChecking {
+    return Intl.message(
+      'Checking the network…',
+      name: 'heroChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Measuring the selected node`
+  String get heroCheckingHint {
+    return Intl.message(
+      'Measuring the selected node',
+      name: 'heroCheckingHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reconnecting…`
+  String get heroReconnecting {
+    return Intl.message(
+      'Reconnecting…',
+      name: 'heroReconnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restoring the tunnel`
+  String get heroReconnectingHint {
+    return Intl.message(
+      'Restoring the tunnel',
+      name: 'heroReconnectingHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Another VPN is active`
+  String get heroForeignVpn {
+    return Intl.message(
+      'Another VPN is active',
+      name: 'heroForeignVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Connected {time}`
   String connectedFor(String time) {
     return Intl.message(
@@ -5802,21 +5892,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Russia — mobile`
-  String get smartRoutingPresetRuMobile {
+  /// `Russia`
+  String get smartRoutingPresetRussia {
     return Intl.message(
-      'Russia — mobile',
-      name: 'smartRoutingPresetRuMobile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Russia — home`
-  String get smartRoutingPresetRuHome {
-    return Intl.message(
-      'Russia — home',
-      name: 'smartRoutingPresetRuHome',
+      'Russia',
+      name: 'smartRoutingPresetRussia',
       desc: '',
       args: [],
     );
@@ -5917,6 +5997,1576 @@ class AppLocalizations {
     return Intl.message(
       'Not respected',
       name: 'smartRoutingManualHoldOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region`
+  String get smartRoutingRegion {
+    return Intl.message(
+      'Region',
+      name: 'smartRoutingRegion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{preset} · adjusted`
+  String smartRoutingPresetEdited(String preset) {
+    return Intl.message(
+      '$preset · adjusted',
+      name: 'smartRoutingPresetEdited',
+      desc: '',
+      args: [preset],
+    );
+  }
+
+  /// `Behaviour`
+  String get smartRoutingBehaviour {
+    return Intl.message(
+      'Behaviour',
+      name: 'smartRoutingBehaviour',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Probing`
+  String get smartRoutingProbing {
+    return Intl.message(
+      'Probing',
+      name: 'smartRoutingProbing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Require UDP support`
+  String get smartRoutingRequireUdp {
+    return Intl.message(
+      'Require UDP support',
+      name: 'smartRoutingRequireUdp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip servers that cannot carry calls and games`
+  String get smartRoutingRequireUdpDesc {
+    return Intl.message(
+      'Skip servers that cannot carry calls and games',
+      name: 'smartRoutingRequireUdpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settle time`
+  String get smartRoutingDwell {
+    return Intl.message(
+      'Settle time',
+      name: 'smartRoutingDwell',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How long a working server is kept before a faster one wins`
+  String get smartRoutingDwellDesc {
+    return Intl.message(
+      'How long a working server is kept before a faster one wins',
+      name: 'smartRoutingDwellDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{seconds} s`
+  String smartRoutingSeconds(num seconds) {
+    return Intl.message(
+      '$seconds s',
+      name: 'smartRoutingSeconds',
+      desc: '',
+      args: [seconds],
+    );
+  }
+
+  /// `Servers per check`
+  String get smartRoutingWave {
+    return Intl.message(
+      'Servers per check',
+      name: 'smartRoutingWave',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How many servers one background check measures`
+  String get smartRoutingWaveDesc {
+    return Intl.message(
+      'How many servers one background check measures',
+      name: 'smartRoutingWaveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} servers`
+  String smartRoutingWaveNodes(num count) {
+    return Intl.message(
+      '$count servers',
+      name: 'smartRoutingWaveNodes',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Routing overview`
+  String get smartRoutingOverview {
+    return Intl.message(
+      'Routing overview',
+      name: 'smartRoutingOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check every server`
+  String get smartRoutingDeepScan {
+    return Intl.message(
+      'Check every server',
+      name: 'smartRoutingDeepScan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking every server…`
+  String get smartRoutingDeepScanRunning {
+    return Intl.message(
+      'Checking every server…',
+      name: 'smartRoutingDeepScanRunning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignores the probe budget, so it costs traffic`
+  String get smartRoutingDeepScanHint {
+    return Intl.message(
+      'Ignores the probe budget, so it costs traffic',
+      name: 'smartRoutingDeepScanHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chosen server`
+  String get smartRoutingChosen {
+    return Intl.message(
+      'Chosen server',
+      name: 'smartRoutingChosen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No server chosen yet`
+  String get smartRoutingChosenNone {
+    return Intl.message(
+      'No server chosen yet',
+      name: 'smartRoutingChosenNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Why`
+  String get smartRoutingWhy {
+    return Intl.message('Why', name: 'smartRoutingWhy', desc: '', args: []);
+  }
+
+  /// `First pick on this network`
+  String get smartRoutingReasonColdStart {
+    return Intl.message(
+      'First pick on this network',
+      name: 'smartRoutingReasonColdStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Working, nothing better found`
+  String get smartRoutingReasonHold {
+    return Intl.message(
+      'Working, nothing better found',
+      name: 'smartRoutingReasonHold',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous server stopped answering`
+  String get smartRoutingReasonIncumbentDead {
+    return Intl.message(
+      'Previous server stopped answering',
+      name: 'smartRoutingReasonIncumbentDead',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This one is proven to reach the open internet`
+  String get smartRoutingReasonVerdictGain {
+    return Intl.message(
+      'This one is proven to reach the open internet',
+      name: 'smartRoutingReasonVerdictGain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This one is a latency band faster`
+  String get smartRoutingReasonLatencyGain {
+    return Intl.message(
+      'This one is a latency band faster',
+      name: 'smartRoutingReasonLatencyGain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network changed`
+  String get smartRoutingReasonTerrainChanged {
+    return Intl.message(
+      'The network changed',
+      name: 'smartRoutingReasonTerrainChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing reachable, keeping the current server`
+  String get smartRoutingReasonStranded {
+    return Intl.message(
+      'Nothing reachable, keeping the current server',
+      name: 'smartRoutingReasonStranded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No server passed the checks`
+  String get smartRoutingReasonNoCandidate {
+    return Intl.message(
+      'No server passed the checks',
+      name: 'smartRoutingReasonNoCandidate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Waiting out the settle time before switching`
+  String get smartRoutingReasonDwellHold {
+    return Intl.message(
+      'Waiting out the settle time before switching',
+      name: 'smartRoutingReasonDwellHold',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Respecting the server you picked`
+  String get smartRoutingReasonManualHold {
+    return Intl.message(
+      'Respecting the server you picked',
+      name: 'smartRoutingReasonManualHold',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network`
+  String get smartRoutingNetworkFormat {
+    return Intl.message(
+      'Network',
+      name: 'smartRoutingNetworkFormat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fully open`
+  String get smartRoutingFormatOpen {
+    return Intl.message(
+      'Fully open',
+      name: 'smartRoutingFormatOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing blocked between you and the open internet`
+  String get smartRoutingFormatOpenDesc {
+    return Intl.message(
+      'Nothing blocked between you and the open internet',
+      name: 'smartRoutingFormatOpenDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restricted`
+  String get smartRoutingFormatRestricted {
+    return Intl.message(
+      'Restricted',
+      name: 'smartRoutingFormatRestricted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only local services answer, foreign ones do not`
+  String get smartRoutingFormatRestrictedDesc {
+    return Intl.message(
+      'Only local services answer, foreign ones do not',
+      name: 'smartRoutingFormatRestrictedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign-in required`
+  String get smartRoutingFormatPortal {
+    return Intl.message(
+      'Sign-in required',
+      name: 'smartRoutingFormatPortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network wants you to log in before it passes traffic`
+  String get smartRoutingFormatPortalDesc {
+    return Intl.message(
+      'The network wants you to log in before it passes traffic',
+      name: 'smartRoutingFormatPortalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No connectivity`
+  String get smartRoutingFormatOffline {
+    return Intl.message(
+      'No connectivity',
+      name: 'smartRoutingFormatOffline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing answers, local or foreign`
+  String get smartRoutingFormatOfflineDesc {
+    return Intl.message(
+      'Nothing answers, local or foreign',
+      name: 'smartRoutingFormatOfflineDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Still measuring`
+  String get smartRoutingFormatUnknown {
+    return Intl.message(
+      'Still measuring',
+      name: 'smartRoutingFormatUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not enough answers yet to tell`
+  String get smartRoutingFormatUnknownDesc {
+    return Intl.message(
+      'Not enough answers yet to tell',
+      name: 'smartRoutingFormatUnknownDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system confirmed internet access`
+  String get smartRoutingEvidenceValidated {
+    return Intl.message(
+      'The system confirmed internet access',
+      name: 'smartRoutingEvidenceValidated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system reports no internet access`
+  String get smartRoutingEvidenceUnvalidated {
+    return Intl.message(
+      'The system reports no internet access',
+      name: 'smartRoutingEvidenceUnvalidated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system flagged a sign-in page`
+  String get smartRoutingEvidencePortal {
+    return Intl.message(
+      'The system flagged a sign-in page',
+      name: 'smartRoutingEvidencePortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A foreign address answered`
+  String get smartRoutingEvidenceForeignOk {
+    return Intl.message(
+      'A foreign address answered',
+      name: 'smartRoutingEvidenceForeignOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No foreign address answered`
+  String get smartRoutingEvidenceForeignFail {
+    return Intl.message(
+      'No foreign address answered',
+      name: 'smartRoutingEvidenceForeignFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A local address answered`
+  String get smartRoutingEvidenceDomesticOk {
+    return Intl.message(
+      'A local address answered',
+      name: 'smartRoutingEvidenceDomesticOk',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No local address answered`
+  String get smartRoutingEvidenceDomesticFail {
+    return Intl.message(
+      'No local address answered',
+      name: 'smartRoutingEvidenceDomesticFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Metered link`
+  String get smartRoutingMetered {
+    return Intl.message(
+      'Metered link',
+      name: 'smartRoutingMetered',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Servers`
+  String get smartRoutingServers {
+    return Intl.message(
+      'Servers',
+      name: 'smartRoutingServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{eligible} of {total} usable`
+  String smartRoutingServersCount(num eligible, num total) {
+    return Intl.message(
+      '$eligible of $total usable',
+      name: 'smartRoutingServersCount',
+      desc: '',
+      args: [eligible, total],
+    );
+  }
+
+  /// `Recent switches`
+  String get smartRoutingHistory {
+    return Intl.message(
+      'Recent switches',
+      name: 'smartRoutingHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No switches yet`
+  String get smartRoutingHistoryEmpty {
+    return Intl.message(
+      'No switches yet',
+      name: 'smartRoutingHistoryEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{from} → {to}`
+  String smartRoutingSwitchLine(String from, String to) {
+    return Intl.message(
+      '$from → $to',
+      name: 'smartRoutingSwitchLine',
+      desc: '',
+      args: [from, to],
+    );
+  }
+
+  /// `{left} of {cap} probes left this hour`
+  String smartRoutingProbeBudget(num left, num cap) {
+    return Intl.message(
+      '$left of $cap probes left this hour',
+      name: 'smartRoutingProbeBudget',
+      desc: '',
+      args: [left, cap],
+    );
+  }
+
+  /// `Your manual pick is respected for {minutes} min more`
+  String smartRoutingManualUntil(num minutes) {
+    return Intl.message(
+      'Your manual pick is respected for $minutes min more',
+      name: 'smartRoutingManualUntil',
+      desc: '',
+      args: [minutes],
+    );
+  }
+
+  /// `Reaches the open internet`
+  String get smartRoutingVerdictPreferred {
+    return Intl.message(
+      'Reaches the open internet',
+      name: 'smartRoutingVerdictPreferred',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Usable`
+  String get smartRoutingVerdictViable {
+    return Intl.message(
+      'Usable',
+      name: 'smartRoutingVerdictViable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last resort`
+  String get smartRoutingVerdictLastResort {
+    return Intl.message(
+      'Last resort',
+      name: 'smartRoutingVerdictLastResort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not usable`
+  String get smartRoutingVerdictReject {
+    return Intl.message(
+      'Not usable',
+      name: 'smartRoutingVerdictReject',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirmed by your own traffic`
+  String get smartRoutingEvidenceLive {
+    return Intl.message(
+      'Confirmed by your own traffic',
+      name: 'smartRoutingEvidenceLive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirmed by a recent check`
+  String get smartRoutingEvidenceFresh {
+    return Intl.message(
+      'Confirmed by a recent check',
+      name: 'smartRoutingEvidenceFresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last confirmed a while ago`
+  String get smartRoutingEvidenceStale {
+    return Intl.message(
+      'Last confirmed a while ago',
+      name: 'smartRoutingEvidenceStale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never confirmed`
+  String get smartRoutingEvidenceNone {
+    return Intl.message(
+      'Never confirmed',
+      name: 'smartRoutingEvidenceNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not in the current server list`
+  String get smartRoutingBlockAbsent {
+    return Intl.message(
+      'Not in the current server list',
+      name: 'smartRoutingBlockAbsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No UDP support`
+  String get smartRoutingBlockNoUdp {
+    return Intl.message(
+      'No UDP support',
+      name: 'smartRoutingBlockNoUdp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cooling down after {count} failures`
+  String smartRoutingBlockCooling(num count) {
+    return Intl.message(
+      'Cooling down after $count failures',
+      name: 'smartRoutingBlockCooling',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Failed its checks here`
+  String get smartRoutingBlockDisproven {
+    return Intl.message(
+      'Failed its checks here',
+      name: 'smartRoutingBlockDisproven',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local server, barred on this network`
+  String get smartRoutingBlockLastResort {
+    return Intl.message(
+      'Local server, barred on this network',
+      name: 'smartRoutingBlockLastResort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing routes on this network yet`
+  String get smartRoutingBlockTerrainUnfit {
+    return Intl.message(
+      'Nothing routes on this network yet',
+      name: 'smartRoutingBlockTerrainUnfit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `band {band}`
+  String smartRoutingBandLabel(num band) {
+    return Intl.message(
+      'band $band',
+      name: 'smartRoutingBandLabel',
+      desc: '',
+      args: [band],
+    );
+  }
+
+  /// `Throttled`
+  String get smartRoutingDegraded {
+    return Intl.message(
+      'Throttled',
+      name: 'smartRoutingDegraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn smart routing on to let it pick servers for you`
+  String get smartRoutingOffHint {
+    return Intl.message(
+      'Turn smart routing on to let it pick servers for you',
+      name: 'smartRoutingOffHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Everything set up in a minute`
+  String get setupWelcome {
+    return Intl.message(
+      'Everything set up in a minute',
+      name: 'setupWelcome',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a language`
+  String get setupLanguageTitle {
+    return Intl.message(
+      'Choose a language',
+      name: 'setupLanguageTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can change it later in settings`
+  String get setupLanguageDesc {
+    return Intl.message(
+      'You can change it later in settings',
+      name: 'setupLanguageDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Before we start`
+  String get setupLegalTitle {
+    return Intl.message(
+      'Before we start',
+      name: 'setupLegalTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send crash reports`
+  String get setupDataCollection {
+    return Intl.message(
+      'Send crash reports',
+      name: 'setupDataCollection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a subscription`
+  String get setupSubscriptionTitle {
+    return Intl.message(
+      'Add a subscription',
+      name: 'setupSubscriptionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A link from your provider, a QR code, or a config file`
+  String get setupSubscriptionDesc {
+    return Intl.message(
+      'A link from your provider, a QR code, or a config file',
+      name: 'setupSubscriptionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription added`
+  String get setupSubscriptionReady {
+    return Intl.message(
+      'Subscription added',
+      name: 'setupSubscriptionReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restore from a backup`
+  String get setupRestore {
+    return Intl.message(
+      'Restore from a backup',
+      name: 'setupRestore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move everything from a ReClash, FlClashX, or FlClash backup`
+  String get setupRestoreDesc {
+    return Intl.message(
+      'Move everything from a ReClash, FlClashX, or FlClash backup',
+      name: 'setupRestoreDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Almost done`
+  String get setupFinishTitle {
+    return Intl.message(
+      'Almost done',
+      name: 'setupFinishTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sets the starting point for server selection`
+  String get setupRegionDesc {
+    return Intl.message(
+      'Sets the starting point for server selection',
+      name: 'setupRegionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do not pick`
+  String get setupRegionNone {
+    return Intl.message(
+      'Do not pick',
+      name: 'setupRegionNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect on launch`
+  String get setupAutoRun {
+    return Intl.message(
+      'Connect on launch',
+      name: 'setupAutoRun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The tunnel comes up as soon as the app opens`
+  String get setupAutoRunDesc {
+    return Intl.message(
+      'The tunnel comes up as soon as the app opens',
+      name: 'setupAutoRunDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN permission`
+  String get setupPermissionVpn {
+    return Intl.message(
+      'VPN permission',
+      name: 'setupPermissionVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The system will ask on the first connection`
+  String get setupPermissionVpnDesc {
+    return Intl.message(
+      'The system will ask on the first connection',
+      name: 'setupPermissionVpnDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications`
+  String get setupPermissionNotifications {
+    return Intl.message(
+      'Notifications',
+      name: 'setupPermissionNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shows the connection status while running`
+  String get setupPermissionNotificationsDesc {
+    return Intl.message(
+      'Shows the connection status while running',
+      name: 'setupPermissionNotificationsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Skip`
+  String get setupSkip {
+    return Intl.message('Skip', name: 'setupSkip', desc: '', args: []);
+  }
+
+  /// `Next`
+  String get setupNext {
+    return Intl.message('Next', name: 'setupNext', desc: '', args: []);
+  }
+
+  /// `Done`
+  String get setupDone {
+    return Intl.message('Done', name: 'setupDone', desc: '', args: []);
+  }
+
+  /// `Whitelist specialist`
+  String get smartRoutingBreaker {
+    return Intl.message(
+      'Whitelist specialist',
+      name: 'smartRoutingBreaker',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Kept for restricted networks, so it is not spent on an open one`
+  String get smartRoutingBreakerDesc {
+    return Intl.message(
+      'Kept for restricted networks, so it is not spent on an open one',
+      name: 'smartRoutingBreakerDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Technical detail`
+  String get smartRoutingTechnical {
+    return Intl.message(
+      'Technical detail',
+      name: 'smartRoutingTechnical',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check now`
+  String get smartRoutingRecheck {
+    return Intl.message(
+      'Check now',
+      name: 'smartRoutingRecheck',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network`
+  String get smartRoutingSectionNetwork {
+    return Intl.message(
+      'Network',
+      name: 'smartRoutingSectionNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Servers`
+  String get smartRoutingSectionHealth {
+    return Intl.message(
+      'Servers',
+      name: 'smartRoutingSectionHealth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decision`
+  String get smartRoutingSectionRound {
+    return Intl.message(
+      'Decision',
+      name: 'smartRoutingSectionRound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Earlier switches`
+  String get smartRoutingSectionHistory {
+    return Intl.message(
+      'Earlier switches',
+      name: 'smartRoutingSectionHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What was tested`
+  String get smartRoutingWhatWasTested {
+    return Intl.message(
+      'What was tested',
+      name: 'smartRoutingWhatWasTested',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{answered} of {total} answered`
+  String smartRoutingCanariesAnswered(int answered, int total) {
+    return Intl.message(
+      '$answered of $total answered',
+      name: 'smartRoutingCanariesAnswered',
+      desc: '',
+      args: [answered, total],
+    );
+  }
+
+  /// `no answer`
+  String get smartRoutingNoAnswer {
+    return Intl.message(
+      'no answer',
+      name: 'smartRoutingNoAnswer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `untested`
+  String get smartRoutingUntested {
+    return Intl.message(
+      'untested',
+      name: 'smartRoutingUntested',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `local`
+  String get smartRoutingCanaryDomestic {
+    return Intl.message(
+      'local',
+      name: 'smartRoutingCanaryDomestic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `foreign`
+  String get smartRoutingCanaryForeign {
+    return Intl.message(
+      'foreign',
+      name: 'smartRoutingCanaryForeign',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{alive} of {total} servers can be used right now`
+  String smartRoutingAliveCount(int alive, int total) {
+    return Intl.message(
+      '$alive of $total servers can be used right now',
+      name: 'smartRoutingAliveCount',
+      desc: '',
+      args: [alive, total],
+    );
+  }
+
+  /// `usable`
+  String get smartRoutingHealthUsable {
+    return Intl.message(
+      'usable',
+      name: 'smartRoutingHealthUsable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `blocked`
+  String get smartRoutingHealthBlocked {
+    return Intl.message(
+      'blocked',
+      name: 'smartRoutingHealthBlocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `unchecked`
+  String get smartRoutingHealthUnknown {
+    return Intl.message(
+      'unchecked',
+      name: 'smartRoutingHealthUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Read the network`
+  String get smartRoutingStepNetwork {
+    return Intl.message(
+      'Read the network',
+      name: 'smartRoutingStepNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decided who is allowed`
+  String get smartRoutingStepAdmit {
+    return Intl.message(
+      'Decided who is allowed',
+      name: 'smartRoutingStepAdmit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ranked what was left`
+  String get smartRoutingStepRank {
+    return Intl.message(
+      'Ranked what was left',
+      name: 'smartRoutingStepRank',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Landed here`
+  String get smartRoutingStepDecision {
+    return Intl.message(
+      'Landed here',
+      name: 'smartRoutingStepDecision',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{eligible} of {total} servers passed, {blocked} were held back`
+  String smartRoutingStepAdmitBody(int eligible, int total, int blocked) {
+    return Intl.message(
+      '$eligible of $total servers passed, $blocked were held back',
+      name: 'smartRoutingStepAdmitBody',
+      desc: '',
+      args: [eligible, total, blocked],
+    );
+  }
+
+  /// `Verdict first, then specialist fit, then evidence, then latency band`
+  String get smartRoutingStepRankBody {
+    return Intl.message(
+      'Verdict first, then specialist fit, then evidence, then latency band',
+      name: 'smartRoutingStepRankBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All servers`
+  String get smartRoutingAllServers {
+    return Intl.message(
+      'All servers',
+      name: 'smartRoutingAllServers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ranking order`
+  String get smartRoutingRankOrder {
+    return Intl.message(
+      'Ranking order',
+      name: 'smartRoutingRankOrder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verdict`
+  String get smartRoutingKeyVerdict {
+    return Intl.message(
+      'Verdict',
+      name: 'smartRoutingKeyVerdict',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fit for this network`
+  String get smartRoutingKeyMisfit {
+    return Intl.message(
+      'Fit for this network',
+      name: 'smartRoutingKeyMisfit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Evidence`
+  String get smartRoutingKeyEvidence {
+    return Intl.message(
+      'Evidence',
+      name: 'smartRoutingKeyEvidence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency band`
+  String get smartRoutingKeyBand {
+    return Intl.message(
+      'Latency band',
+      name: 'smartRoutingKeyBand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bands: {bands}`
+  String smartRoutingBands(String bands) {
+    return Intl.message(
+      'Bands: $bands',
+      name: 'smartRoutingBands',
+      desc: '',
+      args: [bands],
+    );
+  }
+
+  /// `Switched {time} ago`
+  String smartRoutingSwitchedAgo(String time) {
+    return Intl.message(
+      'Switched $time ago',
+      name: 'smartRoutingSwitchedAgo',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `No switch yet on this network`
+  String get smartRoutingNeverSwitched {
+    return Intl.message(
+      'No switch yet on this network',
+      name: 'smartRoutingNeverSwitched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network memory key`
+  String get smartRoutingEnvKey {
+    return Intl.message(
+      'Network memory key',
+      name: 'smartRoutingEnvKey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `kept`
+  String get smartRoutingKept {
+    return Intl.message('kept', name: 'smartRoutingKept', desc: '', args: []);
+  }
+
+  /// `switched`
+  String get smartRoutingSwitched {
+    return Intl.message(
+      'switched',
+      name: 'smartRoutingSwitched',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `General purpose`
+  String get smartRoutingNotBreaker {
+    return Intl.message(
+      'General purpose',
+      name: 'smartRoutingNotBreaker',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{seconds} s left`
+  String smartRoutingCoolFor(int seconds) {
+    return Intl.message(
+      '$seconds s left',
+      name: 'smartRoutingCoolFor',
+      desc: '',
+      args: [seconds],
+    );
+  }
+
+  /// `{count} failures in a row`
+  String smartRoutingFails(int count) {
+    return Intl.message(
+      '$count failures in a row',
+      name: 'smartRoutingFails',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `UDP`
+  String get smartRoutingNodeUdp {
+    return Intl.message('UDP', name: 'smartRoutingNodeUdp', desc: '', args: []);
+  }
+
+  /// `No UDP`
+  String get smartRoutingNodeNoUdp {
+    return Intl.message(
+      'No UDP',
+      name: 'smartRoutingNodeNoUdp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Canary addresses`
+  String get smartRoutingCanaries {
+    return Intl.message(
+      'Canary addresses',
+      name: 'smartRoutingCanaries',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Foreign canaries`
+  String get smartRoutingCanariesForeign {
+    return Intl.message(
+      'Foreign canaries',
+      name: 'smartRoutingCanariesForeign',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plain IP:port reached directly, to tell an open network from a shutdown`
+  String get smartRoutingCanariesForeignDesc {
+    return Intl.message(
+      'Plain IP:port reached directly, to tell an open network from a shutdown',
+      name: 'smartRoutingCanariesForeignDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local canaries`
+  String get smartRoutingCanariesDomestic {
+    return Intl.message(
+      'Local canaries',
+      name: 'smartRoutingCanariesDomestic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reached directly to tell a whitelist network from no connectivity at all`
+  String get smartRoutingCanariesDomesticDesc {
+    return Intl.message(
+      'Reached directly to tell a whitelist network from no connectivity at all',
+      name: 'smartRoutingCanariesDomesticDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service checks`
+  String get smartRoutingMarkers {
+    return Intl.message(
+      'Service checks',
+      name: 'smartRoutingMarkers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open-internet checks`
+  String get smartRoutingMarkersOpen {
+    return Intl.message(
+      'Open-internet checks',
+      name: 'smartRoutingMarkersOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A server must return one of these statuses to count as proven`
+  String get smartRoutingMarkersOpenDesc {
+    return Intl.message(
+      'A server must return one of these statuses to count as proven',
+      name: 'smartRoutingMarkersOpenDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local checks`
+  String get smartRoutingMarkersDomestic {
+    return Intl.message(
+      'Local checks',
+      name: 'smartRoutingMarkersDomestic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Used for local servers during a shutdown`
+  String get smartRoutingMarkersDomesticDesc {
+    return Intl.message(
+      'Used for local servers during a shutdown',
+      name: 'smartRoutingMarkersDomesticDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `URL`
+  String get smartRoutingMarkerUrl {
+    return Intl.message(
+      'URL',
+      name: 'smartRoutingMarkerUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Accepted statuses`
+  String get smartRoutingMarkerStatuses {
+    return Intl.message(
+      'Accepted statuses',
+      name: 'smartRoutingMarkerStatuses',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Comma-separated, e.g. 200, 204, 404`
+  String get smartRoutingMarkerStatusesHint {
+    return Intl.message(
+      'Comma-separated, e.g. 200, 204, 404',
+      name: 'smartRoutingMarkerStatusesHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter HTTP status codes separated by commas`
+  String get smartRoutingMarkerStatusesTip {
+    return Intl.message(
+      'Enter HTTP status codes separated by commas',
+      name: 'smartRoutingMarkerStatusesTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No checks configured`
+  String get smartRoutingMarkersEmpty {
+    return Intl.message(
+      'No checks configured',
+      name: 'smartRoutingMarkersEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Censoring countries`
+  String get smartRoutingCensor {
+    return Intl.message(
+      'Censoring countries',
+      name: 'smartRoutingCensor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A server here counts as local, so it is held back until a shutdown`
+  String get smartRoutingCensorDesc {
+    return Intl.message(
+      'A server here counts as local, so it is held back until a shutdown',
+      name: 'smartRoutingCensorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Whitelist specialist names`
+  String get smartRoutingBreakerPatterns {
+    return Intl.message(
+      'Whitelist specialist names',
+      name: 'smartRoutingBreakerPatterns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name fragments that mark a server kept for restricted networks`
+  String get smartRoutingBreakerPatternsDesc {
+    return Intl.message(
+      'Name fragments that mark a server kept for restricted networks',
+      name: 'smartRoutingBreakerPatternsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detection`
+  String get smartRoutingDetection {
+    return Intl.message(
+      'Detection',
+      name: 'smartRoutingDetection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ranking`
+  String get smartRoutingRanking {
+    return Intl.message(
+      'Ranking',
+      name: 'smartRoutingRanking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency bands are fixed: a knob here would let milliseconds outrank whether a server works`
+  String get smartRoutingRankingDesc {
+    return Intl.message(
+      'Latency bands are fixed: a knob here would let milliseconds outrank whether a server works',
+      name: 'smartRoutingRankingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset to preset`
+  String get smartRoutingResetSection {
+    return Intl.message(
+      'Reset to preset',
+      name: 'smartRoutingResetSection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restores the region defaults and keeps smart routing on`
+  String get smartRoutingResetSectionDesc {
+    return Intl.message(
+      'Restores the region defaults and keeps smart routing on',
+      name: 'smartRoutingResetSectionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing measured yet`
+  String get smartRoutingEmpty {
+    return Intl.message(
+      'Nothing measured yet',
+      name: 'smartRoutingEmpty',
       desc: '',
       args: [],
     );

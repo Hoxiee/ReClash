@@ -171,15 +171,8 @@ class HeroConnect extends ConsumerStatefulWidget {
 }
 
 class _HeroConnectState extends ConsumerState<HeroConnect> {
-  HeroOrbPhase _phase = HeroOrbPhase.off;
-
-  @override
-  void initState() {
-    super.initState();
-    if (ref.read(runTimeProvider) != null) {
-      _phase = ref.read(pausedProvider) ? HeroOrbPhase.paused : HeroOrbPhase.on;
-    }
-  }
+  /// Owned by the orb after seeding: it holds the optimistic `connecting` too.
+  late HeroOrbPhase _phase = ref.read(heroLifecycleProvider);
 
   @override
   Widget build(BuildContext context) {
@@ -320,15 +313,19 @@ class _OrbSection extends ConsumerWidget {
 
     final title = switch (status) {
       HeroStatus.off => appLocalizations.heroNotProtected,
+      HeroStatus.checking => appLocalizations.heroChecking,
       HeroStatus.connecting => appLocalizations.heroConnecting,
+      HeroStatus.reconnecting => appLocalizations.heroReconnecting,
       HeroStatus.paused => appLocalizations.heroPaused,
       HeroStatus.broken => appLocalizations.heroLinkBroken,
-      HeroStatus.secured || HeroStatus.degraded =>
-        appLocalizations.heroProtected,
+      HeroStatus.secured ||
+      HeroStatus.degraded => appLocalizations.heroProtected,
     };
     final subtitle = switch (status) {
       HeroStatus.off => appLocalizations.heroTapToConnect,
+      HeroStatus.checking => appLocalizations.heroCheckingHint,
       HeroStatus.connecting => displayName,
+      HeroStatus.reconnecting => appLocalizations.heroReconnectingHint,
       HeroStatus.paused => appLocalizations.heroTapToResume,
       HeroStatus.secured || HeroStatus.degraded || HeroStatus.broken =>
         appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
@@ -345,6 +342,7 @@ class _OrbSection extends ConsumerWidget {
 
     return Column(
       children: [
+        const _ForeignVpnBadge(),
         const SizedBox(height: 18),
         HeroOrb(
           size: 220,
@@ -399,6 +397,69 @@ class _OrbSection extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Worth naming, not worth interrupting for.
+class _ForeignVpnBadge extends ConsumerWidget {
+  const _ForeignVpnBadge();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final present = ref.watch(foreignVpnProvider);
+    final colorScheme = context.colorScheme;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: present ? 1 : 0),
+      duration: const Duration(milliseconds: 480),
+      curve: Curves.easeOutCubic,
+      // Gone from the tree at rest, so nothing reads it out unused.
+      builder: (context, t, child) => t <= 0
+          ? const SizedBox.shrink()
+          : ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: t,
+                child: Opacity(
+                  opacity: t,
+                  child: Transform.translate(
+                    offset: Offset(0, -6 * (1 - t)),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(heroPillRadius),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.vpn_lock_rounded,
+                size: 13,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              ),
+              const SizedBox(width: 7),
+              Text(
+                context.appLocalizations.heroForeignVpn,
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1204,18 +1265,17 @@ class _PauseChip extends ConsumerWidget {
 class _ModeChip extends ConsumerWidget {
   const _ModeChip();
 
-  IconData _modeIcon(Mode mode) => switch (mode) {
-    Mode.rule => Icons.rule,
-    Mode.global => Icons.public,
-    Mode.direct => Icons.flash_on,
+  IconData _modeIcon(UiOutboundMode mode) => switch (mode) {
+    UiOutboundMode.auto => Icons.auto_mode,
+    UiOutboundMode.rule => Icons.rule,
+    UiOutboundMode.global => Icons.public,
+    UiOutboundMode.direct => Icons.flash_on,
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
-    final mode = ref.watch(
-      patchClashConfigProvider.select((state) => state.mode),
-    );
+    final mode = ref.watch(uiOutboundModeProvider);
     return CommonPopupBox(
       targetBuilder: (open) => Tooltip(
         message: mode.label,
@@ -1233,12 +1293,12 @@ class _ModeChip extends ConsumerWidget {
       ),
       popupBuilder: (_) => CommonPopupMenu(
         items: [
-          for (final item in Mode.values)
+          for (final item in UiOutboundMode.values)
             CommonPopupMenuItem(
               icon: _modeIcon(item),
               label: item.label,
               onPressed: () {
-                ref.read(setupActionProvider.notifier).changeMode(item);
+                ref.read(setupActionProvider.notifier).changeUiMode(item);
               },
             ),
         ],

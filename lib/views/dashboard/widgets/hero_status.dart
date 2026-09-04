@@ -2,27 +2,59 @@ import 'dart:math' as math;
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum HeroOrbPhase { off, connecting, on, paused }
+/// No health: `broken` is a verdict on a tunnel that is still `on`.
+enum HeroOrbPhase { off, checking, connecting, reconnecting, on, paused }
 
 /// `unknown` is not a middle ground: it withholds the verdict, so a missing or
 /// in-flight measurement can never paint the orb red.
 enum HeroHealth { unknown, healthy, degraded, broken }
 
-enum HeroStatus { off, connecting, secured, degraded, broken, paused }
+enum HeroStatus {
+  off,
+  checking,
+  connecting,
+  reconnecting,
+  secured,
+  degraded,
+  broken,
+  paused,
+}
 
 extension HeroStatusExt on HeroStatus {
-  bool get isLive => this != HeroStatus.off;
+  bool get isLive => this != HeroStatus.off && this != HeroStatus.checking;
 
   bool get isAlert =>
       this == HeroStatus.paused ||
       this == HeroStatus.degraded ||
       this == HeroStatus.broken;
 
+  bool get isSweeping =>
+      this == HeroStatus.checking ||
+      this == HeroStatus.connecting ||
+      this == HeroStatus.reconnecting;
+
+  bool get isTransitioning =>
+      this == HeroStatus.connecting || this == HeroStatus.reconnecting;
+
   bool get flows => this == HeroStatus.secured || this == HeroStatus.degraded;
 }
+
+/// Only the breathe period reads this: `repeat` captures its period.
+enum HeroOrbActivity { idle, active }
+
+HeroOrbActivity heroActivityBandOf(HeroOrbActivity current, double activity) =>
+    switch (current) {
+      HeroOrbActivity.idle =>
+        activity > 0.28 ? HeroOrbActivity.active : HeroOrbActivity.idle,
+      HeroOrbActivity.active =>
+        activity < 0.18 ? HeroOrbActivity.idle : HeroOrbActivity.active,
+    };
 
 /// Matches `getDelayColor`, so amber in the proxy list is never healthy here.
 const heroDegradedDelay = 600;
@@ -35,10 +67,40 @@ HeroHealth heroHealthOf({required int? delay, required bool measuring}) {
   return HeroHealth.healthy;
 }
 
+final heroLifecycleProvider = Provider<HeroOrbPhase>((ref) {
+  final phase = heroLifecycleOf(
+    isStart: ref.watch(isStartProvider),
+    paused: ref.watch(pausedProvider),
+    coreConnecting:
+        ref.watch(coreStatusProvider) == CoreStatus.connecting &&
+        ref.watch(initProvider),
+  );
+  final probing = ref.watch(
+    pendingDelayTestsProvider.select((state) => state.isNotEmpty),
+  );
+  return heroPhaseWithProbe(phase, probing);
+});
+
+/// Nothing here auto-retries, so recovery is only a core reconnecting.
+HeroOrbPhase heroLifecycleOf({
+  required bool isStart,
+  required bool paused,
+  required bool coreConnecting,
+}) {
+  if (!isStart) return HeroOrbPhase.off;
+  if (paused) return HeroOrbPhase.paused;
+  return coreConnecting ? HeroOrbPhase.reconnecting : HeroOrbPhase.on;
+}
+
+HeroOrbPhase heroPhaseWithProbe(HeroOrbPhase phase, bool probing) =>
+    probing && phase == HeroOrbPhase.off ? HeroOrbPhase.checking : phase;
+
 HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
     switch (phase) {
       HeroOrbPhase.off => HeroStatus.off,
+      HeroOrbPhase.checking => HeroStatus.checking,
       HeroOrbPhase.connecting => HeroStatus.connecting,
+      HeroOrbPhase.reconnecting => HeroStatus.reconnecting,
       HeroOrbPhase.paused => HeroStatus.paused,
       HeroOrbPhase.on => switch (health) {
         HeroHealth.broken => HeroStatus.broken,
@@ -81,6 +143,18 @@ const List<Color> _brokenRing = [
   Color(0xFFC92A2A),
 ];
 
+const List<Color> _reconnectingRing = [
+  Color(0xFF10EDF8),
+  Color(0xFFFFC93C),
+  Color(0xFFF03E3E),
+];
+
+const List<Color> _checkingRing = [
+  Color(0xFF9BF6FF),
+  Color(0xFF10EDF8),
+  Color(0xFF2A8BFD),
+];
+
 class HeroPalette {
   const HeroPalette({
     required this.ring,
@@ -105,6 +179,33 @@ class HeroPalette {
       accent: Color.lerp(a.accent, b.accent, t)!,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is HeroPalette &&
+      other.glow == glow &&
+      other.accent == accent &&
+      _sameRing(other.ring, ring);
+
+  @override
+  int get hashCode => Object.hash(glow, accent, Object.hashAll(ring));
+
+  static bool _sameRing(List<Color> a, List<Color> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+}
+
+/// Every palette change animates, so a theme switch travels as smoothly as a
+/// status change does.
+class HeroPaletteTween extends Tween<HeroPalette> {
+  HeroPaletteTween({super.begin, super.end});
+
+  @override
+  HeroPalette lerp(double t) => HeroPalette.lerp(begin!, end!, t);
 }
 
 HeroPalette heroPaletteOf(BuildContext context, HeroStatus status) {
@@ -143,6 +244,15 @@ HeroPalette heroPaletteOf(BuildContext context, HeroStatus status) {
         glow: ring[1],
         accent: colorScheme.primary,
       );
+    case HeroStatus.checking:
+      final ring = tuned(_checkingRing);
+      return HeroPalette(
+        ring: ring,
+        glow: ring[1],
+        accent: colorScheme.onSurfaceVariant,
+      );
+    case HeroStatus.reconnecting:
+      return alert(_reconnectingRing);
     case HeroStatus.paused:
       return alert(_pausedRing);
     case HeroStatus.degraded:

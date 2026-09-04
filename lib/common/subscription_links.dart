@@ -11,6 +11,7 @@ const _schemes = [
   'vmess://',
   'vless://',
   'ss://',
+  'ssr://',
   'trojan://',
   'hysteria2://',
   'hy2://',
@@ -42,13 +43,7 @@ class ShareLinksResult implements ConvertedSubscription {
   final List<SkippedNode> skipped;
 }
 
-/// Link input mihomo cannot dial — routed to the converter, not the network.
-const _unsupportedSchemes = [
-  'ssr://',
-];
-
-bool _isLinkLine(String line) =>
-    _schemes.any(line.startsWith) || _unsupportedSchemes.any(line.startsWith);
+bool _isLinkLine(String line) => _schemes.any(line.startsWith);
 
 bool isShareLinkInput(String input) {
   final trimmed = input.trim();
@@ -97,10 +92,6 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
     for (final line in text.split(RegExp(r'[\r\n]+'))) {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
-      if (_unsupportedSchemes.any(trimmed.startsWith)) {
-        skipped.add(_unsupportedSchemeNode(trimmed));
-        continue;
-      }
       if (trimmed.startsWith('vpn://')) {
         final (vpnProxies, vpnSkipped) = parseVpnLink(
           trimmed.substring('vpn://'.length),
@@ -147,26 +138,6 @@ class _UnsupportedLink implements Exception {
   final SkippedNode node;
 }
 
-SkippedNode _unsupportedSchemeNode(String line) {
-  final scheme = _unsupportedSchemes.firstWhere(line.startsWith);
-  final kind = scheme.substring(0, scheme.length - 3);
-  final hashIdx = line.indexOf('#');
-  final fragment = hashIdx >= 0 ? line.substring(hashIdx + 1) : '';
-  String name;
-  if (fragment.length > 1) {
-    // Share-link fragments are percent-encoded; ssr remarks are base64.
-    name = _tryDecodeFragment(fragment) ?? fragment;
-  } else {
-    // An ssr body has no readable name; the raw head is the best handle.
-    name = line.length > 32 ? '${line.substring(0, 32)}…' : line;
-  }
-  return SkippedNode(
-    name: name,
-    kind: kind,
-    reason: SkippedNodeReason.protocol,
-  );
-}
-
 String? _tryDecodeFragment(String fragment) {
   try {
     return Uri.decodeComponent(fragment);
@@ -180,6 +151,7 @@ String? _tryDecodeFragment(String fragment) {
 Map<String, Object?>? _parseUri(String uri) {
   if (uri.startsWith('vmess://')) return _parseVmess(uri);
   if (uri.startsWith('vless://')) return _parseVless(uri);
+  if (uri.startsWith('ssr://')) return _parseShadowsocksR(uri);
   if (uri.startsWith('ss://')) return _parseShadowsocks(uri);
   if (uri.startsWith('trojan://')) return _parseTrojan(uri);
   if (uri.startsWith('hysteria2://') || uri.startsWith('hy2://')) {
@@ -523,8 +495,48 @@ Map<String, Object?>? _parseShadowsocks(String uri) {
     'password': password,
     'udp': true,
   };
+  if (params['udp-over-tcp'] == 'true' || params['uot'] == '1') {
+    proxy['udp-over-tcp'] = true;
+    final version = int.tryParse(params['udp-over-tcp-version'] ?? '');
+    if (version != null && version > 0) {
+      proxy['udp-over-tcp-version'] = version;
+    }
+  }
   if (!_applyPlugin(proxy, params['plugin'] ?? '')) return null;
   return proxy;
+}
+
+Map<String, Object?>? _parseShadowsocksR(String uri) {
+  final decoded = tryBase64Decode(uri.substring('ssr://'.length));
+  if (decoded == null) return null;
+  final cutIdx = decoded.indexOf('/?');
+  final head = cutIdx >= 0 ? decoded.substring(0, cutIdx) : decoded;
+  final params = cutIdx >= 0
+      ? _splitQuery(decoded.substring(cutIdx + 2))
+      : const <String, String>{};
+
+  final fields = head.split(':');
+  if (fields.length != 6) return null;
+  final port = int.tryParse(fields[1]);
+  final password = tryBase64Decode(fields[5]);
+  if (fields[0].isEmpty || port == null || password == null) return null;
+
+  final remarks = tryBase64Decode(params['remarks'] ?? '') ?? '';
+  final obfsParam = tryBase64Decode(params['obfsparam'] ?? '') ?? '';
+  final protocolParam = tryBase64Decode(params['protoparam'] ?? '') ?? '';
+  return <String, Object?>{
+    'name': remarks.isEmpty ? fields[0] : remarks,
+    'type': 'ssr',
+    'server': fields[0],
+    'port': port,
+    'cipher': fields[3],
+    'password': password,
+    'obfs': fields[4],
+    'protocol': fields[2],
+    if (obfsParam.isNotEmpty) 'obfs-param': obfsParam,
+    if (protocolParam.isNotEmpty) 'protocol-param': protocolParam,
+    'udp': true,
+  };
 }
 
 Map<String, Object?>? _parseTrojan(String uri) {
@@ -569,10 +581,12 @@ Map<String, Object?>? _parseTrojan(String uri) {
 }
 
 Map<String, Object?>? _parseHysteria2(String uri) {
-  final parts = _splitUserinfoUri(uri);
+  final (hopUri, hopPorts) = splitHysteria2Ports(uri);
+  final parts = _splitUserinfoUri(hopUri);
   if (parts == null) return null;
   final (auth, server, port, params, name) = parts;
 
+  final ports = hopPorts.isNotEmpty ? hopPorts : (params['mport'] ?? '');
   final proxy = <String, Object?>{
     'name': name,
     'type': 'hysteria2',
@@ -580,6 +594,14 @@ Map<String, Object?>? _parseHysteria2(String uri) {
     'port': port,
     'password': auth,
   };
+  if (ports.isNotEmpty) {
+    proxy['ports'] = ports.replaceAll(' ', '');
+    final hopInterval = int.tryParse(params['hop-interval'] ?? '');
+    // Below the core's 5s floor the value is clamped anyway; 0 means default.
+    if (hopInterval != null && hopInterval >= 5) {
+      proxy['hop-interval'] = hopInterval;
+    }
+  }
   final sni = params['sni'] ?? server;
   if (sni.isNotEmpty) proxy['sni'] = sni;
   if (params['insecure'] == '1' || params['insecure'] == 'true') {
@@ -596,6 +618,12 @@ Map<String, Object?>? _parseHysteria2(String uri) {
     final value = params[field];
     if (value != null && value.isNotEmpty) proxy[field] = value;
   }
+  final alpn = params['alpn'] ?? '';
+  if (alpn.isNotEmpty) {
+    proxy['alpn'] = alpn.split(',').map((e) => e.trim()).toList();
+  }
+  final pin = params['pinSHA256'] ?? '';
+  if (pin.isNotEmpty) proxy['fingerprint'] = pin;
   return proxy;
 }
 
@@ -770,6 +798,38 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   );
 }
 
+/// Port hopping puts a range where a port belongs (`host:443,4430-4440`), which
+/// no URI parser accepts. Returns the first-port link plus mihomo's `ports`.
+(String, String) splitHysteria2Ports(String uri) {
+  final schemeIdx = uri.indexOf('://');
+  if (schemeIdx < 0) return (uri, '');
+  final head = uri.substring(0, schemeIdx + 3);
+  final rest = uri.substring(schemeIdx + 3);
+
+  final tailIdx = rest.indexOf(RegExp(r'[/?#]'));
+  var auth = tailIdx >= 0 ? rest.substring(0, tailIdx) : rest;
+  final tail = tailIdx >= 0 ? rest.substring(tailIdx) : '';
+
+  var userinfo = '';
+  final atIdx = auth.lastIndexOf('@');
+  if (atIdx >= 0) {
+    userinfo = auth.substring(0, atIdx + 1);
+    auth = auth.substring(atIdx + 1);
+  }
+  // An IPv6 literal's own colons are not a port list.
+  if (auth.contains(']')) return (uri, '');
+  final colonIdx = auth.lastIndexOf(':');
+  if (colonIdx < 0) return (uri, '');
+
+  final host = auth.substring(0, colonIdx);
+  final ports = auth.substring(colonIdx + 1);
+  if (!ports.contains(',') && !ports.contains('-')) return (uri, '');
+  final firstIdx = ports.indexOf(RegExp('[,-]'));
+  final first = firstIdx >= 0 ? ports.substring(0, firstIdx) : ports;
+  if (int.tryParse(first) == null) return (uri, '');
+  return ('$head$userinfo$host:$first$tail', ports);
+}
+
 (String, int)? splitHostPort(String hostPort) {
   final bracketIdx = hostPort.lastIndexOf(']');
   // IPv6 literals carry colons; the port separator is the first past `]`.
@@ -940,18 +1000,34 @@ Map<String, String> _splitQuery(String query) {
 
 /// Every string is double-quoted — node names freely contain emoji, `#`, `:`
 /// and CJK. Public for the xray converter, which shares this emitter.
-String emitProxiesConfig(List<Map<String, Object?>> proxies) {
+///
+/// PROXY selects between [groups] and only the nodes no group claimed; listing
+/// claimed ones too would put the flat heap back beside its replacement.
+String emitProxiesConfig(
+  List<Map<String, Object?>> proxies, {
+  List<Map<String, Object?>> groups = const [],
+}) {
   final buffer = StringBuffer()..writeln('proxies:');
   for (final proxy in proxies) {
     buffer.writeln('  - {${_emitMap(proxy)}}');
   }
 
+  final claimed = <String>{
+    for (final group in groups)
+      ...?(group['proxies'] as List?)?.map((e) => e.toString()),
+  };
   final groupEntries = [
-    for (final proxy in proxies) _yamlString(proxy['name']! as String),
+    for (final group in groups) _yamlString(group['name']! as String),
+    for (final proxy in proxies)
+      if (!claimed.contains(proxy['name']))
+        _yamlString(proxy['name']! as String),
     'DIRECT',
   ].join(', ');
+  buffer.writeln('proxy-groups:');
+  for (final group in groups) {
+    buffer.writeln('  - {${_emitMap(group)}}');
+  }
   buffer
-    ..writeln('proxy-groups:')
     ..writeln('  - name: "PROXY"')
     ..writeln('    type: select')
     ..writeln('    proxies: [$groupEntries]')

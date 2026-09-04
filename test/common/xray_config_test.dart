@@ -7,12 +7,18 @@ import 'package:reclash/common/xray_config.dart';
 String _json(Object? o) => jsonEncode(o);
 
 List<String> _proxiesNames(String config) {
+  final body = config.substring(
+    0,
+    config.contains('proxy-groups:')
+        ? config.indexOf('proxy-groups:')
+        : config.length,
+  );
   final match = RegExp(
     r'^  - \{name: "((?:[^"\\]|\\.)*)"',
     multiLine: true,
   );
   return [
-    for (final m in match.allMatches(config)) m.group(1)!,
+    for (final m in match.allMatches(body)) m.group(1)!,
   ];
 }
 
@@ -59,6 +65,35 @@ Map<String, Object?> vlessOutbound({
         ...?extraStream,
       },
     };
+
+Map<String, Object?> _node(String tag, String host) => {
+      'tag': tag,
+      'protocol': 'vless',
+      'settings': {
+        'vnext': [
+          {
+            'address': host,
+            'port': 443,
+            'users': [
+              {'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199'}
+            ],
+          }
+        ],
+      },
+    };
+
+List<String> _groupMembers(String config, String name) {
+  final quoted = '"${name.replaceAll(r'\', r'\\')}"';
+  final match = RegExp(
+    '${RegExp.escape(quoted)}.*?proxies: \\[([^\\]]*)\\]',
+    dotAll: true,
+  ).firstMatch(config);
+  if (match == null) return const [];
+  return [
+    for (final entry in match.group(1)!.split(','))
+      entry.trim().replaceAll('"', ''),
+  ];
+}
 
 void main() {
   group('isXrayConfigInput', () {
@@ -671,6 +706,179 @@ void main() {
       );
       expect(tryConvertXrayConfig(_json({'outbounds': []})), isNull);
       expect(tryConvertXrayConfig('not json'), isNull);
+    });
+  });
+
+  group('routing balancers', () {
+    test('leastLoad becomes url-test over the selected tags', () {
+      final result = tryConvertXrayConfig(_json({
+        'outbounds': [
+          _node('proxy', 'a.example.com'),
+          _node('proxy-2', 'b.example.com'),
+          _node('other', 'c.example.com'),
+        ],
+        'routing': {
+          'balancers': [
+            {
+              'tag': 'AUTO',
+              'selector': ['proxy'],
+              'strategy': {'type': 'leastLoad'},
+            }
+          ],
+        },
+      }));
+      expect(result, isNotNull);
+      final config = result!.config;
+      expect(config, contains('name: "AUTO", type: "url-test"'));
+      expect(_groupMembers(config, 'AUTO'), [
+        'a.example.com',
+        'b.example.com',
+      ]);
+      // PROXY offers the balancer, not the nodes it already governs.
+      expect(_groupMembers(config, 'PROXY'), ['AUTO', 'other', 'DIRECT']);
+    });
+
+    test('random becomes round-robin load-balance', () {
+      final result = tryConvertXrayConfig(_json({
+        'outbounds': [_node('GEMINI', 'g.example.com')],
+        'routing': {
+          'balancers': [
+            {
+              'tag': 'GEMINI_BALANCER',
+              'selector': ['GEMINI'],
+              'strategy': {'type': 'random'},
+            }
+          ],
+        },
+      }));
+      expect(result, isNotNull);
+      expect(
+        result!.config,
+        contains('type: "load-balance", strategy: "round-robin"'),
+      );
+    });
+
+    test('tiered costs become a fallback ordered cheapest first', () {
+      final result = tryConvertXrayConfig(_json({
+        'outbounds': [
+          _node('BACKUP', 'b.example.com'),
+          _node('PRIMARY', 'p.example.com'),
+        ],
+        'routing': {
+          'balancers': [
+            {
+              'tag': 'TIERED',
+              'selector': ['BACKUP', 'PRIMARY'],
+              'strategy': {
+                'type': 'leastLoad',
+                'settings': {
+                  'costs': [
+                    {'match': '^PRIMARY', 'value': 1e-06, 'regexp': true},
+                    {'match': '^BACKUP', 'value': 1000000000, 'regexp': true},
+                  ],
+                },
+              },
+            }
+          ],
+        },
+      }));
+      expect(result, isNotNull);
+      expect(result!.config, contains('name: "TIERED", type: "fallback"'));
+      expect(_groupMembers(result.config, 'TIERED'), [
+        'p.example.com',
+        'b.example.com',
+      ]);
+    });
+
+    test('a dialable fallbackTag joins last, block does not', () {
+      Map<String, Object?> body(String fallbackTag) => {
+            'outbounds': [
+              _node('proxy', 'a.example.com'),
+              _node('SPARE', 'z.example.com'),
+              {'tag': 'block', 'protocol': 'blackhole'},
+            ],
+            'routing': {
+              'balancers': [
+                {
+                  'tag': 'AUTO',
+                  'selector': ['proxy'],
+                  'fallbackTag': fallbackTag,
+                }
+              ],
+            },
+          };
+      expect(
+        _groupMembers(tryConvertXrayConfig(_json(body('SPARE')))!.config, 'AUTO'),
+        ['a.example.com', 'z.example.com'],
+      );
+      expect(
+        _groupMembers(tryConvertXrayConfig(_json(body('block')))!.config, 'AUTO'),
+        ['a.example.com'],
+      );
+    });
+
+    test('mode-configs keep their own balancers, named by remarks', () {
+      final result = tryConvertXrayConfig(_json([
+        {
+          'remarks': 'Smart',
+          'outbounds': [_node('proxy', 'a.example.com')],
+          'routing': {
+            'balancers': [
+              {'tag': 'AUTO', 'selector': ['proxy']}
+            ],
+          },
+        },
+        {
+          'remarks': 'LTE',
+          'outbounds': [_node('proxy', 'b.example.com')],
+          'routing': {
+            'balancers': [
+              {'tag': 'AUTO', 'selector': ['proxy']}
+            ],
+          },
+        },
+      ]));
+      expect(result, isNotNull);
+      expect(_groupMembers(result!.config, 'Smart \u00b7 AUTO'),
+          ['a.example.com']);
+      expect(_groupMembers(result.config, 'LTE \u00b7 AUTO'), ['b.example.com']);
+    });
+
+    test('a balancer tag names the role, so nodes keep their hostnames', () {
+      // `proxy` and `GEMINI` here are the same server under two routing roles;
+      // dedup merges them and neither tag may become the node's name.
+      final result = tryConvertXrayConfig(_json({
+        'outbounds': [
+          _node('proxy', 'a.example.com'),
+          _node('GEMINI', 'a.example.com'),
+        ],
+        'routing': {
+          'balancers': [
+            {'tag': 'AUTO', 'selector': ['proxy']},
+            {'tag': 'GEM', 'selector': ['GEMINI']},
+          ],
+        },
+      }));
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['a.example.com']);
+      expect(_groupMembers(result.config, 'AUTO'), ['a.example.com']);
+      expect(_groupMembers(result.config, 'GEM'), ['a.example.com']);
+    });
+
+    test('a balancer selecting nothing dialable is dropped', () {
+      final result = tryConvertXrayConfig(_json({
+        'outbounds': [
+          _node('proxy', 'a.example.com'),
+          {'tag': 'direct', 'protocol': 'freedom'},
+        ],
+        'routing': {
+          'balancers': [
+            {'tag': 'DIRECT_ONLY', 'selector': ['direct']}
+          ],
+        },
+      }));
+      expect(result, isNotNull);
+      expect(result!.config, isNot(contains('DIRECT_ONLY')));
     });
   });
 }

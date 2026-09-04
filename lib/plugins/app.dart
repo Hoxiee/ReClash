@@ -191,6 +191,28 @@ class App {
     }
   }
 
+  Future<bool> canRequestPackageInstalls() async {
+    return await methodChannel.invokeMethod<bool>(
+          'canRequestPackageInstalls',
+        ) ??
+        false;
+  }
+
+  Future<bool> installApk(String path) async {
+    try {
+      return await methodChannel.invokeMethod<bool>('installApk', {
+            'path': path,
+          }) ??
+          false;
+    } catch (error) {
+      commonPrint.log(
+        'installApk failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return false;
+    }
+  }
+
   Future<String?> getAndroidId() async {
     try {
       return await methodChannel

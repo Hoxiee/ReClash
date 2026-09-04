@@ -2,6 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
+import 'routing_overview.dart';
 
 extension PageLabelL10n on PageLabel {
   String get label {
@@ -61,10 +62,34 @@ extension SmartRoutingPresetL10n on SmartRoutingPreset {
     final appLocalizations = currentAppLocalizations;
     return switch (this) {
       SmartRoutingPreset.off => appLocalizations.smartRoutingPresetOff,
-      SmartRoutingPreset.ruMobile => appLocalizations.smartRoutingPresetRuMobile,
-      SmartRoutingPreset.ruHome => appLocalizations.smartRoutingPresetRuHome,
+      SmartRoutingPreset.russia => appLocalizations.smartRoutingPresetRussia,
       SmartRoutingPreset.iran => appLocalizations.smartRoutingPresetIran,
       SmartRoutingPreset.china => appLocalizations.smartRoutingPresetChina,
+    };
+  }
+}
+
+extension NetworkFormatL10n on NetworkFormat {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      NetworkFormat.open => appLocalizations.smartRoutingFormatOpen,
+      NetworkFormat.restricted => appLocalizations.smartRoutingFormatRestricted,
+      NetworkFormat.portal => appLocalizations.smartRoutingFormatPortal,
+      NetworkFormat.offline => appLocalizations.smartRoutingFormatOffline,
+      NetworkFormat.unknown => appLocalizations.smartRoutingFormatUnknown,
+    };
+  }
+
+  String get description {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      NetworkFormat.open => appLocalizations.smartRoutingFormatOpenDesc,
+      NetworkFormat.restricted =>
+        appLocalizations.smartRoutingFormatRestrictedDesc,
+      NetworkFormat.portal => appLocalizations.smartRoutingFormatPortalDesc,
+      NetworkFormat.offline => appLocalizations.smartRoutingFormatOfflineDesc,
+      NetworkFormat.unknown => appLocalizations.smartRoutingFormatUnknownDesc,
     };
   }
 }

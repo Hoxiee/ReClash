@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 type rcxTerrain uint8
 
@@ -36,6 +39,17 @@ const (
 	rcxOriginForeign
 	rcxOriginDomestic
 )
+
+func (o rcxOrigin) String() string {
+	switch o {
+	case rcxOriginForeign:
+		return "foreign"
+	case rcxOriginDomestic:
+		return "domestic"
+	default:
+		return "unknown"
+	}
+}
 
 type rcxProof uint8
 
@@ -78,6 +92,19 @@ const (
 	rcxEvidenceNone
 )
 
+func (e rcxEvidence) String() string {
+	switch e {
+	case rcxEvidenceLiveTraffic:
+		return "live"
+	case rcxEvidenceFreshProbe:
+		return "fresh"
+	case rcxEvidenceStaleProbe:
+		return "stale"
+	default:
+		return "none"
+	}
+}
+
 type rcxReason string
 
 const (
@@ -99,6 +126,22 @@ type rcxFacts struct {
 	Domestic    rcxProof
 	Transit     rcxProof
 	SupportsUDP bool
+	Breaker     bool
+}
+
+// Ranking, never filtering: an open network spends a specialist for nothing, but
+// it still wins when it is alone.
+func rcxMisfit(terrain rcxTerrain, f rcxFacts) uint8 {
+	if terrain == rcxTerrainWhitelist {
+		if f.Breaker {
+			return 0
+		}
+		return 1
+	}
+	if f.Breaker {
+		return 1
+	}
+	return 0
 }
 
 // These rows are the entire domestic-node asymmetry: what a domestic node is
@@ -126,10 +169,11 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 		domesticPrior:   rcxVerdictLastResort,
 		allowLastResort: true,
 	},
-	// Admitting too much is recoverable by the ordering; refusing to route is not.
+	// A domestic proof outlives the whitelist episode that earned it, so an
+	// unmeasured network must not inherit it as viability.
 	rcxTerrainUnknown: {
 		openWorldProven: rcxVerdictPreferred,
-		domesticProven:  rcxVerdictViable,
+		domesticProven:  rcxVerdictLastResort,
 		foreignPrior:    rcxVerdictViable,
 		domesticPrior:   rcxVerdictLastResort,
 		allowLastResort: true,
@@ -169,6 +213,7 @@ func rcxAllowsLastResort(terrain rcxTerrain, presetAllows bool) bool {
 
 type rcxKey struct {
 	verdict    rcxVerdict
+	misfit     uint8
 	evidence   rcxEvidence
 	latBucket  uint8
 	challenger bool
@@ -180,6 +225,12 @@ type rcxKey struct {
 func rcxCompare(a, b rcxKey) int {
 	if a.verdict != b.verdict {
 		if a.verdict > b.verdict {
+			return -1
+		}
+		return 1
+	}
+	if a.misfit != b.misfit {
+		if a.misfit < b.misfit {
 			return -1
 		}
 		return 1
@@ -292,6 +343,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 	}
 	return rcxKey{
 		verdict:    rcxAdmit(in.Terrain, c.Facts),
+		misfit:     rcxMisfit(in.Terrain, c.Facts),
 		evidence:   c.Evidence,
 		latBucket:  bucket,
 		challenger: c.Name != in.Incumbent,
@@ -385,4 +437,66 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
+}
+
+type rcxBlock string
+
+const (
+	rcxBlockNone         rcxBlock = ""
+	rcxBlockAbsent       rcxBlock = "absent"
+	rcxBlockNoUDP        rcxBlock = "no-udp"
+	rcxBlockCooling      rcxBlock = "cooling"
+	rcxBlockDisproven    rcxBlock = "disproven"
+	rcxBlockLastResort   rcxBlock = "last-resort-barred"
+	rcxBlockTerrainUnfit rcxBlock = "terrain-unfit"
+)
+
+func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
+	if !c.InSkeleton {
+		return rcxBlockAbsent
+	}
+	if in.Policy.RequireUDP && !c.Facts.SupportsUDP {
+		return rcxBlockNoUDP
+	}
+	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
+		return rcxBlockCooling
+	}
+	switch rcxAdmit(in.Terrain, c.Facts) {
+	case rcxVerdictReject:
+		if _, ok := rcxAdmissionTable[in.Terrain]; !ok {
+			return rcxBlockTerrainUnfit
+		}
+		return rcxBlockDisproven
+	case rcxVerdictLastResort:
+		if !rcxAllowsLastResort(in.Terrain, in.Policy.AllowDomesticLast) {
+			return rcxBlockLastResort
+		}
+	}
+	return rcxBlockNone
+}
+
+type rcxRanked struct {
+	Candidate rcxCandidate
+	Key       rcxKey
+	Block     rcxBlock
+}
+
+// The decision's own key and order: a second ordering would drift from it.
+func rcxRank(in rcxDecisionInput) []rcxRanked {
+	ranked := make([]rcxRanked, 0, len(in.Candidates))
+	for _, c := range in.Candidates {
+		ranked = append(ranked, rcxRanked{
+			Candidate: c,
+			Key:       rcxKeyOf(c, in),
+			Block:     rcxBlockOf(c, in),
+		})
+	}
+	sort.SliceStable(ranked, func(i, j int) bool {
+		a, b := ranked[i], ranked[j]
+		if (a.Block == rcxBlockNone) != (b.Block == rcxBlockNone) {
+			return a.Block == rcxBlockNone
+		}
+		return rcxCompare(a.Key, b.Key) < 0
+	})
+	return ranked
 }

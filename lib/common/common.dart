@@ -1,4 +1,5 @@
 export 'app_localizations.dart';
+export 'app_update.dart';
 export 'app_ports.dart';
 export 'changelog.dart';
 export 'color.dart';
@@ -43,10 +44,12 @@ export 'provider_reader.dart';
 export 'proxy.dart';
 export 'render.dart';
 export 'request.dart';
+export 'routing_overview.dart';
 export 'scroll.dart';
 export 'shape.dart';
 export 'singbox_config.dart';
 export 'skipped_node.dart';
+export 'smart_routing.dart';
 export 'subscription_links.dart';
 export 'snowflake.dart';
 export 'string.dart';

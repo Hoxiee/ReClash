@@ -15,6 +15,7 @@ import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.FileProvider
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -41,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.io.File
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -167,6 +169,19 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 GlobalState.lastExitInfo()
             }
 
+            "canRequestPackageInstalls" -> {
+                result.success(canRequestPackageInstalls())
+            }
+
+            "installApk" -> {
+                val path = call.argument<String>("path")
+                if (path.isNullOrEmpty()) {
+                    result.error("INVALID_ARGUMENT", "APK path must be a non-empty string", null)
+                } else {
+                    result.success(installApk(path))
+                }
+            }
+
             "getAndroidId" -> reply(result) {
                 Settings.Secure.getString(
                     GlobalState.application.contentResolver,
@@ -246,6 +261,56 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             activity.startActivity(intent)
             true
         } catch (_: Exception) {
+            false
+        }
+    }
+
+    // Below Android 8 unknown sources is one global setting, so per-app consent
+    // does not exist and the install intent is always allowed to fire.
+    private fun canRequestPackageInstalls(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true
+        return GlobalState.application.packageManager.canRequestPackageInstalls()
+    }
+
+    // Returns false after sending the user to the unknown-sources grant screen:
+    // the caller keeps the downloaded APK and retries once the app resumes.
+    private fun installApk(path: String): Boolean {
+        val context = GlobalState.application
+        return try {
+            if (!canRequestPackageInstalls()) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    "package:${context.packageName}".toUri(),
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                (activity ?: context).startActivity(intent)
+                return false
+            }
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileProvider",
+                File(path),
+            )
+            val intent = Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, APK_MIME_TYPE)
+                .addFlags(
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK,
+                )
+            // FLAG_GRANT_READ_URI_PERMISSION alone is honored from API 24 on; the
+            // explicit grants keep older installers able to read the file.
+            for (info in context.packageManager.queryIntentActivities(
+                intent,
+                PackageManager.MATCH_DEFAULT_ONLY,
+            )) {
+                context.grantUriPermission(
+                    info.activityInfo.packageName,
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                )
+            }
+            (activity ?: context).startActivity(intent)
+            true
+        } catch (error: Exception) {
+            GlobalState.log("installApk failed: $error")
             false
         }
     }
@@ -435,5 +500,6 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         const val VPN_PERMISSION_REQUEST_CODE = 1001
         const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
         const val INSTALLED_APPS_PERMISSION_REQUEST_CODE = 1003
+        const val APK_MIME_TYPE = "application/vnd.android.package-archive"
     }
 }

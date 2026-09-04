@@ -41,6 +41,8 @@ enum CoreMethod {
   rcxConfigure,
   rcxNetwork,
   rcxStatus,
+  rcxReport,
+  rcxDeepScan,
   rcxSetEnabled,
 }
 

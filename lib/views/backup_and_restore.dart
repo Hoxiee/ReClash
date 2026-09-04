@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
@@ -138,17 +137,9 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
   }
 
   Future<void> _restoreOnLocal(RestoreOption option) async {
-    final backupAction = ref.read(backupActionProvider.notifier);
     final appLocalizations = context.appLocalizations;
-    final file = await picker.pickerFile();
-    final path = file?.path;
-    if (path == null) return;
-    await File(path).safeCopy(await appPath.backupFilePath);
     final res = await globalState.loadingRun<bool>(
-      () async {
-        await backupAction.restore(option);
-        return true;
-      },
+      () => ref.read(backupActionProvider.notifier).restorePickedFile(option),
       tag: LoadingTag.backup_restore,
       title: appLocalizations.restore,
     );

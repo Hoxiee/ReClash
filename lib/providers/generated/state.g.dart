@@ -718,6 +718,46 @@ final class TunEnabledProvider extends $FunctionalProvider<bool, bool, bool>
 
 String _$tunEnabledHash() => r'a4c40ddd8d0ae4a7b1f9e2163054229239b1663b';
 
+@ProviderFor(needsSetup)
+final needsSetupProvider = NeedsSetupProvider._();
+
+final class NeedsSetupProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  NeedsSetupProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'needsSetupProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$needsSetupHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return needsSetup(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$needsSetupHash() => r'49ea8c53dffbd78699b483e46438f9da883c094d';
+
 @ProviderFor(DynamicColor)
 final dynamicColorProvider = DynamicColorProvider._();
 

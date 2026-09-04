@@ -192,22 +192,22 @@ func TestProbeBudgetGrantsWhatIsLeftAndRecoversWithTheWindow(t *testing.T) {
 }
 
 func TestWavePlanStopsScheduledWavesOnAMeteredLink(t *testing.T) {
-	preset, _ := rcxResolvePreset(rcxPresetRuMobile)
 	config := rcxDefaultConfig()
+	config.WaveWidth = 6
 	config.SaveMobileData = true
 
-	if _, ok := rcxWavePlan(preset, config, true, false); ok {
+	if _, ok := rcxWavePlan(config, true, false); ok {
 		t.Error("a scheduled wave must not run on a metered link while saving data")
 	}
 
-	width, ok := rcxWavePlan(preset, config, true, true)
+	width, ok := rcxWavePlan(config, true, true)
 	if !ok || width != 3 {
 		t.Errorf("on-demand wave = (%d, %v), want a narrow one", width, ok)
 	}
 
 	config.SaveMobileData = false
-	width, ok = rcxWavePlan(preset, config, true, false)
-	if !ok || width != preset.WaveWidth {
-		t.Errorf("wave = (%d, %v), want the preset width when the user opted out", width, ok)
+	width, ok = rcxWavePlan(config, true, false)
+	if !ok || width != config.WaveWidth {
+		t.Errorf("wave = (%d, %v), want the configured width when the user opted out", width, ok)
 	}
 }

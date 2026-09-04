@@ -555,6 +555,40 @@ void main() {
     });
   });
 
+  group('changeUiMode', () {
+    test('auto turns smart routing on and the core mode to rule', () {
+      container.read(setupActionProvider.notifier).changeUiMode(
+        UiOutboundMode.auto,
+      );
+
+      expect(container.read(patchClashConfigProvider).mode, Mode.rule);
+      expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
+      expect(container.read(uiOutboundModeProvider), UiOutboundMode.auto);
+    });
+
+    test('rule turns smart routing off', () {
+      container
+          .read(setupActionProvider.notifier)
+          .changeUiMode(UiOutboundMode.auto);
+      container
+          .read(setupActionProvider.notifier)
+          .changeUiMode(UiOutboundMode.rule);
+
+      expect(container.read(patchClashConfigProvider).mode, Mode.rule);
+      expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
+      expect(container.read(uiOutboundModeProvider), UiOutboundMode.rule);
+    });
+
+    test('direct keeps the engine untouched', () {
+      container
+          .read(setupActionProvider.notifier)
+          .changeUiMode(UiOutboundMode.direct);
+
+      expect(container.read(patchClashConfigProvider).mode, Mode.direct);
+      expect(container.read(uiOutboundModeProvider), UiOutboundMode.direct);
+    });
+  });
+
   group('applyProfileDebounce', () {
     test('collapses a burst into a single apply', () async {
       final notifier = container.read(setupActionProvider.notifier);

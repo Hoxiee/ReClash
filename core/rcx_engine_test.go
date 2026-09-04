@@ -123,14 +123,29 @@ func (r *fakeRuntime) lastStatus() rcxStatus {
 	return r.published[len(r.published)-1]
 }
 
-func newTestEngine(runtime *fakeRuntime, preset string) *rcxEngine {
-	engine := newRcxEngine(runtime)
-	engine.snapshot = rcxEmptySnapshot()
+// Stands in for what the host ships: the core no longer owns a preset table, so a
+// test has to hand it the same fields a bundle would.
+func testConfig(preset string) rcxConfig {
 	config := rcxDefaultConfig()
 	config.Enabled = true
 	config.Preset = preset
+	config.CensorCountries = []string{"RU"}
+	config.CanaryForeign = []string{"1.1.1.1:443"}
+	config.CanaryDomestic = []string{"77.88.8.8:443"}
+	config.OpenMarkers = []rcxMarker{
+		{URL: "https://www.youtube.com/generate_204", Statuses: []int{204}},
+	}
+	config.DomesticMarkers = []rcxMarker{
+		{URL: "https://ya.ru/", Statuses: []int{200, 301, 302}},
+	}
+	return config
+}
+
+func newTestEngine(runtime *fakeRuntime, preset string) *rcxEngine {
+	engine := newRcxEngine(runtime)
+	engine.snapshot = rcxEmptySnapshot()
+	config := testConfig(preset)
 	engine.applyConfigLocked(config)
-	engine.snapshot.Config = config
 	engine.envKey = "w:Home"
 	engine.terrain.observe(rcxTerrainNormal, runtime.Now())
 	return engine
@@ -154,7 +169,7 @@ func TestEngineDoesNothingOutsideRuleMode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.mode = "global"
 	runtime.members = foreignMembers("a", "b")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 
 	engine.reconsider()
 
@@ -169,7 +184,7 @@ func TestEngineDoesNothingOutsideRuleMode(t *testing.T) {
 func TestEngineLeavesADeadIncumbentForALivingNode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("dead", "alive")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.incumbent = "dead"
 	engine.since = runtime.Now().Add(-time.Hour)
 
@@ -191,7 +206,7 @@ func TestEngineLeavesADeadIncumbentForALivingNode(t *testing.T) {
 func TestEngineHoldsAStrandedIncumbentInsteadOfLeaking(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("only")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.incumbent = "only"
 	engine.ledger.NoteProbe("only", "w:Home", rcxRoleOpen, rcxProbeFail, 0, runtime.Now())
 
@@ -208,7 +223,7 @@ func TestEngineHoldsAStrandedIncumbentInsteadOfLeaking(t *testing.T) {
 func TestEngineStartsFromTheNodeRememberedForThisNetwork(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "remembered")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.snapshot.Picks["w:Home"] = "remembered"
 	engine.ledger.NoteProbe("remembered", "w:Home", rcxRoleOpen, rcxProbeOK, 120, runtime.Now())
 	engine.envKey = ""
@@ -227,7 +242,7 @@ func TestEngineStartsFromTheNodeRememberedForThisNetwork(t *testing.T) {
 func TestEngineKeepsFailureMemoryPerNetwork(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 
 	for i := 0; i < 3; i++ {
 		engine.ledger.NoteDialFailure("node", "10.0.0.1:"+string(rune('a'+i)), "w:Home", rcxTerrainNormal, runtime.Now())
@@ -244,7 +259,7 @@ func TestEngineKeepsFailureMemoryPerNetwork(t *testing.T) {
 func TestEngineCarriesMemoryWhenTheSsidBecomesReadable(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.envKey = ""
 
 	anonymous := rcxNetworkPayload{
@@ -275,7 +290,7 @@ func TestEngineCarriesMemoryWhenTheSsidBecomesReadable(t *testing.T) {
 
 func TestNoteDialNeitherBlocksNorTakesCoreLocks(t *testing.T) {
 	runtime := newFakeRuntime()
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 
 	// match() holds configMux while a rule resolves, and patchSelectGroup takes
 	// selectMu under configMu: a hook that reached for either would deadlock.
@@ -303,7 +318,7 @@ func TestNoteDialNeitherBlocksNorTakesCoreLocks(t *testing.T) {
 
 func TestNoteDialIsSilentWhileDisabled(t *testing.T) {
 	runtime := newFakeRuntime()
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.SetEnabled(false)
 	engine.handle(<-engine.events)
 
@@ -317,7 +332,7 @@ func TestNoteDialIsSilentWhileDisabled(t *testing.T) {
 func TestEngineIgnoresEvidenceThatIsNotAboutItsOwnNodes(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.reconsider()
 
 	for i := 0; i < 3; i++ {
@@ -333,7 +348,7 @@ func TestEngineIgnoresEvidenceThatIsNotAboutItsOwnNodes(t *testing.T) {
 func TestEngineStopsCollectingEvidenceOutsideRuleMode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.reconsider()
 	runtime.mode = "global"
 
@@ -350,7 +365,7 @@ func TestEngineStopsCollectingEvidenceOutsideRuleMode(t *testing.T) {
 func TestEngineReadsThrottlingFromTrafficDeltas(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 
 	runtime.traffic = map[string]rcxTrafficSample{"node": {Up: 1000, Down: 500}}
 	engine.sampleTraffic()
@@ -372,7 +387,7 @@ func TestEngineReadsThrottlingFromTrafficDeltas(t *testing.T) {
 func TestEngineBuysOneWaveAtATime(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "b", "c")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 
 	engine.reconsider()
 	if !engine.probing {
@@ -390,13 +405,13 @@ func TestEngineBuysOneWaveAtATime(t *testing.T) {
 func TestEngineNarrowsTheWaveOnAMeteredLink(t *testing.T) {
 	wide := newFakeRuntime()
 	wide.members = foreignMembers("a", "b", "c", "d", "e", "f", "g", "h")
-	home := newTestEngine(wide, rcxPresetRuHome)
+	home := newTestEngine(wide, "ru")
 	home.reconsider()
 	spentOnWifi := rcxProbeBudgetCap - home.budget.Remaining(wide.Now())
 
 	metered := newFakeRuntime()
 	metered.members = wide.members
-	mobile := newTestEngine(metered, rcxPresetRuMobile)
+	mobile := newTestEngine(metered, "ru")
 	mobile.metered = true
 	mobile.reconsider()
 	spentOnLte := rcxProbeBudgetCap - mobile.budget.Remaining(metered.Now())
@@ -412,7 +427,7 @@ func TestEngineNarrowsTheWaveOnAMeteredLink(t *testing.T) {
 func TestEngineLetsWorkingTrafficStandInForAProbe(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "b")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.incumbent = "a"
 	engine.since = runtime.Now().Add(-time.Hour)
 	engine.ledger.NoteDialSuccess("a", "10.0.0.1:1234", "w:Home", 70*time.Millisecond, runtime.Now())
@@ -427,7 +442,7 @@ func TestEngineLetsWorkingTrafficStandInForAProbe(t *testing.T) {
 func TestEngineHonoursAManualPickUntilItStopsWorking(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("chosen", "faster")
-	engine := newTestEngine(runtime, rcxPresetRuHome)
+	engine := newTestEngine(runtime, "ru")
 	engine.ledger.NoteProbe("chosen", "w:Home", rcxRoleOpen, rcxProbeOK, 900, runtime.Now())
 	engine.ledger.NoteProbe("faster", "w:Home", rcxRoleOpen, rcxProbeOK, 60, runtime.Now())
 
@@ -439,7 +454,7 @@ func TestEngineHonoursAManualPickUntilItStopsWorking(t *testing.T) {
 		t.Fatalf("incumbent = %q, want the manual pick to survive a latency gain", got)
 	}
 
-	runtime.advance(time.Duration(engine.config().ManualHoldMinutes) * time.Minute)
+	runtime.advance(time.Duration(engine.cfg.ManualHoldMinutes) * time.Minute)
 	engine.reconsider()
 
 	if got := engine.incumbent; got != "faster" {
@@ -451,7 +466,7 @@ func TestEngineFallsBackToADomesticNodeOnlyUnderAShutdown(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("foreign", "domestic")
 	runtime.countries = map[string]string{"foreign": "NL", "domestic": "RU"}
-	engine := newTestEngine(runtime, rcxPresetRuMobile)
+	engine := newTestEngine(runtime, "ru")
 	engine.ledger.NoteProbe("foreign", "c:25001", rcxRoleOpen, rcxProbeFail, 0, runtime.Now())
 	engine.ledger.NoteProbe("domestic", "c:25001", rcxRoleDomestic, rcxProbeOK, 40, runtime.Now())
 	engine.envKey = "c:25001"
@@ -473,7 +488,7 @@ func TestEngineFallsBackToADomesticNodeOnlyUnderAShutdown(t *testing.T) {
 func TestEngineForgetsProvisionalFailuresWhenTheNetworkRecovers(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
-	engine := newTestEngine(runtime, rcxPresetRuMobile)
+	engine := newTestEngine(runtime, "ru")
 	engine.envKey = "c:25001"
 	engine.terrain.observe(rcxTerrainWhitelist, runtime.Now())
 

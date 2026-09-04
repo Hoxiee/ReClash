@@ -604,6 +604,16 @@ class BatteryOptimizationDisable extends _$BatteryOptimizationDisable
   }
 }
 
+/// Whether a VPN that is not ours holds an interface. Polled, because no
+/// platform offers a change notification for a third party's tunnel.
+@Riverpod(keepAlive: true)
+class ForeignVpn extends _$ForeignVpn with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
 @Riverpod(keepAlive: true)
 class LocationPermissions extends _$LocationPermissions
     with AutoDisposeNotifierMixin {

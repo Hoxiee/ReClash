@@ -114,10 +114,8 @@ extension ModeUiExt on Mode {
 enum SmartRoutingPreset {
   @JsonValue('off')
   off,
-  @JsonValue('ru-mobile')
-  ruMobile,
-  @JsonValue('ru-home')
-  ruHome,
+  @JsonValue('ru')
+  russia,
   @JsonValue('ir')
   iran,
   @JsonValue('cn')
