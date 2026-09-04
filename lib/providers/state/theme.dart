@@ -38,6 +38,7 @@ ColorScheme genColorScheme(
       (state) => (
         primaryColor: state.primaryColor,
         schemeVariant: state.schemeVariant,
+        contrastLevel: state.contrastLevel,
       ),
     ),
   );
@@ -52,19 +53,21 @@ ColorScheme genColorScheme(
       seedColor: seed ?? dynamicColor.accentColor,
       brightness: brightness,
       dynamicSchemeVariant: themeSetting.schemeVariant,
+      contrastLevel: themeSetting.contrastLevel,
     );
   }
   return ColorScheme.fromSeed(
     seedColor: color ?? Color(themeSetting.primaryColor!),
     brightness: brightness,
     dynamicSchemeVariant: themeSetting.schemeVariant,
+    contrastLevel: themeSetting.contrastLevel,
   );
 }
 
 @riverpod
 Brightness currentBrightness(Ref ref) {
   final themeMode = ref.watch(
-    themeSettingProvider.select((state) => state.themeMode),
+    themeSettingProvider.select((state) => state.effectiveThemeMode),
   );
   final systemBrightness = ref.watch(systemBrightnessProvider);
   return switch (themeMode) {

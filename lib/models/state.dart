@@ -325,6 +325,7 @@ abstract class SharedState with _$SharedState {
     required bool onlyStatisticsProxy,
     @Default(true) bool showStopAction,
     required bool crashlytics,
+    @Default(false) bool pureBlackTheme,
   }) = _SharedState;
 
   factory SharedState.fromJson(Map<String, Object?> json) =>

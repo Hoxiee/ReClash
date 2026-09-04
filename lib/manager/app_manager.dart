@@ -119,6 +119,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     if (state == AppLifecycleState.resumed) {
       permissions.check(ref.read);
       render?.resume();
+      ref.read(themeActionProvider.notifier).updateBrightness();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;

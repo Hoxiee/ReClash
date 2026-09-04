@@ -346,7 +346,7 @@ final class ThemeActionProvider extends $NotifierProvider<ThemeAction, void> {
   }
 }
 
-String _$themeActionHash() => r'9802c7ba8247f8c2d396fab398642567d8eecf62';
+String _$themeActionHash() => r'6309ee8cab23e8af58b4ec7f8c857d599befbd1b';
 
 abstract class _$ThemeAction extends $Notifier<void> {
   void build();

@@ -20,6 +20,7 @@ import 'package:reclash/views/profiles/overwrite/custom/rules.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/providers.dart';
 import 'package:reclash/views/proxies/tab.dart';
+import 'package:reclash/views/locale.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/views.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -49,6 +50,7 @@ void main() {
     'advanced config': const AdvancedConfigView(),
     'smart pause config': const SmartPauseView(),
     'theme': const ThemeView(),
+    'language': const LocaleView(),
     'application settings': const ApplicationSettingView(),
     'backup and restore': const BackupAndRestore(),
     'hotkeys': const HotKeyView(),
@@ -101,7 +103,7 @@ void main() {
   }
 
   final toolDestinations = <String, Type>{
-    'Theme': ThemeView,
+    'Appearance': ThemeView,
     'Backup and restore': BackupAndRestore,
     'Basic configuration': ConfigView,
     'Advanced configuration': AdvancedConfigView,

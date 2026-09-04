@@ -172,6 +172,9 @@ SharedState sharedState(Ref ref) {
       ),
     ),
   );
+  final pureBlackTheme = ref.watch(
+    themeSettingProvider.select((state) => state.pureBlack),
+  );
   final networkSetting = ref.watch(
     networkSettingProvider.select(
       (state) => (
@@ -207,6 +210,7 @@ SharedState sharedState(Ref ref) {
     resumeText: currentAppLocalizations.resume,
     pausedText: currentAppLocalizations.paused,
     crashlytics: crashlytics,
+    pureBlackTheme: pureBlackTheme,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,
     pauseTip: currentAppLocalizations.pauseVpn,

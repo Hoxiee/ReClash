@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 
 class ThemeModeItem {
-  final ThemeMode themeMode;
+  final ThemeMode? themeMode;
   final IconData iconData;
   final String label;
 
@@ -40,10 +40,13 @@ class ThemeView extends StatelessWidget {
         slivers: [
           _SectionHeader(title: appLocalizations.appearanceTheme),
           const _ThemeModeItem(),
+          const _ScheduleVisibility(),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           const _PrueBlackItem(),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
           const _TextScaleFactorItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _ContrastItem(),
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
           _SectionHeader(title: appLocalizations.appearanceColor),
           const _PrimaryColorItem(),
@@ -100,8 +103,10 @@ class _ThemeModeItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final themeMode = ref.watch(
-      themeSettingProvider.select((state) => state.themeMode),
+    final (themeMode: themeMode, scheduledTheme: scheduledTheme) = ref.watch(
+      themeSettingProvider.select(
+        (state) => (themeMode: state.themeMode, scheduledTheme: state.scheduledTheme),
+      ),
     );
     final List<ThemeModeItem> themeModeItems = [
       ThemeModeItem(
@@ -119,6 +124,11 @@ class _ThemeModeItem extends ConsumerWidget {
         label: appLocalizations.dark,
         themeMode: ThemeMode.dark,
       ),
+      ThemeModeItem(
+        iconData: Icons.schedule,
+        label: appLocalizations.schedule,
+        themeMode: null,
+      ),
     ];
     return SliverToBoxAdapter(
       child: ItemCard(
@@ -135,14 +145,22 @@ class _ThemeModeItem extends ConsumerWidget {
             itemBuilder: (_, index) {
               final themeModeItem = themeModeItems[index];
               return CommonCard(
-                isSelected: themeModeItem.themeMode == themeMode,
+                isSelected: themeModeItem.themeMode == null
+                    ? scheduledTheme
+                    : !scheduledTheme && themeModeItem.themeMode == themeMode,
                 onPressed: () {
-                  ref
-                      .read(themeSettingProvider.notifier)
-                      .update(
-                        (state) =>
-                            state.copyWith(themeMode: themeModeItem.themeMode),
-                      );
+                  ref.read(themeSettingProvider.notifier).update(
+                    (state) => themeModeItem.themeMode == null
+                        ? state.copyWith(
+                            scheduledTheme: true,
+                            darkAt: state.darkAt ?? '22:00',
+                            lightAt: state.lightAt ?? '07:00',
+                          )
+                        : state.copyWith(
+                            scheduledTheme: false,
+                            themeMode: themeModeItem.themeMode!,
+                          ),
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -163,6 +181,152 @@ class _ThemeModeItem extends ConsumerWidget {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ScheduleVisibility extends ConsumerWidget {
+  const _ScheduleVisibility();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheduledTheme = ref.watch(
+      themeSettingProvider.select((state) => state.scheduledTheme),
+    );
+    if (!scheduledTheme) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+    return const SliverToBoxAdapter(child: _ScheduleItem());
+  }
+}
+
+class _ScheduleItem extends ConsumerWidget {
+  const _ScheduleItem();
+
+  Future<void> _editTime(
+    BuildContext context,
+    WidgetRef ref,
+    bool isDark,
+  ) async {
+    final appLocalizations = context.appLocalizations;
+    final current = ref.read(
+      themeSettingProvider.select(
+        (state) => (isDark ? state.darkAt : state.lightAt) ?? '',
+      ),
+    );
+    final options = <String>{
+      if (current.isNotEmpty) current,
+      '20:00',
+      '21:00',
+      '22:00',
+      '23:00',
+      '00:00',
+      '06:00',
+      '07:00',
+      '08:00',
+      '09:00',
+    }.toList();
+    final value = await dialogs.showCommonDialog<String>(
+      child: OptionsDialog<String>(
+        title: isDark
+            ? appLocalizations.darkAt
+            : appLocalizations.lightAt,
+        options: options,
+        value: current.isEmpty ? '22:00' : current,
+        textBuilder: (item) => item,
+      ),
+    );
+    if (value == null) {
+      return;
+    }
+    ref.read(themeSettingProvider.notifier).update(
+      (state) => isDark
+          ? state.copyWith(darkAt: value)
+          : state.copyWith(lightAt: value),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final (darkAt: darkAt, lightAt: lightAt) = ref.watch(
+      themeSettingProvider.select(
+        (state) => (darkAt: state.darkAt, lightAt: state.lightAt),
+      ),
+    );
+    return Column(
+      children: [
+        ListItem(
+          leading: const Icon(Icons.bedtime),
+          title: Text(appLocalizations.darkAt),
+          subtitle: Text(darkAt ?? '22:00'),
+          onTap: () => _editTime(context, ref, true),
+        ),
+        ListItem(
+          leading: const Icon(Icons.wb_sunny),
+          title: Text(appLocalizations.lightAt),
+          subtitle: Text(lightAt ?? '07:00'),
+          onTap: () => _editTime(context, ref, false),
+        ),
+      ],
+    );
+  }
+}
+
+class _ContrastItem extends ConsumerWidget {
+  const _ContrastItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final (contrastLevel: contrast, pureBlack: pureBlack) = ref.watch(
+      themeSettingProvider.select(
+        (state) => (
+          contrastLevel: state.contrastLevel,
+          pureBlack: state.pureBlack,
+        ),
+      ),
+    );
+    final process = contrast >= 0
+        ? '+${(contrast * 100).round()}%'
+        : '${(contrast * 100).round()}%';
+    return SliverToBoxAdapter(
+      child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListItem(
+          leading: Tooltip(
+            message: pureBlack ? appLocalizations.contrastAmoledHint : '',
+            child: const Icon(Icons.contrast),
+          ),
+          horizontalTitleGap: 12,
+          title: Text(
+            appLocalizations.contrast,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Text(process, style: context.textTheme.titleMedium),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SliderTheme(
+            data: SliderDefaultsM3(context),
+            child: Slider(
+              padding: EdgeInsets.zero,
+              min: -1,
+              max: 1,
+              value: contrast.clamp(-1, 1),
+              onChanged: (value) {
+                ref
+                    .read(themeSettingProvider.notifier)
+                    .update((state) => state.copyWith(contrastLevel: value));
+              },
+            ),
+          ),
+        ),
+      ],
       ),
     );
   }

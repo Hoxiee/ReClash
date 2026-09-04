@@ -9,6 +9,7 @@ import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/manager/manager.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
@@ -187,7 +188,7 @@ class ApplicationState extends ConsumerState<Application> {
           title: appName,
           locale: getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,
-          themeMode: themeProps.themeMode,
+          themeMode: themeProps.effectiveThemeMode,
           theme: ThemeData(
             useMaterial3: true,
             pageTransitionsTheme: _pageTransitionsTheme,

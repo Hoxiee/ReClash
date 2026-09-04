@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'f370c250f0da9b752d073392756ce38437157073';
+String _$sharedStateHash() => r'0fc2c3f9a8cc0674843c69c0efe13256fe5726db';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -873,7 +873,7 @@ final class GenColorSchemeProvider
   }
 }
 
-String _$genColorSchemeHash() => r'2b413948f7d0fbcd3b1263a0053c3d35cbbd4db5';
+String _$genColorSchemeHash() => r'1078d00e2eb3ce4b788babd4e04b05f9acecb9fd';
 
 final class GenColorSchemeFamily extends $Family
     with
@@ -942,7 +942,7 @@ final class CurrentBrightnessProvider
   }
 }
 
-String _$currentBrightnessHash() => r'ab56c47af4fcae773c8f9f81c91800c1e1890b70';
+String _$currentBrightnessHash() => r'144902d42fc168240f4f08b488af9228d352e7e8';
 
 @ProviderFor(customOverwriteDate)
 final customOverwriteDateProvider = CustomOverwriteDateFamily._();

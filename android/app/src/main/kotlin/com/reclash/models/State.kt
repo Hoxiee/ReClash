@@ -14,6 +14,7 @@ data class SharedState(
     val resumeText: String = "Resume",
     val pausedText: String = "Paused",
     val onlyStatisticsProxy: Boolean = false,
+    val pureBlackTheme: Boolean = false,
     val showStopAction: Boolean = true,
     val vpnOptions: VpnOptions? = null,
     val setupParams: SetupParams? = null,
