@@ -341,6 +341,7 @@ class SetupAction extends _$SetupAction {
     final smartRouting = ref.read(
       smartRoutingSettingProvider.select((state) => state.enabled),
     );
+    final desync = ref.read(desyncSettingProvider);
     final configMap = await _core.getConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
@@ -382,6 +383,10 @@ class SetupAction extends _$SetupAction {
         smartRouting: smartRouting,
         authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
+        desync: desync.enabled,
+        desyncPort: desync.port,
+        desyncCategories: desync.categories,
+        desyncForceTcp: desync.forceTcp,
       ),
     );
     return res;

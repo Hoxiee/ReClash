@@ -39,6 +39,14 @@ class SmartRoutingSetting extends _$SmartRoutingSetting
 }
 
 @riverpod
+class DesyncSetting extends _$DesyncSetting with AutoDisposeNotifierMixin {
+  @override
+  DesyncProps build() {
+    return const DesyncProps();
+  }
+}
+
+@riverpod
 class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {
   @override
   NetworkProps build() {
@@ -121,6 +129,7 @@ Config _config(Ref ref) {
   final vpnProps = ref.watch(vpnSettingProvider);
   final networkProps = ref.watch(networkSettingProvider);
   final smartRoutingProps = ref.watch(smartRoutingSettingProvider);
+  final desyncProps = ref.watch(desyncSettingProvider);
   final themeProps = ref.watch(themeSettingProvider);
   final currentProfileId = ref.watch(currentProfileIdProvider);
   final davProps = ref.watch(davSettingProvider);
@@ -134,6 +143,7 @@ Config _config(Ref ref) {
     vpnProps: vpnProps,
     networkProps: networkProps,
     smartRoutingProps: smartRoutingProps,
+    desyncProps: desyncProps,
     themeProps: themeProps,
     currentProfileId: currentProfileId,
     davProps: davProps,
@@ -153,6 +163,7 @@ List<Override> buildConfigOverrides(Config config) {
     smartRoutingSettingProvider.overrideWithBuild(
       (_, _) => config.smartRoutingProps,
     ),
+    desyncSettingProvider.overrideWithBuild((_, _) => config.desyncProps),
     themeSettingProvider.overrideWithBuild((_, _) => config.themeProps),
     currentProfileIdProvider.overrideWithBuild(
       (_, _) => config.currentProfileId,

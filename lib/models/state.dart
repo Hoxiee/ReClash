@@ -8,6 +8,7 @@ import 'clash_config.dart';
 import 'common.dart';
 import 'config.dart';
 import 'core.dart';
+import 'desync.dart';
 import 'profile.dart';
 
 part 'generated/state.freezed.dart';
@@ -365,6 +366,10 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(false) bool smartRouting,
     @Default([]) List<String> authentication,
     String? matchTarget,
+    @Default(false) bool desync,
+    @Default(defaultDesyncPort) int desyncPort,
+    @Default([]) List<DesyncCategory> desyncCategories,
+    @Default(true) bool desyncForceTcp,
   }) = _MakeRealProfileState;
 }
 

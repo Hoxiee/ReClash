@@ -113,6 +113,8 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
       const [],
   smartPauseCloseConnections:
       json['smartPauseCloseConnections'] as bool? ?? false,
+  desyncEnabled: json['desyncEnabled'] as bool? ?? false,
+  desyncPort: (json['desyncPort'] as num?)?.toInt() ?? defaultDesyncPort,
 );
 
 Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
@@ -130,6 +132,8 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'smartPauseEnabled': instance.smartPauseEnabled,
       'smartPauseNetworks': instance.smartPauseNetworks,
       'smartPauseCloseConnections': instance.smartPauseCloseConnections,
+      'desyncEnabled': instance.desyncEnabled,
+      'desyncPort': instance.desyncPort,
     };
 
 _InitParams _$InitParamsFromJson(Map<String, dynamic> json) => _InitParams(

@@ -3091,7 +3091,7 @@ $TextScaleCopyWith<$Res> get textScale {
 /// @nodoc
 mixin _$Config {
 
- int? get currentProfileId; bool get overrideDns; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
+ int? get currentProfileId; bool get overrideDns; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps; DesyncProps get desyncProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3105,20 +3105,20 @@ $ConfigCopyWith<Config> get copyWith => _$ConfigCopyWithImpl<Config>(this as Con
 @override
 bool operator ==(Object other) {
   final _this = this as Config;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.desyncProps, _this.desyncProps) || other.desyncProps == _this.desyncProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Config;
-  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
+  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.desyncProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
 }
 
 @override
 String toString() {
   final _this = this as Config;
-  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
+  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, desyncProps: ${_this.desyncProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
 }
 
 
@@ -3129,11 +3129,11 @@ abstract mixin class $ConfigCopyWith<$Res>  {
   factory $ConfigCopyWith(Config value, $Res Function(Config) _then) = _$ConfigCopyWithImpl;
 @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps, DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
-$AppSettingPropsCopyWith<$Res> get appSettingProps;$DAVPropsCopyWith<$Res>? get davProps;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;$WindowPropsCopyWith<$Res> get windowProps;$PatchClashConfigCopyWith<$Res> get patchClashConfig;
+$AppSettingPropsCopyWith<$Res> get appSettingProps;$DAVPropsCopyWith<$Res>? get davProps;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;$DesyncPropsCopyWith<$Res> get desyncProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;$WindowPropsCopyWith<$Res> get windowProps;$PatchClashConfigCopyWith<$Res> get patchClashConfig;
 
 }
 /// @nodoc
@@ -3146,7 +3146,7 @@ class _$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
@@ -3156,7 +3156,8 @@ as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // 
 as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
 as NetworkProps,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,smartRoutingProps: null == smartRoutingProps ? _self.smartRoutingProps : smartRoutingProps // ignore: cast_nullable_to_non_nullable
-as SmartRoutingProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
+as SmartRoutingProps,desyncProps: null == desyncProps ? _self.desyncProps : desyncProps // ignore: cast_nullable_to_non_nullable
+as DesyncProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
 as ThemeProps,proxiesStyleProps: null == proxiesStyleProps ? _self.proxiesStyleProps : proxiesStyleProps // ignore: cast_nullable_to_non_nullable
 as ProxiesStyleProps,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
 as WindowProps,patchClashConfig: null == patchClashConfig ? _self.patchClashConfig : patchClashConfig // ignore: cast_nullable_to_non_nullable
@@ -3210,6 +3211,15 @@ $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps {
   
   return $SmartRoutingPropsCopyWith<$Res>(_self.smartRoutingProps, (value) {
     return _then(_self.copyWith(smartRoutingProps: value));
+  });
+}/// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$DesyncPropsCopyWith<$Res> get desyncProps {
+  
+  return $DesyncPropsCopyWith<$Res>(_self.desyncProps, (value) {
+    return _then(_self.copyWith(desyncProps: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
@@ -3329,10 +3339,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps,  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return orElse();
 
 }
@@ -3350,10 +3360,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps,  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
 switch (_that) {
 case _Config():
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3370,10 +3380,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps,  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return null;
 
 }
@@ -3385,7 +3395,7 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 @JsonSerializable()
 
 class _Config implements Config {
-  const _Config({this.currentProfileId, this.overrideDns = false,  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
+  const _Config({this.currentProfileId, this.overrideDns = false,  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, this.desyncProps = defaultDesyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
   factory _Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 
 @override final  int? currentProfileId;
@@ -3402,6 +3412,7 @@ class _Config implements Config {
 @override@JsonKey() final  NetworkProps networkProps;
 @override@JsonKey() final  VpnProps vpnProps;
 @override@JsonKey() final  SmartRoutingProps smartRoutingProps;
+@override@JsonKey() final  DesyncProps desyncProps;
 @override@JsonKey(fromJson: ThemeProps.safeFromJson) final  ThemeProps themeProps;
 @override@JsonKey() final  ProxiesStyleProps proxiesStyleProps;
 @override@JsonKey() final  WindowProps windowProps;
@@ -3420,18 +3431,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.desyncProps, desyncProps) || other.desyncProps == desyncProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,currentProfileId,overrideDns,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
+    return Object.hash(runtimeType,currentProfileId,overrideDns,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,desyncProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
 }
 
 @override
 String toString() {
-    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
+    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, desyncProps: $desyncProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
 }
 
 
@@ -3442,11 +3453,11 @@ abstract mixin class _$ConfigCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   factory _$ConfigCopyWith(_Config value, $Res Function(_Config) _then) = __$ConfigCopyWithImpl;
 @override @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps, DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
-@override $AppSettingPropsCopyWith<$Res> get appSettingProps;@override $DAVPropsCopyWith<$Res>? get davProps;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;@override $WindowPropsCopyWith<$Res> get windowProps;@override $PatchClashConfigCopyWith<$Res> get patchClashConfig;
+@override $AppSettingPropsCopyWith<$Res> get appSettingProps;@override $DAVPropsCopyWith<$Res>? get davProps;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;@override $DesyncPropsCopyWith<$Res> get desyncProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;@override $WindowPropsCopyWith<$Res> get windowProps;@override $PatchClashConfigCopyWith<$Res> get patchClashConfig;
 
 }
 /// @nodoc
@@ -3459,7 +3470,7 @@ class __$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(_Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
@@ -3469,7 +3480,8 @@ as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // 
 as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
 as NetworkProps,vpnProps: null == vpnProps ? _self.vpnProps : vpnProps // ignore: cast_nullable_to_non_nullable
 as VpnProps,smartRoutingProps: null == smartRoutingProps ? _self.smartRoutingProps : smartRoutingProps // ignore: cast_nullable_to_non_nullable
-as SmartRoutingProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
+as SmartRoutingProps,desyncProps: null == desyncProps ? _self.desyncProps : desyncProps // ignore: cast_nullable_to_non_nullable
+as DesyncProps,themeProps: null == themeProps ? _self.themeProps : themeProps // ignore: cast_nullable_to_non_nullable
 as ThemeProps,proxiesStyleProps: null == proxiesStyleProps ? _self.proxiesStyleProps : proxiesStyleProps // ignore: cast_nullable_to_non_nullable
 as ProxiesStyleProps,windowProps: null == windowProps ? _self.windowProps : windowProps // ignore: cast_nullable_to_non_nullable
 as WindowProps,patchClashConfig: null == patchClashConfig ? _self.patchClashConfig : patchClashConfig // ignore: cast_nullable_to_non_nullable
@@ -3524,6 +3536,15 @@ $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps {
   
   return $SmartRoutingPropsCopyWith<$Res>(_self.smartRoutingProps, (value) {
     return _then(_self.copyWith(smartRoutingProps: value));
+  });
+}/// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$DesyncPropsCopyWith<$Res> get desyncProps {
+  
+  return $DesyncPropsCopyWith<$Res>(_self.desyncProps, (value) {
+    return _then(_self.copyWith(desyncProps: value));
   });
 }/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.

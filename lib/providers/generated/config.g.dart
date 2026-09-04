@@ -217,6 +217,58 @@ abstract class _$SmartRoutingSetting extends $Notifier<SmartRoutingProps> {
   }
 }
 
+@ProviderFor(DesyncSetting)
+final desyncSettingProvider = DesyncSettingProvider._();
+
+final class DesyncSettingProvider
+    extends $NotifierProvider<DesyncSetting, DesyncProps> {
+  DesyncSettingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'desyncSettingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$desyncSettingHash();
+
+  @$internal
+  @override
+  DesyncSetting create() => DesyncSetting();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DesyncProps value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DesyncProps>(value),
+    );
+  }
+}
+
+String _$desyncSettingHash() => r'f86e755726da3009031c5e59bdd6733525b73e04';
+
+abstract class _$DesyncSetting extends $Notifier<DesyncProps> {
+  DesyncProps build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<DesyncProps, DesyncProps>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<DesyncProps, DesyncProps>,
+              DesyncProps,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(NetworkSetting)
 final networkSettingProvider = NetworkSettingProvider._();
 
@@ -720,4 +772,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'2595bfffebac2e6f0bd7b2a2de2f8c177cab2fb7';
+String _$_configHash() => r'5819c9874ed14a5c3dd0648642b5df1c7df15eab';

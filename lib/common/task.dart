@@ -130,6 +130,7 @@ List<String> injectRcxSkeleton({
       (rawConfig['proxies'] as List?)
           ?.map((proxy) => proxy is Map ? proxy['name']?.toString() : null)
           .whereType<String>()
+          .where((name) => name != desyncOutboundName)
           .toList() ??
       const <String>[];
   if (providers.isEmpty && inline.isEmpty) {
@@ -228,6 +229,47 @@ bool _isPrivateCidr(String host) {
     return true;
   }
   return first == 172 && second >= 16 && second <= 31;
+}
+
+// A profile that owns the name wins: our insertion is not worth overwriting it.
+void appendDesyncProxy({
+  required Map<dynamic, dynamic> rawConfig,
+  required int port,
+}) {
+  final existing = rawConfig['proxies'];
+  final proxies = existing is List ? existing : const [];
+  final taken = proxies.map(
+    (proxy) => proxy is Map ? proxy['name']?.toString() : null,
+  );
+  if (taken.contains(desyncOutboundName)) {
+    return;
+  }
+  rawConfig['proxies'] = <Object?>[
+    ...proxies,
+    <String, Object?>{
+      'name': desyncOutboundName,
+      'type': 'socks5',
+      'server': '127.0.0.1',
+      'port': port,
+      'udp': true,
+    },
+  ];
+}
+
+List<String> desyncRules({
+  required List<DesyncCategory> categories,
+  required bool forceTcp,
+}) {
+  if (categories.isEmpty) {
+    return const [];
+  }
+  return [
+    if (forceTcp)
+      for (final category in categories)
+        'AND,((NETWORK,udp),(DST-PORT,443),(GEOSITE,${category.geosite})),REJECT',
+    for (final category in categories)
+      'GEOSITE,${category.geosite},$desyncOutboundName',
+  ];
 }
 
 Future<({String yaml, String md5})> makeRealProfileTask(
@@ -445,6 +487,17 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   }
   if (data.smartRouting) {
     rules = injectRcxSkeleton(rawConfig: rawConfig, rules: rules);
+  }
+  // After the skeleton: an outbound present while it is built is ranked as a node.
+  if (data.desync) {
+    appendDesyncProxy(rawConfig: rawConfig, port: data.desyncPort);
+    rules = [
+      ...desyncRules(
+        categories: data.desyncCategories,
+        forceTcp: data.desyncForceTcp,
+      ),
+      ...rules,
+    ];
   }
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));

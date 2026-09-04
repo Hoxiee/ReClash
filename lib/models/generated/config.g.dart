@@ -493,6 +493,9 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       : SmartRoutingProps.fromJson(
           json['smartRoutingProps'] as Map<String, dynamic>?,
         ),
+  desyncProps: json['desyncProps'] == null
+      ? defaultDesyncProps
+      : DesyncProps.fromJson(json['desyncProps'] as Map<String, dynamic>?),
   themeProps: ThemeProps.safeFromJson(
     json['themeProps'] as Map<String, Object?>?,
   ),
@@ -520,6 +523,7 @@ Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'networkProps': instance.networkProps,
   'vpnProps': instance.vpnProps,
   'smartRoutingProps': instance.smartRoutingProps,
+  'desyncProps': instance.desyncProps,
   'themeProps': instance.themeProps,
   'proxiesStyleProps': instance.proxiesStyleProps,
   'windowProps': instance.windowProps,

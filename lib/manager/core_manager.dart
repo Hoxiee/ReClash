@@ -75,6 +75,14 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         });
       }
     });
+    // Rules and the outbound only exist in profiles built while it was on, so the
+    // flip has to rebuild the config, not just push options to the service.
+    ref.listenManual(desyncSettingProvider, (prev, next) {
+      if (prev == next) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+      });
+    });
     ref.listenManual(appSettingProvider.select((state) => state.openLogs), (
       prev,
       next,

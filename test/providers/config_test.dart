@@ -249,7 +249,7 @@ void main() {
         overrideDns: true,
       );
       final overrides = buildConfigOverrides(config);
-      expect(overrides.length, 12);
+      expect(overrides.length, 13);
 
       final overrideContainer = ProviderContainer(overrides: overrides);
       addTearDown(overrideContainer.dispose);
@@ -261,6 +261,10 @@ void main() {
         config.patchClashConfig,
       );
       expect(overrideContainer.read(vpnSettingProvider), config.vpnProps);
+      expect(
+        overrideContainer.read(desyncSettingProvider),
+        config.desyncProps,
+      );
       expect(
         overrideContainer.read(appSettingProvider).onlyStatisticsProxy,
         false,

@@ -195,6 +195,7 @@ SharedState sharedState(Ref ref) {
     ),
   );
   final vpnSetting = ref.watch(vpnSettingProvider);
+  final desyncSetting = ref.watch(desyncSettingProvider);
   final currentProfileName = currentProfile.label;
   final selectedMap = currentProfile.selectedMap;
   final onlyStatisticsProxy = appSetting.onlyStatisticsProxy;
@@ -234,6 +235,8 @@ SharedState sharedState(Ref ref) {
       smartPauseEnabled: vpnSetting.smartPauseEnabled,
       smartPauseNetworks: vpnSetting.smartPauseNetworks,
       smartPauseCloseConnections: vpnSetting.smartPauseCloseConnections,
+      desyncEnabled: desyncSetting.enabled,
+      desyncPort: desyncSetting.port,
     ),
   );
 }
