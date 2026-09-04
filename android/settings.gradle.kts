@@ -27,5 +27,6 @@ plugins {
 
 include(":app")
 include(":core")
+include(":byedpi")
 include(":service")
 include(":common")

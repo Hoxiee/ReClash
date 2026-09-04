@@ -31,6 +31,7 @@ kotlin {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":byedpi"))
     implementation(project(":common"))
     implementation(libs.gson)
     implementation(libs.androidx.core)
