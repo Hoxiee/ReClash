@@ -151,7 +151,7 @@ class TrackerInfoDetailView extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 16,
+        spacing: 20,
         children: [
           Text(context.appLocalizations.proxyChains),
           Flexible(
@@ -254,7 +254,7 @@ class _DetailRow extends StatelessWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 16,
+        spacing: 20,
         children: [
           Text(title),
           Flexible(

@@ -12,10 +12,13 @@ import 'bootstrap.dart';
 import 'common/common.dart';
 import 'common/window.dart';
 
-void main() {
+void main(List<String> args) {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      if (Platform.isLinux) {
+        linkManager.seedInitialLink(args);
+      }
       FlutterError.onError = (details) {
         Future.microtask(() {
           commonPrint.log(

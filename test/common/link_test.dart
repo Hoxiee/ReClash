@@ -68,6 +68,34 @@ void main() {
     expect(received, ['https://example.com/a.yaml']);
   });
 
+  test(
+    'a seeded launch argument is delivered once a listener attaches',
+    () async {
+      linkManager.seedInitialLink([
+        '--verbose',
+        'reclash://install-config?url=https://example.com/a.yaml',
+      ]);
+
+      expect(received, isEmpty);
+
+      await listen();
+
+      expect(received, ['https://example.com/a.yaml']);
+
+      await listen();
+
+      expect(received, ['https://example.com/a.yaml']);
+    },
+  );
+
+  test('launch arguments without a known scheme are ignored', () async {
+    linkManager.seedInitialLink(['https://example.com/a.yaml', 'not a uri']);
+
+    await listen();
+
+    expect(received, isEmpty);
+  });
+
   test('destroy stops delivery and is safe to repeat', () async {
     await listen();
 

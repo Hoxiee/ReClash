@@ -2,6 +2,7 @@ use std::io;
 
 #[cfg(windows)]
 use interprocess::local_socket::RecvHalf;
+use interprocess::local_socket::{ListenerOptions, Stream};
 #[cfg(windows)]
 use std::io::Read;
 #[cfg(unix)]
@@ -28,8 +29,68 @@ pub fn cleanup_socket(path: &str) -> io::Result<()> {
     Ok(())
 }
 
+/// Linux carries an `fchmod` on the unbound socket over to the file `bind`
+/// creates; other Unixes reject it and keep the chmod after `bind`.
+pub fn restrict_listener_mode(options: ListenerOptions<'_>) -> ListenerOptions<'_> {
+    #[cfg(target_os = "linux")]
+    {
+        use interprocess::os::unix::local_socket::ListenerOptionsExt as _;
+
+        options.mode(0o600)
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        options
+    }
+}
+
+pub fn restrict_socket_to_owner(path: &str) -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+
+        std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600))?;
+    }
+    #[cfg(windows)]
+    {
+        let _ = path;
+    }
+    Ok(())
+}
+
+#[cfg(unix)]
+pub fn authorize_peer(stream: &Stream) -> io::Result<()> {
+    use interprocess::local_socket::traits::StreamCommon as _;
+
+    let peer_uid = stream.peer_creds()?.euid().ok_or_else(|| {
+        io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "peer user ID is unavailable",
+        )
+    })?;
+    // SAFETY: geteuid() takes no arguments and cannot fail.
+    let own_uid = unsafe { libc::geteuid() };
+    if is_permitted_uid(peer_uid, own_uid) {
+        return Ok(());
+    }
+    Err(io::Error::new(
+        io::ErrorKind::PermissionDenied,
+        format!("peer uid {peer_uid} is neither {own_uid} nor root"),
+    ))
+}
+
+#[cfg(unix)]
+fn is_permitted_uid(peer_uid: libc::uid_t, own_uid: libc::uid_t) -> bool {
+    peer_uid == own_uid || peer_uid == 0
+}
+
 #[cfg(windows)]
-pub fn connected_payload(stream: &interprocess::local_socket::Stream) -> io::Result<Vec<u8>> {
+pub fn authorize_peer(_stream: &Stream) -> io::Result<()> {
+    Ok(())
+}
+
+#[cfg(windows)]
+pub fn connected_payload(stream: &Stream) -> io::Result<Vec<u8>> {
     use interprocess::local_socket::traits::StreamCommon as _;
 
     let credentials = stream.peer_creds()?;
@@ -43,7 +104,7 @@ pub fn connected_payload(stream: &interprocess::local_socket::Stream) -> io::Res
 }
 
 #[cfg(not(windows))]
-pub fn connected_payload(_stream: &interprocess::local_socket::Stream) -> io::Result<Vec<u8>> {
+pub fn connected_payload(_stream: &Stream) -> io::Result<Vec<u8>> {
     Ok(Vec::new())
 }
 
@@ -84,5 +145,26 @@ impl Read for PipeReader<'_> {
             return Err(io::ErrorKind::WouldBlock.into());
         }
         self.receiver.read(buffer)
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::is_permitted_uid;
+
+    #[test]
+    fn admits_the_socket_owner() {
+        assert!(is_permitted_uid(501, 501));
+    }
+
+    #[test]
+    fn admits_root_because_the_core_runs_privileged_for_tun() {
+        assert!(is_permitted_uid(0, 501));
+    }
+
+    #[test]
+    fn rejects_every_other_user() {
+        assert!(!is_permitted_uid(502, 501));
+        assert!(!is_permitted_uid(501, 0));
     }
 }

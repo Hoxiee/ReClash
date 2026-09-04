@@ -57,7 +57,10 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
           ),
           const SizedBox(width: 8),
         ],
-        body: const CustomScrollView(slivers: [_Title(), _Content()]),
+        body: const ScrollConfiguration(
+          behavior: ShowBarScrollBehavior(),
+          child: CustomScrollView(slivers: [_Title(), _Content()]),
+        ),
       ),
     );
   }

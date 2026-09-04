@@ -187,6 +187,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "applicationDesc": MessageLookupByLibrary.simpleMessage(
       "アプリケーション関連の設定を変更します",
     ),
+    "authentication": MessageLookupByLibrary.simpleMessage("認証"),
+    "authenticationDesc": MessageLookupByLibrary.simpleMessage(
+      "ローカルプロキシポートに認証を要求し、他のアプリによる無断利用を防ぎます",
+    ),
+    "authenticationSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
+      "認証が有効な間は適用されません",
+    ),
     "authorize": MessageLookupByLibrary.simpleMessage("許可"),
     "authorized": MessageLookupByLibrary.simpleMessage("許可済み"),
     "auto": MessageLookupByLibrary.simpleMessage("自動"),
@@ -520,6 +527,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("ファイルからインポート"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("URLからインポート"),
     "importUrl": MessageLookupByLibrary.simpleMessage("URLからインポート"),
+    "inbound": MessageLookupByLibrary.simpleMessage("インバウンド"),
     "includeAllProxies": MessageLookupByLibrary.simpleMessage("すべてのプロキシを含める"),
     "includeAllProxiesTip": MessageLookupByLibrary.simpleMessage(
       "プロキシグループに属さないすべてのプロキシを取り込みます。下でプロキシグループを追加できます",
@@ -734,9 +742,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("WebDAVを連携してください"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage(
       "スクリプト名を入力してください",
-    ),
-    "pleaseInputAdminPassword": MessageLookupByLibrary.simpleMessage(
-      "管理者パスワードを入力してください",
     ),
     "pleaseUploadValidQrcode": MessageLookupByLibrary.simpleMessage(
       "有効なQRコードをアップロードしてください",
@@ -1034,6 +1039,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "show": MessageLookupByLibrary.simpleMessage("表示"),
     "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "showMore": MessageLookupByLibrary.simpleMessage("展開"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "通知に停止ボタンを表示",
+    ),
+    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
+      "常駐通知に停止ボタンを表示します。これが原因で通知が常に展開される場合はオフにしてください",
+    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("パスワードを表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("コンパクト"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("サイレント起動"),

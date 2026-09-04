@@ -13,14 +13,6 @@ class SystemAction extends _$SystemAction {
     if (ref.read(isMobileViewProvider)) {
       await Future.delayed(commonDuration);
     }
-    if (ref.read(packagesProvider).isEmpty) {
-      ref.read(packagesProvider.notifier).value =
-          await app?.getPackages() ?? [];
-    }
-    return ref.read(packagesProvider);
-  }
-
-  Future<List<Package>> refreshPackages() async {
     ref.read(packagesProvider.notifier).value = await app?.getPackages() ?? [];
     return ref.read(packagesProvider);
   }

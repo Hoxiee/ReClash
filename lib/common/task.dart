@@ -254,6 +254,10 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   patchNetwork('tproxy-port', realPatchConfig.tproxyPort);
   patchNetwork('find-process-mode', realPatchConfig.findProcessMode.name);
   patchNetwork('allow-lan', realPatchConfig.allowLan);
+  // The app owns local inbound authentication; a profile-provided
+  // skip-auth-prefixes could silently exempt loopback and defeat it.
+  rawConfig['authentication'] = data.authentication;
+  rawConfig['skip-auth-prefixes'] = [];
   rawConfig['mode'] = realPatchConfig.mode.name;
   if (rawConfig['tun'] == null) {
     rawConfig['tun'] = {};

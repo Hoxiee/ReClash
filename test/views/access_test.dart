@@ -41,14 +41,15 @@ class _TestSystemAction extends SystemAction {
   bool installedAppsPermissionGranted = true;
   bool grantOnRequest = true;
   int requestCount = 0;
+  int loadCount = 0;
   List<Package> grantedPackages = const [];
 
   @override
-  Future<List<Package>> getPackages() async => ref.read(packagesProvider);
-
-  @override
-  Future<List<Package>> refreshPackages() async {
-    ref.read(packagesProvider.notifier).value = grantedPackages;
+  Future<List<Package>> getPackages() async {
+    loadCount++;
+    if (installedAppsPermissionGranted && grantedPackages.isNotEmpty) {
+      ref.read(packagesProvider.notifier).value = grantedPackages;
+    }
     return ref.read(packagesProvider);
   }
 
@@ -254,6 +255,23 @@ void main() {
 
       await teardownView(tester);
     });
+  });
+
+  testWidgets('asks the platform for the app list on every entry', (
+    tester,
+  ) async {
+    systemAction.grantedPackages = [
+      ..._packages,
+      _package('com.example.fresh', label: 'Fresh'),
+    ];
+    seedAccessControl(const AccessControlProps(enable: true));
+
+    await pumpAccessView(tester);
+
+    expect(systemAction.loadCount, 1);
+    expect(find.text('Fresh'), findsOneWidget);
+
+    await teardownView(tester);
   });
 
   group('installed apps permission', () {

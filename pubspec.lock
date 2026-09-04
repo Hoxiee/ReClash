@@ -1842,8 +1842,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/window_manager"
-      ref: "v0.5.1-flclash.2"
-      resolved-ref: "3f2e35e9c2912df7dabd6a1bf5f401715d1ef5cd"
+      ref: "v0.5.1-flclash.3"
+      resolved-ref: "4c7dcf9b6b0658a83ce77ad8c3e480952d190d3a"
       url: "https://github.com/chen08209/window_manager"
     source: git
     version: "0.5.1"

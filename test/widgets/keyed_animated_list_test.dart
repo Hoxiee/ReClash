@@ -60,6 +60,19 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('item inserted and removed before it grows is dropped', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildList(const ['a']));
+    await tester.pumpWidget(buildList(const ['a', 'b']));
+    await tester.pumpWidget(buildList(const ['a']));
+    expect(tester.takeException(), null);
+
+    await tester.pumpAndSettle();
+    expect(find.text('b'), findsNothing);
+    expect(find.text('a'), findsOneWidget);
+  });
+
   testWidgets('item removed and re-added keeps a single row', (tester) async {
     await tester.pumpWidget(buildList(const ['a', 'b']));
     await tester.pumpWidget(buildList(const ['a']));

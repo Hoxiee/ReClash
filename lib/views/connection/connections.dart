@@ -75,7 +75,20 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   }
 
   void _applyConnections(List<TrackerInfo> trackerInfos) {
-    _listController.setTrackerInfos(trackerInfos);
+    // The core snapshot iterates a Go map, so its order is random per poll;
+    // sort by total traffic to keep the list stable between refreshes.
+    final sorted = List.of(trackerInfos)
+      ..sort((a, b) {
+        final traffic = (b.upload + b.download).compareTo(
+          a.upload + a.download,
+        );
+        if (traffic != 0) {
+          return traffic;
+        }
+        final start = b.start.compareTo(a.start);
+        return start != 0 ? start : a.id.compareTo(b.id);
+      });
+    _listController.setTrackerInfos(sorted);
   }
 
   Future<void> _handleBlockConnection(String id) async {

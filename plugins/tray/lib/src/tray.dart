@@ -173,24 +173,78 @@ final class Tray {
     }
   }
 
+  /// Scales probed in Flutter's `2.0x/` variant layout; the README says how
+  /// each platform consumes them.
+  static const variantScales = [1.0, 2.0, 3.0, 4.0];
+
+  @visibleForTesting
+  static bool Function(String filePath) fileExists = (filePath) =>
+      File(filePath).existsSync();
+
+  @visibleForTesting
+  static String variantAsset(String asset, double scale) {
+    if (scale == 1.0) {
+      return asset;
+    }
+    final directory = path.posix.dirname(asset);
+    return path.posix.joinAll([
+      if (directory != '.') directory,
+      '${scale.toStringAsFixed(1)}x',
+      path.posix.basename(asset),
+    ]);
+  }
+
   Future<Map<String, Object?>> _resolveIcon(TrayIcon icon) async {
     final resolved = <String, Object?>{
       'isTemplate': icon.isTemplate,
       'size': icon.size,
       'position': icon.position.name,
     };
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
-      final data = await rootBundle.load(icon.asset);
-      resolved['bytes'] = base64Encode(data.buffer.asUint8List());
-    } else {
-      resolved['path'] = path.joinAll([
-        path.dirname(Platform.resolvedExecutable),
-        'data',
-        'flutter_assets',
-        icon.asset,
-      ]);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+        resolved['reps'] = await _loadRepresentations(icon.asset);
+      case TargetPlatform.linux:
+        resolved['path'] = _largestBundledVariant(icon.asset);
+      default:
+        resolved['path'] = _bundledPath(icon.asset);
     }
     return resolved;
+  }
+
+  Future<List<Map<String, Object?>>> _loadRepresentations(String asset) async {
+    final reps = <Map<String, Object?>>[];
+    for (final scale in variantScales) {
+      final ByteData data;
+      try {
+        data = await rootBundle.load(variantAsset(asset, scale));
+      } on FlutterError {
+        continue;
+      }
+      reps.add({
+        'scale': scale,
+        'bytes': base64Encode(data.buffer.asUint8List()),
+      });
+    }
+    return reps;
+  }
+
+  String _largestBundledVariant(String asset) {
+    for (final scale in variantScales.reversed) {
+      final candidate = _bundledPath(variantAsset(asset, scale));
+      if (fileExists(candidate)) {
+        return candidate;
+      }
+    }
+    return _bundledPath(asset);
+  }
+
+  String _bundledPath(String asset) {
+    return path.joinAll([
+      path.dirname(Platform.resolvedExecutable),
+      'data',
+      'flutter_assets',
+      asset,
+    ]);
   }
 
   String get _stableId {

@@ -33,6 +33,11 @@ await Tray.instance.hide();
   rebuilds the tray from scratch.
 - `openMenu` is a no-op where `capabilities.menuControl` is false.
 
+`TrayIcon.asset` names a bundled PNG and follows Flutter's resolution-aware layout: every
+`2.0x/`, `3.0x/`, `4.0x/` sibling that exists is loaded too. macOS receives them all as
+representations of one `size`-point image; Linux is handed the largest raster on disk and lets the
+indicator scale it; Windows loads the path as-is, so point it at a multi-size `.ico` instead.
+
 Menu item ids are assigned by pre-order position, so an unchanged menu serializes identically across
 rebuilds and click dispatch stays stable while a menu is open.
 

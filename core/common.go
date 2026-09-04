@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/adapter/provider"
+	"github.com/metacubex/mihomo/component/auth"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/component/updater"
@@ -29,6 +31,7 @@ import (
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
 	"github.com/metacubex/mihomo/listener"
+	authStore "github.com/metacubex/mihomo/listener/auth"
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/log"
 	rp "github.com/metacubex/mihomo/rules/provider"
@@ -345,10 +348,30 @@ func updateConfig(params *UpdateParams) error {
 		currentConfig.Controller.ExternalController = *params.ExternalController
 		route.ReCreateServer(routeConfig(currentConfig))
 	}
+	if params.Authentication != nil {
+		applyAuthentication(currentConfig, *params.Authentication)
+	}
 
 	updateListeners(currentConfig)
 	syncGeoUpdater(params.GeoAutoUpdate, params.GeoUpdateInterval)
 	return nil
+}
+
+func applyAuthentication(cfg *config.Config, authentication []string) {
+	users := make([]auth.AuthUser, 0, len(authentication))
+	for _, line := range authentication {
+		if user, pass, found := strings.Cut(line, ":"); found {
+			users = append(users, auth.AuthUser{User: user, Pass: pass})
+		}
+	}
+	cfg.General.Authentication = authentication
+	cfg.Users = users
+	authStore.Default.SetAuthenticator(auth.NewAuthenticator(users))
+	if len(users) > 0 {
+		// A loopback exemption would let any local app bypass the credentials.
+		cfg.General.SkipAuthPrefixes = nil
+		inbound.SetSkipAuthPrefixes(nil)
+	}
 }
 
 func syncGeoUpdater(autoUpdate *bool, interval *int) {

@@ -121,7 +121,8 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
         }
     };
 
-    let listener = match ListenerOptions::new().name(fs_name).create_sync() {
+    let options = platform::restrict_listener_mode(ListenerOptions::new().name(fs_name));
+    let listener = match options.create_sync() {
         Ok(listener) => listener,
         Err(e) => {
             report_error(&sink, format!("bind error: {e}"));
@@ -129,6 +130,12 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
             return;
         }
     };
+
+    if let Err(e) = platform::restrict_socket_to_owner(&name) {
+        report_error(&sink, format!("socket permission error: {e}"));
+        finish_server(&name);
+        return;
+    }
 
     if let Err(e) = listener.set_nonblocking(ListenerNonblockingMode::Accept) {
         report_error(&sink, format!("listener nonblocking error: {e}"));
@@ -155,6 +162,11 @@ fn io_loop(name: String, sink: StreamSink<Vec<u8>, SseCodec>) {
                 break;
             }
         };
+
+        if let Err(e) = platform::authorize_peer(&stream) {
+            ipc_debug!("[IPC] rejected connection: {e}");
+            continue;
+        }
 
         if let Err(e) = stream.set_nonblocking(true) {
             report_error(&sink, format!("stream nonblocking error: {e}"));

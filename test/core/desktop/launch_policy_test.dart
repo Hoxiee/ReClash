@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('reads the OS error the Helper reports in the response details', () {
-    const error = WindowsHelperException(
+    const error = HelperException(
       code: 'processLaunchFailed',
       message: 'spawn failed',
       details: {'osError': 577},
@@ -18,7 +18,7 @@ void main() {
   });
 
   test('falls back to the code embedded in an older Helper message', () {
-    const error = WindowsHelperException(
+    const error = HelperException(
       code: 'processLaunchFailed',
       message: 'This program is blocked by group policy. (os error 1260)',
     );
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('ignores Helper failures that happened before the spawn', () {
-    const error = WindowsHelperException(
+    const error = HelperException(
       code: 'coreVerificationFailed',
       message: 'Core executable SHA256 mismatch (os error 577)',
     );

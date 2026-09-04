@@ -86,6 +86,14 @@ class ApplicationSettingView extends StatelessWidget {
       ),
       if (system.isAndroid)
         _appSettingToggle(
+          title: (l) => l.showNotificationStopAction,
+          subtitle: (l) => l.showNotificationStopActionDesc,
+          select: (state) => state.showNotificationStopAction,
+          update: (state, value) =>
+              state.copyWith(showNotificationStopAction: value),
+        ),
+      if (system.isAndroid)
+        _appSettingToggle(
           title: (l) => l.crashlytics,
           subtitle: (l) => l.crashlyticsTip,
           select: (state) => state.crashlytics,

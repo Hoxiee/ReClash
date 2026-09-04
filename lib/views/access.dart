@@ -49,11 +49,9 @@ class _AccessViewState extends ConsumerState<AccessView> {
     );
   }
 
-  Future<void> _loadPackages({bool force = false}) async {
+  Future<void> _loadPackages() async {
     final action = ref.read(systemActionProvider.notifier);
-    final packages = force
-        ? await action.refreshPackages()
-        : await action.getPackages();
+    final packages = await action.getPackages();
     final granted =
         packages.isNotEmpty || await action.isInstalledAppsPermissionGranted();
     if (!mounted || granted == _installedAppsPermissionGranted) {
@@ -84,10 +82,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       }
       return;
     }
-    await globalState.loadingRun(
-      () => _loadPackages(force: true),
-      tag: LoadingTag.access,
-    );
+    await globalState.loadingRun(_loadPackages, tag: LoadingTag.access);
   }
 
   void _pinList() {

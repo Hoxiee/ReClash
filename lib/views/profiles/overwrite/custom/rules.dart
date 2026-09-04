@@ -524,7 +524,8 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
 bool _handleSaveRule(BuildContext context, WidgetRef ref) {
   final rule = ref.read(ruleProvider);
   final appLocalizations = context.appLocalizations;
-  if (rule.realContent?.isNotEmpty != true) {
+  if (rule.ruleAction != RuleAction.MATCH &&
+      rule.realContent?.isNotEmpty != true) {
     dialogs.showMessage(
       cancelable: false,
       message: TextSpan(

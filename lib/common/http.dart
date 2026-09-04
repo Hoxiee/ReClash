@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,12 @@ class ReClashHttpOverrides extends HttpOverrides {
     final mixedPort = read(
       patchClashConfigProvider.select((state) => state.mixedPort),
     );
-    return 'PROXY localhost:$mixedPort';
+    final authentication = read(
+      networkSettingProvider.select((state) => state.authentication),
+    );
+    final credentials = authentication.credentials;
+    final userInfo = credentials.isNotEmpty ? '${credentials.first}@' : '';
+    return 'PROXY ${userInfo}localhost:$mixedPort';
   }
 
   static bool allowBadCertificate(

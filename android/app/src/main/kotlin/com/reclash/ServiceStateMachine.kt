@@ -459,6 +459,7 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             pauseText = state.pauseText,
             resumeText = state.resumeText,
             pausedText = state.pausedText,
+            showStopAction = state.showStopAction,
         )
     }
 }

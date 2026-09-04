@@ -36,6 +36,7 @@ private data class ExtendedNotificationParams(
     val pauseText: String,
     val resumeText: String,
     val paused: Boolean,
+    val showStopAction: Boolean,
     val contentText: String,
 )
 
@@ -45,6 +46,7 @@ private fun NotificationParams.extended(paused: Boolean) = ExtendedNotificationP
     pauseText,
     resumeText,
     paused,
+    showStopAction,
     if (paused) pausedText else Core.getSpeedTrafficText(onlyStatisticsProxy),
 )
 
@@ -115,8 +117,14 @@ internal class NotificationModule(
                 setContentText(params.contentText)
                 clearActions()
                 addAction(0, toggleText, toggleAction.quickIntent.toPendingIntent)
-                addAction(0, params.stopText, QuickAction.STOP.quickIntent.toPendingIntent)
-                    .build()
+                if (params.showStopAction) {
+                    addAction(
+                        0,
+                        params.stopText,
+                        QuickAction.STOP.quickIntent.toPendingIntent,
+                    )
+                }
+                build()
             },
         )
     }

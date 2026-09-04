@@ -34,6 +34,7 @@ class _RecordingSystemAction extends SystemAction {
 
 class _RecordingWindowPort implements WindowPort {
   Rect bounds = const Rect.fromLTWH(0, 0, 1000, 800);
+  int shows = 0;
   Completer<void>? geometryGate;
   bool isNormal = true;
   bool supportsPosition = true;
@@ -68,7 +69,9 @@ class _RecordingWindowPort implements WindowPort {
   Future<bool> get isVisible async => true;
 
   @override
-  Future<void> show() async {}
+  Future<void> show() async {
+    shows++;
+  }
 }
 
 void main() {
@@ -188,6 +191,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an activate request shows the window through the port', (
+    tester,
+  ) async {
+    final listener = await pumpWindowManager(tester);
+
+    listener.onWindowActivate();
+    listener.onWindowFocus();
+    await tester.pump();
+
+    expect(window.shows, 1);
   });
 
   testWidgets('a move that resolves after disposal is dropped', (tester) async {

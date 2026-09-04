@@ -6,7 +6,7 @@ import 'constant.dart';
 
 double getWindowHeaderHeight({required bool isDesktop, required bool isMacOS}) {
   if (!isDesktop) return 0;
-  return isMacOS ? 28 : 40;
+  return isMacOS ? 28 : 32;
 }
 
 bool showsWindowHeader({

@@ -312,7 +312,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: ScrollConfiguration(
-                  behavior: HiddenBarScrollBehavior(),
+                  behavior: const HiddenBarScrollBehavior(),
                   child: CustomScrollView(
                     key: proxiesListStoreKey,
                     controller: _controller,

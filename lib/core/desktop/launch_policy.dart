@@ -46,9 +46,7 @@ int? launchOsError(Object? error) {
   return switch (error) {
     DesktopCoreFailure(:final cause) => launchOsError(cause),
     ProcessException(:final errorCode) => errorCode == 0 ? null : errorCode,
-    WindowsHelperException(code: 'processLaunchFailed') => _helperOsError(
-      error,
-    ),
+    HelperException(code: 'processLaunchFailed') => _helperOsError(error),
     _ => null,
   };
 }
@@ -57,7 +55,7 @@ bool isPolicyBlockedLaunch(Object? error) {
   return policyBlockedOsErrors.contains(launchOsError(error));
 }
 
-int? _helperOsError(WindowsHelperException error) {
+int? _helperOsError(HelperException error) {
   final details = error.details;
   if (details is Map && details['osError'] is int) {
     return details['osError'] as int;

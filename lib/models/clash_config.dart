@@ -393,26 +393,41 @@ abstract class Rule with _$Rule {
         )
         .map((item) => item.trim())
         .toList();
+    if (shortSplits.isEmpty) {
+      return Rule(
+        id: id,
+        ruleAction: RuleAction.DOMAIN,
+        ruleTarget: RuleTarget.DIRECT.name,
+      );
+    }
     final ruleAction = RuleAction.values.firstWhere(
       (item) => item.value == shortSplits.first,
       orElse: () => RuleAction.DOMAIN,
     );
+    // Every action except MATCH carries a payload before the target, so a
+    // two-field payload rule is read as payload-only rather than target-only.
+    final hasPayload = ruleAction != RuleAction.MATCH;
+    final payload = hasPayload && shortSplits.length > 1
+        ? shortSplits[1]
+        : null;
+    final target = shortSplits.length > (hasPayload ? 2 : 1)
+        ? shortSplits.last
+        : null;
+
     String? subRule;
     String? ruleTarget;
-
     if (ruleAction == RuleAction.SUB_RULE) {
-      subRule = shortSplits.last;
+      subRule = target;
     } else {
-      ruleTarget = shortSplits.last;
+      ruleTarget = target;
     }
 
     String? content;
     String? ruleProvider;
-
     if (ruleAction == RuleAction.RULE_SET) {
-      ruleProvider = shortSplits[1];
+      ruleProvider = payload;
     } else {
-      content = shortSplits[1];
+      content = payload;
     }
 
     return Rule(
@@ -439,9 +454,10 @@ extension RuleExt on Rule {
   }
 
   String? get realContent {
-    return switch (ruleAction == RuleAction.RULE_SET) {
-      true => ruleProvider,
-      false => content,
+    return switch (ruleAction) {
+      RuleAction.MATCH => null,
+      RuleAction.RULE_SET => ruleProvider,
+      _ => content,
     };
   }
 
@@ -460,10 +476,12 @@ extension RuleExt on Rule {
   }
 
   String get rawValue {
+    final content = realContent;
+    final target = realTarget;
     return [
       ruleAction.value,
-      realContent,
-      realTarget,
+      if (content?.isNotEmpty == true) content!,
+      if (target?.isNotEmpty == true) target!,
       if (ruleAction.hasParams) ...[
         if (src) 'src',
         if (noResolve) 'no-resolve',

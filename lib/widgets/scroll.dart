@@ -16,6 +16,7 @@ class CommonScrollBar extends StatelessWidget {
   final Widget child;
   final bool trackVisibility;
   final bool thumbVisibility;
+  final EdgeInsets padding;
 
   const CommonScrollBar({
     super.key,
@@ -23,10 +24,10 @@ class CommonScrollBar extends StatelessWidget {
     required this.controller,
     this.trackVisibility = false,
     this.thumbVisibility = false,
+    this.padding = EdgeInsets.zero,
   });
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildScrollBar(Widget child) {
     return Scrollbar(
       controller: controller,
       thumbVisibility: thumbVisibility,
@@ -35,6 +36,20 @@ class CommonScrollBar extends StatelessWidget {
       radius: const Radius.circular(_thumbThickness / 2),
       interactive: true,
       child: child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (padding == EdgeInsets.zero) {
+      return _buildScrollBar(child);
+    }
+    // Scrollbar insets its track by MediaQuery padding, so the inset reaches it
+    // through a MediaQuery of its own and the child keeps the original one.
+    final mediaQuery = MediaQuery.of(context);
+    return MediaQuery(
+      data: mediaQuery.copyWith(padding: mediaQuery.padding + padding),
+      child: _buildScrollBar(MediaQuery(data: mediaQuery, child: child)),
     );
   }
 }

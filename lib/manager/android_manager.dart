@@ -46,7 +46,15 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       }
     });
     service?.addListener(this);
+    app?.onPackagesChanged = _reloadPackages;
     unawaited(_syncPauseState());
+  }
+
+  void _reloadPackages() {
+    if (ref.read(packagesProvider).isEmpty) {
+      return;
+    }
+    unawaited(ref.read(systemActionProvider.notifier).getPackages());
   }
 
   Future<void> _syncPauseState() async {
@@ -62,6 +70,9 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
 
   @override
   void dispose() {
+    if (app?.onPackagesChanged == _reloadPackages) {
+      app?.onPackagesChanged = null;
+    }
     service?.removeListener(this);
     super.dispose();
   }

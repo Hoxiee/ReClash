@@ -282,7 +282,7 @@ class AppSidebarContainer extends ConsumerWidget {
                     ],
                     Expanded(
                       child: ScrollConfiguration(
-                        behavior: HiddenBarScrollBehavior(),
+                        behavior: const HiddenBarScrollBehavior(),
                         child: _SidebarRail(
                           items: navigationItems,
                           currentIndex: currentIndex,

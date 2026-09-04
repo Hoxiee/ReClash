@@ -85,7 +85,7 @@ void main() {
       code: 'start_failed',
       phase: DesktopCorePhase.starting,
       revision: 1,
-      cause: WindowsHelperException(
+      cause: HelperException(
         code: 'processLaunchFailed',
         message: 'spawn failed',
         details: {'osError': 577},
@@ -120,7 +120,7 @@ void main() {
         code: 'start_failed',
         phase: DesktopCorePhase.starting,
         revision: 1,
-        cause: WindowsHelperException(
+        cause: HelperException(
           code: 'transportError',
           message: 'Helper start request failed',
         ),

@@ -334,6 +334,7 @@ class SetupAction extends _$SetupAction {
           appendSystemDns: state.appendSystemDns,
           routeMode: state.routeMode,
           overrideNetwork: state.overrideSubscriptionNetwork,
+          authentication: state.authentication,
         ),
       ),
     );
@@ -379,6 +380,7 @@ class SetupAction extends _$SetupAction {
         addedRules: addedRules,
         defaultUA: defaultUA,
         smartRouting: smartRouting,
+        authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
       ),
     );

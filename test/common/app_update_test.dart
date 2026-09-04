@@ -13,8 +13,8 @@ Map<String, Object?> asset(
   return {
     'name': name,
     'browser_download_url': url,
-    if (size != null) 'size': size,
-    if (digest != null) 'digest': digest,
+    'size': ?size,
+    'digest': ?digest,
   };
 }
 

@@ -84,6 +84,35 @@ void main() {
     );
   });
 
+  test('carries credentials when local authentication is enabled', () {
+    final container = buildContainer();
+    container.read(networkSettingProvider.notifier).value = const NetworkProps()
+        .copyWith(
+          authentication: const AuthenticationProps(
+            enable: true,
+            username: 'user',
+            password: 'pass',
+          ),
+        );
+
+    expect(
+      ReClashHttpOverrides.findProxyFor(container, remote),
+      'PROXY user:pass@localhost:7890',
+    );
+
+    container.read(networkSettingProvider.notifier).value = const NetworkProps()
+        .copyWith(
+          authentication: const AuthenticationProps(
+            enable: false,
+            username: 'user',
+          ),
+        );
+    expect(
+      ReClashHttpOverrides.findProxyFor(container, remote),
+      'PROXY localhost:7890',
+    );
+  });
+
   test('bypasses the proxy when the core is not running', () {
     final container = buildContainer(running: false);
 

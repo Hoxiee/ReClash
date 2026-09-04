@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Sync with FlClash dev @ c304a93c: local proxy authentication, notification stop-action toggle, package-change watcher
+- Linux desktop-entry registration for clash/clashmeta/reclash URL schemes
+
 ## v0.8.96 (2026-08-17)
 
 **Bug Fixes**

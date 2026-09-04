@@ -5,10 +5,14 @@ UpdateParams updateParams(Ref ref) {
   final routeMode = ref.watch(
     networkSettingProvider.select((state) => state.routeMode),
   );
+  final authentication = ref.watch(
+    networkSettingProvider.select((state) => state.authentication),
+  );
   return ref.watch(
     patchClashConfigProvider.select(
       (state) => UpdateParams(
         tun: state.tun.getRealTun(routeMode),
+        authentication: authentication.credentials,
         allowLan: state.allowLan,
         findProcessMode: state.findProcessMode,
         mode: state.mode,
@@ -162,6 +166,7 @@ SharedState sharedState(Ref ref) {
     appSettingProvider.select(
       (state) => (
         onlyStatisticsProxy: state.onlyStatisticsProxy,
+        showStopAction: state.showNotificationStopAction,
         crashlytics: state.crashlytics,
         testUrl: state.testUrl,
       ),
@@ -169,7 +174,11 @@ SharedState sharedState(Ref ref) {
   );
   final networkSetting = ref.watch(
     networkSettingProvider.select(
-      (state) => (bypassDomain: state.bypassDomain, routeMode: state.routeMode),
+      (state) => (
+        bypassDomain: state.bypassDomain,
+        routeMode: state.routeMode,
+        authenticated: state.authentication.credentials.isNotEmpty,
+      ),
     ),
   );
   final clashConfig = ref.watch(
@@ -192,6 +201,7 @@ SharedState sharedState(Ref ref) {
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
+    showStopAction: appSetting.showStopAction,
     stopText: currentAppLocalizations.stop,
     pauseText: currentAppLocalizations.pause,
     resumeText: currentAppLocalizations.resume,
@@ -204,7 +214,10 @@ SharedState sharedState(Ref ref) {
     vpnOptions: VpnOptions(
       enable: vpnSetting.enable,
       stack: stack,
-      systemProxy: vpnSetting.systemProxy,
+      // VpnService.setHttpProxy cannot carry credentials, so an authenticated
+      // mixed port must not be declared as the system HTTP proxy; traffic
+      // still flows through TUN.
+      systemProxy: vpnSetting.systemProxy && !networkSetting.authenticated,
       port: port,
       ipv6: vpnSetting.ipv6,
       dnsHijacking: vpnSetting.dnsHijacking,

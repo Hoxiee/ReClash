@@ -227,6 +227,15 @@ class ServiceStateMachineTest {
     }
 
     @Test
+    fun `notification params carry the stop action switch`() {
+        val params = ServiceStateMachine.notificationParams(
+            SharedState(showStopAction = false),
+        )
+
+        assertEquals(false, params.showStopAction)
+    }
+
+    @Test
     fun `refresh reports STARTED only while the service has a run time`() = runTest {
         val host = FakeHost(backgroundScope)
         val machine = ServiceStateMachine(host)

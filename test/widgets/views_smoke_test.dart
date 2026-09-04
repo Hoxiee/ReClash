@@ -22,9 +22,7 @@ import 'package:reclash/views/proxies/providers.dart';
 import 'package:reclash/views/proxies/tab.dart';
 import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/views.dart';
-import 'package:reclash/widgets/inherited.dart';
-import 'package:reclash/widgets/paged_sheet.dart';
-import 'package:reclash/widgets/sheet.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -208,7 +206,25 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          child: Scaffold(body: ListView(children: generalItems)),
+          child: Scaffold(
+            body: ListView(
+              children: [
+                ConfigToggleItem(
+                  leading: const Icon(Icons.perm_device_information_outlined),
+                  title: (l) => l.sendDeviceIdentity,
+                  subtitle: (l) => l.sendDeviceIdentityDesc,
+                  selector: appSettingProvider.select(
+                    (state) => state.sendDeviceIdentity,
+                  ),
+                  onChanged: (ref, value) => ref
+                      .read(appSettingProvider.notifier)
+                      .update(
+                        (state) => state.copyWith(sendDeviceIdentity: value),
+                      ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -22,6 +22,7 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
   resumeText: json['resumeText'] as String,
   pausedText: json['pausedText'] as String,
   onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool,
+  showStopAction: json['showStopAction'] as bool? ?? true,
   crashlytics: json['crashlytics'] as bool,
 );
 
@@ -38,5 +39,6 @@ Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
       'resumeText': instance.resumeText,
       'pausedText': instance.pausedText,
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
+      'showStopAction': instance.showStopAction,
       'crashlytics': instance.crashlytics,
     };

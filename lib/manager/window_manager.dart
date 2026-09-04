@@ -59,6 +59,14 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     render?.resume();
   }
 
+  /// Another launch, or a Dock reopen, asked for the window; showing it from
+  /// here keeps the render loop running before it becomes visible.
+  @override
+  void onWindowActivate() {
+    super.onWindowActivate();
+    unawaited(windowPort?.show());
+  }
+
   @override
   Future<void> onWindowShouldTerminate() async {
     await ref.read(systemActionProvider.notifier).handleExit();
@@ -371,6 +379,7 @@ class WindowHeaderBar extends StatelessWidget {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       minimumSize: WidgetStatePropertyAll(Size.square(height)),
                       maximumSize: WidgetStatePropertyAll(Size.square(height)),
+                      iconSize: WidgetStatePropertyAll(height / 2),
                       padding: const WidgetStatePropertyAll(EdgeInsets.zero),
                     ),
                   ),
@@ -435,7 +444,7 @@ class WindowHeaderActions extends StatelessWidget {
                   : appLocalizations.maximize,
               onPressed: onMaximize,
               icon: value
-                  ? const Icon(Icons.filter_none, size: 20)
+                  ? const Icon(Icons.filter_none, size: 14)
                   : const Icon(Icons.crop_square),
             );
           },

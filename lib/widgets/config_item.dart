@@ -124,6 +124,7 @@ class ConfigTextItem extends _ConfigItem<String> {
     this.maxLength,
     this.keyboardType,
     this.validator,
+    this.normalize,
     this.showValueAsSubtitle = true,
     super.subtitle,
     super.leading,
@@ -133,7 +134,15 @@ class ConfigTextItem extends _ConfigItem<String> {
   final TextInputType? keyboardType;
   final String? Function(String? value, AppLocalizations appLocalizations)?
   validator;
+  final String Function(String value)? normalize;
   final bool showValueAsSubtitle;
+
+  String? _normalize(String? value) {
+    if (value == null) {
+      return null;
+    }
+    return normalize?.call(value) ?? value;
+  }
 
   @override
   Widget buildItem(
@@ -155,16 +164,18 @@ class ConfigTextItem extends _ConfigItem<String> {
       maxLength: maxLength,
       keyboardType: keyboardType,
       validator: (value) {
-        if (value == null || value.isEmpty) {
+        final normalized = _normalize(value);
+        if (normalized == null || normalized.isEmpty) {
           return appLocalizations.emptyTip(label);
         }
-        return validator?.call(value, appLocalizations);
+        return validator?.call(normalized, appLocalizations);
       },
       onChanged: (value) {
-        if (value == null) {
+        final normalized = _normalize(value);
+        if (normalized == null) {
           return;
         }
-        onChanged(ref, value);
+        onChanged(ref, normalized);
       },
     );
   }

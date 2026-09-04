@@ -323,6 +323,7 @@ abstract class SharedState with _$SharedState {
     required String resumeText,
     required String pausedText,
     required bool onlyStatisticsProxy,
+    @Default(true) bool showStopAction,
     required bool crashlytics,
   }) = _SharedState;
 
@@ -360,6 +361,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required List<Rule> addedRules,
     required String defaultUA,
     @Default(false) bool smartRouting,
+    @Default([]) List<String> authentication,
     String? matchTarget,
   }) = _MakeRealProfileState;
 }

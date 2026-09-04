@@ -155,6 +155,22 @@ void main() {
     expect(await App().getLastExitInfo(), isNull);
   });
 
+  test('forwards package change notices from Android', () async {
+    var changes = 0;
+    final app = App();
+    app.onPackagesChanged = () => changes++;
+    addTearDown(() => app.onPackagesChanged = null);
+
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          channel.name,
+          channel.codec.encodeMethodCall(const MethodCall('packagesChanged')),
+          (_) {},
+        );
+
+    expect(changes, 1);
+  });
+
   test('reports the installed apps permission Android answers with', () async {
     final methods = <String>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

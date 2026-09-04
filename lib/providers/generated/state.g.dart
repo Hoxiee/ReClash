@@ -48,7 +48,7 @@ final class UpdateParamsProvider
   }
 }
 
-String _$updateParamsHash() => r'6f471ce2a4114291cc7dc725723911764c8c3cd9';
+String _$updateParamsHash() => r'5ef71d333c5640d108319478859adce30a580fc5';
 
 @ProviderFor(trayState)
 final trayStateProvider = TrayStateProvider._();
@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'0a3f24020951f1ef168c0630ee0b7420e2dcecb8';
+String _$sharedStateHash() => r'f370c250f0da9b752d073392756ce38437157073';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();

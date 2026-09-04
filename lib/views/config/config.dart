@@ -10,7 +10,7 @@ class ConfigView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       title: context.appLocalizations.basicConfig,
-      body: generateListView(generalItems),
+      body: const GeneralListView(),
     );
   }
 }

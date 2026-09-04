@@ -31,6 +31,7 @@ type UpdateParams struct {
 	TCPConcurrent      *bool              `json:"tcp-concurrent"`
 	ExternalController *string            `json:"external-controller"`
 	UnifiedDelay       *bool              `json:"unified-delay"`
+	Authentication     *[]string          `json:"authentication"`
 	GeoAutoUpdate      *bool              `json:"geo-auto-update"`
 	GeoUpdateInterval  *int               `json:"geo-update-interval"`
 }

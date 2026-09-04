@@ -137,6 +137,18 @@ String generateRandomString({int minLength = 10, int maxLength = 100}) {
   return result;
 }
 
+String generateRandomSecret(int length) {
+  const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = Random.secure();
+  return String.fromCharCodes(
+    Iterable.generate(
+      length,
+      (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+    ),
+  );
+}
+
 String getOverwriteLabel(String label) {
   final reg = RegExp(r'\((\d+)\)$');
   final matches = reg.allMatches(label);

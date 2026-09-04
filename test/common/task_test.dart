@@ -407,6 +407,41 @@ void main() {
     },
   );
 
+  // A profile-shipped loopback skip-auth-prefixes would bypass the credentials.
+  test('makeRealProfileTask lets the app own local authentication', () async {
+    final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+      await encodeJSONTask({
+        'authentication': ['subscription:injected'],
+        'skip-auth-prefixes': ['127.0.0.1/32'],
+      }),
+    );
+    final state = MakeRealProfileState(
+      profilesPath: '/profiles',
+      profileId: 12,
+      rawConfig: rawConfig,
+      realPatchConfig: const PatchClashConfig(),
+      overrideDns: false,
+      appendSystemDns: false,
+      proxyGroups: const [],
+      rules: const [],
+      addedRules: const [],
+      defaultUA: 'FlClash-Test',
+      authentication: const ['user:pass'],
+    );
+
+    final enabled = await makeRealProfileTask(state);
+    final enabledConfig = loadYaml(enabled.yaml) as YamlMap;
+    expect(enabledConfig['authentication'], ['user:pass']);
+    expect(enabledConfig['skip-auth-prefixes'], isEmpty);
+
+    final disabled = await makeRealProfileTask(
+      state.copyWith(authentication: const []),
+    );
+    final disabledConfig = loadYaml(disabled.yaml) as YamlMap;
+    expect(disabledConfig['authentication'], isEmpty);
+    expect(disabledConfig['skip-auth-prefixes'], isEmpty);
+  });
+
   test('makeRealProfileTask overrides DNS and explicit custom data', () async {
     final result = await makeRealProfileTask(
       const MakeRealProfileState(

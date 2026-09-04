@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -21,13 +22,16 @@ class Window implements WindowPort {
   Future<void> init(int version, WindowProps props) async {
     final acquire = await singleInstanceLock.acquire();
     if (!acquire) {
-      await singleInstanceLock.requestActivation();
+      commonPrint.log('another instance owns the data directory, exiting');
       exit(0);
     }
     if (system.isWindows) {
-      protocol.register('clash');
-      protocol.register('clashmeta');
-      protocol.register('reclash');
+      for (final scheme in protocolSchemes) {
+        protocol.register(scheme);
+      }
+    }
+    if (system.isLinux) {
+      unawaited(protocol.registerLinux(protocolSchemes));
     }
     await windowManager.ensureInitialized();
     _supportsPosition = !system.isMacOS;
@@ -52,7 +56,6 @@ class Window implements WindowPort {
       await _windowPosition(props);
     }
     await windowManager.setPreventClose(true);
-    singleInstanceLock.activationRequests.listen((_) => show());
   }
 
   Future<void> _windowPosition(WindowProps props) async {

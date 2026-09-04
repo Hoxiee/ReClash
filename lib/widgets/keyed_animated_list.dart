@@ -103,6 +103,7 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
 
     final removedBefore = <Object, List<_Entry<T>>>{};
     var pending = <_Entry<T>>[];
+    final transitions = <VoidCallback>[];
     for (final entry in _entries) {
       if (newKeys.contains(entry.key)) {
         if (pending.isNotEmpty) {
@@ -113,10 +114,11 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
         pending.add(entry);
         if (!entry.removing) {
           entry.removing = true;
-          final controller =
-              entry.controller ?? _createController(entry, from: 1);
-          entry.controller = controller;
-          controller.reverse();
+          final controller = entry.controller ??= _createController(
+            entry,
+            from: 1,
+          );
+          transitions.add(controller.reverse);
         }
       }
     }
@@ -128,14 +130,19 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
       final existing = oldByKey[key];
       if (existing == null) {
         final entry = _Entry(key, item);
-        entry.controller = _createController(entry, from: 0)..forward();
+        final controller = _createController(entry, from: 0);
+        entry.controller = controller;
+        transitions.add(controller.forward);
         next.add(entry);
         continue;
       }
       existing.item = item;
       if (existing.removing) {
         existing.removing = false;
-        existing.controller?.forward();
+        final controller = existing.controller;
+        if (controller != null) {
+          transitions.add(controller.forward);
+        }
       }
       next.add(existing);
     }
@@ -145,6 +152,9 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
       _entries = next;
       _generation++;
     });
+    for (final transition in transitions) {
+      transition();
+    }
   }
 
   Widget _buildRow(BuildContext context, int index) {

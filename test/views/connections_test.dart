@@ -20,10 +20,15 @@ TrackerInfo _tracker({
   String host = 'example.com',
   String process = 'curl',
   List<String> chains = const ['Proxy'],
+  int upload = 0,
+  int download = 0,
+  DateTime? start,
 }) {
   return TrackerInfo(
     id: id,
-    start: DateTime.utc(2026),
+    upload: upload,
+    download: download,
+    start: start ?? DateTime.utc(2026),
     metadata: Metadata(
       network: 'tcp',
       host: host,
@@ -108,6 +113,33 @@ void main() {
     expect(find.byType(NullStatus), findsNothing);
     expect(find.textContaining('alpha.test'), findsWidgets);
     expect(find.textContaining('beta.test'), findsWidgets);
+    expect(tester.takeException(), null);
+
+    await teardownView(tester);
+  });
+
+  testWidgets('orders rows by total traffic, then newest first', (
+    tester,
+  ) async {
+    when(core.getConnections).thenAnswer(
+      (_) async => [
+        _tracker(id: 'a', host: 'alpha.test', download: 100),
+        _tracker(id: 'b', host: 'beta.test', upload: 300, download: 300),
+        _tracker(
+          id: 'c',
+          host: 'gamma.test',
+          download: 100,
+          start: DateTime.utc(2026, 2),
+        ),
+      ],
+    );
+
+    await pumpConnections(tester);
+
+    double topOf(String host) =>
+        tester.getTopLeft(find.textContaining(host).first).dy;
+    expect(topOf('beta.test'), lessThan(topOf('gamma.test')));
+    expect(topOf('gamma.test'), lessThan(topOf('alpha.test')));
     expect(tester.takeException(), null);
 
     await teardownView(tester);

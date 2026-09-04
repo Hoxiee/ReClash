@@ -97,13 +97,21 @@ public class TrayPlugin: NSObject, FlutterPlugin, NSMenuDelegate {
     }
 
     private func makeImage(_ icon: [String: Any]) -> NSImage? {
-        guard let encoded = icon["bytes"] as? String,
-              let data = Data(base64Encoded: encoded, options: .ignoreUnknownCharacters),
-              let image = NSImage(data: data) else {
+        let size = icon["size"] as? Int ?? 18
+        let pointSize = NSSize(width: size, height: size)
+        let image = NSImage(size: pointSize)
+        for rep in icon["reps"] as? [[String: Any]] ?? [] {
+            guard let encoded = rep["bytes"] as? String,
+                  let data = Data(base64Encoded: encoded, options: .ignoreUnknownCharacters),
+                  let bitmap = NSBitmapImageRep(data: data) else {
+                continue
+            }
+            bitmap.size = pointSize
+            image.addRepresentation(bitmap)
+        }
+        guard !image.representations.isEmpty else {
             return nil
         }
-        let size = icon["size"] as? Int ?? 18
-        image.size = NSSize(width: size, height: size)
         image.isTemplate = icon["isTemplate"] as? Bool ?? false
         return image
     }

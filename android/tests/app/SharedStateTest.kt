@@ -47,6 +47,7 @@ class SharedStateTest {
               "currentProfileName": "Work",
               "stopText": "Halt",
               "onlyStatisticsProxy": true,
+              "showStopAction": false,
               "vpnOptions": {
                 "enable": true,
                 "port": 7890,
@@ -77,6 +78,7 @@ class SharedStateTest {
         assertEquals("Work", state.currentProfileName)
         assertEquals(false, state.crashlytics)
         assertEquals(true, state.onlyStatisticsProxy)
+        assertEquals(false, state.showStopAction)
         assertEquals(7890, state.vpnOptions?.port)
         assertEquals("gvisor", state.vpnOptions?.stack)
         assertEquals(
@@ -95,6 +97,7 @@ class SharedStateTest {
         assertEquals("Stop", defaults.stopText)
         assertEquals(true, defaults.crashlytics)
         assertEquals(false, defaults.onlyStatisticsProxy)
+        assertEquals(true, defaults.showStopAction)
         assertNull(defaults.vpnOptions)
         assertNull(defaults.setupParams)
     }

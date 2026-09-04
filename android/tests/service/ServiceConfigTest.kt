@@ -36,6 +36,7 @@ class ServiceConfigTest {
         assertEquals("ReClash", defaults.title)
         assertEquals("STOP", defaults.stopText)
         assertEquals(false, defaults.onlyStatisticsProxy)
+        assertEquals(true, defaults.showStopAction)
     }
 
     @Test

@@ -1205,6 +1205,36 @@ class AppLocalizations {
     return Intl.message('Password', name: 'password', desc: '', args: []);
   }
 
+  /// `Authentication`
+  String get authentication {
+    return Intl.message(
+      'Authentication',
+      name: 'authentication',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Require credentials on the local proxy port to keep other local apps from using it`
+  String get authenticationDesc {
+    return Intl.message(
+      'Require credentials on the local proxy port to keep other local apps from using it',
+      name: 'authenticationDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not applied while authentication is enabled`
+  String get authenticationSystemProxyDesc {
+    return Intl.message(
+      'Not applied while authentication is enabled',
+      name: 'authenticationSystemProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Check for updates`
   String get checkUpdate {
     return Intl.message(
@@ -1495,6 +1525,11 @@ class AppLocalizations {
     return Intl.message('Connections', name: 'connections', desc: '', args: []);
   }
 
+  /// `Inbound`
+  String get inbound {
+    return Intl.message('Inbound', name: 'inbound', desc: '', args: []);
+  }
+
   /// `View current connection data`
   String get connectionsDesc {
     return Intl.message(
@@ -1665,6 +1700,26 @@ class AppLocalizations {
     return Intl.message(
       'When enabled, only proxy traffic is counted',
       name: 'onlyStatisticsProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop button in notification`
+  String get showNotificationStopAction {
+    return Intl.message(
+      'Stop button in notification',
+      name: 'showNotificationStopAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show a stop button on the persistent notification. Turn it off if your system keeps the notification expanded because of it`
+  String get showNotificationStopActionDesc {
+    return Intl.message(
+      'Show a stop button on the persistent notification. Turn it off if your system keeps the notification expanded because of it',
+      name: 'showNotificationStopActionDesc',
       desc: '',
       args: [],
     );
@@ -2597,16 +2652,6 @@ class AppLocalizations {
     return Intl.message(
       'Network interface used for outbound connections',
       name: 'interfaceNameDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Please enter the administrator password`
-  String get pleaseInputAdminPassword {
-    return Intl.message(
-      'Please enter the administrator password',
-      name: 'pleaseInputAdminPassword',
       desc: '',
       args: [],
     );

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,9 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/component/updater"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
+	authStore "github.com/metacubex/mihomo/listener/auth"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 )
@@ -103,6 +106,38 @@ func TestHandleUpdateConfigReportsAnUnappliedConfig(t *testing.T) {
 
 	if message := handleUpdateConfig(&UpdateParams{}); message == "" {
 		t.Error("handleUpdateConfig reported success without an applied config")
+	}
+}
+
+func TestUpdateConfigAppliesAuthenticationAndClearsLoopbackExemptions(t *testing.T) {
+	withCurrentConfig(t, &config.Config{General: &config.General{}, Controller: &config.Controller{}})
+	currentConfig.General.SkipAuthPrefixes = []netip.Prefix{
+		netip.MustParsePrefix("127.0.0.1/32"),
+	}
+	inbound.SetSkipAuthPrefixes(currentConfig.General.SkipAuthPrefixes)
+	t.Cleanup(func() {
+		authStore.Default.SetAuthenticator(nil)
+		inbound.SetSkipAuthPrefixes(nil)
+	})
+
+	users := []string{"user:pass"}
+	if err := updateConfig(&UpdateParams{Authentication: &users}); err != nil {
+		t.Fatalf("updateConfig error: %v", err)
+	}
+	authenticator := authStore.Default.Authenticator()
+	if authenticator == nil || !authenticator.Verify("user", "pass") {
+		t.Error("authenticator missing or rejecting the configured credentials")
+	}
+	if inbound.SkipAuthRemoteAddress("127.0.0.1:1234") {
+		t.Error("loopback stayed exempt; local apps could bypass the credentials")
+	}
+
+	empty := []string{}
+	if err := updateConfig(&UpdateParams{Authentication: &empty}); err != nil {
+		t.Fatalf("updateConfig error: %v", err)
+	}
+	if authStore.Default.Authenticator() != nil {
+		t.Error("authenticator survived an empty authentication list")
 	}
 }
 

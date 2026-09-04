@@ -7,4 +7,5 @@ data class NotificationParams(
     val pauseText: String = "Pause",
     val resumeText: String = "Resume",
     val pausedText: String = "Paused",
+    val showStopAction: Boolean = true,
 )

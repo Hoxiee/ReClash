@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/features/overwrite/overwrite.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -145,6 +146,69 @@ void main() {
 
     expect(find.text(currentAppLocalizations.subRuleNotEmpty), findsOne);
     expect(harness.rules.puts, isEmpty);
+  });
+
+  testWidgets('a MATCH rule saves without a content field', (tester) async {
+    final harness = _Harness();
+    await harness.pump(tester);
+    await harness.openAddSheet(tester);
+
+    await tester.tap(find.text(currentAppLocalizations.proxyType));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(RuleAction.MATCH.name),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(RuleAction.MATCH.name).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text(currentAppLocalizations.content), findsNothing);
+
+    await harness.save(tester);
+
+    expect(find.text(currentAppLocalizations.contentNotEmpty), findsNothing);
+    expect(harness.rules.puts, hasLength(1));
+    final stored = harness.rules.puts.single;
+    expect(stored.ruleAction, RuleAction.MATCH);
+    expect(stored.ruleTarget, 'DIRECT');
+    expect(stored.rawValue, 'MATCH,DIRECT');
+  });
+
+  testWidgets('the type sheet opens scrolled to the selected action', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.pump(tester);
+    await harness.openAddSheet(tester);
+
+    await tester.tap(find.text(currentAppLocalizations.proxyType));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(RuleAction.SUB_RULE.name),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(RuleAction.SUB_RULE.name).last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(currentAppLocalizations.proxyType));
+    await tester.pumpAndSettle();
+
+    final sheet = find.byType(OverwriteSelectionSheet<RuleAction>);
+    final item = find.descendant(
+      of: sheet,
+      matching: find.text(RuleAction.SUB_RULE.name),
+    );
+    expect(item, findsOne);
+    final viewport = tester.getRect(
+      find.descendant(of: sheet, matching: find.byType(CustomScrollView)),
+    );
+    final itemRect = tester.getRect(item);
+    expect(itemRect.top, greaterThanOrEqualTo(viewport.top));
+    expect(itemRect.bottom, lessThanOrEqualTo(viewport.bottom));
   });
 
   testWidgets('a complete rule is stored with a generated id', (tester) async {

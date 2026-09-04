@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/window.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/system_dns.dart';
@@ -92,6 +93,7 @@ class ApplicationState extends ConsumerState<Application> {
   void _initLink() {
     final color = context.colorScheme.primary;
     linkManager.initAppLinksListen((url) async {
+      unawaited(window?.show());
       ResolvedExternalLink? resolved;
       try {
         resolved = await resolveExternalLink(url);
@@ -181,7 +183,7 @@ class ApplicationState extends ConsumerState<Application> {
               ),
             );
           },
-          scrollBehavior: BaseScrollBehavior(),
+          scrollBehavior: const BaseScrollBehavior(),
           title: appName,
           locale: getLocaleForString(locale),
           supportedLocales: AppLocalizations.delegate.supportedLocales,

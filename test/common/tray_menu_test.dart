@@ -189,7 +189,9 @@ void main() {
     final arguments = showCalls.single.arguments as Map;
     expect(arguments['toolTip'], appName);
     expect(arguments['menu'], isNotEmpty);
-    expect((arguments['icon'] as Map)['bytes'], isNotEmpty);
+    final reps = ((arguments['icon'] as Map)['reps'] as List).cast<Map>();
+    expect(reps.map((rep) => rep['scale']), containsAll([1.0, 2.0, 3.0, 4.0]));
+    expect(reps.map((rep) => rep['bytes']), everyElement(isNotEmpty));
     expect((arguments['icon'] as Map)['isTemplate'], isTrue);
   });
 

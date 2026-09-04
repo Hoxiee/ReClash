@@ -58,7 +58,7 @@ Future<Widget> _buildScrollbar(
 void main() {
   group('BaseScrollBehavior', () {
     test('enables mouse dragging only on desktop', () {
-      final devices = BaseScrollBehavior().dragDevices;
+      final devices = const BaseScrollBehavior().dragDevices;
       expect(devices, contains(PointerDeviceKind.touch));
       expect(devices, contains(PointerDeviceKind.trackpad));
       expect(devices.contains(PointerDeviceKind.mouse), system.isDesktop);
@@ -67,7 +67,7 @@ void main() {
     testWidgets('leaves horizontal scrollables unwrapped', (tester) async {
       final result = await _buildScrollbar(
         tester,
-        BaseScrollBehavior(),
+        const BaseScrollBehavior(),
         axis: Axis.horizontal,
         platform: TargetPlatform.macOS,
       );
@@ -79,7 +79,7 @@ void main() {
     ) async {
       final result = await _buildScrollbar(
         tester,
-        BaseScrollBehavior(),
+        const BaseScrollBehavior(),
         axis: Axis.vertical,
         platform: TargetPlatform.macOS,
       );
@@ -89,7 +89,7 @@ void main() {
     testWidgets('leaves vertical mobile scrollables unwrapped', (tester) async {
       final result = await _buildScrollbar(
         tester,
-        BaseScrollBehavior(),
+        const BaseScrollBehavior(),
         axis: Axis.vertical,
         platform: TargetPlatform.android,
       );
@@ -101,21 +101,35 @@ void main() {
     testWidgets('HiddenBarScrollBehavior never wraps', (tester) async {
       final result = await _buildScrollbar(
         tester,
-        HiddenBarScrollBehavior(),
+        const HiddenBarScrollBehavior(),
         axis: Axis.vertical,
         platform: TargetPlatform.macOS,
       );
       expect(result.key, const ValueKey('child'));
     });
 
-    testWidgets('ShowBarScrollBehavior always wraps', (tester) async {
+    testWidgets('ShowBarScrollBehavior wraps vertical scrollables on mobile', (
+      tester,
+    ) async {
       final result = await _buildScrollbar(
         tester,
-        ShowBarScrollBehavior(),
-        axis: Axis.horizontal,
+        const ShowBarScrollBehavior(),
+        axis: Axis.vertical,
         platform: TargetPlatform.android,
       );
       expect(result, isA<CommonScrollBar>());
+    });
+
+    testWidgets('ShowBarScrollBehavior leaves horizontal scrollables alone', (
+      tester,
+    ) async {
+      final result = await _buildScrollbar(
+        tester,
+        const ShowBarScrollBehavior(),
+        axis: Axis.horizontal,
+        platform: TargetPlatform.android,
+      );
+      expect(result.key, const ValueKey('child'));
     });
   });
 

@@ -104,7 +104,7 @@ void main() {
 
   group('getWindowHeaderHeight', () {
     test('Windows reserves more than macOS, mobile reserves nothing', () {
-      expect(_windowsHeaderHeight, 40);
+      expect(_windowsHeaderHeight, 32);
       expect(_macOSHeaderHeight, 28);
       expect(getWindowHeaderHeight(isDesktop: false, isMacOS: false), 0);
     });
@@ -244,6 +244,34 @@ void main() {
               rect.right <= bar.right,
           isTrue,
           reason: '$icon is laid out at $rect, outside the bar $bar',
+        );
+      }
+    });
+
+    testWidgets('the caption buttons and their glyphs follow the bar height', (
+      tester,
+    ) async {
+      await pumpBar(tester, width: 900);
+
+      for (final icon in [
+        Icons.push_pin_outlined,
+        Icons.remove,
+        Icons.crop_square,
+        Icons.close,
+      ]) {
+        final button = find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byType(IconButton),
+        );
+        expect(
+          tester.getSize(button),
+          Size.square(_windowsHeaderHeight),
+          reason: '$icon does not fill a square the height of the bar',
+        );
+        expect(
+          tester.getSize(find.byIcon(icon)).longestSide,
+          lessThanOrEqualTo(_windowsHeaderHeight / 2),
+          reason: '$icon is drawn too large for a title bar glyph',
         );
       }
     });

@@ -14,6 +14,7 @@ class App {
   static App? _instance;
   late MethodChannel methodChannel;
   Function()? onExit;
+  Function()? onPackagesChanged;
 
   App._internal() {
     methodChannel = const MethodChannel('$packageName/app');
@@ -23,6 +24,8 @@ class App {
           if (onExit != null) {
             await onExit!();
           }
+        case 'packagesChanged':
+          onPackagesChanged?.call();
         default:
           throw MissingPluginException();
       }

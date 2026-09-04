@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+# Git exports these to its hooks, and they outrank the `-C <dir>` the probes
+# below rely on: every file then resolves its own directory as the repository,
+# so a main checkout skips the file and a linked worktree measures all of it.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+
 max_density="${COMMENT_DENSITY_MAX:-5}"
 min_lines="${COMMENT_DENSITY_MIN_LINES:-20}"
 

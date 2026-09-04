@@ -111,11 +111,13 @@ void main() {
     processes = _FakeProcesses();
     system.runProcess = processes.run;
     MacOS().runProcess = processes.run;
+    Linux().runProcess = processes.run;
   });
 
   tearDown(() {
     system.runProcess = Process.run;
     MacOS().runProcess = Process.run;
+    Linux().runProcess = Process.run;
   });
 
   group('statArguments', () {
@@ -276,30 +278,50 @@ void main() {
     });
   });
 
-  group('checkIsAdmin', () {
-    test('stats the core path verbatim', () async {
-      processes.stub(
-        'stat',
-        Platform.isMacOS ? 'root:admin -rwsr-sr-x' : 'root 4755',
-      );
+  group(
+    'checkIsAdmin',
+    () {
+      test('stats the core path verbatim', () async {
+        processes.stub(
+          'stat',
+          system.isLinux ? 'root 4755' : 'root:admin -rwsr-sr-x',
+        );
+        expect(await system.checkIsAdmin(), isTrue);
+        expect(processes.argumentsFor('stat').last, appPath.corePath);
+      });
 
-      expect(await system.checkIsAdmin(), isTrue);
-      expect(processes.argumentsFor('stat').last, appPath.corePath);
+      test('reports a core that is not setuid root', () async {
+        processes.stub('stat', 'alice:staff -rwxr-xr-x');
+
+        expect(await system.checkIsAdmin(), isFalse);
+      });
+
+      test('reports a core stat could not find', () async {
+        processes.stub('stat', '');
+
+        expect(await system.checkIsAdmin(), isFalse);
+      });
+    },
+    skip: system.hasHelperService
+        ? 'the Helper probe replaces stat here'
+        : false,
+  );
+
+  group('Linux installService', () {
+    test('asks pkexec to install the bundled Helper', () async {
+      expect(await Linux().installService(), isTrue);
+      expect(processes.argumentsFor('pkexec'), [appPath.helperPath, 'install']);
     });
 
-    test('reports a core that is not setuid root', () async {
-      processes.stub(
-        'stat',
-        Platform.isMacOS ? 'alice:staff -rwxr-xr-x' : 'alice 755',
-      );
-
-      expect(await system.checkIsAdmin(), isFalse);
+    test('reports an installation the user dismissed', () async {
+      processes.stub('pkexec', '', exitCode: 126);
+      expect(await Linux().installService(), isFalse);
     });
 
-    test('reports a core stat could not find', () async {
-      processes.stub('stat', '');
+    test('reports a host with no pkexec at all', () async {
+      processes.stubThrow('pkexec');
 
-      expect(await system.checkIsAdmin(), isFalse);
+      expect(await Linux().installService(), isFalse);
     });
   });
 

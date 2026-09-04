@@ -177,6 +177,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage("强制为配置附加系统DNS"),
     "application": MessageLookupByLibrary.simpleMessage("应用程序"),
     "applicationDesc": MessageLookupByLibrary.simpleMessage("修改应用程序相关设置"),
+    "authentication": MessageLookupByLibrary.simpleMessage("认证"),
+    "authenticationDesc": MessageLookupByLibrary.simpleMessage(
+      "为本地代理端口启用认证，防止本机其他应用擅自使用",
+    ),
+    "authenticationSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
+      "认证启用时不生效",
+    ),
     "authorize": MessageLookupByLibrary.simpleMessage("授权"),
     "authorized": MessageLookupByLibrary.simpleMessage("已授权"),
     "auto": MessageLookupByLibrary.simpleMessage("自动"),
@@ -200,8 +207,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "通过WebDAV或者文件同步数据",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("备份成功"),
-    "basicConfig": MessageLookupByLibrary.simpleMessage("基本配置"),
-    "basicConfigDesc": MessageLookupByLibrary.simpleMessage("全局修改基本配置"),
+    "basicConfig": MessageLookupByLibrary.simpleMessage("基础配置"),
+    "basicConfigDesc": MessageLookupByLibrary.simpleMessage("全局修改基础配置"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基础信息"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基础策略"),
     "batteryOptimizationDesc": MessageLookupByLibrary.simpleMessage(
@@ -460,6 +467,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "importFile": MessageLookupByLibrary.simpleMessage("通过文件导入"),
     "importFromURL": MessageLookupByLibrary.simpleMessage("从URL导入"),
     "importUrl": MessageLookupByLibrary.simpleMessage("通过URL导入"),
+    "inbound": MessageLookupByLibrary.simpleMessage("入站"),
     "includeAllProxies": MessageLookupByLibrary.simpleMessage("包含所有代理"),
     "includeAllProxiesTip": MessageLookupByLibrary.simpleMessage(
       "引入不包含策略组的所有代理，可在下方额外添加策略组",
@@ -637,9 +645,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "pinWindow": MessageLookupByLibrary.simpleMessage("窗口置顶"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage("请绑定WebDAV"),
     "pleaseEnterScriptName": MessageLookupByLibrary.simpleMessage("请输入脚本名称"),
-    "pleaseInputAdminPassword": MessageLookupByLibrary.simpleMessage(
-      "请输入管理员密码",
-    ),
     "pleaseUploadValidQrcode": MessageLookupByLibrary.simpleMessage(
       "请上传有效的二维码",
     ),
@@ -890,6 +895,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "show": MessageLookupByLibrary.simpleMessage("显示"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
     "showMore": MessageLookupByLibrary.simpleMessage("展开"),
+    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
+      "通知栏显示停止按钮",
+    ),
+    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
+      "在常驻通知上显示停止按钮。若系统因此总是展开通知，可关闭",
+    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("显示密码"),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
@@ -1191,7 +1202,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "stackMode": MessageLookupByLibrary.simpleMessage("栈模式"),
     "standard": MessageLookupByLibrary.simpleMessage("标准"),
     "standardModeDesc": MessageLookupByLibrary.simpleMessage(
-      "标准模式，覆写基本配置，提供简单追加规则能力",
+      "标准模式，覆写基础配置，提供简单追加规则能力",
     ),
     "start": MessageLookupByLibrary.simpleMessage("启动"),
     "startVpn": MessageLookupByLibrary.simpleMessage("正在启动VPN..."),

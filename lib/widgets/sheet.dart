@@ -242,7 +242,12 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
         children: [
           if (!widget.sheetTransparentToolBar) ...[
             sheetAppBar,
-            Flexible(child: widget.body),
+            Flexible(
+              child: ScrollConfiguration(
+                behavior: const ShowBarScrollBehavior(),
+                child: widget.body,
+              ),
+            ),
           ] else
             Flexible(
               child: _TransparentToolBarBody(
@@ -349,7 +354,12 @@ class _TransparentToolBarBody extends StatelessWidget {
             }
             return false;
           },
-          child: body,
+          child: ScrollConfiguration(
+            behavior: const ShowBarScrollBehavior(
+              scrollbarPadding: EdgeInsets.only(top: sheetAppBarHeight),
+            ),
+            child: body,
+          ),
         ),
         Positioned(
           top: 0,

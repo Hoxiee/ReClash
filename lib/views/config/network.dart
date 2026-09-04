@@ -108,9 +108,14 @@ class VpnSystemProxyItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    final authenticationEnable = ref.watch(
+      networkSettingProvider.select((state) => state.authentication.enable),
+    );
     return _vpnToggle(
       title: (l) => l.systemProxy,
-      subtitle: (l) => l.systemProxyDesc,
+      subtitle: (l) => authenticationEnable
+          ? l.authenticationSystemProxyDesc
+          : l.systemProxyDesc,
       select: (state) => state.systemProxy,
       update: (state, value) => state.copyWith(systemProxy: value),
     );
