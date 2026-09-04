@@ -50,14 +50,15 @@ class ByeDpiArgsTest {
     }
 
     @Test
-    fun `env key ignores the ssid and follows the link`() {
+    fun `env key follows the link and salts it with the ssid`() {
         val home = RcxNetworkFacts(
             ssid = "Home",
             gateways = listOf("192.168.1.1"),
             dhcp = "192.168.1.1",
             dns = listOf("192.168.1.1"),
         )
-        assertEquals(byeDpiEnvKey(home), byeDpiEnvKey(home.copy(ssid = "Home 5GHz")))
+        assertNotEquals(byeDpiEnvKey(home), byeDpiEnvKey(home.copy(ssid = "Cafe")))
+        assertNotEquals(byeDpiEnvKey(home), byeDpiEnvKey(home.copy(ssid = "")))
         assertNotEquals(byeDpiEnvKey(home), byeDpiEnvKey(home.copy(gateways = listOf("10.0.0.1"))))
     }
 
