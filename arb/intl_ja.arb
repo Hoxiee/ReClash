@@ -881,5 +881,41 @@
   "smartRoutingRankingDesc": "遅延帯は固定です。ここに調整を置くとミリ秒が可用性を上回ってしまいます",
   "smartRoutingResetSection": "プリセットに戻す",
   "smartRoutingResetSectionDesc": "地域の既定値に戻し、スマートルーティングは有効のままにします",
-  "smartRoutingEmpty": "まだ測定結果がありません"
+  "smartRoutingEmpty": "まだ測定結果がありません",
+  "appearance": "外観",
+  "appearanceDesc": "テーマ・色・アイコンとダッシュボードの見た目",
+  "appearanceTheme": "テーマ",
+  "appearanceColor": "色",
+  "appearanceIcon": "アイコン",
+  "appearanceDashboard": "ダッシュボード",
+  "appearanceMotion": "モーション",
+  "schedule": "スケジュール",
+  "scheduleDesc": "{darkAt} から {lightAt} までダーク",
+  "@scheduleDesc": {
+    "placeholders": {
+      "darkAt": {
+        "type": "String"
+      },
+      "lightAt": {
+        "type": "String"
+      }
+    }
+  },
+  "darkAt": "ダーク切替",
+  "lightAt": "ライト切替",
+  "contrast": "コントラスト",
+  "contrastAmoledHint": "ピュアブラックでは +0.3 のコントラストが読みやすいことが多い",
+  "systemColor": "システムの色",
+  "systemColorDesc": "OS のアクセント色を使用 (Material You)",
+  "systemSeed": "OS の色",
+  "appIcon": "アプリのアイコン",
+  "appIconChangeNote": "ランチャーは数秒後にアイコンを再描画します。一部のランチャーではピン留めショートカットが消えることがあります。",
+  "dashboardStyle": "ダッシュボードのスタイル",
+  "classicDashboard": "クラシック",
+  "newDashboardTitle": "新しい",
+  "showLabels": "サイドバーのラベル",
+  "reduceMotion": "モーションを減らす",
+  "reduceMotionDesc": "装飾アニメーションを無効化",
+  "pageAnimation": "ページアニメーション",
+  "pageAnimationDesc": "ページ切替をアニメーション化"
 }

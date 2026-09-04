@@ -7616,6 +7616,206 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Appearance`
+  String get appearance {
+    return Intl.message('Appearance', name: 'appearance', desc: '', args: []);
+  }
+
+  /// `Theme, colors, icons and dashboard look`
+  String get appearanceDesc {
+    return Intl.message(
+      'Theme, colors, icons and dashboard look',
+      name: 'appearanceDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Theme`
+  String get appearanceTheme {
+    return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
+  }
+
+  /// `Color`
+  String get appearanceColor {
+    return Intl.message('Color', name: 'appearanceColor', desc: '', args: []);
+  }
+
+  /// `Icon`
+  String get appearanceIcon {
+    return Intl.message('Icon', name: 'appearanceIcon', desc: '', args: []);
+  }
+
+  /// `Dashboard`
+  String get appearanceDashboard {
+    return Intl.message(
+      'Dashboard',
+      name: 'appearanceDashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Motion`
+  String get appearanceMotion {
+    return Intl.message('Motion', name: 'appearanceMotion', desc: '', args: []);
+  }
+
+  /// `Scheduled`
+  String get schedule {
+    return Intl.message('Scheduled', name: 'schedule', desc: '', args: []);
+  }
+
+  /// `Dark from {darkAt} to {lightAt}`
+  String scheduleDesc(String darkAt, String lightAt) {
+    return Intl.message(
+      'Dark from $darkAt to $lightAt',
+      name: 'scheduleDesc',
+      desc: '',
+      args: [darkAt, lightAt],
+    );
+  }
+
+  /// `Dark at`
+  String get darkAt {
+    return Intl.message('Dark at', name: 'darkAt', desc: '', args: []);
+  }
+
+  /// `Light at`
+  String get lightAt {
+    return Intl.message('Light at', name: 'lightAt', desc: '', args: []);
+  }
+
+  /// `Contrast`
+  String get contrast {
+    return Intl.message('Contrast', name: 'contrast', desc: '', args: []);
+  }
+
+  /// `On pure black, +0.3 contrast usually reads better`
+  String get contrastAmoledHint {
+    return Intl.message(
+      'On pure black, +0.3 contrast usually reads better',
+      name: 'contrastAmoledHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use system color`
+  String get systemColor {
+    return Intl.message(
+      'Use system color',
+      name: 'systemColor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Take the accent color from the OS (Material You)`
+  String get systemColorDesc {
+    return Intl.message(
+      'Take the accent color from the OS (Material You)',
+      name: 'systemColorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System seed`
+  String get systemSeed {
+    return Intl.message('System seed', name: 'systemSeed', desc: '', args: []);
+  }
+
+  /// `App icon`
+  String get appIcon {
+    return Intl.message('App icon', name: 'appIcon', desc: '', args: []);
+  }
+
+  /// `The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.`
+  String get appIconChangeNote {
+    return Intl.message(
+      'The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.',
+      name: 'appIconChangeNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dashboard style`
+  String get dashboardStyle {
+    return Intl.message(
+      'Dashboard style',
+      name: 'dashboardStyle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Classic`
+  String get classicDashboard {
+    return Intl.message(
+      'Classic',
+      name: 'classicDashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New`
+  String get newDashboardTitle {
+    return Intl.message('New', name: 'newDashboardTitle', desc: '', args: []);
+  }
+
+  /// `Show sidebar labels`
+  String get showLabels {
+    return Intl.message(
+      'Show sidebar labels',
+      name: 'showLabels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reduce motion`
+  String get reduceMotion {
+    return Intl.message(
+      'Reduce motion',
+      name: 'reduceMotion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disable decorative animations`
+  String get reduceMotionDesc {
+    return Intl.message(
+      'Disable decorative animations',
+      name: 'reduceMotionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Page animation`
+  String get pageAnimation {
+    return Intl.message(
+      'Page animation',
+      name: 'pageAnimation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Animate switching between pages`
+  String get pageAnimationDesc {
+    return Intl.message(
+      'Animate switching between pages',
+      name: 'pageAnimationDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

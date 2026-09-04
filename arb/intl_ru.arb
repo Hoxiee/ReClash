@@ -895,5 +895,41 @@
   "smartRoutingRankingDesc": "Полосы задержки не настраиваются: ручка здесь позволила бы миллисекундам перевесить работоспособность",
   "smartRoutingResetSection": "Сбросить к пресету",
   "smartRoutingResetSectionDesc": "Возвращает настройки региона и оставляет маршрутизацию включённой",
-  "smartRoutingEmpty": "Пока нечего показать"
+  "smartRoutingEmpty": "Пока нечего показать",
+  "appearance": "Оформление",
+  "appearanceDesc": "Тема, цвета, иконки и вид панели",
+  "appearanceTheme": "Тема",
+  "appearanceColor": "Цвет",
+  "appearanceIcon": "Иконка",
+  "appearanceDashboard": "Панель",
+  "appearanceMotion": "Движение",
+  "schedule": "По расписанию",
+  "scheduleDesc": "Тёмная с {darkAt} до {lightAt}",
+  "@scheduleDesc": {
+    "placeholders": {
+      "darkAt": {
+        "type": "String"
+      },
+      "lightAt": {
+        "type": "String"
+      }
+    }
+  },
+  "darkAt": "Тёмная в",
+  "lightAt": "Светлая в",
+  "contrast": "Контраст",
+  "contrastAmoledHint": "На чистом чёрном контраст +0.3 обычно читается лучше",
+  "systemColor": "Цвет системы",
+  "systemColorDesc": "Брать акцентный цвет из ОС (Material You)",
+  "systemSeed": "Цвет ОС",
+  "appIcon": "Иконка приложения",
+  "appIconChangeNote": "Лаунчер перерисует иконку через несколько секунд. На некоторых лаунчерах закреплённый ярлык может пропасть.",
+  "dashboardStyle": "Вид панели",
+  "classicDashboard": "Классическая",
+  "newDashboardTitle": "Новая",
+  "showLabels": "Подписи в боковой панели",
+  "reduceMotion": "Меньше движения",
+  "reduceMotionDesc": "Отключить декоративные анимации",
+  "pageAnimation": "Анимация страниц",
+  "pageAnimationDesc": "Анимировать переключение между страницами"
 }

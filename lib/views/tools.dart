@@ -155,8 +155,8 @@ class _ThemeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListItem.open(
       leading: const Icon(Icons.style),
-      title: Text(context.appLocalizations.theme),
-      subtitle: Text(context.appLocalizations.themeDesc),
+      title: Text(context.appLocalizations.appearance),
+      subtitle: Text(context.appLocalizations.appearanceDesc),
       widget: const ThemeView(),
     );
   }

@@ -35,20 +35,36 @@ class ThemeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return BaseScaffold(
-      title: appLocalizations.theme,
-      body: const CustomScrollView(
+      title: appLocalizations.appearance,
+      body: CustomScrollView(
         slivers: [
-          _ThemeModeItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _PrimaryColorItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _PrueBlackItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _NewDashboardItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 16)),
-          _TextScaleFactorItem(),
-          SliverToBoxAdapter(child: SizedBox(height: 32)),
+          _SectionHeader(title: appLocalizations.appearanceTheme),
+          const _ThemeModeItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _PrueBlackItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const _TextScaleFactorItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          _SectionHeader(title: appLocalizations.appearanceColor),
+          const _PrimaryColorItem(),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: ListHeader(
+        title: title,
+        padding: listHeaderPadding.copyWith(bottom: 8.ap),
       ),
     );
   }
@@ -510,34 +526,6 @@ class _PrueBlackItem extends ConsumerWidget {
           ref
               .read(themeSettingProvider.notifier)
               .update((state) => state.copyWith(pureBlack: value));
-        },
-      ),
-    );
-  }
-}
-
-class _NewDashboardItem extends ConsumerWidget {
-  const _NewDashboardItem();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final newDashboard = ref.watch(newDashboardEnabledProvider);
-    return SliverToBoxAdapter(
-      child: ListItem.toggle(
-        leading: const Icon(Icons.dashboard_customize),
-        horizontalTitleGap: 12,
-        title: Text(
-          appLocalizations.newDashboard,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        value: newDashboard,
-        onChanged: (value) {
-          ref
-              .read(appSettingProvider.notifier)
-              .update((state) => state.copyWith(newDashboard: value));
         },
       ),
     );

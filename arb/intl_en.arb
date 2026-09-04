@@ -1035,5 +1035,41 @@
         "type": "int"
       }
     }
-  }
+  },
+  "appearance": "Appearance",
+  "appearanceDesc": "Theme, colors, icons and dashboard look",
+  "appearanceTheme": "Theme",
+  "appearanceColor": "Color",
+  "appearanceIcon": "Icon",
+  "appearanceDashboard": "Dashboard",
+  "appearanceMotion": "Motion",
+  "schedule": "Scheduled",
+  "scheduleDesc": "Dark from {darkAt} to {lightAt}",
+  "@scheduleDesc": {
+    "placeholders": {
+      "darkAt": {
+        "type": "String"
+      },
+      "lightAt": {
+        "type": "String"
+      }
+    }
+  },
+  "darkAt": "Dark at",
+  "lightAt": "Light at",
+  "contrast": "Contrast",
+  "contrastAmoledHint": "On pure black, +0.3 contrast usually reads better",
+  "systemColor": "Use system color",
+  "systemColorDesc": "Take the accent color from the OS (Material You)",
+  "systemSeed": "System seed",
+  "appIcon": "App icon",
+  "appIconChangeNote": "The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.",
+  "dashboardStyle": "Dashboard style",
+  "classicDashboard": "Classic",
+  "newDashboardTitle": "New",
+  "showLabels": "Show sidebar labels",
+  "reduceMotion": "Reduce motion",
+  "reduceMotionDesc": "Disable decorative animations",
+  "pageAnimation": "Page animation",
+  "pageAnimationDesc": "Animate switching between pages"
 }

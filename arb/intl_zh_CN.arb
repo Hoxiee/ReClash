@@ -881,5 +881,41 @@
   "smartRoutingRankingDesc": "延迟档固定不可调：这里加开关会让毫秒盖过服务器是否可用",
   "smartRoutingResetSection": "恢复为预设",
   "smartRoutingResetSectionDesc": "恢复该地区默认值，并保持智能路由开启",
-  "smartRoutingEmpty": "暂无测量结果"
+  "smartRoutingEmpty": "暂无测量结果",
+  "appearance": "外观",
+  "appearanceDesc": "主题、颜色、图标与面板外观",
+  "appearanceTheme": "主题",
+  "appearanceColor": "颜色",
+  "appearanceIcon": "图标",
+  "appearanceDashboard": "面板",
+  "appearanceMotion": "动效",
+  "schedule": "按时间",
+  "scheduleDesc": "{darkAt} 至 {lightAt} 使用深色",
+  "@scheduleDesc": {
+    "placeholders": {
+      "darkAt": {
+        "type": "String"
+      },
+      "lightAt": {
+        "type": "String"
+      }
+    }
+  },
+  "darkAt": "深色开始",
+  "lightAt": "浅色开始",
+  "contrast": "对比度",
+  "contrastAmoledHint": "纯黑背景下 +0.3 对比度通常更易读",
+  "systemColor": "跟随系统颜色",
+  "systemColorDesc": "使用系统强调色（Material You）",
+  "systemSeed": "系统颜色",
+  "appIcon": "应用图标",
+  "appIconChangeNote": "启动器会在几秒后重绘图标。部分启动器上固定的快捷方式可能消失。",
+  "dashboardStyle": "面板样式",
+  "classicDashboard": "经典",
+  "newDashboardTitle": "新版",
+  "showLabels": "侧栏标签",
+  "reduceMotion": "减少动效",
+  "reduceMotionDesc": "关闭装饰性动画",
+  "pageAnimation": "页面动画",
+  "pageAnimationDesc": "切换页面时使用动画"
 }
