@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
+import 'panel_headers.dart';
 import 'panel_meta.dart';
 
 part 'generated/profile.freezed.dart';
@@ -66,9 +67,7 @@ abstract class Profile with _$Profile {
     @Default('') String customUserAgent,
     @JsonKey(includeToJson: false, includeFromJson: false)
     SubscriptionClient? lastWorkingClient,
-    @Default([])
-    @SkippedNodesConverter()
-    List<SkippedNode> skippedNodes,
+    @Default([]) @SkippedNodesConverter() List<SkippedNode> skippedNodes,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
@@ -199,45 +198,86 @@ extension ProfileExtension on Profile {
     required ValidateConfig validate,
     Map<String, String>? requestHeaders,
   }) async {
+    final target = normalizeSubscriptionUrl(url);
+    final record = await preferences.getSubscriptionHostRecord();
     var lastError = 'subscription fetch failed';
-    for (final candidate in probeOrder(
-      clientEmulation,
-      lastWorking: lastWorkingClient,
-    )) {
-      final headers = buildSubscriptionHeaders(
-        candidate,
-        deviceDetails: await deviceIdentity.info,
-        defaultUa: requestHeaders?['User-Agent'],
-        identityUserAgent: requestHeaders?['User-Agent'],
-        customUserAgent: customUserAgent,
-        sendDeviceHeaders: requestHeaders != null,
-      );
-      final response = await request.getFileResponseForUrl(
-        url,
-        headers: headers,
-      );
-      final data = response.data;
-      if (data == null) {
-        lastError = 'empty response body';
-        continue;
-      }
-      try {
-        return await _updateFromResponse(
-          response,
-          data,
-          validate: validate,
-          workingClient: candidate,
+    for (final host in subscriptionUrlCandidates(target, record.hostsFor(id))) {
+      for (final candidate in probeOrder(
+        clientEmulation,
+        lastWorking: lastWorkingClient,
+      )) {
+        final headers = buildSubscriptionHeaders(
+          candidate,
+          deviceDetails: await deviceIdentity.info,
+          defaultUa: requestHeaders?['User-Agent'],
+          identityUserAgent: requestHeaders?['User-Agent'],
+          customUserAgent: customUserAgent,
+          sendDeviceHeaders: requestHeaders != null,
         );
-      } on MessageException catch (e) {
-        lastError = e.message;
+        final Response<Uint8List> response;
+        try {
+          response = await request.getFileResponseForUrl(
+            host,
+            headers: headers,
+          );
+        } catch (error) {
+          if (!shouldTryFallbackHost(error)) {
+            rethrow;
+          }
+          lastError = compactError(error);
+          break;
+        }
+        final data = response.data;
+        if (data == null) {
+          lastError = 'empty response body';
+          continue;
+        }
+        try {
+          final updated = await _updateFromResponse(
+            response,
+            data,
+            primaryUrl: target,
+            validate: validate,
+            workingClient: candidate,
+          );
+          await _rememberSpareHosts(
+            record: record,
+            headers: response.headers.map,
+            primaryUrl: target,
+            updatedUrl: updated.url,
+          );
+          return updated;
+        } on MessageException catch (e) {
+          lastError = e.message;
+        }
       }
     }
     throw MessageException(lastError);
   }
 
+  Future<void> _rememberSpareHosts({
+    required SubscriptionHostRecord record,
+    required Map<String, List<String>> headers,
+    required String primaryUrl,
+    required String updatedUrl,
+  }) async {
+    final rotatedHost = updatedUrl == primaryUrl
+        ? null
+        : Uri.tryParse(primaryUrl)?.host;
+    final spares = [
+      ...parseFallbackHosts(normalizePanelHeaders(headers)['fallbackHosts']),
+      if (rotatedHost != null && rotatedHost.isNotEmpty) rotatedHost,
+    ];
+    if (spares.isEmpty) return;
+    final merged = record.remember(profileId: id, hosts: spares);
+    if (merged.hostsFor(id).join(',') == record.hostsFor(id).join(',')) return;
+    await preferences.saveSubscriptionHostRecord(merged);
+  }
+
   Future<Profile> _updateFromResponse(
     Response<Uint8List> response,
     Uint8List data, {
+    required String primaryUrl,
     required ValidateConfig validate,
     required SubscriptionClient workingClient,
   }) async {
@@ -245,10 +285,10 @@ extension ProfileExtension on Profile {
     final userinfo = response.headers.value('subscription-userinfo');
     final panelMeta = PanelMeta.fromHeaders(response.headers.map);
     final updateInterval = panelMeta.updateIntervalMinutes;
-    var updatedUrl = url;
+    var updatedUrl = primaryUrl;
     final newDomain = panelMeta.newDomain;
     if (newDomain != null && newDomain.isNotEmpty) {
-      final currentUri = Uri.tryParse(url);
+      final currentUri = Uri.tryParse(primaryUrl);
       if (currentUri != null && currentUri.host != newDomain) {
         updatedUrl = currentUri.replace(host: newDomain).toString();
       }
@@ -328,21 +368,15 @@ extension ProfileExtension on Profile {
     for (final convert in converters) {
       final converted = convert();
       if (converted == null) continue;
-      final convertedMessage = await validateData(
-        converted.config,
-        validate,
-      );
-      if (convertedMessage.isEmpty) return (converted.config, converted.skipped);
+      final convertedMessage = await validateData(converted.config, validate);
+      if (convertedMessage.isEmpty) {
+        return (converted.config, converted.skipped);
+      }
     }
-    throw MessageException(
-      message.isEmpty ? 'invalid config' : message,
-    );
+    throw MessageException(message.isEmpty ? 'invalid config' : message);
   }
 
-  Future<String> validateData(
-    String data,
-    ValidateConfig validate,
-  ) async {
+  Future<String> validateData(String data, ValidateConfig validate) async {
     final path = await appPath.tempFilePath;
     final tempFile = File(path);
     try {

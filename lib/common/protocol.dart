@@ -4,7 +4,26 @@ import 'package:win32_registry/win32_registry.dart';
 
 import 'print.dart';
 
-const protocolSchemes = ['clash', 'clashmeta', 'reclash'];
+const configProtocolSchemes = ['clash', 'clashmeta', 'reclash'];
+
+const deepLinkProtocolSchemes = ['incy', 'happ'];
+
+const shareProtocolSchemes = [
+  'vmess',
+  'vless',
+  'ss',
+  'ssr',
+  'trojan',
+  'hysteria',
+  'hysteria2',
+  'hy2',
+  'tuic',
+  'anytls',
+];
+
+const protocolSchemes = [...configProtocolSchemes, ...deepLinkProtocolSchemes];
+
+const allProtocolSchemes = [...protocolSchemes, ...shareProtocolSchemes];
 
 class ProtocolRegistrationPlan {
   final String scheme;
@@ -31,11 +50,16 @@ class ProtocolRegistrationPlan {
 /// .desktop file. Rewritten on every launch, like the Windows registry keys.
 class LinuxProtocolRegistrationPlan {
   final List<String> schemes;
+
+  /// Forced as the handler, so only schemes ours by name belong here.
+  final List<String> defaults;
+
   final String executable;
   final String applicationsDir;
 
   const LinuxProtocolRegistrationPlan({
     required this.schemes,
+    required this.defaults,
     required this.executable,
     required this.applicationsDir,
   });
@@ -44,8 +68,7 @@ class LinuxProtocolRegistrationPlan {
 
   String get desktopPath => '$applicationsDir/$desktopId';
 
-  List<String> get mimeTypes =>
-      schemes.map((scheme) => 'x-scheme-handler/$scheme').toList();
+  List<String> get mimeTypes => schemes.map(_mimeType).toList();
 
   String get exec => '"${_quoteExecArgument(executable)}" %u';
 
@@ -59,7 +82,13 @@ class LinuxProtocolRegistrationPlan {
     '',
   ].join('\n');
 
-  List<String> get xdgMimeArguments => ['default', desktopId, ...mimeTypes];
+  List<String> get xdgMimeArguments => [
+    'default',
+    desktopId,
+    ...defaults.map(_mimeType),
+  ];
+
+  static String _mimeType(String scheme) => 'x-scheme-handler/$scheme';
 
   static String _quoteExecArgument(String value) {
     return value
@@ -103,7 +132,10 @@ class Protocol {
     }
   }
 
-  Future<void> registerLinux(List<String> schemes) async {
+  Future<void> registerLinux({
+    required List<String> schemes,
+    required List<String> defaults,
+  }) async {
     final env = Platform.environment;
     final home = env['HOME'];
     if (home == null || home.isEmpty) {
@@ -112,20 +144,32 @@ class Protocol {
     final dataHome = env['XDG_DATA_HOME'];
     final plan = LinuxProtocolRegistrationPlan(
       schemes: schemes,
+      defaults: defaults,
       executable: env['APPIMAGE'] ?? Platform.resolvedExecutable,
       applicationsDir:
           '${dataHome?.isNotEmpty == true ? dataHome : '$home/.local/share'}/applications',
     );
+    final file = File(plan.desktopPath);
     try {
-      final file = File(plan.desktopPath);
       await file.parent.create(recursive: true);
       await file.writeAsString(plan.desktopEntry);
-      final result = await Process.run('xdg-mime', plan.xdgMimeArguments);
-      if (result.exitCode != 0) {
-        commonPrint.log('xdg-mime default failed: ${result.stderr}'.trim());
-      }
     } catch (e) {
       commonPrint.log('linux protocol registration failed: $e');
+      return;
+    }
+    await _run('xdg-mime', plan.xdgMimeArguments);
+    // Schemes we advertise without claiming stay inert until the cache sees them.
+    await _run('update-desktop-database', [file.parent.path]);
+  }
+
+  Future<void> _run(String executable, List<String> arguments) async {
+    try {
+      final result = await Process.run(executable, arguments);
+      if (result.exitCode != 0) {
+        commonPrint.log('$executable failed: ${result.stderr}'.trim());
+      }
+    } catch (e) {
+      commonPrint.log('$executable is unavailable: $e');
     }
   }
 }

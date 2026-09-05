@@ -3,13 +3,17 @@ import 'dart:async';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/permission.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/profiles/overwrite/custom/widgets.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
+
+const _togglePadding = EdgeInsets.only(left: 16, right: 8);
 
 class SmartPauseView extends ConsumerStatefulWidget {
   const SmartPauseView({super.key, this.isAndroid, this.isMacOS});
@@ -22,7 +26,7 @@ class SmartPauseView extends ConsumerStatefulWidget {
 }
 
 class _SmartPauseViewState extends ConsumerState<SmartPauseView>
-  with UniqueKeyStateMixin {
+    with UniqueKeyStateMixin {
   static const _authorizeButtonPadding = 12.0;
   static const _minAuthorizeButtonWidth = 80.0;
 
@@ -95,8 +99,57 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     final networks = ref.read(
       vpnSettingProvider.select((state) => state.smartPauseNetworks),
     );
+    if (network != null) {
+      await _handleEditNetwork(network);
+      return;
+    }
     final appLocalizations = context.appLocalizations;
-    final newNetwork = await dialogs.showCommonDialog<String>(
+    final picked = await showSheet<String>(
+      context: context,
+      props: const SheetProps(maxHeight: 520),
+      builder: (_) {
+        return SizedBox(
+          height: 460,
+          child: AdaptiveSheetScaffold(
+            title: appLocalizations.pickNetwork,
+            body: SmartPauseNetworkPicker(
+              selected: networks.toSet(),
+              onSelected: (ssid) {
+                Navigator.of(context).maybePop();
+                _handleAddNetwork(ssid);
+              },
+            ),
+            actions: [
+              IconButtonData(
+                tooltip: appLocalizations.enterManually,
+                icon: Icons.keyboard_rounded,
+                onPressed: () => _handleEnterManually(networks),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (picked == null) {
+      return;
+    }
+    _handleAddNetwork(picked);
+  }
+
+  Future<void> _handleEnterManually(List<String> networks) async {
+    Navigator.of(context).maybePop();
+    final entered = await _showNetworkInputDialog(null, networks);
+    if (entered != null) {
+      _handleAddNetwork(entered);
+    }
+  }
+
+  Future<String?> _showNetworkInputDialog(
+    String? network,
+    List<String> networks,
+  ) async {
+    final appLocalizations = context.appLocalizations;
+    return dialogs.showCommonDialog<String>(
       child: InputDialog(
         title: network == null
             ? appLocalizations.addNetwork
@@ -106,19 +159,26 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
         hintText: appLocalizations.networkEntryHint,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return appLocalizations.emptyTip(
-              appLocalizations.trustedNetworks,
-            ).trim();
+            return appLocalizations
+                .emptyTip(appLocalizations.trustedNetworks)
+                .trim();
           }
           if (networks.contains(value.trim()) && network != value.trim()) {
-            return appLocalizations.existsTip(
-              appLocalizations.trustedNetworks,
-            ).trim();
+            return appLocalizations
+                .existsTip(appLocalizations.trustedNetworks)
+                .trim();
           }
           return null;
         },
       ),
     );
+  }
+
+  Future<void> _handleEditNetwork(String network) async {
+    final networks = ref.read(
+      vpnSettingProvider.select((state) => state.smartPauseNetworks),
+    );
+    final newNetwork = await _showNetworkInputDialog(network, networks);
     if (newNetwork == null) {
       return;
     }
@@ -126,11 +186,34 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     if (trimmed.isEmpty || trimmed == network) {
       return;
     }
-    ref.read(vpnSettingProvider.notifier).update((state) {
-      final networks = state.smartPauseNetworks.where((item) {
+    _commitNetworks((state) {
+      final kept = state.smartPauseNetworks.where((item) {
         return item != network && item != trimmed;
       }).toList();
-      return state.copyWith(smartPauseNetworks: [...networks, trimmed]);
+      return state.copyWith(smartPauseNetworks: [...kept, trimmed]);
+    });
+  }
+
+  void _handleAddNetwork(String network) {
+    final trimmed = network.trim();
+    if (trimmed.isEmpty) {
+      return;
+    }
+    _commitNetworks((state) {
+      if (state.smartPauseNetworks.any(
+        (item) => item.trim().toLowerCase() == trimmed.toLowerCase(),
+      )) {
+        return null;
+      }
+      return state.copyWith(
+        smartPauseNetworks: [...state.smartPauseNetworks, trimmed],
+      );
+    });
+  }
+
+  void _commitNetworks(VpnProps? Function(VpnProps state) update) {
+    ref.read(vpnSettingProvider.notifier).update((state) {
+      return update(state) ?? state;
     });
   }
 
@@ -164,9 +247,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             isEditing: isEditing,
             minVerticalPadding: 8,
             leading: Icon(
-              isSubnetRule(network)
-                  ? Icons.router_rounded
-                  : Icons.wifi_rounded,
+              isSubnetRule(network) ? Icons.router_rounded : Icons.wifi_rounded,
               color: context.colorScheme.onSurfaceVariant,
             ),
             title: TooltipText(
@@ -189,9 +270,9 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
   }
 
   void _handleSelectAll() {
-    final networks = ref.read(
-      vpnSettingProvider.select((state) => state.smartPauseNetworks),
-    ).toSet();
+    final networks = ref
+        .read(vpnSettingProvider.select((state) => state.smartPauseNetworks))
+        .toSet();
     ref.read(itemsProvider(key).notifier).update((selected) {
       return selected.containsAll(networks) ? {} : networks;
     });
@@ -325,7 +406,8 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
   }
 
   Widget _buildPrerequisites() {
-    return generateSectionV3(
+    return SettingSection(
+      top: 16,
       title: context.appLocalizations.prerequisites,
       items: [
         if (_isAndroid) _buildBatteryOptimizationItem(),
@@ -337,35 +419,21 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
   Widget _buildSwitches() {
     final appLocalizations = context.appLocalizations;
     final vpnSetting = ref.watch(vpnSettingProvider);
-    return generateSectionV3(
+    return SettingSection(
       items: [
-        DecorationListItem(
-          minVerticalPadding: 8,
-          contentPadding: const EdgeInsets.only(left: 16, right: 8),
+        DecorationListItem.toggle(
+          contentPadding: _togglePadding,
           title: Text(appLocalizations.smartPause),
           subtitle: Text(appLocalizations.smartPauseDesc),
-          onPressed: () {
-            _updateSmartPauseEnabled(!vpnSetting.smartPauseEnabled);
-          },
-          trailing: Switch(
-            value: vpnSetting.smartPauseEnabled,
-            onChanged: _updateSmartPauseEnabled,
-          ),
+          value: vpnSetting.smartPauseEnabled,
+          onChanged: _updateSmartPauseEnabled,
         ),
         if (vpnSetting.smartPauseEnabled)
-          DecorationListItem(
-            minVerticalPadding: 8,
-            contentPadding: const EdgeInsets.only(left: 16, right: 8),
-            title: Text(appLocalizations.smartPauseCloseConnections),
-            subtitle: Text(appLocalizations.closeConnectionsDesc),
-            onPressed: () {
-              ref.read(vpnSettingProvider.notifier).update((state) {
-                return state.copyWith(
-                  smartPauseCloseConnections: !state.smartPauseCloseConnections,
-                );
-              });
-            },
-            trailing: Switch(
+          FadeSlideEnterBox(
+            child: DecorationListItem.toggle(
+              contentPadding: _togglePadding,
+              title: Text(appLocalizations.smartPauseCloseConnections),
+              subtitle: Text(appLocalizations.closeConnectionsDesc),
               value: vpnSetting.smartPauseCloseConnections,
               onChanged: (value) {
                 ref.read(vpnSettingProvider.notifier).update((state) {
@@ -474,10 +542,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     );
   }
 
-  Widget _buildNetworksList(
-    List<String> networks,
-    Set<dynamic> selectedItems,
-  ) {
+  Widget _buildNetworksList(List<String> networks, Set<dynamic> selectedItems) {
     if (networks.isEmpty) {
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
@@ -517,21 +582,16 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     return CommonScaffold(
       body: CustomScrollView(
         slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(child: _buildPrerequisites()),
-          ),
+          SliverToBoxAdapter(child: _buildPrerequisites()),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverToBoxAdapter(child: _buildSwitches()),
-          ),
+          SliverToBoxAdapter(child: _buildSwitches()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverToBoxAdapter(child: _buildNetworksHeader()),
           ),
           _buildStatus(),
           _buildNetworksList(networks, selectedItems),
+          const SettingBottomInset.sliver(),
         ],
       ),
       title: context.appLocalizations.smartPause,

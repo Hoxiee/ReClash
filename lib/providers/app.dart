@@ -350,6 +350,15 @@ class _SmartRoutingStatus extends _$SmartRoutingStatus
   }
 }
 
+@Riverpod(name: 'smartRoutingTrailProvider', keepAlive: true)
+class _SmartRoutingTrail extends _$SmartRoutingTrail
+    with AutoDisposeNotifierMixin {
+  @override
+  List<String> build() {
+    return const [];
+  }
+}
+
 @riverpod
 class Query extends _$Query with AutoDisposeNotifierMixin {
   @override
@@ -586,6 +595,16 @@ class CurrentIPv4s extends _$CurrentIPv4s with AutoDisposeNotifierMixin {
   }
 }
 
+/// Plain reachability from the last connectivity report; null before the first.
+@Riverpod(keepAlive: true)
+class NetworkReachable extends _$NetworkReachable
+    with AutoDisposeNotifierMixin {
+  @override
+  bool? build() {
+    return null;
+  }
+}
+
 /// The Android service's own pause flag; null until the first report lands.
 @Riverpod(keepAlive: true)
 class NativePause extends _$NativePause with AutoDisposeNotifierMixin {
@@ -598,16 +617,6 @@ class NativePause extends _$NativePause with AutoDisposeNotifierMixin {
 @Riverpod(keepAlive: true)
 class BatteryOptimizationDisable extends _$BatteryOptimizationDisable
     with AutoDisposeNotifierMixin {
-  @override
-  bool build() {
-    return false;
-  }
-}
-
-/// Whether a VPN that is not ours holds an interface. Polled, because no
-/// platform offers a change notification for a third party's tunnel.
-@Riverpod(keepAlive: true)
-class ForeignVpn extends _$ForeignVpn with AutoDisposeNotifierMixin {
   @override
   bool build() {
     return false;

@@ -36,7 +36,8 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
   if (configs.isEmpty) return null;
 
   // One server can appear under several routing tags across mode-configs.
-  final groups = <String, (Map<String, Object?>, List<({String name, bool generic})>)>{};
+  final groups =
+      <String, (Map<String, Object?>, List<({String name, bool generic})>)>{};
   final skipped = <String, SkippedNode>{};
 
   void recordSkipped(SkippedNode node, {String? handle}) {
@@ -78,11 +79,13 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
                 );
           if (proxy == null) {
             // One bad location must not take the rest of the subscription down.
-            recordSkipped(SkippedNode(
-              name: name == null || name.isEmpty ? 'amneziawg' : name,
-              kind: 'amneziawg',
-              reason: SkippedNodeReason.protocol,
-            ));
+            recordSkipped(
+              SkippedNode(
+                name: name == null || name.isEmpty ? 'amneziawg' : name,
+                kind: 'amneziawg',
+                reason: SkippedNodeReason.protocol,
+              ),
+            );
             continue;
           }
           record(proxy, proxy['name']! as String);
@@ -211,7 +214,10 @@ Map<String, Object?>? _balancerGroup(
   if (prefixes.isEmpty) return null;
 
   final strategy = _asMap(balancer['strategy']);
-  final ranked = _rankPrefixes(prefixes, _asMap(strategy?['settings'])?['costs']);
+  final ranked = _rankPrefixes(
+    prefixes,
+    _asMap(strategy?['settings'])?['costs'],
+  );
 
   final members = <String>[];
   for (final prefix in ranked.prefixes) {
@@ -389,15 +395,20 @@ Map<String, Object?>? _convertOutbound(
     'socks' => _convertSocks(outbound, name),
     'wireguard' => _convertWireguardOutbound(outbound, name),
     '' || 'freedom' || 'blackhole' || 'dns' => null,
-    _ => throw _UnsupportedOutbound(SkippedNode(
+    _ => throw _UnsupportedOutbound(
+      SkippedNode(
         name: name.isEmpty ? protocol : name,
         kind: protocol,
         reason: SkippedNodeReason.protocol,
-      )),
+      ),
+    ),
   };
 }
 
-Map<String, Object?>? _convertVless(Map<String, Object?> outbound, String name) {
+Map<String, Object?>? _convertVless(
+  Map<String, Object?> outbound,
+  String name,
+) {
   final settings = outbound['settings'];
   if (settings is! Map<String, Object?>) return null;
   final vnext = _firstOf(settings['vnext']);
@@ -427,7 +438,10 @@ Map<String, Object?>? _convertVless(Map<String, Object?> outbound, String name) 
   return proxy;
 }
 
-Map<String, Object?>? _convertVmess(Map<String, Object?> outbound, String name) {
+Map<String, Object?>? _convertVmess(
+  Map<String, Object?> outbound,
+  String name,
+) {
   final settings = outbound['settings'];
   if (settings is! Map<String, Object?>) return null;
   final vnext = _firstOf(settings['vnext']);
@@ -457,8 +471,16 @@ Map<String, Object?>? _convertVmess(Map<String, Object?> outbound, String name) 
   return proxy;
 }
 
-Map<String, Object?>? _convertTrojan(Map<String, Object?> outbound, String name) {
-  final proxy = _fromServersList(outbound, name, 'trojan', credentialKey: 'password');
+Map<String, Object?>? _convertTrojan(
+  Map<String, Object?> outbound,
+  String name,
+) {
+  final proxy = _fromServersList(
+    outbound,
+    name,
+    'trojan',
+    credentialKey: 'password',
+  );
   if (proxy == null) return proxy;
   _applyStreamSettings(
     proxy,
@@ -473,21 +495,26 @@ Map<String, Object?>? _convertShadowsocks(
   String name,
 ) {
   // Two shapes: settings.servers[] or the vnext-less settings.vnext[] form.
-  final proxy = _fromServersList(outbound, name, 'ss', credentialKey: 'password',
-      extraKey: 'method');
-  return proxy;
-}
-
-Map<String, Object?>? _convertHttp(Map<String, Object?> outbound, String name) =>
-    _fromServersList(outbound, name, 'http', credentialKey: null);
-
-Map<String, Object?>? _convertSocks(Map<String, Object?> outbound, String name) {
   final proxy = _fromServersList(
     outbound,
     name,
-    'socks5',
-    credentialKey: null,
+    'ss',
+    credentialKey: 'password',
+    extraKey: 'method',
   );
+  return proxy;
+}
+
+Map<String, Object?>? _convertHttp(
+  Map<String, Object?> outbound,
+  String name,
+) => _fromServersList(outbound, name, 'http', credentialKey: null);
+
+Map<String, Object?>? _convertSocks(
+  Map<String, Object?> outbound,
+  String name,
+) {
+  final proxy = _fromServersList(outbound, name, 'socks5', credentialKey: null);
   return proxy;
 }
 
@@ -517,7 +544,8 @@ Map<String, Object?>? _fromServersList(
   if (credentialKey != null) {
     final credential = servers[credentialKey]?.toString();
     if (credential == null || credential.isEmpty) return null;
-    proxy[credentialKey == 'password' ? 'password' : credentialKey] = credential;
+    proxy[credentialKey == 'password' ? 'password' : credentialKey] =
+        credential;
   }
   if (extraKey != null) {
     final extra = servers[extraKey]?.toString();
@@ -547,21 +575,18 @@ Map<String, Object?>? _convertWireguardOutbound(
   final address = addressList is List && addressList.isNotEmpty
       ? addressList.first.toString()
       : addressList?.toString();
-  if (secretKeyOf(settings) == null ||
-      address == null ||
-      address.isEmpty) {
+  if (secretKeyOf(settings) == null || address == null || address.isEmpty) {
     return null;
   }
   final secretKey = secretKeyOf(settings)!;
 
   // The peer is settings.peers[0] or flattened into settings, per generator.
   final peers = _firstOf(settings['peers']);
-  final publicKey =
-      (peers?['publicKey'] ?? settings['publicKey'])?.toString();
+  final publicKey = (peers?['publicKey'] ?? settings['publicKey'])?.toString();
   final endpoint =
       (peers?['endpoint'] ?? settings['endpoint'])?.toString() ?? '';
-  final presharedKey =
-      (peers?['presharedKey'] ?? settings['presharedKey'])?.toString();
+  final presharedKey = (peers?['presharedKey'] ?? settings['presharedKey'])
+      ?.toString();
 
   final split = _splitHostPort(endpoint);
   if (split == null) return null;
@@ -599,10 +624,9 @@ void _applyStreamSettings(
   if (streamSettings is! Map<String, Object?>) return;
 
   final security = streamSettings['security']?.toString() ?? 'none';
-  final sni = (streamSettings['servername'] ??
-          streamSettings['host'] ??
-          fallbackSni)
-      .toString();
+  final sni =
+      (streamSettings['servername'] ?? streamSettings['host'] ?? fallbackSni)
+          .toString();
 
   if (security == 'reality') {
     final reality = _asMap(streamSettings['realitySettings']);
@@ -673,9 +697,11 @@ bool _applyXrayTransport(
       return true;
     case 'h2' || 'http':
       // xray's `http` network (h2 prior to v4-era naming) maps to mihomo h2.
-      final h2 = _asMap(streamSettings['httpSettings'] ??
-          streamSettings['h2Settings'] ??
-          streamSettings['kcpSettings']);
+      final h2 = _asMap(
+        streamSettings['httpSettings'] ??
+            streamSettings['h2Settings'] ??
+            streamSettings['kcpSettings'],
+      );
       final host = h2?['host'];
       proxy['network'] = 'h2';
       proxy['h2-opts'] = {

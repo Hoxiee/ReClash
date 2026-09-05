@@ -28,6 +28,7 @@ type rcxProber struct {
 	timeout     time.Duration
 	jitter      func(spread int) int
 	sleep       func(ctx context.Context, d time.Duration) bool
+	enough      func(rcxProbeResult) bool
 }
 
 func newRcxProber(test rcxTestFunc) *rcxProber {
@@ -88,6 +89,8 @@ func (p *rcxProber) Run(ctx context.Context, targets []rcxProbeTarget) []rcxProb
 	if concurrency < 1 {
 		concurrency = 1
 	}
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	slots := make(chan struct{}, concurrency)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -103,16 +106,28 @@ dispatch:
 			break dispatch
 		}
 		wg.Add(1)
-		go func(index int) {
+		index := i
+		// A zero result reads as a pass, so an unanswered slot starts overloaded.
+		safeGoDetached("rcx probe", func() {
 			defer func() {
 				<-slots
 				wg.Done()
 			}()
-			result := p.probe(ctx, targets[index])
-			mu.Lock()
-			results[index] = result
-			mu.Unlock()
-		}(i)
+			result := rcxProbeResult{
+				Node:    targets[index].Node,
+				Role:    targets[index].Role,
+				Outcome: rcxProbeOverloaded,
+			}
+			defer func() {
+				mu.Lock()
+				results[index] = result
+				mu.Unlock()
+				if p.enough != nil && p.enough(result) {
+					cancel()
+				}
+			}()
+			result = p.probe(ctx, targets[index])
+		})
 	}
 	wg.Wait()
 	return results
@@ -141,6 +156,7 @@ func (p *rcxProber) probe(parent context.Context, target rcxProbeTarget) rcxProb
 
 type rcxProbeNode struct {
 	Name          string
+	Key           string
 	Type          string
 	Port          int
 	HasServerName bool
@@ -156,6 +172,17 @@ func rcxPortClass(port int) string {
 		return "cdn"
 	default:
 		return "other"
+	}
+}
+
+func rcxHoistNode(nodes []rcxProbeNode, name string) {
+	for at, node := range nodes {
+		if node.Name != name {
+			continue
+		}
+		copy(nodes[1:at+1], nodes[:at])
+		nodes[0] = node
+		return
 	}
 }
 
@@ -236,6 +263,17 @@ func (b *rcxProbeBudget) Take(want int, now time.Time) int {
 	return want
 }
 
+// An aborted wave measured nothing, so the cap must not charge for it.
+func (b *rcxProbeBudget) Refund(count int) {
+	if count <= 0 {
+		return
+	}
+	if count > len(b.stamps) {
+		count = len(b.stamps)
+	}
+	b.stamps = b.stamps[:len(b.stamps)-count]
+}
+
 func (b *rcxProbeBudget) Remaining(now time.Time) int {
 	b.prune(now)
 	free := b.limit - len(b.stamps)
@@ -253,23 +291,4 @@ func (b *rcxProbeBudget) prune(now time.Time) {
 		}
 	}
 	b.stamps = kept
-}
-
-// A metered link pays for every probe, so scheduled waves stop and only a dead
-// incumbent still buys a narrow one.
-func rcxWavePlan(config rcxConfig, metered, onDemand bool) (int, bool) {
-	width := config.WaveWidth
-	if width <= 0 {
-		width = rcxWaveWidth
-	}
-	if !metered || !config.SaveMobileData {
-		return width, true
-	}
-	if !onDemand {
-		return 0, false
-	}
-	if width > 3 {
-		width = 3
-	}
-	return width, true
 }

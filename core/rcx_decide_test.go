@@ -151,7 +151,7 @@ func TestAdmitRejectsEveryNodeOnAPortalOrOfflineTerrain(t *testing.T) {
 	}
 }
 
-func TestLatBucketPlacesUnknownLatencyLast(t *testing.T) {
+func TestLatBucketPlacesUnknownLatencyMidTable(t *testing.T) {
 	tests := []struct {
 		ms   int
 		want uint8
@@ -161,8 +161,8 @@ func TestLatBucketPlacesUnknownLatencyLast(t *testing.T) {
 		{ms: 151, want: 1},
 		{ms: 1200, want: 3},
 		{ms: 1201, want: 4},
-		{ms: 0, want: 4},
-		{ms: -1, want: 4},
+		{ms: 0, want: 2},
+		{ms: -1, want: 2},
 	}
 
 	for _, tc := range tests {
@@ -318,7 +318,7 @@ func TestDecideRespectsAManualPinForLatencyOnly(t *testing.T) {
 		Terrain:        rcxTerrainNormal,
 		Incumbent:      "nl-1",
 		IncumbentSince: now.Add(-time.Hour),
-		ManualHold:     true,
+		Pin:            "nl-1",
 		Candidates:     []rcxCandidate{slow, fast},
 		Now:            now,
 	})
@@ -335,7 +335,7 @@ func TestDecideOverridesAManualPinWhenTheNodeDies(t *testing.T) {
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:    rcxTerrainWhitelist,
 		Incumbent:  "nl-1",
-		ManualHold: true,
+		Pin:        "nl-1",
 		Candidates: []rcxCandidate{dead, rcxNode("de-1", foreignProven())},
 	})
 
@@ -565,5 +565,68 @@ func TestASpecialistIsStillPickedWhenItIsAllThereIs(t *testing.T) {
 
 	if got := rcxDecide(input); !got.Switch {
 		t.Errorf("decision = %+v, want the specialist: sinking it must never mean barring it", got)
+	}
+}
+
+func TestAdmitLetsAMeasurementOutliveTheGeographyItContradicted(t *testing.T) {
+	// mmdb reads the entry address, so a fronted foreign egress reads domestic.
+	fronted := rcxFacts{
+		Origin:      rcxOriginDomestic,
+		OpenedOnce:  true,
+		Transit:     rcxProofProven,
+		SupportsUDP: true,
+	}
+
+	if got := rcxAdmit(rcxTerrainNormal, fronted); got != rcxVerdictViable {
+		t.Errorf("verdict = %v, want viable: this node was measured opening the world", got)
+	}
+	blind := fronted
+	blind.OpenedOnce = false
+	if got := rcxAdmit(rcxTerrainNormal, blind); got != rcxVerdictLastResort {
+		t.Errorf("unmeasured verdict = %v, want last-resort: only geography speaks for it", got)
+	}
+}
+
+func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
+	tests := []struct {
+		name string
+		node rcxCandidate
+		want uint8
+	}{
+		{name: "own median wins", node: rcxCandidate{MedianMs: 100, HostMs: 900}, want: 0},
+		{name: "host delay orders the never-probed", node: rcxCandidate{HostMs: 60}, want: 0},
+		{name: "a slow host delay is still an order", node: rcxCandidate{HostMs: 700}, want: 3},
+		{name: "the host found it dead", node: rcxCandidate{HostDead: true}, want: 4},
+		{name: "nobody measured anything", node: rcxCandidate{}, want: 2},
+	}
+
+	for _, tc := range tests {
+		if got := rcxLatencyBucket(tc.node, rcxTestBands); got != tc.want {
+			t.Errorf("%s: bucket = %d, want %d", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestCompareRanksHistoryBelowTheBandItIsMeasuredIn(t *testing.T) {
+	fastAndNew := rcxKey{latBucket: 0, unproven: true}
+	slowAndKnown := rcxKey{latBucket: 1}
+
+	if rcxCompare(fastAndNew, slowAndKnown) >= 0 {
+		t.Error("a 60ms stranger must outrank a 200ms acquaintance: history breaks ties inside a band, it does not buy one")
+	}
+	if rcxCompareLatency(fastAndNew, slowAndKnown) >= 0 {
+		t.Error("the latency strategy cannot rank a band worse than the band above it")
+	}
+}
+
+func TestCompareRanksAProvenNodeAboveANeverSeenOneInTheSameBand(t *testing.T) {
+	proven := rcxKey{latBucket: 2, order: 60_000}
+	stranger := rcxKey{latBucket: 2, unproven: true, order: 1}
+
+	if rcxCompare(proven, stranger) >= 0 {
+		t.Error("inside one band the node that carried traffic here beats a hash winner: order is the last word, not the first")
+	}
+	if rcxCompareLatency(proven, stranger) >= 0 {
+		t.Error("the latency strategy must break a band tie on history too")
 	}
 }

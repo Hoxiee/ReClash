@@ -42,15 +42,7 @@ class AboutView extends ConsumerWidget {
     required List<Credit> credits,
   }) {
     final items = [for (final credit in credits) _CreditItem(credit: credit)];
-    if (subTitle == null) {
-      return generateSectionV3(title: title, items: items);
-    }
-    return Column(
-      children: [
-        ListHeader(title: title, subTitle: subTitle),
-        generateSectionV3(items: items),
-      ],
-    );
+    return SettingSection(title: title, subTitle: subTitle, items: items);
   }
 
   @override
@@ -85,9 +77,11 @@ class AboutView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.about,
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
-          const _IdentityCard(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: _IdentityCard(),
+          ),
           _buildCreditSection(
             title: appLocalizations.madeBy,
             credits: [author],
@@ -97,7 +91,7 @@ class AboutView extends ConsumerWidget {
             subTitle: appLocalizations.gratitudeDesc,
             credits: gratitude,
           ),
-          generateSectionV3(
+          SettingSection(
             title: appLocalizations.more,
             items: [
               DecorationListItem(
@@ -148,6 +142,7 @@ class AboutView extends ConsumerWidget {
               ),
             ],
           ),
+          const SettingBottomInset(),
         ],
       ),
     );
@@ -160,8 +155,7 @@ class _IdentityCard extends ConsumerWidget {
   /// Only asks the core while it is up: a stopped core would burn the 2s
   /// timeout and leave a pending timer behind.
   Widget _buildCoreChip(WidgetRef ref) {
-    final isConnected =
-        ref.watch(coreStatusProvider) == CoreStatus.connected;
+    final isConnected = ref.watch(coreStatusProvider) == CoreStatus.connected;
     if (!isConnected) return const SizedBox.shrink();
     return FutureBuilder<String?>(
       future: deviceIdentity.coreVersion,
@@ -186,7 +180,8 @@ class _IdentityCard extends ConsumerWidget {
       onLongPress: () {
         Clipboard.setData(
           ClipboardData(
-            text: '$appName $version '
+            text:
+                '$appName $version '
                 '(${globalState.packageInfo.buildNumber}) · $platform',
           ),
         );

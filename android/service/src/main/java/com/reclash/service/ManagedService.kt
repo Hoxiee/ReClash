@@ -16,8 +16,10 @@ interface ManagedService {
     fun resume(manual: Boolean) {}
 }
 
-internal fun Service.notifyVpnStartRequested() {
-    GlobalState.log("VPN start requested")
+// Also the sticky-restart path: the system brings the service back without the app layer
+// that configured it, and the app layer is what re-runs setup and hands the tun over.
+internal fun Service.notifyStartRequested() {
+    GlobalState.log("Service start requested: ${javaClass.simpleName}")
     BroadcastAction.VPN_START_REQUESTED.sendBroadcast()
 }
 

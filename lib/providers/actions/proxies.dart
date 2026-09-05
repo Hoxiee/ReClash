@@ -174,6 +174,28 @@ class ProxiesAction extends _$ProxiesAction {
     ref.read(checkIpNumProvider.notifier).add();
   }
 
+  /// Releasing the pin keeps the engine's own node, so connections stay up.
+  Future<void> resumeSmartRouting() async {
+    final profilesAction = ref.read(profilesActionProvider.notifier);
+    final rollbackName = _currentSelectedName(rcxNodeGroupName);
+    profilesAction.updateCurrentSelectedMap(rcxNodeGroupName, '');
+    try {
+      await _core.changeProxy(
+        const ChangeProxyParams(groupName: rcxNodeGroupName, proxyName: ''),
+      );
+    } catch (error) {
+      commonPrint.log(
+        'resumeSmartRouting failed: $error',
+        logLevel: coreFailureLogLevel(error),
+      );
+      profilesAction.updateCurrentSelectedMap(rcxNodeGroupName, rollbackName);
+      dialogs.showNotifier(
+        currentAppLocalizations.changeProxyFailedTip,
+        level: MessageLevel.error,
+      );
+    }
+  }
+
   Future<String> updateProvider(
     ExternalProvider provider, {
     bool showLoading = false,

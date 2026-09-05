@@ -5,10 +5,11 @@ import 'package:test/test.dart';
 void main() {
   group('parsePanelWidgets', () {
     test('matches names case-insensitively and keeps order', () {
-      final widgets = parsePanelWidgets(
-        ['announce', 'MetaInfo', 'outboundModeV2'],
-        platform: SupportPlatform.Linux,
-      );
+      final widgets = parsePanelWidgets([
+        'announce',
+        'MetaInfo',
+        'outboundModeV2',
+      ], platform: SupportPlatform.Linux);
 
       expect(widgets, [
         DashboardWidget.announce,
@@ -18,32 +19,29 @@ void main() {
     });
 
     test('drops unknown names and duplicates', () {
-      final widgets = parsePanelWidgets(
-        ['announce', 'nope', 'ANNOUNCE', ''],
-        platform: SupportPlatform.Linux,
-      );
+      final widgets = parsePanelWidgets([
+        'announce',
+        'nope',
+        'ANNOUNCE',
+        '',
+      ], platform: SupportPlatform.Linux);
 
       expect(widgets, [DashboardWidget.announce]);
     });
 
     test('drops widgets unavailable on the platform', () {
-      final widgets = parsePanelWidgets(
-        ['announce', 'vpnButton', 'tunButton'],
-        platform: SupportPlatform.Android,
-      );
+      final widgets = parsePanelWidgets([
+        'announce',
+        'vpnButton',
+        'tunButton',
+      ], platform: SupportPlatform.Android);
 
-      expect(widgets, [
-        DashboardWidget.announce,
-        DashboardWidget.vpnButton,
-      ]);
+      expect(widgets, [DashboardWidget.announce, DashboardWidget.vpnButton]);
     });
   });
 
   group('applyPanelWidgets', () {
-    final panelList = [
-      DashboardWidget.announce,
-      DashboardWidget.metaInfo,
-    ];
+    final panelList = [DashboardWidget.announce, DashboardWidget.metaInfo];
 
     test('update mode replaces the dashboard outright', () {
       final next = applyPanelWidgets(

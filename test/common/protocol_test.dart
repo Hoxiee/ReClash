@@ -19,12 +19,13 @@ void main() {
 
   group('LinuxProtocolRegistrationPlan', () {
     const plan = LinuxProtocolRegistrationPlan(
-      schemes: protocolSchemes,
+      schemes: ['clash', 'reclash', 'vless'],
+      defaults: ['clash', 'reclash'],
       executable: '/home/me/Apps/ReClash.AppImage',
       applicationsDir: '/home/me/.local/share/applications',
     );
 
-    test('writes a hidden desktop entry claiming every scheme', () {
+    test('writes a hidden desktop entry advertising every scheme', () {
       expect(
         plan.desktopPath,
         '/home/me/.local/share/applications/reclash-url-handler.desktop',
@@ -36,17 +37,16 @@ void main() {
         'Name=ReClash\n'
         'NoDisplay=true\n'
         'Exec="/home/me/Apps/ReClash.AppImage" %u\n'
-        'MimeType=x-scheme-handler/clash;x-scheme-handler/clashmeta;'
-        'x-scheme-handler/reclash;\n',
+        'MimeType=x-scheme-handler/clash;x-scheme-handler/reclash;'
+        'x-scheme-handler/vless;\n',
       );
     });
 
-    test('makes the entry the default handler for every scheme', () {
+    test('takes the default handler only for the schemes it owns', () {
       expect(plan.xdgMimeArguments, [
         'default',
         'reclash-url-handler.desktop',
         'x-scheme-handler/clash',
-        'x-scheme-handler/clashmeta',
         'x-scheme-handler/reclash',
       ]);
     });
@@ -54,6 +54,7 @@ void main() {
     test('escapes reserved characters in the executable path', () {
       const plan = LinuxProtocolRegistrationPlan(
         schemes: ['reclash'],
+        defaults: ['reclash'],
         executable: r'/opt/my "apps"/$HOME/100%/Re`Clash\bin',
         applicationsDir: '/tmp',
       );

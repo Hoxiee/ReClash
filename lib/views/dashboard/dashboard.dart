@@ -69,12 +69,11 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     return switch (item) {
       DashboardWidget.metaInfo =>
         subscriptionInfo != null &&
-        (subscriptionInfo.total > 0 || subscriptionInfo.expire != 0),
+            (subscriptionInfo.total > 0 || subscriptionInfo.expire != 0),
       DashboardWidget.announce => panelMeta?.announce != null,
       DashboardWidget.serviceInfo =>
         panelMeta?.serviceName != null || panelMeta?.serviceLogo != null,
-      DashboardWidget.changeServerButton =>
-        panelMeta?.serverInfoGroup != null,
+      DashboardWidget.changeServerButton => panelMeta?.serverInfoGroup != null,
       _ => true,
     };
   }

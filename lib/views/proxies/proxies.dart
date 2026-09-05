@@ -26,6 +26,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   List<Widget> _buildActions(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return [
+      const _ResumeSmartRoutingButton(),
       if (_isTab)
         IconButton(
           tooltip: context.appLocalizations.scrollToSelected,
@@ -141,6 +142,30 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
         ProxiesType.tab => ProxiesTabView(key: _proxiesTabKey),
         ProxiesType.list => const ProxiesListView(),
       },
+    );
+  }
+}
+
+class _ResumeSmartRoutingButton extends ConsumerWidget {
+  const _ResumeSmartRoutingButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pinned = ref.watch(
+      smartRoutingStatusProvider.select(
+        (state) => state?.enabled == true && state!.pinned,
+      ),
+    );
+    return FadeScaleBox(
+      child: !pinned
+          ? const SizedBox()
+          : IconButton(
+              tooltip: context.appLocalizations.smartRoutingBackToAuto,
+              onPressed: () {
+                ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
+              },
+              icon: const Icon(Icons.auto_mode),
+            ),
     );
   }
 }

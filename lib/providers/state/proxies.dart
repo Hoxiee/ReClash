@@ -28,13 +28,22 @@ GroupsState currentGroupsState(Ref ref) {
     value: switch (mode) {
       Mode.direct => [],
       Mode.global => groups.toList(),
-      Mode.rule =>
+      Mode.rule => _rcxFirst(
         groups
             .where((item) => item.hidden == false)
             .where((element) => element.name != GroupName.GLOBAL.name)
             .toList(),
+      ),
     },
   );
+}
+
+List<Group> _rcxFirst(List<Group> groups) {
+  final index = groups.indexWhere((item) => item.name == rcxNodeGroupName);
+  if (index <= 0) {
+    return groups;
+  }
+  return [groups.removeAt(index), ...groups];
 }
 
 @riverpod
@@ -240,10 +249,19 @@ String? proxyName(Ref ref, String groupName) {
 
 @riverpod
 String? selectedProxyName(Ref ref, String groupName) {
-  final proxyName = ref.watch(proxyNameProvider(groupName));
   final group = ref.watch(
     groupsProvider.select((state) => state.getGroup(groupName)),
   );
+  if (groupName == rcxNodeGroupName) {
+    // A stored pick here can name a node the engine has already left.
+    final engineNode = ref.watch(
+      smartRoutingStatusProvider.select(
+        (state) => state?.enabled == true ? state!.node : '',
+      ),
+    );
+    return engineNode.isNotEmpty ? engineNode : group?.realNow;
+  }
+  final proxyName = ref.watch(proxyNameProvider(groupName));
   return group?.getCurrentSelectedName(proxyName ?? '');
 }
 

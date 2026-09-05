@@ -97,18 +97,12 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
   if (server.isEmpty || port == null) return null;
 
   final name = tag.isNotEmpty ? tag : server;
-  final proxy = <String, Object?>{
-    'name': name,
-    'server': server,
-    'port': port,
-  };
+  final proxy = <String, Object?>{'name': name, 'server': server, 'port': port};
 
   void unsupported(String kind, SkippedNodeReason reason) {
-    throw _UnsupportedOutbound(SkippedNode(
-      name: name,
-      kind: kind,
-      reason: reason,
-    ));
+    throw _UnsupportedOutbound(
+      SkippedNode(name: name, kind: kind, reason: reason),
+    );
   }
 
   switch (type) {
@@ -348,11 +342,13 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
   final path = transportValue['path']?.toString() ?? '';
   final headers = _asMap(transportValue['headers']);
   final hostValue = transportValue['host'];
-  final host = (hostValue is List && hostValue.isNotEmpty
+  final host =
+      (hostValue is List && hostValue.isNotEmpty
           ? hostValue.first.toString()
           : hostValue?.toString()) ??
       headers?['Host']?.toString() ??
-      '';  switch (type) {
+      '';
+  switch (type) {
     case 'ws':
       proxy['network'] = 'ws';
       final earlyData = _toInt(transportValue['max_early_data']);
@@ -362,8 +358,8 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
         if (earlyData != null && earlyData > 0) 'max-early-data': earlyData,
       };
       proxy['ws-opts'] = wsOpts;
-      final earlyHeader = transportValue['early_data_header_name']
-          ?.toString() ??
+      final earlyHeader =
+          transportValue['early_data_header_name']?.toString() ??
           (earlyData != null ? 'Sec-WebSocket-Protocol' : '');
       if (earlyHeader.isNotEmpty) {
         wsOpts['early-data-header-name'] = earlyHeader;
@@ -390,11 +386,13 @@ void _applyTransport(Map<String, Object?> proxy, Object? transportValue) {
         if (host.isNotEmpty) 'headers': {'Host': host},
       };
     default:
-      throw _UnsupportedOutbound(SkippedNode(
-        name: proxy['name']! as String,
-        kind: type,
-        reason: SkippedNodeReason.transport,
-      ));
+      throw _UnsupportedOutbound(
+        SkippedNode(
+          name: proxy['name']! as String,
+          kind: type,
+          reason: SkippedNodeReason.transport,
+        ),
+      );
   }
 }
 
@@ -405,10 +403,7 @@ void _set(Map<String, Object?> proxy, String key, Object? value) {
   proxy[key] = text;
 }
 
-void _bandwidth(
-  Map<String, Object?> proxy,
-  Map<String, Object?> outbound,
-) {
+void _bandwidth(Map<String, Object?> proxy, Map<String, Object?> outbound) {
   for (final field in ['up', 'down']) {
     final mbps = _toInt(outbound['${field}_mbps']);
     if (mbps != null && mbps > 0) proxy[field] = '$mbps';

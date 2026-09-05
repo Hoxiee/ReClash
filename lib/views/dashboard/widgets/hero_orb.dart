@@ -23,6 +23,9 @@ const _checkingStroke = 4.0;
 const _pausedDash = 5.0;
 const _pausedPeriod = 13.0;
 
+const _noSignalDash = 2.0;
+const _noSignalPeriod = 40.0;
+
 const _connectingTail = 220 * math.pi / 180;
 const _checkingTail = 70 * math.pi / 180;
 
@@ -232,7 +235,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _runBreathing() {
-    final wanted = !_still && _status != HeroStatus.off;
+    final wanted =
+        !_still && _status != HeroStatus.off && _status != HeroStatus.offline;
     if (!wanted) {
       _breathe.stop();
       return;
@@ -309,7 +313,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       ref.read(commonActionProvider.notifier).toggleRunning();
       return;
     }
-    _beginConnecting(revertTo: HeroOrbPhase.off);
+    _beginConnecting(revertTo: HeroOrbPhase.offline);
     ref.read(commonActionProvider.notifier).toggleRunning();
   }
 
@@ -347,6 +351,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       message: switch (_status) {
         HeroStatus.paused => context.appLocalizations.resume,
         HeroStatus.off ||
+        HeroStatus.offline ||
         HeroStatus.checking ||
         HeroStatus.connecting ||
         HeroStatus.reconnecting => context.appLocalizations.start,
@@ -508,6 +513,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   IconData get _statusIcon => switch (_status) {
     HeroStatus.paused => Icons.play_arrow_rounded,
     HeroStatus.checking => Icons.wifi_tethering_rounded,
+    HeroStatus.offline => Icons.wifi_off_rounded,
     _ => Icons.power_settings_new_rounded,
   };
 }
@@ -622,6 +628,8 @@ class _HeroOrbPainter extends CustomPainter {
     _paintCore(canvas, center, coreRadius);
 
     switch (status) {
+      case HeroStatus.offline:
+        _paintNoSignalRing(canvas, rect, radius, morph);
       case HeroStatus.off:
         // Still unwinding, so the light fades instead of vanishing.
         if (drawProgress <= 0.004) break;
@@ -630,6 +638,8 @@ class _HeroOrbPainter extends CustomPainter {
             _paintPausedRing(canvas, rect, radius, 1);
           case HeroStatus.broken:
             _paintBrokenRing(canvas, rect, 1);
+          case HeroStatus.offline:
+            _paintNoSignalRing(canvas, rect, radius, 1);
           case _:
             _paintFlowRing(canvas, center, rect, radius, bloom: false);
         }
@@ -801,6 +811,27 @@ class _HeroOrbPainter extends CustomPainter {
       false,
       _ringPaint(rect, -math.pi / 2, alpha: lerpDouble(1, dip, pulse)!),
     );
+  }
+
+  void _paintNoSignalRing(Canvas canvas, Rect rect, double radius, morph) {
+    final count = math.max(6, (2 * math.pi * radius / _noSignalPeriod).round());
+    final step = 2 * math.pi / count;
+    final fill = lerpDouble(1, _noSignalDash / _noSignalPeriod, morph);
+    final paint = _ringPaint(
+      rect,
+      -math.pi / 2,
+      strokeWidth: lerpDouble(_ringStroke, _pausedStroke, morph),
+      alpha: lerpDouble(1, 0.55, morph)!,
+    );
+    for (var i = 0; i < count; i++) {
+      canvas.drawArc(
+        rect,
+        -math.pi / 2 + i * step,
+        step * fill! * drawProgress,
+        false,
+        paint,
+      );
+    }
   }
 
   void _paintPausedRing(Canvas canvas, Rect rect, double radius, double morph) {

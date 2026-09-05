@@ -41,7 +41,6 @@ void main() {
     required SsidReader readSsid,
     void Function(List<ConnectivityResult>)? onConnectivityChanged,
     Ipv4sReader? readIpv4s,
-    ForeignVpnReader? readForeignVpn,
     bool? isDesktop,
     List<String> networks = const ['Home'],
   }) async {
@@ -52,8 +51,6 @@ void main() {
           connectivityStream: connectivity.stream,
           readSsid: readSsid,
           readIpv4s: readIpv4s,
-          readForeignVpn:
-              readForeignVpn ?? ({String ownDevice = '', String fakeIpRange = ''}) async => false,
           isDesktop: isDesktop,
           onConnectivityChanged: onConnectivityChanged,
           child: const SizedBox.shrink(),
@@ -64,6 +61,20 @@ void main() {
   }
 
   String? currentSsid() => container.read(currentSSIDProvider);
+
+  testWidgets('tracks plain reachability through the events', (tester) async {
+    await pumpManager(tester, readSsid: () async => 'Home');
+
+    expect(container.read(networkReachableProvider), isNull);
+
+    connectivity.add([ConnectivityResult.wifi]);
+    await tester.pumpAndSettle();
+    expect(container.read(networkReachableProvider), isTrue);
+
+    connectivity.add([ConnectivityResult.none]);
+    await tester.pumpAndSettle();
+    expect(container.read(networkReachableProvider), isFalse);
+  });
 
   testWidgets('publishes the SSID once Wi-Fi is up', (tester) async {
     await pumpManager(tester, readSsid: () async => 'Home');
@@ -164,7 +175,6 @@ void main() {
         child: ConnectivityManager(
           connectivityStream: connectivity.stream,
           readSsid: () async => 'Home',
-          readForeignVpn: ({String ownDevice = '', String fakeIpRange = ''}) async => false,
           child: const SizedBox.shrink(),
         ),
       ),
@@ -257,51 +267,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(currentIPv4sProvider), isEmpty);
-  });
-
-  testWidgets('another VPN is published without any rule configured', (
-    tester,
-  ) async {
-    var present = false;
-    await pumpManager(
-      tester,
-      readSsid: () async => 'Home',
-      readForeignVpn: ({String ownDevice = '', String fakeIpRange = ''}) async => present,
-      networks: const [],
-    );
-
-    expect(container.read(foreignVpnProvider), isFalse);
-
-    present = true;
-    connectivity.add([ConnectivityResult.wifi]);
-    await tester.pumpAndSettle();
-
-    expect(container.read(foreignVpnProvider), isTrue);
-  });
-
-  testWidgets('the tunnel device name reaches the interface check', (
-    tester,
-  ) async {
-    String? seen;
-    container
-        .read(patchClashConfigProvider.notifier)
-        .update(
-          (state) => state.copyWith(tun: state.tun.copyWith(device: 'utun9')),
-        );
-    await Future<void>.value();
-    await pumpManager(
-      tester,
-      readSsid: () async => 'Home',
-      readForeignVpn: ({String ownDevice = '', String fakeIpRange = ''}) async {
-        seen = ownDevice;
-        return false;
-      },
-    );
-
-    connectivity.add([ConnectivityResult.wifi]);
-    await tester.pumpAndSettle();
-
-    expect(seen, 'utun9');
   });
 
   testWidgets('off desktop nothing is polled, but events still land', (

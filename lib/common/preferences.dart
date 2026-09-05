@@ -151,6 +151,65 @@ class Preferences {
     await sharedPreferencesIns?.setString(bootRecordKey, json.encode(record));
   }
 
+  Future<SubscriptionNoticeRecord> getSubscriptionNoticeRecord() async {
+    try {
+      final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+      final raw = sharedPreferencesIns?.getString(subscriptionNoticeKey);
+      if (raw == null) {
+        return const SubscriptionNoticeRecord();
+      }
+      return SubscriptionNoticeRecord.fromJson(json.decode(raw));
+    } catch (e) {
+      commonPrint.log(
+        'getSubscriptionNoticeRecord error ${e.toString()}',
+        logLevel: LogLevel.warning,
+      );
+      return const SubscriptionNoticeRecord();
+    }
+  }
+
+  Future<void> saveSubscriptionNoticeRecord(
+    SubscriptionNoticeRecord record,
+  ) async {
+    final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+    await sharedPreferencesIns?.setString(
+      subscriptionNoticeKey,
+      json.encode(record),
+    );
+  }
+
+  Future<SubscriptionHostRecord> getSubscriptionHostRecord() async {
+    try {
+      final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+      final raw = sharedPreferencesIns?.getString(subscriptionHostsKey);
+      if (raw == null) {
+        return const SubscriptionHostRecord();
+      }
+      return SubscriptionHostRecord.fromJson(json.decode(raw));
+    } catch (e) {
+      commonPrint.log(
+        'getSubscriptionHostRecord error ${e.toString()}',
+        logLevel: LogLevel.warning,
+      );
+      return const SubscriptionHostRecord();
+    }
+  }
+
+  Future<void> saveSubscriptionHostRecord(SubscriptionHostRecord record) async {
+    final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+    await sharedPreferencesIns?.setString(
+      subscriptionHostsKey,
+      json.encode(record),
+    );
+  }
+
+  Future<void> forgetSubscriptionHosts(int profileId) async {
+    final record = await getSubscriptionHostRecord();
+    final remaining = record.forget(profileId);
+    if (remaining.hosts.length == record.hosts.length) return;
+    await saveSubscriptionHostRecord(remaining);
+  }
+
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
     await sharedPreferencesIns?.clear();

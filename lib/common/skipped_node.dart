@@ -69,6 +69,7 @@ class SkippedNodesConverter
   ];
 
   @override
-  List<Object?> toJson(List<SkippedNode> nodes) =>
-      [for (final node in nodes) node.toJson()];
+  List<Object?> toJson(List<SkippedNode> nodes) => [
+    for (final node in nodes) node.toJson(),
+  ];
 }

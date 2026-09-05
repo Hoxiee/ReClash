@@ -16,13 +16,12 @@ class DeveloperView extends ConsumerWidget {
 
   Widget _getDeveloperList(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    return generateSectionV2(
+    return SettingSection(
       title: appLocalizations.options,
       items: [
-        ListItem(
+        DecorationListItem(
           title: Text(appLocalizations.messageTest),
-          minVerticalPadding: 12,
-          onTap: () {
+          onPressed: () {
             for (final level in MessageLevel.values) {
               context.showNotifier(
                 '${level.name}: ${appLocalizations.messageTestTip}',
@@ -31,10 +30,9 @@ class DeveloperView extends ConsumerWidget {
             }
           },
         ),
-        ListItem(
+        DecorationListItem(
           title: Text(appLocalizations.logsTest),
-          minVerticalPadding: 12,
-          onTap: () {
+          onPressed: () {
             for (int i = 0; i < 1000; i++) {
               ref
                   .read(logsProvider.notifier)
@@ -61,10 +59,9 @@ class DeveloperView extends ConsumerWidget {
               unawaited(coreAction.crash());
             },
           ),
-        ListItem(
+        DecorationListItem(
           title: Text(appLocalizations.clearData),
-          minVerticalPadding: 12,
-          onTap: () async {
+          onPressed: () async {
             final storeAction = ref.read(storeActionProvider.notifier);
             final res = await dialogs.showMessage(
               message: TextSpan(text: appLocalizations.confirmClearAllData),
@@ -75,10 +72,9 @@ class DeveloperView extends ConsumerWidget {
             await storeAction.handleClear();
           },
         ),
-        ListItem(
+        DecorationListItem(
           title: Text(appLocalizations.pruneCache),
-          minVerticalPadding: 12,
-          onTap: () async {
+          onPressed: () async {
             await ref.read(storeActionProvider.notifier).shakingStore();
           },
         ),

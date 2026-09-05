@@ -15,25 +15,25 @@ String _pluralWord(int n, String one, String few, String many) {
 }
 
 String heroDaysWord(int days) => _pluralWord(
-      days,
-      currentAppLocalizations.day,
-      currentAppLocalizations.daysGenitive,
-      currentAppLocalizations.days,
-    );
+  days,
+  currentAppLocalizations.day,
+  currentAppLocalizations.daysGenitive,
+  currentAppLocalizations.days,
+);
 
 String _minutesWord(int minutes) => _pluralWord(
-      minutes,
-      currentAppLocalizations.minute,
-      currentAppLocalizations.minutesPlural,
-      currentAppLocalizations.minutesGenitive,
-    );
+  minutes,
+  currentAppLocalizations.minute,
+  currentAppLocalizations.minutesPlural,
+  currentAppLocalizations.minutesGenitive,
+);
 
 String _hoursWord(int hours) => _pluralWord(
-      hours,
-      currentAppLocalizations.hour,
-      currentAppLocalizations.hoursPlural,
-      currentAppLocalizations.hoursGenitive,
-    );
+  hours,
+  currentAppLocalizations.hour,
+  currentAppLocalizations.hoursPlural,
+  currentAppLocalizations.hoursGenitive,
+);
 
 String heroDurationWords(int? elapsedMinutes) {
   if (elapsedMinutes == null) return '';
@@ -56,7 +56,5 @@ String heroAgoWords(int? sinceEpochMs) {
   final elapsed = DateTime.now().millisecondsSinceEpoch - sinceEpochMs;
   final minutes = elapsed ~/ 60000;
   if (minutes < 1) return currentAppLocalizations.heroJustNow;
-  return currentAppLocalizations.heroRoutingAgo(
-    heroDurationWords(minutes),
-  );
+  return currentAppLocalizations.heroRoutingAgo(heroDurationWords(minutes));
 }

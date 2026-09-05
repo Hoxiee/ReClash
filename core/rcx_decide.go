@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/binary"
+	"hash/fnv"
 	"sort"
 	"time"
 )
@@ -111,17 +113,21 @@ const (
 	rcxReasonHold           rcxReason = "hold"
 	rcxReasonIncumbentDead  rcxReason = "incumbent-dead"
 	rcxReasonVerdictGain    rcxReason = "verdict-gain"
+	rcxReasonDegraded       rcxReason = "degraded"
 	rcxReasonLatencyGain    rcxReason = "latency-gain"
 	rcxReasonColdStart      rcxReason = "cold-start"
 	rcxReasonTerrainChanged rcxReason = "terrain-changed"
 	rcxReasonNoCandidate    rcxReason = "no-candidate"
 	rcxReasonStranded       rcxReason = "stranded"
 	rcxReasonDwellHold      rcxReason = "dwell-hold"
+	rcxReasonMeasuring      rcxReason = "measuring"
 	rcxReasonManualHold     rcxReason = "manual-hold"
+	rcxReasonPinReturn      rcxReason = "pin-return"
 )
 
 type rcxFacts struct {
 	Origin      rcxOrigin
+	OpenedOnce  bool
 	OpenWorld   rcxProof
 	Domestic    rcxProof
 	Transit     rcxProof
@@ -149,6 +155,7 @@ func rcxMisfit(terrain rcxTerrain, f rcxFacts) uint8 {
 type rcxAdmissionRow struct {
 	openWorldProven rcxVerdict
 	domesticProven  rcxVerdict
+	breakerProven   rcxVerdict
 	foreignPrior    rcxVerdict
 	domesticPrior   rcxVerdict
 	allowLastResort bool
@@ -158,6 +165,7 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 	rcxTerrainNormal: {
 		openWorldProven: rcxVerdictPreferred,
 		domesticProven:  rcxVerdictLastResort,
+		breakerProven:   rcxVerdictViable,
 		foreignPrior:    rcxVerdictViable,
 		domesticPrior:   rcxVerdictLastResort,
 		allowLastResort: false,
@@ -165,6 +173,7 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 	rcxTerrainWhitelist: {
 		openWorldProven: rcxVerdictPreferred,
 		domesticProven:  rcxVerdictViable,
+		breakerProven:   rcxVerdictPreferred,
 		foreignPrior:    rcxVerdictViable,
 		domesticPrior:   rcxVerdictLastResort,
 		allowLastResort: true,
@@ -174,6 +183,7 @@ var rcxAdmissionTable = map[rcxTerrain]rcxAdmissionRow{
 	rcxTerrainUnknown: {
 		openWorldProven: rcxVerdictPreferred,
 		domesticProven:  rcxVerdictLastResort,
+		breakerProven:   rcxVerdictViable,
 		foreignPrior:    rcxVerdictViable,
 		domesticPrior:   rcxVerdictLastResort,
 		allowLastResort: true,
@@ -192,12 +202,16 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 		return rcxVerdictReject
 	}
 	if f.OpenWorld == rcxProofProven {
+		if f.Breaker {
+			return row.breakerProven
+		}
 		return row.openWorldProven
 	}
 	if f.Domestic == rcxProofProven {
 		return row.domesticProven
 	}
-	if f.Origin == rcxOriginDomestic {
+	// One measurement outranks the database: OpenedOnce voids the domestic prior.
+	if f.Origin == rcxOriginDomestic && !f.OpenedOnce {
 		return row.domesticPrior
 	}
 	return row.foreignPrior
@@ -216,6 +230,7 @@ type rcxKey struct {
 	misfit     uint8
 	evidence   rcxEvidence
 	latBucket  uint8
+	unproven   bool
 	challenger bool
 	order      uint16
 }
@@ -247,6 +262,12 @@ func rcxCompare(a, b rcxKey) int {
 		}
 		return 1
 	}
+	if a.unproven != b.unproven {
+		if !a.unproven {
+			return -1
+		}
+		return 1
+	}
 	if a.challenger != b.challenger {
 		if !a.challenger {
 			return -1
@@ -266,7 +287,7 @@ func rcxCompare(a, b rcxKey) int {
 // which is a structural flap guard and needs no debounce timer.
 func rcxLatBucket(medianMs int, bands []int) uint8 {
 	if medianMs <= 0 {
-		return uint8(len(bands))
+		return uint8(len(bands) / 2)
 	}
 	for i, edge := range bands {
 		if medianMs <= edge {
@@ -282,6 +303,8 @@ type rcxCandidate struct {
 	Facts      rcxFacts
 	Evidence   rcxEvidence
 	MedianMs   int
+	HostMs     int
+	HostDead   bool
 	CoolUntil  time.Time
 	InSkeleton bool
 	Degraded   bool
@@ -289,6 +312,7 @@ type rcxCandidate struct {
 
 type rcxPolicy struct {
 	LatencyBands        []int
+	Strategy            string
 	RequireUDP          bool
 	AllowDomesticLast   bool
 	DwellSeconds        int
@@ -299,7 +323,7 @@ type rcxDecisionInput struct {
 	Terrain        rcxTerrain
 	Incumbent      string
 	IncumbentSince time.Time
-	ManualHold     bool
+	Pin            string
 	Candidates     []rcxCandidate
 	Policy         rcxPolicy
 	Now            time.Time
@@ -337,7 +361,7 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 
 func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 	bands := uint8(len(in.Policy.LatencyBands))
-	bucket := rcxLatBucket(c.MedianMs, in.Policy.LatencyBands)
+	bucket := rcxLatencyBucket(c, in.Policy.LatencyBands)
 	if c.Degraded {
 		bucket = rcxSaturatingAdd(bucket, in.Policy.DegradedBandPenalty, bands)
 	}
@@ -346,9 +370,23 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
 		evidence:   c.Evidence,
 		latBucket:  bucket,
+		unproven:   c.Facts.Transit != rcxProofProven,
 		challenger: c.Name != in.Incumbent,
 		order:      c.Order,
 	}
+}
+
+// Our own median wins: it is measured through the tunnel being decided about, while the
+// host's delay test only orders the crowd this engine never reached, and a park of 250 has
+// no other order but a hash.
+func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
+	if c.MedianMs > 0 {
+		return rcxLatBucket(c.MedianMs, bands)
+	}
+	if c.HostDead {
+		return uint8(len(bands))
+	}
+	return rcxLatBucket(c.HostMs, bands)
 }
 
 func rcxSaturatingAdd(value, delta, max uint8) uint8 {
@@ -364,18 +402,27 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	var bestKey rcxKey
 	var incumbentKey rcxKey
 	incumbentEligible := false
-
+	incumbentPenalised := false
+	pinEligible := false
+	compare := rcxCompare
+	if in.Policy.Strategy == rcxStrategyLatency {
+		compare = rcxCompareLatency
+	}
 	for i := range in.Candidates {
 		c := &in.Candidates[i]
 		if !rcxEligible(*c, in) {
 			continue
 		}
 		key := rcxKeyOf(*c, in)
+		if c.Name == in.Pin {
+			pinEligible = true
+		}
 		if c.Name == in.Incumbent {
 			incumbentEligible = true
 			incumbentKey = key
+			incumbentPenalised = c.Degraded
 		}
-		if best == nil || rcxCompare(key, bestKey) < 0 {
+		if best == nil || compare(key, bestKey) < 0 {
 			best = c
 			bestKey = key
 		}
@@ -391,7 +438,20 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	if in.Incumbent == "" {
-		return rcxDecision{Switch: true, To: best.Name, Reason: rcxReasonColdStart}
+		to := best.Name
+		if pinEligible {
+			to = in.Pin
+		}
+		return rcxDecision{Switch: true, To: to, Reason: rcxReasonColdStart}
+	}
+
+	if pinEligible && in.Pin != in.Incumbent {
+		return rcxDecision{
+			Switch: true,
+			To:     in.Pin,
+			Reason: rcxReasonPinReturn,
+			Detail: in.Incumbent,
+		}
 	}
 
 	if !incumbentEligible {
@@ -407,6 +467,10 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
 	}
 
+	if in.Pin == in.Incumbent {
+		return rcxDecision{Reason: rcxReasonManualHold, Detail: in.Incumbent}
+	}
+
 	if bestKey.verdict > incumbentKey.verdict {
 		return rcxDecision{
 			Switch: true,
@@ -416,10 +480,6 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		}
 	}
 
-	if in.ManualHold {
-		return rcxDecision{Reason: rcxReasonManualHold, Detail: in.Incumbent}
-	}
-
 	// A verdict gain is a correctness change and never waits; a latency gain is
 	// a comfort change, so it waits out the dwell window.
 	dwell := time.Duration(in.Policy.DwellSeconds) * time.Second
@@ -427,7 +487,9 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		return rcxDecision{Reason: rcxReasonDwellHold, Detail: in.Incumbent}
 	}
 
-	if bestKey.latBucket < incumbentKey.latBucket {
+	// The degrade penalty is measured, so a penalised incumbent loses its band.
+	if bestKey.latBucket+rcxLatencyHysteresis < incumbentKey.latBucket ||
+		incumbentKey.latBucket > bestKey.latBucket && incumbentPenalised {
 		return rcxDecision{
 			Switch: true,
 			To:     best.Name,
@@ -437,6 +499,52 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
+}
+
+const rcxLatencyHysteresis = 1
+
+func rcxOrderOf(seed uint64, key string) uint16 {
+	digest := fnv.New64a()
+	var buf [8]byte
+	binary.LittleEndian.PutUint64(buf[:], seed)
+	// Key first: FNV spreads only the rounds after the last write over the word.
+	_, _ = digest.Write([]byte(key))
+	_, _ = digest.Write(buf[:])
+	return uint16(digest.Sum64() >> 16)
+}
+
+func rcxCompareLatency(a, b rcxKey) int {
+	if a.latBucket != b.latBucket {
+		if a.latBucket < b.latBucket {
+			return -1
+		}
+		return 1
+	}
+	if a.evidence != b.evidence {
+		if a.evidence < b.evidence {
+			return -1
+		}
+		return 1
+	}
+	if a.unproven != b.unproven {
+		if !a.unproven {
+			return -1
+		}
+		return 1
+	}
+	if a.challenger != b.challenger {
+		if !a.challenger {
+			return -1
+		}
+		return 1
+	}
+	if a.order != b.order {
+		if a.order < b.order {
+			return -1
+		}
+		return 1
+	}
+	return 0
 }
 
 type rcxBlock string
@@ -483,6 +591,10 @@ type rcxRanked struct {
 
 // The decision's own key and order: a second ordering would drift from it.
 func rcxRank(in rcxDecisionInput) []rcxRanked {
+	compare := rcxCompare
+	if in.Policy.Strategy == rcxStrategyLatency {
+		compare = rcxCompareLatency
+	}
 	ranked := make([]rcxRanked, 0, len(in.Candidates))
 	for _, c := range in.Candidates {
 		ranked = append(ranked, rcxRanked{
@@ -496,7 +608,7 @@ func rcxRank(in rcxDecisionInput) []rcxRanked {
 		if (a.Block == rcxBlockNone) != (b.Block == rcxBlockNone) {
 			return a.Block == rcxBlockNone
 		}
-		return rcxCompare(a.Key, b.Key) < 0
+		return compare(a.Key, b.Key) < 0
 	})
 	return ranked
 }

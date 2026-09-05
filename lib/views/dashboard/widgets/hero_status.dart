@@ -9,13 +9,22 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// No health: `broken` is a verdict on a tunnel that is still `on`.
-enum HeroOrbPhase { off, checking, connecting, reconnecting, on, paused }
+enum HeroOrbPhase {
+  offline,
+  off,
+  checking,
+  connecting,
+  reconnecting,
+  on,
+  paused,
+}
 
 /// `unknown` is not a middle ground: it withholds the verdict, so a missing or
 /// in-flight measurement can never paint the orb red.
 enum HeroHealth { unknown, healthy, degraded, broken }
 
 enum HeroStatus {
+  offline,
   off,
   checking,
   connecting,
@@ -27,12 +36,16 @@ enum HeroStatus {
 }
 
 extension HeroStatusExt on HeroStatus {
-  bool get isLive => this != HeroStatus.off && this != HeroStatus.checking;
+  bool get isLive =>
+      this != HeroStatus.offline &&
+      this != HeroStatus.off &&
+      this != HeroStatus.checking;
 
   bool get isAlert =>
       this == HeroStatus.paused ||
       this == HeroStatus.degraded ||
-      this == HeroStatus.broken;
+      this == HeroStatus.broken ||
+      this == HeroStatus.offline;
 
   bool get isSweeping =>
       this == HeroStatus.checking ||
@@ -68,6 +81,8 @@ HeroHealth heroHealthOf({required int? delay, required bool measuring}) {
 }
 
 final heroLifecycleProvider = Provider<HeroOrbPhase>((ref) {
+  final reachable = ref.watch(networkReachableProvider) ?? true;
+  if (!reachable) return HeroOrbPhase.offline;
   final phase = heroLifecycleOf(
     isStart: ref.watch(isStartProvider),
     paused: ref.watch(pausedProvider),
@@ -97,6 +112,7 @@ HeroOrbPhase heroPhaseWithProbe(HeroOrbPhase phase, bool probing) =>
 
 HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
     switch (phase) {
+      HeroOrbPhase.offline => HeroStatus.offline,
       HeroOrbPhase.off => HeroStatus.off,
       HeroOrbPhase.checking => HeroStatus.checking,
       HeroOrbPhase.connecting => HeroStatus.connecting,
@@ -229,6 +245,7 @@ HeroPalette heroPaletteOf(BuildContext context, HeroStatus status) {
   }
 
   switch (status) {
+    case HeroStatus.offline:
     case HeroStatus.off:
       final idle = colorScheme.outlineVariant;
       return HeroPalette(

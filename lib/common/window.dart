@@ -26,12 +26,17 @@ class Window implements WindowPort {
       exit(0);
     }
     if (system.isWindows) {
-      for (final scheme in protocolSchemes) {
+      for (final scheme in allProtocolSchemes) {
         protocol.register(scheme);
       }
     }
     if (system.isLinux) {
-      unawaited(protocol.registerLinux(protocolSchemes));
+      unawaited(
+        protocol.registerLinux(
+          schemes: allProtocolSchemes,
+          defaults: protocolSchemes,
+        ),
+      );
     }
     await windowManager.ensureInitialized();
     _supportsPosition = !system.isMacOS;

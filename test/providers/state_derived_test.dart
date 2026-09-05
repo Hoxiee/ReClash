@@ -677,9 +677,7 @@ void main() {
 
       expect(container.read(pausedProvider), isFalse);
 
-      container
-          .read(manualPauseProvider.notifier)
-          .clear();
+      container.read(manualPauseProvider.notifier).clear();
       expect(container.read(pausedProvider), isTrue);
     });
 

@@ -39,7 +39,9 @@ class ChangeServerButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final group = ref.watch(
-      currentProfileProvider.select((state) => state?.panelMeta?.serverInfoGroup),
+      currentProfileProvider.select(
+        (state) => state?.panelMeta?.serverInfoGroup,
+      ),
     );
     return SizedBox(
       height: getWidgetHeight(1),
@@ -99,8 +101,7 @@ class ChangeServerButton extends ConsumerWidget {
     final delayColor = getDelayColor(delay);
     final delayStyle = delayColor == null
         ? context.textTheme.bodyMedium?.toLight.adjustSize(1)
-        : context.textTheme.bodyMedium
-              ?.toLight
+        : context.textTheme.bodyMedium?.toLight
               .adjustSize(1)
               .copyWith(color: delayColor);
     return Column(

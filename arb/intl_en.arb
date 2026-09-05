@@ -64,6 +64,7 @@
   "add": "Add",
   "save": "Save",
   "delete": "Delete",
+  "reload": "Reload",
   "seconds": "seconds",
   "qrcode": "QR code",
   "qrcodeDesc": "Scan a QR code to obtain a profile",
@@ -296,6 +297,10 @@
   "perpetualSubscription": "Perpetual subscription",
   "remainingTraffic": "Remaining",
   "daysLeft": "{count, plural, =1{1 day left} other{{count} days left}}",
+  "subscriptionNoticeChannel": "Subscription reminders",
+  "subscriptionExpired": "Your subscription has expired",
+  "subscriptionExpiresToday": "Your subscription expires today",
+  "subscriptionExpiresInDays": "{count, plural, =1{Your subscription expires tomorrow} other{Your subscription expires in {count} days}}",
   "overrideNetworkSettings": "Override network settings",
   "overrideNetworkSettingsDesc": "Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values",
   "disclaimer": "Disclaimer",
@@ -611,6 +616,13 @@
   "networksEmpty": "No trusted networks yet",
   "addNetwork": "Add network",
   "editNetwork": "Edit network",
+  "pickNetwork": "Pick a network",
+  "pickNetworkDesc": "Wi-Fi networks visible around you",
+  "pickNetworkScanning": "Looking for nearby Wi-Fi networks…",
+  "pickNetworkEmpty": "No Wi-Fi networks found",
+  "pickNetworkGrantLocation": "Location permission is required to list nearby Wi-Fi networks",
+  "pickNetworkRefresh": "Refresh",
+  "enterManually": "Enter manually",
   "networkEntryHint": "SSID (Home Wi-Fi) or subnet (192.168.1.0/24)",
   "smartPauseCloseConnections": "Close connections",
   "closeConnectionsDesc": "Drop every open connection when the VPN pauses",
@@ -681,7 +693,7 @@
   "heroCheckingHint": "Measuring the selected node",
   "heroReconnecting": "Reconnecting…",
   "heroReconnectingHint": "Restoring the tunnel",
-  "heroForeignVpn": "Another VPN is active",
+  "heroNoNetworkHint": "Waiting for a connection",
   "connectedFor": "Connected {time}",
   "trafficFreeOfTotal": "free of {total}",
   "subscriptionCaption": "Subscription",
@@ -730,19 +742,14 @@
   "smartRoutingPresetChina": "China",
   "smartRoutingDomestic": "Local servers during a shutdown",
   "smartRoutingDomesticDesc": "A last resort on a whitelist network, so local services keep working",
-  "smartRoutingSaveData": "Save mobile data",
-  "smartRoutingSaveDataDesc": "Narrow the probe burst on a metered link",
   "smartRoutingManualHold": "Respect a manual pick",
-  "smartRoutingManualHoldDesc": "How long a server you chose yourself is left alone",
-  "smartRoutingManualHoldMinutes": "{minutes} min",
-  "@smartRoutingManualHoldMinutes": {
-    "placeholders": {
-      "minutes": {
-        "type": "num"
-      }
-    }
-  },
-  "smartRoutingManualHoldOff": "Not respected",
+  "smartRoutingManualHoldDesc": "Keep the server you chose yourself until it stops working",
+  "smartRoutingManualPinned": "Held until it stops working",
+  "smartRoutingBackToAuto": "Back to automatic",
+  "smartRoutingStrategy": "Strategy",
+  "smartRoutingStrategyDesc": "How the engine trades latency for stability",
+  "smartRoutingStrategyBalanced": "Balanced",
+  "smartRoutingStrategyLowestLatency": "Lowest latency",
   "smartRoutingRegion": "Region",
   "smartRoutingPresetEdited": "{preset} · adjusted",
   "@smartRoutingPresetEdited": {
@@ -793,6 +800,9 @@
   "smartRoutingReasonNoCandidate": "No server passed the checks",
   "smartRoutingReasonDwellHold": "Waiting out the settle time before switching",
   "smartRoutingReasonManualHold": "Respecting the server you picked",
+  "smartRoutingReasonDegraded": "Previous server stopped passing traffic",
+  "smartRoutingReasonMeasuring": "Checking the candidate before switching",
+  "smartRoutingReasonPinReturn": "The server you picked works again",
   "smartRoutingNetworkFormat": "Network",
   "smartRoutingFormatOpen": "Fully open",
   "smartRoutingFormatOpenDesc": "Nothing blocked between you and the open internet",
@@ -811,6 +821,8 @@
   "smartRoutingEvidenceForeignFail": "No foreign address answered",
   "smartRoutingEvidenceDomesticOk": "A local address answered",
   "smartRoutingEvidenceDomesticFail": "No local address answered",
+  "smartRoutingDomesticViaNode": "Domestic services go through the chosen server",
+  "smartRoutingDomesticViaDirect": "Domestic services go direct",
   "smartRoutingMetered": "Metered link",
   "smartRoutingServers": "Servers",
   "smartRoutingServersCount": "{eligible} of {total} usable",
@@ -844,14 +856,6 @@
         "type": "num"
       },
       "cap": {
-        "type": "num"
-      }
-    }
-  },
-  "smartRoutingManualUntil": "Your manual pick is respected for {minutes} min more",
-  "@smartRoutingManualUntil": {
-    "placeholders": {
-      "minutes": {
         "type": "num"
       }
     }
@@ -917,8 +921,11 @@
   "smartRoutingSectionHealth": "Servers",
   "smartRoutingSectionRound": "Decision",
   "smartRoutingSectionHistory": "Earlier switches",
-  "smartRoutingWhatWasTested": "What was tested",
+  "smartRoutingWhatWasTested": "Link check",
   "smartRoutingCanariesAnswered": "{answered} of {total} answered",
+  "smartRoutingNodeChecks": "Server checks",
+  "smartRoutingNodesMeasured": "measured {measured} of {total}",
+  "smartRoutingHostDelay": "from the delay test",
   "smartRoutingNoAnswer": "no answer",
   "smartRoutingUntested": "untested",
   "smartRoutingCanaryDomestic": "local",
@@ -932,13 +939,14 @@
   "smartRoutingStepRank": "Ranked what was left",
   "smartRoutingStepDecision": "Landed here",
   "smartRoutingStepAdmitBody": "{eligible} of {total} servers passed, {blocked} were held back",
-  "smartRoutingStepRankBody": "Verdict first, then specialist fit, then evidence, then latency band",
+  "smartRoutingStepRankBody": "Verdict first, then specialist fit, then evidence, then latency band, history last",
   "smartRoutingAllServers": "All servers",
   "smartRoutingRankOrder": "Ranking order",
   "smartRoutingKeyVerdict": "Verdict",
   "smartRoutingKeyMisfit": "Fit for this network",
   "smartRoutingKeyEvidence": "Evidence",
   "smartRoutingKeyBand": "Latency band",
+  "smartRoutingKeyHistory": "History on this network",
   "smartRoutingBands": "Bands: {bands}",
   "smartRoutingSwitchedAgo": "Switched {time} ago",
   "smartRoutingNeverSwitched": "No switch yet on this network",
@@ -1078,5 +1086,31 @@
   "reduceMotionDesc": "Disable decorative animations",
   "reduceMotionSystemHint": "Already enabled in system settings",
   "pageAnimation": "Page animation",
-  "pageAnimationDesc": "Animate switching between pages"
+  "pageAnimationDesc": "Animate switching between pages",
+  "webDashboard": "Web dashboard",
+  "webDashboardDesc": "zashboard, served by the core itself",
+  "webDashboardOpen": "Open dashboard",
+  "webDashboardSessionTip": "The external controller stays on while the dashboard is open",
+  "webDashboardInstallTip": "zashboard is downloaded on first open",
+  "webDashboardUnreachable": "The core is not serving the dashboard yet",
+  "openInBrowser": "Open in browser",
+  "off": "Off",
+  "subscriptionNoQuota": "This subscription reports no traffic quota or end date",
+  "subscriptionDomainMoved": "The provider moved to {host}",
+  "subscriptionUpdated": "Updated",
+  "subscriptionProviderInterval": "The provider suggests {value}",
+  "@subscriptionDomainMoved": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "@subscriptionProviderInterval": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -83,6 +83,16 @@ func rcxEnvKeys(payload rcxNetworkPayload) (primary, secondary string) {
 	}
 }
 
+// Keyed on these fields, not the transport label a desktop link never reports.
+func rcxPayloadIdentifies(payload rcxNetworkPayload) bool {
+	if payload.SSID != "" || payload.Carrier != "" || payload.DHCPServer != "" {
+		return true
+	}
+	return len(rcxSortedCopy(payload.Gateways)) > 0 ||
+		len(rcxSortedCopy(payload.DNSServers)) > 0 ||
+		len(rcxSubnets(payload.IPv4)) > 0
+}
+
 type rcxTerrainFacts struct {
 	Validated      bool
 	CaptivePortal  bool
@@ -104,12 +114,10 @@ func rcxClassifyTerrain(facts rcxTerrainFacts) rcxTerrain {
 		return rcxTerrainUnknown
 	}
 	switch {
+	case facts.DomesticReach == rcxProbeOK && facts.ForeignReach != rcxProbeOK:
+		return rcxTerrainWhitelist
 	case facts.ForeignReach == rcxProbeOK:
 		return rcxTerrainNormal
-	case facts.ForeignReach == rcxProbeOverloaded:
-		return rcxTerrainUnknown
-	case facts.DomesticReach == rcxProbeOK:
-		return rcxTerrainWhitelist
 	case facts.DomesticReach == rcxProbeFail:
 		return rcxTerrainOffline
 	default:
@@ -122,9 +130,30 @@ type rcxTerrainState struct {
 	since         time.Time
 	unvalidatedAt time.Time
 	portalUntil   time.Time
+	whitelistSeen int
 }
 
-const rcxPortalGrace = 20 * time.Second
+const (
+	rcxPortalGrace      = 20 * time.Second
+	rcxWhitelistConfirm = 2
+)
+
+func (s *rcxTerrainState) settle(terrain rcxTerrain, measured bool) rcxTerrain {
+	if terrain != rcxTerrainWhitelist {
+		s.whitelistSeen = 0
+		return terrain
+	}
+	if s.terrain == rcxTerrainWhitelist {
+		return terrain
+	}
+	if measured {
+		s.whitelistSeen++
+	}
+	if s.whitelistSeen >= rcxWhitelistConfirm {
+		return terrain
+	}
+	return rcxTerrainUnknown
+}
 
 func (s *rcxTerrainState) portalExpired(now time.Time) bool {
 	return s.terrain == rcxTerrainPortal &&

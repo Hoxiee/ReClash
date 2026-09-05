@@ -10,13 +10,31 @@ func rcxTestLedger() (*rcxLedger, time.Time) {
 	return newRcxLedger(rcxDefaultLedgerPolicy()), time.Unix(1_700_000_000, 0)
 }
 
+// Failures land one per episode window, the way an outage that outlasts a minute
+// does, and returns the last charge so the caller can reason from it.
+func rcxChargeFailures(
+	ledger *rcxLedger,
+	node, env string,
+	terrain rcxTerrain,
+	first time.Time,
+	count int,
+) time.Time {
+	step := rcxDefaultLedgerPolicy().EpisodeTTL + time.Second
+	last := first
+	for i := 0; i < count; i++ {
+		last = first.Add(time.Duration(i) * step)
+		ledger.NoteDialFailure(node, env, terrain, last)
+	}
+	return last
+}
+
 func TestLedgerFoldsRetryAttemptsIntoOneEpisode(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
 	opened := 0
 	// retry() hands the same connection to the node up to ten times.
 	for i := 0; i < 10; i++ {
-		if ledger.NoteDialFailure("nl-1", "10.0.0.1:44100", "wifi:home", rcxTerrainNormal, now.Add(time.Duration(i)*50*time.Millisecond)) {
+		if ledger.NoteDialFailure("nl-1", "wifi:home", rcxTerrainNormal, now.Add(time.Duration(i)*50*time.Millisecond)) {
 			opened++
 		}
 	}
@@ -29,19 +47,94 @@ func TestLedgerFoldsRetryAttemptsIntoOneEpisode(t *testing.T) {
 	}
 }
 
-func TestLedgerCountsDistinctConnectionsSeparately(t *testing.T) {
+func TestLedgerFoldsAnOutageBurstIntoOneEpisode(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
-	ledger.NoteDialFailure("nl-1", "10.0.0.1:44100", "wifi:home", rcxTerrainNormal, now)
-	ledger.NoteDialFailure("nl-1", "10.0.0.1:44101", "wifi:home", rcxTerrainNormal, now)
-	ledger.NoteDialFailure("nl-1", "10.0.0.1:44102", "wifi:home", rcxTerrainNormal, now)
+	// A dark uplink fails every socket the app opens, each from a fresh port.
+	for i := 0; i < 3; i++ {
+		ledger.NoteDialFailure("nl-1", "wifi:home", rcxTerrainNormal, now.Add(time.Duration(i)*time.Second))
+	}
 
 	state := ledger.envState("wifi:home", "nl-1")
-	if state.FailStreak != 3 {
-		t.Fatalf("failStreak = %d, want 3: distinct source ports are distinct connections", state.FailStreak)
+	if state.FailStreak != 1 {
+		t.Fatalf("failStreak = %d, want 1: three sockets in three seconds are one outage", state.FailStreak)
 	}
-	if state.CoolUntil.IsZero() {
-		t.Error("want a cooling window once the streak reaches the threshold")
+	if !state.CoolUntil.IsZero() {
+		t.Error("want no cooling window: a single dark second must not ban a node")
+	}
+}
+
+func TestLedgerCapsAFailStreak(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	policy := rcxDefaultLedgerPolicy()
+
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 20)
+
+	state := ledger.envState("wifi:home", "nl-1")
+	if state.FailStreak != policy.MaxFailStreak {
+		t.Fatalf("failStreak = %d, want the cap %d", state.FailStreak, policy.MaxFailStreak)
+	}
+	quiet := last.Add(time.Duration(policy.MaxFailStreak) * policy.FailDecay)
+	if got := ledger.CoolUntil("nl-1", "wifi:home", quiet); !got.IsZero() {
+		t.Errorf("cooling = %v, want a bad minute paid off within the streak cap", got)
+	}
+}
+
+func TestLedgerIgnoresADialTooFastToBeRemote(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	if ledger.NoteDialSuccess("nl-1", "wifi:home", time.Millisecond, now) {
+		t.Fatal("a dial answered inside a millisecond opened a local socket, not a tunnel")
+	}
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL).Transit; got == rcxProofProven {
+		t.Errorf("transit = %v, want it unproven: a mux stream opens against a dead node too", got)
+	}
+}
+
+func TestLedgerDropsAHarvestFasterThanAnyRemoteExchange(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteHarvestedProbe("nl-1", "wifi:home", 1, now)
+
+	if got := ledger.MedianMs("nl-1", "wifi:home", now, time.Time{}, time.Time{}); got != 0 {
+		t.Errorf("median = %d, want 0: a middlebox answering for the node is not the node's latency", got)
+	}
+}
+
+func TestLedgerSamplesAHarvestTheAppYardstickMeasured(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteHarvestedProbe("nl-1", "wifi:home", 120, now)
+
+	if got := ledger.MedianMs("nl-1", "wifi:home", now, time.Time{}, time.Time{}); got != 120 {
+		t.Errorf("median = %d, want 120: a plausible hand test is the only park-wide measurement there is", got)
+	}
+}
+
+func TestLedgerRefusesAProbeFasterThanAnyRemoteExchange(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleOpen, rcxProbeOK, 1, now)
+
+	facts := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL)
+	if facts.OpenWorld == rcxProofProven {
+		t.Error("an exchange faster than any remote RTT never left the local path: it proves no open world")
+	}
+	if got := ledger.MedianMs("nl-1", "wifi:home", now, time.Time{}, time.Time{}); got != 0 {
+		t.Errorf("median = %d, want 0: the forged answer must not become the fastest node in the park", got)
+	}
+	if ledger.ProbeAt("nl-1", "wifi:home").IsZero() {
+		t.Error("the rotation must still advance, or the node is probed forever")
+	}
+}
+
+func TestLedgerDialSuccessNeverFeedsTheMedian(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteDialSuccess("nl-1", "wifi:home", 120*time.Millisecond, now)
+
+	if got := ledger.MedianMs("nl-1", "wifi:home", now, time.Time{}, time.Time{}); got != 0 {
+		t.Errorf("median = %d, want 0: the hook times a local handshake for anything multiplexed", got)
 	}
 }
 
@@ -49,20 +142,18 @@ func TestLedgerReopensAnEpisodeAfterTheTTL(t *testing.T) {
 	ledger, now := rcxTestLedger()
 	policy := rcxDefaultLedgerPolicy()
 
-	ledger.NoteDialFailure("nl-1", "10.0.0.1:44100", "wifi:home", rcxTerrainNormal, now)
-	reopened := ledger.NoteDialFailure("nl-1", "10.0.0.1:44100", "wifi:home", rcxTerrainNormal, now.Add(policy.EpisodeTTL+time.Second))
+	ledger.NoteDialFailure("nl-1", "wifi:home", rcxTerrainNormal, now)
+	reopened := ledger.NoteDialFailure("nl-1", "wifi:home", rcxTerrainNormal, now.Add(policy.EpisodeTTL+time.Second))
 
 	if !reopened {
-		t.Error("a reused source port past the TTL is a new connection and must open a new episode")
+		t.Error("a failure past the TTL is a new outage and must open a new episode")
 	}
 }
 
 func TestLedgerRollsBackFailuresRecordedOffNormalTerrain(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
-	for i := 0; i < 4; i++ {
-		ledger.NoteDialFailure("nl-1", "10.0.0.1:"+strconv.Itoa(44100+i), "lte:mts", rcxTerrainWhitelist, now)
-	}
+	rcxChargeFailures(ledger, "nl-1", "lte:mts", rcxTerrainWhitelist, now, 4)
 	before := ledger.envState("lte:mts", "nl-1")
 	if before.CoolUntil.IsZero() {
 		t.Fatal("want the node cooling during the shutdown")
@@ -82,9 +173,7 @@ func TestLedgerRollsBackFailuresRecordedOffNormalTerrain(t *testing.T) {
 func TestLedgerKeepsFailuresRecordedOnNormalTerrain(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
-	for i := 0; i < 4; i++ {
-		ledger.NoteDialFailure("nl-1", "10.0.0.1:"+strconv.Itoa(44100+i), "wifi:home", rcxTerrainNormal, now)
-	}
+	rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 4)
 	ledger.PromoteTerrainNormal("wifi:home")
 
 	if got := ledger.envState("wifi:home", "nl-1").FailStreak; got != 4 {
@@ -95,27 +184,86 @@ func TestLedgerKeepsFailuresRecordedOnNormalTerrain(t *testing.T) {
 func TestLedgerKeepsStatePerEnvironment(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
-	for i := 0; i < 4; i++ {
-		ledger.NoteDialFailure("nl-1", "10.0.0.1:"+strconv.Itoa(44100+i), "lte:mts", rcxTerrainWhitelist, now)
-	}
+	rcxChargeFailures(ledger, "nl-1", "lte:mts", rcxTerrainWhitelist, now, 4)
 
-	home := ledger.Facts("nl-1", "wifi:home", true, now)
+	home := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL)
 	if home.Transit == rcxProofDisproven {
 		t.Error("a shutdown on mobile must not mark the node dead on home wifi")
 	}
 }
 
-func TestLedgerSuccessClearsCooling(t *testing.T) {
+func TestLedgerDialSuccessPaysBackOneCharge(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
-	for i := 0; i < 4; i++ {
-		ledger.NoteDialFailure("nl-1", "10.0.0.1:"+strconv.Itoa(44100+i), "wifi:home", rcxTerrainNormal, now)
-	}
-	ledger.NoteDialSuccess("nl-1", "10.0.0.1:44200", "wifi:home", 120*time.Millisecond, now.Add(time.Minute))
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 4)
+	at := last.Add(time.Minute)
+	ledger.NoteDialSuccess("nl-1", "wifi:home", 120*time.Millisecond, at)
 
-	facts := ledger.Facts("nl-1", "wifi:home", true, now.Add(time.Minute))
-	if facts.Transit != rcxProofProven {
-		t.Errorf("transit = %v, want proven after a real connection succeeded", facts.Transit)
+	state := ledger.envState("wifi:home", "nl-1")
+	if state.FailStreak != 3 {
+		t.Errorf("fail streak = %d, want 3: a handshake refutes exactly one charge", state.FailStreak)
+	}
+	if state.CoolUntil.IsZero() || !at.Before(state.CoolUntil) {
+		t.Error("a dial must shorten the backoff, not erase the cooling it cannot re-earn")
+	}
+	if got := ledger.Facts("nl-1", "wifi:home", true, at, rcxLedgerProofTTL).Transit; got != rcxProofDisproven {
+		t.Errorf("transit = %v, want disproven: the dial proved the session, not the delivery", got)
+	}
+}
+
+func TestLedgerDialSuccessDecaysQuietTimeFirst(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	policy := rcxDefaultLedgerPolicy()
+
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 6)
+	quiet := time.Duration(policy.MaxFailStreak-1) * policy.FailDecay
+	ledger.NoteDialSuccess("nl-1", "wifi:home", 120*time.Millisecond, last.Add(quiet))
+
+	if got := ledger.envState("wifi:home", "nl-1").FailStreak; got != 0 {
+		t.Errorf("fail streak = %d, want 0: quiet time pays its credits before the handshake's one", got)
+	}
+}
+
+func TestLedgerDialSuccessIsNotBeingGood(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteTrafficProgress("payload", "wifi:home", false, now)
+	ledger.NoteDialSuccess("handshake", "wifi:home", 120*time.Millisecond, now.Add(time.Minute))
+
+	ledger.Prune(1, now.Add(time.Hour))
+
+	if _, ok := ledger.envs["wifi:home"]["payload"]; !ok {
+		t.Error("want the node that carried payload kept: a handshake is never more recently good")
+	}
+}
+
+func TestLedgerDialSuccessDoesNotProveTransit(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	ledger.NoteDialSuccess("nl-1", "wifi:home", 120*time.Millisecond, now)
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL).Transit; got != rcxProofUnknown {
+		t.Errorf("transit = %v, want unknown: a handshake is a session, not a delivery", got)
+	}
+
+	ledger.NoteTrafficProgress("nl-1", "wifi:home", false, now)
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL).Transit; got != rcxProofProven {
+		t.Errorf("transit = %v, want proven once payload answered", got)
+	}
+}
+
+func TestLedgerDowngradesTransitAfterTheBanExpires(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	policy := rcxDefaultLedgerPolicy()
+
+	ledger.NoteTrafficProgress("nl-1", "wifi:home", false, now)
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now.Add(time.Minute), 4)
+	if got := ledger.Facts("nl-1", "wifi:home", true, last, rcxLedgerProofTTL).Transit; got != rcxProofDisproven {
+		t.Fatalf("transit = %v, want disproven while the ban stands", got)
+	}
+
+	expired := last.Add(2*policy.DeadRetry + time.Minute)
+	if got := ledger.Facts("nl-1", "wifi:home", true, expired, rcxLedgerProofTTL).Transit; got != rcxProofUnknown {
+		t.Errorf("transit = %v, want unknown after the ban: worth a retry, not a proven rank", got)
 	}
 }
 
@@ -132,6 +280,57 @@ func TestLedgerBackoffGrowsAndIsCapped(t *testing.T) {
 	}
 	if huge != policy.MaxDeadRetry {
 		t.Errorf("backoff = %v, want the cap %v", huge, policy.MaxDeadRetry)
+	}
+}
+
+func TestLedgerDecaysAFailStreakWithTime(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	policy := rcxDefaultLedgerPolicy()
+
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 4)
+	if ledger.CoolUntil("nl-1", "wifi:home", last).IsZero() {
+		t.Fatal("want a cooling window before the decay has anything to give back")
+	}
+
+	quiet := last.Add(2 * policy.FailDecay)
+	if got := ledger.CoolUntil("nl-1", "wifi:home", quiet); !got.IsZero() {
+		t.Errorf("cooling = %v, want it lifted: a cooling node is never dialled and so can never earn the success that clears it", got)
+	}
+	if got := ledger.envState("wifi:home", "nl-1").FailStreak; got != 2 {
+		t.Errorf("failStreak = %d, want 2 after two quiet hours", got)
+	}
+}
+
+func TestLedgerDecayNeverExtendsACoolingWindow(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	policy := rcxDefaultLedgerPolicy()
+
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 10)
+	banned := ledger.CoolUntil("nl-1", "wifi:home", last)
+	if banned.Sub(last) != policy.MaxDeadRetry {
+		t.Fatalf("cooling = %v, want the capped ban %v", banned.Sub(last), policy.MaxDeadRetry)
+	}
+
+	got := ledger.CoolUntil("nl-1", "wifi:home", last.Add(policy.FailDecay))
+	if got.After(banned) {
+		t.Errorf("cooling = %v, want a paid-off credit never to push the release past %v", got, banned)
+	}
+}
+
+func TestLedgerRefundsWhatALinkEventCharged(t *testing.T) {
+	ledger, now := rcxTestLedger()
+
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 3)
+	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleOpen, rcxProbeFail, 0, last)
+
+	ledger.RollbackFailures("wifi:home", map[string]int{"nl-1": 3})
+
+	state := ledger.envState("wifi:home", "nl-1")
+	if state.FailStreak != 0 || !state.CoolUntil.IsZero() {
+		t.Errorf("streak %d cooling %v, want both given back", state.FailStreak, state.CoolUntil)
+	}
+	if state.OpenWorld != rcxProofUnknown {
+		t.Errorf("openWorld = %v, want unknown: a marker unreachable through a dead link disproves nothing", state.OpenWorld)
 	}
 }
 
@@ -207,7 +406,8 @@ func TestLedgerEvidenceDegradesWithAge(t *testing.T) {
 	ledger, now := rcxTestLedger()
 	live := time.Minute
 	fresh := 30 * time.Minute
-	ledger.NoteDialSuccess("nl-1", "10.0.0.1:1", "wifi:home", 90*time.Millisecond, now)
+	ledger.NoteDialSuccess("nl-1", "wifi:home", 90*time.Millisecond, now)
+	ledger.NoteTrafficProgress("nl-1", "wifi:home", false, now)
 
 	tests := []struct {
 		at   time.Time
@@ -236,7 +436,7 @@ func TestLedgerPruneKeepsTheMostRecentlyGoodNodes(t *testing.T) {
 	ledger, now := rcxTestLedger()
 	for i := 0; i < 5; i++ {
 		node := "n" + strconv.Itoa(i)
-		ledger.NoteDialSuccess(node, "10.0.0.1:1", "wifi:home", 100*time.Millisecond, now.Add(time.Duration(i)*time.Minute))
+		ledger.NoteTrafficProgress(node, "wifi:home", false, now.Add(time.Duration(i)*time.Minute))
 	}
 
 	ledger.Prune(2, now.Add(time.Hour))
@@ -247,5 +447,23 @@ func TestLedgerPruneKeepsTheMostRecentlyGoodNodes(t *testing.T) {
 	}
 	if _, ok := nodes["n4"]; !ok {
 		t.Error("want the most recently good node kept")
+	}
+}
+
+func TestLedgerKeepsTheOpenWorldFalsificationAfterTheProofAges(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.SetOrigin("nl-1", "RU", rcxOriginDomestic)
+	ledger.NoteTrafficProgress("nl-1", "wifi:home", true, now)
+
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL); got.OpenWorld != rcxProofProven {
+		t.Fatalf("proof = %v, want proven: the payload reached a host no domestic egress can", got.OpenWorld)
+	}
+	aged := ledger.Facts("nl-1", "wifi:home", true, now.Add(rcxLedgerProofTTL+time.Minute), rcxLedgerProofTTL)
+
+	if aged.OpenWorld != rcxProofUnknown {
+		t.Errorf("aged proof = %v, want unknown: one lucky pass must not rank it for life", aged.OpenWorld)
+	}
+	if !aged.OpenedOnce {
+		t.Error("the measurement that falsified mmdb expired with the proof: geography decides again")
 	}
 }

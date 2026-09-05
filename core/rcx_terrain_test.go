@@ -78,6 +78,26 @@ func TestEnvKeysUseTheCarrierOnCellular(t *testing.T) {
 	}
 }
 
+func TestAPayloadIdentifiesByItsKeysNotItsTransport(t *testing.T) {
+	blank := rcxNetworkPayload{Transport: "wifi"}
+	if rcxPayloadIdentifies(blank) {
+		t.Error("a transport label alone names no network: every field a key is built from is blank")
+	}
+	desktop := rcxNetworkPayload{IPv4: []string{"192.168.31.44"}}
+	if !rcxPayloadIdentifies(desktop) {
+		t.Error("a link with no transport name still carries addresses, and an address is an identity")
+	}
+	if !rcxPayloadIdentifies(rcxNetworkPayload{SSID: "Home"}) {
+		t.Error("an SSID alone identifies the network")
+	}
+	if !rcxPayloadIdentifies(rcxNetworkPayload{Carrier: "25001"}) {
+		t.Error("a carrier alone identifies the network")
+	}
+	if rcxPayloadIdentifies(rcxNetworkPayload{Transport: "wifi", Gateways: []string{""}, IPv4: []string{"fe80::1"}}) {
+		t.Error("blank and non-IPv4 entries drop out of the key, so they cannot supply an identity")
+	}
+}
+
 func TestClassifyTerrainHoldsBackDuringTheValidationWindow(t *testing.T) {
 	got := rcxClassifyTerrain(rcxTerrainFacts{
 		Validated:      false,
@@ -147,15 +167,66 @@ func TestClassifyTerrainSeparatesWhitelistFromOffline(t *testing.T) {
 	}
 }
 
-func TestClassifyTerrainTreatsASaturatedProbeAsNoInformation(t *testing.T) {
+func TestClassifyTerrainReadsAnUnansweredForeignCanaryAsAWhitelist(t *testing.T) {
 	got := rcxClassifyTerrain(rcxTerrainFacts{
 		Validated:     true,
 		ForeignReach:  rcxProbeOverloaded,
 		DomesticReach: rcxProbeOK,
 	})
 
+	if got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist: a shutdown drops the foreign SYN rather than refusing it", got)
+	}
+}
+
+func TestClassifyTerrainKeepsUnknownWhenNothingAnswersEither(t *testing.T) {
+	got := rcxClassifyTerrain(rcxTerrainFacts{
+		Validated:     true,
+		ForeignReach:  rcxProbeOverloaded,
+		DomesticReach: rcxProbeOverloaded,
+	})
+
 	if got != rcxTerrainUnknown {
-		t.Errorf("terrain = %s, want unknown: a starved probe slot proves nothing about the network", got)
+		t.Errorf("terrain = %s, want unknown: an unmeasured round is not a verdict", got)
+	}
+}
+
+func TestTerrainStateChargesTwoRoundsToEnterAWhitelist(t *testing.T) {
+	state := &rcxTerrainState{terrain: rcxTerrainNormal}
+
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainUnknown {
+		t.Errorf("terrain = %s, want unknown: one throttled canary is not a shutdown", got)
+	}
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist once a second round agrees", got)
+	}
+}
+
+func TestTerrainStateLeavesAWhitelistOnOneRound(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	state := &rcxTerrainState{terrain: rcxTerrainWhitelist}
+
+	left := state.settle(rcxTerrainNormal, true)
+	if left != rcxTerrainNormal {
+		t.Errorf("terrain = %s, want normal: leaving costs one round, not two", left)
+	}
+	state.observe(left, now)
+
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainUnknown {
+		t.Error("re-entry must be confirmed again after the terrain was left")
+	}
+}
+
+func TestTerrainStateCountsOnlyMeasuredRounds(t *testing.T) {
+	state := &rcxTerrainState{terrain: rcxTerrainNormal}
+
+	for i := 0; i < 4; i++ {
+		if got := state.settle(rcxTerrainWhitelist, false); got != rcxTerrainUnknown {
+			t.Fatalf("terrain = %s, want unknown: link callbacks reclassify old facts", got)
+		}
+	}
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainUnknown {
+		t.Errorf("terrain = %s, want unknown until a second measurement lands", got)
 	}
 }
 

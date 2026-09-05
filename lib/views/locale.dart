@@ -28,9 +28,9 @@ class LocaleView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.language,
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
-          generateSectionV3(
+          SettingSection(
+            top: 16,
             items: [
               for (final locale in options)
                 DecorationListItem(
@@ -59,6 +59,7 @@ class LocaleView extends ConsumerWidget {
                 ),
             ],
           ),
+          const SettingBottomInset(),
         ],
       ),
     );

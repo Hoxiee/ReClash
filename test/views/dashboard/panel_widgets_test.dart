@@ -162,7 +162,7 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsNothing);
     });
 
-    testWidgets('opens the subscription info on tap', (tester) async {
+    testWidgets('opens the subscription overview on tap', (tester) async {
       setProfile(
         _profile(
           subscriptionInfo: const SubscriptionInfo(
@@ -177,7 +177,23 @@ void main() {
       await tester.tap(find.byType(MetaInfo));
       await tester.pumpAndSettle();
 
-      expect(find.text('Subscription info'), findsOneWidget);
+      expect(find.text('Traffic usage'), findsOneWidget);
+      expect(find.text('example.com'), findsOneWidget);
+    });
+
+    testWidgets('opens even when the panel sent no subscription data', (
+      tester,
+    ) async {
+      setProfile(_profile());
+      await pumpWidget(tester, const MetaInfo());
+
+      await tester.tap(find.byType(MetaInfo));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('This subscription reports no traffic quota or end date'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('offers a sync action for url profiles', (tester) async {

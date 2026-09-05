@@ -46,7 +46,8 @@ class DeviceIdentity {
     return sha256.convert(utf8.encode('reclash-device:$source')).toString();
   }
 
-  Future<DeviceIdentityInfo> get info => _pendingInfo ??= _loadInfo();  Future<DeviceIdentityInfo> _loadInfo() async {
+  Future<DeviceIdentityInfo> get info => _pendingInfo ??= _loadInfo();
+  Future<DeviceIdentityInfo> _loadInfo() async {
     try {
       final deviceInfo = await DeviceInfoPlugin().deviceInfo;
       final (source, model) = switch (deviceInfo) {
@@ -58,10 +59,8 @@ class DeviceIdentity {
           :final identifierForVendor,
           :final modelName,
           :final utsname,
-        ) => (
-          identifierForVendor,
-          modelName.takeFirstValid([utsname.machine]),
-        ),
+        ) =>
+          (identifierForVendor, modelName.takeFirstValid([utsname.machine])),
         MacOsDeviceInfo(:final systemGUID, :final modelName) => (
           systemGUID,
           modelName,

@@ -32,6 +32,25 @@ void main() {
     expect(await manager.getSsid(), isNull);
   });
 
+  test('listSsid returns the native list', () async {
+    MethodCall? receivedCall;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          receivedCall = call;
+          return <Object?>['Home', 'Office'];
+        });
+
+    expect(await manager.listSsid(), ['Home', 'Office']);
+    expect(receivedCall?.method, 'listSsid');
+  });
+
+  test('listSsid preserves a null native value as an empty list', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async => null);
+
+    expect(await manager.listSsid(), isEmpty);
+  });
+
   test('checkPermission maps every native permission state', () async {
     var nativeState = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

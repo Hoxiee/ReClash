@@ -9,7 +9,6 @@ import 'list.dart';
 import 'text.dart';
 
 const _expireGap = 12.0;
-const _perpetualExpireYear = 2099;
 const _trafficWarnRatio = 0.75;
 const _trafficCriticalRatio = 0.95;
 
@@ -56,7 +55,7 @@ class SubscriptionInfoView extends StatelessWidget {
     final expireDate = info.expire == 0
         ? null
         : DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
-    final isPerpetual = (expireDate?.year ?? 0) >= _perpetualExpireYear;
+    final isPerpetual = (expireDate?.year ?? 0) >= perpetualExpireYear;
     final expireShow = isPerpetual
         ? context.appLocalizations.perpetualSubscription
         : expireDate == null
@@ -162,7 +161,7 @@ class SubscriptionInfoDetailView extends StatelessWidget {
     final expireDate = subscriptionInfo.expire == 0
         ? null
         : DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
-    final expire = (expireDate?.year ?? 0) >= _perpetualExpireYear
+    final expire = (expireDate?.year ?? 0) >= perpetualExpireYear
         ? appLocalizations.perpetualSubscription
         : expireDate == null
         ? appLocalizations.infiniteTime

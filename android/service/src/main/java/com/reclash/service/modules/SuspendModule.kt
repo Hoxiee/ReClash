@@ -22,6 +22,7 @@ internal class SuspendModule(
         get() = service.getSystemService<PowerManager>()?.isDeviceIdleMode ?: true
 
     private fun updateSuspension(screenOn: Boolean) {
+        Core.screenOff(!screenOn)
         Core.suspended(!screenOn && isDeviceIdle)
     }
 
@@ -42,6 +43,7 @@ internal class SuspendModule(
     }
 
     override fun stop() {
+        Core.screenOff(false)
         Core.suspended(false)
     }
 }

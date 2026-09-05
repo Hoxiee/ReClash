@@ -92,11 +92,11 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _initLink() {
     final color = context.colorScheme.primary;
-    linkManager.initAppLinksListen((url) async {
+    linkManager.initAppLinksListen((link) async {
       unawaited(window?.show());
       ResolvedExternalLink? resolved;
       try {
-        resolved = await resolveExternalLink(url);
+        resolved = await resolveExternalLink(link.payload);
       } on IncyLinkException catch (e) {
         await dialogs.showMessage(
           title: currentAppLocalizations.addProfile,
@@ -104,17 +104,20 @@ class ApplicationState extends ConsumerState<Application> {
         );
         return;
       }
-      final target = resolved?.url ?? url;
-      final name = resolved?.name;
-      final message = currentAppLocalizations.createProfileFromUrlTip(target);
-      final parts = message.split(target);
+      final target = resolved?.url ?? link.payload;
+      final content = target.isEmpty ? resolved?.data : null;
+      final full = target.isEmpty ? link.payload : target;
+      // A share link or an inlined config can be arbitrarily long.
+      final source = full.length > 120 ? '${full.substring(0, 119)}…' : full;
+      final message = currentAppLocalizations.createProfileFromUrlTip(source);
+      final parts = message.split(source);
       final res = await dialogs.showMessage(
         title: currentAppLocalizations.addProfile,
         message: TextSpan(
           children: [
             TextSpan(text: parts.first),
             TextSpan(
-              text: target,
+              text: source,
               style: TextStyle(
                 color: color,
                 decoration: TextDecoration.underline,
@@ -126,10 +129,17 @@ class ApplicationState extends ConsumerState<Application> {
         ),
       );
       if (res != true) return;
+      final action = ref.read(profilesActionProvider.notifier);
+      if (content != null) {
+        unawaited(action.addProfileFromLocalContent(content));
+        return;
+      }
       unawaited(
-        ref
-            .read(profilesActionProvider.notifier)
-            .addProfileFormURL(target, client: resolved?.preset ?? SubscriptionClient.auto, name: name),
+        action.addProfileFormURL(
+          target,
+          client: resolved?.preset ?? SubscriptionClient.auto,
+          name: resolved?.name ?? link.name,
+        ),
       );
     });
   }

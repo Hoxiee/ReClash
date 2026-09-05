@@ -11,6 +11,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.telephony.TelephonyManager
 import androidx.core.content.getSystemService
 import com.reclash.core.Core
@@ -20,7 +21,7 @@ import java.net.Inet6Address
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 
-private data class NetworkInfo(
+internal data class NetworkInfo(
     @Volatile var losingUntilMillis: Long = 0,
     @Volatile var dnsList: List<InetAddress> = emptyList(),
     @Volatile var ipv4List: List<String> = emptyList(),
@@ -36,6 +37,20 @@ private data class NetworkInfo(
         get() = if (losingUntilMillis > System.currentTimeMillis()) 10 else 0
 }
 
+// Only onCapabilitiesChanged fills the transport: before it there is no network to key on.
+internal fun <K> routingCandidate(
+    infos: Map<K, NetworkInfo>,
+    priority: (Map.Entry<K, NetworkInfo>) -> Int,
+): NetworkInfo? = infos.asSequence()
+    .filter { it.value.transport.isNotEmpty() }
+    .minByOrNull(priority)?.value
+
+private data class PrimaryNetwork(
+    val network: Network?,
+    val transport: String,
+    val ipv4: List<String>,
+)
+
 internal class NetworkObserveModule(private val service: Service) : ServiceModule {
 
     // Union across all networks: a phone on wifi+cellular belongs to both LANs at once.
@@ -50,6 +65,8 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     private var lastIpv4Union = emptyList<String>()
     private var lastSsidUnion = emptyList<String>()
     private var lastRcxFacts: RcxNetworkFacts? = null
+    private var lastPrimary: PrimaryNetwork? = null
+    private val resetThrottle = ConnectionResetThrottle()
     private val telephony by lazy {
         service.getSystemService<TelephonyManager>()
     }
@@ -112,6 +129,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         updateDns()
         updatePhysical()
         updateRouting()
+        updateConnections()
     }
 
     private fun handleLosing(network: Network, maxMsToLive: Int) {
@@ -132,6 +150,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         updateDns()
         updatePhysical()
         updateRouting()
+        updateConnections()
     }
 
     private fun handleCapabilitiesChanged(
@@ -153,6 +172,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
         updatePhysical()
         updateRouting()
+        updateConnections()
     }
 
     private fun transportName(capabilities: NetworkCapabilities): String = when {
@@ -179,6 +199,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         updateDns()
         updatePhysical()
         updateRouting()
+        updateConnections()
     }
 
     override fun start() {
@@ -237,7 +258,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     // facts it classifies terrain from have to come from here.
     @Synchronized
     private fun updateRouting() {
-        val info = networkInfos.asSequence().minByOrNull(::networkPriority)?.value ?: return
+        val info = routingCandidate(networkInfos, ::networkPriority) ?: return
         val facts = RcxNetworkFacts(
             transport = info.transport,
             ssid = info.ssid.orEmpty(),
@@ -261,6 +282,37 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         Core.rcxNetwork(facts.toJson())
     }
 
+    // Sockets bound to the interface that just went away hang until their own timeouts.
+    private fun dropStaleConnections() {
+        Core.resetConnections()
+        Core.closeConnections()
+    }
+
+    private val deferredReset = Runnable {
+        if (resetThrottle.fire(SystemClock.uptimeMillis())) dropStaleConnections()
+    }
+
+    @Synchronized
+    private fun updateConnections() {
+        val entry = networkInfos.entries.minByOrNull(::networkPriority)
+        val primary = PrimaryNetwork(
+            network = entry?.key,
+            transport = entry?.value?.transport.orEmpty(),
+            ipv4 = entry?.value?.ipv4List.orEmpty().sorted(),
+        )
+        val previous = lastPrimary
+        lastPrimary = primary
+        if (previous == null || previous == primary || primary.network == null) {
+            return
+        }
+        val plan = resetThrottle.request(SystemClock.uptimeMillis())
+        when (plan.action) {
+            ResetAction.NOW -> dropStaleConnections()
+            ResetAction.DEFER -> mainHandler.postDelayed(deferredReset, plan.delayMs)
+            ResetAction.COALESCE -> Unit
+        }
+    }
+
     override fun stop() {
         mainHandler.removeCallbacksAndMessages(null)
         try {
@@ -270,6 +322,8 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             lastIpv4Union = emptyList()
             lastSsidUnion = emptyList()
             lastRcxFacts = null
+            lastPrimary = null
+            resetThrottle.reset()
             updateDns()
         }
     }

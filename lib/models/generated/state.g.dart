@@ -25,6 +25,7 @@ _SharedState _$SharedStateFromJson(Map<String, dynamic> json) => _SharedState(
   showStopAction: json['showStopAction'] as bool? ?? true,
   crashlytics: json['crashlytics'] as bool,
   pureBlackTheme: json['pureBlackTheme'] as bool? ?? false,
+  autoRun: json['autoRun'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
@@ -43,4 +44,5 @@ Map<String, dynamic> _$SharedStateToJson(_SharedState instance) =>
       'showStopAction': instance.showStopAction,
       'crashlytics': instance.crashlytics,
       'pureBlackTheme': instance.pureBlackTheme,
+      'autoRun': instance.autoRun,
     };

@@ -4,11 +4,11 @@ import 'package:reclash/common/device_identity.dart';
 import 'package:reclash/enum/enum.dart';
 
 DeviceIdentityInfo details() => const DeviceIdentityInfo(
-      hwid: 'HWID1234',
-      os: 'Android',
-      osVersion: '16',
-      model: 'Pixel 9',
-    );
+  hwid: 'HWID1234',
+  os: 'Android',
+  osVersion: '16',
+  model: 'Pixel 9',
+);
 
 void main() {
   group('probeOrder', () {
@@ -30,7 +30,10 @@ void main() {
 
     test('the remembered working preset comes first without duplicating', () {
       expect(
-        probeOrder(SubscriptionClient.auto, lastWorking: SubscriptionClient.incy),
+        probeOrder(
+          SubscriptionClient.auto,
+          lastWorking: SubscriptionClient.incy,
+        ),
         [
           SubscriptionClient.incy,
           SubscriptionClient.clash,
@@ -38,12 +41,18 @@ void main() {
           SubscriptionClient.singbox,
         ],
       );
-      expect(probeOrder(SubscriptionClient.auto, lastWorking: SubscriptionClient.clash), [
-        SubscriptionClient.clash,
-        SubscriptionClient.happ,
-        SubscriptionClient.incy,
-        SubscriptionClient.singbox,
-      ]);
+      expect(
+        probeOrder(
+          SubscriptionClient.auto,
+          lastWorking: SubscriptionClient.clash,
+        ),
+        [
+          SubscriptionClient.clash,
+          SubscriptionClient.happ,
+          SubscriptionClient.incy,
+          SubscriptionClient.singbox,
+        ],
+      );
     });
   });
 
@@ -64,26 +73,35 @@ void main() {
         deviceDetails: details(),
         defaultUa: 'ReClash/v1.0.0 core/v1.19.13 Platform/android',
       );
-      expect(headers['User-Agent'], 'ReClash/v1.0.0 core/v1.19.13 Platform/android');
+      expect(
+        headers['User-Agent'],
+        'ReClash/v1.0.0 core/v1.19.13 Platform/android',
+      );
     });
 
-    test('a preset UA beats the identity override — it is the whole point of the preset', () {
-      for (final client in [
-        SubscriptionClient.happ,
-        SubscriptionClient.incy,
-        SubscriptionClient.v2rayng,
-      ]) {
-        final headers = buildSubscriptionHeaders(
-          client,
-          deviceDetails: details(),
-          defaultUa: 'ReClash/v1.0.0',
-          identityUserAgent: 'MyCustom/UA',
-          customUserAgent: 'CustomPreset/UA',
-        );
-        expect(headers['User-Agent'], isNot(anyOf('MyCustom/UA', 'ReClash/v1.0.0')),
-            reason: client.name);
-      }
-    });
+    test(
+      'a preset UA beats the identity override — it is the whole point of the preset',
+      () {
+        for (final client in [
+          SubscriptionClient.happ,
+          SubscriptionClient.incy,
+          SubscriptionClient.v2rayng,
+        ]) {
+          final headers = buildSubscriptionHeaders(
+            client,
+            deviceDetails: details(),
+            defaultUa: 'ReClash/v1.0.0',
+            identityUserAgent: 'MyCustom/UA',
+            customUserAgent: 'CustomPreset/UA',
+          );
+          expect(
+            headers['User-Agent'],
+            isNot(anyOf('MyCustom/UA', 'ReClash/v1.0.0')),
+            reason: client.name,
+          );
+        }
+      },
+    );
 
     test('happ preset: UA only, device headers flow as today', () {
       final headers = buildSubscriptionHeaders(
@@ -128,25 +146,28 @@ void main() {
       expect(headers, isNot(contains('x-client')));
     });
 
-    test('custom preset uses the profile text, empty falls back to the default', () {
-      expect(
-        buildSubscriptionHeaders(
-          SubscriptionClient.custom,
-          deviceDetails: details(),
-          customUserAgent: 'Whatever/1.2',
-        )['User-Agent'],
-        'Whatever/1.2',
-      );
-      expect(
-        buildSubscriptionHeaders(
-          SubscriptionClient.custom,
-          deviceDetails: details(),
-          customUserAgent: '',
-          defaultUa: 'ReClash/v1.0.0',
-        )['User-Agent'],
-        'ReClash/v1.0.0',
-      );
-    });
+    test(
+      'custom preset uses the profile text, empty falls back to the default',
+      () {
+        expect(
+          buildSubscriptionHeaders(
+            SubscriptionClient.custom,
+            deviceDetails: details(),
+            customUserAgent: 'Whatever/1.2',
+          )['User-Agent'],
+          'Whatever/1.2',
+        );
+        expect(
+          buildSubscriptionHeaders(
+            SubscriptionClient.custom,
+            deviceDetails: details(),
+            customUserAgent: '',
+            defaultUa: 'ReClash/v1.0.0',
+          )['User-Agent'],
+          'ReClash/v1.0.0',
+        );
+      },
+    );
 
     test('sendDeviceHeaders=false drops the whole device-header family', () {
       final headers = buildSubscriptionHeaders(
@@ -155,7 +176,12 @@ void main() {
         sendDeviceHeaders: false,
       );
       expect(headers['User-Agent'], 'Happ/3.26.1');
-      for (final name in ['x-hwid', 'x-device-os', 'x-ver-os', 'x-device-model']) {
+      for (final name in [
+        'x-hwid',
+        'x-device-os',
+        'x-ver-os',
+        'x-device-model',
+      ]) {
         expect(headers, isNot(contains(name)), reason: name);
       }
     });

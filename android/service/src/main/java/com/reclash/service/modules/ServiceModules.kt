@@ -33,6 +33,7 @@ internal class ServiceModules(private val service: Service) {
             add(NotificationModule(service, nextScope))
             add(networkModule)
             add(SuspendModule(service, nextScope))
+            add(WakeLockModule(service, nextScope))
             if (pauseModule != null) add(pauseModule)
         }
         val startedModules = mutableListOf<ServiceModule>()

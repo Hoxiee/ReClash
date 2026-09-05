@@ -61,12 +61,6 @@ class ApplicationSettingView extends StatelessWidget {
           update: (state, value) => state.copyWith(hidden: value),
         ),
       _appSettingToggle(
-        title: (l) => l.tabAnimation,
-        subtitle: (l) => l.tabAnimationDesc,
-        select: (state) => state.isAnimateToPage,
-        update: (state, value) => state.copyWith(isAnimateToPage: value),
-      ),
-      _appSettingToggle(
         title: (l) => l.logcat,
         subtitle: (l) => l.logcatDesc,
         select: (state) => state.openLogs,
@@ -114,11 +108,11 @@ class ApplicationSettingView extends StatelessWidget {
     ];
     return BaseScaffold(
       title: context.appLocalizations.application,
-      body: ListView.separated(
-        padding: EdgeInsets.only(bottom: 16 + BottomInsetScope.of(context)),
-        itemBuilder: (_, index) => items[index],
-        separatorBuilder: (_, _) => const Divider(height: 0),
-        itemCount: items.length,
+      body: ListView(
+        children: [
+          SettingSection(top: 16, items: items),
+          const SettingBottomInset(),
+        ],
       ),
     );
   }

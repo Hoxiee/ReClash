@@ -184,6 +184,7 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
   const factory SmartRoutingProps({
     @Default(false) bool enabled,
     @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,
+    @Default(SmartRoutingStrategy.balanced) SmartRoutingStrategy strategy,
     @Default([]) List<String> censorCountries,
     @Default([]) List<String> canaryForeign,
     @Default([]) List<String> canaryDomestic,
@@ -191,15 +192,13 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default([]) List<RcxMarker> domesticMarkers,
     @Default([]) List<String> breakerPatterns,
     @Default(true) bool allowDomesticLastResort,
-    @Default(true) bool saveMobileData,
     @Default(false) bool requireUdp,
-    @Default(60) int manualHoldMinutes,
+    @Default(true) bool respectPick,
     @Default(90) int dwellSeconds,
     @Default(12) int waveWidth,
   }) = _SmartRoutingProps;
 
-  factory SmartRoutingProps.fromJson(Map<String, Object?>? json) =>
-      json == null
+  factory SmartRoutingProps.fromJson(Map<String, Object?>? json) => json == null
       ? defaultSmartRoutingProps
       : _$SmartRoutingPropsFromJson(json);
 }

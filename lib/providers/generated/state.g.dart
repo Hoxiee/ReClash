@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'0fc2c3f9a8cc0674843c69c0efe13256fe5726db';
+String _$sharedStateHash() => r'602328400ecd84dc6142804b55a895ad4495d9b1';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1687,7 +1687,7 @@ final class CurrentGroupsStateProvider
 }
 
 String _$currentGroupsStateHash() =>
-    r'dbf8f02606a31486c99d7b89d19914cd5a1fc496';
+    r'd4dbfeb16892234b30c0f0c86dacf1291ecafdaa';
 
 @ProviderFor(proxyState)
 final proxyStateProvider = ProxyStateProvider._();
@@ -2668,7 +2668,7 @@ final class SelectedProxyNameProvider
   }
 }
 
-String _$selectedProxyNameHash() => r'417c99385108d630b7cc8aaa3e94abd7011cbc58';
+String _$selectedProxyNameHash() => r'336c5f6f31b17a63d8ae60b6cd0b681298780a9b';
 
 final class SelectedProxyNameFamily extends $Family
     with $FunctionalFamilyOverride<String?, String> {

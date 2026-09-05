@@ -557,9 +557,9 @@ void main() {
 
   group('changeUiMode', () {
     test('auto turns smart routing on and the core mode to rule', () {
-      container.read(setupActionProvider.notifier).changeUiMode(
-        UiOutboundMode.auto,
-      );
+      container
+          .read(setupActionProvider.notifier)
+          .changeUiMode(UiOutboundMode.auto);
 
       expect(container.read(patchClashConfigProvider).mode, Mode.rule);
       expect(container.read(smartRoutingSettingProvider).enabled, isTrue);

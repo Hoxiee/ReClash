@@ -199,6 +199,7 @@ abstract class RcxConfigParams with _$RcxConfigParams {
   const factory RcxConfigParams({
     @JsonKey(name: 'on') required bool enabled,
     @JsonKey(name: 'preset') required String preset,
+    @JsonKey(name: 'st') required String strategy,
     @JsonKey(name: 'dv') required int defaultsVersion,
     @JsonKey(name: 'cc') required List<String> censorCountries,
     @JsonKey(name: 'cf') required List<String> canaryForeign,
@@ -207,9 +208,8 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'dm') required List<RcxMarker> domesticMarkers,
     @JsonKey(name: 'bp') required List<String> breakerPatterns,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
-    @JsonKey(name: 'smd') required bool saveMobileData,
     @JsonKey(name: 'udp') required bool requireUdp,
-    @JsonKey(name: 'mhm') required int manualHoldMinutes,
+    @JsonKey(name: 'rpk') required bool respectPick,
     @JsonKey(name: 'dwl') required int dwellSeconds,
     @JsonKey(name: 'ww') required int waveWidth,
   }) = _RcxConfigParams;
@@ -231,6 +231,9 @@ abstract class RcxStatus with _$RcxStatus {
     @Default('') String reason,
     @Default(false) bool searching,
     @Default(false) bool deep,
+    @Default(false) bool pinned,
+    @Default('') String pinNode,
+    @Default('') String direct,
     @Default(0) int candidates,
     @Default(0) int eligible,
     @Default(0) int switchedAt,
@@ -252,6 +255,7 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default('none') String evidence,
     @Default('') String block,
     @Default(0) int delay,
+    @Default(0) int hostDelay,
     @Default(0) int band,
     @Default(false) bool degraded,
     @Default(false) bool breaker,
@@ -318,7 +322,7 @@ abstract class RcxReport with _$RcxReport {
     @Default([]) List<int> bands,
     @Default(0) int probesLeft,
     @Default(0) int probeCap,
-    @Default(0) int manualTill,
+    @Default(false) bool manual,
     @Default(0) int at,
   }) = _RcxReport;
 

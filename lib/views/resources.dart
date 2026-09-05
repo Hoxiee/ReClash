@@ -78,24 +78,15 @@ class ResourcesView extends ConsumerWidget {
     return CommonScaffold(
       title: context.appLocalizations.resources,
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-        ).copyWith(bottom: 16),
         children: [
-          generateSectionV3(
+          SettingSection(
+            top: 16,
             title: appLocalizations.geoOptions,
             items: [
-              DecorationListItem(
-                minVerticalPadding: 8,
-                contentPadding: const EdgeInsets.only(left: 16, right: 8),
+              DecorationListItem.toggle(
                 title: Text(appLocalizations.geoAutoUpdate),
-                onPressed: () {
-                  updateAutoUpdate(!geoSetting.autoUpdate);
-                },
-                trailing: Switch(
-                  value: geoSetting.autoUpdate,
-                  onChanged: updateAutoUpdate,
-                ),
+                value: geoSetting.autoUpdate,
+                onChanged: updateAutoUpdate,
               ),
               DecorationListItem(
                 minVerticalPadding: 8,
@@ -110,13 +101,15 @@ class ResourcesView extends ConsumerWidget {
               ),
             ],
           ),
-          generateSectionV3(
+          SettingSection(
             title: appLocalizations.geoResources,
             items: [
               for (final geoResource in geoResources)
                 _GeoResourceListItem(geoResource),
             ],
+            enterDelay: const Duration(milliseconds: 50),
           ),
+          const SettingBottomInset(),
         ],
       ),
     );

@@ -64,6 +64,10 @@ object Core {
         suspended: Boolean,
     )
 
+    external fun screenOff(
+        off: Boolean,
+    )
+
     private external fun invokeMethod(
         data: String,
         cb: InvokeInterface,

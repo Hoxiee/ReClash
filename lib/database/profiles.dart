@@ -26,7 +26,8 @@ class Profiles extends Table {
   TextColumn get subscriptionInfo =>
       text().map(const SubscriptionInfoConverter()).nullable()();
 
-  TextColumn get panelMeta => text().map(const PanelMetaConverter()).nullable()();
+  TextColumn get panelMeta =>
+      text().map(const PanelMetaConverter()).nullable()();
 
   BoolColumn get autoUpdate => boolean()();
 
@@ -37,16 +38,13 @@ class Profiles extends Table {
   IntColumn get order => integer().nullable()();
 
   TextColumn get clientEmulation =>
-      textEnum<SubscriptionClient>().withDefault(
-        const Constant('auto'),
-      )();
+      textEnum<SubscriptionClient>().withDefault(const Constant('auto'))();
 
   TextColumn get customUserAgent => text().withDefault(const Constant(''))();
 
-  TextColumn get skippedNodes =>
-      text().map(const SkippedNodesSqlConverter()).withDefault(
-        const Constant('[]'),
-      )();
+  TextColumn get skippedNodes => text()
+      .map(const SkippedNodesSqlConverter())
+      .withDefault(const Constant('[]'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -85,7 +83,8 @@ class PanelMetaConverter extends TypeConverter<PanelMeta?, String?> {
   }
 }
 
-class SkippedNodesSqlConverter extends TypeConverter<List<SkippedNode>, String> {
+class SkippedNodesSqlConverter
+    extends TypeConverter<List<SkippedNode>, String> {
   const SkippedNodesSqlConverter();
 
   @override
@@ -99,9 +98,8 @@ class SkippedNodesSqlConverter extends TypeConverter<List<SkippedNode>, String> 
   }
 
   @override
-  String toSql(List<SkippedNode> value) => json.encode(
-    [for (final node in value) node.toJson()],
-  );
+  String toSql(List<SkippedNode> value) =>
+      json.encode([for (final node in value) node.toJson()]);
 }
 
 @DriftAccessor(tables: [Profiles])

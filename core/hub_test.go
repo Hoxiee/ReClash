@@ -26,6 +26,7 @@ import (
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
+	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
 func namedProxy(name string) constant.Proxy {
@@ -587,6 +588,34 @@ func TestPatchSelectGroupSerialisesWithProxyChanges(t *testing.T) {
 	}
 }
 
+// RCX-NODE must stay hand-selectable: the manual pick is what arms the hold.
+func TestHandleChangeProxyAdmitsNodeGroupOnly(t *testing.T) {
+	node := selectorGroup(t, rcxGroupNode, "node-a", "node-b")
+	final := selectorGroup(t, rcxGroupFinal, "node-a")
+	tunnel.UpdateProxies(
+		map[string]constant.Proxy{rcxGroupNode: node, rcxGroupFinal: final},
+		nil,
+	)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	if message := handleChangeProxy(&ChangeProxyParams{
+		GroupName: rcxGroupNode,
+		ProxyName: "node-b",
+	}); message != "" {
+		t.Fatalf("RCX-NODE change failed: %q", message)
+	}
+	if got := groupNow(t, node); got != "node-b" {
+		t.Errorf("RCX-NODE resolved to %q, want the manual pick", got)
+	}
+
+	if message := handleChangeProxy(&ChangeProxyParams{
+		GroupName: rcxGroupFinal,
+		ProxyName: "node-a",
+	}); message != errGroupNotFound.Error() {
+		t.Errorf("RCX-FINAL message = %q, want the group not found rejection", message)
+	}
+}
+
 // The hoisted constant has to keep meaning what the call meant, so a change to
 // mihomo's parser cannot silently narrow which HTTP statuses a delay test
 // accepts.
@@ -949,5 +978,30 @@ func TestHandleGetProxiesSeesAProviderUpdate(t *testing.T) {
 	}
 	if _, exist := data.Proxies["node-a"]; exist {
 		t.Error("a proxy the refresh removed is still reported")
+	}
+}
+
+// The engine and the Requests page share one notify hook: whichever assignment loses goes dark.
+func TestRequestNotifyReachesTheEngine(t *testing.T) {
+	engine := rcxEngineInstance
+	engine.mu.Lock()
+	enabled, hosts := engine.enabled, engine.openHosts
+	engine.enabled = true
+	engine.openHosts = map[string]struct{}{"marker.example": {}}
+	engine.mu.Unlock()
+	t.Cleanup(func() {
+		engine.mu.Lock()
+		engine.enabled, engine.openHosts = enabled, hosts
+		delete(engine.openSeen, "marker-1")
+		engine.mu.Unlock()
+	})
+
+	statistic.DefaultRequestNotify(newFakeTracker("marker-1", "node-a", "marker.example"))
+
+	engine.mu.RLock()
+	sighting, seen := engine.openSeen["marker-1"]
+	engine.mu.RUnlock()
+	if !seen || sighting.node != "node-a" {
+		t.Error("the engine never saw the connection: its side of the hook is gone")
 	}
 }

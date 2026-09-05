@@ -8,6 +8,7 @@ import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/widgets/list.dart';
 import 'package:reclash/widgets/scaffold.dart';
+import 'package:reclash/widgets/setting.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +21,7 @@ class AdvancedConfigView extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final List<Widget> items = [
-      ListItem.open(
+      DecorationListItem.open(
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
         leading: const Icon(Icons.vpn_key),
@@ -30,21 +31,21 @@ class AdvancedConfigView extends StatelessWidget {
           body: const NetworkListView(),
         ),
       ),
-      ListItem.open(
+      DecorationListItem.open(
         title: Text(appLocalizations.smartPause),
         subtitle: Text(appLocalizations.smartPauseDesc),
         leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
         widget: const SmartPauseView(),
         blur: false,
       ),
-      ListItem.open(
+      DecorationListItem.open(
         title: Text(appLocalizations.smartRouting),
         subtitle: Text(appLocalizations.smartRoutingDesc),
         leading: const Icon(Icons.alt_route_rounded),
         widget: const SmartRoutingView(),
         blur: false,
       ),
-      ListItem.open(
+      DecorationListItem.open(
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const Icon(Icons.dns),
@@ -76,14 +77,14 @@ class AdvancedConfigView extends StatelessWidget {
         ),
         blur: false,
       ),
-      ListItem.open(
+      DecorationListItem.open(
         title: Text(appLocalizations.addedRules),
         subtitle: Text(appLocalizations.controlGlobalAddedRules),
         leading: const Icon(Icons.library_books),
         widget: const AddedRulesView(),
         blur: false,
       ),
-      ListItem.open(
+      DecorationListItem.open(
         title: Text(appLocalizations.script),
         subtitle: Text(appLocalizations.overrideScript),
         leading: const Icon(Icons.rocket, fontWeight: FontWeight.w900),
@@ -93,8 +94,11 @@ class AdvancedConfigView extends StatelessWidget {
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
-      body: generateListView(
-        items.separated(const Divider(height: 0)).toList(),
+      body: ListView(
+        children: [
+          SettingSection(top: 16, items: items),
+          const SettingBottomInset(),
+        ],
       ),
     );
   }

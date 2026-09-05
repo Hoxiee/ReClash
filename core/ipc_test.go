@@ -546,19 +546,29 @@ func TestSendRearmsTheFailureReportAfterAFrameGetsThrough(t *testing.T) {
 	}
 }
 
+func awaitFrames(t *testing.T, fake *fakeConn) [][]byte {
+	t.Helper()
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		writeMu.Lock()
+		frames := fake.frames(t)
+		writeMu.Unlock()
+		if len(frames) > 0 || time.Now().After(deadline) {
+			return frames
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
+// safeGo's deferred recover runs after the handler's own defers.
 func TestSafeGoAnswersWhenTheHandlerPanics(t *testing.T) {
-	response := newMethodResponse("5", nil)
-	done := make(chan struct{})
+	fake := &fakeConn{}
+	previous := swapConn(fake)
+	defer swapConn(previous)
 
-	frames := captureFrames(t, func() {
-		safeGo(response, func() {
-			defer close(done)
-			panic("handler exploded")
-		})
-		<-done
-		time.Sleep(50 * time.Millisecond)
-	})
+	safeGo(newMethodResponse("5", nil), func() { panic("handler exploded") })
 
+	frames := awaitFrames(t, fake)
 	if len(frames) != 1 {
 		t.Fatalf("captured %d frames, want the panic answered exactly once", len(frames))
 	}

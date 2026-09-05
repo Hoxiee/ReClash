@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 
 typedef NetworkInterfaceLister =
@@ -72,67 +71,6 @@ Future<List<String>> getLocalIPv4s() async {
         if (address.isIPv4 && address.address != _tunInterfaceAddress)
           address.address,
   ];
-}
-
-const _vpnInterfacePrefixes = [
-  'tun',
-  'tap',
-  'utun',
-  'ppp',
-  'wg',
-  'nordlynx',
-  'proton',
-  'mullvad',
-  'tailscale',
-  'zt',
-  'ipsec',
-  'ppa',
-];
-
-bool _isVpnInterfaceName(String name) {
-  final lower = name.toLowerCase();
-  return _vpnInterfacePrefixes.any(lower.startsWith);
-}
-
-/// Mirrors the Dns default; the desktop TUN takes its /30 out of this range.
-const defaultFakeIpRange = '198.18.0.1/16';
-
-/// Android names our tunnel itself — `VpnService.Builder` yields `tun0`, and
-/// `tun.device` never reaches it — so the address, not the name, identifies us.
-/// Mirrors IPV4_ADDRESS/IPV6_ADDRESS in VpnService.kt.
-const _ownVpnSubnets = ['172.19.0.0/24'];
-const _ownVpnV6Prefixes = ['fdfe:dcba:9876:'];
-
-/// `fakeIpRange` is passed in because the desktop TUN takes its address from
-/// it, and `ownDevice` because a profile can rename the interface.
-Future<bool> hasForeignVpnInterface({
-  String ownDevice = appName,
-  String fakeIpRange = defaultFakeIpRange,
-}) async {
-  final own = ownDevice.trim().toLowerCase();
-  final subnets = [..._ownVpnSubnets, fakeIpRange];
-  try {
-    final interfaces = await listNetworkInterfaces(includeLoopback: false);
-    for (final interface in interfaces) {
-      final name = interface.name.toLowerCase();
-      if (own.isNotEmpty && (name == own || name.startsWith(own))) continue;
-      if (!_isVpnInterfaceName(name)) continue;
-      if (interface.addresses.isEmpty) continue;
-      final ours = interface.addresses.every((address) {
-        if (address.isIPv4) return _inTrustedSubnets(address.address, subnets);
-        final lower = address.address.toLowerCase();
-        return _ownVpnV6Prefixes.any(lower.startsWith);
-      });
-      if (ours) continue;
-      return true;
-    }
-  } catch (error) {
-    commonPrint.log(
-      'Unable to inspect VPN interfaces: $error',
-      logLevel: LogLevel.warning,
-    );
-  }
-  return false;
 }
 
 /// SSID rules match exactly; subnet rules accept bare IPv4s as /32.

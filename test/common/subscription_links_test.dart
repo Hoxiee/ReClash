@@ -5,13 +5,8 @@ import 'package:reclash/common/skipped_node.dart';
 import 'package:reclash/common/subscription_links.dart';
 
 List<String> _proxiesNames(String config) {
-  final match = RegExp(
-    r'^  - \{name: "((?:[^"\\]|\\.)*)"',
-    multiLine: true,
-  );
-  return [
-    for (final m in match.allMatches(config)) m.group(1)!,
-  ];
+  final match = RegExp(r'^  - \{name: "((?:[^"\\]|\\.)*)"', multiLine: true);
+  return [for (final m in match.allMatches(config)) m.group(1)!];
 }
 
 const _awgConf = '''
@@ -48,8 +43,7 @@ void main() {
         'awg://',
         'vpn://',
       ]) {
-        expect(isShareLinkInput('$scheme anything'), isTrue,
-            reason: scheme);
+        expect(isShareLinkInput('$scheme anything'), isTrue, reason: scheme);
       }
     });
 
@@ -61,8 +55,7 @@ void main() {
     });
 
     test('accepts a base64 blob of links', () {
-      final blob = base64
-          .encode(utf8.encode('vless://a@b:1\nss://c@d:2'));
+      final blob = base64.encode(utf8.encode('vless://a@b:1\nss://c@d:2'));
       expect(isShareLinkInput(blob), isTrue);
     });
 
@@ -86,8 +79,9 @@ void main() {
         'tls': 'tls',
         'sni': 'cdn.example.com',
       });
-      final result =
-          tryConvertShareLinks('vmess://${base64.encode(utf8.encode(json))}');
+      final result = tryConvertShareLinks(
+        'vmess://${base64.encode(utf8.encode(json))}',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['Tokyo']);
       final config = result.config;
@@ -101,7 +95,8 @@ void main() {
     });
 
     test('vless reality link', () {
-      const link = 'vless://uuid-2@example.com:443'
+      const link =
+          'vless://uuid-2@example.com:443'
           '?type=grpc&security=reality&pbk=PUBKEY&sid=abcd&sni=example.com'
           '&fp=chrome&flow=xtls-rprx-vision#Reality%20node';
       final ShareLinksResult? result = tryConvertShareLinks(link);
@@ -119,13 +114,15 @@ void main() {
 
     test('ss modern and legacy shapes', () {
       final modern = tryConvertShareLinks(
-          'ss://${base64.encode(utf8.encode('aes-128-gcm:pass'))}@1.1.1.1:8388#ss-modern');
+        'ss://${base64.encode(utf8.encode('aes-128-gcm:pass'))}@1.1.1.1:8388#ss-modern',
+      );
       expect(modern, isNotNull);
       expect(modern!.config, contains('cipher: "aes-128-gcm"'));
       expect(modern.config, contains('password: "pass"'));
 
       final legacy = tryConvertShareLinks(
-          'ss://${base64.encode(utf8.encode('aes-128-gcm:pass@1.1.1.1:8388'))}#ss-legacy');
+        'ss://${base64.encode(utf8.encode('aes-128-gcm:pass@1.1.1.1:8388'))}#ss-legacy',
+      );
       expect(legacy, isNotNull);
       expect(legacy!.config, contains('server: "1.1.1.1"'));
       expect(legacy.config, contains('port: 8388'));
@@ -145,9 +142,11 @@ void main() {
 
     test('ssr converts with its obfs and protocol params', () {
       String b64(String value) => base64Url.encode(utf8.encode(value));
-      final body = b64('h.example.com:8388:auth_aes128_md5:aes-256-cfb:tls1.2_ticket_auth:'
-          '${b64('pw')}/?obfsparam=${b64('cdn.example.com')}'
-          '&protoparam=${b64('64')}&remarks=${b64('ssr node')}');
+      final body = b64(
+        'h.example.com:8388:auth_aes128_md5:aes-256-cfb:tls1.2_ticket_auth:'
+        '${b64('pw')}/?obfsparam=${b64('cdn.example.com')}'
+        '&protoparam=${b64('64')}&remarks=${b64('ssr node')}',
+      );
       final result = tryConvertShareLinks('ssr://$body');
       expect(result, isNotNull);
       final config = result!.config;
@@ -201,7 +200,10 @@ void main() {
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
       expect(result!.config, contains('network: "xhttp"'));
-      expect(result.config, contains('xhttp-opts: {path: "/xh", host: "x.example.com"}'));
+      expect(
+        result.config,
+        contains('xhttp-opts: {path: "/xh", host: "x.example.com"}'),
+      );
     });
 
     test('splithttp spelling normalises to xhttp', () {
@@ -216,7 +218,8 @@ void main() {
     test('xhttp on non-vless links is skipped, siblings live', () {
       // mihomo dials xhttp for vless only — trojan/vmess with type=xhttp
       // would silently degrade to TCP and connect nowhere.
-      const input = 'trojan://pw@t.example.com:443?type=xhttp&path=%2Fx#dead\n'
+      const input =
+          'trojan://pw@t.example.com:443?type=xhttp&path=%2Fx#dead\n'
           'socks5://u:p@s.example.com:1080#socks';
       final result = tryConvertShareLinks(input);
       expect(result, isNotNull);
@@ -235,8 +238,9 @@ void main() {
         'id': 'uuid-x',
         'net': 'xhttp',
       });
-      final result =
-          tryConvertShareLinks('vmess://${base64.encode(utf8.encode(json))}');
+      final result = tryConvertShareLinks(
+        'vmess://${base64.encode(utf8.encode(json))}',
+      );
       expect(result, isNull);
     });
 
@@ -248,7 +252,8 @@ void main() {
         'id': 'uuid-x',
         'net': 'xhttp',
       });
-      final blob = 'vmess://${base64.encode(utf8.encode(json))}\n'
+      final blob =
+          'vmess://${base64.encode(utf8.encode(json))}\n'
           'trojan://p@h:1#keep';
       final result = tryConvertShareLinks(blob);
       expect(result, isNotNull);
@@ -259,7 +264,8 @@ void main() {
     });
 
     test('hysteria2 link', () {
-      const link = 'hy2://auth@h.example.com:8443'
+      const link =
+          'hy2://auth@h.example.com:8443'
           '?sni=h.example.com&insecure=1&obfs=salamander&obfs-password=ob&up=100&down=500#hy2';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
@@ -271,7 +277,8 @@ void main() {
     });
 
     test('hysteria2 port hopping keeps the node and its range', () {
-      const link = 'hy2://auth@h.example.com:8443,20000-25000'
+      const link =
+          'hy2://auth@h.example.com:8443,20000-25000'
           '?sni=h.example.com&hop-interval=60#hop';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
@@ -303,7 +310,8 @@ void main() {
     });
 
     test('hysteria2 pinSHA256 pins the cert, alpn splits', () {
-      const link = 'hy2://auth@h.example.com:443'
+      const link =
+          'hy2://auth@h.example.com:443'
           '?pinSHA256=aa:bb:cc&alpn=h3,h2#pin';
       final result = tryConvertShareLinks(link);
       expect(result!.config, contains('fingerprint: "aa:bb:cc"'));
@@ -311,7 +319,8 @@ void main() {
     });
 
     test('ws path with ed= becomes max-early-data, path cleaned', () {
-      const link = 'vless://u@h.example.com:443'
+      const link =
+          'vless://u@h.example.com:443'
           '?security=tls&sni=s.example.com&type=ws&host=cdn.example.com'
           '&path=%2Fws%3Fed%3D2048#ed-node';
       final result = tryConvertShareLinks(link);
@@ -327,7 +336,8 @@ void main() {
     });
 
     test('vless httpupgrade maps to ws + v2ray-http-upgrade', () {
-      const link = 'vless://u@h.example.com:443'
+      const link =
+          'vless://u@h.example.com:443'
           '?security=tls&sni=s.example.com&type=httpupgrade&host=cdn.example.com'
           '&path=%2Fup#hu-node';
       final result = tryConvertShareLinks(link);
@@ -340,7 +350,8 @@ void main() {
     });
 
     test('vless httpupgrade with ed= adds fast-open', () {
-      const link = 'vless://u@h.example.com:443'
+      const link =
+          'vless://u@h.example.com:443'
           '?security=tls&sni=s.example.com&type=httpupgrade'
           '&path=%2Fup%3Fed%3D2048#hu-ed-node';
       final result = tryConvertShareLinks(link);
@@ -353,7 +364,8 @@ void main() {
     });
 
     test('trojan httpupgrade maps to ws + v2ray-http-upgrade', () {
-      const link = 'trojan://pw@h.example.com:443'
+      const link =
+          'trojan://pw@h.example.com:443'
           '?sni=s.example.com&type=httpupgrade&path=%2Ft&host=h.example.com'
           '#tro-hu';
       final result = tryConvertShareLinks(link);
@@ -373,8 +385,9 @@ void main() {
         'net': 'httpupgrade',
         'path': '/vm?ed=1024',
       });
-      final result =
-          tryConvertShareLinks('vmess://${base64.encode(utf8.encode(json))}');
+      final result = tryConvertShareLinks(
+        'vmess://${base64.encode(utf8.encode(json))}',
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('network: "ws"'));
@@ -385,30 +398,37 @@ void main() {
 
     test('vless encryption param is passed through', () {
       final result = tryConvertShareLinks(
-          'vless://u@h.example.com:443?security=tls&sni=s.example.com'
-          '&encryption=2022-blake3-aes-128-gcm#enc-node');
+        'vless://u@h.example.com:443?security=tls&sni=s.example.com'
+        '&encryption=2022-blake3-aes-128-gcm#enc-node',
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('encryption: "2022-blake3-aes-128-gcm"'));
     });
 
     test('vless encryption=none is omitted', () {
       final result = tryConvertShareLinks(
-          'vless://u@h.example.com:443?security=tls&sni=s.example.com'
-          '&encryption=none#enc-none');
+        'vless://u@h.example.com:443?security=tls&sni=s.example.com'
+        '&encryption=none#enc-none',
+      );
       expect(result, isNotNull);
       expect(result!.config, isNot(contains('encryption')));
     });
 
     test('ws path with eh= names the early-data header', () {
-      const link = 'trojan://pw@h.example.com:443'
+      const link =
+          'trojan://pw@h.example.com:443'
           '?sni=s.example.com&type=ws&path=%2Fws%3Fed%3D2048%26eh%3DSec-WebSocket-Protocol%23x#eh-node';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
-      expect(result!.config, contains('early-data-header-name: "Sec-WebSocket-Protocol#x"'));
+      expect(
+        result!.config,
+        contains('early-data-header-name: "Sec-WebSocket-Protocol#x"'),
+      );
     });
 
     test('ws path with other query params keeps them in the path', () {
-      const link = 'vless://u@h.example.com:443'
+      const link =
+          'vless://u@h.example.com:443'
           '?security=tls&sni=s.example.com&type=ws&path=%2Fws%3Ffoo%3D1%26ed%3D2048#mixed';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
@@ -417,7 +437,8 @@ void main() {
     });
 
     test('plain ws path is untouched', () {
-      const link = 'vless://u@h.example.com:443'
+      const link =
+          'vless://u@h.example.com:443'
           '?security=tls&sni=s.example.com&type=ws&path=%2Fplain#plain';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
@@ -426,7 +447,8 @@ void main() {
     });
 
     test('tuic v5 link', () {
-      const link = 'tuic://uuid-tuic:pw@h.example.com:443'
+      const link =
+          'tuic://uuid-tuic:pw@h.example.com:443'
           '?sni=h.example.com&alpn=h3&congestion_control=bbr&udp_relay_mode=native'
           '&allow_insecure=1#tuic-node';
       final result = tryConvertShareLinks(link);
@@ -443,15 +465,17 @@ void main() {
 
     test('tuic v4 token link is skipped, v5 without password is skipped', () {
       // The token form has no uuid:password split for mihomo to map.
-      expect(tryConvertShareLinks('tuic://token@h.example.com:443#v4'),
-          isNull);
+      expect(tryConvertShareLinks('tuic://token@h.example.com:443#v4'), isNull);
       // `:` is the separator; a bare uuid is a v4-style link in disguise.
-      expect(tryConvertShareLinks('tuic://uuid-only@h.example.com:443#v5'),
-          isNull);
+      expect(
+        tryConvertShareLinks('tuic://uuid-only@h.example.com:443#v5'),
+        isNull,
+      );
     });
 
     test('anytls link', () {
-      const link = 'anytls://pw@h.example.com:443'
+      const link =
+          'anytls://pw@h.example.com:443'
           '?sni=h.example.com&insecure=1#anytls-node';
       final result = tryConvertShareLinks(link);
       expect(result, isNotNull);
@@ -463,7 +487,8 @@ void main() {
     });
 
     test('hysteria v1 link', () {
-      const link = 'hysteria://h.example.com:443'
+      const link =
+          'hysteria://h.example.com:443'
           '?auth=secret&peer=h.example.com&insecure=1&upmbps=100&downmbps=500'
           '&alpn=h3&obfs=xplus&obfsParam=xp#hy1-node';
       final result = tryConvertShareLinks(link);
@@ -477,24 +502,29 @@ void main() {
       expect(config, contains('skip-cert-verify: true'));
     });
 
-    test('hysteria v1 obfs key: obfsParam wins, raw obfs is the fallback key',
-        () {
-      final withParam = tryConvertShareLinks(
+    test(
+      'hysteria v1 obfs key: obfsParam wins, raw obfs is the fallback key',
+      () {
+        final withParam = tryConvertShareLinks(
           'hysteria://h.example.com:443?auth=s&up=1&down=1&obfs=anything'
-          '&obfsParam=key1#o1');
-      expect(withParam, isNotNull);
-      expect(withParam!.config, contains('obfs: "key1"'));
+          '&obfsParam=key1#o1',
+        );
+        expect(withParam, isNotNull);
+        expect(withParam!.config, contains('obfs: "key1"'));
 
-      final withoutParam = tryConvertShareLinks(
-          'hysteria://h.example.com:443?auth=s&up=1&down=1&obfs=key2#o2');
-      expect(withoutParam, isNotNull);
-      expect(withoutParam!.config, contains('obfs: "key2"'));
-      expect(withoutParam.config, isNot(contains('obfs-password')));
-    });
+        final withoutParam = tryConvertShareLinks(
+          'hysteria://h.example.com:443?auth=s&up=1&down=1&obfs=key2#o2',
+        );
+        expect(withoutParam, isNotNull);
+        expect(withoutParam!.config, contains('obfs: "key2"'));
+        expect(withoutParam.config, isNot(contains('obfs-password')));
+      },
+    );
 
     test('hysteria v1 accepts plain up/down params', () {
       final result = tryConvertShareLinks(
-          'hysteria://h.example.com:443?auth=s&upmbps=50&down=80#hy1-alt');
+        'hysteria://h.example.com:443?auth=s&upmbps=50&down=80#hy1-alt',
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('up: "50"'));
       expect(result.config, contains('down: "80"'));
@@ -502,8 +532,9 @@ void main() {
 
     test('hysteria v1 without up/down is skipped, siblings live', () {
       final mixed = tryConvertShareLinks(
-          'hysteria://h.example.com:443?auth=s#hy-no-bw\n'
-          'trojan://p@h:1#keep');
+        'hysteria://h.example.com:443?auth=s#hy-no-bw\n'
+        'trojan://p@h:1#keep',
+      );
       expect(mixed, isNotNull);
       expect(_proxiesNames(mixed!.config), ['keep']);
       expect(mixed.skipped.single.name, 'hy-no-bw');
@@ -531,32 +562,33 @@ void main() {
 
     test('socks5 tls without insecure keeps certificate verification', () {
       final plain = tryConvertShareLinks(
-          'socks5://u:p@h.example.com:1080?tls=1#tls-socks');
+        'socks5://u:p@h.example.com:1080?tls=1#tls-socks',
+      );
       expect(plain, isNotNull);
       expect(plain!.config, contains('tls: true'));
       expect(plain.config, isNot(contains('skip-cert-verify')));
 
       final insecure = tryConvertShareLinks(
-          'socks5://u:p@h.example.com:1080?tls=1&insecure=1#insec-socks');
+        'socks5://u:p@h.example.com:1080?tls=1&insecure=1#insec-socks',
+      );
       expect(insecure, isNotNull);
       expect(insecure!.config, contains('skip-cert-verify: true'));
     });
 
     test('socks5:// alias and bare-user form', () {
       final result = tryConvertShareLinks(
-          'socks5://justuser@h.example.com:1080#bare');
+        'socks5://justuser@h.example.com:1080#bare',
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('username: "justuser"'));
       expect(result.config, isNot(contains('password:')));
     });
 
     test('http proxy link requires userinfo, bare url stays a url', () {
-      expect(
-        isShareLinkInput('http://h.example.com:8080/sub'),
-        isFalse,
-      );
+      expect(isShareLinkInput('http://h.example.com:8080/sub'), isFalse);
       final result = tryConvertShareLinks(
-          'http://user:pass@h.example.com:8080#http-node');
+        'http://user:pass@h.example.com:8080#http-node',
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('type: "http"'));
       expect(result.config, contains('username: "user"'));
@@ -564,7 +596,8 @@ void main() {
     });
 
     test('wireguard link: keys, peers, v4/v6 addresses', () {
-      const link = 'wireguard://PRIVATEKEY@wg.example.com:51820'
+      const link =
+          'wireguard://PRIVATEKEY@wg.example.com:51820'
           '?publickey=PUBKEY&presharedkey=PSK&address=10.0.0.2/32,fd00::2'
           '&mtu=1420&dns=1.1.1.1#wg-node';
       final result = tryConvertShareLinks(link);
@@ -584,8 +617,9 @@ void main() {
 
     test('wireguard keeps only the first address per family', () {
       final result = tryConvertShareLinks(
-          'wg://KEY@wg.example.com:51820'
-          '?address=10.0.0.2/32,10.0.0.3/32,fd00::2/64,fd00::3/64#multi');
+        'wg://KEY@wg.example.com:51820'
+        '?address=10.0.0.2/32,10.0.0.3/32,fd00::2/64,fd00::3/64#multi',
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('ip: "10.0.0.2/32"'));
@@ -596,7 +630,8 @@ void main() {
 
     test('wireguard reserved needs exactly 3 bytes 0-255', () {
       final valid = tryConvertShareLinks(
-          'wg://KEY@wg.example.com:51820?reserved=1,2,3#r-ok');
+        'wg://KEY@wg.example.com:51820?reserved=1,2,3#r-ok',
+      );
       expect(valid, isNotNull);
       expect(valid!.config, contains('reserved: [1, 2, 3]'));
 
@@ -612,26 +647,33 @@ void main() {
       }
     });
 
-    test('wireguard without address keeps empty ip/ipv6 (mihomo requires the fields)', () {
-      final result = tryConvertShareLinks(
-          'wg://PRIVATEKEY@wg.example.com:51820?publickey=PUBKEY#wg');
-      expect(result, isNotNull);
-      expect(result!.config, contains('ip: ""'));
-      expect(result.config, contains('ipv6: ""'));
-    });
+    test(
+      'wireguard without address keeps empty ip/ipv6 (mihomo requires the fields)',
+      () {
+        final result = tryConvertShareLinks(
+          'wg://PRIVATEKEY@wg.example.com:51820?publickey=PUBKEY#wg',
+        );
+        expect(result, isNotNull);
+        expect(result!.config, contains('ip: ""'));
+        expect(result.config, contains('ipv6: ""'));
+      },
+    );
 
     test('amneziawg links convert alongside other protocols', () {
-      final input = 'vless://u@h:443#keep\n'
+      final input =
+          'vless://u@h:443#keep\n'
           'amneziawg://${base64Url.encode(utf8.encode(_awgConf))}#awg\n'
           'awg://${base64Url.encode(utf8.encode(_awgConf))}#awg2\n'
           'tuic://uuid-tuic:pw@h:1#tuic-now-supported\n';
       expect(isShareLinkInput(input), isTrue);
       final result = tryConvertShareLinks(input);
       expect(result, isNotNull);
-      expect(
-        _proxiesNames(result!.config),
-        ['keep', 'awg', 'awg2', 'tuic-now-supported'],
-      );
+      expect(_proxiesNames(result!.config), [
+        'keep',
+        'awg',
+        'awg2',
+        'tuic-now-supported',
+      ]);
       expect(result.config, contains('amnezia-wg-option'));
       expect(result.skipped, isEmpty);
     });
@@ -643,12 +685,8 @@ void main() {
     test('probe is empty once anything imports', () {
       expect(
         probeUnsupportedShareLinks(
-            'vmess://${base64.encode(utf8.encode(jsonEncode({
-              'add': 'h',
-              'port': 1,
-              'id': 'u',
-              'net': 'xhttp',
-            })))}\ntrojan://p@h:2#alive'),
+          'vmess://${base64.encode(utf8.encode(jsonEncode({'add': 'h', 'port': 1, 'id': 'u', 'net': 'xhttp'})))}\ntrojan://p@h:2#alive',
+        ),
         isEmpty,
       );
       // And for input that is not links at all.
@@ -656,7 +694,8 @@ void main() {
     });
 
     test('base64 blob with several links and junk lines', () {
-      final plain = '# comment\nvless://u@h1:1#a\n\nnot a link\nss://'
+      final plain =
+          '# comment\nvless://u@h1:1#a\n\nnot a link\nss://'
           '${base64.encode(utf8.encode('aes-128-gcm:p'))}@h2:2#b\n';
       final result = tryConvertShareLinks(base64.encode(utf8.encode(plain)));
       expect(result, isNotNull);
@@ -664,8 +703,9 @@ void main() {
     });
 
     test('duplicate names are numbered, not collapsed', () {
-      final result =
-          tryConvertShareLinks('trojan://p@h:1#same\nvless://u@h:2#same');
+      final result = tryConvertShareLinks(
+        'trojan://p@h:1#same\nvless://u@h:2#same',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['same', 'same 2']);
       // Both entries must survive in the group.
@@ -674,14 +714,16 @@ void main() {
 
     test('names needing yaml quoting survive emission', () {
       final result = tryConvertShareLinks(
-          'trojan://p@h:1#node: "weird" \\ one\n#hash');
+        'trojan://p@h:1#node: "weird" \\ one\n#hash',
+      );
       expect(result, isNotNull);
       expect(result!.config, contains(r'"node: \"weird\" \\ one"'));
     });
 
     test('control characters in names are escaped as \\xNN', () {
-      final result =
-          tryConvertShareLinks('trojan://p@h:1#node\x01\x7f\x08#ctrl');
+      final result = tryConvertShareLinks(
+        'trojan://p@h:1#node\x01\x7f\x08#ctrl',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), [r'node\x01\x7f\x08#ctrl']);
       const quoted = '"node\\x01\\x7f\\x08#ctrl"';
@@ -707,15 +749,15 @@ void main() {
     });
 
     test('ipv6 host survives', () {
-      final result =
-          tryConvertShareLinks('trojan://p@[2001:db8::1]:443#v6');
+      final result = tryConvertShareLinks('trojan://p@[2001:db8::1]:443#v6');
       expect(result, isNotNull);
       expect(result!.config, contains('server: "2001:db8::1"'));
     });
   });
 
   group('awkward provider input', () {
-    const threeNodes = 'vless://u1@h1.example.com:443#Cheap\n'
+    const threeNodes =
+        'vless://u1@h1.example.com:443#Cheap\n'
         'vless://u2@h2.example.com:443#100% Fast\n'
         'vless://u3@h3.example.com:443#Quiet';
 
@@ -726,8 +768,9 @@ void main() {
     });
 
     test('the same list as a base64 blob imports all three', () {
-      final result =
-          tryConvertShareLinks(base64.encode(utf8.encode(threeNodes)));
+      final result = tryConvertShareLinks(
+        base64.encode(utf8.encode(threeNodes)),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['Cheap', '100% Fast', 'Quiet']);
       expect(result.config, contains('"Cheap", "100% Fast", "Quiet", DIRECT'));
@@ -755,7 +798,8 @@ void main() {
 
     test('a bare % in a query keeps the node', () {
       final result = tryConvertShareLinks(
-          'vless://u@h:443?security=tls&sni=a.example.com&note=100%#pct');
+        'vless://u@h:443?security=tls&sni=a.example.com&note=100%#pct',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['pct']);
       expect(result.config, contains('servername: "a.example.com"'));
@@ -768,8 +812,7 @@ void main() {
     });
 
     test('an ipv6 literal keeps its own colons out of the port', () {
-      final result =
-          tryConvertShareLinks('vless://uuid@[2001:db8::1]:443#v6');
+      final result = tryConvertShareLinks('vless://uuid@[2001:db8::1]:443#v6');
       expect(result, isNotNull);
       expect(result!.config, contains('server: "2001:db8::1"'));
       expect(result.config, contains('port: 443'));
@@ -782,15 +825,17 @@ void main() {
         'port': 443,
         'id': 'uuid-3',
       });
-      final result =
-          tryConvertShareLinks('vmess://${base64.encode(utf8.encode(json))}');
+      final result = tryConvertShareLinks(
+        'vmess://${base64.encode(utf8.encode(json))}',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['9.9.9.9']);
     });
 
     test('an empty ss name takes the server host', () {
       final result = tryConvertShareLinks(
-          'ss://${base64.encode(utf8.encode('aes-128-gcm:pass'))}@1.1.1.1:8388#');
+        'ss://${base64.encode(utf8.encode('aes-128-gcm:pass'))}@1.1.1.1:8388#',
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['1.1.1.1']);
     });

@@ -343,31 +343,47 @@ class NetworkListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return generateListView([
-      if (system.isAndroid) const VPNItem(),
-      if (system.isAndroid)
-        ...generateSection(
-          title: 'VPN',
-          items: [
-            const VpnSystemProxyItem(),
-            const BypassDomainItem(),
-            const AllowBypassItem(),
-            const Ipv6Item(),
-            const DNSHijackingItem(),
-          ],
-        ),
-      if (system.isDesktop)
-        ...generateSection(
-          title: appLocalizations.system,
-          items: [const SystemProxyItem(), const BypassDomainItem()],
-        ),
-      ...generateSection(
-        title: appLocalizations.options,
-        items: networkOptionsItems(
-          isDesktop: system.isDesktop,
-          isMacOS: system.isMacOS,
-        ),
-      ),
-    ]);
+    return ListView(
+      children: [
+        if (system.isAndroid) ...[
+          const SettingSection(
+            top: 16,
+            title: 'VPN',
+            items: [
+              VPNItem(),
+              VpnSystemProxyItem(),
+              BypassDomainItem(),
+              AllowBypassItem(),
+              Ipv6Item(),
+              DNSHijackingItem(),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.options,
+            items: networkOptionsItems(
+              isDesktop: system.isDesktop,
+              isMacOS: system.isMacOS,
+            ),
+            enterDelay: const Duration(milliseconds: 50),
+          ),
+        ],
+        if (system.isDesktop) ...[
+          SettingSection(
+            top: 16,
+            title: appLocalizations.system,
+            items: [const SystemProxyItem(), const BypassDomainItem()],
+          ),
+          SettingSection(
+            title: appLocalizations.options,
+            items: networkOptionsItems(
+              isDesktop: system.isDesktop,
+              isMacOS: system.isMacOS,
+            ),
+            enterDelay: const Duration(milliseconds: 50),
+          ),
+        ],
+        const SettingBottomInset(),
+      ],
+    );
   }
 }

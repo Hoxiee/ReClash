@@ -7,12 +7,13 @@ type rcxMarker struct {
 	Statuses []int  `json:"statuses"`
 }
 
-const rcxDefaultsVersion = 2
+const rcxDefaultsVersion = 3
 
 type rcxConfig struct {
 	Enabled                 bool        `json:"on"`
 	Preset                  string      `json:"preset"`
 	DefaultsVersion         int         `json:"dv"`
+	Strategy                string      `json:"st"`
 	CensorCountries         []string    `json:"cc"`
 	CanaryForeign           []string    `json:"cf"`
 	CanaryDomestic          []string    `json:"cd"`
@@ -20,22 +21,27 @@ type rcxConfig struct {
 	DomesticMarkers         []rcxMarker `json:"dm"`
 	BreakerPatterns         []string    `json:"bp"`
 	AllowDomesticLastResort bool        `json:"dlr"`
-	SaveMobileData          bool        `json:"smd"`
 	RequireUDP              bool        `json:"udp"`
-	ManualHoldMinutes       int         `json:"mhm"`
+	RespectPick             bool        `json:"rpk"`
 	DwellSeconds            int         `json:"dwl"`
 	WaveWidth               int         `json:"ww"`
+	ProofTTLMinutes         int         `json:"pttl"`
+	DegradeConfirmSeconds   int         `json:"dgc"`
 }
 
 const (
-	rcxDwellSeconds        = 90
-	rcxWaveWidth           = 12
-	rcxProbeConcurrency    = 2
-	rcxProbeStaggerMs      = 250
-	rcxLiveWindowSeconds   = 60
-	rcxFreshWindowSeconds  = 1800
-	rcxDegradedBandPenalty = 2
-	rcxDeepScanWidth       = 64
+	rcxStrategyBalanced = "balanced"
+	rcxStrategyLatency  = "lowest-latency"
+
+	rcxDwellSeconds       = 90
+	rcxWaveWidth          = 12
+	rcxProofTTLMinutes    = 30
+	rcxDegradeConfirmSec  = 60
+	rcxProbeConcurrency   = 2
+	rcxProbeStaggerMs     = 250
+	rcxLiveWindowSeconds  = 60
+	rcxFreshWindowSeconds = 1800
+	rcxDegradedPenalty    = 2
 )
 
 // Not a setting: a knob here lets milliseconds outrank whether a node works.
@@ -48,11 +54,13 @@ func rcxDefaultConfig() rcxConfig {
 		Enabled:                 false,
 		Preset:                  "off",
 		DefaultsVersion:         rcxDefaultsVersion,
+		Strategy:                rcxStrategyBalanced,
 		AllowDomesticLastResort: true,
-		SaveMobileData:          true,
-		ManualHoldMinutes:       60,
+		RespectPick:             true,
 		DwellSeconds:            rcxDwellSeconds,
 		WaveWidth:               rcxWaveWidth,
+		ProofTTLMinutes:         rcxProofTTLMinutes,
+		DegradeConfirmSeconds:   rcxDegradeConfirmSec,
 	}
 }
 
@@ -64,8 +72,14 @@ func (c rcxConfig) normalized() rcxConfig {
 	if c.WaveWidth <= 0 {
 		c.WaveWidth = rcxWaveWidth
 	}
-	if c.ManualHoldMinutes < 0 {
-		c.ManualHoldMinutes = 0
+	if c.ProofTTLMinutes <= 0 {
+		c.ProofTTLMinutes = rcxProofTTLMinutes
+	}
+	if c.DegradeConfirmSeconds <= 0 {
+		c.DegradeConfirmSeconds = rcxDegradeConfirmSec
+	}
+	if c.Strategy != rcxStrategyLatency {
+		c.Strategy = rcxStrategyBalanced
 	}
 	return c
 }
@@ -78,10 +92,11 @@ func (c rcxConfig) operable() bool {
 func (c rcxConfig) policy() rcxPolicy {
 	return rcxPolicy{
 		LatencyBands:        rcxLatencyBands(),
+		Strategy:            c.Strategy,
 		RequireUDP:          c.RequireUDP,
 		AllowDomesticLast:   c.AllowDomesticLastResort,
 		DwellSeconds:        c.DwellSeconds,
-		DegradedBandPenalty: rcxDegradedBandPenalty,
+		DegradedBandPenalty: rcxDegradedPenalty,
 	}
 }
 

@@ -74,6 +74,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     companion object {
         private const val CHANNEL_NAME = "wifi_ssid"
         private const val METHOD_GET_SSID = "getSsid"
+        private const val METHOD_LIST_SSID = "listSsid"
         private const val METHOD_CHECK_PERMISSION = "checkPermission"
         private const val METHOD_REQUEST_PERMISSION = "requestPermission"
         private const val ERROR_UNAVAILABLE = "UNAVAILABLE"
@@ -135,6 +136,7 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             METHOD_GET_SSID -> getSsid(result)
+            METHOD_LIST_SSID -> listSsid(result)
             METHOD_CHECK_PERMISSION -> checkPermission(result)
             METHOD_REQUEST_PERMISSION -> requestPermission(result)
             else -> result.notImplemented()
@@ -283,6 +285,35 @@ class WifiSsidPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return normalized?.takeIf {
             it.isNotEmpty() && it != WifiManager.UNKNOWN_SSID && it != "0x"
         }
+    }
+
+    // A fresh scan needs the same location permission, so the cache is read.
+    private fun listSsid(result: Result) {
+        val ctx = context ?: run {
+            result.error(ERROR_UNAVAILABLE, "Context not available", null)
+            return
+        }
+        if (!hasForegroundLocation(ctx)) {
+            result.success(emptyList<String>())
+            return
+        }
+        val wm = wifiManager ?: run {
+            result.error(ERROR_UNAVAILABLE, "WifiManager not available", null)
+            return
+        }
+        val current = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            currentSsid()
+        } else {
+            @Suppress("DEPRECATION")
+            normalizeSsid(wm.connectionInfo?.ssid)
+        }
+        val ssids = LinkedHashSet<String>()
+        current?.let(ssids::add)
+        @Suppress("DEPRECATION")
+        for (scan in wm.scanResults) {
+            normalizeSsid(scan.SSID)?.let(ssids::add)
+        }
+        result.success(ssids.toList())
     }
 
     private fun refreshWifiNetworkCallback() {

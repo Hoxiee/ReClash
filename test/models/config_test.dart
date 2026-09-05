@@ -371,10 +371,7 @@ void main() {
       expect(props.nextScheduleFlip(at(6, 45)), const Duration(minutes: 15));
       expect(props.nextScheduleFlip(at(12, 0)), const Duration(hours: 10));
       expect(props.nextScheduleFlip(at(7, 0)), const Duration(hours: 15));
-      expect(
-        const ThemeProps().nextScheduleFlip(at(12, 0)),
-        isNull,
-      );
+      expect(const ThemeProps().nextScheduleFlip(at(12, 0)), isNull);
     });
   });
 

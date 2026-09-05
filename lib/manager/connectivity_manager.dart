@@ -15,16 +15,12 @@ typedef ConnectivityReader = Future<List<ConnectivityResult>> Function();
 
 typedef Ipv4sReader = Future<List<String>> Function();
 
-typedef ForeignVpnReader =
-    Future<bool> Function({String ownDevice, String fakeIpRange});
-
 class ConnectivityManager extends ConsumerStatefulWidget {
   final Function(List<ConnectivityResult> results)? onConnectivityChanged;
   final Stream<List<ConnectivityResult>>? connectivityStream;
   final SsidReader? readSsid;
   final ConnectivityReader? readConnectivity;
   final Ipv4sReader? readIpv4s;
-  final ForeignVpnReader? readForeignVpn;
   final bool? isDesktop;
   final Widget child;
 
@@ -35,7 +31,6 @@ class ConnectivityManager extends ConsumerStatefulWidget {
     this.readSsid,
     this.readConnectivity,
     this.readIpv4s,
-    this.readForeignVpn,
     this.isDesktop,
     required this.child,
   });
@@ -50,16 +45,12 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   late final SsidReader _readSsid =
       widget.readSsid ?? WifiSsidManager.instance.getSsid;
   late final Ipv4sReader _readIpv4s = widget.readIpv4s ?? getLocalIPv4s;
-  late final ForeignVpnReader _readForeignVpn =
-      widget.readForeignVpn ?? hasForeignVpnInterface;
 
   bool get _isDesktop => widget.isDesktop ?? system.isDesktop;
   Timer? _pollTimer;
-  Timer? _vpnTimer;
 
   int _ssidRequestId = 0;
   int _ipv4RequestId = 0;
-  int _vpnRequestId = 0;
   bool _onWifi = false;
 
   @override
@@ -87,17 +78,11 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
       },
       fireImmediately: true,
     );
-    // No platform notifies us of a third party's tunnel, so this always polls.
-    _vpnTimer = Timer.periodic(
-      _vpnPollInterval,
-      (_) => unawaited(_updateForeignVpn()),
-    );
     unawaited(_bootstrap());
   }
 
   Future<void> _bootstrap() async {
     unawaited(_updateIpv4s());
-    unawaited(_updateForeignVpn());
     final readConnectivity =
         widget.readConnectivity ?? Connectivity().checkConnectivity;
     try {
@@ -107,9 +92,11 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
 
   void _handleResults(List<ConnectivityResult> results) {
     _onWifi = results.contains(ConnectivityResult.wifi);
+    ref.read(networkReachableProvider.notifier).value = !results.contains(
+      ConnectivityResult.none,
+    );
     unawaited(_updateSsid());
     unawaited(_updateIpv4s());
-    unawaited(_updateForeignVpn());
     widget.onConnectivityChanged?.call(results);
   }
 
@@ -183,27 +170,9 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
     }
   }
 
-  Future<void> _updateForeignVpn() async {
-    final requestId = ++_vpnRequestId;
-    final own = ref.read(
-      patchClashConfigProvider.select(
-        (state) => (device: state.tun.device, fakeIpRange: state.dns.fakeIpRange),
-      ),
-    );
-    final present = await _readForeignVpn(
-      ownDevice: own.device,
-      fakeIpRange: own.fakeIpRange,
-    );
-    if (requestId != _vpnRequestId || !mounted) {
-      return;
-    }
-    ref.read(foreignVpnProvider.notifier).value = present;
-  }
-
   @override
   void dispose() {
     _pollTimer?.cancel();
-    _vpnTimer?.cancel();
     subscription.cancel();
     super.dispose();
   }
@@ -214,5 +183,4 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
   }
 
   static const _pollInterval = Duration(seconds: 25);
-  static const _vpnPollInterval = Duration(seconds: 6);
 }

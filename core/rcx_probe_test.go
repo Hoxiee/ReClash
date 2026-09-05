@@ -173,6 +173,32 @@ func TestDiverseWaveFallsBackToOneBucket(t *testing.T) {
 	}
 }
 
+func TestHoistNodeGivesTheSuspectTheSeatEveryWaveTakes(t *testing.T) {
+	nodes := []rcxProbeNode{
+		{Name: "a", Type: "Vless", Port: 443},
+		{Name: "b", Type: "Vless", Port: 443},
+		{Name: "suspect", Type: "Vless", Port: 443},
+	}
+
+	rcxHoistNode(nodes, "suspect")
+
+	got := []string{nodes[0].Name, nodes[1].Name, nodes[2].Name}
+	want := []string{"suspect", "a", "b"}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("pool = %v, want the suspect first and the rest in order: %v", got, want)
+		}
+	}
+	if wave := rcxDiverseWave(nodes, 1); wave[0].Name != "suspect" {
+		t.Errorf("wave = %v, want even the narrowest wave to measure the suspect", wave)
+	}
+
+	rcxHoistNode(nodes, "gone")
+	if nodes[0].Name != "suspect" {
+		t.Error("a name outside the pool must leave the order alone")
+	}
+}
+
 func TestProbeBudgetGrantsWhatIsLeftAndRecoversWithTheWindow(t *testing.T) {
 	budget := newRcxProbeBudget(4, time.Hour)
 	now := time.Unix(1_700_000_000, 0)
@@ -191,23 +217,74 @@ func TestProbeBudgetGrantsWhatIsLeftAndRecoversWithTheWindow(t *testing.T) {
 	}
 }
 
-func TestWavePlanStopsScheduledWavesOnAMeteredLink(t *testing.T) {
-	config := rcxDefaultConfig()
-	config.WaveWidth = 6
-	config.SaveMobileData = true
+func TestBudgetGivesBackWhatMeasuredNothing(t *testing.T) {
+	budget := newRcxProbeBudget(4, time.Hour)
+	now := time.Now()
 
-	if _, ok := rcxWavePlan(config, true, false); ok {
-		t.Error("a scheduled wave must not run on a metered link while saving data")
+	budget.Take(4, now)
+	budget.Refund(3)
+
+	if got := budget.Remaining(now); got != 3 {
+		t.Errorf("remaining = %d, want the three unmeasured probes back", got)
 	}
-
-	width, ok := rcxWavePlan(config, true, true)
-	if !ok || width != 3 {
-		t.Errorf("on-demand wave = (%d, %v), want a narrow one", width, ok)
+	budget.Refund(9)
+	if got := budget.Remaining(now); got != 4 {
+		t.Errorf("remaining = %d, want a refund clamped to what was spent", got)
 	}
+}
 
-	config.SaveMobileData = false
-	width, ok = rcxWavePlan(config, true, false)
-	if !ok || width != config.WaveWidth {
-		t.Errorf("wave = (%d, %v), want the configured width when the user opted out", width, ok)
+func TestProberEndsTheWaveOnceItHasLearnedEnough(t *testing.T) {
+	var mu sync.Mutex
+	asked := 0
+	prober := newRcxProber(func(ctx context.Context, node string, _ rcxMarker) (int, bool, error) {
+		mu.Lock()
+		asked++
+		mu.Unlock()
+		if node == "alive" {
+			return 40, true, nil
+		}
+		<-ctx.Done()
+		return 0, false, ctx.Err()
+	})
+	prober.staggerMs = 0
+	prober.timeout = time.Second
+	prober.enough = func(result rcxProbeResult) bool { return result.Outcome == rcxProbeOK }
+
+	targets := []rcxProbeTarget{{Node: "alive"}}
+	for i := 0; i < 8; i++ {
+		targets = append(targets, rcxProbeTarget{Node: "dead"})
+	}
+	results := prober.Run(context.Background(), targets)
+
+	if results[0].Outcome != rcxProbeOK {
+		t.Fatalf("first result = %v, want the working node measured", results[0].Outcome)
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	if asked > 3 {
+		t.Errorf("asked %d nodes, want the sweep to stop at the one that works", asked)
+	}
+}
+
+// A contained panic must mark its slot: an empty one reads as a pass.
+func TestRunContainsAPanickingProbe(t *testing.T) {
+	prober := testProber(func(_ context.Context, node string, _ rcxMarker) (int, bool, error) {
+		if node == "boom" {
+			panic("probe exploded")
+		}
+		return 40, true, nil
+	})
+
+	results := prober.Run(context.Background(), []rcxProbeTarget{
+		{Node: "boom", Role: rcxRoleOpen},
+		{Node: "fine", Role: rcxRoleOpen},
+	})
+
+	if got := results[0]; got.Outcome != rcxProbeOverloaded || got.Node != "boom" {
+		t.Errorf("result = %+v, want boom unmeasured", got)
+	}
+	if got := results[1].Outcome; got != rcxProbeOK {
+		t.Errorf("outcome = %s, want ok: one bad target must not cost the wave",
+			rcxOutcomeName(got))
 	}
 }

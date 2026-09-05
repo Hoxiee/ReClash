@@ -11,7 +11,8 @@ import 'package:reclash/common/xray_config.dart';
 const _privateKey = '6FYeSwQ3LHkaHK7XR/yM4CBrLr46tr6d4lSCBdOJvlw=';
 const _publicKey = '2RbYMI7eFt4OEEnHfil3Idn4HmRmc3hBQvR1ysYzQWc=';
 
-const _v1Conf = '''
+const _v1Conf =
+    '''
 # Name = awg-node
 [Interface]
 PrivateKey = $_privateKey
@@ -34,7 +35,8 @@ Endpoint = wg.example.com:51820
 PersistentKeepalive = 25
 ''';
 
-const _v3Conf = '''
+const _v3Conf =
+    '''
 [Device]
 Jc = 4
 S1 = 12
@@ -55,7 +57,8 @@ PublicKey = $_publicKey
 Endpoint = v3.example.com:51820
 ''';
 
-const _plainWgConf = '''
+const _plainWgConf =
+    '''
 [Interface]
 PrivateKey = $_privateKey
 Address = 10.8.0.2/32
@@ -78,13 +81,8 @@ String _qCompressed(String text) {
 }
 
 List<String> _proxiesNames(String config) {
-  final match = RegExp(
-    r'^  - \{name: "((?:[^"\\]|\\.)*)"',
-    multiLine: true,
-  );
-  return [
-    for (final m in match.allMatches(config)) m.group(1)!,
-  ];
+  final match = RegExp(r'^  - \{name: "((?:[^"\\]|\\.)*)"', multiLine: true);
+  return [for (final m in match.allMatches(config)) m.group(1)!];
 }
 
 void main() {
@@ -105,12 +103,12 @@ void main() {
       expect(proxy['udp'], isTrue);
       final peers = proxy['peers']! as List<Map<String, Object?>>;
       expect(peers.single['public-key'], _publicKey);
-      expect(peers.single['pre-shared-key'], 'FpCyjIcAwSgZRZpxSa7piP4cNT0AGHliS5eQ5jbbNnc=');
-      expect(peers.single['allowed-ips'], ['0.0.0.0/0,::/0']);
       expect(
-        proxy['amnezia-wg-option'],
-        containsPair('jc', 4),
+        peers.single['pre-shared-key'],
+        'FpCyjIcAwSgZRZpxSa7piP4cNT0AGHliS5eQ5jbbNnc=',
       );
+      expect(peers.single['allowed-ips'], ['0.0.0.0/0,::/0']);
+      expect(proxy['amnezia-wg-option'], containsPair('jc', 4));
       final option = proxy['amnezia-wg-option']! as Map<String, Object?>;
       expect(option['jmin'], 40);
       expect(option['jmax'], 70);
@@ -155,8 +153,10 @@ void main() {
     });
 
     test('hex private and peer keys normalize to base64', () {
-      const hex = '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';
-      const conf = '''
+      const hex =
+          '000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f';
+      const conf =
+          '''
 [Interface]
 PrivateKey = $hex
 
@@ -166,7 +166,10 @@ Endpoint = hex.example.com:51820
 ''';
       final proxy = parseAwgConf(conf);
       expect(proxy, isNotNull);
-      expect(proxy!['private-key'], 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=');
+      expect(
+        proxy!['private-key'],
+        'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=',
+      );
       final peers = proxy['peers']! as List<Map<String, Object?>>;
       expect(peers.single['public-key'], proxy['private-key']);
     });
@@ -181,8 +184,10 @@ Endpoint = hex.example.com:51820
     });
 
     test('a keepalive range takes its lower bound', () {
-      final conf = _v1Conf.replaceFirst('PersistentKeepalive = 25',
-          'PersistentKeepalive = 25-35');
+      final conf = _v1Conf.replaceFirst(
+        'PersistentKeepalive = 25',
+        'PersistentKeepalive = 25-35',
+      );
       expect(parseAwgConf(conf)!['persistent-keepalive'], 25);
     });
 
@@ -256,15 +261,17 @@ Endpoint = hex.example.com:51820
 
   group('tryConvertXrayConfig with an INCY container', () {
     test('each server converts; malformed entries skip alone', () {
-      final result = tryConvertXrayConfig(jsonEncode({
-        'type': 'amneziawg',
-        'version': 1,
-        'servers': [
-          {'name': 'Germany', 'config': _b64url(_v1Conf)},
-          {'name': 'Broken', 'config': '%%%'},
-          {'config': _b64url(_v1Conf)},
-        ],
-      }));
+      final result = tryConvertXrayConfig(
+        jsonEncode({
+          'type': 'amneziawg',
+          'version': 1,
+          'servers': [
+            {'name': 'Germany', 'config': _b64url(_v1Conf)},
+            {'name': 'Broken', 'config': '%%%'},
+            {'config': _b64url(_v1Conf)},
+          ],
+        }),
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('amnezia-wg-option'));
       expect(result.skipped, hasLength(1));
@@ -273,45 +280,49 @@ Endpoint = hex.example.com:51820
     });
 
     test('identical confs collapse, first named server wins', () {
-      final result = tryConvertXrayConfig(jsonEncode({
-        'type': 'amneziawg',
-        'servers': [
-          {'name': 'Germany', 'config': _b64url(_v1Conf)},
-          {'name': 'Netherlands', 'config': _b64url(_v1Conf)},
-        ],
-      }));
+      final result = tryConvertXrayConfig(
+        jsonEncode({
+          'type': 'amneziawg',
+          'servers': [
+            {'name': 'Germany', 'config': _b64url(_v1Conf)},
+            {'name': 'Netherlands', 'config': _b64url(_v1Conf)},
+          ],
+        }),
+      );
       expect(_proxiesNames(result!.config), ['Germany']);
     });
 
     test('a container sits next to xray configs, order preserved', () {
-      final result = tryConvertXrayConfig(jsonEncode([
-        {
-          'remarks': 'vless node',
-          'outbounds': [
-            {
-              'tag': '',
-              'protocol': 'vless',
-              'settings': {
-                'vnext': [
-                  {
-                    'address': 'v.example.com',
-                    'port': 443,
-                    'users': [
-                      {'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199'}
-                    ],
-                  }
-                ],
+      final result = tryConvertXrayConfig(
+        jsonEncode([
+          {
+            'remarks': 'vless node',
+            'outbounds': [
+              {
+                'tag': '',
+                'protocol': 'vless',
+                'settings': {
+                  'vnext': [
+                    {
+                      'address': 'v.example.com',
+                      'port': 443,
+                      'users': [
+                        {'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199'},
+                      ],
+                    },
+                  ],
+                },
               },
-            },
-          ],
-        },
-        {
-          'type': 'amneziawg',
-          'servers': [
-            {'name': 'awg node', 'config': _b64url(_v1Conf)}
-          ],
-        },
-      ]));
+            ],
+          },
+          {
+            'type': 'amneziawg',
+            'servers': [
+              {'name': 'awg node', 'config': _b64url(_v1Conf)},
+            ],
+          },
+        ]),
+      );
       expect(_proxiesNames(result!.config), ['vless node', 'awg node']);
     });
   });
@@ -332,10 +343,7 @@ Endpoint = hex.example.com:51820
           {
             'container': 'amnezia-awg',
             'amnezia-awg': {
-              'last_config': jsonEncode({
-                'config': _v1Conf,
-                'Jc': '9',
-              }),
+              'last_config': jsonEncode({'config': _v1Conf, 'Jc': '9'}),
             },
           },
         ],
@@ -344,7 +352,8 @@ Endpoint = hex.example.com:51820
       expect(skipped, isEmpty);
       expect(proxies, hasLength(1));
       expect(proxies.single['name'], 'My Amnezia');
-      final option = proxies.single['amnezia-wg-option']! as Map<String, Object?>;
+      final option =
+          proxies.single['amnezia-wg-option']! as Map<String, Object?>;
       expect(option['jc'], 4);
     });
 
@@ -374,7 +383,8 @@ Endpoint = hex.example.com:51820
       expect(proxies.single['server'], 'flat.example.com');
       expect(proxies.single['ip'], '10.8.0.2/32');
       expect(proxies.single['private-key'], _privateKey);
-      final option = proxies.single['amnezia-wg-option']! as Map<String, Object?>;
+      final option =
+          proxies.single['amnezia-wg-option']! as Map<String, Object?>;
       expect(option['jc'], 4);
       expect(option['h1'], '1234567890');
     });
@@ -382,7 +392,10 @@ Endpoint = hex.example.com:51820
     test('non-wireguard containers become named skips', () {
       final share = jsonEncode({
         'containers': [
-          {'container': 'openvpn', 'openvpn': {'last_config': '{}'}},
+          {
+            'container': 'openvpn',
+            'openvpn': {'last_config': '{}'},
+          },
           {'container': 'xray', 'xray': {}},
         ],
       });

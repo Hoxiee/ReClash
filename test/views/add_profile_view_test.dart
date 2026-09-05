@@ -137,9 +137,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('URL import dialog hides presets until expanded', (
-    tester,
-  ) async {
+  testWidgets('URL import dialog hides presets until expanded', (tester) async {
     final container = _containerFor(tester);
 
     await tester.pumpWidget(
@@ -167,16 +165,19 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    expect(find.text(currentAppLocalizations.subscriptionClientAuto),
-        findsNothing);
-    expect(find.text(currentAppLocalizations.subscriptionClientHapp),
-        findsNothing);
+    expect(
+      find.text(currentAppLocalizations.subscriptionClientAuto),
+      findsNothing,
+    );
+    expect(
+      find.text(currentAppLocalizations.subscriptionClientHapp),
+      findsNothing,
+    );
 
     await tester.tap(find.byTooltip(currentAppLocalizations.showMore));
     await tester.pumpAndSettle();
 
-    expect(find.text(currentAppLocalizations.subscriptionClientAuto),
-        findsOne);
+    expect(find.text(currentAppLocalizations.subscriptionClientAuto), findsOne);
     expect(find.byType(TextField), findsOne);
     expect(tester.takeException(), null);
   });

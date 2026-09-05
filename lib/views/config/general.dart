@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,11 +62,11 @@ class UaItem extends ConsumerWidget {
     final globalUa = ref.watch(
       patchClashConfigProvider.select((state) => state.globalUa),
     );
-    return ListItem(
+    return DecorationListItem(
       leading: const Icon(Icons.computer_outlined),
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
-      onTap: () => _handleShowUaDialog(ref),
+      onPressed: () => _handleShowUaDialog(ref),
     );
   }
 }
@@ -79,7 +80,7 @@ class KeepAliveIntervalItem extends ConsumerWidget {
     final keepAliveInterval = ref.watch(
       patchClashConfigProvider.select((state) => state.keepAliveInterval),
     );
-    return ListItem.input(
+    return DecorationListItem.input(
       leading: const Icon(Icons.timer_outlined),
       title: Text(appLocalizations.keepAliveIntervalDesc),
       subtitle: Text(appLocalizations.secondsCount(keepAliveInterval)),
@@ -120,7 +121,7 @@ class TestUrlItem extends ConsumerWidget {
     final testUrl = ref.watch(
       appSettingProvider.select((state) => state.testUrl),
     );
-    return ListItem.input(
+    return DecorationListItem.input(
       leading: const Icon(Icons.timeline),
       title: Text(appLocalizations.testUrl),
       subtitle: Text(testUrl),
@@ -162,11 +163,11 @@ class PortItem extends ConsumerWidget {
     final mixedPort = ref.watch(
       patchClashConfigProvider.select((state) => state.mixedPort),
     );
-    return ListItem(
+    return DecorationListItem(
       leading: const Icon(Icons.adjust_outlined),
       title: Text(appLocalizations.port),
       subtitle: Text('$mixedPort'),
-      onTap: () {
+      onPressed: () {
         handleShowPortDialog();
       },
     );
@@ -182,7 +183,7 @@ class HostsItem extends ConsumerWidget {
     final hosts = ref.watch(
       patchClashConfigProvider.select((state) => state.hosts),
     );
-    return ListItem.open(
+    return DecorationListItem.open(
       leading: const Icon(Icons.view_list_outlined),
       title: const Text('Hosts'),
       subtitle: Text(appLocalizations.hostsDesc),
@@ -300,118 +301,125 @@ class GeneralListView extends ConsumerWidget {
     final authentication = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
-    return generateListView([
-      ...generateSection(
-        title: appLocalizations.inbound,
-        isFirst: true,
-        items: [
-          const PortItem(),
-          _clashToggle(
-            icon: Icons.device_hub,
-            title: (l) => l.allowLan,
-            subtitle: (l) => l.allowLanDesc,
-            select: (state) => state.allowLan,
-            update: (state, value) => state.copyWith(allowLan: value),
-          ),
-          _clashToggle(
-            icon: Icons.api_outlined,
-            title: (l) => l.externalController,
-            subtitle: (l) => l.externalControllerDesc,
-            select: (state) =>
-                state.externalController == ExternalControllerStatus.open,
-            update: (state, value) => state.copyWith(
-              externalController: value
-                  ? ExternalControllerStatus.open
-                  : ExternalControllerStatus.close,
+    return ListView(
+      children: [
+        SettingSection(
+          top: 16,
+          title: appLocalizations.inbound,
+          items: [
+            const PortItem(),
+            _clashToggle(
+              icon: Icons.device_hub,
+              title: (l) => l.allowLan,
+              subtitle: (l) => l.allowLanDesc,
+              select: (state) => state.allowLan,
+              update: (state, value) => state.copyWith(allowLan: value),
             ),
-          ),
-          const AuthenticationItem(),
-        ],
-      ),
-      if (authentication)
-        ...generateSection(
-          title: appLocalizations.authentication,
-          items: const [
-            AuthenticationAccountItem(),
-            AuthenticationPasswordItem(),
+            _clashToggle(
+              icon: Icons.api_outlined,
+              title: (l) => l.externalController,
+              subtitle: (l) => l.externalControllerDesc,
+              select: (state) =>
+                  state.externalController == ExternalControllerStatus.open,
+              update: (state, value) => state.copyWith(
+                externalController: value
+                    ? ExternalControllerStatus.open
+                    : ExternalControllerStatus.close,
+              ),
+            ),
+            const WebDashboardItem(),
+            const AuthenticationItem(),
           ],
         ),
-      ...generateSection(
-        title: appLocalizations.other,
-        items: [
-          const LogLevelItem(),
-          const UaItem(),
-          const TestUrlItem(),
-          if (system.isDesktop) const KeepAliveIntervalItem(),
-          const HostsItem(),
-          ConfigToggleItem(
-            leading: const Icon(Icons.perm_device_information_outlined),
-            title: (l) => l.sendDeviceIdentity,
-            subtitle: (l) => l.sendDeviceIdentityDesc,
-            selector: appSettingProvider.select(
-              (state) => state.sendDeviceIdentity,
+        if (authentication)
+          SettingSection(
+            title: appLocalizations.authentication,
+            items: const [
+              AuthenticationAccountItem(),
+              AuthenticationPasswordItem(),
+            ],
+            enterDelay: const Duration(milliseconds: 50),
+          ),
+        SettingSection(
+          title: appLocalizations.other,
+          items: [
+            const LogLevelItem(),
+            const UaItem(),
+            const TestUrlItem(),
+            if (system.isDesktop) const KeepAliveIntervalItem(),
+            const HostsItem(),
+            ConfigToggleItem(
+              leading: const Icon(Icons.perm_device_information_outlined),
+              title: (l) => l.sendDeviceIdentity,
+              subtitle: (l) => l.sendDeviceIdentityDesc,
+              selector: appSettingProvider.select(
+                (state) => state.sendDeviceIdentity,
+              ),
+              onChanged: (ref, value) => ref
+                  .read(appSettingProvider.notifier)
+                  .update((state) => state.copyWith(sendDeviceIdentity: value)),
             ),
-            onChanged: (ref, value) => ref
-                .read(appSettingProvider.notifier)
-                .update((state) => state.copyWith(sendDeviceIdentity: value)),
-          ),
-          ConfigToggleItem(
-            leading: const Icon(Icons.dns_outlined),
-            title: (l) => l.appendSystemDns,
-            subtitle: (l) => l.appendSystemDnsTip,
-            selector: networkSettingProvider.select(
-              (state) => state.appendSystemDns,
+            ConfigToggleItem(
+              leading: const Icon(Icons.dns_outlined),
+              title: (l) => l.appendSystemDns,
+              subtitle: (l) => l.appendSystemDnsTip,
+              selector: networkSettingProvider.select(
+                (state) => state.appendSystemDns,
+              ),
+              onChanged: (ref, value) => ref
+                  .read(networkSettingProvider.notifier)
+                  .update((state) => state.copyWith(appendSystemDns: value)),
             ),
-            onChanged: (ref, value) => ref
-                .read(networkSettingProvider.notifier)
-                .update((state) => state.copyWith(appendSystemDns: value)),
-          ),
-          _clashToggle(
-            icon: Icons.water_outlined,
-            title: (l) => 'IPv6',
-            subtitle: (l) => l.ipv6Desc,
-            select: (state) => state.ipv6,
-            update: (state, value) => state.copyWith(ipv6: value),
-          ),
-          _clashToggle(
-            icon: Icons.compress_outlined,
-            title: (l) => l.unifiedDelay,
-            subtitle: (l) => l.unifiedDelayDesc,
-            select: (state) => state.unifiedDelay,
-            update: (state, value) => state.copyWith(unifiedDelay: value),
-          ),
-          _clashToggle(
-            icon: Icons.double_arrow_outlined,
-            title: (l) => l.tcpConcurrent,
-            subtitle: (l) => l.tcpConcurrentDesc,
-            select: (state) => state.tcpConcurrent,
-            update: (state, value) => state.copyWith(tcpConcurrent: value),
-          ),
-          _clashToggle(
-            icon: Icons.polymer_outlined,
-            title: (l) => l.findProcessMode,
-            subtitle: (l) => l.findProcessModeDesc,
-            select: (state) => state.findProcessMode == FindProcessMode.always,
-            update: (state, value) => state.copyWith(
-              findProcessMode: value
-                  ? FindProcessMode.always
-                  : FindProcessMode.off,
+            _clashToggle(
+              icon: Icons.water_outlined,
+              title: (l) => 'IPv6',
+              subtitle: (l) => l.ipv6Desc,
+              select: (state) => state.ipv6,
+              update: (state, value) => state.copyWith(ipv6: value),
             ),
-          ),
-          _clashToggle(
-            icon: Icons.memory,
-            title: (l) => l.geodataLoader,
-            subtitle: (l) => l.geodataLoaderDesc,
-            select: (state) =>
-                state.geodataLoader == GeodataLoader.memconservative,
-            update: (state, value) => state.copyWith(
-              geodataLoader: value
-                  ? GeodataLoader.memconservative
-                  : GeodataLoader.standard,
+            _clashToggle(
+              icon: Icons.compress_outlined,
+              title: (l) => l.unifiedDelay,
+              subtitle: (l) => l.unifiedDelayDesc,
+              select: (state) => state.unifiedDelay,
+              update: (state, value) => state.copyWith(unifiedDelay: value),
             ),
-          ),
-        ],
-      ),
-    ]);
+            _clashToggle(
+              icon: Icons.double_arrow_outlined,
+              title: (l) => l.tcpConcurrent,
+              subtitle: (l) => l.tcpConcurrentDesc,
+              select: (state) => state.tcpConcurrent,
+              update: (state, value) => state.copyWith(tcpConcurrent: value),
+            ),
+            _clashToggle(
+              icon: Icons.polymer_outlined,
+              title: (l) => l.findProcessMode,
+              subtitle: (l) => l.findProcessModeDesc,
+              select: (state) =>
+                  state.findProcessMode == FindProcessMode.always,
+              update: (state, value) => state.copyWith(
+                findProcessMode: value
+                    ? FindProcessMode.always
+                    : FindProcessMode.off,
+              ),
+            ),
+            _clashToggle(
+              icon: Icons.memory,
+              title: (l) => l.geodataLoader,
+              subtitle: (l) => l.geodataLoaderDesc,
+              select: (state) =>
+                  state.geodataLoader == GeodataLoader.memconservative,
+              update: (state, value) => state.copyWith(
+                geodataLoader: value
+                    ? GeodataLoader.memconservative
+                    : GeodataLoader.standard,
+              ),
+            ),
+          ],
+          enterDelay: const Duration(milliseconds: 100),
+        ),
+        const SettingBottomInset(),
+      ],
+    );
   }
 }

@@ -20,22 +20,10 @@ void main() {
 
   group('ModeUiExt', () {
     test('rule with the engine on is the only way to read as auto', () {
-      expect(
-        Mode.rule.uiMode(smartRouting: true),
-        UiOutboundMode.auto,
-      );
-      expect(
-        Mode.rule.uiMode(smartRouting: false),
-        UiOutboundMode.rule,
-      );
-      expect(
-        Mode.global.uiMode(smartRouting: true),
-        UiOutboundMode.global,
-      );
-      expect(
-        Mode.direct.uiMode(smartRouting: true),
-        UiOutboundMode.direct,
-      );
+      expect(Mode.rule.uiMode(smartRouting: true), UiOutboundMode.auto);
+      expect(Mode.rule.uiMode(smartRouting: false), UiOutboundMode.rule);
+      expect(Mode.global.uiMode(smartRouting: true), UiOutboundMode.global);
+      expect(Mode.direct.uiMode(smartRouting: true), UiOutboundMode.direct);
     });
 
     test('every core mode round-trips through the ui vocabulary', () {
@@ -47,10 +35,7 @@ void main() {
 
     test('a ui pick carries exactly what the core needs', () {
       for (final ui in UiOutboundMode.values) {
-        expect(
-          ui.coreMode.uiMode(smartRouting: ui.smartRouting),
-          ui,
-        );
+        expect(ui.coreMode.uiMode(smartRouting: ui.smartRouting), ui);
       }
     });
   });

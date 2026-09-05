@@ -68,6 +68,7 @@ class DecorationListItem extends StatelessWidget {
   final VoidCallback? onPressed;
   final double? minVerticalPadding;
   final bool invalid;
+  final _ListItemAction? _action;
 
   const DecorationListItem({
     super.key,
@@ -81,7 +82,120 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.invalid = false,
-  });
+  }) : _action = null;
+
+  DecorationListItem.toggle({
+    super.key,
+    this.contentPadding,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    required bool value,
+    ValueChanged<bool>? onChanged,
+    this.isSelected,
+    this.horizontalTitleGap,
+    this.minVerticalPadding = 8,
+    this.invalid = false,
+  }) : trailing = null,
+       onPressed = null,
+       _action = _ToggleAction(value: value, onChanged: onChanged);
+
+  DecorationListItem.options({
+    super.key,
+    this.contentPadding,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    required String dialogTitle,
+    required List<Object?> options,
+    required Object? value,
+    required String Function(Object? value) textBuilder,
+    required ValueChanged<Object?> onChanged,
+    this.isSelected,
+    this.horizontalTitleGap,
+    this.minVerticalPadding = 8,
+    this.invalid = false,
+  }) : onPressed = null,
+       _action = _OptionsAction<Object?>(
+         title: dialogTitle,
+         options: options,
+         value: value,
+         textBuilder: textBuilder,
+         onChanged: onChanged,
+       );
+
+  DecorationListItem.input({
+    super.key,
+    this.contentPadding,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    required String dialogTitle,
+    required String value,
+    String? suffixText,
+    required ValueChanged<String?> onChanged,
+    FormFieldValidator<String>? validator,
+    int? maxLength,
+    TextInputType? keyboardType,
+    String? resetValue,
+    this.isSelected,
+    this.horizontalTitleGap,
+    this.minVerticalPadding = 8,
+    this.invalid = false,
+  }) : onPressed = null,
+       _action = _InputAction(
+         title: dialogTitle,
+         value: value,
+         suffixText: suffixText,
+         onChanged: onChanged,
+         validator: validator,
+         maxLength: maxLength,
+         keyboardType: keyboardType,
+         resetValue: resetValue,
+       );
+
+  DecorationListItem.open({
+    super.key,
+    this.contentPadding,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+    required Widget widget,
+    double? maxWidth,
+    bool blur = true,
+    bool forceFull = true,
+    ValueChanged<dynamic>? onChanged,
+    this.isSelected,
+    this.horizontalTitleGap,
+    this.minVerticalPadding = 8,
+    this.invalid = false,
+  }) : onPressed = null,
+       _action = _OpenAction(
+         widget: widget,
+         maxWidth: maxWidth,
+         blur: blur,
+         forceFull: forceFull,
+         onChanged: onChanged,
+       );
+
+  DecorationListItem.checkbox({
+    super.key,
+    this.contentPadding,
+    this.leading,
+    required this.title,
+    this.subtitle,
+    bool value = false,
+    ValueChanged<bool?>? onChanged,
+    this.isSelected,
+    this.horizontalTitleGap,
+    this.minVerticalPadding = 8,
+    this.invalid = false,
+  }) : trailing = null,
+       onPressed = null,
+       _action = _CheckboxAction(value: value, onChanged: onChanged);
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +214,128 @@ class DecorationListItem extends StatelessWidget {
       top: isStart ? AppCorner.xl : AppCorner.none,
       bottom: isEnd ? AppCorner.xl : AppCorner.none,
     );
+    Widget? effectiveTrailing = trailing;
+    VoidCallback? effectiveOnPressed = onPressed;
+    switch (_action) {
+      case null:
+        break;
+      case final _ToggleAction toggleAction:
+        effectiveOnPressed = toggleAction.onChanged == null
+            ? null
+            : () {
+                toggleAction.onChanged!(!toggleAction.value);
+              };
+        effectiveTrailing = _tappableTrailing(
+          context,
+          Switch(value: toggleAction.value, onChanged: toggleAction.onChanged),
+        );
+      case final _OptionsAction<Object?> options:
+        effectiveOnPressed = () async {
+          final value = await dialogs.showCommonDialog<Object?>(
+            child: OptionsDialog<Object?>(
+              title: options.title,
+              options: options.options,
+              textBuilder: options.textBuilder,
+              value: options.value,
+            ),
+          );
+          options.onChanged(value);
+        };
+      case final _InputAction inputDelegate:
+        effectiveOnPressed = () async {
+          final value = await dialogs.showCommonDialog<String>(
+            child: InputDialog(
+              title: inputDelegate.title,
+              value: inputDelegate.value,
+              suffixText: inputDelegate.suffixText,
+              resetValue: inputDelegate.resetValue,
+              inputFormatters: inputDelegate.maxLength == null
+                  ? null
+                  : TextInputLimits.limit(inputDelegate.maxLength!),
+              keyboardType: inputDelegate.keyboardType,
+              validator: inputDelegate.validator,
+            ),
+          );
+          inputDelegate.onChanged(value);
+        };
+      case final _OpenAction openDelegate:
+        final child = openDelegate.widget;
+        final onChanged = openDelegate.onChanged;
+        return OpenContainer<dynamic>(
+          closedBuilder: (context, action) {
+            Future<void> openAction() async {
+              final isMobile = context.isMobileView;
+              if (!isMobile || kDebugMode) {
+                final res = await showExtend(
+                  context,
+                  props: ExtendProps(
+                    blur: openDelegate.blur,
+                    maxWidth: openDelegate.maxWidth,
+                    forceFull: openDelegate.forceFull,
+                  ),
+                  builder: (_) {
+                    return child;
+                  },
+                );
+                if (onChanged != null) {
+                  onChanged(res);
+                }
+                return;
+              }
+              action();
+            }
+
+            return _buildActionCard(
+              proxyDecorator: proxyDecorator,
+              borderRadius: borderRadius,
+              isEnd: isEnd,
+              onTap: openAction,
+              trailing: effectiveTrailing,
+            );
+          },
+          onClosed: onChanged,
+          openBuilder: (_, action) {
+            return child;
+          },
+        );
+      case final _CheckboxAction checkboxDelegate:
+        effectiveOnPressed = checkboxDelegate.onChanged == null
+            ? null
+            : () {
+                checkboxDelegate.onChanged!(!checkboxDelegate.value);
+              };
+        effectiveTrailing = _tappableTrailing(
+          context,
+          CommonCheckBox(
+            value: checkboxDelegate.value,
+            onChanged: checkboxDelegate.onChanged,
+          ),
+        );
+      case _RadioAction():
+      case _NextAction():
+      case _DefaultAction():
+        break;
+    }
+    return _buildActionCard(
+      proxyDecorator: proxyDecorator,
+      borderRadius: borderRadius,
+      isEnd: isEnd,
+      trailing: effectiveTrailing,
+      onTap: effectiveOnPressed,
+    );
+  }
+
+  Widget _tappableTrailing(BuildContext context, Widget trailing) {
+    return ExcludeSemantics(child: IgnorePointer(child: trailing));
+  }
+
+  Widget _buildActionCard({
+    required bool proxyDecorator,
+    required BorderRadius borderRadius,
+    required bool isEnd,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
     return CommonCard(
       shape: proxyDecorator == true
           ? LinearBorder.none
@@ -108,7 +344,7 @@ class DecorationListItem extends StatelessWidget {
       isSelected: isSelected,
       padding: EdgeInsets.zero,
       type: CommonCardType.filled,
-      onPressed: proxyDecorator ? null : onPressed,
+      onPressed: proxyDecorator ? null : onTap,
       child: LayoutBuilder(
         builder: (_, constraints) {
           final isInfinite = constraints.maxHeight >= double.infinity;

@@ -60,14 +60,16 @@ void main() {
     );
     await tester.pump();
 
-    DecorationListItem tileOf(String text) => find
-        .ancestor(
-          of: find.text(text),
-          matching: find.byType(DecorationListItem),
-        )
-        .evaluate()
-        .single
-        .widget as DecorationListItem;
+    DecorationListItem tileOf(String text) =>
+        find
+                .ancestor(
+                  of: find.text(text),
+                  matching: find.byType(DecorationListItem),
+                )
+                .evaluate()
+                .single
+                .widget
+            as DecorationListItem;
 
     expect(tileOf('Default').isSelected, isTrue);
 

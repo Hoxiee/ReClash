@@ -59,9 +59,14 @@ class ThemeManager extends ConsumerWidget {
     globalState.theme = CommonTheme.of(context, textScaleFactor);
     final padding = MediaQuery.of(context).padding;
     final height = MediaQuery.of(context).size.height;
+    final reduceMotion = ref.watch(
+      appSettingProvider.select((state) => state.reduceMotion),
+    );
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScaleFactor),
+        disableAnimations:
+            MediaQuery.of(context).disableAnimations || reduceMotion,
         padding: padding.copyWith(
           top: padding.top > height * 0.3 ? 20.0 : padding.top,
         ),

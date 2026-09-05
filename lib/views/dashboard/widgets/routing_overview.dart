@@ -55,10 +55,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
   }
 
   void _handleSettings() {
-    showExtend(
-      context,
-      builder: (context) => const SmartRoutingView(),
-    );
+    showExtend(context, builder: (context) => const SmartRoutingView());
   }
 
   @override
@@ -142,6 +139,9 @@ String routingReasonLabel(AppLocalizations l10n, String reason) =>
       'no-candidate' => l10n.smartRoutingReasonNoCandidate,
       'dwell-hold' => l10n.smartRoutingReasonDwellHold,
       'manual-hold' => l10n.smartRoutingReasonManualHold,
+      'degraded' => l10n.smartRoutingReasonDegraded,
+      'measuring' => l10n.smartRoutingReasonMeasuring,
+      'pin-return' => l10n.smartRoutingReasonPinReturn,
       _ => l10n.unknown,
     };
 
@@ -163,18 +163,16 @@ String routingEvidenceLabel(AppLocalizations l10n, String evidence) =>
 
 /// The block is the gate that actually stopped the node, so it replaces the
 /// verdict in the row: telling the user both would be telling them twice.
-String routingBlockLabel(
-  AppLocalizations l10n,
-  RcxCandidateReport candidate,
-) => switch (candidate.block) {
-  'absent' => l10n.smartRoutingBlockAbsent,
-  'no-udp' => l10n.smartRoutingBlockNoUdp,
-  'cooling' => l10n.smartRoutingBlockCooling(candidate.fails),
-  'disproven' => l10n.smartRoutingBlockDisproven,
-  'last-resort-barred' => l10n.smartRoutingBlockLastResort,
-  'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
-  _ => routingVerdictLabel(l10n, candidate.verdict),
-};
+String routingBlockLabel(AppLocalizations l10n, RcxCandidateReport candidate) =>
+    switch (candidate.block) {
+      'absent' => l10n.smartRoutingBlockAbsent,
+      'no-udp' => l10n.smartRoutingBlockNoUdp,
+      'cooling' => l10n.smartRoutingBlockCooling(candidate.fails),
+      'disproven' => l10n.smartRoutingBlockDisproven,
+      'last-resort-barred' => l10n.smartRoutingBlockLastResort,
+      'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
+      _ => routingVerdictLabel(l10n, candidate.verdict),
+    };
 
 NetworkFormat _formatOf(RcxReport report) =>
     networkFormatOf(report.status.terrain);
@@ -325,11 +323,7 @@ class _Hairline extends StatelessWidget {
 /// A fold whose collapsed state still says what is inside, so only the evidence
 /// costs a tap.
 class _Disclosure extends StatefulWidget {
-  const _Disclosure({
-    required this.label,
-    required this.child,
-    this.summary,
-  });
+  const _Disclosure({required this.label, required this.child, this.summary});
 
   final String label;
   final Widget child;
@@ -419,9 +413,11 @@ class _VerdictCard extends StatelessWidget {
     final chosen = report.candidates.firstWhereOrNull(
       (candidate) => candidate.current,
     );
-    final failed = status.reason == 'stranded' || status.reason == 'no-candidate';
+    final failed =
+        status.reason == 'stranded' || status.reason == 'no-candidate';
     final tone = failed ? colorScheme.error : _formatAccent(context, format);
-    final delay = status.delay > 0 ? status.delay : chosen?.delay ?? 0;
+    final ours = status.delay > 0 ? status.delay : chosen?.delay ?? 0;
+    final delay = ours > 0 ? ours : chosen?.hostDelay ?? 0;
     final counts = routingCountsOf(report);
     return _Card(
       child: Column(
@@ -472,9 +468,9 @@ class _VerdictCard extends StatelessWidget {
               if (delay > 0) ...[
                 const SizedBox(width: 10),
                 Text(
-                  '$delay ms',
+                  ours > 0 ? '$delay ms' : '≈$delay ms',
                   style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: ours > 0 ? FontWeight.w600 : FontWeight.w400,
                     color: getDelayColor(delay) ?? colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -530,12 +526,10 @@ class _VerdictCard extends StatelessWidget {
                   )
                 : appLocalizations.smartRoutingNeverSwitched,
           ),
-          if (report.manualTill > report.at)
+          if (report.manual)
             _Stat(
               label: appLocalizations.smartRoutingManualHold,
-              value: appLocalizations.smartRoutingManualUntil(
-                _minutesBetween(report.at, report.manualTill),
-              ),
+              value: appLocalizations.smartRoutingManualPinned,
             ),
           if (technical && status.env.isNotEmpty)
             _Stat(
@@ -551,11 +545,6 @@ class _VerdictCard extends StatelessWidget {
 int _minutesSince(RcxReport report, int at) {
   final elapsed = report.at - at;
   return elapsed < 0 ? 0 : elapsed ~/ 60000;
-}
-
-int _minutesBetween(int from, int to) {
-  final minutes = ((to - from) / 60000).ceil();
-  return minutes < 1 ? 1 : minutes;
 }
 
 /// The format, what it means for the person on it, and every measurement that
@@ -575,6 +564,9 @@ class _NetworkCard extends StatelessWidget {
     final link = report.link;
     final canaries = report.canaries;
     final answered = canaries.where((canary) => canary.answered).length;
+    final probed = report.candidates
+        .where((candidate) => candidate.delay > 0)
+        .toList();
     final facts = <String>[
       if (link.portal) appLocalizations.smartRoutingEvidencePortal,
       if (link.validated)
@@ -589,6 +581,10 @@ class _NetworkCard extends StatelessWidget {
         link.domesticReached
             ? appLocalizations.smartRoutingEvidenceDomesticOk
             : appLocalizations.smartRoutingEvidenceDomesticFail,
+      if (report.status.direct == 'node')
+        appLocalizations.smartRoutingDomesticViaNode
+      else if (report.status.direct == 'direct')
+        appLocalizations.smartRoutingDomesticViaDirect,
     ];
     return _Card(
       accent: accent,
@@ -659,6 +655,18 @@ class _NetworkCard extends StatelessWidget {
                     )
                     .toList(),
               ),
+            ),
+          // The canaries are fixed addresses dialled outside any tunnel, so
+          // their answer says nothing about a server: the counts sit together
+          // because reading one as the other is what makes the screen lie.
+          if (report.candidates.isNotEmpty)
+            _Disclosure(
+              label: appLocalizations.smartRoutingNodeChecks,
+              summary: appLocalizations.smartRoutingNodesMeasured(
+                probed.length,
+                report.candidates.length,
+              ),
+              child: _CandidateList(rows: probed, technical: technical),
             ),
         ],
       ),
@@ -972,10 +980,8 @@ class _RoundCard extends StatelessWidget {
       child: Column(
         children: List.generate(
           steps.length,
-          (index) => _StepTile(
-            data: steps[index],
-            last: index == steps.length - 1,
-          ),
+          (index) =>
+              _StepTile(data: steps[index], last: index == steps.length - 1),
         ),
       ),
     );
@@ -1036,15 +1042,14 @@ class _RoundCard extends StatelessWidget {
         title: appLocalizations.smartRoutingStepDecision,
         body: routingReasonLabel(appLocalizations, status.reason),
         chips: [
-          if (status.node.isNotEmpty)
-            MetaChip(label: status.node),
+          if (status.node.isNotEmpty) MetaChip(label: status.node),
           if (chosen != null)
             MetaChip(
               label: routingVerdictLabel(appLocalizations, chosen.verdict),
             ),
         ],
         childLabel: appLocalizations.smartRoutingAllServers,
-        child: _CandidateList(report: report, technical: technical),
+        child: _CandidateList(rows: report.candidates, technical: technical),
       ),
     ];
   }
@@ -1064,6 +1069,7 @@ class _RankOrder extends StatelessWidget {
       appLocalizations.smartRoutingKeyMisfit,
       appLocalizations.smartRoutingKeyEvidence,
       appLocalizations.smartRoutingKeyBand,
+      appLocalizations.smartRoutingKeyHistory,
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1167,9 +1173,9 @@ class _StepTile extends StatelessWidget {
 }
 
 class _CandidateList extends StatelessWidget {
-  const _CandidateList({required this.report, required this.technical});
+  const _CandidateList({required this.rows, required this.technical});
 
-  final RcxReport report;
+  final List<RcxCandidateReport> rows;
   final bool technical;
 
   /// Above this many rows the list takes its own bounded scroll area rather than
@@ -1178,7 +1184,6 @@ class _CandidateList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = report.candidates;
     if (rows.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1193,9 +1198,7 @@ class _CandidateList extends StatelessWidget {
     Widget rowAt(int index) =>
         _CandidateRow(candidate: rows[index], technical: technical);
     if (rows.length <= _inlineLimit) {
-      return Column(
-        children: List.generate(rows.length, rowAt),
-      );
+      return Column(children: List.generate(rows.length, rowAt));
     }
     return Container(
       height: 280,
@@ -1230,13 +1233,16 @@ class _CandidateRow extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
     final eligible = candidate.eligible;
+    final hosted = candidate.delay <= 0 && candidate.hostDelay > 0;
+    final delay = hosted ? candidate.hostDelay : candidate.delay;
     final tags = <String>[
       if (candidate.breaker) appLocalizations.smartRoutingBreaker,
       if (candidate.degraded) appLocalizations.smartRoutingDegraded,
       if (technical && candidate.country.isNotEmpty) candidate.country,
       if (technical && candidate.coolFor > 0)
         appLocalizations.smartRoutingCoolFor(candidate.coolFor),
-      if (technical && candidate.delay > 0)
+      if (technical && hosted) appLocalizations.smartRoutingHostDelay,
+      if (technical && delay > 0)
         appLocalizations.smartRoutingBandLabel(candidate.band),
       if (technical && !candidate.udp) appLocalizations.smartRoutingNodeNoUdp,
     ];
@@ -1294,14 +1300,17 @@ class _CandidateRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            candidate.delay > 0
-                ? '${candidate.delay} ms'
-                : appLocalizations.smartRoutingNoAnswer,
+            switch (delay) {
+              > 0 when hosted => '≈$delay ms',
+              > 0 => '$delay ms',
+              _ when candidate.block == 'disproven' || candidate.coolFor > 0 =>
+                appLocalizations.smartRoutingNoAnswer,
+              _ => appLocalizations.smartRoutingUntested,
+            },
             style: context.textTheme.labelSmall?.copyWith(
-              fontWeight: candidate.delay > 0 ? FontWeight.w600 : null,
-              color: candidate.delay > 0
-                  ? (getDelayColor(candidate.delay) ??
-                        colorScheme.onSurfaceVariant)
+              fontWeight: hosted || delay <= 0 ? null : FontWeight.w600,
+              color: delay > 0
+                  ? (getDelayColor(delay) ?? colorScheme.onSurfaceVariant)
                   : muted,
             ),
           ),

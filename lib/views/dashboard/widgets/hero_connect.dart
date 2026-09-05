@@ -5,6 +5,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
@@ -12,6 +13,7 @@ import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
+import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -97,6 +99,22 @@ String _formatBytes(int bytes) {
     i++;
   }
   return '${value.toStringAsFixed(1)} ${units[i]}';
+}
+
+/// Countries the engine left behind, so the stack reads as its own history.
+List<String> _trailCodes(List<String> trail, String current) {
+  final codes = <String>[];
+  for (final node in trail) {
+    if (node == current) continue;
+    final code = _flagToCountryCode(node);
+    if (code != null) codes.add(code);
+  }
+  return codes;
+}
+
+int _enginePoolSize(RcxStatus status) {
+  final pool = status.eligible > 0 ? status.eligible : status.candidates;
+  return pool > 1 ? pool - 1 : 0;
 }
 
 String _resolveToDisplayName(List<Group> groups, String proxyName) {
@@ -195,6 +213,14 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final mode = ref.watch(
       patchClashConfigProvider.select((state) => state.mode),
     );
+    final smartRoutingEnabled =
+        mode == Mode.rule &&
+        ref.watch(smartRoutingSettingProvider.select((state) => state.enabled));
+    final rcxStatus = smartRoutingEnabled
+        ? ref.watch(smartRoutingStatusProvider)
+        : null;
+    final engineNode = rcxStatus?.node ?? '';
+    final engineDecided = smartRoutingEnabled && engineNode.isNotEmpty;
     final serverInfo = ref.watch(
       groupsProvider.select(
         (state) => _selectServerInfo(switch (mode) {
@@ -208,21 +234,28 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
         }, serverInfoHeader),
       ),
     );
-    final serverName = serverInfo.serverName;
+    final serverName = engineDecided ? engineNode : serverInfo.serverName;
     final testUrl = serverInfo.testUrl;
-    final otherCodes = serverInfo.flags.isEmpty
+    final otherCodes = engineDecided
+        ? _trailCodes(ref.watch(smartRoutingTrailProvider), engineNode)
+        : serverInfo.flags.isEmpty
         ? const <String>[]
         : serverInfo.flags.split(',');
-    final otherLocations = serverInfo.otherLocations;
+    final otherLocations = engineDecided
+        ? _enginePoolSize(rcxStatus!)
+        : serverInfo.otherLocations;
     final displayName = _stripLeadingEmoji(serverName);
     final nameCountryCode = _flagToCountryCode(serverName);
     final isUpdating =
         profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
 
-    final delay = serverName.isEmpty
+    final delay = engineDecided
+        ? (rcxStatus!.delay > 0 ? rcxStatus.delay : null)
+        : serverName.isEmpty
         ? null
         : ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl));
     final measuring =
+        !engineDecided &&
         serverName.isNotEmpty &&
         ref.watch(
           delayTestPendingProvider(proxyName: serverName, testUrl: testUrl),
@@ -253,6 +286,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             accent: accent,
             otherCodes: otherCodes,
             otherLocations: otherLocations,
+            smartRouting: smartRoutingEnabled,
           ),
           if (hasSub) ...[
             const SizedBox(height: 12),
@@ -312,6 +346,7 @@ class _OrbSection extends ConsumerWidget {
     final isConnected = runMinutes != null && status != HeroStatus.paused;
 
     final title = switch (status) {
+      HeroStatus.offline => appLocalizations.noNetwork,
       HeroStatus.off => appLocalizations.heroNotProtected,
       HeroStatus.checking => appLocalizations.heroChecking,
       HeroStatus.connecting => appLocalizations.heroConnecting,
@@ -322,6 +357,7 @@ class _OrbSection extends ConsumerWidget {
       HeroStatus.degraded => appLocalizations.heroProtected,
     };
     final subtitle = switch (status) {
+      HeroStatus.offline => appLocalizations.heroNoNetworkHint,
       HeroStatus.off => appLocalizations.heroTapToConnect,
       HeroStatus.checking => appLocalizations.heroCheckingHint,
       HeroStatus.connecting => displayName,
@@ -342,7 +378,6 @@ class _OrbSection extends ConsumerWidget {
 
     return Column(
       children: [
-        const _ForeignVpnBadge(),
         const SizedBox(height: 18),
         HeroOrb(
           size: 220,
@@ -397,69 +432,6 @@ class _OrbSection extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Worth naming, not worth interrupting for.
-class _ForeignVpnBadge extends ConsumerWidget {
-  const _ForeignVpnBadge();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final present = ref.watch(foreignVpnProvider);
-    final colorScheme = context.colorScheme;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(end: present ? 1 : 0),
-      duration: const Duration(milliseconds: 480),
-      curve: Curves.easeOutCubic,
-      // Gone from the tree at rest, so nothing reads it out unused.
-      builder: (context, t, child) => t <= 0
-          ? const SizedBox.shrink()
-          : ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: t,
-                child: Opacity(
-                  opacity: t,
-                  child: Transform.translate(
-                    offset: Offset(0, -6 * (1 - t)),
-                    child: child,
-                  ),
-                ),
-              ),
-            ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(heroPillRadius),
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.vpn_lock_rounded,
-                size: 13,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
-              ),
-              const SizedBox(width: 7),
-              Text(
-                context.appLocalizations.heroForeignVpn,
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.85),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -728,6 +700,7 @@ class _ServerPanel extends StatelessWidget {
     this.accent,
     this.otherCodes = const [],
     this.otherLocations = 0,
+    this.smartRouting = false,
   });
 
   final String displayName;
@@ -737,25 +710,32 @@ class _ServerPanel extends StatelessWidget {
   final Color? accent;
   final List<String> otherCodes;
   final int otherLocations;
+  final bool smartRouting;
 
   @override
   Widget build(BuildContext context) => HeroSurface(
     accent: accent,
-    child: Column(
-      children: [
-        _ServerZone(
-          displayName: displayName,
-          nameCountryCode: nameCountryCode,
-          delay: delay,
-          otherCodes: otherCodes,
-          otherLocations: otherLocations,
-        ),
-        const HeroCardDivider(),
-        _HeroInfoRow(
-          status: status,
-          accent: accent ?? context.colorScheme.onSurfaceVariant,
-        ),
-      ],
+    child: AnimatedSize(
+      duration: commonDuration,
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: Column(
+        children: [
+          _ServerZone(
+            displayName: displayName,
+            nameCountryCode: nameCountryCode,
+            delay: delay,
+            otherCodes: otherCodes,
+            otherLocations: otherLocations,
+            smartRouting: smartRouting,
+          ),
+          const HeroCardDivider(),
+          _HeroInfoRow(
+            status: status,
+            accent: accent ?? context.colorScheme.onSurfaceVariant,
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -785,6 +765,7 @@ class _ServerZone extends ConsumerWidget {
     this.delay,
     this.otherCodes = const [],
     this.otherLocations = 0,
+    this.smartRouting = false,
   });
 
   final String displayName;
@@ -792,6 +773,7 @@ class _ServerZone extends ConsumerWidget {
   final int? delay;
   final List<String> otherCodes;
   final int otherLocations;
+  final bool smartRouting;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -810,8 +792,13 @@ class _ServerZone extends ConsumerWidget {
 
     return FocusableTap(
       borderRadius: heroCardRadius,
-      onTap: () =>
-          ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies),
+      onTap: () {
+        if (smartRouting) {
+          showExtend(context, builder: (_) => const RoutingOverviewView());
+          return;
+        }
+        ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
@@ -952,6 +939,18 @@ class _FlagCircle extends StatelessWidget {
       child: EmojiText(fallbackEmoji, style: TextStyle(fontSize: size * 0.5)),
     );
 
+    // The emoji stands in until the image lands, so no frame shows a grey disc.
+    Widget emojiFill(double side, String code) => Container(
+      width: side,
+      height: side,
+      color: colorScheme.surfaceContainerHighest,
+      alignment: Alignment.center,
+      child: EmojiText(
+        _countryCodeToEmoji(code),
+        style: TextStyle(fontSize: side * 0.5),
+      ),
+    );
+
     final active = cc.length != 2
         ? fallback()
         : ClipOval(
@@ -960,17 +959,20 @@ class _FlagCircle extends StatelessWidget {
               width: size,
               height: size,
               fit: BoxFit.cover,
-              placeholder: (_, _) => Container(
-                width: size,
-                height: size,
-                color: colorScheme.surfaceContainerHighest,
-              ),
+              fadeInDuration: Duration.zero,
+              placeholderFadeInDuration: Duration.zero,
+              placeholder: (_, _) => emojiFill(size, cc),
               errorWidget: (_, _, _) => fallback(),
             ),
           );
 
-    final backs = otherCodes.take(2).toList();
-    Widget backFlag(int i, String code) {
+    // Always two behind: an empty disc holds the height when history is short.
+    const backCount = 2;
+    final backs = [
+      for (var i = 0; i < backCount; i++)
+        i < otherCodes.length ? otherCodes[i] : null,
+    ];
+    Widget backFlag(int i, String? code) {
       final s = size * (1 - 0.14 * i);
       return Transform.translate(
         offset: Offset(0, -10.0 * i),
@@ -982,18 +984,24 @@ class _FlagCircle extends StatelessWidget {
           child: ClipOval(
             child: Stack(
               children: [
-                CachedNetworkImage(
-                  imageUrl: 'https://flagcdn.com/w80/${code.toLowerCase()}.png',
-                  width: s,
-                  height: s,
-                  fit: BoxFit.cover,
-                  placeholder: (_, _) => SizedBox(width: s, height: s),
-                  errorWidget: (_, _, _) => Container(
+                if (code == null)
+                  Container(
                     width: s,
                     height: s,
-                    color: colorScheme.surfaceContainerHighest,
+                    color: colorScheme.surfaceContainerHigh,
+                  )
+                else
+                  CachedNetworkImage(
+                    imageUrl:
+                        'https://flagcdn.com/w80/${code.toLowerCase()}.png',
+                    width: s,
+                    height: s,
+                    fit: BoxFit.cover,
+                    fadeInDuration: Duration.zero,
+                    placeholderFadeInDuration: Duration.zero,
+                    placeholder: (_, _) => emojiFill(s, code),
+                    errorWidget: (_, _, _) => emojiFill(s, code),
                   ),
-                ),
                 Positioned.fill(
                   child: ColoredBox(
                     color: Colors.black.withValues(alpha: 0.15 * i),
@@ -1035,19 +1043,12 @@ class _FlagCircle extends StatelessWidget {
       ],
     );
 
-    final topPeek = backs.isEmpty
-        ? 0.0
-        : (10.0 * backs.length +
-                  size * (1 - 0.14 * backs.length) / 2 -
-                  size / 2 +
-                  2)
-              .clamp(0.0, 40.0)
-              .toDouble();
-    final bottomPeek = badge != null ? 7.0 : 0.0;
+    final topPeek =
+        (10.0 * backCount + size * (1 - 0.14 * backCount) / 2 - size / 2 + 2)
+            .clamp(0.0, 40.0)
+            .toDouble();
+    const bottomPeek = 7.0;
 
-    if (topPeek == 0 && bottomPeek == 0) {
-      return SizedBox(width: size, height: size, child: unit);
-    }
     return SizedBox(
       width: size,
       height: size + topPeek + bottomPeek,
@@ -1236,6 +1237,43 @@ class _HeroActionRow extends ConsumerWidget {
 class _PauseChip extends ConsumerWidget {
   const _PauseChip();
 
+  void _showSmartPauseSheet(BuildContext context, WidgetRef ref) {
+    showSheet(
+      context: context,
+      props: const SheetProps(maxHeight: 520),
+      builder: (sheetContext) {
+        return SizedBox(
+          height: 460,
+          child: AdaptiveSheetScaffold(
+            title: sheetContext.appLocalizations.pickNetwork,
+            body: SmartPauseNetworkPicker(
+              selected: ref
+                  .read(
+                    vpnSettingProvider.select(
+                      (state) => state.smartPauseNetworks,
+                    ),
+                  )
+                  .toSet(),
+              onSelected: (ssid) {
+                Navigator.of(sheetContext).maybePop();
+                ref.read(vpnSettingProvider.notifier).update((state) {
+                  if (state.smartPauseNetworks.any(
+                    (item) => item.trim().toLowerCase() == ssid.toLowerCase(),
+                  )) {
+                    return state;
+                  }
+                  return state.copyWith(
+                    smartPauseNetworks: [...state.smartPauseNetworks, ssid],
+                  );
+                });
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
@@ -1246,6 +1284,7 @@ class _PauseChip extends ConsumerWidget {
       child: FocusableTap(
         borderRadius: heroPillRadius,
         onTap: () => ref.read(commonActionProvider.notifier).togglePaused(),
+        onLongPress: () => _showSmartPauseSheet(context, ref),
         child: HeroSurface(
           radius: heroPillRadius,
           width: 44,

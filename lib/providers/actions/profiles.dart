@@ -22,6 +22,8 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> deleteProfile(int id) async {
     await ref.read(profilesProvider.notifier).del(id);
     await clearEffect(id);
+    unawaited(subscriptionReminder.forget(id));
+    unawaited(preferences.forgetSubscriptionHosts(id));
     final currentProfileId = ref.read(currentProfileIdProvider);
     if (currentProfileId == id) {
       final profiles = ref.read(profilesProvider);
@@ -88,6 +90,7 @@ class ProfilesAction extends _$ProfilesAction {
       );
       ref.read(profilesProvider.notifier).put(newProfile);
       unawaited(handlePanelVerdicts(newProfile.panelMeta));
+      unawaited(subscriptionReminder.check(newProfile));
       if (profile.id == ref.read(currentProfileIdProvider)) {
         applyPanelWidgetsFromMeta(
           newProfile.panelMeta,

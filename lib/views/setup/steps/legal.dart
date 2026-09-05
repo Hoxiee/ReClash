@@ -21,13 +21,15 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
   void _handleAgree() {
     // Written before the step changes, so a failure further along the wizard
     // cannot lose a consent the user already gave.
-    ref.read(appSettingProvider.notifier).update(
-      (state) => state.copyWith(
-        disclaimerAccepted: true,
-        crashlyticsTip: true,
-        crashlytics: system.isAndroid && _crashlytics,
-      ),
-    );
+    ref
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            disclaimerAccepted: true,
+            crashlyticsTip: true,
+            crashlytics: system.isAndroid && _crashlytics,
+          ),
+        );
     widget.onAgree();
   }
 
@@ -68,8 +70,7 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
           onPressed: _handleAgree,
         ),
         TextButton(
-          onPressed: () =>
-              ref.read(systemActionProvider.notifier).handleExit(),
+          onPressed: () => ref.read(systemActionProvider.notifier).handleExit(),
           child: Text(appLocalizations.exit),
         ),
       ],

@@ -1270,7 +1270,7 @@ $AccessControlPropsCopyWith<$Res> get accessControlProps {
 /// @nodoc
 mixin _$SmartRoutingProps {
 
- bool get enabled; SmartRoutingPreset get preset; List<String> get censorCountries; List<String> get canaryForeign; List<String> get canaryDomestic; List<RcxMarker> get openMarkers; List<RcxMarker> get domesticMarkers; List<String> get breakerPatterns; bool get allowDomesticLastResort; bool get saveMobileData; bool get requireUdp; int get manualHoldMinutes; int get dwellSeconds; int get waveWidth;
+ bool get enabled; SmartRoutingPreset get preset; SmartRoutingStrategy get strategy; List<String> get censorCountries; List<String> get canaryForeign; List<String> get canaryDomestic; List<RcxMarker> get openMarkers; List<RcxMarker> get domesticMarkers; List<String> get breakerPatterns; bool get allowDomesticLastResort; bool get requireUdp; bool get respectPick; int get dwellSeconds; int get waveWidth;
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1284,20 +1284,20 @@ $SmartRoutingPropsCopyWith<SmartRoutingProps> get copyWith => _$SmartRoutingProp
 @override
 bool operator ==(Object other) {
   final _this = this as SmartRoutingProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.saveMobileData, _this.saveMobileData) || other.saveMobileData == _this.saveMobileData)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.manualHoldMinutes, _this.manualHoldMinutes) || other.manualHoldMinutes == _this.manualHoldMinutes)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SmartRoutingProps;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.saveMobileData,_this.requireUdp,_this.manualHoldMinutes,_this.dwellSeconds,_this.waveWidth);
+  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.strategy,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth);
 }
 
 @override
 String toString() {
   final _this = this as SmartRoutingProps;
-  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, saveMobileData: ${_this.saveMobileData}, requireUdp: ${_this.requireUdp}, manualHoldMinutes: ${_this.manualHoldMinutes}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
+  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
 }
 
 
@@ -1308,7 +1308,7 @@ abstract mixin class $SmartRoutingPropsCopyWith<$Res>  {
   factory $SmartRoutingPropsCopyWith(SmartRoutingProps value, $Res Function(SmartRoutingProps) _then) = _$SmartRoutingPropsCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool saveMobileData, bool requireUdp, int manualHoldMinutes, int dwellSeconds, int waveWidth
+ bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
 });
 
 
@@ -1325,21 +1325,21 @@ class _$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as SmartRoutingPreset,censorCountries: null == censorCountries ? _self.censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as SmartRoutingPreset,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as SmartRoutingStrategy,censorCountries: null == censorCountries ? _self.censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
 as List<String>,canaryForeign: null == canaryForeign ? _self.canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
 as List<String>,canaryDomestic: null == canaryDomestic ? _self.canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
 as List<String>,openMarkers: null == openMarkers ? _self.openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self.domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
 as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
-as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
-as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
-as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
+as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
 as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -1426,10 +1426,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   return orElse();
 
 }
@@ -1447,10 +1447,10 @@ return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryFor
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps():
-return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1467,10 +1467,10 @@ return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryFor
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool saveMobileData,  bool requireUdp,  int manualHoldMinutes,  int dwellSeconds,  int waveWidth)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.saveMobileData,_that.requireUdp,_that.manualHoldMinutes,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   return null;
 
 }
@@ -1482,11 +1482,12 @@ return $default(_that.enabled,_that.preset,_that.censorCountries,_that.canaryFor
 @JsonSerializable()
 
 class _SmartRoutingProps implements SmartRoutingProps {
-  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<String> breakerPatterns = const [], this.allowDomesticLastResort = true, this.saveMobileData = true, this.requireUdp = false, this.manualHoldMinutes = 60, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_breakerPatterns = breakerPatterns;
+  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off, this.strategy = SmartRoutingStrategy.balanced,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<String> breakerPatterns = const [], this.allowDomesticLastResort = true, this.requireUdp = false, this.respectPick = true, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_breakerPatterns = breakerPatterns;
   factory _SmartRoutingProps.fromJson(Map<String, dynamic> json) => _$SmartRoutingPropsFromJson(json);
 
 @override@JsonKey() final  bool enabled;
 @override@JsonKey() final  SmartRoutingPreset preset;
+@override@JsonKey() final  SmartRoutingStrategy strategy;
  final  List<String> _censorCountries;
 @override@JsonKey() List<String> get censorCountries {
   if (_censorCountries is EqualUnmodifiableListView) return _censorCountries;
@@ -1530,9 +1531,8 @@ class _SmartRoutingProps implements SmartRoutingProps {
 }
 
 @override@JsonKey() final  bool allowDomesticLastResort;
-@override@JsonKey() final  bool saveMobileData;
 @override@JsonKey() final  bool requireUdp;
-@override@JsonKey() final  int manualHoldMinutes;
+@override@JsonKey() final  bool respectPick;
 @override@JsonKey() final  int dwellSeconds;
 @override@JsonKey() final  int waveWidth;
 
@@ -1549,18 +1549,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.saveMobileData, saveMobileData) || other.saveMobileData == saveMobileData)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.manualHoldMinutes, manualHoldMinutes) || other.manualHoldMinutes == manualHoldMinutes)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,saveMobileData,requireUdp,manualHoldMinutes,dwellSeconds,waveWidth);
+    return Object.hash(runtimeType,enabled,preset,strategy,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth);
 }
 
 @override
 String toString() {
-    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, saveMobileData: $saveMobileData, requireUdp: $requireUdp, manualHoldMinutes: $manualHoldMinutes, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
+    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, strategy: $strategy, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
 }
 
 
@@ -1571,7 +1571,7 @@ abstract mixin class _$SmartRoutingPropsCopyWith<$Res> implements $SmartRoutingP
   factory _$SmartRoutingPropsCopyWith(_SmartRoutingProps value, $Res Function(_SmartRoutingProps) _then) = __$SmartRoutingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool saveMobileData, bool requireUdp, int manualHoldMinutes, int dwellSeconds, int waveWidth
+ bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<String> breakerPatterns, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
 });
 
 
@@ -1588,21 +1588,21 @@ class __$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? saveMobileData = null,Object? requireUdp = null,Object? manualHoldMinutes = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(_SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
-as SmartRoutingPreset,censorCountries: null == censorCountries ? _self._censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
+as SmartRoutingPreset,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as SmartRoutingStrategy,censorCountries: null == censorCountries ? _self._censorCountries : censorCountries // ignore: cast_nullable_to_non_nullable
 as List<String>,canaryForeign: null == canaryForeign ? _self._canaryForeign : canaryForeign // ignore: cast_nullable_to_non_nullable
 as List<String>,canaryDomestic: null == canaryDomestic ? _self._canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
 as List<String>,openMarkers: null == openMarkers ? _self._openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self._domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,breakerPatterns: null == breakerPatterns ? _self._breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
 as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
-as bool,saveMobileData: null == saveMobileData ? _self.saveMobileData : saveMobileData // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
-as bool,manualHoldMinutes: null == manualHoldMinutes ? _self.manualHoldMinutes : manualHoldMinutes // ignore: cast_nullable_to_non_nullable
-as int,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
+as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
+as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
 as int,waveWidth: null == waveWidth ? _self.waveWidth : waveWidth // ignore: cast_nullable_to_non_nullable
 as int,
   ));

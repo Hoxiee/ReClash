@@ -33,6 +33,7 @@ import com.reclash.common.quickIntent
 import com.reclash.common.registerReceiverCompat
 import com.reclash.getPackageIconPath
 import com.reclash.packages.PackageResolver
+import com.reclash.showNotice
 import com.reclash.showToast
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -212,6 +213,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 } else {
                     result.success(installApk(path))
                 }
+            }
+
+            "showNotice" -> reply(result) {
+                GlobalState.application.showNotice(
+                    channelName = call.argument<String>("channelName").orEmpty(),
+                    title = call.argument<String>("title").orEmpty(),
+                    message = call.argument<String>("message").orEmpty(),
+                    actionLabel = call.argument<String>("actionLabel"),
+                    actionUrl = call.argument<String>("actionUrl"),
+                )
             }
 
             "getAndroidId" -> reply(result) {

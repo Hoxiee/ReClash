@@ -65,7 +65,7 @@ class ConfigToggleItem extends _ConfigItem<bool> {
     AppLocalizations appLocalizations,
     bool value,
   ) {
-    return ListItem.toggle(
+    return DecorationListItem.toggle(
       leading: leading,
       title: Text(title(appLocalizations)),
       subtitle: buildSubtitle(appLocalizations),
@@ -97,19 +97,19 @@ class ConfigOptionsItem<T> extends _ConfigItem<T> {
     AppLocalizations appLocalizations,
     T value,
   ) {
-    return ListItem<T>.options(
+    return DecorationListItem.options(
       leading: leading,
       title: Text(title(appLocalizations)),
       subtitle: Text(subtitle?.call(appLocalizations) ?? textBuilder(value)),
       dialogTitle: title(appLocalizations),
-      options: options,
+      options: [for (final option in options) option],
       value: value,
-      textBuilder: textBuilder,
+      textBuilder: (value) => textBuilder(value as T),
       onChanged: (value) {
         if (value == null) {
           return;
         }
-        onChanged(ref, value);
+        onChanged(ref, value as T);
       },
     );
   }
@@ -153,7 +153,7 @@ class ConfigTextItem extends _ConfigItem<String> {
   ) {
     final label = title(appLocalizations);
     final validator = this.validator;
-    return ListItem.input(
+    return DecorationListItem.input(
       leading: leading,
       title: Text(label),
       subtitle: showValueAsSubtitle
@@ -204,7 +204,7 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
     List<String> value,
   ) {
     final label = title(appLocalizations);
-    return ListItem.open(
+    return DecorationListItem.open(
       leading: leading,
       title: Text(label),
       subtitle: buildSubtitle(appLocalizations),

@@ -131,14 +131,25 @@ class ProxyCard extends ConsumerWidget {
             final selectedProxyName = ref.watch(
               selectedProxyNameProvider(groupName),
             );
+            final isSelected = selectedProxyName == proxy.name;
+            final byEngine =
+                isSelected &&
+                groupName == rcxNodeGroupName &&
+                ref.watch(
+                  smartRoutingStatusProvider.select(
+                    (state) =>
+                        state?.enabled == true &&
+                        !routingPinHolds(state, proxy.name),
+                  ),
+                );
             return CommonCard(
               radius: AppCorner.lg,
               key: key,
               onPressed: () {
                 _changeProxy(ref);
               },
-              isSelected: selectedProxyName == proxy.name,
-              child: child!,
+              isSelected: isSelected,
+              child: byEngine ? _EngineWash(child: child!) : child!,
             );
           },
           child: Container(
@@ -194,8 +205,68 @@ class ProxyCard extends ConsumerWidget {
             top: 0,
             right: 0,
             child: _ProxyComputedMark(groupName: groupName, proxy: proxy),
-          ),
+          )
+        else if (groupName == rcxNodeGroupName)
+          Positioned(top: 0, right: 0, child: _ProxyPinMark(proxy: proxy)),
       ],
+    );
+  }
+}
+
+/// A pin outranks the engine, so the card reads as held rather than washed.
+class _ProxyPinMark extends ConsumerWidget {
+  final Proxy proxy;
+
+  const _ProxyPinMark({required this.proxy});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final held = ref.watch(
+      smartRoutingStatusProvider.select(
+        (state) => routingPinHolds(state, proxy.name),
+      ),
+    );
+    return FadeScaleBox(
+      child: !held
+          ? const SizedBox()
+          : Container(
+              margin: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.colorScheme.secondaryContainer,
+              ),
+              child: Icon(
+                Icons.push_pin,
+                size: 12,
+                color: context.colorScheme.onSecondaryContainer,
+              ),
+            ),
+    );
+  }
+}
+
+/// The engine's own pick carries an accent wash instead of a badge.
+class _EngineWash extends StatelessWidget {
+  final Widget child;
+
+  const _EngineWash({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withValues(alpha: 0.24),
+            colorScheme.tertiary.withValues(alpha: 0.10),
+          ],
+        ),
+      ),
+      child: child,
     );
   }
 }

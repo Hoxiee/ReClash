@@ -192,7 +192,7 @@ class AppTray implements TrayPort {
     return [
       for (final group in trayState.groups)
         TrayMenuSubmenu(
-          label: group.name,
+          label: groupDisplayName(group.name),
           items: [
             for (final proxy in group.all)
               TrayMenuCheckbox(

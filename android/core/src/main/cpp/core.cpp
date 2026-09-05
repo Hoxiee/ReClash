@@ -72,6 +72,12 @@ Java_com_reclash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_reclash_core_Core_screenOff(JNIEnv *env, jobject thiz, jboolean off) {
+    screenOff(off);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_reclash_core_Core_suspended(JNIEnv *env, jobject thiz, jboolean suspended) {
     suspend(suspended);
 }
@@ -248,6 +254,11 @@ JNIEXPORT jstring JNICALL
 Java_com_reclash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
                                                 const jboolean only_statistics_proxy) {
     return env->NewStringUTF("{}");
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_reclash_core_Core_screenOff(JNIEnv *env, jobject thiz, jboolean off) {
 }
 
 extern "C"

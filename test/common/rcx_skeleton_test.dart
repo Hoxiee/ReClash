@@ -26,7 +26,8 @@ void main() {
     );
 
     expect(rules.last, 'MATCH,RCX-FINAL');
-    expect(rules.first, 'DOMAIN-SUFFIX,lan,DIRECT');
+    // A direct rule is the profile's domestic policy: it follows the terrain.
+    expect(rules.first, 'DOMAIN-SUFFIX,lan,RCX-DIRECT');
     final node = _groupNamed(rawConfig, 'RCX-NODE');
     expect(node['proxies'], ['Amsterdam #1', 'Amsterdam #2']);
     expect(node.containsKey('use'), isFalse);
@@ -65,7 +66,7 @@ void main() {
       rules: ['DOMAIN-SUFFIX,lan,DIRECT'],
     );
 
-    expect(rules, ['DOMAIN-SUFFIX,lan,DIRECT', 'MATCH,RCX-FINAL']);
+    expect(rules, ['DOMAIN-SUFFIX,lan,RCX-DIRECT', 'MATCH,RCX-FINAL']);
   });
 
   test('only the effective MATCH is retargeted', () {
@@ -80,7 +81,8 @@ void main() {
       rules: ['MATCH,PROXY', 'MATCH,DIRECT'],
     );
 
-    expect(rules, ['MATCH,RCX-FINAL', 'MATCH,DIRECT']);
+    // Only the first MATCH is live; a parked one still retargets DIRECT.
+    expect(rules, ['MATCH,RCX-FINAL', 'MATCH,RCX-DIRECT']);
   });
 
   test('a profile that already owns the names is left alone', () {
@@ -89,7 +91,11 @@ void main() {
         {'name': 'node'},
       ],
       'proxy-groups': [
-        {'name': 'RCX-NODE', 'type': 'select', 'proxies': ['node']},
+        {
+          'name': 'RCX-NODE',
+          'type': 'select',
+          'proxies': ['node'],
+        },
       ],
     };
 
@@ -114,6 +120,76 @@ void main() {
     expect(rawConfig.containsKey('proxy-groups'), isFalse);
   });
 
+  test('domestic direct rules retarget, local ranges stay direct', () {
+    final rawConfig = <String, Object?>{
+      'proxies': [
+        {'name': 'node'},
+      ],
+    };
+
+    final rules = injectRcxSkeleton(
+      rawConfig: rawConfig,
+      rules: [
+        'DOMAIN-SUFFIX,yandex.ru,DIRECT',
+        'GEOIP,RU,DIRECT',
+        'GEOIP,private,DIRECT,no-resolve',
+        'IP-CIDR,10.0.0.0/8,DIRECT',
+        'IP-CIDR,192.168.1.0/24,DIRECT',
+        'IP-CIDR,172.16.0.0/12,DIRECT',
+        'IP-CIDR,127.0.0.1/32,DIRECT',
+        'DOMAIN-SUFFIX,google.com,PROXY',
+      ],
+    );
+
+    expect(rules, [
+      'DOMAIN-SUFFIX,yandex.ru,RCX-DIRECT',
+      'GEOIP,RU,RCX-DIRECT',
+      'GEOIP,private,DIRECT,no-resolve',
+      'IP-CIDR,10.0.0.0/8,DIRECT',
+      'IP-CIDR,192.168.1.0/24,DIRECT',
+      'IP-CIDR,172.16.0.0/12,DIRECT',
+      'IP-CIDR,127.0.0.1/32,DIRECT',
+      'DOMAIN-SUFFIX,google.com,PROXY',
+      'MATCH,RCX-FINAL',
+    ]);
+    final split = _groupNamed(rawConfig, 'RCX-DIRECT');
+    expect(split['hidden'], isTrue);
+    // DIRECT is index 0, so an unconfigured group starts on the safe path.
+    expect(split['proxies'], ['DIRECT', 'RCX-NODE']);
+  });
+
+  test('no-resolve rides along on a retargeted rule', () {
+    final rawConfig = <String, Object?>{
+      'proxies': [
+        {'name': 'node'},
+      ],
+    };
+
+    final rules = injectRcxSkeleton(
+      rawConfig: rawConfig,
+      rules: ['GEOIP,RU,DIRECT,no-resolve', 'MATCH,DIRECT'],
+    );
+
+    expect(rules, ['GEOIP,RU,RCX-DIRECT,no-resolve', 'MATCH,RCX-FINAL']);
+  });
+
+  test('a patched config is not patched twice', () {
+    final rawConfig = <String, Object?>{
+      'proxies': [
+        {'name': 'node'},
+      ],
+    };
+
+    final once = injectRcxSkeleton(
+      rawConfig: rawConfig,
+      rules: ['GEOIP,RU,DIRECT', 'MATCH,DIRECT'],
+    );
+
+    final twice = injectRcxSkeleton(rawConfig: rawConfig, rules: once);
+
+    expect(twice, once);
+  });
+
   test('groups the overwrite feature built survive the append', () {
     final rawConfig = <String, Object?>{
       'proxies': [
@@ -127,7 +203,7 @@ void main() {
     injectRcxSkeleton(rawConfig: rawConfig, rules: ['MATCH,PROXY']);
 
     final groups = rawConfig['proxy-groups'] as List;
-    expect(groups.length, 3);
+    expect(groups.length, 4);
     expect((groups.first as ProxyGroup).name, 'Mine');
   });
 }

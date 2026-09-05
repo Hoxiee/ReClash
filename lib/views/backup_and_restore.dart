@@ -15,6 +15,7 @@ import 'package:reclash/widgets/input.dart';
 import 'package:reclash/widgets/list.dart';
 import 'package:reclash/widgets/loading.dart';
 import 'package:reclash/widgets/scaffold.dart';
+import 'package:reclash/widgets/setting.dart';
 import 'package:reclash/widgets/text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,90 +200,105 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
       title: appLocalizations.backupAndRestore,
       body: ListView(
         children: [
-          ListHeader(title: appLocalizations.remote),
-          if (dav == null)
-            ListItem(
-              leading: const Icon(Icons.account_box),
-              title: Text(appLocalizations.noInfo),
-              subtitle: Text(appLocalizations.pleaseBindWebDAV),
-              trailing: FilledButton.tonal(
-                onPressed: () {
-                  _showAddWebDAV(dav);
-                },
-                child: Text(appLocalizations.bind),
-              ),
-            )
-          else ...[
-            ListItem(
-              leading: const Icon(Icons.account_box),
-              title: TooltipText(
-                text: Text(
-                  dav.user,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          SettingSection(
+            top: 16,
+            title: appLocalizations.remote,
+            items: [
+              if (dav == null)
+                DecorationListItem(
+                  leading: const Icon(Icons.account_box),
+                  title: Text(appLocalizations.noInfo),
+                  subtitle: Text(appLocalizations.pleaseBindWebDAV),
+                  trailing: FilledButton.tonal(
+                    onPressed: () {
+                      _showAddWebDAV(dav);
+                    },
+                    child: Text(appLocalizations.bind),
+                  ),
+                )
+              else ...[
+                DecorationListItem(
+                  leading: const Icon(Icons.account_box),
+                  title: TooltipText(
+                    text: Text(
+                      dav.user,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(appLocalizations.connectivity),
+                        _DavConnectionIndicator(connection: _davConnection),
+                      ],
+                    ),
+                  ),
+                  trailing: FilledButton.tonal(
+                    onPressed: () {
+                      _showAddWebDAV(dav);
+                    },
+                    child: Text(appLocalizations.edit),
+                  ),
                 ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(appLocalizations.connectivity),
-                    _DavConnectionIndicator(connection: _davConnection),
-                  ],
+                DecorationListItem.input(
+                  title: Text(appLocalizations.file),
+                  subtitle: Text(dav.fileName),
+                  dialogTitle: appLocalizations.file,
+                  value: dav.fileName,
+                  resetValue: defaultDavFileName,
+                  maxLength: TextInputLimits.fileName,
+                  onChanged: (value) {
+                    _handleChange(value, ref);
+                  },
                 ),
-              ),
-              trailing: FilledButton.tonal(
+                DecorationListItem(
+                  onPressed: () {
+                    _backupOnWebDAV();
+                  },
+                  title: Text(appLocalizations.backup),
+                  subtitle: Text(appLocalizations.remoteBackupDesc),
+                ),
+                DecorationListItem(
+                  onPressed: () {
+                    _handleRestoreOnWebDAV();
+                  },
+                  title: Text(appLocalizations.restore),
+                  subtitle: Text(appLocalizations.restoreFromWebDAVDesc),
+                ),
+              ],
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.local,
+            items: [
+              DecorationListItem(
                 onPressed: () {
-                  _showAddWebDAV(dav);
+                  _backupOnLocal();
                 },
-                child: Text(appLocalizations.edit),
+                title: Text(appLocalizations.backup),
+                subtitle: Text(appLocalizations.localBackupDesc),
               ),
-            ),
-            const SizedBox(height: 4),
-            ListItem.input(
-              title: Text(appLocalizations.file),
-              subtitle: Text(dav.fileName),
-              dialogTitle: appLocalizations.file,
-              value: dav.fileName,
-              resetValue: defaultDavFileName,
-              maxLength: TextInputLimits.fileName,
-              onChanged: (value) {
-                _handleChange(value, ref);
-              },
-            ),
-            ListItem(
-              onTap: () {
-                _backupOnWebDAV();
-              },
-              title: Text(appLocalizations.backup),
-              subtitle: Text(appLocalizations.remoteBackupDesc),
-            ),
-            ListItem(
-              onTap: () {
-                _handleRestoreOnWebDAV();
-              },
-              title: Text(appLocalizations.restore),
-              subtitle: Text(appLocalizations.restoreFromWebDAVDesc),
-            ),
-          ],
-          ListHeader(title: appLocalizations.local),
-          ListItem(
-            onTap: () {
-              _backupOnLocal();
-            },
-            title: Text(appLocalizations.backup),
-            subtitle: Text(appLocalizations.localBackupDesc),
+              DecorationListItem(
+                onPressed: () {
+                  _handleRestoreOnLocal();
+                },
+                title: Text(appLocalizations.restore),
+                subtitle: Text(appLocalizations.restoreFromFileDesc),
+              ),
+            ],
+            enterDelay: const Duration(milliseconds: 50),
           ),
-          ListItem(
-            onTap: () {
-              _handleRestoreOnLocal();
-            },
-            title: Text(appLocalizations.restore),
-            subtitle: Text(appLocalizations.restoreFromFileDesc),
+          SettingSection(
+            title: appLocalizations.options,
+            items: [
+              _RestoreStrategyItem(onPressed: _handleUpdateRestoreStrategy),
+            ],
+            enterDelay: const Duration(milliseconds: 100),
           ),
-          ListHeader(title: appLocalizations.options),
-          _RestoreStrategyItem(onPressed: _handleUpdateRestoreStrategy),
+          const SettingBottomInset(),
         ],
       ),
     );
@@ -336,8 +352,8 @@ class _RestoreStrategyItem extends ConsumerWidget {
     final restoreStrategy = ref.watch(
       appSettingProvider.select((state) => state.restoreStrategy),
     );
-    return ListItem(
-      onTap: onPressed,
+    return DecorationListItem(
+      onPressed: onPressed,
       title: Text(context.appLocalizations.restoreStrategy),
       trailing: FilledButton(
         onPressed: onPressed,

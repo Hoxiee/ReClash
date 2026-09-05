@@ -54,15 +54,17 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       }
       if (ref.read(coreStatusProvider) == CoreStatus.connected) {
         unawaited(
-          _core.configureSmartRouting(next.rcxParams).then(
-            (_) {},
-            // An older core without the rcx methods keeps tunneling; the
-            // next start re-syncs the engine when a matching core returns.
-            onError: (Object error) => commonPrint.log(
-              'smart routing sync skipped: $error',
-              logLevel: LogLevel.warning,
-            ),
-          ),
+          _core
+              .configureSmartRouting(next.rcxParams)
+              .then(
+                (_) {},
+                // An older core without the rcx methods keeps tunneling; the
+                // next start re-syncs the engine when a matching core returns.
+                onError: (Object error) => commonPrint.log(
+                  'smart routing sync skipped: $error',
+                  logLevel: LogLevel.warning,
+                ),
+              ),
         );
       }
       // The RCX groups only exist in profiles built while enabled, so the
@@ -152,6 +154,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void onRcxStatus(RcxStatus status) {
     ref.read(smartRoutingStatusProvider.notifier).value = status;
+    ref.read(smartRoutingTrailProvider.notifier).update((trail) {
+      return status.enabled ? rcxTrailWith(trail, status.node) : const [];
+    });
     super.onRcxStatus(status);
   }
 

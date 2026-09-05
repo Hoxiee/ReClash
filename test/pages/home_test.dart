@@ -592,10 +592,7 @@ void main() {
     expect(find.byType(AppNavBar), findsOneWidget);
 
     Finder segmentIcon(IconData icon) => find
-        .descendant(
-          of: find.byType(AppNavBar),
-          matching: find.byIcon(icon),
-        )
+        .descendant(of: find.byType(AppNavBar), matching: find.byIcon(icon))
         .first;
 
     double highlightX() =>

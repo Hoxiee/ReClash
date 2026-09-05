@@ -189,7 +189,9 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('send device identity toggle flips the app setting', (tester) async {
+  testWidgets('send device identity toggle flips the app setting', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1000, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

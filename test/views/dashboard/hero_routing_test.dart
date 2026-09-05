@@ -24,11 +24,7 @@ void main() {
         RoutingRowState.off,
       );
       expect(
-        routingRowStateOf(
-          enabled: false,
-          mode: Mode.rule,
-          status: statusOf(),
-        ),
+        routingRowStateOf(enabled: false, mode: Mode.rule, status: statusOf()),
         RoutingRowState.off,
       );
     });
@@ -132,17 +128,13 @@ void main() {
           child: const TestApp(
             includeNavigatorKey: false,
             setTheme: false,
-            child: Scaffold(
-              body: HeroRoutingRow(accent: Color(0xFF000000)),
-            ),
+            child: Scaffold(body: HeroRoutingRow(accent: Color(0xFF000000))),
           ),
         ),
       );
     }
 
-    testWidgets('renders every state line from its own status', (
-      tester,
-    ) async {
+    testWidgets('renders every state line from its own status', (tester) async {
       final cases = (
         props: const SmartRoutingProps(enabled: true),
         mode: Mode.rule,

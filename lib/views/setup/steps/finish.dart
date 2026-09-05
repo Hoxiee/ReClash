@@ -17,11 +17,13 @@ class SetupFinishStep extends ConsumerWidget {
   final VoidCallback onDone;
 
   void _selectPreset(WidgetRef ref, SmartRoutingPreset value) {
-    ref.read(smartRoutingSettingProvider.notifier).update(
-      (state) => state
-          .applyPreset(value)
-          .copyWith(enabled: value != SmartRoutingPreset.off),
-    );
+    ref
+        .read(smartRoutingSettingProvider.notifier)
+        .update(
+          (state) => state
+              .applyPreset(value)
+              .copyWith(enabled: value != SmartRoutingPreset.off),
+        );
   }
 
   @override
@@ -111,8 +113,9 @@ class _Permissions extends ConsumerWidget {
           _PermissionRow(
             title: appLocalizations.setupPermissionNotifications,
             desc: appLocalizations.setupPermissionNotificationsDesc,
-            onPressed: () =>
-                unawaited(app?.requestNotificationsPermission() ?? Future.value()),
+            onPressed: () => unawaited(
+              app?.requestNotificationsPermission() ?? Future.value(),
+            ),
           ),
           if (!battery)
             _PermissionRow(

@@ -3,6 +3,7 @@ package com.reclash.models
 import com.reclash.common.AccessControlMode
 import com.google.gson.Gson
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -98,8 +99,17 @@ class SharedStateTest {
         assertEquals(true, defaults.crashlytics)
         assertEquals(false, defaults.onlyStatisticsProxy)
         assertEquals(true, defaults.showStopAction)
+        assertEquals(false, defaults.autoRun)
         assertNull(defaults.vpnOptions)
         assertNull(defaults.setupParams)
+    }
+
+    @Test
+    fun `auto run decodes from the flag the boot receiver reads`() {
+        val state = gson.fromJson("""{"autoRun":true}""", SharedState::class.java)
+
+        assertTrue(state.autoRun)
+        assertFalse(gson.fromJson("{}", SharedState::class.java).autoRun)
     }
 
     @Test

@@ -7,7 +7,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-const _manualHoldChoices = [0, 15, 30, 60, 240];
 const _dwellChoices = [30, 90, 180, 600];
 const _waveChoices = [4, 8, 12, 20];
 
@@ -44,110 +43,17 @@ class SmartRoutingView extends ConsumerWidget {
     _update(ref, (state) => state.applyPreset(state.preset));
   }
 
-  Widget _switchItem({
-    required String title,
-    required String desc,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      title: Text(title),
-      subtitle: Text(desc),
-      onPressed: () => onChanged(!value),
-      trailing: Switch(value: value, onChanged: onChanged),
-    );
-  }
-
-  Widget _optionsItem<T>(
-    BuildContext context, {
-    required String title,
-    required String desc,
-    required List<T> options,
-    required T value,
-    required String Function(T value) labelOf,
-    required ValueChanged<T> onChanged,
-  }) {
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      title: Text(title),
-      subtitle: Text(desc),
-      trailing: Text(
-        labelOf(value),
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: context.colorScheme.onSurface.opacity60,
-        ),
-      ),
-      onPressed: () async {
-        final next = await dialogs.showCommonDialog<T>(
-          child: OptionsDialog<T>(
-            title: title,
-            options: options,
-            value: value,
-            textBuilder: labelOf,
-          ),
-        );
-        if (next != null) {
-          onChanged(next);
-        }
-      },
-    );
-  }
-
-  Widget _listItem({
-    required BuildContext context,
-    required WidgetRef ref,
-    required String title,
-    required String desc,
-    required List<String> value,
-    required SmartRoutingProps Function(SmartRoutingProps, List<String>) write,
-  }) {
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      title: Text(title),
-      subtitle: Text(
-        value.isEmpty ? desc : '${value.length} · ${value.join(', ')}',
-      ),
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-      onPressed: () {
-        final controller = ListEditingController(
-          items: value,
-          onChanged: (items) => _update(
-            ref,
-            (state) => write(state, List<String>.from(items)),
-          ),
-        );
-        showExtend(
-          context,
-          props: const ExtendProps(blur: false),
-          builder: (_) {
-            return AdaptiveSheetScaffold(
-              title: title,
-              actions: controller.iconActions(context),
-              body: ListInputBody(
-                controller: controller,
-                titleBuilder: Text.new,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
     final slivers = <Widget>[
-      _section(
+      SettingSection.sliver(
+        top: 12,
         items: [
-          _switchItem(
-            title: appLocalizations.smartRouting,
-            desc: appLocalizations.smartRoutingDesc,
+          DecorationListItem.toggle(
+            title: Text(appLocalizations.smartRouting),
+            subtitle: Text(appLocalizations.smartRoutingDesc),
             value: props.enabled,
             onChanged: (value) => _handleEnabled(ref, value),
           ),
@@ -157,7 +63,7 @@ class SmartRoutingView extends ConsumerWidget {
 
     if (props.enabled) {
       slivers.addAll([
-        _section(
+        SettingSection.sliver(
           title: appLocalizations.smartRoutingPreset,
           actions: [
             const SizedBox(width: 8),
@@ -171,119 +77,120 @@ class SmartRoutingView extends ConsumerWidget {
             ),
           ],
           items: [
-            _optionsItem<SmartRoutingPreset>(
-              context,
-              title: appLocalizations.smartRoutingRegion,
-              desc:
-                  props.matchesPreset
-                      ? props.preset.label
-                      : appLocalizations.smartRoutingPresetEdited(
+            DecorationListItem.options(
+              title: Text(appLocalizations.smartRoutingRegion),
+              subtitle: Text(
+                props.matchesPreset
+                    ? props.preset.label
+                    : appLocalizations.smartRoutingPresetEdited(
                         props.preset.label,
                       ),
+              ),
+              dialogTitle: appLocalizations.smartRoutingRegion,
               options: SmartRoutingPreset.values,
               value: props.preset,
-              labelOf: (value) => value.label,
-              onChanged: (value) =>
-                  _update(ref, (state) => state.applyPreset(value)),
+              textBuilder: (value) => (value as SmartRoutingPreset).label,
+              onChanged: (value) => _update(
+                ref,
+                (state) => state.applyPreset(value as SmartRoutingPreset),
+              ),
+            ),
+            DecorationListItem.options(
+              title: Text(appLocalizations.smartRoutingStrategy),
+              subtitle: Text(appLocalizations.smartRoutingStrategyDesc),
+              dialogTitle: appLocalizations.smartRoutingStrategy,
+              options: SmartRoutingStrategy.values,
+              value: props.strategy,
+              textBuilder: (value) => (value as SmartRoutingStrategy).label,
+              onChanged: (value) => _update(
+                ref,
+                (state) =>
+                    state.copyWith(strategy: value as SmartRoutingStrategy),
+              ),
             ),
           ],
         ),
-        _section(
+        SettingSection.sliver(
           title: appLocalizations.smartRoutingBehaviour,
           items: [
-            _switchItem(
-              title: appLocalizations.smartRoutingDomestic,
-              desc: appLocalizations.smartRoutingDomesticDesc,
+            DecorationListItem.toggle(
+              title: Text(appLocalizations.smartRoutingDomestic),
+              subtitle: Text(appLocalizations.smartRoutingDomesticDesc),
               value: props.allowDomesticLastResort,
               onChanged: (value) => _update(
                 ref,
                 (state) => state.copyWith(allowDomesticLastResort: value),
               ),
             ),
-            _switchItem(
-              title: appLocalizations.smartRoutingRequireUdp,
-              desc: appLocalizations.smartRoutingRequireUdpDesc,
+            DecorationListItem.toggle(
+              title: Text(appLocalizations.smartRoutingRequireUdp),
+              subtitle: Text(appLocalizations.smartRoutingRequireUdpDesc),
               value: props.requireUdp,
               onChanged: (value) =>
                   _update(ref, (state) => state.copyWith(requireUdp: value)),
             ),
-            _optionsItem<int>(
-              context,
-              title: appLocalizations.smartRoutingManualHold,
-              desc: appLocalizations.smartRoutingManualHoldDesc,
-              options: _manualHoldChoices,
-              value: props.manualHoldMinutes,
-              labelOf: (value) => _minutesLabel(context, value),
+            DecorationListItem.toggle(
+              title: Text(appLocalizations.smartRoutingManualHold),
+              subtitle: Text(appLocalizations.smartRoutingManualHoldDesc),
+              value: props.respectPick,
               onChanged: (value) =>
-                  _update(ref, (state) => state.copyWith(manualHoldMinutes: value)),
+                  _update(ref, (state) => state.copyWith(respectPick: value)),
             ),
-            _optionsItem<int>(
-              context,
-              title: appLocalizations.smartRoutingDwell,
-              desc: appLocalizations.smartRoutingDwellDesc,
+            DecorationListItem.options(
+              title: Text(appLocalizations.smartRoutingDwell),
+              subtitle: Text(appLocalizations.smartRoutingDwellDesc),
+              dialogTitle: appLocalizations.smartRoutingDwell,
               options: _dwellChoices,
               value: props.dwellSeconds,
-              labelOf: (value) => appLocalizations.smartRoutingSeconds(value),
-              onChanged: (value) =>
-                  _update(ref, (state) => state.copyWith(dwellSeconds: value)),
-            ),
-          ],
-        ),
-        _section(
-          title: appLocalizations.smartRoutingProbing,
-          items: [
-            _switchItem(
-              title: appLocalizations.smartRoutingSaveData,
-              desc: appLocalizations.smartRoutingSaveDataDesc,
-              value: props.saveMobileData,
+              textBuilder: (value) =>
+                  appLocalizations.smartRoutingSeconds(value as int),
               onChanged: (value) => _update(
                 ref,
-                (state) => state.copyWith(saveMobileData: value),
+                (state) => state.copyWith(dwellSeconds: value as int),
               ),
-            ),
-            _optionsItem<int>(
-              context,
-              title: appLocalizations.smartRoutingWave,
-              desc: appLocalizations.smartRoutingWaveDesc,
-              options: _waveChoices,
-              value: props.waveWidth,
-              labelOf: (value) =>
-                  appLocalizations.smartRoutingWaveNodes(value),
-              onChanged: (value) =>
-                  _update(ref, (state) => state.copyWith(waveWidth: value)),
             ),
           ],
         ),
-        _section(
+        SettingSection.sliver(
+          title: appLocalizations.smartRoutingProbing,
+          items: [
+            DecorationListItem.options(
+              title: Text(appLocalizations.smartRoutingWave),
+              subtitle: Text(appLocalizations.smartRoutingWaveDesc),
+              dialogTitle: appLocalizations.smartRoutingWave,
+              options: _waveChoices,
+              value: props.waveWidth,
+              textBuilder: (value) =>
+                  appLocalizations.smartRoutingWaveNodes(value as int),
+              onChanged: (value) => _update(
+                ref,
+                (state) => state.copyWith(waveWidth: value as int),
+              ),
+            ),
+          ],
+        ),
+        SettingSection.sliver(
           title: appLocalizations.smartRoutingDetection,
           items: [
-            _listItem(
-              context: context,
-              ref: ref,
+            _StringListItem(
               title: appLocalizations.smartRoutingCanariesForeign,
               desc: appLocalizations.smartRoutingCanariesForeignDesc,
               value: props.canaryForeign,
               write: (state, value) => state.copyWith(canaryForeign: value),
             ),
-            _listItem(
-              context: context,
-              ref: ref,
+            _StringListItem(
               title: appLocalizations.smartRoutingCanariesDomestic,
               desc: appLocalizations.smartRoutingCanariesDomesticDesc,
               value: props.canaryDomestic,
               write: (state, value) => state.copyWith(canaryDomestic: value),
             ),
-            _listItem(
-              context: context,
-              ref: ref,
+            _StringListItem(
               title: appLocalizations.smartRoutingCensor,
               desc: appLocalizations.smartRoutingCensorDesc,
               value: props.censorCountries,
               write: (state, value) => state.copyWith(censorCountries: value),
             ),
-            _listItem(
-              context: context,
-              ref: ref,
+            _StringListItem(
               title: appLocalizations.smartRoutingBreakerPatterns,
               desc: appLocalizations.smartRoutingBreakerPatternsDesc,
               value: props.breakerPatterns,
@@ -291,7 +198,7 @@ class SmartRoutingView extends ConsumerWidget {
             ),
           ],
         ),
-        _section(
+        SettingSection.sliver(
           title: appLocalizations.smartRoutingMarkers,
           items: [
             _MarkersItem(
@@ -308,7 +215,7 @@ class SmartRoutingView extends ConsumerWidget {
             ),
           ],
         ),
-        _section(
+        SettingSection.sliver(
           title: appLocalizations.smartRoutingRanking,
           bottom: 24,
           items: [
@@ -332,34 +239,25 @@ class SmartRoutingView extends ConsumerWidget {
           ],
         ),
       ]);
+    } else {
+      slivers.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 48),
+            child: NullStatus(label: appLocalizations.smartRoutingOffHint),
+          ),
+        ),
+      );
     }
 
     return CommonScaffold(
       title: appLocalizations.smartRouting,
-      body: CustomScrollView(slivers: slivers),
+      body: CustomScrollView(
+        slivers: [...slivers, const SettingBottomInset.sliver()],
+      ),
     );
   }
-}
-
-Widget _section({
-  required List<Widget> items,
-  String? title,
-  List<Widget>? actions,
-  double bottom = 12,
-}) {
-  return SliverPadding(
-    padding: EdgeInsets.fromLTRB(16, 0, 16, bottom),
-    sliver: SliverToBoxAdapter(
-      child: generateSectionV3(title: title, actions: actions, items: items),
-    ),
-  );
-}
-
-String _minutesLabel(BuildContext context, int minutes) {
-  final appLocalizations = context.appLocalizations;
-  return minutes == 0
-      ? appLocalizations.smartRoutingManualHoldOff
-      : appLocalizations.smartRoutingManualHoldMinutes(minutes);
 }
 
 /// A marker is a URL plus the statuses that count, so it cannot ride the plain
@@ -384,15 +282,13 @@ class _MarkersItem extends StatelessWidget {
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
       title: Text(title),
       subtitle: Text(
-        markers.isEmpty
-            ? desc
-            : markers.map((marker) => marker.url).join(', '),
+        markers.isEmpty ? desc : markers.map((marker) => marker.url).join(', '),
       ),
       trailing: const Icon(Icons.chevron_right_rounded, size: 20),
       onPressed: () {
         showExtend(
           context,
-          props: const ExtendProps(blur: false),
+          props: const ExtendProps(blur: false, forceFull: true),
           builder: (_) {
             return _MarkersSheet(title: title, domestic: domestic);
           },
@@ -404,24 +300,58 @@ class _MarkersItem extends StatelessWidget {
 
 /// The sheet wrapper for a marker list: the toolbar carries the add action,
 /// because the body is a bare list with no title bar of its own.
-class _MarkersSheet extends ConsumerWidget {
+class _MarkersSheet extends ConsumerStatefulWidget {
   const _MarkersSheet({required this.title, required this.domestic});
 
   final String title;
   final bool domestic;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_MarkersSheet> createState() => _MarkersSheetState();
+}
+
+class _MarkersSheetState extends ConsumerState<_MarkersSheet> {
+  Set<String> _selection = {};
+
+  void _deleteSelected() {
+    _writeMarkers(
+      ref,
+      widget.domestic,
+      _markerRowsOf(
+        ref.read(smartRoutingSettingProvider),
+        widget.domestic,
+      ).where((marker) => !_selection.contains(marker.url)).toList(),
+    );
+    _selection = {};
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selection = _selection;
     return AdaptiveSheetScaffold(
-      title: title,
+      title: widget.title,
       actions: [
-        IconButtonData(
-          icon: Icons.add,
-          tooltip: context.appLocalizations.add,
-          onPressed: () => showMarkerDialog(context, ref, domestic),
-        ),
+        if (selection.isNotEmpty)
+          IconButtonData(
+            icon: Icons.delete,
+            tooltip: context.appLocalizations.delete,
+            onPressed: _deleteSelected,
+          )
+        else
+          IconButtonData(
+            icon: Icons.add,
+            tooltip: context.appLocalizations.add,
+            onPressed: () => showMarkerDialog(context, ref, widget.domestic),
+          ),
       ],
-      body: _MarkersBody(domestic: domestic),
+      body: _MarkersBody(
+        domestic: widget.domestic,
+        selection: selection,
+        onSelected: (url) => setState(() {
+          _selection = {..._selection}..addOrRemove(url);
+        }),
+      ),
     );
   }
 }
@@ -430,11 +360,13 @@ List<RcxMarker> _markerRowsOf(SmartRoutingProps props, bool domestic) =>
     domestic ? props.domesticMarkers : props.openMarkers;
 
 void _writeMarkers(WidgetRef ref, bool domestic, List<RcxMarker> next) {
-  ref.read(smartRoutingSettingProvider.notifier).update(
-    (state) => domestic
-        ? state.copyWith(domesticMarkers: next)
-        : state.copyWith(openMarkers: next),
-  );
+  ref
+      .read(smartRoutingSettingProvider.notifier)
+      .update(
+        (state) => domestic
+            ? state.copyWith(domesticMarkers: next)
+            : state.copyWith(openMarkers: next),
+      );
 }
 
 Future<void> showMarkerDialog(
@@ -462,9 +394,15 @@ Future<void> showMarkerDialog(
 /// The marker list as a bare body: the opening row already named the list, and
 /// the sheet's toolbar is the only title bar.
 class _MarkersBody extends ConsumerWidget {
-  const _MarkersBody({required this.domestic});
+  const _MarkersBody({
+    required this.domestic,
+    required this.selection,
+    required this.onSelected,
+  });
 
   final bool domestic;
+  final Set<String> selection;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -483,15 +421,12 @@ class _MarkersBody extends ConsumerWidget {
                   ? [
                       DecorationListItem(
                         minVerticalPadding: 8,
-                        title: Text(
-                          appLocalizations.smartRoutingMarkersEmpty,
-                        ),
+                        title: Text(appLocalizations.smartRoutingMarkersEmpty),
                       ),
                     ]
                   : List.generate(
                       rows.length,
-                      (index) => DecorationListItem(
-                        minVerticalPadding: 8,
+                      (index) => SelectedDecorationListItem(
                         title: TooltipText(
                           text: Text(
                             rows[index].url,
@@ -500,18 +435,12 @@ class _MarkersBody extends ConsumerWidget {
                           ),
                         ),
                         subtitle: Text(rows[index].statuses.join(', ')),
-                        onPressed: () => showMarkerDialog(context, ref, domestic, index),
-                        trailing: IconButton(
-                          tooltip: appLocalizations.delete,
-                          onPressed: () {
-                            _writeMarkers(
-                              ref,
-                              domestic,
-                              [...rows]..removeAt(index),
-                            );
-                          },
-                          icon: const Icon(Icons.delete_outline),
-                        ),
+                        isSelected: selection.contains(rows[index].url),
+                        isEditing: selection.isNotEmpty,
+                        onSelected: () => onSelected(rows[index].url),
+                        onPressed: () => selection.isEmpty
+                            ? showMarkerDialog(context, ref, domestic, index)
+                            : onSelected(rows[index].url),
                       ),
                     ),
             ),
@@ -631,6 +560,35 @@ class _MarkerDialogState extends State<_MarkerDialog> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _StringListItem extends ConsumerWidget {
+  const _StringListItem({
+    required this.title,
+    required this.desc,
+    required this.value,
+    required this.write,
+  });
+
+  final String title;
+  final String desc;
+  final List<String> value;
+  final SmartRoutingProps Function(SmartRoutingProps, List<String>) write;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return DecorationListItem.open(
+      title: Text(title),
+      subtitle: Text(
+        value.isEmpty ? desc : '${value.length} · ${value.join(', ')}',
+      ),
+      blur: false,
+      widget: ListInputPage(title: title, items: value, titleBuilder: Text.new),
+      onChanged: (items) => ref
+          .read(smartRoutingSettingProvider.notifier)
+          .update((state) => write(state, List<String>.from(items as List))),
     );
   }
 }

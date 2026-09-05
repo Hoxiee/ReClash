@@ -30,9 +30,12 @@ class SetupSubscriptionStep extends ConsumerWidget {
     if (restored != true) return;
     // A restored config replaces app settings wholesale; the consent the
     // legal step recorded must survive it or the disclaimer shows again.
-    ref.read(appSettingProvider.notifier).update(
-      (state) => state.copyWith(disclaimerAccepted: true, crashlyticsTip: true),
-    );
+    ref
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) =>
+              state.copyWith(disclaimerAccepted: true, crashlyticsTip: true),
+        );
     if (context.mounted) {
       context.showNotifier(appLocalizations.restoreSuccess);
     }
@@ -76,7 +79,9 @@ class SetupSubscriptionStep extends ConsumerWidget {
             ),
       actions: [
         SetupPrimaryButton(
-          label: added ? appLocalizations.setupNext : appLocalizations.setupSkip,
+          label: added
+              ? appLocalizations.setupNext
+              : appLocalizations.setupSkip,
           onPressed: onNext,
         ),
       ],
@@ -119,9 +124,7 @@ class _AddedProfile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            SubscriptionInfoView(
-              subscriptionInfo: profile.subscriptionInfo,
-            ),
+            SubscriptionInfoView(subscriptionInfo: profile.subscriptionInfo),
           ],
         ),
       ),

@@ -73,7 +73,10 @@ class SetupLanguageStep extends ConsumerWidget {
         ],
       ),
       actions: [
-        SetupPrimaryButton(label: appLocalizations.setupNext, onPressed: onNext),
+        SetupPrimaryButton(
+          label: appLocalizations.setupNext,
+          onPressed: onNext,
+        ),
       ],
     );
   }

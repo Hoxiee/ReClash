@@ -47,12 +47,14 @@ void main() {
     container.read(runTimeProvider.notifier).value = running ? 1 : null;
     container.read(currentSSIDProvider.notifier).value = currentSsid;
     if (trustedNetworks.isNotEmpty) {
-      container.read(vpnSettingProvider.notifier).update(
-        (_) => const VpnProps().copyWith(
-          smartPauseEnabled: true,
-          smartPauseNetworks: trustedNetworks,
-        ),
-      );
+      container
+          .read(vpnSettingProvider.notifier)
+          .update(
+            (_) => const VpnProps().copyWith(
+              smartPauseEnabled: true,
+              smartPauseNetworks: trustedNetworks,
+            ),
+          );
     }
     container.read(patchClashConfigProvider.notifier).value =
         const PatchClashConfig().copyWith(mixedPort: mixedPort);

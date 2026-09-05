@@ -9,9 +9,12 @@ import (
 
 var rcxEngineInstance = newRcxEngine(rcxCoreRuntime{})
 
-// RCX-NODE stays selectable by hand, which is what arms manual-hold.
+// Every RCX group is engine-owned: the host's persisted selection map must
+// never ForceSet one, or a stale manual pick clobbers the engine's node on
+// every config re-apply. A user's RCX-NODE pick is not a ForceSet: it arrives
+// through handleChangeProxy, which sets and pins in one path.
 func rcxIsServiceGroup(name string) bool {
-	return strings.HasPrefix(name, rcxGroupPrefix) && name != rcxGroupNode
+	return strings.HasPrefix(name, rcxGroupPrefix)
 }
 
 func init() {
@@ -38,7 +41,7 @@ func init() {
 		response.success(true)
 	}))
 
-	adapter.DialResultHook = func(name, source string, err error, elapsed time.Duration) {
-		rcxEngineInstance.NoteDial(name, source, err != nil, elapsed, time.Now())
+	adapter.DialResultHook = func(name, _ string, err error, elapsed time.Duration) {
+		rcxEngineInstance.NoteDial(name, err != nil, elapsed, time.Now())
 	}
 }

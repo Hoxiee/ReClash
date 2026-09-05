@@ -194,7 +194,9 @@ Map<String, Object?>? _withSetupCompleted(Map<String, Object?>? configMap) {
 
 // v3→v4: the mobile/home split described the network, which the engine already
 // learns per network, so both stored values name the one Russian preset now.
-Map<String, Object?>? _withMergedRussianPreset(Map<String, Object?>? configMap) {
+Map<String, Object?>? _withMergedRussianPreset(
+  Map<String, Object?>? configMap,
+) {
   final routing = configMap?['smartRoutingProps'];
   if (configMap == null || routing is! Map) {
     return configMap;
@@ -211,14 +213,14 @@ Map<String, Object?>? _withMergedRussianPreset(Map<String, Object?>? configMap) 
 
 // v4→v5: canaries and markers moved out of the core into the stored settings,
 // so an install that only ever named a preset carries none of them yet.
-Map<String, Object?>? _withSeededRoutingBundle(Map<String, Object?>? configMap) {
+Map<String, Object?>? _withSeededRoutingBundle(
+  Map<String, Object?>? configMap,
+) {
   final routing = configMap?['smartRoutingProps'];
   if (configMap == null || routing is! Map) {
     return configMap;
   }
-  final stored = SmartRoutingProps.fromJson(
-    Map<String, Object?>.from(routing),
-  );
+  final stored = SmartRoutingProps.fromJson(Map<String, Object?>.from(routing));
   final map = Map<String, Object?>.from(configMap);
   map['smartRoutingProps'] = stored.applyPreset(stored.preset).toJson();
   return map;

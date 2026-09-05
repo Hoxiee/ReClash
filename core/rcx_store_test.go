@@ -136,3 +136,22 @@ func TestSnapshotStaysCompact(t *testing.T) {
 		t.Errorf("payload = %d bytes for one pick, want the short field names to hold", len(payload))
 	}
 }
+
+func TestStoreKeepsTheTieBreakSeedItHandedOut(t *testing.T) {
+	storage := newFakeStorage()
+	store := testStore(storage)
+
+	first := store.Load()
+	if first.Seed == 0 {
+		t.Fatal("no seed: the order tie-break falls back to the subscription's own index for everyone")
+	}
+	first.Pins["w:Home"] = "endpoint-nl-1"
+	store.Save(first, time.Unix(1_700_000_000, 0), true)
+
+	if got := testStore(storage).Load(); got.Seed != first.Seed {
+		t.Errorf("seed = %d, want %d: a reshuffle on every start is a reshuffle of the park", got.Seed, first.Seed)
+	}
+	if got := testStore(storage).Load().Pins["w:Home"]; got != "endpoint-nl-1" {
+		t.Errorf("pin = %q, want it to survive the round trip", got)
+	}
+}

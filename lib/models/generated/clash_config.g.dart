@@ -234,7 +234,7 @@ _Dns _$DnsFromJson(Map<String, dynamic> json) => _Dns(
   enhancedMode:
       $enumDecodeNullable(_$DnsModeEnumMap, json['enhanced-mode']) ??
       DnsMode.fakeIp,
-  fakeIpRange: json['fake-ip-range'] as String? ?? defaultFakeIpRange,
+  fakeIpRange: json['fake-ip-range'] as String? ?? '198.18.0.1/16',
   fakeIpFilter:
       (json['fake-ip-filter'] as List<dynamic>?)
           ?.map((e) => e as String)

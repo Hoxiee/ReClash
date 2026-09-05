@@ -7,25 +7,29 @@ import 'dart:convert';
 import 'amnezia_config.dart';
 import 'skipped_node.dart';
 
-const _schemes = [
-  'vmess://',
-  'vless://',
-  'ss://',
-  'ssr://',
-  'trojan://',
-  'hysteria2://',
-  'hy2://',
-  'tuic://',
-  'anytls://',
-  'hysteria://',
-  'socks://',
-  'socks5://',
-  'wireguard://',
-  'wg://',
-  'amneziawg://',
-  'awg://',
-  'vpn://',
+/// Scheme names the parser accepts; `protocol.dart` claims a subset of them
+/// from the OS so a tapped link reaches the import pipeline.
+const shareLinkSchemes = [
+  'vmess',
+  'vless',
+  'ss',
+  'ssr',
+  'trojan',
+  'hysteria2',
+  'hy2',
+  'tuic',
+  'anytls',
+  'hysteria',
+  'socks',
+  'socks5',
+  'wireguard',
+  'wg',
+  'amneziawg',
+  'awg',
+  'vpn',
 ];
+
+final _schemes = [for (final scheme in shareLinkSchemes) '$scheme://'];
 
 abstract interface class ConvertedSubscription {
   String get config;
@@ -223,8 +227,7 @@ Map<String, Object?>? _parseWireguard(String uri) {
   final (privateKey, server, port, params, name) = parts;
 
   final reservedValue = params['reserved'] ?? '';
-  final reserved =
-      reservedValue.isEmpty ? null : _parseReserved(reservedValue);
+  final reserved = reservedValue.isEmpty ? null : _parseReserved(reservedValue);
   final peers = <String, Object?>{
     'server': server,
     'port': port,
@@ -345,11 +348,13 @@ Map<String, Object?>? _parseVmess(String uri) {
   // mihomo dials xhttp for vless only; elsewhere it degrades to TCP.
   final network = j['net']?.toString() ?? 'tcp';
   if (network == 'xhttp' || network == 'splithttp') {
-    throw _UnsupportedLink(SkippedNode(
-      name: name.isEmpty ? server : name,
-      kind: 'xhttp',
-      reason: SkippedNodeReason.transport,
-    ));
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name.isEmpty ? server : name,
+        kind: 'xhttp',
+        reason: SkippedNodeReason.transport,
+      ),
+    );
   }
   if (network != 'tcp') proxy['network'] = _mihomoNetwork(network);
   _applyTransport(
@@ -444,20 +449,21 @@ Map<String, Object?>? _parseShadowsocks(String uri) {
   final name = hashIdx >= 0
       ? _decodeComponent(noScheme.substring(hashIdx + 1))
       : '';
-  final withoutName =
-      hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
+  final withoutName = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
   final queryIdx = withoutName.indexOf('?');
   final params = queryIdx >= 0
       ? _splitQuery(withoutName.substring(queryIdx + 1))
       : const <String, String>{};
-  final payload =
-      queryIdx >= 0 ? withoutName.substring(0, queryIdx) : withoutName;
+  final payload = queryIdx >= 0
+      ? withoutName.substring(0, queryIdx)
+      : withoutName;
 
   final atIdx = payload.lastIndexOf('@');
   String method, password, server;
   int port;
   if (atIdx > 0) {
-    final credential = tryBase64Decode(payload.substring(0, atIdx)) ??
+    final credential =
+        tryBase64Decode(payload.substring(0, atIdx)) ??
         _decodeComponent(payload.substring(0, atIdx));
     final colonIdx = credential.indexOf(':');
     if (colonIdx < 0) return null;
@@ -563,11 +569,13 @@ Map<String, Object?>? _parseTrojan(String uri) {
   final network = params['type'] ?? 'tcp';
   // xhttp is vless-only; see _parseVmess.
   if (network == 'xhttp' || network == 'splithttp') {
-    throw _UnsupportedLink(SkippedNode(
-      name: name,
-      kind: 'xhttp',
-      reason: SkippedNodeReason.transport,
-    ));
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: name,
+        kind: 'xhttp',
+        reason: SkippedNodeReason.transport,
+      ),
+    );
   }
   if (network != 'tcp') proxy['network'] = _mihomoNetwork(network);
   _applyTransport(
@@ -713,7 +721,9 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   final withoutName = hashIdx >= 0 ? noScheme.substring(0, hashIdx) : noScheme;
 
   final queryIdx = withoutName.indexOf('?');
-  final hostPort = queryIdx >= 0 ? withoutName.substring(0, queryIdx) : withoutName;
+  final hostPort = queryIdx >= 0
+      ? withoutName.substring(0, queryIdx)
+      : withoutName;
   final params = queryIdx >= 0
       ? _splitQuery(withoutName.substring(queryIdx + 1))
       : const <String, String>{};
@@ -729,11 +739,13 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   // mihomo rejects up/down of 0 outright, and one bad proxy kills the whole
   // config — a link without bandwidth is skipped, not emitted broken.
   if (up.isEmpty || down.isEmpty) {
-    throw _UnsupportedLink(SkippedNode(
-      name: displayName,
-      kind: 'hysteria',
-      reason: SkippedNodeReason.bandwidth,
-    ));
+    throw _UnsupportedLink(
+      SkippedNode(
+        name: displayName,
+        kind: 'hysteria',
+        reason: SkippedNodeReason.bandwidth,
+      ),
+    );
   }
   final proxy = <String, Object?>{
     'name': displayName,
@@ -762,9 +774,14 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   return proxy;
 }
 
-(String userinfo, String server, int port, Map<String, String> params,
-        String name)?
-    _splitUserinfoUri(String uri) {
+(
+  String userinfo,
+  String server,
+  int port,
+  Map<String, String> params,
+  String name,
+)?
+_splitUserinfoUri(String uri) {
   final schemeEnd = uri.indexOf('://') + 3;
   final noScheme = uri.substring(schemeEnd);
 
@@ -789,13 +806,7 @@ Map<String, Object?>? _parseHysteria1(String uri) {
   final split = splitHostPort(hostPort.substring(atIdx + 1));
   if (split == null) return null;
   final (server, port) = split;
-  return (
-    userinfo,
-    server,
-    port,
-    params,
-    name.isEmpty ? server : name,
-  );
+  return (userinfo, server, port, params, name.isEmpty ? server : name);
 }
 
 /// Port hopping puts a range where a port belongs (`host:443,4430-4440`), which
@@ -837,11 +848,12 @@ Map<String, Object?>? _parseHysteria1(String uri) {
       ? hostPort.indexOf(':', bracketIdx + 1)
       : hostPort.lastIndexOf(':');
   if (colonIdx <= 0) return null;
-  final server = (bracketIdx >= 0
-          ? hostPort.substring(0, bracketIdx + 1)
-          : hostPort.substring(0, colonIdx))
-      .replaceAll('[', '')
-      .replaceAll(']', '');
+  final server =
+      (bracketIdx >= 0
+              ? hostPort.substring(0, bracketIdx + 1)
+              : hostPort.substring(0, colonIdx))
+          .replaceAll('[', '')
+          .replaceAll(']', '');
   final port = int.tryParse(hostPort.substring(colonIdx + 1));
   if (server.isEmpty || port == null) return null;
   return (server, port);
@@ -849,7 +861,8 @@ Map<String, Object?>? _parseHysteria1(String uri) {
 
 /// mihomo has no network "httpupgrade"; the HTTP Upgrade dial rides the ws
 /// transport with `v2ray-http-upgrade`.
-String _mihomoNetwork(String network) => network == 'httpupgrade' ? 'ws' : network;
+String _mihomoNetwork(String network) =>
+    network == 'httpupgrade' ? 'ws' : network;
 
 void _applyTransport(
   Map<String, Object?> proxy, {
@@ -942,8 +955,7 @@ bool _applyPlugin(Map<String, Object?> proxy, String pluginParam) {
       proxy['plugin'] = 'obfs';
       proxy['plugin-opts'] = {
         'mode': opts['obfs'] ?? 'http',
-        if ((opts['obfs-host'] ?? '').isNotEmpty)
-          'host': opts['obfs-host'],
+        if ((opts['obfs-host'] ?? '').isNotEmpty) 'host': opts['obfs-host'],
       };
     case 'v2ray-plugin':
       proxy['plugin'] = 'v2ray-plugin';
@@ -991,8 +1003,9 @@ Map<String, String> _splitQuery(String query) {
       final eq = pair.indexOf('=');
       final key = eq >= 0 ? pair.substring(0, eq) : pair;
       final value = eq >= 0 ? pair.substring(eq + 1) : '';
-      params[_decodeComponent(key.replaceAll('+', ' '))] =
-          _decodeComponent(value.replaceAll('+', ' '));
+      params[_decodeComponent(key.replaceAll('+', ' '))] = _decodeComponent(
+        value.replaceAll('+', ' '),
+      );
     }
     return params;
   }
@@ -1065,8 +1078,7 @@ String _yamlString(Object? value) {
       // go-yaml rejects raw C0 controls and DEL; \xNN keeps the config loadable.
       .replaceAllMapped(
         RegExp('[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]'),
-        (m) =>
-            '\\x${m[0]!.codeUnitAt(0).toRadixString(16).padLeft(2, '0')}',
+        (m) => '\\x${m[0]!.codeUnitAt(0).toRadixString(16).padLeft(2, '0')}',
       );
   return '"$escaped"';
 }

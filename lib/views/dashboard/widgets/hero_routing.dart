@@ -114,10 +114,7 @@ class HeroRoutingRow extends ConsumerWidget {
 
     return FocusableTap(
       onTap: () {
-        showExtend(
-          context,
-          builder: (context) => const RoutingOverviewView(),
-        );
+        showExtend(context, builder: (context) => const RoutingOverviewView());
       },
       child: Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 6),
@@ -154,11 +151,7 @@ class HeroRoutingRow extends ConsumerWidget {
 /// The routing line of the hero card. A fault takes it over while one lasts,
 /// which is how the connection doctor will speak once it lands.
 class HeroLinkRow extends StatelessWidget {
-  const HeroLinkRow({
-    super.key,
-    required this.status,
-    required this.accent,
-  });
+  const HeroLinkRow({super.key, required this.status, required this.accent});
 
   final HeroStatus status;
   final Color accent;

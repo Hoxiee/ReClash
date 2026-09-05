@@ -380,6 +380,11 @@ func suspend(suspended bool) {
 	handleSuspend(suspended)
 }
 
+//export screenOff
+func screenOff(off bool) {
+	handleScreenOff(off)
+}
+
 //export forceGC
 func forceGC() {
 	handleForceGC()

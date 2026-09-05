@@ -66,7 +66,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Servers per check'), findsOne);
-    expect(find.text('Save mobile data'), findsOne);
   });
 
   testWidgets('an adjusted preset says so and can be reset', (tester) async {
@@ -93,16 +92,17 @@ void main() {
     expect(find.text('Russia'), findsAtLeast(1));
   });
 
-  testWidgets('turning it on from off adopts a preset instead of an empty one', (
-    tester,
-  ) async {
-    final container = await _pump(tester, props: const SmartRoutingProps());
+  testWidgets(
+    'turning it on from off adopts a preset instead of an empty one',
+    (tester) async {
+      final container = await _pump(tester, props: const SmartRoutingProps());
 
-    await tester.tap(find.byType(Switch));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
 
-    final props = container.read(smartRoutingSettingProvider);
-    expect(props.enabled, isTrue);
-    expect(props.rcxParams.enabled, isTrue);
-  });
+      final props = container.read(smartRoutingSettingProvider);
+      expect(props.enabled, isTrue);
+      expect(props.rcxParams.enabled, isTrue);
+    },
+  );
 }

@@ -22,6 +22,7 @@ import com.reclash.service.models.toCIDR
 import com.reclash.service.modules.ServiceModules
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.thread
 import android.net.VpnService as SystemVpnService
 
 class VpnService : SystemVpnService(), ManagedService {
@@ -108,13 +109,25 @@ class VpnService : SystemVpnService(), ManagedService {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Android starts always-on VPN through this callback instead of the bound-service
         // path. Notify the app layer so it can restore Core and fully initialize the VPN service.
-        notifyVpnStartRequested()
-        return super.onStartCommand(intent, flags, startId)
+        notifyStartRequested()
+        super.onStartCommand(intent, flags, startId)
+        // The inherited START_STICKY_COMPATIBILITY restarts the process without calling back
+        // here, which would leave the tunnel down with no one to rebuild it.
+        return START_STICKY
     }
 
     override fun onRevoke() {
         stop()
         notifyVpnRevoked()
+    }
+
+    private fun stopTunOffMainThread() {
+        val worker = thread(name = TEARDOWN_THREAD, isDaemon = true) {
+            synchronized(tunLock) { stopTunLocked() }
+        }
+        // Core.stopTun blocks on the core's own tun locks, and this runs on the main thread
+        // from onDestroy and onRevoke; past the cap the descriptor dies with the process.
+        worker.join(TEARDOWN_JOIN_MILLIS)
     }
 
     private fun handleStart(options: VpnOptions) {
@@ -301,12 +314,8 @@ class VpnService : SystemVpnService(), ManagedService {
             ServiceConfig.updatePauseState(PauseState())
             modules.stop()
         } finally {
-            stopTun()
+            stopTunOffMainThread()
         }
-    }
-
-    private fun stopTun() = synchronized(tunLock) {
-        stopTunLocked()
     }
 
     private fun stopTunLocked() {
@@ -325,5 +334,7 @@ class VpnService : SystemVpnService(), ManagedService {
         private const val NET_ANY6 = "::"
         private const val LOCAL_HOST = "127.0.0.1"
         private const val MTU = 9000
+        private const val TEARDOWN_THREAD = "reclash-vpn-teardown"
+        private const val TEARDOWN_JOIN_MILLIS = 1_500L
     }
 }

@@ -70,6 +70,8 @@ docs/
 /env.json
 /core_sha256.json
 /plugins/rust_api/.claude/
+/core/core
+/core/core.exe
 /issue-triage/
 devtools_options.yaml
 

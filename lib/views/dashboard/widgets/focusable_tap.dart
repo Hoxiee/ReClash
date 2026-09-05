@@ -6,11 +6,13 @@ class FocusableTap extends StatefulWidget {
     required this.onTap,
     required this.child,
     super.key,
+    this.onLongPress,
     this.autofocus = false,
     this.borderRadius = 18,
   });
 
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final Widget child;
   final bool autofocus;
   final double borderRadius;
@@ -51,6 +53,7 @@ class _FocusableTapState extends State<FocusableTap> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
           child: widget.child,
         ),
       ),

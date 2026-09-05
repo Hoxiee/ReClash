@@ -37,10 +37,7 @@ List<DashboardWidget> applyPanelWidgets({
   if (mode == PanelWidgetsApplyMode.update || !userCustomized) {
     return panelWidgets;
   }
-  return [
-    ...current,
-    ...panelWidgets.where((item) => !current.contains(item)),
-  ];
+  return [...current, ...panelWidgets.where((item) => !current.contains(item))];
 }
 
 bool sameWidgets(List<DashboardWidget> a, List<DashboardWidget> b) {

@@ -43,8 +43,9 @@ class GlobalState {
     return _instance!;
   }
 
-  String? get configuredUa => container
-      .read(patchClashConfigProvider.select((state) => state.globalUa));
+  String? get configuredUa => container.read(
+    patchClashConfigProvider.select((state) => state.globalUa),
+  );
 
   String get ua => configuredUa.takeFirstValid([packageInfo.ua]);
 

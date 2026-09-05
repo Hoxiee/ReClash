@@ -1426,6 +1426,59 @@ abstract class _$SmartRoutingStatus extends $Notifier<RcxStatus?> {
   }
 }
 
+@ProviderFor(_SmartRoutingTrail)
+final smartRoutingTrailProvider = _SmartRoutingTrailProvider._();
+
+final class _SmartRoutingTrailProvider
+    extends $NotifierProvider<_SmartRoutingTrail, List<String>> {
+  _SmartRoutingTrailProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'smartRoutingTrailProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$_smartRoutingTrailHash();
+
+  @$internal
+  @override
+  _SmartRoutingTrail create() => _SmartRoutingTrail();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<String>>(value),
+    );
+  }
+}
+
+String _$_smartRoutingTrailHash() =>
+    r'a30008b7464fdacd4d195043b3f3c042fecd4f36';
+
+abstract class _$SmartRoutingTrail extends $Notifier<List<String>> {
+  List<String> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<List<String>, List<String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<String>, List<String>>,
+              List<String>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Query)
 final queryProvider = QueryFamily._();
 
@@ -2071,6 +2124,64 @@ abstract class _$CurrentIPv4s extends $Notifier<List<String>> {
   }
 }
 
+/// Plain reachability from the last connectivity report; null before the first.
+
+@ProviderFor(NetworkReachable)
+final networkReachableProvider = NetworkReachableProvider._();
+
+/// Plain reachability from the last connectivity report; null before the first.
+final class NetworkReachableProvider
+    extends $NotifierProvider<NetworkReachable, bool?> {
+  /// Plain reachability from the last connectivity report; null before the first.
+  NetworkReachableProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'networkReachableProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$networkReachableHash();
+
+  @$internal
+  @override
+  NetworkReachable create() => NetworkReachable();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool?>(value),
+    );
+  }
+}
+
+String _$networkReachableHash() => r'b6f51303755103b9b9f1c27ca828de9bc4cc30db';
+
+/// Plain reachability from the last connectivity report; null before the first.
+
+abstract class _$NetworkReachable extends $Notifier<bool?> {
+  bool? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool?, bool?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool?, bool?>,
+              bool?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// The Android service's own pause flag; null until the first report lands.
 
 @ProviderFor(NativePause)
@@ -2165,67 +2276,6 @@ String _$batteryOptimizationDisableHash() =>
     r'a95e3e5500f685d44f61804ea280a6a73d639ac1';
 
 abstract class _$BatteryOptimizationDisable extends $Notifier<bool> {
-  bool build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<bool, bool>,
-              bool,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
-/// Whether a VPN that is not ours holds an interface. Polled, because no
-/// platform offers a change notification for a third party's tunnel.
-
-@ProviderFor(ForeignVpn)
-final foreignVpnProvider = ForeignVpnProvider._();
-
-/// Whether a VPN that is not ours holds an interface. Polled, because no
-/// platform offers a change notification for a third party's tunnel.
-final class ForeignVpnProvider extends $NotifierProvider<ForeignVpn, bool> {
-  /// Whether a VPN that is not ours holds an interface. Polled, because no
-  /// platform offers a change notification for a third party's tunnel.
-  ForeignVpnProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'foreignVpnProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$foreignVpnHash();
-
-  @$internal
-  @override
-  ForeignVpn create() => ForeignVpn();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
-    );
-  }
-}
-
-String _$foreignVpnHash() => r'f14c85b85cf16ebb5a3e79d7b6f48ae9a6d1ac5c';
-
-/// Whether a VPN that is not ours holds an interface. Polled, because no
-/// platform offers a change notification for a third party's tunnel.
-
-abstract class _$ForeignVpn extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override

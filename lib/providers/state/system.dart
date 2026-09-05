@@ -169,6 +169,7 @@ SharedState sharedState(Ref ref) {
         showStopAction: state.showNotificationStopAction,
         crashlytics: state.crashlytics,
         testUrl: state.testUrl,
+        autoRun: state.autoRun,
       ),
     ),
   );
@@ -211,6 +212,7 @@ SharedState sharedState(Ref ref) {
     pausedText: currentAppLocalizations.paused,
     crashlytics: crashlytics,
     pureBlackTheme: pureBlackTheme,
+    autoRun: appSetting.autoRun,
     stopTip: currentAppLocalizations.stopVpn,
     startTip: currentAppLocalizations.startVpn,
     pauseTip: currentAppLocalizations.pauseVpn,
@@ -269,10 +271,7 @@ List<String> networkAnchor(Ref ref) {
   if (ssid != null && ssid.isNotEmpty) {
     return [ssid];
   }
-  final anchors = ref
-      .watch(currentIPv4sProvider)
-      .map(ipv4ToSubnetCidr)
-      .toList()
+  final anchors = ref.watch(currentIPv4sProvider).map(ipv4ToSubnetCidr).toList()
     ..sort();
   return anchors;
 }
@@ -319,10 +318,11 @@ bool tunEnabled(Ref ref) {
   if (system.isAndroid) {
     return ref.watch(vpnSettingProvider.select((state) => state.enable));
   }
-  return ref.watch(patchClashConfigProvider.select((state) => state.tun.enable));
+  return ref.watch(
+    patchClashConfigProvider.select((state) => state.tun.enable),
+  );
 }
 
 @riverpod
-bool needsSetup(Ref ref) => !ref.watch(
-  appSettingProvider.select((state) => state.setupCompleted),
-);
+bool needsSetup(Ref ref) =>
+    !ref.watch(appSettingProvider.select((state) => state.setupCompleted));

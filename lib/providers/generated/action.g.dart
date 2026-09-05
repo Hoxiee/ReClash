@@ -346,7 +346,7 @@ final class ThemeActionProvider extends $NotifierProvider<ThemeAction, void> {
   }
 }
 
-String _$themeActionHash() => r'6309ee8cab23e8af58b4ec7f8c857d599befbd1b';
+String _$themeActionHash() => r'65f0fd2e7c99a0a6a686e78548a9b5f2a1058709';
 
 abstract class _$ThemeAction extends $Notifier<void> {
   void build();
@@ -398,7 +398,7 @@ final class ProxiesActionProvider
   }
 }
 
-String _$proxiesActionHash() => r'e5cfaea7d700d18f1dd3995ea324270de965d251';
+String _$proxiesActionHash() => r'763f4d3cd02185c5ea19ad315b09646babf6ca6b';
 
 abstract class _$ProxiesAction extends $Notifier<void> {
   void build();
@@ -450,7 +450,7 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'9244d9b77a18077b4afedd90530ad0d68e58beb1';
+String _$profilesActionHash() => r'578120602196e93f9e98e4697c16ba62f49b6f7b';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
   void build();

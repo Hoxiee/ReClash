@@ -57,10 +57,10 @@ class _AppNavBarState extends ConsumerState<AppNavBar>
   }
 
   double get _position => lerpDouble(
-        _from,
-        _to,
-        NavBarMetrics.motionCurve.transform(_controller.value),
-      )!;
+    _from,
+    _to,
+    NavBarMetrics.motionCurve.transform(_controller.value),
+  )!;
 
   void _hopTo(int index) {
     if (index.toDouble() == _to) {
@@ -197,20 +197,18 @@ class _SegmentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        children: [
-          for (var i = 0; i < items.length; i++)
-            Expanded(
-              child: _Segment(
-                item: items[i],
-                color: color,
-                covered: (1 - (position - i).abs()).clamp(0.0, 1.0),
-                onToPage: onToPage == null
-                    ? null
-                    : () => onToPage!(items[i].label),
-              ),
-            ),
-        ],
-      );
+    children: [
+      for (var i = 0; i < items.length; i++)
+        Expanded(
+          child: _Segment(
+            item: items[i],
+            color: color,
+            covered: (1 - (position - i).abs()).clamp(0.0, 1.0),
+            onToPage: onToPage == null ? null : () => onToPage!(items[i].label),
+          ),
+        ),
+    ],
+  );
 }
 
 class _Segment extends StatelessWidget {

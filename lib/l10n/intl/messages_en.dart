@@ -116,33 +116,37 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m39(count) => "${count} failures in a row";
 
-  static String m40(minutes) => "${minutes} min";
+  static String m40(measured, total) => "measured ${measured} of ${total}";
 
-  static String m41(minutes) =>
-      "Your manual pick is respected for ${minutes} min more";
+  static String m41(preset) => "${preset} · adjusted";
 
-  static String m42(preset) => "${preset} · adjusted";
+  static String m42(left, cap) => "${left} of ${cap} probes left this hour";
 
-  static String m43(left, cap) => "${left} of ${cap} probes left this hour";
+  static String m43(seconds) => "${seconds} s";
 
-  static String m44(seconds) => "${seconds} s";
+  static String m44(eligible, total) => "${eligible} of ${total} usable";
 
-  static String m45(eligible, total) => "${eligible} of ${total} usable";
-
-  static String m46(eligible, total, blocked) =>
+  static String m45(eligible, total, blocked) =>
       "${eligible} of ${total} servers passed, ${blocked} were held back";
 
-  static String m47(from, to) => "${from} → ${to}";
+  static String m46(from, to) => "${from} → ${to}";
 
-  static String m48(time) => "Switched ${time} ago";
+  static String m47(time) => "Switched ${time} ago";
 
-  static String m49(count) => "${count} servers";
+  static String m48(count) => "${count} servers";
 
-  static String m50(total) => "free of ${total}";
+  static String m49(host) => "The provider moved to ${host}";
 
-  static String m51(label) => "${label} must be a URL";
+  static String m50(count) =>
+      "${Intl.plural(count, one: 'Your subscription expires tomorrow', other: 'Your subscription expires in ${count} days')}";
 
-  static String m52(count) =>
+  static String m51(value) => "The provider suggests ${value}";
+
+  static String m52(total) => "free of ${total}";
+
+  static String m53(label) => "${label} must be a URL";
+
+  static String m54(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -528,6 +532,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("Edit rule"),
     "emptyTip": m9,
     "en": MessageLookupByLibrary.simpleMessage("English"),
+    "enterManually": MessageLookupByLibrary.simpleMessage("Enter manually"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m10,
     "exclude": MessageLookupByLibrary.simpleMessage("Hide from recent tasks"),
@@ -622,9 +627,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Measuring the selected node",
     ),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("Connecting…"),
-    "heroForeignVpn": MessageLookupByLibrary.simpleMessage(
-      "Another VPN is active",
-    ),
     "heroJustNow": MessageLookupByLibrary.simpleMessage("just now"),
     "heroLinkBroken": MessageLookupByLibrary.simpleMessage(
       "Connection is not working",
@@ -637,6 +639,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "heroLinkSlow": MessageLookupByLibrary.simpleMessage(
       "The node is responding slowly",
+    ),
+    "heroNoNetworkHint": MessageLookupByLibrary.simpleMessage(
+      "Waiting for a connection",
     ),
     "heroNotProtected": MessageLookupByLibrary.simpleMessage("Not protected"),
     "heroPaused": MessageLookupByLibrary.simpleMessage(
@@ -899,6 +904,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "nullTip": m25,
     "numberTip": m26,
+    "off": MessageLookupByLibrary.simpleMessage("Off"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon only"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
       "Only count proxy traffic",
@@ -906,6 +912,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "onlyStatisticsProxyDesc": MessageLookupByLibrary.simpleMessage(
       "When enabled, only proxy traffic is counted",
     ),
+    "openInBrowser": MessageLookupByLibrary.simpleMessage("Open in browser"),
     "optional": MessageLookupByLibrary.simpleMessage("Optional"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
@@ -945,6 +952,20 @@ class MessageLookup extends MessageLookupByLibrary {
       "Perpetual subscription",
     ),
     "pickFromAlbum": MessageLookupByLibrary.simpleMessage("Choose from album"),
+    "pickNetwork": MessageLookupByLibrary.simpleMessage("Pick a network"),
+    "pickNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Wi-Fi networks visible around you",
+    ),
+    "pickNetworkEmpty": MessageLookupByLibrary.simpleMessage(
+      "No Wi-Fi networks found",
+    ),
+    "pickNetworkGrantLocation": MessageLookupByLibrary.simpleMessage(
+      "Location permission is required to list nearby Wi-Fi networks",
+    ),
+    "pickNetworkRefresh": MessageLookupByLibrary.simpleMessage("Refresh"),
+    "pickNetworkScanning": MessageLookupByLibrary.simpleMessage(
+      "Looking for nearby Wi-Fi networks…",
+    ),
     "pinWindow": MessageLookupByLibrary.simpleMessage("Pin window"),
     "pleaseBindWebDAV": MessageLookupByLibrary.simpleMessage(
       "Please bind WebDAV",
@@ -1048,6 +1069,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Already enabled in system settings",
     ),
+    "reload": MessageLookupByLibrary.simpleMessage("Reload"),
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remote": MessageLookupByLibrary.simpleMessage("Remote"),
@@ -1341,6 +1363,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "All servers",
     ),
+    "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
+      "Back to automatic",
+    ),
     "smartRoutingBandLabel": m34,
     "smartRoutingBands": m35,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Behaviour"),
@@ -1422,6 +1447,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
       "A last resort on a whitelist network, so local services keep working",
+    ),
+    "smartRoutingDomesticViaDirect": MessageLookupByLibrary.simpleMessage(
+      "Domestic services go direct",
+    ),
+    "smartRoutingDomesticViaNode": MessageLookupByLibrary.simpleMessage(
+      "Domestic services go through the chosen server",
     ),
     "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("Settle time"),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
@@ -1510,9 +1541,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
       "No switches yet",
     ),
+    "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
+      "from the delay test",
+    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("kept"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("Latency band"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("Evidence"),
+    "smartRoutingKeyHistory": MessageLookupByLibrary.simpleMessage(
+      "History on this network",
+    ),
     "smartRoutingKeyMisfit": MessageLookupByLibrary.simpleMessage(
       "Fit for this network",
     ),
@@ -1521,13 +1558,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Respect a manual pick",
     ),
     "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
-      "How long a server you chose yourself is left alone",
+      "Keep the server you chose yourself until it stops working",
     ),
-    "smartRoutingManualHoldMinutes": m40,
-    "smartRoutingManualHoldOff": MessageLookupByLibrary.simpleMessage(
-      "Not respected",
+    "smartRoutingManualPinned": MessageLookupByLibrary.simpleMessage(
+      "Held until it stops working",
     ),
-    "smartRoutingManualUntil": m41,
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "Accepted statuses",
     ),
@@ -1567,8 +1602,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingNoServers": MessageLookupByLibrary.simpleMessage(
       "No reachable servers",
     ),
+    "smartRoutingNodeChecks": MessageLookupByLibrary.simpleMessage(
+      "Server checks",
+    ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("No UDP"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
+    "smartRoutingNodesMeasured": m40,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "General purpose",
     ),
@@ -1586,11 +1625,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Preset"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("China"),
-    "smartRoutingPresetEdited": m42,
+    "smartRoutingPresetEdited": m41,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Iran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Off"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russia"),
-    "smartRoutingProbeBudget": m43,
+    "smartRoutingProbeBudget": m42,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Probing"),
     "smartRoutingRankOrder": MessageLookupByLibrary.simpleMessage(
       "Ranking order",
@@ -1601,6 +1640,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingReasonColdStart": MessageLookupByLibrary.simpleMessage(
       "First pick on this network",
+    ),
+    "smartRoutingReasonDegraded": MessageLookupByLibrary.simpleMessage(
+      "Previous server stopped passing traffic",
     ),
     "smartRoutingReasonDwellHold": MessageLookupByLibrary.simpleMessage(
       "Waiting out the settle time before switching",
@@ -1617,8 +1659,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingReasonManualHold": MessageLookupByLibrary.simpleMessage(
       "Respecting the server you picked",
     ),
+    "smartRoutingReasonMeasuring": MessageLookupByLibrary.simpleMessage(
+      "Checking the candidate before switching",
+    ),
     "smartRoutingReasonNoCandidate": MessageLookupByLibrary.simpleMessage(
       "No server passed the checks",
+    ),
+    "smartRoutingReasonPinReturn": MessageLookupByLibrary.simpleMessage(
+      "The server you picked works again",
     ),
     "smartRoutingReasonStranded": MessageLookupByLibrary.simpleMessage(
       "Nothing reachable, keeping the current server",
@@ -1652,16 +1700,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Available in Rule mode only",
     ),
-    "smartRoutingSaveData": MessageLookupByLibrary.simpleMessage(
-      "Save mobile data",
-    ),
-    "smartRoutingSaveDataDesc": MessageLookupByLibrary.simpleMessage(
-      "Narrow the probe burst on a metered link",
-    ),
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Picking a server…",
     ),
-    "smartRoutingSeconds": m44,
+    "smartRoutingSeconds": m43,
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
       "Servers",
     ),
@@ -1675,11 +1717,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Decision",
     ),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Servers"),
-    "smartRoutingServersCount": m45,
+    "smartRoutingServersCount": m44,
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Decided who is allowed",
     ),
-    "smartRoutingStepAdmitBody": m46,
+    "smartRoutingStepAdmitBody": m45,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Landed here",
     ),
@@ -1690,11 +1732,21 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ranked what was left",
     ),
     "smartRoutingStepRankBody": MessageLookupByLibrary.simpleMessage(
-      "Verdict first, then specialist fit, then evidence, then latency band",
+      "Verdict first, then specialist fit, then evidence, then latency band, history last",
     ),
-    "smartRoutingSwitchLine": m47,
+    "smartRoutingStrategy": MessageLookupByLibrary.simpleMessage("Strategy"),
+    "smartRoutingStrategyBalanced": MessageLookupByLibrary.simpleMessage(
+      "Balanced",
+    ),
+    "smartRoutingStrategyDesc": MessageLookupByLibrary.simpleMessage(
+      "How the engine trades latency for stability",
+    ),
+    "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
+      "Lowest latency",
+    ),
+    "smartRoutingSwitchLine": m46,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("switched"),
-    "smartRoutingSwitchedAgo": m48,
+    "smartRoutingSwitchedAgo": m47,
     "smartRoutingTechnical": MessageLookupByLibrary.simpleMessage(
       "Technical detail",
     ),
@@ -1715,9 +1767,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "How many servers one background check measures",
     ),
-    "smartRoutingWaveNodes": m49,
+    "smartRoutingWaveNodes": m48,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
-      "What was tested",
+      "Link check",
     ),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Why"),
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
@@ -1770,9 +1822,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
     ),
+    "subscriptionDomainMoved": m49,
+    "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
+      "Your subscription has expired",
+    ),
+    "subscriptionExpiresInDays": m50,
+    "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
+      "Your subscription expires today",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
+    "subscriptionNoQuota": MessageLookupByLibrary.simpleMessage(
+      "This subscription reports no traffic quota or end date",
+    ),
+    "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
+      "Subscription reminders",
+    ),
+    "subscriptionProviderInterval": m51,
+    "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Updated"),
     "support": MessageLookupByLibrary.simpleMessage("Support"),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
@@ -1818,7 +1886,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Flashlight"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m50,
+    "trafficFreeOfTotal": m52,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Trusted networks"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -1857,7 +1925,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",
     ),
-    "urlTip": m51,
+    "urlTip": m53,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -1877,8 +1945,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",
     ),
+    "webDashboard": MessageLookupByLibrary.simpleMessage("Web dashboard"),
+    "webDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "zashboard, served by the core itself",
+    ),
+    "webDashboardInstallTip": MessageLookupByLibrary.simpleMessage(
+      "zashboard is downloaded on first open",
+    ),
+    "webDashboardOpen": MessageLookupByLibrary.simpleMessage("Open dashboard"),
+    "webDashboardSessionTip": MessageLookupByLibrary.simpleMessage(
+      "The external controller stays on while the dashboard is open",
+    ),
+    "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage(
+      "The core is not serving the dashboard yet",
+    ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m52,
+    "yearsAgo": m54,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

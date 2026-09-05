@@ -3,6 +3,14 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
 import 'routing_overview.dart';
+import 'task.dart';
+
+/// The engine's group name is wire detail, not a label to decode.
+String groupDisplayName(String groupName) {
+  return groupName == rcxNodeGroupName
+      ? currentAppLocalizations.smartRouting
+      : groupName;
+}
 
 extension PageLabelL10n on PageLabel {
   String get label {
@@ -65,6 +73,18 @@ extension SmartRoutingPresetL10n on SmartRoutingPreset {
       SmartRoutingPreset.russia => appLocalizations.smartRoutingPresetRussia,
       SmartRoutingPreset.iran => appLocalizations.smartRoutingPresetIran,
       SmartRoutingPreset.china => appLocalizations.smartRoutingPresetChina,
+    };
+  }
+}
+
+extension SmartRoutingStrategyL10n on SmartRoutingStrategy {
+  String get label {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      SmartRoutingStrategy.balanced =>
+        appLocalizations.smartRoutingStrategyBalanced,
+      SmartRoutingStrategy.lowestLatency =>
+        appLocalizations.smartRoutingStrategyLowestLatency,
     };
   }
 }

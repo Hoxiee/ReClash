@@ -34,8 +34,33 @@ class Request {
           }
           return ReClashHttpOverrides.findProxyForReader(read, uri);
         };
+        client.connectionFactory = (uri, proxyHost, proxyPort) => dohConnect(
+          uri,
+          proxyHost,
+          proxyPort,
+          onBadCertificate: (certificate) => _allowBadCertificate(
+            certificate,
+            uri.host,
+            uri.hasPort ? uri.port : 443,
+          ),
+        );
         return client;
       },
+    );
+  }
+
+  bool _allowBadCertificate(
+    X509Certificate certificate,
+    String host,
+    int port,
+  ) {
+    final read = _read;
+    if (read == null) return false;
+    return ReClashHttpOverrides.allowBadCertificateForReader(
+      read,
+      certificate,
+      host,
+      port,
     );
   }
 

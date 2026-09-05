@@ -230,7 +230,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                           child: Builder(
                             builder: (context) {
                               return EmojiText(
-                                group.name,
+                                groupDisplayName(group.name),
                                 style: DefaultTextStyle.of(context).style,
                               );
                             },

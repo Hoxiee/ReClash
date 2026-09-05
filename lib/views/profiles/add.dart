@@ -23,9 +23,9 @@ class AddProfileView extends ConsumerWidget {
 
   Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
     unawaited(
-      ref.read(profilesActionProvider.notifier).addProfileFormFile(
-        keepCurrentPage: keepCurrentPage,
-      ),
+      ref
+          .read(profilesActionProvider.notifier)
+          .addProfileFormFile(keepCurrentPage: keepCurrentPage),
     );
   }
 
@@ -89,7 +89,9 @@ class AddProfileView extends ConsumerWidget {
     if (result == null) return;
     final url = result.url.trim();
     if (url.isEmpty) return;
-    if (!url.isUrl && !url.startsWith('incy://') && !url.startsWith('happ://')) {
+    if (!url.isUrl &&
+        !url.startsWith('incy://') &&
+        !url.startsWith('happ://')) {
       unawaited(
         profilesAction.addProfileFromLocalContent(
           url,

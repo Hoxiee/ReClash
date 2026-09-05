@@ -99,12 +99,14 @@ void main() {
     final paused = ProviderContainer();
     addTearDown(paused.dispose);
     paused.read(runTimeProvider.notifier).value = 1;
-    paused.read(vpnSettingProvider.notifier).update(
-      (_) => const VpnProps().copyWith(
-        smartPauseEnabled: true,
-        smartPauseNetworks: ['Office Wi-Fi'],
-      ),
-    );
+    paused
+        .read(vpnSettingProvider.notifier)
+        .update(
+          (_) => const VpnProps().copyWith(
+            smartPauseEnabled: true,
+            smartPauseNetworks: ['Office Wi-Fi'],
+          ),
+        );
     paused.read(currentSSIDProvider.notifier).value = 'Office Wi-Fi';
 
     expect(paused.read(proxyStateProvider).isStart, isFalse);

@@ -16,6 +16,7 @@ data class SharedState(
     val onlyStatisticsProxy: Boolean = false,
     val pureBlackTheme: Boolean = false,
     val showStopAction: Boolean = true,
+    val autoRun: Boolean = false,
     val vpnOptions: VpnOptions? = null,
     val setupParams: SetupParams? = null,
 )

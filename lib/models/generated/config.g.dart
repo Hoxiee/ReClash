@@ -201,6 +201,12 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
       preset:
           $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
           SmartRoutingPreset.off,
+      strategy:
+          $enumDecodeNullable(
+            _$SmartRoutingStrategyEnumMap,
+            json['strategy'],
+          ) ??
+          SmartRoutingStrategy.balanced,
       censorCountries:
           (json['censorCountries'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -232,9 +238,8 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
-      saveMobileData: json['saveMobileData'] as bool? ?? true,
       requireUdp: json['requireUdp'] as bool? ?? false,
-      manualHoldMinutes: (json['manualHoldMinutes'] as num?)?.toInt() ?? 60,
+      respectPick: json['respectPick'] as bool? ?? true,
       dwellSeconds: (json['dwellSeconds'] as num?)?.toInt() ?? 90,
       waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
     );
@@ -243,6 +248,7 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(_SmartRoutingProps instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
       'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
+      'strategy': _$SmartRoutingStrategyEnumMap[instance.strategy]!,
       'censorCountries': instance.censorCountries,
       'canaryForeign': instance.canaryForeign,
       'canaryDomestic': instance.canaryDomestic,
@@ -250,9 +256,8 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(_SmartRoutingProps instance) =>
       'domesticMarkers': instance.domesticMarkers,
       'breakerPatterns': instance.breakerPatterns,
       'allowDomesticLastResort': instance.allowDomesticLastResort,
-      'saveMobileData': instance.saveMobileData,
       'requireUdp': instance.requireUdp,
-      'manualHoldMinutes': instance.manualHoldMinutes,
+      'respectPick': instance.respectPick,
       'dwellSeconds': instance.dwellSeconds,
       'waveWidth': instance.waveWidth,
     };
@@ -262,6 +267,11 @@ const _$SmartRoutingPresetEnumMap = {
   SmartRoutingPreset.russia: 'ru',
   SmartRoutingPreset.iran: 'ir',
   SmartRoutingPreset.china: 'cn',
+};
+
+const _$SmartRoutingStrategyEnumMap = {
+  SmartRoutingStrategy.balanced: 'balanced',
+  SmartRoutingStrategy.lowestLatency: 'lowest-latency',
 };
 
 _AuthenticationProps _$AuthenticationPropsFromJson(Map<String, dynamic> json) =>

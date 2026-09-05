@@ -141,6 +141,10 @@ class Bootstrap {
   ProviderContainer get _container => globalState.container;
 
   Future<void> _initApp() async {
+    // The wizard and autoUpdateProfiles validate imported profiles through
+    // Core; against a core that was never launched validateConfig only waits
+    // out its connect window and fails as no_response.
+    final coreStart = _container.read(coreActionProvider.notifier).startCore();
     unawaited(_container.read(systemActionProvider.notifier).updateTray());
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
@@ -164,7 +168,7 @@ class Bootstrap {
     await _handlerDisclaimer();
     await _showCrashRecoveryTip();
     await _showCrashlyticsTip();
-    await _container.read(coreActionProvider.notifier).startCore();
+    await coreStart;
     if (!_bootDecision.isDegraded) {
       await _container.read(setupActionProvider.notifier).initStatus();
     }

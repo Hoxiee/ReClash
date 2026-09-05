@@ -26,7 +26,12 @@ const _report = RcxReport(
   ),
   canaries: [
     RcxCanaryReport(addr: '1.1.1.1:443', outcome: 'fail'),
-    RcxCanaryReport(addr: '77.88.8.8:443', domestic: true, outcome: 'ok', delay: 24),
+    RcxCanaryReport(
+      addr: '77.88.8.8:443',
+      domestic: true,
+      outcome: 'ok',
+      delay: 24,
+    ),
   ],
   candidates: [
     RcxCandidateReport(
@@ -48,6 +53,7 @@ const _report = RcxReport(
       verdict: 'reject',
       evidence: 'none',
       block: 'cooling',
+      hostDelay: 60,
       fails: 4,
     ),
   ],
@@ -141,10 +147,7 @@ void main() {
   ) async {
     await _pump(tester, enabled: true, report: _report);
 
-    expect(
-      find.text('2 of 3 servers can be used right now'),
-      findsOne,
-    );
+    expect(find.text('2 of 3 servers can be used right now'), findsOne);
     await tester.scrollUntilVisible(
       find.text('31 of 40 probes left this hour'),
       200,
@@ -159,12 +162,48 @@ void main() {
     await _pump(tester, enabled: true, report: _report);
 
     expect(find.text('1 of 2 answered'), findsOne);
-    await tester.tap(find.text('What was tested'));
+    await tester.tap(find.text('Link check'));
     await tester.pumpAndSettle();
 
     expect(find.text('1.1.1.1:443'), findsOne);
     expect(find.text('no answer'), findsWidgets);
     expect(find.text('24 ms'), findsOne);
+  });
+
+  testWidgets('a link the canaries answered is not a tested server', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+
+    expect(find.text('measured 2 of 3'), findsOne);
+    await tester.scrollUntilVisible(
+      find.text('Server checks'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Server checks'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Frankfurt #1'), findsOne);
+    expect(find.text('240 ms'), findsOne);
+    expect(find.text('Paris #7'), findsNothing);
+  });
+
+  testWidgets('a server nobody probed still shows the delay test that has it', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('All servers'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('All servers'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('≈60 ms'), findsOne);
+    expect(find.text('untested'), findsNothing);
   });
 
   testWidgets('a blocked server states its gate, not a score', (tester) async {
@@ -178,10 +217,7 @@ void main() {
     await tester.tap(find.text('All servers'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('Cooling down after 4 failures'),
-      findsOne,
-    );
+    expect(find.textContaining('Cooling down after 4 failures'), findsOne);
   });
 
   testWidgets('the decision is told as the sequence that produced it', (
@@ -196,10 +232,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Read the network'), findsOne);
-    expect(
-      find.text('2 of 3 servers passed, 1 were held back'),
-      findsOne,
-    );
+    expect(find.text('2 of 3 servers passed, 1 were held back'), findsOne);
     expect(find.text('Landed here'), findsOne);
   });
 
@@ -213,9 +246,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Paris #7 → Amsterdam #3'), findsOne);
-    expect(
-      find.textContaining('Previous server stopped answering'),
-      findsOne,
-    );
+    expect(find.textContaining('Previous server stopped answering'), findsOne);
   });
 }

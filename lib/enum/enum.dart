@@ -122,6 +122,13 @@ enum SmartRoutingPreset {
   china,
 }
 
+enum SmartRoutingStrategy {
+  @JsonValue('balanced')
+  balanced,
+  @JsonValue('lowest-latency')
+  lowestLatency,
+}
+
 enum ViewMode { mobile, laptop, desktop }
 
 enum LogLevel { debug, info, warning, error, silent }

@@ -18,6 +18,7 @@ import (
 
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/resolver"
@@ -224,8 +225,14 @@ func selectableGroup(groupName string) (outboundgroup.SelectAble, error) {
 	return selector, nil
 }
 
+// RCX-NODE is engine-owned but hand-selectable, which is what arms
+// manual-hold; the other RCX groups are invisible plumbing.
+func rcxIsSelectableServiceGroup(name string) bool {
+	return rcxIsServiceGroup(name) && name != rcxGroupNode
+}
+
 func handleChangeProxy(params *ChangeProxyParams) string {
-	if rcxIsServiceGroup(params.GroupName) {
+	if rcxIsSelectableServiceGroup(params.GroupName) {
 		return errGroupNotFound.Error()
 	}
 
@@ -249,8 +256,9 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 		return err
 	}
 
+	// The host already wrote the selector: the engine only learns the pick.
 	if params.GroupName == rcxGroupNode {
-		rcxEngineInstance.NoteManualPick(params.ProxyName)
+		rcxEngineInstance.OnManualAsserted(params.ProxyName)
 	}
 	return ""
 }
@@ -582,6 +590,12 @@ func defaultRefreshHealthChecks() {
 
 var refreshHealthChecks = defaultRefreshHealthChecks
 
+// Doze is minutes away when a screen goes off, so a health check gated on
+// suspension alone still probes every provider from a pocketed phone.
+func handleScreenOff(off bool) {
+	provider.SetScreenOff(off)
+}
+
 func handleSuspend(suspended bool) bool {
 	wasSuspended := isSuspended.Swap(suspended)
 	if suspended {
@@ -735,7 +749,7 @@ func handleSetupConfig(params *SetupParams) string {
 
 func init() {
 	adapter.UrlTestHook = func(url string, name string, delay uint16) {
-		rcxEngineInstance.NoteHarvestedProbe(name, int(delay))
+		rcxEngineInstance.NoteHarvestedProbe(url, name, int(delay))
 		if !shouldPublishDelay(delay) {
 			return
 		}
@@ -749,6 +763,7 @@ func init() {
 		})
 	}
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
+		rcxEngineInstance.NoteTracker(c)
 		sendMessage(Message{
 			Type: RequestMessage,
 			Data: c,

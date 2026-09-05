@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"sync"
 	"time"
@@ -23,6 +25,8 @@ type rcxSnapshot struct {
 	Global  map[string]*rcxNodeGlobal         `json:"g"`
 	Envs    map[string]map[string]*rcxNodeEnv `json:"e"`
 	Picks   map[string]string                 `json:"p"`
+	Pins    map[string]string                 `json:"pn"`
+	Seed    uint64                            `json:"sd"`
 	Regimes map[string]rcxRegimeMemory        `json:"r"`
 	Dirty   bool                              `json:"d"`
 }
@@ -102,9 +106,16 @@ func rcxFillSnapshot(snapshot *rcxSnapshot) {
 	if snapshot.Picks == nil {
 		snapshot.Picks = map[string]string{}
 	}
+	if snapshot.Pins == nil {
+		snapshot.Pins = map[string]string{}
+	}
+	if snapshot.Seed == 0 {
+		snapshot.Seed = rcxNewSeed()
+	}
 	if snapshot.Regimes == nil {
 		snapshot.Regimes = map[string]rcxRegimeMemory{}
 	}
+	delete(snapshot.Regimes, "")
 }
 
 func (s *rcxStore) Save(snapshot *rcxSnapshot, now time.Time, force bool) {
@@ -134,4 +145,13 @@ func (s *rcxStore) Pending() bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.pending
+}
+
+// Per install, so the last tie-break is not the same answer for everyone.
+func rcxNewSeed() uint64 {
+	var buf [8]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		return uint64(time.Now().UnixNano()) | 1
+	}
+	return binary.LittleEndian.Uint64(buf[:]) | 1
 }

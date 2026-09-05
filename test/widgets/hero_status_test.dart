@@ -63,8 +63,11 @@ void main() {
       expect(HeroStatus.paused.isAlert, isTrue);
       expect(HeroStatus.degraded.isAlert, isTrue);
       expect(HeroStatus.broken.isAlert, isTrue);
+      expect(HeroStatus.offline.isAlert, isTrue);
       expect(HeroStatus.secured.isAlert, isFalse);
       expect(HeroStatus.off.isLive, isFalse);
+      expect(HeroStatus.offline.isLive, isFalse);
+      expect(HeroStatus.offline.flows, isFalse);
       expect(HeroStatus.degraded.flows, isTrue);
       expect(HeroStatus.broken.flows, isFalse);
     });
@@ -91,6 +94,14 @@ void main() {
     test('ON is never the most active ring', () {
       expect(HeroStatus.secured.isSweeping, isFalse);
       expect(HeroStatus.secured.isTransitioning, isFalse);
+    });
+
+    test('offline maps and paints as its own state', () {
+      expect(
+        heroStatusOf(HeroOrbPhase.offline, HeroHealth.broken),
+        HeroStatus.offline,
+      );
+      expect(HeroStatus.offline.isSweeping, isFalse);
     });
   });
 
@@ -271,9 +282,10 @@ void main() {
       int? delay,
       bool paused = false,
       bool running = true,
-      bool foreignVpn = false,
       CoreStatus coreStatus = CoreStatus.connected,
       Set<String> pendingTests = const {},
+      bool? reachable,
+      RcxStatus? rcxStatus,
     }) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1;
@@ -297,9 +309,16 @@ void main() {
           groupsProvider.overrideWithValue([group]),
           pausedProvider.overrideWithValue(paused),
           delayProvider(proxyName: 'Node A').overrideWithValue(delay),
-          foreignVpnProvider.overrideWithBuild((_, _) => foreignVpn),
           coreStatusProvider.overrideWithBuild((_, _) => coreStatus),
           pendingDelayTestsProvider.overrideWithBuild((_, _) => pendingTests),
+          if (reachable != null)
+            networkReachableProvider.overrideWithBuild((_, _) => reachable),
+          if (rcxStatus != null)
+            smartRoutingSettingProvider.overrideWithBuild((_, _) {
+              return const SmartRoutingProps(enabled: true);
+            }),
+          if (rcxStatus != null)
+            smartRoutingStatusProvider.overrideWithBuild((_, _) => rcxStatus),
           initProvider.overrideWithBuild((_, _) => true),
         ],
       );
@@ -325,6 +344,41 @@ void main() {
       await pumpHero(tester, delay: 140);
       expect(find.text('You are protected'), findsOne);
       expect(find.text('Smart routing is off'), findsOne);
+    });
+
+    testWidgets('the engine node outranks the panel selector', (tester) async {
+      await pumpHero(
+        tester,
+        delay: 140,
+        rcxStatus: const RcxStatus(
+          enabled: true,
+          node: 'Engine Node',
+          delay: 90,
+        ),
+      );
+      expect(find.text('Engine Node'), findsOne);
+      expect(find.text('Node A'), findsNothing);
+      expect(find.text('90 ms'), findsOne);
+    });
+
+    testWidgets('the card falls back to the panel while deciding', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, rcxStatus: const RcxStatus());
+      expect(find.text('Node A'), findsOne);
+    });
+
+    testWidgets('a missing network outranks the tunnel state', (tester) async {
+      await pumpHero(tester, delay: 140, reachable: false);
+      expect(find.text('No network'), findsOne);
+      expect(find.text('Waiting for a connection'), findsOne);
+      expect(find.text('You are protected'), findsNothing);
+    });
+
+    testWidgets('an unconfirmed network claims nothing', (tester) async {
+      await pumpHero(tester, running: false);
+      expect(find.text('No network'), findsNothing);
+      expect(find.text('Not protected'), findsOne);
     });
 
     testWidgets('keeps protection wording while the node is slow', (
@@ -376,22 +430,6 @@ void main() {
       await pumpHero(tester, delay: 140, pendingTests: const {'probe'});
       expect(find.text('You are protected'), findsOne);
       expect(find.text('Checking the network…'), findsNothing);
-    });
-
-    testWidgets('another VPN is named without taking over the card', (
-      tester,
-    ) async {
-      await pumpHero(tester, delay: 140, foreignVpn: true);
-      // Never settles: the orb's own loops run forever by design.
-      await tester.pump(const Duration(milliseconds: 600));
-      expect(find.text('Another VPN is active'), findsOne);
-      expect(find.text('You are protected'), findsOne);
-    });
-
-    testWidgets('nothing is claimed while no other VPN is up', (tester) async {
-      await pumpHero(tester, delay: 140);
-      await tester.pump(const Duration(milliseconds: 600));
-      expect(find.text('Another VPN is active'), findsNothing);
     });
   });
 }

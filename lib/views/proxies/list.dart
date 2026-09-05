@@ -496,7 +496,10 @@ class _GroupSummary extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        EmojiText(groupName, style: context.textTheme.titleMedium),
+        EmojiText(
+          groupDisplayName(groupName),
+          style: context.textTheme.titleMedium,
+        ),
         const SizedBox(height: 4),
         Flexible(flex: 1, child: _SelectedProxyName(groupName: groupName)),
       ],

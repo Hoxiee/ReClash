@@ -1,0 +1,195 @@
+package main
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"net/netip"
+	"sync/atomic"
+	"testing"
+	"time"
+)
+
+func rcxForgetHost(t *testing.T, host string) {
+	t.Helper()
+	t.Cleanup(func() {
+		rcxResolveMu.Lock()
+		delete(rcxResolveHosts, host)
+		rcxResolveMu.Unlock()
+	})
+}
+
+func rcxSeedHost(host string, entry rcxResolvedHost) {
+	rcxResolveMu.Lock()
+	rcxResolveHosts[host] = entry
+	rcxResolveMu.Unlock()
+}
+
+func TestResolveHostAnswersFromCacheAndFillsInLater(t *testing.T) {
+	const host = "node.example"
+	rcxForgetHost(t, host)
+	restore := rcxResolveIP
+	t.Cleanup(func() { rcxResolveIP = restore })
+	rcxResolveIP = func(context.Context, string) (netip.Addr, error) {
+		return netip.MustParseAddr("203.0.113.7"), nil
+	}
+
+	if got := rcxResolveHost(host); got.IsValid() {
+		t.Fatalf("addr = %v on the first ask: the decision loop must not wait on DNS", got)
+	}
+
+	deadline := time.Now().Add(2 * time.Second)
+	for !rcxResolveHost(host).IsValid() {
+		if time.Now().After(deadline) {
+			t.Fatal("the resolved address never reached the cache, so origin stays unknown forever")
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
+func TestResolveHostRetriesAFailureOnlyAfterTheFloor(t *testing.T) {
+	const host = "gone.example"
+	rcxForgetHost(t, host)
+	var calls atomic.Int32
+	restore := rcxResolveIP
+	t.Cleanup(func() { rcxResolveIP = restore })
+	rcxResolveIP = func(context.Context, string) (netip.Addr, error) {
+		calls.Add(1)
+		return netip.Addr{}, context.DeadlineExceeded
+	}
+
+	rcxSeedHost(host, rcxResolvedHost{at: time.Now()})
+	if got := rcxResolveHost(host); got.IsValid() {
+		t.Fatalf("addr = %v, want nothing for a host that just failed", got)
+	}
+	if got := calls.Load(); got != 0 {
+		t.Fatalf("resolves = %d, want 0: a fresh failure must not be re-asked every tick", got)
+	}
+
+	rcxSeedHost(host, rcxResolvedHost{at: time.Now().Add(-rcxResolveRetry - time.Second)})
+	rcxResolveHost(host)
+
+	deadline := time.Now().Add(2 * time.Second)
+	for calls.Load() == 0 {
+		if time.Now().After(deadline) {
+			t.Fatal("a failure older than the retry floor must buy a new resolve")
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
+func TestMmdbGuardIsSpacedOutButNotAnsweredOnce(t *testing.T) {
+	rcxMmdbMu.Lock()
+	ok, at := rcxMmdbOK, rcxMmdbCheckAt
+	rcxMmdbMu.Unlock()
+	t.Cleanup(func() {
+		rcxMmdbMu.Lock()
+		rcxMmdbOK, rcxMmdbCheckAt = ok, at
+		rcxMmdbMu.Unlock()
+	})
+
+	now := time.Now()
+	rcxMmdbMu.Lock()
+	rcxMmdbOK, rcxMmdbCheckAt = true, now
+	rcxMmdbMu.Unlock()
+
+	if !rcxMmdbUsable(now.Add(rcxMmdbRecheck / 2)) {
+		t.Error("the database was verified moments ago: opening it again per node is the cost")
+	}
+
+	rcxMmdbUsable(now.Add(rcxMmdbRecheck + time.Second))
+
+	rcxMmdbMu.Lock()
+	checked := rcxMmdbCheckAt
+	rcxMmdbMu.Unlock()
+	if !checked.After(now) {
+		t.Error("a geo update resets the loader's once, so the guard has to run again")
+	}
+}
+
+func TestNodeKeyIgnoresTheNameAndSeparatesSharedEndpoints(t *testing.T) {
+	stable := rcxNodeKey("Vless", "nl-1.example:443", "")
+	if renamed := rcxNodeKey("Vless", "nl-1.example:443", ""); renamed != stable {
+		t.Errorf("key = %q, want %q: a display name must not be part of the identity", renamed, stable)
+	}
+	if moved := rcxNodeKey("Vless", "nl-1.example:8443", ""); moved == stable {
+		t.Error("two ports on one host share a key: they are separate egresses")
+	}
+	if nested := rcxNodeKey("Selector", "", ""); nested != "" {
+		t.Errorf("key = %q for a node with no endpoint, want the name to take over", nested)
+	}
+
+	members := rcxSeparateCollisions([]rcxMember{
+		{Name: "account-a", ID: stable},
+		{Name: "account-b", ID: stable},
+		{Name: "alone", ID: rcxNodeKey("Vless", "de-1.example:443", "")},
+	})
+
+	if members[0].ID != "" || members[1].ID != "" {
+		t.Error("two accounts on one endpoint kept one key: their measurements would pool")
+	}
+	if members[2].ID == "" {
+		t.Error("an uncontested endpoint lost its key")
+	}
+}
+
+func rcxClosedServerURL(t *testing.T) string {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	url := server.URL
+	server.Close()
+	return url
+}
+
+func rcxLiveServerURL(t *testing.T) string {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
+	t.Cleanup(server.Close)
+	return server.URL
+}
+
+func TestHostDelayValueRefusesAnAnswerFasterThanAnyRemote(t *testing.T) {
+	if delay, dead := rcxHostDelayValue(1); delay != 0 || dead {
+		t.Errorf("delay = %d, dead = %v: a millisecond answer is local, so it is unknown rather than fast", delay, dead)
+	}
+	if delay, dead := rcxHostDelayValue(rcxHostDelayUnknown); delay != 0 || dead {
+		t.Errorf("delay = %d, dead = %v: an unmeasured node reads unknown", delay, dead)
+	}
+	if delay, dead := rcxHostDelayValue(120); delay != 120 || dead {
+		t.Errorf("delay = %d, dead = %v, want 120: a plausible measurement is the park-wide latency source", delay, dead)
+	}
+}
+
+func TestHostDelayTreatsAForeignFailureAsSilence(t *testing.T) {
+	node := namedProxy("node")
+	foreign := rcxClosedServerURL(t)
+	ours := rcxLiveServerURL(t)
+
+	if _, err := node.URLTest(context.Background(), foreign, nil); err == nil {
+		t.Fatal("the setup needs the node to fail under the foreign URL")
+	}
+
+	if _, dead := rcxHostDelay(node, ours); dead {
+		t.Error("a failure under another test URL condemned the node: mihomo's global alive flag is not a record under ours")
+	}
+}
+
+func TestHostDelayCondemnsOnlyUnderItsOwnURL(t *testing.T) {
+	node := namedProxy("node")
+	ours := rcxClosedServerURL(t)
+	foreign := rcxLiveServerURL(t)
+
+	if _, err := node.URLTest(context.Background(), ours, nil); err == nil {
+		t.Fatal("the setup needs the node to fail under our own URL")
+	}
+	if _, dead := rcxHostDelay(node, ours); !dead {
+		t.Error("a failed record under our own URL must stay a verdict")
+	}
+
+	if _, err := node.URLTest(context.Background(), foreign, nil); err != nil {
+		t.Fatalf("the node must answer under the foreign URL: %v", err)
+	}
+	if _, dead := rcxHostDelay(node, ours); !dead {
+		t.Error("a foreign success masked the failed record under our URL")
+	}
+}

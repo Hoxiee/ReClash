@@ -520,6 +520,11 @@ class AppLocalizations {
     return Intl.message('Delete', name: 'delete', desc: '', args: []);
   }
 
+  /// `Reload`
+  String get reload {
+    return Intl.message('Reload', name: 'reload', desc: '', args: []);
+  }
+
   /// `seconds`
   String get seconds {
     return Intl.message('seconds', name: 'seconds', desc: '', args: []);
@@ -2332,6 +2337,48 @@ class AppLocalizations {
       one: '1 day left',
       other: '$count days left',
       name: 'daysLeft',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Subscription reminders`
+  String get subscriptionNoticeChannel {
+    return Intl.message(
+      'Subscription reminders',
+      name: 'subscriptionNoticeChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription has expired`
+  String get subscriptionExpired {
+    return Intl.message(
+      'Your subscription has expired',
+      name: 'subscriptionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your subscription expires today`
+  String get subscriptionExpiresToday {
+    return Intl.message(
+      'Your subscription expires today',
+      name: 'subscriptionExpiresToday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{Your subscription expires tomorrow} other{Your subscription expires in {count} days}}`
+  String subscriptionExpiresInDays(num count) {
+    return Intl.plural(
+      count,
+      one: 'Your subscription expires tomorrow',
+      other: 'Your subscription expires in $count days',
+      name: 'subscriptionExpiresInDays',
       desc: '',
       args: [count],
     );
@@ -5062,6 +5109,76 @@ class AppLocalizations {
     );
   }
 
+  /// `Pick a network`
+  String get pickNetwork {
+    return Intl.message(
+      'Pick a network',
+      name: 'pickNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wi-Fi networks visible around you`
+  String get pickNetworkDesc {
+    return Intl.message(
+      'Wi-Fi networks visible around you',
+      name: 'pickNetworkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for nearby Wi-Fi networks…`
+  String get pickNetworkScanning {
+    return Intl.message(
+      'Looking for nearby Wi-Fi networks…',
+      name: 'pickNetworkScanning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Wi-Fi networks found`
+  String get pickNetworkEmpty {
+    return Intl.message(
+      'No Wi-Fi networks found',
+      name: 'pickNetworkEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission is required to list nearby Wi-Fi networks`
+  String get pickNetworkGrantLocation {
+    return Intl.message(
+      'Location permission is required to list nearby Wi-Fi networks',
+      name: 'pickNetworkGrantLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh`
+  String get pickNetworkRefresh {
+    return Intl.message(
+      'Refresh',
+      name: 'pickNetworkRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter manually`
+  String get enterManually {
+    return Intl.message(
+      'Enter manually',
+      name: 'enterManually',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `SSID (Home Wi-Fi) or subnet (192.168.1.0/24)`
   String get networkEntryHint {
     return Intl.message(
@@ -5687,11 +5804,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Another VPN is active`
-  String get heroForeignVpn {
+  /// `Waiting for a connection`
+  String get heroNoNetworkHint {
     return Intl.message(
-      'Another VPN is active',
-      name: 'heroForeignVpn',
+      'Waiting for a connection',
+      name: 'heroNoNetworkHint',
       desc: '',
       args: [],
     );
@@ -5987,26 +6104,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Save mobile data`
-  String get smartRoutingSaveData {
-    return Intl.message(
-      'Save mobile data',
-      name: 'smartRoutingSaveData',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Narrow the probe burst on a metered link`
-  String get smartRoutingSaveDataDesc {
-    return Intl.message(
-      'Narrow the probe burst on a metered link',
-      name: 'smartRoutingSaveDataDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Respect a manual pick`
   String get smartRoutingManualHold {
     return Intl.message(
@@ -6017,31 +6114,71 @@ class AppLocalizations {
     );
   }
 
-  /// `How long a server you chose yourself is left alone`
+  /// `Keep the server you chose yourself until it stops working`
   String get smartRoutingManualHoldDesc {
     return Intl.message(
-      'How long a server you chose yourself is left alone',
+      'Keep the server you chose yourself until it stops working',
       name: 'smartRoutingManualHoldDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `{minutes} min`
-  String smartRoutingManualHoldMinutes(num minutes) {
+  /// `Held until it stops working`
+  String get smartRoutingManualPinned {
     return Intl.message(
-      '$minutes min',
-      name: 'smartRoutingManualHoldMinutes',
+      'Held until it stops working',
+      name: 'smartRoutingManualPinned',
       desc: '',
-      args: [minutes],
+      args: [],
     );
   }
 
-  /// `Not respected`
-  String get smartRoutingManualHoldOff {
+  /// `Back to automatic`
+  String get smartRoutingBackToAuto {
     return Intl.message(
-      'Not respected',
-      name: 'smartRoutingManualHoldOff',
+      'Back to automatic',
+      name: 'smartRoutingBackToAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategy`
+  String get smartRoutingStrategy {
+    return Intl.message(
+      'Strategy',
+      name: 'smartRoutingStrategy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How the engine trades latency for stability`
+  String get smartRoutingStrategyDesc {
+    return Intl.message(
+      'How the engine trades latency for stability',
+      name: 'smartRoutingStrategyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Balanced`
+  String get smartRoutingStrategyBalanced {
+    return Intl.message(
+      'Balanced',
+      name: 'smartRoutingStrategyBalanced',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lowest latency`
+  String get smartRoutingStrategyLowestLatency {
+    return Intl.message(
+      'Lowest latency',
+      name: 'smartRoutingStrategyLowestLatency',
       desc: '',
       args: [],
     );
@@ -6332,6 +6469,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Previous server stopped passing traffic`
+  String get smartRoutingReasonDegraded {
+    return Intl.message(
+      'Previous server stopped passing traffic',
+      name: 'smartRoutingReasonDegraded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the candidate before switching`
+  String get smartRoutingReasonMeasuring {
+    return Intl.message(
+      'Checking the candidate before switching',
+      name: 'smartRoutingReasonMeasuring',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server you picked works again`
+  String get smartRoutingReasonPinReturn {
+    return Intl.message(
+      'The server you picked works again',
+      name: 'smartRoutingReasonPinReturn',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Network`
   String get smartRoutingNetworkFormat {
     return Intl.message(
@@ -6512,6 +6679,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Domestic services go through the chosen server`
+  String get smartRoutingDomesticViaNode {
+    return Intl.message(
+      'Domestic services go through the chosen server',
+      name: 'smartRoutingDomesticViaNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Domestic services go direct`
+  String get smartRoutingDomesticViaDirect {
+    return Intl.message(
+      'Domestic services go direct',
+      name: 'smartRoutingDomesticViaDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Metered link`
   String get smartRoutingMetered {
     return Intl.message(
@@ -6579,16 +6766,6 @@ class AppLocalizations {
       name: 'smartRoutingProbeBudget',
       desc: '',
       args: [left, cap],
-    );
-  }
-
-  /// `Your manual pick is respected for {minutes} min more`
-  String smartRoutingManualUntil(num minutes) {
-    return Intl.message(
-      'Your manual pick is respected for $minutes min more',
-      name: 'smartRoutingManualUntil',
-      desc: '',
-      args: [minutes],
     );
   }
 
@@ -7047,10 +7224,10 @@ class AppLocalizations {
     );
   }
 
-  /// `What was tested`
+  /// `Link check`
   String get smartRoutingWhatWasTested {
     return Intl.message(
-      'What was tested',
+      'Link check',
       name: 'smartRoutingWhatWasTested',
       desc: '',
       args: [],
@@ -7064,6 +7241,36 @@ class AppLocalizations {
       name: 'smartRoutingCanariesAnswered',
       desc: '',
       args: [answered, total],
+    );
+  }
+
+  /// `Server checks`
+  String get smartRoutingNodeChecks {
+    return Intl.message(
+      'Server checks',
+      name: 'smartRoutingNodeChecks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `measured {measured} of {total}`
+  String smartRoutingNodesMeasured(Object measured, Object total) {
+    return Intl.message(
+      'measured $measured of $total',
+      name: 'smartRoutingNodesMeasured',
+      desc: '',
+      args: [measured, total],
+    );
+  }
+
+  /// `from the delay test`
+  String get smartRoutingHostDelay {
+    return Intl.message(
+      'from the delay test',
+      name: 'smartRoutingHostDelay',
+      desc: '',
+      args: [],
     );
   }
 
@@ -7197,10 +7404,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Verdict first, then specialist fit, then evidence, then latency band`
+  /// `Verdict first, then specialist fit, then evidence, then latency band, history last`
   String get smartRoutingStepRankBody {
     return Intl.message(
-      'Verdict first, then specialist fit, then evidence, then latency band',
+      'Verdict first, then specialist fit, then evidence, then latency band, history last',
       name: 'smartRoutingStepRankBody',
       desc: '',
       args: [],
@@ -7262,6 +7469,16 @@ class AppLocalizations {
     return Intl.message(
       'Latency band',
       name: 'smartRoutingKeyBand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `History on this network`
+  String get smartRoutingKeyHistory {
+    return Intl.message(
+      'History on this network',
+      name: 'smartRoutingKeyHistory',
       desc: '',
       args: [],
     );
@@ -7869,6 +8086,121 @@ class AppLocalizations {
       name: 'pageAnimationDesc',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Web dashboard`
+  String get webDashboard {
+    return Intl.message(
+      'Web dashboard',
+      name: 'webDashboard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `zashboard, served by the core itself`
+  String get webDashboardDesc {
+    return Intl.message(
+      'zashboard, served by the core itself',
+      name: 'webDashboardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open dashboard`
+  String get webDashboardOpen {
+    return Intl.message(
+      'Open dashboard',
+      name: 'webDashboardOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The external controller stays on while the dashboard is open`
+  String get webDashboardSessionTip {
+    return Intl.message(
+      'The external controller stays on while the dashboard is open',
+      name: 'webDashboardSessionTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `zashboard is downloaded on first open`
+  String get webDashboardInstallTip {
+    return Intl.message(
+      'zashboard is downloaded on first open',
+      name: 'webDashboardInstallTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The core is not serving the dashboard yet`
+  String get webDashboardUnreachable {
+    return Intl.message(
+      'The core is not serving the dashboard yet',
+      name: 'webDashboardUnreachable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open in browser`
+  String get openInBrowser {
+    return Intl.message(
+      'Open in browser',
+      name: 'openInBrowser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get off {
+    return Intl.message('Off', name: 'off', desc: '', args: []);
+  }
+
+  /// `This subscription reports no traffic quota or end date`
+  String get subscriptionNoQuota {
+    return Intl.message(
+      'This subscription reports no traffic quota or end date',
+      name: 'subscriptionNoQuota',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The provider moved to {host}`
+  String subscriptionDomainMoved(String host) {
+    return Intl.message(
+      'The provider moved to $host',
+      name: 'subscriptionDomainMoved',
+      desc: '',
+      args: [host],
+    );
+  }
+
+  /// `Updated`
+  String get subscriptionUpdated {
+    return Intl.message(
+      'Updated',
+      name: 'subscriptionUpdated',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The provider suggests {value}`
+  String subscriptionProviderInterval(String value) {
+    return Intl.message(
+      'The provider suggests $value',
+      name: 'subscriptionProviderInterval',
+      desc: '',
+      args: [value],
     );
   }
 }

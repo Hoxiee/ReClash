@@ -11,12 +11,20 @@ class WifiSsidManager {
 
   static const _channel = MethodChannel('wifi_ssid');
   static const _getSsidMethod = 'getSsid';
+  static const _listSsidMethod = 'listSsid';
   static const _checkPermissionMethod = 'checkPermission';
   static const _requestPermissionMethod = 'requestPermission';
 
   /// Returns the current WiFi SSID, or null if not connected to WiFi.
   Future<String?> getSsid() {
     return _channel.invokeMethod<String>(_getSsidMethod);
+  }
+
+  /// Returns SSIDs visible to the device, strongest signal first.
+  /// The current network leads the list where the platform reports it.
+  Future<List<String>> listSsid() async {
+    final result = await _channel.invokeListMethod<String>(_listSsidMethod);
+    return result ?? const [];
   }
 
   /// Checks whether the required platform permission has been granted.

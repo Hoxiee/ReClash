@@ -59,14 +59,12 @@ class ClientPresetSelector extends StatelessWidget {
     SubscriptionClient client,
     AppLocalizations appLocalizations,
   ) => switch (client) {
-        SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
-        SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
-        SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
-        SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
-        SubscriptionClient.singbox =>
-          appLocalizations.subscriptionClientSingbox,
-        SubscriptionClient.v2rayng =>
-          appLocalizations.subscriptionClientV2rayNG,
-        SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
-      };
+    SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
+    SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
+    SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
+    SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
+    SubscriptionClient.singbox => appLocalizations.subscriptionClientSingbox,
+    SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayNG,
+    SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
+  };
 }

@@ -29,8 +29,7 @@ void main() {
       );
     });
 
-    test('malformed payloads are rejected, not thrown as raw errors',
-        () async {
+    test('malformed payloads are rejected, not thrown as raw errors', () async {
       await expectLater(
         resolveExternalLink('incy://crypt1/'),
         throwsA(isA<IncyLinkException>()),
@@ -79,8 +78,7 @@ void main() {
       expect(resolved.name, 'Test provider');
     });
 
-    test('incy://import/ with a raw payload yields data, not a url',
-        () async {
+    test('incy://import/ with a raw payload yields data, not a url', () async {
       final payload = Uri.encodeComponent(
         'vless://uuid@host:443?security=tls#node1\nvless://uuid@host2:443#node2',
       );
@@ -111,11 +109,16 @@ void main() {
 
     test('plain urls and garbage are not external links', () async {
       expect(await resolveExternalLink(''), isNull);
-      expect(
-        await resolveExternalLink('https://example.com/sub'),
-        isNull,
-      );
-      expect(await resolveExternalLink('vless://u@h:1#n'), isNull);
+      expect(await resolveExternalLink('https://example.com/sub'), isNull);
+      expect(await resolveExternalLink('not a config!'), isNull);
+    });
+
+    test('a share link is content rather than a url to fetch', () async {
+      final resolved = await resolveExternalLink('vless://u@h:1#n');
+      expect(resolved, isNotNull);
+      expect(resolved!.url, isEmpty);
+      expect(resolved.data, 'vless://u@h:1#n');
+      expect(resolved.preset, SubscriptionClient.auto);
     });
   });
 }

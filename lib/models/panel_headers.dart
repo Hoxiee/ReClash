@@ -126,6 +126,10 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'newDomain',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-fallbackhosts'],
+    canonicalKey: 'fallbackHosts',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['profile-title'],
     canonicalKey: 'profileTitle',
   ),

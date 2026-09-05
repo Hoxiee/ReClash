@@ -11,7 +11,8 @@ const _incyVersion = '3.3.1';
 const _v2rayngUa = 'v2rayNG/1.9.24';
 const _singboxUa = 'Karing/1.0.0';
 
-List<SubscriptionClient> probeOrder(SubscriptionClient client, {
+List<SubscriptionClient> probeOrder(
+  SubscriptionClient client, {
   SubscriptionClient? lastWorking,
 }) {
   if (client != SubscriptionClient.auto) return [client];
@@ -55,8 +56,9 @@ Map<String, String> buildSubscriptionHeaders(
     case SubscriptionClient.v2rayng:
       headers['User-Agent'] = _v2rayngUa;
     case SubscriptionClient.custom:
-      headers['User-Agent'] =
-          customUserAgent?.isNotEmpty == true ? customUserAgent! : defaultUa ?? '';
+      headers['User-Agent'] = customUserAgent?.isNotEmpty == true
+          ? customUserAgent!
+          : defaultUa ?? '';
   }
 
   if (sendDeviceHeaders) {

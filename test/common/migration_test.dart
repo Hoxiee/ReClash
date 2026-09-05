@@ -207,28 +207,28 @@ void main() {
       expect(store.version, Migration.currentVersion);
     });
 
-    test('v1 to v2 defaults an unset global-ua to the FlClashX preset', () async {
-      final configMap = _createConfigMap();
-      final patch = configMap['patchClashConfig']! as Map<String, Object?>;
-      patch['global-ua'] = null;
-      final store = _FakeMigrationStore(configMap: configMap, version: 1);
+    test(
+      'v1 to v2 defaults an unset global-ua to the FlClashX preset',
+      () async {
+        final configMap = _createConfigMap();
+        final patch = configMap['patchClashConfig']! as Map<String, Object?>;
+        patch['global-ua'] = null;
+        final store = _FakeMigrationStore(configMap: configMap, version: 1);
 
-      final config = await Migration(store: store).run();
+        final config = await Migration(store: store).run();
 
-      expect(config.patchClashConfig.globalUa, flClashXCompatUa);
-      expect(
-        store.savedConfig?.patchClashConfig.globalUa,
-        flClashXCompatUa,
-      );
-      expect(store.version, Migration.currentVersion);
-      expect(store.events, [
-        'getConfigMap',
-        'getVersion',
-        'restore',
-        'saveConfig',
-        'setVersion',
-      ]);
-    });
+        expect(config.patchClashConfig.globalUa, flClashXCompatUa);
+        expect(store.savedConfig?.patchClashConfig.globalUa, flClashXCompatUa);
+        expect(store.version, Migration.currentVersion);
+        expect(store.events, [
+          'getConfigMap',
+          'getVersion',
+          'restore',
+          'saveConfig',
+          'setVersion',
+        ]);
+      },
+    );
 
     test('v2 to v3 marks an existing install as already set up', () async {
       final store = _FakeMigrationStore(

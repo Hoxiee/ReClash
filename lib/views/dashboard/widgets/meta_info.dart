@@ -2,11 +2,11 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _perpetualExpireYear = 2099;
 const _expiringSoonDays = 3;
 
 class MetaInfo extends StatelessWidget {
@@ -31,9 +31,10 @@ class MetaInfo extends StatelessWidget {
               infoActions: profile != null && profile.type == ProfileType.url
                   ? [_UpdateAction(profile: profile)]
                   : null,
-              onPressed: subscriptionInfo == null
-                  ? null
-                  : () => showSubscriptionInfoDialog(context, subscriptionInfo),
+              onPressed: () => showExtend(
+                context,
+                builder: (_) => const SubscriptionOverviewView(),
+              ),
               child: _MetaInfoBody(
                 profileLabel: profile?.realLabel ?? '',
                 subscriptionInfo: subscriptionInfo,
@@ -63,7 +64,7 @@ class _MetaInfoBody extends StatelessWidget {
         ? null
         : DateTime.fromMillisecondsSinceEpoch(expire * 1000);
     final isPerpetual =
-        expire == 0 || (expireDate?.year ?? 0) >= _perpetualExpireYear;
+        expire == 0 || (expireDate?.year ?? 0) >= perpetualExpireYear;
     var daysLeft = expireDate?.difference(DateTime.now()).inDays;
     if (daysLeft != null && daysLeft < 0) {
       daysLeft = 0;

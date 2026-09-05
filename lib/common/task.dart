@@ -97,8 +97,9 @@ ClashConfig buildClashConfig(Map<String, dynamic> configMap) {
   return clashConfig.copyWith(proxyTypeMap: proxyTypeMap);
 }
 
-const _rcxNodeGroupName = 'RCX-NODE';
-const _rcxFinalGroupName = 'RCX-FINAL';
+const rcxNodeGroupName = 'RCX-NODE';
+const rcxFinalGroupName = 'RCX-FINAL';
+const rcxDirectGroupName = 'RCX-DIRECT';
 
 String? _proxyGroupName(Object? group) => switch (group) {
   final ProxyGroup value => value.name,
@@ -116,7 +117,7 @@ List<String> injectRcxSkeleton({
   final groups = rawConfig['proxy-groups'];
   final existing = groups is List ? groups : const [];
   final names = existing.map(_proxyGroupName).whereType<String>().toSet();
-  if (names.contains(_rcxNodeGroupName) || names.contains(_rcxFinalGroupName)) {
+  if (names.contains(rcxNodeGroupName) || names.contains(rcxFinalGroupName)) {
     return rules;
   }
 
@@ -141,29 +142,92 @@ List<String> injectRcxSkeleton({
   rawConfig['proxy-groups'] = <Object?>[
     ...existing,
     <String, Object?>{
-      'name': _rcxNodeGroupName,
+      'name': rcxNodeGroupName,
       'type': 'select',
       'proxies': members,
       if (providers.isNotEmpty) 'use': providers,
     },
     <String, Object?>{
-      'name': _rcxFinalGroupName,
+      'name': rcxDirectGroupName,
       'type': 'select',
       'hidden': true,
-      'proxies': <String>[_rcxNodeGroupName, 'DIRECT'],
+      'proxies': <String>['DIRECT', rcxNodeGroupName],
+    },
+    <String, Object?>{
+      'name': rcxFinalGroupName,
+      'type': 'select',
+      'hidden': true,
+      'proxies': <String>[rcxNodeGroupName, 'DIRECT'],
     },
   ];
 
+  return _patchRcxRules(rules);
+}
+
+List<String> _patchRcxRules(List<String> rules) {
   final patched = List<String>.from(rules);
+  for (var i = 0; i < patched.length; i++) {
+    final parts = patched[i].split(',');
+    final target = _ruleTargetOf(parts);
+    if (target < 0 || parts[target].trim().toUpperCase() != 'DIRECT') {
+      continue;
+    }
+    if (_isLocalRule(parts)) {
+      continue;
+    }
+    parts[target] = rcxDirectGroupName;
+    patched[i] = parts.join(',');
+  }
   for (var i = 0; i < patched.length; i++) {
     if (patched[i].split(',').first.trim().toUpperCase() != 'MATCH') {
       continue;
     }
-    patched[i] = 'MATCH,$_rcxFinalGroupName';
+    patched[i] = 'MATCH,$rcxFinalGroupName';
     return patched;
   }
-  patched.add('MATCH,$_rcxFinalGroupName');
+  patched.add('MATCH,$rcxFinalGroupName');
   return patched;
+}
+
+// src/no-resolve flags trail the target field.
+int _ruleTargetOf(List<String> parts) {
+  for (var i = parts.length - 1; i >= 1; i--) {
+    final flag = parts[i].trim().toLowerCase();
+    if (flag == 'src' || flag == 'no-resolve') {
+      continue;
+    }
+    return i;
+  }
+  return -1;
+}
+
+bool _isLocalRule(List<String> parts) {
+  final action = parts.first.trim().toUpperCase();
+  final content = parts.length > 1 ? parts[1].trim().toLowerCase() : '';
+  if (action == 'GEOIP') {
+    return content == 'private' || content == 'lan';
+  }
+  if (action == 'IP-CIDR' || action == 'IP-CIDR6') {
+    final host = content.split('/').first;
+    return host == '127.0.0.1' || host == '::1' || _isPrivateCidr(host);
+  }
+  return false;
+}
+
+bool _isPrivateCidr(String host) {
+  final ipv4 = host.split('.');
+  if (ipv4.length != 4) {
+    return false;
+  }
+  final first = int.tryParse(ipv4[0]);
+  final second = int.tryParse(ipv4[1]);
+  if (first == null || second == null) {
+    return false;
+  }
+  if (first == 10 || (first == 192 && second == 168)) {
+    return true;
+  }
+  return first == 172 && second >= 16 && second <= 31;
 }
 
 Future<({String yaml, String md5})> makeRealProfileTask(
@@ -224,7 +288,12 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   }
 
   rawConfig['external-controller'] = realPatchConfig.externalController.value;
-  rawConfig['external-ui'] = '';
+  // An external-ui the Core cannot read makes it download one instead, and it
+  // does that synchronously inside every config apply.
+  final homeDirPath = dirname(profilesPath);
+  rawConfig['external-ui'] = isWebDashboardInstalledIn(homeDirPath)
+      ? webDashboardDirName
+      : '';
   switch (realPatchConfig.interfaceNameMode) {
     case InterfaceNameMode.clear:
       rawConfig['interface-name'] = '';
@@ -250,10 +319,11 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   patchNetwork('mixed-port', realPatchConfig.mixedPort);
   patchNetwork('port', realPatchConfig.port);
   patchNetwork('socks-port', realPatchConfig.socksPort);
-  patchNetwork('redir-port', realPatchConfig.redirPort);
-  patchNetwork('tproxy-port', realPatchConfig.tproxyPort);
   patchNetwork('find-process-mode', realPatchConfig.findProcessMode.name);
   patchNetwork('allow-lan', realPatchConfig.allowLan);
+  // redir/tproxy arm netfilter listeners the sandbox cannot.
+  rawConfig['redir-port'] = realPatchConfig.redirPort;
+  rawConfig['tproxy-port'] = realPatchConfig.tproxyPort;
   // The app owns local inbound authentication; a profile-provided
   // skip-auth-prefixes could silently exempt loopback and defeat it.
   rawConfig['authentication'] = data.authentication;

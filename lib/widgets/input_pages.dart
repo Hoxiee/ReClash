@@ -101,51 +101,51 @@ class ListInputBody extends StatelessWidget {
       builder: (context, _) {
         final selectedItems = controller.selection;
         final items = controller.items;
-    return items.isEmpty
-        ? NullStatus(label: appLocalizations.noData)
-        : ReorderableListView.builder(
-            padding: const EdgeInsets.only(
-              bottom: 16 + 64,
-              top: 16,
-              left: 16,
-              right: 16,
-            ),
-            buildDefaultDragHandles: false,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final value = items[index];
-              return controller.buildItem(
-                context: context,
-                value: value,
-                index: index,
-                length: items.length,
-                isSelected: selectedItems.contains(value),
-                isEditing: selectedItems.isNotEmpty,
-                titleBuilder: titleBuilder,
-                subtitleBuilder: subtitleBuilder,
-                leadingBuilder: leadingBuilder,
-              );
-            },
-            proxyDecorator: (child, index, animation) {
-              final value = items[index];
-              return commonProxyDecorator(
-                controller.buildItem(
-                  context: context,
-                  value: value,
-                  index: index,
-                  length: items.length,
-                  isSelected: selectedItems.contains(value),
-                  isEditing: selectedItems.isNotEmpty,
-                  titleBuilder: titleBuilder,
-                  subtitleBuilder: subtitleBuilder,
-                  leadingBuilder: leadingBuilder,
+        return items.isEmpty
+            ? NullStatus(label: appLocalizations.noData)
+            : ReorderableListView.builder(
+                padding: const EdgeInsets.only(
+                  bottom: 16 + 64,
+                  top: 16,
+                  left: 16,
+                  right: 16,
                 ),
-                index,
-                animation,
+                buildDefaultDragHandles: false,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final value = items[index];
+                  return controller.buildItem(
+                    context: context,
+                    value: value,
+                    index: index,
+                    length: items.length,
+                    isSelected: selectedItems.contains(value),
+                    isEditing: selectedItems.isNotEmpty,
+                    titleBuilder: titleBuilder,
+                    subtitleBuilder: subtitleBuilder,
+                    leadingBuilder: leadingBuilder,
+                  );
+                },
+                proxyDecorator: (child, index, animation) {
+                  final value = items[index];
+                  return commonProxyDecorator(
+                    controller.buildItem(
+                      context: context,
+                      value: value,
+                      index: index,
+                      length: items.length,
+                      isSelected: selectedItems.contains(value),
+                      isEditing: selectedItems.isNotEmpty,
+                      titleBuilder: titleBuilder,
+                      subtitleBuilder: subtitleBuilder,
+                      leadingBuilder: leadingBuilder,
+                    ),
+                    index,
+                    animation,
+                  );
+                },
+                onReorderItem: controller.reorder,
               );
-            },
-            onReorderItem: controller.reorder,
-          );
       },
     );
   }

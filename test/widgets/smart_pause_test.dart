@@ -4,8 +4,10 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/smart_pause.dart';
+import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -52,10 +54,7 @@ void main() {
       overrides: [
         vpnSettingProvider.overrideWith(
           () => _TestVpnSetting(
-            VpnProps(
-              smartPauseEnabled: enabled,
-              smartPauseNetworks: networks,
-            ),
+            VpnProps(smartPauseEnabled: enabled, smartPauseNetworks: networks),
           ),
         ),
         locationPermissionsProvider.overrideWith(
@@ -149,23 +148,21 @@ void main() {
     expect(find.text('Add'), findsOneWidget, reason: 'selection was cleared');
   });
 
-  testWidgets('deleting removes the selected networks and clears the selection', (
-    tester,
-  ) async {
-    await pumpView(tester, networks: ['Home', 'Office']);
-    await tester.tap(find.byType(CommonCheckBox).first);
-    await tester.pumpAndSettle();
+  testWidgets(
+    'deleting removes the selected networks and clears the selection',
+    (tester) async {
+      await pumpView(tester, networks: ['Home', 'Office']);
+      await tester.tap(find.byType(CommonCheckBox).first);
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.delete));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.delete));
+      await tester.pumpAndSettle();
 
-    expect(
-      container.read(vpnSettingProvider).smartPauseNetworks,
-      ['Office'],
-    );
-    expect(find.text('Home'), findsNothing);
-    expect(find.text('Add'), findsOneWidget, reason: 'selection was cleared');
-  });
+      expect(container.read(vpnSettingProvider).smartPauseNetworks, ['Office']);
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Add'), findsOneWidget, reason: 'selection was cleared');
+    },
+  );
 
   testWidgets('the switches toggle smart pause and connection closing', (
     tester,
@@ -260,6 +257,102 @@ void main() {
     expect(find.text('Ignore battery optimization'), findsNothing);
     expect(find.text('Location permission'), findsNothing);
     expect(find.bySemanticsLabel('Tap to authorize'), findsNothing);
+  });
+
+  testWidgets('add opens a picker of nearby SSIDs', (tester) async {
+    const channel = MethodChannel('wifi_ssid');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'listSsid');
+          return <Object?>['Home', 'Office', 'Cafe'];
+        });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    await pumpView(tester);
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SmartPauseNetworkPicker), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Office'), findsOneWidget);
+    expect(find.text('Cafe'), findsOneWidget);
+  });
+
+  testWidgets('picking an SSID adds it to the trusted networks', (
+    tester,
+  ) async {
+    const channel = MethodChannel('wifi_ssid');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'listSsid');
+          return <Object?>['Home', 'Office'];
+        });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    await pumpView(tester, networks: ['Cafe']);
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(vpnSettingProvider).smartPauseNetworks, [
+      'Cafe',
+      'Home',
+    ]);
+  });
+
+  testWidgets('the picker hides SSIDs that are already trusted', (
+    tester,
+  ) async {
+    const channel = MethodChannel('wifi_ssid');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'listSsid');
+          return <Object?>['Home', 'Office'];
+        });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    await pumpView(tester, networks: ['Office']);
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(SmartPauseNetworkPicker),
+        matching: find.text('Office'),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('an empty scan shows the placeholder', (tester) async {
+    const channel = MethodChannel('wifi_ssid');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          expect(call.method, 'listSsid');
+          return <Object?>[];
+        });
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
+    await pumpView(tester);
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No Wi-Fi networks found'), findsOneWidget);
   });
 }
 

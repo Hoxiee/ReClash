@@ -13,13 +13,8 @@ List<String> _proxiesNames(String config) {
         ? config.indexOf('proxy-groups:')
         : config.length,
   );
-  final match = RegExp(
-    r'^  - \{name: "((?:[^"\\]|\\.)*)"',
-    multiLine: true,
-  );
-  return [
-    for (final m in match.allMatches(body)) m.group(1)!,
-  ];
+  final match = RegExp(r'^  - \{name: "((?:[^"\\]|\\.)*)"', multiLine: true);
+  return [for (final m in match.allMatches(body)) m.group(1)!];
 }
 
 Map<String, Object?> vlessOutbound({
@@ -27,60 +22,59 @@ Map<String, Object?> vlessOutbound({
   String network = 'grpc',
   String security = 'reality',
   Map<String, Object?>? extraStream,
-}) =>
-    {
-      'tag': tag,
-      'protocol': 'vless',
-      'settings': {
-        'vnext': [
+}) => {
+  'tag': tag,
+  'protocol': 'vless',
+  'settings': {
+    'vnext': [
+      {
+        'address': 'v.example.com',
+        'port': 443,
+        'users': [
           {
-            'address': 'v.example.com',
-            'port': 443,
-            'users': [
-              {
-                'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199',
-                'encryption': 'none',
-                'flow': 'xtls-rprx-vision',
-              }
-            ],
-          }
+            'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199',
+            'encryption': 'none',
+            'flow': 'xtls-rprx-vision',
+          },
         ],
       },
-      'streamSettings': {
-        'network': network,
-        'security': security,
-        if (security == 'reality')
-          'realitySettings': {
-            'publicKey': 'PUBKEY',
-            'shortId': 'e6c87ce',
-            'serverName': 'www.amd.com',
-            'fingerprint': 'firefox',
-          },
-        if (security == 'tls')
-          'tlsSettings': {
-            'serverName': 'tls.example.com',
-            'alpn': ['h2', 'http/1.1'],
-            'fingerprint': 'chrome',
-          },
-        ...?extraStream,
+    ],
+  },
+  'streamSettings': {
+    'network': network,
+    'security': security,
+    if (security == 'reality')
+      'realitySettings': {
+        'publicKey': 'PUBKEY',
+        'shortId': 'e6c87ce',
+        'serverName': 'www.amd.com',
+        'fingerprint': 'firefox',
       },
-    };
+    if (security == 'tls')
+      'tlsSettings': {
+        'serverName': 'tls.example.com',
+        'alpn': ['h2', 'http/1.1'],
+        'fingerprint': 'chrome',
+      },
+    ...?extraStream,
+  },
+};
 
 Map<String, Object?> _node(String tag, String host) => {
-      'tag': tag,
-      'protocol': 'vless',
-      'settings': {
-        'vnext': [
-          {
-            'address': host,
-            'port': 443,
-            'users': [
-              {'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199'}
-            ],
-          }
+  'tag': tag,
+  'protocol': 'vless',
+  'settings': {
+    'vnext': [
+      {
+        'address': host,
+        'port': 443,
+        'users': [
+          {'id': 'cea80e62-16cf-4fc0-8dea-b8c407e06199'},
         ],
       },
-    };
+    ],
+  },
+};
 
 List<String> _groupMembers(String config, String name) {
   final quoted = '"${name.replaceAll(r'\', r'\\')}"';
@@ -98,14 +92,25 @@ List<String> _groupMembers(String config, String name) {
 void main() {
   group('isXrayConfigInput', () {
     test('accepts an object with outbounds', () {
-      expect(isXrayConfigInput(_json({'outbounds': [{}]})), isTrue);
+      expect(
+        isXrayConfigInput(
+          _json({
+            'outbounds': [{}],
+          }),
+        ),
+        isTrue,
+      );
     });
 
     test('accepts an array of configs', () {
       expect(
-        isXrayConfigInput(_json([
-          {'outbounds': [{}]}
-        ])),
+        isXrayConfigInput(
+          _json([
+            {
+              'outbounds': [{}],
+            },
+          ]),
+        ),
         isTrue,
       );
     });
@@ -120,9 +125,11 @@ void main() {
 
   group('tryConvertXrayConfig', () {
     test('vless reality grpc outbound', () {
-      final XrayConfigResult? result = tryConvertXrayConfig(_json({
-        'outbounds': [vlessOutbound()],
-      }));
+      final XrayConfigResult? result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [vlessOutbound()],
+        }),
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('type: "vless"'));
@@ -140,45 +147,54 @@ void main() {
     });
 
     test('grpc with serviceName maps grpc-opts', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessOutbound(
-            extraStream: {'grpcSettings': {'serviceName': 'gunsvc'}},
-          ),
-        ],
-      }));
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            vlessOutbound(
+              extraStream: {
+                'grpcSettings': {'serviceName': 'gunsvc'},
+              },
+            ),
+          ],
+        }),
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('grpc-service-name: "gunsvc"'));
     });
 
     test('vmess ws outbound', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'vm',
-            'protocol': 'vmess',
-            'settings': {
-              'vnext': [
-                {
-                  'address': 'vm.example.com',
-                  'port': 443,
-                  'users': [
-                    {'id': '11223344-5566-7788-9900-aabbccddeeff', 'alterId': 0}
-                  ],
-                }
-              ],
-            },
-            'streamSettings': {
-              'network': 'ws',
-              'security': 'tls',
-              'wsSettings': {
-                'path': '/ws',
-                'headers': {'Host': 'cdn.example.com'},
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'vm',
+              'protocol': 'vmess',
+              'settings': {
+                'vnext': [
+                  {
+                    'address': 'vm.example.com',
+                    'port': 443,
+                    'users': [
+                      {
+                        'id': '11223344-5566-7788-9900-aabbccddeeff',
+                        'alterId': 0,
+                      },
+                    ],
+                  },
+                ],
+              },
+              'streamSettings': {
+                'network': 'ws',
+                'security': 'tls',
+                'wsSettings': {
+                  'path': '/ws',
+                  'headers': {'Host': 'cdn.example.com'},
+                },
               },
             },
-          }
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('type: "vmess"'));
@@ -189,33 +205,35 @@ void main() {
     });
 
     test('trojan and shadowsocks outbounds', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'tj',
-            'protocol': 'trojan',
-            'settings': {
-              'servers': [
-                {'address': 't.example.com', 'port': 443, 'password': 'pw'}
-              ]
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'tj',
+              'protocol': 'trojan',
+              'settings': {
+                'servers': [
+                  {'address': 't.example.com', 'port': 443, 'password': 'pw'},
+                ],
+              },
             },
-          },
-          {
-            'tag': 'ss',
-            'protocol': 'shadowsocks',
-            'settings': {
-              'servers': [
-                {
-                  'address': 's.example.com',
-                  'port': 8388,
-                  'method': 'aes-128-gcm',
-                  'password': 'ssp',
-                }
-              ]
+            {
+              'tag': 'ss',
+              'protocol': 'shadowsocks',
+              'settings': {
+                'servers': [
+                  {
+                    'address': 's.example.com',
+                    'port': 8388,
+                    'method': 'aes-128-gcm',
+                    'password': 'ssp',
+                  },
+                ],
+              },
             },
-          },
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['tj', 'ss']);
       expect(result.config, contains('type: "trojan"'));
@@ -224,48 +242,56 @@ void main() {
       expect(result.config, contains('cipher: "aes-128-gcm"'));
     });
 
-    test('array of configs with remarks names and internal outbounds skipped',
-        () {
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': '🇩🇪 Germany',
-          'outbounds': [
-            vlessOutbound(tag: ''),
-            {'tag': 'direct', 'protocol': 'freedom'},
-            {'tag': 'block', 'protocol': 'blackhole'},
-          ],
-        },
-        {
-          'remarks': '🇵🇱 Poland',
-          'outbounds': [
-            vlessOutbound(
-              tag: '',
-              extraStream: {'grpcSettings': {'serviceName': 'plsvc'}},
-            ),
-          ],
-        },
-      ]));
-      expect(result, isNotNull);
-      // Empty tags fall back to config remarks; duplicates get numbered.
-      expect(_proxiesNames(result!.config), ['🇩🇪 Germany', '🇵🇱 Poland']);
-      // freedom/blackhole never appear.
-      expect(result.config, isNot(contains('freedom')));
-      expect(result.config, isNot(contains('blackhole')));
-    });
+    test(
+      'array of configs with remarks names and internal outbounds skipped',
+      () {
+        final result = tryConvertXrayConfig(
+          _json([
+            {
+              'remarks': '🇩🇪 Germany',
+              'outbounds': [
+                vlessOutbound(tag: ''),
+                {'tag': 'direct', 'protocol': 'freedom'},
+                {'tag': 'block', 'protocol': 'blackhole'},
+              ],
+            },
+            {
+              'remarks': '🇵🇱 Poland',
+              'outbounds': [
+                vlessOutbound(
+                  tag: '',
+                  extraStream: {
+                    'grpcSettings': {'serviceName': 'plsvc'},
+                  },
+                ),
+              ],
+            },
+          ]),
+        );
+        expect(result, isNotNull);
+        // Empty tags fall back to config remarks; duplicates get numbered.
+        expect(_proxiesNames(result!.config), ['🇩🇪 Germany', '🇵🇱 Poland']);
+        // freedom/blackhole never appear.
+        expect(result.config, isNot(contains('freedom')));
+        expect(result.config, isNot(contains('blackhole')));
+      },
+    );
 
     test('a malformed amneziawg server skips alone, siblings still load', () {
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': 'proxy node',
-          'outbounds': [vlessOutbound(tag: '')],
-        },
-        {
-          'type': 'amneziawg',
-          'servers': [
-            {'name': 'awg', 'config': 'AAECAwQF'}
-          ],
-        },
-      ]));
+      final result = tryConvertXrayConfig(
+        _json([
+          {
+            'remarks': 'proxy node',
+            'outbounds': [vlessOutbound(tag: '')],
+          },
+          {
+            'type': 'amneziawg',
+            'servers': [
+              {'name': 'awg', 'config': 'AAECAwQF'},
+            ],
+          },
+        ]),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['proxy node']);
       expect(result.config, isNot(contains('wireguard')));
@@ -277,38 +303,35 @@ void main() {
 
     test('unknown protocols are skipped with their protocol as the kind, '
         'service outbounds stay silent', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'ssh-node',
-            'protocol': 'ssh',
-            'settings': {'servers': []},
-          },
-          {
-            'tag': 'freedom',
-            'protocol': 'freedom',
-            'settings': {},
-          },
-          {
-            'tag': 'dns',
-            'protocol': 'dns',
-          },
-        ],
-      }));
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'ssh-node',
+              'protocol': 'ssh',
+              'settings': {'servers': []},
+            },
+            {'tag': 'freedom', 'protocol': 'freedom', 'settings': {}},
+            {'tag': 'dns', 'protocol': 'dns'},
+          ],
+        }),
+      );
       expect(result, isNull);
       // With a surviving sibling the skipped list tells the story.
-      final mixed = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessOutbound(tag: 'keep'),
-          {
-            'tag': 'ssh-node',
-            'protocol': 'ssh',
-            'settings': {'servers': []},
-          },
-          {'tag': 'bypass', 'protocol': 'freedom'},
-          {'tag': 'reject', 'protocol': 'blackhole'},
-        ],
-      }));
+      final mixed = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            vlessOutbound(tag: 'keep'),
+            {
+              'tag': 'ssh-node',
+              'protocol': 'ssh',
+              'settings': {'servers': []},
+            },
+            {'tag': 'bypass', 'protocol': 'freedom'},
+            {'tag': 'reject', 'protocol': 'blackhole'},
+          ],
+        }),
+      );
       expect(mixed, isNotNull);
       expect(_proxiesNames(mixed!.config), ['keep']);
       expect(mixed.skipped, hasLength(1));
@@ -318,31 +341,33 @@ void main() {
     });
 
     test('vless xhttp transport maps, trojan xhttp drops', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessOutbound(
-            tag: 'keep',
-            network: 'xhttp',
-            extraStream: {
-              'xhttpSettings': {'path': '/x', 'host': 'h.example.com'},
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            vlessOutbound(
+              tag: 'keep',
+              network: 'xhttp',
+              extraStream: {
+                'xhttpSettings': {'path': '/x', 'host': 'h.example.com'},
+              },
+            ),
+            {
+              'tag': 'drop',
+              'protocol': 'trojan',
+              'settings': {
+                'servers': [
+                  {'address': 't.example.com', 'port': 443, 'password': 'p'},
+                ],
+              },
+              'streamSettings': {
+                'network': 'xhttp',
+                'security': 'tls',
+                'xhttpSettings': {'path': '/x'},
+              },
             },
-          ),
-          {
-            'tag': 'drop',
-            'protocol': 'trojan',
-            'settings': {
-              'servers': [
-                {'address': 't.example.com', 'port': 443, 'password': 'p'}
-              ]
-            },
-            'streamSettings': {
-              'network': 'xhttp',
-              'security': 'tls',
-              'xhttpSettings': {'path': '/x'},
-            },
-          },
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       // mihomo dials xhttp for vless only; the trojan node is dropped.
       expect(_proxiesNames(result!.config), ['keep']);
@@ -364,8 +389,8 @@ void main() {
         'protocol': 'trojan',
         'settings': {
           'servers': [
-            {'address': 't.example.com', 'port': 443, 'password': 'p'}
-          ]
+            {'address': 't.example.com', 'port': 443, 'password': 'p'},
+          ],
         },
         'streamSettings': {
           'network': 'xhttp',
@@ -373,16 +398,18 @@ void main() {
           'xhttpSettings': {'path': '/x'},
         },
       };
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': 'mode A',
-          'outbounds': [vlessOutbound(tag: 'keep'), trojanXhttp('proxy')],
-        },
-        {
-          'remarks': 'mode B',
-          'outbounds': [trojanXhttp('proxy-2')],
-        },
-      ]));
+      final result = tryConvertXrayConfig(
+        _json([
+          {
+            'remarks': 'mode A',
+            'outbounds': [vlessOutbound(tag: 'keep'), trojanXhttp('proxy')],
+          },
+          {
+            'remarks': 'mode B',
+            'outbounds': [trojanXhttp('proxy-2')],
+          },
+        ]),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['keep']);
       expect(result.skipped, hasLength(1));
@@ -394,42 +421,44 @@ void main() {
     test('xhttp extra opts and xmux map to mihomo xhttp-opts', () {
       // The lazyka BACKUP shape: tuning knobs in xhttpSettings.extra,
       // xmux for connection reuse.
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessOutbound(
-            tag: 'backup',
-            network: 'xhttp',
-            security: 'tls',
-            extraStream: {
-              'xhttpSettings': {
-                'mode': 'packet-up',
-                'host': 'msk1.example.com',
-                'path': '/session/api',
-                'extra': {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            vlessOutbound(
+              tag: 'backup',
+              network: 'xhttp',
+              security: 'tls',
+              extraStream: {
+                'xhttpSettings': {
                   'mode': 'packet-up',
+                  'host': 'msk1.example.com',
                   'path': '/session/api',
-                  'xmux': {
-                    'cMaxReuseTimes': 32,
-                    'maxConcurrency': 4,
-                    'maxConnections': 0,
-                    'hKeepAlivePeriod': 30,
+                  'extra': {
+                    'mode': 'packet-up',
+                    'path': '/session/api',
+                    'xmux': {
+                      'cMaxReuseTimes': 32,
+                      'maxConcurrency': 4,
+                      'maxConnections': 0,
+                      'hKeepAlivePeriod': 30,
+                    },
+                    'seqKey': 'chunk_id',
+                    'xPaddingKey': 'pid',
+                    'seqPlacement': 'query',
+                    'xPaddingBytes': '1-4',
+                    'sessionIDTable': 'Base62',
+                    'sessionIDLength': '12-16',
+                    'uplinkHTTPMethod': 'GET',
+                    'xPaddingObfsMode': true,
+                    'xPaddingPlacement': 'query',
+                    'scMaxBufferedPosts': 64,
                   },
-                  'seqKey': 'chunk_id',
-                  'xPaddingKey': 'pid',
-                  'seqPlacement': 'query',
-                  'xPaddingBytes': '1-4',
-                  'sessionIDTable': 'Base62',
-                  'sessionIDLength': '12-16',
-                  'uplinkHTTPMethod': 'GET',
-                  'xPaddingObfsMode': true,
-                  'xPaddingPlacement': 'query',
-                  'scMaxBufferedPosts': 64,
                 },
               },
-            },
-          ),
-        ],
-      }));
+            ),
+          ],
+        }),
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('mode: "packet-up"'));
@@ -452,33 +481,31 @@ void main() {
 
     test('session-table below the core room floor falls back to defaults', () {
       String configWith(Map<String, Object?> extra) {
-        final result = tryConvertXrayConfig(_json({
-          'outbounds': [
-            vlessOutbound(
-              tag: 't',
-              network: 'xhttp',
-              security: 'tls',
-              extraStream: {
-                'xhttpSettings': {
-                  'path': '/x',
-                  'extra': extra,
+        final result = tryConvertXrayConfig(
+          _json({
+            'outbounds': [
+              vlessOutbound(
+                tag: 't',
+                network: 'xhttp',
+                security: 'tls',
+                extraStream: {
+                  'xhttpSettings': {'path': '/x', 'extra': extra},
                 },
-              },
-            ),
-          ],
-        }));
+              ),
+            ],
+          }),
+        );
         expect(result, isNotNull);
         return result!.config;
       }
+
       final small = configWith({
         'sessionIDTable': 'hex',
         'sessionIDLength': '16',
       });
       expect(small, isNot(contains('session-table')));
       expect(small, isNot(contains('session-length')));
-      final custom = configWith({
-        'sessionIDTable': '0123456789abcdef',
-      });
+      final custom = configWith({'sessionIDTable': '0123456789abcdef'});
       expect(custom, contains('session-table: "0123456789abcdef"'));
       final predefined = configWith({
         'sessionIDTable': 'alphabet',
@@ -490,77 +517,89 @@ void main() {
       expect(uuid, contains('session-table: "uuid"'));
     });
 
-    test('xhttp headers and uplink data keys map, non-string headers dropped',
-        () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessOutbound(
-            tag: 'hdr',
-            network: 'xhttp',
-            security: 'tls',
-            extraStream: {
-              'xhttpSettings': {
-                'extra': {
-                  'headers': {
-                    'User-Agent': 'Go-http-client/1.1',
-                    'X-Empty': '',
-                    'X-Count': 5,
+    test(
+      'xhttp headers and uplink data keys map, non-string headers dropped',
+      () {
+        final result = tryConvertXrayConfig(
+          _json({
+            'outbounds': [
+              vlessOutbound(
+                tag: 'hdr',
+                network: 'xhttp',
+                security: 'tls',
+                extraStream: {
+                  'xhttpSettings': {
+                    'extra': {
+                      'headers': {
+                        'User-Agent': 'Go-http-client/1.1',
+                        'X-Empty': '',
+                        'X-Count': 5,
+                      },
+                      'xPaddingHeader': 'Referer',
+                      'uplinkDataPlacement': 'query',
+                      'uplinkDataKey': 'upkey',
+                      'uplinkChunkSize': '2-4',
+                      'xmux': {
+                        'hMaxRequestTimes': 600,
+                        'hMaxReusableSecs': 180,
+                      },
+                    },
                   },
-                  'xPaddingHeader': 'Referer',
-                  'uplinkDataPlacement': 'query',
-                  'uplinkDataKey': 'upkey',
-                  'uplinkChunkSize': '2-4',
-                  'xmux': {'hMaxRequestTimes': 600, 'hMaxReusableSecs': 180},
+                },
+              ),
+            ],
+          }),
+        );
+        expect(result, isNotNull);
+        final config = result!.config;
+        expect(config, contains('headers: {User-Agent: "Go-http-client/1.1"}'));
+        expect(config, contains('x-padding-header: "Referer"'));
+        expect(config, contains('uplink-data-placement: "query"'));
+        expect(config, contains('uplink-data-key: "upkey"'));
+        expect(config, contains('uplink-chunk-size: "2-4"'));
+        expect(config, contains('h-max-request-times: "600"'));
+        expect(config, contains('h-max-reusable-secs: "180"'));
+      },
+    );
+
+    test('httpupgrade and h2 transports map', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'up',
+              'protocol': 'trojan',
+              'settings': {
+                'servers': [
+                  {'address': 'u.example.com', 'port': 443, 'password': 'p'},
+                ],
+              },
+              'streamSettings': {
+                'network': 'httpupgrade',
+                'security': 'tls',
+                'httpupgradeSettings': {'path': '/up', 'host': 'u.example.com'},
+              },
+            },
+            {
+              'tag': 'h2n',
+              'protocol': 'trojan',
+              'settings': {
+                'servers': [
+                  {'address': 'h.example.com', 'port': 443, 'password': 'p'},
+                ],
+              },
+              'streamSettings': {
+                'network': 'h2',
+                'security': 'tls',
+                'h2Settings': {
+                  'path': '/h2',
+                  'host': ['h.example.com'],
                 },
               },
             },
-          ),
-        ],
-      }));
-      expect(result, isNotNull);
-      final config = result!.config;
-      expect(config, contains('headers: {User-Agent: "Go-http-client/1.1"}'));
-      expect(config, contains('x-padding-header: "Referer"'));
-      expect(config, contains('uplink-data-placement: "query"'));
-      expect(config, contains('uplink-data-key: "upkey"'));
-      expect(config, contains('uplink-chunk-size: "2-4"'));
-      expect(config, contains('h-max-request-times: "600"'));
-      expect(config, contains('h-max-reusable-secs: "180"'));
-    });
-
-    test('httpupgrade and h2 transports map', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'up',
-            'protocol': 'trojan',
-            'settings': {
-              'servers': [
-                {'address': 'u.example.com', 'port': 443, 'password': 'p'}
-              ]
-            },
-            'streamSettings': {
-              'network': 'httpupgrade',
-              'security': 'tls',
-              'httpupgradeSettings': {'path': '/up', 'host': 'u.example.com'},
-            },
-          },
-          {
-            'tag': 'h2n',
-            'protocol': 'trojan',
-            'settings': {
-              'servers': [
-                {'address': 'h.example.com', 'port': 443, 'password': 'p'}
-              ]
-            },
-            'streamSettings': {
-              'network': 'h2',
-              'security': 'tls',
-              'h2Settings': {'path': '/h2', 'host': ['h.example.com']},
-            },
-          },
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       // mihomo has no httpupgrade network: ws + the v2ray-http-upgrade flag.
       expect(result!.config, contains('network: "ws"'));
@@ -571,21 +610,23 @@ void main() {
     });
 
     test('wireguard outbound maps with peer', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'wg',
-            'protocol': 'wireguard',
-            'settings': {
-              'secretKey': 'PRIVATEKEY',
-              'address': ['10.0.0.2/32'],
-              'peers': [
-                {'publicKey': 'PUBKEY', 'endpoint': 'wg.example.com:51820'}
-              ],
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'wg',
+              'protocol': 'wireguard',
+              'settings': {
+                'secretKey': 'PRIVATEKEY',
+                'address': ['10.0.0.2/32'],
+                'peers': [
+                  {'publicKey': 'PUBKEY', 'endpoint': 'wg.example.com:51820'},
+                ],
+              },
             },
-          }
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('type: "wireguard"'));
@@ -597,36 +638,42 @@ void main() {
     });
 
     test('http and socks dialer outbounds map with users', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          {
-            'tag': 'h',
-            'protocol': 'http',
-            'settings': {
-              'servers': [
-                {
-                  'address': 'p.example.com',
-                  'port': 8080,
-                  'users': [{'user': 'u', 'pass': 'p'}],
-                }
-              ]
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            {
+              'tag': 'h',
+              'protocol': 'http',
+              'settings': {
+                'servers': [
+                  {
+                    'address': 'p.example.com',
+                    'port': 8080,
+                    'users': [
+                      {'user': 'u', 'pass': 'p'},
+                    ],
+                  },
+                ],
+              },
             },
-          },
-          {
-            'tag': 's',
-            'protocol': 'socks',
-            'settings': {
-              'servers': [
-                {
-                  'address': 'p2.example.com',
-                  'port': 1080,
-                  'users': [{'user': 'u2', 'pass': 'p2'}],
-                }
-              ]
+            {
+              'tag': 's',
+              'protocol': 'socks',
+              'settings': {
+                'servers': [
+                  {
+                    'address': 'p2.example.com',
+                    'port': 1080,
+                    'users': [
+                      {'user': 'u2', 'pass': 'p2'},
+                    ],
+                  },
+                ],
+              },
             },
-          },
-        ],
-      }));
+          ],
+        }),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['h', 's']);
       expect(result.config, contains('type: "http"'));
@@ -634,27 +681,30 @@ void main() {
       expect(result.config, contains('username: "u"'));
     });
 
-    test('a node under several routing tags imports once, best name wins',
-        () {
+    test('a node under several routing tags imports once, best name wins', () {
       // The lazeyka shape: an array of mode-configs where the same
       // server+uuid carries routing-role tags (proxy, GEMINI, PRIMARY).
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': '🧠 Умный режим',
-          'outbounds': [
-            vlessOutbound(tag: 'proxy'),
-            vlessOutbound(tag: 'GEMINI'),
-            vlessOutbound(
-              tag: 'OTHER',
-              extraStream: {'grpcSettings': {'serviceName': 'svc2'}},
-            ),
-          ],
-        },
-        {
-          'remarks': '📋 Авто LTE',
-          'outbounds': [vlessOutbound(tag: 'PRIMARY')],
-        },
-      ]));
+      final result = tryConvertXrayConfig(
+        _json([
+          {
+            'remarks': '🧠 Умный режим',
+            'outbounds': [
+              vlessOutbound(tag: 'proxy'),
+              vlessOutbound(tag: 'GEMINI'),
+              vlessOutbound(
+                tag: 'OTHER',
+                extraStream: {
+                  'grpcSettings': {'serviceName': 'svc2'},
+                },
+              ),
+            ],
+          },
+          {
+            'remarks': '📋 Авто LTE',
+            'outbounds': [vlessOutbound(tag: 'PRIMARY')],
+          },
+        ]),
+      );
       expect(result, isNotNull);
       // proxy/GEMINI/PRIMARY are one node — GEMINI is the first
       // non-generic tag; a different streamSettings makes a distinct node.
@@ -662,16 +712,18 @@ void main() {
     });
 
     test('a node whose every tag is generic takes the server host', () {
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': 'mode',
-          'outbounds': [vlessOutbound(tag: 'proxy-2')],
-        },
-        {
-          'remarks': 'mode',
-          'outbounds': [vlessOutbound(tag: 'PRIMARY-4')],
-        },
-      ]));
+      final result = tryConvertXrayConfig(
+        _json([
+          {
+            'remarks': 'mode',
+            'outbounds': [vlessOutbound(tag: 'proxy-2')],
+          },
+          {
+            'remarks': 'mode',
+            'outbounds': [vlessOutbound(tag: 'PRIMARY-4')],
+          },
+        ]),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['v.example.com']);
     });
@@ -688,12 +740,14 @@ void main() {
         return outbound;
       }
 
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          vlessWithId('one', '00000000-0000-0000-0000-000000000000'),
-          vlessWithId('second', 'cea80e62-16cf-4fc0-8dea-b8c407e06199'),
-        ],
-      }));
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            vlessWithId('one', '00000000-0000-0000-0000-000000000000'),
+            vlessWithId('second', 'cea80e62-16cf-4fc0-8dea-b8c407e06199'),
+          ],
+        }),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['one', 'second']);
     });
@@ -701,7 +755,12 @@ void main() {
     test('only internals / empty input returns null', () {
       expect(
         tryConvertXrayConfig(
-            _json({'outbounds': [{'protocol': 'freedom'}]})),
+          _json({
+            'outbounds': [
+              {'protocol': 'freedom'},
+            ],
+          }),
+        ),
         isNull,
       );
       expect(tryConvertXrayConfig(_json({'outbounds': []})), isNull);
@@ -711,46 +770,47 @@ void main() {
 
   group('routing balancers', () {
     test('leastLoad becomes url-test over the selected tags', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          _node('proxy', 'a.example.com'),
-          _node('proxy-2', 'b.example.com'),
-          _node('other', 'c.example.com'),
-        ],
-        'routing': {
-          'balancers': [
-            {
-              'tag': 'AUTO',
-              'selector': ['proxy'],
-              'strategy': {'type': 'leastLoad'},
-            }
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            _node('proxy-2', 'b.example.com'),
+            _node('other', 'c.example.com'),
           ],
-        },
-      }));
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'AUTO',
+                'selector': ['proxy'],
+                'strategy': {'type': 'leastLoad'},
+              },
+            ],
+          },
+        }),
+      );
       expect(result, isNotNull);
       final config = result!.config;
       expect(config, contains('name: "AUTO", type: "url-test"'));
-      expect(_groupMembers(config, 'AUTO'), [
-        'a.example.com',
-        'b.example.com',
-      ]);
+      expect(_groupMembers(config, 'AUTO'), ['a.example.com', 'b.example.com']);
       // PROXY offers the balancer, not the nodes it already governs.
       expect(_groupMembers(config, 'PROXY'), ['AUTO', 'other', 'DIRECT']);
     });
 
     test('random becomes round-robin load-balance', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [_node('GEMINI', 'g.example.com')],
-        'routing': {
-          'balancers': [
-            {
-              'tag': 'GEMINI_BALANCER',
-              'selector': ['GEMINI'],
-              'strategy': {'type': 'random'},
-            }
-          ],
-        },
-      }));
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [_node('GEMINI', 'g.example.com')],
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'GEMINI_BALANCER',
+                'selector': ['GEMINI'],
+                'strategy': {'type': 'random'},
+              },
+            ],
+          },
+        }),
+      );
       expect(result, isNotNull);
       expect(
         result!.config,
@@ -759,29 +819,31 @@ void main() {
     });
 
     test('tiered costs become a fallback ordered cheapest first', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          _node('BACKUP', 'b.example.com'),
-          _node('PRIMARY', 'p.example.com'),
-        ],
-        'routing': {
-          'balancers': [
-            {
-              'tag': 'TIERED',
-              'selector': ['BACKUP', 'PRIMARY'],
-              'strategy': {
-                'type': 'leastLoad',
-                'settings': {
-                  'costs': [
-                    {'match': '^PRIMARY', 'value': 1e-06, 'regexp': true},
-                    {'match': '^BACKUP', 'value': 1000000000, 'regexp': true},
-                  ],
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('BACKUP', 'b.example.com'),
+            _node('PRIMARY', 'p.example.com'),
+          ],
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'TIERED',
+                'selector': ['BACKUP', 'PRIMARY'],
+                'strategy': {
+                  'type': 'leastLoad',
+                  'settings': {
+                    'costs': [
+                      {'match': '^PRIMARY', 'value': 1e-06, 'regexp': true},
+                      {'match': '^BACKUP', 'value': 1000000000, 'regexp': true},
+                    ],
+                  },
                 },
               },
-            }
-          ],
-        },
-      }));
+            ],
+          },
+        }),
+      );
       expect(result, isNotNull);
       expect(result!.config, contains('name: "TIERED", type: "fallback"'));
       expect(_groupMembers(result.config, 'TIERED'), [
@@ -792,73 +854,98 @@ void main() {
 
     test('a dialable fallbackTag joins last, block does not', () {
       Map<String, Object?> body(String fallbackTag) => {
-            'outbounds': [
-              _node('proxy', 'a.example.com'),
-              _node('SPARE', 'z.example.com'),
-              {'tag': 'block', 'protocol': 'blackhole'},
-            ],
-            'routing': {
-              'balancers': [
-                {
-                  'tag': 'AUTO',
-                  'selector': ['proxy'],
-                  'fallbackTag': fallbackTag,
-                }
-              ],
+        'outbounds': [
+          _node('proxy', 'a.example.com'),
+          _node('SPARE', 'z.example.com'),
+          {'tag': 'block', 'protocol': 'blackhole'},
+        ],
+        'routing': {
+          'balancers': [
+            {
+              'tag': 'AUTO',
+              'selector': ['proxy'],
+              'fallbackTag': fallbackTag,
             },
-          };
+          ],
+        },
+      };
       expect(
-        _groupMembers(tryConvertXrayConfig(_json(body('SPARE')))!.config, 'AUTO'),
+        _groupMembers(
+          tryConvertXrayConfig(_json(body('SPARE')))!.config,
+          'AUTO',
+        ),
         ['a.example.com', 'z.example.com'],
       );
       expect(
-        _groupMembers(tryConvertXrayConfig(_json(body('block')))!.config, 'AUTO'),
+        _groupMembers(
+          tryConvertXrayConfig(_json(body('block')))!.config,
+          'AUTO',
+        ),
         ['a.example.com'],
       );
     });
 
     test('mode-configs keep their own balancers, named by remarks', () {
-      final result = tryConvertXrayConfig(_json([
-        {
-          'remarks': 'Smart',
-          'outbounds': [_node('proxy', 'a.example.com')],
-          'routing': {
-            'balancers': [
-              {'tag': 'AUTO', 'selector': ['proxy']}
-            ],
+      final result = tryConvertXrayConfig(
+        _json([
+          {
+            'remarks': 'Smart',
+            'outbounds': [_node('proxy', 'a.example.com')],
+            'routing': {
+              'balancers': [
+                {
+                  'tag': 'AUTO',
+                  'selector': ['proxy'],
+                },
+              ],
+            },
           },
-        },
-        {
-          'remarks': 'LTE',
-          'outbounds': [_node('proxy', 'b.example.com')],
-          'routing': {
-            'balancers': [
-              {'tag': 'AUTO', 'selector': ['proxy']}
-            ],
+          {
+            'remarks': 'LTE',
+            'outbounds': [_node('proxy', 'b.example.com')],
+            'routing': {
+              'balancers': [
+                {
+                  'tag': 'AUTO',
+                  'selector': ['proxy'],
+                },
+              ],
+            },
           },
-        },
-      ]));
+        ]),
+      );
       expect(result, isNotNull);
-      expect(_groupMembers(result!.config, 'Smart \u00b7 AUTO'),
-          ['a.example.com']);
-      expect(_groupMembers(result.config, 'LTE \u00b7 AUTO'), ['b.example.com']);
+      expect(_groupMembers(result!.config, 'Smart \u00b7 AUTO'), [
+        'a.example.com',
+      ]);
+      expect(_groupMembers(result.config, 'LTE \u00b7 AUTO'), [
+        'b.example.com',
+      ]);
     });
 
     test('a balancer tag names the role, so nodes keep their hostnames', () {
       // `proxy` and `GEMINI` here are the same server under two routing roles;
       // dedup merges them and neither tag may become the node's name.
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          _node('proxy', 'a.example.com'),
-          _node('GEMINI', 'a.example.com'),
-        ],
-        'routing': {
-          'balancers': [
-            {'tag': 'AUTO', 'selector': ['proxy']},
-            {'tag': 'GEM', 'selector': ['GEMINI']},
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            _node('GEMINI', 'a.example.com'),
           ],
-        },
-      }));
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'AUTO',
+                'selector': ['proxy'],
+              },
+              {
+                'tag': 'GEM',
+                'selector': ['GEMINI'],
+              },
+            ],
+          },
+        }),
+      );
       expect(result, isNotNull);
       expect(_proxiesNames(result!.config), ['a.example.com']);
       expect(_groupMembers(result.config, 'AUTO'), ['a.example.com']);
@@ -866,17 +953,22 @@ void main() {
     });
 
     test('a balancer selecting nothing dialable is dropped', () {
-      final result = tryConvertXrayConfig(_json({
-        'outbounds': [
-          _node('proxy', 'a.example.com'),
-          {'tag': 'direct', 'protocol': 'freedom'},
-        ],
-        'routing': {
-          'balancers': [
-            {'tag': 'DIRECT_ONLY', 'selector': ['direct']}
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            {'tag': 'direct', 'protocol': 'freedom'},
           ],
-        },
-      }));
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'DIRECT_ONLY',
+                'selector': ['direct'],
+              },
+            ],
+          },
+        }),
+      );
       expect(result, isNotNull);
       expect(result!.config, isNot(contains('DIRECT_ONLY')));
     });

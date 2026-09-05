@@ -220,6 +220,31 @@ class App {
     }
   }
 
+  Future<bool> showNotice({
+    required String channelName,
+    required String title,
+    required String message,
+    String? actionLabel,
+    String? actionUrl,
+  }) async {
+    try {
+      return await methodChannel.invokeMethod<bool>('showNotice', {
+            'channelName': channelName,
+            'title': title,
+            'message': message,
+            'actionLabel': actionLabel,
+            'actionUrl': actionUrl,
+          }) ??
+          false;
+    } catch (error) {
+      commonPrint.log(
+        'showNotice failed: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return false;
+    }
+  }
+
   Future<String?> getAndroidId() async {
     try {
       return await methodChannel

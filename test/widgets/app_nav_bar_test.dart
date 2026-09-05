@@ -49,10 +49,7 @@ void main() {
         child: const TestApp(
           includeNavigatorKey: false,
           child: Scaffold(
-            body: Align(
-              alignment: Alignment.bottomCenter,
-              child: AppNavBar(),
-            ),
+            body: Align(alignment: Alignment.bottomCenter, child: AppNavBar()),
           ),
         ),
       ),
@@ -89,8 +86,9 @@ void main() {
 
     await tester.pumpAndSettle();
     final settled = highlightX(tester);
-    final segmentWidth =
-        tester.getSize(find.byKey(AppNavBar.highlightKey)).width;
+    final segmentWidth = tester
+        .getSize(find.byKey(AppNavBar.highlightKey))
+        .width;
     expect(middle, lessThan(settled));
     expect(
       settled,
@@ -122,8 +120,9 @@ void main() {
 
     await tester.pumpAndSettle();
     final settled = highlightX(tester);
-    final segmentWidth =
-        tester.getSize(find.byKey(AppNavBar.highlightKey)).width;
+    final segmentWidth = tester
+        .getSize(find.byKey(AppNavBar.highlightKey))
+        .width;
     expect(settled, closeTo(start + segmentWidth, 1.0));
   });
 

@@ -290,6 +290,7 @@ _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
     _RcxConfigParams(
       enabled: json['on'] as bool,
       preset: json['preset'] as String,
+      strategy: json['st'] as String,
       defaultsVersion: (json['dv'] as num).toInt(),
       censorCountries: (json['cc'] as List<dynamic>)
           .map((e) => e as String)
@@ -310,9 +311,8 @@ _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
           .map((e) => e as String)
           .toList(),
       allowDomesticLastResort: json['dlr'] as bool,
-      saveMobileData: json['smd'] as bool,
       requireUdp: json['udp'] as bool,
-      manualHoldMinutes: (json['mhm'] as num).toInt(),
+      respectPick: json['rpk'] as bool,
       dwellSeconds: (json['dwl'] as num).toInt(),
       waveWidth: (json['ww'] as num).toInt(),
     );
@@ -321,6 +321,7 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
     <String, dynamic>{
       'on': instance.enabled,
       'preset': instance.preset,
+      'st': instance.strategy,
       'dv': instance.defaultsVersion,
       'cc': instance.censorCountries,
       'cf': instance.canaryForeign,
@@ -329,9 +330,8 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'dm': instance.domesticMarkers,
       'bp': instance.breakerPatterns,
       'dlr': instance.allowDomesticLastResort,
-      'smd': instance.saveMobileData,
       'udp': instance.requireUdp,
-      'mhm': instance.manualHoldMinutes,
+      'rpk': instance.respectPick,
       'dwl': instance.dwellSeconds,
       'ww': instance.waveWidth,
     };
@@ -347,6 +347,9 @@ _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
   reason: json['reason'] as String? ?? '',
   searching: json['searching'] as bool? ?? false,
   deep: json['deep'] as bool? ?? false,
+  pinned: json['pinned'] as bool? ?? false,
+  pinNode: json['pinNode'] as String? ?? '',
+  direct: json['direct'] as String? ?? '',
   candidates: (json['candidates'] as num?)?.toInt() ?? 0,
   eligible: (json['eligible'] as num?)?.toInt() ?? 0,
   switchedAt: (json['switchedAt'] as num?)?.toInt() ?? 0,
@@ -364,6 +367,9 @@ Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
       'reason': instance.reason,
       'searching': instance.searching,
       'deep': instance.deep,
+      'pinned': instance.pinned,
+      'pinNode': instance.pinNode,
+      'direct': instance.direct,
       'candidates': instance.candidates,
       'eligible': instance.eligible,
       'switchedAt': instance.switchedAt,
@@ -378,6 +384,7 @@ _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
       evidence: json['evidence'] as String? ?? 'none',
       block: json['block'] as String? ?? '',
       delay: (json['delay'] as num?)?.toInt() ?? 0,
+      hostDelay: (json['hostDelay'] as num?)?.toInt() ?? 0,
       band: (json['band'] as num?)?.toInt() ?? 0,
       degraded: json['degraded'] as bool? ?? false,
       breaker: json['breaker'] as bool? ?? false,
@@ -396,6 +403,7 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
       'evidence': instance.evidence,
       'block': instance.block,
       'delay': instance.delay,
+      'hostDelay': instance.hostDelay,
       'band': instance.band,
       'degraded': instance.degraded,
       'breaker': instance.breaker,
@@ -488,7 +496,7 @@ _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
       const [],
   probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
   probeCap: (json['probeCap'] as num?)?.toInt() ?? 0,
-  manualTill: (json['manualTill'] as num?)?.toInt() ?? 0,
+  manual: json['manual'] as bool? ?? false,
   at: (json['at'] as num?)?.toInt() ?? 0,
 );
 
@@ -502,6 +510,6 @@ Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
       'bands': instance.bands,
       'probesLeft': instance.probesLeft,
       'probeCap': instance.probeCap,
-      'manualTill': instance.manualTill,
+      'manual': instance.manual,
       'at': instance.at,
     };

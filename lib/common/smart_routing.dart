@@ -2,7 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
 /// Bumped when shipped preset data changes, so the core drops its own copy.
-const smartRoutingDefaultsVersion = 2;
+const smartRoutingDefaultsVersion = 4;
 
 class SmartRoutingBundle {
   const SmartRoutingBundle({
@@ -13,9 +13,8 @@ class SmartRoutingBundle {
     this.domesticMarkers = const [],
     this.breakerPatterns = const [],
     this.allowDomesticLastResort = true,
-    this.saveMobileData = true,
     this.requireUdp = false,
-    this.manualHoldMinutes = 60,
+    this.respectPick = true,
     this.dwellSeconds = 90,
     this.waveWidth = 12,
   });
@@ -27,18 +26,23 @@ class SmartRoutingBundle {
   final List<RcxMarker> domesticMarkers;
   final List<String> breakerPatterns;
   final bool allowDomesticLastResort;
-  final bool saveMobileData;
   final bool requireUdp;
-  final int manualHoldMinutes;
+  final bool respectPick;
   final int dwellSeconds;
   final int waveWidth;
 }
 
 // Canaries are IP literals: DNS often answers while transit is dead, so a
 // hostname would measure the resolver instead of the network.
+// One operator blocked nationwide is not a whitelist network, hence four ASNs.
 const _russia = SmartRoutingBundle(
   censorCountries: ['RU'],
-  canaryForeign: ['1.1.1.1:443', '9.9.9.9:443'],
+  canaryForeign: [
+    '1.1.1.1:443',
+    '9.9.9.9:443',
+    '8.8.8.8:443',
+    '94.140.14.14:443',
+  ],
   canaryDomestic: ['77.88.8.8:443', '213.180.204.242:443'],
   openMarkers: [
     RcxMarker(url: 'https://www.youtube.com/generate_204', statuses: [204]),
@@ -57,7 +61,12 @@ const _smartRoutingBundles = {
   SmartRoutingPreset.russia: _russia,
   SmartRoutingPreset.iran: SmartRoutingBundle(
     censorCountries: ['IR'],
-    canaryForeign: ['1.1.1.1:443', '9.9.9.9:443'],
+    canaryForeign: [
+      '1.1.1.1:443',
+      '9.9.9.9:443',
+      '8.8.8.8:443',
+      '94.140.14.14:443',
+    ],
     canaryDomestic: ['5.200.200.200:443'],
     openMarkers: [
       RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
@@ -68,7 +77,12 @@ const _smartRoutingBundles = {
   ),
   SmartRoutingPreset.china: SmartRoutingBundle(
     censorCountries: ['CN'],
-    canaryForeign: ['1.1.1.1:443', '9.9.9.9:443'],
+    canaryForeign: [
+      '1.1.1.1:443',
+      '9.9.9.9:443',
+      '8.8.8.8:443',
+      '94.140.14.14:443',
+    ],
     canaryDomestic: ['223.5.5.5:443'],
     openMarkers: [
       RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
@@ -85,6 +99,13 @@ SmartRoutingPreset smartRoutingPresetForLocale(String? locale) {
   if (code.startsWith('fa')) return SmartRoutingPreset.iran;
   if (code.startsWith('zh')) return SmartRoutingPreset.china;
   return SmartRoutingPreset.off;
+}
+
+extension SmartRoutingStrategyWire on SmartRoutingStrategy {
+  String get wire => switch (this) {
+    SmartRoutingStrategy.balanced => 'balanced',
+    SmartRoutingStrategy.lowestLatency => 'lowest-latency',
+  };
 }
 
 extension SmartRoutingPresetBundle on SmartRoutingPreset {
@@ -114,9 +135,8 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       domesticMarkers: bundle.domesticMarkers,
       breakerPatterns: bundle.breakerPatterns,
       allowDomesticLastResort: bundle.allowDomesticLastResort,
-      saveMobileData: bundle.saveMobileData,
       requireUdp: bundle.requireUdp,
-      manualHoldMinutes: bundle.manualHoldMinutes,
+      respectPick: bundle.respectPick,
       dwellSeconds: bundle.dwellSeconds,
       waveWidth: bundle.waveWidth,
     );
@@ -127,6 +147,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
   RcxConfigParams get rcxParams => RcxConfigParams(
     enabled: enabled,
     preset: preset.wire,
+    strategy: strategy.wire,
     defaultsVersion: smartRoutingDefaultsVersion,
     censorCountries: censorCountries,
     canaryForeign: canaryForeign,
@@ -135,10 +156,29 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     domesticMarkers: domesticMarkers,
     breakerPatterns: breakerPatterns,
     allowDomesticLastResort: allowDomesticLastResort,
-    saveMobileData: saveMobileData,
     requireUdp: requireUdp,
-    manualHoldMinutes: manualHoldMinutes,
+    respectPick: respectPick,
     dwellSeconds: dwellSeconds,
     waveWidth: waveWidth,
   );
 }
+
+const rcxTrailLimit = 4;
+
+List<String> rcxTrailWith(List<String> trail, String node) {
+  if (node.isEmpty) {
+    return trail;
+  }
+  if (trail.isNotEmpty && trail.first == node) {
+    return trail;
+  }
+  final next = [node, ...trail.where((item) => item != node)];
+  return next.length <= rcxTrailLimit ? next : next.sublist(0, rcxTrailLimit);
+}
+
+/// The node the engine holds and the node the user pinned are two questions.
+bool routingPinHolds(RcxStatus? status, String node) =>
+    status != null &&
+    status.enabled &&
+    status.pinNode.isNotEmpty &&
+    status.pinNode == node;

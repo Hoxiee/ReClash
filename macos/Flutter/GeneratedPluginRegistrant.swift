@@ -19,6 +19,7 @@ import shared_preferences_foundation
 import sqflite_darwin
 import tray
 import url_launcher_macos
+import webview_flutter_wkwebview
 import wifi_ssid
 import window_manager
 
@@ -37,6 +38,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
   TrayPlugin.register(with: registry.registrar(forPlugin: "TrayPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
+  WebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "WebViewFlutterPlugin"))
   WifiSsidPlugin.register(with: registry.registrar(forPlugin: "WifiSsidPlugin"))
   WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
 }

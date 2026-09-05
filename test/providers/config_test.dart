@@ -67,30 +67,32 @@ void main() {
       expect(container.read(vpnSettingProvider).enable, false);
     });
 
-    test('smart pause networks reorder with final insertion index semantics',
-        () {
-      container
-          .read(vpnSettingProvider.notifier)
-          .update(
-            (_) => const VpnProps(
-              smartPauseEnabled: true,
-              smartPauseNetworks: ['Home', 'Office', 'Cafe', 'Hotel'],
-            ),
+    test(
+      'smart pause networks reorder with final insertion index semantics',
+      () {
+        container
+            .read(vpnSettingProvider.notifier)
+            .update(
+              (_) => const VpnProps(
+                smartPauseEnabled: true,
+                smartPauseNetworks: ['Home', 'Office', 'Cafe', 'Hotel'],
+              ),
+            );
+
+        container.read(vpnSettingProvider.notifier).update((value) {
+          return value.copyWith(
+            smartPauseNetworks: value.smartPauseNetworks.copyAndReorder(1, 3),
           );
+        });
 
-      container.read(vpnSettingProvider.notifier).update((value) {
-        return value.copyWith(
-          smartPauseNetworks: value.smartPauseNetworks.copyAndReorder(1, 3),
-        );
-      });
-
-      expect(container.read(vpnSettingProvider).smartPauseNetworks, [
-        'Home',
-        'Cafe',
-        'Hotel',
-        'Office',
-      ]);
-    });
+        expect(container.read(vpnSettingProvider).smartPauseNetworks, [
+          'Home',
+          'Cafe',
+          'Hotel',
+          'Office',
+        ]);
+      },
+    );
   });
 
   group('NetworkSetting provider', () {
@@ -258,10 +260,7 @@ void main() {
         overrideContainer.read(patchClashConfigProvider),
         config.patchClashConfig,
       );
-      expect(
-        overrideContainer.read(vpnSettingProvider),
-        config.vpnProps,
-      );
+      expect(overrideContainer.read(vpnSettingProvider), config.vpnProps);
       expect(
         overrideContainer.read(appSettingProvider).onlyStatisticsProxy,
         false,

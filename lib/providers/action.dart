@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:reclash/common/boot_guard.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/subscription_reminder.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/database/database.dart';
