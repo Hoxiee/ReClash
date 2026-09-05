@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -128,6 +129,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 result.success(true)
             }
 
+            "setIconVariant" -> {
+                val variant = call.arguments as? String
+                if (variant == null) {
+                    result.error("INVALID_ARGUMENT", "Icon variant must be a string", null)
+                } else {
+                    setIconVariant(variant)
+                    result.success(true)
+                }
+            }
+
             "updateExcludeFromRecents" -> {
                 val value = call.argument<Boolean>("value")
                 updateExcludeFromRecents(value)
@@ -230,6 +241,45 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             } catch (error: Exception) {
                 GlobalState.log("Platform call failed: $error")
                 result.error("PLATFORM_ERROR", error.toString(), null)
+            }
+        }
+    }
+
+    private val iconVariantAliases = mapOf(
+        "mono" to ".icons.MonoAlias",
+        "sepia" to ".icons.SepiaAlias",
+        "inverted" to ".icons.InvertedAlias",
+        "dark_mono" to ".icons.DarkMonoAlias",
+        "cool" to ".icons.CoolAlias",
+    )
+
+    private fun setIconVariant(variant: String) {
+        val packageName = GlobalState.application.packageName
+        val manager = GlobalState.application.packageManager
+        val target = if (variant == "default") {
+            ComponentName(packageName, "$packageName.MainActivity")
+        } else {
+            iconVariantAliases[variant]?.let { ComponentName(packageName, "$packageName$it") }
+        }
+        if (target == null) {
+            return
+        }
+        manager.setComponentEnabledSetting(
+            target,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
+        )
+        for (alias in iconVariantAliases.values) {
+            val component = ComponentName(packageName, "$packageName$alias")
+            if (component == target) continue
+            if (manager.getComponentEnabledSetting(component) ==
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            ) {
+                manager.setComponentEnabledSetting(
+                    component,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP,
+                )
             }
         }
     }

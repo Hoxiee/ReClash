@@ -64,11 +64,29 @@ ColorScheme genColorScheme(
   );
 }
 
+@Riverpod(keepAlive: true)
+class EffectiveThemeMode extends _$EffectiveThemeMode {
+  @override
+  ThemeMode build() {
+    final themeSetting = ref.watch(themeSettingProvider);
+    final now = DateTime.now();
+    final flip = themeSetting.nextScheduleFlip(now);
+    if (flip != null) {
+      // Одноразовый таймер на границу окна: секунда запаса, чтобы пересчёт
+      // случился уже за ней, а не ровно на ней.
+      final timer = Timer(
+        flip + const Duration(seconds: 1),
+        ref.invalidateSelf,
+      );
+      ref.onDispose(timer.cancel);
+    }
+    return themeSetting.themeModeAt(now);
+  }
+}
+
 @riverpod
 Brightness currentBrightness(Ref ref) {
-  final themeMode = ref.watch(
-    themeSettingProvider.select((state) => state.effectiveThemeMode),
-  );
+  final themeMode = ref.watch(effectiveThemeModeProvider);
   final systemBrightness = ref.watch(systemBrightnessProvider);
   return switch (themeMode) {
     ThemeMode.system => systemBrightness,

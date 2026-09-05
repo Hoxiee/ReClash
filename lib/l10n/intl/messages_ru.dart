@@ -218,13 +218,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconChangeNote": MessageLookupByLibrary.simpleMessage(
       "Лаунчер перерисует иконку через несколько секунд. На некоторых лаунчерах закреплённый ярлык может пропасть.",
     ),
+    "appIconCool": MessageLookupByLibrary.simpleMessage("Холодный"),
+    "appIconDarkMono": MessageLookupByLibrary.simpleMessage("Тёмный монохром"),
+    "appIconInverted": MessageLookupByLibrary.simpleMessage("Инверсия"),
+    "appIconMono": MessageLookupByLibrary.simpleMessage("Монохром"),
+    "appIconSepia": MessageLookupByLibrary.simpleMessage("Сепия"),
     "appearance": MessageLookupByLibrary.simpleMessage("Оформление"),
     "appearanceColor": MessageLookupByLibrary.simpleMessage("Цвет"),
-    "appearanceDashboard": MessageLookupByLibrary.simpleMessage("Панель"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Тема, цвета, иконки и вид панели",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Иконка"),
+    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Макет"),
     "appearanceMotion": MessageLookupByLibrary.simpleMessage("Движение"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Тема"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
@@ -337,6 +342,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "У вас уже последняя версия",
     ),
     "classicDashboard": MessageLookupByLibrary.simpleMessage("Классическая"),
+    "classicDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сетка плиток и кнопка запуска",
+    ),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Очистить поиск"),
     "clientNotSupported": MessageLookupByLibrary.simpleMessage(
@@ -875,6 +883,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "networksEmpty": MessageLookupByLibrary.simpleMessage("Список сетей пуст"),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Нейтральная"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("Новый вид"),
+    "newDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Кольцо подключения и трафик под ним",
+    ),
     "newDashboardTitle": MessageLookupByLibrary.simpleMessage("Новая"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("Нет анонсов"),
@@ -1062,6 +1073,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Меньше движения"),
     "reduceMotionDesc": MessageLookupByLibrary.simpleMessage(
       "Отключить декоративные анимации",
+    ),
+    "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
+      "Уже включено в настройках системы",
     ),
     "remaining": MessageLookupByLibrary.simpleMessage("Осталось"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Осталось"),

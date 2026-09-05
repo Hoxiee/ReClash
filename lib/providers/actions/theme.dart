@@ -10,6 +10,7 @@ class ThemeAction extends _$ThemeAction {
       ref.read(systemBrightnessProvider.notifier).value =
           WidgetsBinding.instance.platformDispatcher.platformBrightness;
       ref.invalidate(themeSettingProvider);
+      ref.invalidate(effectiveThemeModeProvider);
     });
   }
 

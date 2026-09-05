@@ -218,13 +218,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconChangeNote": MessageLookupByLibrary.simpleMessage(
       "The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.",
     ),
+    "appIconCool": MessageLookupByLibrary.simpleMessage("Cool"),
+    "appIconDarkMono": MessageLookupByLibrary.simpleMessage("Dark mono"),
+    "appIconInverted": MessageLookupByLibrary.simpleMessage("Inverted"),
+    "appIconMono": MessageLookupByLibrary.simpleMessage("Mono"),
+    "appIconSepia": MessageLookupByLibrary.simpleMessage("Sepia"),
     "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
     "appearanceColor": MessageLookupByLibrary.simpleMessage("Color"),
-    "appearanceDashboard": MessageLookupByLibrary.simpleMessage("Dashboard"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Theme, colors, icons and dashboard look",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Icon"),
+    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Layout"),
     "appearanceMotion": MessageLookupByLibrary.simpleMessage("Motion"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Theme"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
@@ -329,6 +334,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "The app is already up to date",
     ),
     "classicDashboard": MessageLookupByLibrary.simpleMessage("Classic"),
+    "classicDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Tile grid with a start button",
+    ),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear data"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
     "clientNotSupported": MessageLookupByLibrary.simpleMessage(
@@ -861,6 +869,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "neutralScheme": MessageLookupByLibrary.simpleMessage("Neutral"),
     "newDashboard": MessageLookupByLibrary.simpleMessage("New look"),
+    "newDashboardDesc": MessageLookupByLibrary.simpleMessage(
+      "Connection ring with traffic below",
+    ),
     "newDashboardTitle": MessageLookupByLibrary.simpleMessage("New"),
     "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("No announcements"),
@@ -1034,6 +1045,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Reduce motion"),
     "reduceMotionDesc": MessageLookupByLibrary.simpleMessage(
       "Disable decorative animations",
+    ),
+    "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
+      "Already enabled in system settings",
     ),
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Remaining"),

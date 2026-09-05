@@ -5,6 +5,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/general.dart';
@@ -21,7 +22,6 @@ import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/providers.dart';
 import 'package:reclash/views/proxies/tab.dart';
 import 'package:reclash/views/locale.dart';
-import 'package:reclash/views/theme.dart';
 import 'package:reclash/views/views.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -49,7 +49,7 @@ void main() {
     'network config': const Scaffold(body: NetworkListView()),
     'advanced config': const AdvancedConfigView(),
     'smart pause config': const SmartPauseView(),
-    'theme': const ThemeView(),
+    'appearance': const AppearanceView(),
     'language': const LocaleView(),
     'application settings': const ApplicationSettingView(),
     'backup and restore': const BackupAndRestore(),
@@ -103,7 +103,7 @@ void main() {
   }
 
   final toolDestinations = <String, Type>{
-    'Appearance': ThemeView,
+    'Appearance': AppearanceView,
     'Backup and restore': BackupAndRestore,
     'Basic configuration': ConfigView,
     'Advanced configuration': AdvancedConfigView,

@@ -903,6 +903,59 @@ final class GenColorSchemeFamily extends $Family
   String toString() => r'genColorSchemeProvider';
 }
 
+@ProviderFor(EffectiveThemeMode)
+final effectiveThemeModeProvider = EffectiveThemeModeProvider._();
+
+final class EffectiveThemeModeProvider
+    extends $NotifierProvider<EffectiveThemeMode, ThemeMode> {
+  EffectiveThemeModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveThemeModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveThemeModeHash();
+
+  @$internal
+  @override
+  EffectiveThemeMode create() => EffectiveThemeMode();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThemeMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThemeMode>(value),
+    );
+  }
+}
+
+String _$effectiveThemeModeHash() =>
+    r'c77dcc101dbd2e5366492d11eda3851eb0953854';
+
+abstract class _$EffectiveThemeMode extends $Notifier<ThemeMode> {
+  ThemeMode build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<ThemeMode, ThemeMode>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ThemeMode, ThemeMode>,
+              ThemeMode,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(currentBrightness)
 final currentBrightnessProvider = CurrentBrightnessProvider._();
 
@@ -942,7 +995,7 @@ final class CurrentBrightnessProvider
   }
 }
 
-String _$currentBrightnessHash() => r'144902d42fc168240f4f08b488af9228d352e7e8';
+String _$currentBrightnessHash() => r'b0d9ee06c85d3b76948855bf52e4eb0a42e52e7a';
 
 @ProviderFor(customOverwriteDate)
 final customOverwriteDateProvider = CustomOverwriteDateFamily._();

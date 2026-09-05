@@ -298,21 +298,48 @@ abstract class ThemeProps with _$ThemeProps {
 }
 
 extension ThemePropsScheduleExt on ThemeProps {
-  ThemeMode get effectiveThemeMode {
-    if (!scheduledTheme || darkAt == null || lightAt == null) {
+  ThemeMode get effectiveThemeMode => themeModeAt(DateTime.now());
+
+  ThemeMode themeModeAt(DateTime now) {
+    final window = _scheduleWindow;
+    if (window == null) {
       return themeMode;
     }
-    final dark = _parseDayMinutes(darkAt!);
-    final light = _parseDayMinutes(lightAt!);
-    if (dark == null || light == null) {
-      return themeMode;
-    }
-    final now = DateTime.now();
+    final (dark, light) = window;
     final minutes = now.hour * 60 + now.minute;
     final isDark = dark < light
         ? minutes >= dark && minutes < light
         : minutes >= dark || minutes < light;
     return isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  Duration? nextScheduleFlip(DateTime now) {
+    final window = _scheduleWindow;
+    if (window == null) {
+      return null;
+    }
+    final (dark, light) = window;
+    final seconds = now.hour * 3600 + now.minute * 60 + now.second;
+    Duration until(int boundary) {
+      final delta = (boundary * 60 - seconds) % 86400;
+      return Duration(seconds: delta == 0 ? 86400 : delta);
+    }
+
+    final toDark = until(dark);
+    final toLight = until(light);
+    return toDark <= toLight ? toDark : toLight;
+  }
+
+  (int, int)? get _scheduleWindow {
+    if (!scheduledTheme || darkAt == null || lightAt == null) {
+      return null;
+    }
+    final dark = _parseDayMinutes(darkAt!);
+    final light = _parseDayMinutes(lightAt!);
+    if (dark == null || light == null) {
+      return null;
+    }
+    return (dark, light);
   }
 }
 

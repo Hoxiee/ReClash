@@ -166,14 +166,34 @@ extension DynamicSchemeVariantL10n on DynamicSchemeVariant {
 }
 
 extension LocaleL10n on Locale {
-  String get label {
-    final appLocalizations = currentAppLocalizations;
+  /// Fixed names: the picker must stay readable in the current locale.
+  String get nativeLabel {
     return switch (toString()) {
-      'en' => appLocalizations.en,
-      'ja' => appLocalizations.ja,
-      'ru' => appLocalizations.ru,
-      'zh_CN' => appLocalizations.zhCN,
+      'en' => 'English',
+      'ja' => '日本語',
+      'ru' => 'Русский',
+      'zh_CN' => '简体中文',
       final code => code,
+    };
+  }
+
+  String get englishLabel {
+    return switch (toString()) {
+      'en' => 'English',
+      'ja' => 'Japanese',
+      'ru' => 'Russian',
+      'zh_CN' => 'Chinese (Simplified)',
+      final code => code,
+    };
+  }
+
+  String get flagEmoji {
+    return switch (toString()) {
+      'en' => '🇬🇧',
+      'ja' => '🇯🇵',
+      'ru' => '🇷🇺',
+      'zh_CN' => '🇨🇳',
+      _ => '🌐',
     };
   }
 }

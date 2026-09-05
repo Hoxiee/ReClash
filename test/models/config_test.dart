@@ -339,6 +339,45 @@ void main() {
     });
   });
 
+  group('ThemeProps schedule', () {
+    const props = ThemeProps(
+      themeMode: ThemeMode.system,
+      scheduledTheme: true,
+      darkAt: '22:00',
+      lightAt: '07:00',
+    );
+
+    DateTime at(int hour, int minute) => DateTime(2026, 1, 2, hour, minute);
+
+    test('themeModeAt covers the overnight window edges', () {
+      expect(props.themeModeAt(at(22, 0)), ThemeMode.dark);
+      expect(props.themeModeAt(at(3, 30)), ThemeMode.dark);
+      expect(props.themeModeAt(at(6, 59)), ThemeMode.dark);
+      expect(props.themeModeAt(at(7, 0)), ThemeMode.light);
+      expect(props.themeModeAt(at(21, 59)), ThemeMode.light);
+    });
+
+    test('themeModeAt keeps the stored mode without a schedule', () {
+      const off = ThemeProps(themeMode: ThemeMode.system);
+      expect(off.themeModeAt(at(23, 0)), ThemeMode.system);
+      expect(
+        props.copyWith(lightAt: null).themeModeAt(at(23, 0)),
+        ThemeMode.system,
+      );
+    });
+
+    test('nextScheduleFlip returns the nearest boundary', () {
+      expect(props.nextScheduleFlip(at(21, 30)), const Duration(minutes: 30));
+      expect(props.nextScheduleFlip(at(6, 45)), const Duration(minutes: 15));
+      expect(props.nextScheduleFlip(at(12, 0)), const Duration(hours: 10));
+      expect(props.nextScheduleFlip(at(7, 0)), const Duration(hours: 15));
+      expect(
+        const ThemeProps().nextScheduleFlip(at(12, 0)),
+        isNull,
+      );
+    });
+  });
+
   group('AccessControlProps', () {
     test('currentList returns acceptList in acceptSelected mode', () {
       const props = AccessControlProps(

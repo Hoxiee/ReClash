@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/about.dart';
@@ -10,14 +9,15 @@ import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/backup_and_restore.dart';
 import 'package:reclash/views/config/config.dart';
 import 'package:reclash/views/hotkey.dart';
+import 'package:reclash/views/locale.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
 
+import 'appearance/appearance.dart';
 import 'config/advanced.dart';
 import 'developer.dart';
-import 'theme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
@@ -120,30 +120,19 @@ class _ToolViewState extends ConsumerState<ToolsView> {
 class _LocaleItem extends ConsumerWidget {
   const _LocaleItem();
 
-  String _getLocaleString(BuildContext context, Locale? locale) {
-    if (locale == null) return context.appLocalizations.defaultText;
-    return locale.label;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(
-      appSettingProvider.select((state) => state.locale),
+    final appLocalizations = context.appLocalizations;
+    final currentLocale = getLocaleForString(
+      ref.watch(appSettingProvider.select((state) => state.locale)),
     );
-    final currentLocale = getLocaleForString(locale);
-    return ListItem<Locale?>.options(
+    return ListItem.open(
       leading: const Icon(Icons.language_outlined),
-      title: Text(context.appLocalizations.language),
-      subtitle: Text(_getLocaleString(context, currentLocale)),
-      dialogTitle: context.appLocalizations.language,
-      options: [null, ...AppLocalizations.delegate.supportedLocales],
-      onChanged: (Locale? locale) {
-        ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(locale: locale?.toString()));
-      },
-      textBuilder: (locale) => _getLocaleString(context, locale),
-      value: currentLocale,
+      title: Text(appLocalizations.language),
+      subtitle: Text(
+        currentLocale?.nativeLabel ?? appLocalizations.defaultText,
+      ),
+      widget: const LocaleView(),
     );
   }
 }
@@ -157,7 +146,7 @@ class _ThemeItem extends StatelessWidget {
       leading: const Icon(Icons.style),
       title: Text(context.appLocalizations.appearance),
       subtitle: Text(context.appLocalizations.appearanceDesc),
-      widget: const ThemeView(),
+      widget: const AppearanceView(),
     );
   }
 }

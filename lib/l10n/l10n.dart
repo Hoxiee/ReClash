@@ -7647,14 +7647,9 @@ class AppLocalizations {
     return Intl.message('Icon', name: 'appearanceIcon', desc: '', args: []);
   }
 
-  /// `Dashboard`
-  String get appearanceDashboard {
-    return Intl.message(
-      'Dashboard',
-      name: 'appearanceDashboard',
-      desc: '',
-      args: [],
-    );
+  /// `Layout`
+  String get appearanceLayout {
+    return Intl.message('Layout', name: 'appearanceLayout', desc: '', args: []);
   }
 
   /// `Motion`
@@ -7742,6 +7737,41 @@ class AppLocalizations {
     );
   }
 
+  /// `Mono`
+  String get appIconMono {
+    return Intl.message('Mono', name: 'appIconMono', desc: '', args: []);
+  }
+
+  /// `Sepia`
+  String get appIconSepia {
+    return Intl.message('Sepia', name: 'appIconSepia', desc: '', args: []);
+  }
+
+  /// `Inverted`
+  String get appIconInverted {
+    return Intl.message(
+      'Inverted',
+      name: 'appIconInverted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dark mono`
+  String get appIconDarkMono {
+    return Intl.message(
+      'Dark mono',
+      name: 'appIconDarkMono',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cool`
+  String get appIconCool {
+    return Intl.message('Cool', name: 'appIconCool', desc: '', args: []);
+  }
+
   /// `Dashboard style`
   String get dashboardStyle {
     return Intl.message(
@@ -7762,9 +7792,29 @@ class AppLocalizations {
     );
   }
 
+  /// `Tile grid with a start button`
+  String get classicDashboardDesc {
+    return Intl.message(
+      'Tile grid with a start button',
+      name: 'classicDashboardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `New`
   String get newDashboardTitle {
     return Intl.message('New', name: 'newDashboardTitle', desc: '', args: []);
+  }
+
+  /// `Connection ring with traffic below`
+  String get newDashboardDesc {
+    return Intl.message(
+      'Connection ring with traffic below',
+      name: 'newDashboardDesc',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Show sidebar labels`
@@ -7792,6 +7842,16 @@ class AppLocalizations {
     return Intl.message(
       'Disable decorative animations',
       name: 'reduceMotionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Already enabled in system settings`
+  String get reduceMotionSystemHint {
+    return Intl.message(
+      'Already enabled in system settings',
+      name: 'reduceMotionSystemHint',
       desc: '',
       args: [],
     );

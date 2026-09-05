@@ -477,6 +477,138 @@ void main() {
     expect(zh.startTip, isNot(en.startTip));
   });
 
+  group('theme schedule', () {
+    int currentMinutes() {
+      final now = DateTime.now();
+      return now.hour * 60 + now.minute;
+    }
+
+    int wrap(int minutes) => (minutes % 1440 + 1440) % 1440;
+
+    String hhmm(int minutes) {
+      final hh = (minutes ~/ 60).toString().padLeft(2, '0');
+      final mm = (minutes % 60).toString().padLeft(2, '0');
+      return '$hh:$mm';
+    }
+
+    void schedule({String? darkAt, String? lightAt}) {
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              scheduledTheme: true,
+              darkAt: darkAt,
+              lightAt: lightAt,
+            ),
+          );
+    }
+
+    ThemeMode effectiveThemeMode() =>
+        container.read(themeSettingProvider).effectiveThemeMode;
+
+    test('falls back to the stored mode without a full schedule', () {
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(themeMode: ThemeMode.system));
+      expect(effectiveThemeMode(), ThemeMode.system);
+
+      schedule(darkAt: '20:00');
+      expect(effectiveThemeMode(), ThemeMode.system);
+    });
+
+    test('invalid times fall back to the stored mode', () {
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(themeMode: ThemeMode.system));
+      schedule(darkAt: '24:00', lightAt: '06:30');
+      expect(effectiveThemeMode(), ThemeMode.system);
+
+      schedule(darkAt: '20:00', lightAt: '12:60');
+      expect(effectiveThemeMode(), ThemeMode.system);
+
+      schedule(darkAt: 'evening', lightAt: '06:30');
+      expect(effectiveThemeMode(), ThemeMode.system);
+    });
+
+    test('picks dark inside the window and light outside it', () {
+      final minutes = currentMinutes();
+      schedule(
+        darkAt: hhmm(wrap(minutes - 2)),
+        lightAt: hhmm(wrap(minutes + 2)),
+      );
+      expect(effectiveThemeMode(), ThemeMode.dark);
+
+      schedule(
+        darkAt: hhmm(wrap(minutes + 2)),
+        lightAt: hhmm(wrap(minutes - 2)),
+      );
+      expect(effectiveThemeMode(), ThemeMode.light);
+    });
+
+    test('the window includes its start and excludes its end', () {
+      final minutes = currentMinutes();
+      schedule(darkAt: hhmm(minutes), lightAt: hhmm(wrap(minutes + 1)));
+      expect(effectiveThemeMode(), ThemeMode.dark);
+
+      schedule(darkAt: hhmm(wrap(minutes - 1)), lightAt: hhmm(minutes));
+      expect(effectiveThemeMode(), ThemeMode.light);
+    });
+
+    test('effectiveThemeMode reflects the schedule', () {
+      final minutes = currentMinutes();
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(themeMode: ThemeMode.light));
+      expect(container.read(effectiveThemeModeProvider), ThemeMode.light);
+
+      schedule(
+        darkAt: hhmm(wrap(minutes - 2)),
+        lightAt: hhmm(wrap(minutes + 2)),
+      );
+      expect(container.read(effectiveThemeModeProvider), ThemeMode.dark);
+    });
+
+    test('currentBrightness follows the schedule over the system mode', () {
+      final minutes = currentMinutes();
+      container
+          .read(systemBrightnessProvider.notifier)
+          .update((_) => Brightness.light);
+      schedule(
+        darkAt: hhmm(wrap(minutes - 2)),
+        lightAt: hhmm(wrap(minutes + 2)),
+      );
+      expect(container.read(currentBrightnessProvider), Brightness.dark);
+
+      schedule(
+        darkAt: hhmm(wrap(minutes + 2)),
+        lightAt: hhmm(wrap(minutes - 2)),
+      );
+      expect(container.read(currentBrightnessProvider), Brightness.light);
+    });
+  });
+
+  test('genColorScheme raises on-surface contrast with contrastLevel', () {
+    container
+        .read(themeSettingProvider.notifier)
+        .update((state) => state.copyWith(contrastLevel: 1));
+    final elevated = container.read(
+      genColorSchemeProvider(Brightness.dark, ignoreConfig: true),
+    );
+
+    container
+        .read(themeSettingProvider.notifier)
+        .update((state) => state.copyWith(contrastLevel: 0));
+    final normal = container.read(
+      genColorSchemeProvider(Brightness.dark, ignoreConfig: true),
+    );
+
+    double contrast(ColorScheme scheme) =>
+        (scheme.onSurface.computeLuminance() + 0.05) /
+        (scheme.surface.computeLuminance() + 0.05);
+
+    expect(contrast(elevated), greaterThan(contrast(normal)));
+  });
+
   group('pausedProvider', () {
     void trust({
       String? ssid,

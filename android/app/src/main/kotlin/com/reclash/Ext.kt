@@ -3,7 +3,7 @@ package com.reclash
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.Configuration.MODE_PRIVATE
+import android.content.Context.MODE_PRIVATE
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable

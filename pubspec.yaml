@@ -106,6 +106,7 @@ flutter:
     - assets/images/
     - assets/images/avatar/
     - assets/images/empty/
+    - assets/images/icon_variants/
     - path: assets/images/icon/status_1.png
       platforms: [macos, linux]
     - path: assets/images/icon/status_2.png

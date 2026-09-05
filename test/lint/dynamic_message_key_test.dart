@@ -64,17 +64,18 @@ void main() {
     );
   });
 
-  test('every supported locale has a translated display name', () async {
+  test('every supported locale has a fixed display name', () async {
     for (final locale in AppLocalizations.delegate.supportedLocales) {
-      await AppLocalizations.load(locale);
       expect(
-        locale.label,
+        locale.nativeLabel,
         isNot(locale.toString()),
         reason:
-            'LocaleL10n.label fell back to the raw locale code for $locale. '
-            'Add the locale to the switch in lib/common/l10n_labels.dart and '
-            'a display-name key to every .arb file.',
+            'LocaleL10n.nativeLabel fell back to the raw locale code for '
+            '$locale. Add the locale to the switches in '
+            'lib/common/l10n_labels.dart.',
       );
+      expect(locale.englishLabel, isNot(locale.toString()));
+      expect(locale.flagEmoji, isNotEmpty);
     }
   });
 }
