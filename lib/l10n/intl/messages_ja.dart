@@ -191,7 +191,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconMono": MessageLookupByLibrary.simpleMessage("モノクロ"),
     "appIconSepia": MessageLookupByLibrary.simpleMessage("セピア"),
     "appearance": MessageLookupByLibrary.simpleMessage("外観"),
-    "appearanceColor": MessageLookupByLibrary.simpleMessage("色"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "テーマ・色・アイコンとダッシュボードの見た目",
     ),

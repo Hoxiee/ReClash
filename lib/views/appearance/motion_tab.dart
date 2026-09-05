@@ -1,9 +1,8 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'widgets.dart';
 
 class AppearanceMotionTab extends ConsumerWidget {
   const AppearanceMotionTab({super.key});
@@ -23,26 +22,28 @@ class AppearanceMotionTab extends ConsumerWidget {
     return CustomScrollView(
       primary: false,
       slivers: [
-        appearanceSection(
+        SettingSection.sliver(
           top: 12,
           items: [
-            AppearanceSwitchItem(
+            DecorationListItem.toggle(
               leading: const Icon(Icons.animation),
-              title: appLocalizations.pageAnimation,
-              desc: appLocalizations.pageAnimationDesc,
+              title: Text(appLocalizations.pageAnimation),
+              subtitle: Text(appLocalizations.pageAnimationDesc),
               value: motion.isAnimateToPage,
               onChanged: (value) => ref
                   .read(appSettingProvider.notifier)
                   .update((state) => state.copyWith(isAnimateToPage: value)),
             ),
-            AppearanceSwitchItem(
+            DecorationListItem.toggle(
               leading: const Icon(Icons.motion_photos_off),
-              title: appLocalizations.reduceMotion,
+              title: Text(appLocalizations.reduceMotion),
               // Флаг ОС уже складывается с настройкой в ThemeManager, поэтому
               // выбор пользователя не перезаписываем — только сообщаем факт.
-              desc: systemReduced
-                  ? appLocalizations.reduceMotionSystemHint
-                  : appLocalizations.reduceMotionDesc,
+              subtitle: Text(
+                systemReduced
+                    ? appLocalizations.reduceMotionSystemHint
+                    : appLocalizations.reduceMotionDesc,
+              ),
               value: motion.reduceMotion,
               onChanged: (value) => ref
                   .read(appSettingProvider.notifier)
@@ -50,7 +51,7 @@ class AppearanceMotionTab extends ConsumerWidget {
             ),
           ],
         ),
-        appearanceBottomInset(context),
+        const SettingBottomInset.sliver(),
       ],
     );
   }

@@ -885,7 +885,6 @@
   "appearance": "外観",
   "appearanceDesc": "テーマ・色・アイコンとダッシュボードの見た目",
   "appearanceTheme": "テーマ",
-  "appearanceColor": "色",
   "appearanceIcon": "アイコン",
   "appearanceLayout": "レイアウト",
   "appearanceMotion": "モーション",

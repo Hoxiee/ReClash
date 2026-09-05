@@ -6,6 +6,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,8 +43,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Finder tabBar() => find.byType(CommonTabBar<int>);
+
   Future<void> openTab(WidgetTester tester, String label) async {
-    await tester.tap(find.widgetWithText(Tab, label));
+    // Every segment renders its label twice, once per selection style.
+    await tester.tap(
+      find.descendant(of: tabBar(), matching: find.text(label)).first,
+    );
     await tester.pumpAndSettle();
   }
 
@@ -72,11 +78,25 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (final label in ['Color', 'Layout', 'Motion', 'Theme']) {
+    for (final label in ['Layout', 'Motion', 'Theme']) {
       await openTab(tester, label);
       expect(tester.takeException(), isNull, reason: label);
     }
     expect(find.text('Show sidebar labels'), findsNothing);
+  });
+
+  testWidgets('arrow keys move between tabs', (tester) async {
+    await pumpAppearanceView(tester);
+    Focus.of(tester.element(tabBar())).requestFocus();
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard style'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('Contrast'), findsOneWidget);
   });
 
   group('theme mode', () {
@@ -121,6 +141,26 @@ void main() {
     });
   });
 
+  group('contrast', () {
+    testWidgets('resets back to the neutral level', (tester) async {
+      await pumpAppearanceView(tester);
+
+      expect(find.byIcon(Icons.replay), findsNothing);
+
+      container
+          .read(themeSettingProvider.notifier)
+          .update((state) => state.copyWith(contrastLevel: 0.5));
+      await tester.pumpAndSettle();
+      expect(find.text('+50%'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.replay));
+      await tester.pumpAndSettle();
+
+      expect(readTheme().contrastLevel, 0);
+      expect(find.byIcon(Icons.replay), findsNothing);
+    });
+  });
+
   group('pure black', () {
     testWidgets('toggles both ways', (tester) async {
       await pumpAppearanceView(tester);
@@ -158,16 +198,18 @@ void main() {
   });
 
   group('text scale', () {
-    testWidgets('is disabled until its toggle is enabled', (tester) async {
+    testWidgets('hides the slider until its toggle is enabled', (tester) async {
       await pumpAppearanceView(tester);
       await openTab(tester, 'Layout');
 
       expect(readTheme().textScale.enable, isFalse);
+      expect(find.byType(Slider), findsNothing);
 
       await tester.tap(switchOf('Text scaling'));
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.enable, isTrue);
+      expect(find.byType(Slider), findsOneWidget);
     });
 
     testWidgets('the slider writes a new scale once enabled', (tester) async {
@@ -177,10 +219,7 @@ void main() {
       await tester.pumpAndSettle();
       final before = readTheme().textScale.scale;
 
-      final slider = find.descendant(
-        of: find.byType(DisabledMask),
-        matching: find.byType(Slider),
-      );
+      final slider = find.byType(Slider);
       expect(slider, findsOneWidget);
       await tester.drag(slider, const Offset(120, 0));
       await tester.pumpAndSettle();
@@ -199,6 +238,22 @@ void main() {
       await openTab(tester, 'Layout');
 
       expect(find.text('120%'), findsOneWidget);
+    });
+
+    testWidgets('resets back to the default scale', (tester) async {
+      container
+          .read(themeSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith.textScale(enable: true, scale: 1.2),
+          );
+
+      await pumpAppearanceView(tester);
+      await openTab(tester, 'Layout');
+      await tester.tap(find.byIcon(Icons.replay));
+      await tester.pumpAndSettle();
+
+      expect(readTheme().textScale.scale, 1);
+      expect(find.text('100%'), findsOneWidget);
     });
   });
 

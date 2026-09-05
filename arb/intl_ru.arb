@@ -899,7 +899,6 @@
   "appearance": "Оформление",
   "appearanceDesc": "Тема, цвета, иконки и вид панели",
   "appearanceTheme": "Тема",
-  "appearanceColor": "Цвет",
   "appearanceIcon": "Иконка",
   "appearanceLayout": "Макет",
   "appearanceMotion": "Движение",

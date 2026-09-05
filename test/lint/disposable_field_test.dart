@@ -29,6 +29,10 @@ final _declaration = RegExp(
   r'\b',
 );
 
+/// `X.of(context)` and `X.maybeOf(context)` hand back an ambient object; the
+/// widget that built it owns the disposal.
+final _ambientLookup = RegExp(r'=\s*[A-Za-z]\w*\.(?:maybe)?of\(');
+
 /// A `late` field declared without an initialiser, which the pattern above
 /// cannot see because there is no constructor call on the line. These are
 /// built in `initState` and owned just the same — `pages/editor.dart` kept a
@@ -65,6 +69,9 @@ void main() {
             ? _lateDeclaration.firstMatch(lines[i])
             : null;
         if (match == null && lateMatch == null) {
+          continue;
+        }
+        if (match != null && _ambientLookup.hasMatch(lines[i])) {
           continue;
         }
         final field = match?.group(1) ?? lateMatch!.group(2)!;

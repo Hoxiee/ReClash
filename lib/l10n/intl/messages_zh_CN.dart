@@ -185,7 +185,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconMono": MessageLookupByLibrary.simpleMessage("单色"),
     "appIconSepia": MessageLookupByLibrary.simpleMessage("复古"),
     "appearance": MessageLookupByLibrary.simpleMessage("外观"),
-    "appearanceColor": MessageLookupByLibrary.simpleMessage("颜色"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage("主题、颜色、图标与面板外观"),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("图标"),
     "appearanceLayout": MessageLookupByLibrary.simpleMessage("布局"),

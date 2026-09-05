@@ -1039,7 +1039,6 @@
   "appearance": "Appearance",
   "appearanceDesc": "Theme, colors, icons and dashboard look",
   "appearanceTheme": "Theme",
-  "appearanceColor": "Color",
   "appearanceIcon": "Icon",
   "appearanceLayout": "Layout",
   "appearanceMotion": "Motion",

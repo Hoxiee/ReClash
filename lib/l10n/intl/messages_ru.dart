@@ -224,7 +224,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconMono": MessageLookupByLibrary.simpleMessage("Монохром"),
     "appIconSepia": MessageLookupByLibrary.simpleMessage("Сепия"),
     "appearance": MessageLookupByLibrary.simpleMessage("Оформление"),
-    "appearanceColor": MessageLookupByLibrary.simpleMessage("Цвет"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Тема, цвета, иконки и вид панели",
     ),

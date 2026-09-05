@@ -5,7 +5,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'widgets.dart';
+import 'color_sections.dart';
 
 const _defaultDarkAt = '22:00';
 const _defaultLightAt = '07:00';
@@ -49,10 +49,8 @@ class AppearanceThemeTab extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final (themeMode: themeMode, scheduledTheme: scheduled) = ref.watch(
       themeSettingProvider.select(
-        (state) => (
-          themeMode: state.themeMode,
-          scheduledTheme: state.scheduledTheme,
-        ),
+        (state) =>
+            (themeMode: state.themeMode, scheduledTheme: state.scheduledTheme),
       ),
     );
     final modes = [
@@ -67,8 +65,7 @@ class AppearanceThemeTab extends ConsumerWidget {
           isSelected: !scheduled && mode == themeMode,
           onPressed: () => _update(
             ref,
-            (state) =>
-                state.copyWith(scheduledTheme: false, themeMode: mode),
+            (state) => state.copyWith(scheduledTheme: false, themeMode: mode),
           ),
         ),
     ];
@@ -92,18 +89,20 @@ class AppearanceThemeTab extends ConsumerWidget {
     return CustomScrollView(
       primary: false,
       slivers: [
-        appearanceSection(
+        SettingSection.sliver(
           title: appLocalizations.themeMode,
           items: [
             Wrap(spacing: 8, runSpacing: 8, children: _modeCards(context, ref)),
           ],
         ),
-        appearanceSection(
+        SettingSection.sliver(
           items: [
-            AppearanceSwitchItem(
+            DecorationListItem.toggle(
               leading: const Icon(Icons.schedule),
-              title: appLocalizations.schedule,
-              desc: appLocalizations.scheduleDesc(theme.darkAt, theme.lightAt),
+              title: Text(appLocalizations.schedule),
+              subtitle: Text(
+                appLocalizations.scheduleDesc(theme.darkAt, theme.lightAt),
+              ),
               value: theme.scheduledTheme,
               onChanged: (value) => _update(
                 ref,
@@ -117,31 +116,41 @@ class AppearanceThemeTab extends ConsumerWidget {
               ),
             ),
             if (theme.scheduledTheme) ...[
-              AppearanceValueItem(
+              DecorationListItem(
                 leading: const Icon(Icons.bedtime),
-                title: appLocalizations.darkAt,
-                value: theme.darkAt,
+                title: Text(appLocalizations.darkAt),
+                trailing: Text(
+                  theme.darkAt,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurface.opacity60,
+                  ),
+                ),
                 onPressed: () => _editTime(context, ref, isDark: true),
               ),
-              AppearanceValueItem(
+              DecorationListItem(
                 leading: const Icon(Icons.wb_sunny),
-                title: appLocalizations.lightAt,
-                value: theme.lightAt,
+                title: Text(appLocalizations.lightAt),
+                trailing: Text(
+                  theme.lightAt,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurface.opacity60,
+                  ),
+                ),
                 onPressed: () => _editTime(context, ref, isDark: false),
               ),
             ],
           ],
         ),
-        appearanceSection(
+        SettingSection.sliver(
           items: [
-            AppearanceSwitchItem(
+            DecorationListItem.toggle(
               leading: const Icon(Icons.nightlight_round),
-              title: appLocalizations.pureBlackMode,
+              title: Text(appLocalizations.pureBlackMode),
               value: theme.pureBlack,
               onChanged: (value) =>
                   _update(ref, (state) => state.copyWith(pureBlack: value)),
             ),
-            AppearanceSliderItem(
+            SettingSliderItem(
               leading: Tooltip(
                 message: theme.pureBlack
                     ? appLocalizations.contrastAmoledHint
@@ -153,12 +162,14 @@ class AppearanceThemeTab extends ConsumerWidget {
               min: -1,
               max: 1,
               value: contrast,
+              resetValue: 0,
               onChanged: (value) =>
                   _update(ref, (state) => state.copyWith(contrastLevel: value)),
             ),
           ],
         ),
-        appearanceBottomInset(context),
+        const AppearanceColorSections(),
+        const SettingBottomInset.sliver(),
       ],
     );
   }

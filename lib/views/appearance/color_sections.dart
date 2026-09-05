@@ -10,8 +10,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 
-import 'widgets.dart';
-
 const _iconVariants = [
   'default',
   'mono',
@@ -21,14 +19,16 @@ const _iconVariants = [
   'cool',
 ];
 
-class AppearanceColorTab extends ConsumerStatefulWidget {
-  const AppearanceColorTab({super.key});
+class AppearanceColorSections extends ConsumerStatefulWidget {
+  const AppearanceColorSections({super.key});
 
   @override
-  ConsumerState<AppearanceColorTab> createState() => _AppearanceColorTabState();
+  ConsumerState<AppearanceColorSections> createState() =>
+      _AppearanceColorSectionsState();
 }
 
-class _AppearanceColorTabState extends ConsumerState<AppearanceColorTab> {
+class _AppearanceColorSectionsState
+    extends ConsumerState<AppearanceColorSections> {
   int? _removablePrimaryColor;
 
   void _update(ThemeProps Function(ThemeProps) f) {
@@ -174,73 +174,80 @@ class _AppearanceColorTabState extends ConsumerState<AppearanceColorTab> {
     final primaryColor = themeColors.primaryColor;
     final isDynamic = primaryColor == null;
     final removable = _removablePrimaryColor;
-    return CommonPopScope(
-      onPop: (_) {
-        if (removable == null) {
-          return true;
-        }
-        _clearRemovable();
-        return false;
-      },
-      child: CustomScrollView(
-        primary: false,
-        slivers: [
-          appearanceSection(
-            title: appLocalizations.themeColor,
-            items: [
-              AppearanceSwitchItem(
-                leading: const Icon(Icons.colorize),
-                title: appLocalizations.systemColor,
-                desc: appLocalizations.systemColorDesc,
-                value: isDynamic,
-                onChanged: (value) {
-                  _clearRemovable();
-                  _update(
-                    (state) => state.copyWith(
-                      primaryColor: value
-                          ? null
-                          : (state.primaryColors.contains(defaultPrimaryColor)
-                                ? defaultPrimaryColor
-                                : state.primaryColors.firstOrNull),
-                    ),
-                  );
-                },
-              ),
-              if (isDynamic) const _SystemSeedItem(),
-              AppearanceValueItem(
-                leading: const Icon(Icons.gradient),
-                title: appLocalizations.colorSchemes,
-                value: themeColors.schemeVariant.label,
-                onPressed: () =>
-                    _handleChangeSchemeVariant(themeColors.schemeVariant),
-              ),
-            ],
-          ),
-          appearanceSection(
-            title: appLocalizations.palette,
-            actions: [
-              if (removable != null)
-                CommonMinFilledButtonTheme(
-                  child: FilledButton.tonal(
-                    onPressed: _clearRemovable,
-                    child: Text(appLocalizations.cancel),
+    return SliverMainAxisGroup(
+      slivers: [
+        SettingSection.sliver(
+          title: appLocalizations.themeColor,
+          items: [
+            DecorationListItem.toggle(
+              leading: const Icon(Icons.colorize),
+              title: Text(appLocalizations.systemColor),
+              subtitle: Text(appLocalizations.systemColorDesc),
+              value: isDynamic,
+              onChanged: (value) {
+                _clearRemovable();
+                _update(
+                  (state) => state.copyWith(
+                    primaryColor: value
+                        ? null
+                        : (state.primaryColors.contains(defaultPrimaryColor)
+                              ? defaultPrimaryColor
+                              : state.primaryColors.firstOrNull),
                   ),
+                );
+              },
+            ),
+            if (isDynamic) const _SystemSeedItem(),
+            DecorationListItem(
+              leading: const Icon(Icons.gradient),
+              title: Text(appLocalizations.colorSchemes),
+              trailing: Text(
+                themeColors.schemeVariant.label,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurface.opacity60,
                 ),
-              if (removable == null && !themeColors.isDefault)
-                CommonMinFilledButtonTheme(
-                  child: FilledButton.tonal(
-                    onPressed: _handleReset,
-                    child: Text(appLocalizations.reset),
-                  ),
+              ),
+              onPressed: () =>
+                  _handleChangeSchemeVariant(themeColors.schemeVariant),
+            ),
+          ],
+        ),
+        SettingSection.sliver(
+          title: appLocalizations.palette,
+          // One always-present action: a swap of label keeps the header height
+          // stable, unlike showing and hiding a button.
+          actions: [
+            CommonMinFilledButtonTheme(
+              child: FilledButton.tonal(
+                onPressed: removable != null
+                    ? _clearRemovable
+                    : (themeColors.isDefault ? null : _handleReset),
+                child: Text(
+                  removable != null
+                      ? appLocalizations.cancel
+                      : appLocalizations.reset,
                 ),
-            ],
-            items: [
-              DisabledMask(
+              ),
+            ),
+          ],
+          items: [
+            CommonPopScope(
+              onPop: (_) {
+                if (removable == null) {
+                  return true;
+                }
+                _clearRemovable();
+                return false;
+              },
+              child: DisabledMask(
                 status: isDynamic,
                 child: ActivateBox(
                   active: !isDynamic,
                   child: _PrimaryColorGrid(
-                    colors: [if (!isDynamic) null, ...themeColors.primaryColors],
+                    colors: [
+                      if (!isDynamic) null,
+                      ...themeColors.primaryColors,
+                    ],
                     selectedColor: primaryColor,
                     removableColor: removable,
                     onSelect: _handleSelectColor,
@@ -250,30 +257,29 @@ class _AppearanceColorTabState extends ConsumerState<AppearanceColorTab> {
                   ),
                 ),
               ),
+            ),
+          ],
+        ),
+        if (system.isAndroid)
+          SettingSection.sliver(
+            title: appLocalizations.appearanceIcon,
+            items: [
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final variant in _iconVariants)
+                    _AppIconTile(
+                      asset: 'assets/images/icon_variants/$variant.png',
+                      label: _iconVariantLabel(context, variant),
+                      isSelected: iconVariant == variant,
+                      onPressed: () => _handleSelectIcon(variant),
+                    ),
+                ],
+              ),
             ],
           ),
-          if (system.isAndroid)
-            appearanceSection(
-              title: appLocalizations.appearanceIcon,
-              items: [
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    for (final variant in _iconVariants)
-                      _AppIconTile(
-                        asset: 'assets/images/icon_variants/$variant.png',
-                        label: _iconVariantLabel(context, variant),
-                        isSelected: iconVariant == variant,
-                        onPressed: () => _handleSelectIcon(variant),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          appearanceBottomInset(context),
-        ],
-      ),
+      ],
     );
   }
 }

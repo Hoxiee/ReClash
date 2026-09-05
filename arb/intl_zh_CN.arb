@@ -885,7 +885,6 @@
   "appearance": "外观",
   "appearanceDesc": "主题、颜色、图标与面板外观",
   "appearanceTheme": "主题",
-  "appearanceColor": "颜色",
   "appearanceIcon": "图标",
   "appearanceLayout": "布局",
   "appearanceMotion": "动效",

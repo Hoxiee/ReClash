@@ -246,6 +246,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     }
 
     private val iconVariantAliases = mapOf(
+        "default" to ".icons.DefaultAlias",
         "mono" to ".icons.MonoAlias",
         "sepia" to ".icons.SepiaAlias",
         "inverted" to ".icons.InvertedAlias",
@@ -256,24 +257,19 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun setIconVariant(variant: String) {
         val packageName = GlobalState.application.packageName
         val manager = GlobalState.application.packageManager
-        val target = if (variant == "default") {
-            ComponentName(packageName, "$packageName.MainActivity")
-        } else {
-            iconVariantAliases[variant]?.let { ComponentName(packageName, "$packageName$it") }
-        }
-        if (target == null) {
-            return
-        }
+        val alias = iconVariantAliases[variant] ?: return
+        val target = ComponentName(packageName, "$packageName$alias")
+        // Enabling first keeps a launcher entry alive throughout the swap.
         manager.setComponentEnabledSetting(
             target,
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP,
         )
-        for (alias in iconVariantAliases.values) {
-            val component = ComponentName(packageName, "$packageName$alias")
+        for (other in iconVariantAliases.values) {
+            val component = ComponentName(packageName, "$packageName$other")
             if (component == target) continue
-            if (manager.getComponentEnabledSetting(component) ==
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+            if (manager.getComponentEnabledSetting(component) !=
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
             ) {
                 manager.setComponentEnabledSetting(
                     component,

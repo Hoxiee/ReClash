@@ -14,6 +14,7 @@ import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/navigation.dart';
@@ -148,6 +149,11 @@ class Bootstrap {
     unawaited(
       autoLaunch?.updateStatus(_container.read(appSettingProvider).autoLaunch),
     );
+    if (system.isAndroid) {
+      unawaited(
+        app?.setIconVariant(_container.read(appSettingProvider).iconVariant),
+      );
+    }
     if (!_container.read(appSettingProvider).silentLaunch) {
       unawaited(window?.show());
     } else {

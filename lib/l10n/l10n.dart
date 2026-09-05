@@ -7637,11 +7637,6 @@ class AppLocalizations {
     return Intl.message('Theme', name: 'appearanceTheme', desc: '', args: []);
   }
 
-  /// `Color`
-  String get appearanceColor {
-    return Intl.message('Color', name: 'appearanceColor', desc: '', args: []);
-  }
-
   /// `Icon`
   String get appearanceIcon {
     return Intl.message('Icon', name: 'appearanceIcon', desc: '', args: []);
