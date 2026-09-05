@@ -100,9 +100,7 @@ final class HelperClient {
   }
 
   static String _defaultBaseUrl() {
-    return Platform.isLinux
-        ? 'http://$appHelperService'
-        : 'http://$localhost:$helperPort';
+    return 'http://$localhost:$helperPort';
   }
 
   static Future<String> _readBundledCoreSha256() async {

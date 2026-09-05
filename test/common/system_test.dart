@@ -291,7 +291,10 @@ void main() {
       });
 
       test('reports a core that is not setuid root', () async {
-        processes.stub('stat', 'alice:staff -rwxr-xr-x');
+        processes.stub(
+          'stat',
+          system.isLinux ? 'alice 755' : 'alice:staff -rwxr-xr-x',
+        );
 
         expect(await system.checkIsAdmin(), isFalse);
       });

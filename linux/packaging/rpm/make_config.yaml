@@ -13,6 +13,20 @@ icon: ./assets/images/icon.png
 requires:
   - libsecret
 
+# rpmbuild's find-debuginfo and brp-strip rewrite the Core and drop the setuid
+# bit the Linux TUN path relies on.
+spec_macros:
+  - '%global debug_package %{nil}'
+  - '%global __os_install_post %{nil}'
+
+postinstall_scripts:
+  - 'update-desktop-database %{_datadir}/applications &> /dev/null || :'
+
+supported_mime_type:
+  - x-scheme-handler/clash
+  - x-scheme-handler/clashmeta
+  - x-scheme-handler/reclash
+
 keywords:
   - ReClash
   - Clash

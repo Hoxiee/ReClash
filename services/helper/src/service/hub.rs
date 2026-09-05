@@ -513,6 +513,13 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
             StatusCode::NOT_FOUND,
         ));
     }
+    if rejection.find::<warp::reject::MethodNotAllowed>().is_some() {
+        return Ok(error_response(
+            "invalidRequest",
+            "Helper endpoint does not accept this method",
+            StatusCode::METHOD_NOT_ALLOWED,
+        ));
+    }
     Ok(error_response(
         "internalError",
         "unhandled Helper request rejection",
@@ -521,27 +528,28 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
 }
 
 fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
-    let api_ping = warp::get()
-        .and(warp::path("ping"))
+    // Path before method, so an unknown path rejects as not-found, not as 405.
+    let api_ping = warp::path("ping")
         .and(warp::path::end())
+        .and(warp::get())
         .and(warp::query::<PingParams>())
         .and_then(ping_request);
 
-    let api_start = warp::post()
-        .and(warp::path("start"))
+    let api_start = warp::path("start")
         .and(warp::path::end())
+        .and(warp::post())
         .and(warp::body::json())
         .and_then(start_request);
 
-    let api_stop = warp::post()
-        .and(warp::path("stop"))
+    let api_stop = warp::path("stop")
         .and(warp::path::end())
+        .and(warp::post())
         .and(warp::body::json())
         .and_then(stop_request);
 
-    let api_logs = warp::get()
-        .and(warp::path("logs"))
+    let api_logs = warp::path("logs")
         .and(warp::path::end())
+        .and(warp::get())
         .map(get_logs);
 
     api_ping
@@ -692,6 +700,28 @@ mod tests {
                 .unwrap(),
             "Core executable SHA256 mismatch"
         );
+    }
+
+    #[tokio::test]
+    async fn unknown_endpoints_are_not_found() {
+        let response = warp::test::request()
+            .method("GET")
+            .path("/nope")
+            .reply(&routes())
+            .await;
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn known_endpoints_reject_the_wrong_method() {
+        let response = warp::test::request()
+            .method("POST")
+            .path("/ping")
+            .reply(&routes())
+            .await;
+
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
     }
 
     #[tokio::test]

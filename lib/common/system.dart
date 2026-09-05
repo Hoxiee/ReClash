@@ -102,8 +102,6 @@ class System {
     return parts[0] == 'root' && (mode & 0x800) != 0;
   }
 
-  // The Helper service ships on Windows only for now; the Linux Helper cluster
-  // is a separate port, so Linux keeps the setuid Core path.
   bool get hasHelperService => isWindows;
 
   Future<bool> checkIsAdmin() async {
@@ -378,9 +376,7 @@ Future<bool> _waitForHelperService() async {
 
 final windows = system.isWindows ? Windows() : null;
 
-/// Linux Helper installation, parked until the Helper cluster port: the
-/// service binary and systemd unit do not ship yet, so nothing reaches this
-/// path in production.
+// TODO: Linux Helper cluster — no service binary or unit ships yet.
 class Linux {
   static Linux? _instance;
 
