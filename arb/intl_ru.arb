@@ -989,6 +989,7 @@
   "urlSchemeDesc": "Deep links, которые ReClash регистрирует и открывает",
   "urlSchemeCommands": "Команды автоматизации",
   "urlSchemeCommandsDesc": "Для таскеров, скриптов, ярлыков и автоматизации",
+  "urlSchemeProfiles": "Профили",
   "urlSchemeConnect": "Подключить",
   "urlSchemeConnectDesc": "Запустить туннель и подключиться",
   "urlSchemeDisconnect": "Отключить",

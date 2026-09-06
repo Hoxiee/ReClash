@@ -2069,6 +2069,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Bring the window to the front",
     ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profiles"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Connect if stopped, disconnect if running",

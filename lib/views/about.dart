@@ -117,7 +117,7 @@ class AboutView extends ConsumerWidget {
                 trailing: const Icon(Icons.launch, size: 20),
                 onPressed: () {
                   dialogs.openUrl(
-                    'https://github.com/chen08209/Clash.Meta/tree/FlClash',
+                    'https://github.com/Hoxiee/Clash.Meta/tree/reclash',
                   );
                 },
               ),
@@ -126,7 +126,7 @@ class AboutView extends ConsumerWidget {
                 leading: const Icon(Icons.telegram),
                 trailing: const Icon(Icons.launch, size: 20),
                 onPressed: () {
-                  dialogs.openUrl('https://t.me/FlClash');
+                  dialogs.openUrl('https://t.me/ReClashNews');
                 },
               ),
               DecorationListItem(

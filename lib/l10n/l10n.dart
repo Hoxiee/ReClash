@@ -8299,6 +8299,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Profiles`
+  String get urlSchemeProfiles {
+    return Intl.message(
+      'Profiles',
+      name: 'urlSchemeProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Connect`
   String get urlSchemeConnect {
     return Intl.message(

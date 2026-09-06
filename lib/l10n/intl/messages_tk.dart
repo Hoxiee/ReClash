@@ -2157,6 +2157,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Penjireni öňe çykarýar",
     ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profiller"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Çalyş"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Beslenen bolsa baglanýar, işleýän bolsa aýrylýar",

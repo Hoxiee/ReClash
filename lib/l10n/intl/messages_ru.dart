@@ -2144,6 +2144,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Поднять окно на передний план",
     ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Профили"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Подключить, если остановлено; отключить, если работает",

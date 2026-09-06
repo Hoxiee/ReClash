@@ -975,6 +975,7 @@
   "urlSchemeDesc": "ReClash が登録して開くディープリンク",
   "urlSchemeCommands": "自動化コマンド",
   "urlSchemeCommandsDesc": "タスクやスクリプト、ショートカットの自動化用",
+  "urlSchemeProfiles": "プロファイル",
   "urlSchemeConnect": "接続",
   "urlSchemeConnectDesc": "トンネルを開始して接続します",
   "urlSchemeDisconnect": "切断",

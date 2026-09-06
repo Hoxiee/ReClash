@@ -19,7 +19,7 @@ class _SchemeCommand {
   final String Function(AppLocalizations appLocalizations) desc;
 }
 
-const List<_SchemeCommand> _commands = [
+const List<_SchemeCommand> _tunnelCommands = [
   _SchemeCommand(
     link: 'reclash://connect',
     title: _connect,
@@ -35,6 +35,9 @@ const List<_SchemeCommand> _commands = [
     title: _toggle,
     desc: _toggleDesc,
   ),
+];
+
+const List<_SchemeCommand> _windowCommands = [
   _SchemeCommand(
     link: 'reclash://open',
     title: _open,
@@ -45,6 +48,9 @@ const List<_SchemeCommand> _commands = [
     title: _close,
     desc: _closeDesc,
   ),
+];
+
+const List<_SchemeCommand> _profileCommands = [
   _SchemeCommand(
     link: 'reclash://import/<base64 config>',
     title: _import,
@@ -54,6 +60,11 @@ const List<_SchemeCommand> _commands = [
     link: 'reclash://add/<subscription url>',
     title: _add,
     desc: _addDesc,
+  ),
+  _SchemeCommand(
+    link: 'reclash://install-config?url=<encoded url>&name=<encoded name>',
+    title: _installConfig,
+    desc: _installConfigDesc,
   ),
 ];
 
@@ -71,6 +82,8 @@ String _import(AppLocalizations l) => l.urlSchemeImport;
 String _importDesc(AppLocalizations l) => l.urlSchemeImportDesc;
 String _add(AppLocalizations l) => l.urlSchemeAdd;
 String _addDesc(AppLocalizations l) => l.urlSchemeAddDesc;
+String _installConfig(AppLocalizations l) => l.urlSchemeInstallConfig;
+String _installConfigDesc(AppLocalizations l) => l.urlSchemeInstallConfigDesc;
 
 class UrlSchemeView extends StatelessWidget {
   const UrlSchemeView({super.key});
@@ -93,10 +106,14 @@ class UrlSchemeView extends StatelessWidget {
       body: ListView(
         children: [
           SettingSection(
+            top: 16,
             title: appLocalizations.urlSchemeCommands,
             subTitle: appLocalizations.urlSchemeCommandsDesc,
             items: [
-              for (final command in _commands)
+              for (final command in [
+                ..._tunnelCommands,
+                ..._windowCommands,
+              ])
                 _CommandItem(
                   command: command,
                   onCopy: (value) => _copy(context, value),
@@ -104,16 +121,13 @@ class UrlSchemeView extends StatelessWidget {
             ],
           ),
           SettingSection(
-            title: appLocalizations.urlSchemeInstallConfig,
+            title: appLocalizations.urlSchemeProfiles,
             items: [
-              _CommandItem(
-                command: _SchemeCommand(
-                  link: 'reclash://install-config?url=<encoded url>&name=<encoded name>',
-                  title: (l) => l.urlScheme,
-                  desc: (l) => l.urlSchemeInstallConfigDesc,
+              for (final command in _profileCommands)
+                _CommandItem(
+                  command: command,
+                  onCopy: (value) => _copy(context, value),
                 ),
-                onCopy: (value) => _copy(context, value),
-              ),
             ],
           ),
           const SettingBottomInset(),

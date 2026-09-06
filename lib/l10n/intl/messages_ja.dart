@@ -1726,6 +1726,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("開く"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage("ウィンドウを前面に表示します"),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("プロファイル"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切り替え"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "停止中なら接続、実行中なら切断します",

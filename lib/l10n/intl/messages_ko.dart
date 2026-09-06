@@ -1718,6 +1718,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("열기"),
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage("창을 맨 앞으로 가져옵니다"),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("프로필"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("전환"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "중지 상태면 연결하고, 실행 중이면 연결을 해제합니다",

@@ -2221,6 +2221,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Oynani oldinga chiqaradi",
     ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Profillar"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Almashtirish"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Oʻchiq boʻlsa ulaydi, yoniq boʻlsa uzadi",

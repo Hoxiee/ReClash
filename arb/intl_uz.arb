@@ -962,6 +962,7 @@
   "urlSchemeDesc": "ReClash roʻyxatga oladigan va ochadigan havolalar",
   "urlSchemeCommands": "Avtomatlashtirish buyruqlari",
   "urlSchemeCommandsDesc": "Tasker, skriptlar, yorliqlar va avtomatlashtirish uchun",
+  "urlSchemeProfiles": "Profillar",
   "urlSchemeConnect": "Ulanish",
   "urlSchemeConnectDesc": "Tunnelni ishga tushiradi va ulanadi",
   "urlSchemeDisconnect": "Uzish",

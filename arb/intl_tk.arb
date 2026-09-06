@@ -962,6 +962,7 @@
   "urlSchemeDesc": "ReClash ýazga alýan we açýan çuň salgylar",
   "urlSchemeCommands": "Awtomatizasiýa buýryklary",
   "urlSchemeCommandsDesc": "Tasker, skriptler, çalt klawişalar we awtomatizasiýa üçin",
+  "urlSchemeProfiles": "Profiller",
   "urlSchemeConnect": "Baglan",
   "urlSchemeConnectDesc": "Tonneli başladýar we baglanýar",
   "urlSchemeDisconnect": "Aýryl",

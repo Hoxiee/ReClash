@@ -975,6 +975,7 @@
   "urlSchemeDesc": "ReClash 注册并处理的深链接",
   "urlSchemeCommands": "自动化命令",
   "urlSchemeCommandsDesc": "用于任务、脚本、快捷方式与自动化",
+  "urlSchemeProfiles": "配置文件",
   "urlSchemeConnect": "连接",
   "urlSchemeConnectDesc": "启动隧道并连接",
   "urlSchemeDisconnect": "断开",

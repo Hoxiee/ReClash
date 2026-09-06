@@ -962,6 +962,7 @@
   "urlSchemeDesc": "ReClash тіркейтін және ашатын терең сілтемелер",
   "urlSchemeCommands": "Автоматтандыру командалары",
   "urlSchemeCommandsDesc": "Tasker, скрипттер, жарлықтар және автоматтандыру үшін",
+  "urlSchemeProfiles": "Профильдер",
   "urlSchemeConnect": "Қосу",
   "urlSchemeConnectDesc": "Туннельді іске қосып, байланысты орнатады",
   "urlSchemeDisconnect": "Ажырату",

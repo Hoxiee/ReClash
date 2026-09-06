@@ -2149,6 +2149,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Терезені алға шығарады",
     ),
+    "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("Профильдер"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Ауыстыру"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Тоқтатылған болса қосады, істеп тұрса ажыратады",
