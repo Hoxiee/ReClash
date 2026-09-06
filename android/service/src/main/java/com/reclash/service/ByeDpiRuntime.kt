@@ -19,7 +19,7 @@ internal class ByeDpiRuntime(
     private var receiver: ByeDpiProtect? = null
     private var receiverThread: Thread? = null
 
-    override fun start(args: List<String>) {
+    @Synchronized override fun start(args: List<String>) {
         if (branch != null) return
         openReceiver()
         branch = thread(name = THREAD_NAME) {
@@ -32,16 +32,20 @@ internal class ByeDpiRuntime(
         }
     }
 
-    override fun stop() {
-        val running = branch ?: return
+    @Synchronized override fun stop() {
+        val running = branch
         branch = null
-        ByeDpiNative.stop()
-        running.join(STOP_JOIN_MS)
-        if (running.isAlive) {
-            log("Desync branch did not stop, closing the listener")
-            ByeDpiNative.forceClose()
+        if (running != null) {
+            ByeDpiNative.stop()
             running.join(STOP_JOIN_MS)
+            if (running.isAlive) {
+                log("Desync branch did not stop, closing the listener")
+                ByeDpiNative.forceClose()
+                running.join(STOP_JOIN_MS)
+            }
         }
+        // A dead branch must not pin a stale receiver: the next start would
+        // reuse a socket the old accept loop no longer serves.
         closeReceiver()
     }
 

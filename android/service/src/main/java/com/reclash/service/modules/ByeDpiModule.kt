@@ -49,6 +49,11 @@ internal class ByeDpiModule(
     @Volatile private var current: ByeDpiTarget? = null
     @Volatile private var envKey = ""
 
+    // The options flow and environment changes both land here from separate
+    // coroutines; an interleaved stop would close the protect receiver under
+    // a freshly started branch, leaving it to fail every dial.
+    private val applyLock = Any()
+
     fun onEnvironmentChanged(key: String) {
         if (key == envKey) return
         envKey = key
@@ -64,11 +69,13 @@ internal class ByeDpiModule(
     override fun stop() {
         configJob?.cancel()
         configJob = null
-        probeJob?.cancel()
-        probeJob = null
-        if (current != null) {
-            current = null
-            runCatching { engine.stop() }
+        synchronized(applyLock) {
+            probeJob?.cancel()
+            probeJob = null
+            if (current != null) {
+                current = null
+                runCatching { engine.stop() }
+            }
         }
     }
 
@@ -87,17 +94,19 @@ internal class ByeDpiModule(
         )
     }
 
-    private suspend fun apply(target: ByeDpiTarget?) {
-        if (target == current) return
-        if (current != null) {
-            probeJob?.cancel()
-            probeJob = null
-            current = null
-            runCatching { engine.stop() }
-                .onFailure { error -> log("Desync stop failed: $error") }
+    private fun apply(target: ByeDpiTarget?) {
+        synchronized(applyLock) {
+            if (target == current) return
+            if (current != null) {
+                probeJob?.cancel()
+                probeJob = null
+                current = null
+                runCatching { engine.stop() }
+                    .onFailure { error -> log("Desync stop failed: $error") }
+            }
+            if (target == null) return
+            launchBranch(target)
         }
-        if (target == null) return
-        launchBranch(target)
     }
 
     private fun launchBranch(target: ByeDpiTarget) {

@@ -4,7 +4,14 @@ import com.reclash.common.AccessControlMode
 import com.reclash.service.ServiceConfig
 import com.reclash.service.models.AccessControlProps
 import com.reclash.service.models.VpnOptions
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -183,5 +190,67 @@ class ByeDpiModuleTest {
         runCurrent()
         module.stop()
         assertEquals(1, engine.stops)
+    }
+
+    // The options flow and environment changes land from separate coroutines on
+    // a multi-threaded dispatcher: an apply that slips past an in-flight stop
+    // would start a second branch over the receiver the stop is about to close.
+    @Test
+    fun `an apply waits for an in-flight stop instead of racing it`() = runTest {
+        val blocking = BlockingEngine()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val module = ByeDpiModule(scope, blocking) { }
+        module.start()
+        ServiceConfig.updateVpnOptions(options())
+        assertTrue(blocking.firstStart.await(2, TimeUnit.SECONDS))
+
+        ServiceConfig.updateVpnOptions(options(port = 7899))
+        assertTrue(blocking.inStop.await(2, TimeUnit.SECONDS))
+        module.onEnvironmentChanged("abc")
+
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(500)
+        while (System.nanoTime() < deadline) {
+            assertEquals("no start may slip past a mid-flight stop", 1, blocking.starts.get())
+            Thread.sleep(20)
+        }
+
+        blocking.release()
+        val settled = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
+        while (blocking.starts.get() < 3 && System.nanoTime() < settled) {
+            Thread.sleep(20)
+        }
+        assertEquals(3, blocking.starts.get())
+        assertEquals(2, blocking.stops.get())
+
+        module.stop()
+        scope.cancel()
+    }
+
+    private class BlockingEngine : ByeDpiModule.Engine {
+        val starts = AtomicInteger()
+        val stops = AtomicInteger()
+        val firstStart = CountDownLatch(1)
+        val inStop = CountDownLatch(1)
+        private val releaseStop = CountDownLatch(1)
+
+        override fun start(args: List<String>) {
+            starts.incrementAndGet()
+            firstStart.countDown()
+        }
+
+        override fun stop() {
+            stops.incrementAndGet()
+            inStop.countDown()
+            releaseStop.await()
+        }
+
+        fun release() = releaseStop.countDown()
+
+        override fun probe(port: Int): Boolean = true
+
+        override fun protectPath(): String? = "/data/byedpi.protect"
+
+        override fun cacheFile(envKey: String): String? =
+            if (envKey.isEmpty()) null else "/cache/$envKey.cache"
     }
 }
