@@ -1709,9 +1709,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "トンネルを開始して接続します",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "ReClash が登録して開くディープリンク",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("切断"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "トンネルを停止します",

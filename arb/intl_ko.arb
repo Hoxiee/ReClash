@@ -960,7 +960,6 @@
   "subscriptionUpdated": "업데이트됨",
   "subscriptionProviderInterval": "제공자 권장값: {value}",
   "urlScheme": "URL 스킴",
-  "urlSchemeDesc": "ReClash가 등록하고 여는 딥 링크입니다",
   "urlSchemeCommands": "자동화 명령",
   "urlSchemeCommandsDesc": "Tasker, 스크립트, 바로가기, 자동화에 사용합니다",
   "urlSchemeProfiles": "프로필",

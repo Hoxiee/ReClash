@@ -2122,9 +2122,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "Запустить туннель и подключиться",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "Deep links, которые ReClash регистрирует и открывает",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Отключить"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "Остановить туннель",

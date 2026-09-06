@@ -2198,9 +2198,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "Tunnelni ishga tushiradi va ulanadi",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "ReClash roʻyxatga oladigan va ochadigan havolalar",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Uzish"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "Tunnelni toʻxtatadi",

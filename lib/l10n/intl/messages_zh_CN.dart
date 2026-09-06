@@ -1478,7 +1478,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("连接"),
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage("启动隧道并连接"),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage("ReClash 注册并处理的深链接"),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("断开"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage("停止隧道"),
     "urlSchemeImport": MessageLookupByLibrary.simpleMessage("导入配置"),

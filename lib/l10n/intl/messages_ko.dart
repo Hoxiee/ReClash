@@ -1701,9 +1701,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "터널을 시작하고 연결합니다",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "ReClash가 등록하고 여는 딥 링크입니다",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("연결 해제"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "터널을 중지합니다",

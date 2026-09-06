@@ -1113,7 +1113,6 @@
   "subscriptionUpdated": "Updated",
   "subscriptionProviderInterval": "The provider suggests {value}",
   "urlScheme": "URL Scheme",
-  "urlSchemeDesc": "Deep links ReClash registers and opens",
   "urlSchemeCommands": "Automation commands",
   "urlSchemeCommandsDesc": "For tasker, scripts, shortcuts, and automation",
   "urlSchemeProfiles": "Profiles",

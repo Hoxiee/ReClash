@@ -2048,9 +2048,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "Start the tunnel and connect",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "Deep links ReClash registers and opens",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Disconnect"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "Stop the tunnel",

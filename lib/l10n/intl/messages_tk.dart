@@ -2134,9 +2134,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "Tonneli başladýar we baglanýar",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "ReClash ýazga alýan we açýan çuň salgylar",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Aýryl"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "Tonneli bes edýär",

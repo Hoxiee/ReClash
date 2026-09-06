@@ -960,7 +960,6 @@
   "subscriptionUpdated": "Жаңартылды",
   "subscriptionProviderInterval": "Провайдер {value} ұсынады",
   "urlScheme": "URL-сұлбасы",
-  "urlSchemeDesc": "ReClash тіркейтін және ашатын терең сілтемелер",
   "urlSchemeCommands": "Автоматтандыру командалары",
   "urlSchemeCommandsDesc": "Tasker, скрипттер, жарлықтар және автоматтандыру үшін",
   "urlSchemeProfiles": "Профильдер",

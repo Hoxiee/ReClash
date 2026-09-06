@@ -973,7 +973,6 @@
   "subscriptionUpdated": "更新于",
   "subscriptionProviderInterval": "提供方建议 {value}",
   "urlScheme": "URL 方案",
-  "urlSchemeDesc": "ReClash 注册并处理的深链接",
   "urlSchemeCommands": "自动化命令",
   "urlSchemeCommandsDesc": "用于任务、脚本、快捷方式与自动化",
   "urlSchemeProfiles": "配置文件",

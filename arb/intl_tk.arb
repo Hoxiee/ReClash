@@ -960,7 +960,6 @@
   "subscriptionUpdated": "Täzelendi",
   "subscriptionProviderInterval": "Üpjün edijiniň teklifi: {value}",
   "urlScheme": "URL şemasy",
-  "urlSchemeDesc": "ReClash ýazga alýan we açýan çuň salgylar",
   "urlSchemeCommands": "Awtomatizasiýa buýryklary",
   "urlSchemeCommandsDesc": "Tasker, skriptler, çalt klawişalar we awtomatizasiýa üçin",
   "urlSchemeProfiles": "Profiller",

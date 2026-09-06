@@ -278,7 +278,6 @@ class _UrlSchemeItem extends StatelessWidget {
     return DecorationListItem.open(
       leading: const Icon(Icons.link),
       title: Text(context.appLocalizations.urlScheme),
-      subtitle: Text(context.appLocalizations.urlSchemeDesc),
       widget: const UrlSchemeView(),
     );
   }

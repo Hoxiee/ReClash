@@ -987,7 +987,6 @@
   "subscriptionUpdated": "Обновлено",
   "subscriptionProviderInterval": "Провайдер предлагает {value}",
   "urlScheme": "URL-схема",
-  "urlSchemeDesc": "Deep links, которые ReClash регистрирует и открывает",
   "urlSchemeCommands": "Команды автоматизации",
   "urlSchemeCommandsDesc": "Для таскеров, скриптов, ярлыков и автоматизации",
   "urlSchemeProfiles": "Профили",

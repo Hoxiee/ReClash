@@ -2126,9 +2126,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
       "Туннельді іске қосып, байланысты орнатады",
     ),
-    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
-      "ReClash тіркейтін және ашатын терең сілтемелер",
-    ),
     "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Ажырату"),
     "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
       "Туннельді тоқтатады",

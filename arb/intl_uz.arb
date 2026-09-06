@@ -960,7 +960,6 @@
   "subscriptionUpdated": "Yangilandi",
   "subscriptionProviderInterval": "Provayder tavsiya qiladi: {value}",
   "urlScheme": "URL sxemasi",
-  "urlSchemeDesc": "ReClash roʻyxatga oladigan va ochadigan havolalar",
   "urlSchemeCommands": "Avtomatlashtirish buyruqlari",
   "urlSchemeCommandsDesc": "Tasker, skriptlar, yorliqlar va avtomatlashtirish uchun",
   "urlSchemeProfiles": "Profillar",

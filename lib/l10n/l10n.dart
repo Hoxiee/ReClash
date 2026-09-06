@@ -8279,16 +8279,6 @@ class AppLocalizations {
     return Intl.message('URL Scheme', name: 'urlScheme', desc: '', args: []);
   }
 
-  /// `Deep links ReClash registers and opens`
-  String get urlSchemeDesc {
-    return Intl.message(
-      'Deep links ReClash registers and opens',
-      name: 'urlSchemeDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Automation commands`
   String get urlSchemeCommands {
     return Intl.message(

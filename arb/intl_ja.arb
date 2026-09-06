@@ -973,7 +973,6 @@
   "subscriptionUpdated": "更新日時",
   "subscriptionProviderInterval": "プロバイダーの推奨は {value} です",
   "urlScheme": "URLスキーム",
-  "urlSchemeDesc": "ReClash が登録して開くディープリンク",
   "urlSchemeCommands": "自動化コマンド",
   "urlSchemeCommandsDesc": "タスクやスクリプト、ショートカットの自動化用",
   "urlSchemeProfiles": "プロファイル",
