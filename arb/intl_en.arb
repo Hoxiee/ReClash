@@ -1145,5 +1145,33 @@
         "type": "String"
       }
     }
+  },
+  "desync": "DPI bypass",
+  "desyncDesc": "ByeDPI desync strategies",
+  "desyncStrategySection": "Strategy",
+  "desyncArgs": "Engine arguments",
+  "desyncArgsHint": "-A torst,conn -L s,o --split 1",
+  "desyncArgsQuoteError": "A quote is left unclosed",
+  "desyncDefaultName": "Default ladder",
+  "desyncSaveCurrent": "Save current",
+  "desyncStrategyNameHint": "Strategy name",
+  "desyncEngine": "Engine",
+  "desyncCache": "Strategy cache",
+  "desyncCacheDesc": "Picked strategies are kept per network",
+  "desyncCacheTtl": "Cache lifetime",
+  "desyncTtlHour": "1 hour",
+  "desyncTtl12Hours": "12 hours",
+  "desyncTtl28Hours": "28 hours",
+  "desyncTtlWeek": "7 days",
+  "desyncRouting": "Routing",
+  "desyncForceTcp": "Force TCP",
+  "desyncForceTcpDesc": "Blocks QUIC for the categories above; a desync cannot reach UDP",
+  "desyncArgsCount": "{count, plural, =0{no arguments} =1{1 argument} other{{count} arguments}}",
+  "@desyncArgsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   }
 }

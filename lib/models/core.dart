@@ -58,6 +58,9 @@ abstract class VpnOptions with _$VpnOptions {
     @Default(false) bool smartPauseCloseConnections,
     @Default(false) bool desyncEnabled,
     @Default(defaultDesyncPort) int desyncPort,
+    @Default([]) List<String> desyncStrategy,
+    @Default(defaultDesyncCacheTtl) int desyncCacheTtl,
+    @Default(true) bool desyncCacheEnabled,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>

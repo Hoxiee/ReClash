@@ -1005,5 +1005,33 @@
         "type": "String"
       }
     }
+  },
+  "desync": "DPI 绕过",
+  "desyncDesc": "ByeDPI 失同步策略",
+  "desyncStrategySection": "策略",
+  "desyncArgs": "引擎参数",
+  "desyncArgsHint": "-A torst,conn -L s,o --split 1",
+  "desyncArgsQuoteError": "引号未闭合",
+  "desyncDefaultName": "默认阶梯",
+  "desyncSaveCurrent": "保存当前",
+  "desyncStrategyNameHint": "策略名称",
+  "desyncEngine": "引擎",
+  "desyncCache": "策略缓存",
+  "desyncCacheDesc": "所选策略按网络分别保存",
+  "desyncCacheTtl": "缓存有效期",
+  "desyncTtlHour": "1 小时",
+  "desyncTtl12Hours": "12 小时",
+  "desyncTtl28Hours": "28 小时",
+  "desyncTtlWeek": "7 天",
+  "desyncRouting": "路由",
+  "desyncForceTcp": "强制 TCP",
+  "desyncForceTcpDesc": "阻止上述分类的 QUIC；失同步无法作用于 UDP",
+  "desyncArgsCount": "{count, plural, other{{count} 个参数}}",
+  "@desyncArgsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   }
 }

@@ -43,7 +43,11 @@ class ByeDpiModuleTest {
     private lateinit var engine: FakeEngine
     private val logs = mutableListOf<String>()
 
-    private fun options(enabled: Boolean = true, port: Int = 7898) = VpnOptions(
+    private fun options(
+        enabled: Boolean = true,
+        port: Int = 7898,
+        strategy: List<String> = emptyList(),
+    ) = VpnOptions(
         enable = true,
         port = 7890,
         ipv6 = false,
@@ -61,6 +65,7 @@ class ByeDpiModuleTest {
         routeAddress = listOf("0.0.0.0/0"),
         desyncEnabled = enabled,
         desyncPort = port,
+        desyncStrategy = strategy,
     )
 
     // The default log seam hits android.util.Log, which is not mocked on the JVM.
@@ -156,6 +161,18 @@ class ByeDpiModuleTest {
         assertEquals(2, engine.starts.size)
         val args = engine.starts.last()
         assertEquals("/cache/abc123.cache", args[args.indexOf("-y") + 1])
+    }
+
+    @Test
+    fun `a strategy change restarts the branch with the new args`() = runTest {
+        module().start()
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        ServiceConfig.updateVpnOptions(options(strategy = listOf("--split", "1")))
+        runCurrent()
+        assertEquals(1, engine.stops)
+        assertEquals(2, engine.starts.size)
+        assertTrue("--split" in engine.starts.last())
     }
 
     @Test

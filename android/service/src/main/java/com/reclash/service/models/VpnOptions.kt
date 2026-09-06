@@ -28,6 +28,9 @@ data class VpnOptions(
     val smartPauseCloseConnections: Boolean = false,
     val desyncEnabled: Boolean = false,
     val desyncPort: Int = 0,
+    val desyncStrategy: List<String> = emptyList(),
+    val desyncCacheTtl: Int = 0,
+    val desyncCacheEnabled: Boolean = true,
 )
 
 data class CIDR(

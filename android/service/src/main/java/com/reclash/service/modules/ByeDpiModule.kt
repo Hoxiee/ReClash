@@ -10,6 +10,9 @@ import kotlinx.coroutines.launch
 
 internal data class ByeDpiTarget(
     val port: Int,
+    val strategy: List<String>,
+    val cacheTtl: Int,
+    val cacheEnabled: Boolean,
     val envKey: String,
 )
 
@@ -71,7 +74,17 @@ internal class ByeDpiModule(
 
     private fun targetOf(options: VpnOptions?): ByeDpiTarget? {
         if (options?.desyncEnabled != true || options.desyncPort <= 0) return null
-        return ByeDpiTarget(port = options.desyncPort, envKey = envKey)
+        return ByeDpiTarget(
+            port = options.desyncPort,
+            strategy = options.desyncStrategy,
+            cacheTtl = if (options.desyncCacheTtl > 0) {
+                options.desyncCacheTtl
+            } else {
+                BYEDPI_CACHE_TTL_SECONDS
+            },
+            cacheEnabled = options.desyncCacheEnabled,
+            envKey = envKey,
+        )
     }
 
     private suspend fun apply(target: ByeDpiTarget?) {
@@ -90,8 +103,11 @@ internal class ByeDpiModule(
     private fun launchBranch(target: ByeDpiTarget) {
         val args = byeDpiArgs(
             port = target.port,
+            strategy = target.strategy,
             cacheFile = engine.cacheFile(target.envKey),
             protectPath = engine.protectPath(),
+            cacheTtlSeconds = target.cacheTtl,
+            cacheEnabled = target.cacheEnabled,
         )
         current = target
         runCatching { engine.start(args) }
@@ -116,8 +132,11 @@ internal class ByeDpiModule(
             if (current != target) return
             val args = byeDpiArgs(
                 port = target.port,
+                strategy = target.strategy,
                 cacheFile = engine.cacheFile(target.envKey),
                 protectPath = engine.protectPath(),
+                cacheTtlSeconds = target.cacheTtl,
+                cacheEnabled = target.cacheEnabled,
             )
             runCatching { engine.start(args) }
                 .onFailure { error -> log("Desync restart failed: $error") }

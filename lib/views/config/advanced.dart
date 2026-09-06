@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/smart_pause.dart';
@@ -91,6 +92,13 @@ class AdvancedConfigView extends StatelessWidget {
         subtitle: Text(appLocalizations.smartRoutingDesc),
         leading: const Icon(Icons.alt_route_rounded),
         widget: const SmartRoutingView(),
+        blur: false,
+      ),
+      DecorationListItem.open(
+        title: Text(appLocalizations.desync),
+        subtitle: Text(appLocalizations.desyncDesc),
+        leading: const Icon(Icons.bolt_rounded),
+        widget: const DesyncView(),
         blur: false,
       ),
     ];

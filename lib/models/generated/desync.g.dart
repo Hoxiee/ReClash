@@ -6,6 +6,17 @@ part of '../desync.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_DesyncStrategy _$DesyncStrategyFromJson(Map<String, dynamic> json) =>
+    _DesyncStrategy(
+      name: json['name'] as String,
+      args:
+          (json['args'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$DesyncStrategyToJson(_DesyncStrategy instance) =>
+    <String, dynamic>{'name': instance.name, 'args': instance.args};
+
 _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
   enabled: json['enabled'] as bool? ?? false,
   port: (json['port'] as num?)?.toInt() ?? defaultDesyncPort,
@@ -15,6 +26,18 @@ _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
           .toList() ??
       const [DesyncCategory.youtube, DesyncCategory.discord],
   forceTcp: json['forceTcp'] as bool? ?? true,
+  strategyArgs:
+      (json['strategyArgs'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      desyncDefaultStrategy,
+  cacheEnabled: json['cacheEnabled'] as bool? ?? true,
+  cacheTtl: (json['cacheTtl'] as num?)?.toInt() ?? defaultDesyncCacheTtl,
+  savedStrategies:
+      (json['savedStrategies'] as List<dynamic>?)
+          ?.map((e) => DesyncStrategy.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
@@ -25,6 +48,10 @@ Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
           .map((e) => _$DesyncCategoryEnumMap[e]!)
           .toList(),
       'forceTcp': instance.forceTcp,
+      'strategyArgs': instance.strategyArgs,
+      'cacheEnabled': instance.cacheEnabled,
+      'cacheTtl': instance.cacheTtl,
+      'savedStrategies': instance.savedStrategies,
     };
 
 const _$DesyncCategoryEnumMap = {

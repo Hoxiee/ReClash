@@ -1019,5 +1019,33 @@
         "type": "String"
       }
     }
+  },
+  "desync": "Обход DPI",
+  "desyncDesc": "Стратегии десинхронизации ByeDPI",
+  "desyncStrategySection": "Стратегия",
+  "desyncArgs": "Аргументы движка",
+  "desyncArgsHint": "-A torst,conn -L s,o --split 1",
+  "desyncArgsQuoteError": "Не закрыта кавычка",
+  "desyncDefaultName": "Лестница по умолчанию",
+  "desyncSaveCurrent": "Сохранить текущую",
+  "desyncStrategyNameHint": "Имя стратегии",
+  "desyncEngine": "Движок",
+  "desyncCache": "Кэш стратегий",
+  "desyncCacheDesc": "Подобранные стратегии хранятся по сетям",
+  "desyncCacheTtl": "Срок хранения",
+  "desyncTtlHour": "1 час",
+  "desyncTtl12Hours": "12 часов",
+  "desyncTtl28Hours": "28 часов",
+  "desyncTtlWeek": "7 дней",
+  "desyncRouting": "Маршрутизация",
+  "desyncForceTcp": "Переводить на TCP",
+  "desyncForceTcpDesc": "Блокирует QUIC для категорий выше; десинк не работает с UDP",
+  "desyncArgsCount": "{count, plural, =0{нет аргументов} =1{1 аргумент} few{{count} аргумента} other{{count} аргументов}}",
+  "@desyncArgsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   }
 }

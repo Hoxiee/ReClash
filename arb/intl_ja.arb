@@ -1005,5 +1005,33 @@
         "type": "String"
       }
     }
+  },
+  "desync": "DPIバイパス",
+  "desyncDesc": "ByeDPI デシンク戦略",
+  "desyncStrategySection": "戦略",
+  "desyncArgs": "エンジン引数",
+  "desyncArgsHint": "-A torst,conn -L s,o --split 1",
+  "desyncArgsQuoteError": "引用符が閉じられていません",
+  "desyncDefaultName": "デフォルトのラダー",
+  "desyncSaveCurrent": "現在のものを保存",
+  "desyncStrategyNameHint": "戦略名",
+  "desyncEngine": "エンジン",
+  "desyncCache": "戦略キャッシュ",
+  "desyncCacheDesc": "選ばれた戦略はネットワークごとに保持されます",
+  "desyncCacheTtl": "キャッシュ保持期間",
+  "desyncTtlHour": "1時間",
+  "desyncTtl12Hours": "12時間",
+  "desyncTtl28Hours": "28時間",
+  "desyncTtlWeek": "7日",
+  "desyncRouting": "ルーティング",
+  "desyncForceTcp": "TCPへ強制",
+  "desyncForceTcpDesc": "上記カテゴリのQUICをブロックします。デシンクはUDPに効きません",
+  "desyncArgsCount": "{count, plural, other{{count} 個の引数}}",
+  "@desyncArgsCount": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
   }
 }

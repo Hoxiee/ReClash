@@ -280,26 +280,6 @@ class AppLocalizations {
     return Intl.message('Simplified Chinese', name: 'zhCN', desc: '', args: []);
   }
 
-  /// `Korean`
-  String get ko {
-    return Intl.message('Korean', name: 'ko', desc: '', args: []);
-  }
-
-  /// `Uzbek`
-  String get uz {
-    return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
-  }
-
-  /// `Kazakh`
-  String get kk {
-    return Intl.message('Kazakh', name: 'kk', desc: '', args: []);
-  }
-
-  /// `Turkmen`
-  String get tk {
-    return Intl.message('Turkmen', name: 'tk', desc: '', args: []);
-  }
-
   /// `Theme`
   String get theme {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
@@ -715,10 +695,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The app requests the subscription in this client's format`
+  /// `The app requests the subscription pretending to be this client`
   String get subscriptionClientDesc {
     return Intl.message(
-      'The app requests the subscription in this client\'s format',
+      'The app requests the subscription pretending to be this client',
       name: 'subscriptionClientDesc',
       desc: '',
       args: [],
@@ -1028,21 +1008,6 @@ class AppLocalizations {
   /// `License`
   String get license {
     return Intl.message('License', name: 'license', desc: '', args: []);
-  }
-
-  /// `Licenses`
-  String get licenses {
-    return Intl.message('Licenses', name: 'licenses', desc: '', args: []);
-  }
-
-  /// `Packages bundled into the app`
-  String get licensesDesc {
-    return Intl.message(
-      'Packages bundled into the app',
-      name: 'licensesDesc',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Source code`
@@ -1423,11 +1388,6 @@ class AppLocalizations {
   /// `General`
   String get general {
     return Intl.message('General', name: 'general', desc: '', args: []);
-  }
-
-  /// `Extra`
-  String get extra {
-    return Intl.message('Extra', name: 'extra', desc: '', args: []);
   }
 
   /// `Set the system proxy`
@@ -6004,16 +5964,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.`
-  String get smartRoutingIntro {
-    return Intl.message(
-      'Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.',
-      name: 'smartRoutingIntro',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Available in Rule mode only`
   String get smartRoutingRuleOnly {
     return Intl.message(
@@ -8224,16 +8174,6 @@ class AppLocalizations {
     );
   }
 
-  /// `None of the nodes in this subscription can be reached — try another client format`
-  String get subscriptionUndialable {
-    return Intl.message(
-      'None of the nodes in this subscription can be reached — try another client format',
-      name: 'subscriptionUndialable',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `The provider moved to {host}`
   String subscriptionDomainMoved(String host) {
     return Intl.message(
@@ -8264,193 +8204,191 @@ class AppLocalizations {
     );
   }
 
-  /// `URL Scheme`
-  String get urlScheme {
-    return Intl.message('URL Scheme', name: 'urlScheme', desc: '', args: []);
+  /// `DPI bypass`
+  String get desync {
+    return Intl.message('DPI bypass', name: 'desync', desc: '', args: []);
   }
 
-  /// `Deep links ReClash registers and opens`
-  String get urlSchemeDesc {
+  /// `ByeDPI desync strategies`
+  String get desyncDesc {
     return Intl.message(
-      'Deep links ReClash registers and opens',
-      name: 'urlSchemeDesc',
+      'ByeDPI desync strategies',
+      name: 'desyncDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Automation commands`
-  String get urlSchemeCommands {
+  /// `Strategy`
+  String get desyncStrategySection {
     return Intl.message(
-      'Automation commands',
-      name: 'urlSchemeCommands',
+      'Strategy',
+      name: 'desyncStrategySection',
       desc: '',
       args: [],
     );
   }
 
-  /// `For tasker, scripts, shortcuts, and automation`
-  String get urlSchemeCommandsDesc {
+  /// `Engine arguments`
+  String get desyncArgs {
     return Intl.message(
-      'For tasker, scripts, shortcuts, and automation',
-      name: 'urlSchemeCommandsDesc',
+      'Engine arguments',
+      name: 'desyncArgs',
       desc: '',
       args: [],
     );
   }
 
-  /// `Connect`
-  String get urlSchemeConnect {
+  /// `-A torst,conn -L s,o --split 1`
+  String get desyncArgsHint {
     return Intl.message(
-      'Connect',
-      name: 'urlSchemeConnect',
+      '-A torst,conn -L s,o --split 1',
+      name: 'desyncArgsHint',
       desc: '',
       args: [],
     );
   }
 
-  /// `Start the tunnel and connect`
-  String get urlSchemeConnectDesc {
+  /// `A quote is left unclosed`
+  String get desyncArgsQuoteError {
     return Intl.message(
-      'Start the tunnel and connect',
-      name: 'urlSchemeConnectDesc',
+      'A quote is left unclosed',
+      name: 'desyncArgsQuoteError',
       desc: '',
       args: [],
     );
   }
 
-  /// `Disconnect`
-  String get urlSchemeDisconnect {
+  /// `Default ladder`
+  String get desyncDefaultName {
     return Intl.message(
-      'Disconnect',
-      name: 'urlSchemeDisconnect',
+      'Default ladder',
+      name: 'desyncDefaultName',
       desc: '',
       args: [],
     );
   }
 
-  /// `Stop the tunnel`
-  String get urlSchemeDisconnectDesc {
+  /// `Save current`
+  String get desyncSaveCurrent {
     return Intl.message(
-      'Stop the tunnel',
-      name: 'urlSchemeDisconnectDesc',
+      'Save current',
+      name: 'desyncSaveCurrent',
       desc: '',
       args: [],
     );
   }
 
-  /// `Toggle`
-  String get urlSchemeToggle {
-    return Intl.message('Toggle', name: 'urlSchemeToggle', desc: '', args: []);
-  }
-
-  /// `Connect if stopped, disconnect if running`
-  String get urlSchemeToggleDesc {
+  /// `Strategy name`
+  String get desyncStrategyNameHint {
     return Intl.message(
-      'Connect if stopped, disconnect if running',
-      name: 'urlSchemeToggleDesc',
+      'Strategy name',
+      name: 'desyncStrategyNameHint',
       desc: '',
       args: [],
     );
   }
 
-  /// `Open`
-  String get urlSchemeOpen {
-    return Intl.message('Open', name: 'urlSchemeOpen', desc: '', args: []);
+  /// `Engine`
+  String get desyncEngine {
+    return Intl.message('Engine', name: 'desyncEngine', desc: '', args: []);
   }
 
-  /// `Bring the window to the front`
-  String get urlSchemeOpenDesc {
+  /// `Strategy cache`
+  String get desyncCache {
     return Intl.message(
-      'Bring the window to the front',
-      name: 'urlSchemeOpenDesc',
+      'Strategy cache',
+      name: 'desyncCache',
       desc: '',
       args: [],
     );
   }
 
-  /// `Close`
-  String get urlSchemeClose {
-    return Intl.message('Close', name: 'urlSchemeClose', desc: '', args: []);
-  }
-
-  /// `Hide to tray, or exit when configured`
-  String get urlSchemeCloseDesc {
+  /// `Picked strategies are kept per network`
+  String get desyncCacheDesc {
     return Intl.message(
-      'Hide to tray, or exit when configured',
-      name: 'urlSchemeCloseDesc',
+      'Picked strategies are kept per network',
+      name: 'desyncCacheDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Import config`
-  String get urlSchemeImport {
+  /// `Cache lifetime`
+  String get desyncCacheTtl {
     return Intl.message(
-      'Import config',
-      name: 'urlSchemeImport',
+      'Cache lifetime',
+      name: 'desyncCacheTtl',
       desc: '',
       args: [],
     );
   }
 
-  /// `A base64-encoded config file, imported as a profile`
-  String get urlSchemeImportDesc {
+  /// `1 hour`
+  String get desyncTtlHour {
+    return Intl.message('1 hour', name: 'desyncTtlHour', desc: '', args: []);
+  }
+
+  /// `12 hours`
+  String get desyncTtl12Hours {
     return Intl.message(
-      'A base64-encoded config file, imported as a profile',
-      name: 'urlSchemeImportDesc',
+      '12 hours',
+      name: 'desyncTtl12Hours',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add subscription`
-  String get urlSchemeAdd {
+  /// `28 hours`
+  String get desyncTtl28Hours {
     return Intl.message(
-      'Add subscription',
-      name: 'urlSchemeAdd',
+      '28 hours',
+      name: 'desyncTtl28Hours',
       desc: '',
       args: [],
     );
   }
 
-  /// `A subscription URL, added after confirmation`
-  String get urlSchemeAddDesc {
+  /// `7 days`
+  String get desyncTtlWeek {
+    return Intl.message('7 days', name: 'desyncTtlWeek', desc: '', args: []);
+  }
+
+  /// `Routing`
+  String get desyncRouting {
+    return Intl.message('Routing', name: 'desyncRouting', desc: '', args: []);
+  }
+
+  /// `Force TCP`
+  String get desyncForceTcp {
     return Intl.message(
-      'A subscription URL, added after confirmation',
-      name: 'urlSchemeAddDesc',
+      'Force TCP',
+      name: 'desyncForceTcp',
       desc: '',
       args: [],
     );
   }
 
-  /// `The import payload is not valid base64`
-  String get urlSchemeImportInvalid {
+  /// `Blocks QUIC for the categories above; a desync cannot reach UDP`
+  String get desyncForceTcpDesc {
     return Intl.message(
-      'The import payload is not valid base64',
-      name: 'urlSchemeImportInvalid',
+      'Blocks QUIC for the categories above; a desync cannot reach UDP',
+      name: 'desyncForceTcpDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Install a profile`
-  String get urlSchemeInstallConfig {
-    return Intl.message(
-      'Install a profile',
-      name: 'urlSchemeInstallConfig',
+  /// `{count, plural, =0{no arguments} =1{1 argument} other{{count} arguments}}`
+  String desyncArgsCount(num count) {
+    return Intl.plural(
+      count,
+      zero: 'no arguments',
+      one: '1 argument',
+      other: '$count arguments',
+      name: 'desyncArgsCount',
       desc: '',
-      args: [],
-    );
-  }
-
-  /// `The compat link Clash and FlClash buttons already use`
-  String get urlSchemeInstallConfigDesc {
-    return Intl.message(
-      'The compat link Clash and FlClash buttons already use',
-      name: 'urlSchemeInstallConfigDesc',
-      desc: '',
-      args: [],
+      args: [count],
     );
   }
 }
@@ -8462,11 +8400,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'ja'),
-      Locale.fromSubtags(languageCode: 'kk'),
-      Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'ru'),
-      Locale.fromSubtags(languageCode: 'tk'),
-      Locale.fromSubtags(languageCode: 'uz'),
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }

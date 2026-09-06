@@ -33,20 +33,31 @@ class ByeDpiArgsTest {
         assertEquals("/data/byedpi.protect", args[args.indexOf("-P") + 1])
     }
 
-    // Nothing may precede the first -A: options there form the group ByeDPI applies
-    // unconditionally, which would desync sites that were never blocked.
     @Test
-    fun `no strategy sits outside a trigger group`() {
-        val args = byeDpiArgs(port = 7898, ladder = listOf(listOf("--split", "1")))
-        val head = args.subList(0, args.indexOf("-A"))
-        assertEquals(listOf("-i", BYEDPI_LOOPBACK, "-p", "7898", "-u", "100800"), head)
+    fun `a disabled cache drops the file even when present`() {
+        val args = byeDpiArgs(
+            port = 7898,
+            cacheFile = "/data/byedpi/abc.cache",
+            cacheEnabled = false,
+        )
+        assertTrue("-y" !in args)
     }
 
     @Test
-    fun `every ladder step opens its own group`() {
-        val args = byeDpiArgs(port = 7898)
-        assertEquals(BYEDPI_LADDER.size, args.count { it == "-A" })
-        assertEquals(BYEDPI_LADDER.size, args.count { it == "-L" })
+    fun `a custom cache ttl replaces the default`() {
+        val args = byeDpiArgs(port = 7898, cacheTtlSeconds = 60)
+        assertEquals("60", args[args.indexOf("-u") + 1])
+    }
+
+    @Test
+    fun `the user strategy follows the managed block verbatim`() {
+        val strategy = listOf("-A", "torst,conn", "-L", "s,o", "--split", "1")
+        val args = byeDpiArgs(port = 7899, strategy = strategy)
+        assertEquals(
+            listOf("-i", BYEDPI_LOOPBACK, "-p", "7899", "-u", BYEDPI_CACHE_TTL_SECONDS.toString()),
+            args.subList(0, 6),
+        )
+        assertEquals(strategy, args.subList(6, args.size))
     }
 
     @Test

@@ -1,29 +1,19 @@
 package com.reclash.service.modules
 
-/// Each strategy sits behind its own `-A`, so the group before the first one stays empty:
-/// a working site is passed through untouched, and the ladder is climbed only on a trigger.
-internal val BYEDPI_LADDER: List<List<String>> = listOf(
-    listOf("--split", "1"),
-    listOf("--disorder", "1"),
-    listOf("--fake", "-1", "--ttl", "8"),
-    listOf("--oob", "1"),
-    listOf("--tlsrec", "1+s"),
-)
-
 internal const val BYEDPI_LOOPBACK = "127.0.0.1"
 
 internal const val BYEDPI_CACHE_TTL_SECONDS = 100800
 
-private const val TRIGGERS = "torst,redirect,ssl_err,conn"
-
-private const val AUTO_MODE = "s,o"
-
+/// The app owns the listener, the per-network cache and the loop break, so they
+/// lead and the user strategy follows: ciadpi's last-wins getopt lets a strategy
+/// override them, and ByeByeDPI grants exactly that freedom.
 internal fun byeDpiArgs(
     port: Int,
+    strategy: List<String> = emptyList(),
     cacheFile: String? = null,
     protectPath: String? = null,
     cacheTtlSeconds: Int = BYEDPI_CACHE_TTL_SECONDS,
-    ladder: List<List<String>> = BYEDPI_LADDER,
+    cacheEnabled: Boolean = true,
 ): List<String> = buildList {
     add("-i")
     add(BYEDPI_LOOPBACK)
@@ -31,7 +21,7 @@ internal fun byeDpiArgs(
     add(port.toString())
     add("-u")
     add(cacheTtlSeconds.toString())
-    if (cacheFile != null) {
+    if (cacheEnabled && cacheFile != null) {
         add("-y")
         add(cacheFile)
     }
@@ -39,11 +29,5 @@ internal fun byeDpiArgs(
         add("-P")
         add(protectPath)
     }
-    ladder.forEach { strategy ->
-        add("-A")
-        add(TRIGGERS)
-        add("-L")
-        add(AUTO_MODE)
-        addAll(strategy)
-    }
+    addAll(strategy)
 }

@@ -7,6 +7,7 @@ export 'client_emulation.dart';
 export 'incy_links.dart';
 export 'compute.dart';
 export 'constant.dart';
+export 'desync.dart';
 export 'context.dart';
 export 'converter.dart';
 export 'datetime.dart';

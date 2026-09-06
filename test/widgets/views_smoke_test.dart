@@ -7,6 +7,7 @@ import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/advanced.dart';
+import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/config/network.dart';
@@ -50,6 +51,7 @@ void main() {
     'network config': const Scaffold(body: NetworkListView()),
     'advanced config': const AdvancedConfigView(),
     'smart pause config': const SmartPauseView(),
+    'desync config': const DesyncView(),
     'appearance': const AppearanceView(),
     'language': const LocaleView(),
     'application settings': const ApplicationSettingView(),
