@@ -66,11 +66,13 @@ final _cacheMange = DefaultCacheManager();
 class ImageCacheWidget extends StatefulWidget {
   final String src;
   final Widget defaultWidget;
+  final BoxFit? fit;
 
   const ImageCacheWidget({
     super.key,
     required this.src,
     required this.defaultWidget,
+    this.fit,
   });
 
   @override
@@ -135,6 +137,7 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
         return CommonImage(
           data: data,
           isSvg: widget.src.isSvg,
+          fit: widget.fit,
           errorBuilder: (_, _, _) {
             return widget.defaultWidget;
           },
@@ -220,6 +223,7 @@ class _PackageIconState extends State<PackageIcon> {
 class CommonImage extends StatelessWidget {
   final File data;
   final bool isSvg;
+  final BoxFit? fit;
   final Widget Function(
     BuildContext context,
     Object error,
@@ -230,6 +234,7 @@ class CommonImage extends StatelessWidget {
   const CommonImage({
     super.key,
     required this.data,
+    this.fit,
     this.errorBuilder,
     this.isSvg = false,
   });
@@ -237,7 +242,11 @@ class CommonImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return isSvg
-        ? SvgPicture.file(data, errorBuilder: errorBuilder)
-        : Image.file(data, errorBuilder: errorBuilder);
+        ? SvgPicture.file(
+            data,
+            fit: fit ?? BoxFit.contain,
+            errorBuilder: errorBuilder,
+          )
+        : Image.file(data, fit: fit, errorBuilder: errorBuilder);
   }
 }

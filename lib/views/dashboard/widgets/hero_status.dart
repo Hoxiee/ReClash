@@ -110,6 +110,17 @@ HeroOrbPhase heroLifecycleOf({
 HeroOrbPhase heroPhaseWithProbe(HeroOrbPhase phase, bool probing) =>
     probing && phase == HeroOrbPhase.off ? HeroOrbPhase.checking : phase;
 
+/// What the orb's core carries: the provider's mark while the tunnel flows,
+/// the app's own mark when the panel sent none, the state icon otherwise.
+enum HeroCoreMark { serviceLogo, appMark, statusIcon }
+
+HeroCoreMark heroCoreMarkOf(HeroStatus status, String? serviceLogo) =>
+    status.flows
+    ? (serviceLogo != null && serviceLogo.isNotEmpty
+          ? HeroCoreMark.serviceLogo
+          : HeroCoreMark.appMark)
+    : HeroCoreMark.statusIcon;
+
 HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
     switch (phase) {
       HeroOrbPhase.offline => HeroStatus.offline,

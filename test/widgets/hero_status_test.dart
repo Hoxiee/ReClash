@@ -3,6 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
+import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
 import 'package:material_ui/material_ui.dart';
@@ -33,6 +34,42 @@ void main() {
         heroHealthOf(delay: heroDegradedDelay, measuring: false),
         HeroHealth.degraded,
       );
+    });
+  });
+
+  group('hero core mark', () {
+    test('a flowing tunnel wears the panel logo, else the app mark', () {
+      expect(
+        heroCoreMarkOf(HeroStatus.secured, 'https://x/l.png'),
+        HeroCoreMark.serviceLogo,
+      );
+      expect(
+        heroCoreMarkOf(HeroStatus.degraded, 'https://x/l.png'),
+        HeroCoreMark.serviceLogo,
+      );
+      expect(
+        heroCoreMarkOf(HeroStatus.secured, null),
+        HeroCoreMark.appMark,
+      );
+      expect(heroCoreMarkOf(HeroStatus.secured, ''), HeroCoreMark.appMark);
+    });
+
+    test('every other state keeps its action icon', () {
+      for (final status in [
+        HeroStatus.off,
+        HeroStatus.offline,
+        HeroStatus.checking,
+        HeroStatus.connecting,
+        HeroStatus.reconnecting,
+        HeroStatus.broken,
+        HeroStatus.paused,
+      ]) {
+        expect(
+          heroCoreMarkOf(status, 'https://x/l.png'),
+          HeroCoreMark.statusIcon,
+          reason: '$status',
+        );
+      }
     });
   });
 
@@ -286,6 +323,7 @@ void main() {
       Set<String> pendingTests = const {},
       bool? reachable,
       RcxStatus? rcxStatus,
+      String? serviceLogo,
     }) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1;
@@ -294,6 +332,9 @@ void main() {
 
       final profile = Profile.normal().copyWith(
         selectedMap: const {'Selector': 'Node A'},
+        panelMeta: serviceLogo == null
+            ? null
+            : PanelMeta(serviceName: 'Panel', serviceLogo: serviceLogo),
       );
       const group = Group(
         name: 'Selector',
@@ -344,6 +385,48 @@ void main() {
       await pumpHero(tester, delay: 140);
       expect(find.text('You are protected'), findsOne);
       expect(find.text('Smart routing is off'), findsOne);
+    });
+
+    testWidgets('the flowing core shows the panel logo, not the power icon', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, serviceLogo: 'https://panel/l.png');
+      expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
+      expect(find.byKey(const ValueKey('core-mark')), findsOne);
+    });
+
+    testWidgets('without a panel logo the flowing core shows the app mark', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140);
+      expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
+      expect(find.byKey(const ValueKey('core-mark')), findsOne);
+    });
+
+    testWidgets('a paused orb keeps its action icon over any logo', (
+      tester,
+    ) async {
+      await pumpHero(
+        tester,
+        delay: 140,
+        paused: true,
+        serviceLogo: 'https://p/l.png',
+      );
+      final orbScope = find.byType(HeroOrb);
+      expect(
+        find.descendant(
+          of: orbScope,
+          matching: find.byIcon(Icons.power_settings_new_rounded),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: orbScope,
+          matching: find.byIcon(Icons.play_arrow_rounded),
+        ),
+        findsOne,
+      );
     });
 
     testWidgets('the engine node outranks the panel selector', (tester) async {

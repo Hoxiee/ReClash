@@ -276,6 +276,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             status: status,
             health: health,
             palette: palette,
+            serviceLogo: panelMeta?.serviceLogo,
             onPhaseChanged: (phase) => setState(() => _phase = phase),
           ),
           const SizedBox(height: 16),
@@ -336,6 +337,7 @@ class _OrbSection extends ConsumerWidget {
     required this.status,
     required this.health,
     required this.palette,
+    this.serviceLogo,
     required this.onPhaseChanged,
   });
 
@@ -344,6 +346,7 @@ class _OrbSection extends ConsumerWidget {
   final HeroStatus status;
   final HeroHealth health;
   final HeroPalette palette;
+  final String? serviceLogo;
   final ValueChanged<HeroOrbPhase> onPhaseChanged;
 
   @override
@@ -394,6 +397,7 @@ class _OrbSection extends ConsumerWidget {
           enabled: isReady,
           health: health,
           activity: heroActivityOf(lastTraffic),
+          serviceLogo: serviceLogo,
           onPhaseChanged: onPhaseChanged,
         ),
         const SizedBox(height: 18),

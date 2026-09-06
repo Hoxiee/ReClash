@@ -6,6 +6,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -36,11 +37,14 @@ class HeroOrb extends ConsumerStatefulWidget {
     this.enabled = true,
     this.health = HeroHealth.unknown,
     this.activity = 0,
+    this.serviceLogo,
     this.onPhaseChanged,
   });
 
   final double size;
   final bool enabled;
+
+  final String? serviceLogo;
 
   /// Verdict on the live connection. Today it comes from the incumbent node's
   /// last delay measurement; the connection doctor will replace the source
@@ -484,13 +488,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                             child: child,
                                           ),
                                         ),
-                                    child: Icon(
-                                      _statusIcon,
-                                      key: ValueKey(_statusIcon),
-                                      size: core * 0.46,
-                                      color: _status == HeroStatus.off
-                                          ? colorScheme.onSurfaceVariant
-                                          : palette.accent,
+                                    child: _coreChild(
+                                      core,
+                                      palette.accent,
                                     ),
                                   ),
                                 ),
@@ -516,6 +516,57 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.offline => Icons.wifi_off_rounded,
     _ => Icons.power_settings_new_rounded,
   };
+
+  Widget _coreChild(double core, Color accent) {
+    switch (heroCoreMarkOf(_status, widget.serviceLogo)) {
+      case HeroCoreMark.serviceLogo:
+        final side = core * 0.56;
+        return SizedBox(
+          key: const ValueKey('core-mark'),
+          width: side,
+          height: side,
+          child: ImageCacheWidget(
+            src: widget.serviceLogo!,
+            fit: BoxFit.contain,
+            defaultWidget: _appMark(core, accent),
+          ),
+        );
+      case HeroCoreMark.appMark:
+        return KeyedSubtree(
+          key: const ValueKey('core-mark'),
+          child: _appMark(core, accent),
+        );
+      case HeroCoreMark.statusIcon:
+        return Icon(
+          _statusIcon,
+          key: ValueKey(_statusIcon),
+          size: core * 0.46,
+          color: _status == HeroStatus.off
+              ? context.colorScheme.onSurfaceVariant
+              : accent,
+        );
+    }
+  }
+
+  Widget _appMark(double core, Color accent) {
+    final side = core * 0.56;
+    return Container(
+      width: side,
+      height: side,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/images/icon.png',
+          width: side,
+          height: side,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
 }
 
 class _HeroHaloPainter extends CustomPainter {
