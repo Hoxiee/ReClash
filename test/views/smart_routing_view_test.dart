@@ -46,6 +46,19 @@ void main() {
     expect(find.text('Behaviour'), findsNothing);
   });
 
+  testWidgets('the intro card stays up before and after enabling', (
+    tester,
+  ) async {
+    await _pump(tester, props: const SmartRoutingProps());
+
+    expect(find.textContaining('Start from a region preset'), findsOne);
+
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Start from a region preset'), findsOne);
+  });
+
   testWidgets('the mid layer is settings, never weights', (tester) async {
     await _pump(
       tester,

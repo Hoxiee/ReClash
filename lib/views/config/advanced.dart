@@ -20,7 +20,7 @@ class AdvancedConfigView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final List<Widget> items = [
+    final generalItems = [
       DecorationListItem.open(
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
@@ -30,20 +30,6 @@ class AdvancedConfigView extends StatelessWidget {
           title: appLocalizations.network,
           body: const NetworkListView(),
         ),
-      ),
-      DecorationListItem.open(
-        title: Text(appLocalizations.smartPause),
-        subtitle: Text(appLocalizations.smartPauseDesc),
-        leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
-        widget: const SmartPauseView(),
-        blur: false,
-      ),
-      DecorationListItem.open(
-        title: Text(appLocalizations.smartRouting),
-        subtitle: Text(appLocalizations.smartRoutingDesc),
-        leading: const Icon(Icons.alt_route_rounded),
-        widget: const SmartRoutingView(),
-        blur: false,
       ),
       DecorationListItem.open(
         title: const Text('DNS'),
@@ -92,11 +78,36 @@ class AdvancedConfigView extends StatelessWidget {
         blur: false,
       ),
     ];
+    final extraItems = [
+      DecorationListItem.open(
+        title: Text(appLocalizations.smartPause),
+        subtitle: Text(appLocalizations.smartPauseDesc),
+        leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
+        widget: const SmartPauseView(),
+        blur: false,
+      ),
+      DecorationListItem.open(
+        title: Text(appLocalizations.smartRouting),
+        subtitle: Text(appLocalizations.smartRoutingDesc),
+        leading: const Icon(Icons.alt_route_rounded),
+        widget: const SmartRoutingView(),
+        blur: false,
+      ),
+    ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
       body: ListView(
         children: [
-          SettingSection(top: 16, items: items),
+          SettingSection(
+            top: 16,
+            title: appLocalizations.general,
+            items: generalItems,
+          ),
+          SettingSection(
+            title: appLocalizations.extra,
+            items: extraItems,
+            enterDelay: const Duration(milliseconds: 50),
+          ),
           const SettingBottomInset(),
         ],
       ),

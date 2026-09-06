@@ -573,6 +573,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("Внешнее получение"),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
+    "extra": MessageLookupByLibrary.simpleMessage("Дополнительно"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Фильтр Fake-IP"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Диапазон Fake-IP"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -1594,6 +1595,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
       "из проверки задержки",
+    ),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "Умная маршрутизация держит сервер, работающий в текущей сети, и сама переключается при её смене. Начните с регионального пресета, затем настройте стратегию, проверки и маркеры ниже.",
     ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("оставлен"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage(

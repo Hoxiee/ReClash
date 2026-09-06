@@ -560,6 +560,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("External fetch"),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
+    "extra": MessageLookupByLibrary.simpleMessage("Extra"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP filter"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fake-IP range"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -1543,6 +1544,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
       "from the delay test",
+    ),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.",
     ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("kept"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("Latency band"),

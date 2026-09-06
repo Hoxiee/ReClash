@@ -1390,6 +1390,11 @@ class AppLocalizations {
     return Intl.message('General', name: 'general', desc: '', args: []);
   }
 
+  /// `Extra`
+  String get extra {
+    return Intl.message('Extra', name: 'extra', desc: '', args: []);
+  }
+
   /// `Set the system proxy`
   String get systemProxyDesc {
     return Intl.message(
@@ -5959,6 +5964,16 @@ class AppLocalizations {
     return Intl.message(
       'Keeps a working server picked for every network, without opening the app',
       name: 'smartRoutingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.`
+  String get smartRoutingIntro {
+    return Intl.message(
+      'Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.',
+      name: 'smartRoutingIntro',
       desc: '',
       args: [],
     );

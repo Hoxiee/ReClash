@@ -465,6 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("外部取得"),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部リンク"),
+    "extra": MessageLookupByLibrary.simpleMessage("追加"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IPフィルター"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fake-IP範囲"),
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
@@ -1269,6 +1270,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "まだ切り替えはありません",
     ),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("遅延テストの値"),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "スマートルーティングは現在のネットワークで機能するサーバーを維持し、ネットワークが変わると自動で切り替えます。まずリージョンのプリセットを選び、下で戦略・検査・マーカーを調整します。",
+    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("維持"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("遅延帯"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("証拠"),

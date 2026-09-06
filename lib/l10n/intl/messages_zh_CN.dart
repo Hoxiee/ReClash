@@ -419,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("外部获取"),
     "externalLink": MessageLookupByLibrary.simpleMessage("外部链接"),
+    "extra": MessageLookupByLibrary.simpleMessage("附加"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fakeip过滤"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fakeip范围"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -1103,6 +1104,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近的切换"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage("还没有切换过"),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("来自延迟测试"),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "智能路由为当前网络保持可用的服务器，并在网络变化时自动切换。先选择区域预设，再在下方微调策略、探测与标记。",
+    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("保持"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("延迟档"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("证据"),
