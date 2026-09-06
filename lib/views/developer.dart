@@ -90,11 +90,11 @@ class DeveloperView extends ConsumerWidget {
     );
     return BaseScaffold(
       title: appLocalizations.developerMode,
-      body: SingleChildScrollView(
-        padding: baseInfoEdgeInsets,
-        child: Column(
-          children: [
-            CommonCard(
+      body: ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: CommonCard(
               type: CommonCardType.filled,
               radius: AppCorner.md,
               child: ListItem.toggle(
@@ -108,10 +108,10 @@ class DeveloperView extends ConsumerWidget {
                 },
               ),
             ),
-            const SizedBox(height: 16),
-            _getDeveloperList(context, ref),
-          ],
-        ),
+          ),
+          _getDeveloperList(context, ref),
+          const SettingBottomInset(),
+        ],
       ),
     );
   }
