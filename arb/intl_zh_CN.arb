@@ -1012,6 +1012,30 @@
   "desyncArgs": "引擎参数",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "引号未闭合",
+  "desyncArgsUnknownFlag": "未知选项 {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} 由应用设定，将被忽略",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} 需要一个值",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} 不是选项",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncDefaultName": "默认阶梯",
   "desyncSaveCurrent": "保存当前",
   "desyncStrategyNameHint": "策略名称",

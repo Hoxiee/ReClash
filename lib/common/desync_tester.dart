@@ -81,10 +81,13 @@ List<String> desyncTestSitesFor(List<String> ids) {
   }.toList();
 }
 
+enum DesyncSiteStatus { passed, blocked, engineDown }
+
 class DesyncTestOutcome {
   const DesyncTestOutcome({
     required this.text,
     required this.failedSites,
+    required this.passedOnRetry,
     required this.total,
     required this.engineUp,
   });
@@ -93,6 +96,8 @@ class DesyncTestOutcome {
 
   final List<String> failedSites;
 
+  final int passedOnRetry;
+
   final int total;
 
   /// False when the line could not even keep the listener alive; the score
@@ -100,6 +105,11 @@ class DesyncTestOutcome {
   final bool engineUp;
 
   int get passed => engineUp ? total - failedSites.length : 0;
+
+  /// First-try passes weigh full, retry saves weigh half: a strategy that
+  /// opens a site every time outranks one that needs a second roll.
+  double get score =>
+      engineUp ? (passed - passedOnRetry + passedOnRetry / 2) / total : 0;
 }
 
 List<String> desyncTestArgs(String line) {
@@ -139,13 +149,19 @@ class DesyncStrategyTester {
         if (!listEquals(args, running)) {
           if (engineUp) {
             final sentinel = await _connect(port);
-            await applyArgs(args);
             if (sentinel == null) {
               engineUp = false;
             } else {
-              // The old engine's death arrives before the new listener does;
-              // a sentinel that survives means the options never reached it.
-              final swapped = await _awaitSwap(sentinel);
+              await applyArgs(args);
+              var swapped = await _awaitSwap(sentinel);
+              if (!swapped && await _listenerAlive(port)) {
+                // A draining branch bails its own start; push the options
+                // once more after its drain window before giving up.
+                await Future<void>.delayed(_drainWindow);
+                await applyArgs(args);
+                swapped = await _awaitSwap(sentinel);
+              }
+              sentinel.destroy();
               if (!swapped && await _listenerAlive(port)) {
                 break;
               }
@@ -162,31 +178,47 @@ class DesyncStrategyTester {
             }
           }
         }
-        if (!engineUp) {
-          final outcome = DesyncTestOutcome(
-            text: line,
-            failedSites: const [],
-            total: sites.length,
-            engineUp: false,
-          );
-          outcomes.add(outcome);
-          onProgress?.call(i, outcome);
-          continue;
-        }
-        final outcome = await _testStrategy(line, sites);
+        final outcome = engineUp
+            ? await _testStrategy(line, sites)
+            : DesyncTestOutcome(
+                text: line,
+                failedSites: const [],
+                passedOnRetry: 0,
+                total: sites.length,
+                engineUp: false,
+              );
         outcomes.add(outcome);
         onProgress?.call(i, outcome);
       }
     } finally {
       if (!listEquals(running, originalArgs)) {
-        await applyArgs(originalArgs);
+        await _restore(originalArgs);
       }
     }
     return outcomes;
   }
 
-  Future<DesyncTestOutcome> _testStrategy(String line, List<String> sites) async {
+  Future<void> _restore(List<String> originalArgs) async {
+    if (!await _listenerAlive(port)) {
+      await applyArgs(originalArgs);
+      return;
+    }
+    final sentinel = await _connect(port);
+    await applyArgs(originalArgs);
+    if (sentinel != null) {
+      await _awaitSwap(sentinel);
+      sentinel.destroy();
+    }
+  }
+
+  Future<DesyncTestOutcome> _testStrategy(
+    String line,
+    List<String> sites,
+  ) async {
     final failed = <String>[];
+    var passedOnRetry = 0;
+    var engineUp = true;
+    var consecutiveDown = 0;
     final queue = List<String>.of(sites);
     await Future.wait(
       List.generate(
@@ -194,9 +226,30 @@ class DesyncStrategyTester {
         (_) async {
           while (true) {
             final host = queue.isEmpty ? null : queue.removeAt(0);
-            if (host == null) return;
-            if (!await desyncCheckSite(host, port)) {
+            if (host == null || !engineUp) return;
+            var passed = false;
+            var onRetry = false;
+            for (var attempt = 0; attempt < _siteAttempts; attempt++) {
+              final status = await desyncCheckSite(host, port);
+              if (status == DesyncSiteStatus.engineDown) {
+                if (++consecutiveDown >= _downAbort) {
+                  engineUp = false;
+                  queue.clear();
+                  break;
+                }
+                continue;
+              }
+              consecutiveDown = 0;
+              if (status == DesyncSiteStatus.passed) {
+                passed = true;
+                onRetry = attempt > 0;
+                break;
+              }
+            }
+            if (!passed) {
               failed.add(host);
+            } else if (onRetry) {
+              passedOnRetry++;
             }
           }
         },
@@ -205,24 +258,25 @@ class DesyncStrategyTester {
     return DesyncTestOutcome(
       text: line,
       failedSites: failed,
+      passedOnRetry: passedOnRetry,
       total: sites.length,
-      engineUp: true,
+      engineUp: engineUp,
     );
   }
 
+  // A sentinel that survives the swap window means the options never
+  // reached the module at all.
   Future<bool> _awaitSwap(Socket sentinel) async {
     try {
       await sentinel.drain<void>().timeout(_swapTimeout);
+      return true;
     } on Exception {
-      sentinel.destroy();
       return false;
     }
-    sentinel.destroy();
-    return true;
   }
 
   Future<bool> _awaitListener() async {
-    final deadline = DateTime.now().add(_swapTimeout);
+    final deadline = DateTime.now().add(_listenerTimeout);
     while (DateTime.now().isBefore(deadline)) {
       if (await _listenerAlive(port)) return true;
       await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -231,15 +285,40 @@ class DesyncStrategyTester {
   }
 }
 
-/// A full check is a SOCKS5 CONNECT, a TLS handshake whose ClientHello is the
-/// censored payload, and any HTTP status line back.
-Future<bool> desyncCheckSite(String host, int port) async {
+const _siteAttempts = 2;
+
+const _siteConcurrency = 20;
+
+const _downAbort = 5;
+
+const _stepTimeout = Duration(seconds: 6);
+
+const _dialTimeout = Duration(seconds: 10);
+
+const _swapTimeout = Duration(seconds: 12);
+
+// The native side can spend 2s joining the old branch and 8s waiting out a
+// drain before the new listener binds.
+const _listenerTimeout = Duration(seconds: 15);
+
+const _drainWindow = Duration(seconds: 9);
+
+const _bodyCap = 256 * 1024;
+
+const _headerCap = 16 * 1024;
+
+const _userAgent = 'Mozilla/5.0 (Linux; Android 11; Redmi) AppleWebKit/537.36'
+    ' (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36';
+
+/// SOCKS5 CONNECT, a TLS handshake (the censored payload), then a sub-400
+/// status line whose body is not truncated below its declared length.
+Future<DesyncSiteStatus> desyncCheckSite(String host, int port) async {
   final buffer = _SocketBuffer();
   Socket? socket;
   SecureSocket? secure;
   try {
     socket = await _connect(port);
-    if (socket == null) return false;
+    if (socket == null) return DesyncSiteStatus.engineDown;
     socket.listen(
       buffer.add,
       onDone: buffer.close,
@@ -247,38 +326,102 @@ Future<bool> desyncCheckSite(String host, int port) async {
     );
     socket.add([5, 1, 0]);
     final greeting = await buffer.take(2, _stepTimeout);
-    if (greeting.length < 2 || greeting[0] != 5) return false;
+    if (greeting.length < 2 || greeting[0] != 5 || greeting[1] != 0) {
+      return DesyncSiteStatus.engineDown;
+    }
     final name = host.codeUnits;
     socket.add(<int>[
       5, 1, 0, 3, name.length, ...name, 443 >> 8, 443 & 0xff,
     ]);
-    final reply = await buffer.take(10, _dialTimeout);
-    if (reply.length < 10 || reply[0] != 5 || reply[1] != 0) return false;
+    final head = await buffer.take(4, _dialTimeout);
+    if (head.length < 4 || head[0] != 5) {
+      return DesyncSiteStatus.engineDown;
+    }
+    switch (head[3]) {
+      case 1:
+        if ((await buffer.take(6, _stepTimeout)).length < 6) {
+          return DesyncSiteStatus.blocked;
+        }
+      case 3:
+        final length = await buffer.take(1, _stepTimeout);
+        final rest = await buffer.take(length[0] + 2, _stepTimeout);
+        if (length.isEmpty || rest.length < length[0] + 2) {
+          return DesyncSiteStatus.blocked;
+        }
+      case 4:
+        if ((await buffer.take(20, _stepTimeout)).length < 20) {
+          return DesyncSiteStatus.blocked;
+        }
+      default:
+        return DesyncSiteStatus.blocked;
+    }
+    if (head[1] != 0) return DesyncSiteStatus.blocked;
+    final response = _SocketBuffer();
     secure = await SecureSocket.secure(
       socket,
       host: host,
+      supportedProtocols: const ['http/1.1'],
     ).timeout(_stepTimeout);
     socket = null;
-    secure.add(
-      'GET / HTTP/1.1\r\nHost: $host\r\nConnection: close\r\n\r\n'.codeUnits,
+    secure.listen(
+      response.add,
+      onDone: response.close,
+      onError: (Object _) => response.close(),
     );
-    final response = await secure.first.timeout(_stepTimeout);
-    return String.fromCharCodes(response.take(12)).startsWith('HTTP/');
+    secure.add(
+      'GET / HTTP/1.1\r\n'
+              'Host: $host\r\n'
+              'User-Agent: $_userAgent\r\n'
+              'Accept: */*\r\n'
+              'Connection: close\r\n'
+              '\r\n'
+          .codeUnits,
+    );
+    final header = await response.takeUntil(
+      _crlf2,
+      _headerCap,
+      _stepTimeout,
+    );
+    if (header == null) return DesyncSiteStatus.blocked;
+    final text = String.fromCharCodes(header);
+    final code = int.tryParse(
+      text
+          .split(' ')
+          .elementAtOrNull(1)
+          ?.split('\r\n')
+          .first ??
+          '',
+    );
+    if (code == null || code >= 400) return DesyncSiteStatus.blocked;
+    final declared = _contentLength(text);
+    if (declared <= 0) return DesyncSiteStatus.passed;
+    final target = declared > _bodyCap ? _bodyCap : declared;
+    while (response.length < target && !response.isClosed) {
+      await response.wait(_stepTimeout);
+    }
+    return response.length >= target
+        ? DesyncSiteStatus.passed
+        : DesyncSiteStatus.blocked;
   } on Exception {
-    return false;
+    return DesyncSiteStatus.blocked;
   } finally {
     secure?.destroy();
     socket?.destroy();
   }
 }
 
-const _siteConcurrency = 20;
+const _crlf2 = <int>[13, 10, 13, 10];
 
-const _stepTimeout = Duration(seconds: 6);
-
-const _dialTimeout = Duration(seconds: 10);
-
-const _swapTimeout = Duration(seconds: 12);
+int _contentLength(String header) {
+  for (final line in header.split('\r\n')) {
+    final index = line.indexOf(':');
+    if (index < 0) continue;
+    if (line.substring(0, index).trim().toLowerCase() == 'content-length') {
+      return int.tryParse(line.substring(index + 1).trim()) ?? 0;
+    }
+  }
+  return 0;
+}
 
 Future<Socket?> _connect(int port) async {
   try {
@@ -303,6 +446,10 @@ class _SocketBuffer {
   final _waiters = <Completer<void>>[];
   var _closed = false;
 
+  int get length => _data.length;
+
+  bool get isClosed => _closed;
+
   void add(List<int> bytes) {
     _data.addAll(bytes);
     _resolve();
@@ -319,14 +466,50 @@ class _SocketBuffer {
     }
   }
 
+  Future<void> wait(Duration timeout) {
+    if (_data.isNotEmpty || _closed) return Future.value();
+    final completer = Completer<void>();
+    _waiters.add(completer);
+    return completer.future.timeout(timeout);
+  }
+
   Future<Uint8List> take(int count, Duration timeout) async {
     while (_data.length < count && !_closed) {
-      final completer = Completer<void>();
-      _waiters.add(completer);
-      await completer.future.timeout(timeout);
+      await wait(timeout);
     }
     final taken = Uint8List.fromList(_data.take(count).toList());
     _data.removeRange(0, taken.length);
     return taken;
+  }
+
+  /// Reads up to [cap] bytes until [pattern]; null on close or timeout.
+  Future<Uint8List?> takeUntil(
+    List<int> pattern,
+    int cap,
+    Duration timeout,
+  ) async {
+    while (!_closed) {
+      final index = _indexOf(pattern);
+      if (index >= 0) {
+        return Uint8List.fromList(_data.take(index + pattern.length).toList());
+      }
+      if (_data.length > cap) return null;
+      await wait(timeout);
+    }
+    return null;
+  }
+
+  int _indexOf(List<int> pattern) {
+    for (var i = 0; i + pattern.length <= _data.length; i++) {
+      var matched = true;
+      for (var j = 0; j < pattern.length; j++) {
+        if (_data[i + j] != pattern[j]) {
+          matched = false;
+          break;
+        }
+      }
+      if (matched) return i;
+    }
+    return -1;
   }
 }

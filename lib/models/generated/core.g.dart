@@ -123,6 +123,7 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
   desyncCacheTtl:
       (json['desyncCacheTtl'] as num?)?.toInt() ?? defaultDesyncCacheTtl,
   desyncCacheEnabled: json['desyncCacheEnabled'] as bool? ?? true,
+  desyncTesting: json['desyncTesting'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
@@ -145,6 +146,7 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'desyncStrategy': instance.desyncStrategy,
       'desyncCacheTtl': instance.desyncCacheTtl,
       'desyncCacheEnabled': instance.desyncCacheEnabled,
+      'desyncTesting': instance.desyncTesting,
     };
 
 _InitParams _$InitParamsFromJson(Map<String, dynamic> json) => _InitParams(

@@ -100,10 +100,10 @@ class Migration {
         final hasPlainTextDavPassword =
             storedDavPassword != null &&
             storedDavPassword == config.davProps?.password;
-        if (hasPlainTextDavPassword && !await _store.saveConfig(config)) {
+          if (hasPlainTextDavPassword && !await _store.saveConfig(config)) {
           throw StateError('Failed to obfuscate the legacy WebDAV password');
         }
-        return config;
+        return _recoverDesyncTester(this, config);
       }
     }
 
@@ -154,8 +154,28 @@ class Migration {
       await _store.clearClashConfig();
     }
     await _store.setVersion(currentVersion);
-    return config;
+    return _recoverDesyncTester(this, config);
   }
+}
+
+// A stored testRunning means the strategy tester died mid-run and left the
+// engine on some battery preset; put the user's strategy back and clear the
+// crash markers. An unsaved recovery simply retries on the next start.
+Future<Config> _recoverDesyncTester(
+  Migration migration,
+  Config config,
+) async {
+  final desync = config.desyncProps;
+  if (!desync.testRunning) return config;
+  final recovered = config.copyWith(
+    desyncProps: desync.copyWith(
+      strategyArgs: desync.testRestoreArgs ?? desync.strategyArgs,
+      testRunning: false,
+      testRestoreArgs: null,
+    ),
+  );
+  await migration._store.saveConfig(recovered);
+  return recovered;
 }
 
 bool _isV0(Map<String, Object?>? configMap) =>

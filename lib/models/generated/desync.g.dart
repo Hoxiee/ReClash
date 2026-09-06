@@ -48,6 +48,12 @@ _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
           ?.map((e) => e as String)
           .toList() ??
       defaultDesyncTestSiteLists,
+  testRunning: json['testRunning'] as bool? ?? false,
+  testRestoreArgs:
+      (json['testRestoreArgs'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      null,
 );
 
 Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
@@ -64,6 +70,8 @@ Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
       'cacheTtl': instance.cacheTtl,
       'savedStrategies': instance.savedStrategies,
       'testSiteLists': instance.testSiteLists,
+      'testRunning': instance.testRunning,
+      'testRestoreArgs': instance.testRestoreArgs,
     };
 
 const _$DesyncCategoryEnumMap = {

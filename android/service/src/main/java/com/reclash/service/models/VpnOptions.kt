@@ -31,6 +31,7 @@ data class VpnOptions(
     val desyncStrategy: List<String> = emptyList(),
     val desyncCacheTtl: Int = 0,
     val desyncCacheEnabled: Boolean = true,
+    val desyncTesting: Boolean = false,
 )
 
 data class CIDR(

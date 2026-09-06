@@ -240,6 +240,7 @@ SharedState sharedState(Ref ref) {
       desyncStrategy: desyncSetting.strategyArgs,
       desyncCacheTtl: desyncSetting.cacheTtl,
       desyncCacheEnabled: desyncSetting.cacheEnabled,
+      desyncTesting: desyncSetting.testRunning,
     ),
   );
 }

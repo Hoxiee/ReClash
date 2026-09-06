@@ -1012,6 +1012,30 @@
   "desyncArgs": "エンジン引数",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "引用符が閉じられていません",
+  "desyncArgsUnknownFlag": "不明なオプション {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} はアプリが設定するため除外されます",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} には値が必要です",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} はオプションではありません",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncDefaultName": "デフォルトのラダー",
   "desyncSaveCurrent": "現在のものを保存",
   "desyncStrategyNameHint": "戦略名",

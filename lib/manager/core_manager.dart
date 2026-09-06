@@ -85,7 +85,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
           enabled: state.enabled,
           onlyDpi: state.onlyDpi,
           port: state.port,
-          categories: state.categories,
+          // A new List with the same categories is not a new selection.
+          categories: state.categories.map((e) => e.name).join(','),
           forceTcp: state.forceTcp,
         ),
       ),

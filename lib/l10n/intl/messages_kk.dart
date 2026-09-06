@@ -40,130 +40,138 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(label) => "Бұл ${label} жойылсын ба?";
 
-  static String m8(count) =>
-      "${Intl.plural(count, zero: 'аргумент жоқ', other: '${count} аргумент')}";
+  static String m8(token) => "${token} қолданба орнатады, алынып тасталады";
 
   static String m9(count) =>
+      "${Intl.plural(count, zero: 'аргумент жоқ', other: '${count} аргумент')}";
+
+  static String m10(token) => "${token} мән қажет";
+
+  static String m11(token) => "${token} опция емес";
+
+  static String m12(token) => "Белгісіз опция ${token}";
+
+  static String m13(count) =>
       "${Intl.plural(count, one: '1 домен', other: '${count} домен')}";
 
-  static String m10(count) => "Дайын: ${count} стратегия сынаалды";
+  static String m14(count) => "Дайын: ${count} стратегия сынаалды";
 
-  static String m11(count) =>
+  static String m15(count) =>
       "Барлық белгілі стратегияны движок арқылы ${count} хостқа жеке сынаайды; аяқталғаннан кейін ағымдағы стратегия қалпына келеді";
 
-  static String m12(index, total) => "Тестіленуде ${index}, барлығы ${total}";
+  static String m16(index, total) => "Тестіленуде ${index}, барлығы ${total}";
 
-  static String m13(passed, total) => "${total} хосттың ${passed} жауап береді";
+  static String m17(passed, total) => "${total} хосттың ${passed} жауап береді";
 
-  static String m14(label) => "${label} туралы мәліметтер";
+  static String m18(label) => "${label} туралы мәліметтер";
 
-  static String m15(label) => "${label} бос болмауы керек";
+  static String m19(label) => "${label} бос болмауы керек";
 
-  static String m16(count) =>
+  static String m20(count) =>
       "${Intl.plural(count, one: '1 жазба', other: '${count} жазба')}";
 
-  static String m17(label) => "${label} бұрыннан бар";
+  static String m21(label) => "${label} бұрыннан бар";
 
-  static String m18(name) => "${name} ең соңғы нұсқада тұр";
+  static String m22(name) => "${name} ең соңғы нұсқада тұр";
 
-  static String m19(name) => "${name} жаңартылды";
+  static String m23(name) => "${name} жаңартылды";
 
-  static String m20(time) => "${time} бұрын";
+  static String m24(time) => "${time} бұрын";
 
-  static String m21(count) =>
+  static String m25(count) =>
       "${Intl.plural(count, one: '1 сағат бұрын', other: '${count} сағат бұрын')}";
 
-  static String m22(count) =>
+  static String m26(count) =>
       "${Intl.plural(count, one: '1 сағат', other: '${count} сағат')}";
 
-  static String m23(target) => "${target} — жарамсыз саясат";
+  static String m27(target) => "${target} — жарамсыз саясат";
 
-  static String m24(proxyName) => "${proxyName} — жарамсыз прокси";
+  static String m28(proxyName) => "${proxyName} — жарамсыз прокси";
 
-  static String m25(providerName) =>
+  static String m29(providerName) =>
       "${providerName} — жарамсыз прокси провайдері";
 
-  static String m26(subRule) => "${subRule} — жарамсыз SUB_RULE";
+  static String m30(subRule) => "${subRule} — жарамсыз SUB_RULE";
 
-  static String m27(appName) =>
+  static String m31(appName) =>
       "1. Жүйелік баптауларды ашып, «Жекелік және қауіпсіздік» бөліміне өтіңіз\n2. Орналасу қызметтерін таңдаңыз\n3. Тізімнен ${appName} қолданбасын тауып, құсбелгі қойыңыз\n\nДайын болған соң қолданбаға оралыңыз. Ынтымақтастығыңыз үшін рахмет.";
 
-  static String m28(label, max) =>
+  static String m32(label, max) =>
       "${label} ең көбі ${max} таңбадан аспауы керек";
 
-  static String m29(count) =>
+  static String m33(count) =>
       "${Intl.plural(count, one: '1 минут бұрын', other: '${count} минут бұрын')}";
 
-  static String m30(count) =>
+  static String m34(count) =>
       "${Intl.plural(count, one: '1 ай бұрын', other: '${count} ай бұрын')}";
 
-  static String m31(label) => "Әзірге ${label} жоқ";
+  static String m35(label) => "Әзірге ${label} жоқ";
 
-  static String m32(label) => "${label} сан болуы керек";
+  static String m36(label) => "${label} сан болуы керек";
 
-  static String m33(label) => "${label} 1024 пен 49151 аралығында болуы керек";
+  static String m37(label) => "${label} 1024 пен 49151 аралығында болуы керек";
 
-  static String m34(count) =>
+  static String m38(count) =>
       "${Intl.plural(count, one: '1 прокси', other: '${count} прокси')}";
 
-  static String m35(count) =>
+  static String m39(count) =>
       "${Intl.plural(count, one: '1 ереже', other: '${count} ереже')}";
 
-  static String m36(darkAt, lightAt) => "Қараңғы режим: ${darkAt} — ${lightAt}";
+  static String m40(darkAt, lightAt) => "Қараңғы режим: ${darkAt} — ${lightAt}";
 
-  static String m37(count) =>
+  static String m41(count) =>
       "${Intl.plural(count, one: '1 секунд', other: '${count} секунд')}";
 
-  static String m38(count) => "${count} таңдалды";
+  static String m42(count) => "${count} таңдалды";
 
-  static String m39(alive, total) =>
+  static String m43(alive, total) =>
       "Қазір қолжетімді серверлер: ${alive}/${total}";
 
-  static String m40(band) => "жолақ ${band}";
+  static String m44(band) => "жолақ ${band}";
 
-  static String m41(bands) => "Жолақтар: ${bands}";
+  static String m45(bands) => "Жолақтар: ${bands}";
 
-  static String m42(count) => "${count} сәтсіздіктен кейін салқындап тұр";
+  static String m46(count) => "${count} сәтсіздіктен кейін салқындап тұр";
 
-  static String m43(answered, total) => "${answered} / ${total} жауап берді";
+  static String m47(answered, total) => "${answered} / ${total} жауап берді";
 
-  static String m44(seconds) => "${seconds} с қалды";
+  static String m48(seconds) => "${seconds} с қалды";
 
-  static String m45(count) => "Қатар келген ${count} сәтсіздік";
+  static String m49(count) => "Қатар келген ${count} сәтсіздік";
 
-  static String m46(measured, total) => "өлшенді: ${measured} / ${total}";
+  static String m50(measured, total) => "өлшенді: ${measured} / ${total}";
 
-  static String m47(preset) => "${preset} · өзгертілді";
+  static String m51(preset) => "${preset} · өзгертілді";
 
-  static String m48(left, cap) =>
+  static String m52(left, cap) =>
       "Осы сағатта қалған өлшеулер: ${left} / ${cap}";
 
-  static String m49(seconds) => "${seconds} с";
+  static String m53(seconds) => "${seconds} с";
 
-  static String m50(eligible, total) =>
+  static String m54(eligible, total) =>
       "${eligible} / ${total} қолдануға жарамды";
 
-  static String m51(eligible, total, blocked) =>
+  static String m55(eligible, total, blocked) =>
       "${total} сервердің ішінен ${eligible} өтті, ${blocked} ұсталды";
 
-  static String m52(from, to) => "${from} → ${to}";
+  static String m56(from, to) => "${from} → ${to}";
 
-  static String m53(time) => "${time} бұрын ауыстырылды";
+  static String m57(time) => "${time} бұрын ауыстырылды";
 
-  static String m54(count) => "${count} сервер";
+  static String m58(count) => "${count} сервер";
 
-  static String m55(host) => "Провайдер ${host} мекенжайына көшкен";
-
-  static String m56(count) =>
-      "${Intl.plural(count, one: 'Жазылыс мерзімі ертең аяқталады', other: 'Жазылыс мерзімі ${count} күннен кейін аяқталады')}";
-
-  static String m57(value) => "Провайдер ${value} ұсынады";
-
-  static String m58(total) => "${total} ішінен бос";
-
-  static String m59(label) => "${label} URL болуы керек";
+  static String m59(host) => "Провайдер ${host} мекенжайына көшкен";
 
   static String m60(count) =>
+      "${Intl.plural(count, one: 'Жазылыс мерзімі ертең аяқталады', other: 'Жазылыс мерзімі ${count} күннен кейін аяқталады')}";
+
+  static String m61(value) => "Провайдер ${value} ұсынады";
+
+  static String m62(total) => "${total} ішінен бос";
+
+  static String m63(label) => "${label} URL болуы керек";
+
+  static String m64(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -518,13 +526,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "destinationIPASN": MessageLookupByLibrary.simpleMessage("Нысан IP ASN"),
     "desync": MessageLookupByLibrary.simpleMessage("DPI айналып өту"),
     "desyncArgs": MessageLookupByLibrary.simpleMessage("Движок аргументтері"),
-    "desyncArgsCount": m8,
+    "desyncArgsAppOwnedFlag": m8,
+    "desyncArgsCount": m9,
     "desyncArgsHint": MessageLookupByLibrary.simpleMessage(
       "-A torst,conn -L s,o --split 1",
     ),
+    "desyncArgsMissingValue": m10,
+    "desyncArgsPositional": m11,
     "desyncArgsQuoteError": MessageLookupByLibrary.simpleMessage(
       "Жабылмаған тырнақша",
     ),
+    "desyncArgsUnknownFlag": m12,
     "desyncCache": MessageLookupByLibrary.simpleMessage("Стратегиялар кэші"),
     "desyncCacheDesc": MessageLookupByLibrary.simpleMessage(
       "Таңдалған стратегиялар желілер бойынша сақталады",
@@ -556,8 +568,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Тоқтатылды: стратегиялар движокқа жетпей қалды",
     ),
     "desyncTestDomains": MessageLookupByLibrary.simpleMessage("Тест domenдері"),
-    "desyncTestDomainsCount": m9,
-    "desyncTestDone": m10,
+    "desyncTestDomainsCount": m13,
+    "desyncTestDone": m14,
     "desyncTestEngineCrashed": MessageLookupByLibrary.simpleMessage(
       "Движок осы стратегияда құлады",
     ),
@@ -567,12 +579,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncTestFailedTitle": MessageLookupByLibrary.simpleMessage(
       "Бұл стратегиядан өтпеген хосттар",
     ),
-    "desyncTestHint": m11,
+    "desyncTestHint": m15,
     "desyncTestNoLists": MessageLookupByLibrary.simpleMessage(
       "Төменнен кемінде бір домен тізімін таңдаңыз",
     ),
-    "desyncTestProgress": m12,
-    "desyncTestScore": m13,
+    "desyncTestProgress": m16,
+    "desyncTestScore": m17,
     "desyncTestSection": MessageLookupByLibrary.simpleMessage(
       "Стратегия тесті",
     ),
@@ -584,7 +596,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncTtl28Hours": MessageLookupByLibrary.simpleMessage("28 сағат"),
     "desyncTtlHour": MessageLookupByLibrary.simpleMessage("1 сағат"),
     "desyncTtlWeek": MessageLookupByLibrary.simpleMessage("7 күн"),
-    "details": m14,
+    "details": m18,
     "detectionTip": MessageLookupByLibrary.simpleMessage(
       "Үшінші тарап API-іне сүйенеді; нәтиже — тек ақпарат",
     ),
@@ -631,11 +643,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Прокси тобын өңдеу",
     ),
     "editRule": MessageLookupByLibrary.simpleMessage("Ережені өңдеу"),
-    "emptyTip": m15,
+    "emptyTip": m19,
     "en": MessageLookupByLibrary.simpleMessage("Ағылшынша"),
     "enterManually": MessageLookupByLibrary.simpleMessage("Қолмен енгізу"),
     "entries": MessageLookupByLibrary.simpleMessage(" жазба"),
-    "entriesCount": m16,
+    "entriesCount": m20,
     "exclude": MessageLookupByLibrary.simpleMessage(
       "Соңғы қолданбалардан жасыру",
     ),
@@ -646,7 +658,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проксилерді алып тастау сүзгісі",
     ),
     "excludeType": MessageLookupByLibrary.simpleMessage("Алып тастау түрі"),
-    "existsTip": m17,
+    "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Шығу"),
     "expand": MessageLookupByLibrary.simpleMessage("Қалыпты"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Күтілетін күй"),
@@ -701,8 +713,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "geoOptions": MessageLookupByLibrary.simpleMessage("Geo баптаулары"),
     "geoResources": MessageLookupByLibrary.simpleMessage("Geo ресурстары"),
-    "geoSkipped": m18,
-    "geoUpdated": m19,
+    "geoSkipped": m22,
+    "geoUpdated": m23,
     "geodataLoader": MessageLookupByLibrary.simpleMessage("Geo: жад үнемдеу"),
     "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
       "Geo деректерін жадты үнемдейтін режимде жүктеу",
@@ -754,7 +766,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "heroReconnectingHint": MessageLookupByLibrary.simpleMessage(
       "Туннель қалпына келтірілуде",
     ),
-    "heroRoutingAgo": m20,
+    "heroRoutingAgo": m24,
     "heroRoutingStub": MessageLookupByLibrary.simpleMessage(
       "Смарт бағыттау өшірулі",
     ),
@@ -779,8 +791,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hour": MessageLookupByLibrary.simpleMessage("сағат"),
     "hours": MessageLookupByLibrary.simpleMessage("сағат"),
-    "hoursAgo": m21,
-    "hoursCount": m22,
+    "hoursAgo": m25,
+    "hoursCount": m26,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("сағат"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("сағат"),
     "icon": MessageLookupByLibrary.simpleMessage("Таңбаша"),
@@ -854,10 +866,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Жарамсыз сақтық көшірме файлы",
     ),
-    "invalidPolicy": m23,
-    "invalidProxy": m24,
-    "invalidProxyProvider": m25,
-    "invalidSubRule": m26,
+    "invalidPolicy": m27,
+    "invalidProxy": m28,
+    "invalidProxyProvider": m29,
+    "invalidSubRule": m30,
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/CIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "Қосулы кезде IPv6 трафигін қабылдауға болады",
@@ -904,7 +916,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locationPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Жүйе Wi-Fi атауын оқу үшін орналасу рұқсатын талап етеді. Android-де «Әрқашан рұқсат ету» опциясын таңдаңыз, әйтпесе қолданба фонда жүргенде Wi-Fi атауын оқи алмайды.",
     ),
-    "locationPermissionGuide": m27,
+    "locationPermissionGuide": m31,
     "locationPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Орналасу рұқсаты қажет",
     ),
@@ -938,7 +950,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage(
       "Макс. сәтсіздік саны",
     ),
-    "maxLengthTip": m28,
+    "maxLengthTip": m32,
     "maximize": MessageLookupByLibrary.simpleMessage("Үлкейту"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Жад ақпараты"),
     "messageTest": MessageLookupByLibrary.simpleMessage("Хабарлама тесті"),
@@ -953,13 +965,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жүйенің әдепкі шығу әрекетін ауыстырады",
     ),
     "minute": MessageLookupByLibrary.simpleMessage("минут"),
-    "minutesAgo": m29,
+    "minutesAgo": m33,
     "minutesGenitive": MessageLookupByLibrary.simpleMessage("минут"),
     "minutesPlural": MessageLookupByLibrary.simpleMessage("минут"),
     "mixedPort": MessageLookupByLibrary.simpleMessage("Аралас порт"),
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
-    "monthsAgo": m30,
+    "monthsAgo": m34,
     "more": MessageLookupByLibrary.simpleMessage("Тағы"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Бірнеше мәнді үтірмен ажыратыңыз",
@@ -1022,8 +1034,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Әзірге профильдер жоқ. Алдымен профиль қосыңыз.",
     ),
-    "nullTip": m31,
-    "numberTip": m32,
+    "nullTip": m35,
+    "numberTip": m36,
     "off": MessageLookupByLibrary.simpleMessage("Өшірулі"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Таңбаша ғана"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -1102,7 +1114,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Басқа порт енгізіңіз",
     ),
-    "portTip": m33,
+    "portTip": m37,
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH үшін HTTP/3-ті артық көру",
     ),
@@ -1139,7 +1151,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providers": MessageLookupByLibrary.simpleMessage("Сыртқы ресурстар"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
-    "proxiesCount": m34,
+    "proxiesCount": m38,
     "proxiesEmpty": MessageLookupByLibrary.simpleMessage("Проксилер бос"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Прокси тізбегі"),
     "proxyDetectedAbnormal": MessageLookupByLibrary.simpleMessage(
@@ -1376,13 +1388,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleSet": MessageLookupByLibrary.simpleMessage("Ереже жинағы"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Ереже нысаны"),
     "rules": MessageLookupByLibrary.simpleMessage("Ережелер"),
-    "rulesCount": m35,
+    "rulesCount": m39,
     "save": MessageLookupByLibrary.simpleMessage("Сақтау"),
     "saveChanges": MessageLookupByLibrary.simpleMessage(
       "Өзгерістер сақталсын ба?",
     ),
     "schedule": MessageLookupByLibrary.simpleMessage("Кесте бойынша"),
-    "scheduleDesc": m36,
+    "scheduleDesc": m40,
     "script": MessageLookupByLibrary.simpleMessage("Скрипт"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Скрипт режимі: сыртқы кеңейту скрипттері арқылы конфигурацияны бір шертумен қайта жазады",
@@ -1392,7 +1404,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "search": MessageLookupByLibrary.simpleMessage("Іздеу"),
     "seconds": MessageLookupByLibrary.simpleMessage("секунд"),
-    "secondsCount": m37,
+    "secondsCount": m41,
     "selectAll": MessageLookupByLibrary.simpleMessage("Барлығын таңдау"),
     "selectMatchTarget": MessageLookupByLibrary.simpleMessage(
       "MATCH-TARGET нысанын таңдау",
@@ -1413,7 +1425,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ішкі ережені таңдаңыз",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Таңдалған"),
-    "selectedCountTitle": m38,
+    "selectedCountTitle": m42,
     "sendDeviceIdentity": MessageLookupByLibrary.simpleMessage(
       "Құрылғы идентификаторын жіберу",
     ),
@@ -1501,20 +1513,20 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сенімді желілерде VPN автоматты түрде кідіртіледі",
     ),
     "smartRouting": MessageLookupByLibrary.simpleMessage("Смарт бағыттау"),
-    "smartRoutingAliveCount": m39,
+    "smartRoutingAliveCount": m43,
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "Барлық серверлер",
     ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Автоматты режимге қайту",
     ),
-    "smartRoutingBandLabel": m40,
-    "smartRoutingBands": m41,
+    "smartRoutingBandLabel": m44,
+    "smartRoutingBands": m45,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Іс-әрекет"),
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Ағымдағы сервер тізімінде жоқ",
     ),
-    "smartRoutingBlockCooling": m42,
+    "smartRoutingBlockCooling": m46,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Мұндағы тексеруден өтпеді",
     ),
@@ -1542,7 +1554,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage(
       "Канарейка адрестері",
     ),
-    "smartRoutingCanariesAnswered": m43,
+    "smartRoutingCanariesAnswered": m47,
     "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
       "Жергілікті канарейкалар",
     ),
@@ -1573,7 +1585,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "Әлі сервер таңдалған жоқ",
     ),
-    "smartRoutingCoolFor": m44,
+    "smartRoutingCoolFor": m48,
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Әр серверді тексеру",
     ),
@@ -1643,7 +1655,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "Жүйе интернет байланысын растады",
     ),
-    "smartRoutingFails": m45,
+    "smartRoutingFails": m49,
     "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage(
       "Байланыс жоқ",
     ),
@@ -1758,7 +1770,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("UDP жоқ"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m46,
+    "smartRoutingNodesMeasured": m50,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "Жалпы мақсаттағы",
     ),
@@ -1778,11 +1790,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Дайын баптаулар",
     ),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Қытай"),
-    "smartRoutingPresetEdited": m47,
+    "smartRoutingPresetEdited": m51,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Иран"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Өшірулі"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Ресей"),
-    "smartRoutingProbeBudget": m48,
+    "smartRoutingProbeBudget": m52,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Өлшеу"),
     "smartRoutingRankOrder": MessageLookupByLibrary.simpleMessage(
       "Реттеу реті",
@@ -1858,7 +1870,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Сервер таңдалуда…",
     ),
-    "smartRoutingSeconds": m49,
+    "smartRoutingSeconds": m53,
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
       "Серверлер",
     ),
@@ -1868,11 +1880,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingSectionNetwork": MessageLookupByLibrary.simpleMessage("Желі"),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("Шешім"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Серверлер"),
-    "smartRoutingServersCount": m50,
+    "smartRoutingServersCount": m54,
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Кім өтетінін шешті",
     ),
-    "smartRoutingStepAdmitBody": m51,
+    "smartRoutingStepAdmitBody": m55,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Осында тоқтады",
     ),
@@ -1895,9 +1907,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Ең төмен кідіріс",
     ),
-    "smartRoutingSwitchLine": m52,
+    "smartRoutingSwitchLine": m56,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("ауыстырылды"),
-    "smartRoutingSwitchedAgo": m53,
+    "smartRoutingSwitchedAgo": m57,
     "smartRoutingTechnical": MessageLookupByLibrary.simpleMessage(
       "Техникалық мәлімет",
     ),
@@ -1922,7 +1934,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "Бір фондық тексеру қанша серверді өлшейді",
     ),
-    "smartRoutingWaveNodes": m54,
+    "smartRoutingWaveNodes": m58,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Байланыс тексерісі",
     ),
@@ -1979,11 +1991,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
     ),
-    "subscriptionDomainMoved": m55,
+    "subscriptionDomainMoved": m59,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі аяқталды",
     ),
-    "subscriptionExpiresInDays": m56,
+    "subscriptionExpiresInDays": m60,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Жазылыс мерзімі бүгін аяқталады",
     ),
@@ -1996,7 +2008,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Жазылыс ескертулері",
     ),
-    "subscriptionProviderInterval": m57,
+    "subscriptionProviderInterval": m61,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Бұл жазылыстағы түйіндердің ешбіріне қосыла алмайды — басқа клиент пішімін қолданып көріңіз",
     ),
@@ -2053,7 +2065,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Қолшам"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Жалпы трафик"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
-    "trafficFreeOfTotal": m58,
+    "trafficFreeOfTotal": m62,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Сенімді желілер"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -2141,7 +2153,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Тоқтатылған болса қосады, істеп тұрса ажыратады",
     ),
-    "urlTip": m59,
+    "urlTip": m63,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hosts файлын қолдану"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Жүйелік hosts файлын қолдану",
@@ -2181,7 +2193,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ядро әлі бақылау тақтасын қызмет етпей тұр",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ақ тізім режимі"),
-    "yearsAgo": m60,
+    "yearsAgo": m64,
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };
 }

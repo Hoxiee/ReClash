@@ -79,6 +79,23 @@ class ByeDpiArgsTest {
     }
 
     @Test
+    fun `app-owned flags are stripped from the strategy`() {
+        val dropped = mutableListOf<String>()
+        val stripped = stripAppOwnedArgs(
+            listOf("-d1", "-p", "9050", "-i=0.0.0.0", "--port=1234", "-yX", "-s1"),
+            dropped::add,
+        )
+        assertEquals(listOf("-d1", "-s1"), stripped)
+        assertEquals(listOf("-p", "-i=0.0.0.0", "--port=1234", "-yX"), dropped)
+    }
+
+    @Test
+    fun `help and version never reach the engine`() {
+        val stripped = stripAppOwnedArgs(listOf("-h", "-d1", "--help", "--version"))
+        assertEquals(listOf("-d1"), stripped)
+    }
+
+    @Test
     fun `backoff grows and is capped`() {
         assertEquals(1_000L, ByeDpiPolicy.backoffMs(0))
         assertEquals(2_000L, ByeDpiPolicy.backoffMs(1))

@@ -1151,6 +1151,30 @@
   "desyncArgsCount": "{count, plural, =0{argument yoʻq} other{{count} ta argument}}",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "Yopilmagan qoʻshtirnoq",
+  "desyncArgsUnknownFlag": "Nomaʼlum parametr {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} ilova tomonidan beriladi, tashlab yuboriladi",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} qiymat talab qiladi",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} parametr emas",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncCache": "Strategiyalar keshi",
   "desyncCacheDesc": "Tanlangan strategiyalar tarmoqlar boʻyicha saqlanadi",
   "desyncCacheTtl": "Saqlash muddati",

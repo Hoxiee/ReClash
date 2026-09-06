@@ -22,11 +22,13 @@ internal class ByeDpiRuntime(
     private var receiver: ByeDpiProtect? = null
     private var receiverThread: Thread? = null
 
-    @Synchronized override fun start(args: List<String>) {
+    // False means the engine is not running these args: either the old
+    // branch refused to drain, or the branch died on launch.
+    @Synchronized override fun start(args: List<String>): Boolean {
         branch?.join(BRANCH_DRAIN_MS)
         if (branch?.isAlive == true) {
             log("Desync branch still draining, keeping the previous run")
-            return
+            return false
         }
         openReceiver()
         val dns = underlyingDns()
@@ -44,6 +46,7 @@ internal class ByeDpiRuntime(
                 branch = null
             }
         }
+        return branch != null
     }
 
     @Synchronized override fun stop() {

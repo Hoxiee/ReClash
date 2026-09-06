@@ -74,18 +74,22 @@ void main() {
     const up = DesyncTestOutcome(
       text: '-d1',
       failedSites: ['youtu.be', 'youtube.com'],
+      passedOnRetry: 4,
       total: 83,
       engineUp: true,
     );
     expect(up.passed, 81);
+    expect(up.score, closeTo(79 / 83, 1e-9));
 
     const crashed = DesyncTestOutcome(
       text: '-d1',
       failedSites: [],
+      passedOnRetry: 0,
       total: 83,
       engineUp: false,
     );
     expect(crashed.passed, 0);
+    expect(crashed.score, 0);
     expect(crashed.total, 83);
   });
 }

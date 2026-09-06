@@ -12,8 +12,15 @@ const _ttlChoices = [3600, 43200, 100800, 604800];
 /// The strategy is a raw ciadpi argument line, ByeByeDPI-style: the app manages
 /// the listener, the per-network cache and the loop break, everything else is
 /// the user's to write.
-class DesyncView extends ConsumerWidget {
+class DesyncView extends ConsumerStatefulWidget {
   const DesyncView({super.key});
+
+  @override
+  ConsumerState<DesyncView> createState() => _DesyncViewState();
+}
+
+class _DesyncViewState extends ConsumerState<DesyncView> {
+  var _testing = false;
 
   void _update(WidgetRef ref, DesyncProps Function(DesyncProps) f) {
     ref.read(desyncSettingProvider.notifier).update(f);
@@ -79,7 +86,8 @@ class DesyncView extends ConsumerWidget {
       };
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     final defaultActive = listEquals(props.strategyArgs, desyncDefaultStrategy);
@@ -95,7 +103,7 @@ class DesyncView extends ConsumerWidget {
             ),
           ),
         ],
-        items: [
+        items: _locked([
           DecorationListItem.open(
             title: Text(appLocalizations.desyncArgs),
             subtitle: Text(
@@ -142,12 +150,14 @@ class DesyncView extends ConsumerWidget {
                 (state) => state.copyWith(strategyArgs: strategy.args),
               ),
             ),
-        ],
+        ]),
       ),
-      const _DesyncTester(),
+      _DesyncTester(
+        onRunningChanged: (value) => setState(() => _testing = value),
+      ),
       SettingSection.sliver(
         title: appLocalizations.desyncEngine,
-        items: [
+        items: _locked([
           DecorationListItem.input(
             title: Text(appLocalizations.port),
             subtitle: Text(props.port.toString()),
@@ -199,12 +209,12 @@ class DesyncView extends ConsumerWidget {
                 (state) => state.copyWith(cacheTtl: value as int),
               ),
             ),
-        ],
+        ]),
       ),
       SettingSection.sliver(
         title: appLocalizations.desyncRouting,
         bottom: 24,
-        items: [
+        items: _locked([
           for (final category in DesyncCategory.values)
             DecorationListItem.toggle(
               title: Text(_categoryLabel(category)),
@@ -223,7 +233,7 @@ class DesyncView extends ConsumerWidget {
             onChanged: (value) =>
                 _update(ref, (state) => state.copyWith(forceTcp: value)),
           ),
-        ],
+        ]),
       ),
     ];
     return CommonScaffold(
@@ -233,6 +243,12 @@ class DesyncView extends ConsumerWidget {
       ),
     );
   }
+
+  // The tester drives the strategy field through the provider; the rest of
+  // the page must not fight it from under the battery.
+  List<Widget> _locked(List<Widget> items) => _testing
+      ? items.map((item) => IgnorePointer(child: item)).toList()
+      : items;
 
   String _categoryLabel(DesyncCategory category) => switch (category) {
     DesyncCategory.youtube => 'YouTube',
@@ -287,6 +303,27 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
           );
           return false;
         }
+        final issues = desyncValidateArgs(args);
+        if (issues.isNotEmpty) {
+          await dialogs.showMessage(
+            title: appLocalizations.desyncArgs,
+            message: TextSpan(
+              text: issues
+                  .map((issue) => switch (issue.kind) {
+                    DesyncArgsIssueKind.unknownFlag =>
+                      appLocalizations.desyncArgsUnknownFlag(issue.token),
+                    DesyncArgsIssueKind.appOwnedFlag =>
+                      appLocalizations.desyncArgsAppOwnedFlag(issue.token),
+                    DesyncArgsIssueKind.missingValue =>
+                      appLocalizations.desyncArgsMissingValue(issue.token),
+                    DesyncArgsIssueKind.positional =>
+                      appLocalizations.desyncArgsPositional(issue.token),
+                  })
+                  .join('\n'),
+            ),
+          );
+          return false;
+        }
         if (context.mounted) {
           Navigator.of(context).pop(args);
         }
@@ -322,7 +359,9 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
 /// Runs the preset battery against the live engine and lets the user apply a
 /// winner; the strategy in force when the test started is restored at the end.
 class _DesyncTester extends ConsumerStatefulWidget {
-  const _DesyncTester();
+  const _DesyncTester({required this.onRunningChanged});
+
+  final ValueChanged<bool> onRunningChanged;
 
   @override
   ConsumerState<_DesyncTester> createState() => _DesyncTesterState();
@@ -366,22 +405,39 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
       _index = 0;
       _outcomes.clear();
     });
-    final outcomes = await tester.run(
+    widget.onRunningChanged(true);
+    // Persisted so a crash mid-battery restores the strategy instead of
+    // leaving the engine on a random preset.
+    notifier.update(
+      (state) => state.copyWith(
+        testRunning: true,
+        testRestoreArgs: props.strategyArgs,
+      ),
+    );
+    List<DesyncTestOutcome> outcomes;
+    try {
+      outcomes = await tester.run(
       originalArgs: props.strategyArgs,
       sites: sites,
-      onProgress: (index, outcome) {
-        if (!mounted) return;
-        setState(() {
-          _index = index + 1;
-          _outcomes.add(outcome);
-        });
-      },
-    );
+        onProgress: (index, outcome) {
+          if (!mounted) return;
+          setState(() {
+            _index = index + 1;
+            _outcomes.add(outcome);
+          });
+        },
+      );
+    } finally {
+      notifier.update(
+        (state) => state.copyWith(testRunning: false, testRestoreArgs: null),
+      );
+    }
     if (!mounted) return;
     setState(() {
       _running = false;
       _aborted = outcomes.length < desyncTestPresets.length && !_stoppedByUser;
     });
+    widget.onRunningChanged(false);
   }
 
   void _handleStop() {
@@ -415,9 +471,7 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
         : appLocalizations.desyncTestHint(sites.length);
     final outcomes = _running || _outcomes.length < 2
         ? _outcomes
-        : [..._outcomes]..sort(
-            (a, b) => b.passed.compareTo(a.passed),
-          );
+        : [..._outcomes]..sort((a, b) => b.score.compareTo(a.score));
     return SettingSection.sliver(
       title: appLocalizations.desyncTestSection,
       items: [

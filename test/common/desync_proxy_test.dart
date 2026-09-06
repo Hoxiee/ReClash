@@ -84,6 +84,21 @@ void main() {
     ]);
   });
 
+  test('forceTcp refuses quic to the datacenter ranges too', () {
+    final rules = desyncRules(
+      categories: [DesyncCategory.telegram],
+      forceTcp: true,
+    );
+
+    expect(rules, [
+      'AND,((NETWORK,udp),(DST-PORT,443),(GEOSITE,telegram)),REJECT',
+      'GEOSITE,telegram,DESYNC',
+      for (final cidr in desyncTelegramCidrs)
+        'AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,$cidr)),REJECT',
+      for (final cidr in desyncTelegramCidrs) 'IP-CIDR,$cidr,DESYNC',
+    ]);
+  });
+
   test('no category means no rules', () {
     expect(desyncRules(categories: [], forceTcp: true), isEmpty);
   });

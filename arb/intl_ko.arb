@@ -1151,6 +1151,30 @@
   "desyncArgsCount": "{count, plural, other{인수 {count}개}}",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "닫히지 않은 따옴표",
+  "desyncArgsUnknownFlag": "알 수 없는 옵션 {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token}은(는) 앱이 설정하므로 제외됩니다",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token}에 값이 필요합니다",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token}은(는) 옵션이 아닙니다",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncCache": "전략 캐시",
   "desyncCacheDesc": "선택된 전략은 네트워크별로 보관됩니다",
   "desyncCacheTtl": "보관 기간",

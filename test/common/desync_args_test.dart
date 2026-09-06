@@ -25,6 +25,14 @@ void main() {
     test('an empty line yields no tokens', () {
       expect(desyncArgsFromText('   \n  '), isEmpty);
     });
+
+    test('empty quotes carry an empty token', () {
+      expect(desyncArgsFromText('-l "" -t 8'), ['-l', '', '-t', '8']);
+    });
+
+    test('a backslash escapes a space', () {
+      expect(desyncArgsFromText(r'-l /a\ b.bin'), ['-l', '/a b.bin']);
+    });
   });
 
   group('desyncArgsToText', () {
@@ -40,6 +48,41 @@ void main() {
         desyncArgsFromText(desyncArgsToText(desyncDefaultStrategy)),
         desyncDefaultStrategy,
       );
+    });
+  });
+
+  group('desyncValidateArgs', () {
+    test('accepts the default strategy and every preset', () {
+      expect(desyncValidateArgs(desyncDefaultStrategy), isEmpty);
+      for (final preset in desyncTestPresets) {
+        expect(
+          desyncValidateArgs(desyncTestArgs(preset)),
+          isEmpty,
+          reason: preset,
+        );
+      }
+    });
+
+    test('flags app-owned options', () {
+      final issues = desyncValidateArgs(['-d1', '-p', '9050']);
+      expect(issues, hasLength(1));
+      expect(issues.single.kind, DesyncArgsIssueKind.appOwnedFlag);
+      expect(issues.single.token, '-p');
+    });
+
+    test('rejects an unknown flag', () {
+      final issues = desyncValidateArgs(['-J', '1']);
+      expect(issues.single.kind, DesyncArgsIssueKind.unknownFlag);
+    });
+
+    test('rejects a value flag without a value', () {
+      final issues = desyncValidateArgs(['-d1', '--split']);
+      expect(issues.single.kind, DesyncArgsIssueKind.missingValue);
+    });
+
+    test('rejects a positional token', () {
+      final issues = desyncValidateArgs(['torst,conn']);
+      expect(issues.single.kind, DesyncArgsIssueKind.positional);
     });
   });
 

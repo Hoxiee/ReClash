@@ -283,6 +283,10 @@ List<String> desyncRules({
       'GEOSITE,${category.geosite},$desyncOutboundName',
     for (final category in categories)
       for (final cidr in category.cidrs)
+        if (forceTcp)
+          'AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,$cidr)),REJECT',
+    for (final category in categories)
+      for (final cidr in category.cidrs)
         'IP-CIDR,$cidr,$desyncOutboundName',
   ];
 }

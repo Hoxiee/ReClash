@@ -1152,6 +1152,30 @@
   "desyncArgs": "Engine arguments",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "A quote is left unclosed",
+  "desyncArgsUnknownFlag": "Unknown option {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} is set by the app and will be dropped",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} needs a value",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} is not an option",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncDefaultName": "Default ladder",
   "desyncSaveCurrent": "Save current",
   "desyncStrategyNameHint": "Strategy name",

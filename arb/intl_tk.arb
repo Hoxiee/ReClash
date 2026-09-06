@@ -1151,6 +1151,30 @@
   "desyncArgsCount": "{count, plural, =0{argument ýok} other{{count} argument}}",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "Ýapylmadyk goşa dyrnak",
+  "desyncArgsUnknownFlag": "Näbelli wariant {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} programma tarapyndan goýulýar, taşlanýar",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} bahany talap edýär",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} wariant däl",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncCache": "Strategiýalar keşi",
   "desyncCacheDesc": "Saýlanan strategiýalar torlar boýunça saklanýar",
   "desyncCacheTtl": "Saklanmöhleti",

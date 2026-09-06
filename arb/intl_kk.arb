@@ -1151,6 +1151,30 @@
   "desyncArgsCount": "{count, plural, =0{аргумент жоқ} other{{count} аргумент}}",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "Жабылмаған тырнақша",
+  "desyncArgsUnknownFlag": "Белгісіз опция {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} қолданба орнатады, алынып тасталады",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} мән қажет",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} опция емес",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncCache": "Стратегиялар кэші",
   "desyncCacheDesc": "Таңдалған стратегиялар желілер бойынша сақталады",
   "desyncCacheTtl": "Сақтау мерзімі",

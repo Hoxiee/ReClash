@@ -19,6 +19,8 @@ internal data class ByeDpiTarget(
 internal object ByeDpiPolicy {
     const val PROBE_INTERVAL_MS = 15_000L
 
+    const val PROBE_MISSES = 2
+
     const val MAX_BACKOFF_MS = 30_000L
 
     fun backoffMs(attempt: Int): Long =
@@ -32,7 +34,7 @@ internal class ByeDpiModule(
 ) : ServiceModule {
 
     interface Engine {
-        fun start(args: List<String>)
+        fun start(args: List<String>): Boolean
 
         fun stop()
 
@@ -48,6 +50,7 @@ internal class ByeDpiModule(
 
     @Volatile private var current: ByeDpiTarget? = null
     @Volatile private var envKey = ""
+    private var startFailures = 0
 
     // Blocks a parked apply coroutine from resurrecting the branch after stop().
     @Volatile private var stopped = false
@@ -88,13 +91,15 @@ internal class ByeDpiModule(
         if (options?.desyncEnabled != true || options.desyncPort <= 0) return null
         return ByeDpiTarget(
             port = options.desyncPort,
-            strategy = options.desyncStrategy,
+            strategy = stripAppOwnedArgs(options.desyncStrategy) { flag ->
+                log("Desync strategy flag '$flag' is app-owned, dropped")
+            },
             cacheTtl = if (options.desyncCacheTtl > 0) {
                 options.desyncCacheTtl
             } else {
                 BYEDPI_CACHE_TTL_SECONDS
             },
-            cacheEnabled = options.desyncCacheEnabled,
+            cacheEnabled = options.desyncCacheEnabled && !options.desyncTesting,
             envKey = envKey,
         )
     }
@@ -116,11 +121,12 @@ internal class ByeDpiModule(
     }
 
     private fun launchBranch(target: ByeDpiTarget) {
-        startEngine(target)
-        probeJob = scope.launch { watch(target) }
+        if (startEngine(target)) {
+            probeJob = scope.launch { watch(target) }
+        }
     }
 
-    private fun startEngine(target: ByeDpiTarget) {
+    private fun startEngine(target: ByeDpiTarget): Boolean {
         val args = byeDpiArgs(
             port = target.port,
             strategy = target.strategy,
@@ -129,9 +135,30 @@ internal class ByeDpiModule(
             cacheTtlSeconds = target.cacheTtl,
             cacheEnabled = target.cacheEnabled,
         )
-        current = target
-        runCatching { engine.start(args) }
-            .onFailure { error -> log("Desync start failed: $error") }
+        val started = runCatching { engine.start(args) }
+            .getOrElse { error ->
+                log("Desync start failed: $error")
+                false
+            }
+        if (started) {
+            current = target
+            startFailures = 0
+        } else {
+            current = null
+            scheduleStartRetry(target)
+        }
+        return started
+    }
+
+    private fun scheduleStartRetry(target: ByeDpiTarget) {
+        val delayMs = ByeDpiPolicy.backoffMs(startFailures++)
+        scope.launch {
+            delay(delayMs)
+            synchronized(applyLock) {
+                if (stopped || current != null) return@launch
+                launchBranch(target)
+            }
+        }
     }
 
     private fun restart(target: ByeDpiTarget) {
@@ -142,25 +169,29 @@ internal class ByeDpiModule(
             current = null
             runCatching { engine.stop() }
                 .onFailure { error -> log("Desync stop failed: $error") }
-            startEngine(target)
-            probeJob = scope.launch { watch(target) }
+            if (startEngine(target)) {
+                probeJob = scope.launch { watch(target) }
+            }
         }
     }
 
     // The thread outliving its listener is the failure Doze produces, so liveness is
     // "the listener still accepts a connection" and nothing weaker.
     private suspend fun watch(target: ByeDpiTarget) {
-        var attempt = 0
+        var misses = 0
+        var restarts = 0
         while (true) {
             delay(ByeDpiPolicy.PROBE_INTERVAL_MS)
             if (current != target) return
             if (engine.probe(target.port)) {
-                attempt = 0
+                misses = 0
                 continue
             }
+            if (++misses < ByeDpiPolicy.PROBE_MISSES) continue
+            misses = 0
             log("Desync listener is down, restarting")
             restart(target)
-            delay(ByeDpiPolicy.backoffMs(attempt++))
+            delay(ByeDpiPolicy.backoffMs(restarts++))
             if (current != target) return
         }
     }

@@ -428,6 +428,18 @@ void main() {
       expect(restored.testSiteLists, ['telegram', 'discord']);
     });
 
+    test('tester crash markers survive the round-trip', () {
+      const props = DesyncProps(
+        testRunning: true,
+        testRestoreArgs: ['-d1', '-s1'],
+      );
+
+      final restored = roundTrip(props.toJson, DesyncProps.fromJson);
+
+      expect(restored.testRunning, isTrue);
+      expect(restored.testRestoreArgs, ['-d1', '-s1']);
+    });
+
     test('a custom strategy survives the round-trip', () {
       const props = DesyncProps(
         enabled: true,

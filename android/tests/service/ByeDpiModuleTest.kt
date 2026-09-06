@@ -30,9 +30,11 @@ class ByeDpiModuleTest {
         var stops = 0
         var alive = true
         var protect: String? = "/data/byedpi.protect"
+        var startResult = true
 
-        override fun start(args: List<String>) {
+        override fun start(args: List<String>): Boolean {
             starts += args
+            return startResult
         }
 
         override fun stop() {
@@ -129,12 +131,24 @@ class ByeDpiModuleTest {
     }
 
     @Test
-    fun `a dead listener is restarted right away`() = runTest {
+    fun `one missed probe is not a dead listener`() = runTest {
         module().start()
         ServiceConfig.updateVpnOptions(options())
         runCurrent()
         engine.alive = false
         advanceTimeBy(ByeDpiPolicy.PROBE_INTERVAL_MS + 1)
+        runCurrent()
+        assertEquals(0, engine.stops)
+        assertEquals(1, engine.starts.size)
+    }
+
+    @Test
+    fun `consecutive missed probes restart the branch`() = runTest {
+        module().start()
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        engine.alive = false
+        advanceTimeBy(ByeDpiPolicy.PROBE_INTERVAL_MS * ByeDpiPolicy.PROBE_MISSES + 1)
         runCurrent()
         assertEquals(1, engine.stops)
         assertEquals(2, engine.starts.size)
@@ -142,6 +156,52 @@ class ByeDpiModuleTest {
         advanceTimeBy(ByeDpiPolicy.backoffMs(0))
         runCurrent()
         assertEquals(2, engine.starts.size)
+    }
+
+    @Test
+    fun `a refused start is retried with backoff`() = runTest {
+        module().start()
+        engine.startResult = false
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        assertEquals(1, engine.starts.size)
+        engine.startResult = true
+        advanceTimeBy(ByeDpiPolicy.backoffMs(0))
+        runCurrent()
+        assertEquals(2, engine.starts.size)
+    }
+
+    @Test
+    fun `a strategy cannot retune the listener or the cache`() = runTest {
+        module().start()
+        ServiceConfig.updateVpnOptions(
+            options(
+                strategy = listOf("-d1", "-p", "9050", "-i", "0.0.0.0", "-s1"),
+            ),
+        )
+        runCurrent()
+        val args = engine.starts.single()
+        assertEquals("7898", args[args.indexOf("-p") + 1])
+        assertEquals("127.0.0.1", args[args.indexOf("-i") + 1])
+        assertTrue("9050" !in args)
+        assertTrue("0.0.0.0" !in args)
+        assertTrue("-d1" in args)
+        assertTrue("-s1" in args)
+    }
+
+    @Test
+    fun `a testing run keeps the cache detached`() = runTest {
+        val module = module()
+        module.start()
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        assertTrue("-y" !in engine.starts.single())
+        module.onEnvironmentChanged("abc123")
+        runCurrent()
+        assertTrue("-y" in engine.starts.last())
+        ServiceConfig.updateVpnOptions(options().copy(desyncTesting = true))
+        runCurrent()
+        assertTrue("-y" !in engine.starts.last())
     }
 
     @Test
@@ -246,9 +306,10 @@ class ByeDpiModuleTest {
         val inStop = CountDownLatch(1)
         private val releaseStop = CountDownLatch(1)
 
-        override fun start(args: List<String>) {
+        override fun start(args: List<String>): Boolean {
             starts.incrementAndGet()
             firstStart.countDown()
+            return true
         }
 
         override fun stop() {

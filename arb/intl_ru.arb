@@ -1026,6 +1026,30 @@
   "desyncArgs": "Аргументы движка",
   "desyncArgsHint": "-A torst,conn -L s,o --split 1",
   "desyncArgsQuoteError": "Не закрыта кавычка",
+  "desyncArgsUnknownFlag": "Неизвестная опция {token}",
+  "@desyncArgsUnknownFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsAppOwnedFlag": "{token} задаётся приложением и будет отброшен",
+  "@desyncArgsAppOwnedFlag": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsMissingValue": "{token} требует значение",
+  "@desyncArgsMissingValue": {
+    "placeholders": {
+      "token": {}
+    }
+  },
+  "desyncArgsPositional": "{token} — не опция",
+  "@desyncArgsPositional": {
+    "placeholders": {
+      "token": {}
+    }
+  },
   "desyncDefaultName": "Лестница по умолчанию",
   "desyncSaveCurrent": "Сохранить текущую",
   "desyncStrategyNameHint": "Имя стратегии",

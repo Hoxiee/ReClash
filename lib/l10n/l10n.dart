@@ -8509,6 +8509,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Unknown option {token}`
+  String desyncArgsUnknownFlag(Object token) {
+    return Intl.message(
+      'Unknown option $token',
+      name: 'desyncArgsUnknownFlag',
+      desc: '',
+      args: [token],
+    );
+  }
+
+  /// `{token} is set by the app and will be dropped`
+  String desyncArgsAppOwnedFlag(Object token) {
+    return Intl.message(
+      '$token is set by the app and will be dropped',
+      name: 'desyncArgsAppOwnedFlag',
+      desc: '',
+      args: [token],
+    );
+  }
+
+  /// `{token} needs a value`
+  String desyncArgsMissingValue(Object token) {
+    return Intl.message(
+      '$token needs a value',
+      name: 'desyncArgsMissingValue',
+      desc: '',
+      args: [token],
+    );
+  }
+
+  /// `{token} is not an option`
+  String desyncArgsPositional(Object token) {
+    return Intl.message(
+      '$token is not an option',
+      name: 'desyncArgsPositional',
+      desc: '',
+      args: [token],
+    );
+  }
+
   /// `Default ladder`
   String get desyncDefaultName {
     return Intl.message(
