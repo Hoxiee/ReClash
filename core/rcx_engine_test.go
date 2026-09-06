@@ -110,7 +110,7 @@ func (r *fakeRuntime) Test(_ context.Context, node string, _ rcxMarker) (int, bo
 	}
 }
 
-func (r *fakeRuntime) Reach(ctx context.Context, addr string) rcxProbeOutcome {
+func (r *fakeRuntime) Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome {
 	r.mu.Lock()
 	outcome, ok := r.reach[addr]
 	hang := r.hang[addr]

@@ -6689,10 +6689,10 @@ class AppLocalizations {
     );
   }
 
-  /// `A foreign address answered`
+  /// `A foreign address passed a certificate check`
   String get smartRoutingEvidenceForeignOk {
     return Intl.message(
-      'A foreign address answered',
+      'A foreign address passed a certificate check',
       name: 'smartRoutingEvidenceForeignOk',
       desc: '',
       args: [],
@@ -6704,6 +6704,16 @@ class AppLocalizations {
     return Intl.message(
       'No foreign address answered',
       name: 'smartRoutingEvidenceForeignFail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A gate answered TLS with a forged certificate`
+  String get smartRoutingEvidenceForeignForged {
+    return Intl.message(
+      'A gate answered TLS with a forged certificate',
+      name: 'smartRoutingEvidenceForeignForged',
       desc: '',
       args: [],
     );

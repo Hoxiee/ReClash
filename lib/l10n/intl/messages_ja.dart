@@ -1300,8 +1300,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "海外のアドレスは応答しませんでした",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "ゲートが偽造証明書で応答しました",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "海外のアドレスが応答しました",
+      "海外のアドレスが証明書検証を通過しました",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "最近の検査で確認済み",

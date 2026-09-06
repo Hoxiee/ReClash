@@ -14,6 +14,17 @@ class PanelTheme {
       primaryColor == null && schemeVariant == null && pureBlack == null;
 }
 
+/// The active profile's panel theme dresses over the user's own choices
+/// without ever writing into them, so switching away restores the user.
+ThemeProps applyPanelTheme(ThemeProps user, PanelTheme? panel) {
+  if (panel == null) return user;
+  return user.copyWith(
+    primaryColor: panel.primaryColor ?? user.primaryColor,
+    schemeVariant: panel.schemeVariant ?? user.schemeVariant,
+    pureBlack: panel.pureBlack ?? user.pureBlack,
+  );
+}
+
 /// `FF5733[:variant][:pureblack]`, tokens after the colour accepted in any
 /// order so a panel that emits only `pureblack` still works.
 PanelTheme? parsePanelTheme(String? value) {

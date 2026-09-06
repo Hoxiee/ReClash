@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"net"
+	"net/http"
 	"net/netip"
 	"strconv"
 	"strings"
@@ -14,11 +15,13 @@ import (
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/ca"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
+	mihomoTLS "github.com/metacubex/tls"
 )
 
 const (
@@ -337,7 +340,9 @@ func rcxExpectedStatuses(statuses []int) (utils.IntRanges[uint16], error) {
 
 // Canaries go out through DIRECT so they measure the link itself, and through an
 // outbound rather than a raw dial so the socket is still protected from the tun.
-func (rcxCoreRuntime) Reach(ctx context.Context, address string) rcxProbeOutcome {
+// A whitelist accepts the TCP handshake on any address and cuts the data, so a
+// foreign canary is judged by the TLS handshake, which a gate cannot forge.
+func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) rcxProbeOutcome {
 	direct := lookupProxy("DIRECT")
 	if direct == nil {
 		return rcxProbeOverloaded
@@ -361,7 +366,54 @@ func (rcxCoreRuntime) Reach(ctx context.Context, address string) rcxProbeOutcome
 		}
 		return rcxProbeFail
 	}
-	_ = conn.Close()
+	if domestic {
+		_ = conn.Close()
+		return rcxProbeOK
+	}
+	defer conn.Close()
+	return rcxVerifyTLS(dialCtx, conn, address)
+}
+
+// Only the foreign canaries verify: their hosts carry public-root IP-SAN
+// certificates, which the domestic ones do not.
+func rcxVerifyTLS(ctx context.Context, conn net.Conn, address string) rcxProbeOutcome {
+	tlsConfig, err := ca.GetTLSConfig(ca.Option{})
+	if err != nil {
+		return rcxProbeOverloaded
+	}
+	tlsConfig.ServerName = rcxHostOf(address)
+	tlsConn := mihomoTLS.Client(conn, tlsConfig)
+	if err := tlsConn.HandshakeContext(ctx); err != nil {
+		if ctx.Err() != nil {
+			return rcxProbeOverloaded
+		}
+		return rcxProbeStatusMismatch
+	}
+	req, err := http.NewRequest(http.MethodHead, "https://"+address+"/", nil)
+	if err != nil {
+		return rcxProbeOverloaded
+	}
+	req = req.WithContext(ctx)
+	client := http.Client{
+		Transport: &http.Transport{
+			DialTLSContext: func(context.Context, string, string) (net.Conn, error) {
+				return tlsConn, nil
+			},
+			DisableKeepAlives: true,
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	defer client.CloseIdleConnections()
+	resp, err := client.Do(req)
+	if err != nil {
+		if ctx.Err() != nil {
+			return rcxProbeOverloaded
+		}
+		return rcxProbeStatusMismatch
+	}
+	_ = resp.Body.Close()
 	return rcxProbeOK
 }
 

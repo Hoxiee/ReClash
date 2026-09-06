@@ -222,7 +222,6 @@ class ProfilesAction extends _$ProfilesAction {
       putProfile(profile);
       applyPanelWidgetsFromMeta(profile.panelMeta);
       applyPanelSettingsDefaults(profile.panelMeta);
-      applyPanelThemeDefaults(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta));
     }
   }
@@ -245,23 +244,6 @@ class ProfilesAction extends _$ProfilesAction {
             closeConnections: set.contains('closeconnections'),
           ),
         );
-  }
-
-  // Add-time only, like the settings above.
-  void applyPanelThemeDefaults(PanelMeta? meta) {
-    final theme = parsePanelTheme(meta?.themeHex);
-    if (theme == null) return;
-    ref.read(themeSettingProvider.notifier).update((state) {
-      final color = theme.primaryColor;
-      return state.copyWith(
-        primaryColor: color ?? state.primaryColor,
-        primaryColors: color == null || state.primaryColors.contains(color)
-            ? state.primaryColors
-            : [...state.primaryColors, color],
-        schemeVariant: theme.schemeVariant ?? state.schemeVariant,
-        pureBlack: theme.pureBlack ?? state.pureBlack,
-      );
-    });
   }
 
   void applyPanelWidgetsFromMeta(PanelMeta? meta, {PanelMeta? previousMeta}) {

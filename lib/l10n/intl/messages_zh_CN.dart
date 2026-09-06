@@ -1129,8 +1129,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "没有境外地址响应",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "网关返回了伪造的证书",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "境外地址有响应",
+      "境外地址通过了证书验证",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "由最近一次检查确认",

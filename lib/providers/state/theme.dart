@@ -6,6 +6,15 @@ typedef DynamicColorSeeds = ({
   Color accentColor,
 });
 
+@riverpod
+ThemeProps effectiveThemeProps(Ref ref) {
+  final user = ref.watch(themeSettingProvider);
+  final themeHex = ref.watch(
+    currentProfileProvider.select((state) => state?.panelMeta?.themeHex),
+  );
+  return applyPanelTheme(user, parsePanelTheme(themeHex));
+}
+
 @Riverpod(keepAlive: true)
 class DynamicColor extends _$DynamicColor {
   @override
@@ -34,7 +43,7 @@ ColorScheme genColorScheme(
   bool ignoreConfig = false,
 }) {
   final themeSetting = ref.watch(
-    themeSettingProvider.select(
+    effectiveThemePropsProvider.select(
       (state) => (
         primaryColor: state.primaryColor,
         schemeVariant: state.schemeVariant,

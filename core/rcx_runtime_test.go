@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
@@ -191,5 +192,34 @@ func TestHostDelayCondemnsOnlyUnderItsOwnURL(t *testing.T) {
 	}
 	if _, dead := rcxHostDelay(node, ours); !dead {
 		t.Error("a foreign success masked the failed record under our URL")
+	}
+}
+
+// The gate under test accepts the handshake and answers TLS with a certificate
+// the public pool does not root, which is the signature a whitelist MITM leaves.
+func TestVerifyTLSRejectsAForgedChain(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	t.Cleanup(server.Close)
+
+	remote := server.Listener.Addr().String()
+	host, port, err := net.SplitHostPort(remote)
+	if err != nil {
+		t.Fatalf("split %s: %v", remote, err)
+	}
+	address := host + ":" + port
+	if ip, err := netip.ParseAddr(host); err == nil {
+		address = ip.String() + ":" + port
+	}
+	conn, err := net.Dial("tcp", remote)
+	if err != nil {
+		t.Fatalf("dial: %v", err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	got := rcxVerifyTLS(context.Background(), conn, address)
+	if got != rcxProbeStatusMismatch {
+		t.Errorf("outcome = %s, want mismatch: a self-signed answer is not an open network", rcxOutcomeName(got))
 	}
 }

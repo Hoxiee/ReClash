@@ -266,18 +266,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     )
 
     private fun setIconVariant(variant: String) {
-        val packageName = GlobalState.application.packageName
         val manager = GlobalState.application.packageManager
-        val alias = iconVariantAliases[variant] ?: return
-        val target = ComponentName(packageName, "$packageName$alias")
+        val target = iconVariantAliases[variant]?.let(::aliasComponent) ?: return
         // Enabling first keeps a launcher entry alive throughout the swap.
         manager.setComponentEnabledSetting(
             target,
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP,
         )
-        for (other in iconVariantAliases.values) {
-            val component = ComponentName(packageName, "$packageName$other")
+        for (suffix in iconVariantAliases.values) {
+            val component = aliasComponent(suffix) ?: continue
             if (component == target) continue
             if (manager.getComponentEnabledSetting(component) !=
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED
@@ -289,6 +287,22 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 )
             }
         }
+    }
+
+    // The aliases are declared under the manifest package, which the debug
+    // applicationId suffix does not carry, so they resolve by suffix match.
+    private fun aliasComponent(suffix: String): ComponentName? {
+        val packageName = GlobalState.application.packageName
+        val manager = GlobalState.application.packageManager
+        val info = manager.getPackageInfo(
+            packageName,
+            PackageManager.GET_ACTIVITIES or PackageManager.GET_DISABLED_COMPONENTS,
+        )
+        val className = info.activities
+            ?.firstOrNull { it.name.endsWith(suffix) }
+            ?.name
+            ?: return null
+        return ComponentName(packageName, className)
     }
 
     private fun initShortcuts(label: String) {

@@ -174,7 +174,7 @@ SharedState sharedState(Ref ref) {
     ),
   );
   final pureBlackTheme = ref.watch(
-    themeSettingProvider.select((state) => state.pureBlack),
+    effectiveThemePropsProvider.select((state) => state.pureBlack),
   );
   final networkSetting = ref.watch(
     networkSettingProvider.select(

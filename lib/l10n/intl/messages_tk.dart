@@ -1643,8 +1643,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "Hiç bir daşary salgy jogap bermedi",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "Derwez ýalan sertifikat bilen jogap berdi",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "Daşary salgy jogap berdi",
+      "Daşary salgy sertifikat barlamasyny geçdi",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "Soňky barlag bilen tassyklanan",

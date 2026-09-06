@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'680eb00c394d54aa3b0fd025c6559717b3486742';
+String _$sharedStateHash() => r'9aa7e1c4d0b792e22622dd09162d8dcdb295c135';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -758,6 +758,48 @@ final class NeedsSetupProvider extends $FunctionalProvider<bool, bool, bool>
 
 String _$needsSetupHash() => r'49ea8c53dffbd78699b483e46438f9da883c094d';
 
+@ProviderFor(effectiveThemeProps)
+final effectiveThemePropsProvider = EffectiveThemePropsProvider._();
+
+final class EffectiveThemePropsProvider
+    extends $FunctionalProvider<ThemeProps, ThemeProps, ThemeProps>
+    with $Provider<ThemeProps> {
+  EffectiveThemePropsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveThemePropsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveThemePropsHash();
+
+  @$internal
+  @override
+  $ProviderElement<ThemeProps> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ThemeProps create(Ref ref) {
+    return effectiveThemeProps(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ThemeProps value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ThemeProps>(value),
+    );
+  }
+}
+
+String _$effectiveThemePropsHash() =>
+    r'6983d17a5a2dc43476b93202b7fdcaeac29e6dce';
+
 @ProviderFor(DynamicColor)
 final dynamicColorProvider = DynamicColorProvider._();
 
@@ -873,7 +915,7 @@ final class GenColorSchemeProvider
   }
 }
 
-String _$genColorSchemeHash() => r'1078d00e2eb3ce4b788babd4e04b05f9acecb9fd';
+String _$genColorSchemeHash() => r'156b8d85ca3a22eb125a9bc0b61df9f2fbcdd563';
 
 final class GenColorSchemeFamily extends $Family
     with

@@ -1685,8 +1685,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "Hech bir xorijiy manzil javob bermadi",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "Darvoza soxta sertifikat bilan javob berdi",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "Xorijiy manzil javob berdi",
+      "Xorijiy manzil sertifikat tekshiruvidan o\'tdi",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "Soʻnggi tekshiruv bilan tasdiqlangan",

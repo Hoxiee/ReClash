@@ -1631,8 +1631,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "Ешбір шетелдік мекенжай жауап бермеді",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "Қақпа құйма сертификатпен жауап берді",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "Шетелдік мекенжай жауап берді",
+      "Шетелдік мекенжай сертификат тексерісінен өтті",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "Жақындағы тексерумен расталды",

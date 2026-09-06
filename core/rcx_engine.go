@@ -135,7 +135,7 @@ type rcxRuntime interface {
 	Mode() string
 	Country(node string) string
 	Test(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
-	Reach(ctx context.Context, addr string) rcxProbeOutcome
+	Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome
 	Connections() []rcxConnSample
 	CloseConnections(node string)
 	SampleLink() (rcxNetworkPayload, bool)
@@ -1685,7 +1685,7 @@ func (e *rcxEngine) reachAny(
 					outcome: outcome,
 				}
 			}()
-			outcome = e.runtime.Reach(ctx, address)
+			outcome = e.runtime.Reach(ctx, address, domestic)
 		})
 	}
 

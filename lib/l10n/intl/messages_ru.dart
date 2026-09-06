@@ -1629,8 +1629,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "Ни один зарубежный адрес не ответил",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "Шлюз ответил подделанным сертификатом",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "Зарубежный адрес ответил",
+      "Зарубежный адрес прошёл проверку сертификата",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "Подтверждён недавней проверкой",

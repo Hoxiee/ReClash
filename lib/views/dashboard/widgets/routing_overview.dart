@@ -573,7 +573,9 @@ class _NetworkCard extends StatelessWidget {
         appLocalizations.smartRoutingEvidenceValidated
       else
         appLocalizations.smartRoutingEvidenceUnvalidated,
-      if (link.foreignMeasured)
+      if (link.foreignForged)
+        appLocalizations.smartRoutingEvidenceForeignForged
+      else if (link.foreignMeasured)
         link.foreignReached
             ? appLocalizations.smartRoutingEvidenceForeignOk
             : appLocalizations.smartRoutingEvidenceForeignFail,
@@ -720,6 +722,8 @@ class _CanaryRow extends StatelessWidget {
           Text(
             canary.answered
                 ? '${canary.delay} ms'
+                : canary.forged
+                ? appLocalizations.smartRoutingEvidenceForeignForged
                 : canary.measured
                 ? appLocalizations.smartRoutingNoAnswer
                 : appLocalizations.smartRoutingUntested,

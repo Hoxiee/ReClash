@@ -1308,8 +1308,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceForeignFail": MessageLookupByLibrary.simpleMessage(
       "외부 주소가 응답하지 않았습니다",
     ),
+    "smartRoutingEvidenceForeignForged": MessageLookupByLibrary.simpleMessage(
+      "게이트가 위조된 인증서로 응답했습니다",
+    ),
     "smartRoutingEvidenceForeignOk": MessageLookupByLibrary.simpleMessage(
-      "외부 주소가 응답했습니다",
+      "외부 주소가 인증서 검증을 통과했습니다",
     ),
     "smartRoutingEvidenceFresh": MessageLookupByLibrary.simpleMessage(
       "최근 점검으로 확인됨",

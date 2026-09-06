@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Debug builds talk to LAN test panels over plain HTTP. -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

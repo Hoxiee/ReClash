@@ -299,3 +299,15 @@ func TestTerrainStateReportsOnlyRealTransitions(t *testing.T) {
 		t.Error("re-observing the same terrain must not look like a change")
 	}
 }
+
+func TestClassifyTerrainReadsAMitmGateAsAWhitelist(t *testing.T) {
+	got := rcxClassifyTerrain(rcxTerrainFacts{
+		Validated:     true,
+		ForeignReach:  rcxProbeStatusMismatch,
+		DomesticReach: rcxProbeOK,
+	})
+
+	if got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist: a gate answering TLS with a forged chain is a shutdown", got)
+	}
+}

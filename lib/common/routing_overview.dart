@@ -12,12 +12,16 @@ NetworkFormat networkFormatOf(String terrain) => switch (terrain) {
 
 extension RcxLinkReportFormat on RcxLinkReport {
   /// Reach outcomes carry `overloaded` for "never measured", so an unmeasured
-  /// canary must not read as a failed one.
+  /// canary must not read as a failed one. `mismatch` is a TLS chain a gate
+  /// forged: the address answered, the open internet did not.
   bool get foreignReached => foreign == 'ok';
 
   bool get domesticReached => domestic == 'ok';
 
-  bool get foreignMeasured => foreign == 'ok' || foreign == 'fail';
+  bool get foreignMeasured =>
+      foreign == 'ok' || foreign == 'fail' || foreign == 'mismatch';
+
+  bool get foreignForged => foreign == 'mismatch';
 
   bool get domesticMeasured => domestic == 'ok' || domestic == 'fail';
 }
@@ -25,7 +29,10 @@ extension RcxLinkReportFormat on RcxLinkReport {
 extension RcxCanaryReportView on RcxCanaryReport {
   bool get answered => outcome == 'ok';
 
-  bool get measured => outcome == 'ok' || outcome == 'fail';
+  bool get measured =>
+      outcome == 'ok' || outcome == 'fail' || outcome == 'mismatch';
+
+  bool get forged => outcome == 'mismatch';
 
   /// The host is what a person recognises; the port is noise until it is not.
   String get label => addr;

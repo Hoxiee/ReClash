@@ -119,6 +119,22 @@ void main() {
       expect(failed.foreignReached, isFalse);
       expect(failed.domesticReached, isTrue);
     });
+
+    test('a forged chain is a measurement the open network did not make', () {
+      const forged = RcxLinkReport(foreign: 'mismatch', domestic: 'ok');
+      expect(forged.foreignMeasured, isTrue);
+      expect(forged.foreignReached, isFalse);
+      expect(forged.foreignForged, isTrue);
+
+      const answered = RcxCanaryReport(addr: '1.1.1.1:443');
+      expect(answered.measured, isFalse);
+      expect(answered.forged, isFalse);
+
+      const mitm = RcxCanaryReport(addr: '1.1.1.1:443', outcome: 'mismatch');
+      expect(mitm.measured, isTrue);
+      expect(mitm.answered, isFalse);
+      expect(mitm.forged, isTrue);
+    });
   });
 
   group('routing counts', () {
