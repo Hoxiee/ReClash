@@ -658,6 +658,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("Внешнее получение"),
     "externalLink": MessageLookupByLibrary.simpleMessage("Внешняя ссылка"),
+    "extra": MessageLookupByLibrary.simpleMessage("Дополнительно"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Фильтр Fake-IP"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Диапазон Fake-IP"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -859,6 +860,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Интервал TCP keep-alive",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Ключ"),
+    "kk": MessageLookupByLibrary.simpleMessage("Казахский"),
+    "ko": MessageLookupByLibrary.simpleMessage("Корейский"),
     "language": MessageLookupByLibrary.simpleMessage("Язык"),
     "launchInterrupted": MessageLookupByLibrary.simpleMessage(
       "Запуск не завершён",
@@ -868,6 +871,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "license": MessageLookupByLibrary.simpleMessage("Лицензия"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Лицензии"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Пакеты, входящие в приложение",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Светлая"),
     "lightAt": MessageLookupByLibrary.simpleMessage("Светлая в"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
@@ -1680,6 +1687,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
       "из проверки задержки",
     ),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "Умная маршрутизация держит сервер, работающий в текущей сети, и сама переключается при её смене. Начните с регионального пресета, затем настройте стратегию, проверки и маркеры ниже.",
+    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("оставлен"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage(
       "Полоса задержки",
@@ -1955,7 +1965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Свой"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "Приложение запросит подписку, представившись этим клиентом",
+      "Приложение запросит подписку в формате этого клиента",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1986,6 +1996,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Напоминания о подписке",
     ),
     "subscriptionProviderInterval": m57,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "Ни один узел подписки не дозванивается — попробуйте другой формат клиента",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Обновлено"),
     "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),
@@ -2030,6 +2043,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "time": MessageLookupByLibrary.simpleMessage("Время"),
     "timeout": MessageLookupByLibrary.simpleMessage("Тайм-аут"),
     "tip": MessageLookupByLibrary.simpleMessage("Подсказка"),
+    "tk": MessageLookupByLibrary.simpleMessage("Туркменский"),
     "toggle": MessageLookupByLibrary.simpleMessage("Переключить"),
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Переключить подписи"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
@@ -2075,6 +2089,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("Получить профиль по URL"),
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL-схема"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Добавить подписку"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "URL подписки, добавляется после подтверждения",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Закрыть"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Свернуть в трей или выйти, если так настроено",
+    ),
+    "urlSchemeCommands": MessageLookupByLibrary.simpleMessage(
+      "Команды автоматизации",
+    ),
+    "urlSchemeCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Для таскеров, скриптов, ярлыков и автоматизации",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Подключить"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Запустить туннель и подключиться",
+    ),
+    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
+      "Deep links, которые ReClash регистрирует и открывает",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Отключить"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Остановить туннель",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("Импорт конфига"),
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Конфиг в base64, импортируется как профиль",
+    ),
+    "urlSchemeImportInvalid": MessageLookupByLibrary.simpleMessage(
+      "Полезная нагрузка импорта — не корректный base64",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Установка профиля",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Совместимая ссылка, которую уже используют кнопки Clash и FlClash",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Открыть"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Поднять окно на передний план",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Переключить"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Подключить, если остановлено; отключить, если работает",
+    ),
     "urlTip": m59,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
@@ -2084,6 +2145,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Использованный трафик",
     ),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
+    "uz": MessageLookupByLibrary.simpleMessage("Узбекский"),
     "value": MessageLookupByLibrary.simpleMessage("Значение"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Яркая"),
     "view": MessageLookupByLibrary.simpleMessage("Просмотр"),

@@ -635,6 +635,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "externalFetch": MessageLookupByLibrary.simpleMessage("External fetch"),
     "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
+    "extra": MessageLookupByLibrary.simpleMessage("Extra"),
     "fakeipFilter": MessageLookupByLibrary.simpleMessage("Fake-IP filter"),
     "fakeipRange": MessageLookupByLibrary.simpleMessage("Fake-IP range"),
     "fallback": MessageLookupByLibrary.simpleMessage("Fallback"),
@@ -838,6 +839,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "TCP keep-alive interval",
     ),
     "key": MessageLookupByLibrary.simpleMessage("Key"),
+    "kk": MessageLookupByLibrary.simpleMessage("Kazakh"),
+    "ko": MessageLookupByLibrary.simpleMessage("Korean"),
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "launchInterrupted": MessageLookupByLibrary.simpleMessage(
       "Launch did not finish",
@@ -847,6 +850,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
     "license": MessageLookupByLibrary.simpleMessage("License"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Licenses"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Packages bundled into the app",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "lightAt": MessageLookupByLibrary.simpleMessage("Light at"),
     "list": MessageLookupByLibrary.simpleMessage("List"),
@@ -1619,6 +1626,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
       "from the delay test",
     ),
+    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
+      "Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.",
+    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("kept"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("Latency band"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("Evidence"),
@@ -1884,7 +1894,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Custom"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "The app requests the subscription pretending to be this client",
+      "The app requests the subscription in this client\'s format",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1915,6 +1925,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription reminders",
     ),
     "subscriptionProviderInterval": m57,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "None of the nodes in this subscription can be reached — try another client format",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Updated"),
     "support": MessageLookupByLibrary.simpleMessage("Support"),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),
@@ -1953,6 +1966,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "time": MessageLookupByLibrary.simpleMessage("Time"),
     "timeout": MessageLookupByLibrary.simpleMessage("Timeout"),
     "tip": MessageLookupByLibrary.simpleMessage("Tip"),
+    "tk": MessageLookupByLibrary.simpleMessage("Turkmen"),
     "toggle": MessageLookupByLibrary.simpleMessage("Toggle"),
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Toggle labels"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Tonal spot"),
@@ -2000,11 +2014,59 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",
     ),
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL Scheme"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Add subscription"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "A subscription URL, added after confirmation",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Close"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Hide to tray, or exit when configured",
+    ),
+    "urlSchemeCommands": MessageLookupByLibrary.simpleMessage(
+      "Automation commands",
+    ),
+    "urlSchemeCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "For tasker, scripts, shortcuts, and automation",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Connect"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Start the tunnel and connect",
+    ),
+    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
+      "Deep links ReClash registers and opens",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Disconnect"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Stop the tunnel",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("Import config"),
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "A base64-encoded config file, imported as a profile",
+    ),
+    "urlSchemeImportInvalid": MessageLookupByLibrary.simpleMessage(
+      "The import payload is not valid base64",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Install a profile",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "The compat link Clash and FlClash buttons already use",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Open"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Bring the window to the front",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Toggle"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Connect if stopped, disconnect if running",
+    ),
     "urlTip": m59,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
+    "uz": MessageLookupByLibrary.simpleMessage("Uzbek"),
     "value": MessageLookupByLibrary.simpleMessage("Value"),
     "vibrantScheme": MessageLookupByLibrary.simpleMessage("Vibrant"),
     "view": MessageLookupByLibrary.simpleMessage("View"),

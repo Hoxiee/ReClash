@@ -280,6 +280,26 @@ class AppLocalizations {
     return Intl.message('Simplified Chinese', name: 'zhCN', desc: '', args: []);
   }
 
+  /// `Korean`
+  String get ko {
+    return Intl.message('Korean', name: 'ko', desc: '', args: []);
+  }
+
+  /// `Uzbek`
+  String get uz {
+    return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
+  }
+
+  /// `Kazakh`
+  String get kk {
+    return Intl.message('Kazakh', name: 'kk', desc: '', args: []);
+  }
+
+  /// `Turkmen`
+  String get tk {
+    return Intl.message('Turkmen', name: 'tk', desc: '', args: []);
+  }
+
   /// `Theme`
   String get theme {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
@@ -695,10 +715,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The app requests the subscription pretending to be this client`
+  /// `The app requests the subscription in this client's format`
   String get subscriptionClientDesc {
     return Intl.message(
-      'The app requests the subscription pretending to be this client',
+      'The app requests the subscription in this client\'s format',
       name: 'subscriptionClientDesc',
       desc: '',
       args: [],
@@ -1008,6 +1028,21 @@ class AppLocalizations {
   /// `License`
   String get license {
     return Intl.message('License', name: 'license', desc: '', args: []);
+  }
+
+  /// `Licenses`
+  String get licenses {
+    return Intl.message('Licenses', name: 'licenses', desc: '', args: []);
+  }
+
+  /// `Packages bundled into the app`
+  String get licensesDesc {
+    return Intl.message(
+      'Packages bundled into the app',
+      name: 'licensesDesc',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Source code`
@@ -1388,6 +1423,11 @@ class AppLocalizations {
   /// `General`
   String get general {
     return Intl.message('General', name: 'general', desc: '', args: []);
+  }
+
+  /// `Extra`
+  String get extra {
+    return Intl.message('Extra', name: 'extra', desc: '', args: []);
   }
 
   /// `Set the system proxy`
@@ -5964,6 +6004,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.`
+  String get smartRoutingIntro {
+    return Intl.message(
+      'Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.',
+      name: 'smartRoutingIntro',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Available in Rule mode only`
   String get smartRoutingRuleOnly {
     return Intl.message(
@@ -8174,6 +8224,16 @@ class AppLocalizations {
     );
   }
 
+  /// `None of the nodes in this subscription can be reached — try another client format`
+  String get subscriptionUndialable {
+    return Intl.message(
+      'None of the nodes in this subscription can be reached — try another client format',
+      name: 'subscriptionUndialable',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The provider moved to {host}`
   String subscriptionDomainMoved(String host) {
     return Intl.message(
@@ -8201,6 +8261,196 @@ class AppLocalizations {
       name: 'subscriptionProviderInterval',
       desc: '',
       args: [value],
+    );
+  }
+
+  /// `URL Scheme`
+  String get urlScheme {
+    return Intl.message('URL Scheme', name: 'urlScheme', desc: '', args: []);
+  }
+
+  /// `Deep links ReClash registers and opens`
+  String get urlSchemeDesc {
+    return Intl.message(
+      'Deep links ReClash registers and opens',
+      name: 'urlSchemeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automation commands`
+  String get urlSchemeCommands {
+    return Intl.message(
+      'Automation commands',
+      name: 'urlSchemeCommands',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `For tasker, scripts, shortcuts, and automation`
+  String get urlSchemeCommandsDesc {
+    return Intl.message(
+      'For tasker, scripts, shortcuts, and automation',
+      name: 'urlSchemeCommandsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect`
+  String get urlSchemeConnect {
+    return Intl.message(
+      'Connect',
+      name: 'urlSchemeConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start the tunnel and connect`
+  String get urlSchemeConnectDesc {
+    return Intl.message(
+      'Start the tunnel and connect',
+      name: 'urlSchemeConnectDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disconnect`
+  String get urlSchemeDisconnect {
+    return Intl.message(
+      'Disconnect',
+      name: 'urlSchemeDisconnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stop the tunnel`
+  String get urlSchemeDisconnectDesc {
+    return Intl.message(
+      'Stop the tunnel',
+      name: 'urlSchemeDisconnectDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Toggle`
+  String get urlSchemeToggle {
+    return Intl.message('Toggle', name: 'urlSchemeToggle', desc: '', args: []);
+  }
+
+  /// `Connect if stopped, disconnect if running`
+  String get urlSchemeToggleDesc {
+    return Intl.message(
+      'Connect if stopped, disconnect if running',
+      name: 'urlSchemeToggleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open`
+  String get urlSchemeOpen {
+    return Intl.message('Open', name: 'urlSchemeOpen', desc: '', args: []);
+  }
+
+  /// `Bring the window to the front`
+  String get urlSchemeOpenDesc {
+    return Intl.message(
+      'Bring the window to the front',
+      name: 'urlSchemeOpenDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close`
+  String get urlSchemeClose {
+    return Intl.message('Close', name: 'urlSchemeClose', desc: '', args: []);
+  }
+
+  /// `Hide to tray, or exit when configured`
+  String get urlSchemeCloseDesc {
+    return Intl.message(
+      'Hide to tray, or exit when configured',
+      name: 'urlSchemeCloseDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import config`
+  String get urlSchemeImport {
+    return Intl.message(
+      'Import config',
+      name: 'urlSchemeImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A base64-encoded config file, imported as a profile`
+  String get urlSchemeImportDesc {
+    return Intl.message(
+      'A base64-encoded config file, imported as a profile',
+      name: 'urlSchemeImportDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add subscription`
+  String get urlSchemeAdd {
+    return Intl.message(
+      'Add subscription',
+      name: 'urlSchemeAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A subscription URL, added after confirmation`
+  String get urlSchemeAddDesc {
+    return Intl.message(
+      'A subscription URL, added after confirmation',
+      name: 'urlSchemeAddDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The import payload is not valid base64`
+  String get urlSchemeImportInvalid {
+    return Intl.message(
+      'The import payload is not valid base64',
+      name: 'urlSchemeImportInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install a profile`
+  String get urlSchemeInstallConfig {
+    return Intl.message(
+      'Install a profile',
+      name: 'urlSchemeInstallConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The compat link Clash and FlClash buttons already use`
+  String get urlSchemeInstallConfigDesc {
+    return Intl.message(
+      'The compat link Clash and FlClash buttons already use',
+      name: 'urlSchemeInstallConfigDesc',
+      desc: '',
+      args: [],
     );
   }
 
@@ -8557,7 +8807,11 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'kk'),
+      Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'tk'),
+      Locale.fromSubtags(languageCode: 'uz'),
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }
