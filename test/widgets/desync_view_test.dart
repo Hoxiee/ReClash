@@ -123,7 +123,7 @@ void main() {
 
     expect(
       container.read(desyncSettingProvider).categories,
-      [DesyncCategory.discord, DesyncCategory.telegram],
+      [DesyncCategory.discord],
     );
   });
 }

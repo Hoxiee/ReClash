@@ -72,31 +72,22 @@ void main() {
     expect(rules, ['GEOSITE,discord,DESYNC']);
   });
 
-  test('telegram routes the app itself by datacenter IP', () {
-    final rules = desyncRules(
-      categories: [DesyncCategory.telegram],
-      forceTcp: false,
+  test('telegram is no longer a category', () {
+    expect(DesyncCategory.values.map((e) => e.name), isNot(contains('telegram')));
+
+    final saved = {
+      'enabled': true,
+      'categories': ['youtube', 'telegram'],
+      'testSiteLists': ['youtube', 'telegram'],
+    };
+    final cleaned = stripSavedTelegram(saved);
+    expect(cleaned['categories'], ['youtube']);
+    expect(cleaned['testSiteLists'], ['youtube']);
+    expect(
+      () => DesyncProps.fromJson(saved),
+      throwsA(anything),
     );
-
-    expect(rules, [
-      'GEOSITE,telegram,DESYNC',
-      for (final cidr in desyncTelegramCidrs) 'IP-CIDR,$cidr,DESYNC',
-    ]);
-  });
-
-  test('forceTcp refuses quic to the datacenter ranges too', () {
-    final rules = desyncRules(
-      categories: [DesyncCategory.telegram],
-      forceTcp: true,
-    );
-
-    expect(rules, [
-      'AND,((NETWORK,udp),(DST-PORT,443),(GEOSITE,telegram)),REJECT',
-      'GEOSITE,telegram,DESYNC',
-      for (final cidr in desyncTelegramCidrs)
-        'AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,$cidr)),REJECT',
-      for (final cidr in desyncTelegramCidrs) 'IP-CIDR,$cidr,DESYNC',
-    ]);
+    expect(DesyncProps.fromJson(cleaned).categories, [DesyncCategory.youtube]);
   });
 
   test('no category means no rules', () {

@@ -253,7 +253,6 @@ class _DesyncViewState extends ConsumerState<DesyncView> {
   String _categoryLabel(DesyncCategory category) => switch (category) {
     DesyncCategory.youtube => 'YouTube',
     DesyncCategory.discord => 'Discord',
-    DesyncCategory.telegram => 'Telegram',
     DesyncCategory.twitter => 'Twitter / X',
     DesyncCategory.meta => 'Meta',
     DesyncCategory.signal => 'Signal',

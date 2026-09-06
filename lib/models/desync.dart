@@ -67,29 +67,11 @@ const desyncLegacyByedpi = <String>['-o1', '-a1', '-r-5+se'];
 
 const desyncLegacyTlsrec = <String>['-r-5+se'];
 
-// The Telegram app dials its datacenters by raw IP, so a domain rule never
-// sees it; these are core.telegram.org/resources/cidr.txt.
-const desyncTelegramCidrs = <String>[
-  '91.105.192.0/23',
-  '91.108.4.0/22',
-  '91.108.8.0/22',
-  '91.108.12.0/22',
-  '91.108.16.0/22',
-  '91.108.20.0/22',
-  '91.108.56.0/22',
-  '149.154.160.0/20',
-  '185.76.151.0/24',
-];
-
-/// Only blocks a desync can actually lift: a service that needs a foreign address
-/// belongs behind a node, not here.
 enum DesyncCategory {
   @JsonValue('youtube')
   youtube,
   @JsonValue('discord')
   discord,
-  @JsonValue('telegram')
-  telegram,
   @JsonValue('twitter')
   twitter,
   @JsonValue('meta')
@@ -100,16 +82,12 @@ enum DesyncCategory {
   String get geosite => switch (this) {
     DesyncCategory.youtube => 'youtube',
     DesyncCategory.discord => 'discord',
-    DesyncCategory.telegram => 'telegram',
     DesyncCategory.twitter => 'twitter',
     DesyncCategory.meta => 'meta',
     DesyncCategory.signal => 'signal',
   };
 
-  List<String> get cidrs => switch (this) {
-    DesyncCategory.telegram => desyncTelegramCidrs,
-    _ => const [],
-  };
+  List<String> get cidrs => const [];
 }
 
 /// Test domain groups carried over from ByeByeDPI's proxy test, verbatim.
@@ -168,25 +146,6 @@ const desyncTestSiteLists = <DesyncTestSiteList>[
       'rr1---sn-q4fl6n6y.googlevideo.com',
       'rr2---sn-hgn7ynek.googlevideo.com',
       'rr1---sn-xguxaxjvh-gufl.googlevideo.com',
-    ],
-  ),
-  DesyncTestSiteList(
-    id: 'telegram',
-    name: 'Telegram',
-    // ByeByeDPI ships 51 subdomains here; ten distinct services — site,
-    // API, both web clients, payments, short links, articles, CDN and two
-    // web backends — cover what a strategy has to open.
-    domains: [
-      'telegram.org',
-      'api.telegram.org',
-      'web.telegram.org',
-      'webk.telegram.org',
-      'my.telegram.org',
-      'telegram.me',
-      'telegra.ph',
-      'cdn.telegram.org',
-      'zws1.web.telegram.org',
-      'venus.web.telegram.org',
     ],
   ),
   DesyncTestSiteList(
@@ -281,7 +240,6 @@ const desyncTestSiteLists = <DesyncTestSiteList>[
 const defaultDesyncTestSiteLists = <String>[
   'youtube',
   'googlevideo',
-  'telegram',
 ];
 
 @freezed
@@ -304,7 +262,6 @@ abstract class DesyncProps with _$DesyncProps {
     @Default([
       DesyncCategory.youtube,
       DesyncCategory.discord,
-      DesyncCategory.telegram,
     ])
     List<DesyncCategory> categories,
     @Default(true) bool forceTcp,
@@ -327,9 +284,10 @@ abstract class DesyncProps with _$DesyncProps {
     if (json == null) {
       return defaultDesyncProps;
     }
+    final cleaned = stripSavedTelegram(json);
     return decodeOrRestoreDefault(
       'desync settings',
-      () => DesyncProps.fromJson(json),
+      () => DesyncProps.fromJson(cleaned),
       () => defaultDesyncProps,
     );
   }
@@ -343,6 +301,24 @@ DesyncProps migrateDesyncProps(DesyncProps props) {
     return props.copyWith(strategyArgs: desyncDefaultStrategy);
   }
   return props;
+}
+
+Map<String, Object?> stripSavedTelegram(Map<String, Object?> json) {
+  var changed = false;
+  final copy = <String, Object?>{...json};
+  for (final key in ['categories', 'testSiteLists']) {
+    final value = copy[key];
+    if (value is! List) continue;
+    final filtered = [
+      for (final item in value)
+        if (item != 'telegram') item,
+    ];
+    if (filtered.length != value.length) {
+      copy[key] = filtered;
+      changed = true;
+    }
+  }
+  return changed ? copy : json;
 }
 
 const defaultDesyncProps = DesyncProps();

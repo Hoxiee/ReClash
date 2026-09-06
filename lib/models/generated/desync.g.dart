@@ -25,11 +25,7 @@ _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
       (json['categories'] as List<dynamic>?)
           ?.map((e) => $enumDecode(_$DesyncCategoryEnumMap, e))
           .toList() ??
-      const [
-        DesyncCategory.youtube,
-        DesyncCategory.discord,
-        DesyncCategory.telegram,
-      ],
+      const [DesyncCategory.youtube, DesyncCategory.discord],
   forceTcp: json['forceTcp'] as bool? ?? true,
   strategyArgs:
       (json['strategyArgs'] as List<dynamic>?)
@@ -77,7 +73,6 @@ Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
 const _$DesyncCategoryEnumMap = {
   DesyncCategory.youtube: 'youtube',
   DesyncCategory.discord: 'discord',
-  DesyncCategory.telegram: 'telegram',
   DesyncCategory.twitter: 'twitter',
   DesyncCategory.meta: 'meta',
   DesyncCategory.signal: 'signal',

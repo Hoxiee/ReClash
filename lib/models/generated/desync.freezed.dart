@@ -525,7 +525,7 @@ return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.fo
 @JsonSerializable()
 
 class _DesyncProps with DiagnosticableTreeMixin implements DesyncProps {
-  const _DesyncProps({this.enabled = false, this.onlyDpi = false, this.port = defaultDesyncPort,  List<DesyncCategory> categories = const [DesyncCategory.youtube, DesyncCategory.discord, DesyncCategory.telegram], this.forceTcp = true,  List<String> strategyArgs = desyncDefaultStrategy, this.cacheEnabled = true, this.cacheTtl = defaultDesyncCacheTtl,  List<DesyncStrategy> savedStrategies = const [],  List<String> testSiteLists = defaultDesyncTestSiteLists, this.testRunning = false,  List<String>? testRestoreArgs = null}): _categories = categories,_strategyArgs = strategyArgs,_savedStrategies = savedStrategies,_testSiteLists = testSiteLists,_testRestoreArgs = testRestoreArgs;
+  const _DesyncProps({this.enabled = false, this.onlyDpi = false, this.port = defaultDesyncPort,  List<DesyncCategory> categories = const [DesyncCategory.youtube, DesyncCategory.discord], this.forceTcp = true,  List<String> strategyArgs = desyncDefaultStrategy, this.cacheEnabled = true, this.cacheTtl = defaultDesyncCacheTtl,  List<DesyncStrategy> savedStrategies = const [],  List<String> testSiteLists = defaultDesyncTestSiteLists, this.testRunning = false,  List<String>? testRestoreArgs = null}): _categories = categories,_strategyArgs = strategyArgs,_savedStrategies = savedStrategies,_testSiteLists = testSiteLists,_testRestoreArgs = testRestoreArgs;
   factory _DesyncProps.fromJson(Map<String, dynamic> json) => _$DesyncPropsFromJson(json);
 
 @override@JsonKey() final  bool enabled;

@@ -7,20 +7,21 @@ import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/config/scripts.dart';
-import 'package:reclash/widgets/list.dart';
-import 'package:reclash/widgets/scaffold.dart';
-import 'package:reclash/widgets/setting.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'rules.dart';
 
-class AdvancedConfigView extends StatelessWidget {
+class AdvancedConfigView extends ConsumerWidget {
   const AdvancedConfigView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final developerMode = ref.watch(
+      appSettingProvider.select((state) => state.developerMode),
+    );
     final generalItems = [
       DecorationListItem.open(
         title: Text(appLocalizations.network),
@@ -96,11 +97,12 @@ class AdvancedConfigView extends StatelessWidget {
       ),
       // The engine is an Android JNI module; on desktop the entry would only
       // produce rules pointing at a listener that never exists.
-      if (system.isAndroid)
+      if (system.isAndroid && developerMode)
         DecorationListItem.open(
           title: Text(appLocalizations.desync),
           subtitle: Text(appLocalizations.desyncDesc),
           leading: const Icon(Icons.bolt_rounded),
+          trailing: const CommonChip(label: 'Experimental'),
           widget: const DesyncView(),
           blur: false,
         ),
