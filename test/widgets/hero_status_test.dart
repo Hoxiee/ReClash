@@ -392,7 +392,12 @@ void main() {
     ) async {
       await pumpHero(tester, delay: 140, serviceLogo: 'https://panel/l.png');
       expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
-      expect(find.byKey(const ValueKey('core-mark')), findsOne);
+      final mark = find.byKey(const ValueKey('core-mark'));
+      expect(mark, findsOne);
+      expect(
+        find.descendant(of: mark, matching: find.byType(ColorFiltered)),
+        findsWidgets,
+      );
     });
 
     testWidgets('without a panel logo the flowing core shows the app mark', (

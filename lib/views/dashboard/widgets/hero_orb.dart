@@ -520,21 +520,25 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   Widget _coreChild(double core, Color accent) {
     switch (heroCoreMarkOf(_status, widget.serviceLogo)) {
       case HeroCoreMark.serviceLogo:
-        final side = core * 0.56;
         return SizedBox(
           key: const ValueKey('core-mark'),
-          width: side,
-          height: side,
-          child: ImageCacheWidget(
-            src: widget.serviceLogo!,
-            fit: BoxFit.contain,
-            defaultWidget: _appMark(core, accent),
+          width: core * 0.5,
+          height: core * 0.5,
+          child: _mono(
+            accent,
+            ImageCacheWidget(
+              src: widget.serviceLogo!,
+              fit: BoxFit.contain,
+              defaultWidget: _appMark(accent),
+            ),
           ),
         );
       case HeroCoreMark.appMark:
-        return KeyedSubtree(
+        return SizedBox(
           key: const ValueKey('core-mark'),
-          child: _appMark(core, accent),
+          width: core * 0.5,
+          height: core * 0.5,
+          child: _appMark(accent),
         );
       case HeroCoreMark.statusIcon:
         return Icon(
@@ -548,25 +552,15 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     }
   }
 
-  Widget _appMark(double core, Color accent) {
-    final side = core * 0.56;
-    return Container(
-      width: side,
-      height: side,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: accent.withValues(alpha: 0.35)),
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/images/icon.png',
-          width: side,
-          height: side,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
+  Widget _appMark(Color accent) => _mono(
+    accent,
+    Image.asset('assets/images/icon_variants/mark_mono.png', fit: BoxFit.contain),
+  );
+
+  Widget _mono(Color accent, Widget image) => ColorFiltered(
+    colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
+    child: image,
+  );
 }
 
 class _HeroHaloPainter extends CustomPainter {
