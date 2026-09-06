@@ -1608,6 +1608,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URLからプロファイルを取得します"),
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URLスキーム"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("サブスクリプションを追加"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "確認後にサブスクリプション URL を追加します",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("閉じる"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "トレイに隠す、設定によっては終了します",
+    ),
+    "urlSchemeCommands": MessageLookupByLibrary.simpleMessage("自動化コマンド"),
+    "urlSchemeCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "タスクやスクリプト、ショートカットの自動化用",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("接続"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "トンネルを開始して接続します",
+    ),
+    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash が登録して開くディープリンク",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("切断"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "トンネルを停止します",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("設定をインポート"),
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "base64 の設定ファイルをプロファイルとして取り込みます",
+    ),
+    "urlSchemeImportInvalid": MessageLookupByLibrary.simpleMessage(
+      "インポートのペイロードが正しい base64 ではありません",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage("プロファイルの追加"),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash・FlClash のボタンが既に使っている互換リンク",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("開く"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage("ウィンドウを前面に表示します"),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切り替え"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "停止中なら接続、実行中なら切断します",
+    ),
     "urlTip": m53,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),

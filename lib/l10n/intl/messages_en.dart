@@ -1939,6 +1939,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",
     ),
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL Scheme"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Add subscription"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "A subscription URL, added after confirmation",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Close"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Hide to tray, or exit when configured",
+    ),
+    "urlSchemeCommands": MessageLookupByLibrary.simpleMessage(
+      "Automation commands",
+    ),
+    "urlSchemeCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "For tasker, scripts, shortcuts, and automation",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Connect"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Start the tunnel and connect",
+    ),
+    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
+      "Deep links ReClash registers and opens",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Disconnect"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Stop the tunnel",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("Import config"),
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "A base64-encoded config file, imported as a profile",
+    ),
+    "urlSchemeImportInvalid": MessageLookupByLibrary.simpleMessage(
+      "The import payload is not valid base64",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Install a profile",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "The compat link Clash and FlClash buttons already use",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Open"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Bring the window to the front",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Toggle"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Connect if stopped, disconnect if running",
+    ),
     "urlTip": m53,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),

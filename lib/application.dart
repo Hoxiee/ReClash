@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -92,7 +93,14 @@ class ApplicationState extends ConsumerState<Application> {
 
   void _initLink() {
     final color = context.colorScheme.primary;
-    linkManager.initAppLinksListen((link) async {
+    linkManager.initAppLinksListen((uri) async {
+      final command = parseReClashCommand(uri);
+      if (command != null) {
+        await _handleReClashCommand(command);
+        return;
+      }
+      final link = parseIncomingLink(uri);
+      if (link == null) return;
       unawaited(window?.show());
       ResolvedExternalLink? resolved;
       try {
@@ -107,41 +115,108 @@ class ApplicationState extends ConsumerState<Application> {
       final target = resolved?.url ?? link.payload;
       final content = target.isEmpty ? resolved?.data : null;
       final full = target.isEmpty ? link.payload : target;
-      // A share link or an inlined config can be arbitrarily long.
-      final source = full.length > 120 ? '${full.substring(0, 119)}…' : full;
-      final message = currentAppLocalizations.createProfileFromUrlTip(source);
-      final parts = message.split(source);
-      final res = await dialogs.showMessage(
-        title: currentAppLocalizations.addProfile,
-        message: TextSpan(
-          children: [
-            TextSpan(text: parts.first),
-            TextSpan(
-              text: source,
-              style: TextStyle(
-                color: color,
-                decoration: TextDecoration.underline,
-                decorationColor: color,
-              ),
-            ),
-            if (parts.length > 1) TextSpan(text: parts.last),
-          ],
-        ),
-      );
-      if (res != true) return;
-      final action = ref.read(profilesActionProvider.notifier);
-      if (content != null) {
-        unawaited(action.addProfileFromLocalContent(content));
-        return;
-      }
-      unawaited(
-        action.addProfileFormURL(
-          target,
-          client: resolved?.preset ?? SubscriptionClient.auto,
-          name: resolved?.name ?? link.name,
-        ),
+      await _confirmAddProfile(
+        source: full,
+        name: resolved?.name ?? link.name,
+        target: target,
+        content: content,
+        preset: resolved?.preset ?? SubscriptionClient.auto,
+        color: color,
       );
     });
+  }
+
+  Future<void> _handleReClashCommand(IncomingCommand command) async {
+    final action = ref.read(systemActionProvider.notifier);
+    switch (command.command) {
+      case ReClashCommand.connect:
+        await ref
+            .read(setupActionProvider.notifier)
+            .setRunning(true, initialize: true);
+      case ReClashCommand.disconnect:
+        await ref.read(setupActionProvider.notifier).setRunning(false);
+      case ReClashCommand.toggle:
+        ref.read(commonActionProvider.notifier).toggleRunning();
+      case ReClashCommand.open:
+        await window?.show();
+      case ReClashCommand.close:
+        await action.handleClose();
+      case ReClashCommand.importProfile:
+        final payload = command.payload!;
+        final importColor = context.colorScheme.primary;
+        String content;
+        try {
+          content = utf8.decode(base64Decode(payload));
+        } on FormatException {
+          await dialogs.showMessage(
+            title: currentAppLocalizations.addProfile,
+            message: TextSpan(
+              text: currentAppLocalizations.urlSchemeImportInvalid,
+            ),
+          );
+          return;
+        }
+        await window?.show();
+        await _confirmAddProfile(
+          source: content,
+          name: null,
+          target: '',
+          content: content,
+          preset: SubscriptionClient.auto,
+          color: importColor,
+        );
+      case ReClashCommand.addProfile:
+        final addColor = context.colorScheme.primary;
+        await window?.show();
+        await _confirmAddProfile(
+          source: command.payload!,
+          name: null,
+          target: command.payload!,
+          content: null,
+          preset: SubscriptionClient.auto,
+          color: addColor,
+        );
+    }
+  }
+
+  Future<void> _confirmAddProfile({
+    required String source,
+    required String? name,
+    required String target,
+    required String? content,
+    required SubscriptionClient preset,
+    required Color color,
+  }) async {
+    // A share link or an inlined config can be arbitrarily long.
+    final trimmed = source.length > 120 ? '${source.substring(0, 119)}…' : source;
+    final message = currentAppLocalizations.createProfileFromUrlTip(trimmed);
+    final parts = message.split(trimmed);
+    final res = await dialogs.showMessage(
+      title: currentAppLocalizations.addProfile,
+      message: TextSpan(
+        children: [
+          TextSpan(text: parts.first),
+          TextSpan(
+            text: trimmed,
+            style: TextStyle(
+              color: color,
+              decoration: TextDecoration.underline,
+              decorationColor: color,
+            ),
+          ),
+          if (parts.length > 1) TextSpan(text: parts.last),
+        ],
+      ),
+    );
+    if (res != true) return;
+    final action = ref.read(profilesActionProvider.notifier);
+    if (content != null) {
+      unawaited(action.addProfileFromLocalContent(content));
+      return;
+    }
+    unawaited(
+      action.addProfileFormURL(target, client: preset, name: name),
+    );
   }
 
   void _autoUpdateProfilesTask() {

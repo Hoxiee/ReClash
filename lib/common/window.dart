@@ -34,7 +34,9 @@ class Window implements WindowPort {
       unawaited(
         protocol.registerLinux(
           schemes: allProtocolSchemes,
-          defaults: protocolSchemes,
+          // incy/happ stay advertised but never forced: their owners' apps
+          // keep the default handler on a dual install.
+          defaults: configProtocolSchemes,
         ),
       );
     }

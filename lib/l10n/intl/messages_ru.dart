@@ -2004,6 +2004,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("Получить профиль по URL"),
+    "urlScheme": MessageLookupByLibrary.simpleMessage("URL-схема"),
+    "urlSchemeAdd": MessageLookupByLibrary.simpleMessage("Добавить подписку"),
+    "urlSchemeAddDesc": MessageLookupByLibrary.simpleMessage(
+      "URL подписки, добавляется после подтверждения",
+    ),
+    "urlSchemeClose": MessageLookupByLibrary.simpleMessage("Закрыть"),
+    "urlSchemeCloseDesc": MessageLookupByLibrary.simpleMessage(
+      "Свернуть в трей или выйти, если так настроено",
+    ),
+    "urlSchemeCommands": MessageLookupByLibrary.simpleMessage(
+      "Команды автоматизации",
+    ),
+    "urlSchemeCommandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Для таскеров, скриптов, ярлыков и автоматизации",
+    ),
+    "urlSchemeConnect": MessageLookupByLibrary.simpleMessage("Подключить"),
+    "urlSchemeConnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Запустить туннель и подключиться",
+    ),
+    "urlSchemeDesc": MessageLookupByLibrary.simpleMessage(
+      "Deep links, которые ReClash регистрирует и открывает",
+    ),
+    "urlSchemeDisconnect": MessageLookupByLibrary.simpleMessage("Отключить"),
+    "urlSchemeDisconnectDesc": MessageLookupByLibrary.simpleMessage(
+      "Остановить туннель",
+    ),
+    "urlSchemeImport": MessageLookupByLibrary.simpleMessage("Импорт конфига"),
+    "urlSchemeImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Конфиг в base64, импортируется как профиль",
+    ),
+    "urlSchemeImportInvalid": MessageLookupByLibrary.simpleMessage(
+      "Полезная нагрузка импорта — не корректный base64",
+    ),
+    "urlSchemeInstallConfig": MessageLookupByLibrary.simpleMessage(
+      "Установка профиля",
+    ),
+    "urlSchemeInstallConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Совместимая ссылка, которую уже используют кнопки Clash и FlClash",
+    ),
+    "urlSchemeOpen": MessageLookupByLibrary.simpleMessage("Открыть"),
+    "urlSchemeOpenDesc": MessageLookupByLibrary.simpleMessage(
+      "Поднять окно на передний план",
+    ),
+    "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("Переключить"),
+    "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
+      "Подключить, если остановлено; отключить, если работает",
+    ),
     "urlTip": m53,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(

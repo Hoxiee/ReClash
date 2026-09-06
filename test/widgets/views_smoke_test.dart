@@ -22,6 +22,7 @@ import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/providers.dart';
 import 'package:reclash/views/proxies/tab.dart';
 import 'package:reclash/views/locale.dart';
+import 'package:reclash/views/url_scheme.dart';
 import 'package:reclash/views/views.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -107,6 +108,7 @@ void main() {
     'Backup and restore': BackupAndRestore,
     'Basic configuration': ConfigView,
     'Advanced configuration': AdvancedConfigView,
+    'URL Scheme': UrlSchemeView,
     'Application': ApplicationSettingView,
   };
 

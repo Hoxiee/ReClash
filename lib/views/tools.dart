@@ -18,6 +18,7 @@ import 'package:path/path.dart' show dirname, join;
 import 'appearance/appearance.dart';
 import 'config/advanced.dart';
 import 'developer.dart';
+import 'url_scheme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
@@ -53,6 +54,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         title: context.appLocalizations.other,
         items: [
           const _DisclaimerItem(),
+          const _UrlSchemeItem(),
           if (enableDeveloperMode) const _DeveloperItem(),
           const _InfoItem(),
         ],
@@ -264,6 +266,20 @@ class _DisclaimerItem extends ConsumerWidget {
           await ref.read(systemActionProvider.notifier).handleExit();
         }
       },
+    );
+  }
+}
+
+class _UrlSchemeItem extends StatelessWidget {
+  const _UrlSchemeItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecorationListItem.open(
+      leading: const Icon(Icons.link),
+      title: Text(context.appLocalizations.urlScheme),
+      subtitle: Text(context.appLocalizations.urlSchemeDesc),
+      widget: const UrlSchemeView(),
     );
   }
 }
