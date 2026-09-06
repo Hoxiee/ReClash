@@ -397,6 +397,49 @@ void main() {
     });
   });
 
+  group('DesyncProps', () {
+    test('saved legacy strategies are migrated to the working default', () {
+      for (final legacy in [
+        desyncLegacyLadder,
+        desyncLegacyByedpi,
+        desyncLegacyTlsrec,
+      ]) {
+        final props = DesyncProps(enabled: true, strategyArgs: legacy);
+
+        final restored = roundTrip(props.toJson, DesyncProps.fromJson);
+
+        expect(restored.strategyArgs, desyncDefaultStrategy);
+      }
+    });
+
+    test('the default site-list selection survives the round-trip', () {
+      const props = DesyncProps(enabled: true);
+
+      final restored = roundTrip(props.toJson, DesyncProps.fromJson);
+
+      expect(restored.testSiteLists, defaultDesyncTestSiteLists);
+    });
+
+    test('a custom site-list selection survives the round-trip', () {
+      const props = DesyncProps(testSiteLists: ['telegram', 'discord']);
+
+      final restored = roundTrip(props.toJson, DesyncProps.fromJson);
+
+      expect(restored.testSiteLists, ['telegram', 'discord']);
+    });
+
+    test('a custom strategy survives the round-trip', () {
+      const props = DesyncProps(
+        enabled: true,
+        strategyArgs: ['-o1', '-a1'],
+      );
+
+      final restored = roundTrip(props.toJson, DesyncProps.fromJson);
+
+      expect(restored.strategyArgs, ['-o1', '-a1']);
+    });
+  });
+
   group('Config composite serialization', () {
     test('DAVProps obfuscates and restores its password', () {
       const props = DAVProps(

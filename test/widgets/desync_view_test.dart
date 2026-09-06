@@ -91,6 +91,29 @@ void main() {
     );
   });
 
+  testWidgets('the tester section reports a dead engine', (tester) async {
+    await pumpView(
+      tester,
+      props: defaultDesyncProps.copyWith(port: 1),
+    );
+    expect(find.text('Start'), findsOneWidget);
+
+    await tester.tap(find.text('Start'));
+    // The engine probe is real socket IO; FakeAsync needs a turn on the
+    // actual event loop to see the connection refused.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'The engine is not running — connect with DPI bypass enabled first',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a category toggle drops the category', (tester) async {
     await pumpView(tester);
     expect(find.text('GEOSITE,youtube'), findsOneWidget);
@@ -100,7 +123,7 @@ void main() {
 
     expect(
       container.read(desyncSettingProvider).categories,
-      [DesyncCategory.discord],
+      [DesyncCategory.discord, DesyncCategory.telegram],
     );
   });
 }

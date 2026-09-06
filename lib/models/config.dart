@@ -371,7 +371,9 @@ abstract class Config with _$Config {
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
     @Default(defaultSmartRoutingProps) SmartRoutingProps smartRoutingProps,
-    @Default(defaultDesyncProps) DesyncProps desyncProps,
+    @JsonKey(fromJson: DesyncProps.safeFromJson)
+    @Default(defaultDesyncProps)
+    DesyncProps desyncProps,
     @JsonKey(fromJson: ThemeProps.safeFromJson) required ThemeProps themeProps,
     @Default(defaultProxiesStyleProps) ProxiesStyleProps proxiesStyleProps,
     @Default(defaultWindowProps) WindowProps windowProps,

@@ -495,7 +495,7 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
         ),
   desyncProps: json['desyncProps'] == null
       ? defaultDesyncProps
-      : DesyncProps.fromJson(json['desyncProps'] as Map<String, dynamic>?),
+      : DesyncProps.safeFromJson(json['desyncProps'] as Map<String, Object?>?),
   themeProps: ThemeProps.safeFromJson(
     json['themeProps'] as Map<String, Object?>?,
   ),

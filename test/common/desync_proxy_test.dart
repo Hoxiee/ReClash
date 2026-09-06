@@ -72,16 +72,24 @@ void main() {
     expect(rules, ['GEOSITE,discord,DESYNC']);
   });
 
+  test('telegram routes the app itself by datacenter IP', () {
+    final rules = desyncRules(
+      categories: [DesyncCategory.telegram],
+      forceTcp: false,
+    );
+
+    expect(rules, [
+      'GEOSITE,telegram,DESYNC',
+      for (final cidr in desyncTelegramCidrs) 'IP-CIDR,$cidr,DESYNC',
+    ]);
+  });
+
   test('no category means no rules', () {
     expect(desyncRules(categories: [], forceTcp: true), isEmpty);
   });
 
-  test('only-dpi mode sends everything to the engine', () {
-    expect(desyncOnlyRules(forceTcp: true), [
-      'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
-      'MATCH,DESYNC',
-    ]);
-    expect(desyncOnlyRules(forceTcp: false), ['MATCH,DESYNC']);
+  test('only-dpi mode keeps the rest of the traffic off the engine', () {
+    expect(desyncOnlyFallback(), ['MATCH,DIRECT']);
   });
 
   test('an only-dpi config builds with no profile at all', () async {
@@ -99,14 +107,18 @@ void main() {
         defaultUA: 'ReClash-Test',
         desync: true,
         desyncOnly: true,
+        desyncCategories: [DesyncCategory.youtube],
       ),
     );
 
     final yaml = loadYaml(result.yaml) as YamlMap;
     expect(yaml['rules'], [
-      'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
-      'MATCH,DESYNC',
+      'AND,((NETWORK,udp),(DST-PORT,443),(GEOSITE,youtube)),REJECT',
+      'GEOSITE,youtube,DESYNC',
+      'MATCH,DIRECT',
     ]);
+    // Fake-ip would hand the engine unmapped 198.18.x dials it cannot route.
+    expect(yaml['dns']['enhanced-mode'], 'redir-host');
     final proxies = yaml['proxies'] as YamlList;
     expect(
       proxies.whereType<YamlMap>().any((proxy) => proxy['name'] == 'DESYNC'),

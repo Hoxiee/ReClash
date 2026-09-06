@@ -5,6 +5,7 @@ import android.net.LocalSocket
 import android.net.LocalSocketAddress
 import android.os.ParcelFileDescriptor
 import android.system.Os
+import android.system.OsConstants
 import com.reclash.common.GlobalState
 import java.io.File
 import java.io.FileDescriptor
@@ -24,6 +25,11 @@ internal class ByeDpiProtect(
 ) {
     private var server: LocalServerSocket? = null
 
+    // The bound LocalSocket owns the listening fd; dropping the reference lets
+    // the LocalSocketImpl finalizer close it under the live server at the next
+    // GC, and LocalServerSocket(fd).close() is a no-op on Android 11.
+    private var bound: LocalSocket? = null
+
     val path: String
         get() = socketFile.path
 
@@ -31,7 +37,10 @@ internal class ByeDpiProtect(
         socketFile.delete()
         val socket = LocalSocket(LocalSocket.SOCKET_STREAM)
         socket.bind(LocalSocketAddress(socketFile.path, LocalSocketAddress.Namespace.FILESYSTEM))
-        return LocalServerSocket(socket.fileDescriptor).also { server = it }
+        return LocalServerSocket(socket.fileDescriptor).also {
+            bound = socket
+            server = it
+        }
     }
 
     fun acceptLoop(listener: LocalServerSocket) {
@@ -39,6 +48,7 @@ internal class ByeDpiProtect(
             val client = try {
                 listener.accept()
             } catch (error: IOException) {
+                log("Desync protect accept loop ended: $error")
                 return
             }
             runCatching { serve(client) }
@@ -47,8 +57,15 @@ internal class ByeDpiProtect(
     }
 
     fun close() {
+        // A thread blocked in accept(2) is not woken by close() from another
+        // thread; shutdown is what makes accept fail so the loop can exit.
+        bound?.fileDescriptor?.let { fd ->
+            runCatching { Os.shutdown(fd, OsConstants.SHUT_RDWR) }
+        }
         runCatching { server?.close() }
         server = null
+        runCatching { bound?.close() }
+        bound = null
         socketFile.delete()
     }
 

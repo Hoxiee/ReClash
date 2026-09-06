@@ -1030,6 +1030,20 @@
   "desyncModeVpn": "VPN",
   "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, other{{count} 個の引数}}",
+  "desyncTestSection": "ストラテジーテスト",
+  "desyncTestTitle": "全プリセットを実行",
+  "desyncTestStart": "開始",
+  "desyncTestHint": "エンジンを通して {count} 個のホストへ全ストラテジーを試します。終了後に現在のストラテジーへ戻します",
+  "desyncTestProgress": "テスト中 {index} / {total}",
+  "desyncTestEngineDown": "エンジンが動作していません — DPI バイパスを有効にして接続してください",
+  "desyncTestAborted": "中断しました: ストラテジーがエンジンへ届きません",
+  "desyncTestDone": "完了: {count} 個のストラテジーをテストしました",
+  "desyncTestScore": "{total} ホスト中 {passed} が応答",
+  "desyncTestEngineCrashed": "このストラテジーでエンジンが停止しました",
+  "desyncTestDomains": "テストドメイン",
+  "desyncTestDomainsCount": "{count, plural, other{{count} 個のドメイン}}",
+  "desyncTestNoLists": "下からドメインリストを1つ以上選んでください",
+  "desyncTestFailedTitle": "このストラテジーが失敗したホスト",
   "@desyncArgsCount": {
     "placeholders": {
       "count": {

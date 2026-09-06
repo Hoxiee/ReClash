@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:reclash/common/common.dart';
 
 part 'generated/desync.freezed.dart';
 part 'generated/desync.g.dart';
@@ -9,8 +12,23 @@ const desyncOutboundName = 'DESYNC';
 
 const defaultDesyncCacheTtl = 100800;
 
-// The group before the first -A stays empty, so working sites pass untouched.
+// The ByeByeDPI tester's top scorer on a live TSPU network: 30/32 youtube
+// hosts, fake- and oob-free so it cannot trip the fake-packet detectors.
 const desyncDefaultStrategy = <String>[
+  '-d1',
+  '-s1+s',
+  '-s3+s',
+  '-s6+s',
+  '-s9+s',
+  '-s12+s',
+  '-s15+s',
+  '-s20+s',
+  '-s30+s',
+  '-a1',
+];
+
+// Saved by earlier installs with no editor to change them by hand.
+const desyncLegacyLadder = <String>[
   '-A',
   'torst,redirect,ssl_err,conn',
   '-L',
@@ -45,6 +63,24 @@ const desyncDefaultStrategy = <String>[
   '1+s',
 ];
 
+const desyncLegacyByedpi = <String>['-o1', '-a1', '-r-5+se'];
+
+const desyncLegacyTlsrec = <String>['-r-5+se'];
+
+// The Telegram app dials its datacenters by raw IP, so a domain rule never
+// sees it; these are core.telegram.org/resources/cidr.txt.
+const desyncTelegramCidrs = <String>[
+  '91.105.192.0/23',
+  '91.108.4.0/22',
+  '91.108.8.0/22',
+  '91.108.12.0/22',
+  '91.108.16.0/22',
+  '91.108.20.0/22',
+  '91.108.56.0/22',
+  '149.154.160.0/20',
+  '185.76.151.0/24',
+];
+
 /// Only blocks a desync can actually lift: a service that needs a foreign address
 /// belongs behind a node, not here.
 enum DesyncCategory {
@@ -52,6 +88,8 @@ enum DesyncCategory {
   youtube,
   @JsonValue('discord')
   discord,
+  @JsonValue('telegram')
+  telegram,
   @JsonValue('twitter')
   twitter,
   @JsonValue('meta')
@@ -62,11 +100,228 @@ enum DesyncCategory {
   String get geosite => switch (this) {
     DesyncCategory.youtube => 'youtube',
     DesyncCategory.discord => 'discord',
+    DesyncCategory.telegram => 'telegram',
     DesyncCategory.twitter => 'twitter',
     DesyncCategory.meta => 'meta',
     DesyncCategory.signal => 'signal',
   };
+
+  List<String> get cidrs => switch (this) {
+    DesyncCategory.telegram => desyncTelegramCidrs,
+    _ => const [],
+  };
 }
+
+/// Test domain groups carried over from ByeByeDPI's proxy test, verbatim.
+class DesyncTestSiteList {
+  const DesyncTestSiteList({
+    required this.id,
+    required this.name,
+    required this.domains,
+  });
+
+  final String id;
+  final String name;
+  final List<String> domains;
+}
+
+const desyncTestSiteLists = <DesyncTestSiteList>[
+  DesyncTestSiteList(
+    id: 'youtube',
+    name: 'YouTube',
+    domains: [
+      'youtu.be',
+      'youtube.com',
+      'i.ytimg.com',
+      'i9.ytimg.com',
+      'yt3.ggpht.com',
+      'yt4.ggpht.com',
+      'googleapis.com',
+      'jnn-pa.googleapis.com',
+      'googleusercontent.com',
+      'signaler-pa.youtube.com',
+      'youtubei.googleapis.com',
+      'manifest.googlevideo.com',
+      'yt3.googleusercontent.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'googlevideo',
+    name: 'Google Video',
+    domains: [
+      'rr1---sn-4axm-n8vs.googlevideo.com',
+      'rr1---sn-gvnuxaxjvh-o8ge.googlevideo.com',
+      'rr1---sn-ug5onuxaxjvh-p3ul.googlevideo.com',
+      'rr1---sn-ug5onuxaxjvh-n8v6.googlevideo.com',
+      'rr4---sn-q4flrnsl.googlevideo.com',
+      'rr10---sn-gvnuxaxjvh-304z.googlevideo.com',
+      'rr14---sn-n8v7kn7r.googlevideo.com',
+      'rr16---sn-axq7sn76.googlevideo.com',
+      'rr1---sn-8ph2xajvh-5xge.googlevideo.com',
+      'rr1---sn-gvnuxaxjvh-5gie.googlevideo.com',
+      'rr12---sn-gvnuxaxjvh-bvwz.googlevideo.com',
+      'rr5---sn-n8v7knez.googlevideo.com',
+      'rr1---sn-u5uuxaxjvhg0-ocje.googlevideo.com',
+      'rr2---sn-q4fl6ndl.googlevideo.com',
+      'rr5---sn-gvnuxaxjvh-n8vk.googlevideo.com',
+      'rr4---sn-jvhnu5g-c35d.googlevideo.com',
+      'rr1---sn-q4fl6n6y.googlevideo.com',
+      'rr2---sn-hgn7ynek.googlevideo.com',
+      'rr1---sn-xguxaxjvh-gufl.googlevideo.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'telegram',
+    name: 'Telegram',
+    domains: [
+      'telegram.org',
+      'core.telegram.org',
+      'web.telegram.org',
+      'webk.telegram.org',
+      'my.telegram.org',
+      'translations.telegram.org',
+      'instantview.telegram.org',
+      'blog.telegram.org',
+      'comments.telegram.org',
+      'verify.telegram.org',
+      'login.telegram.org',
+      'auth.telegram.org',
+      'api.telegram.org',
+      'promo.telegram.org',
+      'desktop.telegram.org',
+      'macos.telegram.org',
+      'ios.telegram.org',
+      'android.telegram.org',
+      'reactions.telegram.org',
+      'claims.telegram.org',
+      'x.telegram.org',
+      'help.telegram.org',
+      'docs.telegram.org',
+      'schema.telegram.org',
+      'dev.telegram.org',
+      'contest.telegram.org',
+      'premium.telegram.org',
+      'settings.telegram.org',
+      'qr.telegram.org',
+      'stickers.telegram.org',
+      'emoji.telegram.org',
+      'themes.telegram.org',
+      'donate.telegram.org',
+      'fragment.telegram.org',
+      'ton.telegram.org',
+      'wallet.telegram.org',
+      'pay.telegram.org',
+      'telegram.me',
+      'telegram.dog',
+      'telegra.ph',
+      'telesco.pe',
+      'web.telegram.me',
+      'zws1.web.telegram.org',
+      'zws2.web.telegram.org',
+      'zws1.web.telegram.me',
+      'zws2.web.telegram.me',
+      'venus.web.telegram.org',
+      'pluto.web.telegram.org',
+      'aurora.web.telegram.org',
+      'vesta.web.telegram.org',
+      'voice.telegram.org',
+      'cdn.telegram.org',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'discord',
+    name: 'Discord',
+    domains: [
+      'dis.gd',
+      'discord.co',
+      'discord.gg',
+      'discord.app',
+      'discord.com',
+      'discord.dev',
+      'discord.new',
+      'discord.gift',
+      'discord.gifts',
+      'discord.media',
+      'discord.store',
+      'discord.design',
+      'discordapp.com',
+      'discordcdn.com',
+      'discordsez.com',
+      'discordsays.com',
+      'discordmerch.com',
+      'discordpartygames.com',
+      'discordactivities.com',
+      'stable.dl2.discordapp.net',
+      'discord-attachments-uploads-prd.storage.googleapis.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'social',
+    name: 'Social',
+    domains: [
+      'snapchat.com',
+      'snap.com',
+      'linkedin.com',
+      'facebook.com',
+      'fb.com',
+      'fb.me',
+      'fbcdn.net',
+      'messenger.com',
+      'meta.com',
+      'instagram.com',
+      'static.cdninstagram.com',
+      'proton.me',
+      'medium.com',
+      'x.com',
+      'twitter.com',
+      'soundcloud.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'general',
+    name: 'General',
+    domains: [
+      'rutracker.org',
+      'nyaa.si',
+      'rutor.org',
+      'nnmclub.to',
+      'speedtest.net',
+      'ookla.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'cloudflare',
+    name: 'Cloudflare',
+    domains: [
+      'cloudflare.net',
+      'cloudflare.com',
+      'cloudflarecn.net',
+      'cloudflare-ech.com',
+    ],
+  ),
+  DesyncTestSiteList(
+    id: 'turkiye',
+    name: 'Türkiye',
+    domains: [
+      'roblox.com',
+      'wattpad.com',
+      'pastebin.com',
+      '4shared.com',
+      'wikileaks.org',
+      'bitly.com',
+      'cutt.ly',
+      't2m.io',
+    ],
+  ),
+];
+
+// Telegram stays reachable when a VPN subscription lapses, so it rides along
+// the YouTube default instead of ByeByeDPI's youtube+googlevideo pair.
+const defaultDesyncTestSiteLists = <String>[
+  'youtube',
+  'googlevideo',
+  'telegram',
+];
 
 @freezed
 abstract class DesyncStrategy with _$DesyncStrategy {
@@ -85,17 +340,44 @@ abstract class DesyncProps with _$DesyncProps {
     @Default(false) bool enabled,
     @Default(false) bool onlyDpi,
     @Default(defaultDesyncPort) int port,
-    @Default([DesyncCategory.youtube, DesyncCategory.discord])
+    @Default([
+      DesyncCategory.youtube,
+      DesyncCategory.discord,
+      DesyncCategory.telegram,
+    ])
     List<DesyncCategory> categories,
     @Default(true) bool forceTcp,
     @Default(desyncDefaultStrategy) List<String> strategyArgs,
     @Default(true) bool cacheEnabled,
     @Default(defaultDesyncCacheTtl) int cacheTtl,
     @Default([]) List<DesyncStrategy> savedStrategies,
+    @Default(defaultDesyncTestSiteLists) List<String> testSiteLists,
   }) = _DesyncProps;
 
-  factory DesyncProps.fromJson(Map<String, Object?>? json) =>
-      json == null ? defaultDesyncProps : _$DesyncPropsFromJson(json);
+  factory DesyncProps.fromJson(Map<String, Object?>? json) => json == null
+      ? defaultDesyncProps
+      : migrateDesyncProps(_$DesyncPropsFromJson(json));
+
+  static DesyncProps safeFromJson(Map<String, Object?>? json) {
+    if (json == null) {
+      return defaultDesyncProps;
+    }
+    return decodeOrRestoreDefault(
+      'desync settings',
+      () => DesyncProps.fromJson(json),
+      () => defaultDesyncProps,
+    );
+  }
+}
+
+DesyncProps migrateDesyncProps(DesyncProps props) {
+  final legacy = props.strategyArgs;
+  if (listEquals(legacy, desyncLegacyLadder) ||
+      listEquals(legacy, desyncLegacyByedpi) ||
+      listEquals(legacy, desyncLegacyTlsrec)) {
+    return props.copyWith(strategyArgs: desyncDefaultStrategy);
+  }
+  return props;
 }
 
 const defaultDesyncProps = DesyncProps();

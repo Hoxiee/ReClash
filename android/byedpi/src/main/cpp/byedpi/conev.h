@@ -108,6 +108,7 @@ struct poolhd {
     int max;
     int count;
     int efd;
+    int wake_fd;
     struct eval **links;
     struct eval *items;
 #ifndef NOEPOLL
@@ -122,6 +123,12 @@ struct poolhd {
     struct buffer *root_buff;
     int buff_count;
 };
+
+// fd of the eventfd registered with the live pool's epoll, -1 when no loop
+// runs. shutdown() on the listener does not wake epoll_wait on every kernel,
+// and close() from another thread never does, so the host stops the loop by
+// writing to it.
+extern int wake_fd;
 
 struct poolhd *init_pool(int count);
 

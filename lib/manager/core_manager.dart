@@ -77,12 +77,25 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     });
     // Rules and the outbound only exist in profiles built while it was on, so the
     // flip has to rebuild the config, not just push options to the service.
-    ref.listenManual(desyncSettingProvider, (prev, next) {
-      if (prev == next) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-      });
-    });
+    // Strategy and cache keys are engine-only: they reach the listener through
+    // VpnOptions, and the strategy tester flips them dozens of times a run.
+    ref.listenManual(
+      desyncSettingProvider.select(
+        (state) => (
+          enabled: state.enabled,
+          onlyDpi: state.onlyDpi,
+          port: state.port,
+          categories: state.categories,
+          forceTcp: state.forceTcp,
+        ),
+      ),
+      (prev, next) {
+        if (prev == next) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+        });
+      },
+    );
     ref.listenManual(appSettingProvider.select((state) => state.openLogs), (
       prev,
       next,

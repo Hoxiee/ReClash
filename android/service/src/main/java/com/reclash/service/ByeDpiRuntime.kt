@@ -1,11 +1,14 @@
 package com.reclash.service
 
 import android.app.Service
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import com.reclash.byedpi.ByeDpiNative
 import com.reclash.common.GlobalState
 import com.reclash.service.modules.BYEDPI_LOOPBACK
 import com.reclash.service.modules.ByeDpiModule
 import java.io.File
+import java.net.Inet4Address
 import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -15,46 +18,71 @@ internal class ByeDpiRuntime(
     private val protect: ((Int) -> Boolean)?,
     private val log: (String) -> Unit = GlobalState::log,
 ) : ByeDpiModule.Engine {
-    private var branch: Thread? = null
+    @Volatile private var branch: Thread? = null
     private var receiver: ByeDpiProtect? = null
     private var receiverThread: Thread? = null
 
     @Synchronized override fun start(args: List<String>) {
-        if (branch != null) return
+        branch?.join(BRANCH_DRAIN_MS)
+        if (branch?.isAlive == true) {
+            log("Desync branch still draining, keeping the previous run")
+            return
+        }
         openReceiver()
+        val dns = underlyingDns()
+        log("Desync engine dns: ${dns ?: "system"}")
+        ByeDpiNative.setDns(dns)
         branch = thread(name = THREAD_NAME) {
-            val status = runCatching { ByeDpiNative.runUntilStopped(args) }
-                .getOrElse { error ->
-                    log("Desync branch crashed: $error")
-                    -1
-                }
-            if (status != 0) log("Desync branch exited with $status")
+            try {
+                val status = runCatching { ByeDpiNative.runUntilStopped(args) }
+                    .getOrElse { error ->
+                        log("Desync branch crashed: $error")
+                        -1
+                    }
+                if (status != 0) log("Desync branch exited with $status")
+            } finally {
+                branch = null
+            }
         }
     }
 
     @Synchronized override fun stop() {
         val running = branch
-        branch = null
         if (running != null) {
             ByeDpiNative.stop()
             running.join(STOP_JOIN_MS)
             if (running.isAlive) {
-                log("Desync branch did not stop, closing the listener")
-                ByeDpiNative.forceClose()
-                running.join(STOP_JOIN_MS)
+                // Forcing fds closed now would strand the live engine (fdsan).
+                log("Desync branch did not stop, leaving it to wind down")
+                return
             }
         }
-        // A dead branch must not pin a stale receiver: the next start would
-        // reuse a socket the old accept loop no longer serves.
         closeReceiver()
     }
 
     override fun probe(port: Int): Boolean = runCatching {
         Socket().use { socket ->
+            socket.tcpNoDelay = true
             socket.connect(InetSocketAddress(BYEDPI_LOOPBACK, port), PROBE_TIMEOUT_MS)
+            socket.soTimeout = PROBE_TIMEOUT_MS
+            socket.getOutputStream().write(byteArrayOf(5, 1, 0))
+            socket.getInputStream().read() == 5
         }
-        true
     }.getOrDefault(false)
+
+    // The engine's host lookups must not go through the tunnel: the VPN's own
+    // DNS answers for the whole device. Hand it the underlying link's resolver.
+    private fun underlyingDns(): String? = runCatching {
+        val manager = service.getSystemService(ConnectivityManager::class.java)
+        for (network in manager?.allNetworks.orEmpty()) {
+            val capabilities = manager?.getNetworkCapabilities(network) ?: continue
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+            val dns = manager.getLinkProperties(network)?.dnsServers
+                ?.firstOrNull { it is Inet4Address } ?: continue
+            return dns.hostAddress
+        }
+        null
+    }.getOrNull()
 
     override fun protectPath(): String? =
         if (protect == null) null else File(service.filesDir, PROTECT_SOCKET).path
@@ -93,6 +121,7 @@ internal class ByeDpiRuntime(
         const val PROTECT_SOCKET = "byedpi.protect"
         const val CACHE_DIR = "byedpi"
         const val STOP_JOIN_MS = 2_000L
+        const val BRANCH_DRAIN_MS = 8_000L
         const val PROBE_TIMEOUT_MS = 1_500
     }
 }

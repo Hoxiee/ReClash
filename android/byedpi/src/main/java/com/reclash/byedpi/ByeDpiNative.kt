@@ -13,8 +13,9 @@ object ByeDpiNative {
         if (loaded) nativeStop()
     }
 
-    fun forceClose() {
-        if (loaded) nativeForceClose()
+    fun setDns(ip: String?) {
+        ensureLoaded()
+        nativeSetDns(ip)
     }
 
     @Synchronized
@@ -28,5 +29,5 @@ object ByeDpiNative {
 
     private external fun nativeStop()
 
-    private external fun nativeForceClose()
+    private external fun nativeSetDns(ip: String?)
 }

@@ -129,7 +129,7 @@ class ByeDpiModuleTest {
     }
 
     @Test
-    fun `a dead listener is restarted after the backoff`() = runTest {
+    fun `a dead listener is restarted right away`() = runTest {
         module().start()
         ServiceConfig.updateVpnOptions(options())
         runCurrent()
@@ -137,7 +137,8 @@ class ByeDpiModuleTest {
         advanceTimeBy(ByeDpiPolicy.PROBE_INTERVAL_MS + 1)
         runCurrent()
         assertEquals(1, engine.stops)
-        assertEquals(1, engine.starts.size)
+        assertEquals(2, engine.starts.size)
+        // The backoff only spaces the next probe, not the restart itself.
         advanceTimeBy(ByeDpiPolicy.backoffMs(0))
         runCurrent()
         assertEquals(2, engine.starts.size)
@@ -190,6 +191,18 @@ class ByeDpiModuleTest {
         runCurrent()
         module.stop()
         assertEquals(1, engine.stops)
+    }
+
+    @Test
+    fun `an environment change after stop cannot resurrect the branch`() = runTest {
+        val module = module()
+        module.start()
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        module.stop()
+        module.onEnvironmentChanged("abc123")
+        runCurrent()
+        assertEquals(1, engine.starts.size)
     }
 
     // The options flow and environment changes land from separate coroutines on

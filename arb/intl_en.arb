@@ -1170,6 +1170,20 @@
   "desyncModeVpn": "VPN",
   "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, =0{no arguments} =1{1 argument} other{{count} arguments}}",
+  "desyncTestSection": "Strategy test",
+  "desyncTestTitle": "Run every preset",
+  "desyncTestStart": "Start",
+  "desyncTestHint": "Tries every known strategy against {count} hosts through the engine; the current strategy is restored afterwards",
+  "desyncTestProgress": "Testing {index} of {total}",
+  "desyncTestEngineDown": "The engine is not running — connect with DPI bypass enabled first",
+  "desyncTestAborted": "Stopped early: strategies stopped reaching the engine",
+  "desyncTestDone": "Finished: {count} strategies tested",
+  "desyncTestScore": "{passed} of {total} hosts up",
+  "desyncTestEngineCrashed": "The engine died on this strategy",
+  "desyncTestDomains": "Test domains",
+  "desyncTestDomainsCount": "{count, plural, =1{1 domain} other{{count} domains}}",
+  "desyncTestNoLists": "Pick at least one domain list below",
+  "desyncTestFailedTitle": "Hosts this strategy failed",
   "@desyncArgsCount": {
     "placeholders": {
       "count": {

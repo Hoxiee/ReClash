@@ -1030,6 +1030,20 @@
   "desyncModeVpn": "VPN",
   "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, other{{count} 个参数}}",
+  "desyncTestSection": "策略测试",
+  "desyncTestTitle": "运行全部预设",
+  "desyncTestStart": "开始",
+  "desyncTestHint": "通过引擎对 {count} 个主机逐个测试所有已知策略；结束后会恢复当前策略",
+  "desyncTestProgress": "正在测试第 {index} 个，共 {total} 个",
+  "desyncTestEngineDown": "引擎未运行 — 请先在启用 DPI 绕过的情况下连接",
+  "desyncTestAborted": "已中止：策略无法送达引擎",
+  "desyncTestDone": "完成：已测试 {count} 个策略",
+  "desyncTestScore": "{passed} / {total} 个主机可达",
+  "desyncTestEngineCrashed": "引擎在该策略下崩溃",
+  "desyncTestDomains": "测试域名",
+  "desyncTestDomainsCount": "{count, plural, other{{count} 个域名}}",
+  "desyncTestNoLists": "请在下方至少选择一个域名列表",
+  "desyncTestFailedTitle": "该策略未通过的主机",
   "@desyncArgsCount": {
     "placeholders": {
       "count": {

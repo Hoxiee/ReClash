@@ -144,6 +144,7 @@ class DesyncView extends ConsumerWidget {
             ),
         ],
       ),
+      const _DesyncTester(),
       SettingSection.sliver(
         title: appLocalizations.desyncEngine,
         items: [
@@ -236,6 +237,7 @@ class DesyncView extends ConsumerWidget {
   String _categoryLabel(DesyncCategory category) => switch (category) {
     DesyncCategory.youtube => 'YouTube',
     DesyncCategory.discord => 'Discord',
+    DesyncCategory.telegram => 'Telegram',
     DesyncCategory.twitter => 'Twitter / X',
     DesyncCategory.meta => 'Meta',
     DesyncCategory.signal => 'Signal',
@@ -312,6 +314,212 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Runs the preset battery against the live engine and lets the user apply a
+/// winner; the strategy in force when the test started is restored at the end.
+class _DesyncTester extends ConsumerStatefulWidget {
+  const _DesyncTester();
+
+  @override
+  ConsumerState<_DesyncTester> createState() => _DesyncTesterState();
+}
+
+class _DesyncTesterState extends ConsumerState<_DesyncTester> {
+  final _outcomes = <DesyncTestOutcome>[];
+  DesyncStrategyTester? _tester;
+  int _index = 0;
+  bool _running = false;
+  bool _stoppedByUser = false;
+  bool _aborted = false;
+  bool _engineDown = false;
+
+  @override
+  void dispose() {
+    _tester?.stop();
+    super.dispose();
+  }
+
+  Future<void> _handleStart() async {
+    final props = ref.read(desyncSettingProvider);
+    final sites = desyncTestSitesFor(props.testSiteLists);
+    if (sites.isEmpty || !await desyncEngineAlive(props.port)) {
+      setState(() => _engineDown = true);
+      return;
+    }
+    final notifier = ref.read(desyncSettingProvider.notifier);
+    final tester = DesyncStrategyTester(
+      port: props.port,
+      applyArgs: (args) async => notifier.update(
+        (state) => state.copyWith(strategyArgs: args),
+      ),
+    );
+    setState(() {
+      _tester = tester;
+      _running = true;
+      _stoppedByUser = false;
+      _aborted = false;
+      _engineDown = false;
+      _index = 0;
+      _outcomes.clear();
+    });
+    final outcomes = await tester.run(
+      originalArgs: props.strategyArgs,
+      sites: sites,
+      onProgress: (index, outcome) {
+        if (!mounted) return;
+        setState(() {
+          _index = index + 1;
+          _outcomes.add(outcome);
+        });
+      },
+    );
+    if (!mounted) return;
+    setState(() {
+      _running = false;
+      _aborted = outcomes.length < desyncTestPresets.length && !_stoppedByUser;
+    });
+  }
+
+  void _handleStop() {
+    _stoppedByUser = true;
+    _tester?.stop();
+  }
+
+  void _applyOutcome(DesyncTestOutcome outcome) {
+    ref.read(desyncSettingProvider.notifier).update(
+          (state) => state.copyWith(strategyArgs: desyncTestArgs(outcome.text)),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(
+      desyncSettingProvider.select((state) => state.testSiteLists),
+    );
+    final sites = desyncTestSitesFor(props);
+    final subtitle = _running
+        ? appLocalizations.desyncTestProgress(_index, desyncTestPresets.length)
+        : _engineDown
+        ? appLocalizations.desyncTestEngineDown
+        : _aborted
+        ? appLocalizations.desyncTestAborted
+        : _outcomes.isNotEmpty
+        ? appLocalizations.desyncTestDone(_outcomes.length)
+        : sites.isEmpty
+        ? appLocalizations.desyncTestNoLists
+        : appLocalizations.desyncTestHint(sites.length);
+    final outcomes = _running || _outcomes.length < 2
+        ? _outcomes
+        : [..._outcomes]..sort(
+            (a, b) => b.passed.compareTo(a.passed),
+          );
+    return SettingSection.sliver(
+      title: appLocalizations.desyncTestSection,
+      items: [
+        DecorationListItem(
+          title: Text(appLocalizations.desyncTestTitle),
+          subtitle: Text(subtitle),
+          trailing: CommonMinFilledButtonTheme(
+            child: FilledButton.tonal(
+              onPressed: _running
+                  ? _handleStop
+                  : sites.isEmpty
+                  ? null
+                  : _handleStart,
+              child: Text(
+                _running
+                    ? appLocalizations.stop
+                    : appLocalizations.desyncTestStart,
+              ),
+            ),
+          ),
+        ),
+        DecorationListItem.open(
+          title: Text(appLocalizations.desyncTestDomains),
+          subtitle: Text(appLocalizations.desyncTestDomainsCount(sites.length)),
+          widget: const _DesyncTestSitesPage(),
+        ),
+        for (final outcome in outcomes)
+          DecorationListItem(
+            leading: outcome.engineUp && outcome.passed == outcome.total
+                ? const Icon(Icons.check_rounded)
+                : null,
+            title: Text(
+              outcome.text.replaceAll('{sni}', desyncTestFakeSni),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            ),
+            subtitle: Text(
+              outcome.engineUp
+                  ? appLocalizations.desyncTestScore(
+                      outcome.passed,
+                      outcome.total,
+                    )
+                  : appLocalizations.desyncTestEngineCrashed,
+            ),
+            trailing: outcome.failedSites.isEmpty
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.info_outline_rounded),
+                    tooltip: appLocalizations.desyncTestFailedTitle,
+                    onPressed: () => _showFailed(outcome),
+                  ),
+            onPressed: _running ? null : () => _applyOutcome(outcome),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _showFailed(DesyncTestOutcome outcome) async {
+    final appLocalizations = context.appLocalizations;
+    await dialogs.showMessage(
+      title: appLocalizations.desyncTestFailedTitle,
+      message: TextSpan(text: outcome.failedSites.join('\n')),
+    );
+  }
+}
+
+class _DesyncTestSitesPage extends ConsumerWidget {
+  const _DesyncTestSitesPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final selected = ref.watch(
+      desyncSettingProvider.select((state) => state.testSiteLists),
+    );
+    return CommonScaffold(
+      title: appLocalizations.desyncTestDomains,
+      body: CustomScrollView(
+        slivers: [
+          SettingSection.sliver(
+            bottom: 24,
+            items: [
+              for (final list in desyncTestSiteLists)
+                DecorationListItem.toggle(
+                  title: Text(list.name),
+                  subtitle: Text(
+                    appLocalizations.desyncTestDomainsCount(list.domains.length),
+                  ),
+                  value: selected.contains(list.id),
+                  onChanged: (value) => ref
+                      .read(desyncSettingProvider.notifier)
+                      .update((state) {
+                        final next = {...state.testSiteLists};
+                        value ? next.add(list.id) : next.remove(list.id);
+                        return state.copyWith(testSiteLists: next.toList());
+                      }),
+                ),
+            ],
+          ),
+          const SettingBottomInset.sliver(),
+        ],
       ),
     );
   }

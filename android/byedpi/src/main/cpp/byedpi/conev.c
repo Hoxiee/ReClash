@@ -6,6 +6,12 @@
 #include <assert.h>
 #include "error.h"
 
+#ifndef NOEPOLL
+    #include <sys/eventfd.h>
+#endif
+
+int wake_fd = -1;
+
 
 struct poolhd *init_pool(int count)
 {
@@ -25,6 +31,16 @@ struct poolhd *init_pool(int count)
         return 0;
     }
     pool->efd = efd;
+    int wfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (wfd >= 0) {
+        struct epoll_event wev = { .events = EPOLLIN, .data = {0} };
+        if (epoll_ctl(efd, EPOLL_CTL_ADD, wfd, &wev)) {
+            close(wfd);
+            wfd = -1;
+        }
+    }
+    pool->wake_fd = wfd;
+    wake_fd = wfd;
     #endif
     pool->pevents = malloc(sizeof(*pool->pevents) * count);
     pool->links = malloc(sizeof(*pool->links) * count);
@@ -151,6 +167,12 @@ void destroy_pool(struct poolhd *pool)
     #ifndef NOEPOLL
     if (pool->efd)
         close(pool->efd);
+    if (pool->wake_fd > 0) {
+        close(pool->wake_fd);
+        if (wake_fd == pool->wake_fd) {
+            wake_fd = -1;
+        }
+    }
     #endif
     buff_destroy(pool->root_buff);
     memset(pool, 0, sizeof(*pool));
@@ -174,6 +196,12 @@ struct eval *next_event(struct poolhd *pool, int *offs, int *type, int ms)
             pool->iters++;
         }
         struct eval *val = pool->pevents[i].data.ptr;
+        // the wake eventfd carries no eval; the host wants the loop to stop
+        if (!val) {
+            *offs = i - 1;
+            errno = ECANCELED;
+            return 0;
+        }
         *offs = i - 1;
         if (val->mod_iter == pool->iters) {
             continue;

@@ -14,7 +14,7 @@ part of '../desync.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$DesyncStrategy {
+mixin _$DesyncStrategy implements DiagnosticableTreeMixin {
 
  String get name; List<String> get args;
 /// Create a copy of DesyncStrategy
@@ -26,6 +26,13 @@ $DesyncStrategyCopyWith<DesyncStrategy> get copyWith => _$DesyncStrategyCopyWith
   /// Serializes this DesyncStrategy to a JSON map.
   Map<String, dynamic> toJson();
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  final _this = this as DesyncStrategy;
+  properties
+    ..add(DiagnosticsProperty('type', 'DesyncStrategy'))
+    ..add(DiagnosticsProperty('name', _this.name))..add(DiagnosticsProperty('args', _this.args));
+}
 
 @override
 bool operator ==(Object other) {
@@ -41,7 +48,7 @@ int get hashCode {
 }
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   final _this = this as DesyncStrategy;
   return 'DesyncStrategy(name: ${_this.name}, args: ${_this.args})';
 }
@@ -215,7 +222,7 @@ return $default(_that.name,_that.args);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _DesyncStrategy implements DesyncStrategy {
+class _DesyncStrategy with DiagnosticableTreeMixin implements DesyncStrategy {
   const _DesyncStrategy({required this.name,  List<String> args = const []}): _args = args;
   factory _DesyncStrategy.fromJson(Map<String, dynamic> json) => _$DesyncStrategyFromJson(json);
 
@@ -238,6 +245,12 @@ _$DesyncStrategyCopyWith<_DesyncStrategy> get copyWith => __$DesyncStrategyCopyW
 Map<String, dynamic> toJson() {
   return _$DesyncStrategyToJson(this, );
 }
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+    ..add(DiagnosticsProperty('type', 'DesyncStrategy'))
+    ..add(DiagnosticsProperty('name', name))..add(DiagnosticsProperty('args', args));
+}
 
 @override
 bool operator ==(Object other) {
@@ -251,7 +264,7 @@ int get hashCode {
 }
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
     return 'DesyncStrategy(name: $name, args: $args)';
 }
 
@@ -293,9 +306,9 @@ as List<String>,
 
 
 /// @nodoc
-mixin _$DesyncProps {
+mixin _$DesyncProps implements DiagnosticableTreeMixin {
 
- bool get enabled; bool get onlyDpi; int get port; List<DesyncCategory> get categories; bool get forceTcp; List<String> get strategyArgs; bool get cacheEnabled; int get cacheTtl; List<DesyncStrategy> get savedStrategies;
+ bool get enabled; bool get onlyDpi; int get port; List<DesyncCategory> get categories; bool get forceTcp; List<String> get strategyArgs; bool get cacheEnabled; int get cacheTtl; List<DesyncStrategy> get savedStrategies; List<String> get testSiteLists;
 /// Create a copy of DesyncProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -305,24 +318,31 @@ $DesyncPropsCopyWith<DesyncProps> get copyWith => _$DesyncPropsCopyWithImpl<Desy
   /// Serializes this DesyncProps to a JSON map.
   Map<String, dynamic> toJson();
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  final _this = this as DesyncProps;
+  properties
+    ..add(DiagnosticsProperty('type', 'DesyncProps'))
+    ..add(DiagnosticsProperty('enabled', _this.enabled))..add(DiagnosticsProperty('onlyDpi', _this.onlyDpi))..add(DiagnosticsProperty('port', _this.port))..add(DiagnosticsProperty('categories', _this.categories))..add(DiagnosticsProperty('forceTcp', _this.forceTcp))..add(DiagnosticsProperty('strategyArgs', _this.strategyArgs))..add(DiagnosticsProperty('cacheEnabled', _this.cacheEnabled))..add(DiagnosticsProperty('cacheTtl', _this.cacheTtl))..add(DiagnosticsProperty('savedStrategies', _this.savedStrategies))..add(DiagnosticsProperty('testSiteLists', _this.testSiteLists));
+}
 
 @override
 bool operator ==(Object other) {
   final _this = this as DesyncProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DesyncProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.onlyDpi, _this.onlyDpi) || other.onlyDpi == _this.onlyDpi)&&(identical(other.port, _this.port) || other.port == _this.port)&&const DeepCollectionEquality().equals(other.categories, _this.categories)&&(identical(other.forceTcp, _this.forceTcp) || other.forceTcp == _this.forceTcp)&&const DeepCollectionEquality().equals(other.strategyArgs, _this.strategyArgs)&&(identical(other.cacheEnabled, _this.cacheEnabled) || other.cacheEnabled == _this.cacheEnabled)&&(identical(other.cacheTtl, _this.cacheTtl) || other.cacheTtl == _this.cacheTtl)&&const DeepCollectionEquality().equals(other.savedStrategies, _this.savedStrategies));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DesyncProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.onlyDpi, _this.onlyDpi) || other.onlyDpi == _this.onlyDpi)&&(identical(other.port, _this.port) || other.port == _this.port)&&const DeepCollectionEquality().equals(other.categories, _this.categories)&&(identical(other.forceTcp, _this.forceTcp) || other.forceTcp == _this.forceTcp)&&const DeepCollectionEquality().equals(other.strategyArgs, _this.strategyArgs)&&(identical(other.cacheEnabled, _this.cacheEnabled) || other.cacheEnabled == _this.cacheEnabled)&&(identical(other.cacheTtl, _this.cacheTtl) || other.cacheTtl == _this.cacheTtl)&&const DeepCollectionEquality().equals(other.savedStrategies, _this.savedStrategies)&&const DeepCollectionEquality().equals(other.testSiteLists, _this.testSiteLists));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DesyncProps;
-  return Object.hash(runtimeType,_this.enabled,_this.onlyDpi,_this.port,const DeepCollectionEquality().hash(_this.categories),_this.forceTcp,const DeepCollectionEquality().hash(_this.strategyArgs),_this.cacheEnabled,_this.cacheTtl,const DeepCollectionEquality().hash(_this.savedStrategies));
+  return Object.hash(runtimeType,_this.enabled,_this.onlyDpi,_this.port,const DeepCollectionEquality().hash(_this.categories),_this.forceTcp,const DeepCollectionEquality().hash(_this.strategyArgs),_this.cacheEnabled,_this.cacheTtl,const DeepCollectionEquality().hash(_this.savedStrategies),const DeepCollectionEquality().hash(_this.testSiteLists));
 }
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   final _this = this as DesyncProps;
-  return 'DesyncProps(enabled: ${_this.enabled}, onlyDpi: ${_this.onlyDpi}, port: ${_this.port}, categories: ${_this.categories}, forceTcp: ${_this.forceTcp}, strategyArgs: ${_this.strategyArgs}, cacheEnabled: ${_this.cacheEnabled}, cacheTtl: ${_this.cacheTtl}, savedStrategies: ${_this.savedStrategies})';
+  return 'DesyncProps(enabled: ${_this.enabled}, onlyDpi: ${_this.onlyDpi}, port: ${_this.port}, categories: ${_this.categories}, forceTcp: ${_this.forceTcp}, strategyArgs: ${_this.strategyArgs}, cacheEnabled: ${_this.cacheEnabled}, cacheTtl: ${_this.cacheTtl}, savedStrategies: ${_this.savedStrategies}, testSiteLists: ${_this.testSiteLists})';
 }
 
 
@@ -333,7 +353,7 @@ abstract mixin class $DesyncPropsCopyWith<$Res>  {
   factory $DesyncPropsCopyWith(DesyncProps value, $Res Function(DesyncProps) _then) = _$DesyncPropsCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, bool onlyDpi, int port, List<DesyncCategory> categories, bool forceTcp, List<String> strategyArgs, bool cacheEnabled, int cacheTtl, List<DesyncStrategy> savedStrategies
+ bool enabled, bool onlyDpi, int port, List<DesyncCategory> categories, bool forceTcp, List<String> strategyArgs, bool cacheEnabled, int cacheTtl, List<DesyncStrategy> savedStrategies, List<String> testSiteLists
 });
 
 
@@ -350,7 +370,7 @@ class _$DesyncPropsCopyWithImpl<$Res>
 
 /// Create a copy of DesyncProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? onlyDpi = null,Object? port = null,Object? categories = null,Object? forceTcp = null,Object? strategyArgs = null,Object? cacheEnabled = null,Object? cacheTtl = null,Object? savedStrategies = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? onlyDpi = null,Object? port = null,Object? categories = null,Object? forceTcp = null,Object? strategyArgs = null,Object? cacheEnabled = null,Object? cacheTtl = null,Object? savedStrategies = null,Object? testSiteLists = null,}) {
   return _then(DesyncProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,onlyDpi: null == onlyDpi ? _self.onlyDpi : onlyDpi // ignore: cast_nullable_to_non_nullable
@@ -361,7 +381,8 @@ as bool,strategyArgs: null == strategyArgs ? _self.strategyArgs : strategyArgs /
 as List<String>,cacheEnabled: null == cacheEnabled ? _self.cacheEnabled : cacheEnabled // ignore: cast_nullable_to_non_nullable
 as bool,cacheTtl: null == cacheTtl ? _self.cacheTtl : cacheTtl // ignore: cast_nullable_to_non_nullable
 as int,savedStrategies: null == savedStrategies ? _self.savedStrategies : savedStrategies // ignore: cast_nullable_to_non_nullable
-as List<DesyncStrategy>,
+as List<DesyncStrategy>,testSiteLists: null == testSiteLists ? _self.testSiteLists : testSiteLists // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -446,10 +467,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies,  List<String> testSiteLists)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DesyncProps() when $default != null:
-return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies);case _:
+return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies,_that.testSiteLists);case _:
   return orElse();
 
 }
@@ -467,10 +488,10 @@ return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.fo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies,  List<String> testSiteLists)  $default,) {final _that = this;
 switch (_that) {
 case _DesyncProps():
-return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies);case _:
+return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies,_that.testSiteLists);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -487,10 +508,10 @@ return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.fo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  bool onlyDpi,  int port,  List<DesyncCategory> categories,  bool forceTcp,  List<String> strategyArgs,  bool cacheEnabled,  int cacheTtl,  List<DesyncStrategy> savedStrategies,  List<String> testSiteLists)?  $default,) {final _that = this;
 switch (_that) {
 case _DesyncProps() when $default != null:
-return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies);case _:
+return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.forceTcp,_that.strategyArgs,_that.cacheEnabled,_that.cacheTtl,_that.savedStrategies,_that.testSiteLists);case _:
   return null;
 
 }
@@ -501,8 +522,8 @@ return $default(_that.enabled,_that.onlyDpi,_that.port,_that.categories,_that.fo
 /// @nodoc
 @JsonSerializable()
 
-class _DesyncProps implements DesyncProps {
-  const _DesyncProps({this.enabled = false, this.onlyDpi = false, this.port = defaultDesyncPort,  List<DesyncCategory> categories = const [DesyncCategory.youtube, DesyncCategory.discord], this.forceTcp = true,  List<String> strategyArgs = desyncDefaultStrategy, this.cacheEnabled = true, this.cacheTtl = defaultDesyncCacheTtl,  List<DesyncStrategy> savedStrategies = const []}): _categories = categories,_strategyArgs = strategyArgs,_savedStrategies = savedStrategies;
+class _DesyncProps with DiagnosticableTreeMixin implements DesyncProps {
+  const _DesyncProps({this.enabled = false, this.onlyDpi = false, this.port = defaultDesyncPort,  List<DesyncCategory> categories = const [DesyncCategory.youtube, DesyncCategory.discord, DesyncCategory.telegram], this.forceTcp = true,  List<String> strategyArgs = desyncDefaultStrategy, this.cacheEnabled = true, this.cacheTtl = defaultDesyncCacheTtl,  List<DesyncStrategy> savedStrategies = const [],  List<String> testSiteLists = defaultDesyncTestSiteLists}): _categories = categories,_strategyArgs = strategyArgs,_savedStrategies = savedStrategies,_testSiteLists = testSiteLists;
   factory _DesyncProps.fromJson(Map<String, dynamic> json) => _$DesyncPropsFromJson(json);
 
 @override@JsonKey() final  bool enabled;
@@ -532,6 +553,13 @@ class _DesyncProps implements DesyncProps {
   return EqualUnmodifiableListView(_savedStrategies);
 }
 
+ final  List<String> _testSiteLists;
+@override@JsonKey() List<String> get testSiteLists {
+  if (_testSiteLists is EqualUnmodifiableListView) return _testSiteLists;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_testSiteLists);
+}
+
 
 /// Create a copy of DesyncProps
 /// with the given fields replaced by the non-null parameter values.
@@ -543,21 +571,27 @@ _$DesyncPropsCopyWith<_DesyncProps> get copyWith => __$DesyncPropsCopyWithImpl<_
 Map<String, dynamic> toJson() {
   return _$DesyncPropsToJson(this, );
 }
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+    ..add(DiagnosticsProperty('type', 'DesyncProps'))
+    ..add(DiagnosticsProperty('enabled', enabled))..add(DiagnosticsProperty('onlyDpi', onlyDpi))..add(DiagnosticsProperty('port', port))..add(DiagnosticsProperty('categories', categories))..add(DiagnosticsProperty('forceTcp', forceTcp))..add(DiagnosticsProperty('strategyArgs', strategyArgs))..add(DiagnosticsProperty('cacheEnabled', cacheEnabled))..add(DiagnosticsProperty('cacheTtl', cacheTtl))..add(DiagnosticsProperty('savedStrategies', savedStrategies))..add(DiagnosticsProperty('testSiteLists', testSiteLists));
+}
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DesyncProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.onlyDpi, onlyDpi) || other.onlyDpi == onlyDpi)&&(identical(other.port, port) || other.port == port)&&const DeepCollectionEquality().equals(other.categories, _categories)&&(identical(other.forceTcp, forceTcp) || other.forceTcp == forceTcp)&&const DeepCollectionEquality().equals(other.strategyArgs, _strategyArgs)&&(identical(other.cacheEnabled, cacheEnabled) || other.cacheEnabled == cacheEnabled)&&(identical(other.cacheTtl, cacheTtl) || other.cacheTtl == cacheTtl)&&const DeepCollectionEquality().equals(other.savedStrategies, _savedStrategies));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DesyncProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.onlyDpi, onlyDpi) || other.onlyDpi == onlyDpi)&&(identical(other.port, port) || other.port == port)&&const DeepCollectionEquality().equals(other.categories, _categories)&&(identical(other.forceTcp, forceTcp) || other.forceTcp == forceTcp)&&const DeepCollectionEquality().equals(other.strategyArgs, _strategyArgs)&&(identical(other.cacheEnabled, cacheEnabled) || other.cacheEnabled == cacheEnabled)&&(identical(other.cacheTtl, cacheTtl) || other.cacheTtl == cacheTtl)&&const DeepCollectionEquality().equals(other.savedStrategies, _savedStrategies)&&const DeepCollectionEquality().equals(other.testSiteLists, _testSiteLists));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,onlyDpi,port,const DeepCollectionEquality().hash(_categories),forceTcp,const DeepCollectionEquality().hash(_strategyArgs),cacheEnabled,cacheTtl,const DeepCollectionEquality().hash(_savedStrategies));
+    return Object.hash(runtimeType,enabled,onlyDpi,port,const DeepCollectionEquality().hash(_categories),forceTcp,const DeepCollectionEquality().hash(_strategyArgs),cacheEnabled,cacheTtl,const DeepCollectionEquality().hash(_savedStrategies),const DeepCollectionEquality().hash(_testSiteLists));
 }
 
 @override
-String toString() {
-    return 'DesyncProps(enabled: $enabled, onlyDpi: $onlyDpi, port: $port, categories: $categories, forceTcp: $forceTcp, strategyArgs: $strategyArgs, cacheEnabled: $cacheEnabled, cacheTtl: $cacheTtl, savedStrategies: $savedStrategies)';
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return 'DesyncProps(enabled: $enabled, onlyDpi: $onlyDpi, port: $port, categories: $categories, forceTcp: $forceTcp, strategyArgs: $strategyArgs, cacheEnabled: $cacheEnabled, cacheTtl: $cacheTtl, savedStrategies: $savedStrategies, testSiteLists: $testSiteLists)';
 }
 
 
@@ -568,7 +602,7 @@ abstract mixin class _$DesyncPropsCopyWith<$Res> implements $DesyncPropsCopyWith
   factory _$DesyncPropsCopyWith(_DesyncProps value, $Res Function(_DesyncProps) _then) = __$DesyncPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, bool onlyDpi, int port, List<DesyncCategory> categories, bool forceTcp, List<String> strategyArgs, bool cacheEnabled, int cacheTtl, List<DesyncStrategy> savedStrategies
+ bool enabled, bool onlyDpi, int port, List<DesyncCategory> categories, bool forceTcp, List<String> strategyArgs, bool cacheEnabled, int cacheTtl, List<DesyncStrategy> savedStrategies, List<String> testSiteLists
 });
 
 
@@ -585,7 +619,7 @@ class __$DesyncPropsCopyWithImpl<$Res>
 
 /// Create a copy of DesyncProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? onlyDpi = null,Object? port = null,Object? categories = null,Object? forceTcp = null,Object? strategyArgs = null,Object? cacheEnabled = null,Object? cacheTtl = null,Object? savedStrategies = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? onlyDpi = null,Object? port = null,Object? categories = null,Object? forceTcp = null,Object? strategyArgs = null,Object? cacheEnabled = null,Object? cacheTtl = null,Object? savedStrategies = null,Object? testSiteLists = null,}) {
   return _then(_DesyncProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,onlyDpi: null == onlyDpi ? _self.onlyDpi : onlyDpi // ignore: cast_nullable_to_non_nullable
@@ -596,7 +630,8 @@ as bool,strategyArgs: null == strategyArgs ? _self._strategyArgs : strategyArgs 
 as List<String>,cacheEnabled: null == cacheEnabled ? _self.cacheEnabled : cacheEnabled // ignore: cast_nullable_to_non_nullable
 as bool,cacheTtl: null == cacheTtl ? _self.cacheTtl : cacheTtl // ignore: cast_nullable_to_non_nullable
 as int,savedStrategies: null == savedStrategies ? _self._savedStrategies : savedStrategies // ignore: cast_nullable_to_non_nullable
-as List<DesyncStrategy>,
+as List<DesyncStrategy>,testSiteLists: null == testSiteLists ? _self._testSiteLists : testSiteLists // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

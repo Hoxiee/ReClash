@@ -281,17 +281,15 @@ List<String> desyncRules({
         'AND,((NETWORK,udp),(DST-PORT,443),(GEOSITE,${category.geosite})),REJECT',
     for (final category in categories)
       'GEOSITE,${category.geosite},$desyncOutboundName',
+    for (final category in categories)
+      for (final cidr in category.cidrs)
+        'IP-CIDR,$cidr,$desyncOutboundName',
   ];
 }
 
-// Only-dpi mode routes the whole device through the local engine; its own
-// trigger groups decide what actually gets desynced.
-List<String> desyncOnlyRules({required bool forceTcp}) {
-  return [
-    if (forceTcp) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
-    'MATCH,$desyncOutboundName',
-  ];
-}
+// Only-dpi keeps the profile's own MATCH out of play: everything the engine
+// cannot desync must reach the network the plain way, not die on its triggers.
+List<String> desyncOnlyFallback() => ['MATCH,DIRECT'];
 
 Future<({String yaml, String md5})> makeRealProfileTask(
   MakeRealProfileState data,
@@ -455,6 +453,11 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
       rawConfig['dns']['nameserver'] = [...nameserver, systemDns];
     }
   }
+  // Only-dpi has no domain rules for fake-ip to serve, and an unmapped fake
+  // reaches the engine as a raw 198.18.x dial target the engine cannot route.
+  if (data.desyncOnly) {
+    rawConfig['dns']['enhanced-mode'] = 'redir-host';
+  }
   List<String> rules = [];
   if (data.rules.isEmpty) {
     if (rawConfig['rules'] != null) {
@@ -514,7 +517,13 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
     appendDesyncProxy(rawConfig: rawConfig, port: data.desyncPort);
     rules = [
       ...(data.desyncOnly
-          ? desyncOnlyRules(forceTcp: data.desyncForceTcp)
+          ? [
+              ...desyncRules(
+                categories: data.desyncCategories,
+                forceTcp: data.desyncForceTcp,
+              ),
+              ...desyncOnlyFallback(),
+            ]
           : desyncRules(
               categories: data.desyncCategories,
               forceTcp: data.desyncForceTcp,

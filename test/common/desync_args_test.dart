@@ -44,13 +44,17 @@ void main() {
   });
 
   group('desyncDefaultStrategy', () {
-    test('no method runs before the first trigger group', () {
-      expect(desyncDefaultStrategy.first, '-A');
-    });
-
-    test('every rung carries its own trigger group and auto mode', () {
-      expect(desyncDefaultStrategy.where((t) => t == '-A').length, 5);
-      expect(desyncDefaultStrategy.where((t) => t == '-L').length, 5);
+    // The ByeByeDPI tester's top preset on a live network: fake- and oob-free,
+    // since those families trip the TSPU's fake-packet detectors.
+    test('is a split/disorder ladder without fake or oob', () {
+      expect(desyncDefaultStrategy.where((t) => t.startsWith('-d')), isNotEmpty);
+      expect(desyncDefaultStrategy.where((t) => t.startsWith('-s')), isNotEmpty);
+      expect(
+        desyncDefaultStrategy.where(
+          (t) => t.startsWith('-f') || t.startsWith('-o') || t.startsWith('-q'),
+        ),
+        isEmpty,
+      );
     });
   });
 }

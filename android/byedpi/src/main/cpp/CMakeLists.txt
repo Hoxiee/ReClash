@@ -13,6 +13,7 @@ endif ()
 add_compile_definitions(ANDROID_APP)
 
 add_library(${CMAKE_PROJECT_NAME} SHARED
+        engine_dns.c
         native-lib.c
         byedpi/conev.c
         byedpi/desync.c
@@ -22,6 +23,6 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         byedpi/packets.c
         byedpi/proxy.c)
 
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE byedpi)
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE byedpi .)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} log)

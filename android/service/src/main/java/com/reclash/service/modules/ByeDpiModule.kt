@@ -49,24 +49,29 @@ internal class ByeDpiModule(
     @Volatile private var current: ByeDpiTarget? = null
     @Volatile private var envKey = ""
 
+    // Blocks a parked apply coroutine from resurrecting the branch after stop().
+    @Volatile private var stopped = false
+
     // The options flow and environment changes both land here from separate
     // coroutines; an interleaved stop would close the protect receiver under
     // a freshly started branch, leaving it to fail every dial.
     private val applyLock = Any()
 
     fun onEnvironmentChanged(key: String) {
-        if (key == envKey) return
+        if (stopped || key == envKey) return
         envKey = key
         scope.launch { apply(targetOf(ServiceConfig.vpnOptions)) }
     }
 
     override fun start() {
+        stopped = false
         configJob = scope.launch {
             ServiceConfig.vpnOptionsFlow.collect { options -> apply(targetOf(options)) }
         }
     }
 
     override fun stop() {
+        stopped = true
         configJob?.cancel()
         configJob = null
         synchronized(applyLock) {
@@ -96,6 +101,7 @@ internal class ByeDpiModule(
 
     private fun apply(target: ByeDpiTarget?) {
         synchronized(applyLock) {
+            if (stopped) return
             if (target == current) return
             if (current != null) {
                 probeJob?.cancel()
@@ -110,6 +116,11 @@ internal class ByeDpiModule(
     }
 
     private fun launchBranch(target: ByeDpiTarget) {
+        startEngine(target)
+        probeJob = scope.launch { watch(target) }
+    }
+
+    private fun startEngine(target: ByeDpiTarget) {
         val args = byeDpiArgs(
             port = target.port,
             strategy = target.strategy,
@@ -121,7 +132,19 @@ internal class ByeDpiModule(
         current = target
         runCatching { engine.start(args) }
             .onFailure { error -> log("Desync start failed: $error") }
-        probeJob = scope.launch { watch(target) }
+    }
+
+    private fun restart(target: ByeDpiTarget) {
+        synchronized(applyLock) {
+            if (current != target) return
+            probeJob?.cancel()
+            probeJob = null
+            current = null
+            runCatching { engine.stop() }
+                .onFailure { error -> log("Desync stop failed: $error") }
+            startEngine(target)
+            probeJob = scope.launch { watch(target) }
+        }
     }
 
     // The thread outliving its listener is the failure Doze produces, so liveness is
@@ -136,19 +159,9 @@ internal class ByeDpiModule(
                 continue
             }
             log("Desync listener is down, restarting")
-            runCatching { engine.stop() }
+            restart(target)
             delay(ByeDpiPolicy.backoffMs(attempt++))
             if (current != target) return
-            val args = byeDpiArgs(
-                port = target.port,
-                strategy = target.strategy,
-                cacheFile = engine.cacheFile(target.envKey),
-                protectPath = engine.protectPath(),
-                cacheTtlSeconds = target.cacheTtl,
-                cacheEnabled = target.cacheEnabled,
-            )
-            runCatching { engine.start(args) }
-                .onFailure { error -> log("Desync restart failed: $error") }
         }
     }
 }

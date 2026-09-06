@@ -1044,6 +1044,20 @@
   "desyncModeVpn": "VPN",
   "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, =0{нет аргументов} =1{1 аргумент} few{{count} аргумента} other{{count} аргументов}}",
+  "desyncTestSection": "Тест стратегий",
+  "desyncTestTitle": "Прогнать все пресеты",
+  "desyncTestStart": "Старт",
+  "desyncTestHint": "Прогоняет все известные стратегии по {count} хостам через движок; текущая стратегия возвращается по окончании",
+  "desyncTestProgress": "Тестируется {index} из {total}",
+  "desyncTestEngineDown": "Движок не запущен — сначала подключитесь с включённым обходом DPI",
+  "desyncTestAborted": "Прервано: стратегии перестали доходить до движка",
+  "desyncTestDone": "Готово: протестировано {count} стратегий",
+  "desyncTestScore": "Отвечают {passed} из {total} хостов",
+  "desyncTestEngineCrashed": "Движок упал на этой стратегии",
+  "desyncTestDomains": "Домены для теста",
+  "desyncTestDomainsCount": "{count, plural, =1{1 домен} few{{count} домена} other{{count} доменов}}",
+  "desyncTestNoLists": "Выберите хотя бы один список доменов ниже",
+  "desyncTestFailedTitle": "Хосты, не прошедшие стратегию",
   "@desyncArgsCount": {
     "placeholders": {
       "count": {

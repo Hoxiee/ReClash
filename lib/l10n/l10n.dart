@@ -8411,6 +8411,143 @@ class AppLocalizations {
       args: [count],
     );
   }
+
+  /// `Strategy test`
+  String get desyncTestSection {
+    return Intl.message(
+      'Strategy test',
+      name: 'desyncTestSection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run every preset`
+  String get desyncTestTitle {
+    return Intl.message(
+      'Run every preset',
+      name: 'desyncTestTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start`
+  String get desyncTestStart {
+    return Intl.message('Start', name: 'desyncTestStart', desc: '', args: []);
+  }
+
+  /// `Tries every known strategy against {count} hosts through the engine; the current strategy is restored afterwards`
+  String desyncTestHint(Object count) {
+    return Intl.message(
+      'Tries every known strategy against $count hosts through the engine; the current strategy is restored afterwards',
+      name: 'desyncTestHint',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Testing {index} of {total}`
+  String desyncTestProgress(Object index, Object total) {
+    return Intl.message(
+      'Testing $index of $total',
+      name: 'desyncTestProgress',
+      desc: '',
+      args: [index, total],
+    );
+  }
+
+  /// `The engine is not running — connect with DPI bypass enabled first`
+  String get desyncTestEngineDown {
+    return Intl.message(
+      'The engine is not running — connect with DPI bypass enabled first',
+      name: 'desyncTestEngineDown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stopped early: strategies stopped reaching the engine`
+  String get desyncTestAborted {
+    return Intl.message(
+      'Stopped early: strategies stopped reaching the engine',
+      name: 'desyncTestAborted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finished: {count} strategies tested`
+  String desyncTestDone(Object count) {
+    return Intl.message(
+      'Finished: $count strategies tested',
+      name: 'desyncTestDone',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `{passed} of {total} hosts up`
+  String desyncTestScore(Object passed, Object total) {
+    return Intl.message(
+      '$passed of $total hosts up',
+      name: 'desyncTestScore',
+      desc: '',
+      args: [passed, total],
+    );
+  }
+
+  /// `The engine died on this strategy`
+  String get desyncTestEngineCrashed {
+    return Intl.message(
+      'The engine died on this strategy',
+      name: 'desyncTestEngineCrashed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test domains`
+  String get desyncTestDomains {
+    return Intl.message(
+      'Test domains',
+      name: 'desyncTestDomains',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 domain} other{{count} domains}}`
+  String desyncTestDomainsCount(num count) {
+    return Intl.plural(
+      count,
+      one: '1 domain',
+      other: '$count domains',
+      name: 'desyncTestDomainsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Pick at least one domain list below`
+  String get desyncTestNoLists {
+    return Intl.message(
+      'Pick at least one domain list below',
+      name: 'desyncTestNoLists',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hosts this strategy failed`
+  String get desyncTestFailedTitle {
+    return Intl.message(
+      'Hosts this strategy failed',
+      name: 'desyncTestFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -9,6 +9,7 @@
 
 #include "params.h"
 #include "conev.h"
+#include "engine_dns.h"
 #include "extend.h"
 #include "error.h"
 #include "packets.h"
@@ -141,6 +142,15 @@ static int resolve(const char *chost, int len,
     
     LOG(LOG_S, "resolve: %s\n", host);
     
+    // The system resolver answers through the tunnel and hands back addresses
+    // the engine cannot dial; ask the real network directly instead.
+    if (engine_dns_ready()) {
+        if (engine_dns_query(host, len, &addr->in.sin_addr)) {
+            return -1;
+        }
+        addr->in.sin_family = AF_INET;
+        return 0;
+    }
     if (getaddrinfo(host, 0, &hints, &res) || !res) {
         return -1;
     }
