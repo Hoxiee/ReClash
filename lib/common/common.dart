@@ -38,6 +38,7 @@ export 'navigator.dart';
 export 'network.dart';
 export 'num.dart';
 export 'package.dart';
+export 'panel_naming.dart';
 export 'path.dart';
 export 'picker.dart';
 export 'preferences.dart';

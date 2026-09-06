@@ -72,6 +72,7 @@ abstract class Profile with _$Profile {
     SubscriptionClient? lastWorkingClient,
     @Default([]) @SkippedNodesConverter() List<SkippedNode> skippedNodes,
     @Default(false) bool undialableNodes,
+    @Default(false) bool userLabel,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
@@ -326,15 +327,27 @@ extension ProfileExtension on Profile {
         updatedUrl = currentUri.replace(host: newDomain).toString();
       }
     }
+    final naming = ProfileNaming.fromResponse(
+      headers: response.headers.map,
+      host: Uri.tryParse(primaryUrl)?.host,
+      profileTitle: panelMeta.profileTitle,
+      dispositionFilename: getFileNameForDisposition(disposition),
+    );
+    final enrichedMeta = panelMeta.hasContent || naming.username != null
+        ? panelMeta.copyWith(accountUsername: naming.username)
+        : null;
+    // A hand-set name wins forever; only panel-derived labels track the wire.
+    final resolvedLabel = userLabel
+        ? null
+        : naming.label.takeFirstValid([
+            getFileNameForDisposition(disposition),
+            Uri.tryParse(primaryUrl)?.host,
+          ]);
     return copyWith(
       url: updatedUrl,
-      label: label.takeFirstValid([
-        getFileNameForDisposition(disposition),
-        panelMeta.profileTitle,
-        id.toString(),
-      ]),
+      label: resolvedLabel ?? label,
       subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-      panelMeta: panelMeta.hasContent ? panelMeta : null,
+      panelMeta: enrichedMeta,
       autoUpdateDuration: updateInterval != null
           ? Duration(minutes: updateInterval)
           : autoUpdateDuration,

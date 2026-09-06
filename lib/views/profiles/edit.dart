@@ -74,6 +74,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     var profile = widget.profile.copyWith(
       url: _urlController.text,
       label: _labelController.text,
+      userLabel: _labelController.text.trim().isNotEmpty,
       autoUpdate: _autoUpdate,
       clientEmulation: _clientEmulation,
       customUserAgent: _customUserAgentController.text.trim(),

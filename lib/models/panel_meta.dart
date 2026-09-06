@@ -25,6 +25,7 @@ abstract class PanelMeta with _$PanelMeta {
     List<String>? settings,
     String? newDomain,
     String? profileTitle,
+    String? accountUsername,
     String? proxiesView,
     String? themeHex,
   }) = _PanelMeta;
@@ -65,6 +66,7 @@ abstract class PanelMeta with _$PanelMeta {
       settings: settings.isNotEmpty ? settings : null,
       newDomain: map['newDomain'],
       profileTitle: map['profileTitle'],
+      accountUsername: map['accountUsername'],
       proxiesView: map['proxiesView'],
       themeHex: map['themeHex'],
     );
@@ -86,6 +88,7 @@ extension PanelMetaExt on PanelMeta {
       widgets != null ||
       newDomain != null ||
       profileTitle != null ||
+      accountUsername != null ||
       proxiesView != null ||
       themeHex != null ||
       settings != null;

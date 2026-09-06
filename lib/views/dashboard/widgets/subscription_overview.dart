@@ -299,11 +299,12 @@ class _ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final logo = panelMeta?.serviceLogo;
+    final username = panelMeta?.accountUsername;
     final name = panelMeta?.serviceName.takeFirstValid([
-      panelMeta?.profileTitle,
       profile.realLabel,
     ]);
     final host = Uri.tryParse(profile.url)?.host ?? '';
+    final subtitle = username?.takeFirstValid([host]) ?? host;
     final fallbackIcon = Icon(
       Icons.cloud_outlined,
       size: 22,
@@ -345,10 +346,10 @@ class _ServiceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  host.isNotEmpty ? host : context.appLocalizations.file,
+                  subtitle.isNotEmpty ? subtitle : context.appLocalizations.file,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(
+                  style: context.textTheme.bodySmall?.toJetBrainsMono.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),

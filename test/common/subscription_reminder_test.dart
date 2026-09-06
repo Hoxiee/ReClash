@@ -127,6 +127,22 @@ void main() {
     },
   );
 
+  test('the account username joins the service name in the title', () async {
+    final store = _NoticeStore();
+
+    await _reminder(store).check(
+      _profile(
+        until: const Duration(hours: 3),
+        panelMeta: const PanelMeta(
+          serviceName: 'Remnawave',
+          accountUsername: '550704498_s07ef90',
+        ),
+      ),
+    );
+
+    expect(store.shown.single.title, 'Remnawave (550704498_s07ef90)');
+  });
+
   test('the renew link outranks support, and its label follows', () async {
     final store = _NoticeStore();
     final reminder = _reminder(store);

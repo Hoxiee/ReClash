@@ -50,13 +50,21 @@ class SubscriptionReminder {
     final panelMeta = profile.panelMeta;
     final renewUrl = panelMeta?.buyPlanUrl;
     final actionUrl = renewUrl ?? panelMeta?.supportUrl;
+    final username = panelMeta?.accountUsername;
+    final service = (panelMeta?.serviceName ?? '').trim();
+    final labelAlreadyCarriesService = profile.realLabel.startsWith(
+      '$service (',
+    );
+    var displayName = profile.realLabel;
+    if (service.isNotEmpty && !labelAlreadyCarriesService) {
+      displayName = username == null
+          ? service
+          : '$service ($username)';
+    }
     return NoticeRequest(
       channelName: localizations.subscriptionNoticeChannel,
       title: sanitizeNoticeText(
-        (panelMeta?.serviceName ?? '').takeFirstValid([
-          profile.realLabel,
-          appName,
-        ]),
+        displayName.takeFirstValid([appName]),
       ),
       message: sanitizeNoticeText(switch (day) {
         subscriptionExpiredDay => localizations.subscriptionExpired,

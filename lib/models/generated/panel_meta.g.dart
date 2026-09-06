@@ -31,6 +31,7 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
       .toList(),
   newDomain: json['newDomain'] as String?,
   profileTitle: json['profileTitle'] as String?,
+  accountUsername: json['accountUsername'] as String?,
   proxiesView: json['proxiesView'] as String?,
   themeHex: json['themeHex'] as String?,
 );
@@ -53,6 +54,7 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'settings': instance.settings,
       'newDomain': instance.newDomain,
       'profileTitle': instance.profileTitle,
+      'accountUsername': instance.accountUsername,
       'proxiesView': instance.proxiesView,
       'themeHex': instance.themeHex,
     };
