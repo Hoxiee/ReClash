@@ -193,12 +193,47 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
   /// Owned by the orb after seeding: it holds the optimistic `connecting` too.
   late HeroOrbPhase _phase = ref.read(heroLifecycleProvider);
 
+  Future<void> _showModePicker() async {
+    final appLocalizations = context.appLocalizations;
+    const modes = ['vpn', 'byedpi'];
+    final current =
+        ref.read(
+          desyncSettingProvider.select(
+            (state) => state.enabled && state.onlyDpi,
+          ),
+        )
+        ? 'byedpi'
+        : 'vpn';
+    final mode = await dialogs.showCommonDialog<String>(
+      context: context,
+      child: OptionsDialog<String>(
+        title: appLocalizations.desyncModeTitle,
+        options: modes,
+        value: current,
+        textBuilder: (value) => value == 'byedpi'
+            ? appLocalizations.desyncModeByedpi
+            : appLocalizations.desyncModeVpn,
+      ),
+    );
+    if (mode == null || mode == current) return;
+    ref
+        .read(desyncSettingProvider.notifier)
+        .update(
+          (state) => mode == 'byedpi'
+              ? state.copyWith(enabled: true, onlyDpi: true)
+              : state.copyWith(enabled: false, onlyDpi: false),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasProfile = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
     );
-    if (!hasProfile) return const _EmptyHero();
+    final byedpiMode = ref.watch(
+      desyncSettingProvider.select((state) => state.enabled && state.onlyDpi),
+    );
+    if (!hasProfile && !byedpiMode) return const _EmptyHero();
 
     final isReady = ref.watch(initProvider);
     final profile = ref.watch(currentProfileProvider);
@@ -235,7 +270,13 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
         }, serverInfoHeader),
       ),
     );
-    final serverName = engineDecided ? engineNode : serverInfo.serverName;
+    // In only-dpi mode no node carries the traffic, so the panel names the
+    // engine instead and never measures a node delay.
+    final serverName = byedpiMode
+        ? 'ByeDPI'
+        : engineDecided
+        ? engineNode
+        : serverInfo.serverName;
     final testUrl = serverInfo.testUrl;
     final otherCodes = engineDecided
         ? _trailCodes(ref.watch(smartRoutingTrailProvider), engineNode)
@@ -250,12 +291,15 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final isUpdating =
         profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
 
-    final delay = engineDecided
+    final delay = byedpiMode
+        ? null
+        : engineDecided
         ? (rcxStatus!.delay > 0 ? rcxStatus.delay : null)
         : serverName.isEmpty
         ? null
         : ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl));
     final measuring =
+        !byedpiMode &&
         !engineDecided &&
         serverName.isNotEmpty &&
         ref.watch(
@@ -278,6 +322,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             palette: palette,
             serviceLogo: panelMeta?.serviceLogo,
             onPhaseChanged: (phase) => setState(() => _phase = phase),
+            onLongPress: () => _showModePicker(),
           ),
           const SizedBox(height: 16),
           _ServerPanel(
@@ -339,6 +384,7 @@ class _OrbSection extends ConsumerWidget {
     required this.palette,
     this.serviceLogo,
     required this.onPhaseChanged,
+    this.onLongPress,
   });
 
   final bool isReady;
@@ -348,6 +394,7 @@ class _OrbSection extends ConsumerWidget {
   final HeroPalette palette;
   final String? serviceLogo;
   final ValueChanged<HeroOrbPhase> onPhaseChanged;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -399,6 +446,7 @@ class _OrbSection extends ConsumerWidget {
           activity: heroActivityOf(lastTraffic),
           serviceLogo: serviceLogo,
           onPhaseChanged: onPhaseChanged,
+          onLongPress: onLongPress,
         ),
         const SizedBox(height: 18),
         AnimatedDefaultTextStyle(

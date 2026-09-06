@@ -1026,6 +1026,9 @@
   "desyncRouting": "路由",
   "desyncForceTcp": "强制 TCP",
   "desyncForceTcpDesc": "阻止上述分类的 QUIC；失同步无法作用于 UDP",
+  "desyncModeTitle": "连接模式",
+  "desyncModeVpn": "VPN",
+  "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, other{{count} 个参数}}",
   "@desyncArgsCount": {
     "placeholders": {

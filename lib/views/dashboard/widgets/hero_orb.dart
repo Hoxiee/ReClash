@@ -39,6 +39,7 @@ class HeroOrb extends ConsumerStatefulWidget {
     this.activity = 0,
     this.serviceLogo,
     this.onPhaseChanged,
+    this.onLongPress,
   });
 
   final double size;
@@ -57,6 +58,9 @@ class HeroOrb extends ConsumerStatefulWidget {
   /// Fired only on a genuine transition, so the listeners' immediate fire in
   /// `initState` can never rebuild an ancestor mid-build.
   final void Function(HeroOrbPhase phase)? onPhaseChanged;
+
+  /// Opens the VPN / ByeDPI mode picker.
+  final VoidCallback? onLongPress;
 
   @override
   ConsumerState<HeroOrb> createState() => _HeroOrbState();
@@ -446,6 +450,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                             autofocus: true,
                             borderRadius: size / 2,
                             onTap: _handleTap,
+                            onLongPress: widget.onLongPress,
                             child: CustomPaint(
                               size: Size.square(size),
                               painter: _HeroOrbPainter(

@@ -326,7 +326,12 @@ class SetupAction extends _$SetupAction {
     required PatchClashConfig patchConfig,
   }) async {
     final profileId = setupState.profileId;
-    if (profileId == null) return (yaml: '', md5: '');
+    final desync = ref.read(desyncSettingProvider);
+    // Only-dpi mode is the subscription-free use of the app: no profile to
+    // fetch, the whole config is synthesized from the empty map.
+    if (profileId == null && !(desync.enabled && desync.onlyDpi)) {
+      return (yaml: '', md5: '');
+    }
     final defaultUA = globalState.packageInfo.ua;
     final networkSetting = ref.read(
       networkSettingProvider.select(
@@ -341,8 +346,9 @@ class SetupAction extends _$SetupAction {
     final smartRouting = ref.read(
       smartRoutingSettingProvider.select((state) => state.enabled),
     );
-    final desync = ref.read(desyncSettingProvider);
-    final configMap = await _core.getConfig(profileId);
+    final configMap = profileId == null
+        ? <String, dynamic>{}
+        : await _core.getConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
     final routeMode = networkSetting.routeMode;
@@ -387,6 +393,7 @@ class SetupAction extends _$SetupAction {
         desyncPort: desync.port,
         desyncCategories: desync.categories,
         desyncForceTcp: desync.forceTcp,
+        desyncOnly: desync.enabled && desync.onlyDpi,
       ),
     );
     return res;

@@ -513,6 +513,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "Blocks QUIC for the categories above; a desync cannot reach UDP",
     ),
+    "desyncModeByedpi": MessageLookupByLibrary.simpleMessage("ByeDPI"),
+    "desyncModeTitle": MessageLookupByLibrary.simpleMessage("Connection mode"),
+    "desyncModeVpn": MessageLookupByLibrary.simpleMessage("VPN"),
     "desyncRouting": MessageLookupByLibrary.simpleMessage("Routing"),
     "desyncSaveCurrent": MessageLookupByLibrary.simpleMessage("Save current"),
     "desyncStrategyNameHint": MessageLookupByLibrary.simpleMessage(

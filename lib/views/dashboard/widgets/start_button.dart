@@ -186,7 +186,10 @@ class _StartButtonState extends ConsumerState<StartButton>
     final hasProfile = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
     );
-    if (!hasProfile) {
+    final byedpiMode = ref.watch(
+      desyncSettingProvider.select((state) => state.enabled && state.onlyDpi),
+    );
+    if (!hasProfile && !byedpiMode) {
       return Container();
     }
     final paused = ref.watch(pausedProvider);

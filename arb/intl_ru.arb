@@ -1040,6 +1040,9 @@
   "desyncRouting": "Маршрутизация",
   "desyncForceTcp": "Переводить на TCP",
   "desyncForceTcpDesc": "Блокирует QUIC для категорий выше; десинк не работает с UDP",
+  "desyncModeTitle": "Режим подключения",
+  "desyncModeVpn": "VPN",
+  "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, =0{нет аргументов} =1{1 аргумент} few{{count} аргумента} other{{count} аргументов}}",
   "@desyncArgsCount": {
     "placeholders": {

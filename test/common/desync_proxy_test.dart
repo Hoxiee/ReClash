@@ -2,6 +2,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:yaml/yaml.dart';
 
 Map<dynamic, dynamic> _proxyNamed(
   Map<dynamic, dynamic> rawConfig,
@@ -75,6 +76,44 @@ void main() {
     expect(desyncRules(categories: [], forceTcp: true), isEmpty);
   });
 
+  test('only-dpi mode sends everything to the engine', () {
+    expect(desyncOnlyRules(forceTcp: true), [
+      'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
+      'MATCH,DESYNC',
+    ]);
+    expect(desyncOnlyRules(forceTcp: false), ['MATCH,DESYNC']);
+  });
+
+  test('an only-dpi config builds with no profile at all', () async {
+    final result = await makeRealProfileTask(
+      const MakeRealProfileState(
+        profilesPath: '/profiles',
+        profileId: null,
+        rawConfig: {},
+        realPatchConfig: PatchClashConfig(),
+        overrideDns: false,
+        appendSystemDns: false,
+        proxyGroups: [],
+        rules: [],
+        addedRules: [],
+        defaultUA: 'ReClash-Test',
+        desync: true,
+        desyncOnly: true,
+      ),
+    );
+
+    final yaml = loadYaml(result.yaml) as YamlMap;
+    expect(yaml['rules'], [
+      'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
+      'MATCH,DESYNC',
+    ]);
+    final proxies = yaml['proxies'] as YamlList;
+    expect(
+      proxies.whereType<YamlMap>().any((proxy) => proxy['name'] == 'DESYNC'),
+      isTrue,
+    );
+  });
+
   test('a provider dialer-proxy at the reserved name is stripped', () {
     final rawConfig = <String, Object?>{
       'proxies': [
@@ -95,7 +134,9 @@ void main() {
   });
 
   test('the strip leaves a config without proxies alone', () {
-    final rawConfig = <String, Object?>{'proxies': ['not a map', null]};
+    final rawConfig = <String, Object?>{
+      'proxies': ['not a map', null],
+    };
     stripDesyncDialerProxy(rawConfig);
     expect(rawConfig['proxies'], ['not a map', null]);
   });

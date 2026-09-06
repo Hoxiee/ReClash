@@ -8379,6 +8379,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Connection mode`
+  String get desyncModeTitle {
+    return Intl.message(
+      'Connection mode',
+      name: 'desyncModeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN`
+  String get desyncModeVpn {
+    return Intl.message('VPN', name: 'desyncModeVpn', desc: '', args: []);
+  }
+
+  /// `ByeDPI`
+  String get desyncModeByedpi {
+    return Intl.message('ByeDPI', name: 'desyncModeByedpi', desc: '', args: []);
+  }
+
   /// `{count, plural, =0{no arguments} =1{1 argument} other{{count} arguments}}`
   String desyncArgsCount(num count) {
     return Intl.plural(

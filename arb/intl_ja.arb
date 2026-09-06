@@ -1026,6 +1026,9 @@
   "desyncRouting": "ルーティング",
   "desyncForceTcp": "TCPへ強制",
   "desyncForceTcpDesc": "上記カテゴリのQUICをブロックします。デシンクはUDPに効きません",
+  "desyncModeTitle": "接続モード",
+  "desyncModeVpn": "VPN",
+  "desyncModeByedpi": "ByeDPI",
   "desyncArgsCount": "{count, plural, other{{count} 個の引数}}",
   "@desyncArgsCount": {
     "placeholders": {

@@ -284,6 +284,15 @@ List<String> desyncRules({
   ];
 }
 
+// Only-dpi mode routes the whole device through the local engine; its own
+// trigger groups decide what actually gets desynced.
+List<String> desyncOnlyRules({required bool forceTcp}) {
+  return [
+    if (forceTcp) 'AND,((NETWORK,udp),(DST-PORT,443)),REJECT',
+    'MATCH,$desyncOutboundName',
+  ];
+}
+
 Future<({String yaml, String md5})> makeRealProfileTask(
   MakeRealProfileState data,
 ) async {
@@ -504,10 +513,12 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   if (data.desync) {
     appendDesyncProxy(rawConfig: rawConfig, port: data.desyncPort);
     rules = [
-      ...desyncRules(
-        categories: data.desyncCategories,
-        forceTcp: data.desyncForceTcp,
-      ),
+      ...(data.desyncOnly
+          ? desyncOnlyRules(forceTcp: data.desyncForceTcp)
+          : desyncRules(
+              categories: data.desyncCategories,
+              forceTcp: data.desyncForceTcp,
+            )),
       ...rules,
     ];
   } else {

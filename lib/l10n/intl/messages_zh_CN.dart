@@ -385,6 +385,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "阻止上述分类的 QUIC；失同步无法作用于 UDP",
     ),
+    "desyncModeByedpi": MessageLookupByLibrary.simpleMessage("ByeDPI"),
+    "desyncModeTitle": MessageLookupByLibrary.simpleMessage("连接模式"),
+    "desyncModeVpn": MessageLookupByLibrary.simpleMessage("VPN"),
     "desyncRouting": MessageLookupByLibrary.simpleMessage("路由"),
     "desyncSaveCurrent": MessageLookupByLibrary.simpleMessage("保存当前"),
     "desyncStrategyNameHint": MessageLookupByLibrary.simpleMessage("策略名称"),

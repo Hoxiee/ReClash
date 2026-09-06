@@ -33,6 +33,33 @@ class AdvancedConfigView extends StatelessWidget {
         ),
       ),
       DecorationListItem.open(
+<<<<<<< HEAD
+=======
+        title: Text(appLocalizations.smartPause),
+        subtitle: Text(appLocalizations.smartPauseDesc),
+        leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
+        widget: const SmartPauseView(),
+        blur: false,
+      ),
+      DecorationListItem.open(
+        title: Text(appLocalizations.smartRouting),
+        subtitle: Text(appLocalizations.smartRoutingDesc),
+        leading: const Icon(Icons.alt_route_rounded),
+        widget: const SmartRoutingView(),
+        blur: false,
+      ),
+      // The engine is an Android JNI module; on desktop the entry would only
+      // produce rules pointing at a listener that never exists.
+      if (system.isAndroid)
+        DecorationListItem.open(
+          title: Text(appLocalizations.desync),
+          subtitle: Text(appLocalizations.desyncDesc),
+          leading: const Icon(Icons.bolt_rounded),
+          widget: const DesyncView(),
+          blur: false,
+        ),
+      DecorationListItem.open(
+>>>>>>> eb07bfd3 (feat: byedpi mode picker on hero orb)
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const Icon(Icons.dns),

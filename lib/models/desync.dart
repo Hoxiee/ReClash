@@ -11,11 +11,38 @@ const defaultDesyncCacheTtl = 100800;
 
 // The group before the first -A stays empty, so working sites pass untouched.
 const desyncDefaultStrategy = <String>[
-  '-A', 'torst,redirect,ssl_err,conn', '-L', 's,o', '--split', '1',
-  '-A', 'torst,redirect,ssl_err,conn', '-L', 's,o', '--disorder', '1',
-  '-A', 'torst,redirect,ssl_err,conn', '-L', 's,o', '--fake', '-1', '--ttl', '8',
-  '-A', 'torst,redirect,ssl_err,conn', '-L', 's,o', '--oob', '1',
-  '-A', 'torst,redirect,ssl_err,conn', '-L', 's,o', '--tlsrec', '1+s',
+  '-A',
+  'torst,redirect,ssl_err,conn',
+  '-L',
+  's,o',
+  '--split',
+  '1',
+  '-A',
+  'torst,redirect,ssl_err,conn',
+  '-L',
+  's,o',
+  '--disorder',
+  '1',
+  '-A',
+  'torst,redirect,ssl_err,conn',
+  '-L',
+  's,o',
+  '--fake',
+  '-1',
+  '--ttl',
+  '8',
+  '-A',
+  'torst,redirect,ssl_err,conn',
+  '-L',
+  's,o',
+  '--oob',
+  '1',
+  '-A',
+  'torst,redirect,ssl_err,conn',
+  '-L',
+  's,o',
+  '--tlsrec',
+  '1+s',
 ];
 
 /// Only blocks a desync can actually lift: a service that needs a foreign address
@@ -56,6 +83,7 @@ abstract class DesyncStrategy with _$DesyncStrategy {
 abstract class DesyncProps with _$DesyncProps {
   const factory DesyncProps({
     @Default(false) bool enabled,
+    @Default(false) bool onlyDpi,
     @Default(defaultDesyncPort) int port,
     @Default([DesyncCategory.youtube, DesyncCategory.discord])
     List<DesyncCategory> categories,
@@ -66,9 +94,8 @@ abstract class DesyncProps with _$DesyncProps {
     @Default([]) List<DesyncStrategy> savedStrategies,
   }) = _DesyncProps;
 
-  factory DesyncProps.fromJson(Map<String, Object?>? json) => json == null
-      ? defaultDesyncProps
-      : _$DesyncPropsFromJson(json);
+  factory DesyncProps.fromJson(Map<String, Object?>? json) =>
+      json == null ? defaultDesyncProps : _$DesyncPropsFromJson(json);
 }
 
 const defaultDesyncProps = DesyncProps();

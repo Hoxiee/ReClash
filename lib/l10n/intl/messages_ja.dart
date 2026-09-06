@@ -425,6 +425,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "上記カテゴリのQUICをブロックします。デシンクはUDPに効きません",
     ),
+    "desyncModeByedpi": MessageLookupByLibrary.simpleMessage("ByeDPI"),
+    "desyncModeTitle": MessageLookupByLibrary.simpleMessage("接続モード"),
+    "desyncModeVpn": MessageLookupByLibrary.simpleMessage("VPN"),
     "desyncRouting": MessageLookupByLibrary.simpleMessage("ルーティング"),
     "desyncSaveCurrent": MessageLookupByLibrary.simpleMessage("現在のものを保存"),
     "desyncStrategyNameHint": MessageLookupByLibrary.simpleMessage("戦略名"),
