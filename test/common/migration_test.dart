@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reclash/common/migration.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -291,6 +292,23 @@ void main() {
 
       expect(config.vpnProps.smartPauseEnabled, isTrue);
       expect(config.vpnProps.smartPauseNetworks, ['Cafe']);
+    });
+
+    test('v4 to v5 re-parses the seeded routing bundle in-process', () async {
+      final configMap = _createConfigMap();
+      configMap['smartRoutingProps'] = {
+        'enabled': true,
+        'preset': 'ru',
+      };
+      final store = _FakeMigrationStore(configMap: configMap, version: 4);
+
+      final config = await Migration(store: store).run();
+
+      expect(store.version, Migration.currentVersion);
+      expect(store.savedConfig?.smartRoutingProps.enabled, isTrue);
+      expect(store.savedConfig?.smartRoutingProps.preset, SmartRoutingPreset.russia);
+      expect(store.savedConfig?.smartRoutingProps.openMarkers, isNotEmpty);
+      expect(config.smartRoutingProps.openMarkers, isNotEmpty);
     });
   });
 }

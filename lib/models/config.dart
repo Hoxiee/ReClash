@@ -181,6 +181,9 @@ abstract class VpnProps with _$VpnProps {
 /// and pushes it down; the core keeps a copy so it still runs with the UI dead.
 @freezed
 abstract class SmartRoutingProps with _$SmartRoutingProps {
+  // explicitToJson keeps the toJson map re-parsable in-process: migration
+  // re-reads it before any json.encode pass.
+  @JsonSerializable(explicitToJson: true)
   const factory SmartRoutingProps({
     @Default(false) bool enabled,
     @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,

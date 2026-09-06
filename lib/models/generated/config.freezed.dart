@@ -1479,8 +1479,8 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,
 }
 
 /// @nodoc
-@JsonSerializable()
 
+@JsonSerializable(explicitToJson: true)
 class _SmartRoutingProps implements SmartRoutingProps {
   const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off, this.strategy = SmartRoutingStrategy.balanced,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<String> breakerPatterns = const [], this.allowDomesticLastResort = true, this.requireUdp = false, this.respectPick = true, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_breakerPatterns = breakerPatterns;
   factory _SmartRoutingProps.fromJson(Map<String, dynamic> json) => _$SmartRoutingPropsFromJson(json);

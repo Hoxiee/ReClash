@@ -244,23 +244,24 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
       waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
     );
 
-Map<String, dynamic> _$SmartRoutingPropsToJson(_SmartRoutingProps instance) =>
-    <String, dynamic>{
-      'enabled': instance.enabled,
-      'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
-      'strategy': _$SmartRoutingStrategyEnumMap[instance.strategy]!,
-      'censorCountries': instance.censorCountries,
-      'canaryForeign': instance.canaryForeign,
-      'canaryDomestic': instance.canaryDomestic,
-      'openMarkers': instance.openMarkers,
-      'domesticMarkers': instance.domesticMarkers,
-      'breakerPatterns': instance.breakerPatterns,
-      'allowDomesticLastResort': instance.allowDomesticLastResort,
-      'requireUdp': instance.requireUdp,
-      'respectPick': instance.respectPick,
-      'dwellSeconds': instance.dwellSeconds,
-      'waveWidth': instance.waveWidth,
-    };
+Map<String, dynamic> _$SmartRoutingPropsToJson(
+  _SmartRoutingProps instance,
+) => <String, dynamic>{
+  'enabled': instance.enabled,
+  'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
+  'strategy': _$SmartRoutingStrategyEnumMap[instance.strategy]!,
+  'censorCountries': instance.censorCountries,
+  'canaryForeign': instance.canaryForeign,
+  'canaryDomestic': instance.canaryDomestic,
+  'openMarkers': instance.openMarkers.map((e) => e.toJson()).toList(),
+  'domesticMarkers': instance.domesticMarkers.map((e) => e.toJson()).toList(),
+  'breakerPatterns': instance.breakerPatterns,
+  'allowDomesticLastResort': instance.allowDomesticLastResort,
+  'requireUdp': instance.requireUdp,
+  'respectPick': instance.respectPick,
+  'dwellSeconds': instance.dwellSeconds,
+  'waveWidth': instance.waveWidth,
+};
 
 const _$SmartRoutingPresetEnumMap = {
   SmartRoutingPreset.off: 'off',
