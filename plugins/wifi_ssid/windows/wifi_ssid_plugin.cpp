@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace wifi_ssid {
 
@@ -240,22 +241,16 @@ void WifiSsidPlugin::ListSsid(
   }
   ScopedInterfaceList interfaces(interface_list);
 
-  // Scan results arrive asynchronously; a short wait lets a fresh scan land
-  // while still returning the cached list when the wait does nothing.
-  HANDLE event = CreateEventW(nullptr, TRUE, FALSE, nullptr);
-  if (event == nullptr) {
-    result->Success(flutter::EncodableValue(flutter::EncodableList()));
-    return;
-  }
+  // WlanScan only starts the scan; results land asynchronously, so wait a
+  // moment and fall back to whatever the cached list already holds.
   for (DWORD i = 0; i < interfaces->dwNumberOfItems; ++i) {
     const auto &interface_info = interfaces->InterfaceInfo[i];
-    wlan.scan(client.get(), &interface_info.InterfaceGuid, nullptr, event,
+    wlan.scan(client.get(), &interface_info.InterfaceGuid, nullptr, nullptr,
               nullptr);
   }
-  WaitForSingleObject(event, kWlanScanWaitMs);
-  CloseHandle(event);
+  Sleep(kWlanScanWaitMs);
 
-  flutter::EncodableList ssids;
+  std::vector<std::string> ssids;
   std::string current_ssid;
   for (DWORD i = 0; i < interfaces->dwNumberOfItems; ++i) {
     const auto &interface_info = interfaces->InterfaceInfo[i];
@@ -309,7 +304,12 @@ void WifiSsidPlugin::ListSsid(
     }
   }
 
-  result->Success(flutter::EncodableValue(ssids));
+  flutter::EncodableList encoded;
+  encoded.reserve(ssids.size());
+  for (const std::string &ssid : ssids) {
+    encoded.push_back(flutter::EncodableValue(ssid));
+  }
+  result->Success(flutter::EncodableValue(encoded));
 }
 
 }  // namespace wifi_ssid

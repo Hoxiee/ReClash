@@ -139,8 +139,9 @@ public class WifiSsidPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate 
         }
         let client = wifiClient
         ssidQueue.async {
-            let current = client.interface()?.ssid()
-            let networks = (try? client.scanForNetworks(withSSID: nil)) ?? []
+            let interface = client.interface()
+            let current = interface?.ssid()
+            let networks = interface.flatMap { try? $0.scanForNetworks(withSSID: nil) } ?? []
             var ssids = [current].compactMap { $0 }
             for network in networks {
                 if let name = network.ssid, !ssids.contains(name) {

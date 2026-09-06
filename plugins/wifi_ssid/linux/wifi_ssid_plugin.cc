@@ -194,15 +194,19 @@ static gchar* get_ssid_from_iwd() {
   gchar* ssid = nullptr;
   const gchar* object_path = nullptr;
   GVariantIter* interfaces = nullptr;
-  while (ssid == nullptr &&
-         g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path,
+  // Leaving a g_variant_iter_loop early leaks its last value.
+  while (g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path,
                              &interfaces)) {
+    if (ssid != nullptr) {
+      continue;
+    }
+
     const gchar* interface_name = nullptr;
     GVariantIter* properties = nullptr;
-    while (ssid == nullptr &&
-           g_variant_iter_loop(interfaces, "{&sa{sv}}", &interface_name,
+    while (g_variant_iter_loop(interfaces, "{&sa{sv}}", &interface_name,
                                &properties)) {
-      if (g_strcmp0(interface_name, "net.connman.iwd.Station") != 0) {
+      if (ssid != nullptr ||
+          g_strcmp0(interface_name, "net.connman.iwd.Station") != 0) {
         continue;
       }
 
@@ -210,19 +214,21 @@ static gchar* get_ssid_from_iwd() {
       GVariant* property_value = nullptr;
       while (g_variant_iter_loop(properties, "{&sv}", &property_name,
                                  &property_value)) {
-        if (g_strcmp0(property_name, "ConnectedNetwork") != 0) {
+        if (ssid != nullptr ||
+            g_strcmp0(property_name, "ConnectedNetwork") != 0) {
           continue;
         }
 
-        const gchar* network_path = g_variant_get_string(property_value, nullptr);
+        const gchar* network_path =
+            g_variant_get_string(property_value, nullptr);
         if (network_path == nullptr || g_strcmp0(network_path, "/") == 0) {
-          break;
+          continue;
         }
 
         g_autoptr(GDBusProxy) network = new_system_proxy(
             "net.connman.iwd", network_path, "net.connman.iwd.Network");
         if (network == nullptr) {
-          break;
+          continue;
         }
 
         g_autoptr(GVariant) name =
@@ -230,7 +236,6 @@ static gchar* get_ssid_from_iwd() {
         if (name != nullptr) {
           ssid = g_strdup(g_variant_get_string(name, nullptr));
         }
-        break;
       }
     }
   }
@@ -264,23 +269,27 @@ static gchar* get_ssid_from_connman() {
   gchar* ssid = nullptr;
   const gchar* service_path = nullptr;
   GVariantIter* properties = nullptr;
-  while (ssid == nullptr &&
-         g_variant_iter_loop(services, "(&oa{sv})", &service_path,
+  while (g_variant_iter_loop(services, "(&oa{sv})", &service_path,
                              &properties)) {
-    const gchar* type = nullptr;
-    const gchar* state = nullptr;
-    const gchar* name = nullptr;
+    if (ssid != nullptr) {
+      continue;
+    }
+
+    g_autofree gchar* type = nullptr;
+    g_autofree gchar* state = nullptr;
+    g_autofree gchar* name = nullptr;
     const gchar* property_name = nullptr;
     GVariant* property_value = nullptr;
 
+    // g_variant_iter_loop frees property_value between iterations.
     while (g_variant_iter_loop(properties, "{&sv}", &property_name,
                                &property_value)) {
       if (g_strcmp0(property_name, "Type") == 0) {
-        type = g_variant_get_string(property_value, nullptr);
+        type = g_variant_dup_string(property_value, nullptr);
       } else if (g_strcmp0(property_name, "State") == 0) {
-        state = g_variant_get_string(property_value, nullptr);
+        state = g_variant_dup_string(property_value, nullptr);
       } else if (g_strcmp0(property_name, "Name") == 0) {
-        name = g_variant_get_string(property_value, nullptr);
+        name = g_variant_dup_string(property_value, nullptr);
       }
     }
 
@@ -450,21 +459,25 @@ static void add_ssids_from_iwd(GPtrArray* output) {
   gchar* station_network = nullptr;
   const gchar* object_path = nullptr;
   GVariantIter* interfaces = nullptr;
-  while (station_network == nullptr &&
-         g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path,
+  while (g_variant_iter_loop(objects, "{&oa{sa{sv}}}", &object_path,
                              &interfaces)) {
+    if (station_network != nullptr) {
+      continue;
+    }
     const gchar* interface_name = nullptr;
     GVariantIter* properties = nullptr;
     while (g_variant_iter_loop(interfaces, "{&sa{sv}}", &interface_name,
                                &properties)) {
-      if (g_strcmp0(interface_name, "net.connman.iwd.Station") != 0) {
+      if (station_network != nullptr ||
+          g_strcmp0(interface_name, "net.connman.iwd.Station") != 0) {
         continue;
       }
       const gchar* property_name = nullptr;
       GVariant* property_value = nullptr;
       while (g_variant_iter_loop(properties, "{&sv}", &property_name,
                                  &property_value)) {
-        if (g_strcmp0(property_name, "ConnectedNetwork") != 0) {
+        if (station_network != nullptr ||
+            g_strcmp0(property_name, "ConnectedNetwork") != 0) {
           continue;
         }
         const gchar* network_path =
@@ -500,7 +513,7 @@ static void add_ssids_from_nmcli(GPtrArray* output) {
   gint argument_count = 0;
   g_autoptr(GError) error = nullptr;
   if (!g_shell_parse_argv(
-          "nmcli --terse --fields ssid,signal device wifi list",
+          "nmcli --terse --fields ssid device wifi list",
           &argument_count, &arguments, &error)) {
     return;
   }
@@ -521,11 +534,10 @@ static void add_ssids_from_nmcli(GPtrArray* output) {
   }
   g_auto(GStrv) lines = g_strsplit(standard_output, "\n", -1);
   for (gchar** line = lines; *line != nullptr; ++line) {
-    g_auto(GStrv) fields = g_strsplit(*line, ":", 2);
-    if (fields[0] == nullptr || strlen(fields[0]) == 0) {
+    if (strlen(*line) == 0) {
       continue;
     }
-    gchar* ssid = unescape_nmcli_value(fields[0]);
+    gchar* ssid = unescape_nmcli_value(*line);
     if (strlen(ssid) == 0) {
       g_free(ssid);
       continue;
@@ -550,7 +562,7 @@ static FlValue* list_ssid_value() {
       g_hash_table_new_full(g_str_hash, g_str_equal, g_free, nullptr);
   for (guint i = 0; i < output->len; ++i) {
     gchar* ssid = static_cast<gchar*>(g_ptr_array_index(output, i));
-    gchar* lowered = g_utf8_strdown(ssid);
+    gchar* lowered = g_utf8_strdown(ssid, -1);
     if (g_hash_table_contains(seen, lowered)) {
       g_free(lowered);
       continue;
@@ -598,6 +610,26 @@ static void get_ssid_task(GTask* task, gpointer source_object,
   g_task_return_pointer(task, get_ssid_value(), g_free);
 }
 
+static void get_ssid_done(GObject* source_object, GAsyncResult* result,
+                          gpointer user_data) {
+  FlMethodCall* method_call = FL_METHOD_CALL(user_data);
+  g_autoptr(GError) error = nullptr;
+  g_autofree gchar* ssid =
+      static_cast<gchar*>(g_task_propagate_pointer(G_TASK(result), &error));
+
+  g_autoptr(FlValue) value = nullptr;
+  if (ssid == nullptr || strlen(ssid) == 0) {
+    value = fl_value_new_null();
+  } else {
+    value = fl_value_new_string(ssid);
+  }
+
+  g_autoptr(FlMethodResponse) response =
+      FL_METHOD_RESPONSE(fl_method_success_response_new(value));
+  fl_method_call_respond(method_call, response, nullptr);
+  g_object_unref(method_call);
+}
+
 static void list_ssid_task(GTask* task, gpointer source_object,
                            gpointer task_data, GCancellable* cancellable) {
   g_task_return_pointer(task, list_ssid_value(),
@@ -608,17 +640,14 @@ static void list_ssid_done(GObject* source_object, GAsyncResult* result,
                            gpointer user_data) {
   FlMethodCall* method_call = FL_METHOD_CALL(user_data);
   g_autoptr(GError) error = nullptr;
-  FlValue* list = static_cast<FlValue*>(
+  g_autoptr(FlValue) list = static_cast<FlValue*>(
       g_task_propagate_pointer(G_TASK(result), &error));
-
-  g_autoptr(FlMethodResponse) response = nullptr;
-  if (error != nullptr || list == nullptr) {
-    response = FL_METHOD_RESPONSE(
-        fl_method_success_response_new(fl_value_new_list()));
-  } else {
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
+  if (list == nullptr) {
+    list = fl_value_new_list();
   }
 
+  g_autoptr(FlMethodResponse) response =
+      FL_METHOD_RESPONSE(fl_method_success_response_new(list));
   fl_method_call_respond(method_call, response, nullptr);
   g_object_unref(method_call);
 }
