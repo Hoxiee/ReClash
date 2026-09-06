@@ -885,7 +885,7 @@ void main() {
       );
     });
 
-    test('mode-configs keep their own balancers, named by remarks', () {
+    test('one balancer per config takes the remarks name', () {
       final result = tryConvertXrayConfig(
         _json([
           {
@@ -914,13 +914,50 @@ void main() {
           },
         ]),
       );
-      expect(result, isNotNull);
-      expect(_groupMembers(result!.config, 'Smart \u00b7 AUTO'), [
-        'a.example.com',
-      ]);
-      expect(_groupMembers(result.config, 'LTE \u00b7 AUTO'), [
-        'b.example.com',
-      ]);
+      final config = result!.config;
+      expect(config, contains('name: "Smart", type: "url-test"'));
+      expect(_groupMembers(config, 'Smart'), ['a.example.com']);
+      expect(_groupMembers(config, 'LTE'), ['b.example.com']);
+      // PROXY offers the two modes, the way Happ lists them.
+      expect(_groupMembers(config, 'PROXY'), ['Smart', 'LTE', 'DIRECT']);
+    });
+
+    test('several balancers nest under a remarks-named select', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'remarks': 'Smart',
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            _node('GEMINI', 'g.example.com'),
+          ],
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'AUTO',
+                'selector': ['proxy'],
+              },
+              {
+                'tag': 'GEM',
+                'selector': ['GEMINI'],
+                'strategy': {'type': 'random'},
+              },
+            ],
+          },
+        }),
+      );
+      final config = result!.config;
+      expect(config, contains('name: "Smart", type: "select"'));
+      expect(_groupMembers(config, 'Smart'), ['AUTO', 'GEM']);
+      expect(_groupMembers(config, 'PROXY'), ['Smart', 'DIRECT']);
+      // The pickers hide them; the wrapper is the only surface they need.
+      expect(
+        config,
+        contains('type: "url-test", proxies: ["a.example.com"], hidden: true'),
+      );
+      expect(
+        config,
+        contains('strategy: "round-robin", proxies: ["g.example.com"], hidden: true'),
+      );
     });
 
     test('a balancer tag names the role, so nodes keep their hostnames', () {

@@ -3755,6 +3755,288 @@ as List<String>,
 
 
 /// @nodoc
+mixin _$ConfigInspection {
+
+ List<String> get servers; bool get providers; String? get error;
+/// Create a copy of ConfigInspection
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ConfigInspectionCopyWith<ConfigInspection> get copyWith => _$ConfigInspectionCopyWithImpl<ConfigInspection>(this as ConfigInspection, _$identity);
+
+  /// Serializes this ConfigInspection to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ConfigInspection;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConfigInspection&&const DeepCollectionEquality().equals(other.servers, _this.servers)&&(identical(other.providers, _this.providers) || other.providers == _this.providers)&&(identical(other.error, _this.error) || other.error == _this.error));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ConfigInspection;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.servers),_this.providers,_this.error);
+}
+
+@override
+String toString() {
+  final _this = this as ConfigInspection;
+  return 'ConfigInspection(servers: ${_this.servers}, providers: ${_this.providers}, error: ${_this.error})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ConfigInspectionCopyWith<$Res>  {
+  factory $ConfigInspectionCopyWith(ConfigInspection value, $Res Function(ConfigInspection) _then) = _$ConfigInspectionCopyWithImpl;
+@useResult
+$Res call({
+ List<String> servers, bool providers, String? error
+});
+
+
+
+
+}
+/// @nodoc
+class _$ConfigInspectionCopyWithImpl<$Res>
+    implements $ConfigInspectionCopyWith<$Res> {
+  _$ConfigInspectionCopyWithImpl(this._self, this._then);
+
+  final ConfigInspection _self;
+  final $Res Function(ConfigInspection) _then;
+
+/// Create a copy of ConfigInspection
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? servers = null,Object? providers = null,Object? error = freezed,}) {
+  return _then(ConfigInspection(
+servers: null == servers ? _self.servers : servers // ignore: cast_nullable_to_non_nullable
+as List<String>,providers: null == providers ? _self.providers : providers // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ConfigInspection].
+extension ConfigInspectionPatterns on ConfigInspection {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ConfigInspection value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ConfigInspection() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ConfigInspection value)  $default,){
+final _that = this;
+switch (_that) {
+case _ConfigInspection():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ConfigInspection value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ConfigInspection() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> servers,  bool providers,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ConfigInspection() when $default != null:
+return $default(_that.servers,_that.providers,_that.error);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> servers,  bool providers,  String? error)  $default,) {final _that = this;
+switch (_that) {
+case _ConfigInspection():
+return $default(_that.servers,_that.providers,_that.error);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> servers,  bool providers,  String? error)?  $default,) {final _that = this;
+switch (_that) {
+case _ConfigInspection() when $default != null:
+return $default(_that.servers,_that.providers,_that.error);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ConfigInspection implements ConfigInspection {
+  const _ConfigInspection({ List<String> servers = const [], this.providers = false, this.error}): _servers = servers;
+  factory _ConfigInspection.fromJson(Map<String, dynamic> json) => _$ConfigInspectionFromJson(json);
+
+ final  List<String> _servers;
+@override@JsonKey() List<String> get servers {
+  if (_servers is EqualUnmodifiableListView) return _servers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_servers);
+}
+
+@override@JsonKey() final  bool providers;
+@override final  String? error;
+
+/// Create a copy of ConfigInspection
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ConfigInspectionCopyWith<_ConfigInspection> get copyWith => __$ConfigInspectionCopyWithImpl<_ConfigInspection>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ConfigInspectionToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConfigInspection&&const DeepCollectionEquality().equals(other.servers, _servers)&&(identical(other.providers, providers) || other.providers == providers)&&(identical(other.error, error) || other.error == error));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_servers),providers,error);
+}
+
+@override
+String toString() {
+    return 'ConfigInspection(servers: $servers, providers: $providers, error: $error)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ConfigInspectionCopyWith<$Res> implements $ConfigInspectionCopyWith<$Res> {
+  factory _$ConfigInspectionCopyWith(_ConfigInspection value, $Res Function(_ConfigInspection) _then) = __$ConfigInspectionCopyWithImpl;
+@override @useResult
+$Res call({
+ List<String> servers, bool providers, String? error
+});
+
+
+
+
+}
+/// @nodoc
+class __$ConfigInspectionCopyWithImpl<$Res>
+    implements _$ConfigInspectionCopyWith<$Res> {
+  __$ConfigInspectionCopyWithImpl(this._self, this._then);
+
+  final _ConfigInspection _self;
+  final $Res Function(_ConfigInspection) _then;
+
+/// Create a copy of ConfigInspection
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? servers = null,Object? providers = null,Object? error = freezed,}) {
+  return _then(_ConfigInspection(
+servers: null == servers ? _self._servers : servers // ignore: cast_nullable_to_non_nullable
+as List<String>,providers: null == providers ? _self.providers : providers // ignore: cast_nullable_to_non_nullable
+as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RcxMarker {
 
 @JsonKey(name: 'url') String get url;@JsonKey(name: 'statuses') List<int> get statuses;

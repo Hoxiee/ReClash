@@ -183,6 +183,20 @@ abstract class ProxiesData with _$ProxiesData {
       _$ProxiesDataFromJson(json);
 }
 
+/// A parsed profile as the subscription gate sees it: every proxy server plus
+/// whether providers may still inject nodes the list cannot show.
+@freezed
+abstract class ConfigInspection with _$ConfigInspection {
+  const factory ConfigInspection({
+    @Default([]) List<String> servers,
+    @Default(false) bool providers,
+    String? error,
+  }) = _ConfigInspection;
+
+  factory ConfigInspection.fromJson(Map<String, Object?> json) =>
+      _$ConfigInspectionFromJson(json);
+}
+
 @freezed
 abstract class RcxMarker with _$RcxMarker {
   const factory RcxMarker({

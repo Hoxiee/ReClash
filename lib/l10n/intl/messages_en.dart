@@ -1809,7 +1809,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Custom"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "The app requests the subscription pretending to be this client",
+      "The app requests the subscription in this client\'s format",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1840,6 +1840,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription reminders",
     ),
     "subscriptionProviderInterval": m51,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "None of the nodes in this subscription can be reached — try another client format",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Updated"),
     "support": MessageLookupByLibrary.simpleMessage("Support"),
     "sync": MessageLookupByLibrary.simpleMessage("Sync"),

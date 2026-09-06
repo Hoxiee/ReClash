@@ -162,15 +162,14 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
 }
 
 /// A balancer is the panel's real topology: tag prefixes plus a strategy. Each
-/// becomes one group, so the picker offers those instead of every raw node.
+/// becomes one group; per config they nest under a select named by `remarks` —
+/// the single entry Happ would have shown for that mode.
 List<Map<String, Object?>> _balancerGroups(
   List<Map<String, Object?>> configs,
   Map<String, String> tagNames,
   Set<String> taken,
 ) {
   final result = <Map<String, Object?>>[];
-  // One balancer tag recurs across mode-configs with different members.
-  final labelled = configs.length > 1;
   for (var index = 0; index < configs.length; index++) {
     final config = configs[index];
     final balancers = _asMap(config['routing'])?['balancers'];
@@ -182,16 +181,32 @@ List<Map<String, Object?>> _balancerGroups(
           if (outbound is Map<String, Object?>)
             outbound['tag']?.toString() ?? '',
     ];
-    final remarks = config['remarks']?.toString() ?? '';
+    final configGroups = <Map<String, Object?>>[];
     for (final balancer in balancers) {
       if (balancer is! Map<String, Object?>) continue;
       final group = _balancerGroup(balancer, index, tags, tagNames);
       if (group == null) continue;
-      final base = labelled && remarks.isNotEmpty
-          ? '$remarks · ${group['name']}'
-          : group['name']! as String;
-      group['name'] = _uniqueName(base, taken);
-      result.add(group);
+      group['name'] = _uniqueName(group['name']! as String, taken);
+      configGroups.add(group);
+    }
+    final remarks = config['remarks']?.toString() ?? '';
+    if (remarks.isEmpty) {
+      result.addAll(configGroups);
+    } else if (configGroups.length == 1) {
+      configGroups.single['name'] = _uniqueName(remarks, taken);
+      result.add(configGroups.single);
+    } else if (configGroups.isNotEmpty) {
+      result.add({
+        'name': _uniqueName(remarks, taken),
+        'type': 'select',
+        'proxies': [for (final group in configGroups) group['name']],
+      });
+      // Reachable through the wrapper; listing each one at the top level is
+      // the heap the wrapper exists to replace.
+      for (final group in configGroups) {
+        group['hidden'] = true;
+      }
+      result.addAll(configGroups);
     }
   }
   return result;

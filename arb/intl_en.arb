@@ -88,7 +88,7 @@
   "dark": "Dark",
   "importFromURL": "Import from URL",
   "subscriptionClientLabel": "Client format",
-  "subscriptionClientDesc": "The app requests the subscription pretending to be this client",
+  "subscriptionClientDesc": "The app requests the subscription in this client's format",
   "subscriptionClientAuto": "Auto",
   "subscriptionClientClash": "Clash",
   "subscriptionClientHapp": "Happ",
@@ -1096,6 +1096,10 @@
   "openInBrowser": "Open in browser",
   "off": "Off",
   "subscriptionNoQuota": "This subscription reports no traffic quota or end date",
+  "subscriptionUndialable": "None of the nodes in this subscription can be reached — try another client format",
+  "@subscriptionUndialable": {
+    "type": "text"
+  },
   "subscriptionDomainMoved": "The provider moved to {host}",
   "subscriptionUpdated": "Updated",
   "subscriptionProviderInterval": "The provider suggests {value}",

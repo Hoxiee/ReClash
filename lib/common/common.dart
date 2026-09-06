@@ -11,6 +11,7 @@ export 'context.dart';
 export 'converter.dart';
 export 'datetime.dart';
 export 'device_identity.dart';
+export 'dialability.dart';
 export 'dialog.dart';
 export 'doh.dart';
 export 'exception.dart';

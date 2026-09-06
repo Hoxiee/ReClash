@@ -695,10 +695,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The app requests the subscription pretending to be this client`
+  /// `The app requests the subscription in this client's format`
   String get subscriptionClientDesc {
     return Intl.message(
-      'The app requests the subscription pretending to be this client',
+      'The app requests the subscription in this client\'s format',
       name: 'subscriptionClientDesc',
       desc: '',
       args: [],
@@ -8169,6 +8169,16 @@ class AppLocalizations {
     return Intl.message(
       'This subscription reports no traffic quota or end date',
       name: 'subscriptionNoQuota',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `None of the nodes in this subscription can be reached — try another client format`
+  String get subscriptionUndialable {
+    return Intl.message(
+      'None of the nodes in this subscription can be reached — try another client format',
+      name: 'subscriptionUndialable',
       desc: '',
       args: [],
     );

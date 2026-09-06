@@ -177,6 +177,9 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	validateConfigMethod: withArguments(func(path *string, response MethodResponse) {
 		response.success(handleValidateConfig(*path))
 	}),
+	inspectConfigMethod: withArguments(func(path *string, response MethodResponse) {
+		response.success(handleInspectConfig(*path))
+	}),
 	updateConfigMethod: withArguments(func(params *UpdateParams, response MethodResponse) {
 		response.success(handleUpdateConfig(params))
 	}),

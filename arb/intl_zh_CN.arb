@@ -88,7 +88,7 @@
   "dark": "深色",
   "importFromURL": "从URL导入",
   "subscriptionClientLabel": "客户端格式",
-  "subscriptionClientDesc": "应用会模拟此客户端来获取订阅",
+  "subscriptionClientDesc": "应用会以此客户端的格式获取订阅",
   "subscriptionClientAuto": "自动",
   "subscriptionClientClash": "Clash",
   "subscriptionClientHapp": "Happ",
@@ -956,6 +956,10 @@
   "openInBrowser": "在浏览器中打开",
   "off": "关闭",
   "subscriptionNoQuota": "此订阅未提供流量额度或到期时间",
+  "subscriptionUndialable": "该订阅没有任何可连接的节点 — 请尝试其他客户端格式",
+  "@subscriptionUndialable": {
+    "type": "text"
+  },
   "subscriptionDomainMoved": "提供方已迁移至 {host}",
   "subscriptionUpdated": "更新于",
   "subscriptionProviderInterval": "提供方建议 {value}",

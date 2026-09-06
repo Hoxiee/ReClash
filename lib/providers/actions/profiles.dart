@@ -82,6 +82,7 @@ class ProfilesAction extends _$ProfilesAction {
       ref.read(profilesProvider.notifier).put(profile);
       final newProfile = await profile.update(
         validate: (path) => _core.validateConfig(path),
+        inspect: (path) => _core.inspectConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
           includeDeviceIdentity: ref
               .read(appSettingProvider)
@@ -209,6 +210,7 @@ class ProfilesAction extends _$ProfilesAction {
           customUserAgent: customUserAgent,
         ).update(
           validate: (path) => _core.validateConfig(path),
+          inspect: (path) => _core.inspectConfig(path),
           requestHeaders: await deviceIdentity.subscriptionHeaders(
             includeDeviceIdentity: false,
           ),

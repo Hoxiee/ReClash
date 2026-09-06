@@ -88,7 +88,7 @@
   "dark": "Тёмная",
   "importFromURL": "Импорт из URL",
   "subscriptionClientLabel": "Формат подписки",
-  "subscriptionClientDesc": "Приложение запросит подписку, представившись этим клиентом",
+  "subscriptionClientDesc": "Приложение запросит подписку в формате этого клиента",
   "subscriptionClientAuto": "Авто",
   "subscriptionClientClash": "Clash",
   "subscriptionClientHapp": "Happ",
@@ -970,6 +970,10 @@
   "openInBrowser": "Открыть в браузере",
   "off": "Выключено",
   "subscriptionNoQuota": "Подписка не сообщает ни лимит трафика, ни срок действия",
+  "subscriptionUndialable": "Ни один узел подписки не дозванивается — попробуйте другой формат клиента",
+  "@subscriptionUndialable": {
+    "type": "text"
+  },
   "subscriptionDomainMoved": "Провайдер переехал на {host}",
   "subscriptionUpdated": "Обновлено",
   "subscriptionProviderInterval": "Провайдер предлагает {value}",

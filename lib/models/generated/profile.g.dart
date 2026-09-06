@@ -66,6 +66,7 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   skippedNodes: json['skippedNodes'] == null
       ? const []
       : const SkippedNodesConverter().fromJson(json['skippedNodes'] as List),
+  undialableNodes: json['undialableNodes'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
@@ -87,6 +88,7 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'clientEmulation': _$SubscriptionClientEnumMap[instance.clientEmulation]!,
   'customUserAgent': instance.customUserAgent,
   'skippedNodes': const SkippedNodesConverter().toJson(instance.skippedNodes),
+  'undialableNodes': instance.undialableNodes,
 };
 
 const _$OverwriteTypeEnumMap = {

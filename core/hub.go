@@ -144,6 +144,29 @@ func handleValidateConfig(path string) string {
 	return ""
 }
 
+// The host decides whether a parsed profile is worth keeping, so validation
+// hands over the proxy servers it saw instead of only a yes/no.
+func handleInspectConfig(path string) map[string]any {
+	buf, err := os.ReadFile(path)
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
+	raw, err := config.UnmarshalRawConfig(buf)
+	if err != nil {
+		return map[string]any{"error": err.Error()}
+	}
+	servers := make([]any, 0, len(raw.Proxy))
+	for _, proxy := range raw.Proxy {
+		if server, ok := proxy["server"].(string); ok {
+			servers = append(servers, server)
+		}
+	}
+	return map[string]any{
+		"servers":   servers,
+		"providers": len(raw.ProxyProvider) > 0,
+	}
+}
+
 const globalProxyName = "GLOBAL"
 
 func isProxyGroupType(adapterType constant.AdapterType) bool {

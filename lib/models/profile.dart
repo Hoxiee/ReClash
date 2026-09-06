@@ -8,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
+import 'core.dart';
 import 'panel_headers.dart';
 import 'panel_meta.dart';
 
@@ -15,6 +16,8 @@ part 'generated/profile.freezed.dart';
 part 'generated/profile.g.dart';
 
 typedef ValidateConfig = Future<String> Function(String path);
+
+typedef InspectConfig = Future<ConfigInspection?> Function(String path);
 
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
@@ -68,6 +71,7 @@ abstract class Profile with _$Profile {
     @JsonKey(includeToJson: false, includeFromJson: false)
     SubscriptionClient? lastWorkingClient,
     @Default([]) @SkippedNodesConverter() List<SkippedNode> skippedNodes,
+    @Default(false) bool undialableNodes,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, Object?> json) =>
@@ -170,6 +174,7 @@ extension ProfileExtension on Profile {
 
   Future<Profile?> checkAndUpdateAndCopy({
     required ValidateConfig validate,
+    required InspectConfig inspect,
     Map<String, String>? requestHeaders,
   }) async {
     final mFile = await _getFile(false);
@@ -177,7 +182,11 @@ extension ProfileExtension on Profile {
     if (isExists || url.isEmpty) {
       return null;
     }
-    return update(validate: validate, requestHeaders: requestHeaders);
+    return update(
+      validate: validate,
+      inspect: inspect,
+      requestHeaders: requestHeaders,
+    );
   }
 
   Future<File> _getFile([bool autoCreate = true]) async {
@@ -196,11 +205,15 @@ extension ProfileExtension on Profile {
 
   Future<Profile> update({
     required ValidateConfig validate,
+    required InspectConfig inspect,
     Map<String, String>? requestHeaders,
   }) async {
     final target = normalizeSubscriptionUrl(url);
     final record = await preferences.getSubscriptionHostRecord();
     var lastError = 'subscription fetch failed';
+    // A payload that parses but carries no dialable node is a panel stub; the
+    // first parsed one is still better than nothing when probing runs dry.
+    (Profile, Map<String, List<String>>)? stubFallback;
     for (final host in subscriptionUrlCandidates(target, record.hostsFor(id))) {
       for (final candidate in probeOrder(
         clientEmulation,
@@ -240,19 +253,39 @@ extension ProfileExtension on Profile {
             validate: validate,
             workingClient: candidate,
           );
-          await _rememberSpareHosts(
-            record: record,
-            headers: response.headers.map,
-            primaryUrl: target,
-            updatedUrl: updated.url,
-          );
-          return updated;
+          if (await _isDialable(inspect)) {
+            await _rememberSpareHosts(
+              record: record,
+              headers: response.headers.map,
+              primaryUrl: target,
+              updatedUrl: updated.url,
+            );
+            return updated.copyWith(undialableNodes: false);
+          }
+          stubFallback ??= (updated, response.headers.map);
+          lastError = 'subscription returned no dialable nodes';
         } on MessageException catch (e) {
           lastError = e.message;
         }
       }
     }
+    final stub = stubFallback?.$1;
+    if (stub != null) {
+      await _rememberSpareHosts(
+        record: record,
+        headers: stubFallback!.$2,
+        primaryUrl: target,
+        updatedUrl: stub.url,
+      );
+      return stub.copyWith(undialableNodes: true);
+    }
     throw MessageException(lastError);
+  }
+
+  Future<bool> _isDialable(InspectConfig inspect) async {
+    final file = await _getFile(false);
+    final inspection = await inspect(file.path);
+    return inspection == null || hasDialableNode(inspection);
   }
 
   Future<void> _rememberSpareHosts({

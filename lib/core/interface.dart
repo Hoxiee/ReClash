@@ -25,6 +25,8 @@ mixin CoreInterface {
 
   Future<String> validateConfig(String path);
 
+  Future<ConfigInspection?> inspectConfig(String path);
+
   Future<Map<String, dynamic>> getConfig(String path);
 
   Future<Delay?> asyncTestDelay(String url, String proxyName);
@@ -170,6 +172,15 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<String> validateConfig(String path) async {
     return _invokeMessage(method: CoreMethod.validateConfig, arguments: path);
+  }
+
+  @override
+  Future<ConfigInspection?> inspectConfig(String path) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.inspectConfig,
+      arguments: path,
+    );
+    return data == null ? null : ConfigInspection.fromJson(data);
   }
 
   @override

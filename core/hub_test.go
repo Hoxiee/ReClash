@@ -456,6 +456,41 @@ func TestHandleValidateConfigReportsAMissingFile(t *testing.T) {
 	}
 }
 
+func TestHandleInspectConfigListsServersAndProviders(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := "proxies:\n" +
+		"  - {name: a, type: socks5, server: auto-wifi.local, port: 443}\n" +
+		"  - {name: b, type: socks5, server: de.example.com, port: 443}\n" +
+		"proxy-providers:\n  p1: {type: http, url: https://example.invalid/sub, path: ./p.yaml}\n"
+	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+
+	got := handleInspectConfig(path)
+
+	if got["error"] != nil {
+		t.Fatalf("handleInspectConfig error = %v", got["error"])
+	}
+	servers := got["servers"].([]any)
+	if len(servers) != 2 || servers[0] != "auto-wifi.local" {
+		t.Errorf("handleInspectConfig servers = %v, want both proxy servers", servers)
+	}
+	if got["providers"] != true {
+		t.Errorf("handleInspectConfig providers = %v, want true", got["providers"])
+	}
+}
+
+func TestHandleInspectConfigReportsMalformedYaml(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	if err := os.WriteFile(path, []byte("proxies: [unterminated\n"), 0o600); err != nil {
+		t.Fatalf("write config: %v", err)
+	}
+
+	if got := handleInspectConfig(path); got["error"] == nil {
+		t.Fatal("handleInspectConfig accepted malformed yaml")
+	}
+}
+
 func TestHandleValidateConfigReportsMalformedYaml(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	if err := os.WriteFile(path, []byte("proxies: [unterminated\n"), 0o600); err != nil {

@@ -485,6 +485,7 @@ class SetupAction extends _$SetupAction {
     final nextProfile = await globalState.safeRun(
       () async => profile?.checkAndUpdateAndCopy(
         validate: (path) => _core.validateConfig(path),
+        inspect: (path) => _core.inspectConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
           includeDeviceIdentity: ref
               .read(appSettingProvider)

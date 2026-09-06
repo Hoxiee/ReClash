@@ -276,6 +276,24 @@ _ProxiesData _$ProxiesDataFromJson(Map<String, dynamic> json) => _ProxiesData(
 Map<String, dynamic> _$ProxiesDataToJson(_ProxiesData instance) =>
     <String, dynamic>{'proxies': instance.proxies, 'all': instance.all};
 
+_ConfigInspection _$ConfigInspectionFromJson(Map<String, dynamic> json) =>
+    _ConfigInspection(
+      servers:
+          (json['servers'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      providers: json['providers'] as bool? ?? false,
+      error: json['error'] as String?,
+    );
+
+Map<String, dynamic> _$ConfigInspectionToJson(_ConfigInspection instance) =>
+    <String, dynamic>{
+      'servers': instance.servers,
+      'providers': instance.providers,
+      'error': instance.error,
+    };
+
 _RcxMarker _$RcxMarkerFromJson(Map<String, dynamic> json) => _RcxMarker(
   url: json['url'] as String,
   statuses: (json['statuses'] as List<dynamic>)

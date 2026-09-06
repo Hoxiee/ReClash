@@ -6,6 +6,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
+import 'package:reclash/views/profiles/edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,6 +42,15 @@ class SubscriptionOverviewView extends ConsumerWidget {
             )
           else ...[
             _sliver(_ServiceCard(profile: profile, panelMeta: panelMeta)),
+            if (profile.undialableNodes)
+              _sliver(
+                _NoticeCard(
+                  icon: Icons.wifi_off_rounded,
+                  text: appLocalizations.subscriptionUndialable,
+                  tone: context.colorScheme.error,
+                  onTap: () => _handleShowEditExtendPage(context, profile),
+                ),
+              ),
             for (final notice in _notices(context, panelMeta)) _sliver(notice),
             if (hasQuota)
               _sliver(_BalanceCard(subscriptionInfo: subscriptionInfo))
@@ -59,6 +69,16 @@ class SubscriptionOverviewView extends ConsumerWidget {
       ),
     );
   }
+}
+
+void _handleShowEditExtendPage(BuildContext context, Profile profile) {
+  showExtend(
+    context,
+    builder: (context) => AdaptiveSheetScaffold(
+      title: context.appLocalizations.edit,
+      body: EditProfileView(profile: profile, context: context),
+    ),
+  );
 }
 
 Widget _sliver(Widget child) => SliverPadding(
@@ -147,16 +167,22 @@ class _Card extends StatelessWidget {
 }
 
 class _NoticeCard extends StatelessWidget {
-  const _NoticeCard({required this.icon, required this.text, this.tone});
+  const _NoticeCard({
+    required this.icon,
+    required this.text,
+    this.tone,
+    this.onTap,
+  });
 
   final IconData icon;
   final String text;
   final Color? tone;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final tone = this.tone ?? context.colorScheme.onSurfaceVariant;
-    return _Card(
+    final card = _Card(
       tone: this.tone,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,6 +199,13 @@ class _NoticeCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+    final onTap = this.onTap;
+    if (onTap == null) return card;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: card,
     );
   }
 }

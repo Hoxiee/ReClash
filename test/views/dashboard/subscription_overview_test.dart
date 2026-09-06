@@ -13,6 +13,7 @@ Profile _profile({
   SubscriptionInfo? subscriptionInfo,
   PanelMeta? panelMeta,
   bool autoUpdate = true,
+  bool undialableNodes = false,
 }) {
   return Profile(
     id: 7,
@@ -23,6 +24,7 @@ Profile _profile({
     autoUpdate: autoUpdate,
     subscriptionInfo: subscriptionInfo,
     panelMeta: panelMeta,
+    undialableNodes: undialableNodes,
   );
 }
 
@@ -162,5 +164,28 @@ void main() {
     expect(find.text('Device limit reached'), findsOne);
     expect(find.text('Maintenance tonight'), findsOne);
     expect(find.text('The provider moved to new.example.com'), findsOne);
+  });
+
+  testWidgets('a subscription whose nodes are all stubs warns about it', (
+    tester,
+  ) async {
+    await _pump(tester, _profile(undialableNodes: true));
+
+    expect(
+      find.text(
+        'None of the nodes in this subscription can be reached — '
+        'try another client format',
+      ),
+      findsOne,
+    );
+  });
+
+  testWidgets('a dialable subscription shows no stub warning', (tester) async {
+    await _pump(tester, _profile());
+
+    expect(
+      find.textContaining('None of the nodes in this subscription'),
+      findsNothing,
+    );
   });
 }

@@ -1496,7 +1496,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("カスタム"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "このクライアントに扮して購読を取得します",
+      "このクライアントの形式で購読を取得します",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1523,6 +1523,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "サブスクリプションのリマインダー",
     ),
     "subscriptionProviderInterval": m51,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "このサブスクリプションのノードにはどれも接続できません。クライアント形式を変更してください",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("更新日時"),
     "support": MessageLookupByLibrary.simpleMessage("サポート"),
     "sync": MessageLookupByLibrary.simpleMessage("同期"),

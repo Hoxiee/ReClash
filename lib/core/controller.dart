@@ -99,6 +99,10 @@ class CoreController {
     return res;
   }
 
+  Future<ConfigInspection?> inspectConfig(String path) async {
+    return _interface.inspectConfig(path);
+  }
+
   Future<String> validateConfigWithData(String data) async {
     final path = await appPath.tempFilePath;
     final file = File(path);

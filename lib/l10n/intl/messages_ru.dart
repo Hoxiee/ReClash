@@ -1870,7 +1870,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("Свой"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "Приложение запросит подписку, представившись этим клиентом",
+      "Приложение запросит подписку в формате этого клиента",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1901,6 +1901,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Напоминания о подписке",
     ),
     "subscriptionProviderInterval": m51,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "Ни один узел подписки не дозванивается — попробуйте другой формат клиента",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("Обновлено"),
     "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
     "sync": MessageLookupByLibrary.simpleMessage("Синхронизация"),

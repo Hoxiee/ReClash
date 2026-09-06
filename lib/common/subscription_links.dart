@@ -1014,8 +1014,9 @@ Map<String, String> _splitQuery(String query) {
 /// Every string is double-quoted — node names freely contain emoji, `#`, `:`
 /// and CJK. Public for the xray converter, which shares this emitter.
 ///
-/// PROXY selects between [groups] and only the nodes no group claimed; listing
-/// claimed ones too would put the flat heap back beside its replacement.
+/// PROXY selects the groups no other group contains plus the nodes no group
+/// claimed; listing claimed ones too would put the flat heap back beside its
+/// replacement.
 String emitProxiesConfig(
   List<Map<String, Object?>> proxies, {
   List<Map<String, Object?>> groups = const [],
@@ -1030,7 +1031,9 @@ String emitProxiesConfig(
       ...?(group['proxies'] as List?)?.map((e) => e.toString()),
   };
   final groupEntries = [
-    for (final group in groups) _yamlString(group['name']! as String),
+    for (final group in groups)
+      if (!claimed.contains(group['name']))
+        _yamlString(group['name']! as String),
     for (final proxy in proxies)
       if (!claimed.contains(proxy['name']))
         _yamlString(proxy['name']! as String),

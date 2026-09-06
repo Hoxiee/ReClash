@@ -88,7 +88,7 @@
   "dark": "ダーク",
   "importFromURL": "URLからインポート",
   "subscriptionClientLabel": "クライアント形式",
-  "subscriptionClientDesc": "このクライアントに扮して購読を取得します",
+  "subscriptionClientDesc": "このクライアントの形式で購読を取得します",
   "subscriptionClientAuto": "自動",
   "subscriptionClientClash": "Clash",
   "subscriptionClientHapp": "Happ",
@@ -956,6 +956,10 @@
   "openInBrowser": "ブラウザーで開く",
   "off": "オフ",
   "subscriptionNoQuota": "このサブスクリプションはトラフィック上限も有効期限も返しません",
+  "subscriptionUndialable": "このサブスクリプションのノードにはどれも接続できません。クライアント形式を変更してください",
+  "@subscriptionUndialable": {
+    "type": "text"
+  },
   "subscriptionDomainMoved": "プロバイダーは {host} に移転しました",
   "subscriptionUpdated": "更新日時",
   "subscriptionProviderInterval": "プロバイダーの推奨は {value} です",

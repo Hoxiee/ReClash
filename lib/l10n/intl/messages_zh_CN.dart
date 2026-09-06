@@ -1296,7 +1296,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientClash": MessageLookupByLibrary.simpleMessage("Clash"),
     "subscriptionClientCustom": MessageLookupByLibrary.simpleMessage("自定义"),
     "subscriptionClientDesc": MessageLookupByLibrary.simpleMessage(
-      "应用会模拟此客户端来获取订阅",
+      "应用会以此客户端的格式获取订阅",
     ),
     "subscriptionClientHapp": MessageLookupByLibrary.simpleMessage("Happ"),
     "subscriptionClientIncy": MessageLookupByLibrary.simpleMessage("INCY"),
@@ -1317,6 +1317,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("订阅提醒"),
     "subscriptionProviderInterval": m51,
+    "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
+      "该订阅没有任何可连接的节点 — 请尝试其他客户端格式",
+    ),
     "subscriptionUpdated": MessageLookupByLibrary.simpleMessage("更新于"),
     "support": MessageLookupByLibrary.simpleMessage("支持"),
     "sync": MessageLookupByLibrary.simpleMessage("同步"),
