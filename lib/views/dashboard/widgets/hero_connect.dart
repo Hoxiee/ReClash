@@ -11,6 +11,7 @@ import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
@@ -290,10 +291,19 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
           ),
           if (hasSub) ...[
             const SizedBox(height: 12),
-            _TrafficCard(
-              sub: sub,
-              buyPlanUrl: buyPlanUrl,
-              buyTrafficUrl: buyTrafficUrl,
+            FocusableTap(
+              borderRadius: heroCardRadius,
+              onTap: () {
+                showExtend(
+                  context,
+                  builder: (_) => const SubscriptionOverviewView(),
+                );
+              },
+              child: _TrafficCard(
+                sub: sub,
+                buyPlanUrl: buyPlanUrl,
+                buyTrafficUrl: buyTrafficUrl,
+              ),
             ),
           ],
           const SizedBox(height: 12),
