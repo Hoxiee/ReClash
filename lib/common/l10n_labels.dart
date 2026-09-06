@@ -192,6 +192,10 @@ extension LocaleL10n on Locale {
       'en' => 'English',
       'ja' => '日本語',
       'ru' => 'Русский',
+      'uz' => 'Oʻzbekcha',
+      'kk' => 'Қазақша',
+      'tk' => 'Türkmençe',
+      'ko' => '한국어',
       'zh_CN' => '简体中文',
       final code => code,
     };
@@ -202,6 +206,10 @@ extension LocaleL10n on Locale {
       'en' => 'English',
       'ja' => 'Japanese',
       'ru' => 'Russian',
+      'uz' => 'Uzbek',
+      'kk' => 'Kazakh',
+      'tk' => 'Turkmen',
+      'ko' => 'Korean',
       'zh_CN' => 'Chinese (Simplified)',
       final code => code,
     };
@@ -212,6 +220,10 @@ extension LocaleL10n on Locale {
       'en' => '🇬🇧',
       'ja' => '🇯🇵',
       'ru' => '🇷🇺',
+      'uz' => '🇺🇿',
+      'kk' => '🇰🇿',
+      'tk' => '🇹🇲',
+      'ko' => '🇰🇷',
       'zh_CN' => '🇨🇳',
       _ => '🌐',
     };

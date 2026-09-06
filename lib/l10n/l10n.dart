@@ -280,6 +280,26 @@ class AppLocalizations {
     return Intl.message('Simplified Chinese', name: 'zhCN', desc: '', args: []);
   }
 
+  /// `Korean`
+  String get ko {
+    return Intl.message('Korean', name: 'ko', desc: '', args: []);
+  }
+
+  /// `Uzbek`
+  String get uz {
+    return Intl.message('Uzbek', name: 'uz', desc: '', args: []);
+  }
+
+  /// `Kazakh`
+  String get kk {
+    return Intl.message('Kazakh', name: 'kk', desc: '', args: []);
+  }
+
+  /// `Turkmen`
+  String get tk {
+    return Intl.message('Turkmen', name: 'tk', desc: '', args: []);
+  }
+
   /// `Theme`
   String get theme {
     return Intl.message('Theme', name: 'theme', desc: '', args: []);
@@ -8237,7 +8257,11 @@ class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'kk'),
+      Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'tk'),
+      Locale.fromSubtags(languageCode: 'uz'),
       Locale.fromSubtags(languageCode: 'zh', countryCode: 'CN'),
     ];
   }
