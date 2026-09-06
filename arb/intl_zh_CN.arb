@@ -130,6 +130,8 @@
   "creditFlClashX": "FlClashX — 机场功能与思路",
   "creditMihomo": "mihomo — 代理内核",
   "license": "许可证",
+  "licenses": "开源许可",
+  "licensesDesc": "应用内置的软件包",
   "sourceCode": "源代码",
   "copyDiagnostics": "复制版本信息",
   "tabAnimation": "选项卡动画",

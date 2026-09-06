@@ -130,6 +130,8 @@
   "creditFlClashX": "FlClashX — провайдерские фичи и идеи",
   "creditMihomo": "mihomo — прокси-ядро",
   "license": "Лицензия",
+  "licenses": "Лицензии",
+  "licensesDesc": "Пакеты, входящие в приложение",
   "sourceCode": "Исходный код",
   "copyDiagnostics": "Скопировать данные о версии",
   "tabAnimation": "Анимация вкладок",

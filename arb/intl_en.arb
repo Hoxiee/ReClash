@@ -130,6 +130,8 @@
   "creditFlClashX": "FlClashX — provider features and ideas",
   "creditMihomo": "mihomo — the proxy core",
   "license": "License",
+  "licenses": "Licenses",
+  "licensesDesc": "Packages bundled into the app",
   "sourceCode": "Source code",
   "copyDiagnostics": "Copy version info",
   "tabAnimation": "Tab animation",

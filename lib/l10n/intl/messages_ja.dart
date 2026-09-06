@@ -632,6 +632,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "license": MessageLookupByLibrary.simpleMessage("ライセンス"),
+    "licenses": MessageLookupByLibrary.simpleMessage("ライセンス一覧"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage("アプリに同梱されているパッケージ"),
     "light": MessageLookupByLibrary.simpleMessage("ライト"),
     "lightAt": MessageLookupByLibrary.simpleMessage("ライト切替"),
     "list": MessageLookupByLibrary.simpleMessage("リスト"),

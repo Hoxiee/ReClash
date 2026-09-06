@@ -554,6 +554,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("布局"),
     "license": MessageLookupByLibrary.simpleMessage("许可证"),
+    "licenses": MessageLookupByLibrary.simpleMessage("开源许可"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage("应用内置的软件包"),
     "light": MessageLookupByLibrary.simpleMessage("浅色"),
     "lightAt": MessageLookupByLibrary.simpleMessage("浅色开始"),
     "list": MessageLookupByLibrary.simpleMessage("列表"),

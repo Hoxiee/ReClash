@@ -140,6 +140,28 @@ class AboutView extends ConsumerWidget {
                   );
                 },
               ),
+              DecorationListItem(
+                title: Text(appLocalizations.licenses),
+                subtitle: Text(appLocalizations.licensesDesc),
+                leading: const Icon(Icons.menu_book),
+                onPressed: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: appName,
+                    applicationVersion:
+                        'v${globalState.packageInfo.version}',
+                    applicationIcon: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/images/icon.png',
+                        width: 48,
+                        height: 48,
+                      ),
+                    ),
+                    applicationLegalese: 'GPL-3.0',
+                  );
+                },
+              ),
             ],
           ),
           const SettingBottomInset(),

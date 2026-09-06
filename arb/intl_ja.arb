@@ -130,6 +130,8 @@
   "creditFlClashX": "FlClashX — プロバイダ機能とアイデア",
   "creditMihomo": "mihomo — プロキシコア",
   "license": "ライセンス",
+  "licenses": "ライセンス一覧",
+  "licensesDesc": "アプリに同梱されているパッケージ",
   "sourceCode": "ソースコード",
   "copyDiagnostics": "バージョン情報をコピー",
   "tabAnimation": "タブアニメーション",

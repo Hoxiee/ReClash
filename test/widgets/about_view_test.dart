@@ -55,4 +55,16 @@ void main() {
     expect(find.text('Telegram'), findsOneWidget);
     expect(tester.takeException(), null);
   });
+
+  testWidgets('opens the bundled packages license page', (tester) async {
+    final l10n = await pumpAbout(tester);
+
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+    await tester.pump();
+    await tester.tap(find.text(l10n.licenses));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LicensePage), findsOneWidget);
+    expect(tester.takeException(), null);
+  });
 }

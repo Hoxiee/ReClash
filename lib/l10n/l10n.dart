@@ -1030,6 +1030,21 @@ class AppLocalizations {
     return Intl.message('License', name: 'license', desc: '', args: []);
   }
 
+  /// `Licenses`
+  String get licenses {
+    return Intl.message('Licenses', name: 'licenses', desc: '', args: []);
+  }
+
+  /// `Packages bundled into the app`
+  String get licensesDesc {
+    return Intl.message(
+      'Packages bundled into the app',
+      name: 'licensesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Source code`
   String get sourceCode {
     return Intl.message('Source code', name: 'sourceCode', desc: '', args: []);

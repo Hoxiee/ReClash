@@ -775,6 +775,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
     "license": MessageLookupByLibrary.simpleMessage("License"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Licenses"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Packages bundled into the app",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Light"),
     "lightAt": MessageLookupByLibrary.simpleMessage("Light at"),
     "list": MessageLookupByLibrary.simpleMessage("List"),

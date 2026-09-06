@@ -786,6 +786,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
     "license": MessageLookupByLibrary.simpleMessage("Лицензия"),
+    "licenses": MessageLookupByLibrary.simpleMessage("Лицензии"),
+    "licensesDesc": MessageLookupByLibrary.simpleMessage(
+      "Пакеты, входящие в приложение",
+    ),
     "light": MessageLookupByLibrary.simpleMessage("Светлая"),
     "lightAt": MessageLookupByLibrary.simpleMessage("Светлая в"),
     "list": MessageLookupByLibrary.simpleMessage("Список"),
