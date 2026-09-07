@@ -543,6 +543,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("제외 유형"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("종료"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage("전체 화면 종료"),
     "expand": MessageLookupByLibrary.simpleMessage("표준"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("예상 상태"),
     "expireTime": MessageLookupByLibrary.simpleMessage("만료 시간"),
@@ -1035,10 +1036,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "도메인 키워드와 일치합니다",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "와일드카드 일치이며 *와 ?만 지원합니다",
+      "도메인 정규식과 일치합니다",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "도메인 접미사와 일치합니다",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "와일드카드 일치이며 *와 ?만 지원합니다",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "DSCP 표시와 일치합니다(tproxy UDP 인바운드 전용)",
@@ -1090,11 +1094,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "프로세스 이름 정규식으로 일치합니다. Android에서는 패키지 이름으로 일치합니다",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "프로세스 이름 와일드카드로 일치합니다. *와 ?만 지원합니다",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "프로세스 전체 경로로 일치합니다",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "프로세스 경로 정규식으로 일치합니다",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "프로세스 경로 와일드카드로 일치합니다. *와 ?만 지원합니다",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "재매치 이름과 일치합니다. 이름이 여러 개인 경우 /로 구분하세요",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "규칙 세트를 참조합니다. rule-providers가 필요합니다",

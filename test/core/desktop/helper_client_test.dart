@@ -97,6 +97,21 @@ void main() {
     );
   });
 
+  test('stop waits out the Helper exit budget before giving up', () async {
+    Duration? receiveTimeout;
+    final client = _client(
+      _ResponseAdapter((options) {
+        receiveTimeout = options.receiveTimeout;
+        return _jsonResponse({'sessionId': _sessionId, 'stopped': true});
+      }),
+    );
+
+    await client.stop(_sessionId);
+
+    expect(receiveTimeout, HelperClient.stopTimeout);
+    expect(receiveTimeout, greaterThan(const Duration(milliseconds: 4500)));
+  });
+
   test('matching stop parses a confirmed response', () async {
     final adapter = _ResponseAdapter((options) {
       expect(options.path, endsWith('/stop'));

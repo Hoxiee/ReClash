@@ -12,6 +12,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
+final _tabStateProvider = NotifierProvider<_TabStateNotifier, ProxiesTabState>(
+  _TabStateNotifier.new,
+);
+
+class _TabStateNotifier extends Notifier<ProxiesTabState> {
+  @override
+  ProxiesTabState build() => _tabState([_group('B'), _group('C')]);
+
+  void set(ProxiesTabState value) => state = value;
+}
+
 void main() {
   late ProviderContainer globalContainer;
   late ProviderSubscription<Profile?> currentProfileSubscription;
@@ -25,12 +36,8 @@ void main() {
         currentGroupsStateProvider.overrideWithValue(
           GroupsState(value: [_group('A'), _group('B'), _group('C')]),
         ),
-        proxiesTabStateProvider.overrideWithValue(
-          ProxiesTabState(
-            groups: [_group('B'), _group('C')],
-            currentGroupName: 'B',
-            proxyCardType: ProxyCardType.expand,
-          ),
+        proxiesTabStateProvider.overrideWith(
+          (ref) => ref.watch(_tabStateProvider),
         ),
       ],
     );
@@ -46,9 +53,10 @@ void main() {
     globalContainer.dispose();
   });
 
-  testWidgets('current group follows the rendered tab list', (tester) async {
+  Future<GlobalKey<ProxiesTabViewState>> pumpTabView(
+    WidgetTester tester,
+  ) async {
     final key = GlobalKey<ProxiesTabViewState>();
-
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: globalContainer,
@@ -59,6 +67,11 @@ void main() {
       ),
     );
     await tester.pump();
+    return key;
+  }
+
+  testWidgets('current group follows the rendered tab list', (tester) async {
+    final key = await pumpTabView(tester);
 
     expect(key.currentState?.currentGroup?.name, 'B');
 
@@ -69,6 +82,52 @@ void main() {
     expect(key.currentState?.currentGroup?.name, 'C');
     expect(globalContainer.read(currentProfileProvider)?.currentGroupName, 'C');
   });
+
+  testWidgets(
+    'keeps the outgoing tab bar usable while the empty state enters',
+    (tester) async {
+      final key = await pumpTabView(tester);
+
+      globalContainer.read(_tabStateProvider.notifier).set(_tabState([]));
+      await tester.pump();
+
+      expect(find.byType(TabBar), findsOneWidget);
+      await tester.tap(find.byType(Tab).at(1), warnIfMissed: false);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(key.currentState?.currentGroup, isNull);
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TabBar), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('rebuilds the tab bar when groups return', (tester) async {
+    final key = await pumpTabView(tester);
+
+    globalContainer.read(_tabStateProvider.notifier).set(_tabState([]));
+    await tester.pumpAndSettle();
+    globalContainer
+        .read(_tabStateProvider.notifier)
+        .set(_tabState([_group('A'), _group('B'), _group('C')]));
+    await tester.pumpAndSettle();
+
+    final tabBar = tester.widget<TabBar>(find.byType(TabBar));
+    expect(tabBar.controller?.length, 3);
+    expect(key.currentState?.currentGroup?.name, 'B');
+    expect(tester.takeException(), isNull);
+  });
+}
+
+ProxiesTabState _tabState(List<Group> groups) {
+  return ProxiesTabState(
+    groups: groups,
+    currentGroupName: 'B',
+    proxyCardType: ProxyCardType.expand,
+  );
 }
 
 Group _group(String name) {

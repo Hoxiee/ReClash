@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/models/models.dart';
@@ -109,6 +110,9 @@ void main() {
     );
 
     await pumpConnections(tester);
+    // NullStatusSwitcher fades the empty state out over the next frames.
+    await tester.pump(commonDuration);
+    await tester.pump(commonDuration);
 
     expect(find.byType(NullStatus), findsNothing);
     expect(find.textContaining('alpha.test'), findsWidgets);

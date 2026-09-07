@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:ui' show ClipOp;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/launch.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -138,11 +140,17 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowMaximize() {
     _invalidateWindowGeometryCapture();
     super.onWindowMaximize();
+    if (system.isWindows) {
+      unawaited(windowManager.setWindowCornerPreference(round: false));
+    }
   }
 
   @override
   void onWindowUnmaximize() {
     super.onWindowUnmaximize();
+    if (system.isWindows) {
+      unawaited(windowManager.setWindowCornerPreference(round: true));
+    }
     _scheduleWindowGeometryCapture();
   }
 
@@ -244,6 +252,122 @@ class WindowHeaderLayout extends StatelessWidget {
   }
 }
 
+@immutable
+class WindowCaptionState {
+  const WindowCaptionState({
+    this.isPinned = false,
+    this.isMaximized = false,
+    this.isFullScreen = false,
+  });
+
+  final bool isPinned;
+  final bool isMaximized;
+  final bool isFullScreen;
+
+  WindowCaptionState copyWith({
+    bool? isPinned,
+    bool? isMaximized,
+    bool? isFullScreen,
+  }) {
+    return WindowCaptionState(
+      isPinned: isPinned ?? this.isPinned,
+      isMaximized: isMaximized ?? this.isMaximized,
+      isFullScreen: isFullScreen ?? this.isFullScreen,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WindowCaptionState &&
+        other.isPinned == isPinned &&
+        other.isMaximized == isMaximized &&
+        other.isFullScreen == isFullScreen;
+  }
+
+  @override
+  int get hashCode => Object.hash(isPinned, isMaximized, isFullScreen);
+}
+
+/// Maximize and fullscreen are written only from window events: the window
+/// manager can change both on its own, and on Linux a maximize request is
+/// applied later, so reading the state back right after the call is stale.
+class WindowCaptionController extends ValueNotifier<WindowCaptionState>
+    with WindowListener {
+  WindowCaptionController() : super(const WindowCaptionState()) {
+    windowManager.addListener(this);
+    unawaited(_syncFromWindow());
+  }
+
+  bool _disposed = false;
+
+  Future<void> _syncFromWindow() async {
+    final states = await Future.wait<bool>([
+      windowManager.isAlwaysOnTop(),
+      windowManager.isMaximized(),
+      windowManager.isFullScreen(),
+    ]);
+    _set(
+      WindowCaptionState(
+        isPinned: states[0],
+        isMaximized: states[1],
+        isFullScreen: states[2],
+      ),
+    );
+  }
+
+  void _set(WindowCaptionState state) {
+    if (_disposed) return;
+    value = state;
+  }
+
+  @override
+  void onWindowMaximize() {
+    super.onWindowMaximize();
+    _set(value.copyWith(isMaximized: true));
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    super.onWindowUnmaximize();
+    _set(value.copyWith(isMaximized: false));
+  }
+
+  @override
+  void onWindowEnterFullScreen() {
+    super.onWindowEnterFullScreen();
+    _set(value.copyWith(isFullScreen: true));
+  }
+
+  @override
+  void onWindowLeaveFullScreen() {
+    super.onWindowLeaveFullScreen();
+    _set(value.copyWith(isFullScreen: false));
+  }
+
+  Future<void> toggleMaximized() async {
+    if (await windowManager.isFullScreen()) {
+      await windowManager.setFullScreen(false);
+    } else if (await windowManager.isMaximized()) {
+      await windowManager.unmaximize();
+    } else {
+      await windowManager.maximize();
+    }
+  }
+
+  Future<void> togglePin() async {
+    final isPinned = await windowManager.isAlwaysOnTop();
+    await windowManager.setAlwaysOnTop(!isPinned);
+    _set(value.copyWith(isPinned: await windowManager.isAlwaysOnTop()));
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    windowManager.removeListener(this);
+    super.dispose();
+  }
+}
+
 class WindowHeader extends ConsumerStatefulWidget {
   const WindowHeader({super.key});
 
@@ -252,55 +376,12 @@ class WindowHeader extends ConsumerStatefulWidget {
 }
 
 class _WindowHeaderState extends ConsumerState<WindowHeader> {
-  final isMaximizedNotifier = ValueNotifier<bool>(false);
-  final isPinNotifier = ValueNotifier<bool>(false);
-
-  @override
-  void initState() {
-    super.initState();
-    _initNotifier();
-  }
-
-  Future<void> _initNotifier() async {
-    final isMaximized = await windowManager.isMaximized();
-    final isPin = await windowManager.isAlwaysOnTop();
-    if (!mounted) return;
-    isMaximizedNotifier.value = isMaximized;
-    isPinNotifier.value = isPin;
-  }
+  final caption = WindowCaptionController();
 
   @override
   void dispose() {
-    isMaximizedNotifier.dispose();
-    isPinNotifier.dispose();
+    caption.dispose();
     super.dispose();
-  }
-
-  Future<void> _updateMaximized() async {
-    final isMaximized = await windowManager.isMaximized();
-    if (isMaximized) {
-      await windowManager.unmaximize();
-      if (system.isWindows) {
-        unawaited(windowManager.setWindowCornerPreference(round: true));
-      }
-    } else {
-      await windowManager.maximize();
-      if (system.isWindows) {
-        unawaited(windowManager.setWindowCornerPreference(round: false));
-      }
-    }
-    final res = await windowManager.isMaximized();
-    if (mounted) {
-      isMaximizedNotifier.value = res;
-    }
-  }
-
-  Future<void> _updatePin() async {
-    final isAlwaysOnTop = await windowManager.isAlwaysOnTop();
-    await windowManager.setAlwaysOnTop(!isAlwaysOnTop);
-    final res = await windowManager.isAlwaysOnTop();
-    if (!mounted) return;
-    isPinNotifier.value = res;
   }
 
   @override
@@ -308,16 +389,15 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
     return WindowHeaderBar(
       height: kHeaderHeight,
       onDragStart: windowManager.startDragging,
-      onDoubleTap: _updateMaximized,
+      onDoubleTap: caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
       actions: system.isMacOS
           ? null
           : WindowHeaderActions(
-              isPinNotifier: isPinNotifier,
-              isMaximizedNotifier: isMaximizedNotifier,
-              onPin: _updatePin,
+              state: caption,
+              onPin: caption.togglePin,
               onMinimize: windowManager.minimize,
-              onMaximize: _updateMaximized,
+              onMaximize: caption.toggleMaximized,
               onClose: () {
                 ref.read(systemActionProvider.notifier).handleClose();
               },
@@ -377,10 +457,17 @@ class WindowHeaderBar extends StatelessWidget {
                   data: IconButtonThemeData(
                     style: ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      minimumSize: WidgetStatePropertyAll(Size.square(height)),
-                      maximumSize: WidgetStatePropertyAll(Size.square(height)),
-                      iconSize: WidgetStatePropertyAll(height / 2),
+                      minimumSize: WidgetStatePropertyAll(
+                        getCaptionButtonSize(height),
+                      ),
+                      maximumSize: WidgetStatePropertyAll(
+                        getCaptionButtonSize(height),
+                      ),
                       padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+                      shape: const WidgetStatePropertyAll(AppShape.none),
+                      foregroundColor: WidgetStatePropertyAll(
+                        context.colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   child: actions!,
@@ -396,16 +483,14 @@ class WindowHeaderBar extends StatelessWidget {
 class WindowHeaderActions extends StatelessWidget {
   const WindowHeaderActions({
     super.key,
-    required this.isPinNotifier,
-    required this.isMaximizedNotifier,
+    required this.state,
     required this.onPin,
     required this.onMinimize,
     required this.onMaximize,
     required this.onClose,
   });
 
-  final ValueNotifier<bool> isPinNotifier;
-  final ValueNotifier<bool> isMaximizedNotifier;
+  final ValueListenable<WindowCaptionState> state;
   final VoidCallback onPin;
   final VoidCallback onMinimize;
   final VoidCallback onMaximize;
@@ -414,49 +499,148 @@ class WindowHeaderActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return Row(
-      children: [
-        ValueListenableBuilder(
-          valueListenable: isPinNotifier,
-          builder: (_, value, _) {
-            return IconButton(
-              tooltip: value
-                  ? appLocalizations.unpinWindow
-                  : appLocalizations.pinWindow,
-              onPressed: onPin,
-              icon: value
-                  ? const Icon(Icons.push_pin)
-                  : const Icon(Icons.push_pin_outlined),
-            );
-          },
-        ),
-        IconButton(
-          tooltip: appLocalizations.minimize,
-          onPressed: onMinimize,
-          icon: const Icon(Icons.remove),
-        ),
-        ValueListenableBuilder(
-          valueListenable: isMaximizedNotifier,
-          builder: (_, value, _) {
-            return IconButton(
-              tooltip: value
-                  ? appLocalizations.unmaximize
-                  : appLocalizations.maximize,
+    return ValueListenableBuilder(
+      valueListenable: state,
+      builder: (_, state, _) {
+        final (maximizeGlyph, maximizeTooltip) = switch (state) {
+          WindowCaptionState(isFullScreen: true) => (
+            CaptionGlyph.restore,
+            appLocalizations.exitFullScreen,
+          ),
+          WindowCaptionState(isMaximized: true) => (
+            CaptionGlyph.restore,
+            appLocalizations.unmaximize,
+          ),
+          _ => (CaptionGlyph.maximize, appLocalizations.maximize),
+        };
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: IconButton(
+                tooltip: state.isPinned
+                    ? appLocalizations.unpinWindow
+                    : appLocalizations.pinWindow,
+                style: const ButtonStyle(
+                  shape: WidgetStatePropertyAll(CircleBorder()),
+                  minimumSize: WidgetStatePropertyAll(Size.zero),
+                  maximumSize: WidgetStatePropertyAll(Size.infinite),
+                  iconSize: WidgetStatePropertyAll(pinIconSize),
+                ),
+                onPressed: onPin,
+                icon: Icon(
+                  state.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: appLocalizations.minimize,
+              onPressed: onMinimize,
+              icon: const CaptionIcon(CaptionGlyph.minimize),
+            ),
+            IconButton(
+              tooltip: maximizeTooltip,
               onPressed: onMaximize,
-              icon: value
-                  ? const Icon(Icons.filter_none, size: 14)
-                  : const Icon(Icons.crop_square),
-            );
-          },
-        ),
-        IconButton(
-          tooltip: appLocalizations.close,
-          onPressed: onClose,
-          icon: const Icon(Icons.close),
-        ),
-      ],
+              icon: CaptionIcon(maximizeGlyph),
+            ),
+            IconButton(
+              tooltip: appLocalizations.close,
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  final active =
+                      states.contains(WidgetState.hovered) ||
+                      states.contains(WidgetState.pressed);
+                  return active ? context.colorScheme.error : null;
+                }),
+                foregroundColor: WidgetStateProperty.resolveWith((states) {
+                  final active =
+                      states.contains(WidgetState.hovered) ||
+                      states.contains(WidgetState.pressed);
+                  return active ? context.colorScheme.onError : null;
+                }),
+                overlayColor: WidgetStateProperty.resolveWith((states) {
+                  return states.contains(WidgetState.pressed)
+                      ? context.colorScheme.onError.opacity12
+                      : Colors.transparent;
+                }),
+              ),
+              onPressed: onClose,
+              icon: const CaptionIcon(CaptionGlyph.close),
+            ),
+          ],
+        );
+      },
     );
   }
+}
+
+enum CaptionGlyph { minimize, maximize, restore, close }
+
+/// Painted rather than taken from an icon font so every caption button keeps
+/// the same one pixel stroke weight on every platform.
+class CaptionIcon extends StatelessWidget {
+  const CaptionIcon(this.glyph, {super.key});
+
+  final CaptionGlyph glyph;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = IconTheme.of(context).color ?? context.colorScheme.onSurface;
+    return CustomPaint(
+      size: const Size.square(captionGlyphSize),
+      painter: _CaptionGlyphPainter(glyph: glyph, color: color),
+    );
+  }
+}
+
+class _CaptionGlyphPainter extends CustomPainter {
+  const _CaptionGlyphPainter({required this.glyph, required this.color});
+
+  final CaptionGlyph glyph;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..strokeJoin = StrokeJoin.round;
+    const corner = Radius.circular(1);
+    // Every coordinate sits on a half pixel so a one pixel stroke covers a
+    // single device pixel at 100% scaling.
+    final box = (Offset.zero & size).deflate(0.5);
+    switch (glyph) {
+      case CaptionGlyph.minimize:
+        final y = (size.height / 2).floorToDouble() + 0.5;
+        canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      case CaptionGlyph.maximize:
+        canvas.drawRRect(RRect.fromRectAndRadius(box, corner), paint);
+      case CaptionGlyph.restore:
+        const offset = 2.0;
+        final front = Rect.fromLTRB(
+          box.left,
+          box.top + offset,
+          box.right - offset,
+          box.bottom,
+        );
+        final back = front.shift(const Offset(offset, -offset));
+        canvas.drawRRect(RRect.fromRectAndRadius(front, corner), paint);
+        canvas.save();
+        canvas.clipRect(front.inflate(0.5), clipOp: ClipOp.difference);
+        canvas.drawRRect(RRect.fromRectAndRadius(back, corner), paint);
+        canvas.restore();
+      case CaptionGlyph.close:
+        paint.strokeCap = StrokeCap.round;
+        canvas.drawLine(box.topLeft, box.bottomRight, paint);
+        canvas.drawLine(box.topRight, box.bottomLeft, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_CaptionGlyphPainter oldDelegate) =>
+      glyph != oldDelegate.glyph || color != oldDelegate.color;
 }
 
 class AppIcon extends StatelessWidget {

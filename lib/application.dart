@@ -258,13 +258,18 @@ class ApplicationState extends ConsumerState<Application> {
             AppLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          builder: (_, child) {
+          builder: (context, child) {
+            // The bridge's legacy Theme swaps in its own default IconTheme color,
+            // which material_ui IconButton.filled reads as custom and loses onPrimary.
             // ignore: deprecated_member_use
             return MaterialUiCompatibilityBridge(
-              child: buildManagerStack(
-                isDesktop: system.isDesktop,
-                onConnectivityChanged: _handleConnectivityChanged,
-                child: child!,
+              child: IconTheme(
+                data: Theme.of(context).iconTheme,
+                child: buildManagerStack(
+                  isDesktop: system.isDesktop,
+                  onConnectivityChanged: _handleConnectivityChanged,
+                  child: child!,
+                ),
               ),
             );
           },

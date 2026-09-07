@@ -158,18 +158,20 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
       child: AdaptiveSheetScaffold(
         sheetTransparentToolBar: true,
         title: widget.title,
-        body: sections.isEmpty
-            ? NullStatus(label: appLocalizations.noData)
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: context.sheetTopPadding),
-                  ),
-                  for (var i = 0; i < sections.length; i++)
-                    ..._buildSection(sections[i], i == sections.length - 1),
-                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                ],
+        body: NullStatusSwitcher(
+          isEmpty: sections.isEmpty,
+          nullStatus: NullStatus(label: appLocalizations.noData),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.sheetTopPadding),
               ),
+              for (var i = 0; i < sections.length; i++)
+                ..._buildSection(sections[i], i == sections.length - 1),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            ],
+          ),
+        ),
       ),
     );
   }

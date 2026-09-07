@@ -10,6 +10,8 @@ use std::future::Future;
 use std::io::{BufRead, Error, Read};
 #[cfg(windows)]
 use std::os::windows::fs::OpenOptionsExt;
+#[cfg(windows)]
+use std::os::windows::io::AsRawHandle;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::{Mutex, MutexGuard};
@@ -18,7 +20,15 @@ use std::{io, thread};
 use warp::http::StatusCode;
 use warp::{Filter, Rejection, Reply};
 #[cfg(windows)]
+use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
+#[cfg(windows)]
 use windows_sys::Win32::Storage::FileSystem::FILE_SHARE_READ;
+#[cfg(windows)]
+use windows_sys::Win32::System::JobObjects::{
+    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+};
 
 const LISTEN_PORT: u16 = 47890;
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\ReClashCore_";
@@ -27,6 +37,7 @@ const PROTOCOL_VERSION: &str = "6";
 const EXPECTED_CORE_SHA256: &str = env!("CORE_SHA256");
 const LOG_CAPACITY: usize = 100;
 const CORE_EXIT_TIMEOUT: Duration = Duration::from_millis(1500);
+const CORE_GRACEFUL_EXIT_TIMEOUT: Duration = Duration::from_millis(3000);
 const CORE_EXIT_POLL_INTERVAL: Duration = Duration::from_millis(20);
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -84,20 +95,91 @@ struct ErrorResponse {
 struct ManagedCore {
     session_id: String,
     child: Child,
+    #[cfg(windows)]
+    _job: CoreJob,
 }
 
 impl ManagedCore {
+    fn adopt(session_id: String, child: Child) -> Result<Self, Error> {
+        #[cfg(windows)]
+        let job = CoreJob::bind(&child)?;
+        Ok(Self {
+            session_id,
+            child,
+            #[cfg(windows)]
+            _job: job,
+        })
+    }
+
     fn terminate(&mut self) -> Result<(), Error> {
+        if self.request_exit() && self.wait_for_exit(CORE_GRACEFUL_EXIT_TIMEOUT)? {
+            return Ok(());
+        }
         let _ = self.child.kill();
-        let deadline = Instant::now() + CORE_EXIT_TIMEOUT;
+        if self.wait_for_exit(CORE_EXIT_TIMEOUT)? {
+            return Ok(());
+        }
+        Err(Error::other("Core did not exit after termination"))
+    }
+
+    fn wait_for_exit(&mut self, timeout: Duration) -> Result<bool, Error> {
+        let deadline = Instant::now() + timeout;
         loop {
             if self.child.try_wait()?.is_some() {
-                return Ok(());
+                return Ok(true);
             }
             if Instant::now() >= deadline {
-                return Err(Error::other("Core did not exit after termination"));
+                return Ok(false);
             }
             thread::sleep(CORE_EXIT_POLL_INTERVAL);
+        }
+    }
+
+    fn request_exit(&mut self) -> bool {
+        false
+    }
+}
+
+/// Windows has no cgroup to take the Core down with a crashed Helper, so the
+/// Core lives in a job that the kernel kills when the Helper's handle closes.
+#[cfg(windows)]
+struct CoreJob(HANDLE);
+
+#[cfg(windows)]
+impl CoreJob {
+    fn bind(child: &Child) -> Result<Self, Error> {
+        // SAFETY: kernel32 calls on handles this process owns.
+        unsafe {
+            let job = CreateJobObjectW(std::ptr::null(), std::ptr::null());
+            if job == 0 {
+                return Err(Error::last_os_error());
+            }
+            let job = Self(job);
+            let mut limits: JOBOBJECT_EXTENDED_LIMIT_INFORMATION = std::mem::zeroed();
+            limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+            if SetInformationJobObject(
+                job.0,
+                JobObjectExtendedLimitInformation,
+                &limits as *const _ as *const _,
+                std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+            ) == 0
+            {
+                return Err(Error::last_os_error());
+            }
+            if AssignProcessToJobObject(job.0, child.as_raw_handle() as HANDLE) == 0 {
+                return Err(Error::last_os_error());
+            }
+            Ok(job)
+        }
+    }
+}
+
+#[cfg(windows)]
+impl Drop for CoreJob {
+    fn drop(&mut self) {
+        // SAFETY: the handle came from CreateJobObjectW and is closed once.
+        unsafe {
+            CloseHandle(self.0);
         }
     }
 }
@@ -312,10 +394,17 @@ fn start(start_params: StartParams) -> warp::reply::Response {
                     }
                 });
             }
-            *managed = Some(ManagedCore {
-                session_id: start_params.session_id.clone(),
-                child,
-            });
+            *managed = match ManagedCore::adopt(start_params.session_id.clone(), child) {
+                Ok(core) => Some(core),
+                Err(error) => {
+                    log_message(format!("Helper could not confine the Core: {error}"));
+                    return error_response(
+                        "internalError",
+                        format!("Core confinement failed: {error}"),
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                    );
+                }
+            };
             json_response(
                 &StartResponse {
                     session_id: start_params.session_id,
@@ -638,10 +727,8 @@ mod tests {
     }
 
     fn adopt_core(session_id: &str) {
-        *lock_surviving_poison(&MANAGED_CORE) = Some(ManagedCore {
-            session_id: session_id.to_string(),
-            child: spawn_running_core(),
-        });
+        *lock_surviving_poison(&MANAGED_CORE) =
+            Some(ManagedCore::adopt(session_id.to_string(), spawn_running_core()).unwrap());
     }
 
     #[test]
@@ -844,10 +931,13 @@ mod tests {
     #[allow(clippy::await_holding_lock)]
     async fn start_releases_the_managed_core_before_rejecting_an_unverified_core() {
         let _state = lock_process_state();
-        *lock_surviving_poison(&MANAGED_CORE) = Some(ManagedCore {
-            session_id: "fedcba9876543210fedcba9876543210".to_string(),
-            child: spawn_placeholder_core(),
-        });
+        *lock_surviving_poison(&MANAGED_CORE) = Some(
+            ManagedCore::adopt(
+                "fedcba9876543210fedcba9876543210".to_string(),
+                spawn_placeholder_core(),
+            )
+            .unwrap(),
+        );
 
         let response = warp::test::request()
             .method("POST")
@@ -914,12 +1004,36 @@ mod tests {
         release_managed_core(&mut managed).unwrap();
     }
 
+    #[cfg(windows)]
+    #[test]
+    fn closing_the_job_takes_the_core_down_with_the_helper() {
+        let core = ManagedCore::adopt(
+            "0123456789abcdef0123456789abcdef".to_string(),
+            spawn_running_core(),
+        )
+        .unwrap();
+        let ManagedCore {
+            mut child, _job, ..
+        } = core;
+
+        drop(_job);
+
+        let deadline = Instant::now() + CORE_EXIT_TIMEOUT;
+        while child.try_wait().unwrap().is_none() {
+            assert!(Instant::now() < deadline, "Core outlived its job");
+            thread::sleep(CORE_EXIT_POLL_INTERVAL);
+        }
+    }
+
     #[test]
     fn terminate_confirms_the_exit_of_a_running_core() {
-        let mut managed = Some(ManagedCore {
-            session_id: "0123456789abcdef0123456789abcdef".to_string(),
-            child: spawn_running_core(),
-        });
+        let mut managed = Some(
+            ManagedCore::adopt(
+                "0123456789abcdef0123456789abcdef".to_string(),
+                spawn_running_core(),
+            )
+            .unwrap(),
+        );
 
         release_managed_core(&mut managed).unwrap();
 

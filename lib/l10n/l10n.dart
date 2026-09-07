@@ -4569,11 +4569,21 @@ class AppLocalizations {
     );
   }
 
-  /// `Wildcard match; only * and ? are supported`
+  /// `Match a domain regex`
   String get ruleActionDomainRegexDesc {
     return Intl.message(
-      'Wildcard match; only * and ? are supported',
+      'Match a domain regex',
       name: 'ruleActionDomainRegexDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wildcard match; only * and ? are supported`
+  String get ruleActionDomainWildcardDesc {
+    return Intl.message(
+      'Wildcard match; only * and ? are supported',
+      name: 'ruleActionDomainWildcardDesc',
       desc: '',
       args: [],
     );
@@ -4739,6 +4749,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Match the rematch name; separate multiple names with /`
+  String get ruleActionRematchNameDesc {
+    return Intl.message(
+      'Match the rematch name; separate multiple names with /',
+      name: 'ruleActionRematchNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Match by the full process path`
   String get ruleActionProcessPathDesc {
     return Intl.message(
@@ -4759,6 +4779,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Match by process path wildcard; only * and ? are supported`
+  String get ruleActionProcessPathWildcardDesc {
+    return Intl.message(
+      'Match by process path wildcard; only * and ? are supported',
+      name: 'ruleActionProcessPathWildcardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Match by process name; matches the package name on Android`
   String get ruleActionProcessNameDesc {
     return Intl.message(
@@ -4774,6 +4804,16 @@ class AppLocalizations {
     return Intl.message(
       'Match by process name regex; matches the package name on Android',
       name: 'ruleActionProcessNameRegexDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match by process name wildcard; only * and ? are supported`
+  String get ruleActionProcessNameWildcardDesc {
+    return Intl.message(
+      'Match by process name wildcard; only * and ? are supported',
+      name: 'ruleActionProcessNameWildcardDesc',
       desc: '',
       args: [],
     );
@@ -5519,6 +5559,16 @@ class AppLocalizations {
     return Intl.message(
       'Unpin window',
       name: 'unpinWindow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit full screen`
+  String get exitFullScreen {
+    return Intl.message(
+      'Exit full screen',
+      name: 'exitFullScreen',
       desc: '',
       args: [],
     );

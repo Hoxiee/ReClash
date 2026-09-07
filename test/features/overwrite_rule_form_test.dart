@@ -20,12 +20,16 @@ class _RecordingProfileCustomRules extends ProfileCustomRules {
 
   final List<Rule> initial;
   final List<Rule> puts = [];
+  final List<int> deletes = [];
 
   @override
   Stream<List<Rule>> build(int profileId) => Stream.value(initial);
 
   @override
   void put(Rule rule) => puts.add(rule);
+
+  @override
+  void delAll(Iterable<int> ruleIds) => deletes.addAll(ruleIds);
 
   @override
   void order(int oldIndex, int newIndex) {}
@@ -53,15 +57,18 @@ class _Harness {
   late final _RecordingProfileCustomRules rules;
   late final Profile profile;
 
-  Future<void> pump(WidgetTester tester) async {
-    const size = Size(1400, 1000);
+  Future<void> pump(
+    WidgetTester tester, {
+    List<Rule> initialRules = const [],
+    Size size = const Size(1400, 1000),
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
     profile = Profile.normal(label: 'profile');
-    rules = _RecordingProfileCustomRules(const []);
+    rules = _RecordingProfileCustomRules(initialRules);
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(() => TestProfiles([profile])),
@@ -92,6 +99,19 @@ class _Harness {
 
   Future<void> save(WidgetTester tester) async {
     await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> selectType(WidgetTester tester, RuleAction action) async {
+    await tester.tap(find.text(currentAppLocalizations.proxyType));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text(action.name),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(action.name).last);
     await tester.pumpAndSettle();
   }
 }
@@ -231,5 +251,86 @@ void main() {
     expect(stored.content, 'example.com');
     expect(stored.ruleTarget, 'DIRECT');
     expect(stored.id, isNot(-1), reason: 'a new rule gets a snowflake id');
+  });
+
+  testWidgets('the additional parameter switches toggle and are stored', (
+    tester,
+  ) async {
+    final harness = _Harness();
+    await harness.pump(tester);
+    await harness.openAddSheet(tester);
+    await harness.selectType(tester, RuleAction.IP_CIDR);
+
+    final l10n = currentAppLocalizations;
+    expect(find.text(l10n.additionalParameters), findsOne);
+    final switches = find.byType(Switch);
+    expect(switches, findsNWidgets(2));
+    expect(tester.widgetList<Switch>(switches).map((s) => s.value), [
+      false,
+      false,
+    ]);
+
+    await tester.tap(switches.at(0));
+    await tester.pumpAndSettle();
+    await tester.tap(switches.at(1));
+    await tester.pumpAndSettle();
+
+    expect(tester.widgetList<Switch>(switches).map((s) => s.value), [
+      true,
+      true,
+    ]);
+
+    await tester.enterText(find.byType(TextFormField), '1.1.1.1/32');
+    await tester.pumpAndSettle();
+    await harness.save(tester);
+
+    final stored = harness.rules.puts.single;
+    expect(stored.noResolve, isTrue);
+    expect(stored.src, isTrue);
+    expect(stored.rawValue, 'IP-CIDR,1.1.1.1/32,DIRECT,src,no-resolve');
+  });
+
+  testWidgets('deleting from the edit sheet removes the rule', (tester) async {
+    final harness = _Harness();
+    final rule = Rule.parse('DOMAIN-SUFFIX,example.com,DIRECT');
+    await harness.pump(tester, initialRules: [rule]);
+
+    await tester.tap(find.text('example.com'));
+    await tester.pumpAndSettle();
+    final l10n = currentAppLocalizations;
+    expect(find.text(l10n.editRule), findsOne);
+
+    await tester.tap(find.text(l10n.delete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.confirm));
+    await tester.pumpAndSettle();
+
+    expect(harness.rules.deletes, [rule.id]);
+    expect(find.text(l10n.editRule), findsNothing);
+  });
+
+  testWidgets('long targets and contents stay inside the rows', (tester) async {
+    final harness = _Harness();
+    final rules = [
+      Rule.parse(
+        'SUB-RULE,(DOMAIN,example.com),a-very-long-sub-rule-name-that-goes-on',
+      ),
+      Rule.parse(
+        r'PROCESS-NAME-REGEX,^very-long-process-name-[0-9]{1,3}\.exe$,DIRECT',
+      ),
+    ];
+    await harness.pump(tester, initialRules: rules, size: const Size(360, 800));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text(RuleAction.PROCESS_NAME_REGEX.name));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.enterText(find.byType(TextFormField), 'x' * 400);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final sheet = tester.getRect(find.byType(OverwriteFormRow).first);
+    final field = tester.getRect(find.byType(EditableText));
+    expect(field.right, lessThanOrEqualTo(sheet.right));
   });
 }

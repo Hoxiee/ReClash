@@ -47,6 +47,20 @@ void main() {
       ]);
     });
 
+    test('refuses to package while a native build hook is skipped', () {
+      const pubspec = '''
+hooks:
+  user_defines:
+    setup:
+      build_assets: false
+    rust_api:
+      build_assets: true
+''';
+
+      expect(setup.packagesNotBuildingAssets(pubspec), ['setup']);
+      expect(setup.packagesNotBuildingAssets('name: x\n'), isEmpty);
+    });
+
     test('packages every Linux format on every architecture', () {
       expect(setup.createPackageTargets('linux', null), 'deb,appimage,rpm');
       expect(setup.createPackageTargets('linux', 'deb'), 'deb');

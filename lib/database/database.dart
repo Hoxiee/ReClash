@@ -54,18 +54,36 @@ class Database extends _$Database {
           await _migrateRules(m);
         }
         if (from < 3) {
-          await m.addColumn(profiles, profiles.matchTarget);
+          await _addColumnIfMissing(m, profiles, profiles.matchTarget);
         }
         if (from < 4) {
-          await m.addColumn(profiles, profiles.panelMeta);
+          await _addColumnIfMissing(m, profiles, profiles.panelMeta);
         }
         if (from < 5) {
-          await m.addColumn(profiles, profiles.clientEmulation);
-          await m.addColumn(profiles, profiles.customUserAgent);
-          await m.addColumn(profiles, profiles.skippedNodes);
+          await _addColumnIfMissing(m, profiles, profiles.clientEmulation);
+          await _addColumnIfMissing(m, profiles, profiles.customUserAgent);
+          await _addColumnIfMissing(m, profiles, profiles.skippedNodes);
         }
       },
     );
+  }
+
+  /// Drift rewinds user_version on downgrade but keeps the columns it added.
+  Future<void> _addColumnIfMissing(
+    Migrator m,
+    TableInfo table,
+    GeneratedColumn column,
+  ) async {
+    final tableInfo = await customSelect(
+      'PRAGMA table_info(${table.actualTableName})',
+    ).get();
+    final exists = tableInfo.any(
+      (row) => row.read<String>('name') == column.name,
+    );
+    if (exists) {
+      return;
+    }
+    await m.addColumn(table, column);
   }
 
   Future<void> _migrateRules(Migrator m) async {

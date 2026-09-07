@@ -25,6 +25,21 @@ final double _macOSHeaderHeight = getWindowHeaderHeight(
   isMacOS: true,
 );
 
+Finder _glyph(CaptionGlyph glyph) => find.byWidgetPredicate(
+  (widget) => widget is CaptionIcon && widget.glyph == glyph,
+);
+
+Finder _captionButton(Finder icon) =>
+    find.ancestor(of: icon, matching: find.byType(IconButton));
+
+Finder get _pinIcon => find.byIcon(Icons.push_pin_outlined);
+
+List<Finder> get _captionIcons => [
+  _glyph(CaptionGlyph.minimize),
+  _glyph(CaptionGlyph.maximize),
+  _glyph(CaptionGlyph.close),
+];
+
 bool _hostShowsHeader({required int version, required bool isMobileView}) {
   return showsWindowHeader(
     isDesktop: system.isDesktop,
@@ -121,19 +136,16 @@ void main() {
   });
 
   group('WindowHeaderBar on Windows', () {
-    late ValueNotifier<bool> isPin;
-    late ValueNotifier<bool> isMaximized;
+    late ValueNotifier<WindowCaptionState> caption;
     late List<String> events;
 
     setUp(() {
-      isPin = ValueNotifier(false);
-      isMaximized = ValueNotifier(false);
+      caption = ValueNotifier(const WindowCaptionState());
       events = [];
     });
 
     tearDown(() {
-      isPin.dispose();
-      isMaximized.dispose();
+      caption.dispose();
     });
 
     Future<void> pumpBar(WidgetTester tester, {double? width}) async {
@@ -164,8 +176,7 @@ void main() {
                 onDragStart: () => events.add('drag'),
                 onDoubleTap: () => events.add('maximize'),
                 actions: WindowHeaderActions(
-                  isPinNotifier: isPin,
-                  isMaximizedNotifier: isMaximized,
+                  state: caption,
                   onPin: () => events.add('pin'),
                   onMinimize: () => events.add('minimize'),
                   onMaximize: () => events.add('maximize'),
@@ -225,18 +236,8 @@ void main() {
       await pumpBar(tester, width: 900);
 
       final bar = barRect(tester);
-      for (final icon in [
-        Icons.push_pin_outlined,
-        Icons.remove,
-        Icons.crop_square,
-        Icons.close,
-      ]) {
-        final rect = tester.getRect(
-          find.ancestor(
-            of: find.byIcon(icon),
-            matching: find.byType(IconButton),
-          ),
-        );
+      for (final icon in [_pinIcon, ..._captionIcons]) {
+        final rect = tester.getRect(_captionButton(icon));
         expect(
           rect.top >= bar.top &&
               rect.bottom <= bar.bottom &&
@@ -248,32 +249,179 @@ void main() {
       }
     });
 
-    testWidgets('the caption buttons and their glyphs follow the bar height', (
+    testWidgets('the caption buttons match the Windows 11 slot', (
       tester,
     ) async {
       await pumpBar(tester, width: 900);
 
-      for (final icon in [
-        Icons.push_pin_outlined,
-        Icons.remove,
-        Icons.crop_square,
-        Icons.close,
-      ]) {
-        final button = find.ancestor(
-          of: find.byIcon(icon),
-          matching: find.byType(IconButton),
+      final slot = getCaptionButtonSize(_windowsHeaderHeight);
+      expect(slot, const Size(46, 32));
+      for (final icon in _captionIcons) {
+        expect(
+          tester.getSize(_captionButton(icon)),
+          slot,
+          reason: '$icon does not fill a caption slot the height of the bar',
         );
         expect(
-          tester.getSize(button),
-          Size.square(_windowsHeaderHeight),
-          reason: '$icon does not fill a square the height of the bar',
-        );
-        expect(
-          tester.getSize(find.byIcon(icon)).longestSide,
+          tester.getSize(icon).longestSide,
           lessThanOrEqualTo(_windowsHeaderHeight / 2),
           reason: '$icon is drawn too large for a title bar glyph',
         );
       }
+      expect(
+        tester.getRect(_captionButton(_glyph(CaptionGlyph.close))).right,
+        900,
+      );
+    });
+
+    testWidgets('the pin keeps the round Material button in a square slot', (
+      tester,
+    ) async {
+      await pumpBar(tester, width: 900);
+
+      final pin = _captionButton(_pinIcon);
+      expect(
+        tester.getSize(pin),
+        Size.square(_windowsHeaderHeight),
+        reason: 'the pin must not stretch into a Windows caption slot',
+      );
+      expect(tester.getSize(_pinIcon), const Size.square(pinIconSize));
+      expect(tester.getCenter(_pinIcon), tester.getCenter(pin));
+      expect(
+        tester.widget<IconButton>(pin).style?.shape?.resolve({}),
+        const CircleBorder(),
+        reason: 'the pin keeps the round ripple of a regular icon button',
+      );
+      expect(
+        tester.getRect(pin).right,
+        tester.getRect(_captionButton(_glyph(CaptionGlyph.minimize))).left,
+      );
+    });
+
+    testWidgets('the window glyphs are 10x10 and centered in their slot', (
+      tester,
+    ) async {
+      await pumpBar(tester, width: 900);
+
+      for (final icon in _captionIcons) {
+        expect(tester.getSize(icon), const Size.square(captionGlyphSize));
+        expect(
+          tester.getCenter(icon),
+          tester.getCenter(_captionButton(icon)),
+          reason: '$icon sits off center in its caption button',
+        );
+      }
+    });
+
+    testWidgets('a maximized window offers the restore glyph', (tester) async {
+      await pumpBar(tester, width: 900);
+      expect(_glyph(CaptionGlyph.maximize), findsOneWidget);
+      expect(_glyph(CaptionGlyph.restore), findsNothing);
+
+      caption.value = const WindowCaptionState(isMaximized: true);
+      await tester.pump();
+
+      expect(_glyph(CaptionGlyph.maximize), findsNothing);
+      expect(_glyph(CaptionGlyph.restore), findsOneWidget);
+      expect(
+        find.byTooltip(currentAppLocalizations.unmaximize),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('caption buttons are flat rectangles that keep the ripple', (
+      tester,
+    ) async {
+      await pumpBar(tester, width: 900);
+
+      final size = getCaptionButtonSize(_windowsHeaderHeight);
+      expect(size.width, greaterThan(size.height));
+
+      final context = tester.element(_glyph(CaptionGlyph.close));
+      final themeStyle = IconButtonTheme.of(context).style!;
+      final onSurface = Theme.of(context).colorScheme.onSurface;
+      expect(themeStyle.shape?.resolve({}), AppShape.none);
+      expect(themeStyle.minimumSize?.resolve({}), size);
+      expect(themeStyle.splashFactory, isNull);
+      expect(themeStyle.animationDuration, isNull);
+      expect(themeStyle.overlayColor, isNull);
+      expect(themeStyle.foregroundColor?.resolve({}), onSurface);
+      expect(
+        themeStyle.foregroundColor?.resolve({WidgetState.pressed}),
+        onSurface,
+      );
+    });
+
+    testWidgets('the close button warns on hover', (tester) async {
+      await pumpBar(tester, width: 900);
+
+      final closeIcon = _glyph(CaptionGlyph.close);
+      final close = tester.widget<IconButton>(_captionButton(closeIcon));
+      final colorScheme = Theme.of(tester.element(closeIcon)).colorScheme;
+      final style = close.style!;
+
+      expect(
+        style.backgroundColor?.resolve({WidgetState.hovered}),
+        colorScheme.error,
+      );
+      expect(
+        style.foregroundColor?.resolve({WidgetState.hovered}),
+        colorScheme.onError,
+      );
+      expect(
+        style.backgroundColor?.resolve({WidgetState.pressed}),
+        colorScheme.error,
+      );
+      expect(style.backgroundColor?.resolve({}), isNull);
+      expect(style.foregroundColor?.resolve({}), isNull);
+      expect(
+        style.overlayColor?.resolve({WidgetState.hovered}),
+        Colors.transparent,
+      );
+      expect(
+        style.overlayColor?.resolve({WidgetState.pressed}),
+        colorScheme.onError.opacity12,
+        reason:
+            'the ripple on the error colored close button must stay visible',
+      );
+
+      for (final icon in [
+        _pinIcon,
+        _glyph(CaptionGlyph.minimize),
+        _glyph(CaptionGlyph.maximize),
+      ]) {
+        final button = tester.widget<IconButton>(_captionButton(icon));
+        expect(
+          button.style?.backgroundColor?.resolve({WidgetState.hovered}),
+          isNull,
+          reason: '$icon must not borrow the close button warning color',
+        );
+      }
+    });
+
+    testWidgets('hovering the close button paints it in the error colors', (
+      tester,
+    ) async {
+      await pumpBar(tester, width: 900);
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await gesture.moveTo(tester.getCenter(_glyph(CaptionGlyph.close)));
+      await tester.pumpAndSettle();
+
+      final context = tester.element(_glyph(CaptionGlyph.close));
+      final colorScheme = Theme.of(context).colorScheme;
+      expect(IconTheme.of(context).color, colorScheme.onError);
+      final material = tester.widget<Material>(
+        find
+            .descendant(
+              of: _captionButton(_glyph(CaptionGlyph.close)),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      expect(material.color, colorScheme.error);
     });
 
     testWidgets('the bar keeps its height in a narrow window', (tester) async {
@@ -326,10 +474,10 @@ void main() {
     testWidgets('each caption button reports its own press', (tester) async {
       await pumpBar(tester, width: 900);
 
-      await tester.tap(find.byIcon(Icons.push_pin_outlined));
-      await tester.tap(find.byIcon(Icons.remove));
-      await tester.tap(find.byIcon(Icons.crop_square));
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(_pinIcon);
+      await tester.tap(_glyph(CaptionGlyph.minimize));
+      await tester.tap(_glyph(CaptionGlyph.maximize));
+      await tester.tap(_glyph(CaptionGlyph.close));
       await tester.pump();
 
       expect(events, ['pin', 'minimize', 'maximize', 'close']);
@@ -340,7 +488,7 @@ void main() {
     ) async {
       await pumpBar(tester, width: 900);
 
-      final close = tester.getCenter(find.byIcon(Icons.close));
+      final close = tester.getCenter(_glyph(CaptionGlyph.close));
       await tester.tapAt(close);
       await tester.pump();
 
@@ -350,10 +498,8 @@ void main() {
 
   group('WindowHeaderLayout above the app navigator', () {
     Future<void> pumpLayout(WidgetTester tester) async {
-      final isPin = ValueNotifier(false);
-      final isMaximized = ValueNotifier(false);
-      addTearDown(isPin.dispose);
-      addTearDown(isMaximized.dispose);
+      final caption = ValueNotifier(const WindowCaptionState());
+      addTearDown(caption.dispose);
       tester.view.physicalSize = const Size(900, 600);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -373,8 +519,7 @@ void main() {
               onDragStart: () {},
               onDoubleTap: () {},
               actions: WindowHeaderActions(
-                isPinNotifier: isPin,
-                isMaximizedNotifier: isMaximized,
+                state: caption,
                 onPin: () {},
                 onMinimize: () {},
                 onMaximize: () {},
@@ -396,7 +541,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(WindowHeaderActions), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(_glyph(CaptionGlyph.close), findsOneWidget);
     });
 
     testWidgets('a caption button shows its tooltip over the page', (
@@ -407,7 +552,7 @@ void main() {
       final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer(location: Offset.zero);
       addTearDown(gesture.removePointer);
-      await gesture.moveTo(tester.getCenter(find.byIcon(Icons.close)));
+      await gesture.moveTo(tester.getCenter(_glyph(CaptionGlyph.close)));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -582,11 +727,10 @@ void main() {
     setUpAll(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(_windowChannel, (call) async {
-            if (call.method == 'isMaximized' ||
-                call.method == 'isAlwaysOnTop') {
-              return false;
-            }
-            return null;
+            return switch (call.method) {
+              'isMaximized' || 'isAlwaysOnTop' || 'isFullScreen' => false,
+              _ => null,
+            };
           });
     });
 

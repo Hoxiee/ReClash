@@ -1,7 +1,5 @@
 #include <jni.h>
 
-#ifdef LIBCLASH
-
 #include <cstring>
 
 #include "jni_helper.h"
@@ -210,65 +208,3 @@ JNI_OnLoad(JavaVM *vm, void *) {
 
     return JNI_VERSION_1_6;
 }
-#else
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_reclash_core_Core_startTun(JNIEnv *env, jobject thiz, jint fd, jobject cb,
-                                         jstring stack, jstring address, jstring dns) {
-    return JNI_FALSE;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_stopTun(JNIEnv *env, jobject thiz) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_invokeMethod(JNIEnv *env, jobject thiz, jstring data, jobject cb) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_forceGC(JNIEnv *env, jobject thiz) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_updateDNS(JNIEnv *env, jobject thiz, jstring dns) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_setEventListener(JNIEnv *env, jobject thiz, jobject cb) {
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_reclash_core_Core_getTraffic(JNIEnv *env, jobject thiz,
-                                           const jboolean only_statistics_proxy) {
-    return env->NewStringUTF("{}");
-}
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_reclash_core_Core_getTotalTraffic(JNIEnv *env, jobject thiz,
-                                                const jboolean only_statistics_proxy) {
-    return env->NewStringUTF("{}");
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_screenOff(JNIEnv *env, jobject thiz, jboolean off) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_suspended(JNIEnv *env, jobject thiz, jboolean suspended) {
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_reclash_core_Core_quickSetup(JNIEnv *env, jobject thiz, jstring init_params_string,
-                                           jstring setup_params_string, jobject cb) {
-}
-#endif

@@ -107,6 +107,12 @@ final class DirectCoreLease implements CoreProcessLease {
       await _process.exitCode.timeout(timeout);
       return CoreProcessStopResult(stopped: stopped, exitConfirmed: true);
     } on TimeoutException {
+      // SIGTERM did not finish in time — the core may hang with its TUN
+      // routes still installed. Escalate to SIGKILL, mirroring the Helper's
+      // terminate ladder, before reporting an unconfirmed exit.
+      _process.kill(ProcessSignal.sigkill);
+      // Best effort: report the unconfirmed exit either way.
+      await _process.exitCode.timeout(timeout).catchError((_) => 0);
       return CoreProcessStopResult(stopped: stopped, exitConfirmed: false);
     }
   }

@@ -39,8 +39,12 @@ class AppTray implements TrayPort {
     return AppTray._internal(isMacOS: isMacOS, isWindows: isWindows);
   }
 
-  String get trayIconSuffix {
+  String get _trayIconSuffix {
     return isWindows ? 'ico' : 'png';
+  }
+
+  String get _trayIconDir {
+    return isWindows ? 'assets/images/tray/windows' : 'assets/images/tray/unix';
   }
 
   String getTrayIcon({
@@ -48,14 +52,13 @@ class AppTray implements TrayPort {
     required bool tunEnable,
     required bool paused,
   }) {
-    if (isMacOS || !isStart) {
-      return 'assets/images/icon/status_1.$trayIconSuffix';
-    }
     // A paused core still runs unprotected traffic, matching a disabled TUN.
-    if (paused || !tunEnable) {
-      return 'assets/images/icon/status_2.$trayIconSuffix';
-    }
-    return 'assets/images/icon/status_3.$trayIconSuffix';
+    final status = switch ((isMacOS || !isStart, paused || !tunEnable)) {
+      (true, _) => 1,
+      (false, false) => 3,
+      (false, true) => 2,
+    };
+    return '$_trayIconDir/status_$status.$_trayIconSuffix';
   }
 
   @override

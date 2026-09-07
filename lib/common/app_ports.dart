@@ -8,9 +8,9 @@ abstract interface class WindowPort {
 
   Future<void> hide();
 
-  Future<void> close();
+  Future<void> toggle();
 
-  Future<bool> get isVisible;
+  Future<void> close();
 
   void forceExit();
 }

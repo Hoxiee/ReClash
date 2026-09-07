@@ -476,6 +476,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("排除类型"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("退出"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage("退出全屏"),
     "expand": MessageLookupByLibrary.simpleMessage("标准"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("预期状态"),
     "expireTime": MessageLookupByLibrary.simpleMessage("到期时间"),
@@ -890,10 +891,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "匹配域名关键字",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "通配符匹配，仅支持*和?通配符",
+      "使用域名正则表达式匹配",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "匹配域名后缀",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "通配符匹配，仅支持*和?通配符",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "匹配DSCP标记 (仅限 tproxy udp 入站)",
@@ -927,11 +931,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "使用进程名称正则表达式匹配，在Android平台可以匹配包名",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程名称通配符匹配，仅支持*和?通配符",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "使用完整进程路径匹配",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "使用进程路径正则表达式匹配",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "使用进程路径通配符匹配，仅支持*和?通配符",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配重匹配名称，多个名称用/分隔",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "引用规则集合，需配置rule-providers",

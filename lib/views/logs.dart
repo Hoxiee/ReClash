@@ -139,46 +139,47 @@ class _LogsViewState extends ConsumerState<LogsView> {
         valueListenable: _listController,
         builder: (context, state, _) {
           final logs = state.list;
-          if (logs.isEmpty) {
-            return NullStatus(
-              illustration: const LogEmptyIllustration(),
+          return NullStatusSwitcher(
+            isEmpty: logs.isEmpty,
+            nullStatus: NullStatus(
+              illustration: NullStatusIllustration.logs,
               label: appLocalizations.nullTip(appLocalizations.logs),
-            );
-          }
-          return Align(
-            alignment: Alignment.topCenter,
-            child: FloatingScrollbar(
-              controller: _scrollController,
-              hintBuilder: (fraction) {
-                final index = (fraction * (logs.length - 1)).round();
-                return logs[index].dateTime;
-              },
-              child: ScrollToEndBox(
-                onCancelToEnd: () {
-                  _listController.setAutoScrollToEnd(false);
-                },
+            ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: FloatingScrollbar(
                 controller: _scrollController,
-                enable: state.autoScrollToEnd,
-                dataSource: logs,
-                child: SuperListView.separated(
-                  physics: const NextClampingScrollPhysics(),
-                  reverse: true,
-                  shrinkWrap: true,
-                  controller: _scrollController,
-                  padding: EdgeInsets.only(
-                    bottom: 16 + BottomInsetScope.of(context),
-                  ),
-                  itemCount: logs.length,
-                  separatorBuilder: (_, _) => const Divider(height: 0),
-                  itemBuilder: (_, index) {
-                    final log = logs[index];
-                    return LogItem(
-                      log: log,
-                      onClick: (value) {
-                        context.commonScaffoldState?.addKeyword(value);
-                      },
-                    );
+                hintBuilder: (fraction) {
+                  final index = (fraction * (logs.length - 1)).round();
+                  return logs[index].dateTime;
+                },
+                child: ScrollToEndBox(
+                  onCancelToEnd: () {
+                    _listController.setAutoScrollToEnd(false);
                   },
+                  controller: _scrollController,
+                  enable: state.autoScrollToEnd,
+                  dataSource: logs,
+                  child: SuperListView.separated(
+                    physics: const NextClampingScrollPhysics(),
+                    reverse: true,
+                    shrinkWrap: true,
+                    controller: _scrollController,
+                    padding: EdgeInsets.only(
+                      bottom: 16 + BottomInsetScope.of(context),
+                    ),
+                    itemCount: logs.length,
+                    separatorBuilder: (_, _) => const Divider(height: 0),
+                    itemBuilder: (_, index) {
+                      final log = logs[index];
+                      return LogItem(
+                        log: log,
+                        onClick: (value) {
+                          context.commonScaffoldState?.addKeyword(value);
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

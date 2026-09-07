@@ -394,6 +394,7 @@ enum RuleAction {
   DOMAIN_SUFFIX('DOMAIN-SUFFIX'),
   DOMAIN_KEYWORD('DOMAIN-KEYWORD'),
   DOMAIN_REGEX('DOMAIN-REGEX'),
+  DOMAIN_WILDCARD('DOMAIN-WILDCARD'),
   GEOSITE('GEOSITE'),
   IP_CIDR('IP-CIDR'),
   IP_CIDR6('IP-CIDR6'),
@@ -410,10 +411,13 @@ enum RuleAction {
   IN_TYPE('IN-TYPE'),
   IN_USER('IN-USER'),
   IN_NAME('IN-NAME'),
+  REMATCH_NAME('REMATCH-NAME'),
   PROCESS_PATH('PROCESS-PATH'),
   PROCESS_PATH_REGEX('PROCESS-PATH-REGEX'),
+  PROCESS_PATH_WILDCARD('PROCESS-PATH-WILDCARD'),
   PROCESS_NAME('PROCESS-NAME'),
   PROCESS_NAME_REGEX('PROCESS-NAME-REGEX'),
+  PROCESS_NAME_WILDCARD('PROCESS-NAME-WILDCARD'),
   UID('UID'),
   NETWORK('NETWORK'),
   DSCP('DSCP'),
@@ -445,11 +449,20 @@ extension RuleActionExt on RuleAction {
   bool get hasParams => [
     RuleAction.GEOIP,
     RuleAction.IP_ASN,
-    RuleAction.SRC_IP_ASN,
     RuleAction.IP_CIDR,
     RuleAction.IP_CIDR6,
     RuleAction.IP_SUFFIX,
     RuleAction.RULE_SET,
+  ].contains(this);
+
+  bool get hasCommaPayload => [
+    RuleAction.AND,
+    RuleAction.OR,
+    RuleAction.NOT,
+    RuleAction.SUB_RULE,
+    RuleAction.DOMAIN_REGEX,
+    RuleAction.PROCESS_NAME_REGEX,
+    RuleAction.PROCESS_PATH_REGEX,
   ].contains(this);
 
   String getDesc(BuildContext context) {
@@ -459,6 +472,8 @@ extension RuleActionExt on RuleAction {
       RuleAction.DOMAIN_SUFFIX => appLocalizations.ruleActionDomainSuffixDesc,
       RuleAction.DOMAIN_KEYWORD => appLocalizations.ruleActionDomainKeywordDesc,
       RuleAction.DOMAIN_REGEX => appLocalizations.ruleActionDomainRegexDesc,
+      RuleAction.DOMAIN_WILDCARD =>
+        appLocalizations.ruleActionDomainWildcardDesc,
       RuleAction.GEOSITE => appLocalizations.ruleActionGeositeDesc,
       RuleAction.IP_CIDR => appLocalizations.ruleActionIpCidrDesc,
       RuleAction.IP_CIDR6 => appLocalizations.ruleActionIpCidr6Desc,
@@ -475,12 +490,17 @@ extension RuleActionExt on RuleAction {
       RuleAction.IN_TYPE => appLocalizations.ruleActionInTypeDesc,
       RuleAction.IN_USER => appLocalizations.ruleActionInUserDesc,
       RuleAction.IN_NAME => appLocalizations.ruleActionInNameDesc,
+      RuleAction.REMATCH_NAME => appLocalizations.ruleActionRematchNameDesc,
       RuleAction.PROCESS_PATH => appLocalizations.ruleActionProcessPathDesc,
       RuleAction.PROCESS_PATH_REGEX =>
         appLocalizations.ruleActionProcessPathRegexDesc,
+      RuleAction.PROCESS_PATH_WILDCARD =>
+        appLocalizations.ruleActionProcessPathWildcardDesc,
       RuleAction.PROCESS_NAME => appLocalizations.ruleActionProcessNameDesc,
       RuleAction.PROCESS_NAME_REGEX =>
         appLocalizations.ruleActionProcessNameRegexDesc,
+      RuleAction.PROCESS_NAME_WILDCARD =>
+        appLocalizations.ruleActionProcessNameWildcardDesc,
       RuleAction.UID => appLocalizations.ruleActionUidDesc,
       RuleAction.NETWORK => appLocalizations.ruleActionNetworkDesc,
       RuleAction.DSCP => appLocalizations.ruleActionDscpDesc,

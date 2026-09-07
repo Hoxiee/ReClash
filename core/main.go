@@ -13,5 +13,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Arguments error")
 		os.Exit(1)
 	}
+	go exitOnTermination()
 	startServer(args[1])
 }

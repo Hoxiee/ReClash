@@ -81,7 +81,11 @@ class OverwriteFormRow extends StatelessWidget {
                     child: Container(
                       alignment: Alignment.centerRight,
                       height: globalState.measure.bodyLargeHeight + 24,
-                      child: trailing,
+                      child: DefaultTextStyle.merge(
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        child: trailing!,
+                      ),
                     ),
                   ),
                 ),

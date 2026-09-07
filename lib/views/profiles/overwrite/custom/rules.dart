@@ -175,10 +175,16 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
         spacing: 4,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            action.name,
-            style: context.textTheme.bodyLarge?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
+          Flexible(
+            child: TooltipText(
+              text: Text(
+                action.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
           const Icon(Icons.arrow_forward_ios),
@@ -252,13 +258,15 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
         spacing: 4,
         mainAxisSize: MainAxisSize.min,
         children: [
-          TooltipText(
-            text: Text(
-              ruleProvider ?? appLocalizations.selectRuleSet,
-              maxLines: 1,
-              style: context.textTheme.bodyLarge?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
+          Flexible(
+            child: TooltipText(
+              text: Text(
+                ruleProvider ?? appLocalizations.selectRuleSet,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -430,19 +438,33 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
     );
   }
 
-  Widget _buildNoResolveItem(bool? noResolve) {
+  Widget _buildNoResolveItem(bool noResolve) {
     final appLocalizations = context.appLocalizations;
     return _buildItem(
       title: appLocalizations.noResolveHostname,
-      trailing: Switch(value: noResolve ?? false, onChanged: (_) {}),
+      trailing: Switch(
+        value: noResolve,
+        onChanged: (value) {
+          ref
+              .read(ruleProvider.notifier)
+              .update((state) => state.copyWith(noResolve: value));
+        },
+      ),
     );
   }
 
-  Widget _buildSrcItem(bool? src) {
+  Widget _buildSrcItem(bool src) {
     final appLocalizations = context.appLocalizations;
     return _buildItem(
       title: appLocalizations.matchSourceIp,
-      trailing: Switch(value: src ?? false, onChanged: (_) {}),
+      trailing: Switch(
+        value: src,
+        onChanged: (value) {
+          ref
+              .read(ruleProvider.notifier)
+              .update((state) => state.copyWith(src: value));
+        },
+      ),
     );
   }
 
@@ -452,7 +474,19 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
     }
   }
 
-  void _handleDelete() {}
+  Future<void> _handleDelete(int profileId) async {
+    final appLocalizations = context.appLocalizations;
+    final res = await dialogs.showMessage(
+      message: TextSpan(
+        text: appLocalizations.deleteTip(appLocalizations.rule),
+      ),
+    );
+    if (res == true && mounted) {
+      final id = ref.read(ruleProvider).id;
+      ref.read(profileCustomRulesProvider(profileId).notifier).delAll([id]);
+      context.safeNestedPop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -506,7 +540,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                     title: appLocalizations.delete,
                     titleStyle: TextStyle(color: context.colorScheme.error),
                     onPressed: () {
-                      _handleDelete();
+                      _handleDelete(profileId);
                     },
                   ),
               ],

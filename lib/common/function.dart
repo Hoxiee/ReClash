@@ -23,7 +23,7 @@ void _applyAndReport(dynamic tag, Function func, List<dynamic>? args) {
 }
 
 class Debouncer {
-  final Map<dynamic, Timer?> _operations = {};
+  final Map<dynamic, Timer> _operations = {};
   final Map<dynamic, ({Function func, List<dynamic>? args})> _pending = {};
 
   void call(
@@ -32,13 +32,9 @@ class Debouncer {
     List<dynamic>? args,
     Duration? duration,
   }) {
-    final timer = _operations[tag];
-    if (timer != null) {
-      timer.cancel();
-    }
+    _operations.remove(tag)?.cancel();
     _pending[tag] = (func: func, args: args);
     _operations[tag] = Timer(duration ?? const Duration(milliseconds: 600), () {
-      _operations[tag]?.cancel();
       _operations.remove(tag);
       final pending = _pending.remove(tag);
       if (pending == null) {
@@ -59,8 +55,7 @@ class Debouncer {
   }
 
   void cancel(dynamic tag) {
-    _operations[tag]?.cancel();
-    _operations[tag] = null;
+    _operations.remove(tag)?.cancel();
     _pending.remove(tag);
   }
 }
@@ -82,7 +77,7 @@ class SerialTaskScheduler {
 }
 
 class Throttler {
-  final Map<dynamic, Timer?> _operations = {};
+  final Map<dynamic, Timer> _operations = {};
 
   bool call(
     dynamic tag,
@@ -91,20 +86,17 @@ class Throttler {
     Duration duration = const Duration(milliseconds: 600),
     bool fire = false,
   }) {
-    final timer = _operations[tag];
-    if (timer != null) {
+    if (_operations.containsKey(tag)) {
       return true;
     }
     if (fire) {
       _applyAndReport(tag, func, args);
       _operations[tag] = Timer(duration, () {
-        _operations[tag]?.cancel();
         _operations.remove(tag);
       });
     } else {
       _operations[tag] = Timer(duration, () {
         _applyAndReport(tag, func, args);
-        _operations[tag]?.cancel();
         _operations.remove(tag);
       });
     }
@@ -112,8 +104,7 @@ class Throttler {
   }
 
   void cancel(dynamic tag) {
-    _operations[tag]?.cancel();
-    _operations[tag] = null;
+    _operations.remove(tag)?.cancel();
   }
 }
 

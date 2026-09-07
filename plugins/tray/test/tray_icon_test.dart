@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tray/tray.dart';
 
 const MethodChannel _channel = MethodChannel('tray');
-const _asset = 'assets/images/icon/status_1.png';
+const _asset = 'assets/images/tray/unix/status_1.png';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,7 +42,7 @@ void main() {
     expect(Tray.variantAsset(_asset, 1.0), _asset);
     expect(
       Tray.variantAsset(_asset, 2.0),
-      'assets/images/icon/2.0x/status_1.png',
+      'assets/images/tray/unix/2.0x/status_1.png',
     );
     expect(Tray.variantAsset('status_1.png', 3.0), '3.0x/status_1.png');
   });
@@ -55,7 +55,7 @@ void main() {
 
     expect(
       lastIcon()['path'],
-      endsWith('flutter_assets/assets/images/icon/3.0x/status_1.png'),
+      endsWith('flutter_assets/assets/images/tray/unix/3.0x/status_1.png'),
     );
   });
 
@@ -68,7 +68,7 @@ void main() {
 
       expect(
         lastIcon()['path'],
-        endsWith('flutter_assets/assets/images/icon/status_1.png'),
+        endsWith('flutter_assets/assets/images/tray/unix/status_1.png'),
       );
     },
   );
@@ -77,7 +77,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     final bundled = {
       _asset: [1],
-      'assets/images/icon/2.0x/status_1.png': [2, 2],
+      'assets/images/tray/unix/2.0x/status_1.png': [2, 2],
     };
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMessageHandler('flutter/assets', (message) async {

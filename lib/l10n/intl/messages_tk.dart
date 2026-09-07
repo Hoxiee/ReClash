@@ -672,6 +672,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("Çykarma görnüşi"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Çyk"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage("Doly ekrandan çyk"),
     "expand": MessageLookupByLibrary.simpleMessage("Standart"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Çaklanýan ýagdaý"),
     "expireTime": MessageLookupByLibrary.simpleMessage("Gutaryş wagty"),
@@ -1312,10 +1313,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Domeniň açar sözüni gabat getirýär",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "Wildcard boýunça gabat getirme; diňe * we ? goldanylýar",
+      "Domeni regex boýunça gabat getirýär",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "Domeniň goşundysyna gabat getirýär",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Wildcard boýunça gabat getirme; diňe * we ? goldanylýar",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "DSCP nyşanyny gabat getirýär (diňe tproxy girýän UDP trafigi üçin)",
@@ -1371,11 +1375,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Proses adyny regex boýunça gabat getirýär; Android-da paketiň ady gabat gelýär",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Proses adyny wildcard boýunça gabat getirýär; diňe * we ? goldanylýar",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "Prosesiň doly ýoly boýunça gabat getirýär",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Proses ýolyny regex boýunça gabat getirýär",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Proses ýolyny wildcard boýunça gabat getirýär; diňe * we ? goldanylýar",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Qayta gabat getirmaniň adyny gabat getirýär; birnäçe ady / bilen aýraň",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "Düzgünler toplumyna salgylanýar; rule-providers gerek",

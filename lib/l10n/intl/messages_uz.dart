@@ -678,6 +678,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("Istisno turi"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Chiqish"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage(
+      "Toʻliq ekrandan chiqish",
+    ),
     "expand": MessageLookupByLibrary.simpleMessage("Standart"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Kutilgan status"),
     "expireTime": MessageLookupByLibrary.simpleMessage("Tugash vaqti"),
@@ -1342,10 +1345,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Domen kalit soʻziga mos keladi",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "Yulduzcha belgilar bilan mos keladi; faqat * va ? ishlatiladi",
+      "Domen muntazam ifodasi boʻyicha mos keladi",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "Domen oxirgi qismiga mos keladi",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Yulduzcha belgilar bilan mos keladi; faqat * va ? ishlatiladi",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "DSCP belgisiga mos keladi (faqat tproxy UDP kirishida)",
@@ -1401,11 +1407,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Jarayon nomi muntazam ifodasi boʻyicha mos keladi; Androidda paket nomiga mos tushadi",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Jarayon nomi yulduzcha belgilari boʻyicha mos keladi; faqat * va ? ishlatiladi",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "Toʻliq jarayon yoʻli boʻyicha mos keladi",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Jarayon yoʻli muntazam ifodasi boʻyicha mos keladi",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Jarayon yoʻli yulduzcha belgilari boʻyicha mos keladi; faqat * va ? ishlatiladi",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Qayta moslash nomiga mos keladi; bir nechta nomni / bilan ajratib yozing",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "Qoida toʻplamini nazarda tutadi; rule-providers talab qilinadi",

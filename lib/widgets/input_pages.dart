@@ -603,43 +603,45 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
           ),
           const SizedBox(width: 8),
         ],
-        body: _items.isEmpty
-            ? NullStatus(label: appLocalizations.noData)
-            : ReorderableListView.builder(
-                padding: const EdgeInsets.only(
-                  bottom: 16 + 64,
-                  top: 16,
-                  left: 16,
-                  right: 16,
+        body: NullStatusSwitcher(
+          isEmpty: _items.isEmpty,
+          nullStatus: NullStatus(label: appLocalizations.noData),
+          child: ReorderableListView.builder(
+            padding: const EdgeInsets.only(
+              bottom: 16 + 64,
+              top: 16,
+              left: 16,
+              right: 16,
+            ),
+            buildDefaultDragHandles: false,
+            itemCount: _items.length,
+            itemBuilder: (context, index) {
+              final value = _items[index];
+              return _buildItem(
+                value: value,
+                index: index,
+                length: _items.length,
+                isSelected: selectedItems.contains(value.key),
+                isEditing: selectedItems.isNotEmpty,
+              );
+            },
+            proxyDecorator: (child, index, animation) {
+              final value = _items[index];
+              return commonProxyDecorator(
+                _buildItem(
+                  value: value,
+                  index: index,
+                  length: _items.length,
+                  isSelected: selectedItems.contains(value.key),
+                  isEditing: selectedItems.isNotEmpty,
                 ),
-                buildDefaultDragHandles: false,
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  final value = _items[index];
-                  return _buildItem(
-                    value: value,
-                    index: index,
-                    length: _items.length,
-                    isSelected: selectedItems.contains(value.key),
-                    isEditing: selectedItems.isNotEmpty,
-                  );
-                },
-                proxyDecorator: (child, index, animation) {
-                  final value = _items[index];
-                  return commonProxyDecorator(
-                    _buildItem(
-                      value: value,
-                      index: index,
-                      length: _items.length,
-                      isSelected: selectedItems.contains(value.key),
-                      isEditing: selectedItems.isNotEmpty,
-                    ),
-                    index,
-                    animation,
-                  );
-                },
-                onReorderItem: _handleReorder,
-              ),
+                index,
+                animation,
+              );
+            },
+            onReorderItem: _handleReorder,
+          ),
+        ),
       ),
     );
   }

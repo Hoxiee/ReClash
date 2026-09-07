@@ -129,8 +129,6 @@ class AdaptiveSheetScaffold extends StatefulWidget {
 }
 
 class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
-  final _isScrolledController = ValueNotifier<bool>(false);
-
   IconData get backIconData {
     if (kIsWeb) {
       return Icons.arrow_back;
@@ -153,12 +151,6 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     if (oldWidget.backAction != widget.backAction) {
       setState(() {});
     }
-  }
-
-  @override
-  void dispose() {
-    _isScrolledController.dispose();
-    super.dispose();
   }
 
   Widget _buildIconButton(IconButtonData data, {required bool filled}) {
@@ -251,7 +243,6 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
           ] else
             Flexible(
               child: _TransparentToolBarBody(
-                isScrolledController: _isScrolledController,
                 backgroundColor: backgroundColor,
                 toolBar: sheetAppBar,
                 body: widget.body,
@@ -332,13 +323,11 @@ class _SheetToolBar extends StatelessWidget {
 
 class _TransparentToolBarBody extends StatelessWidget {
   const _TransparentToolBarBody({
-    required this.isScrolledController,
     required this.backgroundColor,
     required this.toolBar,
     required this.body,
   });
 
-  final ValueNotifier<bool> isScrolledController;
   final Color backgroundColor;
   final Widget toolBar;
   final Widget body;
@@ -347,42 +336,31 @@ class _TransparentToolBarBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              isScrolledController.value = notification.metrics.pixels > 6;
-            }
-            return false;
-          },
-          child: ScrollConfiguration(
-            behavior: const ShowBarScrollBehavior(
-              scrollbarPadding: EdgeInsets.only(top: sheetAppBarHeight),
-            ),
-            child: body,
+        ScrollConfiguration(
+          behavior: const ShowBarScrollBehavior(
+            scrollbarPadding: EdgeInsets.only(top: sheetAppBarHeight),
           ),
+          child: body,
         ),
         Positioned(
           top: 0,
           left: 0,
           right: 0,
-          child: ValueListenableBuilder(
-            valueListenable: isScrolledController,
-            builder: (_, isScrolled, child) {
-              if (!isScrolled) {
-                return ColoredBox(color: backgroundColor, child: child!);
-              }
-              return ClipRSuperellipse(
-                borderRadius: AppRadius.top(AppCorner.xxl),
-                child: BackdropFilter(
-                  filter: commonFilter,
-                  child: ColoredBox(
-                    color: backgroundColor.opacity60,
-                    child: child!,
-                  ),
-                ),
-              );
-            },
-            child: toolBar,
+          height: sheetAppBarHeight,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.5, 1],
+                colors: [
+                  backgroundColor.opacity60,
+                  backgroundColor.opacity60,
+                  backgroundColor.opacity0,
+                ],
+              ),
+            ),
+            child: Align(alignment: Alignment.topCenter, child: toolBar),
           ),
         ),
       ],

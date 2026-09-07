@@ -1,9 +1,9 @@
 name: reclash
 description: A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.
 publish_to: 'none'
-version: 0.8.97+2026090101
+version: 0.8.97+2026090701
 environment:
-  sdk: '>=3.8.0 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -18,7 +18,7 @@ dependencies:
       url: https://github.com/chen08209/window_manager
       ref: v0.5.1-flclash.3
       path: packages/window_manager
-  dynamic_color: ^1.9.0
+  dynamic_color: ^2.1.0
   proxy:
     path: plugins/proxy
   launch_at_startup:
@@ -35,7 +35,7 @@ dependencies:
   wifi_ssid:
     path: plugins/wifi_ssid
   collection: ^1.19.1
-  animations: ^2.1.1
+  animations: ^3.0.0
   package_info_plus: ^10.2.1
   url_launcher: ^6.3.2
   freezed_annotation: ^3.1.0
@@ -73,7 +73,7 @@ dependencies:
   drift_flutter: ^0.3.1
   fractional_indexing: ^1.0.0
   reorderable_grid: ^1.0.13
-  navigator_resizable: ^3.0.3
+  navigator_resizable: ^3.1.0
   flutter_staggered_grid_view: ^0.7.0
   rust_api:
     path: plugins/rust_api
@@ -109,18 +109,10 @@ flutter:
     - assets/images/avatar/
     - assets/images/empty/
     - assets/images/icon_variants/
-    - path: assets/images/icon/status_1.png
-      platforms: [macos, linux]
-    - path: assets/images/icon/status_2.png
-      platforms: [macos, linux]
-    - path: assets/images/icon/status_3.png
-      platforms: [macos, linux]
-    - path: assets/images/icon/status_1.ico
-      platforms: [windows]
-    - path: assets/images/icon/status_2.ico
-      platforms: [windows]
-    - path: assets/images/icon/status_3.ico
-      platforms: [windows]
+    - path: assets/images/tray/unix/
+      platforms: [ macos, linux ]
+    - path: assets/images/tray/windows/
+      platforms: [ windows ]
   fonts:
     - family: JetBrainsMono
       fonts:

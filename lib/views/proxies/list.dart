@@ -286,56 +286,57 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
         final proxiesLayout = ref.watch(
           effectiveProxiesStyleProvider.select((state) => state.layout),
         );
-        if (state.groups.isEmpty) {
-          return NullStatus(
-            illustration: const ProxyEmptyIllustration(),
+        return NullStatusSwitcher(
+          isEmpty: state.groups.isEmpty,
+          nullStatus: NullStatus(
+            illustration: NullStatusIllustration.proxies,
             label: appLocalizations.nullTip(appLocalizations.proxies),
-          );
-        }
-        return LayoutBuilder(
-          builder: (_, constraints) {
-            final columns = getProxiesColumns(
-              max(constraints.maxWidth - 32, 0),
-              proxiesLayout,
-            );
-            _groupOffsets = _getGroupOffsets(
-              groups: state.groups,
-              currentUnfoldSet: state.currentUnfoldSet,
-              columns: columns,
-              cardType: state.proxyCardType,
-            );
-            containerHeight = max(constraints.maxHeight - 16, 0);
-            return CommonScrollBar(
-              controller: _controller,
-              thumbVisibility: true,
-              trackVisibility: true,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: ScrollConfiguration(
-                  behavior: const HiddenBarScrollBehavior(),
-                  child: CustomScrollView(
-                    key: proxiesListStoreKey,
-                    controller: _controller,
-                    slivers: [
-                      for (final group in state.groups)
-                        _buildGroup(
-                          context,
-                          group: group,
-                          currentUnfoldSet: state.currentUnfoldSet,
-                          columns: columns,
-                          cardType: state.proxyCardType,
+          ),
+          child: LayoutBuilder(
+            builder: (_, constraints) {
+              final columns = getProxiesColumns(
+                max(constraints.maxWidth - 32, 0),
+                proxiesLayout,
+              );
+              _groupOffsets = _getGroupOffsets(
+                groups: state.groups,
+                currentUnfoldSet: state.currentUnfoldSet,
+                columns: columns,
+                cardType: state.proxyCardType,
+              );
+              containerHeight = max(constraints.maxHeight - 16, 0);
+              return CommonScrollBar(
+                controller: _controller,
+                thumbVisibility: true,
+                trackVisibility: true,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: ScrollConfiguration(
+                    behavior: const HiddenBarScrollBehavior(),
+                    child: CustomScrollView(
+                      key: proxiesListStoreKey,
+                      controller: _controller,
+                      slivers: [
+                        for (final group in state.groups)
+                          _buildGroup(
+                            context,
+                            group: group,
+                            currentUnfoldSet: state.currentUnfoldSet,
+                            columns: columns,
+                            cardType: state.proxyCardType,
+                          ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 16 + BottomInsetScope.of(context),
+                          ),
                         ),
-                      SliverToBoxAdapter(
-                        child: SizedBox(
-                          height: 16 + BottomInsetScope.of(context),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );

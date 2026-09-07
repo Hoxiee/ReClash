@@ -50,11 +50,16 @@ void main() {
     expect(Window(), same(Window()));
   });
 
-  test('show raises the window and puts it back on the taskbar', () async {
+  testWidgets('show raises the window and puts it back on the taskbar', (
+    tester,
+  ) async {
     await Window().show();
 
-    expect(calls, containsAllInOrder(<String>['show', 'focus']));
-    expect(calls, contains('setSkipTaskbar'));
+    expect(
+      calls,
+      containsAllInOrder(<String>['show', 'focus', 'setSkipTaskbar']),
+    );
+    await tester.pump(const Duration(seconds: 1));
   });
 
   test('hide drops the window off the taskbar', () async {
@@ -69,11 +74,25 @@ void main() {
     expect(calls, ['close']);
   });
 
-  test('isVisible reports what the platform answers', () async {
-    expect(await Window().isVisible, isTrue);
+  testWidgets('toggle hides a visible window and shows a hidden one', (
+    tester,
+  ) async {
+    await Window().toggle();
 
+    expect(
+      calls,
+      containsAllInOrder(<String>['isVisible', 'hide', 'setSkipTaskbar']),
+    );
+
+    calls.clear();
     isVisible = false;
-    expect(await Window().isVisible, isFalse);
+    await Window().toggle();
+
+    expect(
+      calls,
+      containsAllInOrder(<String>['isVisible', 'show', 'setSkipTaskbar']),
+    );
+    await tester.pump(const Duration(seconds: 1));
   });
 
   test(

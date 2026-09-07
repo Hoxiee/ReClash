@@ -119,16 +119,18 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
           title: appLocalizations.profiles,
           floatingActionButton: _buildFAB(),
           actions: _buildActions(state.profiles),
-          body: state.profiles.isEmpty
-              ? NullStatus(
-                  label: appLocalizations.nullProfileDesc,
-                  illustration: const ProfileEmptyIllustration(),
-                )
-              : _ProfilesGrid(
-                  profiles: state.profiles,
-                  currentProfileId: state.currentProfileId,
-                  spacing: spacing,
-                ),
+          body: NullStatusSwitcher(
+            isEmpty: state.profiles.isEmpty,
+            nullStatus: NullStatus(
+              label: appLocalizations.nullProfileDesc,
+              illustration: NullStatusIllustration.profile,
+            ),
+            child: _ProfilesGrid(
+              profiles: state.profiles,
+              currentProfileId: state.currentProfileId,
+              spacing: spacing,
+            ),
+          ),
         );
       },
     );

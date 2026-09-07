@@ -660,6 +660,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("Алып тастау түрі"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Шығу"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage(
+      "Толық экраннан шығу",
+    ),
     "expand": MessageLookupByLibrary.simpleMessage("Қалыпты"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Күтілетін күй"),
     "expireTime": MessageLookupByLibrary.simpleMessage("Жарамдылық мерзімі"),
@@ -1294,10 +1297,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Домен кілт сөзін сәйкестендіру",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "Толтырғыш таңбалар бойынша сәйкестендіру; тек * және ? қолданылады",
+      "Доменнің тұрақты өрнегі бойынша сәйкестендіру",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "Домен жұрнағын сәйкестендіру",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Толтырғыш таңбалар бойынша сәйкестендіру; тек * және ? қолданылады",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "DSCP белгісін сәйкестендіру (тек tproxy UDP кірісі үшін)",
@@ -1353,11 +1359,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Процесс атауының тұрақты өрнегі бойынша сәйкестендіру; Android-та пакет атауына сәйкес келеді",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Процесс атауының толтырғыш таңбалары бойынша сәйкестендіру; тек * және ? қолданылады",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "Процестің толық жолы бойынша сәйкестендіру",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Процесс жолының тұрақты өрнегі бойынша сәйкестендіру",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Процесс жолының толтырғыш таңбалары бойынша сәйкестендіру; тек * және ? қолданылады",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Қайта сәйкестендіру атауын сәйкестендіру; бірнеше атауды / арқылы бөліңіз",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "Ереже жинағына сілтеме жасайды; rule-providers қажет",

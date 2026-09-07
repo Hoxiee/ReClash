@@ -119,12 +119,7 @@ class SystemAction extends _$SystemAction {
   }
 
   Future<void> updateVisible() async {
-    final visible = await windowPort?.isVisible;
-    if (visible != null && !visible) {
-      unawaited(windowPort?.show());
-    } else {
-      unawaited(windowPort?.hide());
-    }
+    await windowPort?.toggle();
   }
 
   void updateTun() {

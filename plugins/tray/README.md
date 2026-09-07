@@ -10,7 +10,7 @@ Callers declare the desired tray state; they never sequence platform calls thems
 ```dart
 await Tray.instance.show(
   TraySpec(
-    icon: TrayIcon.asset('assets/images/icon/status_1.png', isTemplate: true),
+    icon: TrayIcon.asset('assets/images/tray/unix/status_1.png', isTemplate: true),
     toolTip: 'ReClash',
     menu: [
       TrayMenuAction(label: 'Show', onSelected: showWindow),

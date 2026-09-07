@@ -652,6 +652,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("Исключаемые типы"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Выход"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage(
+      "Выйти из полноэкранного режима",
+    ),
     "expand": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
     "expireTime": MessageLookupByLibrary.simpleMessage("Срок действия"),
@@ -1292,10 +1295,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сопоставить ключевое слово в домене",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "Сопоставить по маске; поддерживаются только * и ?",
+      "Сопоставить по регулярному выражению домена",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "Сопоставить суффикс домена",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставление по маске; поддерживаются только * и ?",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "Сопоставить метку DSCP (только для входящего UDP через tproxy)",
@@ -1351,11 +1357,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Сопоставить по регулярному выражению имени процесса; на Android соответствует имени пакета",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по маске имени процесса; поддерживаются только * и ?",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "Сопоставить по полному пути процесса",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Сопоставить по регулярному выражению пути процесса",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить по маске пути процесса; поддерживаются только * и ?",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Сопоставить имя повторного сопоставления; несколько имён разделяются /",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "Ссылка на набор правил; требуется настроить rule-providers",

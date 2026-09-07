@@ -172,6 +172,11 @@ func startServer(arg string) {
 	if err != nil {
 		panic(err.Error())
 	}
+	serve(dialed)
+}
+
+func serve(dialed ipcConn) {
+	defer releaseOnExit()
 	defer func() {
 		connMu.Lock()
 		c := conn

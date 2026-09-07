@@ -175,48 +175,50 @@ class _OverwriteSelectionSheetState<T>
       sheetTransparentToolBar: true,
       body: SizedBox(
         height: height,
-        child: count == 0 && widget.emptyLabel != null
-            ? NullStatus(label: widget.emptyLabel!)
-            : CustomScrollView(
-                controller: _controller,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: context.sheetTopPadding),
-                  ),
-                  for (final (sectionIndex, section)
-                      in widget.sections.indexed) ...[
-                    if (section.label != null) ...[
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        sliver: SliverToBoxAdapter(
-                          child: InfoHeader(info: Info(label: section.label!)),
-                        ),
-                      ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 4)),
-                    ],
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList.builder(
-                        itemCount: section.items.length,
-                        itemBuilder: (context, index) {
-                          final item = section.items[index];
-                          return _buildItem(
-                            context,
-                            section,
-                            item,
-                            index,
-                            isSelected: item == selected,
-                            isRevealTarget:
-                                sectionOffsets[sectionIndex] + index ==
-                                selectedIndex,
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                ],
+        child: NullStatusSwitcher(
+          isEmpty: count == 0 && widget.emptyLabel != null,
+          nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
+          child: CustomScrollView(
+            controller: _controller,
+            slivers: [
+              SliverToBoxAdapter(
+                child: SizedBox(height: context.sheetTopPadding),
               ),
+              for (final (sectionIndex, section)
+                  in widget.sections.indexed) ...[
+                if (section.label != null) ...[
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: InfoHeader(info: Info(label: section.label!)),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                ],
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList.builder(
+                    itemCount: section.items.length,
+                    itemBuilder: (context, index) {
+                      final item = section.items[index];
+                      return _buildItem(
+                        context,
+                        section,
+                        item,
+                        index,
+                        isSelected: item == selected,
+                        isRevealTarget:
+                            sectionOffsets[sectionIndex] + index ==
+                            selectedIndex,
+                      );
+                    },
+                  ),
+                ),
+              ],
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            ],
+          ),
+        ),
       ),
       title: widget.title,
     );

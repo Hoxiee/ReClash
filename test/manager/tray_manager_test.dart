@@ -131,6 +131,9 @@ void main() {
 
     await emitTrayEvent('onIconActivated');
     await tester.pumpAndSettle();
+    // A macOS host arms the Dock settle timer on show; drain it so the binding
+    // ends the test with no pending timer.
+    await tester.pump(const Duration(seconds: 1));
 
     expect(windowCalls, containsAll(<String>['show', 'focus']));
   });

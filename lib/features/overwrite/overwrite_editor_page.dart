@@ -159,40 +159,36 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
         ),
         const SizedBox(width: 8),
       ],
-      body: items.isEmpty
-          ? NullStatus(label: widget.emptyLabel)
-          : CommonScrollBar(
-              controller: _scrollController,
-              child: ReorderableListView.builder(
-                scrollController: _scrollController,
-                buildDefaultDragHandles: false,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ).copyWith(bottom: 24),
-                itemBuilder: (_, index) {
-                  final item = items[index];
-                  return _buildItem(
-                    context,
-                    item,
-                    index,
-                    items.length,
-                    selected,
-                  );
-                },
-                itemExtent: widget.itemExtent,
-                itemCount: items.length,
-                proxyDecorator: (child, index, animation) {
-                  final item = items[index];
-                  return commonProxyDecorator(
-                    _buildItem(context, item, index, items.length, selected),
-                    index,
-                    animation,
-                  );
-                },
-                onReorderItem: widget.onReorder,
-              ),
-            ),
+      body: NullStatusSwitcher(
+        isEmpty: items.isEmpty,
+        nullStatus: NullStatus(label: widget.emptyLabel),
+        child: CommonScrollBar(
+          controller: _scrollController,
+          child: ReorderableListView.builder(
+            scrollController: _scrollController,
+            buildDefaultDragHandles: false,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ).copyWith(bottom: 24),
+            itemBuilder: (_, index) {
+              final item = items[index];
+              return _buildItem(context, item, index, items.length, selected);
+            },
+            itemExtent: widget.itemExtent,
+            itemCount: items.length,
+            proxyDecorator: (child, index, animation) {
+              final item = items[index];
+              return commonProxyDecorator(
+                _buildItem(context, item, index, items.length, selected),
+                index,
+                animation,
+              );
+            },
+            onReorderItem: widget.onReorder,
+          ),
+        ),
+      ),
     );
   }
 }

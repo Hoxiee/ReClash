@@ -293,33 +293,35 @@ class _EditGlobalAddedRules extends ConsumerWidget {
     final rules = ref.watch(globalRulesProvider).value ?? [];
     return BaseScaffold(
       title: appLocalizations.editGlobalRules,
-      body: rules.isEmpty
-          ? NullStatus(
-              label: appLocalizations.nullTip(appLocalizations.rule),
-              illustration: const RuleEmptyIllustration(),
-            )
-          : ScrollConfiguration(
-              behavior: const ShowBarScrollBehavior(),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemExtent: ruleItemHeight,
-                itemBuilder: (context, index) {
-                  final rule = rules[index];
-                  final position = ItemPosition.get(index, rules.length);
-                  return ItemPositionProvider(
-                    position: position,
-                    child: RuleStatusItem(
-                      status: !disabledRuleIds.contains(rule.id),
-                      rule: rule,
-                      onChange: (status) {
-                        _handleChange(ref, profileId, !status, rule.id);
-                      },
-                    ),
-                  );
-                },
-                itemCount: rules.length,
-              ),
-            ),
+      body: NullStatusSwitcher(
+        isEmpty: rules.isEmpty,
+        nullStatus: NullStatus(
+          label: appLocalizations.nullTip(appLocalizations.rule),
+          illustration: NullStatusIllustration.rules,
+        ),
+        child: ScrollConfiguration(
+          behavior: const ShowBarScrollBehavior(),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemExtent: ruleItemHeight,
+            itemBuilder: (context, index) {
+              final rule = rules[index];
+              final position = ItemPosition.get(index, rules.length);
+              return ItemPositionProvider(
+                position: position,
+                child: RuleStatusItem(
+                  status: !disabledRuleIds.contains(rule.id),
+                  rule: rule,
+                  onChange: (status) {
+                    _handleChange(ref, profileId, !status, rule.id);
+                  },
+                ),
+              );
+            },
+            itemCount: rules.length,
+          ),
+        ),
+      ),
     );
   }
 }

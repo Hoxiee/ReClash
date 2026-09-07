@@ -11,6 +11,16 @@ import 'package:window_manager/window_manager.dart';
 class Window implements WindowPort {
   static Window? _instance;
   bool _supportsPosition = false;
+  late final WindowVisibilityController _visibility =
+      WindowVisibilityController(
+        showWindow: _showWindow,
+        hideWindow: _hideWindow,
+        isWindowVisible: _isWindowVisible,
+        setSkipTaskbar: (skip) => windowManager.setSkipTaskbar(skip),
+        dockSettleDuration: system.isMacOS
+            ? const Duration(seconds: 1)
+            : Duration.zero,
+      );
 
   Window._internal();
 
@@ -149,15 +159,26 @@ class Window implements WindowPort {
   }
 
   @override
-  Future<void> show() async {
+  Future<void> show() => _visibility.show();
+
+  @override
+  Future<void> hide() => _visibility.hide();
+
+  @override
+  Future<void> toggle() => _visibility.toggle();
+
+  Future<void> _showWindow() async {
     render?.resume();
     await windowManager.show();
     await windowManager.focus();
-    await windowManager.setSkipTaskbar(false);
   }
 
-  @override
-  Future<bool> get isVisible async {
+  Future<void> _hideWindow() async {
+    render?.pause();
+    await windowManager.hide();
+  }
+
+  Future<bool> _isWindowVisible() async {
     final value = await windowManager.isVisible();
     commonPrint.log('window visible check: $value');
     return value;
@@ -172,12 +193,92 @@ class Window implements WindowPort {
   void forceExit() {
     exit(0);
   }
+}
 
-  @override
-  Future<void> hide() async {
-    render?.pause();
-    await windowManager.hide();
-    await windowManager.setSkipTaskbar(true);
+/// Serializes visibility requests so a burst of hotkey toggles lands in
+/// order, and holds back the Dock-hiding activation policy switch while a
+/// preceding regular switch settles: flipping regular → accessory → regular
+/// within about a second leaves macOS with stray Dock icons.
+class WindowVisibilityController {
+  WindowVisibilityController({
+    required Future<void> Function() showWindow,
+    required Future<void> Function() hideWindow,
+    required Future<bool> Function() isWindowVisible,
+    required Future<void> Function(bool skip) setSkipTaskbar,
+    required this.dockSettleDuration,
+  }) : _showWindow = showWindow,
+       _hideWindow = hideWindow,
+       _isWindowVisible = isWindowVisible,
+       _setSkipTaskbar = setSkipTaskbar;
+
+  final Future<void> Function() _showWindow;
+  final Future<void> Function() _hideWindow;
+  final Future<bool> Function() _isWindowVisible;
+  final Future<void> Function(bool skip) _setSkipTaskbar;
+  final Duration dockSettleDuration;
+
+  Future<void>? _queue;
+  Timer? _dockSettleTimer;
+  bool _dockHidePending = false;
+
+  Future<void> show() => _enqueue(_show);
+
+  Future<void> hide() => _enqueue(_hide);
+
+  Future<void> toggle() => _enqueue(() async {
+    if (await _isWindowVisible()) {
+      await _hide();
+    } else {
+      await _show();
+    }
+  });
+
+  Future<void> _enqueue(Future<void> Function() step) {
+    final previous = _queue;
+    final result = previous == null ? step() : previous.then((_) => step());
+    final tail = result.catchError((_) {});
+    _queue = tail;
+    tail.whenComplete(() {
+      if (identical(_queue, tail)) {
+        _queue = null;
+      }
+    });
+    return result;
+  }
+
+  Future<void> _show() async {
+    _dockHidePending = false;
+    await _showWindow();
+    await _setSkipTaskbar(false);
+    _dockSettleTimer?.cancel();
+    _dockSettleTimer = dockSettleDuration == Duration.zero
+        ? null
+        : Timer(dockSettleDuration, _onDockSettled);
+  }
+
+  Future<void> _hide() async {
+    await _hideWindow();
+    if (_dockSettleTimer?.isActive ?? false) {
+      _dockHidePending = true;
+      return;
+    }
+    await _setSkipTaskbar(true);
+  }
+
+  void _onDockSettled() {
+    _dockSettleTimer = null;
+    if (!_dockHidePending) {
+      return;
+    }
+    unawaited(
+      _enqueue(() async {
+        if (!_dockHidePending) {
+          return;
+        }
+        _dockHidePending = false;
+        await _setSkipTaskbar(true);
+      }),
+    );
   }
 }
 

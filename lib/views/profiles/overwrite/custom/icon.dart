@@ -167,23 +167,31 @@ class _IconEditViewState extends ConsumerState<IconEditView>
                     onChanged: _handleInputChange,
                   ),
                 ),
-                if (records.isNotEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: InfoHeader(
-                      info: Info(label: appLocalizations.iconRecords),
+                Expanded(
+                  child: NullStatusSwitcher(
+                    isEmpty: records.isEmpty,
+                    nullStatus: NullStatus(
+                      label: appLocalizations.noRecords,
+                      illustration: NullStatusIllustration.history,
+                    ),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: InfoHeader(
+                            info: Info(label: appLocalizations.iconRecords),
+                          ),
+                        ),
+                        Expanded(
+                          child: _IconRecordList(
+                            records: records,
+                            onSelected: _handleSelectRecord,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Expanded(
-                    child: _IconRecordList(
-                      records: records,
-                      onSelected: _handleSelectRecord,
-                    ),
-                  ),
-                ] else
-                  Expanded(
-                    child: NullStatus(label: appLocalizations.noRecords),
-                  ),
+                ),
                 const SizedBox(height: 20),
               ],
             );

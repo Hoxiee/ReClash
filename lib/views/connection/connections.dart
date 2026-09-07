@@ -115,23 +115,26 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         valueListenable: _listController,
         builder: (context, state, _) {
           final connections = state.list;
-          if (connections.isEmpty) {
-            return NullStatus(
+          return NullStatusSwitcher(
+            isEmpty: connections.isEmpty,
+            nullStatus: NullStatus(
               label: appLocalizations.nullTip(appLocalizations.connections),
-              illustration: const ConnectionEmptyIllustration(),
-            );
-          }
-          return TrackerInfoAnimatedList(
-            controller: _scrollController,
-            trackerInfos: connections,
-            detailTitle: appLocalizations.details(appLocalizations.connection),
-            trailingBuilder: (trackerInfo) => IconButton(
-              tooltip: appLocalizations.blockConnection,
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.block, size: 20),
-              onPressed: () {
-                _handleBlockConnection(trackerInfo.id);
-              },
+              illustration: NullStatusIllustration.connections,
+            ),
+            child: TrackerInfoAnimatedList(
+              controller: _scrollController,
+              trackerInfos: connections,
+              detailTitle: appLocalizations.details(
+                appLocalizations.connection,
+              ),
+              trailingBuilder: (trackerInfo) => IconButton(
+                tooltip: appLocalizations.blockConnection,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.block, size: 20),
+                onPressed: () {
+                  _handleBlockConnection(trackerInfo.id);
+                },
+              ),
             ),
           );
         },

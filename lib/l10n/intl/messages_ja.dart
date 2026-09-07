@@ -533,6 +533,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("除外タイプ"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("終了"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage("全画面表示を終了"),
     "expand": MessageLookupByLibrary.simpleMessage("標準"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("期待するステータス"),
     "expireTime": MessageLookupByLibrary.simpleMessage("有効期限"),
@@ -1027,10 +1028,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "ドメインキーワードにマッチ",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "ワイルドカードでマッチ（* と ? のみ対応）",
+      "ドメインの正規表現でマッチ",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "ドメインサフィックスにマッチ",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "ワイルドカードでマッチ（* と ? のみ対応）",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "DSCPマークにマッチ（tproxy udpインバウンドのみ）",
@@ -1078,11 +1082,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "プロセス名の正規表現でマッチ（Androidではパッケージ名にマッチ）",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセス名のワイルドカードでマッチ（* と ? のみ対応）",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "プロセスのフルパスでマッチ",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "プロセスパスの正規表現でマッチ",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "プロセスパスのワイルドカードでマッチ（* と ? のみ対応）",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "再マッチ名にマッチ（複数は / で区切る）",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "ルールセットを参照します。rule-providersの設定が必要です",

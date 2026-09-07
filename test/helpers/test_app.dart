@@ -44,7 +44,9 @@ class TestApp extends StatelessWidget {
           globalState.theme = CommonTheme.of(context, 1);
         }
         // ignore: deprecated_member_use
-        return MaterialUiCompatibilityBridge(child: child!);
+        return MaterialUiCompatibilityBridge(
+          child: IconTheme(data: Theme.of(context).iconTheme, child: child!),
+        );
       },
       home: homeBuilder(child),
     );

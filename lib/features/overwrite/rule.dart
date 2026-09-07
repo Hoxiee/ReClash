@@ -17,6 +17,8 @@ final ruleItemHeight =
     12;
 
 class RuleItem extends StatelessWidget {
+  static const _targetMaxWidthFactor = 0.5;
+
   final bool isSelected;
   final bool isEditing;
   final Rule rule;
@@ -96,29 +98,47 @@ class RuleItem extends StatelessWidget {
         onSelected();
       },
       title: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: _RuleItemLabel(rule: rule)),
-            Row(
-              mainAxisSize: MainAxisSize.min,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (invalid) _buildInfoWidget(context),
-                if (rule.realTarget != null)
-                  Text(
-                    hasMatch &&
-                            rule.realTarget!.toUpperCase() ==
-                                RuleAction.MATCH.value
-                        ? context.appLocalizations.matchTarget
-                        : rule.realTarget!,
-                    style: context.textTheme.bodyMedium?.toJetBrainsMono
-                        .copyWith(color: checkResult.color),
+                Expanded(child: _RuleItemLabel(rule: rule)),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: constraints.maxWidth * _targetMaxWidthFactor,
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (invalid) _buildInfoWidget(context),
+                      if (rule.realTarget != null)
+                        Flexible(
+                          child: TooltipText(
+                            text: Text(
+                              hasMatch &&
+                                      rule.realTarget!.toUpperCase() ==
+                                          RuleAction.MATCH.value
+                                  ? context.appLocalizations.matchTarget
+                                  : rule.realTarget!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.toJetBrainsMono
+                                  .copyWith(color: checkResult.color),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
       onPressed: () {

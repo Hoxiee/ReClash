@@ -11,7 +11,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:window_manager/window_manager.dart' show WindowListener;
+import 'package:window_manager/window_manager.dart'
+    show WindowListener, windowManager;
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -66,7 +67,7 @@ class _RecordingWindowPort implements WindowPort {
   Future<void> hide() async {}
 
   @override
-  Future<bool> get isVisible async => true;
+  Future<void> toggle() async {}
 
   @override
   Future<void> show() async {
@@ -79,6 +80,10 @@ void main() {
 
   late ProviderContainer container;
   late _RecordingWindowPort window;
+  late List<MethodCall> windowCalls;
+  late bool isAlwaysOnTop;
+  late bool isMaximized;
+  late bool isFullScreen;
 
   setUpAll(() async {
     await AppLocalizations.load(const Locale('en'));
@@ -86,6 +91,10 @@ void main() {
 
   setUp(() {
     _RecordingSystemAction.calls.clear();
+    windowCalls = [];
+    isAlwaysOnTop = false;
+    isMaximized = false;
+    isFullScreen = false;
     window = _RecordingWindowPort();
     windowPort = window;
     container = ProviderContainer(
@@ -97,10 +106,16 @@ void main() {
     globalState.container = container;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_windowChannel, (call) async {
-          if (call.method == 'isMaximized' || call.method == 'isAlwaysOnTop') {
-            return false;
+          windowCalls.add(call);
+          if (call.method == 'setAlwaysOnTop') {
+            isAlwaysOnTop = call.arguments['isAlwaysOnTop'] as bool;
           }
-          return null;
+          return switch (call.method) {
+            'isAlwaysOnTop' => isAlwaysOnTop,
+            'isMaximized' => isMaximized,
+            'isFullScreen' => isFullScreen,
+            _ => null,
+          };
         });
   });
 
@@ -322,27 +337,23 @@ void main() {
   });
 
   group('WindowHeaderActions', () {
-    late ValueNotifier<bool> isPin;
-    late ValueNotifier<bool> isMaximized;
+    late ValueNotifier<WindowCaptionState> caption;
     late List<String> pressed;
 
     setUp(() {
-      isPin = ValueNotifier(false);
-      isMaximized = ValueNotifier(false);
+      caption = ValueNotifier(const WindowCaptionState());
       pressed = [];
     });
 
     tearDown(() {
-      isPin.dispose();
-      isMaximized.dispose();
+      caption.dispose();
     });
 
     Future<void> pumpActions(WidgetTester tester) async {
       await tester.pumpWidget(
         TestApp(
           child: WindowHeaderActions(
-            isPinNotifier: isPin,
-            isMaximizedNotifier: isMaximized,
+            state: caption,
             onPin: () => pressed.add('pin'),
             onMinimize: () => pressed.add('minimize'),
             onMaximize: () => pressed.add('maximize'),
@@ -353,13 +364,14 @@ void main() {
       await tester.pump();
     }
 
-    String tooltipOf(WidgetTester tester, IconData icon) {
+    Finder glyph(CaptionGlyph glyph) => find.byWidgetPredicate(
+      (widget) => widget is CaptionIcon && widget.glyph == glyph,
+    );
+
+    String tooltipOf(WidgetTester tester, Finder icon) {
       return tester
           .widget<IconButton>(
-            find.ancestor(
-              of: find.byIcon(icon),
-              matching: find.byType(IconButton),
-            ),
+            find.ancestor(of: icon, matching: find.byType(IconButton)),
           )
           .tooltip!;
     }
@@ -368,15 +380,21 @@ void main() {
       await pumpActions(tester);
 
       expect(
-        tooltipOf(tester, Icons.push_pin_outlined),
+        tooltipOf(tester, find.byIcon(Icons.push_pin_outlined)),
         currentAppLocalizations.pinWindow,
       );
-      expect(tooltipOf(tester, Icons.remove), currentAppLocalizations.minimize);
       expect(
-        tooltipOf(tester, Icons.crop_square),
+        tooltipOf(tester, glyph(CaptionGlyph.minimize)),
+        currentAppLocalizations.minimize,
+      );
+      expect(
+        tooltipOf(tester, glyph(CaptionGlyph.maximize)),
         currentAppLocalizations.maximize,
       );
-      expect(tooltipOf(tester, Icons.close), currentAppLocalizations.close);
+      expect(
+        tooltipOf(tester, glyph(CaptionGlyph.close)),
+        currentAppLocalizations.close,
+      );
     });
 
     testWidgets('the pin and maximize labels follow their state', (
@@ -384,17 +402,37 @@ void main() {
     ) async {
       await pumpActions(tester);
 
-      isPin.value = true;
-      isMaximized.value = true;
+      caption.value = const WindowCaptionState(
+        isPinned: true,
+        isMaximized: true,
+      );
       await tester.pump();
 
       expect(
-        tooltipOf(tester, Icons.push_pin),
+        tooltipOf(tester, find.byIcon(Icons.push_pin)),
         currentAppLocalizations.unpinWindow,
       );
       expect(
-        tooltipOf(tester, Icons.filter_none),
+        tooltipOf(tester, glyph(CaptionGlyph.restore)),
         currentAppLocalizations.unmaximize,
+      );
+    });
+
+    testWidgets('a fullscreen window offers to leave fullscreen first', (
+      tester,
+    ) async {
+      await pumpActions(tester);
+
+      caption.value = const WindowCaptionState(
+        isMaximized: true,
+        isFullScreen: true,
+      );
+      await tester.pump();
+
+      expect(glyph(CaptionGlyph.maximize), findsNothing);
+      expect(
+        tooltipOf(tester, glyph(CaptionGlyph.restore)),
+        currentAppLocalizations.exitFullScreen,
       );
     });
 
@@ -402,12 +440,141 @@ void main() {
       await pumpActions(tester);
 
       await tester.tap(find.byIcon(Icons.push_pin_outlined));
-      await tester.tap(find.byIcon(Icons.remove));
-      await tester.tap(find.byIcon(Icons.crop_square));
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(glyph(CaptionGlyph.minimize));
+      await tester.tap(glyph(CaptionGlyph.maximize));
+      await tester.tap(glyph(CaptionGlyph.close));
       await tester.pump();
 
       expect(pressed, ['pin', 'minimize', 'maximize', 'close']);
+    });
+  });
+
+  group('WindowCaptionController', () {
+    Future<void> emitWindowEvent(String name) async {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            _windowChannel.name,
+            _windowChannel.codec.encodeMethodCall(
+              MethodCall('onEvent', {'eventName': name}),
+            ),
+            (_) {},
+          );
+    }
+
+    Future<WindowCaptionController> pumpController(WidgetTester tester) async {
+      final caption = WindowCaptionController();
+      addTearDown(caption.dispose);
+      await tester.pump();
+      return caption;
+    }
+
+    List<String> methodsOf(List<MethodCall> calls) =>
+        calls.map((call) => call.method).toList();
+
+    testWidgets('starts from the state the window already has', (tester) async {
+      isAlwaysOnTop = true;
+      isMaximized = true;
+
+      final caption = await pumpController(tester);
+
+      expect(
+        caption.value,
+        const WindowCaptionState(isPinned: true, isMaximized: true),
+      );
+    });
+
+    testWidgets('a maximize request only shows once the window reports it', (
+      tester,
+    ) async {
+      final caption = await pumpController(tester);
+      windowCalls.clear();
+
+      await caption.toggleMaximized();
+      await tester.pump();
+
+      expect(methodsOf(windowCalls), [
+        'isFullScreen',
+        'isMaximized',
+        'maximize',
+      ]);
+      expect(caption.value.isMaximized, isFalse);
+
+      await emitWindowEvent('maximize');
+
+      expect(caption.value.isMaximized, isTrue);
+    });
+
+    testWidgets('a maximized window is asked to restore', (tester) async {
+      isMaximized = true;
+      final caption = await pumpController(tester);
+      windowCalls.clear();
+
+      await caption.toggleMaximized();
+      await emitWindowEvent('unmaximize');
+
+      expect(methodsOf(windowCalls), contains('unmaximize'));
+      expect(caption.value.isMaximized, isFalse);
+    });
+
+    testWidgets('a fullscreen window leaves fullscreen instead of toggling', (
+      tester,
+    ) async {
+      isFullScreen = true;
+      isMaximized = true;
+      final caption = await pumpController(tester);
+      windowCalls.clear();
+
+      await caption.toggleMaximized();
+
+      expect(methodsOf(windowCalls), isNot(contains('maximize')));
+      expect(methodsOf(windowCalls), isNot(contains('unmaximize')));
+      final leave = windowCalls.singleWhere(
+        (call) => call.method == 'setFullScreen',
+      );
+      expect(leave.arguments, {'isFullScreen': false});
+
+      await emitWindowEvent('leave-full-screen');
+
+      expect(
+        caption.value,
+        const WindowCaptionState(isMaximized: true, isFullScreen: false),
+      );
+    });
+
+    testWidgets('changes made by the window manager itself are mirrored', (
+      tester,
+    ) async {
+      final caption = await pumpController(tester);
+
+      await emitWindowEvent('maximize');
+      expect(caption.value.isMaximized, isTrue);
+
+      await emitWindowEvent('enter-full-screen');
+      expect(caption.value.isFullScreen, isTrue);
+
+      await emitWindowEvent('leave-full-screen');
+      await emitWindowEvent('unmaximize');
+      expect(caption.value, const WindowCaptionState());
+    });
+
+    testWidgets('pinning reads the applied state back', (tester) async {
+      final caption = await pumpController(tester);
+
+      await caption.togglePin();
+      expect(caption.value.isPinned, isTrue);
+
+      await caption.togglePin();
+      expect(caption.value.isPinned, isFalse);
+    });
+
+    testWidgets('disposing stops listening to the window', (tester) async {
+      final caption = WindowCaptionController();
+      await tester.pump();
+      expect(windowManager.listeners, contains(caption));
+
+      caption.dispose();
+
+      expect(windowManager.listeners, isNot(contains(caption)));
     });
   });
 }

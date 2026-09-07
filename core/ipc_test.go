@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/common/observable"
+	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/log"
 )
 
@@ -692,4 +693,39 @@ func TestHandleStartLogAndStopLogLifecycle(t *testing.T) {
 		t.Fatal("handleStopLog did not clear subscriber or cancel func")
 	}
 	logMu.Unlock()
+}
+
+func TestServeReleasesTheCoreWhenTheHostDisconnects(t *testing.T) {
+	withCurrentConfig(t, &config.Config{General: &config.General{}, Controller: &config.Controller{}})
+	isInit.Store(true)
+
+	serve(&fakeConn{})
+
+	if isInit.Load() {
+		t.Error("the host went away without a shutdown call and the core kept its state, so a TUN it owned would leave its routes behind")
+	}
+	if currentConfig != nil {
+		t.Error("currentConfig survived the host disconnect")
+	}
+	connMu.Lock()
+	remaining := conn
+	connMu.Unlock()
+	if remaining != nil {
+		t.Error("serve returned with the closed connection still installed")
+	}
+}
+
+func TestReleaseOnExitIsANoOpBeforeInit(t *testing.T) {
+	isInit.Store(false)
+	logMu.Lock()
+	logSubscriber = make(chan log.Event)
+	logCancel = func() { t.Error("release before init cancelled a log pump it does not own") }
+	logMu.Unlock()
+	t.Cleanup(func() {
+		logMu.Lock()
+		logSubscriber, logCancel = nil, nil
+		logMu.Unlock()
+	})
+
+	releaseOnExit()
 }

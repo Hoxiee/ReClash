@@ -133,6 +133,20 @@ void main() {
     expect(_userVersion(raw), 5);
   });
 
+  test(
+    'a v2 user_version with match_target already present still opens',
+    () async {
+      raw.execute('PRAGMA user_version = 2');
+      expect(_columnsOf(raw, 'profiles'), contains('match_target'));
+
+      await openAndMigrate();
+
+      expect(_columnsOf(raw, 'profiles'), contains('match_target'));
+      // Our schema is at v5 (upstream stops at 3); the walk runs through.
+      expect(_userVersion(raw), 5);
+    },
+  );
+
   test('the upgrade creates the tables v2 added', () async {
     _downgradeToV1(raw);
     expect(_hasTable(raw, 'proxy_groups'), isFalse);

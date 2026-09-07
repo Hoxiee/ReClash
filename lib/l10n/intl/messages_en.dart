@@ -632,6 +632,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "excludeType": MessageLookupByLibrary.simpleMessage("Exclude type"),
     "existsTip": m21,
     "exit": MessageLookupByLibrary.simpleMessage("Exit"),
+    "exitFullScreen": MessageLookupByLibrary.simpleMessage("Exit full screen"),
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
     "expireTime": MessageLookupByLibrary.simpleMessage("Expiration time"),
@@ -1244,10 +1245,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Match a domain keyword",
     ),
     "ruleActionDomainRegexDesc": MessageLookupByLibrary.simpleMessage(
-      "Wildcard match; only * and ? are supported",
+      "Match a domain regex",
     ),
     "ruleActionDomainSuffixDesc": MessageLookupByLibrary.simpleMessage(
       "Match a domain suffix",
+    ),
+    "ruleActionDomainWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Wildcard match; only * and ? are supported",
     ),
     "ruleActionDscpDesc": MessageLookupByLibrary.simpleMessage(
       "Match the DSCP mark (tproxy UDP inbound only)",
@@ -1301,11 +1305,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleActionProcessNameRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Match by process name regex; matches the package name on Android",
     ),
+    "ruleActionProcessNameWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process name wildcard; only * and ? are supported",
+    ),
     "ruleActionProcessPathDesc": MessageLookupByLibrary.simpleMessage(
       "Match by the full process path",
     ),
     "ruleActionProcessPathRegexDesc": MessageLookupByLibrary.simpleMessage(
       "Match by process path regex",
+    ),
+    "ruleActionProcessPathWildcardDesc": MessageLookupByLibrary.simpleMessage(
+      "Match by process path wildcard; only * and ? are supported",
+    ),
+    "ruleActionRematchNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Match the rematch name; separate multiple names with /",
     ),
     "ruleActionRuleSetDesc": MessageLookupByLibrary.simpleMessage(
       "Reference a rule set; requires rule-providers",

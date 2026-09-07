@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 const _allTargets = <String, String>{
   'android': 'apk',
@@ -53,6 +54,18 @@ Future<void> main(List<String> args) async {
 
   final env = results['env'] as String;
   final rootDir = Directory.current.path;
+  final skipped = packagesNotBuildingAssets(
+    File(p.join(rootDir, 'pubspec.yaml')).readAsStringSync(),
+  );
+  if (skipped.isNotEmpty) {
+    stderr.writeln(
+      'pubspec.yaml sets hooks.user_defines.<package>.build_assets: false '
+      'for ${skipped.join(', ')}; a package built this way would ship '
+      'whatever is left in libclash/ and no Rust library. '
+      'Restore "build_assets: true".',
+    );
+    exit(1);
+  }
   final arch = _detectArch();
   final targets = createPackageTargets(platform, results['targets']);
   final androidArch = results['arch'] as String?;
@@ -113,6 +126,18 @@ List<String> createFlutterBuildArgs({
 
 Map<String, String> createBuildEnvironment(String env) {
   return {'APP_ENV': env};
+}
+
+/// Packages whose build hook `pubspec.yaml` turns into a no-op.
+List<String> packagesNotBuildingAssets(String pubspec) {
+  final document = loadYaml(pubspec);
+  if (document is! Map) return const [];
+  final defines = (document['hooks'] as Map?)?['user_defines'];
+  if (defines is! Map) return const [];
+  return [
+    for (final MapEntry(:key, :value) in defines.entries)
+      if (value is Map && value['build_assets'] == false) key.toString(),
+  ]..sort();
 }
 
 String createPackageTargets(String platform, String? customTargets) {
@@ -186,7 +211,6 @@ Future<int> _package(
       ...descriptionArgs,
     ],
     includeParentEnvironment: true,
-    environment: {'ANDROID_ARCH': ?androidArch},
     runInShell: Platform.isWindows,
   );
 
@@ -247,7 +271,6 @@ Future<int> _ensureLinuxDependencies() async {
   const pkgGroups = <List<String>>[
     ['ninja-build', 'libgtk-3-dev'],
     ['libayatana-appindicator3-dev'],
-    ['libkeybinder-3.0-dev'],
     ['libsecret-1-dev'],
     ['locate'],
     ['rpm', 'patchelf'],

@@ -38,7 +38,6 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
         return;
       }
       if (!stringListEquality.equals(prev?.groupNames, next.groupNames)) {
-        _destroyTabController();
         final groupNames = next.groupNames;
         final currentGroupName = next.currentGroupName;
         final index = groupNames.indexWhere((item) => item == currentGroupName);
@@ -168,19 +167,22 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     _tabController = null;
   }
 
+  // An empty group list keeps the previous controller: the outgoing tab bar
+  // still drives it while the empty state animates in.
   void _updateTabController(int length, int index) {
-    _destroyTabController();
     if (length == 0) {
       return;
     }
+    _destroyTabController();
     final realIndex = index == -1 ? 0 : index;
-    _tabController ??= TabController(
+    final controller = TabController(
       length: length,
       initialIndex: realIndex,
       vsync: this,
     );
+    _tabController = controller;
     _tabControllerListener(realIndex);
-    _tabController?.addListener(_tabControllerListener);
+    controller.addListener(_tabControllerListener);
   }
 
   @override
@@ -192,98 +194,100 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
       effectiveProxiesStyleProvider.select((state) => state.layout),
     );
     final groups = state.groups;
-    if (groups.isEmpty || _tabController == null) {
-      return NullStatus(
-        illustration: const ProxyEmptyIllustration(),
-        label: appLocalizations.nullTip(appLocalizations.proxies),
-      );
-    }
     _keyMap = {};
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        NotificationListener<ScrollMetricsNotification>(
-          onNotification: (scrollNotification) {
-            _hasMoreButtonNotifier.value =
-                scrollNotification.metrics.maxScrollExtent > 0;
-            return false;
-          },
-          child: ValueListenableBuilder(
-            valueListenable: _hasMoreButtonNotifier,
-            builder: (_, value, child) {
-              return Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    padding: EdgeInsets.only(
-                      left: 16,
-                      right: 16 + (value ? 16 : 0),
-                    ),
-                    dividerColor: Colors.transparent,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    tabs: [
-                      for (final group in groups)
-                        Tab(
-                          child: Builder(
-                            builder: (context) {
-                              return EmojiText(
-                                groupDisplayName(group.name),
-                                style: DefaultTextStyle.of(context).style,
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                  if (value) Positioned(right: 0, child: child!),
-                ],
-              );
+    return NullStatusSwitcher(
+      isEmpty: groups.isEmpty || _tabController == null,
+      nullStatus: NullStatus(
+        illustration: NullStatusIllustration.proxies,
+        label: appLocalizations.nullTip(appLocalizations.proxies),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          NotificationListener<ScrollMetricsNotification>(
+            onNotification: (scrollNotification) {
+              _hasMoreButtonNotifier.value =
+                  scrollNotification.metrics.maxScrollExtent > 0;
+              return false;
             },
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    context.colorScheme.surface.opacity10,
-                    context.colorScheme.surface,
+            child: ValueListenableBuilder(
+              valueListenable: _hasMoreButtonNotifier,
+              builder: (_, value, child) {
+                return Stack(
+                  alignment: AlignmentDirectional.centerStart,
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16 + (value ? 16 : 0),
+                      ),
+                      dividerColor: Colors.transparent,
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.start,
+                      tabs: [
+                        for (final group in groups)
+                          Tab(
+                            child: Builder(
+                              builder: (context) {
+                                return EmojiText(
+                                  groupDisplayName(group.name),
+                                  style: DefaultTextStyle.of(context).style,
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (value) Positioned(right: 0, child: child!),
                   ],
-                  stops: const [0.0, 0.1],
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      context.colorScheme.surface.opacity10,
+                      context.colorScheme.surface,
+                    ],
+                    stops: const [0.0, 0.1],
+                  ),
                 ),
+                child: _buildMoreButton(),
               ),
-              child: _buildMoreButton(),
             ),
           ),
-        ),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (_, constraints) {
-              final columns = getProxiesColumns(
-                max(constraints.maxWidth - 32, 0),
-                proxiesLayout,
-              );
-              return TabBarView(
-                controller: _tabController,
-                children: [
-                  for (final group in groups)
-                    ProxyGroupView(
-                      key: _keyMap.updateCacheValue(
-                        group.name,
-                        () => GlobalObjectKey<_ProxyGroupViewState>(group.name),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (_, constraints) {
+                final columns = getProxiesColumns(
+                  max(constraints.maxWidth - 32, 0),
+                  proxiesLayout,
+                );
+                return TabBarView(
+                  controller: _tabController,
+                  children: [
+                    for (final group in groups)
+                      ProxyGroupView(
+                        key: _keyMap.updateCacheValue(
+                          group.name,
+                          () =>
+                              GlobalObjectKey<_ProxyGroupViewState>(group.name),
+                        ),
+                        group: group,
+                        columns: columns,
+                        cardType: state.proxyCardType,
                       ),
-                      group: group,
-                      columns: columns,
-                      cardType: state.proxyCardType,
-                    ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

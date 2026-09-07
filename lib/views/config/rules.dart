@@ -103,43 +103,42 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
           ),
           const SizedBox(width: 8),
         ],
-        body: rules.isEmpty
-            ? NullStatus(
-                label: appLocalizations.nullTip(appLocalizations.rule),
-                illustration: const RuleEmptyIllustration(),
-              )
-            : ReorderableList(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
+        body: NullStatusSwitcher(
+          isEmpty: rules.isEmpty,
+          nullStatus: NullStatus(
+            label: appLocalizations.nullTip(appLocalizations.rule),
+            illustration: NullStatusIllustration.rules,
+          ),
+          child: ReorderableList(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            itemBuilder: (context, index) {
+              final rule = rules[index];
+              final position = ItemPosition.get(index, rules.length);
+              return ReorderableDelayedDragStartListener(
+                key: ObjectKey(rule),
+                index: index,
+                child: ItemPositionProvider(
+                  position: position,
+                  child: RuleItem(
+                    hasMatch: true,
+                    isEditing: selectedRules.isNotEmpty,
+                    rule: rule,
+                    isSelected: selectedRules.contains(rule.id),
+                    onSelected: () {
+                      _handleSelected(rule.id);
+                    },
+                    onEdit: (Rule rule) {
+                      _handleAddOrUpdate(rule);
+                    },
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  final rule = rules[index];
-                  final position = ItemPosition.get(index, rules.length);
-                  return ReorderableDelayedDragStartListener(
-                    key: ObjectKey(rule),
-                    index: index,
-                    child: ItemPositionProvider(
-                      position: position,
-                      child: RuleItem(
-                        hasMatch: true,
-                        isEditing: selectedRules.isNotEmpty,
-                        rule: rule,
-                        isSelected: selectedRules.contains(rule.id),
-                        onSelected: () {
-                          _handleSelected(rule.id);
-                        },
-                        onEdit: (Rule rule) {
-                          _handleAddOrUpdate(rule);
-                        },
-                      ),
-                    ),
-                  );
-                },
-                itemExtent: ruleItemHeight,
-                itemCount: rules.length,
-                onReorderItem: ref.read(globalRulesProvider.notifier).order,
-              ),
+              );
+            },
+            itemExtent: ruleItemHeight,
+            itemCount: rules.length,
+            onReorderItem: ref.read(globalRulesProvider.notifier).order,
+          ),
+        ),
       ),
     );
   }

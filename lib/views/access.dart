@@ -369,27 +369,32 @@ class _AccessViewState extends ConsumerState<AccessView> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CommonCircleLoading());
         }
-        return packages.isEmpty
-            ? NullStatus(label: appLocalizations.noData)
-            : CommonScrollBar(
-                controller: _controller,
-                child: ListView.builder(
-                  controller: _controller,
-                  itemCount: packages.length,
-                  itemExtent: 72,
-                  itemBuilder: (_, index) {
-                    final package = packages[index];
-                    return PackageListItem(
-                      key: Key(package.packageName),
-                      package: package,
-                      value: valueList.contains(package.packageName),
-                      onChanged: (value) {
-                        _handleSelected(package.packageName);
-                      },
-                    );
+        return NullStatusSwitcher(
+          isEmpty: packages.isEmpty,
+          nullStatus: NullStatus(
+            label: appLocalizations.noData,
+            illustration: NullStatusIllustration.apps,
+          ),
+          child: CommonScrollBar(
+            controller: _controller,
+            child: ListView.builder(
+              controller: _controller,
+              itemCount: packages.length,
+              itemExtent: 72,
+              itemBuilder: (_, index) {
+                final package = packages[index];
+                return PackageListItem(
+                  key: Key(package.packageName),
+                  package: package,
+                  value: valueList.contains(package.packageName),
+                  onChanged: (value) {
+                    _handleSelected(package.packageName);
                   },
-                ),
-              );
+                );
+              },
+            ),
+          ),
+        );
       },
     );
   }
@@ -399,6 +404,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
     return NullStatus(
       label: appLocalizations.installedAppsPermissionRequired,
       description: appLocalizations.installedAppsPermissionDesc,
+      illustration: NullStatusIllustration.permission,
       action: FilledButton.tonalIcon(
         onPressed: _handleGrantInstalledAppsPermission,
         icon: const Icon(Icons.lock_open),

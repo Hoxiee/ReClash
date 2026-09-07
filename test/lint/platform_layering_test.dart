@@ -8,7 +8,6 @@ const _platformPackages = [
   'window_manager',
   'launch_at_startup',
   'screen_retriever',
-  'hotkey_manager',
 ];
 
 const _platformModules = [

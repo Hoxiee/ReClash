@@ -225,6 +225,10 @@ final class HelperClient {
   /// budget cut those off as a transport error and hid the Helper's answer.
   static const startTimeout = Duration(seconds: 15);
 
+  /// Covers the Helper's graceful-exit wait plus its forced kill, so a Core
+  /// slow to tear down its TUN reports as stopped rather than as a transport error.
+  static const stopTimeout = Duration(seconds: 6);
+
   Future<HelperStartResponse> start({
     required String address,
     required String sessionId,
@@ -268,7 +272,7 @@ final class HelperClient {
       final response = await _dio.post<Object?>(
         '$baseUrl/stop',
         data: {'sessionId': sessionId},
-        options: _options(ResponseType.json),
+        options: _options(ResponseType.json, receiveTimeout: stopTimeout),
       );
       return _parseStopResponse(response, sessionId);
     } on HelperException {

@@ -40,7 +40,7 @@ class ProxyCard extends ConsumerWidget {
           final pending = ref.watch(
             delayTestPendingProvider(proxyName: proxy.name, testUrl: testUrl),
           );
-          return FadeThroughBox(
+          return FadeBox(
             alignment: type == ProxyCardType.expand
                 ? Alignment.centerLeft
                 : Alignment.centerRight,

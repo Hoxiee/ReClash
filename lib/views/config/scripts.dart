@@ -61,36 +61,37 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
 
   Widget _buildContent(List<Script> scripts, Set<dynamic> selectedScriptIds) {
     final appLocalizations = context.appLocalizations;
-    if (scripts.isEmpty) {
-      return NullStatus(
-        illustration: const ScriptEmptyIllustration(),
+    return NullStatusSwitcher(
+      isEmpty: scripts.isEmpty,
+      nullStatus: NullStatus(
+        illustration: NullStatusIllustration.scripts,
         label: appLocalizations.nullTip(appLocalizations.script),
-      );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      itemCount: scripts.length,
-      itemBuilder: (_, index) {
-        final script = scripts[index];
-        return ItemPositionProvider(
-          position: ItemPosition.get(index, scripts.length),
-          child: SelectedDecorationListItem(
-            isSelected: selectedScriptIds.contains(script.id),
-            isEditing: selectedScriptIds.isNotEmpty,
-            title: Text(
-              script.label,
-              style: context.textTheme.bodyLarge,
-              maxLines: 3,
+      ),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        itemCount: scripts.length,
+        itemBuilder: (_, index) {
+          final script = scripts[index];
+          return ItemPositionProvider(
+            position: ItemPosition.get(index, scripts.length),
+            child: SelectedDecorationListItem(
+              isSelected: selectedScriptIds.contains(script.id),
+              isEditing: selectedScriptIds.isNotEmpty,
+              title: Text(
+                script.label,
+                style: context.textTheme.bodyLarge,
+                maxLines: 3,
+              ),
+              onSelected: () {
+                _handleSelected(script.id);
+              },
+              onPressed: () {
+                _handleToEditor(script.id);
+              },
             ),
-            onSelected: () {
-              _handleSelected(script.id);
-            },
-            onPressed: () {
-              _handleToEditor(script.id);
-            },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
