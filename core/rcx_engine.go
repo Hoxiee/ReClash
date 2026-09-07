@@ -391,6 +391,14 @@ func (e *rcxEngine) Start() {
 	e.quit = make(chan struct{})
 	e.done = make(chan struct{})
 	e.snapshot = e.store.Load()
+	// A defaults bump means the shipped markers or canaries changed, so a fact a
+	// node learned under the old set can be poison — a home dud proven open by a
+	// marker since removed. Drop those and re-earn against the new set; manual
+	// picks, pins, regimes and seed are the user's, not the preset's, and stay.
+	if e.snapshot.Config.DefaultsVersion != rcxDefaultsVersion {
+		e.snapshot.Global = map[string]*rcxNodeGlobal{}
+		e.snapshot.Envs = map[string]map[string]*rcxNodeEnv{}
+	}
 	e.ledger.Import(e.snapshot.Global, e.snapshot.Envs)
 	e.applyConfigLocked(e.snapshot.Config)
 	e.sampleLink()

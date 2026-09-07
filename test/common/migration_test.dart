@@ -310,6 +310,33 @@ void main() {
       expect(store.savedConfig?.smartRoutingProps.openMarkers, isNotEmpty);
       expect(config.smartRoutingProps.openMarkers, isNotEmpty);
     });
+
+    test('v5 to v6 drops the youtube open marker and keeps Telegram', () async {
+      final configMap = _createConfigMap();
+      configMap['smartRoutingProps'] = {
+        'enabled': true,
+        'preset': 'ru',
+        'openMarkers': [
+          {
+            'url': 'https://www.youtube.com/generate_204',
+            'statuses': [204],
+          },
+          {
+            'url': 'https://api.telegram.org/',
+            'statuses': [200, 404],
+          },
+        ],
+      };
+      final store = _FakeMigrationStore(configMap: configMap, version: 5);
+
+      final config = await Migration(store: store).run();
+
+      expect(store.version, Migration.currentVersion);
+      final markers = config.smartRoutingProps.openMarkers;
+      expect(markers, isNotEmpty);
+      expect(markers.any((marker) => marker.url.contains('youtube')), isFalse);
+      expect(markers.first.url, contains('telegram'));
+    });
   });
 }
 

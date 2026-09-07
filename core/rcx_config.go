@@ -7,7 +7,10 @@ type rcxMarker struct {
 	Statuses []int  `json:"statuses"`
 }
 
-const rcxDefaultsVersion = 3
+// The version of the shipped preset data. A bump makes the engine drop the
+// per-node facts it learned under the old set on the next start, so a corrected
+// marker set is not fought by proofs a poisoned node earned before it.
+const rcxDefaultsVersion = 4
 
 type rcxConfig struct {
 	Enabled                 bool        `json:"on"`

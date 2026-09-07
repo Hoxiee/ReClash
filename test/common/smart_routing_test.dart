@@ -50,7 +50,8 @@ void main() {
       expect(params.preset, 'ru');
       expect(params.defaultsVersion, smartRoutingDefaultsVersion);
       expect(params.censorCountries, ['RU']);
-      expect(params.openMarkers.first.statuses, contains(204));
+      expect(params.openMarkers.first.url, contains('telegram'));
+      expect(params.openMarkers.first.statuses, contains(404));
       expect(params.canaryForeign.every((item) => item.contains(':')), isTrue);
       expect(params.breakerPatterns, contains('lte'));
     });

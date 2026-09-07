@@ -444,42 +444,78 @@ class _MarkersBody extends ConsumerWidget {
       ref.watch(smartRoutingSettingProvider),
       domestic,
     );
+    if (rows.isEmpty) {
+      return CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            sliver: SliverToBoxAdapter(
+              child: generateSectionV3(
+                items: [
+                  DecorationListItem(
+                    minVerticalPadding: 8,
+                    title: Text(appLocalizations.smartRoutingMarkersEmpty),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    Widget itemAt(int index) => _markerRow(context, ref, rows, index);
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          sliver: SliverToBoxAdapter(
-            child: generateSectionV3(
-              items: rows.isEmpty
-                  ? [
-                      DecorationListItem(
-                        minVerticalPadding: 8,
-                        title: Text(appLocalizations.smartRoutingMarkersEmpty),
-                      ),
-                    ]
-                  : List.generate(
-                      rows.length,
-                      (index) => SelectedDecorationListItem(
-                        title: TooltipText(
-                          text: Text(
-                            rows[index].url,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        subtitle: Text(rows[index].statuses.join(', ')),
-                        isSelected: selection.contains(rows[index].url),
-                        isEditing: selection.isNotEmpty,
-                        onSelected: () => onSelected(rows[index].url),
-                        onPressed: () => selection.isEmpty
-                            ? showMarkerDialog(context, ref, domestic, index)
-                            : onSelected(rows[index].url),
-                      ),
-                    ),
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+          sliver: SliverReorderableList(
+            itemCount: rows.length,
+            itemBuilder: (_, index) => itemAt(index),
+            proxyDecorator: (child, index, animation) =>
+                commonProxyDecorator(itemAt(index), index, animation),
+            onReorderItem: (oldIndex, newIndex) => _writeMarkers(
+              ref,
+              domestic,
+              rows.copyAndReorder(oldIndex, newIndex),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _markerRow(
+    BuildContext context,
+    WidgetRef ref,
+    List<RcxMarker> rows,
+    int index,
+  ) {
+    final marker = rows[index];
+    return ReorderableDelayedDragStartListener(
+      key: ValueKey(marker.url),
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ItemPositionProvider(
+          position: ItemPosition.get(index, rows.length),
+          child: SelectedDecorationListItem(
+            title: TooltipText(
+              text: Text(
+                marker.url,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            subtitle: Text(marker.statuses.join(', ')),
+            isSelected: selection.contains(marker.url),
+            isEditing: selection.isNotEmpty,
+            onSelected: () => onSelected(marker.url),
+            onPressed: () => selection.isEmpty
+                ? showMarkerDialog(context, ref, domestic, index)
+                : onSelected(marker.url),
+          ),
+        ),
+      ),
     );
   }
 }

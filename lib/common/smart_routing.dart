@@ -1,7 +1,9 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
-/// Bumped when shipped preset data changes, so the core drops its own copy.
+/// Sent as the wire `dv`, but the core overwrites it with its own
+/// `rcxDefaultsVersion` (core/rcx_config.go), the real lever that drops learned
+/// facts when shipped preset data changes. Kept only for wire-shape stability.
 const smartRoutingDefaultsVersion = 4;
 
 class SmartRoutingBundle {
@@ -44,10 +46,11 @@ const _russia = SmartRoutingBundle(
     '94.140.14.14:443',
   ],
   canaryDomestic: ['77.88.8.8:443', '213.180.204.242:443'],
+  // The probe tests only the first marker: api.telegram.org is unreachable from
+  // every Russian egress while Telegram works, so reaching it proves a node is
+  // abroad — a home-country dud cannot. 404 counts because the root path 404s
+  // while the host answers, so demanding 200 would disqualify usable nodes.
   openMarkers: [
-    RcxMarker(url: 'https://www.youtube.com/generate_204', statuses: [204]),
-    // 404 counts: api.telegram.org is unreachable from every Russian egress
-    // while Telegram works, so demanding 200 would disqualify usable nodes.
     RcxMarker(url: 'https://api.telegram.org/', statuses: [200, 404]),
   ],
   domesticMarkers: [

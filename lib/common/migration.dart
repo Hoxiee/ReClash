@@ -1,4 +1,5 @@
 import 'package:reclash/database/database.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
 import 'preferences.dart';
@@ -73,7 +74,7 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 5;
+  static const currentVersion = 6;
 
   Future<Config> run() async {
     final configMap = await _store.getConfigMap();
@@ -138,6 +139,9 @@ class Migration {
     }
     if (oldVersion < 5) {
       data = data.copyWith(configMap: _withSeededRoutingBundle(data.configMap));
+    }
+    if (oldVersion < 6) {
+      data = data.copyWith(configMap: _withTelegramOpenMarker(data.configMap));
     }
 
     config = Config.realFromJson(data.configMap);
@@ -243,6 +247,32 @@ Map<String, Object?>? _withSeededRoutingBundle(
   final stored = SmartRoutingProps.fromJson(Map<String, Object?>.from(routing));
   final map = Map<String, Object?>.from(configMap);
   map['smartRoutingProps'] = stored.applyPreset(stored.preset).toJson();
+  return map;
+}
+
+// v5→v6: youtube proved open from Russia too, so drop it, leaving Telegram.
+Map<String, Object?>? _withTelegramOpenMarker(
+  Map<String, Object?>? configMap,
+) {
+  final routing = configMap?['smartRoutingProps'];
+  if (configMap == null || routing is! Map) {
+    return configMap;
+  }
+  final stored = SmartRoutingProps.fromJson(Map<String, Object?>.from(routing));
+  final kept = stored.openMarkers
+      .where((marker) => !marker.url.contains('youtube.com'))
+      .toList();
+  if (stored.preset != SmartRoutingPreset.russia ||
+      kept.length == stored.openMarkers.length) {
+    return configMap;
+  }
+  final map = Map<String, Object?>.from(configMap);
+  map['smartRoutingProps'] = stored
+      .copyWith(
+        openMarkers:
+            kept.isEmpty ? SmartRoutingPreset.russia.bundle.openMarkers : kept,
+      )
+      .toJson();
   return map;
 }
 
