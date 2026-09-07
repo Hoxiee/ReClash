@@ -4,6 +4,76 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
 void main() {
+  group('parsePanelBackground', () {
+    test('parses a web URL with default and explicit opacity', () {
+      final defaultBackground = parsePanelBackground(
+        'https://cdn.example.com/background.webp',
+      );
+      final explicitBackground = parsePanelBackground(
+        'http://panel.test/background.jpg,35',
+      );
+
+      expect(defaultBackground?.url, 'https://cdn.example.com/background.webp');
+      expect(defaultBackground?.opacity, 0.1);
+      expect(explicitBackground?.url, 'http://panel.test/background.jpg');
+      expect(explicitBackground?.opacity, 0.35);
+    });
+
+    test('clamps opacity and preserves commas without a numeric suffix', () {
+      expect(
+        parsePanelBackground('https://example.com/image.jpg,0')?.opacity,
+        0.01,
+      );
+      expect(
+        parsePanelBackground('https://example.com/image.jpg,200')?.opacity,
+        1,
+      );
+      expect(
+        parsePanelBackground('https://example.com/image,a.jpg')?.url,
+        'https://example.com/image,a.jpg',
+      );
+    });
+
+    test('rejects unsafe and malformed URLs', () {
+      for (final value in [
+        'file:///tmp/background.jpg',
+        'data:image/png;base64,AAAA',
+        'javascript:alert(1)',
+        'https://user:secret@example.com/background.jpg',
+        '/relative/background.jpg',
+        '',
+      ]) {
+        expect(
+          parsePanelBackground(value),
+          isNull,
+          reason: '"$value" must not become a background',
+        );
+      }
+    });
+  });
+
+  group('parsePanelHeroRing', () {
+    test('reads exactly three gradient colours', () {
+      expect(parsePanelHeroRing('35B5FF,3657FF,A638F4'), const [
+        Color(0xFF35B5FF),
+        Color(0xFF3657FF),
+        Color(0xFFA638F4),
+      ]);
+      expect(parsePanelHeroRing('#FF0000;#00FF00;#0000FF'), const [
+        Color(0xFFFF0000),
+        Color(0xFF00FF00),
+        Color(0xFF0000FF),
+      ]);
+    });
+
+    test('rejects incomplete and malformed gradients', () {
+      expect(parsePanelHeroRing(null), isNull);
+      expect(parsePanelHeroRing('FF0000,00FF00'), isNull);
+      expect(parsePanelHeroRing('FF0000,broken,0000FF'), isNull);
+      expect(parsePanelHeroRing('FF0000,00FF00,0000FF,FFFFFF'), isNull);
+    });
+  });
+
   group('parsePanelTheme', () {
     test('reads colour, variant and pure black in any order', () {
       final theme = parsePanelTheme('FF5733:vibrant:pureblack')!;
@@ -96,9 +166,11 @@ void main() {
     final meta = PanelMeta.fromHeaders({
       'reclash-view': ['type:list; card:min'],
       'reclash-hex': ['FF5733:pureblack'],
+      'reclash-heroring': ['35B5FF,3657FF,A638F4'],
     });
     expect(meta.proxiesView, 'type:list; card:min');
     expect(meta.themeHex, 'FF5733:pureblack');
+    expect(meta.heroRing, '35B5FF,3657FF,A638F4');
     expect(meta.hasContent, true);
   });
 }

@@ -21,6 +21,23 @@ const shareProtocolSchemes = [
   'anytls',
 ];
 
+const androidProtocolHosts = <String, List<String>>{
+  'clash': ['install-config'],
+  'clashmeta': ['install-config'],
+  'reclash': [
+    'install-config',
+    'connect',
+    'disconnect',
+    'toggle',
+    'open',
+    'close',
+    'import',
+    'add',
+  ],
+  'incy': ['crypt1', 'add', 'import'],
+  'happ': ['add'],
+};
+
 const protocolSchemes = [...configProtocolSchemes, ...deepLinkProtocolSchemes];
 
 const allProtocolSchemes = [...protocolSchemes, ...shareProtocolSchemes];

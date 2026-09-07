@@ -103,6 +103,8 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
             _header(appLocalizations.smartRoutingSectionHealth),
             _sliver(_HealthCard(report: report)),
             _sliver(_ScanCard(report: report, onDeepScan: _handleDeepScan)),
+            _header(appLocalizations.smartRoutingSectionReliability),
+            _sliver(_ReliabilityCard(report: report)),
             _header(appLocalizations.smartRoutingSectionRound),
             _sliver(_RoundCard(report: report, technical: _technical)),
             _header(appLocalizations.smartRoutingSectionHistory),
@@ -171,6 +173,7 @@ String routingBlockLabel(AppLocalizations l10n, RcxCandidateReport candidate) =>
       'disproven' => l10n.smartRoutingBlockDisproven,
       'last-resort-barred' => l10n.smartRoutingBlockLastResort,
       'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
+      'provider-circuit' => l10n.smartRoutingBlockProviderCircuit,
       _ => routingVerdictLabel(l10n, candidate.verdict),
     };
 
@@ -941,6 +944,85 @@ class _ScanCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+String _metricDuration(BuildContext context, int millis) {
+  if (millis <= 0) return context.appLocalizations.smartRoutingNoRecovery;
+  final minutes = millis ~/ 60000;
+  if (minutes > 0) return heroDurationWords(minutes);
+  final seconds = (millis / 1000).ceil();
+  return context.appLocalizations.secondsCount(seconds);
+}
+
+String _metricPeriod(BuildContext context, int millis) {
+  if (millis >= 60000) return heroDurationWords(millis ~/ 60000);
+  final seconds = (millis / 1000).ceil();
+  return context.appLocalizations.secondsCount(seconds);
+}
+
+class _ReliabilityCard extends StatelessWidget {
+  const _ReliabilityCard({required this.report});
+
+  final RcxReport report;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final metrics = report.metrics;
+    final active = <Widget>[
+      if (metrics.activeCircuits.isNotEmpty)
+        _Stat(
+          label: appLocalizations.smartRoutingActiveCircuits,
+          value: metrics.activeCircuits.join(', '),
+        ),
+      if (metrics.activeMarkers.isNotEmpty)
+        _Stat(
+          label: appLocalizations.smartRoutingActiveMarkers,
+          value: metrics.activeMarkers.join(', '),
+        ),
+    ];
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
+        children: [
+          _Stat(
+            label: appLocalizations.smartRoutingAvailability,
+            value: appLocalizations.smartRoutingAvailabilityValue(
+              metrics.availability,
+              _metricPeriod(context, metrics.enabledMillis),
+            ),
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingIncidents,
+            value: '${metrics.incidents}',
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingStandbyHits,
+            value: '${metrics.standbyHits}',
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingLastRecovery,
+            value: _metricDuration(context, metrics.lastOutage),
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingAverageRecovery,
+            value: _metricDuration(context, metrics.averageOutage),
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingProviderIncidents,
+            value: '${metrics.providerIncidents}',
+          ),
+          _Stat(
+            label: appLocalizations.smartRoutingMarkerIncidents,
+            value: '${metrics.markerIncidents}',
+          ),
+          if (active.isNotEmpty) const _Hairline(),
+          ...active,
         ],
       ),
     );

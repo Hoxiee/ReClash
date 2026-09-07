@@ -136,9 +136,9 @@ class ProfilesAction extends _$ProfilesAction {
   }
 
   /// `keepCurrentPage` is for hosts that are not the profiles screen.
-  Future<void> addProfileFormFile({bool keepCurrentPage = false}) async {
+  Future<Profile?> addProfileFormFile({bool keepCurrentPage = false}) async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
-    if (platformFile == null) return;
+    if (platformFile == null) return null;
     final bytes = await platformFile.readBytes();
     if (!keepCurrentPage) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
@@ -156,9 +156,48 @@ class ProfilesAction extends _$ProfilesAction {
     if (profile != null) {
       putProfile(profile);
     }
+    return profile;
   }
 
-  Future<void> addProfileFromLocalContent(
+  Future<bool> installDeveloperSubscription(
+    DeveloperSubscription fixture,
+  ) async {
+    final profiles = ref.read(profilesProvider);
+    final existing = profiles
+        .where((profile) => profile.panelMeta?.serviceLogo == fixture.logo)
+        .firstOrNull;
+    final base = existing ?? Profile.normal(label: fixture.name);
+    final previousMeta = existing?.panelMeta;
+    final content = await rootBundle.loadString(fixture.configAsset);
+    final saved = await globalState.loadingRun<Profile>(
+      tag: LoadingTag.profiles,
+      () {
+        return base
+            .copyWith(
+              label: existing?.userLabel == true
+                  ? existing!.label
+                  : fixture.name,
+              url: '',
+              autoUpdate: false,
+              subscriptionInfo: fixture.subscriptionInfo,
+              panelMeta: fixture.panelMeta,
+            )
+            .saveFileWithString(
+              content,
+              validate: (path) => _core.validateConfig(path),
+            );
+      },
+      title: currentAppLocalizations.addProfile,
+    );
+    if (saved == null) return false;
+    putProfile(saved);
+    if (saved.id == ref.read(currentProfileIdProvider)) {
+      applyPanelWidgetsFromMeta(saved.panelMeta, previousMeta: previousMeta);
+    }
+    return true;
+  }
+
+  Future<Profile?> addProfileFromLocalContent(
     String content, {
     bool keepCurrentPage = false,
   }) async {
@@ -183,9 +222,10 @@ class ProfilesAction extends _$ProfilesAction {
     if (profile != null) {
       putProfile(profile);
     }
+    return profile;
   }
 
-  Future<void> addProfileFormURL(
+  Future<Profile?> addProfileFormURL(
     String url, {
     SubscriptionClient client = SubscriptionClient.auto,
     String? name,
@@ -224,6 +264,7 @@ class ProfilesAction extends _$ProfilesAction {
       applyPanelSettingsDefaults(profile.panelMeta);
       unawaited(handlePanelVerdicts(profile.panelMeta));
     }
+    return profile;
   }
 
   // Add-time only: afterwards the settings are the user's to change.
@@ -286,10 +327,10 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  Future<void> addProfileFormQrCode() async {
+  Future<Profile?> addProfileFormQrCode() async {
     final url = await globalState.safeRun(picker.pickerConfigQRCode);
-    if (url == null) return;
-    unawaited(addProfileFormURL(url));
+    if (url == null) return null;
+    return addProfileFormURL(url);
   }
 
   void reorder(List<Profile> profiles) {

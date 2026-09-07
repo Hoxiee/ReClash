@@ -23,6 +23,13 @@ void main() {
       }
     });
 
+    test('stays monotonic after exhausting a millisecond sequence', () {
+      final ids = List.generate(5000, (_) => snowflake.id);
+      for (int i = 1; i < ids.length; i++) {
+        expect(ids[i], greaterThan(ids[i - 1]));
+      }
+    });
+
     test('buildId returns provided id when non-null', () {
       expect(Snowflake.buildId(42), 42);
       expect(Snowflake.buildId(0), 0);

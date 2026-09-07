@@ -111,6 +111,9 @@
   "selectAll": "Ählisini saýla",
   "cancelSelectAll": "Ählisini aýyr",
   "appAccessControl": "Programmalaryň elýetmäsine gözegçilik",
+  "accessControlIncludeInVpn": "VPN-e goş",
+  "accessControlExcludeFromVpn": "VPN-den çykar",
+  "searchApps": "Programmalary gözle",
   "accessControlAllowDesc": "Diňe saýlanan programmalar VPN arkaly geçýär",
   "accessControlNotAllowDesc": "Saýlanan programmalar VPN-den çykarylýar",
   "accessControlDisabledDesc": "Programmalaryň elýetmäsine gözegçilik öçürilen",
@@ -179,6 +182,8 @@
   "ipv6Desc": "Açyk bolanda IPv6 trafigini kabul etmek mümkin",
   "app": "Programma",
   "general": "Umumy",
+  "identity": "Şahsyýet",
+  "animations": "Animasiýalar",
   "extra": "Goşmaça",
   "systemProxyDesc": "Ulgamyň proksisini sazlaýar",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "Miwe salat",
   "developerMode": "Dörediji usuly",
   "developerModeEnableTip": "Dörediji usuly açyk.",
+  "developerSubscriptions": "Synag abunalary",
+  "developerSubscriptionPrismDesc": "Brend reňkleri, ýörite Hero Ring we ýerli logotip",
+  "developerSubscriptionOrbitDesc": "Kwota, möhlet, bildiriş, domen göçürmesi we teklipler",
+  "developerSubscriptionAtlasDesc": "Üçünji tarap widjetleri, serwer çalşygy we proksi görnüşi",
+  "developerSubscriptionInstalled": "{name} guruldy",
   "messageTest": "Habar synagy",
   "messageTestTip": "Bu bir habar.",
   "crashTest": "Dargamak synagy",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{eligible} ýaranly, jemi {total}",
   "smartRoutingHistory": "Soňky çalyşyklar",
   "smartRoutingHistoryEmpty": "Heniz çalyşyk ýok",
+  "smartRoutingSectionReliability": "Ygtybarlylyk",
+  "smartRoutingAvailability": "Elýeterlilik",
+  "smartRoutingAvailabilityValue": "{duration} dowamynda {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "Ýüze çykarylan kesilmeler",
+  "smartRoutingStandbyHits": "Ýyly ätiýaç bilen dikeldildi",
+  "smartRoutingLastRecovery": "Soňky dikeldiş",
+  "smartRoutingAverageRecovery": "Ortaça dikeldiş",
+  "smartRoutingProviderIncidents": "Üpjün ediji goragynyň işjeňleşmegi",
+  "smartRoutingMarkerIncidents": "Karantine alnan hyzmat barlaglary",
+  "smartRoutingActiveCircuits": "Wagtlaýyn saklanan üpjün edijiler",
+  "smartRoutingActiveMarkers": "Wagtlaýyn saklanan barlaglar",
+  "smartRoutingNoRecovery": "Entäk dikeldilen kesilme ýok",
+  "smartRoutingBlockProviderCircuit": "Garaşsyz näsazlyklardan soň üpjün ediji wagtlaýyn saklandy",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "Bu sagatda {cap} synagyň {left} galan",
   "smartRoutingVerdictPreferred": "Açyk internete ýetýär",
@@ -826,28 +859,28 @@
   "smartRoutingBandLabel": "dereje {band}",
   "smartRoutingDegraded": "Tizligi çäklendirilen",
   "smartRoutingOffHint": "Akylly marşruty işlet, serwerleri özi saýar",
-  "setupWelcome": "Ähli zat bir minutda taýýar bolýar",
-  "setupLanguageTitle": "Dili saýla",
-  "setupLanguageDesc": "Soňra sazlamalarda üýtgedip bolýar",
-  "setupLegalTitle": "Başlamazdan öň",
-  "setupDataCollection": "Dargamak hasabatlaryny ýollamak",
-  "setupSubscriptionTitle": "Abuna goşul",
-  "setupSubscriptionDesc": "Üpjün edijiniň salgysy, QR kod ýa-da konfigurasiýa faýly",
-  "setupSubscriptionReady": "Abuna goşuldy",
-  "setupRestore": "Ätiýaçlyk nusgasyndan dikelt",
-  "setupRestoreDesc": "ReClash, FlClashX ýa-da FlClash ätiýaçlyk nusgasyndan ähli zady göçürip al",
-  "setupFinishTitle": "Ýene azajyk galdy",
-  "setupRegionDesc": "Serwer saýlawynyň başlangyç nokadyny kesgitleýär",
-  "setupRegionNone": "Saýlama",
-  "setupAutoRun": "Açylanda baglan",
-  "setupAutoRunDesc": "Programma açylýan badyna VPN işjeňleşýär",
-  "setupPermissionVpn": "VPN rugsaty",
-  "setupPermissionVpnDesc": "Ulgam ilkinji baglanyşykda rugsat soraýar",
-  "setupPermissionNotifications": "Duýduryşlar",
-  "setupPermissionNotificationsDesc": "Işläp duran mahaly baglanyşyk ýagdaýyny görkezýär",
-  "setupSkip": "Geç",
+  "setupWelcome": "Birkaç düşnükli ädimden soň hemme zat taýýar",
+  "setupLanguageTitle": "Dil saýlaň",
+  "setupLanguageDesc": "Ony soň sazlamalarda üýtgedip bolýar",
+  "setupLegalTitle": "Dowam etmezden öň",
+  "setupDataCollection": "Meýletin näsazlyk hasabatlaryny iber",
+  "setupSubscriptionTitle": "Birikme profilini goşuň",
+  "setupSubscriptionDesc": "Profil birikmek üçin gerekli serwerleri we düzgünleri saklaýar. Ony üpjün edijiden ýa-da ätiýaçlyk nusgadan import ediň.",
+  "setupSubscriptionReady": "Profil taýýar",
+  "setupRestore": "Ätiýaçlyk nusgadan dikelt",
+  "setupRestoreDesc": "ReClash, FlClashX ýa-da FlClash nusgasyndan sazlamalary we profilleri dikelt",
+  "setupFinishTitle": "Sazlamalary barlaň",
+  "setupRegionDesc": "Akylly ugrukdyrma bu sebiti ugur saýlamagyň başlangyjy hökmünde ulanýar. Dil diňe teklip berýär.",
+  "setupRegionNone": "Başga sebit ýa-da akylly ugrukdyrmasyz",
+  "setupAutoRun": "ReClash açylanda birik",
+  "setupAutoRunDesc": "Dogry profil ýüklenenden soň VPN-i awtomatiki başlaýar",
+  "setupPermissionVpn": "VPN rugsady",
+  "setupPermissionVpnDesc": "Ulgam ilkinji birikmede sorar",
+  "setupPermissionNotifications": "Bildirişler",
+  "setupPermissionNotificationsDesc": "ReClash işleýärkä birikme ýagdaýyny görkezýär",
+  "setupSkip": "Profilsiz dowam et",
   "setupNext": "Indiki",
-  "setupDone": "Tamam",
+  "setupDone": "Taýýar",
   "smartRoutingBreaker": "Rugsat sanaw hünärmeni",
   "smartRoutingBreakerDesc": "Çäklendirilen torlar üçin saklanýar, açyk tora sarp edilmeýär",
   "smartRoutingTechnical": "Tehniki jikme-jiklik",
@@ -935,11 +968,13 @@
   "systemSeed": "Ulgamyň tohumy",
   "appIcon": "Programma nyşany",
   "appIconChangeNote": "Launcher nyşany birnäçe sekunddan soň täzeden çizilýär. Käbir launcherlarda berkidilen gysga ýollar ýok bolup biler.",
-  "appIconMono": "Monohrom",
-  "appIconSepia": "Sepiýa",
-  "appIconInverted": "Ters",
-  "appIconDarkMono": "Gara monohrom",
-  "appIconCool": "Sowuk",
+  "appIconPulse": "Impuls",
+  "appIconGlacier": "Buzluk",
+  "appIconObsidian": "Obsidian",
+  "appIconVelvet": "Mahmal",
+  "appIconSolar": "Güneş",
+  "appIconCircuit": "Zynjyr",
+  "appIconPrism": "Prizma",
   "dashboardStyle": "Panel stili",
   "classicDashboard": "Klassiki",
   "classicDashboardDesc": "Başlat düwmeli kwadratlar toru",
@@ -1213,5 +1248,120 @@
   "desyncTtl12Hours": "12 sagat",
   "desyncTtl28Hours": "28 sagat",
   "desyncTtlHour": "1 sagat",
-  "desyncTtlWeek": "7 gün"
+  "desyncTtlWeek": "7 gün",
+  "desyncActiveStrategy": "Işjeň strategiýa",
+  "desyncCacheDisabled": "Strategiýa keşi öçük",
+  "desyncEngineSummary": "ByeDPI dwijogyny {count} marşrut kategoriýasy ulanýar",
+  "desyncTestBattery": "Synag toplumy",
+  "desyncTestBatterySummary": "{presets} preset · {groups} topar · {domains} host",
+  "desyncRoutingRules": "Işjeň düzgünler",
+  "desyncRoutingGeositeNote": "Kategoriýa düzümi içki GEOSITE bazasyndan alynýar; synag domen sanawlary aýrydyr",
+  "desyncRoutingNoCategories": "Aýlaw kategoriýasy saýlanmady",
+  "desyncRoutingNoCategoriesDesc": "Häzir hiç bir hyzmat ByeDPI arkaly ugrukdyrylmaýar",
+  "desyncRoutingFallbackDesc": "Saýlanan GEOSITE kategoriýalaryndan daşardaky ähli trafik göni gidýär",
+  "byedpiOff": "DPI aýlawy öçük",
+  "byedpiStarting": "DPI aýlawy başladylýar",
+  "byedpiChecking": "DPI dwijogy barlanýar",
+  "byedpiReconnecting": "DPI dwijogy täzeden başladylýar",
+  "byedpiActive": "DPI aýlawy işjeň",
+  "byedpiPaused": "DPI aýlawy sägindirildi",
+  "byedpiEngineError": "DPI dwijogyny barlamak gerek",
+  "byedpiTapToStart": "Ýerli aýlaw dwijogyny başlatmak üçin basyň",
+  "byedpiTapToResume": "DPI aýlawyny dowam etdirmek üçin basyň",
+  "byedpiActiveFor": "DPI aýlawy işjeň: {time}",
+  "setupSystemLanguage": "Ulgam dili",
+  "setupStepProgress": "{count} ädimden {step}-nji ädim",
+  "setupLegalSummary": "ReClash traffigi ugrukdyrmak üçin ýerli VPN birikmesini döredýär. Konfigurasiýany ýa-da üpjün edijini özüňiz saýlaýarsyňyz we ulanmak üçin jogapkärsiňiz.",
+  "setupLegalDetails": "Doly jogapkärçilik bildirişini oka",
+  "setupLegalLicense": "Açyk çeşme ygtyýarnamalary",
+  "setupDataCollectionDesc": "Programmanyň näsazlyklaryny tapmaga kömek edýär. Özüňiz açmasaňyz, iberilmeýär.",
+  "setupDecline": "Razy däl we çyk",
+  "setupBack": "Yza",
+  "dashboardNoProfileTitle": "Birikmäni sazlaň",
+  "dashboardNoProfileDesc": "Ynanýan üpjün edijiňizden VPN profilini goşuň. Şoňa çenli VPN öçük galar.",
+  "dashboardNoActiveProfileTitle": "VPN profilini saýlaň",
+  "dashboardNoActiveProfileDesc": "Profiller saklanan, ýöne hiç biri işjeň däl. VPN dolandyryşyny açmak üçin birini saýlaň.",
+  "dashboardSelectProfile": "Profili saýlamak",
+  "dashboardByedpiTitle": "VPN üpjün edijiňiz ýokmy?",
+  "dashboardByedpiDesc": "VPN profilsiz DPI çäklendirmesinden geçmek üçin diňe ByeDPI tertibini ulanyň.",
+  "dashboardUseByedpi": "ByeDPI ulanmak",
+  "setupProfileSourceNotice": "ReClash VPN hyzmatyny satmaýar. Ynanýan üpjün edijiňiziň salgysyny, QR koduny ýa-da konfigurasiýa faýlyny ulanyň. Profil saklanmazdan öň barlanýar.",
+  "setupContinueWithoutProfile": "Profilsiz dowam et",
+  "setupContinueWithoutProfileDesc": "VPN öçük galar. Profili soň goşup ýa-da VPN üpjün edijisiz diňe ByeDPI tertibini ulanyp bolýar.",
+  "setupProfilesReady": "{count} profil taýýar",
+  "setupAddAnotherProfile": "Ýene goş",
+  "setupReplaceProfile": "Çalyş",
+  "setupDeleteProfile": "Poz",
+  "setupReplaceProfileHint": "Täze profil üstünlikli import edilip barlanandan soň häzirki profil pozular.",
+  "setupRegionTitle": "Häzirki tor haýsy sebitde?",
+  "setupRegionRecommended": "Diliňiz üçin maslahat berilýär",
+  "setupAutoRunUnavailable": "Awtomatiki birikme üçin profil goşuň",
+  "setupSummaryTitle": "Sazlamanyň jemleri",
+  "setupSummaryNoProfile": "VPN profili ýok — VPN öçük galar; diňe ByeDPI tertibi elýeterli",
+  "setupSummaryProfile": "Profil: {name}",
+  "setupSummaryRouting": "Akylly ugrukdyrma: {value}",
+  "setupSummaryAutoRunOn": "Awtomatiki birikme: açyk",
+  "setupSummaryAutoRunOff": "Awtomatiki birikme: öçük",
+  "setupPermissionDeferred": "Ilkinji birikmede soralar",
+  "setupPermissionBattery": "Batareýa optimizasiýasy",
+  "setupPermissionBatteryDesc": "ReClash-a VPN-i fonda işjeň saklamaga rugsat beriň",
+  "setupPermissionChecking": "Barlanýar…",
+  "setupPermissionRequest": "Rugsat ber",
+  "setupPermissionGranted": "Rugsat berildi",
+  "setupPermissionDenied": "Rugsat berilmedi",
+  "setupPermissionUnavailable": "Elýeterli däl",
+  "setupPermissionError": "Barlap bolmady",
+  "setupPermissionOpenSettings": "Sazlamalary aç",
+  "setupDoneConnect": "Taýýar we birik",
+  "setupRerun": "Ilkinji sazlamany gaýtala",
+  "setupRerunDesc": "Maglumatlary pozmazdan dili, profili, ugrukdyrmany we rugsatlary barla",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "Telefondan almak",
+  "lanProfileImportDesc": "Ýerli tor arkaly abuna URL salgysyny ibermek üçin bir gezeklik QR koduny görkezmek",
+  "lanProfileImportTitle": "Abunany almak",
+  "lanProfileImportScan": "Bu QR koduny şol bir tordaky telefon bilen skanirläň",
+  "lanProfileImportAddress": "Ýa-da JSON maglumatyny {address} salgysyna iberiň",
+  "lanProfileImportWaiting": "Abuna garaşylýar…",
+  "lanProfileImportImporting": "Abuna import edilýär…",
+  "lanProfileImportImported": "Abuna alyndy",
+  "lanProfileImportTimedOut": "Bir gezeklik salgynyň möhleti gutardy",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "Ýerli tor arkaly paýlaşmagy başladyp bolmady",
+  "lanProfileImportFailed": "Abunany import edip bolmady"
 }

@@ -2,8 +2,6 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:material_ui/material_ui.dart';
 
-/// Every step is the same column so the wizard reads as one screen changing its
-/// contents, not four screens taking turns.
 class SetupStepScaffold extends StatelessWidget {
   const SetupStepScaffold({
     super.key,
@@ -12,7 +10,6 @@ class SetupStepScaffold extends StatelessWidget {
     required this.actions,
     this.subtitle,
     this.header,
-    this.scrollable = true,
   });
 
   final String title;
@@ -20,57 +17,53 @@ class SetupStepScaffold extends StatelessWidget {
   final Widget? header;
   final Widget body;
   final List<Widget> actions;
-  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: scrollable ? MainAxisSize.min : MainAxisSize.max,
-      children: [
-        if (header != null) ...[header!, const SizedBox(height: 24)],
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            subtitle!,
-            textAlign: TextAlign.center,
-            style: textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-        const SizedBox(height: 24),
-        body,
-      ],
-    );
-    return Column(
-      children: [
-        Expanded(
-          child: scrollable
-              ? SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  child: content,
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  child: content,
-                ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: actions,
+            children: [
+              if (header != null) ...[header!, const SizedBox(height: 24)],
+              Focus(
+                autofocus: true,
+                descendantsAreFocusable: false,
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  subtitle!,
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              body,
+              const SizedBox(height: 24),
+              ...actions.expand(
+                (action) => [action, const SizedBox(height: 8)],
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -95,14 +88,16 @@ class SetupLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const size = 88.0;
-    return Center(
-      child: ClipRSuperellipse(
-        borderRadius: AppRadius.all(AppCorner.fit(size)),
-        child: Image.asset(
-          'assets/images/icon.png',
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
+    return ExcludeSemantics(
+      child: Center(
+        child: ClipRSuperellipse(
+          borderRadius: AppRadius.all(AppCorner.fit(size)),
+          child: Image.asset(
+            'assets/images/icon.png',
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
@@ -110,39 +105,48 @@ class SetupLogo extends StatelessWidget {
 }
 
 class SetupProgress extends StatelessWidget {
-  const SetupProgress({super.key, required this.count, required this.index});
+  const SetupProgress({
+    super.key,
+    required this.count,
+    required this.index,
+    required this.label,
+  });
 
   final int count;
   final int index;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 6,
-      children: [
-        for (var i = 0; i < count; i++)
-          AnimatedContainer(
-            duration: midDuration,
-            curve: Curves.easeOutCubic,
-            width: i == index ? 22 : 6,
-            height: 6,
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.full,
-              color: i == index
-                  ? colorScheme.primary
-                  : colorScheme.outlineVariant,
-            ),
-          ),
-      ],
+    return Semantics(
+      label: label,
+      value: '${index + 1}/$count',
+      child: ExcludeSemantics(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 6,
+          children: [
+            for (var i = 0; i < count; i++)
+              AnimatedContainer(
+                duration: context.motionDuration(midDuration),
+                curve: Curves.easeOutCubic,
+                width: i == index ? 22 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  borderRadius: AppRadius.full,
+                  color: i == index
+                      ? colorScheme.primary
+                      : colorScheme.outlineVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-/// The dashboard's own material, hosting list rows. The inner `Material` is what
-/// their ink paints on: without it a `ListTile` would splash on the ancestor
-/// above this card's background and be invisible.
 class SetupCard extends StatelessWidget {
   const SetupCard({super.key, required this.child});
 

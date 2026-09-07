@@ -538,8 +538,6 @@ void main() {
 }
 
 class _DelayedCancelIpAdapter implements HttpClientAdapter {
-  static const _sourceCount = 7;
-
   int _requestCount = 0;
 
   @override
@@ -549,8 +547,7 @@ class _DelayedCancelIpAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) {
     _requestCount++;
-    final batch = ((_requestCount - 1) ~/ _sourceCount) + 1;
-    if (batch == 1) {
+    if (_requestCount == 1) {
       final completer = Completer<ResponseBody>();
       cancelFuture?.then((_) {
         Timer(const Duration(milliseconds: 500), () {

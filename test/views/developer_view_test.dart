@@ -1,22 +1,40 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/developer.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
 
-ProviderContainer _containerFor(WidgetTester tester) {
+class _RecordingProfilesAction extends ProfilesAction {
+  static final installed = <DeveloperSubscription>[];
+
+  @override
+  Future<bool> installDeveloperSubscription(
+    DeveloperSubscription fixture,
+  ) async {
+    installed.add(fixture);
+    return true;
+  }
+}
+
+ProviderContainer _containerFor(
+  WidgetTester tester, {
+  List<Override> overrides = const [],
+}) {
   const size = Size(1400, 1000);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  final container = ProviderContainer();
+  final container = ProviderContainer(overrides: overrides);
   addTearDown(container.dispose);
   globalState.container = container;
   container.read(viewSizeProvider.notifier).update((_) => size);
@@ -54,6 +72,27 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(appSettingProvider).developerMode, !initial);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('shows and installs each developer subscription', (tester) async {
+    _RecordingProfilesAction.installed.clear();
+    final container = _containerFor(
+      tester,
+      overrides: [
+        profilesActionProvider.overrideWith(_RecordingProfilesAction.new),
+      ],
+    );
+    await _pumpDeveloperView(tester, container);
+
+    for (final fixture in developerSubscriptions) {
+      expect(find.text(fixture.name), findsOne);
+    }
+
+    await tester.tap(find.text(developerSubscriptions[1].name));
+    await tester.pumpAndSettle();
+
+    expect(_RecordingProfilesAction.installed, [developerSubscriptions[1]]);
     expect(tester.takeException(), null);
   });
 

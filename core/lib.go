@@ -209,11 +209,11 @@ func handleStopTun() {
 }
 
 func stopTunLocked() {
-	if tunHandler == nil {
-		return
+	if tunHandler != nil {
+		tunHandler.close()
+		tunHandler = nil
 	}
-	tunHandler.close()
-	tunHandler = nil
+	tunUp.Store(false)
 }
 
 func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string) bool {
@@ -231,12 +231,14 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string)
 		callback: callback,
 	}
 	if tunHandler.start(fd, stack, address, dns) {
+		tunUp.Store(true)
 		return true
 	}
 	// start() already cleared the handler, so nothing protects sockets from
 	// here on. Android has the routes up regardless, so the caller has to tear
 	// the VPN down rather than leave the device pointed at a black hole.
 	tunHandler = nil
+	tunUp.Store(false)
 	return false
 }
 

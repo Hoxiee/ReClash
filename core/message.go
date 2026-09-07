@@ -42,8 +42,16 @@ func classOfMessage(message Message) messageClass {
 	}
 }
 
+func shouldEnqueueMessage(message Message) bool {
+	return classOfMessage(message) != bulkMessageClass || uiActive.Load()
+}
+
 func sendMessage(message Message) {
-	switch classOfMessage(message) {
+	if !shouldEnqueueMessage(message) {
+		return
+	}
+	messageClass := classOfMessage(message)
+	switch messageClass {
 	case stateMessageClass:
 		enqueueState(stateMessageQueue, message)
 	case bulkMessageClass:

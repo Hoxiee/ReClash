@@ -111,11 +111,7 @@ class AdvancedConfigView extends ConsumerWidget {
       title: appLocalizations.advancedConfig,
       body: ListView(
         children: [
-          SettingSection(
-            top: 16,
-            title: appLocalizations.general,
-            items: generalItems,
-          ),
+          SettingSection(top: 16, items: generalItems),
           SettingSection(
             title: appLocalizations.extra,
             items: extraItems,

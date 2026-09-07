@@ -6,7 +6,7 @@ import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
-import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,55 +68,39 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return SizedBox(
+    return DashboardInfoCard(
       height: getWidgetHeight(1),
-      child: RepaintBoundary(
-        child: CommonCard(
-          radius: AppCorner.lg,
-          info: Info(
-            iconData: Icons.memory,
-            label: appLocalizations.memoryInfo,
-          ),
-          onPressed: () {
-            _core.requestGc();
-          },
-          child: Container(
-            padding: baseInfoEdgeInsets.copyWith(top: 0),
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: globalState.measure.bodyMediumHeight + 2,
-                  child: ValueListenableBuilder(
-                    valueListenable: _memoryStateNotifier,
-                    builder: (_, memory, _) {
-                      final traffic = memory.traffic;
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            traffic.value,
-                            style: context.textTheme.bodyMedium?.toLight
-                                .adjustSize(1),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            traffic.unit,
-                            style: context.textTheme.bodyMedium?.toLight
-                                .adjustSize(1),
-                          ),
-                        ],
-                      );
-                    },
+      icon: Icons.memory_rounded,
+      label: context.appLocalizations.memoryInfo,
+      onPressed: _core.requestGc,
+      child: ValueListenableBuilder(
+        valueListenable: _memoryStateNotifier,
+        builder: (_, memory, _) {
+          final traffic = memory.traffic;
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: traffic.value,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                  TextSpan(
+                    text: ' ${traffic.unit}',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

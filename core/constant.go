@@ -113,6 +113,7 @@ const (
 	stopListenerMethod             CoreMethod = "stopListener"
 	pauseTunMethod                 CoreMethod = "pauseTun"
 	resumeTunMethod                CoreMethod = "resumeTun"
+	setUiActiveMethod              CoreMethod = "setUiActive"
 	updateDnsMethod                CoreMethod = "updateDns"
 	crashMethod                    CoreMethod = "crash"
 	setupConfigMethod              CoreMethod = "setupConfig"

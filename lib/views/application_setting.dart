@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,8 @@ class ApplicationSettingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <Widget>[
+    final appLocalizations = context.appLocalizations;
+    final behaviorItems = <Widget>[
       _appSettingToggle(
         title: (l) => l.minimizeOnExit,
         subtitle: (l) => l.minimizeOnExitDesc,
@@ -61,22 +63,10 @@ class ApplicationSettingView extends StatelessWidget {
           update: (state, value) => state.copyWith(hidden: value),
         ),
       _appSettingToggle(
-        title: (l) => l.logcat,
-        subtitle: (l) => l.logcatDesc,
-        select: (state) => state.openLogs,
-        update: (state, value) => state.copyWith(openLogs: value),
-      ),
-      _appSettingToggle(
         title: (l) => l.autoCloseConnections,
         subtitle: (l) => l.autoCloseConnectionsDesc,
         select: (state) => state.closeConnections,
         update: (state, value) => state.copyWith(closeConnections: value),
-      ),
-      _appSettingToggle(
-        title: (l) => l.onlyStatisticsProxy,
-        subtitle: (l) => l.onlyStatisticsProxyDesc,
-        select: (state) => state.onlyStatisticsProxy,
-        update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
       ),
       if (system.isAndroid)
         _appSettingToggle(
@@ -86,6 +76,20 @@ class ApplicationSettingView extends StatelessWidget {
           update: (state, value) =>
               state.copyWith(showNotificationStopAction: value),
         ),
+    ];
+    final otherItems = <Widget>[
+      _appSettingToggle(
+        title: (l) => l.logcat,
+        subtitle: (l) => l.logcatDesc,
+        select: (state) => state.openLogs,
+        update: (state, value) => state.copyWith(openLogs: value),
+      ),
+      _appSettingToggle(
+        title: (l) => l.onlyStatisticsProxy,
+        subtitle: (l) => l.onlyStatisticsProxyDesc,
+        select: (state) => state.onlyStatisticsProxy,
+        update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
+      ),
       if (system.isAndroid)
         _appSettingToggle(
           title: (l) => l.crashlytics,
@@ -110,7 +114,20 @@ class ApplicationSettingView extends StatelessWidget {
       title: context.appLocalizations.application,
       body: ListView(
         children: [
-          SettingSection(top: 16, items: items),
+          SettingSection(top: 16, items: behaviorItems),
+          SettingSection(title: appLocalizations.other, items: otherItems),
+          SettingSection(
+            title: appLocalizations.settings,
+            items: [
+              DecorationListItem(
+                title: Text(appLocalizations.setupRerun),
+                subtitle: Text(appLocalizations.setupRerunDesc),
+                leading: const Icon(Icons.restart_alt_rounded),
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onPressed: () => SetupWizard.show(context, revisit: true),
+              ),
+            ],
+          ),
           const SettingBottomInset(),
         ],
       ),

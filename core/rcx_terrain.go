@@ -25,11 +25,23 @@ type rcxNetworkPayload struct {
 // A /24 alone is not an identity: home, office and cafe are commonly all
 // 192.168.1.0/24. Gateway plus DHCP server plus resolver set separates them.
 func rcxLinkFingerprint(payload rcxNetworkPayload) string {
-	parts := make([]string, 0, 8)
+	parts := make([]string, 0, 4)
 	parts = append(parts, strings.Join(rcxSortedCopy(payload.Gateways), ","))
 	parts = append(parts, payload.DHCPServer)
 	parts = append(parts, strings.Join(rcxSortedCopy(payload.DNSServers), ","))
 	parts = append(parts, strings.Join(rcxSubnets(payload.IPv4), ","))
+	return rcxLinkHash(parts)
+}
+
+func rcxStableLinkFingerprint(payload rcxNetworkPayload) string {
+	parts := make([]string, 0, 3)
+	parts = append(parts, strings.Join(rcxSortedCopy(payload.Gateways), ","))
+	parts = append(parts, payload.DHCPServer)
+	parts = append(parts, strings.Join(rcxSubnets(payload.IPv4), ","))
+	return rcxLinkHash(parts)
+}
+
+func rcxLinkHash(parts []string) string {
 	sum := sha1.Sum([]byte(strings.Join(parts, "|")))
 	return hex.EncodeToString(sum[:])[:12]
 }
@@ -59,28 +71,52 @@ func rcxSubnets(addresses []string) []string {
 	return out
 }
 
-// The secondary key is the permission-free one, so a record written before the
-// SSID became readable can be migrated rather than orphaned.
-func rcxEnvKeys(payload rcxNetworkPayload) (primary, secondary string) {
-	fingerprint := rcxLinkFingerprint(payload)
-	switch payload.Transport {
-	case "cellular":
-		key := "c:" + payload.Carrier
-		if payload.Carrier == "" {
-			key = "c:#" + fingerprint
-		}
-		return key, key
-	case "ethernet":
-		return "e:#" + fingerprint, "e:#" + fingerprint
-	case "wifi":
-		secondary = "w:#" + fingerprint
-		if payload.SSID != "" {
-			return "w:" + payload.SSID, secondary
-		}
-		return secondary, secondary
-	default:
-		return "o:#" + fingerprint, "o:#" + fingerprint
+func rcxEnvKeys(payload rcxNetworkPayload) (primary string, aliases []string) {
+	transport := strings.TrimSpace(strings.ToLower(payload.Transport))
+	if transport == "" {
+		transport = "other"
 	}
+	stable := rcxStableLinkFingerprint(payload)
+	legacy := rcxLinkFingerprint(payload)
+	label := ""
+	prefix := "o"
+	switch transport {
+	case "cellular":
+		prefix = "c"
+		label = strings.TrimSpace(payload.Carrier)
+	case "ethernet":
+		prefix = "e"
+	case "wifi":
+		prefix = "w"
+		label = strings.TrimSpace(payload.SSID)
+	}
+	primary = "v2:" + prefix + ":"
+	if label != "" {
+		primary += label + "#" + stable
+	} else {
+		primary += "#" + stable
+	}
+	aliases = append(aliases, prefix+":#"+legacy, prefix+":#"+stable)
+	if label != "" {
+		aliases = append([]string{prefix + ":" + label, "v2:" + prefix + ":#" + stable}, aliases...)
+	}
+	return primary, rcxUniqueStrings(aliases, primary)
+}
+
+func rcxUniqueStrings(values []string, exclude string) []string {
+	out := make([]string, 0, len(values))
+	seen := map[string]struct{}{exclude: {}}
+	for _, value := range values {
+		if value == "" {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		out = append(out, value)
+	}
+	return out
 }
 
 // Keyed on these fields, not the transport label a desktop link never reports.

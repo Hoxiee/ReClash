@@ -313,24 +313,26 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
                   padding: const EdgeInsets.only(top: 16),
                   child: ScrollConfiguration(
                     behavior: const HiddenBarScrollBehavior(),
-                    child: CustomScrollView(
-                      key: proxiesListStoreKey,
-                      controller: _controller,
-                      slivers: [
-                        for (final group in state.groups)
-                          _buildGroup(
-                            context,
-                            group: group,
-                            currentUnfoldSet: state.currentUnfoldSet,
-                            columns: columns,
-                            cardType: state.proxyCardType,
+                    child: _tvTraversalBoundary(
+                      CustomScrollView(
+                        key: proxiesListStoreKey,
+                        controller: _controller,
+                        slivers: [
+                          for (final group in state.groups)
+                            _buildGroup(
+                              context,
+                              group: group,
+                              currentUnfoldSet: state.currentUnfoldSet,
+                              columns: columns,
+                              cardType: state.proxyCardType,
+                            ),
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 16 + BottomInsetScope.of(context),
+                            ),
                           ),
-                        SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: 16 + BottomInsetScope.of(context),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -341,6 +343,10 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
       },
     );
   }
+}
+
+Widget _tvTraversalBoundary(Widget child) {
+  return system.isTV ? FocusTraversalGroup(child: child) : child;
 }
 
 class ListHeader extends ConsumerStatefulWidget {

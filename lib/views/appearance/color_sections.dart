@@ -12,11 +12,13 @@ import 'package:material_color_utilities/hct/hct.dart';
 
 const _iconVariants = [
   'default',
-  'mono',
-  'sepia',
-  'inverted',
-  'dark_mono',
-  'cool',
+  'pulse',
+  'glacier',
+  'obsidian',
+  'velvet',
+  'solar',
+  'circuit',
+  'prism',
 ];
 
 class AppearanceColorSections extends ConsumerStatefulWidget {
@@ -287,11 +289,13 @@ class _AppearanceColorSectionsState
 String _iconVariantLabel(BuildContext context, String variant) {
   final appLocalizations = context.appLocalizations;
   return switch (variant) {
-    'mono' => appLocalizations.appIconMono,
-    'sepia' => appLocalizations.appIconSepia,
-    'inverted' => appLocalizations.appIconInverted,
-    'dark_mono' => appLocalizations.appIconDarkMono,
-    'cool' => appLocalizations.appIconCool,
+    'pulse' => appLocalizations.appIconPulse,
+    'glacier' => appLocalizations.appIconGlacier,
+    'obsidian' => appLocalizations.appIconObsidian,
+    'velvet' => appLocalizations.appIconVelvet,
+    'solar' => appLocalizations.appIconSolar,
+    'circuit' => appLocalizations.appIconCircuit,
+    'prism' => appLocalizations.appIconPrism,
     _ => appLocalizations.defaultText,
   };
 }

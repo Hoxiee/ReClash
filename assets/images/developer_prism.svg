@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="prism-left" x1="35" y1="30" x2="128" y2="222" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#35D5FF"/>
+      <stop offset="1" stop-color="#5368F7"/>
+    </linearGradient>
+    <linearGradient id="prism-right" x1="128" y1="22" x2="226" y2="218" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8C5CFF"/>
+      <stop offset="1" stop-color="#FF4D9A"/>
+    </linearGradient>
+    <linearGradient id="prism-base" x1="43" y1="190" x2="213" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#426FF4"/>
+      <stop offset="1" stop-color="#B34EF0"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#prism-left)" d="M121 20 27 205c-5 10 5 20 15 15l58-30 28-67V23c0-5-5-7-7-3Z"/>
+  <path fill="url(#prism-right)" d="M135 20c-2-4-7-2-7 3v100l28 67 58 30c10 5 20-5 15-15L135 20Z"/>
+  <path fill="url(#prism-base)" d="m99 198-50 26c-6 3-4 12 3 12h152c7 0 9-9 3-12l-50-26-24 31c-3 4-8 4-11 0l-23-31Z"/>
+</svg>

@@ -41,6 +41,9 @@ class System {
 
   bool get isTV => _isTV;
 
+  @visibleForTesting
+  set isTVForTesting(bool value) => _isTV = value;
+
   Future<int> init() async {
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
     _isTV = switch (deviceInfo) {

@@ -89,9 +89,16 @@ func (rcxCoreRuntime) Members() []rcxMember {
 			continue
 		}
 		hostMs, hostDead := rcxHostDelay(node, url)
+		info := node.ProxyInfo()
+		provider := strings.TrimSpace(info.ProviderName)
+		if provider == "" {
+			provider = "inline:" + node.Type().String()
+		}
 		members = append(members, rcxMember{
 			Name:        node.Name(),
 			ID:          rcxNodeKey(node.Type().String(), node.Addr(), ""),
+			Provider:    provider,
+			Transport:   info.DiversityFingerprint,
 			Type:        node.Type().String(),
 			Port:        rcxPortOf(node.Addr()),
 			SupportsUDP: node.SupportUDP(),
@@ -444,10 +451,16 @@ func (rcxCoreRuntime) Connections() []rcxConnSample {
 	return samples
 }
 
-func (rcxCoreRuntime) CloseConnections(node string) {
+func (rcxCoreRuntime) CloseConnections(ids []string) {
+	if len(ids) == 0 {
+		return
+	}
+	wanted := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		wanted[id] = struct{}{}
+	}
 	statistic.DefaultManager.Range(func(tracker statistic.Tracker) bool {
-		info := tracker.Info()
-		if info != nil && info.Chain.Last() == node {
+		if _, ok := wanted[tracker.ID()]; ok {
 			_ = tracker.Close()
 		}
 		return true

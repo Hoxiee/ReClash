@@ -3306,6 +3306,52 @@ final class CurrentProfileProvider
 
 String _$currentProfileHash() => r'55f3cb9570a0aa6b9e0b83a36693b69d52e753ab';
 
+@ProviderFor(panelBackground)
+final panelBackgroundProvider = PanelBackgroundProvider._();
+
+final class PanelBackgroundProvider
+    extends
+        $FunctionalProvider<
+          PanelBackground?,
+          PanelBackground?,
+          PanelBackground?
+        >
+    with $Provider<PanelBackground?> {
+  PanelBackgroundProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'panelBackgroundProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$panelBackgroundHash();
+
+  @$internal
+  @override
+  $ProviderElement<PanelBackground?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PanelBackground? create(Ref ref) {
+    return panelBackground(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PanelBackground? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PanelBackground?>(value),
+    );
+  }
+}
+
+String _$panelBackgroundHash() => r'10c627c60ceec69248479fef1d971195f47fe08b';
+
 @ProviderFor(profile)
 final profileProvider = ProfileFamily._();
 

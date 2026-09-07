@@ -2,6 +2,8 @@ part of '../action.dart';
 
 @Riverpod(keepAlive: true)
 class StoreAction extends _$StoreAction {
+  final _preferencesScheduler = SerialTaskScheduler();
+
   CoreController get _core => ref.read(coreHandlerProvider);
 
   @override
@@ -18,9 +20,30 @@ class StoreAction extends _$StoreAction {
     await Future.wait(pathsToDelete.map(safeDeletePath));
   }
 
+  Future<bool> savePreferences() {
+    debouncer.cancel(FunctionTag.savePreferences);
+    final config = ref.read(configProvider);
+    return _preferencesScheduler.run(() async {
+      try {
+        return await preferences.saveConfig(config);
+      } catch (error, stackTrace) {
+        commonPrint.log(
+          'Failed to save preferences: ${compactError(error)}, $stackTrace',
+          logLevel: LogLevel.warning,
+        );
+        return false;
+      }
+    });
+  }
+
   void savePreferencesDebounce() {
     debouncer.call(FunctionTag.savePreferences, () async {
-      await preferences.saveConfig(ref.read(configProvider));
+      if (!await savePreferences()) {
+        commonPrint.log(
+          'Failed to save preferences',
+          logLevel: LogLevel.warning,
+        );
+      }
     });
   }
 

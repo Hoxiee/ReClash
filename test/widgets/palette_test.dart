@@ -1,10 +1,17 @@
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/palette.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';
 
 void main() {
+  final overrides = <Override>[
+    effectiveThemePropsProvider.overrideWithValue(const ThemeProps()),
+  ];
+
   testWidgets('Palette updates color from hue, chroma, and tone controls', (
     tester,
   ) async {
@@ -14,6 +21,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
+        overrides: overrides,
         child: Scaffold(
           body: SingleChildScrollView(
             child: SizedBox(width: 700, child: Palette(controller: controller)),
@@ -42,6 +50,9 @@ void main() {
     await tester.pump();
     expect(controller.value.computeLuminance(), lessThan(0.01));
     expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 
   testWidgets('Palette lays out narrow tone and preview grids', (tester) async {
@@ -51,6 +62,7 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
+        overrides: overrides,
         child: Scaffold(
           body: SingleChildScrollView(
             child: SizedBox(width: 32, child: Palette(controller: controller)),
@@ -64,5 +76,8 @@ void main() {
     expect(find.text('100'), findsOneWidget);
     expect(find.text('Primary'), findsOneWidget);
     expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }

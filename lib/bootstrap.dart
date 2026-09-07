@@ -8,6 +8,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/launch.dart';
 import 'package:reclash/common/migration.dart';
 import 'package:reclash/common/permission.dart';
+import 'package:reclash/common/subscription_reminder.dart';
 import 'package:reclash/common/tray.dart';
 import 'package:reclash/common/window.dart';
 import 'package:reclash/database/database.dart';
@@ -135,6 +136,7 @@ class Bootstrap {
       getLocaleForString(config.appSettingProps.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
     );
+    unawaited(runSubscriptionReminderSweep(profiles: profiles));
     await window?.init(version, config.windowProps);
     if (system.isAndroid) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

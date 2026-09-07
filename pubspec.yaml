@@ -41,6 +41,7 @@ dependencies:
   freezed_annotation: ^3.1.0
   image_picker: ^1.2.0
   ffi: ^2.1.4
+  qr_flutter: 4.1.0
 
   dio: ^5.8.0+1
   win32: ^6.4.0

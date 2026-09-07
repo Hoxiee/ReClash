@@ -1,10 +1,13 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/pop_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'chip.dart';
+import 'icon.dart';
 import 'inherited.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
@@ -12,7 +15,7 @@ typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 typedef AppBarSearchStateBuilder =
     AppBarSearchState? Function(AppBarSearchState? state);
 
-class CommonScaffold extends StatefulWidget {
+class CommonScaffold extends ConsumerStatefulWidget {
   final AppBar? appBar;
   final Widget body;
   final Color? backgroundColor;
@@ -45,10 +48,10 @@ class CommonScaffold extends StatefulWidget {
   });
 
   @override
-  State<CommonScaffold> createState() => CommonScaffoldState();
+  ConsumerState<CommonScaffold> createState() => CommonScaffoldState();
 }
 
-class CommonScaffoldState extends State<CommonScaffold> {
+class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   late final ValueNotifier<AppBarState> _appBarState;
   final ValueNotifier<bool> _loadingNotifier = ValueNotifier(false);
   final ValueNotifier<bool> _isFabExtendedNotifier = ValueNotifier(true);
@@ -377,24 +380,55 @@ class CommonScaffoldState extends State<CommonScaffold> {
       },
       child: widget.floatingActionButton,
     );
+    final background = ref.watch(panelBackgroundProvider);
+    final foreground = NotificationListener<UserScrollNotification>(
+      child: hasFab
+          ? BottomInsetScope(
+              inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
+              child: body,
+            )
+          : body,
+      onNotification: (notification) {
+        if (notification.direction == ScrollDirection.reverse) {
+          _isFabExtendedNotifier.value = false;
+        } else if (notification.direction == ScrollDirection.forward) {
+          _isFabExtendedNotifier.value = true;
+        }
+        return true;
+      },
+    );
     return Scaffold(
       appBar: _buildAppBar(backActionProvider?.backAction),
-      body: NotificationListener<UserScrollNotification>(
-        child: hasFab
-            ? BottomInsetScope(
-                inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
-                child: body,
-              )
-            : body,
-        onNotification: (notification) {
-          if (notification.direction == ScrollDirection.reverse) {
-            _isFabExtendedNotifier.value = false;
-          } else if (notification.direction == ScrollDirection.forward) {
-            _isFabExtendedNotifier.value = true;
-          }
-          return true;
-        },
-      ),
+      body: background == null
+          ? foreground
+          : Stack(
+              children: [
+                Positioned.fill(
+                  key: const ValueKey('panel-profile-background'),
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: ImageCacheWidget(
+                        src: background.url,
+                        fit: BoxFit.cover,
+                        defaultWidget: ColoredBox(
+                          color: context.colorScheme.surface,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: ColoredBox(
+                      color: context.colorScheme.surface.withValues(
+                        alpha: 1 - background.opacity,
+                      ),
+                    ),
+                  ),
+                ),
+                foreground,
+              ],
+            ),
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       backgroundColor: widget.backgroundColor,
       floatingActionButton: hasFab

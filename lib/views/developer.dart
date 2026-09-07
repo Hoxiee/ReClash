@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/common.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -13,6 +14,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DeveloperView extends ConsumerWidget {
   const DeveloperView({super.key});
+
+  String _subscriptionDescription(
+    AppLocalizations appLocalizations,
+    DeveloperSubscriptionId id,
+  ) => switch (id) {
+    DeveloperSubscriptionId.prism =>
+      appLocalizations.developerSubscriptionPrismDesc,
+    DeveloperSubscriptionId.orbit =>
+      appLocalizations.developerSubscriptionOrbitDesc,
+    DeveloperSubscriptionId.atlas =>
+      appLocalizations.developerSubscriptionAtlasDesc,
+  };
+
+  Widget _getSubscriptionsList(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    return SettingSection(
+      title: appLocalizations.developerSubscriptions,
+      items: [
+        for (final fixture in developerSubscriptions)
+          DecorationListItem(
+            leading: SizedBox.square(
+              dimension: 32,
+              child: ImageCacheWidget(
+                src: fixture.logo,
+                fit: BoxFit.contain,
+                defaultWidget: const Icon(Icons.cloud_outlined),
+              ),
+            ),
+            title: Text(fixture.name),
+            subtitle: Text(
+              _subscriptionDescription(appLocalizations, fixture.id),
+            ),
+            onPressed: () async {
+              final installed = await ref
+                  .read(profilesActionProvider.notifier)
+                  .installDeveloperSubscription(fixture);
+              if (installed && context.mounted) {
+                context.showNotifier(
+                  appLocalizations.developerSubscriptionInstalled(fixture.name),
+                  level: MessageLevel.success,
+                );
+              }
+            },
+          ),
+      ],
+    );
+  }
 
   Widget _getDeveloperList(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
@@ -109,6 +157,7 @@ class DeveloperView extends ConsumerWidget {
               ),
             ),
           ),
+          _getSubscriptionsList(context, ref),
           _getDeveloperList(context, ref),
           const SettingBottomInset(),
         ],

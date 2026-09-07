@@ -111,6 +111,9 @@
   "selectAll": "모두 선택",
   "cancelSelectAll": "선택 해제",
   "appAccessControl": "앱 액세스 제어",
+  "accessControlIncludeInVpn": "VPN에 포함",
+  "accessControlExcludeFromVpn": "VPN에서 제외",
+  "searchApps": "앱 검색",
   "accessControlAllowDesc": "선택한 앱만 VPN을 통과합니다",
   "accessControlNotAllowDesc": "선택한 앱은 VPN을 통과하지 않습니다",
   "accessControlDisabledDesc": "앱 액세스 제어가 꺼져 있습니다",
@@ -179,6 +182,8 @@
   "ipv6Desc": "켜면 IPv6 트래픽을 수신할 수 있습니다",
   "app": "앱",
   "general": "일반",
+  "identity": "식별 정보",
+  "animations": "애니메이션",
   "extra": "기타",
   "systemProxyDesc": "시스템 프록시를 설정합니다",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "과일 샐러드",
   "developerMode": "개발자 모드",
   "developerModeEnableTip": "개발자 모드가 켜져 있습니다",
+  "developerSubscriptions": "테스트 구독",
+  "developerSubscriptionPrismDesc": "브랜드 색상, 사용자 지정 Hero Ring 및 로컬 로고",
+  "developerSubscriptionOrbitDesc": "할당량, 만료, 공지, 도메인 이전 및 상품",
+  "developerSubscriptionAtlasDesc": "공급자 위젯, 서버 전환 및 프록시 레이아웃",
+  "developerSubscriptionInstalled": "{name} 설치 완료",
   "messageTest": "메시지 테스트",
   "messageTestTip": "메시지입니다",
   "crashTest": "크래시 테스트",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{total}개 중 {eligible}개 사용 가능",
   "smartRoutingHistory": "최근 전환",
   "smartRoutingHistoryEmpty": "아직 전환이 없습니다",
+  "smartRoutingSectionReliability": "신뢰성",
+  "smartRoutingAvailability": "가용성",
+  "smartRoutingAvailabilityValue": "{duration} 동안 {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "감지된 장애",
+  "smartRoutingStandbyHits": "웜 스탠바이로 복구",
+  "smartRoutingLastRecovery": "최근 복구 시간",
+  "smartRoutingAverageRecovery": "평균 복구 시간",
+  "smartRoutingProviderIncidents": "공급자 보호 작동 횟수",
+  "smartRoutingMarkerIncidents": "격리된 서비스 확인",
+  "smartRoutingActiveCircuits": "일시 보류된 공급자",
+  "smartRoutingActiveMarkers": "일시 보류된 확인",
+  "smartRoutingNoRecovery": "복구된 장애가 아직 없습니다",
+  "smartRoutingBlockProviderCircuit": "독립적인 장애가 여러 번 발생하여 공급자를 일시 보류함",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "최근 1시간 동안 탐색 {cap}회 중 {left}회 남음",
   "smartRoutingVerdictPreferred": "개방된 인터넷 접근 가능",
@@ -826,26 +859,26 @@
   "smartRoutingBandLabel": "구간 {band}",
   "smartRoutingDegraded": "속도 제한됨",
   "smartRoutingOffHint": "스마트 라우팅을 켜면 서버를 알아서 선택합니다",
-  "setupWelcome": "1분 안에 설정 완료",
+  "setupWelcome": "몇 가지 간단한 단계로 준비할 수 있습니다",
   "setupLanguageTitle": "언어 선택",
   "setupLanguageDesc": "나중에 설정에서 변경할 수 있습니다",
-  "setupLegalTitle": "시작하기 전에",
-  "setupDataCollection": "비정상 종료 보고서 보내기",
-  "setupSubscriptionTitle": "구독 추가",
-  "setupSubscriptionDesc": "제공자에게 받은 링크, QR 코드 또는 설정 파일을 추가할 수 있습니다",
-  "setupSubscriptionReady": "구독 추가됨",
+  "setupLegalTitle": "계속하기 전에",
+  "setupDataCollection": "선택적 충돌 보고서 보내기",
+  "setupSubscriptionTitle": "연결 프로필 추가",
+  "setupSubscriptionDesc": "프로필에는 연결에 필요한 서버와 규칙이 들어 있습니다. 제공업체나 백업에서 가져오세요.",
+  "setupSubscriptionReady": "프로필 준비 완료",
   "setupRestore": "백업에서 복원",
-  "setupRestoreDesc": "ReClash, FlClashX, FlClash 백업의 모든 내용을 옮깁니다",
-  "setupFinishTitle": "거의 다 되었습니다",
-  "setupRegionDesc": "서버 선택의 기준이 됩니다",
-  "setupRegionNone": "선택 안 함",
-  "setupAutoRun": "실행 시 자동 연결",
-  "setupAutoRunDesc": "앱을 열면 즉시 터널이 작동합니다",
+  "setupRestoreDesc": "ReClash, FlClashX 또는 FlClash 백업에서 설정과 프로필 복원",
+  "setupFinishTitle": "설정 검토",
+  "setupRegionDesc": "스마트 라우팅이 경로를 선택할 때 이 지역을 시작점으로 사용합니다. 언어는 추천에만 사용됩니다.",
+  "setupRegionNone": "기타 지역 또는 스마트 라우팅 사용 안 함",
+  "setupAutoRun": "ReClash를 열 때 연결",
+  "setupAutoRunDesc": "유효한 프로필을 불러온 뒤 VPN을 자동으로 시작합니다",
   "setupPermissionVpn": "VPN 권한",
   "setupPermissionVpnDesc": "처음 연결할 때 시스템이 요청합니다",
   "setupPermissionNotifications": "알림",
-  "setupPermissionNotificationsDesc": "실행 중 연결 상태를 표시합니다",
-  "setupSkip": "건너뛰기",
+  "setupPermissionNotificationsDesc": "ReClash 실행 중 연결 상태를 표시합니다",
+  "setupSkip": "프로필 없이 계속",
   "setupNext": "다음",
   "setupDone": "완료",
   "smartRoutingBreaker": "화이트리스트 전용",
@@ -935,11 +968,13 @@
   "systemSeed": "시스템 시드",
   "appIcon": "앱 아이콘",
   "appIconChangeNote": "런처는 몇 초 안에 아이콘을 다시 그립니다. 일부 런처에서는 고정된 바로가기가 사라질 수 있습니다.",
-  "appIconMono": "모노",
-  "appIconSepia": "세피아",
-  "appIconInverted": "반전",
-  "appIconDarkMono": "다크 모노",
-  "appIconCool": "쿨",
+  "appIconPulse": "펄스",
+  "appIconGlacier": "글레이셔",
+  "appIconObsidian": "옵시디언",
+  "appIconVelvet": "벨벳",
+  "appIconSolar": "솔라",
+  "appIconCircuit": "서킷",
+  "appIconPrism": "프리즘",
   "dashboardStyle": "대시보드 스타일",
   "classicDashboard": "클래식",
   "classicDashboardDesc": "시작 버튼이 있는 타일 그리드",
@@ -1213,5 +1248,120 @@
   "desyncTtl12Hours": "12시간",
   "desyncTtl28Hours": "28시간",
   "desyncTtlHour": "1시간",
-  "desyncTtlWeek": "7일"
+  "desyncTtlWeek": "7일",
+  "desyncActiveStrategy": "활성 전략",
+  "desyncCacheDisabled": "전략 캐시 꺼짐",
+  "desyncEngineSummary": "{count}개 라우팅 카테고리가 ByeDPI 엔진 사용",
+  "desyncTestBattery": "테스트 배터리",
+  "desyncTestBatterySummary": "프리셋 {presets}개 · 그룹 {groups}개 · 호스트 {domains}개",
+  "desyncRoutingRules": "적용 규칙",
+  "desyncRoutingGeositeNote": "카테고리 구성은 내장 GEOSITE 데이터베이스에서 가져오며 테스트 도메인 목록과 별개입니다",
+  "desyncRoutingNoCategories": "우회 카테고리 미선택",
+  "desyncRoutingNoCategoriesDesc": "현재 ByeDPI를 통하는 서비스가 없습니다",
+  "desyncRoutingFallbackDesc": "선택한 GEOSITE 카테고리 밖의 모든 트래픽은 직접 연결됩니다",
+  "byedpiOff": "DPI 우회 꺼짐",
+  "byedpiStarting": "DPI 우회 시작 중",
+  "byedpiChecking": "DPI 엔진 확인 중",
+  "byedpiReconnecting": "DPI 엔진 다시 시작 중",
+  "byedpiActive": "DPI 우회 활성",
+  "byedpiPaused": "DPI 우회 일시 중지",
+  "byedpiEngineError": "DPI 엔진 확인 필요",
+  "byedpiTapToStart": "탭하여 로컬 우회 엔진 시작",
+  "byedpiTapToResume": "탭하여 DPI 우회 재개",
+  "byedpiActiveFor": "DPI 우회 중 {time}",
+  "setupSystemLanguage": "시스템 언어",
+  "setupStepProgress": "{count}단계 중 {step}단계",
+  "setupLegalSummary": "ReClash는 트래픽 경로를 지정하기 위해 기기에 로컬 VPN 연결을 만듭니다. 설정 또는 제공업체는 사용자가 직접 선택하며 사용에 대한 책임도 사용자에게 있습니다.",
+  "setupLegalDetails": "전체 면책 조항 읽기",
+  "setupLegalLicense": "오픈 소스 라이선스",
+  "setupDataCollectionDesc": "앱 충돌 원인을 찾는 데 도움이 됩니다. 직접 켜지 않으면 전송되지 않습니다.",
+  "setupDecline": "동의하지 않고 종료",
+  "setupBack": "뒤로",
+  "dashboardNoProfileTitle": "연결 설정",
+  "dashboardNoProfileDesc": "신뢰하는 제공업체의 VPN 프로필을 추가하세요. 추가하기 전까지 VPN은 꺼진 상태로 유지됩니다.",
+  "dashboardNoActiveProfileTitle": "VPN 프로필 선택",
+  "dashboardNoActiveProfileDesc": "프로필이 저장되어 있지만 활성 프로필이 없습니다. VPN 제어를 사용하려면 하나를 선택하세요.",
+  "dashboardSelectProfile": "프로필 선택",
+  "dashboardByedpiTitle": "VPN 제공업체가 없나요?",
+  "dashboardByedpiDesc": "VPN 프로필 없이 DPI를 우회하려면 ByeDPI 전용 모드를 사용하세요.",
+  "dashboardUseByedpi": "ByeDPI 사용",
+  "setupProfileSourceNotice": "ReClash는 VPN 서비스를 판매하지 않습니다. 신뢰하는 제공업체의 링크, QR 코드 또는 설정 파일을 사용하세요. 저장 전에 프로필을 검사합니다.",
+  "setupContinueWithoutProfile": "프로필 없이 계속",
+  "setupContinueWithoutProfileDesc": "VPN은 꺼진 상태로 유지됩니다. 나중에 프로필을 추가하거나 VPN 제공업체 없이 ByeDPI 전용 모드를 사용할 수 있습니다.",
+  "setupProfilesReady": "프로필 {count}개 준비 완료",
+  "setupAddAnotherProfile": "더 추가",
+  "setupReplaceProfile": "교체",
+  "setupDeleteProfile": "삭제",
+  "setupReplaceProfileHint": "새 프로필을 정상적으로 가져와 검사한 뒤 현재 프로필을 삭제합니다.",
+  "setupRegionTitle": "현재 네트워크는 어느 지역에 있나요?",
+  "setupRegionRecommended": "언어에 따른 추천",
+  "setupAutoRunUnavailable": "자동 연결을 사용하려면 프로필을 추가하세요",
+  "setupSummaryTitle": "설정 요약",
+  "setupSummaryNoProfile": "VPN 프로필 없음 — VPN은 꺼짐, ByeDPI 전용 모드는 사용 가능",
+  "setupSummaryProfile": "프로필: {name}",
+  "setupSummaryRouting": "스마트 라우팅: {value}",
+  "setupSummaryAutoRunOn": "자동 연결: 켜짐",
+  "setupSummaryAutoRunOff": "자동 연결: 꺼짐",
+  "setupPermissionDeferred": "처음 연결할 때 요청",
+  "setupPermissionBattery": "배터리 최적화",
+  "setupPermissionBatteryDesc": "백그라운드에서 VPN 연결을 유지하도록 허용합니다",
+  "setupPermissionChecking": "확인 중…",
+  "setupPermissionRequest": "허용",
+  "setupPermissionGranted": "허용됨",
+  "setupPermissionDenied": "허용 안 됨",
+  "setupPermissionUnavailable": "사용할 수 없음",
+  "setupPermissionError": "확인할 수 없음",
+  "setupPermissionOpenSettings": "설정 열기",
+  "setupDoneConnect": "완료하고 연결",
+  "setupRerun": "초기 설정 다시 실행",
+  "setupRerunDesc": "데이터를 지우지 않고 언어, 프로필, 라우팅, 권한을 검토합니다",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "휴대전화에서 받기",
+  "lanProfileImportDesc": "로컬 네트워크를 통해 구독 URL을 전송할 일회용 QR 코드를 표시합니다",
+  "lanProfileImportTitle": "구독 받기",
+  "lanProfileImportScan": "같은 네트워크의 휴대전화로 이 QR 코드를 스캔하세요",
+  "lanProfileImportAddress": "또는 {address}(으)로 JSON을 보내세요",
+  "lanProfileImportWaiting": "구독을 기다리는 중…",
+  "lanProfileImportImporting": "구독을 가져오는 중…",
+  "lanProfileImportImported": "구독을 받았습니다",
+  "lanProfileImportTimedOut": "일회용 링크가 만료되었습니다",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "로컬 공유를 시작할 수 없습니다",
+  "lanProfileImportFailed": "구독을 가져올 수 없습니다"
 }

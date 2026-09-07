@@ -7,6 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
+import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
@@ -19,6 +20,7 @@ import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 String _countryCodeToEmoji(String code) {
@@ -27,148 +29,6 @@ String _countryCodeToEmoji(String code) {
   final first = 0x1F1E6 - 0x41 + upper.codeUnitAt(0);
   final second = 0x1F1E6 - 0x41 + upper.codeUnitAt(1);
   return String.fromCharCodes([first, second]);
-}
-
-String? _flagToCountryCode(String text) {
-  final runes = text.runes.toList();
-  for (var i = 0; i < runes.length - 1; i++) {
-    final a = runes[i];
-    final b = runes[i + 1];
-    if (a >= 0x1F1E6 && a <= 0x1F1FF && b >= 0x1F1E6 && b <= 0x1F1FF) {
-      final c1 = a - 0x1F1E6 + 0x41;
-      final c2 = b - 0x1F1E6 + 0x41;
-      return String.fromCharCodes([c1, c2]);
-    }
-  }
-  return null;
-}
-
-List<String> _collectGroupFlags(List<Group> groups, Group group) {
-  final seen = <String>{};
-  final codes = <String>[];
-  void walk(Group g, int depth) {
-    if (depth > 4) return;
-    for (final proxy in g.all) {
-      final code = _flagToCountryCode(proxy.name);
-      if (code != null) {
-        if (seen.add(code)) codes.add(code);
-      } else {
-        final sub = groups.getGroup(proxy.name);
-        if (sub != null) walk(sub, depth + 1);
-      }
-    }
-  }
-
-  walk(group, 0);
-  return codes;
-}
-
-String _stripLeadingEmoji(String text) {
-  bool isEmojiRune(int r) {
-    final isFlag = r >= 0x1F1E6 && r <= 0x1F1FF;
-    final isModifier =
-        r == 0x200D || r == 0xFE0F || (r >= 0x1F3FB && r <= 0x1F3FF);
-    final isPictograph =
-        (r >= 0x1F000 && r <= 0x1FAFF) ||
-        (r >= 0x2600 && r <= 0x27BF) ||
-        (r >= 0x2190 && r <= 0x21FF) ||
-        (r >= 0x2B00 && r <= 0x2BFF) ||
-        (r >= 0x2300 && r <= 0x23FF);
-    return isFlag || isModifier || isPictograph;
-  }
-
-  bool isSpace(int r) =>
-      r == 0x20 || r == 0x09 || r == 0xA0 || r == 0x0A || r == 0x0D;
-
-  final runes = text.runes.toList();
-  var start = 0;
-  while (start < runes.length &&
-      (isEmojiRune(runes[start]) || isSpace(runes[start]))) {
-    start++;
-  }
-  return String.fromCharCodes(
-    runes.sublist(start),
-  ).replaceAll(RegExp(r'\s+'), ' ').trim();
-}
-
-/// Countries the engine left behind, so the stack reads as its own history.
-List<String> _trailCodes(List<String> trail, String current) {
-  final codes = <String>[];
-  for (final node in trail) {
-    if (node == current) continue;
-    final code = _flagToCountryCode(node);
-    if (code != null) codes.add(code);
-  }
-  return codes;
-}
-
-int _enginePoolSize(RcxStatus status) {
-  final pool = status.eligible > 0 ? status.eligible : status.candidates;
-  return pool > 1 ? pool - 1 : 0;
-}
-
-String _resolveToDisplayName(List<Group> groups, String proxyName) {
-  final group = groups.getGroup(proxyName);
-  if (group == null) return proxyName;
-  final now = group.now;
-  if (now == null || now.isEmpty) return group.name;
-  return now;
-}
-
-typedef _HeroServerInfo = ({
-  String serverName,
-  String? testUrl,
-  String flags,
-  int otherLocations,
-});
-
-_HeroServerInfo _selectServerInfo(
-  List<Group> groups,
-  String? serverInfoHeader,
-) {
-  var serverName = '';
-  String? testUrl;
-  Group? activeGroup;
-  if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-    final group = groups.getGroup(serverInfoHeader.trim());
-    if (group != null) {
-      activeGroup = group;
-      serverName = _resolveToDisplayName(groups, group.name);
-      testUrl = group.testUrl;
-    }
-  }
-  if (serverName.isEmpty) {
-    for (final g in groups) {
-      final now = g.realNow;
-      if (now.isNotEmpty && now != 'DIRECT' && now != 'REJECT') {
-        activeGroup = g;
-        serverName = _resolveToDisplayName(groups, g.name);
-        testUrl = g.testUrl;
-        break;
-      }
-    }
-  }
-  final nameCountryCode = _flagToCountryCode(serverName);
-  final groupFlagCodes = activeGroup != null
-      ? _collectGroupFlags(groups, activeGroup)
-      : const <String>[];
-  final activeUpper = nameCountryCode?.toUpperCase();
-  final otherCodes = groupFlagCodes
-      .where((c) => c.toUpperCase() != activeUpper)
-      .toList();
-  final rawOther = otherCodes.isNotEmpty
-      ? otherCodes.length
-      : (activeGroup != null ? activeGroup.all.length - 1 : 0);
-  final otherLocations = rawOther < 0 ? 0 : rawOther;
-  // The flag codes travel as a comma-joined string so the record stays
-  // value-equal — a plain List compares by identity and would rebuild the
-  // whole board on every groups tick even when nothing on screen changed.
-  return (
-    serverName: serverName,
-    testUrl: testUrl,
-    flags: otherCodes.join(','),
-    otherLocations: otherLocations,
-  );
 }
 
 class HeroConnect extends ConsumerStatefulWidget {
@@ -216,19 +76,22 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
 
   @override
   Widget build(BuildContext context) {
-    final hasProfile = ref.watch(
+    final profile = ref.watch(currentProfileProvider);
+    final hasSavedProfiles = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
     );
     final byedpiMode = ref.watch(
       desyncSettingProvider.select((state) => state.enabled && state.onlyDpi),
     );
-    if (!hasProfile && !byedpiMode) return const _EmptyHero();
+    if (profile == null && !byedpiMode) {
+      return _EmptyHero(hasSavedProfiles: hasSavedProfiles);
+    }
 
     final isReady = ref.watch(initProvider);
     if (byedpiMode) {
       const health = HeroHealth.unknown;
       final status = heroStatusOf(_phase, health);
-      final palette = heroPaletteOf(context, status);
+      final palette = byedpiHeroPaletteOf(context, status);
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -239,80 +102,40 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
               status: status,
               health: health,
               palette: palette,
+              variant: HeroOrbVariant.byedpi,
               onPhaseChanged: (phase) => setState(() => _phase = phase),
               onLongPress: () => _showModePicker(),
             ),
             const SizedBox(height: 16),
-            const DesyncControls(),
+            const _ByeDpiDashboard(),
             SizedBox(height: 12 + BottomInsetScope.of(context)),
           ],
         ),
       );
     }
 
-    final profile = ref.watch(currentProfileProvider);
-    final panelMeta = profile?.panelMeta;
+    final activeProfile = profile!;
+    final panelMeta = activeProfile.panelMeta;
     final announce = panelMeta?.announce?.trim();
-    final sub = profile?.subscriptionInfo;
+    final sub = activeProfile.subscriptionInfo;
     final hasSub = sub != null && (sub.total > 0 || sub.expire > 0);
 
     final buyPlanUrl = panelMeta?.buyPlanUrl;
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
 
-    final serverInfoHeader = panelMeta?.serverInfoGroup;
-    final mode = ref.watch(
-      patchClashConfigProvider.select((state) => state.mode),
-    );
-    final smartRoutingEnabled =
-        mode == Mode.rule &&
-        ref.watch(smartRoutingSettingProvider.select((state) => state.enabled));
-    final rcxStatus = smartRoutingEnabled
-        ? ref.watch(smartRoutingStatusProvider)
-        : null;
-    final engineNode = rcxStatus?.node ?? '';
-    final engineDecided = smartRoutingEnabled && engineNode.isNotEmpty;
-    final serverInfo = ref.watch(
-      groupsProvider.select(
-        (state) => _selectServerInfo(switch (mode) {
-          Mode.direct => const <Group>[],
-          Mode.global => state.toList(),
-          Mode.rule =>
-            state
-                .where((item) => item.hidden == false)
-                .where((element) => element.name != GroupName.GLOBAL.name)
-                .toList(),
-        }, serverInfoHeader),
-      ),
-    );
-    final serverName = engineDecided ? engineNode : serverInfo.serverName;
-    final testUrl = serverInfo.testUrl;
-    final otherCodes = engineDecided
-        ? _trailCodes(ref.watch(smartRoutingTrailProvider), engineNode)
-        : serverInfo.flags.isEmpty
-        ? const <String>[]
-        : serverInfo.flags.split(',');
-    final otherLocations = engineDecided
-        ? _enginePoolSize(rcxStatus!)
-        : serverInfo.otherLocations;
-    final displayName = _stripLeadingEmoji(serverName);
-    final nameCountryCode = _flagToCountryCode(serverName);
-    final isUpdating =
-        profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
-
-    final delay = engineDecided
-        ? (rcxStatus!.delay > 0 ? rcxStatus.delay : null)
-        : serverName.isEmpty
-        ? null
-        : ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl));
-    final measuring =
-        !engineDecided &&
-        serverName.isNotEmpty &&
-        ref.watch(
-          delayTestPendingProvider(proxyName: serverName, testUrl: testUrl),
-        );
+    final activeServer = ref.watch(activeServerProvider);
+    final smartRoutingEnabled = activeServer.smartRouting;
+    final displayName = activeServer.displayName;
+    final nameCountryCode = activeServer.countryCode;
+    final otherCodes = activeServer.otherCodes;
+    final otherLocations = activeServer.otherLocations;
+    final delay = activeServer.delay;
+    final measuring = activeServer.measuring;
+    final isUpdating = ref.watch(isUpdatingProvider(activeProfile.updatingKey));
     final health = heroHealthOf(delay: delay, measuring: measuring);
     final status = heroStatusOf(_phase, health);
-    final palette = heroPaletteOf(context, status);
+    final heroRing = parsePanelHeroRing(panelMeta?.heroRing);
+    final palette = heroPaletteOf(context, status, heroRing: heroRing);
     final accent = status.isAlert ? palette.accent : null;
 
     return SingleChildScrollView(
@@ -326,6 +149,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             health: health,
             palette: palette,
             serviceLogo: panelMeta?.serviceLogo,
+            heroRing: heroRing,
             onPhaseChanged: (phase) => setState(() => _phase = phase),
             onLongPress: () => _showModePicker(),
           ),
@@ -373,17 +197,230 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
           const SizedBox(height: 12),
           _HeroActionRow(
             isUpdating: isUpdating,
-            onUpdate: profile == null
-                ? null
-                : () => unawaited(
-                    ref
-                        .read(profilesActionProvider.notifier)
-                        .updateProfile(profile, showLoading: true),
-                  ),
+            onUpdate: () => unawaited(
+              ref
+                  .read(profilesActionProvider.notifier)
+                  .updateProfile(activeProfile, showLoading: true),
+            ),
             supportUrl: panelMeta?.supportUrl,
           ),
           SizedBox(height: 12 + BottomInsetScope.of(context)),
         ],
+      ),
+    );
+  }
+}
+
+class _ByeDpiDashboard extends ConsumerWidget {
+  const _ByeDpiDashboard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(desyncSettingProvider);
+    final matchingStrategy = props.savedStrategies.where(
+      (strategy) => listEquals(strategy.args, props.strategyArgs),
+    );
+    final strategyName = listEquals(props.strategyArgs, desyncDefaultStrategy)
+        ? appLocalizations.desyncDefaultName
+        : matchingStrategy.isEmpty
+        ? appLocalizations.custom
+        : matchingStrategy.first.name;
+
+    return Column(
+      children: [
+        _ByeDpiStrategyCard(
+          name: strategyName,
+          argsCount: appLocalizations.desyncArgsCount(
+            props.strategyArgs.length,
+          ),
+          onTap: () {
+            showExtend(context, builder: (_) => const DesyncStrategyView());
+          },
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _ByeDpiActionCard(
+                icon: Icons.bolt_rounded,
+                title: appLocalizations.desyncTestSection,
+                subtitle: appLocalizations.desyncTestTitle,
+                onTap: () {
+                  showExtend(context, builder: (_) => const DesyncTestView());
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ByeDpiActionCard(
+                icon: Icons.settings_rounded,
+                title: appLocalizations.desyncEngine,
+                subtitle: '${appLocalizations.port} ${props.port}',
+                onTap: () {
+                  showExtend(context, builder: (_) => const DesyncEngineView());
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ByeDpiStrategyCard extends StatelessWidget {
+  const _ByeDpiStrategyCard({
+    required this.name,
+    required this.argsCount,
+    required this.onTap,
+  });
+
+  final String name;
+  final String argsCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    return FocusableTap(
+      borderRadius: heroCardRadius,
+      onTap: onTap,
+      child: HeroSurface(
+        padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
+        child: Row(
+          children: [
+            const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 46),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    appLocalizations.desyncStrategySection,
+                    style: context.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    argsCount,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 22,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ByeDpiActionCard extends StatelessWidget {
+  const _ByeDpiActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return FocusableTap(
+      borderRadius: heroCardRadius,
+      onTap: onTap,
+      child: HeroSurface(
+        height: 116,
+        padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _ByeDpiCardIcon(icon: icon, size: 36),
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ByeDpiCardIcon extends StatelessWidget {
+  const _ByeDpiCardIcon({required this.icon, required this.size});
+
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        color: colorScheme.primaryContainer,
+        shape: AppShape.md,
+      ),
+      child: Icon(
+        icon,
+        size: size * 0.48,
+        color: colorScheme.onPrimaryContainer,
       ),
     );
   }
@@ -397,6 +434,8 @@ class _OrbSection extends ConsumerWidget {
     required this.health,
     required this.palette,
     this.serviceLogo,
+    this.heroRing,
+    this.variant = HeroOrbVariant.vpn,
     required this.onPhaseChanged,
     this.onLongPress,
   });
@@ -407,6 +446,8 @@ class _OrbSection extends ConsumerWidget {
   final HeroHealth health;
   final HeroPalette palette;
   final String? serviceLogo;
+  final List<Color>? heroRing;
+  final HeroOrbVariant variant;
   final ValueChanged<HeroOrbPhase> onPhaseChanged;
   final VoidCallback? onLongPress;
 
@@ -419,27 +460,53 @@ class _OrbSection extends ConsumerWidget {
     );
     final isConnected = runMinutes != null && status != HeroStatus.paused;
 
-    final title = switch (status) {
-      HeroStatus.offline => appLocalizations.noNetwork,
-      HeroStatus.off => appLocalizations.heroNotProtected,
-      HeroStatus.checking => appLocalizations.heroChecking,
-      HeroStatus.connecting => appLocalizations.heroConnecting,
-      HeroStatus.reconnecting => appLocalizations.heroReconnecting,
-      HeroStatus.paused => appLocalizations.heroPaused,
-      HeroStatus.broken => appLocalizations.heroLinkBroken,
-      HeroStatus.secured ||
-      HeroStatus.degraded => appLocalizations.heroProtected,
-    };
-    final subtitle = switch (status) {
-      HeroStatus.offline => appLocalizations.heroNoNetworkHint,
-      HeroStatus.off => appLocalizations.heroTapToConnect,
-      HeroStatus.checking => appLocalizations.heroCheckingHint,
-      HeroStatus.connecting => displayName,
-      HeroStatus.reconnecting => appLocalizations.heroReconnectingHint,
-      HeroStatus.paused => appLocalizations.heroTapToResume,
-      HeroStatus.secured || HeroStatus.degraded || HeroStatus.broken =>
-        appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
-    };
+    final title = variant == HeroOrbVariant.byedpi
+        ? switch (status) {
+            HeroStatus.offline => appLocalizations.noNetwork,
+            HeroStatus.off => appLocalizations.byedpiOff,
+            HeroStatus.checking => appLocalizations.byedpiChecking,
+            HeroStatus.connecting => appLocalizations.byedpiStarting,
+            HeroStatus.reconnecting => appLocalizations.byedpiReconnecting,
+            HeroStatus.paused => appLocalizations.byedpiPaused,
+            HeroStatus.broken => appLocalizations.byedpiEngineError,
+            HeroStatus.secured ||
+            HeroStatus.degraded => appLocalizations.byedpiActive,
+          }
+        : switch (status) {
+            HeroStatus.offline => appLocalizations.noNetwork,
+            HeroStatus.off => appLocalizations.heroNotProtected,
+            HeroStatus.checking => appLocalizations.heroChecking,
+            HeroStatus.connecting => appLocalizations.heroConnecting,
+            HeroStatus.reconnecting => appLocalizations.heroReconnecting,
+            HeroStatus.paused => appLocalizations.heroPaused,
+            HeroStatus.broken => appLocalizations.heroLinkBroken,
+            HeroStatus.secured ||
+            HeroStatus.degraded => appLocalizations.heroProtected,
+          };
+    final subtitle = variant == HeroOrbVariant.byedpi
+        ? switch (status) {
+            HeroStatus.offline => appLocalizations.heroNoNetworkHint,
+            HeroStatus.off => appLocalizations.byedpiTapToStart,
+            HeroStatus.checking => displayName,
+            HeroStatus.connecting => displayName,
+            HeroStatus.reconnecting => displayName,
+            HeroStatus.paused => appLocalizations.byedpiTapToResume,
+            HeroStatus.secured ||
+            HeroStatus.degraded => appLocalizations.byedpiActiveFor(
+              heroDurationWords(runMinutes ?? 0),
+            ),
+            HeroStatus.broken => displayName,
+          }
+        : switch (status) {
+            HeroStatus.offline => appLocalizations.heroNoNetworkHint,
+            HeroStatus.off => appLocalizations.heroTapToConnect,
+            HeroStatus.checking => appLocalizations.heroCheckingHint,
+            HeroStatus.connecting => displayName,
+            HeroStatus.reconnecting => appLocalizations.heroReconnectingHint,
+            HeroStatus.paused => appLocalizations.heroTapToResume,
+            HeroStatus.secured || HeroStatus.degraded || HeroStatus.broken =>
+              appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
+          };
     final accent = status.isAlert ? palette.accent : null;
 
     final lastTraffic = isConnected
@@ -459,51 +526,74 @@ class _OrbSection extends ConsumerWidget {
           health: health,
           activity: heroActivityOf(lastTraffic),
           serviceLogo: serviceLogo,
+          heroRing: heroRing,
+          variant: variant,
           onPhaseChanged: onPhaseChanged,
           onLongPress: onLongPress,
         ),
         const SizedBox(height: 18),
-        AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeOutCubic,
-          textAlign: TextAlign.center,
-          style: (context.textTheme.headlineSmall ?? const TextStyle())
-              .copyWith(
-                fontWeight: FontWeight.w700,
-                color: accent ?? colorScheme.onSurface,
-              ),
-          child: Text(title, textAlign: TextAlign.center),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          subtitle,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+        SizedBox(
+          height: 58,
+          child: FadeThroughBox(
+            alignment: Alignment.topCenter,
+            child: Column(
+              key: ValueKey((title, subtitle)),
+              children: [
+                AnimatedDefaultTextStyle(
+                  duration: context.motionDuration(
+                    const Duration(milliseconds: 320),
+                  ),
+                  curve: Curves.easeOutCubic,
+                  textAlign: TextAlign.center,
+                  style: (context.textTheme.headlineSmall ?? const TextStyle())
+                      .copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: accent ?? colorScheme.onSurface,
+                      ),
+                  child: Text(title, textAlign: TextAlign.center),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
         RepaintBoundary(
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 250),
-            opacity: isConnected ? 1 : 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _SpeedEntry(
-                  icon: Icons.south_rounded,
-                  value: lastTraffic?.down,
-                  accent: accent,
-                ),
-                const SizedBox(width: 22),
-                _SpeedEntry(
-                  icon: Icons.north_rounded,
-                  value: lastTraffic?.up,
-                  accent: accent,
-                ),
-              ],
+          child: AnimatedSlide(
+            duration: context.motionDuration(const Duration(milliseconds: 320)),
+            curve: Curves.easeOutCubic,
+            offset: isConnected ? Offset.zero : const Offset(0, -0.2),
+            child: AnimatedOpacity(
+              duration: context.motionDuration(
+                const Duration(milliseconds: 220),
+              ),
+              curve: isConnected ? Curves.easeOut : Curves.easeIn,
+              opacity: isConnected ? 1 : 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _SpeedEntry(
+                    icon: Icons.south_rounded,
+                    value: lastTraffic?.down,
+                    accent: accent,
+                  ),
+                  const SizedBox(width: 22),
+                  _SpeedEntry(
+                    icon: Icons.north_rounded,
+                    value: lastTraffic?.up,
+                    accent: accent,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1216,52 +1306,139 @@ class _SignalBars extends StatelessWidget {
 }
 
 class _EmptyHero extends ConsumerWidget {
-  const _EmptyHero();
+  const _EmptyHero({required this.hasSavedProfiles});
+
+  final bool hasSavedProfiles;
+
+  void _showAddProfile(BuildContext context) {
+    showExtend(
+      context,
+      builder: (context) => AdaptiveSheetScaffold(
+        title: context.appLocalizations.addProfile,
+        body: AddProfileView(context: context),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 8),
-        const _Logo(),
-        const SizedBox(height: 16),
-        Text(
-          appName,
-          style: context.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            autofocus: true,
-            onPressed: () {
-              showExtend(
-                context,
-                builder: (context) => AdaptiveSheetScaffold(
-                  title: context.appLocalizations.addProfile,
-                  body: AddProfileView(context: context),
-                ),
-              );
-            },
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
+    final appLocalizations = context.appLocalizations;
+    final title = hasSavedProfiles
+        ? appLocalizations.dashboardNoActiveProfileTitle
+        : appLocalizations.dashboardNoProfileTitle;
+    final description = hasSavedProfiles
+        ? appLocalizations.dashboardNoActiveProfileDesc
+        : appLocalizations.dashboardNoProfileDesc;
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          const _Logo(),
+          const SizedBox(height: 16),
+          Text(
+            appName,
+            style: context.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
-            icon: const Icon(Icons.add_rounded, size: 20),
-            label: Text(context.appLocalizations.addProfile),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: () => ref
-              .read(desyncSettingProvider.notifier)
-              .update((state) => state.copyWith(enabled: true, onlyDpi: true)),
-          icon: const Icon(Icons.shield_rounded, size: 20),
-          label: Text(context.appLocalizations.desyncModeByedpi),
-        ),
-      ],
+          const SizedBox(height: 20),
+          HeroSurface(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    title,
+                    style: context.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  description,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                FilledButton.icon(
+                  autofocus: true,
+                  onPressed: hasSavedProfiles
+                      ? () => ref
+                            .read(currentPageLabelProvider.notifier)
+                            .toProfiles()
+                      : () => _showAddProfile(context),
+                  icon: Icon(
+                    hasSavedProfiles
+                        ? Icons.folder_open_rounded
+                        : Icons.add_rounded,
+                  ),
+                  label: Text(
+                    hasSavedProfiles
+                        ? appLocalizations.dashboardSelectProfile
+                        : appLocalizations.addProfile,
+                  ),
+                ),
+                if (hasSavedProfiles) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _showAddProfile(context),
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(appLocalizations.addProfile),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          FocusableTap(
+            borderRadius: heroCardRadius,
+            onTap: () => ref
+                .read(desyncSettingProvider.notifier)
+                .update(
+                  (state) => state.copyWith(enabled: true, onlyDpi: true),
+                ),
+            child: HeroSurface(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 44),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          appLocalizations.dashboardByedpiTitle,
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          appLocalizations.dashboardByedpiDesc,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 12 + BottomInsetScope.of(context)),
+        ],
+      ),
     );
   }
 }

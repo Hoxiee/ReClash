@@ -1,6 +1,7 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/change_server_button.dart';
 import 'package:reclash/views/dashboard/widgets/meta_info.dart';
@@ -56,7 +57,11 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
-          child: Scaffold(body: ListView(children: [widget])),
+          child: Scaffold(
+            body: ListView(
+              children: [Align(alignment: Alignment.topLeft, child: widget)],
+            ),
+          ),
         ),
       ),
     );
@@ -78,6 +83,21 @@ void main() {
       await pumpWidget(tester, const Announce());
 
       expect(find.text('No announcements'), findsOneWidget);
+    });
+
+    testWidgets('keeps long announcement text inside the card', (tester) async {
+      setProfile(
+        _profile(
+          panelMeta: const PanelMeta(
+            announce:
+                'Очень длинный анонс сервиса с переносом строки и подробным '
+                'описанием технических работ, которое не должно ломать плитку',
+          ),
+        ),
+      );
+      await pumpWidget(tester, const SizedBox(width: 360, child: Announce()));
+
+      expect(tester.takeException(), null);
     });
 
     testWidgets('opens the full announcement on tap', (tester) async {
@@ -162,6 +182,26 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsNothing);
     });
 
+    testWidgets('fits long localized subscription values', (tester) async {
+      setProfile(
+        _profile(
+          subscriptionInfo: SubscriptionInfo(
+            upload: 5 * 1024 * 1024 * 1024,
+            download: 8 * 1024 * 1024 * 1024,
+            total: 10 * 1024 * 1024 * 1024,
+            expire:
+                DateTime.now()
+                    .add(const Duration(days: 120, hours: 1))
+                    .millisecondsSinceEpoch ~/
+                1000,
+          ),
+        ),
+      );
+      await pumpWidget(tester, const SizedBox(width: 360, child: MetaInfo()));
+
+      expect(tester.takeException(), null);
+    });
+
     testWidgets('opens the subscription overview on tap', (tester) async {
       setProfile(
         _profile(
@@ -212,6 +252,23 @@ void main() {
   });
 
   group('ServiceInfo', () {
+    testWidgets('fits a long service name in a compact card', (tester) async {
+      setProfile(
+        _profile(
+          panelMeta: const PanelMeta(
+            serviceName:
+                'Очень длинное название сервиса для компактной карточки',
+          ),
+        ),
+      );
+      await pumpWidget(
+        tester,
+        const SizedBox(width: 177, child: ServiceInfo()),
+      );
+
+      expect(tester.takeException(), null);
+    });
+
     testWidgets('shows the service name', (tester) async {
       setProfile(
         _profile(
@@ -228,6 +285,46 @@ void main() {
   });
 
   group('ChangeServerButton', () {
+    testWidgets('fits a long server name in a compact card', (tester) async {
+      const server = ActiveServerInfo(
+        name: 'Очень длинное название выбранного сервера',
+        displayName: 'Очень длинное название выбранного сервера',
+        countryCode: 'RU',
+        testUrl: null,
+        delay: 123,
+        measuring: false,
+        otherCodes: [],
+        otherLocations: 0,
+        smartRouting: false,
+      );
+      final scopedContainer = ProviderContainer(
+        overrides: [activeServerProvider.overrideWithValue(server)],
+      );
+      addTearDown(scopedContainer.dispose);
+      globalState.container = scopedContainer;
+
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: scopedContainer,
+          child: const TestApp(
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(width: 177, child: ChangeServerButton()),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), null);
+    });
+
     testWidgets('falls back without the serverinfo header', (tester) async {
       setProfile(_profile());
       await pumpWidget(tester, const ChangeServerButton());

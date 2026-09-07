@@ -74,7 +74,7 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 6;
+  static const currentVersion = 7;
 
   Future<Config> run() async {
     final configMap = await _store.getConfigMap();
@@ -101,7 +101,7 @@ class Migration {
         final hasPlainTextDavPassword =
             storedDavPassword != null &&
             storedDavPassword == config.davProps?.password;
-          if (hasPlainTextDavPassword && !await _store.saveConfig(config)) {
+        if (hasPlainTextDavPassword && !await _store.saveConfig(config)) {
           throw StateError('Failed to obfuscate the legacy WebDAV password');
         }
         return _recoverDesyncTester(this, config);
@@ -143,6 +143,9 @@ class Migration {
     if (oldVersion < 6) {
       data = data.copyWith(configMap: _withTelegramOpenMarker(data.configMap));
     }
+    if (oldVersion < 7) {
+      data = data.copyWith(configMap: _withPrivacyDefaults(data.configMap));
+    }
 
     config = Config.realFromJson(data.configMap);
     await _store.restore(data);
@@ -165,10 +168,7 @@ class Migration {
 // A stored testRunning means the strategy tester died mid-run and left the
 // engine on some battery preset; put the user's strategy back and clear the
 // crash markers. An unsaved recovery simply retries on the next start.
-Future<Config> _recoverDesyncTester(
-  Migration migration,
-  Config config,
-) async {
+Future<Config> _recoverDesyncTester(Migration migration, Config config) async {
   final desync = config.desyncProps;
   if (!desync.testRunning) return config;
   final recovered = config.copyWith(
@@ -251,9 +251,7 @@ Map<String, Object?>? _withSeededRoutingBundle(
 }
 
 // v5→v6: youtube proved open from Russia too, so drop it, leaving Telegram.
-Map<String, Object?>? _withTelegramOpenMarker(
-  Map<String, Object?>? configMap,
-) {
+Map<String, Object?>? _withTelegramOpenMarker(Map<String, Object?>? configMap) {
   final routing = configMap?['smartRoutingProps'];
   if (configMap == null || routing is! Map) {
     return configMap;
@@ -269,10 +267,24 @@ Map<String, Object?>? _withTelegramOpenMarker(
   final map = Map<String, Object?>.from(configMap);
   map['smartRoutingProps'] = stored
       .copyWith(
-        openMarkers:
-            kept.isEmpty ? SmartRoutingPreset.russia.bundle.openMarkers : kept,
+        openMarkers: kept.isEmpty
+            ? SmartRoutingPreset.russia.bundle.openMarkers
+            : kept,
       )
       .toJson();
+  return map;
+}
+
+Map<String, Object?>? _withPrivacyDefaults(Map<String, Object?>? configMap) {
+  if (configMap == null) {
+    return null;
+  }
+  final map = Map<String, Object?>.from(configMap);
+  final settings = map['appSettingProps'];
+  map['appSettingProps'] =
+      Map<String, Object?>.from(settings is Map ? settings : const {})
+        ..['autoCheckUpdate'] = false
+        ..['sendDeviceIdentity'] = false;
   return map;
 }
 

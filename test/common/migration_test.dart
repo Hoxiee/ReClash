@@ -27,6 +27,51 @@ void main() {
       expect(store.events, ['getConfigMap', 'getVersion']);
     });
 
+    test('restores the strategy left by an interrupted DPI test', () async {
+      const original = ['-d1', '-s1'];
+      final configMap = _createConfigMap(
+        desyncProps: const DesyncProps(
+          strategyArgs: ['-f-1', '-a1'],
+          testRunning: true,
+          testRestoreArgs: original,
+        ),
+      );
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.desyncProps.strategyArgs, original);
+      expect(config.desyncProps.testRunning, isFalse);
+      expect(config.desyncProps.testRestoreArgs, isNull);
+      expect(store.savedConfig, config);
+      expect(store.events, ['getConfigMap', 'getVersion', 'saveConfig']);
+    });
+
+    test('still restores when persisting DPI recovery fails', () async {
+      final configMap = _createConfigMap(
+        desyncProps: const DesyncProps(
+          strategyArgs: ['-f-1', '-a1'],
+          testRunning: true,
+          testRestoreArgs: ['-d1', '-s1'],
+        ),
+      );
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+        configSaveResult: false,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.desyncProps.strategyArgs, ['-d1', '-s1']);
+      expect(config.desyncProps.testRunning, isFalse);
+      expect(config.desyncProps.testRestoreArgs, isNull);
+      expect(store.events, ['getConfigMap', 'getVersion', 'saveConfig']);
+    });
+
     test(
       'obfuscates a compatible DAV password without a version migration',
       () async {
@@ -296,17 +341,17 @@ void main() {
 
     test('v4 to v5 re-parses the seeded routing bundle in-process', () async {
       final configMap = _createConfigMap();
-      configMap['smartRoutingProps'] = {
-        'enabled': true,
-        'preset': 'ru',
-      };
+      configMap['smartRoutingProps'] = {'enabled': true, 'preset': 'ru'};
       final store = _FakeMigrationStore(configMap: configMap, version: 4);
 
       final config = await Migration(store: store).run();
 
       expect(store.version, Migration.currentVersion);
       expect(store.savedConfig?.smartRoutingProps.enabled, isTrue);
-      expect(store.savedConfig?.smartRoutingProps.preset, SmartRoutingPreset.russia);
+      expect(
+        store.savedConfig?.smartRoutingProps.preset,
+        SmartRoutingPreset.russia,
+      );
       expect(store.savedConfig?.smartRoutingProps.openMarkers, isNotEmpty);
       expect(config.smartRoutingProps.openMarkers, isNotEmpty);
     });
@@ -337,12 +382,37 @@ void main() {
       expect(markers.any((marker) => marker.url.contains('youtube')), isFalse);
       expect(markers.first.url, contains('telegram'));
     });
+
+    test('v6 to v7 disables implicit network metadata sharing', () async {
+      final configMap = _createConfigMap();
+      final settings = configMap['appSettingProps']! as Map<String, Object?>;
+      settings['autoCheckUpdate'] = true;
+      settings['sendDeviceIdentity'] = true;
+      final store = _FakeMigrationStore(configMap: configMap, version: 6);
+
+      final config = await Migration(store: store).run();
+
+      expect(config.appSettingProps.autoCheckUpdate, isFalse);
+      expect(config.appSettingProps.sendDeviceIdentity, isFalse);
+      expect(store.savedConfig?.appSettingProps.autoCheckUpdate, isFalse);
+      expect(store.savedConfig?.appSettingProps.sendDeviceIdentity, isFalse);
+      expect(store.version, Migration.currentVersion);
+    });
   });
 }
 
-Map<String, Object?> _createConfigMap({DAVProps? davProps}) {
+Map<String, Object?> _createConfigMap({
+  DAVProps? davProps,
+  DesyncProps desyncProps = defaultDesyncProps,
+}) {
   return jsonDecode(
-        jsonEncode(Config(themeProps: defaultThemeProps, davProps: davProps)),
+        jsonEncode(
+          Config(
+            themeProps: defaultThemeProps,
+            davProps: davProps,
+            desyncProps: desyncProps,
+          ),
+        ),
       )
       as Map<String, Object?>;
 }

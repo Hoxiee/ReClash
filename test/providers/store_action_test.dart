@@ -9,6 +9,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,6 +96,23 @@ void main() {
 
   Profile profile(int id) =>
       Profile(id: id, label: 'p$id', autoUpdateDuration: Duration.zero);
+
+  group('StoreAction preferences', () {
+    test('an immediate save cancels the older debounced snapshot', () async {
+      final container = buildContainer();
+      final action = container.read(storeActionProvider.notifier);
+
+      action.savePreferencesDebounce();
+      container
+          .read(desyncSettingProvider.notifier)
+          .update((state) => state.copyWith(testRunning: true));
+      expect(await action.savePreferences(), isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      final config = await preferences.getConfig();
+      expect(config?.desyncProps.testRunning, isTrue);
+    });
+  });
 
   group('StoreAction.handleClear', () {
     test('clears the core effect of every profile still in state', () async {

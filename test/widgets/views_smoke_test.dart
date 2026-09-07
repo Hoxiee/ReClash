@@ -238,12 +238,12 @@ void main() {
     );
     await tester.pump();
 
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
 
     await tester.tap(find.text('Send HWID'));
     await tester.pumpAndSettle();
 
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(tester.takeException(), null);
   });
 

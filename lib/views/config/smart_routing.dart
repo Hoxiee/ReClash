@@ -47,42 +47,9 @@ class SmartRoutingView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
-    final colorScheme = context.colorScheme;
     final slivers = <Widget>[
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-        sliver: SliverToBoxAdapter(
-          child: DecoratedBox(
-            decoration: ShapeDecoration(
-              shape: AppShape.xl,
-              color: colorScheme.surfaceContainerHigh,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.alt_route_rounded,
-                    size: 18,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      appLocalizations.smartRoutingIntro,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
       SettingSection.sliver(
-        top: 12,
+        top: 16,
         items: [
           DecorationListItem.toggle(
             title: Text(appLocalizations.smartRouting),
@@ -310,40 +277,28 @@ class _MarkersItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecorationListItem(
-      minVerticalPadding: 8,
-      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+    return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(
         markers.isEmpty ? desc : markers.map((marker) => marker.url).join(', '),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-      onPressed: () {
-        showExtend(
-          context,
-          props: const ExtendProps(blur: false, forceFull: true),
-          builder: (_) {
-            return _MarkersSheet(title: title, domestic: domestic);
-          },
-        );
-      },
+      blur: false,
+      widget: _MarkersPage(title: title, domestic: domestic),
     );
   }
 }
 
-/// The sheet wrapper for a marker list: the toolbar carries the add action,
-/// because the body is a bare list with no title bar of its own.
-class _MarkersSheet extends ConsumerStatefulWidget {
-  const _MarkersSheet({required this.title, required this.domestic});
+class _MarkersPage extends ConsumerStatefulWidget {
+  const _MarkersPage({required this.title, required this.domestic});
 
   final String title;
   final bool domestic;
 
   @override
-  ConsumerState<_MarkersSheet> createState() => _MarkersSheetState();
+  ConsumerState<_MarkersPage> createState() => _MarkersPageState();
 }
 
-class _MarkersSheetState extends ConsumerState<_MarkersSheet> {
+class _MarkersPageState extends ConsumerState<_MarkersPage> {
   Set<String> _selection = {};
 
   void _deleteSelected() {
@@ -355,35 +310,67 @@ class _MarkersSheetState extends ConsumerState<_MarkersSheet> {
         widget.domestic,
       ).where((marker) => !_selection.contains(marker.url)).toList(),
     );
-    _selection = {};
-    setState(() {});
+    setState(() => _selection = {});
+  }
+
+  void _toggleSelectAll() {
+    final markers = _markerRowsOf(
+      ref.read(smartRoutingSettingProvider),
+      widget.domestic,
+    );
+    setState(() {
+      _selection = _selection.length == markers.length
+          ? {}
+          : markers.map((marker) => marker.url).toSet();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final selection = _selection;
-    return AdaptiveSheetScaffold(
-      title: widget.title,
-      actions: [
-        if (selection.isNotEmpty)
-          IconButtonData(
-            icon: Icons.delete,
-            tooltip: context.appLocalizations.delete,
-            onPressed: _deleteSelected,
-          )
-        else
-          IconButtonData(
-            icon: Icons.add,
-            tooltip: context.appLocalizations.add,
-            onPressed: () => showMarkerDialog(context, ref, widget.domestic),
+    final appLocalizations = context.appLocalizations;
+    return CommonPopScope(
+      onPop: (_) {
+        if (selection.isEmpty) {
+          return true;
+        }
+        setState(() => _selection = {});
+        return false;
+      },
+      child: CommonScaffold(
+        title: widget.title,
+        actions: [
+          if (selection.isNotEmpty) ...[
+            CommonMinIconButtonTheme(
+              child: IconButton.filledTonal(
+                tooltip: appLocalizations.delete,
+                onPressed: _deleteSelected,
+                icon: const Icon(Icons.delete),
+              ),
+            ),
+            const SizedBox(width: 2),
+          ],
+          CommonMinFilledButtonTheme(
+            child: selection.isNotEmpty
+                ? FilledButton(
+                    onPressed: _toggleSelectAll,
+                    child: Text(appLocalizations.selectAll),
+                  )
+                : FilledButton.tonal(
+                    onPressed: () =>
+                        showMarkerDialog(context, ref, widget.domestic),
+                    child: Text(appLocalizations.add),
+                  ),
           ),
-      ],
-      body: _MarkersBody(
-        domestic: widget.domestic,
-        selection: selection,
-        onSelected: (url) => setState(() {
-          _selection = {..._selection}..addOrRemove(url);
-        }),
+          const SizedBox(width: 8),
+        ],
+        body: _MarkersBody(
+          domestic: widget.domestic,
+          selection: selection,
+          onSelected: (url) => setState(() {
+            _selection = {..._selection}..addOrRemove(url);
+          }),
+        ),
       ),
     );
   }
@@ -424,8 +411,6 @@ Future<void> showMarkerDialog(
   _writeMarkers(ref, domestic, next);
 }
 
-/// The marker list as a bare body: the opening row already named the list, and
-/// the sheet's toolbar is the only title bar.
 class _MarkersBody extends ConsumerWidget {
   const _MarkersBody({
     required this.domestic,
@@ -439,48 +424,30 @@ class _MarkersBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
     final rows = _markerRowsOf(
       ref.watch(smartRoutingSettingProvider),
       domestic,
     );
     if (rows.isEmpty) {
-      return CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            sliver: SliverToBoxAdapter(
-              child: generateSectionV3(
-                items: [
-                  DecorationListItem(
-                    minVerticalPadding: 8,
-                    title: Text(appLocalizations.smartRoutingMarkersEmpty),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      return NullStatus(
+        label: context.appLocalizations.smartRoutingMarkersEmpty,
       );
     }
     Widget itemAt(int index) => _markerRow(context, ref, rows, index);
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
-          sliver: SliverReorderableList(
-            itemCount: rows.length,
-            itemBuilder: (_, index) => itemAt(index),
-            proxyDecorator: (child, index, animation) =>
-                commonProxyDecorator(itemAt(index), index, animation),
-            onReorderItem: (oldIndex, newIndex) => _writeMarkers(
-              ref,
-              domestic,
-              rows.copyAndReorder(oldIndex, newIndex),
-            ),
-          ),
-        ),
-      ],
+    return ReorderableListView.builder(
+      padding: const EdgeInsets.only(
+        bottom: 16 + 64,
+        top: 16,
+        left: 16,
+        right: 16,
+      ),
+      buildDefaultDragHandles: false,
+      itemCount: rows.length,
+      itemBuilder: (_, index) => itemAt(index),
+      proxyDecorator: (child, index, animation) =>
+          commonProxyDecorator(itemAt(index), index, animation),
+      onReorderItem: (oldIndex, newIndex) =>
+          _writeMarkers(ref, domestic, rows.copyAndReorder(oldIndex, newIndex)),
     );
   }
 
@@ -494,26 +461,23 @@ class _MarkersBody extends ConsumerWidget {
     return ReorderableDelayedDragStartListener(
       key: ValueKey(marker.url),
       index: index,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: ItemPositionProvider(
-          position: ItemPosition.get(index, rows.length),
-          child: SelectedDecorationListItem(
-            title: TooltipText(
-              text: Text(
-                marker.url,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+      child: ItemPositionProvider(
+        position: ItemPosition.get(index, rows.length),
+        child: SelectedDecorationListItem(
+          title: TooltipText(
+            text: Text(
+              marker.url,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            subtitle: Text(marker.statuses.join(', ')),
-            isSelected: selection.contains(marker.url),
-            isEditing: selection.isNotEmpty,
-            onSelected: () => onSelected(marker.url),
-            onPressed: () => selection.isEmpty
-                ? showMarkerDialog(context, ref, domestic, index)
-                : onSelected(marker.url),
           ),
+          subtitle: Text(marker.statuses.join(', ')),
+          isSelected: selection.contains(marker.url),
+          isEditing: selection.isNotEmpty,
+          onSelected: () => onSelected(marker.url),
+          onPressed: () => selection.isEmpty
+              ? showMarkerDialog(context, ref, domestic, index)
+              : onSelected(marker.url),
         ),
       ),
     );

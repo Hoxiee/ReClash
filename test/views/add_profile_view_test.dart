@@ -4,8 +4,13 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/widgets/widgets.dart';
+
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../helpers/test_app.dart';
 
@@ -24,6 +29,83 @@ ProviderContainer _containerFor(WidgetTester tester) {
 }
 
 void main() {
+  testWidgets('shows LAN import only on TV', (tester) async {
+    final container = _containerFor(tester);
+    addTearDown(() => system.isTVForTesting = false);
+
+    Future<void> pump() async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            child: Scaffold(
+              body: Builder(
+                builder: (context) => AddProfileView(context: context),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    system.isTVForTesting = false;
+    await pump();
+    expect(find.byKey(const Key('lan-profile-import')), findsNothing);
+
+    system.isTVForTesting = true;
+    await pump();
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is ListItem && widget.key == const Key('lan-profile-import'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('LAN import dialog closes its listener on dispose', (
+    tester,
+  ) async {
+    final container = _containerFor(tester);
+    final imported = <SubscriptionImportTarget>[];
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => LanProfileImportDialog(
+                    address: InternetAddress.loopbackIPv4,
+                    onImport: (target) async => imported.add(target),
+                  ),
+                ),
+                child: const Text('open LAN import'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open LAN import'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(QrImageView), findsOneWidget);
+    final address = tester.widget<SelectableText>(find.byType(SelectableText));
+    expect(address.data, contains('http://127.0.0.1:'));
+
+    await tester.tap(find.text(currentAppLocalizations.close));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LanProfileImportDialog), findsNothing);
+    expect(imported, isEmpty);
+  });
+
   testWidgets('lists the QR code, file, and URL import entries', (
     tester,
   ) async {

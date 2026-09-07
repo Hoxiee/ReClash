@@ -19,6 +19,26 @@ typedef ValidateConfig = Future<String> Function(String path);
 
 typedef InspectConfig = Future<ConfigInspection?> Function(String path);
 
+typedef FetchProfileResponse =
+    Future<Response<Uint8List>> Function(
+      String url, {
+      Map<String, String>? headers,
+    });
+
+class _PreparedProfileUpdate {
+  const _PreparedProfileUpdate({
+    required this.profile,
+    required this.content,
+    required this.skipped,
+    required this.headers,
+  });
+
+  final Profile profile;
+  final String content;
+  final List<SkippedNode> skipped;
+  final Map<String, List<String>> headers;
+}
+
 @freezed
 abstract class SubscriptionInfo with _$SubscriptionInfo {
   const factory SubscriptionInfo({
@@ -208,32 +228,29 @@ extension ProfileExtension on Profile {
     required ValidateConfig validate,
     required InspectConfig inspect,
     Map<String, String>? requestHeaders,
+    FetchProfileResponse? fetch,
   }) async {
     final target = normalizeSubscriptionUrl(url);
     final record = await preferences.getSubscriptionHostRecord();
+    final fetchResponse = fetch ?? request.getFileResponseForUrl;
     var lastError = 'subscription fetch failed';
-    // A payload that parses but carries no dialable node is a panel stub; the
-    // first parsed one is still better than nothing when probing runs dry.
-    (Profile, Map<String, List<String>>)? stubFallback;
+    _PreparedProfileUpdate? stubFallback;
     for (final host in subscriptionUrlCandidates(target, record.hostsFor(id))) {
-      for (final candidate in probeOrder(
+      for (final client in probeOrder(
         clientEmulation,
         lastWorking: lastWorkingClient,
       )) {
         final headers = buildSubscriptionHeaders(
-          candidate,
+          client,
           deviceDetails: await deviceIdentity.info,
           defaultUa: requestHeaders?['User-Agent'],
           identityUserAgent: requestHeaders?['User-Agent'],
           customUserAgent: customUserAgent,
-          sendDeviceHeaders: requestHeaders != null,
+          sendDeviceHeaders: hasDeviceIdentityHeaders(requestHeaders),
         );
         final Response<Uint8List> response;
         try {
-          response = await request.getFileResponseForUrl(
-            host,
-            headers: headers,
-          );
+          response = await fetchResponse(host, headers: headers);
         } catch (error) {
           if (!shouldTryFallbackHost(error)) {
             rethrow;
@@ -247,46 +264,110 @@ extension ProfileExtension on Profile {
           continue;
         }
         try {
-          final updated = await _updateFromResponse(
+          final prepared = await _prepareUpdate(
             response,
             data,
-            primaryUrl: target,
+            profileUrl: target,
             validate: validate,
-            workingClient: candidate,
+            workingClient: client,
           );
-          if (await _isDialable(inspect)) {
+          final migrated = await _tryDomainMigration(
+            prepared,
+            primaryUrl: target,
+            headers: headers,
+            validate: validate,
+            inspect: inspect,
+            fetch: fetchResponse,
+            workingClient: client,
+          );
+          if (migrated != null) {
+            final committed = await _commitPrepared(migrated);
             await _rememberSpareHosts(
               record: record,
-              headers: response.headers.map,
+              headers: migrated.headers,
               primaryUrl: target,
-              updatedUrl: updated.url,
+              updatedUrl: committed.url,
             );
-            return updated.copyWith(undialableNodes: false);
+            return committed.copyWith(undialableNodes: false);
           }
-          stubFallback ??= (updated, response.headers.map);
+          if (await _isPreparedDialable(prepared, inspect)) {
+            final committed = await _commitPrepared(prepared);
+            await _rememberSpareHosts(
+              record: record,
+              headers: prepared.headers,
+              primaryUrl: target,
+              updatedUrl: committed.url,
+            );
+            return committed.copyWith(undialableNodes: false);
+          }
+          stubFallback ??= prepared;
           lastError = 'subscription returned no dialable nodes';
         } on MessageException catch (e) {
           lastError = e.message;
         }
       }
     }
-    final stub = stubFallback?.$1;
-    if (stub != null) {
+    if (stubFallback != null) {
+      final committed = await _commitPrepared(stubFallback);
       await _rememberSpareHosts(
         record: record,
-        headers: stubFallback!.$2,
+        headers: stubFallback.headers,
         primaryUrl: target,
-        updatedUrl: stub.url,
+        updatedUrl: committed.url,
       );
-      return stub.copyWith(undialableNodes: true);
+      return committed.copyWith(undialableNodes: true);
     }
     throw MessageException(lastError);
   }
 
-  Future<bool> _isDialable(InspectConfig inspect) async {
-    final file = await _getFile(false);
-    final inspection = await inspect(file.path);
-    return inspection == null || hasDialableNode(inspection);
+  Future<_PreparedProfileUpdate?> _tryDomainMigration(
+    _PreparedProfileUpdate source, {
+    required String primaryUrl,
+    required Map<String, String> headers,
+    required ValidateConfig validate,
+    required InspectConfig inspect,
+    required FetchProfileResponse fetch,
+    required SubscriptionClient workingClient,
+  }) async {
+    final candidateUrl = subscriptionDomainCandidate(
+      primaryUrl,
+      source.profile.panelMeta?.newDomain,
+    );
+    if (candidateUrl == null) return null;
+    try {
+      final response = await fetch(candidateUrl, headers: headers);
+      final data = response.data;
+      if (data == null) return null;
+      final prepared = await _prepareUpdate(
+        response,
+        data,
+        profileUrl: candidateUrl,
+        validate: validate,
+        workingClient: workingClient,
+      );
+      return await _isPreparedDialable(prepared, inspect) ? prepared : null;
+    } catch (error) {
+      commonPrint.log(
+        'subscription domain migration skipped: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+      return null;
+    }
+  }
+
+  Future<bool> _isPreparedDialable(
+    _PreparedProfileUpdate prepared,
+    InspectConfig inspect,
+  ) async {
+    final path = await appPath.tempFilePath;
+    final file = File(path);
+    try {
+      await file.safeWriteAsString(prepared.content);
+      final inspection = await inspect(path);
+      return inspection == null || hasDialableNode(inspection);
+    } finally {
+      await file.safeDelete();
+    }
   }
 
   Future<void> _rememberSpareHosts({
@@ -308,10 +389,10 @@ extension ProfileExtension on Profile {
     await preferences.saveSubscriptionHostRecord(merged);
   }
 
-  Future<Profile> _updateFromResponse(
+  Future<_PreparedProfileUpdate> _prepareUpdate(
     Response<Uint8List> response,
     Uint8List data, {
-    required String primaryUrl,
+    required String profileUrl,
     required ValidateConfig validate,
     required SubscriptionClient workingClient,
   }) async {
@@ -319,42 +400,55 @@ extension ProfileExtension on Profile {
     final userinfo = response.headers.value('subscription-userinfo');
     final panelMeta = PanelMeta.fromHeaders(response.headers.map);
     final updateInterval = panelMeta.updateIntervalMinutes;
-    var updatedUrl = primaryUrl;
-    final newDomain = panelMeta.newDomain;
-    if (newDomain != null && newDomain.isNotEmpty) {
-      final currentUri = Uri.tryParse(primaryUrl);
-      if (currentUri != null && currentUri.host != newDomain) {
-        updatedUrl = currentUri.replace(host: newDomain).toString();
-      }
-    }
     final naming = ProfileNaming.fromResponse(
       headers: response.headers.map,
-      host: Uri.tryParse(primaryUrl)?.host,
+      host: Uri.tryParse(profileUrl)?.host,
       profileTitle: panelMeta.profileTitle,
       dispositionFilename: getFileNameForDisposition(disposition),
     );
     final enrichedMeta = panelMeta.hasContent || naming.username != null
         ? panelMeta.copyWith(accountUsername: naming.username)
         : null;
-    // A hand-set name wins forever; only panel-derived labels track the wire.
     final resolvedLabel = userLabel
         ? null
         : naming.label.takeFirstValid([
             getFileNameForDisposition(disposition),
-            Uri.tryParse(primaryUrl)?.host,
+            Uri.tryParse(profileUrl)?.host,
           ]);
-    return copyWith(
-      url: updatedUrl,
-      label: resolvedLabel ?? label,
-      subscriptionInfo: SubscriptionInfo.formHString(userinfo),
-      panelMeta: enrichedMeta,
-      autoUpdateDuration: updateInterval != null
-          ? Duration(minutes: updateInterval)
-          : autoUpdateDuration,
-      lastWorkingClient: clientEmulation == SubscriptionClient.auto
-          ? workingClient
-          : clientEmulation,
-    ).saveFile(data, validate: validate);
+    final (content, skipped) = await _validatedConfig(
+      utf8.decode(data, allowMalformed: true),
+      validate: validate,
+    );
+    return _PreparedProfileUpdate(
+      profile: copyWith(
+        url: profileUrl,
+        label: resolvedLabel ?? label,
+        subscriptionInfo: SubscriptionInfo.formHString(userinfo),
+        panelMeta: enrichedMeta,
+        autoUpdateDuration: updateInterval != null
+            ? Duration(minutes: updateInterval)
+            : autoUpdateDuration,
+        lastWorkingClient: clientEmulation == SubscriptionClient.auto
+            ? workingClient
+            : clientEmulation,
+      ),
+      content: content,
+      skipped: skipped,
+      headers: response.headers.map,
+    );
+  }
+
+  Future<Profile> _commitPrepared(_PreparedProfileUpdate prepared) async {
+    final path = await appPath.tempFilePath;
+    final tempFile = File(path);
+    await tempFile.safeWriteAsString(prepared.content);
+    final target = await prepared.profile.file;
+    await tempFile.copy(target.path);
+    await tempFile.safeDelete();
+    return prepared.profile.copyWith(
+      lastUpdateDate: DateTime.now(),
+      skippedNodes: prepared.skipped,
+    );
   }
 
   Future<Profile> saveFile(

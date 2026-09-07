@@ -46,17 +46,15 @@ void main() {
     expect(find.text('Behaviour'), findsNothing);
   });
 
-  testWidgets('the intro card stays up before and after enabling', (
-    tester,
-  ) async {
+  testWidgets('the intro card is omitted', (tester) async {
     await _pump(tester, props: const SmartRoutingProps());
 
-    expect(find.textContaining('Start from a region preset'), findsOne);
+    expect(find.textContaining('Start from a region preset'), findsNothing);
 
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Start from a region preset'), findsOne);
+    expect(find.textContaining('Start from a region preset'), findsNothing);
   });
 
   testWidgets('the mid layer is settings, never weights', (tester) async {
@@ -80,6 +78,35 @@ void main() {
 
     expect(find.text('Servers per check'), findsOne);
   });
+
+  for (final title in ['Open-internet checks', 'Local checks']) {
+    testWidgets('$title uses the standard list editor', (tester) async {
+      await _pump(
+        tester,
+        props: const SmartRoutingProps(
+          enabled: true,
+          preset: SmartRoutingPreset.russia,
+          openMarkers: [
+            RcxMarker(url: 'https://example.com/open', statuses: [204]),
+          ],
+          domesticMarkers: [
+            RcxMarker(url: 'https://example.com/local', statuses: [200]),
+          ],
+        ),
+      );
+
+      await tester.scrollUntilVisible(
+        find.text(title),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ReorderableListView), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
+    });
+  }
 
   testWidgets('an adjusted preset says so and can be reset', (tester) async {
     final container = await _pump(

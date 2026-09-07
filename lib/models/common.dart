@@ -48,13 +48,14 @@ extension PackagesExt on List<Package> {
     required bool isFilterSystemApp,
     required bool isFilterNonInternetApp,
   }) {
+    final pinnedSet = pinedList.toSet();
     return where(
       (item) =>
           (isFilterSystemApp ? item.system == false : true) &&
           (isFilterNonInternetApp ? item.internet == true : true),
     ).sorted((a, b) {
-      final isSelectA = pinedList.contains(a.packageName);
-      final isSelectB = pinedList.contains(b.packageName);
+      final isSelectA = pinnedSet.contains(a.packageName);
+      final isSelectB = pinnedSet.contains(b.packageName);
 
       if (isSelectA != isSelectB) {
         return isSelectA ? -1 : 1;

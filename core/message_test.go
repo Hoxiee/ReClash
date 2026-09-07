@@ -68,6 +68,34 @@ func TestClassOfMessageRoutesEachTier(t *testing.T) {
 	}
 }
 
+func TestUiActivityOnlyGatesOptionalBulkMessages(t *testing.T) {
+	previous := uiActive.Load()
+	t.Cleanup(func() { uiActive.Store(previous) })
+
+	uiActive.Store(false)
+	for _, messageType := range []MessageType{LogMessage, RequestMessage} {
+		if shouldEnqueueMessage(Message{Type: messageType}) {
+			t.Errorf("%s was published while the UI was inactive", messageType)
+		}
+	}
+	for _, messageType := range []MessageType{
+		LoadedMessage,
+		GeoUpdateMessage,
+		DelayMessage,
+		RcxStatusMessage,
+	} {
+		if !shouldEnqueueMessage(Message{Type: messageType}) {
+			t.Errorf("%s was gated with optional bulk traffic", messageType)
+		}
+	}
+
+	uiActive.Store(true)
+	if !shouldEnqueueMessage(Message{Type: LogMessage}) ||
+		!shouldEnqueueMessage(Message{Type: RequestMessage}) {
+		t.Error("bulk messages stayed gated while the UI was active")
+	}
+}
+
 func TestEnqueueStateNeverEvictsAQueuedEvent(t *testing.T) {
 	queue := make(chan Message, 2)
 	for i := 0; i < 5; i++ {

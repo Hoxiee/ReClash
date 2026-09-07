@@ -308,6 +308,7 @@ type rcxCandidate struct {
 	CoolUntil  time.Time
 	InSkeleton bool
 	Degraded   bool
+	Circuit    bool
 }
 
 type rcxPolicy struct {
@@ -346,6 +347,9 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 		return false
 	}
 	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
+		return false
+	}
+	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return false
 	}
 	verdict := rcxAdmit(in.Terrain, c.Facts)
@@ -514,8 +518,8 @@ func rcxOrderOf(seed uint64, key string) uint16 {
 }
 
 func rcxCompareLatency(a, b rcxKey) int {
-	if a.latBucket != b.latBucket {
-		if a.latBucket < b.latBucket {
+	if a.verdict != b.verdict {
+		if a.verdict > b.verdict {
 			return -1
 		}
 		return 1
@@ -528,6 +532,12 @@ func rcxCompareLatency(a, b rcxKey) int {
 	}
 	if a.unproven != b.unproven {
 		if !a.unproven {
+			return -1
+		}
+		return 1
+	}
+	if a.latBucket != b.latBucket {
+		if a.latBucket < b.latBucket {
 			return -1
 		}
 		return 1
@@ -550,13 +560,14 @@ func rcxCompareLatency(a, b rcxKey) int {
 type rcxBlock string
 
 const (
-	rcxBlockNone         rcxBlock = ""
-	rcxBlockAbsent       rcxBlock = "absent"
-	rcxBlockNoUDP        rcxBlock = "no-udp"
-	rcxBlockCooling      rcxBlock = "cooling"
-	rcxBlockDisproven    rcxBlock = "disproven"
-	rcxBlockLastResort   rcxBlock = "last-resort-barred"
-	rcxBlockTerrainUnfit rcxBlock = "terrain-unfit"
+	rcxBlockNone            rcxBlock = ""
+	rcxBlockAbsent          rcxBlock = "absent"
+	rcxBlockNoUDP           rcxBlock = "no-udp"
+	rcxBlockCooling         rcxBlock = "cooling"
+	rcxBlockProviderCircuit rcxBlock = "provider-circuit"
+	rcxBlockDisproven       rcxBlock = "disproven"
+	rcxBlockLastResort      rcxBlock = "last-resort-barred"
+	rcxBlockTerrainUnfit    rcxBlock = "terrain-unfit"
 )
 
 func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
@@ -568,6 +579,9 @@ func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	}
 	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
 		return rcxBlockCooling
+	}
+	if c.Circuit && c.Facts.Transit != rcxProofProven {
+		return rcxBlockProviderCircuit
 	}
 	switch rcxAdmit(in.Terrain, c.Facts) {
 	case rcxVerdictReject:

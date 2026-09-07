@@ -90,14 +90,15 @@ void main() {
         .copyWith(accessControlProps: props);
   }
 
-  Future<void> pumpAccessView(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1400, 1400);
+  Future<void> pumpAccessView(
+    WidgetTester tester, {
+    Size size = const Size(1400, 1400),
+  }) async {
+    tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    container
-        .read(viewSizeProvider.notifier)
-        .update((_) => const Size(1400, 1400));
+    container.read(viewSizeProvider.notifier).update((_) => size);
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -174,21 +175,142 @@ void main() {
     });
   });
 
-  group('search', () {
-    testWidgets('filters by label and by package name', (tester) async {
+  group('top controls', () {
+    testWidgets('switches between include and exclude lists', (tester) async {
+      seedAccessControl(
+        const AccessControlProps(
+          enable: true,
+          rejectList: ['com.example.browser'],
+        ),
+      );
+      await pumpAccessView(tester);
+
+      await tester.tap(find.text('Include in VPN'));
+      await tester.pumpAndSettle();
+      expect(
+        container.read(accessControlStateProvider).mode,
+        AccessControlMode.acceptSelected,
+      );
+      expect(
+        tester
+            .widget<PackageListItem>(
+              find.widgetWithText(PackageListItem, 'Browser'),
+            )
+            .value,
+        isFalse,
+      );
+
+      await tester.tap(find.text('Chat'));
+      await tester.pump();
+      expect(container.read(accessControlStateProvider).acceptList, [
+        'com.example.chat',
+      ]);
+      expect(container.read(accessControlStateProvider).rejectList, [
+        'com.example.browser',
+      ]);
+
+      await tester.tap(find.text('Exclude from VPN'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<PackageListItem>(
+              find.widgetWithText(PackageListItem, 'Browser'),
+            )
+            .value,
+        isTrue,
+      );
+
+      await teardownView(tester);
+    });
+
+    testWidgets('filters from the inline search field and clears it', (
+      tester,
+    ) async {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
 
-      container.read(queryProvider(QueryTag.access).notifier).value = 'chat';
+      final searchField = find.byKey(const ValueKey('access-search-field'));
+      await tester.enterText(searchField, 'CHAT');
       await tester.pump();
       expect(find.text('Chat'), findsOneWidget);
       expect(find.text('Browser'), findsNothing);
 
-      container.read(queryProvider(QueryTag.access).notifier).value =
-          'com.example.browser';
+      await tester.tap(find.byTooltip('Clear search'));
       await tester.pump();
       expect(find.text('Browser'), findsOneWidget);
-      expect(find.text('Chat'), findsNothing);
+      expect(find.text('Chat'), findsOneWidget);
+      expect(container.read(queryProvider(QueryTag.access)), isEmpty);
+
+      await teardownView(tester);
+    });
+
+    testWidgets('keeps compact filters on one row', (tester) async {
+      seedAccessControl(const AccessControlProps(enable: true));
+      await pumpAccessView(tester, size: const Size(420, 900));
+
+      final sortButton = find.byKey(const ValueKey('access-sort-chip'));
+      final offlineFilter = find.byKey(
+        const ValueKey('access-offline-apps-filter'),
+      );
+      expect(
+        tester.getTopLeft(offlineFilter).dy,
+        tester.getTopLeft(sortButton).dy,
+      );
+      expect(find.text('Sort'), findsNothing);
+      expect(find.text('System apps'), findsNothing);
+      expect(find.text('No network access'), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await teardownView(tester);
+    });
+
+    testWidgets('keeps controls fixed while the app list scrolls', (
+      tester,
+    ) async {
+      container.read(packagesProvider.notifier).value = [
+        for (var index = 0; index < 24; index++)
+          _package('com.example.app$index', label: 'App $index'),
+      ];
+      seedAccessControl(const AccessControlProps(enable: true));
+      await pumpAccessView(tester, size: const Size(700, 900));
+
+      final panel = find.byKey(const ValueKey('access-control-panel'));
+      final initialPanelTop = tester.getTopLeft(panel).dy;
+      final initialFirstItemTop = tester.getTopLeft(find.text('App 0')).dy;
+
+      await tester.drag(find.byType(ListView), const Offset(0, -240));
+      await tester.pumpAndSettle();
+
+      expect(tester.getTopLeft(panel).dy, initialPanelTop);
+      expect(find.text('App 0'), findsNothing);
+      expect(
+        tester.getTopLeft(find.byType(PackageListItem).first).dy,
+        lessThan(initialFirstItemTop),
+      );
+
+      await teardownView(tester);
+    });
+
+    testWidgets('toggles app sources and selects a sort order', (tester) async {
+      seedAccessControl(const AccessControlProps(enable: true));
+      await pumpAccessView(tester);
+
+      await tester.tap(find.byKey(const ValueKey('access-system-apps-filter')));
+      await tester.pump();
+      expect(find.text('Settings'), findsOneWidget);
+      expect(
+        container.read(accessControlStateProvider).isFilterSystemApp,
+        isFalse,
+      );
+
+      await tester.tap(find.byKey(const ValueKey('access-sort-chip')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Name').last);
+      await tester.pumpAndSettle();
+      expect(
+        container.read(accessControlStateProvider).sort,
+        AccessSortType.name,
+      );
 
       await teardownView(tester);
     });

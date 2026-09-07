@@ -59,6 +59,8 @@ var (
 	isInit      atomic.Bool
 	isRunning   atomic.Bool
 	isSuspended atomic.Bool
+	uiActive    atomic.Bool
+	tunUp       atomic.Bool
 	tunPaused   atomic.Bool
 	sdkVersion  atomic.Int32
 	testURL     atomic.Pointer[string]
@@ -170,7 +172,15 @@ func updateListeners(cfg *config.Config) {
 		} else {
 			listener.ReCreateTun(tunConf, tunnel.Tunnel)
 		}
+		syncTunUp()
 	}
+}
+
+func syncTunUp() {
+	if features.Android {
+		return
+	}
+	tunUp.Store(isRunning.Load() && listener.GetTunConf().Enable)
 }
 
 // A closed TUN netdevice unregisters asynchronously (~2s on Linux); creating while the dying device still holds the name attaches to it and wedges netlink — create only on a free name, and treat a free-name failure as a real error.

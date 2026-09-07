@@ -7,16 +7,25 @@ import (
 )
 
 type rcxProbeTarget struct {
-	Node   string
-	Role   rcxRole
-	Marker rcxMarker
+	Node    string
+	Role    rcxRole
+	Marker  rcxMarker
+	Markers []rcxMarker
+}
+
+type rcxMarkerAttempt struct {
+	ID      string
+	Outcome rcxProbeOutcome
+	DelayMs int
 }
 
 type rcxProbeResult struct {
-	Node    string
-	Role    rcxRole
-	Outcome rcxProbeOutcome
-	DelayMs int
+	Node        string
+	Role        rcxRole
+	Fingerprint string
+	Outcome     rcxProbeOutcome
+	DelayMs     int
+	Attempts    []rcxMarkerAttempt
 }
 
 type rcxTestFunc func(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
@@ -70,21 +79,25 @@ func (p *rcxProber) wait(ctx context.Context, d time.Duration) bool {
 	}
 }
 
-// Targets that never started stay overloaded, which the ledger reads as no
-// information: a wave cut short by a dead radio must not condemn the park.
 func (p *rcxProber) Run(ctx context.Context, targets []rcxProbeTarget) []rcxProbeResult {
 	results := make([]rcxProbeResult, len(targets))
 	for i, target := range targets {
-		results[i] = rcxProbeResult{
-			Node:    target.Node,
-			Role:    target.Role,
-			Outcome: rcxProbeOverloaded,
-		}
+		results[i] = rcxUnmeasuredProbe(target)
 	}
-	if len(targets) == 0 {
-		return results
-	}
+	p.Stream(ctx, targets, func(index int, result rcxProbeResult) {
+		results[index] = result
+	})
+	return results
+}
 
+func (p *rcxProber) Stream(
+	ctx context.Context,
+	targets []rcxProbeTarget,
+	deliver func(int, rcxProbeResult),
+) {
+	if len(targets) == 0 {
+		return
+	}
 	concurrency := p.concurrency
 	if concurrency < 1 {
 		concurrency = 1
@@ -93,7 +106,6 @@ func (p *rcxProber) Run(ctx context.Context, targets []rcxProbeTarget) []rcxProb
 	defer cancel()
 	slots := make(chan struct{}, concurrency)
 	var wg sync.WaitGroup
-	var mu sync.Mutex
 
 dispatch:
 	for i := range targets {
@@ -107,21 +119,12 @@ dispatch:
 		}
 		wg.Add(1)
 		index := i
-		// A zero result reads as a pass, so an unanswered slot starts overloaded.
 		safeGoDetached("rcx probe", func() {
+			result := rcxUnmeasuredProbe(targets[index])
 			defer func() {
 				<-slots
 				wg.Done()
-			}()
-			result := rcxProbeResult{
-				Node:    targets[index].Node,
-				Role:    targets[index].Role,
-				Outcome: rcxProbeOverloaded,
-			}
-			defer func() {
-				mu.Lock()
-				results[index] = result
-				mu.Unlock()
+				deliver(index, result)
 				if p.enough != nil && p.enough(result) {
 					cancel()
 				}
@@ -130,36 +133,75 @@ dispatch:
 		})
 	}
 	wg.Wait()
-	return results
+}
+
+func rcxUnmeasuredProbe(target rcxProbeTarget) rcxProbeResult {
+	return rcxProbeResult{
+		Node:        target.Node,
+		Role:        target.Role,
+		Fingerprint: rcxMarkersFingerprint(rcxTargetMarkers(target)),
+		Outcome:     rcxProbeOverloaded,
+	}
+}
+
+func rcxTargetMarkers(target rcxProbeTarget) []rcxMarker {
+	if len(target.Markers) > 0 {
+		return target.Markers
+	}
+	return []rcxMarker{target.Marker}
 }
 
 func (p *rcxProber) probe(parent context.Context, target rcxProbeTarget) rcxProbeResult {
-	ctx, cancel := context.WithTimeout(parent, p.timeout)
-	defer cancel()
-
-	delayMs, satisfied, err := p.test(ctx, target.Node, target.Marker)
-	result := rcxProbeResult{Node: target.Node, Role: target.Role, DelayMs: delayMs}
-	switch {
-	case err != nil && parent.Err() != nil:
-		result.Outcome = rcxProbeOverloaded
-		result.DelayMs = 0
-	case err != nil:
-		result.Outcome = rcxProbeFail
-		result.DelayMs = 0
-	case !satisfied:
-		result.Outcome = rcxProbeStatusMismatch
-	default:
-		result.Outcome = rcxProbeOK
+	result := rcxUnmeasuredProbe(target)
+	markers := rcxTargetMarkers(target)
+	if len(markers) == 0 {
+		return result
+	}
+	for _, marker := range markers {
+		attempt := p.probeMarker(parent, target.Node, target.Role, marker)
+		result.Attempts = append(result.Attempts, attempt)
+		result.Outcome = attempt.Outcome
+		result.DelayMs = attempt.DelayMs
+		result.Fingerprint = attempt.ID
+		if attempt.Outcome == rcxProbeOK || attempt.Outcome == rcxProbeOverloaded {
+			break
+		}
 	}
 	return result
 }
 
+func (p *rcxProber) probeMarker(
+	parent context.Context,
+	node string,
+	role rcxRole,
+	marker rcxMarker,
+) rcxMarkerAttempt {
+	ctx, cancel := context.WithTimeout(parent, p.timeout)
+	defer cancel()
+	delayMs, satisfied, err := p.test(ctx, node, marker)
+	attempt := rcxMarkerAttempt{ID: rcxMarkerID(role, marker), DelayMs: delayMs}
+	switch {
+	case err != nil && parent.Err() != nil:
+		attempt.Outcome = rcxProbeOverloaded
+		attempt.DelayMs = 0
+	case err != nil:
+		attempt.Outcome = rcxProbeFail
+		attempt.DelayMs = 0
+	case !satisfied:
+		attempt.Outcome = rcxProbeStatusMismatch
+	default:
+		attempt.Outcome = rcxProbeOK
+	}
+	return attempt
+}
+
 type rcxProbeNode struct {
-	Name          string
-	Key           string
-	Type          string
-	Port          int
-	HasServerName bool
+	Name      string
+	Key       string
+	Provider  string
+	Transport string
+	Type      string
+	Port      int
 }
 
 func rcxPortClass(port int) string {
@@ -186,8 +228,6 @@ func rcxHoistNode(nodes []rcxProbeNode, name string) {
 	}
 }
 
-// One blocked transport, port class or SNI habit usually takes every node
-// sharing it, so a wave of twelve clones measures one fact twelve times.
 func rcxDiverseWave(nodes []rcxProbeNode, width int) []rcxProbeNode {
 	if width <= 0 || len(nodes) == 0 {
 		return nil
@@ -200,10 +240,7 @@ func rcxDiverseWave(nodes []rcxProbeNode, width int) []rcxProbeNode {
 	index := map[string]int{}
 	buckets := make([]bucket, 0, len(nodes))
 	for _, node := range nodes {
-		key := node.Type + "|" + rcxPortClass(node.Port)
-		if node.HasServerName {
-			key += "|sni"
-		}
+		key := node.Provider + "|" + node.Transport + "|" + node.Type + "|" + rcxPortClass(node.Port)
 		position, ok := index[key]
 		if !ok {
 			index[key] = len(buckets)

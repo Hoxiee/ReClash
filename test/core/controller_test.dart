@@ -91,6 +91,13 @@ void main() {
       expect(result, true);
     });
 
+    test('setUiActive delegates to interface', () async {
+      when(() => mock.setUiActive(true)).thenAnswer((_) async => true);
+
+      expect(await controller.setUiActive(true), isTrue);
+      verify(() => mock.setUiActive(true)).called(1);
+    });
+
     test('crash delegates to interface', () async {
       when(() => mock.crash()).thenAnswer((_) async => true);
 

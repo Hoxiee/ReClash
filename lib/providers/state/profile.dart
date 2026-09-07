@@ -16,6 +16,14 @@ Profile? currentProfile(Ref ref) {
 }
 
 @riverpod
+PanelBackground? panelBackground(Ref ref) {
+  final value = ref.watch(
+    currentProfileProvider.select((state) => state?.panelMeta?.background),
+  );
+  return parsePanelBackground(value);
+}
+
+@riverpod
 Profile? profile(Ref ref, int? profileId) {
   return ref.watch(
     profilesProvider.select((state) => state.getProfile(profileId)),

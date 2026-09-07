@@ -3,6 +3,33 @@ import 'package:material_ui/material_ui.dart';
 
 import 'config.dart';
 
+class PanelBackground {
+  const PanelBackground({required this.url, required this.opacity});
+
+  final String url;
+  final double opacity;
+}
+
+/// `https://example.com/image.jpg[,opacity 1-100]`.
+PanelBackground? parsePanelBackground(String? value) {
+  if (value == null) return null;
+  final separator = value.lastIndexOf(',');
+  final suppliedOpacity = separator == -1
+      ? null
+      : int.tryParse(value.substring(separator + 1).trim());
+  final rawUrl =
+      (suppliedOpacity == null ? value : value.substring(0, separator)).trim();
+  final uri = Uri.tryParse(rawUrl);
+  if (uri == null ||
+      (uri.scheme != 'http' && uri.scheme != 'https') ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty) {
+    return null;
+  }
+  final opacity = (suppliedOpacity ?? 10).clamp(1, 100) / 100;
+  return PanelBackground(url: uri.toString(), opacity: opacity);
+}
+
 class PanelTheme {
   const PanelTheme({this.primaryColor, this.schemeVariant, this.pureBlack});
 
@@ -23,6 +50,15 @@ ThemeProps applyPanelTheme(ThemeProps user, PanelTheme? panel) {
     schemeVariant: panel.schemeVariant ?? user.schemeVariant,
     pureBlack: panel.pureBlack ?? user.pureBlack,
   );
+}
+
+/// Exactly three provider-controlled colours for the normal live orb.
+List<Color>? parsePanelHeroRing(String? value) {
+  final tokens = _splitTokens(value, _ringSeparators);
+  if (tokens.length != 3) return null;
+  final colors = tokens.map(_parseHexColor).toList();
+  if (colors.any((color) => color == null)) return null;
+  return [for (final color in colors) Color(color!)];
 }
 
 /// `FF5733[:variant][:pureblack]`, tokens after the colour accepted in any
@@ -146,6 +182,7 @@ extension ProxiesStyleClaim on ProxiesStyleProps {
 }
 
 final _themeSeparators = RegExp(r'[;,:]');
+final _ringSeparators = RegExp(r'[;,]');
 final _viewSeparators = RegExp(r'[;,]');
 
 List<String> _splitTokens(String? value, Pattern separators) {

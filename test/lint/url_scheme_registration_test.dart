@@ -44,17 +44,9 @@ void main() {
     expect(allProtocolSchemes.toSet(), hasLength(allProtocolSchemes.length));
   });
 
-  test('the android manifest declares every claimed scheme', () {
+  test('the android manifest declares only exact supported pairs', () {
     final manifest = _read('android/app/src/main/AndroidManifest.xml');
-    final declared = RegExp(
-      r'android:scheme="([^"]+)"',
-    ).allMatches(manifest).map((match) => match.group(1)).toSet();
-
-    expect(declared, containsAll(allProtocolSchemes));
-  });
-
-  test('no scheme filter pins a host', () {
-    final manifest = _read('android/app/src/main/AndroidManifest.xml');
+    final declared = <(String, String)>{};
     final filters = RegExp(
       r'<intent-filter>(.*?)</intent-filter>',
       dotAll: true,
@@ -62,13 +54,27 @@ void main() {
 
     for (final filter in filters) {
       final body = filter.group(1)!;
-      if (!body.contains('android:scheme')) continue;
-      expect(
-        body,
-        isNot(contains('android:host')),
-        reason: 'a pinned host drops every deep link addressed to another one',
-      );
+      final schemes = RegExp(
+        r'android:scheme="([^"]+)"',
+      ).allMatches(body).map((match) => match.group(1)!).toList();
+      if (schemes.isEmpty) continue;
+      final hosts = RegExp(
+        r'android:host="([^"]+)"',
+      ).allMatches(body).map((match) => match.group(1)!).toList();
+      expect(schemes, hasLength(1), reason: body);
+      expect(hosts, hasLength(1), reason: body);
+      declared.add((schemes.single, hosts.single));
     }
+
+    final expected = {
+      for (final entry in androidProtocolHosts.entries)
+        for (final host in entry.value) (entry.key, host),
+    };
+    expect(declared, expected);
+    expect(
+      declared.map((pair) => pair.$1),
+      isNot(contains(anyOf(shareProtocolSchemes))),
+    );
   });
 
   test('the macos bundle declares every claimed scheme', () {

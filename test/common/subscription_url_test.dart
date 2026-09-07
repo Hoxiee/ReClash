@@ -49,6 +49,61 @@ void main() {
     });
   });
 
+  group('subscriptionDomainCandidate', () {
+    test('replaces only authority and keeps the subscription target', () {
+      expect(
+        subscriptionDomainCandidate(
+          'https://old.test:8443/sub/path?token=abc#section',
+          'new.test:9443',
+        ),
+        'https://new.test:9443/sub/path?token=abc#section',
+      );
+      expect(
+        subscriptionDomainCandidate(
+          'http://old.test:8080/sub?token=abc',
+          'new.test',
+        ),
+        'http://new.test:8080/sub?token=abc',
+      );
+    });
+
+    test('rejects ambiguous or malformed authorities', () {
+      for (final value in [
+        'https://new.test',
+        'user@new.test',
+        'new.test/path',
+        'new.test?token=other',
+        'new.test#fragment',
+        'new.test:70000',
+        'localhost',
+        '-bad.test',
+      ]) {
+        expect(
+          subscriptionDomainCandidate('https://old.test/sub', value),
+          isNull,
+          reason: value,
+        );
+      }
+      expect(
+        subscriptionDomainCandidate(
+          'https://user:secret@old.test/sub',
+          'new.test',
+        ),
+        isNull,
+      );
+    });
+
+    test('ignores the current authority', () {
+      expect(
+        subscriptionDomainCandidate(
+          'https://old.test:8443/sub',
+          'OLD.TEST:8443',
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('parseFallbackHosts', () {
     test('hosts are lowercased, deduplicated and capped', () {
       final hosts = parseFallbackHosts(

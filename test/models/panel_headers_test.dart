@@ -146,6 +146,8 @@ void main() {
         'reclash-servicename': ['Example VPN'],
         'reclash-servicelogo': ['https://example.com/logo.svg'],
         'reclash-serverinfo': ['Selector'],
+        'reclash-background': ['https://example.com/background.webp,18'],
+        'reclash-heroring': ['35B5FF,3657FF,A638F4'],
         'reclash-widgets': ['announce, metainfo, outboundModeV2'],
         'reclash-custom': ['update'],
       });
@@ -153,6 +155,8 @@ void main() {
       expect(meta.serviceName, 'Example VPN');
       expect(meta.serviceLogo, 'https://example.com/logo.svg');
       expect(meta.serverInfoGroup, 'Selector');
+      expect(meta.background, 'https://example.com/background.webp,18');
+      expect(meta.heroRing, '35B5FF,3657FF,A638F4');
       expect(meta.widgets, ['announce', 'metainfo', 'outboundModeV2']);
       expect(meta.widgetsApplyMode, PanelWidgetsApplyMode.update);
       expect(meta.hasContent, isTrue);
@@ -163,6 +167,7 @@ void main() {
         'flclashx-servicename': ['Example VPN'],
         'flclashx-servicelogo': ['https://example.com/logo.svg'],
         'flclashx-serverinfo': ['Selector'],
+        'flclashx-background': ['https://example.com/background.webp'],
         'flclashx-buyplan': ['https://example.com/buy/plan'],
         'flclashx-buytraffic': ['https://example.com/buy/traffic'],
       });
@@ -170,6 +175,7 @@ void main() {
       expect(meta.serviceName, 'Example VPN');
       expect(meta.serviceLogo, 'https://example.com/logo.svg');
       expect(meta.serverInfoGroup, 'Selector');
+      expect(meta.background, 'https://example.com/background.webp');
       expect(meta.buyPlanUrl, 'https://example.com/buy/plan');
       expect(meta.buyTrafficUrl, 'https://example.com/buy/traffic');
       expect(meta.hasContent, isTrue);
@@ -198,6 +204,24 @@ void main() {
       });
 
       expect(meta.settings, ['minimize', 'autorun', 'closeconnections']);
+    });
+
+    test('keeps the background through JSON serialization', () {
+      const background = 'https://example.com/background.webp,25';
+      final restored = PanelMeta.fromJson(
+        const PanelMeta(background: background).toJson(),
+      );
+      expect(restored.background, background);
+      expect(restored.hasContent, isTrue);
+    });
+
+    test('keeps the hero ring through JSON serialization', () {
+      const ring = '35B5FF;3657FF;A638F4';
+      final restored = PanelMeta.fromJson(
+        const PanelMeta(heroRing: ring).toJson(),
+      );
+      expect(restored.heroRing, ring);
+      expect(restored.hasContent, isTrue);
     });
 
     test('empty response yields inert meta', () {

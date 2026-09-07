@@ -196,4 +196,44 @@ void main() {
 
     expect(store.writes, 1);
   });
+  group('startup sweep', () {
+    final profiles = [_profile(id: 1), _profile(id: 2), _profile(id: 3)];
+
+    test('is Android-only', () async {
+      final checked = <int>[];
+
+      await runSubscriptionReminderSweep(
+        profiles: profiles,
+        isAndroid: false,
+        check: (profile) async => checked.add(profile.id),
+      );
+
+      expect(checked, isEmpty);
+    });
+
+    test('visits every profile sequentially and isolates failures', () async {
+      final checked = <int>[];
+      var active = 0;
+      var maxActive = 0;
+
+      await runSubscriptionReminderSweep(
+        profiles: profiles,
+        isAndroid: true,
+        check: (profile) async {
+          active++;
+          maxActive = active > maxActive ? active : maxActive;
+          checked.add(profile.id);
+          try {
+            if (profile.id == 2) throw StateError('notice failed');
+            await Future<void>.delayed(Duration.zero);
+          } finally {
+            active--;
+          }
+        },
+      );
+
+      expect(checked, [1, 2, 3]);
+      expect(maxActive, 1);
+    });
+  });
 }

@@ -111,6 +111,9 @@
   "selectAll": "すべて選択",
   "cancelSelectAll": "すべて選択解除",
   "appAccessControl": "アプリアクセス制御",
+  "accessControlIncludeInVpn": "VPNに含める",
+  "accessControlExcludeFromVpn": "VPNから除外",
+  "searchApps": "アプリを検索",
   "accessControlAllowDesc": "選択したアプリのみVPNを経由します",
   "accessControlNotAllowDesc": "選択したアプリはVPNから除外されます",
   "accessControlDisabledDesc": "アプリアクセス制御は無効です",
@@ -179,6 +182,8 @@
   "ipv6Desc": "有効にすると、IPv6トラフィックを受信できます",
   "app": "アプリ",
   "general": "一般",
+  "identity": "識別情報",
+  "animations": "アニメーション",
   "extra": "追加",
   "systemProxyDesc": "システムプロキシを設定します",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "フルーツサラダ",
   "developerMode": "開発者モード",
   "developerModeEnableTip": "開発者モードが有効になりました。",
+  "developerSubscriptions": "テスト用サブスクリプション",
+  "developerSubscriptionPrismDesc": "ブランドカラー、カスタム Hero Ring、ローカルロゴ",
+  "developerSubscriptionOrbitDesc": "通信量、有効期限、お知らせ、ドメイン移行、オファー",
+  "developerSubscriptionAtlasDesc": "プロバイダーウィジェット、サーバー切替、プロキシ表示",
+  "developerSubscriptionInstalled": "{name} をインストールしました",
   "messageTest": "メッセージテスト",
   "messageTestTip": "これはメッセージです。",
   "crashTest": "クラッシュテスト",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{total} 台のうち {eligible} 台が使用可能",
   "smartRoutingHistory": "最近の切り替え",
   "smartRoutingHistoryEmpty": "まだ切り替えはありません",
+  "smartRoutingSectionReliability": "信頼性",
+  "smartRoutingAvailability": "可用性",
+  "smartRoutingAvailabilityValue": "{duration} の稼働率 {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "検出された障害",
+  "smartRoutingStandbyHits": "ウォームスタンバイで復旧",
+  "smartRoutingLastRecovery": "直近の復旧時間",
+  "smartRoutingAverageRecovery": "平均復旧時間",
+  "smartRoutingProviderIncidents": "プロバイダー保護の作動回数",
+  "smartRoutingMarkerIncidents": "隔離されたサービスチェック",
+  "smartRoutingActiveCircuits": "一時保留中のプロバイダー",
+  "smartRoutingActiveMarkers": "一時保留中のチェック",
+  "smartRoutingNoRecovery": "復旧済みの障害はまだありません",
+  "smartRoutingBlockProviderCircuit": "独立した複数の障害によりプロバイダーを一時保留中",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "この 1 時間の検査は残り {left}/{cap} 回",
   "smartRoutingVerdictPreferred": "開かれたインターネットに到達",
@@ -826,26 +859,26 @@
   "smartRoutingBandLabel": "{band} 段",
   "smartRoutingDegraded": "帯域制限中",
   "smartRoutingOffHint": "スマートルーティングを有効にすると、サーバーを自動で選びます",
-  "setupWelcome": "1 分で設定が終わります",
+  "setupWelcome": "わかりやすい手順ですぐに準備できます",
   "setupLanguageTitle": "言語を選択",
-  "setupLanguageDesc": "設定からいつでも変更できます",
-  "setupLegalTitle": "はじめる前に",
-  "setupDataCollection": "クラッシュレポートを送信",
-  "setupSubscriptionTitle": "サブスクリプションを追加",
-  "setupSubscriptionDesc": "プロバイダーのリンク、QR コード、または設定ファイル",
-  "setupSubscriptionReady": "サブスクリプションを追加しました",
+  "setupLanguageDesc": "後から設定で変更できます",
+  "setupLegalTitle": "続行する前に",
+  "setupDataCollection": "任意のクラッシュレポートを送信",
+  "setupSubscriptionTitle": "接続プロファイルを追加",
+  "setupSubscriptionDesc": "プロファイルには接続に必要なサーバーとルールが含まれます。プロバイダーまたはバックアップから読み込んでください。",
+  "setupSubscriptionReady": "プロファイルの準備完了",
   "setupRestore": "バックアップから復元",
-  "setupRestoreDesc": "ReClash、FlClashX、FlClash のバックアップからデータを移行",
-  "setupFinishTitle": "あと少しです",
-  "setupRegionDesc": "サーバー選択の初期値を決めます",
-  "setupRegionNone": "選ばない",
-  "setupAutoRun": "起動時に接続",
-  "setupAutoRunDesc": "アプリを開くとすぐにトンネルを開始します",
+  "setupRestoreDesc": "ReClash、FlClashX、FlClash のバックアップから設定とプロファイルを復元",
+  "setupFinishTitle": "設定内容を確認",
+  "setupRegionDesc": "スマートルーティングが経路を選ぶ際の初期値です。言語は候補の提案にのみ使われます。",
+  "setupRegionNone": "その他の地域、またはスマートルーティングを使わない",
+  "setupAutoRun": "ReClash 起動時に接続",
+  "setupAutoRunDesc": "有効なプロファイルの読み込み後、VPN を自動的に開始します",
   "setupPermissionVpn": "VPN の許可",
   "setupPermissionVpnDesc": "初回接続時にシステムが確認します",
   "setupPermissionNotifications": "通知",
-  "setupPermissionNotificationsDesc": "動作中の接続状態を表示します",
-  "setupSkip": "スキップ",
+  "setupPermissionNotificationsDesc": "ReClash の動作中に接続状態を表示します",
+  "setupSkip": "プロファイルなしで続行",
   "setupNext": "次へ",
   "setupDone": "完了",
   "smartRoutingBreaker": "ホワイトリスト用",
@@ -945,11 +978,13 @@
   "systemSeed": "OS の色",
   "appIcon": "アプリのアイコン",
   "appIconChangeNote": "ランチャーは数秒後にアイコンを再描画します。一部のランチャーではピン留めショートカットが消えることがあります。",
-  "appIconMono": "モノクロ",
-  "appIconSepia": "セピア",
-  "appIconInverted": "反転",
-  "appIconDarkMono": "ダークモノ",
-  "appIconCool": "クール",
+  "appIconPulse": "パルス",
+  "appIconGlacier": "グレイシャー",
+  "appIconObsidian": "オブシディアン",
+  "appIconVelvet": "ベルベット",
+  "appIconSolar": "ソーラー",
+  "appIconCircuit": "サーキット",
+  "appIconPrism": "プリズム",
   "dashboardStyle": "ダッシュボードのスタイル",
   "classicDashboard": "クラシック",
   "classicDashboardDesc": "タイル配置と開始ボタン",
@@ -1080,5 +1115,120 @@
         "type": "num"
       }
     }
-  }
+  },
+  "desyncActiveStrategy": "有効なストラテジー",
+  "desyncCacheDisabled": "ストラテジーキャッシュは無効です",
+  "desyncEngineSummary": "{count} 個のルーティングカテゴリが ByeDPI エンジンを使用",
+  "desyncTestBattery": "テストバッテリー",
+  "desyncTestBatterySummary": "{presets} プリセット · {groups} グループ · {domains} ホスト",
+  "desyncRoutingRules": "有効なルール",
+  "desyncRoutingGeositeNote": "カテゴリの内容は内蔵 GEOSITE データベースから取得され、テストドメイン一覧とは別です",
+  "desyncRoutingNoCategories": "バイパスカテゴリが選択されていません",
+  "desyncRoutingNoCategoriesDesc": "現在 ByeDPI を通るサービスはありません",
+  "desyncRoutingFallbackDesc": "選択した GEOSITE カテゴリ以外の通信はすべて直接接続します",
+  "byedpiOff": "DPI バイパスはオフです",
+  "byedpiStarting": "DPI バイパスを開始中",
+  "byedpiChecking": "DPI エンジンを確認中",
+  "byedpiReconnecting": "DPI エンジンを再起動中",
+  "byedpiActive": "DPI バイパスが有効です",
+  "byedpiPaused": "DPI バイパスは一時停止中です",
+  "byedpiEngineError": "DPI エンジンを確認してください",
+  "byedpiTapToStart": "タップしてローカルバイパスエンジンを開始",
+  "byedpiTapToResume": "タップして DPI バイパスを再開",
+  "byedpiActiveFor": "DPI バイパス中 {time}",
+  "setupSystemLanguage": "システムの言語",
+  "setupStepProgress": "{count} ステップ中 {step}",
+  "setupLegalSummary": "ReClash は通信を経路制御するため、端末内に VPN 接続を作成します。設定やプロバイダーはご自身で選び、その利用にはご自身が責任を負います。",
+  "setupLegalDetails": "免責事項をすべて読む",
+  "setupLegalLicense": "オープンソースライセンス",
+  "setupDataCollectionDesc": "アプリの不具合調査に役立ちます。有効にしない限り送信されません。",
+  "setupDecline": "同意せず終了",
+  "setupBack": "戻る",
+  "dashboardNoProfileTitle": "接続を設定",
+  "dashboardNoProfileDesc": "信頼できるプロバイダーの VPN プロファイルを追加してください。それまでは VPN はオフのままです。",
+  "dashboardNoActiveProfileTitle": "VPN プロファイルを選択",
+  "dashboardNoActiveProfileDesc": "プロファイルは保存されていますが、選択されていません。VPN を操作するにはプロファイルを選んでください。",
+  "dashboardSelectProfile": "プロファイルを選択",
+  "dashboardByedpiTitle": "VPN プロバイダーがありませんか？",
+  "dashboardByedpiDesc": "VPN プロファイルなしで DPI を回避するには、ByeDPI 専用モードを使います。",
+  "dashboardUseByedpi": "ByeDPI を使う",
+  "setupProfileSourceNotice": "ReClash は VPN サービスを販売していません。信頼できるプロバイダーのリンク、QR コード、設定ファイルを使ってください。保存前に内容を検証します。",
+  "setupContinueWithoutProfile": "プロファイルなしで続行",
+  "setupContinueWithoutProfileDesc": "VPN はオフのままです。後から追加するか、VPN プロバイダー不要の ByeDPI 専用モードを利用できます。",
+  "setupProfilesReady": "{count} 件のプロファイルを準備しました",
+  "setupAddAnotherProfile": "さらに追加",
+  "setupReplaceProfile": "置き換え",
+  "setupDeleteProfile": "削除",
+  "setupReplaceProfileHint": "新しいプロファイルの読み込みと検証が成功してから現在のものを削除します。",
+  "setupRegionTitle": "現在のネットワークはどの地域ですか？",
+  "setupRegionRecommended": "言語からのおすすめ",
+  "setupAutoRunUnavailable": "自動接続を有効にするにはプロファイルを追加してください",
+  "setupSummaryTitle": "設定の概要",
+  "setupSummaryNoProfile": "VPN プロファイルなし — VPN はオフ。ByeDPI 専用モードは利用できます",
+  "setupSummaryProfile": "プロファイル：{name}",
+  "setupSummaryRouting": "スマートルーティング：{value}",
+  "setupSummaryAutoRunOn": "自動接続：オン",
+  "setupSummaryAutoRunOff": "自動接続：オフ",
+  "setupPermissionDeferred": "初回接続時に確認",
+  "setupPermissionBattery": "バッテリー最適化",
+  "setupPermissionBatteryDesc": "バックグラウンドでも VPN を維持できるようにします",
+  "setupPermissionChecking": "確認中…",
+  "setupPermissionRequest": "許可する",
+  "setupPermissionGranted": "許可済み",
+  "setupPermissionDenied": "未許可",
+  "setupPermissionUnavailable": "利用不可",
+  "setupPermissionError": "確認できませんでした",
+  "setupPermissionOpenSettings": "設定を開く",
+  "setupDoneConnect": "完了して接続",
+  "setupRerun": "初期設定をもう一度実行",
+  "setupRerunDesc": "データを削除せず、言語、プロファイル、経路、権限を見直します",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "スマートフォンから受信",
+  "lanProfileImportDesc": "ローカルネットワーク経由でサブスクリプション URL を送信するための一回限りの QR コードを表示します",
+  "lanProfileImportTitle": "サブスクリプションを受信",
+  "lanProfileImportScan": "同じネットワーク上のスマートフォンでこの QR コードをスキャンしてください",
+  "lanProfileImportAddress": "または {address} に JSON を送信してください",
+  "lanProfileImportWaiting": "サブスクリプションを待機中…",
+  "lanProfileImportImporting": "サブスクリプションをインポート中…",
+  "lanProfileImportImported": "サブスクリプションを受信しました",
+  "lanProfileImportTimedOut": "一回限りのリンクの有効期限が切れました",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "ローカル共有を開始できませんでした",
+  "lanProfileImportFailed": "サブスクリプションをインポートできませんでした"
 }

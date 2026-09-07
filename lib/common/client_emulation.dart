@@ -26,13 +26,17 @@ List<SubscriptionClient> probeOrder(
   return order.toSet().toList();
 }
 
+bool hasDeviceIdentityHeaders(Map<String, String>? headers) {
+  return headers?.containsKey('x-hwid') == true;
+}
+
 Map<String, String> buildSubscriptionHeaders(
   SubscriptionClient client, {
   required DeviceIdentityInfo deviceDetails,
   String? defaultUa,
   String? identityUserAgent,
   String? customUserAgent,
-  bool sendDeviceHeaders = true,
+  bool sendDeviceHeaders = false,
   String? locale,
 }) {
   final headers = <String, String>{};

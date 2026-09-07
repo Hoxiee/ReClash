@@ -260,6 +260,63 @@ void main() {
       expect(container.read(checkIpNumProvider), before);
     });
 
+    test('probes the selected node after a live switch', () async {
+      final probe = Completer<Delay?>();
+      when(
+        () => core.asyncTestDelay(_testUrl, 'HK-01'),
+      ).thenAnswer((_) => probe.future);
+      final container = _delayContainer(
+        () => buildContainer(profile: _selectedProfile('HK-00')),
+      );
+      container.read(runTimeProvider.notifier).value = 1;
+      container.read(groupsProvider.notifier).value = [
+        const Group(
+          name: 'Proxy',
+          type: GroupType.Selector,
+          testUrl: _testUrl,
+          all: [_proxy],
+        ),
+      ];
+
+      await actionOf(
+        container,
+      ).changeProxy(groupName: 'Proxy', proxyName: 'HK-01');
+
+      verify(() => core.asyncTestDelay(_testUrl, 'HK-01')).called(1);
+      expect(container.read(pendingDelayTestsProvider), {_delayKey});
+
+      probe.complete(const Delay(name: 'HK-01', url: _testUrl, value: -1));
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -1);
+      expect(container.read(pendingDelayTestsProvider), isEmpty);
+    });
+
+    test(
+      'does not probe a switched node while the tunnel is stopped',
+      () async {
+        final container = _delayContainer(
+          () => buildContainer(profile: _selectedProfile('HK-00')),
+        );
+        container.read(groupsProvider.notifier).value = [
+          const Group(
+            name: 'Proxy',
+            type: GroupType.Selector,
+            testUrl: _testUrl,
+            all: [_proxy],
+          ),
+        ];
+
+        await actionOf(
+          container,
+        ).changeProxy(groupName: 'Proxy', proxyName: 'HK-01');
+
+        verifyNever(() => core.asyncTestDelay(any(), any()));
+        expect(container.read(pendingDelayTestsProvider), isEmpty);
+      },
+    );
+
     test('commits the selection the Core accepted', () async {
       final container = buildContainer(profile: _selectedProfile('HK-00'));
 
@@ -327,7 +384,7 @@ void main() {
       expect(container.read(pendingDelayTestsProvider), isEmpty);
     });
 
-    test('keeps the last measurement when the Core does not answer', () async {
+    test('records a failed verdict when the Core returns no result', () async {
       when(
         () => core.asyncTestDelay(_testUrl, 'HK-01'),
       ).thenAnswer((_) async => null);
@@ -338,11 +395,11 @@ void main() {
 
       await actionOf(container).proxyDelayTest(_proxy);
 
-      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], 42);
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -1);
       expect(container.read(pendingDelayTestsProvider), isEmpty);
     });
 
-    test('falls back to untested when a throwing call had no value', () async {
+    test('records a failed verdict when the node probe throws', () async {
       when(
         () => core.asyncTestDelay(_testUrl, 'HK-01'),
       ).thenThrow(StateError('channel is gone'));
@@ -350,9 +407,30 @@ void main() {
 
       await actionOf(container).proxyDelayTest(_proxy);
 
-      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], null);
+      expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], -1);
       expect(container.read(pendingDelayTestsProvider), isEmpty);
     });
+
+    test(
+      'does not accuse the node when the Core transport is unavailable',
+      () async {
+        when(() => core.asyncTestDelay(_testUrl, 'HK-01')).thenThrow(
+          const CoreMethodException(
+            code: 'transport_disconnected',
+            message: 'Core RPC client is closed',
+          ),
+        );
+        final container = _delayContainer(buildContainer);
+        container
+            .read(delayDataSourceProvider.notifier)
+            .setDelay(const Delay(name: 'HK-01', url: _testUrl, value: 42));
+
+        await actionOf(container).proxyDelayTest(_proxy);
+
+        expect(container.read(delayDataSourceProvider)[_testUrl]?['HK-01'], 42);
+        expect(container.read(pendingDelayTestsProvider), isEmpty);
+      },
+    );
 
     test('does nothing when the resolved proxy name is empty', () async {
       final container = buildContainer();
@@ -444,8 +522,8 @@ void main() {
 
       expect(calls, proxies.length);
       final delays = container.read(delayDataSourceProvider)[_testUrl];
-      expect(delays?.length, proxies.length - 1);
-      expect(delays?['HK-1'], isNull);
+      expect(delays?.length, proxies.length);
+      expect(delays?['HK-1'], -1);
       expect(container.read(pendingDelayTestsProvider), isEmpty);
     });
 
@@ -474,8 +552,8 @@ void main() {
 
       expect(calls, proxies.length);
       final delays = container.read(delayDataSourceProvider)[_testUrl];
-      expect(delays?.length, proxies.length - 1);
-      expect(delays?['HK-1'], isNull);
+      expect(delays?.length, proxies.length);
+      expect(delays?['HK-1'], -1);
       expect(container.read(pendingDelayTestsProvider), isEmpty);
     });
 

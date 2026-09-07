@@ -332,6 +332,28 @@ abstract class RcxLinkReport with _$RcxLinkReport {
 }
 
 @freezed
+abstract class RcxMetricsReport with _$RcxMetricsReport {
+  const factory RcxMetricsReport({
+    @Default(0) int enabledMillis,
+    @Default(0) int availableMillis,
+    @Default(0) int availability,
+    @Default(0) int incidents,
+    @Default(0) int standbyHits,
+    @Default(0) int providerIncidents,
+    @Default(0) int markerIncidents,
+    @Default(0) int lastFailover,
+    @Default(0) int averageFailover,
+    @Default(0) int lastOutage,
+    @Default(0) int averageOutage,
+    @Default([]) List<String> activeCircuits,
+    @Default([]) List<String> activeMarkers,
+  }) = _RcxMetricsReport;
+
+  factory RcxMetricsReport.fromJson(Map<String, Object?> json) =>
+      _$RcxMetricsReportFromJson(json);
+}
+
+@freezed
 abstract class RcxReport with _$RcxReport {
   const factory RcxReport({
     @Default(RcxStatus()) RcxStatus status,
@@ -339,6 +361,7 @@ abstract class RcxReport with _$RcxReport {
     @Default([]) List<RcxCanaryReport> canaries,
     @Default([]) List<RcxCandidateReport> candidates,
     @Default([]) List<RcxSwitchReport> history,
+    @Default(RcxMetricsReport()) RcxMetricsReport metrics,
     @Default([]) List<int> bands,
     @Default(0) int probesLeft,
     @Default(0) int probeCap,

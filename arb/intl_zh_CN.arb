@@ -111,6 +111,9 @@
   "selectAll": "全选",
   "cancelSelectAll": "取消全选",
   "appAccessControl": "应用访问控制",
+  "accessControlIncludeInVpn": "包含在 VPN 中",
+  "accessControlExcludeFromVpn": "从 VPN 中排除",
+  "searchApps": "搜索应用",
   "accessControlAllowDesc": "只允许选中应用进入VPN",
   "accessControlNotAllowDesc": "选中应用将会被排除在VPN之外",
   "accessControlDisabledDesc": "应用访问控制已关闭",
@@ -179,6 +182,8 @@
   "ipv6Desc": "开启后将可以接收IPv6流量",
   "app": "应用",
   "general": "常规",
+  "identity": "身份标识",
+  "animations": "动画",
   "extra": "附加",
   "systemProxyDesc": "设置系统代理",
   "userAgent": "用户代理",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "果缤纷",
   "developerMode": "开发者模式",
   "developerModeEnableTip": "开发者模式已启用。",
+  "developerSubscriptions": "测试订阅",
+  "developerSubscriptionPrismDesc": "品牌颜色、自定义 Hero Ring 和本地徽标",
+  "developerSubscriptionOrbitDesc": "流量、到期时间、公告、域名迁移和套餐入口",
+  "developerSubscriptionAtlasDesc": "服务商组件、服务器切换和代理布局",
+  "developerSubscriptionInstalled": "已安装 {name}",
   "messageTest": "消息测试",
   "messageTestTip": "这是一条消息。",
   "crashTest": "崩溃测试",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{total} 台中 {eligible} 台可用",
   "smartRoutingHistory": "最近的切换",
   "smartRoutingHistoryEmpty": "还没有切换过",
+  "smartRoutingSectionReliability": "可靠性",
+  "smartRoutingAvailability": "可用性",
+  "smartRoutingAvailabilityValue": "{duration}内为 {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "检测到的中断",
+  "smartRoutingStandbyHits": "通过热备用恢复",
+  "smartRoutingLastRecovery": "最近恢复耗时",
+  "smartRoutingAverageRecovery": "平均恢复耗时",
+  "smartRoutingProviderIncidents": "提供商熔断次数",
+  "smartRoutingMarkerIncidents": "已隔离的服务检查",
+  "smartRoutingActiveCircuits": "暂时停用的提供商",
+  "smartRoutingActiveMarkers": "暂时停用的检查",
+  "smartRoutingNoRecovery": "尚无已恢复的中断",
+  "smartRoutingBlockProviderCircuit": "因多个独立故障而暂时停用提供商",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "本小时还剩 {left}/{cap} 次探测",
   "smartRoutingVerdictPreferred": "可通往开放互联网",
@@ -826,26 +859,26 @@
   "smartRoutingBandLabel": "第 {band} 档",
   "smartRoutingDegraded": "被限速",
   "smartRoutingOffHint": "开启智能路由，让它替你挑选服务器",
-  "setupWelcome": "一分钟完成设置",
+  "setupWelcome": "几个简单步骤即可准备就绪",
   "setupLanguageTitle": "选择语言",
-  "setupLanguageDesc": "之后可以在设置中更改",
-  "setupLegalTitle": "开始之前",
-  "setupDataCollection": "发送崩溃报告",
-  "setupSubscriptionTitle": "添加订阅",
-  "setupSubscriptionDesc": "机场提供的链接、二维码或配置文件",
-  "setupSubscriptionReady": "订阅已添加",
+  "setupLanguageDesc": "之后可在设置中更改",
+  "setupLegalTitle": "继续之前",
+  "setupDataCollection": "发送可选的崩溃报告",
+  "setupSubscriptionTitle": "添加连接配置",
+  "setupSubscriptionDesc": "配置包含 ReClash 连接所需的服务器和规则。请从服务提供商或备份中导入。",
+  "setupSubscriptionReady": "配置已就绪",
   "setupRestore": "从备份恢复",
-  "setupRestoreDesc": "从 ReClash、FlClashX 或 FlClash 的备份迁移数据",
-  "setupFinishTitle": "就快好了",
-  "setupRegionDesc": "决定选择服务器时的初始设置",
-  "setupRegionNone": "不选择",
-  "setupAutoRun": "启动时连接",
-  "setupAutoRunDesc": "打开应用后立即建立隧道",
+  "setupRestoreDesc": "从 ReClash、FlClashX 或 FlClash 备份恢复设置和配置",
+  "setupFinishTitle": "检查设置",
+  "setupRegionDesc": "智能路由会以此作为选择路径的起点。界面语言只用于给出建议。",
+  "setupRegionNone": "其他地区或不使用智能路由",
+  "setupAutoRun": "打开 ReClash 时连接",
+  "setupAutoRunDesc": "载入有效配置后自动启动 VPN",
   "setupPermissionVpn": "VPN 权限",
-  "setupPermissionVpnDesc": "首次连接时系统会询问",
+  "setupPermissionVpnDesc": "首次连接时由系统询问",
   "setupPermissionNotifications": "通知",
-  "setupPermissionNotificationsDesc": "运行时显示连接状态",
-  "setupSkip": "跳过",
+  "setupPermissionNotificationsDesc": "ReClash 运行时显示连接状态",
+  "setupSkip": "不添加配置，继续",
   "setupNext": "下一步",
   "setupDone": "完成",
   "smartRoutingBreaker": "白名单专用",
@@ -945,11 +978,13 @@
   "systemSeed": "系统颜色",
   "appIcon": "应用图标",
   "appIconChangeNote": "启动器会在几秒后重绘图标。部分启动器上固定的快捷方式可能消失。",
-  "appIconMono": "单色",
-  "appIconSepia": "复古",
-  "appIconInverted": "反色",
-  "appIconDarkMono": "深色单色",
-  "appIconCool": "冷色",
+  "appIconPulse": "脉冲",
+  "appIconGlacier": "冰川",
+  "appIconObsidian": "黑曜石",
+  "appIconVelvet": "天鹅绒",
+  "appIconSolar": "日耀",
+  "appIconCircuit": "电路",
+  "appIconPrism": "棱镜",
   "dashboardStyle": "面板样式",
   "classicDashboard": "经典",
   "classicDashboardDesc": "磁贴网格与启动按钮",
@@ -1080,5 +1115,120 @@
         "type": "num"
       }
     }
-  }
+  },
+  "desyncActiveStrategy": "当前策略",
+  "desyncCacheDisabled": "策略缓存已关闭",
+  "desyncEngineSummary": "{count} 个路由分类使用 ByeDPI 引擎",
+  "desyncTestBattery": "测试组合",
+  "desyncTestBatterySummary": "{presets} 个预设 · {groups} 个分组 · {domains} 个主机",
+  "desyncRoutingRules": "生效规则",
+  "desyncRoutingGeositeNote": "分类成员来自内置 GEOSITE 数据库；测试域名列表与其相互独立",
+  "desyncRoutingNoCategories": "未选择绕过分类",
+  "desyncRoutingNoCategoriesDesc": "当前没有服务通过 ByeDPI 路由",
+  "desyncRoutingFallbackDesc": "所选 GEOSITE 分类之外的所有流量均直接连接",
+  "byedpiOff": "DPI 绕过已关闭",
+  "byedpiStarting": "正在启动 DPI 绕过",
+  "byedpiChecking": "正在检查 DPI 引擎",
+  "byedpiReconnecting": "正在重启 DPI 引擎",
+  "byedpiActive": "DPI 绕过已启用",
+  "byedpiPaused": "DPI 绕过已暂停",
+  "byedpiEngineError": "DPI 引擎需要检查",
+  "byedpiTapToStart": "点按以启动本地绕过引擎",
+  "byedpiTapToResume": "点按以恢复 DPI 绕过",
+  "byedpiActiveFor": "DPI 绕过已运行 {time}",
+  "setupSystemLanguage": "跟随系统语言",
+  "setupStepProgress": "第 {step} 步，共 {count} 步",
+  "setupLegalSummary": "ReClash 会在本机创建 VPN 连接来路由流量。配置或服务提供商由你选择，你也需要对其使用负责。",
+  "setupLegalDetails": "阅读完整免责声明",
+  "setupLegalLicense": "开源许可证",
+  "setupDataCollectionDesc": "用于排查应用崩溃。除非你主动开启，否则不会发送。",
+  "setupDecline": "不同意并退出",
+  "setupBack": "返回",
+  "dashboardNoProfileTitle": "设置连接",
+  "dashboardNoProfileDesc": "请添加来自可信服务提供商的 VPN 配置。在此之前，VPN 将保持关闭。",
+  "dashboardNoActiveProfileTitle": "选择 VPN 配置",
+  "dashboardNoActiveProfileDesc": "已有保存的配置，但当前未选中任何配置。请选择一个配置以使用 VPN 控件。",
+  "dashboardSelectProfile": "选择配置",
+  "dashboardByedpiTitle": "没有 VPN 服务商？",
+  "dashboardByedpiDesc": "使用“仅 ByeDPI”模式，无需 VPN 配置即可绕过 DPI。",
+  "dashboardUseByedpi": "使用 ByeDPI",
+  "setupProfileSourceNotice": "ReClash 不销售 VPN 服务。请使用可信服务提供商提供的链接、二维码或配置文件。保存前会先验证配置。",
+  "setupContinueWithoutProfile": "不添加配置，继续",
+  "setupContinueWithoutProfileDesc": "VPN 将保持关闭。你可以稍后添加配置，也可以在没有 VPN 服务商的情况下使用“仅 ByeDPI”模式。",
+  "setupProfilesReady": "已有 {count} 个配置就绪",
+  "setupAddAnotherProfile": "继续添加",
+  "setupReplaceProfile": "替换",
+  "setupDeleteProfile": "删除",
+  "setupReplaceProfileHint": "新配置成功导入并通过验证后，才会删除当前配置。",
+  "setupRegionTitle": "当前网络位于哪个地区？",
+  "setupRegionRecommended": "根据你的语言推荐",
+  "setupAutoRunUnavailable": "添加配置后才能启用自动连接",
+  "setupSummaryTitle": "设置摘要",
+  "setupSummaryNoProfile": "没有 VPN 配置 — VPN 将保持关闭；可使用“仅 ByeDPI”模式",
+  "setupSummaryProfile": "配置：{name}",
+  "setupSummaryRouting": "智能路由：{value}",
+  "setupSummaryAutoRunOn": "自动连接：开启",
+  "setupSummaryAutoRunOff": "自动连接：关闭",
+  "setupPermissionDeferred": "首次连接时询问",
+  "setupPermissionBattery": "电池优化",
+  "setupPermissionBatteryDesc": "允许 ReClash 在后台保持 VPN 连接",
+  "setupPermissionChecking": "正在检查…",
+  "setupPermissionRequest": "允许",
+  "setupPermissionGranted": "已允许",
+  "setupPermissionDenied": "未允许",
+  "setupPermissionUnavailable": "不可用",
+  "setupPermissionError": "无法检查",
+  "setupPermissionOpenSettings": "打开设置",
+  "setupDoneConnect": "完成并连接",
+  "setupRerun": "重新运行初始设置",
+  "setupRerunDesc": "在不删除数据的情况下检查语言、配置、路由和权限",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "从手机接收",
+  "lanProfileImportDesc": "显示一次性二维码，通过局域网发送订阅网址",
+  "lanProfileImportTitle": "接收订阅",
+  "lanProfileImportScan": "请使用同一网络中的手机扫描此二维码",
+  "lanProfileImportAddress": "或将 JSON 发送到 {address}",
+  "lanProfileImportWaiting": "正在等待订阅…",
+  "lanProfileImportImporting": "正在导入订阅…",
+  "lanProfileImportImported": "已接收订阅",
+  "lanProfileImportTimedOut": "一次性链接已过期",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "无法启动局域网共享",
+  "lanProfileImportFailed": "无法导入订阅"
 }

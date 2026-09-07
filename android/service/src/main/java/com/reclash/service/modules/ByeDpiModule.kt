@@ -47,8 +47,10 @@ internal class ByeDpiModule(
 
     private var configJob: Job? = null
     private var probeJob: Job? = null
+    private var retryJob: Job? = null
 
     @Volatile private var current: ByeDpiTarget? = null
+    @Volatile private var requested: ByeDpiTarget? = null
     @Volatile private var envKey = ""
     private var startFailures = 0
 
@@ -78,6 +80,9 @@ internal class ByeDpiModule(
         configJob?.cancel()
         configJob = null
         synchronized(applyLock) {
+            retryJob?.cancel()
+            retryJob = null
+            requested = null
             probeJob?.cancel()
             probeJob = null
             if (current != null) {
@@ -107,7 +112,10 @@ internal class ByeDpiModule(
     private fun apply(target: ByeDpiTarget?) {
         synchronized(applyLock) {
             if (stopped) return
-            if (target == current) return
+            if (target == requested) return
+            requested = target
+            retryJob?.cancel()
+            retryJob = null
             if (current != null) {
                 probeJob?.cancel()
                 probeJob = null
@@ -142,6 +150,7 @@ internal class ByeDpiModule(
             }
         if (started) {
             current = target
+            retryJob = null
             startFailures = 0
         } else {
             current = null
@@ -152,10 +161,11 @@ internal class ByeDpiModule(
 
     private fun scheduleStartRetry(target: ByeDpiTarget) {
         val delayMs = ByeDpiPolicy.backoffMs(startFailures++)
-        scope.launch {
+        retryJob = scope.launch {
             delay(delayMs)
             synchronized(applyLock) {
-                if (stopped || current != null) return@launch
+                if (stopped || requested != target || current != null) return@launch
+                retryJob = null
                 launchBranch(target)
             }
         }

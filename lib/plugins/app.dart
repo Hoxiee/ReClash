@@ -77,6 +77,13 @@ class App {
     return packageNamesRaw.map((e) => e.toString()).toList();
   }
 
+  Future<bool> isNotificationsPermissionGranted() async {
+    return await methodChannel.invokeMethod<bool>(
+          'isNotificationsPermissionGranted',
+        ) ??
+        false;
+  }
+
   Future<bool?> requestNotificationsPermission() async {
     return methodChannel.invokeMethod<bool>('requestNotificationsPermission');
   }

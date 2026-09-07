@@ -1,24 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="108" height="108" viewBox="54 54 132 132" xmlns="http://www.w3.org/2000/svg">
+<svg width="108" height="108" viewBox="50 50 140 140" xmlns="http://www.w3.org/2000/svg">
     <title>status_3</title>
     <defs>
-        <filter id="glow-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0F172A" flood-opacity="0.12"/>
-        </filter>
-        <path id="mark-left" d="M152.79,229.72L193.83,342.48"/>
-        <path id="mark-mid" d="M214.96,143.24L297.04,368.76"/>
-        <path id="mark-right" d="M325.01,188.31L352.37,263.49"/>
+        <path id="mark-left" d="M137.3,225.8L184.5,355.5"/>
+        <path id="mark-mid" d="M208.8,126.3L303.2,385.7"/>
+        <path id="mark-right" d="M335.3,178.1L366.7,264.6"/>
         <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#22D3EE"/>
             <stop offset="100%" stop-color="#7C5CFF"/>
         </linearGradient>
     </defs>
-    <circle cx="120" cy="120" r="64" fill="none" stroke="#FFB02E" stroke-width="4" opacity="0.55"/>
-    <circle cx="120" cy="120" r="54" fill="none" stroke="url(#ring-grad)" stroke-width="12" opacity="1"/>
-    <circle cx="120" cy="120" r="42" fill="none" stroke="#FFD25F" stroke-width="3" opacity="0.78"/>
-    <g filter="url(#glow-shadow)">
+    <circle cx="120" cy="120" r="64" fill="none" stroke="#FFB02E" stroke-width="5" opacity="0.68"/>
+    <circle cx="120" cy="120" r="54" fill="none" stroke="url(#ring-grad)" stroke-width="12"/>
+    <circle cx="120" cy="120" r="42" fill="none" stroke="#FFD25F" stroke-width="4" opacity="0.82"/>
+    <g>
         <g transform="translate(51.8312, 50.9082) scale(0.269890)"
-           fill="none" stroke-width="54" stroke-linecap="round">
+           fill="none" stroke-width="62.1" stroke-linecap="round">
             <use href="#mark-left" stroke="#7367FF"/>
             <use href="#mark-mid" stroke="#1685D8"/>
             <use href="#mark-right" stroke="#12C8FF"/>

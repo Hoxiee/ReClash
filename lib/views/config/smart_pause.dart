@@ -408,7 +408,6 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
   Widget _buildPrerequisites() {
     return SettingSection(
       top: 16,
-      title: context.appLocalizations.prerequisites,
       items: [
         if (_isAndroid) _buildBatteryOptimizationItem(),
         if (_isAndroid || _isMacOS) _buildLocationPermissionItem(),

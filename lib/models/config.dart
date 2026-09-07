@@ -79,10 +79,11 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool newDashboard,
     @Default(defaultTestUrl) String testUrl,
     @Default(true) bool isAnimateToPage,
-    @Default(true) bool autoCheckUpdate,
+    @Default(false) bool autoCheckUpdate,
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool setupCompleted,
+    @Default(0) int setupStep,
     @Default(false) bool crashlyticsTip,
     @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,
@@ -92,7 +93,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool showTrayTitle,
     @Default(true) bool checkCertificate,
     @Default('') String customUserAgent,
-    @Default(true) bool sendDeviceIdentity,
+    @Default(false) bool sendDeviceIdentity,
     @Default('default') String iconVariant,
     @Default(false) bool reduceMotion,
   }) = _AppSettingProps;
@@ -104,12 +105,39 @@ abstract class AppSettingProps with _$AppSettingProps {
     if (json == null) {
       return defaultAppSettingProps;
     }
-    return decodeOrRestoreDefault(
-      'app settings',
-      () => AppSettingProps.fromJson(json),
-      () => defaultAppSettingProps,
-    );
+    return decodeOrRestoreDefault('app settings', () {
+      final migrated = Map<String, Object?>.of(json);
+      final iconVariant = migrated['iconVariant'];
+      migrated['iconVariant'] = _normalizeIconVariant(
+        iconVariant is String ? iconVariant : null,
+      );
+      return AppSettingProps.fromJson(migrated);
+    }, () => defaultAppSettingProps);
   }
+}
+
+const _iconVariants = {
+  'default',
+  'pulse',
+  'glacier',
+  'obsidian',
+  'velvet',
+  'solar',
+  'circuit',
+  'prism',
+};
+
+const _legacyIconVariants = {
+  'mono': 'pulse',
+  'sepia': 'glacier',
+  'inverted': 'obsidian',
+  'dark_mono': 'velvet',
+  'cool': 'solar',
+};
+
+String _normalizeIconVariant(String? value) {
+  final migrated = _legacyIconVariants[value] ?? value;
+  return _iconVariants.contains(migrated) ? migrated! : 'default';
 }
 
 @freezed

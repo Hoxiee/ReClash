@@ -5,6 +5,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/proxies/card.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/proxies.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,7 +20,10 @@ void main() {
     WidgetTester tester, {
     Size size = const Size(1400, 1000),
     int proxyCount = 12,
+    int groupCount = 1,
     bool expanded = true,
+    FocusNode? beforeFocus,
+    FocusNode? afterFocus,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -35,21 +39,24 @@ void main() {
       proxyCount,
       (index) => Proxy(name: 'Proxy $index', type: 'Direct'),
     );
-    final group = Group(
-      name: 'Selector',
-      type: GroupType.Selector,
-      hidden: false,
-      now: 'Proxy 1',
-      all: proxies,
+    final groups = List.generate(
+      groupCount,
+      (index) => Group(
+        name: index == 0 ? 'Selector' : 'Selector ${index + 1}',
+        type: GroupType.Selector,
+        hidden: false,
+        now: 'Proxy 1',
+        all: proxies,
+      ),
     );
     final container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(() => TestProfiles([profile])),
         currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
         currentGroupsStateProvider.overrideWithValue(
-          GroupsState(value: [group]),
+          GroupsState(value: groups),
         ),
-        groupsProvider.overrideWithValue([group]),
+        groupsProvider.overrideWithValue(groups),
       ],
     );
     addTearDown(container.dispose);
@@ -73,7 +80,23 @@ void main() {
             globalState.theme = CommonTheme.of(context, 1);
             return child!;
           },
-          home: const ProxiesView(),
+          home: Column(
+            children: [
+              if (beforeFocus != null)
+                TextButton(
+                  focusNode: beforeFocus,
+                  onPressed: () {},
+                  child: const Text('Before'),
+                ),
+              const Expanded(child: ProxiesView()),
+              if (afterFocus != null)
+                TextButton(
+                  focusNode: afterFocus,
+                  onPressed: () {},
+                  child: const Text('After'),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -114,6 +137,107 @@ void main() {
         .toList();
     return buttons.indexWhere((candidate) => identical(candidate, button));
   }
+
+  bool focusInProxyCard() {
+    final context = FocusManager.instance.primaryFocus?.context;
+    return context?.findAncestorWidgetOfExactType<ProxyCard>() != null;
+  }
+
+  String? focusedHeaderName() {
+    final context = FocusManager.instance.primaryFocus?.context;
+    return context?.findAncestorWidgetOfExactType<ListHeader>()?.group.name;
+  }
+
+  testWidgets('TV list uses one traversal boundary', (tester) async {
+    system.isTVForTesting = true;
+    addTearDown(() => system.isTVForTesting = false);
+
+    await pumpListLayout(tester);
+
+    final scrollView = tester.widget<CustomScrollView>(
+      find.byKey(proxiesListStoreKey),
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is FocusTraversalGroup &&
+            identical(widget.child, scrollView),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ListHeader),
+        matching: find.byType(FocusTraversalGroup),
+      ),
+      findsNothing,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  });
+
+  testWidgets('non-TV list adds no traversal boundary', (tester) async {
+    system.isTVForTesting = false;
+
+    await pumpListLayout(tester);
+
+    final scrollView = tester.widget<CustomScrollView>(
+      find.byKey(proxiesListStoreKey),
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is FocusTraversalGroup &&
+            identical(widget.child, scrollView),
+      ),
+      findsNothing,
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  });
+
+  testWidgets('TV traversal crosses headers, cards, and its outer scope', (
+    tester,
+  ) async {
+    system.isTVForTesting = true;
+    addTearDown(() => system.isTVForTesting = false);
+    final beforeFocus = FocusNode();
+    final afterFocus = FocusNode();
+    addTearDown(beforeFocus.dispose);
+    addTearDown(afterFocus.dispose);
+
+    await pumpListLayout(
+      tester,
+      groupCount: 2,
+      beforeFocus: beforeFocus,
+      afterFocus: afterFocus,
+    );
+
+    beforeFocus.requestFocus();
+    await tester.pump();
+    var reachedFirstHeader = false;
+    var reachedProxy = false;
+    var reachedSecondHeader = false;
+    var escaped = false;
+    for (var i = 0; i < 80 && !escaped; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      reachedFirstHeader |= focusedHeaderName() == 'Selector';
+      reachedProxy |= focusInProxyCard();
+      reachedSecondHeader |= focusedHeaderName() == 'Selector 2';
+      escaped = afterFocus.hasFocus;
+    }
+
+    expect(reachedFirstHeader, isTrue);
+    expect(reachedProxy, isTrue);
+    expect(reachedSecondHeader, isTrue);
+    expect(escaped, isTrue);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  });
 
   testWidgets('arrow right from the ListHeader card enters the actions', (
     tester,

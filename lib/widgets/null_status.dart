@@ -285,7 +285,6 @@ class _EmptyIllustration extends StatelessWidget {
         assetPath,
         width: _dimension,
         height: _dimension,
-        colorMapper: _IllustrationColorMapper(colorScheme),
         excludeFromSemantics: true,
       ),
     );
@@ -320,31 +319,4 @@ class _MaterialShapePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MaterialShapePainter oldDelegate) =>
       oldDelegate.shape != shape || oldDelegate.color != color;
-}
-
-class _IllustrationColorMapper extends ColorMapper {
-  final ColorScheme colorScheme;
-
-  const _IllustrationColorMapper(this.colorScheme);
-
-  @override
-  Color substitute(
-    String? id,
-    String elementName,
-    String attributeName,
-    Color color,
-  ) => switch (color.toARGB32()) {
-    0xFFE8DEF8 => colorScheme.secondaryContainer,
-    0xFF6750A4 => colorScheme.primary,
-    0xFFFDF7FF => colorScheme.surface,
-    0xFFC4C7C5 => colorScheme.outlineVariant,
-    _ => color,
-  };
-
-  @override
-  bool operator ==(Object other) =>
-      other is _IllustrationColorMapper && other.colorScheme == colorScheme;
-
-  @override
-  int get hashCode => colorScheme.hashCode;
 }

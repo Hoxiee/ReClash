@@ -131,10 +131,10 @@ func (r *fakeRuntime) Reach(ctx context.Context, addr string, domestic bool) rcx
 	return rcxProbeFail
 }
 
-func (r *fakeRuntime) CloseConnections(node string) {
+func (r *fakeRuntime) CloseConnections(ids []string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.closed = append(r.closed, node)
+	r.closed = append(r.closed, ids...)
 }
 
 func (r *fakeRuntime) hungUpOn() []string {
@@ -256,6 +256,133 @@ func foreignMembers(names ...string) []rcxMember {
 	return members
 }
 
+func providerMembers(provider string, names ...string) []rcxMember {
+	members := foreignMembers(names...)
+	for i := range members {
+		members[i].Provider = provider
+		members[i].Transport = "transport-" + names[i]
+	}
+	return members
+}
+
+func TestProviderCircuitNeedsIndependentFailures(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	if engine.providerCircuitOpen("one", "b", runtime.Now()) {
+		t.Fatal("one endpoint must not condemn its provider")
+	}
+
+	engine.noteProviderNodeFailure("b", runtime.Now())
+	if !engine.providerCircuitOpen("one", "b", runtime.Now()) {
+		t.Fatal("two independent endpoint failures must open the circuit")
+	}
+}
+
+func TestProviderCircuitDoesNotGateTheLivingIncumbent(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "a"
+
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	engine.noteProviderNodeFailure("b", runtime.Now())
+	candidates := engine.candidates(runtime.members)
+
+	if candidates[0].Circuit {
+		t.Error("an open circuit must not evict the incumbent on its own")
+	}
+	if !candidates[1].Circuit {
+		t.Error("an unproven challenger from the failed provider must be gated")
+	}
+}
+
+func TestProviderCircuitAllowsOnlyOneHalfOpenProbe(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b", "c")
+	engine := newTestEngine(runtime, "ru")
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	engine.noteProviderNodeFailure("b", runtime.Now())
+
+	if wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRoutine); len(wave) != 0 {
+		t.Fatalf("wave = %v, want the circuit quiet before half-open", wave)
+	}
+	runtime.advance(rcxProviderHalfOpenAfter)
+	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRoutine)
+	if len(wave) != 1 {
+		t.Fatalf("wave = %v, want one half-open probe", wave)
+	}
+	if next := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRoutine); len(next) != 0 {
+		t.Fatalf("second wave = %v, want half-open rate-limited", next)
+	}
+}
+
+func TestProviderCircuitSurvivesOtherEnvironmentReconcile(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.snapshot.Circuits[rcxCircuitKey("c:25001", "other")] = rcxProviderCircuit{
+		Until:   runtime.Now().Add(time.Minute),
+		Members: map[string]struct{}{"x": {}},
+	}
+
+	engine.reconcileCircuits(runtime.members, runtime.Now())
+
+	if _, ok := engine.snapshot.Circuits[rcxCircuitKey("c:25001", "other")]; !ok {
+		t.Error("refreshing one environment must not delete another environment's circuit")
+	}
+}
+
+func TestProviderSuccessClosesItsCircuit(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	engine.noteProviderNodeFailure("b", runtime.Now())
+
+	engine.noteProviderSuccess("a")
+
+	if engine.providerCircuitOpen("one", "b", runtime.Now()) {
+		t.Error("successful provider evidence must close the circuit")
+	}
+}
+
+func TestEnvironmentMigrationMergesEveryPersistedDomain(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	old, destination := "w:Home", "v2:w:Home#stable"
+	now := runtime.Now()
+	engine.snapshot.Picks[old] = "old-pick"
+	engine.snapshot.Pins[old] = "old-pin"
+	engine.snapshot.Regimes[old] = rcxRegimeMemory{Terrain: rcxTerrainWhitelist, At: now.Add(time.Minute)}
+	engine.snapshot.Regimes[destination] = rcxRegimeMemory{Terrain: rcxTerrainNormal, At: now}
+	engine.snapshot.Standbys[old] = []string{"b", "c"}
+	engine.snapshot.Standbys[destination] = []string{"a", "b"}
+	circuit := rcxProviderCircuit{OpenedAt: now, Until: now.Add(time.Minute)}
+	engine.snapshot.Circuits[rcxCircuitKey(old, "one")] = circuit
+
+	engine.migrateEnvironment([]string{old}, destination)
+
+	if engine.snapshot.Picks[destination] != "old-pick" || engine.snapshot.Pins[destination] != "old-pin" {
+		t.Fatalf("pick/pin = %q/%q, want migrated values", engine.snapshot.Picks[destination], engine.snapshot.Pins[destination])
+	}
+	if got := engine.snapshot.Regimes[destination].Terrain; got != rcxTerrainWhitelist {
+		t.Fatalf("terrain = %v, want the fresher regime", got)
+	}
+	if got := engine.snapshot.Standbys[destination]; len(got) != 3 || got[0] != "a" || got[1] != "b" || got[2] != "c" {
+		t.Fatalf("standbys = %v, want stable deduplicated merge", got)
+	}
+	if _, ok := engine.snapshot.Circuits[rcxCircuitKey(destination, "one")]; !ok {
+		t.Error("provider circuit did not follow the environment alias")
+	}
+	if _, ok := engine.snapshot.Circuits[rcxCircuitKey(old, "one")]; ok {
+		t.Error("legacy provider circuit was retained")
+	}
+}
+
 func TestEngineDoesNothingOutsideRuleMode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.mode = "global"
@@ -363,14 +490,15 @@ func TestEngineCarriesMemoryWhenTheSsidBecomesReadable(t *testing.T) {
 	named := anonymous
 	named.SSID = "Home"
 	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: named})
+	namedKey, _ := rcxEnvKeys(named)
 
-	if engine.envKey != "w:Home" {
-		t.Fatalf("env key = %q, want the SSID once it is readable", engine.envKey)
+	if engine.envKey != namedKey {
+		t.Fatalf("env key = %q, want %q once the SSID is readable", engine.envKey, namedKey)
 	}
-	if got := engine.snapshot.Picks["w:Home"]; got != "node" {
+	if got := engine.snapshot.Picks[namedKey]; got != "node" {
 		t.Errorf("pick = %q, want the record migrated, not orphaned", got)
 	}
-	if engine.ledger.Facts("node", "w:Home", true, runtime.Now(), rcxLedgerProofTTL).OpenWorld != rcxProofProven {
+	if engine.ledger.Facts("node", namedKey, true, runtime.Now(), rcxLedgerProofTTL).OpenWorld != rcxProofProven {
 		t.Error("the proof gathered before the permission was granted was lost")
 	}
 }
@@ -465,12 +593,15 @@ func TestEngineAdoptsALinkTheTransportNameMissed(t *testing.T) {
 	}
 }
 
-func cellularHandoff(engine *rcxEngine) {
-	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: rcxNetworkPayload{
+func cellularHandoff(engine *rcxEngine) string {
+	payload := rcxNetworkPayload{
 		Transport: "cellular",
 		Carrier:   "25001",
 		Validated: true,
-	}})
+	}
+	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: payload})
+	key, _ := rcxEnvKeys(payload)
+	return key
 }
 
 func TestEngineDropsTheWaveTheOldNetworkBought(t *testing.T) {
@@ -483,9 +614,9 @@ func TestEngineDropsTheWaveTheOldNetworkBought(t *testing.T) {
 		t.Fatal("want a wave in flight on the network the user is leaving")
 	}
 
-	cellularHandoff(engine)
-	if engine.envKey != "c:25001" {
-		t.Fatalf("envKey = %q, want the network that arrived", engine.envKey)
+	cellularKey := cellularHandoff(engine)
+	if engine.envKey != cellularKey {
+		t.Fatalf("envKey = %q, want %q", engine.envKey, cellularKey)
 	}
 	left := engine.budget.Remaining(runtime.Now())
 
@@ -493,7 +624,7 @@ func TestEngineDropsTheWaveTheOldNetworkBought(t *testing.T) {
 		{Node: "a", Role: rcxRoleOpen, Outcome: rcxProbeFail},
 	}})
 
-	if got := engine.ledger.Facts("a", "c:25001", true, runtime.Now(), rcxLedgerProofTTL).OpenWorld; got == rcxProofDisproven {
+	if got := engine.ledger.Facts("a", cellularKey, true, runtime.Now(), rcxLedgerProofTTL).OpenWorld; got == rcxProofDisproven {
 		t.Error("a verdict measured on the old network must not condemn the node on the new one")
 	}
 	if got := engine.ledger.Facts("a", "w:Home", true, runtime.Now(), rcxLedgerProofTTL).OpenWorld; got == rcxProofDisproven {
@@ -580,7 +711,7 @@ func TestEngineDeliversTheWaveTheNewNetworkBought(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 	engine.quit = make(chan struct{})
 
-	cellularHandoff(engine)
+	cellularKey := cellularHandoff(engine)
 	if !engine.probing {
 		t.Fatal("want the new network's own wave in flight")
 	}
@@ -595,7 +726,7 @@ func TestEngineDeliversTheWaveTheNewNetworkBought(t *testing.T) {
 		}
 	}
 
-	if got := engine.ledger.MedianMs("a", "c:25001", runtime.Now(), time.Time{}, time.Time{}); got != 120 {
+	if got := engine.ledger.MedianMs("a", cellularKey, runtime.Now(), time.Time{}, time.Time{}); got != 120 {
 		t.Errorf("median = %d, want 120 recorded against the network that paid for it", got)
 	}
 }
@@ -1993,24 +2124,29 @@ func TestEngineKeepsControlIntentsThroughAHarvestFlood(t *testing.T) {
 	for len(engine.events) < cap(engine.events) {
 		engine.send(rcxEvent{Kind: rcxEventHarvested, Node: "node", DelayMs: 40})
 	}
+	payload := rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true}
 
-	engine.Network(rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true})
+	engine.Network(payload)
 	engine.drainControl()
+	want, _ := rcxEnvKeys(payload)
 
-	if got := engine.envKey; got != "w:Cafe" {
-		t.Errorf("envKey = %q, want a handoff to outlive a queue full of delay tests", got)
+	if got := engine.envKey; got != want {
+		t.Errorf("envKey = %q, want %q after the handoff", got, want)
 	}
 }
 
 func TestEngineActsOnTheNewestControlIntentOnly(t *testing.T) {
 	engine := newTestEngine(newFakeRuntime(), "ru")
+	cafe := rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true}
+	office := rcxNetworkPayload{Transport: "wifi", SSID: "Office", Validated: true}
 
-	engine.Network(rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true})
-	engine.Network(rcxNetworkPayload{Transport: "wifi", SSID: "Office", Validated: true})
+	engine.Network(cafe)
+	engine.Network(office)
 	engine.drainControl()
+	want, _ := rcxEnvKeys(office)
 
-	if got := engine.envKey; got != "w:Office" {
-		t.Errorf("envKey = %q, want the last handoff: the ones behind it describe a link that is gone", got)
+	if got := engine.envKey; got != want {
+		t.Errorf("envKey = %q, want %q for the newest handoff", got, want)
 	}
 }
 
@@ -2049,11 +2185,13 @@ func TestEngineStoresAPickUnderTheNetworkItArrivedWith(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 	engine.reconsider()
 
+	payload := rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true}
 	engine.OnManualAsserted("chosen")
-	engine.Network(rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true})
+	engine.Network(payload)
 	engine.drainControl()
+	key, _ := rcxEnvKeys(payload)
 
-	if got := engine.snapshot.Picks["w:Cafe"]; got == "" {
+	if got := engine.snapshot.Picks[key]; got == "" {
 		t.Error("the pick landed under the network the device had already left")
 	}
 	if got := engine.incumbent; got != "chosen" {
@@ -2075,13 +2213,15 @@ func TestEngineLoopWakesForAControlIntent(t *testing.T) {
 		<-engine.done
 	}()
 
-	engine.Network(rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true})
+	payload := rcxNetworkPayload{Transport: "wifi", SSID: "Cafe", Validated: true}
+	engine.Network(payload)
+	want, _ := rcxEnvKeys(payload)
 
 	deadline := time.Now().Add(2 * time.Second)
-	for runtime.lastStatus().Env != "w:Cafe" {
+	for runtime.lastStatus().Env != want {
 		if time.Now().After(deadline) {
-			t.Fatalf("env = %q, want the loop to act on the handoff without a tick",
-				runtime.lastStatus().Env)
+			t.Fatalf("env = %q, want %q without waiting for a tick",
+				runtime.lastStatus().Env, want)
 		}
 		time.Sleep(time.Millisecond)
 	}
@@ -2172,8 +2312,8 @@ func TestEngineHangsUpOnTheNodeItBuried(t *testing.T) {
 
 	engine.reconsider()
 
-	if got := runtime.hungUpOn(); len(got) != 1 || got[0] != "dead" {
-		t.Errorf("closed = %v, want the dead node's connections cut", got)
+	if got := runtime.hungUpOn(); len(got) != 0 {
+		t.Errorf("closed = %v, want no connection closed without tracker evidence", got)
 	}
 }
 
@@ -2303,15 +2443,17 @@ func TestEngineWritesNoRegimeMemoryBeforeTheFirstNetwork(t *testing.T) {
 	named := newRcxEngine(runtime)
 	named.snapshot = rcxEmptySnapshot()
 	named.applyConfigLocked(testConfig("ru"))
-	named.handle(rcxEvent{Kind: rcxEventNetwork, Payload: rcxNetworkPayload{
+	payload := rcxNetworkPayload{
 		Transport: "wifi",
 		SSID:      "Home",
 		Validated: true,
-	}})
+	}
+	named.handle(rcxEvent{Kind: rcxEventNetwork, Payload: payload})
 	named.reachF, named.reachD = rcxProbeOK, rcxProbeOK
 	named.classifyTerrain(true)
+	key, _ := rcxEnvKeys(payload)
 
-	if _, ok := named.snapshot.Regimes["w:Home"]; !ok {
+	if _, ok := named.snapshot.Regimes[key]; !ok {
 		t.Error("want the memory written once the network has a name")
 	}
 }
@@ -2389,5 +2531,62 @@ func TestScaledProofTTLBuysTheParkTimeToRenewAProof(t *testing.T) {
 		if got := rcxScaledProofTTL(base, tc.park); got != tc.want {
 			t.Errorf("park %d: ttl = %v, want %v", tc.park, got, tc.want)
 		}
+	}
+}
+
+func TestConfigEditSupersedesProbeAndReachResults(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	probeGen := engine.probeGen
+	reachGen := engine.reachGen
+	configGen := engine.configGen
+
+	config := engine.cfg
+	config.OpenMarkers = []rcxMarker{{URL: "https://api.telegram.org/", Statuses: []int{404}}}
+	config.CanaryForeign = []string{"8.8.8.8:443"}
+	engine.applyConfigLocked(config)
+	engine.handle(rcxEvent{
+		Kind:      rcxEventProbeResults,
+		Gen:       probeGen,
+		ConfigGen: configGen,
+		Results: []rcxProbeResult{{
+			Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 90,
+		}},
+	})
+	engine.handle(rcxEvent{
+		Kind:      rcxEventTerrainReach,
+		Gen:       reachGen,
+		ConfigGen: configGen,
+		Foreign:   rcxProbeOK,
+		Domestic:  rcxProbeOK,
+	})
+
+	if got := engine.ledger.Facts("node", "w:Home", true, runtime.Now(), rcxLedgerProofTTL).OpenWorld; got != rcxProofUnknown {
+		t.Fatalf("stale config probe became proof: %v", got)
+	}
+	if engine.reachF == rcxProbeOK || engine.reachD == rcxProbeOK {
+		t.Fatal("stale canary result replaced the new terrain epoch")
+	}
+}
+
+func TestConfigEditInvalidatesOnlyItsProofAndOriginDomains(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	engine.ledger.NoteProbe("node", "w:Home", rcxRoleOpen, rcxProbeOK, 90, runtime.Now())
+	engine.ledger.NoteProbe("node", "w:Home", rcxRoleDomestic, rcxProbeOK, 90, runtime.Now())
+	engine.ledger.SetOrigin("node", "RU", rcxOriginDomestic)
+
+	config := engine.cfg
+	config.OpenMarkers = []rcxMarker{{URL: "https://api.telegram.org/", Statuses: []int{404}}}
+	engine.applyConfigLocked(config)
+	facts := engine.ledger.Facts("node", "w:Home", true, runtime.Now(), rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofUnknown || facts.Domestic != rcxProofProven || facts.Transit != rcxProofProven {
+		t.Fatalf("open marker edit crossed proof domains: %+v", facts)
+	}
+
+	config.CensorCountries = []string{"IR"}
+	engine.applyConfigLocked(config)
+	if got := engine.ledger.Origin("node"); got != rcxOriginUnknown {
+		t.Fatalf("origin = %v, want reevaluation after country edit", got)
 	}
 }

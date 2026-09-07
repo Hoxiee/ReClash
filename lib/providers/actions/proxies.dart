@@ -172,6 +172,18 @@ class ProxiesAction extends _$ProxiesAction {
       );
     }
     ref.read(checkIpNumProvider.notifier).add();
+    _testSelectedProxy(groupName);
+  }
+
+  void _testSelectedProxy(String groupName) {
+    if (!ref.read(isStartProvider)) return;
+    final group = ref.read(groupsProvider).getGroup(groupName);
+    if (group == null) return;
+    unawaited(
+      _runDelayTests([
+        Proxy(name: groupName, type: group.type.name),
+      ], group.testUrl),
+    );
   }
 
   /// Releasing the pin keeps the engine's own node, so connections stay up.
@@ -326,12 +338,17 @@ class ProxiesAction extends _$ProxiesAction {
     }
     try {
       final delay = await _core.getDelay(target.testUrl, target.proxyName);
-      if (delay != null && !job.cancelled) {
-        setDelay(delay);
+      if (!job.cancelled) {
+        setDelay(
+          delay ??
+              Delay(name: target.proxyName, url: target.testUrl, value: -1),
+        );
       }
     } catch (error) {
       if (error is CoreMethodException && error.isCoreUnavailable) {
         job.cancelled = true;
+      } else if (!job.cancelled) {
+        setDelay(Delay(name: target.proxyName, url: target.testUrl, value: -1));
       }
       commonPrint.log(
         'Delay test failed for ${target.proxyName}: $error',

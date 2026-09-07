@@ -111,6 +111,9 @@
   "selectAll": "Barchasini tanlash",
   "cancelSelectAll": "Tanlovni bekor qilish",
   "appAccessControl": "Ilovalar uchun kirish nazorati",
+  "accessControlIncludeInVpn": "VPN ichiga kiritish",
+  "accessControlExcludeFromVpn": "VPN tashqarisida qoldirish",
+  "searchApps": "Ilovalarni qidirish",
   "accessControlAllowDesc": "Faqat tanlangan ilovalar VPN orqali ishlaydi",
   "accessControlNotAllowDesc": "Tanlangan ilovalar VPN tashqarisida qoladi",
   "accessControlDisabledDesc": "Ilovalar uchun kirish nazorati oʻchirilgan",
@@ -179,6 +182,8 @@
   "ipv6Desc": "Yoqilganda IPv6 trafigi qabul qilinadi",
   "app": "Ilova",
   "general": "Umumiy",
+  "identity": "Identifikatsiya",
+  "animations": "Animatsiyalar",
   "extra": "Qoʻshimcha",
   "systemProxyDesc": "Tizim proksisini oʻrnatish",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "Meva salati",
   "developerMode": "Dasturchi rejimi",
   "developerModeEnableTip": "Dasturchi rejimi yoqilgan.",
+  "developerSubscriptions": "Sinov obunalari",
+  "developerSubscriptionPrismDesc": "Brend ranglari, maxsus Hero Ring va mahalliy logotip",
+  "developerSubscriptionOrbitDesc": "Kvota, amal qilish muddati, eʼlon, domen ko‘chirish va takliflar",
+  "developerSubscriptionAtlasDesc": "Provayder vidjetlari, serverni almashtirish va proksi ko‘rinishi",
+  "developerSubscriptionInstalled": "{name} o‘rnatildi",
   "messageTest": "Xabar testi",
   "messageTestTip": "Bu xabar.",
   "crashTest": "Qulash testi",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{total} tadan {eligible} tasi yaroqli",
   "smartRoutingHistory": "Soʻnggi almashtirishlar",
   "smartRoutingHistoryEmpty": "Hozircha almashtirish yoʻq",
+  "smartRoutingSectionReliability": "Ishonchlilik",
+  "smartRoutingAvailability": "Mavjudlik",
+  "smartRoutingAvailabilityValue": "{duration} davomida {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "Aniqlangan uzilishlar",
+  "smartRoutingStandbyHits": "Tayyor zaxira orqali tiklandi",
+  "smartRoutingLastRecovery": "Soʻnggi tiklanish",
+  "smartRoutingAverageRecovery": "Oʻrtacha tiklanish",
+  "smartRoutingProviderIncidents": "Provayder himoyasi ishga tushgan holatlar",
+  "smartRoutingMarkerIncidents": "Karantinga olingan xizmat tekshiruvlari",
+  "smartRoutingActiveCircuits": "Vaqtincha cheklangan provayderlar",
+  "smartRoutingActiveMarkers": "Vaqtincha cheklangan tekshiruvlar",
+  "smartRoutingNoRecovery": "Hali tiklangan uzilish yoʻq",
+  "smartRoutingBlockProviderCircuit": "Mustaqil nosozliklardan soʻng provayder vaqtincha cheklangan",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "Bu soat uchun {cap} ta tekshiruvdan {left} tasi qoldi",
   "smartRoutingVerdictPreferred": "Ochiq internetga yetib boradi",
@@ -826,27 +859,27 @@
   "smartRoutingBandLabel": "{band} diapazoni",
   "smartRoutingDegraded": "Sekinlashtirilgan",
   "smartRoutingOffHint": "Aqlli marshrutlashni yoqing — u serverlarni oʻzi tanlaydi",
-  "setupWelcome": "Hammasi bir daqiqada tayyor boʻladi",
+  "setupWelcome": "Bir necha tushunarli qadamdan so‘ng hammasi tayyor",
   "setupLanguageTitle": "Tilni tanlang",
-  "setupLanguageDesc": "Keyinchalik sozlamalardan oʻzgartirish mumkin",
-  "setupLegalTitle": "Boshlashdan oldin",
-  "setupDataCollection": "Nosozlik hisobotlarini yuborish",
-  "setupSubscriptionTitle": "Obuna qoʻshish",
-  "setupSubscriptionDesc": "Provayderingizdan havola, QR kod yoki konfiguratsiya fayli",
-  "setupSubscriptionReady": "Obuna qoʻshildi",
-  "setupRestore": "Zaxira nusxasidan tiklash",
-  "setupRestoreDesc": "ReClash, FlClashX yoki FlClash zaxira nusxasidan hamma narsani koʻchirish",
-  "setupFinishTitle": "Deyarli tayyor",
-  "setupRegionDesc": "Server tanlash uchun boshlangʻich nuqtani belgilaydi",
-  "setupRegionNone": "Tanlamaslik",
-  "setupAutoRun": "Ishga tushganda ulanish",
-  "setupAutoRunDesc": "Ilova ochilishi bilan tunnel ishga tushadi",
+  "setupLanguageDesc": "Uni keyinroq sozlamalarda o‘zgartirish mumkin",
+  "setupLegalTitle": "Davom etishdan oldin",
+  "setupDataCollection": "Ixtiyoriy nosozlik hisobotlarini yuborish",
+  "setupSubscriptionTitle": "Ulanish profilini qo‘shing",
+  "setupSubscriptionDesc": "Profilda ulanish uchun kerakli serverlar va qoidalar bor. Uni provayderdan yoki zaxira nusxadan import qiling.",
+  "setupSubscriptionReady": "Profil tayyor",
+  "setupRestore": "Zaxira nusxadan tiklash",
+  "setupRestoreDesc": "ReClash, FlClashX yoki FlClash nusxasidan sozlamalar va profillarni tiklash",
+  "setupFinishTitle": "Sozlamalarni tekshiring",
+  "setupRegionDesc": "Aqlli yo‘naltirish bu hududdan marshrut tanlashning boshlang‘ich nuqtasi sifatida foydalanadi. Til faqat tavsiya beradi.",
+  "setupRegionNone": "Boshqa hudud yoki aqlli yo‘naltirishsiz",
+  "setupAutoRun": "ReClash ochilganda ulanish",
+  "setupAutoRunDesc": "Yaroqli profil yuklangach VPNni avtomatik ishga tushiradi",
   "setupPermissionVpn": "VPN ruxsati",
-  "setupPermissionVpnDesc": "Tizim birinchi ulanishda soʻraydi",
+  "setupPermissionVpnDesc": "Tizim birinchi ulanishda so‘raydi",
   "setupPermissionNotifications": "Bildirishnomalar",
-  "setupPermissionNotificationsDesc": "Ishlaganda ulanish holatini koʻrsatadi",
-  "setupSkip": "Oʻtkazib yuborish",
-  "setupNext": "Keyingisi",
+  "setupPermissionNotificationsDesc": "ReClash ishlayotganda ulanish holatini ko‘rsatadi",
+  "setupSkip": "Profilsiz davom etish",
+  "setupNext": "Keyingi",
   "setupDone": "Tayyor",
   "smartRoutingBreaker": "Oq roʻyxat boʻyicha mutaxassis",
   "smartRoutingBreakerDesc": "Cheklangan tarmoqlar uchun saqlanadi — ochiq tarmoqda sarflanmaydi",
@@ -935,11 +968,13 @@
   "systemSeed": "Boshlangʻich rang",
   "appIcon": "Ilova belgisi",
   "appIconChangeNote": "Belgi bir necha soniya ichida qayta chiziladi. Qadalgan yorliq ayrim bosh ekran ilovalarida yoʻqolib qolishi mumkin.",
-  "appIconMono": "Monoxrom",
-  "appIconSepia": "Sepiya",
-  "appIconInverted": "Teskari",
-  "appIconDarkMono": "Toʻq monoxrom",
-  "appIconCool": "Salqin",
+  "appIconPulse": "Impuls",
+  "appIconGlacier": "Muzlik",
+  "appIconObsidian": "Obsidian",
+  "appIconVelvet": "Baxmal",
+  "appIconSolar": "Quyosh",
+  "appIconCircuit": "Sxema",
+  "appIconPrism": "Prizma",
   "dashboardStyle": "Boshqaruv paneli uslubi",
   "classicDashboard": "Klassik",
   "classicDashboardDesc": "Kataklar panjarasi va boshlash tugmasi",
@@ -1213,5 +1248,120 @@
   "desyncTtl12Hours": "12 soat",
   "desyncTtl28Hours": "28 soat",
   "desyncTtlHour": "1 soat",
-  "desyncTtlWeek": "7 kun"
+  "desyncTtlWeek": "7 kun",
+  "desyncActiveStrategy": "Faol strategiya",
+  "desyncCacheDisabled": "Strategiya keshi o‘chiq",
+  "desyncEngineSummary": "ByeDPI dvigokidan {count} marshrutlash kategoriyasi foydalanadi",
+  "desyncTestBattery": "Sinovlar to‘plami",
+  "desyncTestBatterySummary": "{presets} preset · {groups} guruh · {domains} host",
+  "desyncRoutingRules": "Amaldagi qoidalar",
+  "desyncRoutingGeositeNote": "Kategoriya tarkibi ichki GEOSITE bazasidan olinadi; sinov domenlari ro‘yxati alohida",
+  "desyncRoutingNoCategories": "Aylanib o‘tish kategoriyasi tanlanmagan",
+  "desyncRoutingNoCategoriesDesc": "Hozir hech bir servis ByeDPI orqali yo‘naltirilmaydi",
+  "desyncRoutingFallbackDesc": "Tanlangan GEOSITE kategoriyalaridan tashqaridagi barcha trafik to‘g‘ridan-to‘g‘ri o‘tadi",
+  "byedpiOff": "DPI aylanib o‘tish o‘chiq",
+  "byedpiStarting": "DPI aylanib o‘tish ishga tushmoqda",
+  "byedpiChecking": "DPI dvigoki tekshirilmoqda",
+  "byedpiReconnecting": "DPI dvigoki qayta ishga tushmoqda",
+  "byedpiActive": "DPI aylanib o‘tish faol",
+  "byedpiPaused": "DPI aylanib o‘tish to‘xtatildi",
+  "byedpiEngineError": "DPI dvigokini tekshirish kerak",
+  "byedpiTapToStart": "Mahalliy aylanib o‘tish dvigokini ishga tushirish uchun bosing",
+  "byedpiTapToResume": "DPI aylanib o‘tishni davom ettirish uchun bosing",
+  "byedpiActiveFor": "DPI aylanib o‘tish faol: {time}",
+  "setupSystemLanguage": "Tizim tili",
+  "setupStepProgress": "{count} qadamdan {step}-qadam",
+  "setupLegalSummary": "ReClash trafikni yo‘naltirish uchun mahalliy VPN ulanishini yaratadi. Konfiguratsiya yoki provayderni o‘zingiz tanlaysiz va undan foydalanish uchun javobgarsiz.",
+  "setupLegalDetails": "To‘liq ogohlantirishni o‘qish",
+  "setupLegalLicense": "Ochiq kod litsenziyalari",
+  "setupDataCollectionDesc": "Ilova nosozliklarini topishga yordam beradi. O‘zingiz yoqmasangiz, hisobot yuborilmaydi.",
+  "setupDecline": "Rozi emasman va chiqish",
+  "setupBack": "Orqaga",
+  "dashboardNoProfileTitle": "Ulanishni sozlang",
+  "dashboardNoProfileDesc": "Ishonchli provayderdan VPN profilini qo‘shing. Ungacha VPN o‘chiq qoladi.",
+  "dashboardNoActiveProfileTitle": "VPN profilini tanlang",
+  "dashboardNoActiveProfileDesc": "Profillar saqlangan, lekin hech biri faol emas. VPN boshqaruvini ochish uchun birini tanlang.",
+  "dashboardSelectProfile": "Profilni tanlash",
+  "dashboardByedpiTitle": "VPN provayderingiz yo‘qmi?",
+  "dashboardByedpiDesc": "VPN profilisiz DPI cheklovini aylanib o‘tish uchun faqat ByeDPI rejimidan foydalaning.",
+  "dashboardUseByedpi": "ByeDPI ishlatish",
+  "setupProfileSourceNotice": "ReClash VPN xizmatini sotmaydi. Ishonchli provayder bergan havola, QR kod yoki konfiguratsiya faylidan foydalaning. Profil saqlashdan oldin tekshiriladi.",
+  "setupContinueWithoutProfile": "Profilsiz davom etish",
+  "setupContinueWithoutProfileDesc": "VPN o‘chiq qoladi. Profilni keyin qo‘shish yoki VPN provayderisiz faqat ByeDPI rejimidan foydalanish mumkin.",
+  "setupProfilesReady": "{count} ta profil tayyor",
+  "setupAddAnotherProfile": "Yana qo‘shish",
+  "setupReplaceProfile": "Almashtirish",
+  "setupDeleteProfile": "O‘chirish",
+  "setupReplaceProfileHint": "Yangi profil muvaffaqiyatli import qilinib tekshirilgandan keyingina joriy profil o‘chiriladi.",
+  "setupRegionTitle": "Joriy tarmoq qaysi hududda?",
+  "setupRegionRecommended": "Tilingiz uchun tavsiya",
+  "setupAutoRunUnavailable": "Avtomatik ulanish uchun profil qo‘shing",
+  "setupSummaryTitle": "Sozlash yakuni",
+  "setupSummaryNoProfile": "VPN profili yo‘q — VPN o‘chiq qoladi; faqat ByeDPI rejimi mavjud",
+  "setupSummaryProfile": "Profil: {name}",
+  "setupSummaryRouting": "Aqlli yo‘naltirish: {value}",
+  "setupSummaryAutoRunOn": "Avtomatik ulanish: yoqilgan",
+  "setupSummaryAutoRunOff": "Avtomatik ulanish: o‘chiq",
+  "setupPermissionDeferred": "Birinchi ulanishda so‘raladi",
+  "setupPermissionBattery": "Batareyani optimallashtirish",
+  "setupPermissionBatteryDesc": "ReClashga VPNni fonda faol saqlashga ruxsat bering",
+  "setupPermissionChecking": "Tekshirilmoqda…",
+  "setupPermissionRequest": "Ruxsat berish",
+  "setupPermissionGranted": "Ruxsat berilgan",
+  "setupPermissionDenied": "Ruxsat berilmagan",
+  "setupPermissionUnavailable": "Mavjud emas",
+  "setupPermissionError": "Tekshirib bo‘lmadi",
+  "setupPermissionOpenSettings": "Sozlamalarni ochish",
+  "setupDoneConnect": "Tayyor va ulanish",
+  "setupRerun": "Boshlang‘ich sozlashni takrorlash",
+  "setupRerunDesc": "Ma’lumotlarni o‘chirmay til, profil, yo‘naltirish va ruxsatlarni tekshirish",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "Telefondan olish",
+  "lanProfileImportDesc": "Mahalliy tarmoq orqali obuna URL manzilini yuborish uchun bir martalik QR kodni ko‘rsatish",
+  "lanProfileImportTitle": "Obunani olish",
+  "lanProfileImportScan": "Bu QR kodni shu tarmoqdagi telefon orqali skanerlang",
+  "lanProfileImportAddress": "Yoki JSON ma’lumotini {address} manziliga yuboring",
+  "lanProfileImportWaiting": "Obuna kutilmoqda…",
+  "lanProfileImportImporting": "Obuna import qilinmoqda…",
+  "lanProfileImportImported": "Obuna olindi",
+  "lanProfileImportTimedOut": "Bir martalik havola muddati tugadi",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "Mahalliy tarmoq orqali ulashishni ishga tushirib bo‘lmadi",
+  "lanProfileImportFailed": "Obunani import qilib bo‘lmadi"
 }

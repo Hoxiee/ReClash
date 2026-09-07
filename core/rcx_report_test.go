@@ -60,6 +60,13 @@ func TestRankExplainsWhyANodeIsNotEligible(t *testing.T) {
 				Facts:      rcxFacts{OpenWorld: rcxProofProven},
 				Evidence:   rcxEvidenceLiveTraffic,
 			},
+			{
+				Name:       "circuit",
+				Order:      4,
+				InSkeleton: true,
+				Circuit:    true,
+				Facts:      rcxFacts{Origin: rcxOriginForeign},
+			},
 		},
 	}
 
@@ -77,6 +84,7 @@ func TestRankExplainsWhyANodeIsNotEligible(t *testing.T) {
 		"cooling":  rcxBlockCooling,
 		"blocked":  rcxBlockDisproven,
 		"domestic": rcxBlockLastResort,
+		"circuit":  rcxBlockProviderCircuit,
 	}
 	for node, expected := range want {
 		if blocks[node] != expected {
@@ -113,6 +121,64 @@ func TestReportCarriesTheReasoningBehindTheChoice(t *testing.T) {
 	}
 	if report.Link.Foreign == "" || report.ProbeCap != rcxProbeBudgetCap {
 		t.Errorf("link/budget = %+v/%d, want the network facts too", report.Link, report.ProbeCap)
+	}
+}
+
+func TestReportIncludesLocalRecoveryMetricsAndActiveIncidents(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "dead", ID: "dead-id", Provider: "provider-a", Transport: "ws", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "warm", ID: "warm-id", Provider: "provider-b", Transport: "grpc", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	engine := newTestEngine(runtime, "ru-home")
+	engine.incumbent = "dead"
+	engine.candidates(runtime.members)
+	engine.snapshot.Standbys[engine.envKey] = []string{"warm-id"}
+	engine.accountedAt = runtime.Now()
+	runtime.advance(10 * time.Second)
+	engine.startIncident(runtime.Now())
+	runtime.advance(2 * time.Second)
+	engine.noteSwitch("dead", "warm", rcxReasonDegraded, runtime.Now())
+	engine.snapshot.Circuits[rcxCircuitKey(engine.envKey, "provider-a")] = rcxProviderCircuit{Until: runtime.Now().Add(time.Minute)}
+	marker := engine.cfg.OpenMarkers[0]
+	engine.snapshot.Quarantines[rcxMarkerID(rcxRoleOpen, marker)] = rcxMarkerQuarantine{Until: runtime.Now().Add(time.Minute)}
+
+	engine.reconsider()
+	report := engine.Report()
+
+	if report.Metrics.Availability != 83 || report.Metrics.Incidents != 1 || report.Metrics.StandbyHits != 1 {
+		t.Errorf("metrics = %+v, want 10s available of 12s and one standby recovery", report.Metrics)
+	}
+	if report.Metrics.LastFailover != 2_000 || report.Metrics.AverageOutage != 2_000 {
+		t.Errorf("recovery durations = %+v, want the two-second incident", report.Metrics)
+	}
+	if len(report.Metrics.ActiveCircuits) != 1 || report.Metrics.ActiveCircuits[0] != "provider-a" {
+		t.Errorf("circuits = %v, want the active provider named", report.Metrics.ActiveCircuits)
+	}
+	if len(report.Metrics.ActiveMarkers) != 1 || report.Metrics.ActiveMarkers[0] != marker.URL {
+		t.Errorf("markers = %v, want the quarantined marker URL named", report.Metrics.ActiveMarkers)
+	}
+}
+
+func TestMetricsSkipSuspendGapsAndCloseRecoveredIncidents(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru-home")
+	engine.accountedAt = runtime.Now()
+	runtime.advance(5 * time.Second)
+	engine.startIncident(runtime.Now())
+	runtime.advance(3 * time.Second)
+	engine.applySuspend(true)
+	runtime.advance(time.Hour)
+	engine.applySuspend(false)
+	runtime.advance(4 * time.Second)
+	engine.publish(rcxReasonHold, nil, rcxDecisionInput{})
+
+	metrics := engine.Report().Metrics
+	if metrics.EnabledMillis != 12_000 || metrics.AvailableMillis != 9_000 {
+		t.Errorf("metrics = %+v, want the suspend hour excluded", metrics)
+	}
+	if metrics.LastOutage != 0 {
+		t.Errorf("last outage = %d, want a suspended episode abandoned rather than reported as recovery", metrics.LastOutage)
 	}
 }
 

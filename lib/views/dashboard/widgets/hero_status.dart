@@ -21,7 +21,9 @@ enum HeroOrbPhase {
 
 /// `unknown` is not a middle ground: it withholds the verdict, so a missing or
 /// in-flight measurement can never paint the orb red.
-enum HeroHealth { unknown, healthy, degraded, broken }
+enum HeroHealth { unknown, checking, healthy, degraded, broken }
+
+enum HeroOrbVariant { vpn, byedpi }
 
 enum HeroStatus {
   offline,
@@ -61,6 +63,38 @@ extension HeroStatusExt on HeroStatus {
 /// Only the breathe period reads this: `repeat` captures its period.
 enum HeroOrbActivity { idle, active }
 
+enum HeroOrbTransition {
+  steady,
+  ignition,
+  lockOn,
+  shutdown,
+  pause,
+  resume,
+  fault,
+  recovery,
+  networkLoss,
+  networkReturn,
+  healthShift,
+  crossfade,
+}
+
+HeroOrbTransition heroOrbTransitionOf(HeroStatus from, HeroStatus to) {
+  if (from == to) return HeroOrbTransition.steady;
+  if (to == HeroStatus.offline) return HeroOrbTransition.networkLoss;
+  if (to == HeroStatus.off) return HeroOrbTransition.shutdown;
+  if (from == HeroStatus.offline) return HeroOrbTransition.networkReturn;
+  if (to == HeroStatus.paused) return HeroOrbTransition.pause;
+  if (from == HeroStatus.paused) return HeroOrbTransition.resume;
+  if (to == HeroStatus.broken) return HeroOrbTransition.fault;
+  if (from == HeroStatus.broken || to == HeroStatus.reconnecting) {
+    return HeroOrbTransition.recovery;
+  }
+  if (to == HeroStatus.connecting) return HeroOrbTransition.ignition;
+  if (from.isSweeping && to.flows) return HeroOrbTransition.lockOn;
+  if (from.flows && to.flows) return HeroOrbTransition.healthShift;
+  return HeroOrbTransition.crossfade;
+}
+
 HeroOrbActivity heroActivityBandOf(HeroOrbActivity current, double activity) =>
     switch (current) {
       HeroOrbActivity.idle =>
@@ -73,7 +107,7 @@ HeroOrbActivity heroActivityBandOf(HeroOrbActivity current, double activity) =>
 const heroDegradedDelay = 600;
 
 HeroHealth heroHealthOf({required int? delay, required bool measuring}) {
-  if (measuring) return HeroHealth.unknown;
+  if (measuring) return HeroHealth.checking;
   if (delay == null || delay == 0) return HeroHealth.unknown;
   if (delay < 0) return HeroHealth.broken;
   if (delay >= heroDegradedDelay) return HeroHealth.degraded;
@@ -130,6 +164,7 @@ HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
       HeroOrbPhase.reconnecting => HeroStatus.reconnecting,
       HeroOrbPhase.paused => HeroStatus.paused,
       HeroOrbPhase.on => switch (health) {
+        HeroHealth.checking => HeroStatus.checking,
         HeroHealth.broken => HeroStatus.broken,
         HeroHealth.degraded => HeroStatus.degraded,
         HeroHealth.healthy || HeroHealth.unknown => HeroStatus.secured,
@@ -150,6 +185,12 @@ const List<Color> heroRingColors = [
   Color(0xFF10EDF8),
   Color(0xFF2A8BFD),
   Color(0xFF6C58FC),
+];
+
+const List<Color> byedpiHeroRingColors = [
+  Color(0xFF55E6A5),
+  Color(0xFF00B8A9),
+  Color(0xFF168AAD),
 ];
 
 const List<Color> _pausedRing = [
@@ -226,6 +267,25 @@ class HeroPalette {
   }
 }
 
+HeroPalette byedpiHeroPaletteOf(BuildContext context, HeroStatus status) {
+  if (status != HeroStatus.connecting && status != HeroStatus.secured) {
+    return heroPaletteOf(context, status);
+  }
+  final colorScheme = context.colorScheme;
+  final isDark = colorScheme.brightness == Brightness.dark;
+  final ring = [
+    for (final color in byedpiHeroRingColors)
+      isDark
+          ? color.harmonizeWith(colorScheme.tertiary)
+          : color.harmonizeWith(colorScheme.tertiary).darken(6),
+  ];
+  return HeroPalette(
+    ring: ring,
+    glow: ring[1],
+    accent: isDark ? ring[0].lighten(4) : ring[2].darken(10),
+  );
+}
+
 /// Every palette change animates, so a theme switch travels as smoothly as a
 /// status change does.
 class HeroPaletteTween extends Tween<HeroPalette> {
@@ -235,7 +295,11 @@ class HeroPaletteTween extends Tween<HeroPalette> {
   HeroPalette lerp(double t) => HeroPalette.lerp(begin!, end!, t);
 }
 
-HeroPalette heroPaletteOf(BuildContext context, HeroStatus status) {
+HeroPalette heroPaletteOf(
+  BuildContext context,
+  HeroStatus status, {
+  List<Color>? heroRing,
+}) {
   final colorScheme = context.colorScheme;
   final isDark = colorScheme.brightness == Brightness.dark;
 
@@ -266,7 +330,7 @@ HeroPalette heroPaletteOf(BuildContext context, HeroStatus status) {
       );
     case HeroStatus.connecting:
     case HeroStatus.secured:
-      final ring = tuned(heroRingColors);
+      final ring = heroRing ?? tuned(heroRingColors);
       return HeroPalette(
         ring: ring,
         glow: ring[1],

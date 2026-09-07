@@ -58,7 +58,8 @@ class SetupLanguageStep extends ConsumerWidget {
                   for (final locale in options)
                     ListItem<Locale?>.radio(
                       title: Text(
-                        locale?.nativeLabel ?? appLocalizations.defaultText,
+                        locale?.nativeLabel ??
+                            appLocalizations.setupSystemLanguage,
                       ),
                       subtitle: locale == null
                           ? null

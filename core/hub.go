@@ -26,6 +26,7 @@ import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
+	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
@@ -40,6 +41,7 @@ var (
 )
 
 func handleInitClash(params *InitParams) bool {
+	startHealthCheckCadence()
 	func() {
 		configMu.Lock()
 		defer configMu.Unlock()
@@ -57,6 +59,7 @@ func handleStartListener() bool {
 	defer configMu.Unlock()
 	isRunning.Store(true)
 	updateListeners(currentConfig)
+	syncTunUp()
 	resolver.ResetConnection()
 	return true
 }
@@ -67,6 +70,7 @@ func handleStopListener() bool {
 	isRunning.Store(false)
 	tunPaused.Store(false)
 	listener.StopListener()
+	tunUp.Store(false)
 	resolver.ResetConnection()
 	return true
 }
@@ -86,6 +90,7 @@ func handlePauseTun() bool {
 		return true
 	}
 	updateListeners(currentConfig)
+	syncTunUp()
 	return true
 }
 
@@ -99,6 +104,12 @@ func handleResumeTun() bool {
 		return true
 	}
 	updateListeners(currentConfig)
+	syncTunUp()
+	return true
+}
+
+func handleSetUiActive(active bool) bool {
+	uiActive.Store(active)
 	return true
 }
 
@@ -116,6 +127,7 @@ func handleForceGC() {
 }
 
 func handleShutdown() bool {
+	stopHealthCheckCadence()
 	handleStopLog()
 	rcxEngineInstance.Stop()
 
@@ -123,6 +135,7 @@ func handleShutdown() bool {
 	isRunning.Store(false)
 	tunPaused.Store(false)
 	listener.StopListener()
+	tunUp.Store(false)
 	updater.StopGeoUpdater()
 	executor.Shutdown()
 	currentConfig = nil
@@ -599,19 +612,94 @@ func handleSideLoadExternalProvider(providerName string, data []byte) *MethodErr
 	return nil
 }
 
-// defaultRefreshHealthChecks re-probes every proxy provider off the calling
-// thread. Providers coalesce concurrent checks internally, so an extra call
-// costs nothing when one is already running.
+const healthCheckCadenceInterval = 5 * time.Minute
+
+var (
+	healthCheckCadenceMu     sync.Mutex
+	healthCheckCadenceCancel context.CancelFunc
+	healthCheckCadenceEvery  = healthCheckCadenceInterval
+)
+
+func healthCheckProviders() []cp.ProxyProvider {
+	providers := make([]cp.ProxyProvider, 0)
+	healthCheckSeen := make(map[cp.ProxyProvider]struct{})
+	add := func(provider cp.ProxyProvider) {
+		if provider == nil {
+			return
+		}
+		if _, seen := healthCheckSeen[provider]; seen {
+			return
+		}
+		healthCheckSeen[provider] = struct{}{}
+		providers = append(providers, provider)
+	}
+	for _, provider := range tunnel.ProvidersSnapshot() {
+		add(provider)
+	}
+	for _, proxy := range tunnel.AllProxies() {
+		adapterProxy, ok := proxy.(*adapter.Proxy)
+		if !ok {
+			continue
+		}
+		group, ok := adapterProxy.ProxyAdapter.(outboundgroup.ProxyGroup)
+		if !ok {
+			continue
+		}
+		for _, provider := range group.Providers() {
+			add(provider)
+		}
+	}
+	return providers
+}
+
+func runHealthCheckRefresh() {
+	for _, provider := range healthCheckProviders() {
+		log.Debugln("[APP] re-checking provider %s", provider.Name())
+		provider.Touch()
+		provider.HealthCheck()
+	}
+}
+
 func defaultRefreshHealthChecks() {
-	safeGoDetached("refreshHealthChecks", func() {
-		for name, p := range tunnel.ProvidersSnapshot() {
-			log.Debugln("[APP] re-checking provider %s after resume", name)
-			p.HealthCheck()
+	safeGoDetached("refreshHealthChecks", runHealthCheckRefresh)
+}
+
+var refreshHealthChecks = defaultRefreshHealthChecks
+
+func startHealthCheckCadence() {
+	healthCheckCadenceMu.Lock()
+	defer healthCheckCadenceMu.Unlock()
+	if healthCheckCadenceCancel != nil {
+		return
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	healthCheckCadenceCancel = cancel
+	every := healthCheckCadenceEvery
+	safeGoDetached("healthCheckCadence", func() {
+		ticker := time.NewTicker(every)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if tunUp.Load() {
+					refreshHealthChecks()
+				}
+			}
 		}
 	})
 }
 
-var refreshHealthChecks = defaultRefreshHealthChecks
+func stopHealthCheckCadence() {
+	healthCheckCadenceMu.Lock()
+	defer healthCheckCadenceMu.Unlock()
+	if healthCheckCadenceCancel == nil {
+		return
+	}
+	healthCheckCadenceCancel()
+	healthCheckCadenceCancel = nil
+}
 
 // Doze is minutes away when a screen goes off, so a health check gated on
 // suspension alone still probes every provider from a pocketed phone.
@@ -767,6 +855,7 @@ func handleSetupConfig(params *SetupParams) string {
 	if err := setupConfig(params); err != nil {
 		return err.Error()
 	}
+	refreshHealthChecks()
 	return ""
 }
 

@@ -1,6 +1,12 @@
 package main
 
-import "strings"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"sort"
+	"strconv"
+	"strings"
+)
 
 type rcxMarker struct {
 	URL      string `json:"url"`
@@ -11,6 +17,61 @@ type rcxMarker struct {
 // per-node facts it learned under the old set on the next start, so a corrected
 // marker set is not fought by proofs a poisoned node earned before it.
 const rcxDefaultsVersion = 4
+
+type rcxConfigFingerprints struct {
+	Open      string `json:"o"`
+	Domestic  string `json:"d"`
+	Canaries  string `json:"c"`
+	Countries string `json:"r"`
+}
+
+func (c rcxConfig) fingerprints() rcxConfigFingerprints {
+	return rcxConfigFingerprints{
+		Open:      rcxMarkersFingerprint(c.OpenMarkers),
+		Domestic:  rcxMarkersFingerprint(c.DomesticMarkers),
+		Canaries:  rcxStringsFingerprint(c.CanaryForeign, c.CanaryDomestic),
+		Countries: rcxStringsFingerprint(c.CensorCountries),
+	}
+}
+
+func rcxMarkerID(role rcxRole, marker rcxMarker) string {
+	return strconv.Itoa(int(role)) + ":" + rcxMarkersFingerprint([]rcxMarker{marker})
+}
+
+func rcxMarkersFingerprint(markers []rcxMarker) string {
+	values := make([]string, 0, len(markers))
+	for _, marker := range markers {
+		statuses := append([]int(nil), marker.Statuses...)
+		sort.Ints(statuses)
+		parts := make([]string, len(statuses))
+		for i, status := range statuses {
+			parts[i] = strconv.Itoa(status)
+		}
+		values = append(values, strings.TrimSpace(marker.URL)+"|"+strings.Join(parts, ","))
+	}
+	return rcxFingerprint(values)
+}
+
+func rcxStringsFingerprint(groups ...[]string) string {
+	values := make([]string, 0)
+	for _, group := range groups {
+		normalized := make([]string, 0, len(group))
+		for _, value := range group {
+			if value = strings.TrimSpace(value); value != "" {
+				normalized = append(normalized, value)
+			}
+		}
+		sort.Strings(normalized)
+		values = append(values, normalized...)
+		values = append(values, "\x00")
+	}
+	return rcxFingerprint(values)
+}
+
+func rcxFingerprint(values []string) string {
+	sum := sha256.Sum256([]byte(strings.Join(values, "\x1f")))
+	return hex.EncodeToString(sum[:8])
+}
 
 type rcxConfig struct {
 	Enabled                 bool        `json:"on"`

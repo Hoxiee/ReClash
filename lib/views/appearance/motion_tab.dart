@@ -24,6 +24,7 @@ class AppearanceMotionTab extends ConsumerWidget {
       slivers: [
         SettingSection.sliver(
           top: 12,
+          title: appLocalizations.animations,
           items: [
             DecorationListItem.toggle(
               leading: const Icon(Icons.animation),

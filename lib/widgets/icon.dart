@@ -11,6 +11,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
 
 const _maxDecodedIcons = 64;
+const _assetSourcePrefix = 'asset:';
 
 final _decodedIcons = <String, Uint8List?>{};
 
@@ -100,10 +101,11 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
   void _getImageFormCache() {
     _imageNotifier.value = null;
     final src = widget.src;
-    if (src.isEmpty) {
+    unawaited(_streamSubscription?.cancel());
+    _streamSubscription = null;
+    if (src.isEmpty || src.startsWith(_assetSourcePrefix)) {
       return;
     }
-    _streamSubscription?.cancel();
     _streamSubscription = _cacheMange
         .getFileStreamV2(
           src,
@@ -128,6 +130,22 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final src = widget.src;
+    if (src.startsWith(_assetSourcePrefix)) {
+      final asset = src.substring(_assetSourcePrefix.length);
+      if (asset.isEmpty) return widget.defaultWidget;
+      return asset.isSvg
+          ? SvgPicture.asset(
+              asset,
+              fit: widget.fit ?? BoxFit.contain,
+              errorBuilder: (_, _, _) => widget.defaultWidget,
+            )
+          : Image.asset(
+              asset,
+              fit: widget.fit,
+              errorBuilder: (_, _, _) => widget.defaultWidget,
+            );
+    }
     return ValueListenableBuilder<File?>(
       valueListenable: _imageNotifier,
       builder: (_, data, _) {
@@ -136,7 +154,7 @@ class _ImageCacheWidgetState extends State<ImageCacheWidget> {
         }
         return CommonImage(
           data: data,
-          isSvg: widget.src.isSvg,
+          isSvg: src.isSvg,
           fit: widget.fit,
           errorBuilder: (_, _, _) {
             return widget.defaultWidget;

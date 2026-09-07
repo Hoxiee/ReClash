@@ -1,32 +1,39 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/pages/scan.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import 'client_preset_selector.dart';
 
 class AddProfileView extends ConsumerWidget {
   final BuildContext context;
   final bool keepCurrentPage;
+  final bool shrinkWrap;
+  final ValueChanged<Profile>? onProfileAdded;
 
   const AddProfileView({
     super.key,
     required this.context,
     this.keepCurrentPage = false,
+    this.shrinkWrap = false,
+    this.onProfileAdded,
   });
 
   Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
-    unawaited(
-      ref
-          .read(profilesActionProvider.notifier)
-          .addProfileFormFile(keepCurrentPage: keepCurrentPage),
-    );
+    final profile = await ref
+        .read(profilesActionProvider.notifier)
+        .addProfileFormFile(keepCurrentPage: keepCurrentPage);
+    if (profile != null) onProfileAdded?.call(profile);
   }
 
   Future<void> _handleAddUrl(
@@ -48,29 +55,28 @@ class AddProfileView extends ConsumerWidget {
     }
     final target = resolved?.url ?? url;
     if (target.isEmpty) {
-      unawaited(
-        profilesAction.addProfileFromLocalContent(
-          resolved!.data!,
-          keepCurrentPage: keepCurrentPage,
-        ),
+      final profile = await profilesAction.addProfileFromLocalContent(
+        resolved!.data!,
+        keepCurrentPage: keepCurrentPage,
       );
+      if (profile != null) onProfileAdded?.call(profile);
       return;
     }
-    unawaited(
-      profilesAction.addProfileFormURL(
-        target,
-        client: resolved?.preset ?? client,
-        name: resolved?.name,
-        customUserAgent: customUserAgent,
-        keepCurrentPage: keepCurrentPage,
-      ),
+    final profile = await profilesAction.addProfileFormURL(
+      target,
+      client: resolved?.preset ?? client,
+      name: resolved?.name,
+      customUserAgent: customUserAgent,
+      keepCurrentPage: keepCurrentPage,
     );
+    if (profile != null) onProfileAdded?.call(profile);
   }
 
   Future<void> _toScan(WidgetRef ref) async {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     if (system.isDesktop) {
-      unawaited(profilesAction.addProfileFormQrCode());
+      final profile = await profilesAction.addProfileFormQrCode();
+      if (profile != null) onProfileAdded?.call(profile);
       return;
     }
     final url = await BaseNavigator.push(context, const ScanPage());
@@ -79,6 +85,25 @@ class AddProfileView extends ConsumerWidget {
         unawaited(_handleAddUrl(profilesAction, url));
       });
     }
+  }
+
+  Future<void> _toLanImport(WidgetRef ref) async {
+    final profilesAction = ref.read(profilesActionProvider.notifier);
+    await dialogs.showCommonDialog<void>(
+      dismissible: false,
+      child: LanProfileImportDialog(
+        onImport: (target) async {
+          final profile = await profilesAction.addProfileFormURL(
+            target.url,
+            client: target.client,
+            name: target.name,
+            keepCurrentPage: keepCurrentPage,
+          );
+          if (profile == null) throw StateError('Profile import failed');
+          onProfileAdded?.call(profile);
+        },
+      ),
+    );
   }
 
   Future<void> _toAdd(WidgetRef ref) async {
@@ -92,21 +117,18 @@ class AddProfileView extends ConsumerWidget {
     if (!url.isUrl &&
         !url.startsWith('incy://') &&
         !url.startsWith('happ://')) {
-      unawaited(
-        profilesAction.addProfileFromLocalContent(
-          url,
-          keepCurrentPage: keepCurrentPage,
-        ),
+      final profile = await profilesAction.addProfileFromLocalContent(
+        url,
+        keepCurrentPage: keepCurrentPage,
       );
+      if (profile != null) onProfileAdded?.call(profile);
       return;
     }
-    unawaited(
-      _handleAddUrl(
-        profilesAction,
-        url,
-        client: result.client,
-        customUserAgent: result.customUserAgent,
-      ),
+    await _handleAddUrl(
+      profilesAction,
+      url,
+      client: result.client,
+      customUserAgent: result.customUserAgent,
     );
   }
 
@@ -114,7 +136,17 @@ class AddProfileView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     return ListView(
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       children: [
+        if (system.isTV)
+          ListItem(
+            key: const Key('lan-profile-import'),
+            leading: const Icon(Icons.wifi_tethering),
+            title: Text(appLocalizations.lanProfileImport),
+            subtitle: Text(appLocalizations.lanProfileImportDesc),
+            onTap: () => _toLanImport(ref),
+          ),
         ListItem(
           leading: const Icon(Icons.qr_code_sharp),
           title: Text(appLocalizations.qrcode),
@@ -259,6 +291,142 @@ class _URLFormDialogState extends State<URLFormDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class LanProfileImportDialog extends StatefulWidget {
+  const LanProfileImportDialog({
+    super.key,
+    required this.onImport,
+    this.resolve = resolveSubscriptionImport,
+    this.timeout = const Duration(minutes: 3),
+    this.address,
+  });
+
+  final LanProfileImportCallback onImport;
+  final LanProfileImportResolver resolve;
+  final Duration timeout;
+  final InternetAddress? address;
+
+  @override
+  State<LanProfileImportDialog> createState() => _LanProfileImportDialogState();
+}
+
+class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
+  LanProfileImportServer? _server;
+  StreamSubscription<LanProfileImportState>? _subscription;
+  Timer? _countdown;
+  Uri? _uri;
+  Object? _startError;
+  LanProfileImportState _state = LanProfileImportState.waiting;
+  late int _secondsLeft;
+
+  @override
+  void initState() {
+    super.initState();
+    _secondsLeft = widget.timeout.inSeconds;
+    unawaited(_start());
+  }
+
+  Future<void> _start() async {
+    final server = LanProfileImportServer(
+      onImport: widget.onImport,
+      resolve: widget.resolve,
+      timeout: widget.timeout,
+    );
+    _server = server;
+    _subscription = server.state.stream.listen((state) {
+      if (!mounted || state == LanProfileImportState.closed) return;
+      setState(() => _state = state);
+      if (state == LanProfileImportState.imported) {
+        Navigator.of(context).pop();
+      }
+    });
+    try {
+      final uri = await server.start(address: widget.address);
+      if (!mounted) return;
+      setState(() => _uri = uri);
+      _countdown = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted || _secondsLeft <= 0) return;
+        setState(() => _secondsLeft--);
+      });
+    } on Object catch (error) {
+      await server.close();
+      if (!mounted) return;
+      setState(() => _startError = error);
+    }
+  }
+
+  @override
+  void dispose() {
+    _countdown?.cancel();
+    unawaited(_subscription?.cancel());
+    unawaited(_server?.close());
+    super.dispose();
+  }
+
+  String _status(AppLocalizations appLocalizations) {
+    if (_startError != null) {
+      return appLocalizations.lanProfileImportStartFailed;
+    }
+    return switch (_state) {
+      LanProfileImportState.waiting =>
+        '${appLocalizations.lanProfileImportWaiting} ${_secondsLeft}s',
+      LanProfileImportState.importing =>
+        appLocalizations.lanProfileImportImporting,
+      LanProfileImportState.imported =>
+        appLocalizations.lanProfileImportImported,
+      LanProfileImportState.failed => appLocalizations.lanProfileImportFailed,
+      LanProfileImportState.timedOut =>
+        appLocalizations.lanProfileImportTimedOut,
+      LanProfileImportState.closed => appLocalizations.lanProfileImportTimedOut,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final uri = _uri;
+    return CommonDialog(
+      title: appLocalizations.lanProfileImportTitle,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.close),
+        ),
+      ],
+      child: Column(
+        spacing: 12,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            appLocalizations.lanProfileImportScan,
+            textAlign: TextAlign.center,
+          ),
+          if (uri != null)
+            QrImageView(
+              data: uri.toString(),
+              size: 220,
+              backgroundColor: Colors.white,
+            )
+          else
+            const SizedBox.square(
+              dimension: 220,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          Text(
+            _status(appLocalizations),
+            key: const Key('lan-profile-import-status'),
+            textAlign: TextAlign.center,
+          ),
+          if (uri != null)
+            SelectableText(
+              appLocalizations.lanProfileImportAddress(uri.toString()),
+              textAlign: TextAlign.center,
+            ),
+        ],
       ),
     );
   }

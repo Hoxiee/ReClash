@@ -4,19 +4,12 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
 import 'package:reclash/views/profiles/edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _warnRatio = 0.7;
-const _criticalRatio = 0.9;
-const _amber = Color(0xFFC57F0A);
-
-/// Everything a subscription can say about itself, in the order it gets asked:
-/// whose it is, what is left, when it last refreshed, where to buy more.
 class SubscriptionOverviewView extends ConsumerWidget {
   const SubscriptionOverviewView({super.key});
 
@@ -24,47 +17,58 @@ class SubscriptionOverviewView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final profile = ref.watch(currentProfileProvider);
-    final panelMeta = profile?.panelMeta;
-    final subscriptionInfo = profile?.subscriptionInfo;
-    final hasQuota =
-        subscriptionInfo != null &&
-        (subscriptionInfo.total > 0 || subscriptionInfo.expire > 0);
-    final offers = _offersOf(context, panelMeta);
-    return CommonScaffold(
-      title: appLocalizations.metaInfo,
-      body: CustomScrollView(
-        slivers: [
-          if (profile == null)
+    if (profile == null) {
+      return CommonScaffold(
+        title: appLocalizations.metaInfo,
+        body: CustomScrollView(
+          slivers: [
             _sliver(
               _NoticeCard(
                 icon: Icons.folder_off_rounded,
                 text: appLocalizations.nullProfileDesc,
               ),
-            )
-          else ...[
-            _sliver(_IdentityCard(profile: profile, panelMeta: panelMeta)),
-            if (profile.undialableNodes)
-              _sliver(
-                _NoticeCard(
-                  icon: Icons.wifi_off_rounded,
-                  text: appLocalizations.subscriptionUndialable,
-                  tone: context.colorScheme.error,
-                  onTap: () => _handleShowEditExtendPage(context, profile),
-                ),
-              ),
-            for (final notice in _notices(context, panelMeta)) _sliver(notice),
-            if (hasQuota)
-              _sliver(_BalanceCard(subscriptionInfo: subscriptionInfo))
-            else
-              _sliver(
-                _NoticeCard(
-                  icon: Icons.data_usage_rounded,
-                  text: appLocalizations.subscriptionNoQuota,
-                ),
-              ),
-            _sliver(_RefreshCard(profile: profile)),
-            if (offers.isNotEmpty) _sliver(_OffersCard(offers: offers)),
+            ),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
           ],
+        ),
+      );
+    }
+
+    final panelMeta = profile.panelMeta;
+    final subscriptionInfo = profile.subscriptionInfo;
+    final hasDetails =
+        subscriptionInfo != null &&
+        (subscriptionInfo.upload != 0 ||
+            subscriptionInfo.download != 0 ||
+            subscriptionInfo.total != 0 ||
+            subscriptionInfo.expire != 0);
+    final offers = _offersOf(context, panelMeta);
+    return CommonScaffold(
+      title: appLocalizations.metaInfo,
+      body: CustomScrollView(
+        slivers: [
+          if (profile.undialableNodes)
+            _sliver(
+              _NoticeCard(
+                icon: Icons.wifi_off_rounded,
+                text: appLocalizations.subscriptionUndialable,
+                tone: context.colorScheme.error,
+                onTap: () => _handleShowEditExtendPage(context, profile),
+              ),
+            ),
+          for (final notice in _notices(context, panelMeta)) _sliver(notice),
+          if (hasDetails)
+            _sliver(_UsageDetailsCard(subscriptionInfo: subscriptionInfo))
+          else
+            _sliver(
+              _NoticeCard(
+                icon: Icons.data_usage_rounded,
+                text: appLocalizations.subscriptionNoQuota,
+              ),
+            ),
+          _sliver(_AccountDetailsCard(profile: profile)),
+          _sliver(_RefreshCard(profile: profile)),
+          if (offers.isNotEmpty) _sliver(_OffersCard(offers: offers)),
           const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
         ],
       ),
@@ -160,7 +164,7 @@ class _Card extends StatelessWidget {
             : tone.withValues(alpha: 0.10),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: child,
       ),
     );
@@ -189,19 +193,12 @@ class _NoticeCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: tone),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodyMedium,
-            ),
-          ),
+          Icon(icon, size: 20, color: tone),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: context.textTheme.bodyMedium)),
           if (onTap != null) ...[
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, size: 18, color: tone),
+            Icon(Icons.chevron_right_rounded, size: 20, color: tone),
           ],
         ],
       ),
@@ -211,45 +208,32 @@ class _NoticeCard extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  const _Pill({required this.icon, required this.label, required this.tone});
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.icon, required this.label});
 
   final IconData icon;
   final String label;
-  final Color tone;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: tone.withValues(alpha: 0.14),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: tone),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: tone,
-              ),
-            ),
+    final colorScheme = context.colorScheme;
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: context.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row({required this.label, required this.value});
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -258,25 +242,25 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
             label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.copyWith(
+            style: context.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
+        const SizedBox(width: 16),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
       ],
@@ -284,127 +268,14 @@ class _Row extends StatelessWidget {
   }
 }
 
-class _Hairline extends StatelessWidget {
-  const _Hairline();
+class _Divider extends StatelessWidget {
+  const _Divider();
 
   @override
   Widget build(BuildContext context) => Container(
     height: 1,
     color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
   );
-}
-
-/// A provider `serviceLogo` is a full-colour brand mark, so it is shown intact
-/// on a neutral tile, never silhouetted. Providers should ship a transparent,
-/// square-ish icon; anything else is contained and centred without cropping.
-class _LogoTile extends StatelessWidget {
-  const _LogoTile({this.logo});
-
-  final String? logo;
-
-  @override
-  Widget build(BuildContext context) {
-    const size = 52.0;
-    final colorScheme = context.colorScheme;
-    final fallback = Icon(
-      Icons.cloud_outlined,
-      size: size * 0.46,
-      color: colorScheme.primary,
-    );
-    final logo = this.logo;
-    if (logo == null || logo.isEmpty) {
-      return Container(
-        width: size,
-        height: size,
-        alignment: Alignment.center,
-        decoration: ShapeDecoration(
-          shape: AppShape.lg,
-          color: colorScheme.primary.withValues(alpha: 0.12),
-        ),
-        child: fallback,
-      );
-    }
-    return Container(
-      width: size,
-      height: size,
-      padding: const EdgeInsets.all(size * 0.16),
-      decoration: ShapeDecoration(
-        shape: RoundedSuperellipseBorder(
-          borderRadius: AppRadius.lg,
-          side: BorderSide(color: colorScheme.outlineVariant.opacity60),
-        ),
-        color: colorScheme.surfaceBright,
-      ),
-      child: ImageCacheWidget(
-        src: logo,
-        fit: BoxFit.contain,
-        defaultWidget: fallback,
-      ),
-    );
-  }
-}
-
-class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({required this.profile, this.panelMeta});
-
-  final Profile profile;
-  final PanelMeta? panelMeta;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    final name = panelMeta?.serviceName.takeFirstValid([profile.realLabel]);
-    final host = Uri.tryParse(profile.url)?.host ?? '';
-    final username = panelMeta?.accountUsername;
-    final subtitle = username?.takeFirstValid([host]) ?? host;
-    final subscriptionInfo = profile.subscriptionInfo;
-    final expireDate = subscriptionInfo == null
-        ? null
-        : subscriptionExpireDate(subscriptionInfo.expire);
-    final perpetual =
-        subscriptionInfo != null &&
-        subscriptionInfo.expire > 0 &&
-        expireDate == null;
-    final pill = _expirePill(context, expireDate, perpetual);
-    return _Card(
-      child: Row(
-        children: [
-          _LogoTile(logo: panelMeta?.serviceLogo),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name ?? profile.realLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle.isNotEmpty ? subtitle : appLocalizations.file,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.toJetBrainsMono.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (pill != null) ...[
-            const SizedBox(width: 10),
-            Flexible(child: pill),
-          ],
-        ],
-      ),
-    );
-  }
 }
 
 class _Metric extends StatelessWidget {
@@ -423,20 +294,20 @@ class _Metric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: ShapeDecoration(
-        shape: AppShape.lg,
+        shape: AppShape.md,
         color: tone.withValues(alpha: 0.08),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: tone),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          Row(
+            children: [
+              Icon(icon, size: 16, color: tone),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -444,16 +315,17 @@ class _Metric extends StatelessWidget {
                     color: context.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFamily: FontFamily.jetBrainsMono.value,
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              fontFamily: FontFamily.jetBrainsMono.value,
             ),
           ),
         ],
@@ -462,8 +334,8 @@ class _Metric extends StatelessWidget {
   }
 }
 
-class _BalanceCard extends StatelessWidget {
-  const _BalanceCard({required this.subscriptionInfo});
+class _UsageDetailsCard extends StatelessWidget {
+  const _UsageDetailsCard({required this.subscriptionInfo});
 
   final SubscriptionInfo subscriptionInfo;
 
@@ -473,99 +345,20 @@ class _BalanceCard extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final used = subscriptionInfo.upload + subscriptionInfo.download;
     final total = subscriptionInfo.total;
-    final unlimited = total <= 0;
-    final ratio = unlimited ? 0.0 : (used / total).clamp(0.0, 1.0);
-    final barColor = ratio > _criticalRatio
-        ? colorScheme.error
-        : ratio > _warnRatio
-        ? _amber
-        : colorScheme.primary;
-    final free = unlimited ? 0 : (total - used).clamp(0, total);
+    final remaining = total > 0 ? (total - used).clamp(0, total) : null;
     final expireDate = subscriptionExpireDate(subscriptionInfo.expire);
+    final perpetual = subscriptionInfo.expire > 0 && expireDate == null;
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            appLocalizations.trafficUsage,
-            style: context.textTheme.labelLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
+          _SectionTitle(
+            icon: Icons.data_usage_rounded,
+            label: appLocalizations.trafficUsage,
           ),
-          const SizedBox(height: 8),
-          if (unlimited) ...[
-            Text(
-              used.traffic.show,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontFamily: FontFamily.jetBrainsMono.value,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              appLocalizations.usedTraffic,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ] else
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: free.traffic.show,
-                    style: context.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontFamily: FontFamily.jetBrainsMono.value,
-                    ),
-                  ),
-                  const TextSpan(text: ' '),
-                  TextSpan(
-                    text: appLocalizations.trafficFreeOfTotal(
-                      total.traffic.show,
-                    ),
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          if (!unlimited) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(AppCorner.sm),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 8,
-                    color: colorScheme.surfaceContainerHighest,
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: ratio <= 0 ? 0.0 : ratio,
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(AppCorner.sm),
-                        gradient: LinearGradient(
-                          colors: [barColor.withValues(alpha: 0.7), barColor],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
           const SizedBox(height: 14),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _Metric(
@@ -586,11 +379,33 @@ class _BalanceCard extends StatelessWidget {
               ),
             ],
           ),
-          if (expireDate != null) ...[
-            const SizedBox(height: 12),
-            const _Hairline(),
+          const SizedBox(height: 14),
+          const _Divider(),
+          const SizedBox(height: 12),
+          _DetailRow(
+            label: appLocalizations.usedTraffic,
+            value: used.traffic.show,
+          ),
+          if (remaining != null) ...[
             const SizedBox(height: 10),
-            _Row(label: appLocalizations.expireTime, value: expireDate.show),
+            _DetailRow(
+              label: appLocalizations.remainingTraffic,
+              value: remaining.traffic.show,
+            ),
+            const SizedBox(height: 10),
+            _DetailRow(
+              label: appLocalizations.totalTraffic,
+              value: total.traffic.show,
+            ),
+          ],
+          if (subscriptionInfo.expire > 0) ...[
+            const SizedBox(height: 10),
+            _DetailRow(
+              label: appLocalizations.expireTime,
+              value: perpetual
+                  ? appLocalizations.perpetualSubscription
+                  : expireDate!.showFull,
+            ),
           ],
         ],
       ),
@@ -598,36 +413,75 @@ class _BalanceCard extends StatelessWidget {
   }
 }
 
-Widget? _expirePill(
-  BuildContext context,
-  DateTime? expireDate,
-  bool perpetual,
-) {
+class _AccountDetailsCard extends StatelessWidget {
+  const _AccountDetailsCard({required this.profile});
+
+  final Profile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final panelMeta = profile.panelMeta;
+    final username = panelMeta?.accountUsername?.trim();
+    final host = Uri.tryParse(profile.url)?.host ?? '';
+    final client = profile.clientEmulation == SubscriptionClient.auto
+        ? profile.lastWorkingClient ?? profile.clientEmulation
+        : profile.clientEmulation;
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SectionTitle(
+            icon: Icons.badge_outlined,
+            label: appLocalizations.account,
+          ),
+          const SizedBox(height: 14),
+          if (panelMeta?.serviceName?.trim().isNotEmpty ?? false) ...[
+            _DetailRow(
+              label: appLocalizations.serviceInfo,
+              value: panelMeta!.serviceName!.trim(),
+            ),
+            const SizedBox(height: 10),
+          ],
+          _DetailRow(label: appLocalizations.profile, value: profile.realLabel),
+          if (username != null && username.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _DetailRow(label: appLocalizations.account, value: username),
+          ],
+          if (host.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _DetailRow(label: appLocalizations.domain, value: host),
+            const SizedBox(height: 10),
+            _DetailRow(
+              label: appLocalizations.subscriptionClientLabel,
+              value: _clientLabel(context, client),
+            ),
+          ],
+          if (client == SubscriptionClient.custom &&
+              profile.customUserAgent.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            _DetailRow(
+              label: appLocalizations.customUserAgentLabel,
+              value: profile.customUserAgent,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+String _clientLabel(BuildContext context, SubscriptionClient client) {
   final appLocalizations = context.appLocalizations;
-  final colorScheme = context.colorScheme;
-  if (perpetual) {
-    return _Pill(
-      icon: Icons.all_inclusive_rounded,
-      label: appLocalizations.infiniteTime,
-      tone: colorScheme.primary,
-    );
-  }
-  if (expireDate == null) return null;
-  final daysLeft = expireDate.difference(DateTime.now()).inDays;
-  if (daysLeft < 0) {
-    return _Pill(
-      icon: Icons.event_busy_rounded,
-      label: appLocalizations.subscriptionExpired,
-      tone: colorScheme.error,
-    );
-  }
-  return _Pill(
-    icon: Icons.event_rounded,
-    label: '${appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
-    tone: daysLeft <= heroRenewDaysThreshold
-        ? colorScheme.error
-        : colorScheme.primary,
-  );
+  return switch (client) {
+    SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
+    SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
+    SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
+    SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
+    SubscriptionClient.singbox => appLocalizations.subscriptionClientSingbox,
+    SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayNG,
+    SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
+  };
 }
 
 class _RefreshCard extends ConsumerWidget {
@@ -640,9 +494,9 @@ class _RefreshCard extends ConsumerWidget {
       await ref
           .read(profilesActionProvider.notifier)
           .updateProfile(profile, showLoading: true);
-    } catch (e) {
+    } catch (error) {
       dialogs.showNotifier(
-        userFacingErrorMessage(e, currentAppLocalizations),
+        userFacingErrorMessage(error, currentAppLocalizations),
         level: MessageLevel.error,
       );
     }
@@ -662,21 +516,24 @@ class _RefreshCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Row(
-            label: appLocalizations.subscriptionUpdated,
-            value:
-                lastUpdateDate?.getLastUpdateTimeDesc(context) ??
-                appLocalizations.noData,
+          _SectionTitle(
+            icon: Icons.sync_rounded,
+            label: appLocalizations.autoUpdate,
           ),
-          const SizedBox(height: 8),
-          _Row(
+          const SizedBox(height: 14),
+          _DetailRow(
+            label: appLocalizations.subscriptionUpdated,
+            value: lastUpdateDate?.showFull ?? appLocalizations.noData,
+          ),
+          const SizedBox(height: 10),
+          _DetailRow(
             label: appLocalizations.autoUpdate,
             value: profile.realAutoUpdate
                 ? heroDurationWords(ownMinutes)
                 : appLocalizations.off,
           ),
           if (showPanelInterval) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               appLocalizations.subscriptionProviderInterval(
                 heroDurationWords(panelMinutes),
@@ -687,7 +544,7 @@ class _RefreshCard extends ConsumerWidget {
             ),
           ],
           if (profile.type == ProfileType.url) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: CommonMinFilledButtonTheme(

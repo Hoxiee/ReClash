@@ -142,11 +142,11 @@ func TestStaggerStaysInsideTheJitterSpread(t *testing.T) {
 
 func TestDiverseWaveTakesOneFromEachBucketBeforeASecond(t *testing.T) {
 	nodes := []rcxProbeNode{
-		{Name: "vless-a", Type: "Vless", Port: 443, HasServerName: true},
-		{Name: "vless-b", Type: "Vless", Port: 443, HasServerName: true},
-		{Name: "vless-c", Type: "Vless", Port: 443, HasServerName: true},
-		{Name: "ss-a", Type: "Shadowsocks", Port: 8388},
-		{Name: "vless-cdn", Type: "Vless", Port: 2053, HasServerName: true},
+		{Name: "vless-a", Provider: "one", Transport: "ws-sni-a", Type: "Vless", Port: 443},
+		{Name: "vless-b", Provider: "one", Transport: "ws-sni-a", Type: "Vless", Port: 443},
+		{Name: "vless-c", Provider: "one", Transport: "ws-sni-a", Type: "Vless", Port: 443},
+		{Name: "ss-a", Provider: "two", Transport: "tcp", Type: "Shadowsocks", Port: 8388},
+		{Name: "vless-cdn", Provider: "three", Transport: "grpc-sni-b", Type: "Vless", Port: 2053},
 	}
 
 	wave := rcxDiverseWave(nodes, 3)
@@ -157,6 +157,19 @@ func TestDiverseWaveTakesOneFromEachBucketBeforeASecond(t *testing.T) {
 		if got[i] != want[i] {
 			t.Fatalf("wave = %v, want one per bucket first: %v", got, want)
 		}
+	}
+}
+
+func TestDiverseWaveCrossesProvidersBeforeReusingOne(t *testing.T) {
+	nodes := []rcxProbeNode{
+		{Name: "one-a", Provider: "one", Transport: "ws", Type: "Vless", Port: 443},
+		{Name: "one-b", Provider: "one", Transport: "ws", Type: "Vless", Port: 443},
+		{Name: "two-a", Provider: "two", Transport: "ws", Type: "Vless", Port: 443},
+	}
+
+	wave := rcxDiverseWave(nodes, 2)
+	if wave[0].Name != "one-a" || wave[1].Name != "two-a" {
+		t.Fatalf("wave = %v, want independent providers first", wave)
 	}
 }
 
@@ -286,5 +299,50 @@ func TestRunContainsAPanickingProbe(t *testing.T) {
 	if got := results[1].Outcome; got != rcxProbeOK {
 		t.Errorf("outcome = %s, want ok: one bad target must not cost the wave",
 			rcxOutcomeName(got))
+	}
+}
+
+func TestProbeFallsThroughMarkersInOrder(t *testing.T) {
+	first := rcxMarker{URL: "https://first.example/", Statuses: []int{204}}
+	second := rcxMarker{URL: "https://second.example/", Statuses: []int{200}}
+	asked := make([]string, 0, 2)
+	prober := testProber(func(_ context.Context, _ string, marker rcxMarker) (int, bool, error) {
+		asked = append(asked, marker.URL)
+		if marker.URL == first.URL {
+			return 30, false, nil
+		}
+		return 50, true, nil
+	})
+
+	result := prober.probe(context.Background(), rcxProbeTarget{
+		Node: "node", Role: rcxRoleOpen, Markers: []rcxMarker{first, second},
+	})
+
+	if result.Outcome != rcxProbeOK || result.DelayMs != 50 {
+		t.Fatalf("result = %+v, want the fallback marker to prove the node", result)
+	}
+	if len(result.Attempts) != 2 || asked[0] != first.URL || asked[1] != second.URL {
+		t.Fatalf("asked = %v, attempts = %+v, want configured order", asked, result.Attempts)
+	}
+}
+
+func TestProbeStopsTheMarkerChainAtTheFirstSuccess(t *testing.T) {
+	markers := []rcxMarker{
+		{URL: "https://first.example/", Statuses: []int{204}},
+		{URL: "https://second.example/", Statuses: []int{200}},
+		{URL: "https://third.example/", Statuses: []int{200}},
+	}
+	asked := 0
+	prober := testProber(func(_ context.Context, _ string, _ rcxMarker) (int, bool, error) {
+		asked++
+		return 40, asked == 2, nil
+	})
+
+	result := prober.probe(context.Background(), rcxProbeTarget{
+		Node: "node", Role: rcxRoleOpen, Markers: markers,
+	})
+
+	if result.Outcome != rcxProbeOK || asked != 2 || len(result.Attempts) != 2 {
+		t.Fatalf("result = %+v, asked = %d, want no request after success", result, asked)
 	}
 }

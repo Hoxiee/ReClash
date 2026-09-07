@@ -276,6 +276,9 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	resumeTunMethod: withoutArguments(func(response MethodResponse) {
 		response.success(handleResumeTun())
 	}),
+	setUiActiveMethod: withArguments(func(active *bool, response MethodResponse) {
+		response.success(handleSetUiActive(*active))
+	}),
 	getMemoryMethod: withoutArguments(func(response MethodResponse) {
 		safeGo(response, func() {
 			response.success(handleGetMemory())

@@ -30,24 +30,12 @@ const List<_SchemeCommand> _tunnelCommands = [
     title: _disconnect,
     desc: _disconnectDesc,
   ),
-  _SchemeCommand(
-    link: 'reclash://toggle',
-    title: _toggle,
-    desc: _toggleDesc,
-  ),
+  _SchemeCommand(link: 'reclash://toggle', title: _toggle, desc: _toggleDesc),
 ];
 
 const List<_SchemeCommand> _windowCommands = [
-  _SchemeCommand(
-    link: 'reclash://open',
-    title: _open,
-    desc: _openDesc,
-  ),
-  _SchemeCommand(
-    link: 'reclash://close',
-    title: _close,
-    desc: _closeDesc,
-  ),
+  _SchemeCommand(link: 'reclash://open', title: _open, desc: _openDesc),
+  _SchemeCommand(link: 'reclash://close', title: _close, desc: _closeDesc),
 ];
 
 const List<_SchemeCommand> _profileCommands = [
@@ -107,13 +95,18 @@ class UrlSchemeView extends StatelessWidget {
         children: [
           SettingSection(
             top: 16,
-            title: appLocalizations.urlSchemeCommands,
-            subTitle: appLocalizations.urlSchemeCommandsDesc,
             items: [
-              for (final command in [
-                ..._tunnelCommands,
-                ..._windowCommands,
-              ])
+              for (final command in _tunnelCommands)
+                _CommandItem(
+                  command: command,
+                  onCopy: (value) => _copy(context, value),
+                ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.application,
+            items: [
+              for (final command in _windowCommands)
                 _CommandItem(
                   command: command,
                   onCopy: (value) => _copy(context, value),
@@ -147,14 +140,24 @@ class _CommandItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return DecorationListItem(
-      title: Text(
-        command.link,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: context.textTheme.bodyMedium?.toJetBrainsMono,
+      minVerticalPadding: 10,
+      title: Text(command.title(appLocalizations)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(command.desc(appLocalizations)),
+          Text(
+            command.link,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodySmall?.toJetBrainsMono.copyWith(
+              color: context.colorScheme.primary,
+            ),
+          ),
+        ],
       ),
-      subtitle: Text(command.desc(appLocalizations)),
-      trailing: IconButton(
+      trailing: IconButton.filledTonal(
         tooltip: appLocalizations.copy,
         icon: const Icon(Icons.copy_rounded, size: 20),
         onPressed: () => onCopy(command.link),

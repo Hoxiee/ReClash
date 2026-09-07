@@ -215,10 +215,11 @@ extension PackageListSelectorStateExt on PackageListSelectorState {
 
   List<Package> getSortList(List<String> selectedList) {
     final sort = accessControlProps.sort;
+    final selectedSet = selectedList.toSet();
 
     return list.sorted((a, b) {
-      final isSelectA = selectedList.contains(a.packageName);
-      final isSelectB = selectedList.contains(b.packageName);
+      final isSelectA = selectedSet.contains(a.packageName);
+      final isSelectB = selectedSet.contains(b.packageName);
 
       if (isSelectA != isSelectB) {
         return isSelectA ? -1 : 1;

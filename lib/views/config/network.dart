@@ -346,11 +346,10 @@ class NetworkListView extends StatelessWidget {
     return ListView(
       children: [
         if (system.isAndroid) ...[
+          const SettingSection(top: 16, items: [VPNItem()]),
           const SettingSection(
-            top: 16,
             title: 'VPN',
             items: [
-              VPNItem(),
               VpnSystemProxyItem(),
               BypassDomainItem(),
               AllowBypassItem(),
@@ -368,10 +367,9 @@ class NetworkListView extends StatelessWidget {
           ),
         ],
         if (system.isDesktop) ...[
-          SettingSection(
+          const SettingSection(
             top: 16,
-            title: appLocalizations.system,
-            items: [const SystemProxyItem(), const BypassDomainItem()],
+            items: [SystemProxyItem(), BypassDomainItem()],
           ),
           SettingSection(
             title: appLocalizations.options,

@@ -89,15 +89,17 @@ func TestEngineStopsSamplingOnceTheHostReportsTheLink(t *testing.T) {
 	runtime.link = rcxNetworkPayload{Transport: "wifi", IPv4: []string{"192.168.31.44"}, Validated: true}
 	engine := newTestEngine(runtime, "ru")
 
-	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: rcxNetworkPayload{
+	payload := rcxNetworkPayload{
 		Transport: "wifi",
 		SSID:      "Home",
 		Validated: true,
-	}})
+	}
+	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: payload})
 	engine.sampleLink()
+	want, _ := rcxEnvKeys(payload)
 
-	if got := engine.envKey; got != "w:Home" {
-		t.Errorf("envKey = %q, want the host's own key to stand", got)
+	if got := engine.envKey; got != want {
+		t.Errorf("envKey = %q, want %q for the host-reported link", got, want)
 	}
 }
 

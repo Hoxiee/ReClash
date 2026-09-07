@@ -202,7 +202,6 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
         children: [
           SettingSection(
             top: 16,
-            title: appLocalizations.remote,
             items: [
               if (dav == null)
                 DecorationListItem(

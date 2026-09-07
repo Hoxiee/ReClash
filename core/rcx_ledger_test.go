@@ -230,7 +230,7 @@ func TestLedgerDialSuccessIsNotBeingGood(t *testing.T) {
 	ledger.NoteTrafficProgress("payload", "wifi:home", false, now)
 	ledger.NoteDialSuccess("handshake", "wifi:home", 120*time.Millisecond, now.Add(time.Minute))
 
-	ledger.Prune(1, now.Add(time.Hour))
+	ledger.Prune(map[string]struct{}{"payload": {}}, nil, now.Add(time.Hour))
 
 	if _, ok := ledger.envs["wifi:home"]["payload"]; !ok {
 		t.Error("want the node that carried payload kept: a handshake is never more recently good")
@@ -432,21 +432,38 @@ func TestLedgerEvidenceIsNoneForAnUntouchedNode(t *testing.T) {
 	}
 }
 
-func TestLedgerPruneKeepsTheMostRecentlyGoodNodes(t *testing.T) {
+func TestLedgerPruneKeepsEveryActiveMemberInALargePark(t *testing.T) {
 	ledger, now := rcxTestLedger()
-	for i := 0; i < 5; i++ {
+	active := make(map[string]struct{}, 300)
+	for i := 0; i < 300; i++ {
 		node := "n" + strconv.Itoa(i)
+		active[node] = struct{}{}
+		ledger.NoteTrafficProgress(node, "wifi:home", false, now.Add(time.Duration(i)*time.Second))
+	}
+
+	ledger.Prune(active, nil, now.Add(time.Hour))
+
+	if got := len(ledger.envs["wifi:home"]); got != len(active) {
+		t.Fatalf("kept %d nodes, want all %d active members", got, len(active))
+	}
+}
+
+func TestLedgerPruneBoundsRemovedHistoryWithoutDroppingProtectedNodes(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	for i := 0; i < 80; i++ {
+		node := "gone-" + strconv.Itoa(i)
 		ledger.NoteTrafficProgress(node, "wifi:home", false, now.Add(time.Duration(i)*time.Minute))
 	}
+	protected := map[string]struct{}{"gone-0": {}}
 
-	ledger.Prune(2, now.Add(time.Hour))
+	ledger.Prune(nil, protected, now.Add(2*time.Hour))
 
 	nodes := ledger.envs["wifi:home"]
-	if len(nodes) != 2 {
-		t.Fatalf("kept %d nodes, want 2", len(nodes))
+	if _, ok := nodes["gone-0"]; !ok {
+		t.Fatal("protected node was removed")
 	}
-	if _, ok := nodes["n4"]; !ok {
-		t.Error("want the most recently good node kept")
+	if got := len(nodes); got != rcxRemovedKeepPerEnv+1 {
+		t.Fatalf("kept %d nodes, want %d removed plus one protected", got, rcxRemovedKeepPerEnv+1)
 	}
 }
 
@@ -465,5 +482,95 @@ func TestLedgerKeepsTheOpenWorldFalsificationAfterTheProofAges(t *testing.T) {
 	}
 	if !aged.OpenedOnce {
 		t.Error("the measurement that falsified mmdb expired with the proof: geography decides again")
+	}
+}
+
+func TestLedgerRejectsProofFromAnotherMarkerEpoch(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.SetFingerprints("open-v1", "home-v1")
+	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleOpen, rcxProbeOK, 90, now)
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL).OpenWorld; got != rcxProofProven {
+		t.Fatalf("proof = %v, want proven in its own epoch", got)
+	}
+
+	ledger.SetFingerprints("open-v2", "home-v1")
+	if got := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL); got.OpenWorld != rcxProofUnknown || got.OpenedOnce {
+		t.Fatalf("stale marker proof survived: %+v", got)
+	}
+}
+
+func TestLedgerDisprovesARoleOnlyAfterEveryMarkerFails(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	first, second := "open:first", "open:second"
+	ledger.NoteMarkerProbe("node", "wifi:home", rcxRoleOpen, first, rcxProbeFail, 0, now)
+	ledger.RecomputeRole("node", "wifi:home", rcxRoleOpen, []string{first, second}, now)
+
+	if got := ledger.Facts("node", "wifi:home", true, now, rcxLedgerProofTTL).OpenWorld; got != rcxProofUnknown {
+		t.Fatalf("proof = %v, want unknown while a fallback marker is unmeasured", got)
+	}
+
+	ledger.NoteMarkerProbe("node", "wifi:home", rcxRoleOpen, second, rcxProbeStatusMismatch, 40, now)
+	ledger.RecomputeRole("node", "wifi:home", rcxRoleOpen, []string{first, second}, now)
+	if got := ledger.Facts("node", "wifi:home", true, now, rcxLedgerProofTTL).OpenWorld; got != rcxProofDisproven {
+		t.Fatalf("proof = %v, want disproven after the whole chain failed", got)
+	}
+}
+
+func TestLedgerLetsOneMarkerProveTheRole(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	first, second := "open:first", "open:second"
+	ledger.NoteMarkerProbe("node", "wifi:home", rcxRoleOpen, first, rcxProbeFail, 0, now)
+	ledger.NoteMarkerProbe("node", "wifi:home", rcxRoleOpen, second, rcxProbeOK, 50, now)
+	ledger.RecomputeRole("node", "wifi:home", rcxRoleOpen, []string{first, second}, now)
+
+	if got := ledger.Facts("node", "wifi:home", true, now, rcxLedgerProofTTL).OpenWorld; got != rcxProofProven {
+		t.Fatalf("proof = %v, want the successful fallback to win", got)
+	}
+}
+
+func TestLedgerMigrationMergesFreshFieldsAndKeepsPolicyDepth(t *testing.T) {
+	policy := rcxDefaultLedgerPolicy()
+	policy.SampleDepth = 2
+	ledger := newRcxLedger(policy)
+	now := time.Unix(1_700_000_000, 0)
+	current := ledger.envState("new", "node")
+	current.OpenWorld = rcxProofProven
+	current.OpenAt = now.Add(time.Minute)
+	current.LastFailAt = now
+	current.Samples = []rcxSample{{DelayMs: 90, At: now.Add(time.Minute)}}
+	incoming := ledger.envState("old", "node")
+	incoming.OpenWorld = rcxProofDisproven
+	incoming.OpenAt = now
+	incoming.LastGoodAt = now.Add(2 * time.Minute)
+	incoming.Samples = []rcxSample{
+		{DelayMs: 80, At: now},
+		{DelayMs: 70, At: now.Add(2 * time.Minute)},
+	}
+
+	ledger.Migrate("old", "new")
+
+	merged := ledger.envState("new", "node")
+	if merged.OpenWorld != rcxProofProven || merged.LastGoodAt != incoming.LastGoodAt {
+		t.Fatalf("merged = %+v, want fresh values from each evidence domain", merged)
+	}
+	if len(merged.Samples) != 2 || merged.Samples[0].DelayMs != 90 || merged.Samples[1].DelayMs != 70 {
+		t.Fatalf("samples = %v, want the newest two under the active policy", merged.Samples)
+	}
+	if _, exists := ledger.envs["old"]; exists {
+		t.Error("the migrated alias was retained")
+	}
+}
+
+func TestLedgerInvalidatesOnlyTheEditedProofDomain(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.SetFingerprints("open-v1", "home-v1")
+	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleOpen, rcxProbeOK, 90, now)
+	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleDomestic, rcxProbeOK, 90, now)
+
+	ledger.Invalidate(true, false, false)
+	ledger.SetFingerprints("open-v2", "home-v1")
+	facts := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofUnknown || facts.Domestic != rcxProofProven || facts.Transit != rcxProofProven {
+		t.Fatalf("selective invalidation crossed domains: %+v", facts)
 	}
 }

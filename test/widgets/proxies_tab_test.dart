@@ -1,3 +1,4 @@
+import 'package:reclash/common/system.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
@@ -69,6 +70,54 @@ void main() {
     await tester.pump();
     return key;
   }
+
+  testWidgets('TV tab and active list share one traversal boundary', (
+    tester,
+  ) async {
+    system.isTVForTesting = true;
+    addTearDown(() => system.isTVForTesting = false);
+
+    await pumpTabView(tester);
+
+    final column = tester.widget<Column>(
+      find
+          .ancestor(of: find.byType(TabBar), matching: find.byType(Column))
+          .last,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is FocusTraversalGroup && identical(widget.child, column),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(ProxyGroupView),
+        matching: find.byType(FocusTraversalGroup),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('non-TV tab adds no traversal boundary', (tester) async {
+    system.isTVForTesting = false;
+
+    await pumpTabView(tester);
+
+    final column = tester.widget<Column>(
+      find
+          .ancestor(of: find.byType(TabBar), matching: find.byType(Column))
+          .last,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is FocusTraversalGroup && identical(widget.child, column),
+      ),
+      findsNothing,
+    );
+  });
 
   testWidgets('current group follows the rendered tab list', (tester) async {
     final key = await pumpTabView(tester);

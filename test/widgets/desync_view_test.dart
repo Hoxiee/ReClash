@@ -23,6 +23,7 @@ void main() {
   Future<void> pumpView(
     WidgetTester tester, {
     DesyncProps props = defaultDesyncProps,
+    Widget child = const DesyncView(),
   }) async {
     tester.view.physicalSize = const Size(1400, 1000);
     tester.view.devicePixelRatio = 1;
@@ -40,7 +41,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: DesyncView()),
+        child: TestApp(child: child),
       ),
     );
     await tester.pumpAndSettle();
@@ -67,19 +68,14 @@ void main() {
     await tester.tap(find.text('Split only'));
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(desyncSettingProvider).strategyArgs,
-      args,
-    );
+    expect(container.read(desyncSettingProvider).strategyArgs, args);
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
   });
 
   testWidgets('the default row restores the built-in ladder', (tester) async {
     await pumpView(
       tester,
-      props: defaultDesyncProps.copyWith(
-        strategyArgs: const ['--split', '1'],
-      ),
+      props: defaultDesyncProps.copyWith(strategyArgs: const ['--split', '1']),
     );
 
     await tester.tap(find.text('Default ladder'));
@@ -92,10 +88,7 @@ void main() {
   });
 
   testWidgets('the tester section reports a dead engine', (tester) async {
-    await pumpView(
-      tester,
-      props: defaultDesyncProps.copyWith(port: 1),
-    );
+    await pumpView(tester, props: defaultDesyncProps.copyWith(port: 1));
     expect(find.text('Start'), findsOneWidget);
 
     await tester.tap(find.text('Start'));
@@ -114,6 +107,47 @@ void main() {
     );
   });
 
+  testWidgets('the strategy page identifies the active strategy', (
+    tester,
+  ) async {
+    await pumpView(tester, child: const DesyncStrategyView());
+
+    expect(find.text('Active strategy'), findsOneWidget);
+    expect(find.text('Default ladder'), findsNWidgets(2));
+    expect(find.text('10 arguments'), findsNWidgets(2));
+  });
+
+  testWidgets('the test page opens the real domains in a group', (
+    tester,
+  ) async {
+    await pumpView(tester, child: const DesyncTestView());
+
+    expect(find.text('Test battery'), findsOneWidget);
+    expect(find.text('60 presets · 2 groups · 32 hosts'), findsOneWidget);
+
+    await tester.tap(find.text('Test domains'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('youtube.com'), findsOneWidget);
+
+    await tester.tap(find.text('YouTube'));
+    await tester.pumpAndSettle();
+    expect(find.text('youtube.com'), findsOneWidget);
+    expect(find.text('youtubei.googleapis.com'), findsOneWidget);
+  });
+
+  testWidgets('the engine page previews effective routing rules', (
+    tester,
+  ) async {
+    await pumpView(tester, child: const DesyncEngineView());
+
+    expect(find.text('127.0.0.1:7898'), findsOneWidget);
+    expect(find.text('Effective rules'), findsOneWidget);
+    expect(find.text('GEOSITE,youtube,DESYNC'), findsOneWidget);
+    expect(find.text('GEOSITE,discord,DESYNC'), findsOneWidget);
+    expect(find.text('MATCH,DIRECT'), findsOneWidget);
+    expect(find.textContaining('bundled GEOSITE database'), findsOneWidget);
+  });
+
   testWidgets('a category toggle drops the category', (tester) async {
     await pumpView(tester);
     expect(find.text('GEOSITE,youtube'), findsOneWidget);
@@ -121,9 +155,8 @@ void main() {
     await tester.tap(find.text('YouTube'));
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(desyncSettingProvider).categories,
-      [DesyncCategory.discord],
-    );
+    expect(container.read(desyncSettingProvider).categories, [
+      DesyncCategory.discord,
+    ]);
   });
 }

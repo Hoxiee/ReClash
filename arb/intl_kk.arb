@@ -111,6 +111,9 @@
   "selectAll": "Барлығын таңдау",
   "cancelSelectAll": "Таңдауды алып тастау",
   "appAccessControl": "Қолданба қатынасын бақылау",
+  "accessControlIncludeInVpn": "VPN-ге қосу",
+  "accessControlExcludeFromVpn": "VPN-нен шығару",
+  "searchApps": "Қолданбаларды іздеу",
   "accessControlAllowDesc": "Тек таңдалған қолданбалар ғана VPN арқылы өтеді",
   "accessControlNotAllowDesc": "Таңдалған қолданбалар VPN арқылы өтпейді",
   "accessControlDisabledDesc": "Қолданба қатынасын бақылау өшірілген",
@@ -179,6 +182,8 @@
   "ipv6Desc": "Қосулы кезде IPv6 трафигін қабылдауға болады",
   "app": "Қолданба",
   "general": "Жалпы",
+  "identity": "Идентификация",
+  "animations": "Анимациялар",
   "extra": "Қосымша",
   "systemProxyDesc": "Жүйелік прокси серверін орнату",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "Жеміс салаты",
   "developerMode": "Әзірлеуші режимі",
   "developerModeEnableTip": "Әзірлеуші режимі қосылды.",
+  "developerSubscriptions": "Сынақ жазылымдары",
+  "developerSubscriptionPrismDesc": "Бренд түстері, жеке Hero Ring және жергілікті логотип",
+  "developerSubscriptionOrbitDesc": "Квота, жарамдылық мерзімі, хабарландыру, домен көшіру және ұсыныстар",
+  "developerSubscriptionAtlasDesc": "Провайдер виджеттері, сервер ауыстыру және прокси көрінісі",
+  "developerSubscriptionInstalled": "{name} орнатылды",
   "messageTest": "Хабарлама тесті",
   "messageTestTip": "Бұл — хабарлама.",
   "crashTest": "Құлау тесті",
@@ -807,6 +817,29 @@
   "smartRoutingServersCount": "{eligible} / {total} қолдануға жарамды",
   "smartRoutingHistory": "Соңғы ауысулар",
   "smartRoutingHistoryEmpty": "Әлі ауысу болған жоқ",
+  "smartRoutingSectionReliability": "Сенімділік",
+  "smartRoutingAvailability": "Қолжетімділік",
+  "smartRoutingAvailabilityValue": "{duration} ішінде {percent}%",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "Анықталған үзілістер",
+  "smartRoutingStandbyHits": "Жылы резерв арқылы қалпына келтірілді",
+  "smartRoutingLastRecovery": "Соңғы қалпына келу",
+  "smartRoutingAverageRecovery": "Орташа қалпына келу",
+  "smartRoutingProviderIncidents": "Провайдер қорғанысының іске қосылуы",
+  "smartRoutingMarkerIncidents": "Оқшауланған қызмет тексерулері",
+  "smartRoutingActiveCircuits": "Уақытша шегерілген провайдерлер",
+  "smartRoutingActiveMarkers": "Уақытша шегерілген тексерулер",
+  "smartRoutingNoRecovery": "Әзірге қалпына келтірілген үзіліс жоқ",
+  "smartRoutingBlockProviderCircuit": "Тәуелсіз ақаулардан кейін провайдер уақытша шегерілді",
   "smartRoutingSwitchLine": "{from} → {to}",
   "smartRoutingProbeBudget": "Осы сағатта қалған өлшеулер: {left} / {cap}",
   "smartRoutingVerdictPreferred": "Ашық интернетке жетеді",
@@ -826,26 +859,26 @@
   "smartRoutingBandLabel": "жолақ {band}",
   "smartRoutingDegraded": "Тежелген",
   "smartRoutingOffHint": "Смарт бағыттауды қосыңыз — ол серверлерді өзі таңдап береді",
-  "setupWelcome": "Барлығы бір минутта дайын",
+  "setupWelcome": "Бірнеше түсінікті қадамнан кейін бәрі дайын",
   "setupLanguageTitle": "Тілді таңдаңыз",
-  "setupLanguageDesc": "Кейін баптаулардан өзгерте аласыз",
-  "setupLegalTitle": "Бастамас бұрын",
-  "setupDataCollection": "Құлау есептерін жіберу",
-  "setupSubscriptionTitle": "Жазылыс қосу",
-  "setupSubscriptionDesc": "Провайдердің сілтемесі, QR код немесе конфиг файлы",
-  "setupSubscriptionReady": "Жазылыс қосылды",
+  "setupLanguageDesc": "Оны кейін баптаулардан өзгертуге болады",
+  "setupLegalTitle": "Жалғастырмас бұрын",
+  "setupDataCollection": "Қосымша ақау есептерін жіберу",
+  "setupSubscriptionTitle": "Қосылым профилін қосыңыз",
+  "setupSubscriptionDesc": "Профильде қосылуға қажет серверлер мен ережелер бар. Оны провайдерден не сақтық көшірмеден импорттаңыз.",
+  "setupSubscriptionReady": "Профиль дайын",
   "setupRestore": "Сақтық көшірмеден қалпына келтіру",
-  "setupRestoreDesc": "ReClash, FlClashX немесе FlClash сақтық көшірмесінен бәрін көшіру",
-  "setupFinishTitle": "Аз қалды",
-  "setupRegionDesc": "Сервер таңдаудың бастапқы нүктесін белгілейді",
-  "setupRegionNone": "Таңдамау",
-  "setupAutoRun": "Қолданба ашылғанда қосылу",
-  "setupAutoRunDesc": "Қолданба ашыла сала туннель көтеріледі",
+  "setupRestoreDesc": "ReClash, FlClashX немесе FlClash көшірмесінен баптаулар мен профильдерді қалпына келтіру",
+  "setupFinishTitle": "Баптауларды тексеріңіз",
+  "setupRegionDesc": "Ақылды бағыттау осы өңірді маршрут таңдаудың бастапқы нүктесі ретінде қолданады. Тіл тек ұсыныс береді.",
+  "setupRegionNone": "Басқа өңір немесе ақылды бағыттаусыз",
+  "setupAutoRun": "ReClash ашылғанда қосылу",
+  "setupAutoRunDesc": "Жарамды профиль жүктелген соң VPN-ді автоматты іске қосады",
   "setupPermissionVpn": "VPN рұқсаты",
-  "setupPermissionVpnDesc": "Жүйе алғашқы қосылымда сұрайды",
-  "setupPermissionNotifications": "Хабарламалар",
-  "setupPermissionNotificationsDesc": "Жұмыс кезінде қосылым күйін көрсетеді",
-  "setupSkip": "Өткізіп жіберу",
+  "setupPermissionVpnDesc": "Жүйе алғаш қосылғанда сұрайды",
+  "setupPermissionNotifications": "Хабарландырулар",
+  "setupPermissionNotificationsDesc": "ReClash жұмыс істеп тұрғанда қосылым күйін көрсетеді",
+  "setupSkip": "Профильсіз жалғастыру",
   "setupNext": "Келесі",
   "setupDone": "Дайын",
   "smartRoutingBreaker": "Ақ тізім желілерінің маманы",
@@ -935,11 +968,13 @@
   "systemSeed": "Жүйе негізі",
   "appIcon": "Қолданба таңбашасы",
   "appIconChangeNote": "Лаунчер таңбашаны бірнеше секундта қайта салады. Бекітілген таңбашалар кейбір лаунчерлерде жоғалып кетуі мүмкін.",
-  "appIconMono": "Моно",
-  "appIconSepia": "Сепия",
-  "appIconInverted": "Инверттелген",
-  "appIconDarkMono": "Қараңғы моно",
-  "appIconCool": "Салқын",
+  "appIconPulse": "Импульс",
+  "appIconGlacier": "Мұздық",
+  "appIconObsidian": "Обсидиан",
+  "appIconVelvet": "Барқыт",
+  "appIconSolar": "Күн",
+  "appIconCircuit": "Сұлба",
+  "appIconPrism": "Призма",
   "dashboardStyle": "Бақылау тақтасының стилі",
   "classicDashboard": "Дәстүрлі",
   "classicDashboardDesc": "Іске қосу түймесі бар плитка торы",
@@ -1213,5 +1248,120 @@
   "desyncTtl12Hours": "12 сағат",
   "desyncTtl28Hours": "28 сағат",
   "desyncTtlHour": "1 сағат",
-  "desyncTtlWeek": "7 күн"
+  "desyncTtlWeek": "7 күн",
+  "desyncActiveStrategy": "Белсенді стратегия",
+  "desyncCacheDisabled": "Стратегия кэші өшірулі",
+  "desyncEngineSummary": "ByeDPI движогын {count} бағыттау санаты қолданады",
+  "desyncTestBattery": "Тесттер жинағы",
+  "desyncTestBatterySummary": "{presets} пресет · {groups} топ · {domains} хост",
+  "desyncRoutingRules": "Қолданыстағы ережелер",
+  "desyncRoutingGeositeNote": "Санат құрамы кіріктірілген GEOSITE базасынан алынады; тест домендерінің тізімдері бөлек",
+  "desyncRoutingNoCategories": "Айналып өту санаттары таңдалмаған",
+  "desyncRoutingNoCategoriesDesc": "Қазір ешбір сервис ByeDPI арқылы бағытталмайды",
+  "desyncRoutingFallbackDesc": "Таңдалған GEOSITE санаттарынан тыс бүкіл трафик тікелей өтеді",
+  "byedpiOff": "DPI айналып өтуі өшірулі",
+  "byedpiStarting": "DPI айналып өтуі іске қосылуда",
+  "byedpiChecking": "DPI движогы тексерілуде",
+  "byedpiReconnecting": "DPI движогы қайта іске қосылуда",
+  "byedpiActive": "DPI айналып өтуі белсенді",
+  "byedpiPaused": "DPI айналып өтуі кідіртілді",
+  "byedpiEngineError": "DPI движогын тексеру керек",
+  "byedpiTapToStart": "Жергілікті айналып өту движогын іске қосу үшін түртіңіз",
+  "byedpiTapToResume": "DPI айналып өтуін жалғастыру үшін түртіңіз",
+  "byedpiActiveFor": "DPI айналып өтуі белсенді: {time}",
+  "setupSystemLanguage": "Жүйе тілі",
+  "setupStepProgress": "{count} қадамның {step}-қадамы",
+  "setupLegalSummary": "ReClash трафикті бағыттау үшін жергілікті VPN қосылымын жасайды. Конфигурацияны не провайдерді өзіңіз таңдайсыз және оны пайдалануға өзіңіз жауаптысыз.",
+  "setupLegalDetails": "Толық жауапкершіліктен бас тартуды оқу",
+  "setupLegalLicense": "Ашық код лицензиялары",
+  "setupDataCollectionDesc": "Қолданба ақауларын табуға көмектеседі. Өзіңіз қоспасаңыз, есеп жіберілмейді.",
+  "setupDecline": "Келіспеймін және шығу",
+  "setupBack": "Артқа",
+  "dashboardNoProfileTitle": "Қосылымды баптау",
+  "dashboardNoProfileDesc": "Сенімді провайдерден VPN профилін қосыңыз. Оған дейін VPN өшірулі қалады.",
+  "dashboardNoActiveProfileTitle": "VPN профилін таңдаңыз",
+  "dashboardNoActiveProfileDesc": "Профильдер сақталған, бірақ ешқайсысы белсенді емес. VPN басқаруын ашу үшін біреуін таңдаңыз.",
+  "dashboardSelectProfile": "Профильді таңдау",
+  "dashboardByedpiTitle": "VPN провайдері жоқ па?",
+  "dashboardByedpiDesc": "VPN профилінсіз DPI-ді айналып өту үшін тек ByeDPI режимін пайдаланыңыз.",
+  "dashboardUseByedpi": "ByeDPI пайдалану",
+  "setupProfileSourceNotice": "ReClash VPN қызметін сатпайды. Сенімді провайдердің сілтемесін, QR кодын немесе конфигурация файлын пайдаланыңыз. Профиль сақталмас бұрын тексеріледі.",
+  "setupContinueWithoutProfile": "Профильсіз жалғастыру",
+  "setupContinueWithoutProfileDesc": "VPN өшірулі қалады. Профильді кейін қосуға немесе VPN провайдерінсіз тек ByeDPI режимін пайдалануға болады.",
+  "setupProfilesReady": "{count} профиль дайын",
+  "setupAddAnotherProfile": "Тағы қосу",
+  "setupReplaceProfile": "Ауыстыру",
+  "setupDeleteProfile": "Жою",
+  "setupReplaceProfileHint": "Жаңа профиль сәтті импортталып, тексерілгеннен кейін ғана ағымдағысы жойылады.",
+  "setupRegionTitle": "Ағымдағы желі қай өңірде?",
+  "setupRegionRecommended": "Тіліңізге ұсынылады",
+  "setupAutoRunUnavailable": "Автоматты қосылу үшін профиль қосыңыз",
+  "setupSummaryTitle": "Баптау қорытындысы",
+  "setupSummaryNoProfile": "VPN профилі жоқ — VPN өшірулі қалады; тек ByeDPI режимі қолжетімді",
+  "setupSummaryProfile": "Профиль: {name}",
+  "setupSummaryRouting": "Ақылды бағыттау: {value}",
+  "setupSummaryAutoRunOn": "Автоматты қосылу: қосулы",
+  "setupSummaryAutoRunOff": "Автоматты қосылу: өшірулі",
+  "setupPermissionDeferred": "Алғаш қосылғанда сұралады",
+  "setupPermissionBattery": "Батареяны оңтайландыру",
+  "setupPermissionBatteryDesc": "ReClash-қа VPN-ді фонда белсенді ұстауға рұқсат беріңіз",
+  "setupPermissionChecking": "Тексерілуде…",
+  "setupPermissionRequest": "Рұқсат беру",
+  "setupPermissionGranted": "Рұқсат берілген",
+  "setupPermissionDenied": "Рұқсат берілмеген",
+  "setupPermissionUnavailable": "Қолжетімсіз",
+  "setupPermissionError": "Тексеру мүмкін болмады",
+  "setupPermissionOpenSettings": "Баптауларды ашу",
+  "setupDoneConnect": "Дайын және қосылу",
+  "setupRerun": "Бастапқы баптауды қайталау",
+  "setupRerunDesc": "Деректерді жоймай, тілді, профильді, бағыттауды және рұқсаттарды тексеру",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "Телефоннан алу",
+  "lanProfileImportDesc": "Жергілікті желі арқылы жазылым URL мекенжайын жіберу үшін бір реттік QR кодын көрсету",
+  "lanProfileImportTitle": "Жазылымды алу",
+  "lanProfileImportScan": "Осы QR кодын сол желідегі телефонмен сканерлеңіз",
+  "lanProfileImportAddress": "Немесе JSON деректерін {address} мекенжайына жіберіңіз",
+  "lanProfileImportWaiting": "Жазылым күтілуде…",
+  "lanProfileImportImporting": "Жазылым импортталуда…",
+  "lanProfileImportImported": "Жазылым алынды",
+  "lanProfileImportTimedOut": "Бір реттік сілтеменің мерзімі аяқталды",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "Жергілікті желі арқылы жіберуді іске қосу мүмкін болмады",
+  "lanProfileImportFailed": "Жазылымды импорттау мүмкін болмады"
 }

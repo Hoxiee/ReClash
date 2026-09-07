@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/permission.dart';
 import 'package:reclash/common/system_dns.dart';
+import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -24,6 +25,12 @@ class AppStateManager extends ConsumerStatefulWidget {
 
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
+  Future<void> _uiActiveOperation = Future.value();
+  bool? _pendingUiActive;
+  bool? _sentUiActive;
+  var _uiActiveConnectionRevision = 0;
+  int? _sentUiActiveRevision;
+
   @override
   void initState() {
     super.initState();
@@ -99,12 +106,56 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         ref.read(manualPauseProvider.notifier).clear();
       }
     });
+    ref.listenManual(coreStatusProvider, (prev, next) {
+      if (next == CoreStatus.connected && prev != next) {
+        _requestUiActiveSync(force: true);
+      }
+    }, fireImmediately: true);
     final systemDns = systemDnsCoordinator;
     if (systemDns != null) {
       ref.listenManual(shouldPatchSystemDnsProvider, (prev, next) {
         unawaited(systemDns.sync(next));
       }, fireImmediately: true);
     }
+  }
+
+  void _requestUiActiveSync({bool force = false}) {
+    final active =
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
+    if (!force && _pendingUiActive == active) {
+      return;
+    }
+    _pendingUiActive = active;
+    if (force) {
+      _uiActiveConnectionRevision++;
+      _sentUiActive = null;
+      _sentUiActiveRevision = null;
+    }
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    final connectionRevision = _uiActiveConnectionRevision;
+    _uiActiveOperation = _uiActiveOperation.then((_) async {
+      final pending = _pendingUiActive;
+      if (pending == null ||
+          (_sentUiActive == pending &&
+              _sentUiActiveRevision == connectionRevision)) {
+        return;
+      }
+      try {
+        if (await ref.read(coreHandlerProvider).setUiActive(pending)) {
+          if (connectionRevision == _uiActiveConnectionRevision) {
+            _sentUiActive = pending;
+            _sentUiActiveRevision = connectionRevision;
+          }
+        }
+      } catch (error) {
+        commonPrint.log(
+          'UI activity sync failed: $error',
+          logLevel: coreFailureLogLevel(error),
+        );
+      }
+    });
   }
 
   @override
@@ -116,6 +167,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     commonPrint.log('$state');
+    _requestUiActiveSync();
     if (state == AppLifecycleState.resumed) {
       permissions.check(ref.read);
       render?.resume();

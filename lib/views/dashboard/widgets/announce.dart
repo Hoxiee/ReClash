@@ -2,6 +2,7 @@ import 'package:emoji_regex/emoji_regex.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
@@ -9,61 +10,53 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
-class Announce extends StatelessWidget {
+class Announce extends ConsumerWidget {
   const Announce({super.key});
 
   void _showAnnounceSheet(BuildContext context, String text) {
-    final appLocalizations = context.appLocalizations;
     showSheet(
       context: context,
-      builder: (_) {
-        return AdaptiveSheetScaffold(
-          title: appLocalizations.announce,
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: SelectionArea(child: AnnounceText(text: text, links: true)),
-          ),
-        );
-      },
+      builder: (_) => AdaptiveSheetScaffold(
+        title: context.appLocalizations.announce,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: SelectionArea(child: AnnounceText(text: text, links: true)),
+        ),
+      ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return SizedBox(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final announce = ref.watch(
+      currentProfileProvider.select((state) => state?.panelMeta?.announce),
+    );
+    final text = announce?.trim();
+    final hasAnnouncement = text != null && text.isNotEmpty;
+    return DashboardInfoCard(
       height: getWidgetHeight(2),
-      child: RepaintBoundary(
-        child: Consumer(
-          builder: (_, ref, _) {
-            final announce = ref.watch(
-              currentProfileProvider.select(
-                (state) => state?.panelMeta?.announce,
-              ),
-            );
-            return CommonCard(
-              radius: AppCorner.lg,
-              info: Info(
-                label: appLocalizations.announce,
-                iconData: Icons.campaign,
-              ),
-              onPressed: announce == null
-                  ? null
-                  : () => _showAnnounceSheet(context, announce),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: baseInfoEdgeInsets.copyWith(top: 0),
-                  child: AnnounceText(
-                    text: announce ?? appLocalizations.noAnnouncements,
-                    maxLines: 5,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.toLighter,
-                  ),
-                ),
-              ),
-            );
-          },
+      icon: Icons.campaign_rounded,
+      label: context.appLocalizations.announce,
+      action: hasAnnouncement
+          ? const Icon(Icons.open_in_full_rounded, size: 18)
+          : null,
+      onPressed: hasAnnouncement
+          ? () => _showAnnounceSheet(context, text)
+          : null,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: AnnounceText(
+          text: hasAnnouncement
+              ? text
+              : context.appLocalizations.noAnnouncements,
+          maxLines: 7,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: hasAnnouncement
+                ? context.colorScheme.onSurface
+                : context.colorScheme.onSurfaceVariant,
+            height: 1.35,
+          ),
         ),
       ),
     );

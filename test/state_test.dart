@@ -1,14 +1,20 @@
 import 'package:reclash/common/constant.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test(
     'DynamicColor falls back to the default primary color before seeding',
     () {
-      final container = ProviderContainer();
+      const themeProps = ThemeProps();
+      final container = ProviderContainer(
+        overrides: [effectiveThemePropsProvider.overrideWithValue(themeProps)],
+      );
       addTearDown(container.dispose);
       expect(
         container.read(dynamicColorProvider).accentColor,
@@ -20,7 +26,10 @@ void main() {
   test('genColorScheme seeds each brightness from its own dynamic seed', () {
     const lightSeed = Color(0xFF00FF00);
     const darkSeed = Color(0xFF0000FF);
-    final container = ProviderContainer();
+    const themeProps = ThemeProps();
+    final container = ProviderContainer(
+      overrides: [effectiveThemePropsProvider.overrideWithValue(themeProps)],
+    );
     addTearDown(container.dispose);
     container
         .read(dynamicColorProvider.notifier)
@@ -33,7 +42,9 @@ void main() {
     final variant = container.read(themeSettingProvider).schemeVariant;
 
     expect(
-      container.read(genColorSchemeProvider(Brightness.light)),
+      container.read(
+        genColorSchemeProvider(Brightness.light, ignoreConfig: true),
+      ),
       ColorScheme.fromSeed(
         seedColor: lightSeed,
         brightness: Brightness.light,
@@ -41,7 +52,9 @@ void main() {
       ),
     );
     expect(
-      container.read(genColorSchemeProvider(Brightness.dark)),
+      container.read(
+        genColorSchemeProvider(Brightness.dark, ignoreConfig: true),
+      ),
       ColorScheme.fromSeed(
         seedColor: darkSeed,
         brightness: Brightness.dark,
@@ -52,14 +65,19 @@ void main() {
 
   test('genColorScheme falls back to the accent color without a seed', () {
     const accent = Color(0xFFFF0000);
-    final container = ProviderContainer();
+    const themeProps = ThemeProps();
+    final container = ProviderContainer(
+      overrides: [effectiveThemePropsProvider.overrideWithValue(themeProps)],
+    );
     addTearDown(container.dispose);
     container
         .read(dynamicColorProvider.notifier)
         .seed(lightSeed: null, darkSeed: null, accentColor: accent);
 
     expect(
-      container.read(genColorSchemeProvider(Brightness.light)),
+      container.read(
+        genColorSchemeProvider(Brightness.light, ignoreConfig: true),
+      ),
       ColorScheme.fromSeed(
         seedColor: accent,
         brightness: Brightness.light,

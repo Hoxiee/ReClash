@@ -34,6 +34,8 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   accountUsername: json['accountUsername'] as String?,
   proxiesView: json['proxiesView'] as String?,
   themeHex: json['themeHex'] as String?,
+  background: json['background'] as String?,
+  heroRing: json['heroRing'] as String?,
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -57,6 +59,8 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'accountUsername': instance.accountUsername,
       'proxiesView': instance.proxiesView,
       'themeHex': instance.themeHex,
+      'background': instance.background,
+      'heroRing': instance.heroRing,
     };
 
 const _$PanelWidgetsApplyModeEnumMap = {

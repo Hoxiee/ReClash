@@ -27,10 +27,12 @@ void main() {
       );
     });
 
-    test('is domain separated from a bare hash of the source', () {
-      final bare = DeviceIdentity.hwidFromSource('device-1');
-      final salted = DeviceIdentity.hwidFromSource('reclash-device:device-1');
-      expect(bare, isNot(salted));
+    test('is the first 16 lowercase hex characters of SHA-256', () {
+      final hwid = DeviceIdentity.hwidFromSource('device-1');
+
+      expect(hwid, hasLength(16));
+      expect(hwid, matches(RegExp(r'^[0-9a-f]{16}$')));
+      expect(hwid, '03204de92e11fc8c');
     });
   });
 

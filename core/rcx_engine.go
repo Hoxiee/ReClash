@@ -13,6 +13,8 @@ import (
 type rcxMember struct {
 	Name        string
 	ID          string
+	Provider    string
+	Transport   string
 	Type        string
 	Port        int
 	SupportsUDP bool
@@ -109,6 +111,22 @@ type rcxLinkReport struct {
 	Since     int64  `json:"since"`
 }
 
+type rcxMetricsReport struct {
+	EnabledMillis     int64    `json:"enabledMillis"`
+	AvailableMillis   int64    `json:"availableMillis"`
+	Availability      int      `json:"availability"`
+	Incidents         int      `json:"incidents"`
+	StandbyHits       int      `json:"standbyHits"`
+	ProviderIncidents int      `json:"providerIncidents"`
+	MarkerIncidents   int      `json:"markerIncidents"`
+	LastFailover      int64    `json:"lastFailover"`
+	AverageFailover   int64    `json:"averageFailover"`
+	LastOutage        int64    `json:"lastOutage"`
+	AverageOutage     int64    `json:"averageOutage"`
+	ActiveCircuits    []string `json:"activeCircuits"`
+	ActiveMarkers     []string `json:"activeMarkers"`
+}
+
 // The overview's whole payload, pulled on demand rather than pushed: it is large,
 // it changes on every tick, and nobody reads it while the page is closed.
 type rcxReport struct {
@@ -117,6 +135,7 @@ type rcxReport struct {
 	Canaries   []rcxCanaryReport    `json:"canaries"`
 	Candidates []rcxCandidateReport `json:"candidates"`
 	History    []rcxSwitchReport    `json:"history"`
+	Metrics    rcxMetricsReport     `json:"metrics"`
 	Bands      []int                `json:"bands"`
 	ProbesLeft int                  `json:"probesLeft"`
 	ProbeCap   int                  `json:"probeCap"`
@@ -137,7 +156,7 @@ type rcxRuntime interface {
 	Test(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
 	Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome
 	Connections() []rcxConnSample
-	CloseConnections(node string)
+	CloseConnections(ids []string)
 	SampleLink() (rcxNetworkPayload, bool)
 	Publish(status rcxStatus)
 	Now() time.Time
@@ -161,6 +180,7 @@ const (
 	rcxEventManualPick
 	rcxEventManualAssert
 	rcxEventProbeResults
+	rcxEventProbeResult
 	rcxEventTerrainReach
 	rcxEventSetEnabled
 	rcxEventHarvested
@@ -168,23 +188,25 @@ const (
 )
 
 type rcxEvent struct {
-	Kind     rcxEventKind
-	Config   rcxConfig
-	Payload  rcxNetworkPayload
-	Flag     bool
-	Node     string
-	DelayMs  int
-	Results  []rcxProbeResult
-	Foreign  rcxProbeOutcome
-	Domestic rcxProbeOutcome
-	Canaries []rcxCanaryReport
-	Gen      uint32
+	Kind      rcxEventKind
+	Config    rcxConfig
+	Payload   rcxNetworkPayload
+	Flag      bool
+	Node      string
+	DelayMs   int
+	Results   []rcxProbeResult
+	Foreign   rcxProbeOutcome
+	Domestic  rcxProbeOutcome
+	Canaries  []rcxCanaryReport
+	Gen       uint32
+	ConfigGen uint32
 }
 
 const (
 	rcxDialQueueSize  = 512
 	rcxEventQueueSize = 64
 	rcxTickInterval   = 30 * time.Second
+	rcxWatchInterval  = 5 * time.Second
 	rcxProbeWave      = 20 * time.Second
 	rcxDeepProbeWave  = 90 * time.Second
 	rcxRescueWave     = 30 * time.Second
@@ -198,8 +220,7 @@ const (
 	rcxMaxProofTTL    = 6 * time.Hour
 	rcxProbeBudgetWin = time.Hour
 	rcxProbeReserve   = 40
-	rcxMaintainWidth  = 2
-	rcxKeepPerEnv     = 64
+	rcxMaintainWidth  = 3
 	rcxHistoryDepth   = 12
 
 	rcxReachRefresh  = 5 * time.Minute
@@ -241,6 +262,7 @@ type rcxEngine struct {
 
 	snapshot   *rcxSnapshot
 	cfg        rcxConfig
+	configFP   rcxConfigFingerprints
 	terrain    rcxTerrainState
 	envKey     string
 	transport  string
@@ -268,33 +290,46 @@ type rcxEngine struct {
 	rescueAt   time.Time
 	rescueMark rcxRescueStamp
 
-	reachGen     uint32
-	probeGen     uint32
-	reachAgain   bool
-	lastReachAt  time.Time
-	pendingGrant bool
-	pinWaveAt    time.Time
-	hostLinked   bool
-	wantPick     string
-	downFrozen   map[string]time.Time
-	charged      map[string]int
-	chargedAt    time.Time
+	reachGen      uint32
+	probeGen      uint32
+	configGen     uint32
+	reachAgain    bool
+	lastReachAt   time.Time
+	pendingGrant  bool
+	pinWaveAt     time.Time
+	hostLinked    bool
+	wantPick      string
+	downFrozen    map[string]time.Time
+	charged       map[string]int
+	chargedAt     time.Time
+	providerFails map[string]time.Time
+	probeResults  []rcxProbeResult
+	probeStarted  map[string]struct{}
+	probeKind     rcxWaveKind
+	probeCancel   context.CancelFunc
+	incidentConns map[string]struct{}
+	accountedAt   time.Time
+	incidentAt    time.Time
 }
 
 func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 	return &rcxEngine{
-		runtime:    runtime,
-		ledger:     newRcxLedger(rcxDefaultLedgerPolicy()),
-		store:      newRcxStore(),
-		budget:     newRcxProbeBudget(rcxProbeBudgetCap, rcxProbeBudgetWin),
-		cfg:        rcxDefaultConfig(),
-		dials:      make(chan rcxDialEvent, rcxDialQueueSize),
-		events:     make(chan rcxEvent, rcxEventQueueSize),
-		control:    newRcxControl(),
-		wake:       make(chan struct{}, 1),
-		downFrozen: map[string]time.Time{},
-		openSeen:   map[string]rcxOpenSighting{},
-		charged:    map[string]int{},
+		runtime:       runtime,
+		ledger:        newRcxLedger(rcxDefaultLedgerPolicy()),
+		store:         newRcxStore(),
+		budget:        newRcxProbeBudget(rcxProbeBudgetCap, rcxProbeBudgetWin),
+		cfg:           rcxDefaultConfig(),
+		configFP:      rcxConfigFingerprints{},
+		dials:         make(chan rcxDialEvent, rcxDialQueueSize),
+		events:        make(chan rcxEvent, rcxEventQueueSize),
+		control:       newRcxControl(),
+		wake:          make(chan struct{}, 1),
+		downFrozen:    map[string]time.Time{},
+		openSeen:      map[string]rcxOpenSighting{},
+		charged:       map[string]int{},
+		providerFails: map[string]time.Time{},
+		probeStarted:  map[string]struct{}{},
+		incidentConns: map[string]struct{}{},
 	}
 }
 
@@ -391,15 +426,9 @@ func (e *rcxEngine) Start() {
 	e.quit = make(chan struct{})
 	e.done = make(chan struct{})
 	e.snapshot = e.store.Load()
-	// A defaults bump means the shipped markers or canaries changed, so a fact a
-	// node learned under the old set can be poison — a home dud proven open by a
-	// marker since removed. Drop those and re-earn against the new set; manual
-	// picks, pins, regimes and seed are the user's, not the preset's, and stay.
-	if e.snapshot.Config.DefaultsVersion != rcxDefaultsVersion {
-		e.snapshot.Global = map[string]*rcxNodeGlobal{}
-		e.snapshot.Envs = map[string]map[string]*rcxNodeEnv{}
-	}
 	e.ledger.Import(e.snapshot.Global, e.snapshot.Envs)
+	e.configFP = e.snapshot.Fingerprints
+	e.ledger.SetFingerprints(e.configFP.Open, e.configFP.Domestic)
 	e.applyConfigLocked(e.snapshot.Config)
 	e.sampleLink()
 	safeGoDetached("rcx engine", e.loop)
@@ -455,7 +484,9 @@ func (e *rcxEngine) DeepScan() { e.control.DeepScan() }
 func (e *rcxEngine) loop() {
 	defer close(e.done)
 	ticker := time.NewTicker(rcxTickInterval)
+	watchdog := time.NewTicker(rcxWatchInterval)
 	defer ticker.Stop()
+	defer watchdog.Stop()
 
 	for {
 		select {
@@ -470,6 +501,8 @@ func (e *rcxEngine) loop() {
 		case <-e.wake:
 			e.drainDials()
 			e.reconsider()
+		case <-watchdog.C:
+			e.watchIncumbent()
 		case <-ticker.C:
 			e.drainDials()
 			e.sampleLink()
@@ -498,6 +531,9 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.hostLinked = true
 		e.applyNetwork(event.Payload)
 	case rcxEventConfigApplied, rcxEventProvidersLoaded:
+		members := e.runtime.Members()
+		e.syncIdentity(members)
+		e.reconcileCircuits(members, e.runtime.Now())
 		e.reconsider()
 	case rcxEventSuspend:
 		e.applySuspend(event.Flag)
@@ -528,42 +564,19 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.applyManualPick(event.Node, false)
 	case rcxEventDeepScan:
 		e.startDeepScan()
+	case rcxEventProbeResult:
+		e.applyProbeResult(event)
 	case rcxEventProbeResults:
-		if event.Gen != e.probeGen {
+		if event.Gen != e.probeGen || (event.ConfigGen != 0 && event.ConfigGen != e.configGen) {
 			break
 		}
-		e.probing = false
-		e.deep = false
-		now := e.runtime.Now()
-		answered := false
-		measured := map[string]struct{}{}
 		for _, result := range event.Results {
-			negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
-			if negative && !e.chargesNegative(now) {
-				continue
-			}
-			e.ledger.NoteProbe(e.key(result.Node), e.envKey, result.Role, result.Outcome, result.DelayMs, now)
-			if result.Outcome != rcxProbeOverloaded {
-				measured[result.Node] = struct{}{}
-			}
-			if negative {
-				e.escrowNegative(result.Node, 0, now)
-				continue
-			}
-			answered = answered || result.Outcome == rcxProbeOK
+			e.applyProbeResult(rcxEvent{Kind: rcxEventProbeResult, Results: []rcxProbeResult{result}, Gen: event.Gen, ConfigGen: event.ConfigGen})
 		}
-		e.budget.Refund(e.paidWave - len(measured))
-		e.paidWave = 0
-		// A wave that got an answer proves the link, so its failures are the nodes'.
-		if answered {
-			e.noteLinkAlive(now)
-			e.rescueAt = time.Time{}
-		}
-		e.reconsider()
-		e.persist(false)
+		e.finishProbe()
 	case rcxEventTerrainReach:
 		e.reaching = false
-		if event.Gen == e.reachGen {
+		if event.Gen == e.reachGen && (event.ConfigGen == 0 || event.ConfigGen == e.configGen) {
 			e.reachF, e.reachD = event.Foreign, event.Domestic
 			e.canaries = event.Canaries
 			e.lastReachAt = e.runtime.Now()
@@ -584,6 +597,20 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 	// The host does not carry this: shipped defaults are the core's to migrate.
 	config.DefaultsVersion = rcxDefaultsVersion
 	config = config.normalized()
+	previous := e.configFP
+	next := config.fingerprints()
+	hasPrevious := previous != (rcxConfigFingerprints{})
+	changed := hasPrevious && previous != next
+	if changed {
+		e.configGen++
+		e.supersedeProbe()
+		e.supersedeReach()
+		e.ledger.Invalidate(previous.Open != next.Open, previous.Domestic != next.Domestic, previous.Countries != next.Countries)
+		if previous.Canaries != next.Canaries {
+			e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+			e.lastReachAt = time.Time{}
+		}
+	}
 	// A toggle must not refill the probe budget, or it becomes a way to farm one.
 	if config.Preset != e.cfg.Preset {
 		e.budget = newRcxProbeBudget(rcxProbeBudgetCap, rcxProbeBudgetWin)
@@ -593,12 +620,20 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 		e.pendingGrant = true
 	}
 	e.cfg = config
+	e.configFP = next
+	e.ledger.SetFingerprints(next.Open, next.Domestic)
+	now := e.runtime.Now()
+	e.accountMetrics(now)
 	e.mu.Lock()
 	e.enabled = config.operable()
 	e.openHosts = rcxMarkerHosts(config.OpenMarkers)
 	e.mu.Unlock()
+	if !config.operable() {
+		e.closeIncident(now, false)
+	}
 	if e.snapshot != nil {
 		e.snapshot.Config = config
+		e.snapshot.Fingerprints = next
 	}
 }
 
@@ -641,7 +676,7 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 	if !rcxPayloadIdentifies(payload) {
 		return
 	}
-	primary, secondary := rcxEnvKeys(payload)
+	primary, aliases := rcxEnvKeys(payload)
 	e.transport = payload.Transport
 	e.metered = payload.Metered
 	e.validated = payload.Validated
@@ -650,9 +685,9 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 
 	if primary != e.envKey {
 		e.rollbackEscrow()
+		e.providerFails = map[string]time.Time{}
 		e.envKey = primary
-		e.ledger.Migrate(secondary, primary)
-		e.migratePick(secondary, primary)
+		e.migrateEnvironment(aliases, primary)
 		e.supersedeProbe()
 		e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
 		e.incumbent = ""
@@ -678,21 +713,79 @@ func (e *rcxEngine) supersedeReach() {
 
 // The dials really ran, so the charge stands; only the verdicts go stale.
 func (e *rcxEngine) supersedeProbe() {
+	if e.probeCancel != nil {
+		e.probeCancel()
+		e.probeCancel = nil
+	}
 	e.probeGen++
 	e.probing = false
 	e.deep = false
 }
 
-func (e *rcxEngine) migratePick(from, to string) {
-	if from == to {
+func (e *rcxEngine) migrateEnvironment(aliases []string, to string) {
+	for _, from := range aliases {
+		if from == to {
+			continue
+		}
+		e.ledger.Migrate(from, to)
+		migrateLatestString(e.snapshot.Picks, from, to)
+		migrateLatestString(e.snapshot.Pins, from, to)
+		migrateLatestRegime(e.snapshot.Regimes, from, to)
+		migrateStandbys(e.snapshot.Standbys, from, to)
+		e.migrateCircuits(from, to)
+	}
+}
+
+func migrateLatestString(values map[string]string, from, to string) {
+	if values[to] == "" && values[from] != "" {
+		values[to] = values[from]
+	}
+	delete(values, from)
+}
+
+func migrateLatestRegime(values map[string]rcxRegimeMemory, from, to string) {
+	incoming, ok := values[from]
+	if !ok {
 		return
 	}
-	if _, ok := e.snapshot.Picks[to]; ok {
+	if current, exists := values[to]; !exists || incoming.At.After(current.At) {
+		values[to] = incoming
+	}
+	delete(values, from)
+}
+
+func migrateStandbys(values map[string][]string, from, to string) {
+	incoming, ok := values[from]
+	if !ok {
 		return
 	}
-	if pick, ok := e.snapshot.Picks[from]; ok {
-		e.snapshot.Picks[to] = pick
-		delete(e.snapshot.Picks, from)
+	seen := map[string]struct{}{}
+	merged := make([]string, 0, rcxStandbyCount)
+	for _, key := range append(append([]string(nil), values[to]...), incoming...) {
+		if _, ok := seen[key]; ok || key == "" {
+			continue
+		}
+		seen[key] = struct{}{}
+		merged = append(merged, key)
+		if len(merged) == rcxStandbyCount {
+			break
+		}
+	}
+	values[to] = merged
+	delete(values, from)
+}
+
+func (e *rcxEngine) migrateCircuits(from, to string) {
+	prefix := from + "\x00"
+	for key, incoming := range e.snapshot.Circuits {
+		if !strings.HasPrefix(key, prefix) {
+			continue
+		}
+		destination := to + key[len(from):]
+		if current, ok := e.snapshot.Circuits[destination]; !ok || incoming.OpenedAt.After(current.OpenedAt) {
+			e.snapshot.Circuits[destination] = incoming
+		}
+		delete(e.snapshot.Circuits, key)
 	}
 }
 
@@ -726,12 +819,16 @@ func (e *rcxEngine) classifyTerrain(measured bool) {
 func (e *rcxEngine) applySuspend(suspended bool) {
 	now := e.runtime.Now()
 	if suspended {
+		e.accountMetrics(now)
+		e.closeIncident(now, false)
 		e.suspendAt = now
 		e.suspendTo = now
+		e.accountedAt = time.Time{}
 		e.persist(true)
 		return
 	}
 	e.suspendTo = now
+	e.accountedAt = now
 	// Nothing measured while the device was frozen says anything about a node,
 	// and the incumbent is the only one worth a probe on the way back.
 	e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
@@ -796,6 +893,7 @@ drain:
 				}
 				if e.ledger.NoteDialFailure(e.key(event.Node), e.envKey, terrain, at) {
 					e.escrowNegative(event.Node, 1, at)
+					e.noteProviderNodeFailure(event.Node, at)
 				}
 				continue
 			}
@@ -849,6 +947,9 @@ func (e *rcxEngine) sampleTraffic() {
 		// Answered once means idle, not starved: only payload never answered accuses.
 		case conn.Down == 0 && conn.Up > 0 && now.Sub(conn.Start) >= rcxConnStallAge:
 			flow.stalled++
+			if conn.Node == e.incumbent {
+				e.incidentConns[conn.Key] = struct{}{}
+			}
 		}
 	}
 	if alive {
@@ -858,6 +959,13 @@ func (e *rcxEngine) sampleTraffic() {
 		switch {
 		case flow.progress:
 			e.notePayload(node, flow.open, now)
+			if node == e.incumbent {
+				for _, conn := range conns {
+					if conn.Node == node && conn.Down > previous[conn.Key] {
+						delete(e.incidentConns, conn.Key)
+					}
+				}
+			}
 		case flow.stalled*2 > flow.live:
 			e.trackFrozenPayload(node, now)
 		default:
@@ -931,6 +1039,10 @@ func (e *rcxEngine) notePayload(node string, openWorld bool, now time.Time) {
 	delete(e.downFrozen, key)
 	e.ledger.NoteTrafficProgress(key, e.envKey, openWorld, now)
 	e.ledger.ClearDegraded(key, e.envKey)
+	if node == e.incumbent {
+		e.closeIncident(now, true)
+	}
+	e.noteProviderSuccess(node)
 }
 
 func (e *rcxEngine) trackFrozenPayload(node string, now time.Time) {
@@ -1132,6 +1244,7 @@ func (e *rcxEngine) candidates(members []rcxMember) []rcxCandidate {
 			CoolUntil:  e.ledger.CoolUntil(key, e.envKey, now),
 			InSkeleton: true,
 			Degraded:   e.ledger.Degraded(key, e.envKey, now),
+			Circuit:    e.providerCircuitOpen(member.Provider, member.Name, now),
 		})
 	}
 	return candidates
@@ -1226,7 +1339,7 @@ func (e *rcxEngine) reconsider() {
 		from := e.incumbent
 		if err := e.runtime.Select(decision.To); err == nil {
 			if rcxDeathSwitch(decision.Reason) {
-				e.runtime.CloseConnections(from)
+				e.runtime.CloseConnections(e.drainIDs(from))
 			}
 			e.noteSwitch(from, decision.To, decision.Reason, now)
 			input.Incumbent = decision.To
@@ -1246,7 +1359,9 @@ func (e *rcxEngine) reconsider() {
 		}
 		e.startProbe(candidates, members, kind)
 	}
-	e.publish(decision.Reason, rcxRank(input), input)
+	ranked := rcxRank(input)
+	e.rebuildStandbys(ranked)
+	e.publish(decision.Reason, ranked, input)
 }
 
 // A domestic canary that answers proves the direct path lives, while a home
@@ -1292,7 +1407,105 @@ func rcxDeathSwitch(reason rcxReason) bool {
 	return reason == rcxReasonIncumbentDead || reason == rcxReasonDegraded
 }
 
+func (e *rcxEngine) accountMetrics(now time.Time) {
+	if e.snapshot == nil {
+		return
+	}
+	if e.accountedAt.IsZero() {
+		e.accountedAt = now
+		return
+	}
+	elapsed := now.Sub(e.accountedAt)
+	e.accountedAt = now
+	if elapsed <= 0 || !e.Enabled() || (!e.suspendAt.IsZero() && e.suspendTo.Equal(e.suspendAt)) {
+		return
+	}
+	e.snapshot.Metrics.EnabledMillis += elapsed.Milliseconds()
+	if e.incidentAt.IsZero() {
+		e.snapshot.Metrics.AvailableMillis += elapsed.Milliseconds()
+	}
+	e.snapshot.Dirty = true
+}
+
+func (e *rcxEngine) startIncident(now time.Time) {
+	if e.snapshot == nil || !e.incidentAt.IsZero() {
+		return
+	}
+	e.accountMetrics(now)
+	e.incidentAt = now
+	e.snapshot.Metrics.Incidents++
+	e.snapshot.Dirty = true
+}
+
+func (e *rcxEngine) closeIncident(now time.Time, recovered bool) {
+	if e.snapshot == nil || e.incidentAt.IsZero() {
+		return
+	}
+	e.accountMetrics(now)
+	outage := now.Sub(e.incidentAt)
+	e.incidentAt = time.Time{}
+	if recovered && outage >= 0 {
+		millis := outage.Milliseconds()
+		e.snapshot.Metrics.LastOutageMillis = millis
+		e.snapshot.Metrics.TotalOutageMillis += millis
+		e.snapshot.Metrics.RecoveredOutages++
+	}
+	e.snapshot.Dirty = true
+}
+
+func (e *rcxEngine) recordFailover(now time.Time, standby bool) {
+	if e.snapshot == nil || e.incidentAt.IsZero() {
+		return
+	}
+	duration := now.Sub(e.incidentAt)
+	if duration < 0 {
+		duration = 0
+	}
+	millis := duration.Milliseconds()
+	e.snapshot.Metrics.LastFailoverMillis = millis
+	e.snapshot.Metrics.FailoverMillis += millis
+	e.snapshot.Metrics.Failovers++
+	if standby {
+		e.snapshot.Metrics.StandbyHits++
+	}
+	e.closeIncident(now, true)
+}
+
+func (e *rcxEngine) metricsReport(now time.Time) rcxMetricsReport {
+	e.accountMetrics(now)
+	state := e.snapshot.Metrics
+	report := rcxMetricsReport{
+		EnabledMillis:     state.EnabledMillis,
+		AvailableMillis:   state.AvailableMillis,
+		Incidents:         state.Incidents,
+		StandbyHits:       state.StandbyHits,
+		ProviderIncidents: state.ProviderIncidents,
+		MarkerIncidents:   state.MarkerIncidents,
+		LastFailover:      state.LastFailoverMillis,
+		LastOutage:        state.LastOutageMillis,
+		ActiveCircuits:    e.activeCircuitReasons(now),
+		ActiveMarkers:     e.activeMarkerReasons(now),
+	}
+	if state.EnabledMillis > 0 {
+		report.Availability = int(state.AvailableMillis * 100 / state.EnabledMillis)
+	}
+	if state.Failovers > 0 {
+		report.AverageFailover = state.FailoverMillis / int64(state.Failovers)
+	}
+	if state.RecoveredOutages > 0 {
+		report.AverageOutage = state.TotalOutageMillis / int64(state.RecoveredOutages)
+	}
+	return report
+}
+
 func (e *rcxEngine) noteSwitch(from, to string, reason rcxReason, now time.Time) {
+	standby := false
+	for _, key := range e.snapshot.Standbys[e.envKey] {
+		standby = standby || key == e.key(to)
+	}
+	if rcxDeathSwitch(reason) {
+		e.recordFailover(now, standby)
+	}
 	e.incumbent = to
 	e.since = now
 	e.switchedAt = now
@@ -1383,6 +1596,7 @@ const (
 	rcxWaveMaintain
 	rcxWaveGrant
 	rcxWaveRescue
+	rcxWaveIncident
 	rcxWaveDeep
 )
 
@@ -1424,6 +1638,10 @@ func (e *rcxEngine) planWave(
 		return nil
 	}
 	now := e.runtime.Now()
+	halfOpen := map[string]struct{}{}
+	if kind == rcxWaveRoutine || kind == rcxWaveMaintain {
+		halfOpen = e.circuitHalfOpenMembers(members, now)
+	}
 
 	byName := make(map[string]rcxCandidate, len(candidates))
 	for _, candidate := range candidates {
@@ -1437,6 +1655,12 @@ func (e *rcxEngine) planWave(
 	stamps := make(map[string]time.Time, len(members))
 	for _, member := range members {
 		candidate := byName[member.Name]
+		if candidate.Circuit {
+			if _, allowed := halfOpen[member.Provider]; !allowed {
+				continue
+			}
+			delete(halfOpen, member.Provider)
+		}
 		// Bytes moving prove transit, not that the admission proof is inside its TTL.
 		if kind == rcxWaveMaintain {
 			if !e.proofDue(member.Name, now) {
@@ -1454,10 +1678,12 @@ func (e *rcxEngine) planWave(
 		}
 		stamps[member.Name] = e.ledger.ProbeAt(member.key(), e.envKey)
 		pool = append(pool, rcxProbeNode{
-			Name: member.Name,
-			Key:  member.key(),
-			Type: member.Type,
-			Port: member.Port,
+			Name:      member.Name,
+			Key:       member.key(),
+			Provider:  member.Provider,
+			Transport: member.Transport,
+			Type:      member.Type,
+			Port:      member.Port,
 		})
 	}
 	// Least recently measured first, or every wave re-measures the same head.
@@ -1467,6 +1693,9 @@ func (e *rcxEngine) planWave(
 	// Diversity alone would spend a wave on neighbours of the node under suspicion.
 	if suspect != "" {
 		rcxHoistNode(pool, suspect)
+	}
+	if kind == rcxWaveIncident || kind == rcxWaveMaintain {
+		rcxHoistNodes(pool, e.standbyNames())
 	}
 	if pin := e.pin(); pin != "" && pin != e.incumbent {
 		if candidate, ok := byName[pin]; ok && candidate.Facts.Transit != rcxProofProven {
@@ -1485,6 +1714,8 @@ func (e *rcxEngine) planWave(
 	width := e.cfg.WaveWidth
 	if kind == rcxWaveRescue || kind == rcxWaveDeep {
 		width = len(pool)
+	} else if kind == rcxWaveIncident {
+		width = 1 + rcxStandbyCount + e.cfg.WaveWidth/2
 	}
 	wave := rcxDiverseWave(pool, width)
 	if len(wave) == 0 {
@@ -1494,7 +1725,7 @@ func (e *rcxEngine) planWave(
 		return nil
 	}
 	e.paidWave = 0
-	if kind == rcxWaveRoutine {
+	if kind == rcxWaveRoutine || kind == rcxWaveIncident {
 		return e.afford(wave, 0, now)
 	}
 	return wave
@@ -1550,30 +1781,33 @@ func (e *rcxEngine) startProbe(candidates []rcxCandidate, members []rcxMember, k
 	if len(wave) == 0 {
 		return
 	}
-	sweeps := kind == rcxWaveRescue || kind == rcxWaveDeep
 	targets := e.probeTargets(wave, e.terrainCurrent(), kind)
-
 	e.probing = true
+	e.probeKind = kind
+	e.probeResults = nil
+	e.probeStarted = map[string]struct{}{}
 	gen := e.probeGen
+	configGen := e.configGen
 	prober := newRcxProber(e.runtime.Test)
 	window := rcxProbeWave
-	switch kind {
-	case rcxWaveRescue:
+	if kind == rcxWaveRescue || kind == rcxWaveIncident {
 		window = rcxRescueWave
-		prober.enough = func(result rcxProbeResult) bool { return result.Outcome == rcxProbeOK }
-	case rcxWaveDeep:
+		prober.concurrency = rcxSweepParallel
+		prober.timeout = rcxSweepTimeout
+	} else if kind == rcxWaveDeep {
 		window = rcxDeepProbeWave
-	}
-	if sweeps {
 		prober.concurrency = rcxSweepParallel
 		prober.timeout = rcxSweepTimeout
 	}
 	quit := e.quit
+	ctx, cancel := context.WithTimeout(context.Background(), window)
+	e.probeCancel = cancel
 	safeGoDetached("rcx probe wave", func() {
-		ctx, cancel := context.WithTimeout(context.Background(), window)
 		defer cancel()
-		results := prober.Run(ctx, targets)
-		e.sendResult(rcxEvent{Kind: rcxEventProbeResults, Results: results, Gen: gen}, quit)
+		prober.Stream(ctx, targets, func(_ int, result rcxProbeResult) {
+			e.sendResult(rcxEvent{Kind: rcxEventProbeResult, Results: []rcxProbeResult{result}, Gen: gen, ConfigGen: configGen}, quit)
+		})
+		e.sendResult(rcxEvent{Kind: rcxEventProbeResults, Gen: gen, ConfigGen: configGen}, quit)
 	})
 }
 
@@ -1583,14 +1817,12 @@ func (e *rcxEngine) probeTargets(
 	terrain rcxTerrain,
 	kind rcxWaveKind,
 ) []rcxProbeTarget {
-	paired := kind == rcxWaveRescue || kind == rcxWaveDeep
-	open := rcxProbeTarget{Role: rcxRoleOpen, Marker: e.cfg.OpenMarkers[0]}
+	paired := kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveDeep
+	now := e.runtime.Now()
+	open := rcxProbeTarget{Role: rcxRoleOpen, Markers: e.activeMarkers(rcxRoleOpen, now)}
 	both := len(e.cfg.DomesticMarkers) > 0 &&
 		(terrain == rcxTerrainWhitelist || terrain == rcxTerrainUnknown)
-	var home rcxProbeTarget
-	if both {
-		home = rcxProbeTarget{Role: rcxRoleDomestic, Marker: e.cfg.DomesticMarkers[0]}
-	}
+	home := rcxProbeTarget{Role: rcxRoleDomestic, Markers: e.activeMarkers(rcxRoleDomestic, now)}
 	primaries := make([]rcxProbeTarget, 0, len(wave))
 	secondaries := make([]rcxProbeTarget, 0, len(wave))
 	for _, node := range wave {
@@ -1599,16 +1831,18 @@ func (e *rcxEngine) probeTargets(
 			primary, secondary = home, open
 		}
 		primary.Node = node.Name
-		primaries = append(primaries, primary)
-		if !both {
+		if len(primary.Markers) > 0 {
+			primaries = append(primaries, primary)
+		}
+		if !both || len(secondary.Markers) == 0 {
 			continue
 		}
 		secondary.Node = node.Name
 		if paired {
 			primaries = append(primaries, secondary)
-			continue
+		} else {
+			secondaries = append(secondaries, secondary)
 		}
-		secondaries = append(secondaries, secondary)
 	}
 	return append(primaries, secondaries...)
 }
@@ -1622,6 +1856,7 @@ func (e *rcxEngine) startReach() {
 	domestic := append([]string(nil), e.cfg.CanaryDomestic...)
 	e.reaching = true
 	gen := e.reachGen
+	configGen := e.configGen
 	quit := e.quit
 	safeGoDetached("rcx canary round", func() {
 		var (
@@ -1637,11 +1872,12 @@ func (e *rcxEngine) startReach() {
 		foreignOutcome := e.reachGroup(foreign, false, &foreignRows)
 		<-done
 		e.sendResult(rcxEvent{
-			Kind:     rcxEventTerrainReach,
-			Foreign:  foreignOutcome,
-			Domestic: domesticOutcome,
-			Canaries: append(foreignRows, domesticRows...),
-			Gen:      gen,
+			Kind:      rcxEventTerrainReach,
+			Foreign:   foreignOutcome,
+			Domestic:  domesticOutcome,
+			Canaries:  append(foreignRows, domesticRows...),
+			Gen:       gen,
+			ConfigGen: configGen,
 		}, quit)
 	})
 }
@@ -1785,6 +2021,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Canaries:   append([]rcxCanaryReport(nil), e.canaries...),
 		Candidates: e.candidateReports(ranked, input, now),
 		History:    append([]rcxSwitchReport(nil), e.history...),
+		Metrics:    e.metricsReport(now),
 		Bands:      rcxLatencyBands(),
 		ProbesLeft: e.budget.Remaining(now),
 		ProbeCap:   rcxProbeBudgetCap,
@@ -1840,7 +2077,21 @@ func (e *rcxEngine) persist(force bool) {
 		return
 	}
 	now := e.runtime.Now()
-	e.ledger.Prune(rcxKeepPerEnv, now)
+	e.accountMetrics(now)
+	active := map[string]struct{}{}
+	for _, member := range e.runtime.Members() {
+		active[member.key()] = struct{}{}
+	}
+	protected := map[string]struct{}{}
+	keys := []string{e.key(e.incumbent), e.snapshot.Picks[e.envKey], e.snapshot.Pins[e.envKey]}
+	keys = append(keys, e.snapshot.Standbys[e.envKey]...)
+	for _, key := range keys {
+		if key != "" {
+			protected[key] = struct{}{}
+		}
+	}
+	e.ledger.MarkMembers(active, now)
+	e.ledger.Prune(active, protected, now)
 	e.snapshot.Global, e.snapshot.Envs = e.ledger.Export()
 	e.store.Save(e.snapshot, now, force)
 }

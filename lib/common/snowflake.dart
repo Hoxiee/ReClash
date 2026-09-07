@@ -29,19 +29,22 @@ class Snowflake {
 
   final int _workerId = 1;
   int _lastTimestamp = -1;
+  int _lastWallTimestamp = -1;
   int _sequence = 0;
 
   int get id {
-    int timestamp = DateTime.now().millisecondsSinceEpoch;
-    if (timestamp < _lastTimestamp) {
+    final wallTimestamp = DateTime.now().millisecondsSinceEpoch;
+    if (wallTimestamp < _lastWallTimestamp) {
       throw ArgumentError(
-        'Clock moved backwards. Refusing to generate id for ${_lastTimestamp - timestamp} milliseconds',
+        'Clock moved backwards. Refusing to generate id for ${_lastWallTimestamp - wallTimestamp} milliseconds',
       );
     }
+    _lastWallTimestamp = wallTimestamp;
+    var timestamp = max(wallTimestamp, _lastTimestamp);
     if (timestamp == _lastTimestamp) {
       _sequence = (_sequence + 1) & _sequenceMask;
       if (_sequence == 0) {
-        timestamp = _getNextMillis(_lastTimestamp);
+        timestamp++;
       }
     } else {
       _sequence = 0;
@@ -52,14 +55,6 @@ class Snowflake {
     return ((timestamp - _twepoch) << _timestampLeftShift) |
         (_workerId << _workerIdShift) |
         _sequence;
-  }
-
-  int _getNextMillis(int lastTimestamp) {
-    int timestamp = DateTime.now().millisecondsSinceEpoch;
-    while (timestamp <= lastTimestamp) {
-      timestamp = DateTime.now().millisecondsSinceEpoch;
-    }
-    return timestamp;
   }
 }
 

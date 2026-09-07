@@ -124,11 +124,14 @@ class DesyncStrategyTester {
   DesyncStrategyTester({
     required this.port,
     required this.applyArgs,
+    this.checkSite = desyncCheckSite,
   });
 
   final int port;
 
   final Future<void> Function(List<String> args) applyArgs;
+
+  final Future<DesyncSiteStatus> Function(String host, int port) checkSite;
 
   var _stopped = false;
 
@@ -224,13 +227,17 @@ class DesyncStrategyTester {
       List.generate(
         queue.length < _siteConcurrency ? queue.length : _siteConcurrency,
         (_) async {
-          while (true) {
+          while (!_stopped) {
             final host = queue.isEmpty ? null : queue.removeAt(0);
             if (host == null || !engineUp) return;
             var passed = false;
             var onRetry = false;
-            for (var attempt = 0; attempt < _siteAttempts; attempt++) {
-              final status = await desyncCheckSite(host, port);
+            for (
+              var attempt = 0;
+              attempt < _siteAttempts && !_stopped;
+              attempt++
+            ) {
+              final status = await checkSite(host, port);
               if (status == DesyncSiteStatus.engineDown) {
                 if (++consecutiveDown >= _downAbort) {
                   engineUp = false;
@@ -246,6 +253,7 @@ class DesyncStrategyTester {
                 break;
               }
             }
+            if (_stopped) return;
             if (!passed) {
               failed.add(host);
             } else if (onRetry) {
@@ -307,7 +315,8 @@ const _bodyCap = 256 * 1024;
 
 const _headerCap = 16 * 1024;
 
-const _userAgent = 'Mozilla/5.0 (Linux; Android 11; Redmi) AppleWebKit/537.36'
+const _userAgent =
+    'Mozilla/5.0 (Linux; Android 11; Redmi) AppleWebKit/537.36'
     ' (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36';
 
 /// SOCKS5 CONNECT, a TLS handshake (the censored payload), then a sub-400
@@ -330,9 +339,7 @@ Future<DesyncSiteStatus> desyncCheckSite(String host, int port) async {
       return DesyncSiteStatus.engineDown;
     }
     final name = host.codeUnits;
-    socket.add(<int>[
-      5, 1, 0, 3, name.length, ...name, 443 >> 8, 443 & 0xff,
-    ]);
+    socket.add(<int>[5, 1, 0, 3, name.length, ...name, 443 >> 8, 443 & 0xff]);
     final head = await buffer.take(4, _dialTimeout);
     if (head.length < 4 || head[0] != 5) {
       return DesyncSiteStatus.engineDown;
@@ -344,8 +351,9 @@ Future<DesyncSiteStatus> desyncCheckSite(String host, int port) async {
         }
       case 3:
         final length = await buffer.take(1, _stepTimeout);
+        if (length.isEmpty) return DesyncSiteStatus.blocked;
         final rest = await buffer.take(length[0] + 2, _stepTimeout);
-        if (length.isEmpty || rest.length < length[0] + 2) {
+        if (rest.length < length[0] + 2) {
           return DesyncSiteStatus.blocked;
         }
       case 4:
@@ -377,27 +385,19 @@ Future<DesyncSiteStatus> desyncCheckSite(String host, int port) async {
               '\r\n'
           .codeUnits,
     );
-    final header = await response.takeUntil(
-      _crlf2,
-      _headerCap,
-      _stepTimeout,
-    );
+    final header = await response.takeUntil(_crlf2, _headerCap, _stepTimeout);
     if (header == null) return DesyncSiteStatus.blocked;
     final text = String.fromCharCodes(header);
     final code = int.tryParse(
-      text
-          .split(' ')
-          .elementAtOrNull(1)
-          ?.split('\r\n')
-          .first ??
-          '',
+      text.split(' ').elementAtOrNull(1)?.split('\r\n').first ?? '',
     );
     if (code == null || code >= 400) return DesyncSiteStatus.blocked;
     final declared = _contentLength(text);
     if (declared <= 0) return DesyncSiteStatus.passed;
     final target = declared > _bodyCap ? _bodyCap : declared;
+    final bodyClock = Stopwatch()..start();
     while (response.length < target && !response.isClosed) {
-      await response.wait(_stepTimeout);
+      await response.wait(_remainingTimeout(bodyClock, _stepTimeout));
     }
     return response.length >= target
         ? DesyncSiteStatus.passed
@@ -441,6 +441,14 @@ Future<bool> _listenerAlive(int port) async {
   return socket != null;
 }
 
+Duration _remainingTimeout(Stopwatch clock, Duration timeout) {
+  final remaining = timeout - clock.elapsed;
+  if (remaining <= Duration.zero) {
+    throw TimeoutException('Socket step timed out', timeout);
+  }
+  return remaining;
+}
+
 class _SocketBuffer {
   final _data = <int>[];
   final _waiters = <Completer<void>>[];
@@ -467,15 +475,18 @@ class _SocketBuffer {
   }
 
   Future<void> wait(Duration timeout) {
-    if (_data.isNotEmpty || _closed) return Future.value();
+    if (_closed) return Future.value();
     final completer = Completer<void>();
     _waiters.add(completer);
-    return completer.future.timeout(timeout);
+    return completer.future.timeout(timeout).whenComplete(() {
+      _waiters.remove(completer);
+    });
   }
 
   Future<Uint8List> take(int count, Duration timeout) async {
+    final clock = Stopwatch()..start();
     while (_data.length < count && !_closed) {
-      await wait(timeout);
+      await wait(_remainingTimeout(clock, timeout));
     }
     final taken = Uint8List.fromList(_data.take(count).toList());
     _data.removeRange(0, taken.length);
@@ -488,13 +499,14 @@ class _SocketBuffer {
     int cap,
     Duration timeout,
   ) async {
+    final clock = Stopwatch()..start();
     while (!_closed) {
       final index = _indexOf(pattern);
       if (index >= 0) {
         return Uint8List.fromList(_data.take(index + pattern.length).toList());
       }
       if (_data.length > cap) return null;
-      await wait(timeout);
+      await wait(_remainingTimeout(clock, timeout));
     }
     return null;
   }

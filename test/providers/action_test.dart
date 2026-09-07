@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
@@ -11,7 +13,10 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/state.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:riverpod/riverpod.dart';
 
@@ -19,7 +24,23 @@ import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider(this.root);
+
+  final String root;
+
+  @override
+  Future<String?> getTemporaryPath() async => root;
+
+  @override
+  Future<String?> getApplicationSupportPath() async => root;
+
+  @override
+  Future<String?> getApplicationCachePath() async => root;
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('ProfilesAction', () {
     test('keeps edited profile data when remote update fails', () async {
       final original = Profile.normal(label: 'old label', url: 'bad-url');
@@ -202,6 +223,81 @@ void main() {
       expect(state.autoCheckUpdate, isFalse);
       expect(state.closeConnections, isFalse);
     });
+  });
+
+  group('developer subscriptions', () {
+    late Directory tempDir;
+
+    setUpAll(() async {
+      await AppLocalizations.load(const Locale('en'));
+      tempDir = Directory.systemTemp.createTempSync(
+        'developer_subscription_test',
+      );
+      PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    });
+
+    tearDownAll(() {
+      try {
+        tempDir.deleteSync(recursive: true);
+      } catch (_) {}
+    });
+
+    test('installs and reinstalls a fixture without duplicates', () async {
+      final core = _MockCoreHandlerInterface();
+      when(() => core.validateConfig(any())).thenAnswer((_) async => '');
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => null),
+          profilesProvider.overrideWith(() => TestProfiles(const [])),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        ],
+      );
+      addTearDown(container.dispose);
+      globalState.container = container;
+      final action = container.read(profilesActionProvider.notifier);
+      final fixture = developerSubscriptions.first;
+
+      expect(await action.installDeveloperSubscription(fixture), isTrue);
+      final first = container.read(profilesProvider).single;
+      expect(first.panelMeta, fixture.panelMeta);
+      expect(first.subscriptionInfo, fixture.subscriptionInfo);
+      expect(first.type, ProfileType.file);
+      expect(await first.file.then((file) => file.exists()), isTrue);
+
+      expect(await action.installDeveloperSubscription(fixture), isTrue);
+      final reinstalled = container.read(profilesProvider).single;
+      expect(reinstalled.id, first.id);
+      expect(container.read(profilesProvider), hasLength(1));
+      verify(() => core.validateConfig(any())).called(4);
+    });
+
+    test(
+      'keeps another profile current and does not apply fixture widgets',
+      () async {
+        final current = Profile.normal(label: 'Current');
+        final core = _MockCoreHandlerInterface();
+        when(() => core.validateConfig(any())).thenAnswer((_) async => '');
+        final container = ProviderContainer(
+          overrides: [
+            currentProfileIdProvider.overrideWithBuild((_, _) => current.id),
+            profilesProvider.overrideWith(() => TestProfiles([current])),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+          ],
+        );
+        addTearDown(container.dispose);
+        globalState.container = container;
+        final before = container.read(appSettingProvider).dashboardWidgets;
+
+        final installed = await container
+            .read(profilesActionProvider.notifier)
+            .installDeveloperSubscription(developerSubscriptions.last);
+
+        expect(installed, isTrue);
+        expect(container.read(currentProfileIdProvider), current.id);
+        expect(container.read(profilesProvider), hasLength(2));
+        expect(container.read(appSettingProvider).dashboardWidgets, before);
+      },
+    );
   });
 
   group('GeoResourceAction', () {

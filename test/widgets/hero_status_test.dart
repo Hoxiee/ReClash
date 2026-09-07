@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -19,7 +20,14 @@ void main() {
     test('withholds a verdict while nothing has been measured', () {
       expect(heroHealthOf(delay: null, measuring: false), HeroHealth.unknown);
       expect(heroHealthOf(delay: 0, measuring: false), HeroHealth.unknown);
-      expect(heroHealthOf(delay: -1, measuring: true), HeroHealth.unknown);
+      expect(heroHealthOf(delay: -1, measuring: true), HeroHealth.checking);
+    });
+
+    test('a live measurement becomes the checking status', () {
+      expect(
+        heroStatusOf(HeroOrbPhase.on, HeroHealth.checking),
+        HeroStatus.checking,
+      );
     });
 
     test('reads a failed measurement as broken', () {
@@ -48,10 +56,7 @@ void main() {
         heroCoreMarkOf(HeroStatus.degraded, 'https://x/l.png'),
         HeroCoreMark.serviceLogo,
       );
-      expect(
-        heroCoreMarkOf(HeroStatus.secured, null),
-        HeroCoreMark.appMark,
-      );
+      expect(heroCoreMarkOf(HeroStatus.secured, null), HeroCoreMark.appMark);
       expect(heroCoreMarkOf(HeroStatus.secured, ''), HeroCoreMark.appMark);
     });
 
@@ -140,6 +145,51 @@ void main() {
         HeroStatus.offline,
       );
       expect(HeroStatus.offline.isSweeping, isFalse);
+    });
+  });
+
+  group('hero transitions', () {
+    test('classifies every directed topology change', () {
+      const cases = <(HeroStatus, HeroStatus, HeroOrbTransition)>[
+        (HeroStatus.off, HeroStatus.connecting, HeroOrbTransition.ignition),
+        (HeroStatus.connecting, HeroStatus.secured, HeroOrbTransition.lockOn),
+        (HeroStatus.secured, HeroStatus.off, HeroOrbTransition.shutdown),
+        (HeroStatus.offline, HeroStatus.off, HeroOrbTransition.shutdown),
+        (HeroStatus.secured, HeroStatus.paused, HeroOrbTransition.pause),
+        (HeroStatus.paused, HeroStatus.secured, HeroOrbTransition.resume),
+        (HeroStatus.secured, HeroStatus.broken, HeroOrbTransition.fault),
+        (
+          HeroStatus.broken,
+          HeroStatus.reconnecting,
+          HeroOrbTransition.recovery,
+        ),
+        (HeroStatus.secured, HeroStatus.offline, HeroOrbTransition.networkLoss),
+        (
+          HeroStatus.offline,
+          HeroStatus.connecting,
+          HeroOrbTransition.networkReturn,
+        ),
+        (
+          HeroStatus.secured,
+          HeroStatus.degraded,
+          HeroOrbTransition.healthShift,
+        ),
+        (HeroStatus.off, HeroStatus.checking, HeroOrbTransition.crossfade),
+      ];
+
+      for (final (from, to, expected) in cases) {
+        expect(heroOrbTransitionOf(from, to), expected, reason: '$from → $to');
+      }
+    });
+
+    test('leaves an unchanged status steady', () {
+      for (final status in HeroStatus.values) {
+        expect(
+          heroOrbTransitionOf(status, status),
+          HeroOrbTransition.steady,
+          reason: '$status',
+        );
+      }
     });
   });
 
@@ -266,6 +316,43 @@ void main() {
         palettes[HeroStatus.secured]!.accent,
       );
     });
+
+    testWidgets('uses the provider gradient only for normal live states', (
+      tester,
+    ) async {
+      const providerRing = [
+        Color(0xFF35B5FF),
+        Color(0xFF3657FF),
+        Color(0xFFA638F4),
+      ];
+      late HeroPalette secured;
+      late HeroPalette broken;
+      await tester.pumpWidget(
+        TestApp(
+          includeNavigatorKey: false,
+          setTheme: false,
+          child: Builder(
+            builder: (context) {
+              secured = heroPaletteOf(
+                context,
+                HeroStatus.secured,
+                heroRing: providerRing,
+              );
+              broken = heroPaletteOf(
+                context,
+                HeroStatus.broken,
+                heroRing: providerRing,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(secured.ring, providerRing);
+      expect(secured.glow, providerRing[1]);
+      expect(broken.ring, isNot(providerRing));
+    });
   });
 
   group('HeroLinkRow', () {
@@ -325,6 +412,7 @@ void main() {
       bool? reachable,
       RcxStatus? rcxStatus,
       String? serviceLogo,
+      String? heroRing,
     }) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1;
@@ -333,9 +421,13 @@ void main() {
 
       final profile = Profile.normal().copyWith(
         selectedMap: const {'Selector': 'Node A'},
-        panelMeta: serviceLogo == null
+        panelMeta: serviceLogo == null && heroRing == null
             ? null
-            : PanelMeta(serviceName: 'Panel', serviceLogo: serviceLogo),
+            : PanelMeta(
+                serviceName: 'Panel',
+                serviceLogo: serviceLogo,
+                heroRing: heroRing,
+              ),
       );
       const group = Group(
         name: 'Selector',
@@ -395,6 +487,13 @@ void main() {
       expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
+      final markBox = tester.widget<SizedBox>(mark);
+      expect(markBox.width, 96.12);
+      expect(markBox.height, 96.12);
+      expect(
+        find.descendant(of: mark, matching: find.byType(ColorFiltered)),
+        findsOne,
+      );
       expect(
         find.descendant(of: mark, matching: find.byType(ImageCacheWidget)),
         findsOne,
@@ -406,7 +505,28 @@ void main() {
     ) async {
       await pumpHero(tester, delay: 140);
       expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
-      expect(find.byKey(const ValueKey('core-mark')), findsOne);
+      final mark = find.byKey(const ValueKey('core-mark'));
+      expect(mark, findsOne);
+      final markBox = tester.widget<SizedBox>(mark);
+      expect(markBox.width, 96.12);
+      expect(markBox.height, 96.12);
+      final padding = tester.widget<Padding>(
+        find.descendant(of: mark, matching: find.byType(Padding)),
+      );
+      expect(padding.padding, const EdgeInsets.all(9.612));
+      expect(
+        find.descendant(of: mark, matching: find.byType(ColorFiltered)),
+        findsOne,
+      );
+    });
+
+    testWidgets('passes the panel gradient into the orb', (tester) async {
+      await pumpHero(tester, delay: 140, heroRing: '35B5FF,3657FF,A638F4');
+      expect(tester.widget<HeroOrb>(find.byType(HeroOrb)).heroRing, const [
+        Color(0xFF35B5FF),
+        Color(0xFF3657FF),
+        Color(0xFFA638F4),
+      ]);
     });
 
     testWidgets('a paused orb keeps its action icon over any logo', (
@@ -513,7 +633,18 @@ void main() {
       expect(find.text('Checking the network…'), findsOne);
     });
 
-    testWidgets('a probe on a live tunnel leaves the wording alone', (
+    testWidgets('the selected-node probe diagnoses a live tunnel', (
+      tester,
+    ) async {
+      await pumpHero(
+        tester,
+        pendingTests: {delayTestKey(defaultTestUrl, 'Node A')},
+      );
+      expect(find.text('Checking the network…'), findsOne);
+      expect(find.text('You are protected'), findsNothing);
+    });
+
+    testWidgets('an unrelated live probe leaves the wording alone', (
       tester,
     ) async {
       await pumpHero(tester, delay: 140, pendingTests: const {'probe'});

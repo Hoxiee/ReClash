@@ -99,6 +99,133 @@ func TestPatchSelectGroupRestoresASelectionWithoutValidatingIt(t *testing.T) {
 	}
 }
 
+type countingHealthProvider struct {
+	fakeProxyProvider
+	touches atomic.Int32
+	checks  atomic.Int32
+}
+
+func (p *countingHealthProvider) Touch() {
+	p.touches.Add(1)
+}
+
+func (p *countingHealthProvider) HealthCheck() {
+	p.checks.Add(1)
+}
+
+func healthSelectorGroup(
+	t *testing.T,
+	name string,
+	providers ...cp.ProxyProvider,
+) constant.Proxy {
+	t.Helper()
+	group, err := outboundgroup.NewSelector(
+		outboundgroup.GroupCommonOption{Name: name},
+		outboundgroup.SelectorOption{},
+		nil,
+		providers,
+	)
+	if err != nil {
+		t.Fatalf("NewSelector: %v", err)
+	}
+	return adapter.NewProxy(group)
+}
+
+func TestRunHealthCheckRefreshCoversAndDeduplicatesProviderGraph(t *testing.T) {
+	topLevel := &countingHealthProvider{
+		fakeProxyProvider: fakeProxyProvider{name: "top", vehicle: cp.HTTP},
+	}
+	groupOwned := &countingHealthProvider{
+		fakeProxyProvider: fakeProxyProvider{name: "group", vehicle: cp.Compatible},
+	}
+	group := healthSelectorGroup(t, "selector", topLevel, groupOwned, groupOwned)
+	tunnel.UpdateProxies(
+		map[string]constant.Proxy{"selector": group},
+		map[string]cp.ProxyProvider{"top": topLevel},
+	)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	runHealthCheckRefresh()
+	for _, provider := range []*countingHealthProvider{topLevel, groupOwned} {
+		if got := provider.touches.Load(); got != 1 {
+			t.Errorf("%s Touch calls = %d, want 1", provider.Name(), got)
+		}
+		if got := provider.checks.Load(); got != 1 {
+			t.Errorf("%s HealthCheck calls = %d, want 1", provider.Name(), got)
+		}
+	}
+}
+
+func TestHandleSetupConfigRefreshesOnlyAfterSuccess(t *testing.T) {
+	previousSetup := setupConfig
+	previousRefresh := refreshHealthChecks
+	previousInit := isInit.Load()
+	var refreshes atomic.Int32
+	refreshHealthChecks = func() { refreshes.Add(1) }
+	isInit.Store(true)
+	t.Cleanup(func() {
+		setupConfig = previousSetup
+		refreshHealthChecks = previousRefresh
+		isInit.Store(previousInit)
+	})
+
+	setupConfig = func(*SetupParams) error { return nil }
+	if message := handleSetupConfig(defaultSetupParams()); message != "" {
+		t.Fatalf("successful setup returned %q", message)
+	}
+	if got := refreshes.Load(); got != 1 {
+		t.Errorf("refreshes after success = %d, want 1", got)
+	}
+
+	setupConfig = func(*SetupParams) error { return errors.New("apply failed") }
+	if message := handleSetupConfig(defaultSetupParams()); message != "apply failed" {
+		t.Fatalf("failed setup returned %q", message)
+	}
+	if got := refreshes.Load(); got != 1 {
+		t.Errorf("refreshes after failure = %d, want still 1", got)
+	}
+}
+
+func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
+	stopHealthCheckCadence()
+	previousEvery := healthCheckCadenceEvery
+	previousRefresh := refreshHealthChecks
+	previousTunUp := tunUp.Load()
+	healthCheckCadenceEvery = 10 * time.Millisecond
+	var refreshes atomic.Int32
+	refreshHealthChecks = func() { refreshes.Add(1) }
+	tunUp.Store(false)
+	t.Cleanup(func() {
+		stopHealthCheckCadence()
+		healthCheckCadenceEvery = previousEvery
+		refreshHealthChecks = previousRefresh
+		tunUp.Store(previousTunUp)
+	})
+
+	startHealthCheckCadence()
+	startHealthCheckCadence()
+	time.Sleep(30 * time.Millisecond)
+	if got := refreshes.Load(); got != 0 {
+		t.Fatalf("refreshes with TUN down = %d, want 0", got)
+	}
+
+	tunUp.Store(true)
+	deadline := time.Now().Add(time.Second)
+	for refreshes.Load() == 0 && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+	}
+	if got := refreshes.Load(); got == 0 {
+		t.Fatal("cadence did not refresh with TUN up")
+	}
+
+	stopHealthCheckCadence()
+	stoppedAt := refreshes.Load()
+	time.Sleep(30 * time.Millisecond)
+	if got := refreshes.Load(); got != stoppedAt {
+		t.Errorf("refreshes after stop = %d, want %d", got, stoppedAt)
+	}
+}
+
 // Coming out of Doze has to re-probe. The health checks that ran while the app
 // had no network at all left every proxy marked dead and every delay reading
 // Timeout, and a lazy provider skips its next tick because nothing touched it

@@ -103,16 +103,16 @@ void main() {
       },
     );
 
-    test('happ preset: UA only, device headers flow as today', () {
+    test('happ preset omits device headers by default', () {
       final headers = buildSubscriptionHeaders(
         SubscriptionClient.happ,
         deviceDetails: details(),
       );
       expect(headers['User-Agent'], 'Happ/3.26.1');
-      expect(headers['x-hwid'], 'HWID1234');
-      expect(headers['x-device-os'], 'Android');
-      expect(headers['x-ver-os'], '16');
-      expect(headers['x-device-model'], 'Pixel 9');
+      expect(headers, isNot(contains('x-hwid')));
+      expect(headers, isNot(contains('x-device-os')));
+      expect(headers, isNot(contains('x-ver-os')));
+      expect(headers, isNot(contains('x-device-model')));
     });
 
     test('incy preset: UA, client identity headers and locale', () {
@@ -169,21 +169,25 @@ void main() {
       },
     );
 
-    test('sendDeviceHeaders=false drops the whole device-header family', () {
+    test('sendDeviceHeaders=true adds the whole device-header family', () {
       final headers = buildSubscriptionHeaders(
         SubscriptionClient.happ,
         deviceDetails: details(),
-        sendDeviceHeaders: false,
+        sendDeviceHeaders: true,
       );
       expect(headers['User-Agent'], 'Happ/3.26.1');
-      for (final name in [
-        'x-hwid',
-        'x-device-os',
-        'x-ver-os',
-        'x-device-model',
-      ]) {
-        expect(headers, isNot(contains(name)), reason: name);
-      }
+      expect(headers['x-hwid'], 'HWID1234');
+      expect(headers['x-device-os'], 'Android');
+      expect(headers['x-ver-os'], '16');
+      expect(headers['x-device-model'], 'Pixel 9');
+    });
+
+    test('a User-Agent alone does not imply device-header consent', () {
+      expect(hasDeviceIdentityHeaders({'User-Agent': 'ReClash/1.0'}), isFalse);
+      expect(
+        hasDeviceIdentityHeaders({'User-Agent': 'ReClash/1.0', 'x-hwid': 'a'}),
+        isTrue,
+      );
     });
   });
 }

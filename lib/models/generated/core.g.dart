@@ -502,6 +502,48 @@ Map<String, dynamic> _$RcxLinkReportToJson(_RcxLinkReport instance) =>
       'since': instance.since,
     };
 
+_RcxMetricsReport _$RcxMetricsReportFromJson(Map<String, dynamic> json) =>
+    _RcxMetricsReport(
+      enabledMillis: (json['enabledMillis'] as num?)?.toInt() ?? 0,
+      availableMillis: (json['availableMillis'] as num?)?.toInt() ?? 0,
+      availability: (json['availability'] as num?)?.toInt() ?? 0,
+      incidents: (json['incidents'] as num?)?.toInt() ?? 0,
+      standbyHits: (json['standbyHits'] as num?)?.toInt() ?? 0,
+      providerIncidents: (json['providerIncidents'] as num?)?.toInt() ?? 0,
+      markerIncidents: (json['markerIncidents'] as num?)?.toInt() ?? 0,
+      lastFailover: (json['lastFailover'] as num?)?.toInt() ?? 0,
+      averageFailover: (json['averageFailover'] as num?)?.toInt() ?? 0,
+      lastOutage: (json['lastOutage'] as num?)?.toInt() ?? 0,
+      averageOutage: (json['averageOutage'] as num?)?.toInt() ?? 0,
+      activeCircuits:
+          (json['activeCircuits'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      activeMarkers:
+          (json['activeMarkers'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$RcxMetricsReportToJson(_RcxMetricsReport instance) =>
+    <String, dynamic>{
+      'enabledMillis': instance.enabledMillis,
+      'availableMillis': instance.availableMillis,
+      'availability': instance.availability,
+      'incidents': instance.incidents,
+      'standbyHits': instance.standbyHits,
+      'providerIncidents': instance.providerIncidents,
+      'markerIncidents': instance.markerIncidents,
+      'lastFailover': instance.lastFailover,
+      'averageFailover': instance.averageFailover,
+      'lastOutage': instance.lastOutage,
+      'averageOutage': instance.averageOutage,
+      'activeCircuits': instance.activeCircuits,
+      'activeMarkers': instance.activeMarkers,
+    };
+
 _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
   status: json['status'] == null
       ? const RcxStatus()
@@ -524,6 +566,9 @@ _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
           ?.map((e) => RcxSwitchReport.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  metrics: json['metrics'] == null
+      ? const RcxMetricsReport()
+      : RcxMetricsReport.fromJson(json['metrics'] as Map<String, dynamic>),
   bands:
       (json['bands'] as List<dynamic>?)
           ?.map((e) => (e as num).toInt())
@@ -542,6 +587,7 @@ Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
       'canaries': instance.canaries,
       'candidates': instance.candidates,
       'history': instance.history,
+      'metrics': instance.metrics,
       'bands': instance.bands,
       'probesLeft': instance.probesLeft,
       'probeCap': instance.probeCap,

@@ -6161,9 +6161,327 @@ as int,
 
 
 /// @nodoc
+mixin _$RcxMetricsReport {
+
+ int get enabledMillis; int get availableMillis; int get availability; int get incidents; int get standbyHits; int get providerIncidents; int get markerIncidents; int get lastFailover; int get averageFailover; int get lastOutage; int get averageOutage; List<String> get activeCircuits; List<String> get activeMarkers;
+/// Create a copy of RcxMetricsReport
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxMetricsReportCopyWith<RcxMetricsReport> get copyWith => _$RcxMetricsReportCopyWithImpl<RcxMetricsReport>(this as RcxMetricsReport, _$identity);
+
+  /// Serializes this RcxMetricsReport to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxMetricsReport;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxMetricsReport&&(identical(other.enabledMillis, _this.enabledMillis) || other.enabledMillis == _this.enabledMillis)&&(identical(other.availableMillis, _this.availableMillis) || other.availableMillis == _this.availableMillis)&&(identical(other.availability, _this.availability) || other.availability == _this.availability)&&(identical(other.incidents, _this.incidents) || other.incidents == _this.incidents)&&(identical(other.standbyHits, _this.standbyHits) || other.standbyHits == _this.standbyHits)&&(identical(other.providerIncidents, _this.providerIncidents) || other.providerIncidents == _this.providerIncidents)&&(identical(other.markerIncidents, _this.markerIncidents) || other.markerIncidents == _this.markerIncidents)&&(identical(other.lastFailover, _this.lastFailover) || other.lastFailover == _this.lastFailover)&&(identical(other.averageFailover, _this.averageFailover) || other.averageFailover == _this.averageFailover)&&(identical(other.lastOutage, _this.lastOutage) || other.lastOutage == _this.lastOutage)&&(identical(other.averageOutage, _this.averageOutage) || other.averageOutage == _this.averageOutage)&&const DeepCollectionEquality().equals(other.activeCircuits, _this.activeCircuits)&&const DeepCollectionEquality().equals(other.activeMarkers, _this.activeMarkers));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxMetricsReport;
+  return Object.hash(runtimeType,_this.enabledMillis,_this.availableMillis,_this.availability,_this.incidents,_this.standbyHits,_this.providerIncidents,_this.markerIncidents,_this.lastFailover,_this.averageFailover,_this.lastOutage,_this.averageOutage,const DeepCollectionEquality().hash(_this.activeCircuits),const DeepCollectionEquality().hash(_this.activeMarkers));
+}
+
+@override
+String toString() {
+  final _this = this as RcxMetricsReport;
+  return 'RcxMetricsReport(enabledMillis: ${_this.enabledMillis}, availableMillis: ${_this.availableMillis}, availability: ${_this.availability}, incidents: ${_this.incidents}, standbyHits: ${_this.standbyHits}, providerIncidents: ${_this.providerIncidents}, markerIncidents: ${_this.markerIncidents}, lastFailover: ${_this.lastFailover}, averageFailover: ${_this.averageFailover}, lastOutage: ${_this.lastOutage}, averageOutage: ${_this.averageOutage}, activeCircuits: ${_this.activeCircuits}, activeMarkers: ${_this.activeMarkers})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxMetricsReportCopyWith<$Res>  {
+  factory $RcxMetricsReportCopyWith(RcxMetricsReport value, $Res Function(RcxMetricsReport) _then) = _$RcxMetricsReportCopyWithImpl;
+@useResult
+$Res call({
+ int enabledMillis, int availableMillis, int availability, int incidents, int standbyHits, int providerIncidents, int markerIncidents, int lastFailover, int averageFailover, int lastOutage, int averageOutage, List<String> activeCircuits, List<String> activeMarkers
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxMetricsReportCopyWithImpl<$Res>
+    implements $RcxMetricsReportCopyWith<$Res> {
+  _$RcxMetricsReportCopyWithImpl(this._self, this._then);
+
+  final RcxMetricsReport _self;
+  final $Res Function(RcxMetricsReport) _then;
+
+/// Create a copy of RcxMetricsReport
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enabledMillis = null,Object? availableMillis = null,Object? availability = null,Object? incidents = null,Object? standbyHits = null,Object? providerIncidents = null,Object? markerIncidents = null,Object? lastFailover = null,Object? averageFailover = null,Object? lastOutage = null,Object? averageOutage = null,Object? activeCircuits = null,Object? activeMarkers = null,}) {
+  return _then(RcxMetricsReport(
+enabledMillis: null == enabledMillis ? _self.enabledMillis : enabledMillis // ignore: cast_nullable_to_non_nullable
+as int,availableMillis: null == availableMillis ? _self.availableMillis : availableMillis // ignore: cast_nullable_to_non_nullable
+as int,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as int,incidents: null == incidents ? _self.incidents : incidents // ignore: cast_nullable_to_non_nullable
+as int,standbyHits: null == standbyHits ? _self.standbyHits : standbyHits // ignore: cast_nullable_to_non_nullable
+as int,providerIncidents: null == providerIncidents ? _self.providerIncidents : providerIncidents // ignore: cast_nullable_to_non_nullable
+as int,markerIncidents: null == markerIncidents ? _self.markerIncidents : markerIncidents // ignore: cast_nullable_to_non_nullable
+as int,lastFailover: null == lastFailover ? _self.lastFailover : lastFailover // ignore: cast_nullable_to_non_nullable
+as int,averageFailover: null == averageFailover ? _self.averageFailover : averageFailover // ignore: cast_nullable_to_non_nullable
+as int,lastOutage: null == lastOutage ? _self.lastOutage : lastOutage // ignore: cast_nullable_to_non_nullable
+as int,averageOutage: null == averageOutage ? _self.averageOutage : averageOutage // ignore: cast_nullable_to_non_nullable
+as int,activeCircuits: null == activeCircuits ? _self.activeCircuits : activeCircuits // ignore: cast_nullable_to_non_nullable
+as List<String>,activeMarkers: null == activeMarkers ? _self.activeMarkers : activeMarkers // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxMetricsReport].
+extension RcxMetricsReportPatterns on RcxMetricsReport {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxMetricsReport value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxMetricsReport() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxMetricsReport value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxMetricsReport():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxMetricsReport value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxMetricsReport() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int enabledMillis,  int availableMillis,  int availability,  int incidents,  int standbyHits,  int providerIncidents,  int markerIncidents,  int lastFailover,  int averageFailover,  int lastOutage,  int averageOutage,  List<String> activeCircuits,  List<String> activeMarkers)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxMetricsReport() when $default != null:
+return $default(_that.enabledMillis,_that.availableMillis,_that.availability,_that.incidents,_that.standbyHits,_that.providerIncidents,_that.markerIncidents,_that.lastFailover,_that.averageFailover,_that.lastOutage,_that.averageOutage,_that.activeCircuits,_that.activeMarkers);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int enabledMillis,  int availableMillis,  int availability,  int incidents,  int standbyHits,  int providerIncidents,  int markerIncidents,  int lastFailover,  int averageFailover,  int lastOutage,  int averageOutage,  List<String> activeCircuits,  List<String> activeMarkers)  $default,) {final _that = this;
+switch (_that) {
+case _RcxMetricsReport():
+return $default(_that.enabledMillis,_that.availableMillis,_that.availability,_that.incidents,_that.standbyHits,_that.providerIncidents,_that.markerIncidents,_that.lastFailover,_that.averageFailover,_that.lastOutage,_that.averageOutage,_that.activeCircuits,_that.activeMarkers);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int enabledMillis,  int availableMillis,  int availability,  int incidents,  int standbyHits,  int providerIncidents,  int markerIncidents,  int lastFailover,  int averageFailover,  int lastOutage,  int averageOutage,  List<String> activeCircuits,  List<String> activeMarkers)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxMetricsReport() when $default != null:
+return $default(_that.enabledMillis,_that.availableMillis,_that.availability,_that.incidents,_that.standbyHits,_that.providerIncidents,_that.markerIncidents,_that.lastFailover,_that.averageFailover,_that.lastOutage,_that.averageOutage,_that.activeCircuits,_that.activeMarkers);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxMetricsReport implements RcxMetricsReport {
+  const _RcxMetricsReport({this.enabledMillis = 0, this.availableMillis = 0, this.availability = 0, this.incidents = 0, this.standbyHits = 0, this.providerIncidents = 0, this.markerIncidents = 0, this.lastFailover = 0, this.averageFailover = 0, this.lastOutage = 0, this.averageOutage = 0,  List<String> activeCircuits = const [],  List<String> activeMarkers = const []}): _activeCircuits = activeCircuits,_activeMarkers = activeMarkers;
+  factory _RcxMetricsReport.fromJson(Map<String, dynamic> json) => _$RcxMetricsReportFromJson(json);
+
+@override@JsonKey() final  int enabledMillis;
+@override@JsonKey() final  int availableMillis;
+@override@JsonKey() final  int availability;
+@override@JsonKey() final  int incidents;
+@override@JsonKey() final  int standbyHits;
+@override@JsonKey() final  int providerIncidents;
+@override@JsonKey() final  int markerIncidents;
+@override@JsonKey() final  int lastFailover;
+@override@JsonKey() final  int averageFailover;
+@override@JsonKey() final  int lastOutage;
+@override@JsonKey() final  int averageOutage;
+ final  List<String> _activeCircuits;
+@override@JsonKey() List<String> get activeCircuits {
+  if (_activeCircuits is EqualUnmodifiableListView) return _activeCircuits;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_activeCircuits);
+}
+
+ final  List<String> _activeMarkers;
+@override@JsonKey() List<String> get activeMarkers {
+  if (_activeMarkers is EqualUnmodifiableListView) return _activeMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_activeMarkers);
+}
+
+
+/// Create a copy of RcxMetricsReport
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxMetricsReportCopyWith<_RcxMetricsReport> get copyWith => __$RcxMetricsReportCopyWithImpl<_RcxMetricsReport>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxMetricsReportToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxMetricsReport&&(identical(other.enabledMillis, enabledMillis) || other.enabledMillis == enabledMillis)&&(identical(other.availableMillis, availableMillis) || other.availableMillis == availableMillis)&&(identical(other.availability, availability) || other.availability == availability)&&(identical(other.incidents, incidents) || other.incidents == incidents)&&(identical(other.standbyHits, standbyHits) || other.standbyHits == standbyHits)&&(identical(other.providerIncidents, providerIncidents) || other.providerIncidents == providerIncidents)&&(identical(other.markerIncidents, markerIncidents) || other.markerIncidents == markerIncidents)&&(identical(other.lastFailover, lastFailover) || other.lastFailover == lastFailover)&&(identical(other.averageFailover, averageFailover) || other.averageFailover == averageFailover)&&(identical(other.lastOutage, lastOutage) || other.lastOutage == lastOutage)&&(identical(other.averageOutage, averageOutage) || other.averageOutage == averageOutage)&&const DeepCollectionEquality().equals(other.activeCircuits, _activeCircuits)&&const DeepCollectionEquality().equals(other.activeMarkers, _activeMarkers));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enabledMillis,availableMillis,availability,incidents,standbyHits,providerIncidents,markerIncidents,lastFailover,averageFailover,lastOutage,averageOutage,const DeepCollectionEquality().hash(_activeCircuits),const DeepCollectionEquality().hash(_activeMarkers));
+}
+
+@override
+String toString() {
+    return 'RcxMetricsReport(enabledMillis: $enabledMillis, availableMillis: $availableMillis, availability: $availability, incidents: $incidents, standbyHits: $standbyHits, providerIncidents: $providerIncidents, markerIncidents: $markerIncidents, lastFailover: $lastFailover, averageFailover: $averageFailover, lastOutage: $lastOutage, averageOutage: $averageOutage, activeCircuits: $activeCircuits, activeMarkers: $activeMarkers)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxMetricsReportCopyWith<$Res> implements $RcxMetricsReportCopyWith<$Res> {
+  factory _$RcxMetricsReportCopyWith(_RcxMetricsReport value, $Res Function(_RcxMetricsReport) _then) = __$RcxMetricsReportCopyWithImpl;
+@override @useResult
+$Res call({
+ int enabledMillis, int availableMillis, int availability, int incidents, int standbyHits, int providerIncidents, int markerIncidents, int lastFailover, int averageFailover, int lastOutage, int averageOutage, List<String> activeCircuits, List<String> activeMarkers
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxMetricsReportCopyWithImpl<$Res>
+    implements _$RcxMetricsReportCopyWith<$Res> {
+  __$RcxMetricsReportCopyWithImpl(this._self, this._then);
+
+  final _RcxMetricsReport _self;
+  final $Res Function(_RcxMetricsReport) _then;
+
+/// Create a copy of RcxMetricsReport
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enabledMillis = null,Object? availableMillis = null,Object? availability = null,Object? incidents = null,Object? standbyHits = null,Object? providerIncidents = null,Object? markerIncidents = null,Object? lastFailover = null,Object? averageFailover = null,Object? lastOutage = null,Object? averageOutage = null,Object? activeCircuits = null,Object? activeMarkers = null,}) {
+  return _then(_RcxMetricsReport(
+enabledMillis: null == enabledMillis ? _self.enabledMillis : enabledMillis // ignore: cast_nullable_to_non_nullable
+as int,availableMillis: null == availableMillis ? _self.availableMillis : availableMillis // ignore: cast_nullable_to_non_nullable
+as int,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as int,incidents: null == incidents ? _self.incidents : incidents // ignore: cast_nullable_to_non_nullable
+as int,standbyHits: null == standbyHits ? _self.standbyHits : standbyHits // ignore: cast_nullable_to_non_nullable
+as int,providerIncidents: null == providerIncidents ? _self.providerIncidents : providerIncidents // ignore: cast_nullable_to_non_nullable
+as int,markerIncidents: null == markerIncidents ? _self.markerIncidents : markerIncidents // ignore: cast_nullable_to_non_nullable
+as int,lastFailover: null == lastFailover ? _self.lastFailover : lastFailover // ignore: cast_nullable_to_non_nullable
+as int,averageFailover: null == averageFailover ? _self.averageFailover : averageFailover // ignore: cast_nullable_to_non_nullable
+as int,lastOutage: null == lastOutage ? _self.lastOutage : lastOutage // ignore: cast_nullable_to_non_nullable
+as int,averageOutage: null == averageOutage ? _self.averageOutage : averageOutage // ignore: cast_nullable_to_non_nullable
+as int,activeCircuits: null == activeCircuits ? _self._activeCircuits : activeCircuits // ignore: cast_nullable_to_non_nullable
+as List<String>,activeMarkers: null == activeMarkers ? _self._activeMarkers : activeMarkers // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RcxReport {
 
- RcxStatus get status; RcxLinkReport get link; List<RcxCanaryReport> get canaries; List<RcxCandidateReport> get candidates; List<RcxSwitchReport> get history; List<int> get bands; int get probesLeft; int get probeCap; bool get manual; int get at;
+ RcxStatus get status; RcxLinkReport get link; List<RcxCanaryReport> get canaries; List<RcxCandidateReport> get candidates; List<RcxSwitchReport> get history; RcxMetricsReport get metrics; List<int> get bands; int get probesLeft; int get probeCap; bool get manual; int get at;
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6177,20 +6495,20 @@ $RcxReportCopyWith<RcxReport> get copyWith => _$RcxReportCopyWithImpl<RcxReport>
 @override
 bool operator ==(Object other) {
   final _this = this as RcxReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxReport&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.link, _this.link) || other.link == _this.link)&&const DeepCollectionEquality().equals(other.canaries, _this.canaries)&&const DeepCollectionEquality().equals(other.candidates, _this.candidates)&&const DeepCollectionEquality().equals(other.history, _this.history)&&const DeepCollectionEquality().equals(other.bands, _this.bands)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.probeCap, _this.probeCap) || other.probeCap == _this.probeCap)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.at, _this.at) || other.at == _this.at));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxReport&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.link, _this.link) || other.link == _this.link)&&const DeepCollectionEquality().equals(other.canaries, _this.canaries)&&const DeepCollectionEquality().equals(other.candidates, _this.candidates)&&const DeepCollectionEquality().equals(other.history, _this.history)&&(identical(other.metrics, _this.metrics) || other.metrics == _this.metrics)&&const DeepCollectionEquality().equals(other.bands, _this.bands)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.probeCap, _this.probeCap) || other.probeCap == _this.probeCap)&&(identical(other.manual, _this.manual) || other.manual == _this.manual)&&(identical(other.at, _this.at) || other.at == _this.at));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxReport;
-  return Object.hash(runtimeType,_this.status,_this.link,const DeepCollectionEquality().hash(_this.canaries),const DeepCollectionEquality().hash(_this.candidates),const DeepCollectionEquality().hash(_this.history),const DeepCollectionEquality().hash(_this.bands),_this.probesLeft,_this.probeCap,_this.manual,_this.at);
+  return Object.hash(runtimeType,_this.status,_this.link,const DeepCollectionEquality().hash(_this.canaries),const DeepCollectionEquality().hash(_this.candidates),const DeepCollectionEquality().hash(_this.history),_this.metrics,const DeepCollectionEquality().hash(_this.bands),_this.probesLeft,_this.probeCap,_this.manual,_this.at);
 }
 
 @override
 String toString() {
   final _this = this as RcxReport;
-  return 'RcxReport(status: ${_this.status}, link: ${_this.link}, canaries: ${_this.canaries}, candidates: ${_this.candidates}, history: ${_this.history}, bands: ${_this.bands}, probesLeft: ${_this.probesLeft}, probeCap: ${_this.probeCap}, manual: ${_this.manual}, at: ${_this.at})';
+  return 'RcxReport(status: ${_this.status}, link: ${_this.link}, canaries: ${_this.canaries}, candidates: ${_this.candidates}, history: ${_this.history}, metrics: ${_this.metrics}, bands: ${_this.bands}, probesLeft: ${_this.probesLeft}, probeCap: ${_this.probeCap}, manual: ${_this.manual}, at: ${_this.at})';
 }
 
 
@@ -6201,11 +6519,11 @@ abstract mixin class $RcxReportCopyWith<$Res>  {
   factory $RcxReportCopyWith(RcxReport value, $Res Function(RcxReport) _then) = _$RcxReportCopyWithImpl;
 @useResult
 $Res call({
- RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, List<int> bands, int probesLeft, int probeCap, bool manual, int at
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, int probesLeft, int probeCap, bool manual, int at
 });
 
 
-$RcxStatusCopyWith<$Res> get status;$RcxLinkReportCopyWith<$Res> get link;
+$RcxStatusCopyWith<$Res> get status;$RcxLinkReportCopyWith<$Res> get link;$RcxMetricsReportCopyWith<$Res> get metrics;
 
 }
 /// @nodoc
@@ -6218,14 +6536,15 @@ class _$RcxReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? at = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? at = null,}) {
   return _then(RcxReport(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
 as RcxLinkReport,canaries: null == canaries ? _self.canaries : canaries // ignore: cast_nullable_to_non_nullable
 as List<RcxCanaryReport>,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
 as List<RcxCandidateReport>,history: null == history ? _self.history : history // ignore: cast_nullable_to_non_nullable
-as List<RcxSwitchReport>,bands: null == bands ? _self.bands : bands // ignore: cast_nullable_to_non_nullable
+as List<RcxSwitchReport>,metrics: null == metrics ? _self.metrics : metrics // ignore: cast_nullable_to_non_nullable
+as RcxMetricsReport,bands: null == bands ? _self.bands : bands // ignore: cast_nullable_to_non_nullable
 as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
 as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
 as int,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
@@ -6250,6 +6569,15 @@ $RcxLinkReportCopyWith<$Res> get link {
   
   return $RcxLinkReportCopyWith<$Res>(_self.link, (value) {
     return _then(_self.copyWith(link: value));
+  });
+}/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxMetricsReportCopyWith<$Res> get metrics {
+  
+  return $RcxMetricsReportCopyWith<$Res>(_self.metrics, (value) {
+    return _then(_self.copyWith(metrics: value));
   });
 }
 }
@@ -6333,10 +6661,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxReport() when $default != null:
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
   return orElse();
 
 }
@@ -6354,10 +6682,10 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)  $default,) {final _that = this;
 switch (_that) {
 case _RcxReport():
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6374,10 +6702,10 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RcxStatus status,  RcxLinkReport link,  List<RcxCanaryReport> canaries,  List<RcxCandidateReport> candidates,  List<RcxSwitchReport> history,  RcxMetricsReport metrics,  List<int> bands,  int probesLeft,  int probeCap,  bool manual,  int at)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxReport() when $default != null:
-return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
+return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.history,_that.metrics,_that.bands,_that.probesLeft,_that.probeCap,_that.manual,_that.at);case _:
   return null;
 
 }
@@ -6389,7 +6717,7 @@ return $default(_that.status,_that.link,_that.canaries,_that.candidates,_that.hi
 @JsonSerializable()
 
 class _RcxReport implements RcxReport {
-  const _RcxReport({this.status = const RcxStatus(), this.link = const RcxLinkReport(),  List<RcxCanaryReport> canaries = const [],  List<RcxCandidateReport> candidates = const [],  List<RcxSwitchReport> history = const [],  List<int> bands = const [], this.probesLeft = 0, this.probeCap = 0, this.manual = false, this.at = 0}): _canaries = canaries,_candidates = candidates,_history = history,_bands = bands;
+  const _RcxReport({this.status = const RcxStatus(), this.link = const RcxLinkReport(),  List<RcxCanaryReport> canaries = const [],  List<RcxCandidateReport> candidates = const [],  List<RcxSwitchReport> history = const [], this.metrics = const RcxMetricsReport(),  List<int> bands = const [], this.probesLeft = 0, this.probeCap = 0, this.manual = false, this.at = 0}): _canaries = canaries,_candidates = candidates,_history = history,_bands = bands;
   factory _RcxReport.fromJson(Map<String, dynamic> json) => _$RcxReportFromJson(json);
 
 @override@JsonKey() final  RcxStatus status;
@@ -6415,6 +6743,7 @@ class _RcxReport implements RcxReport {
   return EqualUnmodifiableListView(_history);
 }
 
+@override@JsonKey() final  RcxMetricsReport metrics;
  final  List<int> _bands;
 @override@JsonKey() List<int> get bands {
   if (_bands is EqualUnmodifiableListView) return _bands;
@@ -6440,18 +6769,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxReport&&(identical(other.status, status) || other.status == status)&&(identical(other.link, link) || other.link == link)&&const DeepCollectionEquality().equals(other.canaries, _canaries)&&const DeepCollectionEquality().equals(other.candidates, _candidates)&&const DeepCollectionEquality().equals(other.history, _history)&&const DeepCollectionEquality().equals(other.bands, _bands)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.probeCap, probeCap) || other.probeCap == probeCap)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.at, at) || other.at == at));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxReport&&(identical(other.status, status) || other.status == status)&&(identical(other.link, link) || other.link == link)&&const DeepCollectionEquality().equals(other.canaries, _canaries)&&const DeepCollectionEquality().equals(other.candidates, _candidates)&&const DeepCollectionEquality().equals(other.history, _history)&&(identical(other.metrics, metrics) || other.metrics == metrics)&&const DeepCollectionEquality().equals(other.bands, _bands)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.probeCap, probeCap) || other.probeCap == probeCap)&&(identical(other.manual, manual) || other.manual == manual)&&(identical(other.at, at) || other.at == at));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,status,link,const DeepCollectionEquality().hash(_canaries),const DeepCollectionEquality().hash(_candidates),const DeepCollectionEquality().hash(_history),const DeepCollectionEquality().hash(_bands),probesLeft,probeCap,manual,at);
+    return Object.hash(runtimeType,status,link,const DeepCollectionEquality().hash(_canaries),const DeepCollectionEquality().hash(_candidates),const DeepCollectionEquality().hash(_history),metrics,const DeepCollectionEquality().hash(_bands),probesLeft,probeCap,manual,at);
 }
 
 @override
 String toString() {
-    return 'RcxReport(status: $status, link: $link, canaries: $canaries, candidates: $candidates, history: $history, bands: $bands, probesLeft: $probesLeft, probeCap: $probeCap, manual: $manual, at: $at)';
+    return 'RcxReport(status: $status, link: $link, canaries: $canaries, candidates: $candidates, history: $history, metrics: $metrics, bands: $bands, probesLeft: $probesLeft, probeCap: $probeCap, manual: $manual, at: $at)';
 }
 
 
@@ -6462,11 +6791,11 @@ abstract mixin class _$RcxReportCopyWith<$Res> implements $RcxReportCopyWith<$Re
   factory _$RcxReportCopyWith(_RcxReport value, $Res Function(_RcxReport) _then) = __$RcxReportCopyWithImpl;
 @override @useResult
 $Res call({
- RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, List<int> bands, int probesLeft, int probeCap, bool manual, int at
+ RcxStatus status, RcxLinkReport link, List<RcxCanaryReport> canaries, List<RcxCandidateReport> candidates, List<RcxSwitchReport> history, RcxMetricsReport metrics, List<int> bands, int probesLeft, int probeCap, bool manual, int at
 });
 
 
-@override $RcxStatusCopyWith<$Res> get status;@override $RcxLinkReportCopyWith<$Res> get link;
+@override $RcxStatusCopyWith<$Res> get status;@override $RcxLinkReportCopyWith<$Res> get link;@override $RcxMetricsReportCopyWith<$Res> get metrics;
 
 }
 /// @nodoc
@@ -6479,14 +6808,15 @@ class __$RcxReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? at = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? link = null,Object? canaries = null,Object? candidates = null,Object? history = null,Object? metrics = null,Object? bands = null,Object? probesLeft = null,Object? probeCap = null,Object? manual = null,Object? at = null,}) {
   return _then(_RcxReport(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as RcxStatus,link: null == link ? _self.link : link // ignore: cast_nullable_to_non_nullable
 as RcxLinkReport,canaries: null == canaries ? _self._canaries : canaries // ignore: cast_nullable_to_non_nullable
 as List<RcxCanaryReport>,candidates: null == candidates ? _self._candidates : candidates // ignore: cast_nullable_to_non_nullable
 as List<RcxCandidateReport>,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
-as List<RcxSwitchReport>,bands: null == bands ? _self._bands : bands // ignore: cast_nullable_to_non_nullable
+as List<RcxSwitchReport>,metrics: null == metrics ? _self.metrics : metrics // ignore: cast_nullable_to_non_nullable
+as RcxMetricsReport,bands: null == bands ? _self._bands : bands // ignore: cast_nullable_to_non_nullable
 as List<int>,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
 as int,probeCap: null == probeCap ? _self.probeCap : probeCap // ignore: cast_nullable_to_non_nullable
 as int,manual: null == manual ? _self.manual : manual // ignore: cast_nullable_to_non_nullable
@@ -6512,6 +6842,15 @@ $RcxLinkReportCopyWith<$Res> get link {
   
   return $RcxLinkReportCopyWith<$Res>(_self.link, (value) {
     return _then(_self.copyWith(link: value));
+  });
+}/// Create a copy of RcxReport
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxMetricsReportCopyWith<$Res> get metrics {
+  
+  return $RcxMetricsReportCopyWith<$Res>(_self.metrics, (value) {
+    return _then(_self.copyWith(metrics: value));
   });
 }
 }

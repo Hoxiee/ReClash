@@ -64,6 +64,21 @@ const _report = RcxReport(
       reason: 'incumbent-dead',
     ),
   ],
+  metrics: RcxMetricsReport(
+    enabledMillis: 7200000,
+    availableMillis: 7140000,
+    availability: 99,
+    incidents: 3,
+    standbyHits: 2,
+    providerIncidents: 1,
+    markerIncidents: 1,
+    lastFailover: 2300,
+    averageFailover: 4100,
+    lastOutage: 2300,
+    averageOutage: 4100,
+    activeCircuits: ['provider-a'],
+    activeMarkers: ['https://marker.example/'],
+  ),
   probesLeft: 31,
   probeCap: 40,
 );
@@ -218,6 +233,53 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Cooling down after 4 failures'), findsOne);
+  });
+
+  testWidgets('local reliability shows recovery and active safeguards', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('99% over 2 hours'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('99% over 2 hours'), findsOne);
+    expect(find.text('3 seconds'), findsOne);
+    expect(find.text('5 seconds'), findsOne);
+    expect(find.text('provider-a'), findsOne);
+    expect(find.text('https://marker.example/'), findsOne);
+  });
+
+  testWidgets('a provider circuit states its gate instead of its verdict', (
+    tester,
+  ) async {
+    final report = _report.copyWith(
+      candidates: [
+        ..._report.candidates,
+        const RcxCandidateReport(
+          node: 'Circuit node',
+          verdict: 'preferred',
+          block: 'provider-circuit',
+        ),
+      ],
+    );
+    await _pump(tester, enabled: true, report: report);
+    await tester.scrollUntilVisible(
+      find.text('All servers'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('All servers'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Provider temporarily held back after independent failures'),
+      findsOne,
+    );
   });
 
   testWidgets('the decision is told as the sequence that produced it', (

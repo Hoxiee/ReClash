@@ -28,6 +28,8 @@ abstract class PanelMeta with _$PanelMeta {
     String? accountUsername,
     String? proxiesView,
     String? themeHex,
+    String? background,
+    String? heroRing,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
@@ -69,6 +71,8 @@ abstract class PanelMeta with _$PanelMeta {
       accountUsername: map['accountUsername'],
       proxiesView: map['proxiesView'],
       themeHex: map['themeHex'],
+      background: map['background'],
+      heroRing: map['heroRing'],
     );
   }
 }
@@ -91,5 +95,7 @@ extension PanelMetaExt on PanelMeta {
       accountUsername != null ||
       proxiesView != null ||
       themeHex != null ||
+      background != null ||
+      heroRing != null ||
       settings != null;
 }

@@ -285,7 +285,9 @@ void main() {
     expect(find.byKey(const ValueKey('edit-icon')), findsOneWidget);
   });
 
-  testWidgets('inactive page scope exits access search layer', (tester) async {
+  testWidgets('inactive page scope keeps the inline access search field', (
+    tester,
+  ) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     globalState.container = container;
@@ -305,16 +307,13 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 301));
 
-    await tester.tap(find.byIcon(Icons.more_vert));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.search));
-    await tester.pumpAndSettle();
-    expect(find.byType(TextField), findsOneWidget);
+    const searchFieldKey = ValueKey('access-search-field');
+    expect(find.byKey(searchFieldKey), findsOneWidget);
 
     isActive.value = false;
     await tester.pumpAndSettle();
 
-    expect(find.byType(TextField), findsNothing);
+    expect(find.byKey(searchFieldKey), findsOneWidget);
   });
 
   testWidgets('save and system back cannot re-enter dashboard edit mode', (

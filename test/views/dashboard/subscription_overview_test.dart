@@ -1,3 +1,5 @@
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
@@ -14,6 +16,8 @@ Profile _profile({
   PanelMeta? panelMeta,
   bool autoUpdate = true,
   bool undialableNodes = false,
+  SubscriptionClient clientEmulation = SubscriptionClient.auto,
+  SubscriptionClient? lastWorkingClient,
 }) {
   return Profile(
     id: 7,
@@ -24,6 +28,8 @@ Profile _profile({
     autoUpdate: autoUpdate,
     subscriptionInfo: subscriptionInfo,
     panelMeta: panelMeta,
+    clientEmulation: clientEmulation,
+    lastWorkingClient: lastWorkingClient,
     undialableNodes: undialableNodes,
   );
 }
@@ -76,11 +82,13 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('90GB'), findsOne);
-    expect(find.textContaining('free of 100GB'), findsOne);
     expect(find.text('3GB'), findsOne);
     expect(find.text('7GB'), findsOne);
-    expect(find.text('Remaining 11 days'), findsOne);
+    expect(find.text('10GB'), findsOne);
+    expect(find.text('90GB'), findsOne);
+    expect(find.text('100GB'), findsOne);
+    expect(find.text('Remaining 11 days'), findsNothing);
+    expect(find.text(_expire.showFull), findsOne);
   });
 
   testWidgets('a plan without quota or end date explains the blank', (
@@ -95,7 +103,7 @@ void main() {
     expect(find.text('Traffic usage'), findsNothing);
   });
 
-  testWidgets('the panel names the service, the url only its host', (
+  testWidgets('account details expose service, profile, and domain', (
     tester,
   ) async {
     await _pump(
@@ -104,8 +112,24 @@ void main() {
     );
 
     expect(find.text('Nebula VPN'), findsOne);
+    expect(find.text('Local label'), findsOne);
     expect(find.text('panel.example.com'), findsOne);
-    expect(find.text('Local label'), findsNothing);
+  });
+
+  testWidgets('account details use the client that actually worked', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _profile(
+        panelMeta: const PanelMeta(accountUsername: 'user@example.com'),
+        lastWorkingClient: SubscriptionClient.happ,
+      ),
+    );
+
+    expect(find.text('user@example.com'), findsOne);
+    expect(find.text('Happ'), findsOne);
+    expect(find.text('Auto'), findsNothing);
   });
 
   testWidgets(

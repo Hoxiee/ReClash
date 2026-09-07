@@ -47,6 +47,8 @@ mixin CoreInterface {
 
   Future<bool> resumeTun();
 
+  Future<bool> setUiActive(bool active);
+
   Future<List<ExternalProvider>> getExternalProviders();
 
   Future<ExternalProvider?> getExternalProvider(String externalProviderName);
@@ -415,6 +417,15 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> resumeTun() async {
     return await _invokeMethod<bool>(method: CoreMethod.resumeTun) ?? false;
+  }
+
+  @override
+  Future<bool> setUiActive(bool active) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.setUiActive,
+          arguments: active,
+        ) ??
+        false;
   }
 
   @override

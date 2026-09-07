@@ -38,6 +38,8 @@ class HeroOrb extends ConsumerStatefulWidget {
     this.health = HeroHealth.unknown,
     this.activity = 0,
     this.serviceLogo,
+    this.heroRing,
+    this.variant = HeroOrbVariant.vpn,
     this.onPhaseChanged,
     this.onLongPress,
   });
@@ -46,6 +48,8 @@ class HeroOrb extends ConsumerStatefulWidget {
   final bool enabled;
 
   final String? serviceLogo;
+  final List<Color>? heroRing;
+  final HeroOrbVariant variant;
 
   /// Verdict on the live connection. Today it comes from the incumbent node's
   /// last delay measurement; the connection doctor will replace the source
@@ -89,6 +93,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   HeroOrbPhase _phase = HeroOrbPhase.off;
   HeroStatus _status = HeroStatus.off;
+  HeroStatus _previousStatus = HeroStatus.off;
+  HeroOrbTransition _transition = HeroOrbTransition.steady;
 
   /// What the ring is unwinding out of, so switching off never cuts to empty.
   HeroStatus _exiting = HeroStatus.secured;
@@ -165,6 +171,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     if (still == _still) return;
     _still = still;
+    if (still) {
+      _finishFiniteMotion();
+    }
     _applyStatus(_status);
   }
 
@@ -172,8 +181,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   void didUpdateWidget(HeroOrb oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.activity != widget.activity) {
-      _activityFrom = _activity;
-      _settle.forward(from: 0);
+      _activityFrom = _still ? widget.activity : _activity;
+      if (_still) {
+        _settle.value = 1;
+      } else {
+        _settle.forward(from: 0);
+      }
       final band = heroActivityBandOf(_band, widget.activity);
       if (band != _band) {
         _band = band;
@@ -229,6 +242,27 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   double get _breatheValue => (_breathePhase + _breathe.value) % 1.0;
 
+  bool get _canTap => widget.enabled && !_status.isTransitioning;
+
+  double _headOf(HeroStatus status) {
+    if (status.isSweeping) return _sweepValue;
+    if (status.flows) {
+      final speed = status == HeroStatus.degraded ? 0.45 : 1.0;
+      return (_flow.value * speed * (1 + 0.3 * _activity)) % 1.0;
+    }
+    return _handoff;
+  }
+
+  void _finishFiniteMotion() {
+    _press.value = 0;
+    _ripple.value = 1;
+    _morph.value = 1;
+    _settle.value = 1;
+    _onset.value = 1;
+    _tint.value = 1;
+    _draw.value = _status.isLive && !_status.isTransitioning ? 1 : 0;
+  }
+
   void _setPhase(HeroOrbPhase phase) {
     _pendingTimeout?.cancel();
     _pending = false;
@@ -269,26 +303,52 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   void _applyStatus(HeroStatus status) {
     final previous = _status;
-    setState(() => _status = status);
-    if (previous != status) {
-      _morph.forward(from: 0);
-      if (status.isAlert) _onset.forward(from: 0);
-      if (status != HeroStatus.off) _exiting = status;
-      if (previous.isSweeping && !status.isSweeping) {
-        _handoff = _sweepValue;
-      } else if (!status.isSweeping) {
-        _handoff = 0;
+    final changed = previous != status;
+    if (changed) {
+      _handoff = _headOf(previous);
+      _previousStatus = previous;
+      _transition = heroOrbTransitionOf(previous, status);
+      if (status == HeroStatus.off) {
+        _exiting = previous;
+      }
+      if (status.isSweeping) {
+        _sweepPhase = _handoff;
+        _sweep.value = 0;
+      } else if (status.flows && !previous.flows) {
+        _flow.value = _handoff;
       }
     }
-    // The ring draws itself in only on the way into a settled live state; a
-    // status change between two live states must not replay it.
+    setState(() => _status = status);
+
+    if (changed) {
+      if (_still) {
+        _morph.value = 1;
+        _onset.value = 1;
+      } else {
+        _morph.forward(from: 0);
+        if (status.isAlert) _onset.forward(from: 0);
+        if (_transition == HeroOrbTransition.fault) {
+          _ripple.forward(from: 0);
+        }
+      }
+    }
+
     if (status.isLive && !status.isTransitioning) {
       if (!previous.isLive || previous.isTransitioning) {
-        _draw.forward();
-        _ripple.forward(from: 0);
+        if (_still) {
+          _draw.value = 1;
+          _ripple.value = 1;
+        } else {
+          _draw.forward();
+          _ripple.forward(from: 0);
+        }
       }
     } else if (!status.isLive) {
-      _draw.reverse();
+      if (_still) {
+        _draw.value = 0;
+      } else {
+        _draw.reverse();
+      }
     }
 
     _runBreathing();
@@ -307,7 +367,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _handleTap() {
-    if (!widget.enabled || _status.isTransitioning) return;
+    if (!_canTap) return;
     if (defaultTargetPlatform == TargetPlatform.android) {
       HapticFeedback.mediumImpact();
     }
@@ -316,12 +376,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       ref.read(commonActionProvider.notifier).togglePaused();
       return;
     }
-    if (_status.isLive) {
+    if (ref.read(isStartProvider)) {
       _setPhase(HeroOrbPhase.off);
       ref.read(commonActionProvider.notifier).toggleRunning();
       return;
     }
-    _beginConnecting(revertTo: HeroOrbPhase.offline);
+    _beginConnecting(revertTo: _phase);
     ref.read(commonActionProvider.notifier).toggleRunning();
   }
 
@@ -343,7 +403,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final core = size - _coreInset * 2;
     // Retargeted here rather than on a status change alone, so a new theme or
     // seed colour travels the same way a status does.
-    final target = heroPaletteOf(context, _status);
+    final target = widget.variant == HeroOrbVariant.byedpi
+        ? byedpiHeroPaletteOf(context, _status)
+        : heroPaletteOf(context, _status, heroRing: widget.heroRing);
     if (_tintTo != target) {
       final from = _palette;
       _tintFrom = from ?? target;
@@ -355,19 +417,18 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       }
     }
 
+    final running = ref.watch(isStartProvider);
     return Tooltip(
-      message: switch (_status) {
-        HeroStatus.paused => context.appLocalizations.resume,
-        HeroStatus.off ||
-        HeroStatus.offline ||
-        HeroStatus.checking ||
-        HeroStatus.connecting ||
-        HeroStatus.reconnecting => context.appLocalizations.start,
-        _ => context.appLocalizations.stop,
-      },
+      message: _phase == HeroOrbPhase.paused
+          ? context.appLocalizations.resume
+          : running
+          ? context.appLocalizations.stop
+          : context.appLocalizations.start,
       child: RepaintBoundary(
         child: Listener(
-          onPointerDown: (_) => _press.forward(),
+          onPointerDown: (_) {
+            if (_canTap && !_still) _press.forward();
+          },
           onPointerUp: (_) => _press.reverse(),
           onPointerCancel: (_) => _press.reverse(),
           child: AnimatedBuilder(
@@ -398,6 +459,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
               final activity = still ? 0.4 : _activity;
               final drawProgress = Curves.easeOutCubic.transform(_draw.value);
               final morph = Curves.easeOutCubic.transform(_morph.value);
+              final transitionProgress = Curves.easeOutCubic.transform(
+                _morph.value,
+              );
               final sweep = still ? 0.18 : _sweepValue;
               final amplitude = switch (_status) {
                 HeroStatus.secured => 0.022,
@@ -420,7 +484,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
               return Transform.scale(
                 scale: pressScale,
                 child: Opacity(
-                  opacity: widget.enabled ? 1 : 0.55,
+                  opacity: widget.enabled ? 1 : 0.72,
                   child: SizedBox(
                     width: size,
                     height: size,
@@ -446,54 +510,68 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                         ),
                         Transform.scale(
                           scale: breatheScale,
-                          child: FocusableTap(
-                            autofocus: true,
-                            borderRadius: size / 2,
-                            onTap: _handleTap,
-                            onLongPress: widget.onLongPress,
-                            child: CustomPaint(
-                              size: Size.square(size),
-                              painter: _HeroOrbPainter(
-                                status: _status,
-                                exiting: _exiting,
-                                palette: palette,
-                                drawProgress: drawProgress,
-                                sweep: sweep,
-                                handoff: _handoff,
-                                flow: still ? 0.12 : _flow.value,
-                                aurora: still ? 0.2 : _aurora.value,
-                                pulse: pulse,
-                                activity: activity,
-                                morph: morph,
-                                onset: still
-                                    ? 1
-                                    : Curves.easeOut.transform(_onset.value),
-                                trackColor:
-                                    colorScheme.outlineVariant.opacity60,
-                                coreColor:
-                                    colorScheme.surfaceContainerHigh.opacity60,
-                                coreHighlight: colorScheme.surfaceBright,
-                                coreBorder:
-                                    colorScheme.outlineVariant.opacity60,
-                              ),
-                              child: SizedBox(
-                                width: core,
-                                height: core,
-                                child: Center(
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 260),
-                                    transitionBuilder: (child, animation) =>
-                                        ScaleTransition(
-                                          scale: Tween<double>(
-                                            begin: 0.7,
-                                            end: 1,
-                                          ).animate(animation),
+                          child: Semantics(
+                            button: true,
+                            enabled: _canTap,
+                            child: FocusableTap(
+                              autofocus: true,
+                              borderRadius: size / 2,
+                              onTap: _canTap ? _handleTap : null,
+                              onLongPress: widget.onLongPress,
+                              child: CustomPaint(
+                                size: Size.square(size),
+                                painter: _HeroOrbPainter(
+                                  status: _status,
+                                  previousStatus: _previousStatus,
+                                  transition: _transition,
+                                  exiting: _exiting,
+                                  palette: palette,
+                                  drawProgress: drawProgress,
+                                  sweep: sweep,
+                                  handoff: _handoff,
+                                  flow: still ? 0.12 : _flow.value,
+                                  aurora: still ? 0.2 : _aurora.value,
+                                  pulse: pulse,
+                                  activity: activity,
+                                  morph: morph,
+                                  transitionProgress: transitionProgress,
+                                  onset: still
+                                      ? 1
+                                      : Curves.easeOut.transform(_onset.value),
+                                  trackColor:
+                                      colorScheme.outlineVariant.opacity60,
+                                  coreColor: colorScheme
+                                      .surfaceContainerHigh
+                                      .opacity60,
+                                  coreHighlight: colorScheme.surfaceBright,
+                                  coreBorder:
+                                      colorScheme.outlineVariant.opacity60,
+                                ),
+                                child: SizedBox(
+                                  width: core,
+                                  height: core,
+                                  child: Center(
+                                    child: AnimatedSwitcher(
+                                      duration: context.motionDuration(
+                                        const Duration(milliseconds: 360),
+                                      ),
+                                      switchInCurve: Curves.easeOutBack,
+                                      switchOutCurve: Curves.easeInCubic,
+                                      transitionBuilder: (child, animation) {
+                                        final scale = Tween<double>(
+                                          begin: 0.72,
+                                          end: 1,
+                                        ).animate(animation);
+                                        return ScaleTransition(
+                                          scale: scale,
                                           child: FadeTransition(
                                             opacity: animation,
                                             child: child,
                                           ),
-                                        ),
-                                    child: _coreChild(core, palette.accent),
+                                        );
+                                      },
+                                      child: _coreChild(core, palette.accent),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -519,16 +597,48 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _ => Icons.power_settings_new_rounded,
   };
 
+  static const _coreMarkExtent = 0.54;
+  static const _appMarkInset = 0.054;
+
   Widget _coreChild(double core, Color accent) {
+    if (widget.variant == HeroOrbVariant.byedpi && _status.flows) {
+      return Icon(
+        Icons.blur_on_rounded,
+        key: const ValueKey('byedpi-core-mark'),
+        size: core * 0.5,
+        color: accent.opacity80,
+      );
+    }
     switch (heroCoreMarkOf(_status, widget.serviceLogo)) {
       case HeroCoreMark.serviceLogo:
-        return _brandCoin(core);
+        return SizedBox(
+          key: const ValueKey('core-mark'),
+          width: core * _coreMarkExtent,
+          height: core * _coreMarkExtent,
+          child: _mono(
+            accent.opacity80,
+            ImageCacheWidget(
+              src: widget.serviceLogo!,
+              fit: BoxFit.contain,
+              defaultWidget: Padding(
+                padding: EdgeInsets.all(core * _appMarkInset),
+                child: Image.asset(
+                  'assets/images/icon_variants/mark_mono.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+        );
       case HeroCoreMark.appMark:
         return SizedBox(
           key: const ValueKey('core-mark'),
-          width: core * 0.5,
-          height: core * 0.5,
-          child: _appMark(accent),
+          width: core * _coreMarkExtent,
+          height: core * _coreMarkExtent,
+          child: Padding(
+            padding: EdgeInsets.all(core * _appMarkInset),
+            child: _appMark(accent),
+          ),
         );
       case HeroCoreMark.statusIcon:
         return Icon(
@@ -542,38 +652,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     }
   }
 
-  /// A provider `serviceLogo` is a full-colour brand mark, not tinted like ours.
-  Widget _brandCoin(double core) {
-    final colorScheme = context.colorScheme;
-    final coin = core * 0.58;
-    return Container(
-      key: const ValueKey('core-mark'),
-      width: coin,
-      height: coin,
-      padding: EdgeInsets.all(coin * 0.18),
-      decoration: ShapeDecoration(
-        shape: CircleBorder(
-          side: BorderSide(color: colorScheme.outlineVariant.opacity60),
-        ),
-        color: colorScheme.surfaceBright,
-        shadows: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.2),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: ImageCacheWidget(
-        src: widget.serviceLogo!,
-        fit: BoxFit.contain,
-        defaultWidget: _appMark(colorScheme.onSurfaceVariant),
-      ),
-    );
-  }
-
   Widget _appMark(Color accent) => _mono(
-    accent,
+    accent.opacity80,
     Image.asset(
       'assets/images/icon_variants/mark_mono.png',
       fit: BoxFit.contain,
@@ -643,6 +723,8 @@ class _HeroHaloPainter extends CustomPainter {
 class _HeroOrbPainter extends CustomPainter {
   _HeroOrbPainter({
     required this.status,
+    required this.previousStatus,
+    required this.transition,
     required this.exiting,
     required this.palette,
     required this.drawProgress,
@@ -653,6 +735,7 @@ class _HeroOrbPainter extends CustomPainter {
     required this.pulse,
     required this.activity,
     required this.morph,
+    required this.transitionProgress,
     required this.onset,
     required this.trackColor,
     required this.coreColor,
@@ -661,6 +744,8 @@ class _HeroOrbPainter extends CustomPainter {
   });
 
   final HeroStatus status;
+  final HeroStatus previousStatus;
+  final HeroOrbTransition transition;
   final HeroStatus exiting;
   final HeroPalette palette;
   final double drawProgress;
@@ -671,6 +756,7 @@ class _HeroOrbPainter extends CustomPainter {
   final double pulse;
   final double activity;
   final double morph;
+  final double transitionProgress;
   final double onset;
   final Color trackColor;
   final Color coreColor;
@@ -697,9 +783,24 @@ class _HeroOrbPainter extends CustomPainter {
 
     switch (status) {
       case HeroStatus.offline:
-        _paintNoSignalRing(canvas, rect, radius, morph);
+        if (transition == HeroOrbTransition.networkLoss &&
+            previousStatus.flows) {
+          _paintFlowRing(
+            canvas,
+            center,
+            rect,
+            radius,
+            bloom: false,
+            alpha: 1 - transitionProgress,
+          );
+        }
+        _paintNoSignalRing(
+          canvas,
+          rect,
+          radius,
+          transition == HeroOrbTransition.networkLoss ? transitionProgress : 1,
+        );
       case HeroStatus.off:
-        // Still unwinding, so the light fades instead of vanishing.
         if (drawProgress <= 0.004) break;
         switch (exiting) {
           case HeroStatus.paused:
@@ -715,14 +816,82 @@ class _HeroOrbPainter extends CustomPainter {
         _paintComet(canvas, rect, tail: _checkingTail, stroke: _checkingStroke);
       case HeroStatus.connecting:
       case HeroStatus.reconnecting:
+        if (transition == HeroOrbTransition.recovery) {
+          if (previousStatus == HeroStatus.broken) {
+            _paintBrokenRing(canvas, rect, 1, alpha: 1 - transitionProgress);
+          } else if (previousStatus.flows) {
+            _paintFlowRing(
+              canvas,
+              center,
+              rect,
+              radius,
+              bloom: false,
+              alpha: 1 - transitionProgress,
+            );
+          }
+        }
         _paintComet(canvas, rect, tail: _connectingTail, stroke: _ringStroke);
       case HeroStatus.secured:
       case HeroStatus.degraded:
-        _paintFlowRing(canvas, center, rect, radius);
+        if (transition == HeroOrbTransition.resume &&
+            previousStatus == HeroStatus.paused) {
+          _paintPausedRing(
+            canvas,
+            rect,
+            radius,
+            1,
+            alpha: 1 - transitionProgress,
+          );
+        } else if (transition == HeroOrbTransition.recovery &&
+            previousStatus == HeroStatus.broken) {
+          _paintBrokenRing(canvas, rect, 1, alpha: 1 - transitionProgress);
+        }
+        _paintFlowRing(
+          canvas,
+          center,
+          rect,
+          radius,
+          alpha:
+              transition == HeroOrbTransition.resume ||
+                  transition == HeroOrbTransition.recovery
+              ? transitionProgress
+              : 1,
+        );
       case HeroStatus.broken:
-        _paintBrokenRing(canvas, rect, morph);
+        if (transition == HeroOrbTransition.fault && previousStatus.flows) {
+          _paintFlowRing(
+            canvas,
+            center,
+            rect,
+            radius,
+            bloom: false,
+            alpha: 1 - transitionProgress,
+          );
+        }
+        _paintBrokenRing(
+          canvas,
+          rect,
+          morph,
+          alpha: transition == HeroOrbTransition.fault ? transitionProgress : 1,
+        );
       case HeroStatus.paused:
-        _paintPausedRing(canvas, rect, radius, morph);
+        if (transition == HeroOrbTransition.pause && previousStatus.flows) {
+          _paintFlowRing(
+            canvas,
+            center,
+            rect,
+            radius,
+            bloom: false,
+            alpha: 1 - transitionProgress,
+          );
+        }
+        _paintPausedRing(
+          canvas,
+          rect,
+          radius,
+          morph,
+          alpha: transition == HeroOrbTransition.pause ? transitionProgress : 1,
+        );
     }
   }
 
@@ -747,10 +916,22 @@ class _HeroOrbPainter extends CustomPainter {
     final rect = Rect.fromCircle(center: center, radius: radius);
     canvas.drawCircle(center, radius, Paint()..color = coreColor);
 
-    if (status.isLive) {
+    final liveStrength = switch (status) {
+      HeroStatus.connecting => 0.35 + 0.65 * transitionProgress,
+      HeroStatus.reconnecting => 0.65 + 0.35 * transitionProgress,
+      HeroStatus.degraded => 0.72,
+      HeroStatus.broken => 0.28,
+      HeroStatus.paused => 0.42,
+      HeroStatus.secured => 1.0,
+      HeroStatus.off ||
+      HeroStatus.offline when previousStatus.isLive => 1 - transitionProgress,
+      _ => 0.0,
+    };
+    if (liveStrength > 0.001) {
       canvas.save();
       canvas.clipPath(Path()..addOval(rect));
-      final amplitude = (0.24 + 0.20 * activity) * (0.75 + 0.25 * pulse);
+      final amplitude =
+          (0.24 + 0.20 * activity) * (0.75 + 0.25 * pulse) * liveStrength;
       for (var i = 0; i < 2; i++) {
         final spin = (aurora + i * 0.5) * 2 * math.pi * (i == 0 ? 1 : -1);
         final drift = radius * (0.30 + 0.12 * math.sin(spin * 0.5));
@@ -807,6 +988,7 @@ class _HeroOrbPainter extends CustomPainter {
     Rect rect,
     double radius, {
     bool bloom = true,
+    double alpha = 1,
   }) {
     final speed =
         (status == HeroStatus.degraded ? 0.45 : 1.0) * (1 + 0.3 * activity);
@@ -817,9 +999,9 @@ class _HeroOrbPainter extends CustomPainter {
       start,
       2 * math.pi * drawProgress,
       false,
-      _ringPaint(rect, rotation),
+      _ringPaint(rect, rotation, alpha: alpha),
     );
-    if (!bloom || drawProgress < 0.98) return;
+    if (!bloom || drawProgress < 0.98 || alpha < 0.98) return;
     // The gradient seam is the brightest point of the ring; a bloom pinned to
     // it is what makes the rotation legible instead of merely present.
     final head = center + Offset.fromDirection(rotation, radius);
@@ -869,22 +1051,34 @@ class _HeroOrbPainter extends CustomPainter {
   }
 
   /// `onset` makes the first dip the deepest.
-  void _paintBrokenRing(Canvas canvas, Rect rect, double morph) {
+  void _paintBrokenRing(
+    Canvas canvas,
+    Rect rect,
+    double morph, {
+    double alpha = 1,
+  }) {
     final gap = math.pi * morph;
+    final head = -math.pi / 2 + handoff * 2 * math.pi;
     final dip = lerpDouble(0.20, 0.45, onset)!;
     canvas.drawArc(
       rect,
-      -math.pi / 2 + gap / 2,
+      head + gap / 2,
       (2 * math.pi - gap) * drawProgress,
       false,
-      _ringPaint(rect, -math.pi / 2, alpha: lerpDouble(1, dip, pulse)!),
+      _ringPaint(rect, head, alpha: alpha * lerpDouble(1, dip, pulse)!),
     );
   }
 
-  void _paintNoSignalRing(Canvas canvas, Rect rect, double radius, morph) {
+  void _paintNoSignalRing(
+    Canvas canvas,
+    Rect rect,
+    double radius,
+    double morph,
+  ) {
     final count = math.max(6, (2 * math.pi * radius / _noSignalPeriod).round());
     final step = 2 * math.pi / count;
     final fill = lerpDouble(1, _noSignalDash / _noSignalPeriod, morph);
+    final visibility = status == HeroStatus.offline ? 1.0 : drawProgress;
     final paint = _ringPaint(
       rect,
       -math.pi / 2,
@@ -895,14 +1089,20 @@ class _HeroOrbPainter extends CustomPainter {
       canvas.drawArc(
         rect,
         -math.pi / 2 + i * step,
-        step * fill! * drawProgress,
+        step * fill! * visibility,
         false,
         paint,
       );
     }
   }
 
-  void _paintPausedRing(Canvas canvas, Rect rect, double radius, double morph) {
+  void _paintPausedRing(
+    Canvas canvas,
+    Rect rect,
+    double radius,
+    double morph, {
+    double alpha = 1,
+  }) {
     final count = math.max(12, (2 * math.pi * radius / _pausedPeriod).round());
     final step = 2 * math.pi / count;
     final fill = lerpDouble(1, _pausedDash / _pausedPeriod, morph)!;
@@ -910,7 +1110,7 @@ class _HeroOrbPainter extends CustomPainter {
       rect,
       -math.pi / 2,
       strokeWidth: lerpDouble(_ringStroke, _pausedStroke, morph),
-      alpha: lerpDouble(1, 0.70, pulse)!,
+      alpha: alpha * lerpDouble(1, 0.70, pulse)!,
     );
     for (var i = 0; i < count; i++) {
       canvas.drawArc(
@@ -926,6 +1126,8 @@ class _HeroOrbPainter extends CustomPainter {
   @override
   bool shouldRepaint(_HeroOrbPainter old) =>
       old.status != status ||
+      old.previousStatus != previousStatus ||
+      old.transition != transition ||
       old.exiting != exiting ||
       old.palette != palette ||
       old.drawProgress != drawProgress ||
@@ -936,8 +1138,10 @@ class _HeroOrbPainter extends CustomPainter {
       old.pulse != pulse ||
       old.activity != activity ||
       old.morph != morph ||
+      old.transitionProgress != transitionProgress ||
       old.onset != onset ||
       old.trackColor != trackColor ||
       old.coreColor != coreColor ||
+      old.coreHighlight != coreHighlight ||
       old.coreBorder != coreBorder;
 }

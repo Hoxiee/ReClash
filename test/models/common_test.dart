@@ -162,6 +162,17 @@ void main() {
         'system.app',
       ]);
     });
+
+    test('ignores duplicate entries in the pinned list', () {
+      final result = packages.getViewList(
+        pinedList: ['user.old', 'user.old'],
+        sortType: AccessSortType.name,
+        isFilterSystemApp: false,
+        isFilterNonInternetApp: false,
+      );
+
+      expect(result.first.packageName, 'user.old');
+    });
   });
 
   group('TrackerInfoExt', () {

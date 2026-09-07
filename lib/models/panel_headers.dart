@@ -110,6 +110,14 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'themeHex',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-background', 'flclashx-background'],
+    canonicalKey: 'background',
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-heroring'],
+    canonicalKey: 'heroRing',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-widgets'],
     canonicalKey: 'panelWidgets',
   ),

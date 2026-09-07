@@ -12,30 +12,39 @@ type rcxSample struct {
 }
 
 type rcxNodeGlobal struct {
-	Origin   rcxOrigin `json:"o"`
-	Country  string    `json:"c"`
-	EverGood bool      `json:"g"`
-	// One reach no domestic egress could make outranks the database for good.
-	EverOpen bool `json:"eo"`
+	Origin      rcxOrigin `json:"o"`
+	Country     string    `json:"c"`
+	EverGood    bool      `json:"g"`
+	OpenedUnder string    `json:"of,omitempty"`
 }
 
 // Per (node x environment) on purpose: the dominant cause of a dial failure here
 // is the network blocking it, not the node dying, so a global failure count would
 // condemn the whole park after one whitelist episode.
+type rcxMarkerEvidence struct {
+	Outcome rcxProbeOutcome `json:"o"`
+	At      time.Time       `json:"a"`
+	DelayMs int             `json:"d,omitempty"`
+}
+
 type rcxNodeEnv struct {
-	OpenWorld  rcxProof    `json:"w"`
-	Domestic   rcxProof    `json:"m"`
-	FailStreak int         `json:"f"`
-	CoolUntil  time.Time   `json:"c"`
-	LastGoodAt time.Time   `json:"l"`
-	LastFailAt time.Time   `json:"lf"`
-	DegradedAt time.Time   `json:"g"`
-	Samples    []rcxSample `json:"s"`
-	OpenAt     time.Time   `json:"oa"`
-	DomesticAt time.Time   `json:"ma"`
-	ProgressAt time.Time   `json:"p"`
-	ProbeAt    time.Time   `json:"pa"`
-	ProofStall bool        `json:"ps"`
+	OpenWorld  rcxProof                     `json:"w"`
+	Domestic   rcxProof                     `json:"m"`
+	FailStreak int                          `json:"f"`
+	CoolUntil  time.Time                    `json:"c"`
+	LastGoodAt time.Time                    `json:"l"`
+	LastFailAt time.Time                    `json:"lf"`
+	DegradedAt time.Time                    `json:"g"`
+	Samples    []rcxSample                  `json:"s"`
+	OpenAt     time.Time                    `json:"oa"`
+	DomesticAt time.Time                    `json:"ma"`
+	ProgressAt time.Time                    `json:"p"`
+	ProbeAt    time.Time                    `json:"pa"`
+	ProofStall bool                         `json:"ps"`
+	OpenUnder  string                       `json:"owf,omitempty"`
+	HomeUnder  string                       `json:"dmf,omitempty"`
+	LastSeenAt time.Time                    `json:"ls,omitempty"`
+	Markers    map[string]rcxMarkerEvidence `json:"me,omitempty"`
 
 	// Failures stamped while the terrain was not normal, rolled back once it is.
 	provisionalFails int
@@ -70,19 +79,23 @@ func rcxDefaultLedgerPolicy() rcxLedgerPolicy {
 var rcxLedgerProofTTL = rcxDefaultLedgerPolicy().ProofTTL
 
 type rcxLedger struct {
-	mu       sync.Mutex
-	policy   rcxLedgerPolicy
-	global   map[string]*rcxNodeGlobal
-	envs     map[string]map[string]*rcxNodeEnv
-	episodes map[string]time.Time
+	mu              sync.Mutex
+	policy          rcxLedgerPolicy
+	global          map[string]*rcxNodeGlobal
+	envs            map[string]map[string]*rcxNodeEnv
+	episodes        map[string]time.Time
+	openFingerprint string
+	homeFingerprint string
 }
 
 func newRcxLedger(policy rcxLedgerPolicy) *rcxLedger {
 	return &rcxLedger{
-		policy:   policy,
-		global:   map[string]*rcxNodeGlobal{},
-		envs:     map[string]map[string]*rcxNodeEnv{},
-		episodes: map[string]time.Time{},
+		policy:          policy,
+		global:          map[string]*rcxNodeGlobal{},
+		envs:            map[string]map[string]*rcxNodeEnv{},
+		episodes:        map[string]time.Time{},
+		openFingerprint: "legacy",
+		homeFingerprint: "legacy",
 	}
 }
 
@@ -113,6 +126,13 @@ func (l *rcxLedger) ProofTTL() time.Duration {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.policy.ProofTTL
+}
+
+func (l *rcxLedger) SetFingerprints(open, domestic string) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.openFingerprint = open
+	l.homeFingerprint = domestic
 }
 
 func (l *rcxLedger) SetOrigin(node, country string, origin rcxOrigin) {
@@ -170,11 +190,67 @@ func (l *rcxLedger) Migrate(from, to string) {
 	if !ok || len(source) == 0 {
 		return
 	}
-	if existing, ok := l.envs[to]; ok && len(existing) > 0 {
+	destination := l.envs[to]
+	if destination == nil {
+		destination = map[string]*rcxNodeEnv{}
+		l.envs[to] = destination
+	}
+	for node, incoming := range source {
+		if current := destination[node]; current != nil {
+			mergeNodeEnv(current, incoming, l.policy.SampleDepth)
+		} else {
+			destination[node] = incoming
+		}
+	}
+	delete(l.envs, from)
+}
+
+func mergeNodeEnv(current, incoming *rcxNodeEnv, sampleDepth int) {
+	if incoming == nil {
 		return
 	}
-	l.envs[to] = source
-	delete(l.envs, from)
+	if incoming.OpenAt.After(current.OpenAt) {
+		current.OpenWorld, current.OpenAt, current.OpenUnder = incoming.OpenWorld, incoming.OpenAt, incoming.OpenUnder
+	}
+	if incoming.DomesticAt.After(current.DomesticAt) {
+		current.Domestic, current.DomesticAt, current.HomeUnder = incoming.Domestic, incoming.DomesticAt, incoming.HomeUnder
+	}
+	if incoming.LastGoodAt.After(current.LastGoodAt) {
+		current.LastGoodAt = incoming.LastGoodAt
+	}
+	if incoming.LastFailAt.After(current.LastFailAt) {
+		current.FailStreak, current.LastFailAt, current.CoolUntil = incoming.FailStreak, incoming.LastFailAt, incoming.CoolUntil
+	}
+	if incoming.DegradedAt.After(current.DegradedAt) {
+		current.DegradedAt, current.ProofStall = incoming.DegradedAt, incoming.ProofStall
+	}
+	if incoming.ProgressAt.After(current.ProgressAt) {
+		current.ProgressAt = incoming.ProgressAt
+	}
+	if incoming.ProbeAt.After(current.ProbeAt) {
+		current.ProbeAt = incoming.ProbeAt
+	}
+	if incoming.LastSeenAt.After(current.LastSeenAt) {
+		current.LastSeenAt = incoming.LastSeenAt
+	}
+	current.Samples = mergeSamples(current.Samples, incoming.Samples, sampleDepth)
+	if current.Markers == nil {
+		current.Markers = map[string]rcxMarkerEvidence{}
+	}
+	for id, evidence := range incoming.Markers {
+		if known, ok := current.Markers[id]; !ok || evidence.At.After(known.At) {
+			current.Markers[id] = evidence
+		}
+	}
+}
+
+func mergeSamples(current, incoming []rcxSample, depth int) []rcxSample {
+	merged := append(append([]rcxSample(nil), current...), incoming...)
+	sort.SliceStable(merged, func(i, j int) bool { return merged[i].At.Before(merged[j].At) })
+	if depth > 0 && len(merged) > depth {
+		merged = merged[len(merged)-depth:]
+	}
+	return merged
 }
 
 func (l *rcxLedger) Export() (map[string]*rcxNodeGlobal, map[string]map[string]*rcxNodeEnv) {
@@ -343,7 +419,8 @@ func (l *rcxLedger) NoteTrafficProgress(node, envKey string, openWorld bool, now
 	if openWorld {
 		state.OpenWorld = rcxProofProven
 		state.OpenAt = now
-		l.globalState(node).EverOpen = true
+		state.OpenUnder = l.openFingerprint
+		l.globalState(node).OpenedUnder = l.openFingerprint
 	}
 	l.globalState(node).EverGood = true
 }
@@ -391,8 +468,85 @@ func (l *rcxLedger) NoteProbe(
 ) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	l.noteProbeLocked(node, l.envState(envKey, node), role, outcome, delayMs, now)
+}
 
+func (l *rcxLedger) NoteMarkerProbe(
+	node, envKey string,
+	role rcxRole,
+	markerID string,
+	outcome rcxProbeOutcome,
+	delayMs int,
+	now time.Time,
+) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	state := l.envState(envKey, node)
+	if state.Markers == nil {
+		state.Markers = map[string]rcxMarkerEvidence{}
+	}
+	if outcome != rcxProbeOverloaded {
+		state.Markers[markerID] = rcxMarkerEvidence{Outcome: outcome, At: now, DelayMs: delayMs}
+	}
+	if outcome == rcxProbeOK {
+		l.noteProbeLocked(node, state, role, outcome, delayMs, now)
+	} else if outcome != rcxProbeOverloaded {
+		state.ProbeAt = now
+	}
+}
+
+func (l *rcxLedger) RecomputeRole(
+	node, envKey string,
+	role rcxRole,
+	markerIDs []string,
+	now time.Time,
+) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.envState(envKey, node)
+	proof := rcxProofUnknown
+	at := time.Time{}
+	complete := len(markerIDs) > 0
+	for _, markerID := range markerIDs {
+		evidence, ok := state.Markers[markerID]
+		if !ok || evidence.Outcome == rcxProbeOverloaded {
+			complete = false
+			continue
+		}
+		if evidence.Outcome == rcxProbeOK {
+			proof = rcxProofProven
+			if evidence.At.After(at) {
+				at = evidence.At
+			}
+		} else if evidence.At.After(at) {
+			at = evidence.At
+		}
+	}
+	if proof != rcxProofProven && complete {
+		proof = rcxProofDisproven
+	}
+	if role == rcxRoleOpen {
+		state.OpenWorld = proof
+		state.OpenAt = at
+		state.OpenUnder = l.openFingerprint
+		if proof == rcxProofProven {
+			l.globalState(node).OpenedUnder = l.openFingerprint
+		}
+	} else {
+		state.Domestic = proof
+		state.DomesticAt = at
+		state.HomeUnder = l.homeFingerprint
+	}
+}
+
+func (l *rcxLedger) noteProbeLocked(
+	node string,
+	state *rcxNodeEnv,
+	role rcxRole,
+	outcome rcxProbeOutcome,
+	delayMs int,
+	now time.Time,
+) {
 	if outcome != rcxProbeOverloaded {
 		state.ProbeAt = now
 	}
@@ -406,10 +560,12 @@ func (l *rcxLedger) NoteProbe(
 		if role == rcxRoleOpen {
 			state.OpenWorld = rcxProofProven
 			state.OpenAt = now
-			l.globalState(node).EverOpen = true
+			state.OpenUnder = l.openFingerprint
+			l.globalState(node).OpenedUnder = l.openFingerprint
 		} else {
 			state.Domestic = rcxProofProven
 			state.DomesticAt = now
+			state.HomeUnder = l.homeFingerprint
 		}
 		state.LastGoodAt = now
 		state.ProgressAt = now
@@ -424,8 +580,10 @@ func (l *rcxLedger) NoteProbe(
 	case rcxProbeStatusMismatch, rcxProbeFail:
 		if role == rcxRoleOpen {
 			state.OpenWorld = rcxProofDisproven
+			state.OpenUnder = l.openFingerprint
 		} else {
 			state.Domestic = rcxProofDisproven
+			state.HomeUnder = l.homeFingerprint
 		}
 	}
 }
@@ -480,9 +638,9 @@ func (l *rcxLedger) Facts(
 	global := l.globalState(node)
 	facts := rcxFacts{
 		Origin:      global.Origin,
-		OpenedOnce:  global.EverOpen,
-		OpenWorld:   rcxProofAged(state.OpenWorld, state.OpenAt, now, proofTTL),
-		Domestic:    rcxProofAged(state.Domestic, state.DomesticAt, now, proofTTL),
+		OpenedOnce:  global.OpenedUnder != "" && global.OpenedUnder == l.openFingerprint,
+		OpenWorld:   rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, proofTTL),
+		Domestic:    rcxProofForFingerprint(state.Domestic, state.DomesticAt, state.HomeUnder, l.homeFingerprint, now, proofTTL),
 		SupportsUDP: supportsUDP,
 	}
 	switch {
@@ -497,6 +655,13 @@ func (l *rcxLedger) Facts(
 	return facts
 }
 
+func rcxProofForFingerprint(proof rcxProof, provenAt time.Time, stored, active string, now time.Time, ttl time.Duration) rcxProof {
+	if stored == "" || stored != active {
+		return rcxProofUnknown
+	}
+	return rcxProofAged(proof, provenAt, now, ttl)
+}
+
 func rcxProofAged(proof rcxProof, provenAt, now time.Time, ttl time.Duration) rcxProof {
 	if proof != rcxProofProven {
 		return proof
@@ -505,6 +670,12 @@ func rcxProofAged(proof rcxProof, provenAt, now time.Time, ttl time.Duration) rc
 		return rcxProofUnknown
 	}
 	return proof
+}
+
+func (l *rcxLedger) PreviouslyGood(node, envKey string) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return !l.envState(envKey, node).LastGoodAt.IsZero()
 }
 
 func (l *rcxLedger) FailStreak(node, envKey string) int {
@@ -609,28 +780,99 @@ func (l *rcxLedger) Samples(node, envKey string) []rcxSample {
 	return l.envState(envKey, node).Samples
 }
 
-func (l *rcxLedger) Prune(nodeKeep int, now time.Time) {
+const (
+	rcxRemovedKeepPerEnv = 64
+	rcxRemovedTTL        = 7 * 24 * time.Hour
+)
+
+func (l *rcxLedger) MarkMembers(nodes map[string]struct{}, now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, env := range l.envs {
+		for node := range nodes {
+			if state, ok := env[node]; ok {
+				state.LastSeenAt = now
+			}
+		}
+	}
+}
+
+func (l *rcxLedger) Invalidate(openChanged, domesticChanged, countriesChanged bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if countriesChanged {
+		for _, global := range l.global {
+			global.Origin = rcxOriginUnknown
+			global.Country = ""
+		}
+	}
+	if !openChanged && !domesticChanged {
+		return
+	}
+	for _, nodes := range l.envs {
+		for _, state := range nodes {
+			if openChanged {
+				state.OpenWorld = rcxProofUnknown
+				state.OpenAt = time.Time{}
+				state.OpenUnder = ""
+			}
+			if domesticChanged {
+				state.Domestic = rcxProofUnknown
+				state.DomesticAt = time.Time{}
+				state.HomeUnder = ""
+			}
+		}
+	}
+}
+
+func (l *rcxLedger) Prune(active, protected map[string]struct{}, now time.Time) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	l.expireEpisodesLocked(now)
+	keptGlobal := make(map[string]struct{}, len(active)+len(protected))
 	for envKey, nodes := range l.envs {
-		if len(nodes) > nodeKeep {
-			type aged struct {
-				node string
-				at   time.Time
+		type aged struct {
+			node string
+			at   time.Time
+		}
+		removed := make([]aged, 0, len(nodes))
+		for node, state := range nodes {
+			if _, ok := active[node]; ok {
+				keptGlobal[node] = struct{}{}
+				continue
 			}
-			order := make([]aged, 0, len(nodes))
-			for node, state := range nodes {
-				order = append(order, aged{node: node, at: state.LastGoodAt})
+			if _, ok := protected[node]; ok {
+				keptGlobal[node] = struct{}{}
+				continue
 			}
-			sort.Slice(order, func(i, j int) bool { return order[i].at.After(order[j].at) })
-			for _, item := range order[nodeKeep:] {
+			at := state.LastSeenAt
+			if state.LastGoodAt.After(at) {
+				at = state.LastGoodAt
+			}
+			removed = append(removed, aged{node: node, at: at})
+		}
+		sort.Slice(removed, func(i, j int) bool { return removed[i].at.After(removed[j].at) })
+		for i, item := range removed {
+			if i >= rcxRemovedKeepPerEnv || (!item.at.IsZero() && now.Sub(item.at) > rcxRemovedTTL) {
 				delete(nodes, item.node)
+				continue
 			}
+			keptGlobal[item.node] = struct{}{}
 		}
 		if len(nodes) == 0 {
 			delete(l.envs, envKey)
+		}
+	}
+	for node := range active {
+		keptGlobal[node] = struct{}{}
+	}
+	for node := range protected {
+		keptGlobal[node] = struct{}{}
+	}
+	for node := range l.global {
+		if _, ok := keptGlobal[node]; !ok {
+			delete(l.global, node)
 		}
 	}
 }

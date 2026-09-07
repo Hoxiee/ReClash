@@ -305,7 +305,6 @@ class GeneralListView extends ConsumerWidget {
       children: [
         SettingSection(
           top: 16,
-          title: appLocalizations.inbound,
           items: [
             const PortItem(),
             _clashToggle(
@@ -341,13 +340,9 @@ class GeneralListView extends ConsumerWidget {
             enterDelay: const Duration(milliseconds: 50),
           ),
         SettingSection(
-          title: appLocalizations.other,
+          title: appLocalizations.identity,
           items: [
-            const LogLevelItem(),
             const UaItem(),
-            const TestUrlItem(),
-            if (system.isDesktop) const KeepAliveIntervalItem(),
-            const HostsItem(),
             ConfigToggleItem(
               leading: const Icon(Icons.perm_device_information_outlined),
               title: (l) => l.sendDeviceIdentity,
@@ -359,6 +354,16 @@ class GeneralListView extends ConsumerWidget {
                   .read(appSettingProvider.notifier)
                   .update((state) => state.copyWith(sendDeviceIdentity: value)),
             ),
+          ],
+          enterDelay: const Duration(milliseconds: 100),
+        ),
+        SettingSection(
+          title: appLocalizations.other,
+          items: [
+            const LogLevelItem(),
+            const TestUrlItem(),
+            if (system.isDesktop) const KeepAliveIntervalItem(),
+            const HostsItem(),
             ConfigToggleItem(
               leading: const Icon(Icons.dns_outlined),
               title: (l) => l.appendSystemDns,

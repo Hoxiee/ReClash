@@ -44,6 +44,26 @@ func domesticUntested() rcxFacts {
 	return rcxFacts{Origin: rcxOriginDomestic, SupportsUDP: true}
 }
 
+func TestProviderCircuitBarsOnlyAnUnprovenCandidate(t *testing.T) {
+	blocked := rcxNode("blocked", foreignUntested())
+	blocked.Circuit = true
+	proven := rcxNode("proven", foreignProven())
+	proven.Circuit = true
+
+	input := rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{blocked, proven},
+		Policy:     rcxTestPolicy(),
+	}
+	got := rcxDecideAt(input)
+	if got.To != "proven" {
+		t.Errorf("picked %q, want the proven node to survive its provider circuit", got.To)
+	}
+	if block := rcxBlockOf(blocked, input); block != rcxBlockProviderCircuit {
+		t.Errorf("block = %q, want %q", block, rcxBlockProviderCircuit)
+	}
+}
+
 func TestAdmitTableEncodesTheDomesticAsymmetry(t *testing.T) {
 	domestic := domesticUntested()
 
@@ -607,15 +627,15 @@ func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
 	}
 }
 
-func TestCompareRanksHistoryBelowTheBandItIsMeasuredIn(t *testing.T) {
-	fastAndNew := rcxKey{latBucket: 0, unproven: true}
-	slowAndKnown := rcxKey{latBucket: 1}
+func TestCompareLatencyKeepsReliabilityAboveLatency(t *testing.T) {
+	fastAndNew := rcxKey{latBucket: 0, evidence: rcxEvidenceNone, unproven: true}
+	slowAndKnown := rcxKey{latBucket: 1, evidence: rcxEvidenceFreshProbe}
 
-	if rcxCompare(fastAndNew, slowAndKnown) >= 0 {
-		t.Error("a 60ms stranger must outrank a 200ms acquaintance: history breaks ties inside a band, it does not buy one")
+	if rcxCompare(fastAndNew, slowAndKnown) <= 0 {
+		t.Error("a measured working node must beat a faster stranger")
 	}
-	if rcxCompareLatency(fastAndNew, slowAndKnown) >= 0 {
-		t.Error("the latency strategy cannot rank a band worse than the band above it")
+	if rcxCompareLatency(fastAndNew, slowAndKnown) <= 0 {
+		t.Error("lowest-latency must not trade reachability evidence for milliseconds")
 	}
 }
 

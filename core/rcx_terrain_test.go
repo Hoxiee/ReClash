@@ -29,7 +29,7 @@ func TestEnvKeysSeparateNetworksSharingASubnet(t *testing.T) {
 	}
 }
 
-func TestEnvKeysPreferTheSsidButKeepAMigrationKey(t *testing.T) {
+func TestEnvKeysUseCompositeIdentityAndKeepMigrationAliases(t *testing.T) {
 	payload := rcxNetworkPayload{
 		Transport:  "wifi",
 		SSID:       "Home",
@@ -38,16 +38,30 @@ func TestEnvKeysPreferTheSsidButKeepAMigrationKey(t *testing.T) {
 		IPv4:       []string{"192.168.1.55"},
 	}
 
-	primary, secondary := rcxEnvKeys(payload)
-	if primary != "w:Home" {
-		t.Errorf("primary = %s, want the SSID when it is readable", primary)
+	primary, aliases := rcxEnvKeys(payload)
+	withoutLabel := payload
+	withoutLabel.SSID = ""
+	permissionFree, _ := rcxEnvKeys(withoutLabel)
+	if primary != "v2:w:Home#"+rcxStableLinkFingerprint(payload) {
+		t.Errorf("primary = %s, want the labelled composite identity", primary)
 	}
+	if permissionFree != "v2:w:#"+rcxStableLinkFingerprint(payload) {
+		t.Errorf("permission-free key = %s, want the stable link identity", permissionFree)
+	}
+	for _, want := range []string{"w:Home", permissionFree, "w:#" + rcxLinkFingerprint(payload), "w:#" + rcxStableLinkFingerprint(payload)} {
+		if !containsString(aliases, want) {
+			t.Errorf("aliases = %v, want %q", aliases, want)
+		}
+	}
+}
 
-	payload.SSID = ""
-	withoutPermission, _ := rcxEnvKeys(payload)
-	if withoutPermission != secondary {
-		t.Errorf("permission-free key = %s, want %s so the record can be migrated", withoutPermission, secondary)
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
 	}
+	return false
 }
 
 func TestEnvKeysAreStableAcrossAddressChangesWithinASubnet(t *testing.T) {
@@ -73,8 +87,9 @@ func TestEnvKeysUseTheCarrierOnCellular(t *testing.T) {
 
 	primary, _ := rcxEnvKeys(payload)
 
-	if primary != "c:25001" {
-		t.Errorf("primary = %s, want the carrier: a mobile address changes every attach", primary)
+	want := "v2:c:25001#" + rcxStableLinkFingerprint(payload)
+	if primary != want {
+		t.Errorf("primary = %s, want %s", primary, want)
 	}
 }
 

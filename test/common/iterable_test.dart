@@ -87,6 +87,16 @@ void main() {
     });
   });
 
+  group('ListExt.intersection', () {
+    test('keeps matching items in source order', () {
+      expect([1, 2, 3, 2].intersection([3, 2]), [2, 3, 2]);
+    });
+
+    test('accepts any iterable of values', () {
+      expect([1, 2, 3].intersection({1, 3}), [1, 3]);
+    });
+  });
+
   group('ListExt.batch', () {
     test('splits into batches', () {
       final result = [1, 2, 3, 4, 5].batch(2);

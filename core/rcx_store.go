@@ -13,27 +13,47 @@ import (
 
 const (
 	rcxStoreKey      = "rcx.v1"
-	rcxStoreVersion  = 1
+	rcxStoreVersion  = 2
 	rcxFlushDebounce = 30 * time.Second
 )
 
 // One key, not one per network: SetStorage cursor-scans and decodes the whole
 // bucket on every write, so key count costs more than payload size.
 type rcxSnapshot struct {
-	Version int                               `json:"v"`
-	Config  rcxConfig                         `json:"cfg"`
-	Global  map[string]*rcxNodeGlobal         `json:"g"`
-	Envs    map[string]map[string]*rcxNodeEnv `json:"e"`
-	Picks   map[string]string                 `json:"p"`
-	Pins    map[string]string                 `json:"pn"`
-	Seed    uint64                            `json:"sd"`
-	Regimes map[string]rcxRegimeMemory        `json:"r"`
-	Dirty   bool                              `json:"d"`
+	Version      int                               `json:"v"`
+	Config       rcxConfig                         `json:"cfg"`
+	Global       map[string]*rcxNodeGlobal         `json:"g"`
+	Envs         map[string]map[string]*rcxNodeEnv `json:"e"`
+	Picks        map[string]string                 `json:"p"`
+	Pins         map[string]string                 `json:"pn"`
+	Seed         uint64                            `json:"sd"`
+	Regimes      map[string]rcxRegimeMemory        `json:"r"`
+	Circuits     map[string]rcxProviderCircuit     `json:"pc"`
+	Standbys     map[string][]string               `json:"sb"`
+	Quarantines  map[string]rcxMarkerQuarantine    `json:"mq"`
+	Fingerprints rcxConfigFingerprints             `json:"fp"`
+	Metrics      rcxMetricsState                   `json:"mt"`
+	Dirty        bool                              `json:"d"`
 }
 
 type rcxRegimeMemory struct {
 	Terrain rcxTerrain `json:"t"`
 	At      time.Time  `json:"a"`
+}
+
+type rcxMetricsState struct {
+	EnabledMillis      int64 `json:"e,omitempty"`
+	AvailableMillis    int64 `json:"a,omitempty"`
+	Incidents          int   `json:"i,omitempty"`
+	StandbyHits        int   `json:"s,omitempty"`
+	ProviderIncidents  int   `json:"p,omitempty"`
+	MarkerIncidents    int   `json:"m,omitempty"`
+	FailoverMillis     int64 `json:"f,omitempty"`
+	Failovers          int   `json:"n,omitempty"`
+	LastFailoverMillis int64 `json:"x,omitempty"`
+	LastOutageMillis   int64 `json:"l,omitempty"`
+	TotalOutageMillis  int64 `json:"o,omitempty"`
+	RecoveredOutages   int   `json:"r,omitempty"`
 }
 
 type rcxStorage interface {
@@ -77,21 +97,45 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 	if len(raw) == 0 {
 		return rcxEmptySnapshot()
 	}
+	var header struct {
+		Version int `json:"v"`
+	}
+	if err := json.Unmarshal(raw, &header); err != nil {
+		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
+		return rcxEmptySnapshot()
+	}
+	if header.Version != 1 && header.Version != rcxStoreVersion {
+		log.Infoln("[RCX] discarding state from schema v%d", header.Version)
+		return rcxEmptySnapshot()
+	}
 	snapshot := &rcxSnapshot{}
 	if err := json.Unmarshal(raw, snapshot); err != nil {
 		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
 		return rcxEmptySnapshot()
 	}
-	if snapshot.Version != rcxStoreVersion {
-		log.Infoln("[RCX] discarding state from schema v%d", snapshot.Version)
-		return rcxEmptySnapshot()
+	if header.Version == 1 {
+		rcxMigrateSnapshotV1(snapshot)
 	}
 	rcxFillSnapshot(snapshot)
 	return snapshot
 }
 
+func rcxMigrateSnapshotV1(snapshot *rcxSnapshot) {
+	snapshot.Version = rcxStoreVersion
+	for _, nodes := range snapshot.Envs {
+		for _, state := range nodes {
+			state.OpenWorld = rcxProofUnknown
+			state.Domestic = rcxProofUnknown
+			state.OpenAt = time.Time{}
+			state.DomesticAt = time.Time{}
+		}
+	}
+	snapshot.Fingerprints = snapshot.Config.fingerprints()
+}
+
 func rcxEmptySnapshot() *rcxSnapshot {
 	snapshot := &rcxSnapshot{Version: rcxStoreVersion, Config: rcxDefaultConfig()}
+	snapshot.Fingerprints = snapshot.Config.fingerprints()
 	rcxFillSnapshot(snapshot)
 	return snapshot
 }
@@ -114,6 +158,15 @@ func rcxFillSnapshot(snapshot *rcxSnapshot) {
 	}
 	if snapshot.Regimes == nil {
 		snapshot.Regimes = map[string]rcxRegimeMemory{}
+	}
+	if snapshot.Circuits == nil {
+		snapshot.Circuits = map[string]rcxProviderCircuit{}
+	}
+	if snapshot.Standbys == nil {
+		snapshot.Standbys = map[string][]string{}
+	}
+	if snapshot.Quarantines == nil {
+		snapshot.Quarantines = map[string]rcxMarkerQuarantine{}
 	}
 	delete(snapshot.Regimes, "")
 }

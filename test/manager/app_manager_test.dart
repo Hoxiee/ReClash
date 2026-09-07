@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
@@ -7,7 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
-import 'package:flutter/widgets.dart' show SizedBox;
+import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -19,10 +21,12 @@ const _debounce = Duration(milliseconds: 700);
 void main() {
   late _MockCoreHandlerInterface coreInterface;
   late List<String> calls;
+  late Future<bool> Function(bool active) setUiActive;
 
   setUp(() {
     calls = [];
     coreInterface = _MockCoreHandlerInterface();
+    setUiActive = (_) async => true;
     Future<bool> log(String name) async {
       calls.add(name);
       return true;
@@ -33,6 +37,11 @@ void main() {
     when(
       () => coreInterface.closeConnections(),
     ).thenAnswer((_) => log('close'));
+    when(() => coreInterface.setUiActive(any())).thenAnswer((invocation) {
+      final active = invocation.positionalArguments.single as bool;
+      calls.add('ui:$active');
+      return setUiActive(active);
+    });
   });
 
   tearDown(() {
@@ -56,6 +65,58 @@ void main() {
     );
     return container;
   }
+
+  testWidgets('syncs UI activity idempotently and after reconnect', (
+    tester,
+  ) async {
+    final container = await pumpManager(tester);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    await tester.pump();
+    await tester.pump();
+    expect(calls, ['ui:true']);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    await tester.pump();
+    expect(calls, ['ui:true', 'ui:false']);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    await tester.pump();
+    expect(calls, ['ui:true', 'ui:false']);
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    await tester.pump();
+    await tester.pump();
+    expect(calls, ['ui:true', 'ui:false', 'ui:false']);
+  });
+
+  testWidgets('late old-Core reply does not suppress reconnect sync', (
+    tester,
+  ) async {
+    final firstReply = Completer<bool>();
+    setUiActive = (_) => firstReply.future;
+    final container = await pumpManager(tester);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    await tester.pump();
+    expect(calls, ['ui:true']);
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    setUiActive = (_) async => true;
+    firstReply.complete(true);
+    await tester.pump();
+    await tester.pump();
+
+    expect(calls, ['ui:true', 'ui:true']);
+  });
 
   testWidgets('pausing on a trusted network tears the TUN down and back up', (
     tester,

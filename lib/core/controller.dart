@@ -212,6 +212,10 @@ class CoreController {
     return _interface.resumeTun();
   }
 
+  Future<bool> setUiActive(bool active) {
+    return _interface.setUiActive(active);
+  }
+
   Future<bool> configureSmartRouting(RcxConfigParams params) {
     return _interface.configureSmartRouting(params);
   }

@@ -5,6 +5,7 @@ export 'common.dart';
 export 'config.dart';
 export 'core.dart';
 export 'desync.dart';
+export 'developer_subscription.dart';
 export 'panel_appearance.dart';
 export 'panel_headers.dart';
 export 'panel_meta.dart';

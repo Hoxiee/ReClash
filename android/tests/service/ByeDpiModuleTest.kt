@@ -172,6 +172,44 @@ class ByeDpiModuleTest {
     }
 
     @Test
+    fun `a superseded retry cannot start its old target`() = runTest {
+        module().start()
+        engine.startResult = false
+        ServiceConfig.updateVpnOptions(options(port = 7898))
+        runCurrent()
+        ServiceConfig.updateVpnOptions(options(port = 7899))
+        runCurrent()
+        assertEquals(2, engine.starts.size)
+
+        engine.startResult = true
+        advanceTimeBy(ByeDpiPolicy.backoffMs(0))
+        runCurrent()
+        assertEquals(2, engine.starts.size)
+        advanceTimeBy(ByeDpiPolicy.backoffMs(1) - ByeDpiPolicy.backoffMs(0))
+        runCurrent()
+
+        assertEquals(3, engine.starts.size)
+        val args = engine.starts.last()
+        assertEquals("7899", args[args.indexOf("-p") + 1])
+    }
+
+    @Test
+    fun `stopping cancels a pending start retry`() = runTest {
+        val module = module()
+        module.start()
+        engine.startResult = false
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        assertEquals(1, engine.starts.size)
+
+        module.stop()
+        engine.startResult = true
+        advanceTimeBy(ByeDpiPolicy.backoffMs(0))
+        runCurrent()
+        assertEquals(1, engine.starts.size)
+    }
+
+    @Test
     fun `a strategy cannot retune the listener or the cache`() = runTest {
         module().start()
         ServiceConfig.updateVpnOptions(

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -24,9 +25,190 @@ class DesyncView extends StatelessWidget {
   );
 }
 
-/// Shared by the settings subpage and the DPI-only hero.
+class DesyncStrategyView extends StatelessWidget {
+  const DesyncStrategyView({super.key});
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.desyncStrategySection,
+    body: const SingleChildScrollView(
+      child: Column(
+        children: [
+          _DesyncStrategyOverview(),
+          DesyncControls._focused(_DesyncSection.strategy),
+          SettingBottomInset(),
+        ],
+      ),
+    ),
+  );
+}
+
+class DesyncTestView extends StatelessWidget {
+  const DesyncTestView({super.key});
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.desyncTestSection,
+    body: const SingleChildScrollView(
+      child: Column(
+        children: [
+          DesyncControls._focused(_DesyncSection.test),
+          SettingBottomInset(),
+        ],
+      ),
+    ),
+  );
+}
+
+class DesyncEngineView extends StatelessWidget {
+  const DesyncEngineView({super.key});
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.desyncEngine,
+    body: const SingleChildScrollView(
+      child: Column(
+        children: [
+          _DesyncEngineOverview(),
+          DesyncControls._focused(_DesyncSection.engine),
+          SettingBottomInset(),
+        ],
+      ),
+    ),
+  );
+}
+
+enum _DesyncSection { strategy, test, engine }
+
+String _desyncStrategyName(
+  AppLocalizations appLocalizations,
+  DesyncProps props,
+) {
+  if (listEquals(props.strategyArgs, desyncDefaultStrategy)) {
+    return appLocalizations.desyncDefaultName;
+  }
+  for (final strategy in props.savedStrategies) {
+    if (listEquals(strategy.args, props.strategyArgs)) return strategy.name;
+  }
+  return appLocalizations.custom;
+}
+
+String _desyncCategoryLabel(DesyncCategory category) => switch (category) {
+  DesyncCategory.youtube => 'YouTube',
+  DesyncCategory.discord => 'Discord',
+  DesyncCategory.twitter => 'Twitter / X',
+  DesyncCategory.meta => 'Meta',
+  DesyncCategory.signal => 'Signal',
+};
+
+class _DesyncOverviewCard extends StatelessWidget {
+  const _DesyncOverviewCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.detail,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? detail;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+    child: CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.lg,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: ShapeDecoration(
+                color: context.colorScheme.primaryContainer,
+                shape: AppShape.all(AppCorner.md),
+              ),
+              child: Icon(icon, color: context.colorScheme.onPrimaryContainer),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: context.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (detail case final detail?) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      detail,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _DesyncStrategyOverview extends ConsumerWidget {
+  const _DesyncStrategyOverview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(desyncSettingProvider);
+    return _DesyncOverviewCard(
+      icon: Icons.tune_rounded,
+      title: appLocalizations.desyncActiveStrategy,
+      subtitle: _desyncStrategyName(appLocalizations, props),
+      detail: appLocalizations.desyncArgsCount(props.strategyArgs.length),
+    );
+  }
+}
+
+class _DesyncEngineOverview extends ConsumerWidget {
+  const _DesyncEngineOverview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(desyncSettingProvider);
+    return _DesyncOverviewCard(
+      icon: Icons.hub_rounded,
+      title: '127.0.0.1:${props.port}',
+      subtitle: appLocalizations.desyncEngineSummary(props.categories.length),
+      detail: props.cacheEnabled ? null : appLocalizations.desyncCacheDisabled,
+    );
+  }
+}
+
 class DesyncControls extends ConsumerStatefulWidget {
-  const DesyncControls({super.key});
+  const DesyncControls({super.key}) : _section = null;
+
+  const DesyncControls._focused(this._section) : super();
+
+  final _DesyncSection? _section;
 
   @override
   ConsumerState<DesyncControls> createState() => _DesyncControlsState();
@@ -105,145 +287,156 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
     final defaultActive = listEquals(props.strategyArgs, desyncDefaultStrategy);
     return Column(
       children: [
-        SettingSection(
-          title: appLocalizations.desyncStrategySection,
-          actions: [
-            const SizedBox(width: 8),
-            CommonMinFilledButtonTheme(
-              child: FilledButton.tonal(
-                onPressed: () => _handleSave(context, ref),
-                child: Text(appLocalizations.desyncSaveCurrent),
+        if (widget._section == null ||
+            widget._section == _DesyncSection.strategy)
+          SettingSection(
+            top: 16,
+            actions: [
+              const SizedBox(width: 8),
+              CommonMinFilledButtonTheme(
+                child: FilledButton.tonal(
+                  onPressed: () => _handleSave(context, ref),
+                  child: Text(appLocalizations.desyncSaveCurrent),
+                ),
               ),
-            ),
-          ],
-          items: _locked([
-            DecorationListItem.open(
-              title: Text(appLocalizations.desyncArgs),
-              subtitle: Text(
-                appLocalizations.desyncArgsCount(props.strategyArgs.length),
-              ),
-              widget: _DesyncArgsEditor(
-                initialText: desyncArgsToText(props.strategyArgs),
-              ),
-              onChanged: (args) {
-                if (args is List<String>) {
-                  _update(ref, (state) => state.copyWith(strategyArgs: args));
-                }
-              },
-            ),
-            DecorationListItem(
-              leading: defaultActive ? const Icon(Icons.check_rounded) : null,
-              title: Text(appLocalizations.desyncDefaultName),
-              subtitle: const Text('split · disorder · fake · oob · tlsrec'),
-              onPressed: () => _update(
-                ref,
-                (state) => state.copyWith(strategyArgs: desyncDefaultStrategy),
-              ),
-            ),
-            for (final strategy in props.savedStrategies)
-              DecorationListItem(
-                leading: listEquals(props.strategyArgs, strategy.args)
-                    ? const Icon(Icons.check_rounded)
-                    : null,
-                title: Text(strategy.name),
+            ],
+            items: _locked([
+              DecorationListItem.open(
+                title: Text(appLocalizations.desyncArgs),
                 subtitle: Text(
-                  appLocalizations.desyncArgsCount(strategy.args.length),
+                  appLocalizations.desyncArgsCount(props.strategyArgs.length),
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_rounded),
-                  tooltip: appLocalizations.delete,
-                  onPressed: () => _handleDelete(context, ref, strategy),
+                widget: _DesyncArgsEditor(
+                  initialText: desyncArgsToText(props.strategyArgs),
                 ),
+                onChanged: (args) {
+                  if (args is List<String>) {
+                    _update(ref, (state) => state.copyWith(strategyArgs: args));
+                  }
+                },
+              ),
+              DecorationListItem(
+                leading: defaultActive ? const Icon(Icons.check_rounded) : null,
+                title: Text(appLocalizations.desyncDefaultName),
+                subtitle: const Text('split · disorder · fake · oob · tlsrec'),
                 onPressed: () => _update(
                   ref,
-                  (state) => state.copyWith(strategyArgs: strategy.args),
+                  (state) =>
+                      state.copyWith(strategyArgs: desyncDefaultStrategy),
                 ),
               ),
-          ]),
-        ),
-        _DesyncTester(
-          onRunningChanged: (value) => setState(() => _testing = value),
-        ),
-        SettingSection(
-          title: appLocalizations.desyncEngine,
-          items: _locked([
-            DecorationListItem.input(
-              title: Text(appLocalizations.port),
-              subtitle: Text(props.port.toString()),
-              dialogTitle: appLocalizations.port,
-              value: props.port.toString(),
-              keyboardType: TextInputType.number,
-              maxLength: TextInputLimits.port,
-              resetValue: defaultDesyncPort.toString(),
-              validator: (value) {
-                final label = appLocalizations.port;
-                if (value == null || value.isEmpty) {
-                  return appLocalizations.emptyTip(label);
-                }
-                final port = int.tryParse(value);
-                if (port == null) {
-                  return appLocalizations.numberTip(label);
-                }
-                return port >= 1 && port <= 65535
-                    ? null
-                    : appLocalizations.portTip(label);
-              },
-              onChanged: (value) {
-                final port = int.tryParse(value ?? '');
-                if (port != null && port >= 1 && port <= 65535) {
-                  _update(ref, (state) => state.copyWith(port: port));
-                }
-              },
-            ),
-            DecorationListItem.toggle(
-              title: Text(appLocalizations.desyncCache),
-              subtitle: Text(appLocalizations.desyncCacheDesc),
-              value: props.cacheEnabled,
-              onChanged: (value) =>
-                  _update(ref, (state) => state.copyWith(cacheEnabled: value)),
-            ),
-            if (props.cacheEnabled)
-              DecorationListItem.options(
-                title: Text(appLocalizations.desyncCacheTtl),
-                subtitle: Text(_ttlLabel(appLocalizations, props.cacheTtl)),
-                dialogTitle: appLocalizations.desyncCacheTtl,
-                options: _ttlChoices,
-                value: _ttlChoices.contains(props.cacheTtl)
-                    ? props.cacheTtl
-                    : defaultDesyncCacheTtl,
-                textBuilder: (value) =>
-                    _ttlLabel(appLocalizations, value as int),
+              for (final strategy in props.savedStrategies)
+                DecorationListItem(
+                  leading: listEquals(props.strategyArgs, strategy.args)
+                      ? const Icon(Icons.check_rounded)
+                      : null,
+                  title: Text(strategy.name),
+                  subtitle: Text(
+                    appLocalizations.desyncArgsCount(strategy.args.length),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_rounded),
+                    tooltip: appLocalizations.delete,
+                    onPressed: () => _handleDelete(context, ref, strategy),
+                  ),
+                  onPressed: () => _update(
+                    ref,
+                    (state) => state.copyWith(strategyArgs: strategy.args),
+                  ),
+                ),
+            ]),
+          ),
+        if (widget._section == null || widget._section == _DesyncSection.test)
+          _DesyncTester(
+            showOverview: widget._section == _DesyncSection.test,
+            onRunningChanged: (value) => setState(() => _testing = value),
+          ),
+        if (widget._section == null || widget._section == _DesyncSection.engine)
+          SettingSection(
+            title: appLocalizations.desyncEngine,
+            items: _locked([
+              DecorationListItem.input(
+                title: Text(appLocalizations.port),
+                subtitle: Text(props.port.toString()),
+                dialogTitle: appLocalizations.port,
+                value: props.port.toString(),
+                keyboardType: TextInputType.number,
+                maxLength: TextInputLimits.port,
+                resetValue: defaultDesyncPort.toString(),
+                validator: (value) {
+                  final label = appLocalizations.port;
+                  if (value == null || value.isEmpty) {
+                    return appLocalizations.emptyTip(label);
+                  }
+                  final port = int.tryParse(value);
+                  if (port == null) {
+                    return appLocalizations.numberTip(label);
+                  }
+                  return port >= 1 && port <= 65535
+                      ? null
+                      : appLocalizations.portTip(label);
+                },
+                onChanged: (value) {
+                  final port = int.tryParse(value ?? '');
+                  if (port != null && port >= 1 && port <= 65535) {
+                    _update(ref, (state) => state.copyWith(port: port));
+                  }
+                },
+              ),
+              DecorationListItem.toggle(
+                title: Text(appLocalizations.desyncCache),
+                subtitle: Text(appLocalizations.desyncCacheDesc),
+                value: props.cacheEnabled,
                 onChanged: (value) => _update(
                   ref,
-                  (state) => state.copyWith(cacheTtl: value as int),
+                  (state) => state.copyWith(cacheEnabled: value),
                 ),
               ),
-          ]),
-        ),
-        SettingSection(
-          title: appLocalizations.desyncRouting,
-          bottom: 24,
-          items: _locked([
-            for (final category in DesyncCategory.values)
+              if (props.cacheEnabled)
+                DecorationListItem.options(
+                  title: Text(appLocalizations.desyncCacheTtl),
+                  subtitle: Text(_ttlLabel(appLocalizations, props.cacheTtl)),
+                  dialogTitle: appLocalizations.desyncCacheTtl,
+                  options: _ttlChoices,
+                  value: _ttlChoices.contains(props.cacheTtl)
+                      ? props.cacheTtl
+                      : defaultDesyncCacheTtl,
+                  textBuilder: (value) =>
+                      _ttlLabel(appLocalizations, value as int),
+                  onChanged: (value) => _update(
+                    ref,
+                    (state) => state.copyWith(cacheTtl: value as int),
+                  ),
+                ),
+            ]),
+          ),
+        if (widget._section == null || widget._section == _DesyncSection.engine)
+          SettingSection(
+            title: appLocalizations.desyncRouting,
+            bottom: 24,
+            items: _locked([
+              for (final category in DesyncCategory.values)
+                DecorationListItem.toggle(
+                  title: Text(_desyncCategoryLabel(category)),
+                  subtitle: Text('GEOSITE,${category.geosite}'),
+                  value: props.categories.contains(category),
+                  onChanged: (value) => _update(ref, (state) {
+                    final next = {...state.categories};
+                    value ? next.add(category) : next.remove(category);
+                    return state.copyWith(categories: next.toList());
+                  }),
+                ),
               DecorationListItem.toggle(
-                title: Text(_categoryLabel(category)),
-                subtitle: Text('GEOSITE,${category.geosite}'),
-                value: props.categories.contains(category),
-                onChanged: (value) => _update(ref, (state) {
-                  final next = {...state.categories};
-                  value ? next.add(category) : next.remove(category);
-                  return state.copyWith(categories: next.toList());
-                }),
+                title: Text(appLocalizations.desyncForceTcp),
+                subtitle: Text(appLocalizations.desyncForceTcpDesc),
+                value: props.forceTcp,
+                onChanged: (value) =>
+                    _update(ref, (state) => state.copyWith(forceTcp: value)),
               ),
-            DecorationListItem.toggle(
-              title: Text(appLocalizations.desyncForceTcp),
-              subtitle: Text(appLocalizations.desyncForceTcpDesc),
-              value: props.forceTcp,
-              onChanged: (value) =>
-                  _update(ref, (state) => state.copyWith(forceTcp: value)),
-            ),
-          ]),
-        ),
+            ]),
+          ),
+        if (widget._section == _DesyncSection.engine)
+          _DesyncRoutingRules(props: props),
       ],
     );
   }
@@ -253,14 +446,55 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
   List<Widget> _locked(List<Widget> items) => _testing
       ? items.map((item) => IgnorePointer(child: item)).toList()
       : items;
+}
 
-  String _categoryLabel(DesyncCategory category) => switch (category) {
-    DesyncCategory.youtube => 'YouTube',
-    DesyncCategory.discord => 'Discord',
-    DesyncCategory.twitter => 'Twitter / X',
-    DesyncCategory.meta => 'Meta',
-    DesyncCategory.signal => 'Signal',
-  };
+class _DesyncRoutingRules extends StatelessWidget {
+  const _DesyncRoutingRules({required this.props});
+
+  final DesyncProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final rules = desyncRules(
+      categories: props.categories,
+      forceTcp: props.forceTcp,
+    );
+    return SettingSection(
+      title: appLocalizations.desyncRoutingRules,
+      subTitle: appLocalizations.desyncRoutingGeositeNote,
+      bottom: 24,
+      items: [
+        if (rules.isEmpty)
+          DecorationListItem(
+            leading: const Icon(Icons.route_rounded),
+            title: Text(appLocalizations.desyncRoutingNoCategories),
+            subtitle: Text(appLocalizations.desyncRoutingNoCategoriesDesc),
+          )
+        else
+          for (final rule in rules)
+            DecorationListItem(
+              leading: Icon(
+                rule.endsWith('REJECT')
+                    ? Icons.block_rounded
+                    : Icons.alt_route_rounded,
+              ),
+              title: Text(
+                rule,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              ),
+            ),
+        DecorationListItem(
+          leading: const Icon(Icons.public_rounded),
+          title: Text(
+            desyncOnlyFallback().single,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+          subtitle: Text(appLocalizations.desyncRoutingFallbackDesc),
+        ),
+      ],
+    );
+  }
 }
 
 class _DesyncArgsEditor extends StatefulWidget {
@@ -364,8 +598,12 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
 /// Runs the preset battery against the live engine and lets the user apply a
 /// winner; the strategy in force when the test started is restored at the end.
 class _DesyncTester extends ConsumerStatefulWidget {
-  const _DesyncTester({required this.onRunningChanged});
+  const _DesyncTester({
+    required this.showOverview,
+    required this.onRunningChanged,
+  });
 
+  final bool showOverview;
   final ValueChanged<bool> onRunningChanged;
 
   @override
@@ -388,13 +626,18 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
   }
 
   Future<void> _handleStart() async {
-    final props = ref.read(desyncSettingProvider);
+    final container = ProviderScope.containerOf(context, listen: false);
+    final props = container.read(desyncSettingProvider);
     final sites = desyncTestSitesFor(props.testSiteLists);
     if (sites.isEmpty || !await desyncEngineAlive(props.port)) {
-      setState(() => _engineDown = true);
+      if (mounted) setState(() => _engineDown = true);
       return;
     }
-    final notifier = ref.read(desyncSettingProvider.notifier);
+    final retention = container.listen<DesyncProps>(
+      desyncSettingProvider,
+      (_, _) {},
+    );
+    final notifier = container.read(desyncSettingProvider.notifier);
     final tester = DesyncStrategyTester(
       port: props.port,
       applyArgs: (args) async =>
@@ -410,15 +653,37 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
       _outcomes.clear();
     });
     widget.onRunningChanged(true);
-    // Persisted so a crash mid-battery restores the strategy instead of
-    // leaving the engine on a random preset.
     notifier.update(
       (state) => state.copyWith(
         testRunning: true,
         testRestoreArgs: props.strategyArgs,
       ),
     );
-    List<DesyncTestOutcome> outcomes;
+    final store = container.read(storeActionProvider.notifier);
+    if (!await store.savePreferences()) {
+      notifier.update(
+        (state) => state.copyWith(testRunning: false, testRestoreArgs: null),
+      );
+      debouncer.cancel(FunctionTag.savePreferences);
+      retention.close();
+      if (!mounted) return;
+      setState(() {
+        _tester = null;
+        _running = false;
+        _aborted = true;
+      });
+      widget.onRunningChanged(false);
+      dialogs.showNotifier(
+        context.appLocalizations.databaseWriteFailedTip,
+        level: MessageLevel.error,
+      );
+      return;
+    }
+
+    var outcomes = const <DesyncTestOutcome>[];
+    Object? failure;
+    StackTrace? failureStack;
+    var recoverySaved = true;
     try {
       outcomes = await tester.run(
         originalArgs: props.strategyArgs,
@@ -431,17 +696,37 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
           });
         },
       );
+    } catch (error, stackTrace) {
+      failure = error;
+      failureStack = stackTrace;
     } finally {
       notifier.update(
         (state) => state.copyWith(testRunning: false, testRestoreArgs: null),
       );
+      recoverySaved = await store.savePreferences();
+      retention.close();
     }
     if (!mounted) return;
     setState(() {
+      _tester = null;
       _running = false;
-      _aborted = outcomes.length < desyncTestPresets.length && !_stoppedByUser;
+      _aborted =
+          failure != null ||
+          outcomes.length < desyncTestPresets.length && !_stoppedByUser;
     });
     widget.onRunningChanged(false);
+    if (failure case final failure?) {
+      commonPrint.log(
+        'DPI strategy test failed: ${compactError(failure)}, $failureStack',
+        logLevel: LogLevel.warning,
+      );
+      dialogs.showNotifier(compactError(failure), level: MessageLevel.error);
+    } else if (!recoverySaved) {
+      dialogs.showNotifier(
+        context.appLocalizations.databaseWriteFailedTip,
+        level: MessageLevel.error,
+      );
+    }
   }
 
   void _handleStop() {
@@ -478,60 +763,81 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
     final outcomes =
         _running || _outcomes.length < 2 ? _outcomes : [..._outcomes]
           ..sort((a, b) => b.score.compareTo(a.score));
-    return SettingSection(
-      title: appLocalizations.desyncTestSection,
-      items: [
-        DecorationListItem(
-          title: Text(appLocalizations.desyncTestTitle),
-          subtitle: Text(subtitle),
-          trailing: CommonMinFilledButtonTheme(
-            child: FilledButton.tonal(
-              onPressed: _running
-                  ? _handleStop
-                  : sites.isEmpty
-                  ? null
-                  : _handleStart,
-              child: Text(
-                _running
-                    ? appLocalizations.stop
-                    : appLocalizations.desyncTestStart,
+    final selectedLists = [
+      for (final list in desyncTestSiteLists)
+        if (props.contains(list.id)) list,
+    ];
+    return Column(
+      children: [
+        if (widget.showOverview)
+          _DesyncOverviewCard(
+            icon: Icons.science_rounded,
+            title: appLocalizations.desyncTestBattery,
+            subtitle: appLocalizations.desyncTestBatterySummary(
+              desyncTestPresets.length,
+              selectedLists.length,
+              sites.length,
+            ),
+            detail: selectedLists.map((list) => list.name).join(' · '),
+          ),
+        SettingSection(
+          title: appLocalizations.desyncTestSection,
+          items: [
+            DecorationListItem(
+              title: Text(appLocalizations.desyncTestTitle),
+              subtitle: Text(subtitle),
+              trailing: CommonMinFilledButtonTheme(
+                child: FilledButton.tonal(
+                  onPressed: _running
+                      ? _handleStop
+                      : sites.isEmpty
+                      ? null
+                      : _handleStart,
+                  child: Text(
+                    _running
+                        ? appLocalizations.stop
+                        : appLocalizations.desyncTestStart,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        DecorationListItem.open(
-          title: Text(appLocalizations.desyncTestDomains),
-          subtitle: Text(appLocalizations.desyncTestDomainsCount(sites.length)),
-          widget: const _DesyncTestSitesPage(),
-        ),
-        for (final outcome in outcomes)
-          DecorationListItem(
-            leading: outcome.engineUp && outcome.passed == outcome.total
-                ? const Icon(Icons.check_rounded)
-                : null,
-            title: Text(
-              outcome.text.replaceAll('{sni}', desyncTestFakeSni),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            DecorationListItem.open(
+              title: Text(appLocalizations.desyncTestDomains),
+              subtitle: Text(
+                appLocalizations.desyncTestDomainsCount(sites.length),
+              ),
+              widget: const _DesyncTestSitesPage(),
             ),
-            subtitle: Text(
-              outcome.engineUp
-                  ? appLocalizations.desyncTestScore(
-                      outcome.passed,
-                      outcome.total,
-                    )
-                  : appLocalizations.desyncTestEngineCrashed,
-            ),
-            trailing: outcome.failedSites.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.info_outline_rounded),
-                    tooltip: appLocalizations.desyncTestFailedTitle,
-                    onPressed: () => _showFailed(outcome),
-                  ),
-            onPressed: _running ? null : () => _applyOutcome(outcome),
-          ),
+            for (final outcome in outcomes)
+              DecorationListItem(
+                leading: outcome.engineUp && outcome.passed == outcome.total
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                title: Text(
+                  outcome.text.replaceAll('{sni}', desyncTestFakeSni),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                ),
+                subtitle: Text(
+                  outcome.engineUp
+                      ? appLocalizations.desyncTestScore(
+                          outcome.passed,
+                          outcome.total,
+                        )
+                      : appLocalizations.desyncTestEngineCrashed,
+                ),
+                trailing: outcome.failedSites.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.info_outline_rounded),
+                        tooltip: appLocalizations.desyncTestFailedTitle,
+                        onPressed: () => _showFailed(outcome),
+                      ),
+                onPressed: _running ? null : () => _applyOutcome(outcome),
+              ),
+          ],
+        ),
       ],
     );
   }
@@ -562,20 +868,25 @@ class _DesyncTestSitesPage extends ConsumerWidget {
             bottom: 24,
             items: [
               for (final list in desyncTestSiteLists)
-                DecorationListItem.toggle(
+                DecorationListItem.open(
                   title: Text(list.name),
                   subtitle: Text(
-                    appLocalizations.desyncTestDomainsCount(
-                      list.domains.length,
-                    ),
+                    '${appLocalizations.desyncTestDomainsCount(list.domains.length)}'
+                    ' · ${list.domains.take(2).join(' · ')}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  value: selected.contains(list.id),
-                  onChanged: (value) =>
-                      ref.read(desyncSettingProvider.notifier).update((state) {
-                        final next = {...state.testSiteLists};
-                        value ? next.add(list.id) : next.remove(list.id);
-                        return state.copyWith(testSiteLists: next.toList());
-                      }),
+                  trailing: Switch(
+                    value: selected.contains(list.id),
+                    onChanged: (value) => ref
+                        .read(desyncSettingProvider.notifier)
+                        .update((state) {
+                          final next = {...state.testSiteLists};
+                          value ? next.add(list.id) : next.remove(list.id);
+                          return state.copyWith(testSiteLists: next.toList());
+                        }),
+                  ),
+                  widget: _DesyncTestDomainListView(list: list),
                 ),
             ],
           ),
@@ -584,4 +895,37 @@ class _DesyncTestSitesPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _DesyncTestDomainListView extends StatelessWidget {
+  const _DesyncTestDomainListView({required this.list});
+
+  final DesyncTestSiteList list;
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: list.name,
+    body: CustomScrollView(
+      slivers: [
+        SettingSection.sliver(
+          title: context.appLocalizations.desyncTestDomains,
+          subTitle: context.appLocalizations.desyncTestDomainsCount(
+            list.domains.length,
+          ),
+          bottom: 24,
+          items: [
+            for (final domain in list.domains)
+              DecorationListItem(
+                leading: const Icon(Icons.language_rounded),
+                title: SelectableText(
+                  domain,
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+                ),
+              ),
+          ],
+        ),
+        const SettingBottomInset.sliver(),
+      ],
+    ),
+  );
 }

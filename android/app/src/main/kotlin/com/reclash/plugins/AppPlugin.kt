@@ -17,6 +17,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.FileProvider
@@ -168,6 +169,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 packageResolver.hasInstalledAppsPermission()
             }
 
+            "isNotificationsPermissionGranted" -> {
+                result.success(isNotificationsPermissionGranted())
+            }
+
+            "requestNotificationsPermission" -> {
+                requestNotificationPermission { result.success(it) }
+            }
+
             "requestInstalledAppsPermission" -> {
                 requestInstalledAppsPermission { granted -> result.success(granted) }
             }
@@ -258,6 +267,13 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
     private val iconVariantAliases = mapOf(
         "default" to ".icons.DefaultAlias",
+        "pulse" to ".icons.MonoAlias",
+        "glacier" to ".icons.SepiaAlias",
+        "obsidian" to ".icons.InvertedAlias",
+        "velvet" to ".icons.DarkMonoAlias",
+        "solar" to ".icons.CoolAlias",
+        "circuit" to ".icons.CircuitAlias",
+        "prism" to ".icons.PrismAlias",
         "mono" to ".icons.MonoAlias",
         "sepia" to ".icons.SepiaAlias",
         "inverted" to ".icons.InvertedAlias",
@@ -274,7 +290,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP,
         )
-        for (suffix in iconVariantAliases.values) {
+        for (suffix in iconVariantAliases.values.toSet()) {
             val component = aliasComponent(suffix) ?: continue
             if (component == target) continue
             if (manager.getComponentEnabledSetting(component) !=
@@ -418,6 +434,16 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
         }
         task?.setExcludeFromRecents(value ?: false)
+    }
+
+    private fun isNotificationsPermissionGranted(): Boolean {
+        val context = GlobalState.application
+        val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return enabled
+        return enabled && ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun requestNotificationPermission(callback: (Boolean) -> Unit) = onMainThread {

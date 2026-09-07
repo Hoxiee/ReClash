@@ -111,6 +111,9 @@
   "selectAll": "Select all",
   "cancelSelectAll": "Deselect all",
   "appAccessControl": "App access control",
+  "accessControlIncludeInVpn": "Include in VPN",
+  "accessControlExcludeFromVpn": "Exclude from VPN",
+  "searchApps": "Search apps",
   "accessControlAllowDesc": "Only selected apps go through the VPN",
   "accessControlNotAllowDesc": "Selected apps are excluded from the VPN",
   "accessControlDisabledDesc": "App access control is disabled",
@@ -179,6 +182,8 @@
   "ipv6Desc": "When enabled, IPv6 traffic can be received",
   "app": "App",
   "general": "General",
+  "identity": "Identity",
+  "animations": "Animations",
   "extra": "Extra",
   "systemProxyDesc": "Set the system proxy",
   "userAgent": "User-Agent",
@@ -396,6 +401,11 @@
   "fruitSaladScheme": "Fruit salad",
   "developerMode": "Developer mode",
   "developerModeEnableTip": "Developer mode is enabled.",
+  "developerSubscriptions": "Developer subscriptions",
+  "developerSubscriptionPrismDesc": "Brand colors, a custom Hero Ring, and local logo rendering",
+  "developerSubscriptionOrbitDesc": "Quota, expiration, announcements, domain migration, and offers",
+  "developerSubscriptionAtlasDesc": "Provider dashboard widgets, server switching, and proxy layout",
+  "developerSubscriptionInstalled": "{name} installed",
   "messageTest": "Message test",
   "messageTestTip": "This is a message.",
   "crashTest": "Crash test",
@@ -852,6 +862,29 @@
   },
   "smartRoutingHistory": "Recent switches",
   "smartRoutingHistoryEmpty": "No switches yet",
+  "smartRoutingSectionReliability": "Reliability",
+  "smartRoutingAvailability": "Availability",
+  "smartRoutingAvailabilityValue": "{percent}% over {duration}",
+  "@smartRoutingAvailabilityValue": {
+    "placeholders": {
+      "percent": {
+        "type": "num"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingIncidents": "Detected outages",
+  "smartRoutingStandbyHits": "Recovered through a warm standby",
+  "smartRoutingLastRecovery": "Last recovery",
+  "smartRoutingAverageRecovery": "Average recovery",
+  "smartRoutingProviderIncidents": "Provider circuits opened",
+  "smartRoutingMarkerIncidents": "Service checks quarantined",
+  "smartRoutingActiveCircuits": "Providers temporarily held back",
+  "smartRoutingActiveMarkers": "Checks temporarily held back",
+  "smartRoutingNoRecovery": "No recovered outage yet",
+  "smartRoutingBlockProviderCircuit": "Provider temporarily held back after independent failures",
   "smartRoutingSwitchLine": "{from} → {to}",
   "@smartRoutingSwitchLine": {
     "placeholders": {
@@ -905,26 +938,26 @@
   },
   "smartRoutingDegraded": "Throttled",
   "smartRoutingOffHint": "Turn smart routing on to let it pick servers for you",
-  "setupWelcome": "Everything set up in a minute",
-  "setupLanguageTitle": "Choose a language",
-  "setupLanguageDesc": "You can change it later in settings",
-  "setupLegalTitle": "Before we start",
-  "setupDataCollection": "Send crash reports",
-  "setupSubscriptionTitle": "Add a subscription",
-  "setupSubscriptionDesc": "A link from your provider, a QR code, or a config file",
-  "setupSubscriptionReady": "Subscription added",
+  "setupWelcome": "Get ready in a few clear steps",
+  "setupLanguageTitle": "Choose your language",
+  "setupLanguageDesc": "You can change this later in settings",
+  "setupLegalTitle": "Before you continue",
+  "setupDataCollection": "Send optional crash reports",
+  "setupSubscriptionTitle": "Add a connection profile",
+  "setupSubscriptionDesc": "A profile contains the servers and rules ReClash needs to connect. Import one from your provider or a backup.",
+  "setupSubscriptionReady": "Profile ready",
   "setupRestore": "Restore from a backup",
-  "setupRestoreDesc": "Move everything from a ReClash, FlClashX, or FlClash backup",
-  "setupFinishTitle": "Almost done",
-  "setupRegionDesc": "Sets the starting point for server selection",
-  "setupRegionNone": "Do not pick",
-  "setupAutoRun": "Connect on launch",
-  "setupAutoRunDesc": "The tunnel comes up as soon as the app opens",
+  "setupRestoreDesc": "Restore settings and profiles from a ReClash, FlClashX, or FlClash backup",
+  "setupFinishTitle": "Review your setup",
+  "setupRegionDesc": "Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.",
+  "setupRegionNone": "Other region or do not use Smart Routing",
+  "setupAutoRun": "Connect when ReClash opens",
+  "setupAutoRunDesc": "Starts the VPN automatically after a valid profile is loaded",
   "setupPermissionVpn": "VPN permission",
-  "setupPermissionVpnDesc": "The system will ask on the first connection",
+  "setupPermissionVpnDesc": "The system will ask when you connect for the first time",
   "setupPermissionNotifications": "Notifications",
-  "setupPermissionNotificationsDesc": "Shows the connection status while running",
-  "setupSkip": "Skip",
+  "setupPermissionNotificationsDesc": "Shows connection status while ReClash is running",
+  "setupSkip": "Continue without a profile",
   "setupNext": "Next",
   "setupDone": "Done",
   "smartRoutingBreaker": "Whitelist specialist",
@@ -1085,11 +1118,13 @@
   "systemSeed": "System seed",
   "appIcon": "App icon",
   "appIconChangeNote": "The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.",
-  "appIconMono": "Mono",
-  "appIconSepia": "Sepia",
-  "appIconInverted": "Inverted",
-  "appIconDarkMono": "Dark mono",
-  "appIconCool": "Cool",
+  "appIconPulse": "Pulse",
+  "appIconGlacier": "Glacier",
+  "appIconObsidian": "Obsidian",
+  "appIconVelvet": "Velvet",
+  "appIconSolar": "Solar",
+  "appIconCircuit": "Circuit",
+  "appIconPrism": "Prism",
   "dashboardStyle": "Dashboard style",
   "classicDashboard": "Classic",
   "classicDashboardDesc": "Tile grid with a start button",
@@ -1220,5 +1255,120 @@
         "type": "num"
       }
     }
-  }
+  },
+  "desyncActiveStrategy": "Active strategy",
+  "desyncCacheDisabled": "Strategy cache is off",
+  "desyncEngineSummary": "{count} routing categories use the ByeDPI engine",
+  "desyncTestBattery": "Test battery",
+  "desyncTestBatterySummary": "{presets} presets · {groups} groups · {domains} hosts",
+  "desyncRoutingRules": "Effective rules",
+  "desyncRoutingGeositeNote": "Category membership comes from the bundled GEOSITE database; test-domain lists are separate",
+  "desyncRoutingNoCategories": "No bypass categories selected",
+  "desyncRoutingNoCategoriesDesc": "No service is currently routed through ByeDPI",
+  "desyncRoutingFallbackDesc": "All traffic outside selected GEOSITE categories goes directly",
+  "byedpiOff": "DPI bypass is off",
+  "byedpiStarting": "Starting DPI bypass",
+  "byedpiChecking": "Checking the DPI engine",
+  "byedpiReconnecting": "Restarting the DPI engine",
+  "byedpiActive": "DPI bypass is active",
+  "byedpiPaused": "DPI bypass is paused",
+  "byedpiEngineError": "DPI engine needs attention",
+  "byedpiTapToStart": "Tap to start the local bypass engine",
+  "byedpiTapToResume": "Tap to resume DPI bypass",
+  "byedpiActiveFor": "Bypassing DPI {time}",
+  "setupSystemLanguage": "System language",
+  "setupStepProgress": "Step {step} of {count}",
+  "setupLegalSummary": "ReClash creates a local VPN connection to route traffic. You choose and are responsible for the configuration or provider you use.",
+  "setupLegalDetails": "Read the full disclaimer",
+  "setupLegalLicense": "Open-source licenses",
+  "setupDataCollectionDesc": "Helps find app crashes. No reports are sent unless you turn this on.",
+  "setupDecline": "Do not agree and exit",
+  "setupBack": "Back",
+  "dashboardNoProfileTitle": "Set up a connection",
+  "dashboardNoProfileDesc": "Add a VPN profile from a provider you trust. Until then, VPN stays off.",
+  "dashboardNoActiveProfileTitle": "Choose a VPN profile",
+  "dashboardNoActiveProfileDesc": "Profiles are saved, but none is active. Choose one to make VPN controls available.",
+  "dashboardSelectProfile": "Choose profile",
+  "dashboardByedpiTitle": "No VPN provider?",
+  "dashboardByedpiDesc": "Use ByeDPI-only mode to bypass DPI without a VPN profile.",
+  "dashboardUseByedpi": "Use ByeDPI",
+  "setupProfileSourceNotice": "ReClash does not sell VPN access. Use a link, QR code, or config file from a provider you trust. Every profile is checked before it is saved.",
+  "setupContinueWithoutProfile": "Continue without a profile",
+  "setupContinueWithoutProfileDesc": "VPN stays off. You can add a profile later or use ByeDPI-only mode without a VPN provider.",
+  "setupProfilesReady": "{count, plural, =1{1 profile ready} other{{count} profiles ready}}",
+  "setupAddAnotherProfile": "Add another",
+  "setupReplaceProfile": "Replace",
+  "setupDeleteProfile": "Delete",
+  "setupReplaceProfileHint": "Import a working replacement before the current profile is removed.",
+  "setupRegionTitle": "Where is your current network?",
+  "setupRegionRecommended": "Recommended for your language",
+  "setupAutoRunUnavailable": "Add a profile to enable automatic connection",
+  "setupSummaryTitle": "Setup summary",
+  "setupSummaryNoProfile": "No VPN profile — VPN remains off; ByeDPI-only is available",
+  "setupSummaryProfile": "Profile: {name}",
+  "setupSummaryRouting": "Smart Routing: {value}",
+  "setupSummaryAutoRunOn": "Automatic connection: on",
+  "setupSummaryAutoRunOff": "Automatic connection: off",
+  "setupPermissionDeferred": "Requested on first connection",
+  "setupPermissionBattery": "Battery optimization",
+  "setupPermissionBatteryDesc": "Allow ReClash to keep the VPN active in the background",
+  "setupPermissionChecking": "Checking…",
+  "setupPermissionRequest": "Allow",
+  "setupPermissionGranted": "Allowed",
+  "setupPermissionDenied": "Not allowed",
+  "setupPermissionUnavailable": "Unavailable",
+  "setupPermissionError": "Could not check",
+  "setupPermissionOpenSettings": "Open settings",
+  "setupDoneConnect": "Done and connect",
+  "setupRerun": "Run setup again",
+  "setupRerunDesc": "Review language, profile, routing, and permissions without deleting your data",
+  "@setupStepProgress": {
+    "placeholders": {
+      "step": {
+        "type": "num"
+      },
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupProfilesReady": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "@setupSummaryProfile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@setupSummaryRouting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImport": "Receive from phone",
+  "lanProfileImportDesc": "Show a one-time QR code to send a subscription URL over your local network",
+  "lanProfileImportTitle": "Receive subscription",
+  "lanProfileImportScan": "Scan this QR code with a phone on the same network",
+  "lanProfileImportAddress": "Or send JSON to {address}",
+  "lanProfileImportWaiting": "Waiting for a subscription…",
+  "lanProfileImportImporting": "Importing subscription…",
+  "lanProfileImportImported": "Subscription received",
+  "lanProfileImportTimedOut": "The one-time link has expired",
+  "@lanProfileImportAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "lanProfileImportStartFailed": "Could not start local sharing",
+  "lanProfileImportFailed": "Could not import the subscription"
 }

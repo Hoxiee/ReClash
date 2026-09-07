@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_connected">Connected</string>
+    <string name="widget_connecting">Connecting…</string>
+    <string name="widget_disconnecting">Disconnecting…</string>
+    <string name="widget_disconnected">Disconnected</string>
+    <string name="widget_paused">Paused</string>
+    <string name="widget_start">Start</string>
+    <string name="widget_stop">Stop</string>
+    <string name="widget_wait">Wait</string>
+    <string name="widget_resume">Resume</string>
+</resources>

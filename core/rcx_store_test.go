@@ -35,6 +35,19 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 	snapshot.Picks["w:Home"] = "Amsterdam #3"
 	snapshot.Regimes["w:Home"] = rcxRegimeMemory{Terrain: rcxTerrainWhitelist, At: now}
 	snapshot.Global["Amsterdam #3"] = &rcxNodeGlobal{Origin: rcxOriginForeign, EverGood: true}
+	snapshot.Standbys["w:Home"] = []string{"endpoint-de-1", "endpoint-us-1"}
+	snapshot.Quarantines["open:telegram"] = rcxMarkerQuarantine{
+		Until:    now.Add(10 * time.Minute),
+		Failures: []rcxMarkerFailure{{Bucket: "provider-a", At: now}},
+	}
+	snapshot.Metrics = rcxMetricsState{
+		EnabledMillis:      60_000,
+		AvailableMillis:    55_000,
+		Incidents:          2,
+		StandbyHits:        1,
+		LastFailoverMillis: 2_300,
+		LastOutageMillis:   3_100,
+	}
 	snapshot.Envs["w:Home"] = map[string]*rcxNodeEnv{
 		"Amsterdam #3": {OpenWorld: rcxProofProven, LastGoodAt: now},
 	}
@@ -53,6 +66,16 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 	}
 	if restored.Envs["w:Home"]["Amsterdam #3"].OpenWorld != rcxProofProven {
 		t.Error("per-network proof was lost")
+	}
+	if got := restored.Standbys["w:Home"]; len(got) != 2 || got[0] != "endpoint-de-1" {
+		t.Errorf("standbys = %v, want the warm replacement order preserved", got)
+	}
+	quarantine := restored.Quarantines["open:telegram"]
+	if !quarantine.Until.Equal(now.Add(10*time.Minute)) || len(quarantine.Failures) != 1 {
+		t.Errorf("quarantine = %+v, want its expiry and bounded evidence preserved", quarantine)
+	}
+	if got := restored.Metrics; got.EnabledMillis != 60_000 || got.AvailableMillis != 55_000 || got.Incidents != 2 || got.StandbyHits != 1 || got.LastFailoverMillis != 2_300 || got.LastOutageMillis != 3_100 {
+		t.Errorf("metrics = %+v, want local availability and incident counters preserved", got)
 	}
 }
 
@@ -153,5 +176,24 @@ func TestStoreKeepsTheTieBreakSeedItHandedOut(t *testing.T) {
 	}
 	if got := testStore(storage).Load().Pins["w:Home"]; got != "endpoint-nl-1" {
 		t.Errorf("pin = %q, want it to survive the round trip", got)
+	}
+}
+
+func TestStoreMigratesV1WithoutTrustingUnstampedRoleProofs(t *testing.T) {
+	raw := []byte(`{"v":1,"cfg":{"on":true,"preset":"ru","om":[{"url":"https://old.example/","statuses":[204]}]},"g":{"n":{"g":true,"eo":true}},"e":{"w:Home":{"n":{"w":1,"m":1,"l":"2023-11-14T22:13:20Z","oa":"2023-11-14T22:13:20Z","ma":"2023-11-14T22:13:20Z"}}},"p":{"w:Home":"n"}}`)
+
+	snapshot := rcxDecodeSnapshot(raw)
+	state := snapshot.Envs["w:Home"]["n"]
+	if snapshot.Version != rcxStoreVersion {
+		t.Fatalf("version = %d, want %d", snapshot.Version, rcxStoreVersion)
+	}
+	if snapshot.Picks["w:Home"] != "n" || !snapshot.Global["n"].EverGood {
+		t.Fatal("v1 migration discarded marker-independent state")
+	}
+	if state.OpenWorld != rcxProofUnknown || state.Domestic != rcxProofUnknown {
+		t.Fatalf("unstamped v1 proofs survived: %+v", state)
+	}
+	if snapshot.Fingerprints.Open == "" {
+		t.Fatal("migration did not seed semantic fingerprints")
 	}
 }

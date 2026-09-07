@@ -1,7 +1,9 @@
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
+import 'package:reclash/views/dashboard/widget_registry.dart';
 import 'package:reclash/widgets/grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,5 +83,51 @@ void main() {
     expect(tester.getSize(grid).width, 1120);
     expect(tester.getTopLeft(grid).dx, 240);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('edit mode offers every removed ReClash widget', (tester) async {
+    tester.view.physicalSize = const Size(800, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [
+        newDashboardEnabledProvider.overrideWithValue(false),
+        dashboardStateProvider.overrideWithValue(
+          const DashboardState(dashboardWidgets: []),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(child: DashboardView()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('edit-icon')));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.add_circle));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Memory info'), findsOneWidget);
+    expect(find.text('Subscription'), findsOneWidget);
+    expect(find.text('Announcements'), findsOneWidget);
+    expect(find.text('Service'), findsOneWidget);
+    expect(find.text('Change server'), findsOneWidget);
+    expect(tester.takeException(), null);
+  });
+
+  test('ReClash cards keep compact spans except subscription and announce', () {
+    expect(DashboardWidget.memoryInfo.widget.crossAxisCellCount, 4);
+    expect(DashboardWidget.serviceInfo.widget.crossAxisCellCount, 4);
+    expect(DashboardWidget.changeServerButton.widget.crossAxisCellCount, 4);
+    expect(DashboardWidget.metaInfo.widget.crossAxisCellCount, 8);
+    expect(DashboardWidget.announce.widget.crossAxisCellCount, 8);
   });
 }

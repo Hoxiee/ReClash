@@ -33,6 +33,54 @@ String normalizeSubscriptionUrl(String url) {
       .toString();
 }
 
+String? subscriptionDomainCandidate(String url, String? newDomain) {
+  final source = Uri.tryParse(url);
+  final authority = newDomain?.trim();
+  if (source == null ||
+      authority == null ||
+      authority.isEmpty ||
+      (source.scheme != 'http' && source.scheme != 'https') ||
+      source.host.isEmpty ||
+      source.userInfo.isNotEmpty ||
+      authority.contains(RegExp(r'[\s/@?#]')) ||
+      authority.contains('://')) {
+    return null;
+  }
+
+  final parsed = Uri.tryParse('${source.scheme}://$authority');
+  if (parsed == null ||
+      parsed.host.isEmpty ||
+      parsed.userInfo.isNotEmpty ||
+      parsed.path.isNotEmpty ||
+      parsed.hasQuery ||
+      parsed.hasFragment) {
+    return null;
+  }
+  final host = parsed.host.toLowerCase();
+  if (!_hostname.hasMatch(host)) {
+    return null;
+  }
+
+  int? port;
+  try {
+    if (parsed.hasPort) {
+      port = parsed.port;
+      if (port < 1 || port > 65535) return null;
+    }
+  } on FormatException {
+    return null;
+  }
+
+  final candidate = port == null
+      ? source.replace(host: host)
+      : source.replace(host: host, port: port);
+  if (candidate.host.toLowerCase() == source.host.toLowerCase() &&
+      candidate.port == source.port) {
+    return null;
+  }
+  return candidate.toString();
+}
+
 List<String> parseFallbackHosts(String? value) {
   if (value == null || value.isEmpty) return const [];
   return value

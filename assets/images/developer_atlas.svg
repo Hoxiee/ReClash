@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="atlas-route" x1="37" y1="214" x2="218" y2="37" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16C89E"/>
+      <stop offset=".52" stop-color="#18AFC4"/>
+      <stop offset="1" stop-color="#3374F6"/>
+    </linearGradient>
+  </defs>
+  <path fill="none" stroke="url(#atlas-route)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" d="M45 190 91 70l59 72 62-87M150 142l54 64"/>
+  <path fill="url(#atlas-route)" d="m45 160 26 15v30l-26 15-26-15v-30l26-15ZM91 40l26 15v30l-26 15-26-15V55l26-15Zm59 72 26 15v30l-26 15-26-15v-30l26-15Zm62-87 26 15v30l-26 15-26-15V40l26-15Zm-8 151 26 15v30l-26 15-26-15v-30l26-15Z"/>
+</svg>

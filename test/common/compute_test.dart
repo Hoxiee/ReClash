@@ -132,6 +132,20 @@ void main() {
       );
       expect(state.proxyName, 'proxy-b');
     });
+
+    test('stops when selected groups contain a cycle', () {
+      final groups = [
+        const Group(name: 'group-a', type: GroupType.Selector),
+        const Group(name: 'group-b', type: GroupType.Selector),
+      ];
+      final state = computeRealSelectedProxyState(
+        'group-a',
+        groups: groups,
+        selectedMap: {'group-a': 'group-b', 'group-b': 'group-a'},
+      );
+      expect(state.proxyName, 'group-a');
+      expect(state.group, isTrue);
+    });
   });
 
   group('computeProxyDelayState', () {

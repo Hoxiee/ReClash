@@ -34,6 +34,7 @@
 
     <application
         android:name=".ReClashApplication"
+        android:allowBackup="false"
         android:banner="@mipmap/ic_banner"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -60,11 +61,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="clash" />
-                <data android:scheme="clashmeta" />
-                <data android:scheme="reclash" />
-                <data android:scheme="incy" />
-                <data android:scheme="happ" />
+                <data
+                    android:host="install-config"
+                    android:scheme="clash" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -72,16 +71,129 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="vmess" />
-                <data android:scheme="vless" />
-                <data android:scheme="ss" />
-                <data android:scheme="ssr" />
-                <data android:scheme="trojan" />
-                <data android:scheme="hysteria" />
-                <data android:scheme="hysteria2" />
-                <data android:scheme="hy2" />
-                <data android:scheme="tuic" />
-                <data android:scheme="anytls" />
+                <data
+                    android:host="install-config"
+                    android:scheme="clashmeta" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="install-config"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="connect"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="disconnect"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="toggle"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="open"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="close"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="import"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="add"
+                    android:scheme="reclash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="crypt1"
+                    android:scheme="incy" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="add"
+                    android:scheme="incy" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="import"
+                    android:scheme="incy" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="add"
+                    android:scheme="happ" />
             </intent-filter>
         </activity>
 
@@ -104,7 +216,7 @@
             android:name=".icons.MonoAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_mono"
+            android:icon="@mipmap/ic_launcher_pulse"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -117,7 +229,7 @@
             android:name=".icons.SepiaAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_sepia"
+            android:icon="@mipmap/ic_launcher_glacier"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -130,7 +242,7 @@
             android:name=".icons.InvertedAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_inverted"
+            android:icon="@mipmap/ic_launcher_obsidian"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -143,7 +255,7 @@
             android:name=".icons.DarkMonoAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_dark_mono"
+            android:icon="@mipmap/ic_launcher_velvet"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -156,7 +268,33 @@
             android:name=".icons.CoolAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_cool"
+            android:icon="@mipmap/ic_launcher_solar"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.CircuitAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_circuit"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.PrismAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_prism"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -193,10 +331,22 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".HomeWidgetProvider"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/home_widget_info" />
+        </receiver>
+
         <service
             android:name=".TileService"
             android:exported="true"
-            android:icon="@drawable/ic"
+            android:icon="@drawable/ic_quick_settings"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -240,6 +390,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

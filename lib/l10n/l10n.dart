@@ -890,6 +890,31 @@ class AppLocalizations {
     );
   }
 
+  /// `Include in VPN`
+  String get accessControlIncludeInVpn {
+    return Intl.message(
+      'Include in VPN',
+      name: 'accessControlIncludeInVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exclude from VPN`
+  String get accessControlExcludeFromVpn {
+    return Intl.message(
+      'Exclude from VPN',
+      name: 'accessControlExcludeFromVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search apps`
+  String get searchApps {
+    return Intl.message('Search apps', name: 'searchApps', desc: '', args: []);
+  }
+
   /// `Only selected apps go through the VPN`
   String get accessControlAllowDesc {
     return Intl.message(
@@ -1423,6 +1448,16 @@ class AppLocalizations {
   /// `General`
   String get general {
     return Intl.message('General', name: 'general', desc: '', args: []);
+  }
+
+  /// `Identity`
+  String get identity {
+    return Intl.message('Identity', name: 'identity', desc: '', args: []);
+  }
+
+  /// `Animations`
+  String get animations {
+    return Intl.message('Animations', name: 'animations', desc: '', args: []);
   }
 
   /// `Extra`
@@ -3121,6 +3156,56 @@ class AppLocalizations {
       name: 'developerModeEnableTip',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Developer subscriptions`
+  String get developerSubscriptions {
+    return Intl.message(
+      'Developer subscriptions',
+      name: 'developerSubscriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brand colors, a custom Hero Ring, and local logo rendering`
+  String get developerSubscriptionPrismDesc {
+    return Intl.message(
+      'Brand colors, a custom Hero Ring, and local logo rendering',
+      name: 'developerSubscriptionPrismDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quota, expiration, announcements, domain migration, and offers`
+  String get developerSubscriptionOrbitDesc {
+    return Intl.message(
+      'Quota, expiration, announcements, domain migration, and offers',
+      name: 'developerSubscriptionOrbitDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider dashboard widgets, server switching, and proxy layout`
+  String get developerSubscriptionAtlasDesc {
+    return Intl.message(
+      'Provider dashboard widgets, server switching, and proxy layout',
+      name: 'developerSubscriptionAtlasDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{name} installed`
+  String developerSubscriptionInstalled(Object name) {
+    return Intl.message(
+      '$name installed',
+      name: 'developerSubscriptionInstalled',
+      desc: '',
+      args: [name],
     );
   }
 
@@ -6859,6 +6944,136 @@ class AppLocalizations {
     );
   }
 
+  /// `Reliability`
+  String get smartRoutingSectionReliability {
+    return Intl.message(
+      'Reliability',
+      name: 'smartRoutingSectionReliability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Availability`
+  String get smartRoutingAvailability {
+    return Intl.message(
+      'Availability',
+      name: 'smartRoutingAvailability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{percent}% over {duration}`
+  String smartRoutingAvailabilityValue(num percent, String duration) {
+    return Intl.message(
+      '$percent% over $duration',
+      name: 'smartRoutingAvailabilityValue',
+      desc: '',
+      args: [percent, duration],
+    );
+  }
+
+  /// `Detected outages`
+  String get smartRoutingIncidents {
+    return Intl.message(
+      'Detected outages',
+      name: 'smartRoutingIncidents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recovered through a warm standby`
+  String get smartRoutingStandbyHits {
+    return Intl.message(
+      'Recovered through a warm standby',
+      name: 'smartRoutingStandbyHits',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last recovery`
+  String get smartRoutingLastRecovery {
+    return Intl.message(
+      'Last recovery',
+      name: 'smartRoutingLastRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Average recovery`
+  String get smartRoutingAverageRecovery {
+    return Intl.message(
+      'Average recovery',
+      name: 'smartRoutingAverageRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider circuits opened`
+  String get smartRoutingProviderIncidents {
+    return Intl.message(
+      'Provider circuits opened',
+      name: 'smartRoutingProviderIncidents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service checks quarantined`
+  String get smartRoutingMarkerIncidents {
+    return Intl.message(
+      'Service checks quarantined',
+      name: 'smartRoutingMarkerIncidents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Providers temporarily held back`
+  String get smartRoutingActiveCircuits {
+    return Intl.message(
+      'Providers temporarily held back',
+      name: 'smartRoutingActiveCircuits',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checks temporarily held back`
+  String get smartRoutingActiveMarkers {
+    return Intl.message(
+      'Checks temporarily held back',
+      name: 'smartRoutingActiveMarkers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No recovered outage yet`
+  String get smartRoutingNoRecovery {
+    return Intl.message(
+      'No recovered outage yet',
+      name: 'smartRoutingNoRecovery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider temporarily held back after independent failures`
+  String get smartRoutingBlockProviderCircuit {
+    return Intl.message(
+      'Provider temporarily held back after independent failures',
+      name: 'smartRoutingBlockProviderCircuit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{from} → {to}`
   String smartRoutingSwitchLine(String from, String to) {
     return Intl.message(
@@ -7049,80 +7264,80 @@ class AppLocalizations {
     );
   }
 
-  /// `Everything set up in a minute`
+  /// `Get ready in a few clear steps`
   String get setupWelcome {
     return Intl.message(
-      'Everything set up in a minute',
+      'Get ready in a few clear steps',
       name: 'setupWelcome',
       desc: '',
       args: [],
     );
   }
 
-  /// `Choose a language`
+  /// `Choose your language`
   String get setupLanguageTitle {
     return Intl.message(
-      'Choose a language',
+      'Choose your language',
       name: 'setupLanguageTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `You can change it later in settings`
+  /// `You can change this later in settings`
   String get setupLanguageDesc {
     return Intl.message(
-      'You can change it later in settings',
+      'You can change this later in settings',
       name: 'setupLanguageDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Before we start`
+  /// `Before you continue`
   String get setupLegalTitle {
     return Intl.message(
-      'Before we start',
+      'Before you continue',
       name: 'setupLegalTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `Send crash reports`
+  /// `Send optional crash reports`
   String get setupDataCollection {
     return Intl.message(
-      'Send crash reports',
+      'Send optional crash reports',
       name: 'setupDataCollection',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add a subscription`
+  /// `Add a connection profile`
   String get setupSubscriptionTitle {
     return Intl.message(
-      'Add a subscription',
+      'Add a connection profile',
       name: 'setupSubscriptionTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `A link from your provider, a QR code, or a config file`
+  /// `A profile contains the servers and rules ReClash needs to connect. Import one from your provider or a backup.`
   String get setupSubscriptionDesc {
     return Intl.message(
-      'A link from your provider, a QR code, or a config file',
+      'A profile contains the servers and rules ReClash needs to connect. Import one from your provider or a backup.',
       name: 'setupSubscriptionDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Subscription added`
+  /// `Profile ready`
   String get setupSubscriptionReady {
     return Intl.message(
-      'Subscription added',
+      'Profile ready',
       name: 'setupSubscriptionReady',
       desc: '',
       args: [],
@@ -7139,60 +7354,60 @@ class AppLocalizations {
     );
   }
 
-  /// `Move everything from a ReClash, FlClashX, or FlClash backup`
+  /// `Restore settings and profiles from a ReClash, FlClashX, or FlClash backup`
   String get setupRestoreDesc {
     return Intl.message(
-      'Move everything from a ReClash, FlClashX, or FlClash backup',
+      'Restore settings and profiles from a ReClash, FlClashX, or FlClash backup',
       name: 'setupRestoreDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Almost done`
+  /// `Review your setup`
   String get setupFinishTitle {
     return Intl.message(
-      'Almost done',
+      'Review your setup',
       name: 'setupFinishTitle',
       desc: '',
       args: [],
     );
   }
 
-  /// `Sets the starting point for server selection`
+  /// `Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.`
   String get setupRegionDesc {
     return Intl.message(
-      'Sets the starting point for server selection',
+      'Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.',
       name: 'setupRegionDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Do not pick`
+  /// `Other region or do not use Smart Routing`
   String get setupRegionNone {
     return Intl.message(
-      'Do not pick',
+      'Other region or do not use Smart Routing',
       name: 'setupRegionNone',
       desc: '',
       args: [],
     );
   }
 
-  /// `Connect on launch`
+  /// `Connect when ReClash opens`
   String get setupAutoRun {
     return Intl.message(
-      'Connect on launch',
+      'Connect when ReClash opens',
       name: 'setupAutoRun',
       desc: '',
       args: [],
     );
   }
 
-  /// `The tunnel comes up as soon as the app opens`
+  /// `Starts the VPN automatically after a valid profile is loaded`
   String get setupAutoRunDesc {
     return Intl.message(
-      'The tunnel comes up as soon as the app opens',
+      'Starts the VPN automatically after a valid profile is loaded',
       name: 'setupAutoRunDesc',
       desc: '',
       args: [],
@@ -7209,10 +7424,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The system will ask on the first connection`
+  /// `The system will ask when you connect for the first time`
   String get setupPermissionVpnDesc {
     return Intl.message(
-      'The system will ask on the first connection',
+      'The system will ask when you connect for the first time',
       name: 'setupPermissionVpnDesc',
       desc: '',
       args: [],
@@ -7229,19 +7444,24 @@ class AppLocalizations {
     );
   }
 
-  /// `Shows the connection status while running`
+  /// `Shows connection status while ReClash is running`
   String get setupPermissionNotificationsDesc {
     return Intl.message(
-      'Shows the connection status while running',
+      'Shows connection status while ReClash is running',
       name: 'setupPermissionNotificationsDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Skip`
+  /// `Continue without a profile`
   String get setupSkip {
-    return Intl.message('Skip', name: 'setupSkip', desc: '', args: []);
+    return Intl.message(
+      'Continue without a profile',
+      name: 'setupSkip',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Next`
@@ -8059,39 +8279,44 @@ class AppLocalizations {
     );
   }
 
-  /// `Mono`
-  String get appIconMono {
-    return Intl.message('Mono', name: 'appIconMono', desc: '', args: []);
+  /// `Pulse`
+  String get appIconPulse {
+    return Intl.message('Pulse', name: 'appIconPulse', desc: '', args: []);
   }
 
-  /// `Sepia`
-  String get appIconSepia {
-    return Intl.message('Sepia', name: 'appIconSepia', desc: '', args: []);
+  /// `Glacier`
+  String get appIconGlacier {
+    return Intl.message('Glacier', name: 'appIconGlacier', desc: '', args: []);
   }
 
-  /// `Inverted`
-  String get appIconInverted {
+  /// `Obsidian`
+  String get appIconObsidian {
     return Intl.message(
-      'Inverted',
-      name: 'appIconInverted',
+      'Obsidian',
+      name: 'appIconObsidian',
       desc: '',
       args: [],
     );
   }
 
-  /// `Dark mono`
-  String get appIconDarkMono {
-    return Intl.message(
-      'Dark mono',
-      name: 'appIconDarkMono',
-      desc: '',
-      args: [],
-    );
+  /// `Velvet`
+  String get appIconVelvet {
+    return Intl.message('Velvet', name: 'appIconVelvet', desc: '', args: []);
   }
 
-  /// `Cool`
-  String get appIconCool {
-    return Intl.message('Cool', name: 'appIconCool', desc: '', args: []);
+  /// `Solar`
+  String get appIconSolar {
+    return Intl.message('Solar', name: 'appIconSolar', desc: '', args: []);
+  }
+
+  /// `Circuit`
+  String get appIconCircuit {
+    return Intl.message('Circuit', name: 'appIconCircuit', desc: '', args: []);
+  }
+
+  /// `Prism`
+  String get appIconPrism {
+    return Intl.message('Prism', name: 'appIconPrism', desc: '', args: []);
   }
 
   /// `Dashboard style`
@@ -8894,6 +9119,777 @@ class AppLocalizations {
     return Intl.message(
       'Hosts this strategy failed',
       name: 'desyncTestFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Active strategy`
+  String get desyncActiveStrategy {
+    return Intl.message(
+      'Active strategy',
+      name: 'desyncActiveStrategy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strategy cache is off`
+  String get desyncCacheDisabled {
+    return Intl.message(
+      'Strategy cache is off',
+      name: 'desyncCacheDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} routing categories use the ByeDPI engine`
+  String desyncEngineSummary(Object count) {
+    return Intl.message(
+      '$count routing categories use the ByeDPI engine',
+      name: 'desyncEngineSummary',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Test battery`
+  String get desyncTestBattery {
+    return Intl.message(
+      'Test battery',
+      name: 'desyncTestBattery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{presets} presets · {groups} groups · {domains} hosts`
+  String desyncTestBatterySummary(
+    Object presets,
+    Object groups,
+    Object domains,
+  ) {
+    return Intl.message(
+      '$presets presets · $groups groups · $domains hosts',
+      name: 'desyncTestBatterySummary',
+      desc: '',
+      args: [presets, groups, domains],
+    );
+  }
+
+  /// `Effective rules`
+  String get desyncRoutingRules {
+    return Intl.message(
+      'Effective rules',
+      name: 'desyncRoutingRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Category membership comes from the bundled GEOSITE database; test-domain lists are separate`
+  String get desyncRoutingGeositeNote {
+    return Intl.message(
+      'Category membership comes from the bundled GEOSITE database; test-domain lists are separate',
+      name: 'desyncRoutingGeositeNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No bypass categories selected`
+  String get desyncRoutingNoCategories {
+    return Intl.message(
+      'No bypass categories selected',
+      name: 'desyncRoutingNoCategories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No service is currently routed through ByeDPI`
+  String get desyncRoutingNoCategoriesDesc {
+    return Intl.message(
+      'No service is currently routed through ByeDPI',
+      name: 'desyncRoutingNoCategoriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All traffic outside selected GEOSITE categories goes directly`
+  String get desyncRoutingFallbackDesc {
+    return Intl.message(
+      'All traffic outside selected GEOSITE categories goes directly',
+      name: 'desyncRoutingFallbackDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DPI bypass is off`
+  String get byedpiOff {
+    return Intl.message(
+      'DPI bypass is off',
+      name: 'byedpiOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Starting DPI bypass`
+  String get byedpiStarting {
+    return Intl.message(
+      'Starting DPI bypass',
+      name: 'byedpiStarting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the DPI engine`
+  String get byedpiChecking {
+    return Intl.message(
+      'Checking the DPI engine',
+      name: 'byedpiChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restarting the DPI engine`
+  String get byedpiReconnecting {
+    return Intl.message(
+      'Restarting the DPI engine',
+      name: 'byedpiReconnecting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DPI bypass is active`
+  String get byedpiActive {
+    return Intl.message(
+      'DPI bypass is active',
+      name: 'byedpiActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DPI bypass is paused`
+  String get byedpiPaused {
+    return Intl.message(
+      'DPI bypass is paused',
+      name: 'byedpiPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DPI engine needs attention`
+  String get byedpiEngineError {
+    return Intl.message(
+      'DPI engine needs attention',
+      name: 'byedpiEngineError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to start the local bypass engine`
+  String get byedpiTapToStart {
+    return Intl.message(
+      'Tap to start the local bypass engine',
+      name: 'byedpiTapToStart',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tap to resume DPI bypass`
+  String get byedpiTapToResume {
+    return Intl.message(
+      'Tap to resume DPI bypass',
+      name: 'byedpiTapToResume',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bypassing DPI {time}`
+  String byedpiActiveFor(Object time) {
+    return Intl.message(
+      'Bypassing DPI $time',
+      name: 'byedpiActiveFor',
+      desc: '',
+      args: [time],
+    );
+  }
+
+  /// `System language`
+  String get setupSystemLanguage {
+    return Intl.message(
+      'System language',
+      name: 'setupSystemLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Step {step} of {count}`
+  String setupStepProgress(num step, num count) {
+    return Intl.message(
+      'Step $step of $count',
+      name: 'setupStepProgress',
+      desc: '',
+      args: [step, count],
+    );
+  }
+
+  /// `ReClash creates a local VPN connection to route traffic. You choose and are responsible for the configuration or provider you use.`
+  String get setupLegalSummary {
+    return Intl.message(
+      'ReClash creates a local VPN connection to route traffic. You choose and are responsible for the configuration or provider you use.',
+      name: 'setupLegalSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Read the full disclaimer`
+  String get setupLegalDetails {
+    return Intl.message(
+      'Read the full disclaimer',
+      name: 'setupLegalDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open-source licenses`
+  String get setupLegalLicense {
+    return Intl.message(
+      'Open-source licenses',
+      name: 'setupLegalLicense',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Helps find app crashes. No reports are sent unless you turn this on.`
+  String get setupDataCollectionDesc {
+    return Intl.message(
+      'Helps find app crashes. No reports are sent unless you turn this on.',
+      name: 'setupDataCollectionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do not agree and exit`
+  String get setupDecline {
+    return Intl.message(
+      'Do not agree and exit',
+      name: 'setupDecline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back`
+  String get setupBack {
+    return Intl.message('Back', name: 'setupBack', desc: '', args: []);
+  }
+
+  /// `Set up a connection`
+  String get dashboardNoProfileTitle {
+    return Intl.message(
+      'Set up a connection',
+      name: 'dashboardNoProfileTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a VPN profile from a provider you trust. Until then, VPN stays off.`
+  String get dashboardNoProfileDesc {
+    return Intl.message(
+      'Add a VPN profile from a provider you trust. Until then, VPN stays off.',
+      name: 'dashboardNoProfileDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a VPN profile`
+  String get dashboardNoActiveProfileTitle {
+    return Intl.message(
+      'Choose a VPN profile',
+      name: 'dashboardNoActiveProfileTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profiles are saved, but none is active. Choose one to make VPN controls available.`
+  String get dashboardNoActiveProfileDesc {
+    return Intl.message(
+      'Profiles are saved, but none is active. Choose one to make VPN controls available.',
+      name: 'dashboardNoActiveProfileDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose profile`
+  String get dashboardSelectProfile {
+    return Intl.message(
+      'Choose profile',
+      name: 'dashboardSelectProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No VPN provider?`
+  String get dashboardByedpiTitle {
+    return Intl.message(
+      'No VPN provider?',
+      name: 'dashboardByedpiTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use ByeDPI-only mode to bypass DPI without a VPN profile.`
+  String get dashboardByedpiDesc {
+    return Intl.message(
+      'Use ByeDPI-only mode to bypass DPI without a VPN profile.',
+      name: 'dashboardByedpiDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use ByeDPI`
+  String get dashboardUseByedpi {
+    return Intl.message(
+      'Use ByeDPI',
+      name: 'dashboardUseByedpi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash does not sell VPN access. Use a link, QR code, or config file from a provider you trust. Every profile is checked before it is saved.`
+  String get setupProfileSourceNotice {
+    return Intl.message(
+      'ReClash does not sell VPN access. Use a link, QR code, or config file from a provider you trust. Every profile is checked before it is saved.',
+      name: 'setupProfileSourceNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue without a profile`
+  String get setupContinueWithoutProfile {
+    return Intl.message(
+      'Continue without a profile',
+      name: 'setupContinueWithoutProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN stays off. You can add a profile later or use ByeDPI-only mode without a VPN provider.`
+  String get setupContinueWithoutProfileDesc {
+    return Intl.message(
+      'VPN stays off. You can add a profile later or use ByeDPI-only mode without a VPN provider.',
+      name: 'setupContinueWithoutProfileDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{1 profile ready} other{{count} profiles ready}}`
+  String setupProfilesReady(num count) {
+    return Intl.plural(
+      count,
+      one: '1 profile ready',
+      other: '$count profiles ready',
+      name: 'setupProfilesReady',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Add another`
+  String get setupAddAnotherProfile {
+    return Intl.message(
+      'Add another',
+      name: 'setupAddAnotherProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace`
+  String get setupReplaceProfile {
+    return Intl.message(
+      'Replace',
+      name: 'setupReplaceProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get setupDeleteProfile {
+    return Intl.message(
+      'Delete',
+      name: 'setupDeleteProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import a working replacement before the current profile is removed.`
+  String get setupReplaceProfileHint {
+    return Intl.message(
+      'Import a working replacement before the current profile is removed.',
+      name: 'setupReplaceProfileHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Where is your current network?`
+  String get setupRegionTitle {
+    return Intl.message(
+      'Where is your current network?',
+      name: 'setupRegionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recommended for your language`
+  String get setupRegionRecommended {
+    return Intl.message(
+      'Recommended for your language',
+      name: 'setupRegionRecommended',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a profile to enable automatic connection`
+  String get setupAutoRunUnavailable {
+    return Intl.message(
+      'Add a profile to enable automatic connection',
+      name: 'setupAutoRunUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Setup summary`
+  String get setupSummaryTitle {
+    return Intl.message(
+      'Setup summary',
+      name: 'setupSummaryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No VPN profile — VPN remains off; ByeDPI-only is available`
+  String get setupSummaryNoProfile {
+    return Intl.message(
+      'No VPN profile — VPN remains off; ByeDPI-only is available',
+      name: 'setupSummaryNoProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile: {name}`
+  String setupSummaryProfile(String name) {
+    return Intl.message(
+      'Profile: $name',
+      name: 'setupSummaryProfile',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Smart Routing: {value}`
+  String setupSummaryRouting(String value) {
+    return Intl.message(
+      'Smart Routing: $value',
+      name: 'setupSummaryRouting',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `Automatic connection: on`
+  String get setupSummaryAutoRunOn {
+    return Intl.message(
+      'Automatic connection: on',
+      name: 'setupSummaryAutoRunOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic connection: off`
+  String get setupSummaryAutoRunOff {
+    return Intl.message(
+      'Automatic connection: off',
+      name: 'setupSummaryAutoRunOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Requested on first connection`
+  String get setupPermissionDeferred {
+    return Intl.message(
+      'Requested on first connection',
+      name: 'setupPermissionDeferred',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Battery optimization`
+  String get setupPermissionBattery {
+    return Intl.message(
+      'Battery optimization',
+      name: 'setupPermissionBattery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow ReClash to keep the VPN active in the background`
+  String get setupPermissionBatteryDesc {
+    return Intl.message(
+      'Allow ReClash to keep the VPN active in the background',
+      name: 'setupPermissionBatteryDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking…`
+  String get setupPermissionChecking {
+    return Intl.message(
+      'Checking…',
+      name: 'setupPermissionChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow`
+  String get setupPermissionRequest {
+    return Intl.message(
+      'Allow',
+      name: 'setupPermissionRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allowed`
+  String get setupPermissionGranted {
+    return Intl.message(
+      'Allowed',
+      name: 'setupPermissionGranted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not allowed`
+  String get setupPermissionDenied {
+    return Intl.message(
+      'Not allowed',
+      name: 'setupPermissionDenied',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unavailable`
+  String get setupPermissionUnavailable {
+    return Intl.message(
+      'Unavailable',
+      name: 'setupPermissionUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not check`
+  String get setupPermissionError {
+    return Intl.message(
+      'Could not check',
+      name: 'setupPermissionError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open settings`
+  String get setupPermissionOpenSettings {
+    return Intl.message(
+      'Open settings',
+      name: 'setupPermissionOpenSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Done and connect`
+  String get setupDoneConnect {
+    return Intl.message(
+      'Done and connect',
+      name: 'setupDoneConnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run setup again`
+  String get setupRerun {
+    return Intl.message(
+      'Run setup again',
+      name: 'setupRerun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review language, profile, routing, and permissions without deleting your data`
+  String get setupRerunDesc {
+    return Intl.message(
+      'Review language, profile, routing, and permissions without deleting your data',
+      name: 'setupRerunDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive from phone`
+  String get lanProfileImport {
+    return Intl.message(
+      'Receive from phone',
+      name: 'lanProfileImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show a one-time QR code to send a subscription URL over your local network`
+  String get lanProfileImportDesc {
+    return Intl.message(
+      'Show a one-time QR code to send a subscription URL over your local network',
+      name: 'lanProfileImportDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive subscription`
+  String get lanProfileImportTitle {
+    return Intl.message(
+      'Receive subscription',
+      name: 'lanProfileImportTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan this QR code with a phone on the same network`
+  String get lanProfileImportScan {
+    return Intl.message(
+      'Scan this QR code with a phone on the same network',
+      name: 'lanProfileImportScan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or send JSON to {address}`
+  String lanProfileImportAddress(String address) {
+    return Intl.message(
+      'Or send JSON to $address',
+      name: 'lanProfileImportAddress',
+      desc: '',
+      args: [address],
+    );
+  }
+
+  /// `Waiting for a subscription…`
+  String get lanProfileImportWaiting {
+    return Intl.message(
+      'Waiting for a subscription…',
+      name: 'lanProfileImportWaiting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Importing subscription…`
+  String get lanProfileImportImporting {
+    return Intl.message(
+      'Importing subscription…',
+      name: 'lanProfileImportImporting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription received`
+  String get lanProfileImportImported {
+    return Intl.message(
+      'Subscription received',
+      name: 'lanProfileImportImported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The one-time link has expired`
+  String get lanProfileImportTimedOut {
+    return Intl.message(
+      'The one-time link has expired',
+      name: 'lanProfileImportTimedOut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not start local sharing`
+  String get lanProfileImportStartFailed {
+    return Intl.message(
+      'Could not start local sharing',
+      name: 'lanProfileImportStartFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not import the subscription`
+  String get lanProfileImportFailed {
+    return Intl.message(
+      'Could not import the subscription',
+      name: 'lanProfileImportFailed',
       desc: '',
       args: [],
     );

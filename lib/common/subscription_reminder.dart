@@ -1,6 +1,28 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/notice.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+
+typedef CheckSubscriptionReminder = Future<void> Function(Profile profile);
+
+Future<void> runSubscriptionReminderSweep({
+  required List<Profile> profiles,
+  bool? isAndroid,
+  CheckSubscriptionReminder? check,
+}) async {
+  if (!(isAndroid ?? system.isAndroid)) return;
+  final checkProfile = check ?? subscriptionReminder.check;
+  for (final profile in profiles) {
+    try {
+      await checkProfile(profile);
+    } catch (error) {
+      commonPrint.log(
+        'subscription reminder failed for ${profile.id}: ${compactError(error)}',
+        logLevel: LogLevel.warning,
+      );
+    }
+  }
+}
 
 class SubscriptionReminder {
   final Future<SubscriptionNoticeRecord> Function() _readRecord;
@@ -57,15 +79,11 @@ class SubscriptionReminder {
     );
     var displayName = profile.realLabel;
     if (service.isNotEmpty && !labelAlreadyCarriesService) {
-      displayName = username == null
-          ? service
-          : '$service ($username)';
+      displayName = username == null ? service : '$service ($username)';
     }
     return NoticeRequest(
       channelName: localizations.subscriptionNoticeChannel,
-      title: sanitizeNoticeText(
-        displayName.takeFirstValid([appName]),
-      ),
+      title: sanitizeNoticeText(displayName.takeFirstValid([appName])),
       message: sanitizeNoticeText(switch (day) {
         subscriptionExpiredDay => localizations.subscriptionExpired,
         0 => localizations.subscriptionExpiresToday,

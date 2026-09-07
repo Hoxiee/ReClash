@@ -67,6 +67,25 @@ List<String> _labels(MethodCall? call) {
   return _items(call).map((item) => item['label']).whereType<String>().toList();
 }
 
+class _RecordingCommonAction extends CommonAction {
+  static final calls = <String>[];
+
+  @override
+  void toggleRunning() => calls.add('running');
+
+  @override
+  void togglePaused() => calls.add('paused');
+}
+
+class _RecordingSystemAction extends SystemAction {
+  static final calls = <String>[];
+
+  @override
+  Future<void> handleExit([bool needSave = true]) async {
+    calls.add('exit');
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -99,7 +118,14 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
     calls = [];
     tray = AppTray.forPlatform(isMacOS: true, isWindows: false);
-    container = ProviderContainer();
+    _RecordingCommonAction.calls.clear();
+    _RecordingSystemAction.calls.clear();
+    container = ProviderContainer(
+      overrides: [
+        commonActionProvider.overrideWith(_RecordingCommonAction.new),
+        systemActionProvider.overrideWith(_RecordingSystemAction.new),
+      ],
+    );
     Tray.instance.resetForTesting();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, (call) async {
@@ -122,6 +148,21 @@ void main() {
       }
     }
     return null;
+  }
+
+  Future<void> select(String label) async {
+    final item = _items(
+      showCall(),
+    ).firstWhere((item) => item['label'] == label);
+    const codec = StandardMethodCodec();
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          _channel.name,
+          codec.encodeMethodCall(
+            MethodCall('onMenuItemSelected', {'id': item['id']}),
+          ),
+          null,
+        );
   }
 
   Future<void> update(TrayState trayState, {AppTray? on}) {
@@ -235,6 +276,46 @@ void main() {
     expect(submenu['label'], 'Proxy');
     final children = (submenu['items'] as List).cast<Map<Object?, Object?>>();
     expect(children.map((item) => item['label']), contains('A'));
+  });
+
+  test('dispatches start stop pause resume and exit actions', () async {
+    final l10n = currentAppLocalizations;
+
+    await update(_trayState());
+    await select(l10n.start);
+    await select(l10n.exit);
+
+    Tray.instance.resetForTesting();
+    calls.clear();
+    await update(_trayState(isStart: true, tunEnable: true));
+    await select(l10n.stop);
+    await select(l10n.pause);
+
+    Tray.instance.resetForTesting();
+    calls.clear();
+    await update(
+      const TrayState(
+        mode: Mode.rule,
+        port: 7890,
+        autoLaunch: false,
+        systemProxy: false,
+        tunEnable: true,
+        isStart: true,
+        paused: true,
+        groups: [],
+        selectedMap: {},
+        showTrayTitle: false,
+      ),
+    );
+    await select(l10n.resume);
+
+    expect(_RecordingCommonAction.calls, [
+      'running',
+      'running',
+      'paused',
+      'paused',
+    ]);
+    expect(_RecordingSystemAction.calls, ['exit']);
   });
 
   group('a platform that is not macOS', () {

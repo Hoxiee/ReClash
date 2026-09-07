@@ -104,11 +104,13 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.isAnimateToPage, true);
-      expect(restored.autoCheckUpdate, true);
+      expect(restored.autoCheckUpdate, false);
       expect(restored.showLabel, false);
+      expect(restored.setupStep, 0);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
       expect(restored.customUserAgent, '');
+      expect(restored.sendDeviceIdentity, false);
       expect(restored.testUrl, defaultTestUrl);
     });
 
@@ -118,6 +120,7 @@ void main() {
         onlyStatisticsProxy: true,
         autoLaunch: true,
         closeConnections: false,
+        setupStep: 3,
         testUrl: 'https://custom.test',
         customUserAgent: 'CustomUA/1.0',
       );
@@ -129,6 +132,7 @@ void main() {
       expect(restored.onlyStatisticsProxy, true);
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
+      expect(restored.setupStep, 3);
       expect(restored.testUrl, 'https://custom.test');
       expect(restored.customUserAgent, 'CustomUA/1.0');
     });
@@ -142,6 +146,27 @@ void main() {
     test('safeFromJson returns default on invalid JSON', () {
       final result = AppSettingProps.safeFromJson({'invalid': 'data'});
       expect(result, isA<AppSettingProps>());
+    });
+
+    test('safeFromJson migrates legacy icon variants', () {
+      const legacyVariants = {
+        'mono': 'pulse',
+        'sepia': 'glacier',
+        'inverted': 'obsidian',
+        'dark_mono': 'velvet',
+        'cool': 'solar',
+      };
+
+      for (final entry in legacyVariants.entries) {
+        final result = AppSettingProps.safeFromJson({'iconVariant': entry.key});
+        expect(result.iconVariant, entry.value);
+      }
+    });
+
+    test('safeFromJson resets unknown icon variants', () {
+      final result = AppSettingProps.safeFromJson({'iconVariant': 'eclipse'});
+
+      expect(result.iconVariant, 'default');
     });
   });
 
@@ -441,10 +466,7 @@ void main() {
     });
 
     test('a custom strategy survives the round-trip', () {
-      const props = DesyncProps(
-        enabled: true,
-        strategyArgs: ['-o1', '-a1'],
-      );
+      const props = DesyncProps(enabled: true, strategyArgs: ['-o1', '-a1']);
 
       final restored = roundTrip(props.toJson, DesyncProps.fromJson);
 

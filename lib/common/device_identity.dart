@@ -43,7 +43,7 @@ class DeviceIdentity {
 
   @visibleForTesting
   static String hwidFromSource(String source) {
-    return sha256.convert(utf8.encode('reclash-device:$source')).toString();
+    return sha256.convert(utf8.encode(source)).toString().substring(0, 16);
   }
 
   Future<DeviceIdentityInfo> get info => _pendingInfo ??= _loadInfo();

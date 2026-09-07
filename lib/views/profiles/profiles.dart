@@ -282,7 +282,7 @@ class ProfileItem extends ConsumerWidget {
       final mFile = await profile.file;
       final value = await picker.saveFile(
         profile.realLabel,
-        mFile.readAsBytesSync(),
+        await mFile.readAsBytes(),
       );
       if (value == null) return false;
       return true;

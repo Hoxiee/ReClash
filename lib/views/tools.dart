@@ -30,7 +30,7 @@ class ToolsView extends ConsumerStatefulWidget {
 class _ToolViewState extends ConsumerState<ToolsView> {
   Widget _buildNavigationMenu(List<NavigationItem> navigationItems) {
     return SettingSection(
-      title: context.appLocalizations.more,
+      top: 16,
       items: [
         for (final navigationItem in navigationItems)
           DecorationListItem.open(
@@ -63,10 +63,11 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     ];
   }
 
-  List<Widget> _getSettingList() {
+  List<Widget> _getSettingList({required bool first}) {
     return [
       SettingSection(
-        title: context.appLocalizations.settings,
+        top: first ? 16 : 0,
+        title: first ? null : context.appLocalizations.settings,
         items: [
           const _LocaleItem(),
           const _ThemeItem(),
@@ -100,7 +101,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           return _buildNavigationMenu(state.navigationItems);
         },
       ),
-      ..._getSettingList(),
+      ..._getSettingList(
+        first: ref
+            .watch(moreToolsSelectorStateProvider)
+            .navigationItems
+            .isEmpty,
+      ),
       ..._getOtherList(appSetting.developerMode),
       const SettingBottomInset(),
     ];

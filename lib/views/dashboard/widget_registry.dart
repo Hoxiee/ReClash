@@ -45,7 +45,7 @@ extension DashboardWidgetView on DashboardWidget {
       child: MemoryInfo(),
     ),
     DashboardWidget.metaInfo => const GridItem(
-      crossAxisCellCount: 4,
+      crossAxisCellCount: 8,
       child: MetaInfo(),
     ),
     DashboardWidget.announce => const GridItem(

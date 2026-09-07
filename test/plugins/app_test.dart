@@ -171,6 +171,29 @@ void main() {
     expect(changes, 1);
   });
 
+  test('reports the notifications permission Android answers with', () async {
+    final methods = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          methods.add(call.method);
+          return call.method == 'isNotificationsPermissionGranted';
+        });
+
+    expect(await App().isNotificationsPermissionGranted(), isTrue);
+    expect(await App().requestNotificationsPermission(), isFalse);
+    expect(methods, [
+      'isNotificationsPermissionGranted',
+      'requestNotificationsPermission',
+    ]);
+  });
+
+  test('uses false when Android returns no notifications state', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (_) async => null);
+
+    expect(await App().isNotificationsPermissionGranted(), isFalse);
+  });
+
   test('reports the installed apps permission Android answers with', () async {
     final methods = <String>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
