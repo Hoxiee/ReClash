@@ -42,6 +42,7 @@ on Mobile:
 
    ```bash
     sudo apt-get install libayatana-appindicator3-dev
+    sudo apt-get install libkeybinder-3.0-dev
    ```
 
 ### Android
@@ -108,7 +109,7 @@ brew install --cask flclash
 
         2. 依赖会由 setup 脚本自动安装，也可以手动安装：
            ```bash
-           sudo apt-get install -y libayatana-appindicator3-dev
+           sudo apt-get install -y libayatana-appindicator3-dev libkeybinder-3.0-dev
            ```
 
         3. 运行构建脚本
