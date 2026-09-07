@@ -5,6 +5,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
@@ -224,6 +225,31 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     if (!hasProfile && !byedpiMode) return const _EmptyHero();
 
     final isReady = ref.watch(initProvider);
+    if (byedpiMode) {
+      const health = HeroHealth.unknown;
+      final status = heroStatusOf(_phase, health);
+      final palette = heroPaletteOf(context, status);
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            _OrbSection(
+              isReady: isReady,
+              displayName: context.appLocalizations.desyncModeByedpi,
+              status: status,
+              health: health,
+              palette: palette,
+              onPhaseChanged: (phase) => setState(() => _phase = phase),
+              onLongPress: () => _showModePicker(),
+            ),
+            const SizedBox(height: 16),
+            const DesyncControls(),
+            SizedBox(height: 12 + BottomInsetScope.of(context)),
+          ],
+        ),
+      );
+    }
+
     final profile = ref.watch(currentProfileProvider);
     final panelMeta = profile?.panelMeta;
     final announce = panelMeta?.announce?.trim();
@@ -258,13 +284,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
         }, serverInfoHeader),
       ),
     );
-    // In only-dpi mode no node carries the traffic, so the panel names the
-    // engine instead and never measures a node delay.
-    final serverName = byedpiMode
-        ? 'ByeDPI'
-        : engineDecided
-        ? engineNode
-        : serverInfo.serverName;
+    final serverName = engineDecided ? engineNode : serverInfo.serverName;
     final testUrl = serverInfo.testUrl;
     final otherCodes = engineDecided
         ? _trailCodes(ref.watch(smartRoutingTrailProvider), engineNode)
@@ -279,15 +299,12 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final isUpdating =
         profile != null && ref.watch(isUpdatingProvider(profile.updatingKey));
 
-    final delay = byedpiMode
-        ? null
-        : engineDecided
+    final delay = engineDecided
         ? (rcxStatus!.delay > 0 ? rcxStatus.delay : null)
         : serverName.isEmpty
         ? null
         : ref.watch(delayProvider(proxyName: serverName, testUrl: testUrl));
     final measuring =
-        !byedpiMode &&
         !engineDecided &&
         serverName.isNotEmpty &&
         ref.watch(
@@ -337,7 +354,20 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
                 sub: sub,
                 buyPlanUrl: buyPlanUrl,
                 buyTrafficUrl: buyTrafficUrl,
+                hasAnnounce: announce != null && announce.isNotEmpty,
               ),
+            ),
+          ] else if (announce != null && announce.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            FocusableTap(
+              borderRadius: heroCardRadius,
+              onTap: () {
+                showExtend(
+                  context,
+                  builder: (_) => const SubscriptionOverviewView(),
+                );
+              },
+              child: _NoticeOpenCard(text: announce),
             ),
           ],
           const SizedBox(height: 12),
@@ -352,10 +382,6 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
                   ),
             supportUrl: panelMeta?.supportUrl,
           ),
-          if (announce != null && announce.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            _AnnounceBanner(text: announce),
-          ],
           SizedBox(height: 12 + BottomInsetScope.of(context)),
         ],
       ),
@@ -542,11 +568,17 @@ class _Logo extends StatelessWidget {
 }
 
 class _TrafficCard extends StatelessWidget {
-  const _TrafficCard({required this.sub, this.buyPlanUrl, this.buyTrafficUrl});
+  const _TrafficCard({
+    required this.sub,
+    this.buyPlanUrl,
+    this.buyTrafficUrl,
+    this.hasAnnounce = false,
+  });
 
   final SubscriptionInfo sub;
   final String? buyPlanUrl;
   final String? buyTrafficUrl;
+  final bool hasAnnounce;
 
   @override
   Widget build(BuildContext context) {
@@ -624,6 +656,20 @@ class _TrafficCard extends StatelessWidget {
                   ),
                 ),
               ],
+              if (hasAnnounce) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.campaign_rounded,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+              ],
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -1169,11 +1215,11 @@ class _SignalBars extends StatelessWidget {
   }
 }
 
-class _EmptyHero extends StatelessWidget {
+class _EmptyHero extends ConsumerWidget {
   const _EmptyHero();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1207,32 +1253,61 @@ class _EmptyHero extends StatelessWidget {
             label: Text(context.appLocalizations.addProfile),
           ),
         ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () => ref
+              .read(desyncSettingProvider.notifier)
+              .update((state) => state.copyWith(enabled: true, onlyDpi: true)),
+          icon: const Icon(Icons.shield_rounded, size: 20),
+          label: Text(context.appLocalizations.desyncModeByedpi),
+        ),
       ],
     );
   }
 }
 
-class _AnnounceBanner extends StatelessWidget {
-  const _AnnounceBanner({required this.text});
+class _NoticeOpenCard extends StatelessWidget {
+  const _NoticeOpenCard({required this.text});
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(heroCardRadius),
-        color: colorScheme.secondaryContainer,
-      ),
-      child: EmojiText(
-        text,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSecondaryContainer,
-          height: 1.4,
-        ),
+    return HeroSurface(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Row(
+        children: [
+          Icon(Icons.campaign_rounded, size: 20, color: colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.appLocalizations.announce,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                EmojiText(
+                  text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 20,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }

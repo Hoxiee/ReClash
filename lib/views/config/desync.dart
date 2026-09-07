@@ -12,14 +12,27 @@ const _ttlChoices = [3600, 43200, 100800, 604800];
 /// The strategy is a raw ciadpi argument line, ByeByeDPI-style: the app manages
 /// the listener, the per-network cache and the loop break, everything else is
 /// the user's to write.
-class DesyncView extends ConsumerStatefulWidget {
+class DesyncView extends StatelessWidget {
   const DesyncView({super.key});
 
   @override
-  ConsumerState<DesyncView> createState() => _DesyncViewState();
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.desync,
+    body: const SingleChildScrollView(
+      child: Column(children: [DesyncControls(), SettingBottomInset()]),
+    ),
+  );
 }
 
-class _DesyncViewState extends ConsumerState<DesyncView> {
+/// Shared by the settings subpage and the DPI-only hero.
+class DesyncControls extends ConsumerStatefulWidget {
+  const DesyncControls({super.key});
+
+  @override
+  ConsumerState<DesyncControls> createState() => _DesyncControlsState();
+}
+
+class _DesyncControlsState extends ConsumerState<DesyncControls> {
   var _testing = false;
 
   void _update(WidgetRef ref, DesyncProps Function(DesyncProps) f) {
@@ -34,8 +47,7 @@ class _DesyncViewState extends ConsumerState<DesyncView> {
         value: '',
         hintText: appLocalizations.desyncStrategyNameHint,
         maxLength: TextInputLimits.name,
-        validator: (value) =>
-            (value == null || value.trim().isEmpty)
+        validator: (value) => (value == null || value.trim().isEmpty)
             ? appLocalizations.emptyTip(appLocalizations.desyncSaveCurrent)
             : null,
       ),
@@ -91,156 +103,148 @@ class _DesyncViewState extends ConsumerState<DesyncView> {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     final defaultActive = listEquals(props.strategyArgs, desyncDefaultStrategy);
-    final slivers = [
-      SettingSection.sliver(
-        title: appLocalizations.desyncStrategySection,
-        actions: [
-          const SizedBox(width: 8),
-          CommonMinFilledButtonTheme(
-            child: FilledButton.tonal(
-              onPressed: () => _handleSave(context, ref),
-              child: Text(appLocalizations.desyncSaveCurrent),
+    return Column(
+      children: [
+        SettingSection(
+          title: appLocalizations.desyncStrategySection,
+          actions: [
+            const SizedBox(width: 8),
+            CommonMinFilledButtonTheme(
+              child: FilledButton.tonal(
+                onPressed: () => _handleSave(context, ref),
+                child: Text(appLocalizations.desyncSaveCurrent),
+              ),
             ),
-          ),
-        ],
-        items: _locked([
-          DecorationListItem.open(
-            title: Text(appLocalizations.desyncArgs),
-            subtitle: Text(
-              appLocalizations.desyncArgsCount(props.strategyArgs.length),
-            ),
-            widget: _DesyncArgsEditor(
-              initialText: desyncArgsToText(props.strategyArgs),
-            ),
-            onChanged: (args) {
-              if (args is List<String>) {
-                _update(ref, (state) => state.copyWith(strategyArgs: args));
-              }
-            },
-          ),
-          DecorationListItem(
-            leading: defaultActive
-                ? const Icon(Icons.check_rounded)
-                : null,
-            title: Text(appLocalizations.desyncDefaultName),
-            subtitle: const Text(
-              'split · disorder · fake · oob · tlsrec',
-            ),
-            onPressed: () => _update(
-              ref,
-              (state) => state.copyWith(strategyArgs: desyncDefaultStrategy),
-            ),
-          ),
-          for (final strategy in props.savedStrategies)
-            DecorationListItem(
-              leading: listEquals(props.strategyArgs, strategy.args)
-                  ? const Icon(Icons.check_rounded)
-                  : null,
-              title: Text(strategy.name),
+          ],
+          items: _locked([
+            DecorationListItem.open(
+              title: Text(appLocalizations.desyncArgs),
               subtitle: Text(
-                appLocalizations.desyncArgsCount(strategy.args.length),
+                appLocalizations.desyncArgsCount(props.strategyArgs.length),
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_rounded),
-                tooltip: appLocalizations.delete,
-                onPressed: () => _handleDelete(context, ref, strategy),
+              widget: _DesyncArgsEditor(
+                initialText: desyncArgsToText(props.strategyArgs),
               ),
+              onChanged: (args) {
+                if (args is List<String>) {
+                  _update(ref, (state) => state.copyWith(strategyArgs: args));
+                }
+              },
+            ),
+            DecorationListItem(
+              leading: defaultActive ? const Icon(Icons.check_rounded) : null,
+              title: Text(appLocalizations.desyncDefaultName),
+              subtitle: const Text('split · disorder · fake · oob · tlsrec'),
               onPressed: () => _update(
                 ref,
-                (state) => state.copyWith(strategyArgs: strategy.args),
+                (state) => state.copyWith(strategyArgs: desyncDefaultStrategy),
               ),
             ),
-        ]),
-      ),
-      _DesyncTester(
-        onRunningChanged: (value) => setState(() => _testing = value),
-      ),
-      SettingSection.sliver(
-        title: appLocalizations.desyncEngine,
-        items: _locked([
-          DecorationListItem.input(
-            title: Text(appLocalizations.port),
-            subtitle: Text(props.port.toString()),
-            dialogTitle: appLocalizations.port,
-            value: props.port.toString(),
-            keyboardType: TextInputType.number,
-            maxLength: TextInputLimits.port,
-            resetValue: defaultDesyncPort.toString(),
-            validator: (value) {
-              final label = appLocalizations.port;
-              if (value == null || value.isEmpty) {
-                return appLocalizations.emptyTip(label);
-              }
-              final port = int.tryParse(value);
-              if (port == null) {
-                return appLocalizations.numberTip(label);
-              }
-              return port >= 1 && port <= 65535
-                  ? null
-                  : appLocalizations.portTip(label);
-            },
-            onChanged: (value) {
-              final port = int.tryParse(value ?? '');
-              if (port != null && port >= 1 && port <= 65535) {
-                _update(ref, (state) => state.copyWith(port: port));
-              }
-            },
-          ),
-          DecorationListItem.toggle(
-            title: Text(appLocalizations.desyncCache),
-            subtitle: Text(appLocalizations.desyncCacheDesc),
-            value: props.cacheEnabled,
-            onChanged: (value) =>
-                _update(ref, (state) => state.copyWith(cacheEnabled: value)),
-          ),
-          if (props.cacheEnabled)
-            DecorationListItem.options(
-              title: Text(appLocalizations.desyncCacheTtl),
-              subtitle: Text(_ttlLabel(appLocalizations, props.cacheTtl)),
-              dialogTitle: appLocalizations.desyncCacheTtl,
-              options: _ttlChoices,
-              value: _ttlChoices.contains(props.cacheTtl)
-                  ? props.cacheTtl
-                  : defaultDesyncCacheTtl,
-              textBuilder: (value) =>
-                  _ttlLabel(appLocalizations, value as int),
-              onChanged: (value) => _update(
-                ref,
-                (state) => state.copyWith(cacheTtl: value as int),
+            for (final strategy in props.savedStrategies)
+              DecorationListItem(
+                leading: listEquals(props.strategyArgs, strategy.args)
+                    ? const Icon(Icons.check_rounded)
+                    : null,
+                title: Text(strategy.name),
+                subtitle: Text(
+                  appLocalizations.desyncArgsCount(strategy.args.length),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_rounded),
+                  tooltip: appLocalizations.delete,
+                  onPressed: () => _handleDelete(context, ref, strategy),
+                ),
+                onPressed: () => _update(
+                  ref,
+                  (state) => state.copyWith(strategyArgs: strategy.args),
+                ),
               ),
+          ]),
+        ),
+        _DesyncTester(
+          onRunningChanged: (value) => setState(() => _testing = value),
+        ),
+        SettingSection(
+          title: appLocalizations.desyncEngine,
+          items: _locked([
+            DecorationListItem.input(
+              title: Text(appLocalizations.port),
+              subtitle: Text(props.port.toString()),
+              dialogTitle: appLocalizations.port,
+              value: props.port.toString(),
+              keyboardType: TextInputType.number,
+              maxLength: TextInputLimits.port,
+              resetValue: defaultDesyncPort.toString(),
+              validator: (value) {
+                final label = appLocalizations.port;
+                if (value == null || value.isEmpty) {
+                  return appLocalizations.emptyTip(label);
+                }
+                final port = int.tryParse(value);
+                if (port == null) {
+                  return appLocalizations.numberTip(label);
+                }
+                return port >= 1 && port <= 65535
+                    ? null
+                    : appLocalizations.portTip(label);
+              },
+              onChanged: (value) {
+                final port = int.tryParse(value ?? '');
+                if (port != null && port >= 1 && port <= 65535) {
+                  _update(ref, (state) => state.copyWith(port: port));
+                }
+              },
             ),
-        ]),
-      ),
-      SettingSection.sliver(
-        title: appLocalizations.desyncRouting,
-        bottom: 24,
-        items: _locked([
-          for (final category in DesyncCategory.values)
             DecorationListItem.toggle(
-              title: Text(_categoryLabel(category)),
-              subtitle: Text('GEOSITE,${category.geosite}'),
-              value: props.categories.contains(category),
-              onChanged: (value) => _update(ref, (state) {
-                final next = {...state.categories};
-                value ? next.add(category) : next.remove(category);
-                return state.copyWith(categories: next.toList());
-              }),
+              title: Text(appLocalizations.desyncCache),
+              subtitle: Text(appLocalizations.desyncCacheDesc),
+              value: props.cacheEnabled,
+              onChanged: (value) =>
+                  _update(ref, (state) => state.copyWith(cacheEnabled: value)),
             ),
-          DecorationListItem.toggle(
-            title: Text(appLocalizations.desyncForceTcp),
-            subtitle: Text(appLocalizations.desyncForceTcpDesc),
-            value: props.forceTcp,
-            onChanged: (value) =>
-                _update(ref, (state) => state.copyWith(forceTcp: value)),
-          ),
-        ]),
-      ),
-    ];
-    return CommonScaffold(
-      title: appLocalizations.desync,
-      body: CustomScrollView(
-        slivers: [...slivers, const SettingBottomInset.sliver()],
-      ),
+            if (props.cacheEnabled)
+              DecorationListItem.options(
+                title: Text(appLocalizations.desyncCacheTtl),
+                subtitle: Text(_ttlLabel(appLocalizations, props.cacheTtl)),
+                dialogTitle: appLocalizations.desyncCacheTtl,
+                options: _ttlChoices,
+                value: _ttlChoices.contains(props.cacheTtl)
+                    ? props.cacheTtl
+                    : defaultDesyncCacheTtl,
+                textBuilder: (value) =>
+                    _ttlLabel(appLocalizations, value as int),
+                onChanged: (value) => _update(
+                  ref,
+                  (state) => state.copyWith(cacheTtl: value as int),
+                ),
+              ),
+          ]),
+        ),
+        SettingSection(
+          title: appLocalizations.desyncRouting,
+          bottom: 24,
+          items: _locked([
+            for (final category in DesyncCategory.values)
+              DecorationListItem.toggle(
+                title: Text(_categoryLabel(category)),
+                subtitle: Text('GEOSITE,${category.geosite}'),
+                value: props.categories.contains(category),
+                onChanged: (value) => _update(ref, (state) {
+                  final next = {...state.categories};
+                  value ? next.add(category) : next.remove(category);
+                  return state.copyWith(categories: next.toList());
+                }),
+              ),
+            DecorationListItem.toggle(
+              title: Text(appLocalizations.desyncForceTcp),
+              subtitle: Text(appLocalizations.desyncForceTcpDesc),
+              value: props.forceTcp,
+              onChanged: (value) =>
+                  _update(ref, (state) => state.copyWith(forceTcp: value)),
+            ),
+          ]),
+        ),
+      ],
     );
   }
 
@@ -308,16 +312,18 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
             title: appLocalizations.desyncArgs,
             message: TextSpan(
               text: issues
-                  .map((issue) => switch (issue.kind) {
-                    DesyncArgsIssueKind.unknownFlag =>
-                      appLocalizations.desyncArgsUnknownFlag(issue.token),
-                    DesyncArgsIssueKind.appOwnedFlag =>
-                      appLocalizations.desyncArgsAppOwnedFlag(issue.token),
-                    DesyncArgsIssueKind.missingValue =>
-                      appLocalizations.desyncArgsMissingValue(issue.token),
-                    DesyncArgsIssueKind.positional =>
-                      appLocalizations.desyncArgsPositional(issue.token),
-                  })
+                  .map(
+                    (issue) => switch (issue.kind) {
+                      DesyncArgsIssueKind.unknownFlag =>
+                        appLocalizations.desyncArgsUnknownFlag(issue.token),
+                      DesyncArgsIssueKind.appOwnedFlag =>
+                        appLocalizations.desyncArgsAppOwnedFlag(issue.token),
+                      DesyncArgsIssueKind.missingValue =>
+                        appLocalizations.desyncArgsMissingValue(issue.token),
+                      DesyncArgsIssueKind.positional =>
+                        appLocalizations.desyncArgsPositional(issue.token),
+                    },
+                  )
                   .join('\n'),
             ),
           );
@@ -391,9 +397,8 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
     final notifier = ref.read(desyncSettingProvider.notifier);
     final tester = DesyncStrategyTester(
       port: props.port,
-      applyArgs: (args) async => notifier.update(
-        (state) => state.copyWith(strategyArgs: args),
-      ),
+      applyArgs: (args) async =>
+          notifier.update((state) => state.copyWith(strategyArgs: args)),
     );
     setState(() {
       _tester = tester;
@@ -416,8 +421,8 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
     List<DesyncTestOutcome> outcomes;
     try {
       outcomes = await tester.run(
-      originalArgs: props.strategyArgs,
-      sites: sites,
+        originalArgs: props.strategyArgs,
+        sites: sites,
         onProgress: (index, outcome) {
           if (!mounted) return;
           setState(() {
@@ -445,7 +450,9 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
   }
 
   void _applyOutcome(DesyncTestOutcome outcome) {
-    ref.read(desyncSettingProvider.notifier).update(
+    ref
+        .read(desyncSettingProvider.notifier)
+        .update(
           (state) => state.copyWith(strategyArgs: desyncTestArgs(outcome.text)),
         );
   }
@@ -468,10 +475,10 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
         : sites.isEmpty
         ? appLocalizations.desyncTestNoLists
         : appLocalizations.desyncTestHint(sites.length);
-    final outcomes = _running || _outcomes.length < 2
-        ? _outcomes
-        : [..._outcomes]..sort((a, b) => b.score.compareTo(a.score));
-    return SettingSection.sliver(
+    final outcomes =
+        _running || _outcomes.length < 2 ? _outcomes : [..._outcomes]
+          ..sort((a, b) => b.score.compareTo(a.score));
+    return SettingSection(
       title: appLocalizations.desyncTestSection,
       items: [
         DecorationListItem(
@@ -558,12 +565,13 @@ class _DesyncTestSitesPage extends ConsumerWidget {
                 DecorationListItem.toggle(
                   title: Text(list.name),
                   subtitle: Text(
-                    appLocalizations.desyncTestDomainsCount(list.domains.length),
+                    appLocalizations.desyncTestDomainsCount(
+                      list.domains.length,
+                    ),
                   ),
                   value: selected.contains(list.id),
-                  onChanged: (value) => ref
-                      .read(desyncSettingProvider.notifier)
-                      .update((state) {
+                  onChanged: (value) =>
+                      ref.read(desyncSettingProvider.notifier).update((state) {
                         final next = {...state.testSiteLists};
                         value ? next.add(list.id) : next.remove(list.id);
                         return state.copyWith(testSiteLists: next.toList());

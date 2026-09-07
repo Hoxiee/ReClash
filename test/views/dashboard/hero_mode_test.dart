@@ -1,6 +1,7 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:material_ui/material_ui.dart';
@@ -103,6 +104,34 @@ void main() {
 
     expect(container.read(desyncSettingProvider).enabled, isFalse);
     expect(container.read(desyncSettingProvider).onlyDpi, isFalse);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('only-dpi mode carries the engine controls, not a plan card', (
+    tester,
+  ) async {
+    await pumpHero(
+      tester,
+      desync: const DesyncProps(enabled: true, onlyDpi: true),
+    );
+
+    expect(find.byType(DesyncControls), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('the empty hero can switch into only-dpi mode', (tester) async {
+    final container = await pumpHero(tester);
+
+    expect(find.byType(HeroOrb), findsNothing);
+    await tester.tap(find.text('ByeDPI'));
+    await tester.pump();
+
+    expect(container.read(desyncSettingProvider).onlyDpi, isTrue);
+    expect(find.byType(HeroOrb), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 2));
