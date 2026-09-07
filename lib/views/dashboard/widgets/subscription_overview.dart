@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _warnRatio = 0.7;
 const _criticalRatio = 0.9;
+const _amber = Color(0xFFC57F0A);
 
 /// Everything a subscription can say about itself, in the order it gets asked:
 /// whose it is, what is left, when it last refreshed, where to buy more.
@@ -41,7 +42,7 @@ class SubscriptionOverviewView extends ConsumerWidget {
               ),
             )
           else ...[
-            _sliver(_ServiceCard(profile: profile, panelMeta: panelMeta)),
+            _sliver(_IdentityCard(profile: profile, panelMeta: panelMeta)),
             if (profile.undialableNodes)
               _sliver(
                 _NoticeCard(
@@ -181,6 +182,7 @@ class _NoticeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onTap = this.onTap;
     final tone = this.tone ?? context.colorScheme.onSurfaceVariant;
     final card = _Card(
       tone: this.tone,
@@ -197,16 +199,15 @@ class _NoticeCard extends StatelessWidget {
               style: context.textTheme.bodyMedium,
             ),
           ),
+          if (onTap != null) ...[
+            const SizedBox(width: 8),
+            Icon(Icons.chevron_right_rounded, size: 18, color: tone),
+          ],
         ],
       ),
     );
-    final onTap = this.onTap;
     if (onTap == null) return card;
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: card,
-    );
+    return InkWell(customBorder: AppShape.xl, onTap: onTap, child: card);
   }
 }
 
@@ -230,11 +231,15 @@ class _Pill extends StatelessWidget {
         children: [
           Icon(icon, size: 14, color: tone),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: context.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: tone,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: tone,
+              ),
             ),
           ),
         ],
@@ -289,64 +294,100 @@ class _Hairline extends StatelessWidget {
   );
 }
 
-class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.profile, this.panelMeta});
+/// A provider `serviceLogo` is a full-colour brand mark, so it is shown intact
+/// on a neutral tile, never silhouetted. Providers should ship a transparent,
+/// square-ish icon; anything else is contained and centred without cropping.
+class _LogoTile extends StatelessWidget {
+  const _LogoTile({this.logo});
+
+  final String? logo;
+
+  @override
+  Widget build(BuildContext context) {
+    const size = 52.0;
+    final colorScheme = context.colorScheme;
+    final fallback = Icon(
+      Icons.cloud_outlined,
+      size: size * 0.46,
+      color: colorScheme.primary,
+    );
+    final logo = this.logo;
+    if (logo == null || logo.isEmpty) {
+      return Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: ShapeDecoration(
+          shape: AppShape.lg,
+          color: colorScheme.primary.withValues(alpha: 0.12),
+        ),
+        child: fallback,
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(size * 0.16),
+      decoration: ShapeDecoration(
+        shape: RoundedSuperellipseBorder(
+          borderRadius: AppRadius.lg,
+          side: BorderSide(color: colorScheme.outlineVariant.opacity60),
+        ),
+        color: colorScheme.surfaceBright,
+      ),
+      child: ImageCacheWidget(
+        src: logo,
+        fit: BoxFit.contain,
+        defaultWidget: fallback,
+      ),
+    );
+  }
+}
+
+class _IdentityCard extends StatelessWidget {
+  const _IdentityCard({required this.profile, this.panelMeta});
 
   final Profile profile;
   final PanelMeta? panelMeta;
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    final logo = panelMeta?.serviceLogo;
-    final username = panelMeta?.accountUsername;
-    final name = panelMeta?.serviceName.takeFirstValid([
-      profile.realLabel,
-    ]);
+    final name = panelMeta?.serviceName.takeFirstValid([profile.realLabel]);
     final host = Uri.tryParse(profile.url)?.host ?? '';
+    final username = panelMeta?.accountUsername;
     final subtitle = username?.takeFirstValid([host]) ?? host;
-    final fallbackIcon = Icon(
-      Icons.cloud_outlined,
-      size: 22,
-      color: colorScheme.primary,
-    );
+    final subscriptionInfo = profile.subscriptionInfo;
+    final expireDate = subscriptionInfo == null
+        ? null
+        : subscriptionExpireDate(subscriptionInfo.expire);
+    final perpetual =
+        subscriptionInfo != null &&
+        subscriptionInfo.expire > 0 &&
+        expireDate == null;
+    final pill = _expirePill(context, expireDate, perpetual);
     return _Card(
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: ShapeDecoration(
-              shape: AppShape.lg,
-              color: colorScheme.primary.withValues(alpha: 0.12),
-            ),
-            child: logo == null
-                ? fallbackIcon
-                : ClipPath(
-                    clipper: const ShapeBorderClipper(shape: AppShape.lg),
-                    child: ImageCacheWidget(
-                      src: logo,
-                      defaultWidget: fallbackIcon,
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 12),
+          _LogoTile(logo: panelMeta?.serviceLogo),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   name ?? profile.realLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.titleSmall?.copyWith(
+                  style: context.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
-                  subtitle.isNotEmpty ? subtitle : context.appLocalizations.file,
+                  subtitle.isNotEmpty ? subtitle : appLocalizations.file,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.bodySmall?.toJetBrainsMono.copyWith(
@@ -356,6 +397,10 @@ class _ServiceCard extends StatelessWidget {
               ],
             ),
           ),
+          if (pill != null) ...[
+            const SizedBox(width: 10),
+            Flexible(child: pill),
+          ],
         ],
       ),
     );
@@ -377,35 +422,42 @@ class _Metric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: tone),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: ShapeDecoration(
+        shape: AppShape.lg,
+        color: tone.withValues(alpha: 0.08),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: tone),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontFamily: FontFamily.jetBrainsMono.value,
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontFamily: FontFamily.jetBrainsMono.value,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -426,29 +478,20 @@ class _BalanceCard extends StatelessWidget {
     final barColor = ratio > _criticalRatio
         ? colorScheme.error
         : ratio > _warnRatio
-        ? const Color(0xFFC57F0A)
+        ? _amber
         : colorScheme.primary;
     final free = unlimited ? 0 : (total - used).clamp(0, total);
     final expireDate = subscriptionExpireDate(subscriptionInfo.expire);
-    final perpetual = subscriptionInfo.expire > 0 && expireDate == null;
-    final pill = _expirePill(context, expireDate, perpetual);
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  appLocalizations.trafficUsage,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              if (pill != null) ...[const SizedBox(width: 10), pill],
-            ],
+          Text(
+            appLocalizations.trafficUsage,
+            style: context.textTheme.labelLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           if (unlimited) ...[
@@ -532,7 +575,7 @@ class _BalanceCard extends StatelessWidget {
                   tone: colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: _Metric(
                   icon: Icons.south_rounded,

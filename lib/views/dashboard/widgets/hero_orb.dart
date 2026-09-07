@@ -493,10 +493,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                             child: child,
                                           ),
                                         ),
-                                    child: _coreChild(
-                                      core,
-                                      palette.accent,
-                                    ),
+                                    child: _coreChild(core, palette.accent),
                                   ),
                                 ),
                               ),
@@ -525,19 +522,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   Widget _coreChild(double core, Color accent) {
     switch (heroCoreMarkOf(_status, widget.serviceLogo)) {
       case HeroCoreMark.serviceLogo:
-        return SizedBox(
-          key: const ValueKey('core-mark'),
-          width: core * 0.5,
-          height: core * 0.5,
-          child: _mono(
-            accent,
-            ImageCacheWidget(
-              src: widget.serviceLogo!,
-              fit: BoxFit.contain,
-              defaultWidget: _appMark(accent),
-            ),
-          ),
-        );
+        return _brandCoin(core);
       case HeroCoreMark.appMark:
         return SizedBox(
           key: const ValueKey('core-mark'),
@@ -557,9 +542,42 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     }
   }
 
+  /// A provider `serviceLogo` is a full-colour brand mark, not tinted like ours.
+  Widget _brandCoin(double core) {
+    final colorScheme = context.colorScheme;
+    final coin = core * 0.58;
+    return Container(
+      key: const ValueKey('core-mark'),
+      width: coin,
+      height: coin,
+      padding: EdgeInsets.all(coin * 0.18),
+      decoration: ShapeDecoration(
+        shape: CircleBorder(
+          side: BorderSide(color: colorScheme.outlineVariant.opacity60),
+        ),
+        color: colorScheme.surfaceBright,
+        shadows: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: 0.2),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ImageCacheWidget(
+        src: widget.serviceLogo!,
+        fit: BoxFit.contain,
+        defaultWidget: _appMark(colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+
   Widget _appMark(Color accent) => _mono(
     accent,
-    Image.asset('assets/images/icon_variants/mark_mono.png', fit: BoxFit.contain),
+    Image.asset(
+      'assets/images/icon_variants/mark_mono.png',
+      fit: BoxFit.contain,
+    ),
   );
 
   Widget _mono(Color accent, Widget image) => ColorFiltered(

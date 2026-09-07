@@ -90,18 +90,6 @@ String _stripLeadingEmoji(String text) {
   ).replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
-String _formatBytes(int bytes) {
-  if (bytes <= 0) return '0';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  var value = bytes.toDouble();
-  var i = 0;
-  while (value >= 1024 && i < units.length - 1) {
-    value /= 1024;
-    i++;
-  }
-  return '${value.toStringAsFixed(1)} ${units[i]}';
-}
-
 /// Countries the engine left behind, so the stack reads as its own history.
 List<String> _trailCodes(List<String> trail, String current) {
   final codes = <String>[];
@@ -569,9 +557,9 @@ class _TrafficCard extends StatelessWidget {
     final unlimited = total <= 0;
     final progress = total > 0 ? (used / total).clamp(0.0, 1.0) : 0.0;
     final barColor = progress > 0.9
-        ? Colors.red.shade400
+        ? colorScheme.error
         : progress > 0.7
-        ? Colors.orange.shade400
+        ? const Color(0xFFC57F0A)
         : colorScheme.primary;
 
     int? daysLeft;
@@ -583,7 +571,7 @@ class _TrafficCard extends StatelessWidget {
     }
 
     final daysUrgent = daysLeft != null && daysLeft <= heroRenewDaysThreshold;
-    final daysColor = daysUrgent ? Colors.red.shade400 : colorScheme.primary;
+    final daysColor = daysUrgent ? colorScheme.error : colorScheme.primary;
     final free = total > 0 ? (total - used).clamp(0, total) : 0;
     final offers = heroBuyOffers(
       hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
@@ -641,7 +629,7 @@ class _TrafficCard extends StatelessWidget {
           const SizedBox(height: 8),
           if (unlimited)
             Text(
-              _formatBytes(used),
+              used.traffic.show,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.titleLarge?.copyWith(
@@ -654,7 +642,7 @@ class _TrafficCard extends StatelessWidget {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: _formatBytes(free),
+                    text: free.traffic.show,
                     style: context.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                       fontFamily: FontFamily.jetBrainsMono.value,
@@ -663,7 +651,7 @@ class _TrafficCard extends StatelessWidget {
                   const TextSpan(text: ' '),
                   TextSpan(
                     text: appLocalizations.trafficFreeOfTotal(
-                      _formatBytes(total),
+                      total.traffic.show,
                     ),
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,

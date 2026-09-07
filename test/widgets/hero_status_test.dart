@@ -6,6 +6,7 @@ import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/widgets/icon.dart' show ImageCacheWidget;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -395,8 +396,8 @@ void main() {
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
       expect(
-        find.descendant(of: mark, matching: find.byType(ColorFiltered)),
-        findsWidgets,
+        find.descendant(of: mark, matching: find.byType(ImageCacheWidget)),
+        findsOne,
       );
     });
 
