@@ -254,4 +254,79 @@ void main() {
       expect(tester.takeException(), null);
     });
   });
+
+  group('reduced motion', () {
+    Widget host(WidgetTester tester, {required bool disableAnimations}) {
+      return UncontrolledProviderScope(
+        container: container,
+        child: MediaQuery(
+          data: MediaQueryData(disableAnimations: disableAnimations),
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => BaseNavigator.push(
+                    context,
+                    const Scaffold(body: Text('pushed page')),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('a pushed route settles within a single frame', (tester) async {
+      setViewWidth(1400);
+      await tester.pumpWidget(host(tester, disableAnimations: true));
+      await tester.pump();
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+
+      final route = ModalRoute.of(tester.element(find.text('pushed page')));
+      expect(route, isNotNull);
+      expect(route!.animation!.isCompleted, isTrue);
+      expect(route.transitionDuration, Duration.zero);
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('a popped route is removed within a single frame', (
+      tester,
+    ) async {
+      setViewWidth(400);
+      await tester.pumpWidget(host(tester, disableAnimations: true));
+      await tester.pump();
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      expect(find.text('pushed page'), findsOneWidget);
+
+      Navigator.of(tester.element(find.text('pushed page'))).pop();
+      await tester.pump();
+
+      expect(find.text('pushed page'), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+      expect(tester.takeException(), null);
+    });
+
+    testWidgets('the mobile route animates when motion is allowed', (
+      tester,
+    ) async {
+      setViewWidth(400);
+      await tester.pumpWidget(host(tester, disableAnimations: false));
+      await tester.pump();
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      await tester.pump();
+
+      final route = ModalRoute.of(tester.element(find.text('pushed page')));
+      expect(route!.transitionDuration, const Duration(milliseconds: 300));
+      expect(route.animation!.isCompleted, isFalse);
+      await tester.pumpAndSettle();
+    });
+  });
 }

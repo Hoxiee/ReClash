@@ -1,4 +1,4 @@
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/inherited.dart';
 import 'package:reclash/widgets/sheet.dart';
 import 'package:material_ui/material_ui.dart';
@@ -8,6 +8,11 @@ Color _sheetColorOf(BuildContext context) {
   return SheetProvider.of(context)?.type == SheetType.bottomSheet
       ? ColorScheme.of(context).surfaceContainerLow
       : ColorScheme.of(context).surface;
+}
+
+Future<T?> pushPagedSheet<T>(BuildContext context, PagedSheetRoute<T> route) {
+  route._resolveMotionFrom(context);
+  return Navigator.of(context).push<T>(route);
 }
 
 class PagedSheetRoute<T> extends PageRoute<T> with ObservableRouteMixin<T> {
@@ -32,17 +37,23 @@ class PagedSheetRoute<T> extends PageRoute<T> with ObservableRouteMixin<T> {
   final Color? backgroundColor;
   final RouteTransitionsBuilder? transitionsBuilder;
 
+  Duration? _resolvedDuration;
+
+  void _resolveMotionFrom(BuildContext context) {
+    _resolvedDuration = context.motionDuration(duration);
+  }
+
+  @override
+  Duration get transitionDuration => _resolvedDuration ?? duration;
+
+  @override
+  Duration get reverseTransitionDuration => _resolvedDuration ?? duration;
+
   @override
   Color? get barrierColor => null;
 
   @override
   String? get barrierLabel => null;
-
-  @override
-  Duration get transitionDuration => duration;
-
-  @override
-  Duration get reverseTransitionDuration => duration;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {

@@ -4,16 +4,30 @@ import 'package:material_ui/material_ui.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
+const _desktopRouteDuration = Duration(milliseconds: 200);
+
+const _mobileRouteDuration = Duration(milliseconds: 300);
+
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
     if (!context.isMobileView) {
-      return Navigator.of(
-        context,
-      ).push<T>(CommonDesktopRoute(builder: (context) => child));
+      return Navigator.of(context).push<T>(
+        CommonDesktopRoute(
+          builder: (context) => child,
+          transitionDuration: context.motionDuration(_desktopRouteDuration),
+          reverseTransitionDuration: context.motionDuration(
+            _desktopRouteDuration,
+          ),
+        ),
+      );
     }
-    return Navigator.of(
-      context,
-    ).push<T>(CommonRoute(builder: (context) => child));
+    return Navigator.of(context).push<T>(
+      CommonRoute(
+        builder: (context) => child,
+        transitionDuration: context.motionDuration(_mobileRouteDuration),
+        reverseTransitionDuration: context.motionDuration(_mobileRouteDuration),
+      ),
+    );
   }
 }
 
@@ -23,9 +37,19 @@ const commonSharedXPageTransitions = SharedAxisPageTransitionsBuilder(
 );
 
 class CommonDesktopRoute<T> extends PageRoute<T> {
+  CommonDesktopRoute({
+    required this.builder,
+    this.transitionDuration = _desktopRouteDuration,
+    this.reverseTransitionDuration = _desktopRouteDuration,
+  });
+
   final Widget Function(BuildContext context) builder;
 
-  CommonDesktopRoute({required this.builder});
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   Color? get barrierColor => null;
@@ -49,18 +73,22 @@ class CommonDesktopRoute<T> extends PageRoute<T> {
 
   @override
   bool get maintainState => true;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 200);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 200);
 }
 
 class CommonRoute<T> extends PageRoute<T> {
+  CommonRoute({
+    required this.builder,
+    this.transitionDuration = _mobileRouteDuration,
+    this.reverseTransitionDuration = _mobileRouteDuration,
+  });
+
   final Widget Function(BuildContext context) builder;
 
-  CommonRoute({required this.builder});
+  @override
+  final Duration transitionDuration;
+
+  @override
+  final Duration reverseTransitionDuration;
 
   @override
   Color? get barrierColor => null;
@@ -90,12 +118,6 @@ class CommonRoute<T> extends PageRoute<T> {
       ),
     );
   }
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 300);
 }
 
 final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(

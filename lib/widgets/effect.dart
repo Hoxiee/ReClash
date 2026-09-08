@@ -1,6 +1,6 @@
-import 'dart:math';
 import 'dart:ui';
 
+import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -20,28 +20,14 @@ class EffectGestureDetector extends StatefulWidget {
   State<EffectGestureDetector> createState() => _EffectGestureDetectorState();
 }
 
-class _EffectGestureDetectorState extends State<EffectGestureDetector>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _EffectGestureDetectorState extends State<EffectGestureDetector> {
   double _scale = 1;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedScale(
       scale: _scale,
-      duration: kThemeAnimationDuration,
+      duration: context.motionDuration(kThemeAnimationDuration),
       curve: Curves.easeOut,
       child: GestureDetector(
         onLongPress: widget.onLongPress,
@@ -85,24 +71,29 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: midDuration,
       vsync: this,
     );
     _iconTurns = _animationController.drive(_iconTurnTween);
     if (widget.expand) {
-      _animationController.value = pi;
+      _animationController.value = _animationController.upperBound;
     }
   }
 
   @override
   void didUpdateWidget(covariant CommonExpandIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.expand != widget.expand) {
-      if (widget.expand) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
+    if (oldWidget.expand == widget.expand) {
+      return;
+    }
+    if (context.disableAnimations) {
+      _animationController.value = widget.expand
+          ? _animationController.upperBound
+          : _animationController.lowerBound;
+    } else if (widget.expand) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
     }
   }
 

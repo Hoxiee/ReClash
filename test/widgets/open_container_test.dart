@@ -105,4 +105,61 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('the container opens in one frame under reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 160,
+              height: 80,
+              child: OpenContainer<String>(
+                transitionDuration: Duration.zero,
+                closedBuilder: (_, open) {
+                  return FilledButton(
+                    onPressed: open,
+                    child: const Text('Closed'),
+                  );
+                },
+                openBuilder: (_, close) {
+                  return Center(
+                    child: FilledButton(
+                      onPressed: () => close(returnValue: 'done'),
+                      child: const Text('Close'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Closed'));
+    await tester.pump();
+
+    expect(find.text('Close'), findsOneWidget);
+    final route = ModalRoute.of(tester.element(find.text('Close')));
+    expect(route!.transitionDuration, Duration.zero);
+    expect(route.animation!.isCompleted, isTrue);
+
+    await tester.tap(find.text('Close'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Closed'), findsOneWidget);
+    expect(find.text('Closed').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Closed'));
+    await tester.pump();
+    expect(find.text('Close'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -10,11 +10,16 @@ import '../helpers/test_app.dart';
 Future<StatusManagerState> _pumpStatusManager(
   WidgetTester tester, {
   bool isMobileView = true,
+  bool disableAnimations = false,
 }) async {
   await tester.pumpWidget(
     TestApp(
       wrapInProviderScope: true,
       overrides: [isMobileViewProvider.overrideWithValue(isMobileView)],
+      homeBuilder: (child) => MediaQuery(
+        data: MediaQueryData(disableAnimations: disableAnimations),
+        child: child,
+      ),
       child: const StatusManager(child: SizedBox()),
     ),
   );
@@ -463,6 +468,116 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(find.text('arrived mid drag'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('reduced motion shows a message without animating it in', (
+    tester,
+  ) async {
+    final state = await _pumpStatusManager(tester, disableAnimations: true);
+    state.message('instant');
+    await tester.pump();
+
+    expect(_revealOf(tester, 'instant'), 1);
+    expect(_opacityOf(tester, 'instant'), 1);
+    expect(_offsetOf(tester, 'instant'), Offset.zero);
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('reduced motion removes an expiring message without a fade', (
+    tester,
+  ) async {
+    final state = await _pumpStatusManager(tester, disableAnimations: true);
+    state.message('instant');
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+
+    expect(find.text('instant'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('reduced motion removes a swiped message without a fade', (
+    tester,
+  ) async {
+    final state = await _pumpStatusManager(tester, disableAnimations: true);
+    state.message('instant');
+    await tester.pump();
+
+    await tester.drag(find.byType(Dismissible), const Offset(600, 0));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('instant'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('drag hold and queue still work under reduced motion', (
+    tester,
+  ) async {
+    final state = await _pumpStatusManager(
+      tester,
+      isMobileView: false,
+      disableAnimations: true,
+    );
+    state.message('held');
+    await tester.pump();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Dismissible)),
+    );
+    for (var step = 0; step < 4; step++) {
+      await gesture.moveBy(const Offset(10, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    state.message('queued while held');
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.text('held'), findsOneWidget);
+    expect(find.text('queued while held'), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.text('queued while held'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('queued while held'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('an exit after an earlier swipe still uses the exit duration', (
+    tester,
+  ) async {
+    final state = await _pumpStatusManager(tester);
+    state.message('second life');
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(Dismissible), const Offset(600, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('second life'), findsNothing);
+
+    state.message('second life');
+    await tester.pumpAndSettle();
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final reveal = _revealOf(tester, 'second life');
+    expect(reveal, greaterThan(0));
+    expect(reveal, lessThan(1));
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('second life'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('second life'), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

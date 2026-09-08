@@ -152,4 +152,46 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('the sheet enters and exits in one frame under reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return FilledButton(
+                onPressed: () => showModalSideSheet<void>(
+                  context: context,
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  builder: (_) =>
+                      const SizedBox(width: 280, child: Text('Reduced sheet')),
+                ),
+                child: const Text('Open reduced'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open reduced'));
+    await tester.pump();
+
+    expect(find.text('Reduced sheet'), findsOneWidget);
+    final route = ModalRoute.of(tester.element(find.text('Reduced sheet')));
+    expect(route!.transitionDuration, Duration.zero);
+    expect(route.animation!.isCompleted, isTrue);
+
+    await tester.tapAt(const Offset(20, 300));
+    await tester.pump();
+
+    expect(find.text('Reduced sheet'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
 }

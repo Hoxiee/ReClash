@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:reclash/common/color.dart';
+import 'package:reclash/common/context.dart';
 import 'package:reclash/common/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
@@ -9,6 +10,12 @@ const Duration _bottomSheetEnterDuration = Duration(milliseconds: 300);
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 const Curve _modalBottomSheetCurve = Easing.standardDecelerate;
 const double _defaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
+
+Duration _enterDurationOf(BuildContext context) =>
+    context.motionDuration(_bottomSheetEnterDuration);
+
+Duration _exitDurationOf(BuildContext context) =>
+    context.motionDuration(_bottomSheetExitDuration);
 
 class SideSheet extends StatefulWidget {
   const SideSheet({
@@ -63,10 +70,14 @@ class SideSheet extends StatefulWidget {
   @override
   State<SideSheet> createState() => _SideSheetState();
 
-  static AnimationController createAnimationController(TickerProvider vsync) {
+  static AnimationController createAnimationController(
+    TickerProvider vsync, {
+    Duration? duration,
+    Duration? reverseDuration,
+  }) {
     return AnimationController(
-      duration: _bottomSheetEnterDuration,
-      reverseDuration: _bottomSheetExitDuration,
+      duration: duration ?? _bottomSheetEnterDuration,
+      reverseDuration: reverseDuration ?? _bottomSheetExitDuration,
       debugLabel: 'SideSheet',
       vsync: vsync,
     );
@@ -480,10 +491,19 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => _bottomSheetEnterDuration;
+  Duration get transitionDuration => _transitionDuration;
 
   @override
-  Duration get reverseTransitionDuration => _bottomSheetExitDuration;
+  Duration get reverseTransitionDuration => _reverseTransitionDuration;
+
+  Duration _transitionDuration = _bottomSheetEnterDuration;
+  Duration _reverseTransitionDuration = _bottomSheetExitDuration;
+
+  // Before install(): it builds the controller with these durations.
+  void _resolveMotionFrom(BuildContext context) {
+    _transitionDuration = _enterDurationOf(context);
+    _reverseTransitionDuration = _exitDurationOf(context);
+  }
 
   @override
   bool get barrierDismissible => isDismissible;
@@ -503,7 +523,11 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
       _animationController = transitionAnimationController;
       willDisposeAnimationController = false;
     } else {
-      _animationController = SideSheet.createAnimationController(navigator!);
+      _animationController = SideSheet.createAnimationController(
+        navigator!,
+        duration: transitionDuration,
+        reverseDuration: reverseTransitionDuration,
+      );
     }
     return _animationController!;
   }
@@ -598,32 +622,31 @@ Future<T?> showModalSideSheet<T>({
     rootNavigator: useRootNavigator,
   );
   final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-  return navigator.push(
-    ModalSideSheetRoute<T>(
-      builder: builder,
-      filter: filter,
-      capturedThemes: InheritedTheme.capture(
-        from: context,
-        to: navigator.context,
-      ),
-      isScrollControlled: isScrollControlled,
-      scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
-      barrierLabel: barrierLabel ?? localizations.scrimLabel,
-      barrierOnTapHint: localizations.scrimOnTapHint(
-        localizations.bottomSheetLabel,
-      ),
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      clipBehavior: clipBehavior,
-      constraints: constraints,
-      isDismissible: isDismissible,
-      modalBarrierColor:
-          barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
-      settings: routeSettings,
-      transitionAnimationController: transitionAnimationController,
-      anchorPoint: anchorPoint,
-      useSafeArea: useSafeArea,
+  final route = ModalSideSheetRoute<T>(
+    builder: builder,
+    filter: filter,
+    capturedThemes: InheritedTheme.capture(
+      from: context,
+      to: navigator.context,
     ),
-  );
+    isScrollControlled: isScrollControlled,
+    scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
+    barrierLabel: barrierLabel ?? localizations.scrimLabel,
+    barrierOnTapHint: localizations.scrimOnTapHint(
+      localizations.bottomSheetLabel,
+    ),
+    backgroundColor: backgroundColor,
+    elevation: elevation,
+    shape: shape,
+    clipBehavior: clipBehavior,
+    constraints: constraints,
+    isDismissible: isDismissible,
+    modalBarrierColor:
+        barrierColor ?? Theme.of(context).bottomSheetTheme.modalBarrierColor,
+    settings: routeSettings,
+    transitionAnimationController: transitionAnimationController,
+    anchorPoint: anchorPoint,
+    useSafeArea: useSafeArea,
+  ).._resolveMotionFrom(context);
+  return navigator.push(route);
 }

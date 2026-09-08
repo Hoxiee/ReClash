@@ -800,28 +800,9 @@ class _TrafficCard extends StatelessWidget {
             ),
           if (!unlimited) ...[
             const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(heroInlayRadius),
-              child: Stack(
-                children: [
-                  Container(
-                    height: 8,
-                    color: colorScheme.surfaceContainerHighest,
-                  ),
-                  FractionallySizedBox(
-                    widthFactor: progress <= 0 ? 0.0 : progress,
-                    child: Container(
-                      height: 8,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(heroInlayRadius),
-                        gradient: LinearGradient(
-                          colors: [barColor.withValues(alpha: 0.7), barColor],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            _SubscriptionBar(
+              progress: progress <= 0 ? 0.0 : progress,
+              color: barColor,
             ),
           ],
           if (offers.isNotEmpty) ...[
@@ -847,6 +828,77 @@ class _TrafficCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SubscriptionBar extends StatelessWidget {
+  const _SubscriptionBar({required this.progress, required this.color});
+
+  final double progress;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final trackColor = context.colorScheme.surfaceContainerHighest;
+    final gradient = LinearGradient(
+      colors: [color.withValues(alpha: 0.7), color],
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(heroInlayRadius),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: progress, end: progress),
+        duration: context.motionDuration(const Duration(milliseconds: 420)),
+        curve: Easing.standard,
+        builder: (context, value, _) => CustomPaint(
+          size: const Size(double.infinity, 8),
+          painter: _SubscriptionBarPainter(
+            progress: value,
+            trackColor: trackColor,
+            gradient: gradient,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SubscriptionBarPainter extends CustomPainter {
+  const _SubscriptionBarPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.gradient,
+  });
+
+  final double progress;
+  final Color trackColor;
+  final Gradient gradient;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final paint = Paint()..color = trackColor;
+    canvas.drawRSuperellipse(
+      RSuperellipse.fromRectAndRadius(
+        rect,
+        const Radius.circular(heroInlayRadius),
+      ),
+      paint,
+    );
+    if (progress <= 0) return;
+    final fillPaint = Paint()..shader = gradient.createShader(rect);
+    canvas.drawRSuperellipse(
+      RSuperellipse.fromRectAndRadius(
+        Offset.zero & Size(size.width * progress, size.height),
+        const Radius.circular(heroInlayRadius),
+      ),
+      fillPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_SubscriptionBarPainter old) =>
+      old.progress != progress ||
+      old.trackColor != trackColor ||
+      old.gradient != gradient;
 }
 
 class _BuyChip extends StatelessWidget {
@@ -899,31 +951,36 @@ class _ServerPanel extends StatelessWidget {
   final bool smartRouting;
 
   @override
-  Widget build(BuildContext context) => HeroSurface(
-    accent: accent,
-    child: AnimatedSize(
-      duration: commonDuration,
-      curve: Curves.easeOut,
-      alignment: Alignment.topCenter,
-      child: Column(
-        children: [
-          _ServerZone(
-            displayName: displayName,
-            nameCountryCode: nameCountryCode,
-            delay: delay,
-            otherCodes: otherCodes,
-            otherLocations: otherLocations,
-            smartRouting: smartRouting,
-          ),
-          const HeroCardDivider(),
-          _HeroInfoRow(
-            status: status,
-            accent: accent ?? context.colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final panel = Column(
+      children: [
+        _ServerZone(
+          displayName: displayName,
+          nameCountryCode: nameCountryCode,
+          delay: delay,
+          otherCodes: otherCodes,
+          otherLocations: otherLocations,
+          smartRouting: smartRouting,
+        ),
+        const HeroCardDivider(),
+        _HeroInfoRow(
+          status: status,
+          accent: accent ?? context.colorScheme.onSurfaceVariant,
+        ),
+      ],
+    );
+    return HeroSurface(
+      accent: accent,
+      child: context.motionDuration(commonDuration) == Duration.zero
+          ? panel
+          : AnimatedSize(
+              duration: context.motionDuration(commonDuration),
+              curve: Easing.standard,
+              alignment: Alignment.topCenter,
+              child: panel,
+            ),
+    );
+  }
 }
 
 /// The line under the divider belongs to smart routing while it runs; the

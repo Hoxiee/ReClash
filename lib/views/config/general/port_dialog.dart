@@ -188,6 +188,19 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
     );
   }
 
+  Widget _fieldsColumn(AppLocalizations appLocalizations) {
+    return Column(
+      spacing: 24,
+      children: [
+        _buildField(_fields.first, appLocalizations),
+        if (_isMore)
+          ..._fields
+              .skip(1)
+              .map((field) => _buildField(field, appLocalizations)),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _mixedPortController.dispose();
@@ -235,21 +248,14 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: AnimatedSize(
-            duration: midDuration,
-            curve: Curves.easeOutQuad,
-            alignment: Alignment.topCenter,
-            child: Column(
-              spacing: 24,
-              children: [
-                _buildField(_fields.first, appLocalizations),
-                if (_isMore)
-                  ..._fields
-                      .skip(1)
-                      .map((field) => _buildField(field, appLocalizations)),
-              ],
-            ),
-          ),
+          child: context.disableAnimations
+              ? _fieldsColumn(appLocalizations)
+              : AnimatedSize(
+                  duration: midDuration,
+                  curve: Easing.standard,
+                  alignment: Alignment.topCenter,
+                  child: _fieldsColumn(appLocalizations),
+                ),
         ),
       ),
     );

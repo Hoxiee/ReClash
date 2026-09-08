@@ -15,7 +15,8 @@ class _IconEditStateNotifier<T> extends ChangeNotifier {
     required TickerProvider vsync,
     required Duration duration,
     T? initialValue,
-  }) : _value = initialValue {
+  }) : _value = initialValue,
+       _duration = duration {
     _controller = AnimationController(vsync: vsync, duration: duration);
     _layout = CurvedAnimation(
       parent: _controller,
@@ -23,11 +24,11 @@ class _IconEditStateNotifier<T> extends ChangeNotifier {
     );
     _opacity = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.6, 1.0, curve: Curves.easeOutBack),
+      curve: const Interval(0.6, 1.0, curve: Easing.emphasizedDecelerate),
     );
     _scale = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.6, 1.0, curve: Curves.easeOutBack),
+      curve: const Interval(0.6, 1.0, curve: Easing.emphasizedDecelerate),
     );
     _controller.addListener(notifyListeners);
   }
@@ -38,6 +39,8 @@ class _IconEditStateNotifier<T> extends ChangeNotifier {
   late final CurvedAnimation _scale;
 
   T? _value;
+  final Duration _duration;
+  int _reverseToken = 0;
 
   double get layoutFactor => _layout.value;
 
@@ -47,21 +50,41 @@ class _IconEditStateNotifier<T> extends ChangeNotifier {
 
   T? get value => _value;
 
+  set reducedMotion(bool value) {
+    final duration = value ? Duration.zero : _duration;
+    if (_controller.duration == duration) {
+      return;
+    }
+    _controller.duration = duration;
+    _controller.reverseDuration = duration;
+    notifyListeners();
+  }
+
   void setValue(T? newValue) {
+    final token = ++_reverseToken;
     if (newValue == null) {
+      if (_controller.isDismissed) {
+        _value = null;
+        notifyListeners();
+        return;
+      }
       _controller.reverse().then((_) {
+        if (token != _reverseToken) {
+          return;
+        }
         _value = null;
         notifyListeners();
       });
-    } else {
-      _value = newValue;
-      notifyListeners();
-      _controller.forward();
+      return;
     }
+    _value = newValue;
+    notifyListeners();
+    _controller.forward();
   }
 
   @override
   void dispose() {
+    _reverseToken++;
     _controller.removeListener(notifyListeners);
     _controller.dispose();
     super.dispose();
@@ -94,6 +117,12 @@ class _IconEditViewState extends ConsumerState<IconEditView>
       duration: commonDuration * 2,
     );
     _handleInputRealChange();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _state.reducedMotion = context.disableAnimations;
   }
 
   Future<void> _handleInputChange() async {

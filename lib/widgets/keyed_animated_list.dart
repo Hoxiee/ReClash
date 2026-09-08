@@ -1,12 +1,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _defaultDuration = Duration(milliseconds: 300);
 
-/// A lazily built vertical list that diffs [items] by key: removed items
-/// collapse out, inserted items grow in, and items whose key survives slide
-/// from their previous slot to the new one.
 class KeyedAnimatedList<T> extends StatefulWidget {
   final List<T> items;
   final Object Function(T item) keyOf;
@@ -34,14 +32,11 @@ class KeyedAnimatedList<T> extends StatefulWidget {
 class _Entry<T> {
   final Object key;
   T item;
-  AnimationController? controller;
-  bool removing = false;
 
   _Entry(this.key, this.item);
 }
 
-class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
-    with TickerProviderStateMixin {
+class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>> {
   List<_Entry<T>> _entries = [];
   int _generation = 0;
 
@@ -61,100 +56,41 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
     }
   }
 
-  @override
-  void dispose() {
-    for (final entry in _entries) {
-      entry.controller?.dispose();
-    }
-    super.dispose();
-  }
-
-  AnimationController _createController(
-    _Entry<T> entry, {
-    required double from,
-  }) {
-    final controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-      value: from,
-    );
-    controller.addStatusListener((status) {
-      if (!mounted) {
-        return;
-      }
-      if (!status.isAnimating) {
-        setState(() {
-          entry.controller = null;
-          if (status.isDismissed) {
-            _entries.remove(entry);
-          }
-        });
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          controller.dispose();
-        });
-      }
-    });
-    return controller;
-  }
-
   void _applyItems(List<T> items) {
-    final oldByKey = {for (final entry in _entries) entry.key: entry};
-    final newKeys = {for (final item in items) widget.keyOf(item)};
-
-    final removedBefore = <Object, List<_Entry<T>>>{};
-    var pending = <_Entry<T>>[];
-    final transitions = <VoidCallback>[];
-    for (final entry in _entries) {
-      if (newKeys.contains(entry.key)) {
-        if (pending.isNotEmpty) {
-          removedBefore[entry.key] = pending;
-          pending = [];
-        }
-      } else {
-        pending.add(entry);
-        if (!entry.removing) {
-          entry.removing = true;
-          final controller = entry.controller ??= _createController(
-            entry,
-            from: 1,
-          );
-          transitions.add(controller.reverse);
-        }
-      }
-    }
-
+    final entryByKey = <Object, _Entry<T>>{
+      for (final entry in _entries) entry.key: entry,
+    };
+    final oldIndex = <Object, int>{
+      for (final (index, entry) in _entries.indexed) entry.key: index,
+    };
     final next = <_Entry<T>>[];
+    var kept = 0;
+    var highestOld = -1;
+    var reordered = false;
     for (final item in items) {
       final key = widget.keyOf(item);
-      next.addAll(removedBefore[key] ?? const []);
-      final existing = oldByKey[key];
+      final existing = entryByKey.remove(key);
       if (existing == null) {
-        final entry = _Entry(key, item);
-        final controller = _createController(entry, from: 0);
-        entry.controller = controller;
-        transitions.add(controller.forward);
-        next.add(entry);
+        next.add(_Entry(key, item));
         continue;
       }
       existing.item = item;
-      if (existing.removing) {
-        existing.removing = false;
-        final controller = existing.controller;
-        if (controller != null) {
-          transitions.add(controller.forward);
-        }
-      }
       next.add(existing);
+      kept++;
+      final at = oldIndex[key]!;
+      if (at < highestOld) {
+        reordered = true;
+      } else {
+        highestOld = at;
+      }
     }
-    next.addAll(pending);
-
     setState(() {
+      final setDiffers = entryByKey.isNotEmpty || kept != next.length;
       _entries = next;
-      _generation++;
+      if (setDiffers || reordered) {
+        _generation++;
+      }
     });
-    for (final transition in transitions) {
-      transition();
-    }
   }
 
   Widget _buildRow(BuildContext context, int index) {
@@ -163,19 +99,6 @@ class _KeyedAnimatedListState<T> extends State<KeyedAnimatedList<T>>
     Widget row = widget.itemBuilder(context, entry.item);
     if (separator != null && index < _entries.length - 1) {
       row = Column(mainAxisSize: MainAxisSize.min, children: [row, separator]);
-    }
-    final controller = entry.controller;
-    if (controller != null) {
-      final animation = CurvedAnimation(
-        parent: controller,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
-      );
-      row = SizeTransition(
-        sizeFactor: animation,
-        alignment: Alignment.topCenter,
-        child: FadeTransition(opacity: animation, child: row),
-      );
     }
     return _SlideOnMove(
       key: ValueKey(entry.key),
@@ -242,6 +165,8 @@ class _SlideOnMoveState extends State<_SlideOnMove>
     return _SlideOnMoveRenderWidget(
       generation: widget.generation,
       controller: _controller,
+      motionEnabled:
+          !context.disableAnimations && TickerMode.valuesOf(context).enabled,
       child: RepaintBoundary(child: widget.child),
     );
   }
@@ -250,16 +175,22 @@ class _SlideOnMoveState extends State<_SlideOnMove>
 class _SlideOnMoveRenderWidget extends SingleChildRenderObjectWidget {
   final int generation;
   final AnimationController controller;
+  final bool motionEnabled;
 
   const _SlideOnMoveRenderWidget({
     required this.generation,
     required this.controller,
+    required this.motionEnabled,
     required super.child,
   });
 
   @override
   _RenderSlideOnMove createRenderObject(BuildContext context) {
-    return _RenderSlideOnMove(generation: generation, controller: controller);
+    return _RenderSlideOnMove(
+      generation: generation,
+      controller: controller,
+      motionEnabled: motionEnabled,
+    );
   }
 
   @override
@@ -269,6 +200,7 @@ class _SlideOnMoveRenderWidget extends SingleChildRenderObjectWidget {
   ) {
     renderObject
       ..controller = controller
+      ..motionEnabled = motionEnabled
       ..generation = generation;
   }
 }
@@ -281,6 +213,7 @@ class _SlideOnMoveRenderWidget extends SingleChildRenderObjectWidget {
 class _RenderSlideOnMove extends RenderProxyBox {
   int _generation;
   AnimationController _controller;
+  bool _motionEnabled;
   double? _lastOffset;
   double? _previousOffset;
   double _delta = 0;
@@ -289,8 +222,10 @@ class _RenderSlideOnMove extends RenderProxyBox {
   _RenderSlideOnMove({
     required int generation,
     required AnimationController controller,
+    required bool motionEnabled,
   }) : _generation = generation,
-       _controller = controller;
+       _controller = controller,
+       _motionEnabled = motionEnabled;
 
   set controller(AnimationController value) {
     if (identical(value, _controller)) {
@@ -298,6 +233,19 @@ class _RenderSlideOnMove extends RenderProxyBox {
     }
     _controller.removeListener(markNeedsPaint);
     _controller = value..addListener(markNeedsPaint);
+  }
+
+  set motionEnabled(bool value) {
+    if (value == _motionEnabled) {
+      return;
+    }
+    _motionEnabled = value;
+    if (!value) {
+      _delta = 0;
+      _startPending = false;
+      _previousOffset = null;
+      _controller.stop();
+    }
   }
 
   set generation(int value) {
@@ -342,11 +290,14 @@ class _RenderSlideOnMove extends RenderProxyBox {
     if (delta.abs() < 1) {
       return;
     }
+    if (!_motionEnabled || _controller.duration == Duration.zero) {
+      return;
+    }
     _delta = delta;
     _startPending = true;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _startPending = false;
-      if (attached) {
+      if (attached && _motionEnabled) {
         _controller.forward(from: 0);
       }
     });

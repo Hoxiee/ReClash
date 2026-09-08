@@ -180,4 +180,52 @@ void main() {
     expect(route.reverseTransitionDuration, const Duration(milliseconds: 350));
     expect(route.delegatedTransition, isNull);
   });
+
+  testWidgets('pushPagedSheet completes in one frame under reduced motion', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: child!,
+        ),
+        home: Center(
+          child: PagedSheet(
+            child: Navigator(
+              onGenerateInitialRoutes: (_, _) => [
+                PagedSheetRoute(
+                  builder: (_) => Scaffold(
+                    body: Builder(
+                      builder: (context) => TextButton(
+                        onPressed: () => unawaited(
+                          pushPagedSheet<void>(
+                            context,
+                            PagedSheetRoute(
+                              builder: (_) => const Text('reduced page'),
+                            ),
+                          ),
+                        ),
+                        child: const Text('open reduced'),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open reduced'));
+    await tester.pump();
+
+    expect(find.text('reduced page'), findsOneWidget);
+    final route = ModalRoute.of(tester.element(find.text('reduced page')));
+    expect(route!.transitionDuration, Duration.zero);
+    expect(route.animation!.isCompleted, isTrue);
+    expect(tester.takeException(), isNull);
+  });
 }

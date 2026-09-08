@@ -10,7 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
-Future<ProviderContainer> _openPortDialog(WidgetTester tester) async {
+Future<ProviderContainer> _openPortDialog(
+  WidgetTester tester, {
+  bool disableAnimations = false,
+}) async {
   tester.view.physicalSize = const Size(1000, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -29,6 +32,10 @@ Future<ProviderContainer> _openPortDialog(WidgetTester tester) async {
     UncontrolledProviderScope(
       container: container,
       child: TestApp(
+        homeBuilder: (child) => MediaQuery(
+          data: MediaQueryData(disableAnimations: disableAnimations),
+          child: child,
+        ),
         child: Scaffold(body: ListView(children: const [PortItem()])),
       ),
     ),
@@ -107,6 +114,23 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Please enter a different port'), findsWidgets);
+  });
+
+  testWidgets('the extra fields appear without resizing under reduced motion', (
+    tester,
+  ) async {
+    await _openPortDialog(tester, disableAnimations: true);
+    final collapsedHeight = tester.getSize(find.byType(AnimatedSize)).height;
+    expect(find.byType(TextFormField), findsOneWidget);
+
+    await _expandMore(tester);
+
+    expect(find.byType(TextFormField), findsNWidgets(5));
+    expect(
+      tester.getSize(find.byType(AnimatedSize)).height,
+      greaterThan(collapsedHeight),
+    );
+    expect(tester.hasRunningAnimations, isFalse);
   });
 
   testWidgets('submitting valid ports writes them to the patch config', (

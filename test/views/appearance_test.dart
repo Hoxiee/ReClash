@@ -28,7 +28,10 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  Future<void> pumpAppearanceView(WidgetTester tester) async {
+  Future<void> pumpAppearanceView(
+    WidgetTester tester, {
+    bool disableAnimations = false,
+  }) async {
     tester.view.physicalSize = const Size(1400, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -37,13 +40,28 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: AppearanceView()),
+        child: TestApp(
+          homeBuilder: (child) => MediaQuery(
+            data: MediaQueryData(disableAnimations: disableAnimations),
+            child: child,
+          ),
+          child: const AppearanceView(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
   }
 
   Finder tabBar() => find.byType(CommonTabBar<int>);
+
+  Finder focusRing() => find
+      .ancestor(of: tabBar(), matching: find.byType(AnimatedContainer))
+      .first;
+
+  BoxBorder focusRingBorder(WidgetTester tester) =>
+      (tester.widget<AnimatedContainer>(focusRing()).decoration
+              as BoxDecoration)
+          .border!;
 
   Future<void> openTab(WidgetTester tester, String label) async {
     // Every segment renders its label twice, once per selection style.
@@ -97,6 +115,28 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
     expect(find.text('Contrast'), findsOneWidget);
+  });
+
+  testWidgets('the focus ring color snaps under reduced motion', (
+    tester,
+  ) async {
+    await pumpAppearanceView(tester, disableAnimations: true);
+    expect(
+      focusRingBorder(tester).top.color,
+      Colors.transparent,
+      reason: 'transparent while unfocused',
+    );
+
+    // Key events flip the highlight mode to traditional, so the ring only
+    // becomes primary once a keyboard interaction has happened.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(
+      focusRingBorder(tester).top.color,
+      Theme.of(tester.element(focusRing())).colorScheme.primary,
+    );
+    expect(tester.hasRunningAnimations, isFalse);
   });
 
   group('theme mode', () {

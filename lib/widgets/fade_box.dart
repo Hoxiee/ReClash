@@ -82,7 +82,7 @@ class FadeRotationScaleBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final realAlignment = alignment ?? Alignment.center;
     return AnimatedSwitcher(
-      duration: commonDuration,
+      duration: context.motionDuration(commonDuration),
       switchInCurve: Curves.easeOutBack,
       switchOutCurve: Curves.easeInBack,
       transitionBuilder: (child, animation) {
@@ -113,7 +113,7 @@ class FadeScaleBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final realAlignment = alignment ?? Alignment.center;
     return AnimatedSwitcher(
-      duration: commonDuration,
+      duration: context.motionDuration(commonDuration),
       switchOutCurve: Curves.easeOutBack,
       switchInCurve: Curves.easeInBack,
       transitionBuilder: (child, animation) {

@@ -130,6 +130,42 @@ void main() {
     expect(find.text('Picking a server…'), findsOne);
   });
 
+  testWidgets('reduced motion opens the disclosure without a ticker', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        smartRoutingSettingProvider.overrideWithValue(
+          const SmartRoutingProps(enabled: true),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: TestApp(
+            includeNavigatorKey: false,
+            setTheme: false,
+            child: RoutingOverviewView(reportReader: () async => _report),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 4));
+
+    expect(tester.hasRunningAnimations, isFalse);
+    await tester.tap(find.text('Link check'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 4));
+
+    expect(find.text('1.1.1.1:443'), findsOne);
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
   testWidgets('the chosen server comes with the reason it was chosen', (
     tester,
   ) async {

@@ -1,6 +1,8 @@
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
+const _borderDuration = Duration(milliseconds: 150);
+
 class FocusableTap extends StatefulWidget {
   const FocusableTap({
     required this.onTap,
@@ -42,7 +44,8 @@ class _FocusableTapState extends State<FocusableTap> {
         ),
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: context.motionDuration(_borderDuration),
+        curve: Easing.standard,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(widget.borderRadius + 4),
           border: Border.all(

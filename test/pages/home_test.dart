@@ -888,6 +888,263 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('rapid retargeting lands on the last requested page', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.folder),
+                label: PageLabel.profiles,
+                builder: (_) => const Text('page:profiles'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.construction),
+                label: PageLabel.tools,
+                builder: (_) => const Text('page:tools'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pump(const Duration(milliseconds: 70));
+    container
+        .read(currentPageLabelProvider.notifier)
+        .toPage(PageLabel.profiles);
+    await tester.pump(const Duration(milliseconds: 70));
+
+    expect(find.text('page:tools'), findsNothing);
+    expect(container.read(currentPageLabelProvider), PageLabel.profiles);
+
+    await tester.pumpAndSettle();
+    expect(find.text('page:profiles'), findsOneWidget);
+    expect(find.text('page:dashboard'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'removing and restoring a page keeps its navigation button under reduced motion',
+    (tester) async {
+      tester.view.physicalSize = const Size(500, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final dashboardItem = NavigationItem(
+        icon: const Icon(Icons.space_dashboard),
+        label: PageLabel.dashboard,
+        builder: (_) => const Text('page:dashboard'),
+      );
+      final profilesItem = NavigationItem(
+        icon: const Icon(Icons.folder),
+        label: PageLabel.profiles,
+        builder: (_) => const Text('page:profiles'),
+      );
+      var items = [dashboardItem, profilesItem];
+      final container = ProviderContainer(
+        overrides: [
+          navigationItemsStateProvider.overrideWithValue(
+            NavigationItemsState(value: items),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      globalState.container = container;
+      container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            includeNavigatorKey: false,
+            homeBuilder: (child) => MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: child,
+            ),
+            child: const HomePage(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Profiles'), findsNWidgets(2));
+      container
+          .read(currentPageLabelProvider.notifier)
+          .toPage(PageLabel.profiles);
+      await tester.pump();
+
+      items = [dashboardItem];
+      container.updateOverrides([
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items),
+        ),
+      ]);
+      await tester.pump();
+      expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+
+      items = [dashboardItem, profilesItem];
+      container.updateOverrides([
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(value: items),
+        ),
+      ]);
+      await tester.pump();
+
+      expect(find.text('Profiles'), findsNWidgets(2));
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(AppNavBar),
+              matching: find.byIcon(Icons.folder),
+            )
+            .first,
+      );
+      await tester.pump();
+      expect(container.read(currentPageLabelProvider), PageLabel.profiles);
+      expect(find.text('page:profiles'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('the incoming fade is skipped when motion is reduced', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.construction),
+                label: PageLabel.tools,
+                builder: (_) => const Text('page:tools'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          homeBuilder: (child) => MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: child,
+          ),
+          child: const HomePage(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pump();
+
+    final opacity = tester.widget<Opacity>(
+      find.ancestor(of: find.byType(PageView), matching: find.byType(Opacity)),
+    );
+    expect(opacity.opacity, 1);
+    expect(find.text('page:tools'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the incoming fade is skipped when animate-to-page is off', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [
+        appSettingProvider.overrideWithBuild(
+          (_, _) => const AppSettingProps(isAnimateToPage: false),
+        ),
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.construction),
+                label: PageLabel.tools,
+                builder: (_) => const Text('page:tools'),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    container.read(currentPageLabelProvider.notifier).toPage(PageLabel.tools);
+    await tester.pump();
+
+    final opacity = tester.widget<Opacity>(
+      find.ancestor(of: find.byType(PageView), matching: find.byType(Opacity)),
+    );
+    expect(opacity.opacity, 1);
+    expect(find.text('page:tools'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _ThemeManagedTestApp extends StatelessWidget {

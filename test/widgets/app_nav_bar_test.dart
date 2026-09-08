@@ -141,4 +141,47 @@ void main() {
       expect(find.text(label), findsNWidgets(2));
     }
   });
+
+  testWidgets('the highlight settles without a ticker under reduced motion', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpBar(tester);
+    final start = highlightX(tester);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          homeBuilder: (child) => MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: child,
+          ),
+          child: const Scaffold(
+            body: Align(alignment: Alignment.bottomCenter, child: AppNavBar()),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    goTo(PageLabel.tools);
+    await tester.pump();
+
+    final segmentWidth = tester
+        .getSize(find.byKey(AppNavBar.highlightKey))
+        .width;
+    expect(
+      highlightX(tester),
+      closeTo(start + 2 * segmentWidth, 1.0),
+      reason: 'the hop must land in a single frame',
+    );
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(highlightX(tester), closeTo(start + 2 * segmentWidth, 1.0));
+    expect(tester.takeException(), isNull);
+  });
 }

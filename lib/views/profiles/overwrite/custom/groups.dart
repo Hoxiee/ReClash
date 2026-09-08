@@ -215,9 +215,10 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
   }
 
   Future<void> _showIconEdit(String? icon) async {
-    final value = await Navigator.of(
+    final value = await pushPagedSheet<String>(
       context,
-    ).push<String>(PagedSheetRoute(builder: (context) => IconEditView(icon)));
+      PagedSheetRoute(builder: (context) => IconEditView(icon)),
+    );
     if (value == null) {
       return;
     }
@@ -243,14 +244,20 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
   }
 
   void _handleToProxiesView() {
-    Navigator.of(
-      context,
-    ).push(PagedSheetRoute(builder: (context) => const EditProxiesView()));
+    unawaited(
+      pushPagedSheet(
+        context,
+        PagedSheetRoute(builder: (context) => const EditProxiesView()),
+      ),
+    );
   }
 
   void _handleToProvidersView() {
-    Navigator.of(context).push(
-      PagedSheetRoute(builder: (context) => const EditProxyProvidersView()),
+    unawaited(
+      pushPagedSheet(
+        context,
+        PagedSheetRoute(builder: (context) => const EditProxyProvidersView()),
+      ),
     );
   }
 

@@ -38,6 +38,16 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
     widget.onAgree();
   }
 
+  Widget get _detailsBody => _detailsExpanded
+      ? Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Text(
+            context.appLocalizations.disclaimerDesc,
+            style: context.textTheme.bodyMedium?.copyWith(height: 1.45),
+          ),
+        )
+      : const SizedBox(width: double.infinity);
+
   void _showLicenses() {
     showLicensePage(
       context: context,
@@ -69,21 +79,14 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
                       setState(() => _detailsExpanded = !_detailsExpanded),
                   trailing: CommonExpandIcon(expand: _detailsExpanded),
                 ),
-                AnimatedSize(
-                  duration: context.motionDuration(midDuration),
-                  alignment: Alignment.topCenter,
-                  child: _detailsExpanded
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Text(
-                            appLocalizations.disclaimerDesc,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              height: 1.45,
-                            ),
-                          ),
-                        )
-                      : const SizedBox(width: double.infinity),
-                ),
+                context.disableAnimations
+                    ? _detailsBody
+                    : AnimatedSize(
+                        duration: midDuration,
+                        curve: Easing.standard,
+                        alignment: Alignment.topCenter,
+                        child: _detailsBody,
+                      ),
                 ListItem(
                   title: Text(appLocalizations.setupLegalLicense),
                   subtitle: const Text('GPL-3.0'),

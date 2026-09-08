@@ -190,6 +190,14 @@ class URLFormDialog extends StatefulWidget {
 }
 
 class _URLFormDialogState extends State<URLFormDialog> {
+  Widget get _moreBody => _isMore
+      ? ClientPresetSelector(
+          selected: _client,
+          onChanged: (value) => setState(() => _client = value),
+          customUserAgentController: _customUserAgentController,
+        )
+      : const SizedBox(width: double.infinity);
+
   final _urlController = TextEditingController();
   final _customUserAgentController = TextEditingController();
   SubscriptionClient _client = SubscriptionClient.auto;
@@ -277,18 +285,14 @@ class _URLFormDialogState extends State<URLFormDialog> {
               controller: _urlController,
               decoration: InputDecoration(labelText: appLocalizations.url),
             ),
-            AnimatedSize(
-              duration: midDuration,
-              curve: Curves.easeOutQuad,
-              alignment: Alignment.topCenter,
-              child: _isMore
-                  ? ClientPresetSelector(
-                      selected: _client,
-                      onChanged: (value) => setState(() => _client = value),
-                      customUserAgentController: _customUserAgentController,
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
+            context.disableAnimations
+                ? _moreBody
+                : AnimatedSize(
+                    duration: midDuration,
+                    curve: Easing.standard,
+                    alignment: Alignment.topCenter,
+                    child: _moreBody,
+                  ),
           ],
         ),
       ),

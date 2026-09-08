@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/common.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/physics.dart';
 
 enum LoadingIndicatorM3EVariant { defaultStyle, contained }
 
@@ -49,6 +49,11 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
     height: CommonCircleLoading.defaultDimension,
   );
 
+  static final double _globalRotationSeconds =
+      _globalRotationDuration.inMicroseconds / Duration.microsecondsPerSecond;
+  static final double _morphCycleSeconds =
+      _morphInterval.inMicroseconds / Duration.microsecondsPerSecond;
+
   static final List<RoundedPolygon> _defaultShapeSequence = [
     MaterialShapes.softBurst,
     MaterialShapes.cookie9Sided,
@@ -67,44 +72,44 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
     snapToEnd: true,
   );
 
-  late final AnimationController _morphController;
-  late final AnimationController _globalRotationController;
-  late final Listenable _animation;
+  late final AnimationController _clock;
+  var _animating = false;
 
   List<RoundedPolygon>? _cachedPolygons;
   List<Morph>? _cachedMorphs;
 
-  var _currentMorphIndex = 0;
-  var _morphRotationTargetAngle = _quarterRotation;
-
   @override
   void initState() {
     super.initState();
-    _morphController = AnimationController.unbounded(vsync: this);
-    _globalRotationController = AnimationController(
-      duration: _globalRotationDuration,
-      vsync: this,
-    )..repeat();
-    _animation = Listenable.merge([
-      _morphController,
-      _globalRotationController,
-    ]);
-    unawaited(_runMorphLoop());
+    _clock = AnimationController.unbounded(vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncAnimation();
   }
 
   @override
   void dispose() {
-    _morphController.dispose();
-    _globalRotationController.dispose();
+    _clock.dispose();
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant CommonCircleLoading oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.polygons != oldWidget.polygons &&
-        _currentMorphIndex >= _shapeCount) {
-      _currentMorphIndex = 0;
+  // The clock counts elapsed seconds monotonically and never wraps, so every
+  // phase derived from it (morph index, morph progress, rotation) is
+  // continuous. Pausing freezes the count; resuming continues from it.
+  void _syncAnimation() {
+    final shouldAnimate =
+        !context.disableAnimations && TickerMode.valuesOf(context).enabled;
+    if (shouldAnimate == _animating) {
+      return;
+    }
+    _animating = shouldAnimate;
+    if (shouldAnimate) {
+      unawaited(_clock.animateWith(_MonotonicClock(_clock.value)));
+    } else {
+      _clock.stop();
     }
   }
 
@@ -136,7 +141,6 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
           indicatorConstraints,
           widget.constraints ?? _defaultConstraints,
         );
-        final currentMorphIndex = _currentMorphIndex % shapeSequence.length;
         return Align(
           widthFactor: 1,
           heightFactor: 1,
@@ -154,21 +158,28 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
                   child: SizedBox.square(
                     dimension: dimension,
                     child: AnimatedBuilder(
-                      animation: _animation,
+                      animation: _clock,
                       builder: (context, child) {
-                        final morphProgress = _morphController.value.clamp(
-                          0.0,
-                          1.0,
-                        );
+                        final elapsed = _clock.value;
+                        final completedMorphs = elapsed ~/ _morphCycleSeconds;
+                        final cycleOffset =
+                            elapsed - completedMorphs * _morphCycleSeconds;
+                        final morphProgress = _morphAnimation
+                            .x(cycleOffset)
+                            .clamp(0.0, 1.0);
                         final rotationDegrees =
                             morphProgress * _quarterRotation +
-                            _morphRotationTargetAngle +
-                            _globalRotationController.value * _fullRotation;
+                            (completedMorphs + 1) *
+                                _quarterRotation %
+                                _fullRotation +
+                            elapsed / _globalRotationSeconds * _fullRotation;
                         return Transform.rotate(
                           angle: rotationDegrees * math.pi / 180,
                           child: CustomPaint(
                             painter: _MorphPainter(
-                              morph: morphs[currentMorphIndex],
+                              morph:
+                                  morphs[completedMorphs.truncate() %
+                                      shapeSequence.length],
                               progress: morphProgress,
                               color: activeColor,
                               scaleFactor: _activeIndicatorScale,
@@ -188,9 +199,6 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
       },
     );
   }
-
-  int get _shapeCount =>
-      widget.polygons?.length ?? _defaultShapeSequence.length;
 
   List<Morph> _morphsFor(List<RoundedPolygon> polygons) {
     final cachedMorphs = _cachedMorphs;
@@ -231,32 +239,21 @@ class _CommonCircleLoadingState extends State<CommonCircleLoading>
 
     return CommonCircleLoading.defaultDimension;
   }
+}
 
-  Future<void> _runMorphLoop() async {
-    while (mounted) {
-      final startedAt = DateTime.now();
-      try {
-        await _morphController.animateWith(_morphAnimation).orCancel;
-      } on TickerCanceled {
-        return;
-      }
+class _MonotonicClock extends Simulation {
+  _MonotonicClock(this._initialSeconds);
 
-      final elapsed = DateTime.now().difference(startedAt);
-      if (elapsed < _morphInterval) {
-        await Future<void>.delayed(_morphInterval - elapsed);
-      }
-      if (!mounted) {
-        return;
-      }
+  final double _initialSeconds;
 
-      setState(() {
-        _currentMorphIndex = (_currentMorphIndex + 1) % _shapeCount;
-        _morphRotationTargetAngle =
-            (_morphRotationTargetAngle + _quarterRotation) % _fullRotation;
-        _morphController.value = 0;
-      });
-    }
-  }
+  @override
+  double x(double timeInSeconds) => _initialSeconds + timeInSeconds;
+
+  @override
+  double dx(double timeInSeconds) => 1.0;
+
+  @override
+  bool isDone(double timeInSeconds) => false;
 }
 
 class _MorphPainter extends CustomPainter {

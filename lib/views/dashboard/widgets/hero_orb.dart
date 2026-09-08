@@ -242,6 +242,13 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   double get _breatheValue => (_breathePhase + _breathe.value) % 1.0;
 
+  /// The palette currently on screen: `_tintFrom` lerped toward `_tintTo`.
+  HeroPalette get _currentPalette => HeroPalette.lerp(
+    _tintFrom!,
+    _tintTo!,
+    Curves.easeOutCubic.transform(_tint.value),
+  );
+
   bool get _canTap => widget.enabled && !_status.isTransitioning;
 
   double _headOf(HeroStatus status) {
@@ -418,6 +425,36 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     }
 
     final running = ref.watch(isStartProvider);
+
+    // The ambient controllers repaint painters and the two scale transforms
+    // only; everything a tap or a status change owns is built once here, so
+    // the core mark, its image chain and the switcher never rebuild per tick.
+    final coreChild = SizedBox(
+      width: core,
+      height: core,
+      child: Center(
+        child: AnimatedBuilder(
+          animation: _tint,
+          builder: (context, _) => AnimatedSwitcher(
+            duration: context.motionDuration(const Duration(milliseconds: 360)),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              final scale = Tween<double>(
+                begin: 0.72,
+                end: 1,
+              ).animate(animation);
+              return ScaleTransition(
+                scale: scale,
+                child: FadeTransition(opacity: animation, child: child),
+              );
+            },
+            child: _coreChild(core, _currentPalette.accent),
+          ),
+        ),
+      ),
+    );
+
     return Tooltip(
       message: _phase == HeroOrbPhase.paused
           ? context.appLocalizations.resume
@@ -432,93 +469,101 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
           onPointerUp: (_) => _press.reverse(),
           onPointerCancel: (_) => _press.reverse(),
           child: AnimatedBuilder(
-            animation: Listenable.merge([
-              _draw,
-              _breathe,
-              _press,
-              _sweep,
-              _flow,
-              _aurora,
-              _ripple,
-              _morph,
-              _settle,
-              _onset,
-              _tint,
-            ]),
-            builder: (context, _) {
-              final palette = _palette = HeroPalette.lerp(
-                _tintFrom!,
-                _tintTo!,
-                Curves.easeOutCubic.transform(_tint.value),
-              );
-              final still = _still;
-              // A cosine: a period change alters speed, never current depth.
-              final pulse = still
-                  ? 0.0
-                  : 0.5 - 0.5 * math.cos(2 * math.pi * _breatheValue);
-              final activity = still ? 0.4 : _activity;
-              final drawProgress = Curves.easeOutCubic.transform(_draw.value);
-              final morph = Curves.easeOutCubic.transform(_morph.value);
-              final transitionProgress = Curves.easeOutCubic.transform(
-                _morph.value,
-              );
-              final sweep = still ? 0.18 : _sweepValue;
-              final amplitude = switch (_status) {
-                HeroStatus.secured => 0.022,
-                HeroStatus.degraded => 0.014,
-                HeroStatus.paused => 0.008,
-                _ => 0.0,
-              };
-              final breatheScale = 1 + amplitude * pulse;
-              final pressScale = 1.0 - 0.035 * _press.value;
-              final halo =
-                  (_status.isSweeping ? morph : drawProgress) *
-                  (0.55 + 0.45 * pulse) *
-                  (0.62 + 0.38 * activity) *
-                  switch (_status) {
-                    HeroStatus.checking => 0.45,
-                    HeroStatus.paused => 0.30,
-                    _ => 1.0,
-                  };
-
-              return Transform.scale(
-                scale: pressScale,
-                child: Opacity(
-                  opacity: widget.enabled ? 1 : 0.72,
-                  child: SizedBox(
-                    width: size,
-                    height: size,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        Positioned(
-                          left: -_haloSpread,
-                          top: -_haloSpread,
-                          width: size + _haloSpread * 2,
-                          height: size + _haloSpread * 2,
-                          child: IgnorePointer(
-                            child: CustomPaint(
+            animation: _press,
+            child: Opacity(
+              opacity: widget.enabled ? 1 : 0.72,
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      left: -_haloSpread,
+                      top: -_haloSpread,
+                      width: size + _haloSpread * 2,
+                      height: size + _haloSpread * 2,
+                      child: IgnorePointer(
+                        child: AnimatedBuilder(
+                          animation: Listenable.merge([
+                            _draw,
+                            _breathe,
+                            _morph,
+                            _ripple,
+                            _settle,
+                            _tint,
+                          ]),
+                          builder: (context, _) {
+                            // A cosine: a period change alters speed, never
+                            // current depth.
+                            final pulse = _still
+                                ? 0.0
+                                : 0.5 -
+                                      0.5 *
+                                          math.cos(2 * math.pi * _breatheValue);
+                            final activity = _still ? 0.4 : _activity;
+                            final halo =
+                                (_status.isSweeping
+                                    ? Curves.easeOutCubic.transform(
+                                        _morph.value,
+                                      )
+                                    : Curves.easeOutCubic.transform(
+                                        _draw.value,
+                                      )) *
+                                (0.55 + 0.45 * pulse) *
+                                (0.62 + 0.38 * activity) *
+                                switch (_status) {
+                                  HeroStatus.checking => 0.45,
+                                  HeroStatus.paused => 0.30,
+                                  _ => 1.0,
+                                };
+                            return CustomPaint(
                               painter: _HeroHaloPainter(
-                                glow: palette.glow,
+                                glow: _currentPalette.glow,
                                 intensity: halo,
-                                ripple: still ? 1 : _ripple.value,
+                                ripple: _still ? 1 : _ripple.value,
                                 orbRadius: size / 2,
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
-                        Transform.scale(
-                          scale: breatheScale,
-                          child: Semantics(
-                            button: true,
-                            enabled: _canTap,
-                            child: FocusableTap(
-                              autofocus: true,
-                              borderRadius: size / 2,
-                              onTap: _canTap ? _handleTap : null,
-                              onLongPress: widget.onLongPress,
-                              child: CustomPaint(
+                      ),
+                    ),
+                    AnimatedBuilder(
+                      animation: _breathe,
+                      child: Semantics(
+                        button: true,
+                        enabled: _canTap,
+                        child: FocusableTap(
+                          autofocus: true,
+                          borderRadius: size / 2,
+                          onTap: _canTap ? _handleTap : null,
+                          onLongPress: widget.onLongPress,
+                          child: AnimatedBuilder(
+                            animation: Listenable.merge([
+                              _draw,
+                              _breathe,
+                              _sweep,
+                              _flow,
+                              _aurora,
+                              _morph,
+                              _settle,
+                              _onset,
+                              _tint,
+                            ]),
+                            child: coreChild,
+                            builder: (context, child) {
+                              final palette = _palette = _currentPalette;
+                              final still = _still;
+                              final pulse = still
+                                  ? 0.0
+                                  : 0.5 -
+                                        0.5 *
+                                            math.cos(
+                                              2 * math.pi * _breatheValue,
+                                            );
+                              return CustomPaint(
                                 size: Size.square(size),
                                 painter: _HeroOrbPainter(
                                   status: _status,
@@ -526,15 +571,20 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                   transition: _transition,
                                   exiting: _exiting,
                                   palette: palette,
-                                  drawProgress: drawProgress,
-                                  sweep: sweep,
+                                  drawProgress: Curves.easeOutCubic.transform(
+                                    _draw.value,
+                                  ),
+                                  sweep: still ? 0.18 : _sweepValue,
                                   handoff: _handoff,
                                   flow: still ? 0.12 : _flow.value,
                                   aurora: still ? 0.2 : _aurora.value,
                                   pulse: pulse,
-                                  activity: activity,
-                                  morph: morph,
-                                  transitionProgress: transitionProgress,
+                                  activity: still ? 0.4 : _activity,
+                                  morph: Curves.easeOutCubic.transform(
+                                    _morph.value,
+                                  ),
+                                  transitionProgress: Curves.easeOutCubic
+                                      .transform(_morph.value),
                                   onset: still
                                       ? 1
                                       : Curves.easeOut.transform(_onset.value),
@@ -547,43 +597,36 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                   coreBorder:
                                       colorScheme.outlineVariant.opacity60,
                                 ),
-                                child: SizedBox(
-                                  width: core,
-                                  height: core,
-                                  child: Center(
-                                    child: AnimatedSwitcher(
-                                      duration: context.motionDuration(
-                                        const Duration(milliseconds: 360),
-                                      ),
-                                      switchInCurve: Curves.easeOutBack,
-                                      switchOutCurve: Curves.easeInCubic,
-                                      transitionBuilder: (child, animation) {
-                                        final scale = Tween<double>(
-                                          begin: 0.72,
-                                          end: 1,
-                                        ).animate(animation);
-                                        return ScaleTransition(
-                                          scale: scale,
-                                          child: FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                          ),
-                                        );
-                                      },
-                                      child: _coreChild(core, palette.accent),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                                child: child,
+                              );
+                            },
                           ),
                         ),
-                      ],
+                      ),
+                      builder: (context, child) {
+                        final pulse = _still
+                            ? 0.0
+                            : 0.5 - 0.5 * math.cos(2 * math.pi * _breatheValue);
+                        final amplitude = switch (_status) {
+                          HeroStatus.secured => 0.022,
+                          HeroStatus.degraded => 0.014,
+                          HeroStatus.paused => 0.008,
+                          _ => 0.0,
+                        };
+                        return Transform.scale(
+                          scale: 1 + amplitude * pulse,
+                          child: child,
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
+            builder: (context, child) => Transform.scale(
+              scale: 1.0 - 0.035 * _press.value,
+              child: child,
+            ),
           ),
         ),
       ),

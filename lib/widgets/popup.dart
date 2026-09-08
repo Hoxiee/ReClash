@@ -14,6 +14,10 @@ const _anchorOverlap = 8.0;
 
 const _cardInset = 8.0;
 
+const _popupEnterDuration = Duration(milliseconds: 250);
+
+const _popupExitDuration = Duration(milliseconds: 150);
+
 const _itemRadius = AppCorner.md;
 
 const _cardRadius = _itemRadius + _cardInset;
@@ -34,6 +38,8 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     required this.builder,
     required this.anchorOf,
     required this.barrierLabel,
+    this.transitionDuration = _popupEnterDuration,
+    this.reverseTransitionDuration = _popupExitDuration,
   });
 
   final WidgetBuilder builder;
@@ -49,10 +55,10 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 250);
+  final Duration transitionDuration;
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 150);
+  final Duration reverseTransitionDuration;
 
   void _handleDismiss() {
     if (isCurrent) {
@@ -77,8 +83,10 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     Widget child,
   ) {
     const alignment = Alignment.topRight;
-    final fade = animation.drive(CurveTween(curve: Curves.easeOut));
-    final scale = animation.drive(CurveTween(curve: Curves.easeOutBack));
+    final fade = animation.drive(
+      CurveTween(curve: Easing.emphasizedDecelerate),
+    );
+    final scale = animation.drive(CurveTween(curve: Curves.easeOutCubic));
     return Stack(
       children: [
         Positioned.fill(
@@ -253,6 +261,8 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
         ).modalBarrierDismissLabel,
         builder: (context) => widget.popupBuilder(context),
         anchorOf: () => _anchorOf(offset),
+        transitionDuration: context.motionDuration(_popupEnterDuration),
+        reverseTransitionDuration: context.motionDuration(_popupExitDuration),
       ),
     );
   }
@@ -335,11 +345,22 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
   static const _minElevation = 2.0;
   static final _arrowTween = Tween(begin: 0.0, end: 0.25);
 
+  static const _menuExpandDuration = Duration(milliseconds: 260);
+
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 260),
+    duration: _menuExpandDuration,
     value: 1,
   );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final duration = context.motionDuration(_menuExpandDuration);
+    if (_controller.duration != duration) {
+      _controller.duration = duration;
+    }
+  }
 
   late final CurvedAnimation _expand = CurvedAnimation(
     parent: _controller,

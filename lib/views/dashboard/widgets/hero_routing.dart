@@ -119,7 +119,7 @@ class HeroRoutingRow extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 6),
         child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 260),
+          duration: context.motionDuration(const Duration(milliseconds: 260)),
           layoutBuilder: (current, previous) => Stack(
             alignment: Alignment.centerLeft,
             children: [...previous, ?current],
@@ -182,7 +182,7 @@ class HeroLinkRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 6),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 260),
+        duration: context.motionDuration(const Duration(milliseconds: 260)),
         layoutBuilder: (current, previous) => Stack(
           alignment: Alignment.centerLeft,
           children: [...previous, ?current],

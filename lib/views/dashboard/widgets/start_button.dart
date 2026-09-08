@@ -88,10 +88,7 @@ class _StartButtonState extends ConsumerState<StartButton>
       value: isStart ? 1 : 0,
       duration: const Duration(milliseconds: 200),
     );
-    _animation = CurvedAnimation(
-      parent: _controller!,
-      curve: Curves.easeOutBack,
-    );
+    _animation = CurvedAnimation(parent: _controller!, curve: Easing.standard);
     ref.listenManual(runTimeProvider, (_, next) {
       _updateDisplayRunTime(next);
     });
@@ -103,6 +100,9 @@ class _StartButtonState extends ConsumerState<StartButton>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _controller!.duration = context.disableAnimations
+        ? Duration.zero
+        : const Duration(milliseconds: 200);
     _twoDigitTextWidth = null;
     _threeDigitTextWidth = null;
     _pausedTextWidth = null;
@@ -202,6 +202,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     final textWidth = paused
         ? _getPausedTextWidth(context, appLocalizations.paused)
         : _getRunTimeTextWidth(context, hasThreeDigitHours: hasThreeDigitHours);
+    final widthDuration = context.motionDuration(_widthAnimationDuration);
     // While paused the service still runs, so the text panel stays open but
     // the glyph flips to play — the next tap resumes.
     final iconAnimation = paused
@@ -211,21 +212,36 @@ class _StartButtonState extends ConsumerState<StartButton>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedSize(
-            duration: _widthAnimationDuration,
-            curve: Curves.easeOut,
-            alignment: Alignment.centerRight,
-            child: showPauseButton
-                ? FloatingActionButton.small(
-                    heroTag: null,
-                    tooltip: appLocalizations.pause,
-                    onPressed: () {
-                      ref.read(commonActionProvider.notifier).togglePaused();
-                    },
-                    child: const Icon(Icons.pause_rounded),
-                  )
-                : const SizedBox(width: 8),
-          ),
+          widthDuration == Duration.zero
+              ? (showPauseButton
+                    ? FloatingActionButton.small(
+                        heroTag: null,
+                        tooltip: appLocalizations.pause,
+                        onPressed: () {
+                          ref
+                              .read(commonActionProvider.notifier)
+                              .togglePaused();
+                        },
+                        child: const Icon(Icons.pause_rounded),
+                      )
+                    : const SizedBox(width: 8))
+              : AnimatedSize(
+                  duration: widthDuration,
+                  curve: Easing.standard,
+                  alignment: Alignment.centerRight,
+                  child: showPauseButton
+                      ? FloatingActionButton.small(
+                          heroTag: null,
+                          tooltip: appLocalizations.pause,
+                          onPressed: () {
+                            ref
+                                .read(commonActionProvider.notifier)
+                                .togglePaused();
+                          },
+                          child: const Icon(Icons.pause_rounded),
+                        )
+                      : const SizedBox(width: 8),
+                ),
           Theme(
             data: theme.copyWith(
               floatingActionButtonTheme: theme.floatingActionButtonTheme
@@ -277,8 +293,8 @@ class _StartButtonState extends ConsumerState<StartButton>
                     sizeFactor: _animation,
                     child: AnimatedContainer(
                       width: textWidth,
-                      duration: _widthAnimationDuration,
-                      curve: Curves.easeOut,
+                      duration: context.motionDuration(_widthAnimationDuration),
+                      curve: Easing.standard,
                       child: paused
                           ? Text(
                               appLocalizations.paused,

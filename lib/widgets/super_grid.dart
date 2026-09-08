@@ -57,8 +57,8 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   List<int> _tempIndexList = [];
 
-  /// One stable key per slot, so item elements survive a reorder.
-  final List<GlobalKey> _itemKeys = [];
+  /// One stable key per item, so item elements survive a reorder.
+  final Map<GridItem, GlobalKey> _itemKeys = Map.identity();
 
   Size _containerSize = Size.zero;
   int _targetIndex = -1;
@@ -101,7 +101,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     _shakeController = AnimationController(
       vsync: this,
       duration: _shakeDuration,
-    )..repeat();
+    );
 
     _transformController = AnimationController(
       vsync: this,
@@ -110,9 +110,30 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     _resetDragState();
   }
 
+  bool _shakeActive = false;
+
+  void _syncShakeTicker() {
+    final shouldShake =
+        _isDragging &&
+        !context.disableAnimations &&
+        TickerMode.valuesOf(context).enabled;
+    if (shouldShake == _shakeActive) {
+      return;
+    }
+    _shakeActive = shouldShake;
+    if (shouldShake) {
+      _shakeController.repeat();
+    } else {
+      _shakeController
+        ..stop()
+        ..value = 0;
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncShakeTicker();
 
     final scrollable = context.findAncestorWidgetOfExactType<Scrollable>();
     if (scrollable == null) {
@@ -187,16 +208,17 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     widget.onUpdate?.call();
   }
 
-  /// Grows or trims [_itemKeys] without replacing existing entries, so a slot
-  /// keeps its key across reorders and its element is never rebuilt.
   void _syncItemKeys() {
-    while (_itemKeys.length < length) {
-      _itemKeys.add(
-        GlobalKey(debugLabel: 'super_grid_item_${_itemKeys.length}'),
+    final items = _childrenNotifier.value;
+    _itemKeys.removeWhere(
+      (item, _) => !items.any((candidate) => identical(candidate, item)),
+    );
+    for (final item in items) {
+      _itemKeys.putIfAbsent(
+        item,
+        () =>
+            GlobalKey(debugLabel: 'super_grid_item_${identityHashCode(item)}'),
       );
-    }
-    if (_itemKeys.length > length) {
-      _itemKeys.removeRange(length, _itemKeys.length);
     }
   }
 
@@ -221,11 +243,13 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     if (_itemKeys.length != length) {
       return false;
     }
+    final items = _childrenNotifier.value;
     final parentOffset = renderObject.localToGlobal(Offset.zero);
     final sizes = <Size>[];
     final offsets = <Offset>[];
-    for (final key in _itemKeys) {
-      final itemRenderObject = key.currentContext?.findRenderObject();
+    for (final item in items) {
+      final itemRenderObject = _itemKeys[item]?.currentContext
+          ?.findRenderObject();
       if (itemRenderObject is! RenderBox || !itemRenderObject.hasSize) {
         return false;
       }
@@ -284,10 +308,16 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     _transformAnimationMap = transformAnimationMap;
 
     try {
+      if (context.disableAnimations) {
+        _transformController.value = 1;
+        return true;
+      }
       await _transformController.forward(from: 0).orCancel;
       return true;
     } on TickerCanceled {
       return false;
+    } finally {
+      transformCurve.dispose();
     }
   }
 
@@ -297,6 +327,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       return;
     }
     _isDragging = true;
+    _syncShakeTicker();
     _targetIndex = index;
     _targetOffset = _offsets[index];
     _dragNotifier.value = (index: index, size: _sizes[index], landing: false);
@@ -318,6 +349,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
 
   Future<void> _handleDragEnd(DraggableDetails details) async {
     _isDragging = false;
+    _syncShakeTicker();
     _stopAutoScroll();
     _hoverTimer?.cancel();
     final dragIndex = _dragNotifier.value.index;
@@ -333,6 +365,7 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     nextChildren.insert(_targetIndex, nextChildren.removeAt(dragIndex));
     children = nextChildren;
 
+    final reducedMotion = context.disableAnimations;
     const tolerance = Tolerance(distance: 0.001, velocity: 0.01);
     const spring = SpringDescription(mass: 1, stiffness: 180, damping: 18);
     final simulation = SpringSimulation(spring, 0, 1, 0, tolerance: tolerance);
@@ -349,7 +382,14 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     final completer = Completer<bool>();
     _transformCompleter = completer;
     try {
-      await _landingController.animateWith(simulation).orCancel;
+      await (reducedMotion
+              ? _landingController.animateTo(
+                  1,
+                  duration: Duration.zero,
+                  curve: Curves.linear,
+                )
+              : _landingController.animateWith(simulation))
+          .orCancel;
       if (!mounted) {
         return;
       }
@@ -489,9 +529,10 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _shakeController,
       builder: (_, child) {
-        // An irregular phase step keeps neighbours from shaking in unison.
         final phase = index * 1.7;
-        final angle = sin(_shakeController.value * 2 * pi + phase) * 0.01;
+        final angle = _shakeActive
+            ? sin(_shakeController.value * 2 * pi + phase) * 0.01
+            : 0.0;
         return Transform.rotate(angle: angle, child: child!);
       },
       child: child,
@@ -574,11 +615,10 @@ class SuperGridState extends State<SuperGrid> with TickerProviderStateMixin {
       mainAxisCellCount: gridItem.mainAxisCellCount,
       crossAxisCellCount: gridItem.crossAxisCellCount,
       child: KeyedSubtree(
-        key: _itemKeys[index],
+        key: _itemKeys[gridItem],
         child: _buildTransform(
-          // The shake never stops while edit mode is open, and without a
-          // boundary here its markNeedsPaint reaches the scroll viewport, so
-          // every frame repaints the whole grid instead of one item.
+          // Without a boundary here the shake's markNeedsPaint reaches the
+          // scroll viewport, repainting the whole grid every frame.
           RepaintBoundary(
             child: _buildDraggable(
               childWhenDragging: childWhenDragging,
@@ -707,7 +747,11 @@ class _DeletableContainerState extends State<_DeletableContainer>
     setState(() {
       _deleteButtonVisible = false;
     });
-    await _controller.forward(from: 0);
+    if (context.disableAnimations) {
+      _controller.value = 1;
+    } else {
+      await _controller.forward(from: 0);
+    }
     widget.onDelete();
   }
 

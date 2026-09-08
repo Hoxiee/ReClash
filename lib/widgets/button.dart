@@ -28,27 +28,31 @@ class CommonFloatingActionButton extends StatelessWidget {
       ),
       child: FloatingActionButtonExtendedBuilder(
         builder: (isExtended) {
+          final labelChild = isExtended
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(label, softWrap: false),
+                )
+              : const SizedBox.shrink();
+          final effectiveLabel = context.disableAnimations
+              ? labelChild
+              : AnimatedSize(
+                  alignment: Alignment.centerLeft,
+                  duration: midDuration,
+                  curve: Easing.standard,
+                  child: AnimatedOpacity(
+                    duration: midDuration,
+                    opacity: isExtended ? 1.0 : 0.4,
+                    curve: Curves.linear,
+                    child: labelChild,
+                  ),
+                );
           return FloatingActionButton.extended(
             heroTag: null,
             icon: icon,
             onPressed: onPressed,
             isExtended: true,
-            label: AnimatedSize(
-              alignment: Alignment.centerLeft,
-              duration: midDuration,
-              curve: Curves.easeOutBack,
-              child: AnimatedOpacity(
-                duration: midDuration,
-                opacity: isExtended ? 1.0 : 0.4,
-                curve: Curves.linear,
-                child: isExtended
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: Text(label, softWrap: false),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ),
+            label: effectiveLabel,
           );
         },
       ),

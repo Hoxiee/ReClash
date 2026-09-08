@@ -57,6 +57,31 @@ void main() {
     expect(find.byKey(const Key('popup')), findsOneWidget);
   });
 
+  testWidgets('dismissing mid-enter reverses without an opacity jump', (
+    tester,
+  ) async {
+    final open = await pumpBox(tester);
+
+    open();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final routeFade = find.byWidgetPredicate(
+      (widget) => widget is FadeTransition && widget.child is ScaleTransition,
+    );
+    final beforeDismiss = tester
+        .widget<FadeTransition>(routeFade)
+        .opacity
+        .value;
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+    final afterDismiss = tester.widget<FadeTransition>(routeFade).opacity.value;
+
+    expect(afterDismiss, closeTo(beforeDismiss, 0.001));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('popup')), findsNothing);
+  });
+
   testWidgets('the popup is only built once it opens', (tester) async {
     var builds = 0;
     await tester.pumpWidget(
@@ -536,5 +561,87 @@ void main() {
     expect(lastSize!.width, closeTo(foldedSize.width, 1));
     expect(lastSize.height, closeTo(foldedSize.height, 1));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('the route settles in one frame under reduced motion', (
+    tester,
+  ) async {
+    late PopupOpen open;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: CommonPopupBox(
+              targetBuilder: (value) {
+                open = value;
+                return const SizedBox(width: 40, height: 40);
+              },
+              popupBuilder: (_) =>
+                  const SizedBox(width: 80, height: 80, key: Key('popup')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    open();
+    await tester.pump();
+
+    expect(find.byKey(const Key('popup')), findsOneWidget);
+    final route = ModalRoute.of(tester.element(find.byKey(const Key('popup'))));
+    expect(route!.transitionDuration, Duration.zero);
+    expect(route.animation!.isCompleted, isTrue);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pump();
+    expect(find.byKey(const Key('popup')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a nested menu opens fully in one frame under reduced motion', (
+    tester,
+  ) async {
+    late PopupOpen open;
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Center(
+            child: CommonPopupBox(
+              targetBuilder: (value) {
+                open = value;
+                return const SizedBox(width: 40, height: 40);
+              },
+              popupBuilder: (_) => const CommonPopupMenu(
+                items: [
+                  CommonPopupMenuItem(
+                    label: 'parent',
+                    subItems: [CommonPopupMenuItem(label: 'child')],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    open();
+    await tester.pump();
+    await tester.tap(find.text('parent'));
+    await tester.pump();
+
+    expect(find.text('child'), findsOneWidget);
+    final card = tester.getSize(find.byType(Card).last);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(Card).last), card);
+    expect(tester.takeException(), isNull);
   });
 }

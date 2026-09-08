@@ -344,7 +344,9 @@ class _OpenContainerRoute<T> extends ModalRoute<T> {
     _rectTween.end = Offset.zero & navSize;
 
     void takeMeasurementsInSourceRoute([Duration? _]) {
-      if (!navigator.attached || hideableKey.currentContext == null) {
+      if ((delayForSourceRoute && (animation?.isDismissed ?? true)) ||
+          !navigator.attached ||
+          hideableKey.currentContext == null) {
         return;
       }
       _rectTween.begin = _getRect(hideableKey, navigator);

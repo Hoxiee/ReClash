@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:reclash/common/shape.dart';
 import 'package:reclash/widgets/loading.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
@@ -153,5 +155,118 @@ void main() {
       tester.getSize(find.byType(CommonCircleLoading)),
       const Size.square(40),
     );
+  });
+
+  testWidgets('CommonCircleLoading freezes when animations are disabled', (
+    tester,
+  ) async {
+    Widget buildApp({required bool disableAnimations}) {
+      return MaterialApp(
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(disableAnimations: disableAnimations),
+            child: child!,
+          );
+        },
+        home: const Center(child: CommonCircleLoading()),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(disableAnimations: true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    final customPaint = find.descendant(
+      of: find.byType(CommonCircleLoading),
+      matching: find.byType(CustomPaint),
+    );
+    final transform = find.descendant(
+      of: find.byType(CommonCircleLoading),
+      matching: find.byType(Transform),
+    );
+    final frozenTransform = tester.widget<Transform>(transform).transform;
+    final frozenPainter = tester.widget<CustomPaint>(customPaint).painter!;
+
+    await tester.pump(const Duration(milliseconds: 700));
+
+    expect(
+      tester.widget<Transform>(transform).transform.storage,
+      equals(frozenTransform.storage),
+    );
+    expect(
+      tester.widget<CustomPaint>(customPaint).painter,
+      same(frozenPainter),
+    );
+  });
+
+  testWidgets('CommonCircleLoading stops under TickerMode and resumes once', (
+    tester,
+  ) async {
+    Widget buildApp({required bool enabled}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: TickerMode(
+            enabled: enabled,
+            child: const Center(child: CommonCircleLoading()),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpWidget(buildApp(enabled: false));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rotation stays continuous across the 4666ms wrap point', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Center(child: CommonCircleLoading())),
+    );
+
+    final transform = find.descendant(
+      of: find.byType(CommonCircleLoading),
+      matching: find.byType(Transform),
+    );
+
+    double rotationDegrees() {
+      final matrix = tester.widget<Transform>(transform).transform;
+      return math.atan2(matrix.storage[1], matrix.storage[0]) * 180 / math.pi;
+    }
+
+    double stepDegrees(double from, double to) {
+      var delta = to - from;
+      delta -= 360 * (delta / 360).roundToDouble();
+      return delta;
+    }
+
+    // A repeat()-driven clock sawtooths at its 4666ms period, restarting the
+    // morph phase mid-cycle. The monotonic clock must advance smoothly here.
+    await tester.pump(const Duration(milliseconds: 4665));
+    final beforeWrap = rotationDegrees();
+    await tester.pump(const Duration(milliseconds: 1));
+    final atWrap = rotationDegrees();
+    await tester.pump(const Duration(milliseconds: 1));
+    final afterWrap = rotationDegrees();
+
+    expect(stepDegrees(beforeWrap, atWrap).abs(), lessThan(2));
+    expect(stepDegrees(atWrap, afterWrap).abs(), lessThan(2));
+    expect(stepDegrees(beforeWrap, afterWrap), greaterThan(0));
   });
 }

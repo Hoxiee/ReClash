@@ -140,7 +140,8 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
   }
 
   Future<void> _handleSelectedType() async {
-    final res = await Navigator.of(context).push(
+    final res = await pushPagedSheet(
+      context,
       PagedSheetRoute(
         builder: (context) => OverwriteSelectionSheet<RuleAction>(
           title: context.appLocalizations.proxyType,
@@ -216,7 +217,8 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
   }
 
   Future<void> _handleSelectedRuleProvider() async {
-    final res = await Navigator.of(context).push(
+    final res = await pushPagedSheet(
+      context,
       PagedSheetRoute(
         builder: (context) => Consumer(
           builder: (_, ref, _) {
@@ -277,7 +279,8 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
   }
 
   Future<void> _handleSelectedTarget() async {
-    final res = await Navigator.of(context).push(
+    final res = await pushPagedSheet(
+      context,
       PagedSheetRoute(
         builder: (context) => Consumer(
           builder: (_, ref, _) {
@@ -377,7 +380,8 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
   }
 
   Future<void> _handleSelectedSubRule() async {
-    final res = await Navigator.of(context).push(
+    final res = await pushPagedSheet(
+      context,
       PagedSheetRoute(
         builder: (context) => Consumer(
           builder: (_, ref, _) {

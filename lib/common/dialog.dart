@@ -11,6 +11,9 @@ import 'package:url_launcher/url_launcher.dart';
 class Dialogs {
   Dialogs._();
 
+  static const _enterDuration = Duration(milliseconds: 300);
+  static const _exitDuration = Duration(milliseconds: 200);
+
   BuildContext get _context => rootNavigatorKey.currentContext!;
 
   Future<T?> showCommonDialog<T>({
@@ -19,12 +22,15 @@ class Dialogs {
     bool? dismissible,
     bool filter = true,
   }) async {
+    final callerContext = context ?? _context;
     return showModal<T>(
       useRootNavigator: false,
-      context: context ?? _context,
+      context: callerContext,
       configuration: FadeScaleTransitionConfiguration(
         barrierColor: Colors.black38,
         barrierDismissible: dismissible ?? true,
+        transitionDuration: callerContext.motionDuration(_enterDuration),
+        reverseTransitionDuration: callerContext.motionDuration(_exitDuration),
       ),
       builder: (_) => child,
       filter: filter ? commonFilter : null,

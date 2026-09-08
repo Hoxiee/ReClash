@@ -152,7 +152,6 @@ void main() {
         .widget<AnimatedContainer>(find.byType(AnimatedContainer))
         .constraints
         ?.maxWidth;
-    final expandedButtonWidth = tester.getSize(button).width;
     expect(runTimeText(), '100:02:03');
 
     container.read(runTimeProvider.notifier).value = null;
@@ -160,7 +159,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(tester.getSize(button).width, greaterThan(expandedButtonWidth));
+    // The panel is mid-close: wider than the collapsed pill, with the text
+    // held until the close finishes.
+    expect(tester.getSize(button).width, greaterThan(56));
     expect(
       tester
           .widget<AnimatedContainer>(find.byType(AnimatedContainer))
@@ -179,6 +180,47 @@ void main() {
 
     expect(tester.getSize(button).width, 56);
     expect(runTimeText(), '00:00:00');
+  });
+
+  testWidgets('reduced motion swaps the pause slot without a ticker', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWithValue([
+          const Profile(id: 1, autoUpdateDuration: Duration.zero),
+        ]),
+        initProvider.overrideWithBuild((_, _) => true),
+        tunEnabledProvider.overrideWith((_) => true),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(runTimeProvider.notifier).value = 1;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: TestApp(
+            includeNavigatorKey: false,
+            setTheme: false,
+            homeBuilder: (child) => Scaffold(floatingActionButton: child),
+            child: const StartButton(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    container.read(runTimeProvider.notifier).value = null;
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byIcon(Icons.pause_rounded), findsNothing);
+    expect(tester.hasRunningAnimations, isFalse);
   });
 
   testWidgets('dispatches each toggle through the shared running state', (

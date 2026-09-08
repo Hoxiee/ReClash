@@ -13,6 +13,8 @@ class NetworkSpeed extends StatefulWidget {
 }
 
 class _NetworkSpeedState extends State<NetworkSpeed> {
+  static const _chartDuration = Duration(milliseconds: 400);
+
   List<Point> initPoints = const [Point(0, 0), Point(1, 0)];
 
   List<Point> _getPoints(List<Traffic> traffics) {
@@ -84,6 +86,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                         gradient: true,
                         color: Theme.of(context).colorScheme.primary,
                         points: _getPoints(traffics),
+                        duration: context.motionDuration(_chartDuration),
                       ),
                     ),
                   ),

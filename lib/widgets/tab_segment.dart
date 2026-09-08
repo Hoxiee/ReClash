@@ -59,6 +59,12 @@ class _SegmentState<T> extends State<_Segment<T>>
           end: widget.shouldScaleContent ? _kMinThumbScale : 1.0,
         ),
       );
+      if (MediaQuery.disableAnimationsOf(context)) {
+        highlightPressScaleController
+          ..stop()
+          ..value = 1;
+        return;
+      }
       highlightPressScaleController.animateWith(
         _kThumbSpringAnimationSimulation,
       );
@@ -155,8 +161,15 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
     assert(oldWidget.key == widget.key);
 
     if (oldWidget.highlighted != widget.highlighted) {
+      final target = widget.highlighted ? 0.0 : 1.0;
+      if (MediaQuery.disableAnimationsOf(context)) {
+        separatorOpacityController
+          ..stop()
+          ..value = target;
+        return;
+      }
       separatorOpacityController.animateTo(
-        widget.highlighted ? 0 : 1,
+        target,
         duration: _kSpringAnimationDuration,
         curve: Curves.ease,
       );

@@ -721,6 +721,23 @@ void main() {
     expect(container.read(profilesProvider), [imported]);
   });
 
+  testWidgets('reduced motion expands the disclaimer without resizing', (
+    tester,
+  ) async {
+    await _pump(tester, disableAnimations: true);
+    await _toLegal(tester);
+    expect(find.byType(AnimatedSize), findsNothing);
+
+    await tester.tap(find.text('Read the full disclaimer'));
+    await tester.pump();
+
+    expect(find.byType(AnimatedSize), findsNothing);
+    expect(
+      find.textContaining('non-commercial uses', findRichText: true),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('reduced motion changes steps without a fade frame', (
     tester,
   ) async {

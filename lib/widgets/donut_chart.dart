@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -10,6 +11,11 @@ class DonutChartData {
 
   const DonutChartData({required double value, required this.color})
     : _value = value + 1;
+
+  const DonutChartData._interpolated({
+    required double value,
+    required this.color,
+  }) : _value = value;
 
   double get value => _value;
 
@@ -46,25 +52,52 @@ class DonutChart extends StatefulWidget {
 
 class _DonutChartState extends State<DonutChart>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late List<DonutChartData> _oldData;
+  late final AnimationController _animationController = AnimationController(
+    vsync: this,
+    value: 1,
+  );
+  late List<DonutChartData> _oldData = widget.data;
+  Duration? _effectiveDuration;
+
+  double get _progress => Easing.standard.transform(_animationController.value);
 
   @override
-  void initState() {
-    super.initState();
-    _oldData = widget.data;
-    _animationController = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncDuration();
   }
 
   @override
   void didUpdateWidget(DonutChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
-      _oldData = oldWidget.data;
-      _animationController.forward(from: 0);
+    _syncDuration();
+    if (!listEquals(oldWidget.data, widget.data)) {
+      _oldData = DonutChartPainter.interpolate(
+        _oldData,
+        oldWidget.data,
+        _progress,
+      );
+      if (_effectiveDuration == Duration.zero) {
+        _animationController
+          ..stop()
+          ..value = 1;
+      } else {
+        _animationController.forward(from: 0);
+      }
+    }
+  }
+
+  void _syncDuration() {
+    final duration = context.motionDuration(widget.duration);
+    if (_effectiveDuration == duration) {
+      return;
+    }
+    _effectiveDuration = duration;
+    _animationController.duration = duration;
+    if (duration == Duration.zero) {
+      _animationController
+        ..stop()
+        ..value = 1;
     }
   }
 
@@ -80,11 +113,7 @@ class _DonutChartState extends State<DonutChart>
       animation: _animationController,
       builder: (context, child) {
         return CustomPaint(
-          painter: DonutChartPainter(
-            _oldData,
-            widget.data,
-            _animationController.value,
-          ),
+          painter: DonutChartPainter(_oldData, widget.data, _progress),
         );
       },
     );
@@ -111,14 +140,43 @@ class DonutChartPainter extends CustomPainter {
   static const _minValue = 0.1;
   static final _logBaseInv = 1.0 / log(_logBase);
 
-  double _logTransform(double value) {
+  static double _logTransform(double value) {
     if (value < _minValue) return 0;
     return log(value) * _logBaseInv + 1;
   }
 
-  double _expTransform(double value) {
+  static double _expTransform(double value) {
     if (value <= 0) return 0;
     return pow(_logBase, value - 1).toDouble();
+  }
+
+  static List<DonutChartData> interpolate(
+    List<DonutChartData> oldData,
+    List<DonutChartData> newData,
+    double progress,
+  ) {
+    if (newData.isEmpty || oldData.length != newData.length) {
+      return newData;
+    }
+    if (progress <= 0) {
+      return oldData;
+    }
+    if (progress >= 1) {
+      return newData;
+    }
+
+    return [
+      for (var i = 0; i < newData.length; i++)
+        DonutChartData._interpolated(
+          value: _expTransform(
+            _logTransform(oldData[i].value) +
+                (_logTransform(newData[i].value) -
+                        _logTransform(oldData[i].value)) *
+                    progress,
+          ),
+          color: newData[i].color,
+        ),
+    ];
   }
 
   List<DonutChartData> get _interpolatedData {
@@ -126,34 +184,7 @@ class DonutChartPainter extends CustomPainter {
       return _cachedInterpolatedData!;
     }
 
-    if (newData.isEmpty) {
-      _cachedInterpolatedData = newData;
-      _cachedProgress = progress;
-      return newData;
-    }
-
-    if (oldData.length != newData.length) {
-      _cachedInterpolatedData = newData;
-      _cachedProgress = progress;
-      return newData;
-    }
-
-    final result = <DonutChartData>[];
-    for (var i = 0; i < newData.length; i++) {
-      final oldValue = oldData[i].value;
-      final newValue = newData[i].value;
-      final logOldValue = _logTransform(oldValue);
-      final logNewValue = _logTransform(newValue);
-      final interpolatedLogValue =
-          logOldValue + (logNewValue - logOldValue) * progress;
-
-      final interpolatedValue = _expTransform(interpolatedLogValue);
-
-      result.add(
-        DonutChartData(value: interpolatedValue, color: newData[i].color),
-      );
-    }
-
+    final result = interpolate(oldData, newData, progress);
     _cachedInterpolatedData = result;
     _cachedProgress = progress;
     return result;

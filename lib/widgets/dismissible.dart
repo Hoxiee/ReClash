@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 enum ExternalDismissibleEffect { normal, resize }
@@ -28,19 +29,29 @@ class _ExternalDismissibleState extends State<ExternalDismissible>
   late Animation<double> _resizeAnimation;
 
   bool _isDismissing = false;
+  var _dismissOnDependencies = false;
+  var _reducedMotion = false;
 
   bool get _isNormal => widget.effect == ExternalDismissibleEffect.normal;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reducedMotion = context.disableAnimations;
+    final pending = _dismissOnDependencies;
+    _dismissOnDependencies = false;
+    if (pending) {
+      _dismiss();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _controller = AnimationController(vsync: this, duration: dismissDuration);
     _initAnimations();
     if (widget.dismiss) {
-      _dismiss();
+      _dismissOnDependencies = true;
     }
   }
 
@@ -98,7 +109,11 @@ class _ExternalDismissibleState extends State<ExternalDismissible>
     if (!mounted) return;
     _isDismissing = true;
     updateKeepAlive();
-    await _controller.forward();
+    if (_reducedMotion) {
+      _controller.value = _controller.upperBound;
+    } else {
+      await _controller.forward();
+    }
     _isDismissing = false;
     if (!mounted) {
       return;

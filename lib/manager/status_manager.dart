@@ -331,6 +331,8 @@ class _MessageTransitionState extends State<_MessageTransition>
   late final CurvedAnimation _opacity;
   late final CurvedAnimation _slide;
   late final Animation<Offset> _offset;
+  bool _reduceMotion = false;
+  bool _started = false;
 
   @override
   void initState() {
@@ -357,7 +359,6 @@ class _MessageTransitionState extends State<_MessageTransition>
     );
     _offset = _slide.drive(Tween(begin: _messageEnterOffset, end: Offset.zero));
     if (widget.visible) {
-      _controller.forward();
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -368,16 +369,38 @@ class _MessageTransitionState extends State<_MessageTransition>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.disableAnimationsOf(context);
+    _controller.duration = _reduceMotion
+        ? Duration.zero
+        : _messageEnterDuration;
+    _controller.reverseDuration = _reduceMotion
+        ? Duration.zero
+        : _messageExitDuration;
+    if (_started) {
+      return;
+    }
+    _started = true;
+    if (widget.visible) {
+      _controller.forward();
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant _MessageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.visible == oldWidget.visible) {
       return;
     }
     if (widget.visible) {
+      _controller.reverseDuration = _reduceMotion
+          ? Duration.zero
+          : _messageExitDuration;
       _controller.forward();
       return;
     }
-    if (widget.swiped) {
+    if (!_reduceMotion && widget.swiped) {
       _size.reverseCurve = Easing.emphasizedAccelerate;
       _controller.reverseDuration = _messageCollapseDuration;
     }
@@ -385,9 +408,18 @@ class _MessageTransitionState extends State<_MessageTransition>
   }
 
   void _handleAnimationStatus(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && !widget.visible) {
-      widget.onHidden();
+    if (status != AnimationStatus.dismissed || widget.visible) {
+      return;
     }
+    if (!_reduceMotion) {
+      widget.onHidden();
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !widget.visible) {
+        widget.onHidden();
+      }
+    });
   }
 
   @override

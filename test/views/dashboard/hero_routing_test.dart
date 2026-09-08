@@ -162,6 +162,40 @@ void main() {
       }
     });
 
+    testWidgets('reduced motion settles instantly with no ticker', (
+      tester,
+    ) async {
+      final container = ProviderContainer(
+        overrides: [
+          smartRoutingSettingProvider.overrideWithValue(
+            const SmartRoutingProps(enabled: true),
+          ),
+          patchClashConfigProvider.overrideWithValue(
+            const PatchClashConfig(mode: Mode.rule),
+          ),
+          smartRoutingStatusProvider.overrideWithValue(null),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: TestApp(
+              includeNavigatorKey: false,
+              setTheme: false,
+              child: Scaffold(body: HeroRoutingRow(accent: Color(0xFF000000))),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Picking a server…'), findsOne);
+      expect(tester.hasRunningAnimations, isFalse);
+    });
+
     testWidgets('a non-rule mode says so instead of pretending', (
       tester,
     ) async {

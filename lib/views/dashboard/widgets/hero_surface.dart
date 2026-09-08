@@ -60,8 +60,8 @@ class HeroSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AnimatedContainer(
-    duration: const Duration(milliseconds: 420),
-    curve: Curves.easeOutCubic,
+    duration: context.motionDuration(const Duration(milliseconds: 420)),
+    curve: Easing.standard,
     width: width,
     height: height,
     padding: padding,

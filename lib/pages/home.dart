@@ -164,22 +164,26 @@ class _HomePageView extends ConsumerStatefulWidget {
 
 class _HomePageViewState extends ConsumerState<_HomePageView>
     with SingleTickerProviderStateMixin {
+  static const _switchDuration = Duration(milliseconds: 140);
+
   late PageController _pageController;
-  late final AnimationController _fadeController;
-  late final Animation<double> _fade;
+  late final AnimationController _switchController;
+  late final CurvedAnimation _switchIn;
+
+  double _incomingDirection = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _pageIndex);
-    _fadeController = AnimationController(
+    _switchController = AnimationController(
       vsync: this,
-      duration: NavBarMetrics.motionDuration,
+      duration: _switchDuration,
       value: 1,
     );
-    _fade = CurvedAnimation(
-      parent: _fadeController,
-      curve: NavBarMetrics.motionCurve,
+    _switchIn = CurvedAnimation(
+      parent: _switchController,
+      curve: Easing.standardDecelerate,
     );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {
@@ -208,16 +212,23 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
     if (index == -1) {
       return;
     }
-    if (_pageController.hasClients &&
-        _pageController.page != null &&
-        _pageController.page!.round() == index) {
+    final currentPage = _pageController.hasClients
+        ? _pageController.page?.round()
+        : null;
+    if (currentPage == index) {
       return;
     }
     // A jump, never a scroll: scrolling would build every intermediate tab.
-    if (ref.read(appSettingProvider).isAnimateToPage) {
-      _fadeController.forward(from: 0);
+    final animate =
+        ref.read(appSettingProvider).isAnimateToPage &&
+        !context.disableAnimations;
+    if (animate) {
+      if (currentPage != null) {
+        _incomingDirection = (index - currentPage).sign.toDouble();
+      }
+      _switchController.forward(from: 0);
     } else {
-      _fadeController.value = 1;
+      _switchController.value = 1;
     }
     _pageController.jumpToPage(index);
   }
@@ -243,7 +254,8 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
 
   @override
   void dispose() {
-    _fadeController.dispose();
+    _switchIn.dispose();
+    _switchController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -253,8 +265,16 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
     final itemCount = ref.watch(
       currentNavigationItemsStateProvider.select((state) => state.value.length),
     );
-    return FadeTransition(
-      opacity: _fade,
+    return AnimatedBuilder(
+      animation: _switchIn,
+      builder: (context, child) {
+        final t = _switchIn.value;
+        final slide = _incomingDirection * (1 - t) * 0.08;
+        return Transform.translate(
+          offset: Offset(slide * MediaQuery.sizeOf(context).width, 0),
+          child: Opacity(opacity: 0.4 + 0.6 * t, child: child),
+        );
+      },
       child: PageView.builder(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),

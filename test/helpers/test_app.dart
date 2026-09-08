@@ -33,9 +33,10 @@ class TestApp extends StatelessWidget {
     final app = MaterialApp(
       navigatorKey: includeNavigatorKey ? globalState.navigatorKey : null,
       locale: locale,
-      localizationsDelegates: const [
+      localizationsDelegates: [
         AppLocalizations.delegate,
         ...GlobalMaterialLocalizations.delegates,
+        ...fallbackMaterialLocalizationsDelegates,
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {

@@ -15,6 +15,9 @@ import 'common.dart';
 typedef ProxyGroupViewKeyMap =
     Map<String, GlobalObjectKey<_ProxyGroupViewState>>;
 
+const _scrollDuration = Duration(milliseconds: 300);
+const _testDuration = Duration(milliseconds: 400);
+
 class ProxiesTabView extends ConsumerStatefulWidget {
   const ProxiesTabView({super.key});
 
@@ -126,7 +129,12 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                               (item) => item == groupName,
                             );
                             if (index == -1) return;
-                            _tabController?.animateTo(index);
+                            _tabController?.animateTo(
+                              index,
+                              duration: context.motionDuration(
+                                NavBarMetrics.motionDuration,
+                              ),
+                            );
                             ref
                                 .read(proxiesActionProvider.notifier)
                                 .updateCurrentGroupName(groupName);
@@ -344,19 +352,24 @@ class _ProxyGroupViewState extends ConsumerState<ProxyGroupView> {
     if (_controller.position.maxScrollExtent == 0) {
       return;
     }
+    final offset = min(
+      16 +
+          getScrollToSelectedOffset(
+            ref: ref,
+            groupName: widget.group.name,
+            proxies: widget.group.all,
+            columns: widget.columns,
+          ),
+      _controller.position.maxScrollExtent,
+    );
+    if (context.disableAnimations) {
+      _controller.jumpTo(offset);
+      return;
+    }
     _controller.animateTo(
-      min(
-        16 +
-            getScrollToSelectedOffset(
-              ref: ref,
-              groupName: widget.group.name,
-              proxies: widget.group.all,
-              columns: widget.columns,
-            ),
-        _controller.position.maxScrollExtent,
-      ),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeIn,
+      offset,
+      duration: _scrollDuration,
+      curve: Easing.standard,
     );
   }
 
@@ -421,6 +434,8 @@ class _DelayTestButtonState extends State<DelayTestButton>
     unawaited(_controller.forward());
     try {
       await widget.onClick();
+    } catch (e, s) {
+      commonPrint.log('healthcheck ===> $e, $s', logLevel: LogLevel.warning);
     } finally {
       _running = false;
       if (mounted) {
@@ -432,13 +447,21 @@ class _DelayTestButtonState extends State<DelayTestButton>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutBack),
-    );
+    _controller = AnimationController(vsync: this, duration: _testDuration);
+    _animation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Easing.standard));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final duration = context.motionDuration(_testDuration);
+    if (_controller.duration == duration) {
+      return;
+    }
+    _controller.duration = duration;
   }
 
   @override

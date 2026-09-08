@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/overwrite/overwrite.dart';
@@ -78,7 +80,9 @@ class _NameListEditorState extends ConsumerState<NameListEditor>
   }
 
   void _handleToAddView() {
-    Navigator.of(context).push(PagedSheetRoute(builder: widget.addViewBuilder));
+    unawaited(
+      pushPagedSheet(context, PagedSheetRoute(builder: widget.addViewBuilder)),
+    );
   }
 
   void _handleReorder(int oldIndex, int newIndex) {

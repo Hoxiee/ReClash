@@ -1,6 +1,5 @@
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
-
-const _transitionDuration = Duration(milliseconds: 300);
 
 enum _VisibilityMotion {
   sidebar(
@@ -63,8 +62,8 @@ class _AnimatedVisibilityState extends State<AnimatedVisibility>
     _includeChild = widget.visible;
     _controller = AnimationController(
       value: widget.visible ? 1 : 0,
-      duration: _transitionDuration,
-      reverseDuration: _transitionDuration,
+      duration: commonDuration,
+      reverseDuration: commonDuration,
       vsync: this,
     )..addStatusListener(_handleAnimationStatus);
     _animation = CurvedAnimation(
@@ -75,12 +74,27 @@ class _AnimatedVisibilityState extends State<AnimatedVisibility>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!context.disableAnimations) {
+      return;
+    }
+    _controller.value = widget.visible ? 1 : 0;
+  }
+
+  @override
   void didUpdateWidget(covariant AnimatedVisibility oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.visible == oldWidget.visible) {
       if (widget.visible) {
         _presentedChild = widget.child;
       }
+      return;
+    }
+    if (context.disableAnimations) {
+      _presentedChild = widget.child;
+      _includeChild = widget.visible;
+      _controller.value = widget.visible ? 1 : 0;
       return;
     }
     if (widget.visible) {

@@ -106,6 +106,7 @@ class _TrafficChart extends StatelessWidget {
                 DonutChartData(value: up.toDouble(), color: upColor),
                 DonutChartData(value: down.toDouble(), color: downColor),
               ],
+              duration: context.motionDuration(commonDuration),
             ),
           ),
           const SizedBox(width: 8),

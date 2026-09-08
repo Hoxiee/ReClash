@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:reclash/common/color.dart';
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 class Point {
@@ -30,29 +30,62 @@ class LineChart extends StatefulWidget {
 
 class _LineChartState extends State<LineChart>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    value: 1,
+  );
   List<Point> _points = [];
 
   List<Point> _prevRenderPoints = [];
   List<Point> _currentRenderPoints = [];
+  Duration? _effectiveDuration;
+
+  double get _progress => Easing.standard.transform(_controller.value);
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration);
     _points = widget.points;
     _currentRenderPoints = _getRenderPoints(_points);
     _prevRenderPoints = _currentRenderPoints;
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncDuration();
+  }
+
+  @override
   void didUpdateWidget(LineChart oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncDuration();
     if (widget.points != _points) {
+      final renderedPoints = _getInterpolatedPointsAt(_progress);
       _points = widget.points;
-      _prevRenderPoints = _currentRenderPoints;
+      _prevRenderPoints = renderedPoints;
       _currentRenderPoints = _getRenderPoints(_points);
-      _controller.forward(from: 0);
+      if (_effectiveDuration == Duration.zero) {
+        _controller
+          ..stop()
+          ..value = 1;
+      } else {
+        _controller.forward(from: 0);
+      }
+    }
+  }
+
+  void _syncDuration() {
+    final duration = context.motionDuration(widget.duration);
+    if (_effectiveDuration == duration) {
+      return;
+    }
+    _effectiveDuration = duration;
+    _controller.duration = duration;
+    if (duration == Duration.zero) {
+      _controller
+        ..stop()
+        ..value = 1;
     }
   }
 
@@ -60,6 +93,26 @@ class _LineChartState extends State<LineChart>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  List<Point> _getInterpolatedPointsAt(double t) {
+    if (_currentRenderPoints.isEmpty) return [];
+    if (t >= 1) return _currentRenderPoints;
+    if (t <= 0) return _prevRenderPoints;
+    final result = <Point>[];
+    for (var i = 0; i < _currentRenderPoints.length; i++) {
+      if (i > _prevRenderPoints.length - 1) {
+        result.add(_currentRenderPoints[i]);
+      } else {
+        result.add(
+          Point(
+            lerpDouble(_prevRenderPoints[i].x, _currentRenderPoints[i].x, t)!,
+            lerpDouble(_prevRenderPoints[i].y, _currentRenderPoints[i].y, t)!,
+          ),
+        );
+      }
+    }
+    return result;
   }
 
   List<Point> _getRenderPoints(List<Point> points) {
@@ -96,7 +149,7 @@ class _LineChartState extends State<LineChart>
               painter: LineChartPainter(
                 prevRenderPoints: _prevRenderPoints,
                 currentRenderPoints: _currentRenderPoints,
-                progress: _controller.value,
+                progress: _progress,
                 gradient: widget.gradient,
                 color: widget.color,
               ),

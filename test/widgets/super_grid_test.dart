@@ -199,4 +199,183 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     expect(tester.takeException(), null);
   });
+
+  testWidgets('items stay level while the shake ticker is idle', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        homeBuilder: (child) =>
+            Scaffold(body: SingleChildScrollView(child: child)),
+        child: SuperGrid(
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          children: [_item('A'), _item('B'), _item('C'), _item('D')],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    for (final label in ['A', 'B', 'C', 'D']) {
+      final box = tester.renderObject<RenderBox>(find.byKey(ValueKey(label)));
+      final left = box.localToGlobal(Offset.zero);
+      final right = box.localToGlobal(Offset(box.size.width, 0));
+      expect(right.dy, closeTo(left.dy, 0.001), reason: label);
+    }
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('shake ticker runs only while an item is held', (tester) async {
+    final key = GlobalKey<SuperGridState>();
+
+    Widget host(Widget child) {
+      return TestApp(
+        homeBuilder: (inner) =>
+            Scaffold(body: SingleChildScrollView(child: inner)),
+        child: SuperGrid(
+          key: key,
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          children: [_item('A'), _item('B'), _item('C'), _item('D')],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(host(const SizedBox.shrink()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpWidget(
+      host(
+        SuperGrid(
+          key: key,
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          children: [_item('A'), _item('B'), _item('C'), _item('D')],
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('A'))),
+    );
+    await tester.pump();
+    await gesture.moveBy(const Offset(10, 0));
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('reduced motion reorders deterministically with no ticker', (
+    tester,
+  ) async {
+    final key = GlobalKey<SuperGridState>();
+
+    Widget buildGrid() {
+      return SuperGrid(
+        key: key,
+        crossAxisCount: 4,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        children: [_item('A'), _item('B'), _item('C'), _item('D')],
+      );
+    }
+
+    await tester.pumpWidget(
+      TestApp(
+        homeBuilder: (child) => Scaffold(
+          body: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: SingleChildScrollView(child: child),
+            ),
+          ),
+        ),
+        child: buildGrid(),
+      ),
+    );
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    List<String> labels() => key.currentState!.snapshotChildren
+        .map(
+          (item) => ((item.child as SizedBox).key! as ValueKey).value as String,
+        )
+        .toList();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const ValueKey('A'))),
+    );
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+    await gesture.moveBy(const Offset(10, 0));
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.byKey(const ValueKey('D'))));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.hasRunningAnimations, isFalse);
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump();
+
+    expect(labels(), ['B', 'C', 'D', 'A']);
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('reduced motion delete settles in one step', (tester) async {
+    final key = GlobalKey<SuperGridState>();
+    var updates = 0;
+
+    await tester.pumpWidget(
+      TestApp(
+        homeBuilder: (child) => Scaffold(
+          body: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: SingleChildScrollView(child: child),
+            ),
+          ),
+        ),
+        child: SuperGrid(
+          key: key,
+          crossAxisCount: 4,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          onUpdate: () => updates++,
+          children: [_item('A'), _item('B'), _item('C')],
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.close), findsNWidgets(3));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    final deleteButton = tester.widget<IconButton>(
+      find.ancestor(
+        of: find.byIcon(Icons.close).at(1),
+        matching: find.byType(IconButton),
+      ),
+    );
+    deleteButton.onPressed!();
+    await tester.pump();
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    expect(key.currentState!.length, 2);
+    expect(find.byKey(const ValueKey('B')), findsNothing);
+    expect(updates, greaterThanOrEqualTo(1));
+    expect(tester.takeException(), null);
+  });
 }

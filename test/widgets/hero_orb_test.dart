@@ -152,11 +152,74 @@ void main() {
     expect(phases, isEmpty);
   });
 
+  testWidgets('a mid-flight retarget cancels the pending timeout', (
+    tester,
+  ) async {
+    final phases = <HeroOrbPhase>[];
+    final result = await pumpOrb(tester, onPhaseChanged: phases.add);
+
+    await tester.tap(find.byType(HeroOrb));
+    await tester.pump();
+    expect(phases.last, HeroOrbPhase.connecting);
+
+    // A second lifecycle update arrives before the timeout can fire.
+    result.container.updateOverrides([
+      heroLifecycleProvider.overrideWithValue(HeroOrbPhase.on),
+      isStartProvider.overrideWithValue(true),
+      commonActionProvider.overrideWith(_RecordingCommonAction.new),
+    ]);
+    await tester.pump();
+    expect(phases.last, HeroOrbPhase.on);
+
+    await tester.pump(const Duration(seconds: 16));
+    expect(phases.last, HeroOrbPhase.on);
+    // Taps work again: no stale connecting hold.
+    expect(
+      tester.widget<FocusableTap>(find.byType(FocusableTap)).onTap,
+      isNotNull,
+    );
+  });
+
+  testWidgets('a fresh tap replaces an expired pending timeout cleanly', (
+    tester,
+  ) async {
+    final phases = <HeroOrbPhase>[];
+    await pumpOrb(tester, onPhaseChanged: phases.add);
+
+    await tester.tap(find.byType(HeroOrb));
+    await tester.pump(const Duration(seconds: 15));
+    expect(phases, [HeroOrbPhase.connecting, HeroOrbPhase.off]);
+
+    // Reconnecting after a rollback re-arms a new timeout, not a dead one.
+    await tester.tap(find.byType(HeroOrb));
+    await tester.pump();
+    expect(phases.last, HeroOrbPhase.connecting);
+    await tester.pump(const Duration(seconds: 15));
+    expect(phases.last, HeroOrbPhase.off);
+  });
+
   testWidgets('reduced motion leaves no active ticker', (tester) async {
     await pumpOrb(tester, phase: HeroOrbPhase.on, reducedMotion: true);
 
     expect(tester.hasRunningAnimations, isFalse);
     expect(find.byKey(const ValueKey('core-mark')), findsOneWidget);
+  });
+
+  testWidgets('reduced motion connecting rollback is instant', (tester) async {
+    final phases = <HeroOrbPhase>[];
+    await pumpOrb(
+      tester,
+      phase: HeroOrbPhase.on,
+      reducedMotion: true,
+      onPhaseChanged: phases.add,
+    );
+
+    await tester.tap(find.byType(HeroOrb));
+    await tester.pump();
+
+    expect(phases, [HeroOrbPhase.off]);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(tester.hasRunningAnimations, isFalse);
   });
 
   testWidgets('variant changes its core without changing lifecycle', (

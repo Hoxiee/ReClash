@@ -55,15 +55,19 @@ void main() {
   });
 
   Future<GlobalKey<ProxiesTabViewState>> pumpTabView(
-    WidgetTester tester,
-  ) async {
+    WidgetTester tester, {
+    bool disableAnimations = false,
+  }) async {
     final key = GlobalKey<ProxiesTabViewState>();
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: globalContainer,
         child: TestApp(
           child: ProxiesTabView(key: key),
-          homeBuilder: (child) => Scaffold(body: child),
+          homeBuilder: (child) => MediaQuery(
+            data: MediaQueryData(disableAnimations: disableAnimations),
+            child: Scaffold(body: child),
+          ),
         ),
       ),
     );
@@ -154,6 +158,93 @@ void main() {
     },
   );
 
+  testWidgets('scrollToGroupSelected jumps under reduced motion', (
+    tester,
+  ) async {
+    globalContainer
+        .read(_tabStateProvider.notifier)
+        .set(_tabState([_group('B', proxyCount: 40), _group('C')]));
+    final key = await pumpTabView(tester, disableAnimations: true);
+    final grid = tester.widget<GridView>(
+      find.descendant(
+        of: find.byType(ProxyGroupView).first,
+        matching: find.byType(GridView),
+      ),
+    );
+    final position = grid.controller!.position;
+    expect(position.maxScrollExtent, greaterThan(0));
+    expect(position.pixels, 0);
+
+    key.currentState?.scrollToGroupSelected();
+    final jumpedTo = position.pixels;
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(jumpedTo, greaterThan(0));
+    expect(position.pixels, jumpedTo);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'delay test button hides during the run and restores in finally',
+    (tester) async {
+      var clicks = 0;
+      await tester.pumpWidget(
+        TestApp(
+          homeBuilder: (child) => MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Scaffold(body: child),
+          ),
+          child: DelayTestButton(
+            onClick: () async {
+              clicks++;
+              await Future<void>.delayed(const Duration(milliseconds: 50));
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byType(DelayTestButton));
+      await tester.pump();
+      expect(clicks, 1);
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(tester.hasRunningAnimations, isFalse);
+
+      // The control stays operable after the run, so a second tap works.
+      await tester.tap(find.byType(DelayTestButton));
+      await tester.pumpAndSettle();
+      expect(clicks, 2);
+    },
+  );
+
+  testWidgets('a failing healthcheck still restores the button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestApp(
+        homeBuilder: (child) => MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(body: child),
+        ),
+        child: DelayTestButton(
+          onClick: () async {
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+            throw Exception('core died');
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(DelayTestButton));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
   testWidgets('rebuilds the tab bar when groups return', (tester) async {
     final key = await pumpTabView(tester);
 
@@ -179,6 +270,13 @@ ProxiesTabState _tabState(List<Group> groups) {
   );
 }
 
-Group _group(String name) {
-  return Group(type: GroupType.Selector, name: name);
+Group _group(String name, {int proxyCount = 0}) {
+  return Group(
+    type: GroupType.Selector,
+    name: name,
+    all: [
+      for (var index = 0; index < proxyCount; index++)
+        Proxy(name: '$name-$index', type: 'Direct'),
+    ],
+  );
 }

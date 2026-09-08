@@ -254,4 +254,53 @@ void main() {
     expect(find.text('no host listening'), findsNothing);
     expect(tester.takeException(), null);
   });
+
+  testWidgets('the dialog settles in one frame under reduced motion', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container
+        .read(viewSizeProvider.notifier)
+        .update((_) => const Size(1000, 800));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          navigatorKey: globalState.navigatorKey,
+          localizationsDelegates: const [AppLocalizations.delegate],
+          supportedLocales: AppLocalizations.delegate.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: child!,
+          ),
+          home: const Scaffold(body: SizedBox.shrink()),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final result = dialogs.showMessage(
+      message: const TextSpan(text: 'reduced body'),
+    );
+    await tester.pump();
+
+    expect(find.text('reduced body'), findsOneWidget);
+    final route = ModalRoute.of(tester.element(find.text('reduced body')));
+    expect(route!.transitionDuration, Duration.zero);
+    expect(route.animation!.isCompleted, isTrue);
+
+    await tester.tap(find.text('Confirm'));
+    await tester.pump();
+    expect(find.text('reduced body'), findsNothing);
+    expect(await result, isTrue);
+    expect(tester.takeException(), null);
+  });
 }

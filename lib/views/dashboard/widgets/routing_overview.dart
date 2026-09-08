@@ -343,6 +343,9 @@ class _DisclosureState extends State<_Disclosure> {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final summary = widget.summary;
+    final expandDuration = context.motionDuration(
+      const Duration(milliseconds: 180),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -362,7 +365,7 @@ class _DisclosureState extends State<_Disclosure> {
                 ),
                 AnimatedRotation(
                   turns: _open ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 180),
+                  duration: expandDuration,
                   curve: Curves.easeOutCubic,
                   child: Icon(
                     Icons.expand_more_rounded,
@@ -387,14 +390,18 @@ class _DisclosureState extends State<_Disclosure> {
             ),
           ),
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _open
-              ? widget.child
-              : const SizedBox(width: double.infinity, height: 0),
-        ),
+        expandDuration == Duration.zero
+            ? (_open
+                  ? widget.child
+                  : const SizedBox(width: double.infinity, height: 0))
+            : AnimatedSize(
+                duration: expandDuration,
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topCenter,
+                child: _open
+                    ? widget.child
+                    : const SizedBox(width: double.infinity, height: 0),
+              ),
       ],
     );
   }

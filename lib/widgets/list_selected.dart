@@ -262,6 +262,7 @@ class DecorationListItem extends StatelessWidget {
         final child = openDelegate.widget;
         final onChanged = openDelegate.onChanged;
         return OpenContainer<dynamic>(
+          transitionDuration: context.motionDuration(commonDuration),
           closedBuilder: (context, action) {
             Future<void> openAction() async {
               final isMobile = context.isMobileView;

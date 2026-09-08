@@ -1,6 +1,7 @@
 import 'package:reclash/widgets/activate_box.dart';
 import 'package:reclash/widgets/builder.dart';
 import 'package:reclash/widgets/disabled_mask.dart';
+import 'package:reclash/widgets/button.dart';
 import 'package:reclash/widgets/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,6 +61,35 @@ void main() {
     );
 
     expect(find.byType(ColorFiltered), findsNothing);
+  });
+
+  testWidgets('reduced-motion FAB snaps between label layouts', (tester) async {
+    Widget buildFab({required bool isExtended}) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: CommonScaffoldFabExtendedProvider(
+            isExtended: isExtended,
+            child: const Scaffold(
+              floatingActionButton: CommonFloatingActionButton(
+                icon: Icon(Icons.add),
+                label: 'add',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFab(isExtended: true));
+    expect(find.text('add'), findsOneWidget);
+
+    await tester.pumpWidget(buildFab(isExtended: false));
+    await tester.pump();
+
+    expect(find.text('add'), findsNothing);
+    expect(find.byType(AnimatedSize), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('FloatingActionButtonExtendedBuilder defaults to extended', (

@@ -59,6 +59,9 @@ const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
+bool _reducedMotionOf(BuildContext context) =>
+    MediaQuery.disableAnimationsOf(context);
+
 class CommonTabBar<T extends Object> extends StatefulWidget {
   CommonTabBar({
     super.key,
@@ -132,11 +135,22 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
     highlighted = widget.groupValue;
   }
 
+  void _animateThumb() {
+    if (_reducedMotionOf(context)) {
+      thumbController
+        ..stop()
+        ..value = 1;
+      thumbAnimatable = null;
+      return;
+    }
+    thumbController.animateWith(_kThumbSpringAnimationSimulation);
+  }
+
   @override
   void didUpdateWidget(CommonTabBar<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!isThumbDragging && highlighted != widget.groupValue) {
-      thumbController.animateWith(_kThumbSpringAnimationSimulation);
+      _animateThumb();
       thumbAnimatable = null;
       highlighted = widget.groupValue;
     }
@@ -201,6 +215,13 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
         end: isExpanding ? 1 : _kMinThumbScale,
       ),
     );
+    if (_reducedMotionOf(context)) {
+      // Value 0 would freeze the tween at the stale begin side.
+      thumbScaleController
+        ..stop()
+        ..value = 1;
+      return;
+    }
     thumbScaleController.animateWith(_kThumbSpringAnimationSimulation);
   }
 
@@ -212,8 +233,7 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
     setState(() {
       highlighted = newValue;
     });
-    thumbController.animateWith(_kThumbSpringAnimationSimulation);
-    thumbAnimatable = null;
+    _animateThumb();
   }
 
   void onPressedChangedByGesture(T? newValue) {

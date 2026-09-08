@@ -50,6 +50,8 @@ class _MoveTabIntent extends Intent {
 
 /// Segmented selector driving the ambient [TabController]. [CommonTabBar] has
 /// no focus handling of its own, so arrow keys and the focus ring live here.
+const _focusDuration = Duration(milliseconds: 150);
+
 class _AppearanceTabs extends StatefulWidget {
   const _AppearanceTabs({required this.labels});
 
@@ -102,7 +104,10 @@ class _AppearanceTabsState extends State<_AppearanceTabs> {
     if (controller == null || index == null || index == controller.index) {
       return;
     }
-    controller.animateTo(index);
+    controller.animateTo(
+      index,
+      duration: context.motionDuration(kThemeAnimationDuration),
+    );
   }
 
   void _handleMove(int delta) {
@@ -141,7 +146,8 @@ class _AppearanceTabsState extends State<_AppearanceTabs> {
           });
         },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: context.motionDuration(_focusDuration),
+          curve: Easing.standard,
           decoration: BoxDecoration(
             borderRadius: AppRadius.all(AppCorner.sm + 5),
             border: Border.all(

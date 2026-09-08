@@ -188,7 +188,9 @@ class ApplicationState extends ConsumerState<Application> {
     required Color color,
   }) async {
     // A share link or an inlined config can be arbitrarily long.
-    final trimmed = source.length > 120 ? '${source.substring(0, 119)}…' : source;
+    final trimmed = source.length > 120
+        ? '${source.substring(0, 119)}…'
+        : source;
     final message = currentAppLocalizations.createProfileFromUrlTip(trimmed);
     final parts = message.split(trimmed);
     final res = await dialogs.showMessage(
@@ -214,9 +216,7 @@ class ApplicationState extends ConsumerState<Application> {
       unawaited(action.addProfileFromLocalContent(content));
       return;
     }
-    unawaited(
-      action.addProfileFormURL(target, client: preset, name: name),
-    );
+    unawaited(action.addProfileFormURL(target, client: preset, name: name));
   }
 
   void _autoUpdateProfilesTask() {
@@ -254,9 +254,10 @@ class ApplicationState extends ConsumerState<Application> {
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
           onNavigationNotification: (_) => true,
-          localizationsDelegates: const [
+          localizationsDelegates: [
             AppLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
+            ...fallbackMaterialLocalizationsDelegates,
           ],
           builder: (context, child) {
             // The bridge's legacy Theme swaps in its own default IconTheme color,

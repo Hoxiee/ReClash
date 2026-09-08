@@ -46,6 +46,16 @@ class _AppNavBarState extends ConsumerState<AppNavBar>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations) {
+      _controller.stop();
+      _from = _to;
+      _controller.value = 1;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -64,6 +74,10 @@ class _AppNavBarState extends ConsumerState<AppNavBar>
 
   void _hopTo(int index) {
     if (index.toDouble() == _to) {
+      return;
+    }
+    if (context.disableAnimations) {
+      _snapTo(index);
       return;
     }
     _from = _position;

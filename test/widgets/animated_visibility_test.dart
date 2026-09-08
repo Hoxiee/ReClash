@@ -416,6 +416,69 @@ void main() {
     expect(contentKey.currentState, same(initialState));
     expect(tester.takeException(), isNull);
   });
+  testWidgets('hides and shows instantly when animations are disabled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const _ReducedMotionHost(visible: true, disableAnimations: true),
+    );
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpWidget(
+      const _ReducedMotionHost(visible: false, disableAnimations: true),
+    );
+    await tester.pump();
+
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.pumpWidget(
+      const _ReducedMotionHost(visible: true, disableAnimations: true),
+    );
+    await tester.pump();
+
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('an in-flight exit snaps shut when animations turn disabled', (
+    tester,
+  ) async {
+    final visibilityKey = GlobalKey();
+
+    Widget buildApp(bool visible, bool disableAnimations) {
+      return MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: disableAnimations),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Row(
+            children: [
+              AnimatedVisibility.sidebar(
+                key: visibilityKey,
+                visible: visible,
+                child: const SizedBox(width: 180, height: 80),
+              ),
+              const Expanded(child: SizedBox()),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(true, false));
+    await tester.pumpWidget(buildApp(false, false));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpWidget(buildApp(false, true));
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.getSize(find.byKey(visibilityKey)).width, 0);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class _StatefulContent extends StatefulWidget {
@@ -429,5 +492,40 @@ class _StatefulContentState extends State<_StatefulContent> {
   @override
   Widget build(BuildContext context) {
     return const SizedBox(width: 180);
+  }
+}
+
+class _ReducedMotionHost extends StatelessWidget {
+  const _ReducedMotionHost({
+    required this.visible,
+    required this.disableAnimations,
+  });
+
+  final bool visible;
+  final bool disableAnimations;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(disableAnimations: disableAnimations),
+          child: child!,
+        );
+      },
+      home: Scaffold(
+        body: Row(
+          children: [
+            AnimatedVisibility.sidebar(
+              visible: visible,
+              child: const SizedBox(width: 180, height: 80),
+            ),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
+      ),
+    );
   }
 }

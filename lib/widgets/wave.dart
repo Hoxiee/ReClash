@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 class WaveView extends StatefulWidget {
@@ -23,18 +24,49 @@ class WaveView extends StatefulWidget {
 class _WaveViewState extends State<WaveView>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  var _animating = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration)
-      ..repeat();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant WaveView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
+      if (_animating) {
+        _controller.repeat();
+      }
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _syncAnimation() {
+    final shouldAnimate =
+        !context.disableAnimations && TickerMode.valuesOf(context).enabled;
+    if (shouldAnimate == _animating) {
+      return;
+    }
+    _animating = shouldAnimate;
+    if (shouldAnimate) {
+      _controller.repeat();
+    } else {
+      _controller.stop();
+    }
   }
 
   @override
