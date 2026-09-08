@@ -83,10 +83,8 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     Widget child,
   ) {
     const alignment = Alignment.topRight;
-    final fade = animation.drive(
-      CurveTween(curve: Easing.emphasizedDecelerate),
-    );
-    final scale = animation.drive(CurveTween(curve: Curves.easeOutCubic));
+    final fade = animation.drive(CurveTween(curve: Curves.easeOut));
+    final scale = animation.drive(CurveTween(curve: Curves.easeOutBack));
     return Stack(
       children: [
         Positioned.fill(
