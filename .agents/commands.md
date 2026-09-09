@@ -217,7 +217,9 @@ bash tool/check_comment_density_test.sh
 
 Run `flutter analyze` locally before committing when practical.
 
-The workflow runs only for `v*` tag pushes; pull requests do not trigger it.
+The workflow runs its validation jobs for pull requests targeting `main`,
+pushes to `main`, and `v*` tags. Packaging and release publishing run only
+for tags.
 Root analysis excludes `plugins/**`, and root tests do not discover nested
 plugin packages, so CI also validates local Flutter packages, the setup build
 tool, the Go wrapper, and Rust components from their own package directories. A

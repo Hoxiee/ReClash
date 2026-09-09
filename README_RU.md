@@ -1,0 +1,148 @@
+<p align="center">
+  <img src="assets/images/icon.png" width="104" alt="Значок ReClash">
+</p>
+
+<h1 align="center">ReClash</h1>
+
+<p align="center">Управляйте прокси-профилями, подписками и подключениями в одном приложении.</p>
+
+<p align="center">
+  <a href="README.md">English</a> ·
+  <a href="README_zh_CN.md">简体中文</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Hoxiee/ReClash/actions/workflows/build.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Hoxiee/ReClash/build.yaml?branch=main&style=flat-square&label=CI"></a>
+  <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Последний релиз" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
+  <a href="LICENSE"><img alt="Лицензия GPL-3.0" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
+  <a href="https://t.me/ReClashNews"><img alt="Новости в Telegram" src="https://img.shields.io/badge/Telegram-ReClashNews-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+</p>
+
+ReClash — кроссплатформенное приложение для Android, Windows, macOS и Linux. Добавляйте и обновляйте подписки, быстро переключайте узлы, контролируйте соединения и трафик, используйте системный прокси или TUN/VPN. Настройки, резервные копии и инструменты диагностики доступны в одном интерфейсе.
+
+Проект основан на [FlClash](https://github.com/chen08209/FlClash).
+
+## Возможности
+
+- TUN/VPN и системный прокси.
+- Импорт профилей и автоматическое обновление подписок.
+- Переопределения профилей, пользовательские HTTP-заголовки и скрипты.
+- Управление прокси, соединениями и правилами маршрутизации.
+- Мониторинг трафика, логи и проверка задержки.
+- Локальные резервные копии и опциональная WebDAV-синхронизация.
+- Трей, автозапуск, горячие клавиши и deep links на настольных системах.
+- Quick Settings, виджеты, Always-on VPN, TV-навигация и broadcast-команды на Android.
+- Опциональный режим ByeDPI.
+
+> ReClash не предоставляет доступ к прокси или подписки. Импортируйте профили только из доверенных источников.
+
+## Скриншоты
+
+<table>
+  <tr>
+    <td><img src="snapshots/desktop.gif" alt="ReClash на компьютере"></td>
+    <td><img src="snapshots/mobile.gif" alt="ReClash на телефоне"></td>
+  </tr>
+  <tr>
+    <td align="center">Компьютер</td>
+    <td align="center">Телефон</td>
+  </tr>
+</table>
+
+## Установка
+
+Скачайте пакет для своей платформы со страницы [Releases](https://github.com/Hoxiee/ReClash/releases):
+
+| Платформа | Пакеты |
+| --- | --- |
+| Android | APK: `arm64-v8a`, `armeabi-v7a`, `x86_64` |
+| Windows | установщик или portable ZIP: x64, ARM64 |
+| macOS | DMG: Apple silicon, Intel |
+| Linux | AppImage, DEB, RPM: x64, ARM64 |
+
+К каждому релизу прилагается `SHA256SUMS`. В Linux или macOS положите его рядом со скачанным пакетом и выполните:
+
+```bash
+sha256sum -c SHA256SUMS --ignore-missing
+```
+
+В Windows вычислите хеш командой `Get-FileHash <файл> -Algorithm SHA256` и сравните его с соответствующей строкой в `SHA256SUMS`. Предварительные сборки могут быть нестабильными и не поддерживаются как отдельная ветка релизов.
+
+## Начало работы
+
+1. Добавьте URL подписки или импортируйте локальный профиль. Автоматический режим совместимости умеет пробовать подходящие форматы, если сервер меняет ответ в зависимости от `User-Agent`.
+2. Выберите прокси или группу, затем подключитесь через TUN/VPN либо включите системный прокси. Системный прокси работает с приложениями, которые учитывают настройки ОС; TUN/VPN обрабатывает трафик на сетевом уровне.
+3. Используйте переопределения профиля, если локальные DNS, правила маршрутизации, HTTP-заголовки или скрипты должны отличаться от конфигурации провайдера.
+4. Для диагностики проверяйте **Соединения**, **Трафик**, **Логи** и задержку. Перед крупными изменениями создавайте локальную резервную копию; синхронизация через WebDAV включается отдельно.
+
+ReClash не продаёт доступ к прокси, не выдаёт подписки и не рекомендует провайдеров. URL подписки обычно содержит данные доступа, поэтому не публикуйте его в логах и issue.
+
+## Интеграция с системой
+
+Настольные сборки поддерживают трей, автозапуск, глобальные горячие клавиши, управление системным прокси и URL-схему `reclash://`. На Android доступны плитка Quick Settings, виджеты домашнего экрана, Always-on VPN, навигация для телевизоров и ярлыки запуска и подключения.
+
+URL-схему можно использовать в локальных лаунчерах и средствах автоматизации:
+
+```text
+reclash://connect
+reclash://disconnect
+reclash://toggle
+reclash://open
+reclash://close
+reclash://add/<закодированный URL подписки>
+reclash://import/<конфигурация в Base64>
+reclash://install-config?url=<закодированный URL>&name=<закодированное имя>
+```
+
+Ссылки импорта и добавления содержат конфиденциальную конфигурацию. Создавайте их только для доверенной локальной автоматизации и проверяйте ссылки из сторонних источников перед открытием.
+
+## Сборка из исходного кода
+
+В релизах используются Flutter 3.47.1 и Go 1.26.4. Для Android также нужны JDK 17 и NDK r28c. Нативные helper-компоненты требуют стабильный Rust. Клонируйте подмодули и сначала выполните общую проверку:
+
+```bash
+git clone --recurse-submodules https://github.com/Hoxiee/ReClash.git
+cd ReClash
+flutter pub get
+flutter analyze --no-fatal-infos
+flutter test --reporter expanded
+```
+
+Пакет собирается на целевой операционной системе:
+
+```bash
+dart setup.dart android
+dart setup.dart windows
+dart setup.dart macos
+dart setup.dart linux
+```
+
+Инструмент сборки сохраняет пакеты в `dist/`. В Linux он может запросить права администратора для установки нативных зависимостей; в Windows нужны GCC и Inno Setup; в macOS нужен Node.js для `appdmg`. Подробные команды, правила кодогенерации и нативные проверки описаны в [CONTRIBUTING.md](CONTRIBUTING.md) и [`.agents/commands.md`](.agents/commands.md).
+
+## Для провайдеров подписок
+
+Провайдер может передавать в HTTP-ответе подписки сведения о трафике и сроке действия, интервал обновления, ссылки поддержки, оформление, состав dashboard и данные для смены домена. Полный контракт, совместимые имена, примеры, список виджетов, поведение HWID и замечания по безопасности приведены в документе [Subscription response headers](PROVIDER_HEADERS.md).
+
+Пространство имён `reclash-*` имеет приоритет над заголовками совместимости. Эти значения дополняют тело подписки, но не забирают управление у пользователя: сохранённые настройки остаются пользовательскими, а стартовые значения приложения применяются только при добавлении профиля.
+
+## Поддержка и участие
+
+Перед сообщением о проблеме прочитайте [SUPPORT.md](SUPPORT.md), особенно правила безопасной публикации логов и профилей. Уязвимости нужно отправлять приватно по инструкции из [SECURITY.md](SECURITY.md). Правила участия находятся в [CONTRIBUTING.md](CONTRIBUTING.md), нормы общения — в [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Новости проекта публикуются в [Telegram-канале ReClash](https://t.me/ReClashNews). Это канал новостей, а не приватная поддержка провайдеров.
+
+## Благодарности
+
+ReClash существует благодаря работе этих проектов и их сопровождающих:
+
+- [FlClash](https://github.com/chen08209/FlClash) от [chen08209](https://github.com/chen08209) — приложение, на котором основан ReClash.
+- [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — часть функций и идей для интеграции с провайдерами опирается на его работу (надеюсь хоть так он проснется).
+- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения.
+
+ReClash сопровождается независимо. Названия других проектов используются только для описания происхождения, совместимости и зависимостей и не означают одобрения ReClash их авторами.
+
+Полный список зависимостей и соответствующих лицензий находится в приложении и репозитории.
+
+## Лицензия
+
+ReClash распространяется по лицензии [GNU General Public License v3.0](LICENSE).

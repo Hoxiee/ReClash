@@ -1,4 +1,4 @@
-/// Per-profile client emulation: panels serve the body by User-Agent.
+/// Per-profile compatibility preset for panels that vary by User-Agent.
 library;
 
 import 'package:reclash/common/device_identity.dart';

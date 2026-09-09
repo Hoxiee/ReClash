@@ -1,5 +1,5 @@
 name: reclash
-description: A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.
+description: A cross-platform mihomo client with a Material You interface and advanced subscription workflows.
 publish_to: 'none'
 version: 0.8.97+2026090701
 environment:

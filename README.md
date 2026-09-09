@@ -1,139 +1,148 @@
-<div>
-
-[**简体中文**](README_zh_CN.md)
-
-</div>
-
-## FlClash
-
-[![Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases/)[![Last Version](https://img.shields.io/github/release/chen08209/FlClash/all.svg?style=flat-square)](https://github.com/chen08209/FlClash/releases/)[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
-
-[![Channel](https://img.shields.io/badge/Telegram-Channel-blue?style=flat-square&logo=telegram)](https://t.me/FlClash)
-
-A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.
-
-on Desktop:
-<p style="text-align: center;">
-    <img alt="desktop" src="snapshots/desktop.gif">
+<p align="center">
+  <img src="assets/images/icon.png" width="104" alt="ReClash icon">
 </p>
 
-on Mobile:
-<p style="text-align: center;">
-    <img alt="mobile" src="snapshots/mobile.gif">
+<h1 align="center">ReClash</h1>
+
+<p align="center">Manage proxy profiles, subscriptions, and connections in one application.</p>
+
+<p align="center">
+  <a href="README_RU.md">Русский</a> ·
+  <a href="README_zh_CN.md">简体中文</a>
 </p>
+
+<p align="center">
+  <a href="https://github.com/Hoxiee/ReClash/actions/workflows/build.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Hoxiee/ReClash/build.yaml?branch=main&style=flat-square&label=CI"></a>
+  <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
+  <a href="LICENSE"><img alt="GPL-3.0 license" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
+  <a href="https://t.me/ReClashNews"><img alt="Telegram news" src="https://img.shields.io/badge/Telegram-ReClashNews-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+</p>
+
+ReClash is a cross-platform application for Android, Windows, macOS, and Linux. Add and update subscriptions, switch proxies, monitor connections and traffic, and connect through system proxy or TUN/VPN. Settings, backups, and diagnostic tools are available in one interface.
+
+The project is based on [FlClash](https://github.com/chen08209/FlClash).
 
 ## Features
 
-✈️ Multi-platform: Android, Windows, macOS and Linux
+- TUN/VPN and system proxy.
+- Profile import and automatic subscription updates.
+- Profile overrides, custom HTTP headers, and scripts.
+- Proxy, connection, and routing-rule management.
+- Traffic monitoring, logs, and delay tests.
+- Local backups and optional WebDAV synchronization.
+- System tray, startup, hotkeys, and deep links on desktop.
+- Quick Settings, widgets, Always-on VPN, TV navigation, and broadcast actions on Android.
+- Optional ByeDPI mode.
 
-💻 Adaptive multiple screen sizes, Multiple color themes available
+> ReClash does not provide proxy access or subscriptions. Import profiles only from sources you trust.
 
-💡 Based on Material You Design, [Surfboard](https://github.com/getsurfboard/surfboard)-like UI
+## Screenshots
 
-☁️ Supports data sync via WebDAV
+<table>
+  <tr>
+    <td><img src="snapshots/desktop.gif" alt="ReClash on desktop"></td>
+    <td><img src="snapshots/mobile.gif" alt="ReClash on mobile"></td>
+  </tr>
+  <tr>
+    <td align="center">Desktop</td>
+    <td align="center">Mobile</td>
+  </tr>
+</table>
 
-✨ Support subscription link, Dark mode
+## Install
 
-## Use
+Download the package for your platform from [Releases](https://github.com/Hoxiee/ReClash/releases):
 
-### Linux
+| Platform | Packages |
+| --- | --- |
+| Android | APK: `arm64-v8a`, `armeabi-v7a`, `x86_64` |
+| Windows | installer or portable ZIP: x64, ARM64 |
+| macOS | DMG: Apple silicon, Intel |
+| Linux | AppImage, DEB, RPM: x64, ARM64 |
 
-⚠️ Make sure to install the following dependencies before using them
-
-   ```bash
-    sudo apt-get install libayatana-appindicator3-dev
-    sudo apt-get install libkeybinder-3.0-dev
-   ```
-
-### Android
-
-Support the following actions
-
-   ```bash
-    com.follow.clash.action.START
-    
-    com.follow.clash.action.STOP
-    
-    com.follow.clash.action.TOGGLE
-   ```
-
-## Download
-
-<a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" width="200px"/></a> <a href="https://github.com/chen08209/FlClash/releases"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" width="200px"/></a>
-
-### Homebrew
+Each release includes `SHA256SUMS`. On Linux or macOS, place it beside the downloaded package and run:
 
 ```bash
-brew tap chen08209/tap
-brew install --cask flclash
+sha256sum -c SHA256SUMS --ignore-missing
 ```
 
-## Build
+On Windows, calculate the package hash with `Get-FileHash <file> -Algorithm SHA256` and compare it with the matching line in `SHA256SUMS`. Pre-release builds may be unstable and are not maintained as a separate support line.
 
-1. Update submodules
-   ```bash
-   git submodule update --init --recursive
-   ```
+## Getting started
 
-2. Install `Flutter` and `Golang` environment
+1. Add a subscription URL or import a local profile. Automatic compatibility mode can try alternative subscription formats when a server varies its response by `User-Agent`.
+2. Select a proxy or group, then connect through TUN/VPN or enable the system proxy. The system proxy covers applications that follow operating-system proxy settings; TUN/VPN handles traffic at the network layer.
+3. Use profile overrides when local DNS, routing rules, request headers, or scripts must differ from the provider configuration.
+4. Check **Connections**, **Traffic**, **Logs**, and delay tests when diagnosing a route. Back up the local configuration before larger changes; WebDAV synchronization is optional.
 
-3. Build Application
+ReClash does not sell proxy access, provide subscriptions, or recommend providers. Subscription URLs commonly contain credentials, so do not publish them in logs or issue reports.
 
-    - android
+## Platform integration
 
-        1. Install `Android SDK`, `Android NDK`
+Desktop builds provide a system tray, launch-at-startup support, global hotkeys, system-proxy control, and the `reclash://` URL scheme. Android provides a Quick Settings tile, home-screen widgets, Always-on VPN support, TV navigation, and launch/connect shortcuts.
 
-        2. Set `ANDROID_NDK` environment variable
+The URL scheme can be used by local launchers and automation tools:
 
-        3. Run build script
+```text
+reclash://connect
+reclash://disconnect
+reclash://toggle
+reclash://open
+reclash://close
+reclash://add/<encoded subscription URL>
+reclash://import/<base64 configuration>
+reclash://install-config?url=<encoded URL>&name=<encoded name>
+```
 
-           ```bash
-           dart setup.dart android
-           ```
+Import and add links carry sensitive configuration data. Create them only for trusted local automation and inspect links received from other sources before opening them.
 
-    - windows
+## Build from source
 
-        1. Requires a Windows client
+Release builds use Flutter 3.47.1 and Go 1.26.4. Android also requires JDK 17 and NDK r28c. Native helper components require stable Rust. Clone the submodules and run the common validation first:
 
-        2. Install `GCC`, `Inno Setup`
+```bash
+git clone --recurse-submodules https://github.com/Hoxiee/ReClash.git
+cd ReClash
+flutter pub get
+flutter analyze --no-fatal-infos
+flutter test --reporter expanded
+```
 
-        3. Run build script
+Package on the target operating system:
 
-           ```bash
-           dart setup.dart windows
-           ```
+```bash
+dart setup.dart android
+dart setup.dart windows
+dart setup.dart macos
+dart setup.dart linux
+```
 
-    - linux
+The setup tool writes packages to `dist/`. Linux packaging may request administrator access to install native build dependencies; Windows packaging requires GCC and Inno Setup; macOS packaging requires Node.js for `appdmg`. Detailed commands, code-generation rules, and native checks are in [CONTRIBUTING.md](CONTRIBUTING.md) and [`.agents/commands.md`](.agents/commands.md).
 
-        1. Requires a Linux client
+## Subscription providers
 
-        2. Dependencies are auto-installed by setup script, or manually:
-           ```bash
-           sudo apt-get install -y libayatana-appindicator3-dev libkeybinder-3.0-dev
-           ```
+Providers can attach usage, expiration, update policy, support links, branding, dashboard layout, and migration metadata to subscription HTTP responses. The complete wire contract, supported aliases, examples, widget names, HWID behavior, and security notes are documented in [Subscription response headers](PROVIDER_HEADERS.md).
 
-        3. Run build script
+The `reclash-*` namespace takes priority over compatibility headers. These values are suggestions around the subscription body: user-owned settings stay under user control, and initial application defaults are applied only when a profile is added.
 
-           ```bash
-           dart setup.dart linux
-           ```
+## Support and contributing
 
-    - macOS
+Read [SUPPORT.md](SUPPORT.md) before reporting a problem, especially before sharing logs or profiles. Security issues must be reported privately according to [SECURITY.md](SECURITY.md). Contributions are welcome under [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-        1. Requires a macOS client
+Project announcements are published in the [ReClash Telegram channel](https://t.me/ReClashNews). It is a news channel, not a private provider-support service.
 
-        2. Run build script
+## Acknowledgements
 
-           ```bash
-           dart setup.dart macos
-           ```
+ReClash exists because of the work of these projects and maintainers:
 
-## Star
+- [FlClash](https://github.com/chen08209/FlClash) by [chen08209](https://github.com/chen08209), the application ReClash is based on.
+- [FlClashX](https://github.com/pluralplay/FlClashX) by [pluralplay](https://github.com/pluralplay), whose provider-oriented work and ideas informed parts of ReClash.
+- [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application.
 
-The easiest way to support developers is to click on the star (⭐) at the top of the page.
+ReClash is maintained independently. References to other projects describe technical lineage, compatibility, and dependencies; they do not imply endorsement.
 
-<p style="text-align: center;">
-    <a href="https://api.star-history.com/svg?repos=chen08209/FlClash&Date">
-        <img alt="start" width=50% src="https://api.star-history.com/svg?repos=chen08209/FlClash&Date"/>
-    </a>
-</p>
+The full dependency list and corresponding licenses are included with the application and in the repository.
+
+## License
+
+ReClash is distributed under the [GNU General Public License v3.0](LICENSE).

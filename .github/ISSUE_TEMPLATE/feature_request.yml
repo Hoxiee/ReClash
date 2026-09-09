@@ -1,42 +1,64 @@
-name: 功能请求 / Feature request
-title: "[Feature] "
-description: 提出你的功能请求 / Propose your feature request
-
+name: Feature request / 功能建议
+description: Describe a concrete need ReClash could address / 描述 ReClash 可以解决的具体需求
+title: '[Feature] '
 body:
   - type: markdown
     attributes:
       value: |
-        ## 在提交问题之前，请确认以下事项：
-        1. 请务必给issue填写一个简洁明了的标题，以便他人快速检索
-        2. 请确保[已有的问题](https://github.com/chen08209/FlClash/issues?q=is%3Aissue) 中没有人提交过相似issue，否则请在已有的issue下进行讨论
-        3. 请务必按照模板规范详细描述问题，否则issue将会被直接关闭
-        ## Before submitting the issue, please make sure of the following checklist:
-        1. Please be sure to fill in a concise and clear title for the issue so that others can quickly search
-        2. Please make sure there is no similar issue in the [existing issues](https://github.com/chen08209/FlClash/issues?q=is%3Aissue), otherwise please discuss under the existing issue
-        3. Please describe the problem in detail according to the template specification, otherwise issue will be closed directly.
+        Start with the problem rather than a particular implementation. Search existing issues first; if the same need is already discussed, add your use case there.
+
+        请先描述问题，而不是直接限定实现方式。提交前请搜索现有 issue；若已有相同需求，请在原 issue 中补充使用场景。
+
+        ReClash does not provide proxy subscriptions and cannot add provider-specific account features.
+
+        ReClash 不提供代理订阅，也无法添加特定服务商的账号功能。
 
   - type: textarea
-    id: description
+    id: problem
     attributes:
-      label: 功能描述 / Feature description
-      description: 详细清晰地描述你的功能请求 / A clear and concise description of what the feature is
+      label: Problem or use case / 问题或使用场景
+      description: What are you trying to do, and what makes it difficult today? / 你希望完成什么？目前的困难是什么？
     validations:
       required: true
+
   - type: textarea
+    id: behavior
     attributes:
-      label: 使用场景 / Use case
-      description: 请描述你的功能请求的使用场景 / Please describe the use case of your feature request
+      label: Proposed behavior / 期望行为
+      description: Describe the result you would expect in ReClash. / 请描述你希望 ReClash 提供的结果。
     validations:
       required: true
-  - type: checkboxes
-    id: os-labels
+
+  - type: textarea
+    id: alternatives
     attributes:
-      label: 适用系统 / Target OS
-      description: 请选择该功能适用的操作系统（至少选择一个） / Please select the operating system(s) for this feature request (select at least one)
+      label: Alternatives considered / 已尝试的替代方案
+      description: Explain current workarounds or other approaches you considered. / 请说明目前的变通方法或考虑过的其他方案。
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Relevant platforms / 相关平台
+      multiple: true
       options:
-        - label: Android
-        - label: Windows
-        - label: MacOS
-        - label: Linux
+        - Android
+        - Windows
+        - macOS
+        - Linux
+        - All platforms / 所有平台
     validations:
       required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context / 其他信息
+      description: Add mockups, examples, or links that clarify the request. Do not include subscriptions or credentials. / 可添加有助于说明需求的示意图、示例或链接，请勿包含订阅或凭据。
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation / 确认
+      options:
+        - label: I searched existing issues and found no equivalent request. / 我已搜索现有 issue，未发现相同建议。
+          required: true

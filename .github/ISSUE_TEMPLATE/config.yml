@@ -1,4 +1,11 @@
+blank_issues_enabled: false
 contact_links:
-  - name: 讨论交流 / Communication
-    url: https://t.me/+G-veVtwBOl4wODc1
-    about: 在 Telegram 群组中与其他用户讨论交流 / Communicate with other users in the Telegram group
+  - name: Support guide / 支持指南
+    url: https://github.com/Hoxiee/ReClash/blob/main/SUPPORT.md
+    about: Check troubleshooting steps and learn how to share logs safely. / 查看排障步骤以及安全分享日志的方法。
+  - name: Release news / 发布动态
+    url: https://t.me/ReClashNews
+    about: Follow ReClash release announcements on Telegram. / 在 Telegram 关注 ReClash 发布动态。
+  - name: Security report / 安全报告
+    url: https://github.com/Hoxiee/ReClash/blob/main/SECURITY.md
+    about: Read the private reporting instructions before disclosing a vulnerability. / 披露漏洞前请阅读私下报告说明。

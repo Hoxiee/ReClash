@@ -94,6 +94,10 @@ enum Mode { rule, global, direct }
 /// with smart routing on, so an inconsistent pair cannot be expressed.
 enum UiOutboundMode { auto, rule, global, direct }
 
+enum NotificationContentMode { adaptive, traffic, minimal }
+
+enum DoctorNotificationPriority { problems, always, never }
+
 extension UiOutboundModeExt on UiOutboundMode {
   Mode get coreMode => switch (this) {
     UiOutboundMode.auto || UiOutboundMode.rule => Mode.rule,
@@ -209,9 +213,8 @@ enum AccessSortType { none, name, time }
 
 enum ProfileType { file, url }
 
-/// Which client a subscription request imitates. Panels serve the body by
-/// User-Agent, so a profile pins the client whose format it wants — or stays
-/// [auto] and lets the fetch use the plain app UA.
+/// Compatibility preset for subscription servers that vary by User-Agent.
+/// A profile can request a specific response format or use [auto] selection.
 enum SubscriptionClient { auto, clash, happ, incy, singbox, v2rayng, custom }
 
 enum ResultType {
@@ -221,7 +224,16 @@ enum ResultType {
   error,
 }
 
-enum CoreEventType { log, delay, request, loaded, crash, geoUpdate, rcxStatus }
+enum CoreEventType {
+  log,
+  delay,
+  request,
+  loaded,
+  crash,
+  geoUpdate,
+  rcxStatus,
+  doctorStatus,
+}
 
 enum InvokeMessageType { protect, process }
 
