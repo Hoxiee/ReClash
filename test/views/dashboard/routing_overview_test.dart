@@ -1,5 +1,6 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,16 +84,29 @@ const _report = RcxReport(
   probeCap: 40,
 );
 
+const _lanes = [
+  RcxLaneStatus(
+    id: 'youtube-adfree',
+    state: 'active',
+    node: 'Amsterdam #3',
+    candidates: 4,
+    eligible: 2,
+  ),
+  RcxLaneStatus(id: 'gemini-access', state: 'fallback', fallback: 'reject'),
+];
+
 Future<void> _pump(
   WidgetTester tester, {
   required bool enabled,
   RcxReport? report,
+  bool running = true,
 }) async {
   final container = ProviderContainer(
     overrides: [
       smartRoutingSettingProvider.overrideWithValue(
         SmartRoutingProps(enabled: enabled),
       ),
+      isStartProvider.overrideWithValue(running),
     ],
   );
   addTearDown(container.dispose);
@@ -108,6 +122,30 @@ Future<void> _pump(
   );
   await tester.pumpAndSettle();
 }
+
+Future<void> _openDetails(WidgetTester tester) async {
+  await tester.tap(find.text('Details'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _toggleTechnical(WidgetTester tester) async {
+  await tester.tap(find.byIcon(Icons.code_rounded));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _reveal(WidgetTester tester, String label) async {
+  await tester.scrollUntilVisible(
+    find.text(label),
+    200,
+    scrollable: _detailsScroll,
+  );
+  await tester.pumpAndSettle();
+}
+
+final _detailsScroll = find.descendant(
+  of: find.byType(RoutingDetailsTab),
+  matching: find.byType(Scrollable),
+);
 
 void main() {
   testWidgets('an engine that is off explains itself instead of showing rows', (
@@ -128,6 +166,14 @@ void main() {
     await _pump(tester, enabled: true);
 
     expect(find.text('Picking a server…'), findsOne);
+  });
+
+  testWidgets('a stopped core waits for the tunnel instead of picking', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, running: false);
+
+    expect(find.text('Smart routing is on · waiting for the tunnel'), findsOne);
   });
 
   testWidgets('reduced motion opens the disclosure without a ticker', (
@@ -157,6 +203,9 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 4));
 
+    expect(tester.hasRunningAnimations, isFalse);
+    await _openDetails(tester);
+    await _reveal(tester, 'Link check');
     expect(tester.hasRunningAnimations, isFalse);
     await tester.tap(find.text('Link check'));
     await tester.pump();
@@ -198,12 +247,19 @@ void main() {
   ) async {
     await _pump(tester, enabled: true, report: _report);
 
+    await tester.scrollUntilVisible(
+      find.text('2 of 3 servers can be used right now'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+
     expect(find.text('2 of 3 servers can be used right now'), findsOne);
     await tester.scrollUntilVisible(
       find.text('31 of 40 probes left this hour'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.byType(Scrollable).last,
     );
+
     expect(find.text('31 of 40 probes left this hour'), findsOne);
   });
 
@@ -211,6 +267,10 @@ void main() {
     tester,
   ) async {
     await _pump(tester, enabled: true, report: _report);
+
+    await _openDetails(tester);
+
+    await _reveal(tester, 'Link check');
 
     expect(find.text('1 of 2 answered'), findsOne);
     await tester.tap(find.text('Link check'));
@@ -226,12 +286,11 @@ void main() {
   ) async {
     await _pump(tester, enabled: true, report: _report);
 
+    await _openDetails(tester);
+
+    await _reveal(tester, 'Server checks');
+
     expect(find.text('measured 2 of 3'), findsOne);
-    await tester.scrollUntilVisible(
-      find.text('Server checks'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
     await tester.tap(find.text('Server checks'));
     await tester.pumpAndSettle();
 
@@ -244,10 +303,11 @@ void main() {
     tester,
   ) async {
     await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('All servers'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('All servers'), warnIfMissed: false);
@@ -259,10 +319,11 @@ void main() {
 
   testWidgets('a blocked server states its gate, not a score', (tester) async {
     await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('All servers'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('All servers'), warnIfMissed: false);
@@ -275,10 +336,11 @@ void main() {
     tester,
   ) async {
     await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('99% over 2 hours'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
 
@@ -303,10 +365,11 @@ void main() {
       ],
     );
     await _pump(tester, enabled: true, report: report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('All servers'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('All servers'), warnIfMissed: false);
@@ -322,10 +385,11 @@ void main() {
     tester,
   ) async {
     await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('Ranked what was left'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
 
@@ -336,14 +400,68 @@ void main() {
 
   testWidgets('the last switch keeps its reason', (tester) async {
     await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
     await tester.scrollUntilVisible(
       find.text('Paris #7 → Amsterdam #3'),
       200,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: _detailsScroll,
     );
     await tester.pumpAndSettle();
 
     expect(find.text('Paris #7 → Amsterdam #3'), findsOne);
     expect(find.textContaining('Previous server stopped answering'), findsOne);
+  });
+
+  testWidgets('the overview names the services that got a route', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      enabled: true,
+      report: _report.copyWith(status: _report.status.copyWith(lanes: _lanes)),
+    );
+    await tester.scrollUntilVisible(
+      find.text('YouTube without ads'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+
+    expect(find.text('Through Amsterdam #3'), findsOne);
+    expect(find.text('2 of 4 servers ready'), findsOne);
+    expect(find.text('Gemini access'), findsOne);
+    expect(find.text('No specialist ready · service blocked'), findsOne);
+  });
+
+  testWidgets('a routing without service lanes says so instead of nothing', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await tester.scrollUntilVisible(
+      find.text('No service routes are set up'),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
+
+    expect(find.text('No service routes are set up'), findsOne);
+  });
+
+  testWidgets('the technical toggle adds the engine state to the details', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await _openDetails(tester);
+
+    expect(find.text('Terrain code'), findsNothing);
+    await _toggleTechnical(tester);
+    await tester.scrollUntilVisible(
+      find.text('Terrain code'),
+      200,
+      scrollable: _detailsScroll,
+    );
+
+    expect(find.text('whitelist'), findsOne);
+    expect(find.text('wifi'), findsOne);
+    expect(find.text('rule'), findsOne);
+    expect(find.text('Last switchover'), findsOne);
   });
 }

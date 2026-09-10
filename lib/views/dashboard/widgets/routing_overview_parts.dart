@@ -1,0 +1,568 @@
+import 'package:reclash/common/common.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/views/dashboard/widgets/hero_words.dart';
+import 'package:reclash/widgets/widgets.dart';
+import 'package:material_ui/material_ui.dart';
+
+String routingReasonLabel(AppLocalizations l10n, String reason) =>
+    switch (reason) {
+      'cold-start' => l10n.smartRoutingReasonColdStart,
+      'hold' => l10n.smartRoutingReasonHold,
+      'incumbent-dead' => l10n.smartRoutingReasonIncumbentDead,
+      'verdict-gain' => l10n.smartRoutingReasonVerdictGain,
+      'latency-gain' => l10n.smartRoutingReasonLatencyGain,
+      'terrain-changed' => l10n.smartRoutingReasonTerrainChanged,
+      'stranded' => l10n.smartRoutingReasonStranded,
+      'no-candidate' => l10n.smartRoutingReasonNoCandidate,
+      'dwell-hold' => l10n.smartRoutingReasonDwellHold,
+      'manual-hold' => l10n.smartRoutingReasonManualHold,
+      'degraded' => l10n.smartRoutingReasonDegraded,
+      'measuring' => l10n.smartRoutingReasonMeasuring,
+      'pin-return' => l10n.smartRoutingReasonPinReturn,
+      _ => l10n.unknown,
+    };
+
+String routingVerdictLabel(AppLocalizations l10n, String verdict) =>
+    switch (verdict) {
+      'preferred' => l10n.smartRoutingVerdictPreferred,
+      'viable' => l10n.smartRoutingVerdictViable,
+      'last-resort' => l10n.smartRoutingVerdictLastResort,
+      _ => l10n.smartRoutingVerdictReject,
+    };
+
+String routingEvidenceLabel(AppLocalizations l10n, String evidence) =>
+    switch (evidence) {
+      'live' => l10n.smartRoutingEvidenceLive,
+      'fresh' => l10n.smartRoutingEvidenceFresh,
+      'stale' => l10n.smartRoutingEvidenceStale,
+      _ => l10n.smartRoutingEvidenceNone,
+    };
+
+/// The block is the gate that actually stopped the node, so it replaces the
+/// verdict in the row: telling the user both would be telling them twice.
+String routingBlockLabel(AppLocalizations l10n, RcxCandidateReport candidate) =>
+    switch (candidate.block) {
+      'absent' => l10n.smartRoutingBlockAbsent,
+      'no-udp' => l10n.smartRoutingBlockNoUdp,
+      'cooling' => l10n.smartRoutingBlockCooling(candidate.fails),
+      'disproven' => l10n.smartRoutingBlockDisproven,
+      'last-resort-barred' => l10n.smartRoutingBlockLastResort,
+      'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
+      'provider-circuit' => l10n.smartRoutingBlockProviderCircuit,
+      _ => routingVerdictLabel(l10n, candidate.verdict),
+    };
+
+/// Where the node sits relative to the censored country, in the same two words
+/// the canaries use, so one vocabulary covers both halves of the evidence.
+String routingOriginLabel(AppLocalizations l10n, String origin) =>
+    switch (origin) {
+      'foreign' => l10n.smartRoutingCanaryForeign,
+      'domestic' => l10n.smartRoutingCanaryDomestic,
+      _ => l10n.unknown,
+    };
+
+NetworkFormat routingFormatOf(RcxReport report) =>
+    networkFormatOf(report.status.terrain);
+
+Color routingFormatAccent(BuildContext context, NetworkFormat format) {
+  final colorScheme = context.colorScheme;
+  return switch (format) {
+    NetworkFormat.open => colorScheme.primary,
+    NetworkFormat.restricted || NetworkFormat.portal => colorScheme.tertiary,
+    NetworkFormat.offline => colorScheme.error,
+    NetworkFormat.unknown => colorScheme.onSurfaceVariant,
+  };
+}
+
+IconData routingFormatIcon(NetworkFormat format) => switch (format) {
+  NetworkFormat.open => Icons.public_rounded,
+  NetworkFormat.restricted => Icons.shield_moon_rounded,
+  NetworkFormat.portal => Icons.wifi_lock_rounded,
+  NetworkFormat.offline => Icons.cloud_off_rounded,
+  NetworkFormat.unknown => Icons.travel_explore_rounded,
+};
+
+bool routingFailed(RcxStatus status) =>
+    status.reason == 'stranded' || status.reason == 'no-candidate';
+
+RcxCandidateReport? routingChosenOf(RcxReport report) {
+  for (final candidate in report.candidates) {
+    if (candidate.current) return candidate;
+  }
+  return null;
+}
+
+int routingMinutesSince(RcxReport report, int at) {
+  final elapsed = report.at - at;
+  return elapsed < 0 ? 0 : elapsed ~/ 60000;
+}
+
+String routingMetricDuration(BuildContext context, int millis) {
+  if (millis <= 0) return context.appLocalizations.smartRoutingNoRecovery;
+  final minutes = millis ~/ 60000;
+  if (minutes > 0) return heroDurationWords(minutes);
+  final seconds = (millis / 1000).ceil();
+  return context.appLocalizations.secondsCount(seconds);
+}
+
+String routingMetricPeriod(BuildContext context, int millis) {
+  if (millis >= 60000) return heroDurationWords(millis ~/ 60000);
+  final seconds = (millis / 1000).ceil();
+  return context.appLocalizations.secondsCount(seconds);
+}
+
+Widget routingSliver(Widget child) => SliverPadding(
+  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+  sliver: SliverToBoxAdapter(child: child),
+);
+
+Widget routingHeader(String title) => SliverPadding(
+  padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+  sliver: SliverToBoxAdapter(
+    child: ListHeader(title: title, padding: EdgeInsets.zero),
+  ),
+);
+
+class RoutingCard extends StatelessWidget {
+  const RoutingCard({super.key, required this.child, this.accent});
+
+  final Widget child;
+  final Color? accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = this.accent;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: AppShape.xl,
+        color: accent == null
+            ? context.colorScheme.surfaceContainerHigh
+            : accent.withValues(alpha: 0.10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: child,
+      ),
+    );
+  }
+}
+
+class RoutingNotice extends StatelessWidget {
+  const RoutingNotice({super.key, required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoutingCard(
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: context.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: context.textTheme.bodyMedium)),
+        ],
+      ),
+    );
+  }
+}
+
+/// A tinted square with an icon: the one shape on the page that marks a thing
+/// with a state.
+class RoutingBadge extends StatelessWidget {
+  const RoutingBadge({
+    super.key,
+    required this.icon,
+    required this.tone,
+    this.size = 38,
+    this.busy = false,
+  });
+
+  final IconData icon;
+  final Color tone;
+  final double size;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size / 2.8),
+        color: tone.withValues(alpha: 0.14),
+      ),
+      child: busy
+          ? SizedBox.square(
+              dimension: size * 0.44,
+              child: CommonCircleLoading(color: tone),
+            )
+          : Icon(icon, size: size * 0.5, color: tone),
+    );
+  }
+}
+
+class RoutingStat extends StatelessWidget {
+  const RoutingStat({super.key, required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          child: TooltipText(
+            text: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: context.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RoutingHairline extends StatelessWidget {
+  const RoutingHairline({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 1,
+    color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+  );
+}
+
+/// A fold whose collapsed state still says what is inside, so only the evidence
+/// costs a tap.
+class RoutingDisclosure extends StatefulWidget {
+  const RoutingDisclosure({
+    super.key,
+    required this.label,
+    required this.child,
+    this.summary,
+  });
+
+  final String label;
+  final Widget child;
+  final String? summary;
+
+  @override
+  State<RoutingDisclosure> createState() => _RoutingDisclosureState();
+}
+
+class _RoutingDisclosureState extends State<RoutingDisclosure> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final summary = widget.summary;
+    final expandDuration = context.motionDuration(
+      const Duration(milliseconds: 180),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          borderRadius: AppRadius.sm,
+          onTap: () => setState(() => _open = !_open),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Text(
+                  widget.label,
+                  style: context.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                AnimatedRotation(
+                  turns: _open ? 0.5 : 0,
+                  duration: expandDuration,
+                  curve: Curves.easeOutCubic,
+                  child: Icon(
+                    Icons.expand_more_rounded,
+                    size: 17,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                if (summary != null && !_open) ...[
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      summary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        expandDuration == Duration.zero
+            ? (_open
+                  ? widget.child
+                  : const SizedBox(width: double.infinity, height: 0))
+            : AnimatedSize(
+                duration: expandDuration,
+                curve: Curves.easeOutCubic,
+                alignment: Alignment.topCenter,
+                child: _open
+                    ? widget.child
+                    : const SizedBox(width: double.infinity, height: 0),
+              ),
+      ],
+    );
+  }
+}
+
+class RoutingCandidateList extends StatelessWidget {
+  const RoutingCandidateList({
+    super.key,
+    required this.rows,
+    required this.technical,
+  });
+
+  final List<RcxCandidateReport> rows;
+  final bool technical;
+
+  /// Above this many rows the list takes its own bounded scroll area rather than
+  /// pushing the rest of the page a screenful down; a deep scan sweeps hundreds.
+  static const _inlineLimit = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    if (rows.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          context.appLocalizations.smartRoutingEmpty,
+          style: context.textTheme.bodySmall?.copyWith(
+            color: context.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+    Widget rowAt(int index) =>
+        RoutingCandidateRow(candidate: rows[index], technical: technical);
+    if (rows.length <= _inlineLimit) {
+      return Column(children: List.generate(rows.length, rowAt));
+    }
+    return Container(
+      height: 280,
+      margin: const EdgeInsets.only(top: 2),
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.sm,
+        color: context.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.35,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListView.builder(
+        // The page's own scroll view already owns the primary controller.
+        primary: false,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        itemCount: rows.length,
+        itemBuilder: (_, index) => rowAt(index),
+      ),
+    );
+  }
+}
+
+class RoutingCandidateRow extends StatelessWidget {
+  const RoutingCandidateRow({
+    super.key,
+    required this.candidate,
+    required this.technical,
+  });
+
+  final RcxCandidateReport candidate;
+  final bool technical;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+    final eligible = candidate.eligible;
+    final hosted = candidate.delay <= 0 && candidate.hostDelay > 0;
+    final delay = hosted ? candidate.hostDelay : candidate.delay;
+    final tags = <String>[
+      if (candidate.breaker) appLocalizations.smartRoutingBreaker,
+      if (candidate.degraded) appLocalizations.smartRoutingDegraded,
+      if (technical && candidate.region.isNotEmpty) candidate.region,
+      if (technical && candidate.origin != 'unknown')
+        routingOriginLabel(appLocalizations, candidate.origin),
+      if (technical && candidate.coolFor > 0)
+        appLocalizations.smartRoutingCoolFor(candidate.coolFor),
+      if (technical && hosted) appLocalizations.smartRoutingHostDelay,
+      if (technical && delay > 0)
+        appLocalizations.smartRoutingBandLabel(candidate.band),
+      if (technical && !candidate.udp) appLocalizations.smartRoutingNodeNoUdp,
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(
+            candidate.current
+                ? Icons.check_circle_rounded
+                : eligible
+                ? Icons.radio_button_unchecked
+                : Icons.block_rounded,
+            size: 15,
+            color: candidate.current
+                ? colorScheme.primary
+                : eligible
+                ? colorScheme.onSurfaceVariant
+                : colorScheme.error.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TooltipText(
+                  text: Text(
+                    candidate.node,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: eligible
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
+                      fontWeight: candidate.current ? FontWeight.w600 : null,
+                    ),
+                  ),
+                ),
+                Text(
+                  [
+                    eligible
+                        ? routingEvidenceLabel(
+                            appLocalizations,
+                            candidate.evidence,
+                          )
+                        : routingBlockLabel(appLocalizations, candidate),
+                    ...tags,
+                  ].join(' · '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.labelSmall?.copyWith(color: muted),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            switch (delay) {
+              > 0 when hosted => '≈$delay ms',
+              > 0 => '$delay ms',
+              _ when candidate.block == 'disproven' || candidate.coolFor > 0 =>
+                appLocalizations.smartRoutingNoAnswer,
+              _ => appLocalizations.smartRoutingUntested,
+            },
+            style: context.textTheme.labelSmall?.copyWith(
+              fontWeight: hosted || delay <= 0 ? null : FontWeight.w600,
+              color: delay > 0
+                  ? (getDelayColor(delay) ?? colorScheme.onSurfaceVariant)
+                  : muted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RoutingCanaryRow extends StatelessWidget {
+  const RoutingCanaryRow({
+    super.key,
+    required this.canary,
+    required this.technical,
+  });
+
+  final RcxCanaryReport canary;
+  final bool technical;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Icon(
+            canary.answered
+                ? Icons.check_circle_rounded
+                : Icons.remove_circle_outline_rounded,
+            size: 16,
+            color: canary.answered ? colorScheme.primary : muted,
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: TooltipText(
+              text: Text(
+                canary.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodySmall,
+              ),
+            ),
+          ),
+          if (technical) ...[
+            const SizedBox(width: 8),
+            Text(
+              canary.domestic
+                  ? appLocalizations.smartRoutingCanaryDomestic
+                  : appLocalizations.smartRoutingCanaryForeign,
+              style: context.textTheme.labelSmall?.copyWith(color: muted),
+            ),
+          ],
+          const SizedBox(width: 8),
+          Text(
+            canary.answered
+                ? '${canary.delay} ms'
+                : canary.forged
+                ? appLocalizations.smartRoutingEvidenceForeignForged
+                : canary.measured
+                ? appLocalizations.smartRoutingNoAnswer
+                : appLocalizations.smartRoutingUntested,
+            style: context.textTheme.labelSmall?.copyWith(
+              color: canary.answered ? colorScheme.onSurfaceVariant : muted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
