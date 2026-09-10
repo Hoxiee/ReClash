@@ -32,46 +32,27 @@ class SetupLanguageStep extends ConsumerWidget {
       header: const SetupLogo(),
       title: appName,
       subtitle: appLocalizations.setupWelcome,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            appLocalizations.setupLanguageTitle,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            appLocalizations.setupLanguageDesc,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SetupCard(
-            child: RadioGroup<Locale?>(
-              groupValue: selected,
-              onChanged: (value) => _select(ref, value),
-              child: Column(
-                children: [
-                  for (final locale in options)
-                    ListItem<Locale?>.radio(
-                      title: Text(
-                        locale?.nativeLabel ??
-                            appLocalizations.setupSystemLanguage,
-                      ),
-                      subtitle: locale == null
-                          ? null
-                          : Text(locale.englishLabel),
-                      value: locale,
-                      onTap: () => _select(ref, locale),
-                    ),
-                ],
+      body: SetupSectionLabel(
+        caption: appLocalizations.setupLanguageTitle,
+        description: appLocalizations.setupLanguageDesc,
+      ),
+      fillBody: RadioGroup<Locale?>(
+        groupValue: selected,
+        onChanged: (value) => _select(ref, value),
+        child: SetupScrollCard(
+          revealIndex: options.indexOf(selected),
+          children: [
+            for (final locale in options)
+              ListItem<Locale?>.radio(
+                title: Text(
+                  locale?.nativeLabel ?? appLocalizations.setupSystemLanguage,
+                ),
+                subtitle: locale == null ? null : Text(locale.englishLabel),
+                value: locale,
+                onTap: () => _select(ref, locale),
               ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
       actions: [
         SetupPrimaryButton(

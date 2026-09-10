@@ -22,8 +22,13 @@ class SetupLegalStep extends ConsumerStatefulWidget {
 }
 
 class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
-  bool _crashlytics = false;
-  bool _detailsExpanded = false;
+  late bool _crashlytics;
+
+  @override
+  void initState() {
+    super.initState();
+    _crashlytics = ref.read(appSettingProvider).crashlytics;
+  }
 
   void _handleAgree() {
     ref
@@ -32,21 +37,15 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
           (state) => state.copyWith(
             disclaimerAccepted: true,
             crashlyticsTip: true,
-            crashlytics: system.isAndroid && _crashlytics,
+            crashlytics: system.isAndroid ? _crashlytics : state.crashlytics,
           ),
         );
     widget.onAgree();
   }
 
-  Widget get _detailsBody => _detailsExpanded
-      ? Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Text(
-            context.appLocalizations.disclaimerDesc,
-            style: context.textTheme.bodyMedium?.copyWith(height: 1.45),
-          ),
-        )
-      : const SizedBox(width: double.infinity);
+  Future<void> _handleDecline() async {
+    await ref.read(systemActionProvider.notifier).handleExit();
+  }
 
   void _showLicenses() {
     showLicensePage(
@@ -67,60 +66,61 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
     return SetupStepScaffold(
       title: appLocalizations.setupLegalTitle,
       subtitle: appLocalizations.setupLegalSummary,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: SetupSectionLabel(caption: appLocalizations.setupLegalDetails),
+      fillBody: SetupScrollCard(
         children: [
-          SetupCard(
-            child: Column(
-              children: [
-                ListItem(
-                  title: Text(appLocalizations.setupLegalDetails),
-                  onTap: () =>
-                      setState(() => _detailsExpanded = !_detailsExpanded),
-                  trailing: CommonExpandIcon(expand: _detailsExpanded),
-                ),
-                context.disableAnimations
-                    ? _detailsBody
-                    : AnimatedSize(
-                        duration: midDuration,
-                        curve: Easing.standard,
-                        alignment: Alignment.topCenter,
-                        child: _detailsBody,
-                      ),
-                ListItem(
-                  title: Text(appLocalizations.setupLegalLicense),
-                  subtitle: const Text('GPL-3.0'),
-                  onTap: _showLicenses,
-                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              appLocalizations.disclaimerDesc,
+              style: context.textTheme.bodyMedium?.copyWith(height: 1.45),
             ),
           ),
-          if (system.isAndroid) ...[
-            const SizedBox(height: 12),
-            SetupCard(
-              child: ListItem.toggle(
+        ],
+      ),
+      tail: SetupCard(
+        child: Column(
+          children: [
+            if (system.isAndroid)
+              ListItem.toggle(
                 title: Text(appLocalizations.setupDataCollection),
                 subtitle: Text(appLocalizations.setupDataCollectionDesc),
                 value: _crashlytics,
                 onChanged: (value) => setState(() => _crashlytics = value),
               ),
+            ListItem(
+              title: Text(appLocalizations.setupLegalLicense),
+              subtitle: const Text('GPL-3.0'),
+              onTap: _showLicenses,
+              trailing: const Icon(Icons.chevron_right_rounded, size: 20),
             ),
           ],
-        ],
+        ),
       ),
       actions: [
         SetupPrimaryButton(
           label: appLocalizations.agree,
           onPressed: _handleAgree,
         ),
-        OutlinedButton(
-          onPressed: widget.onBack,
-          child: Text(appLocalizations.setupBack),
-        ),
-        TextButton(
-          onPressed: () => ref.read(systemActionProvider.notifier).handleExit(),
-          child: Text(appLocalizations.setupDecline),
+        Row(
+          spacing: 8,
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: widget.onBack,
+                child: Text(appLocalizations.setupBack),
+              ),
+            ),
+            Expanded(
+              child: TextButton(
+                onPressed: _handleDecline,
+                child: Text(
+                  appLocalizations.setupDecline,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

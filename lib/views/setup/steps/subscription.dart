@@ -16,10 +16,12 @@ class SetupSubscriptionStep extends ConsumerStatefulWidget {
     super.key,
     required this.onNext,
     required this.onBack,
+    this.recommendAutoRun = true,
   });
 
   final VoidCallback onNext;
   final VoidCallback onBack;
+  final bool recommendAutoRun;
 
   @override
   ConsumerState<SetupSubscriptionStep> createState() =>
@@ -33,31 +35,38 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
   Future<void> _handleRestore() async {
     final appLocalizations = context.appLocalizations;
     final before = ref.read(appSettingProvider);
-    final option = await dialogs.showCommonDialog<RestoreOption>(
-      child: const RestoreOptionsDialog(),
-    );
-    if (option == null || !mounted) return;
-    final restored = await globalState.loadingRun<bool>(
-      () => ref.read(backupActionProvider.notifier).restorePickedFile(option),
+    final prepared = await globalState.loadingRun<PreparedRestore?>(
+      () => ref.read(backupActionProvider.notifier).preparePickedRestore(),
       tag: LoadingTag.backup_restore,
       title: appLocalizations.restore,
     );
-    if (restored != true) return;
-    ref
-        .read(appSettingProvider.notifier)
-        .update(
-          (state) => state.copyWith(
-            disclaimerAccepted: before.disclaimerAccepted,
-            crashlyticsTip: before.crashlyticsTip,
-            crashlytics: before.crashlytics,
-            setupCompleted: before.setupCompleted,
-            setupStep: before.setupStep,
-          ),
-        );
-    if (mounted) {
-      setState(() => _showImporter = false);
-      context.showNotifier(appLocalizations.restoreSuccess);
+    if (prepared == null || !mounted) return;
+    final option = await dialogs.showCommonDialog<RestoreOption>(
+      child: RestorePreviewDialog(summary: prepared.summary),
+    );
+    if (option == null) {
+      await ref
+          .read(backupActionProvider.notifier)
+          .discardPreparedRestore(prepared);
+      return;
     }
+    final restored = await globalState.loadingRun<bool>(
+      () async {
+        await ref
+            .read(backupActionProvider.notifier)
+            .applyPreparedRestore(
+              prepared,
+              option,
+              context: RestoreApplyContext.setup(before),
+            );
+        return true;
+      },
+      tag: LoadingTag.backup_restore,
+      title: appLocalizations.restore,
+    );
+    if (restored != true || !mounted) return;
+    setState(() => _showImporter = false);
+    context.showNotifier(appLocalizations.restoreSuccess);
   }
 
   Future<void> _delete(Profile profile) async {
@@ -77,7 +86,9 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
       await ref
           .read(profilesActionProvider.notifier)
           .deleteProfile(replaceProfileId);
-    } else if (ref.read(profilesProvider).length == 1 &&
+    } else if (widget.recommendAutoRun &&
+        ref.read(profilesProvider).length == 1 &&
+        !profile.undialableNodes &&
         profile.panelMeta?.settings == null) {
       ref
           .read(appSettingProvider.notifier)
@@ -109,24 +120,24 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
       subtitle: appLocalizations.setupSubscriptionDesc,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
-          Text(
-            appLocalizations.setupProfileSourceNotice,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              appLocalizations.setupProfileSourceNotice,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
           if (importing) ...[
             SetupCard(
               child: AddProfileView(
-                context: context,
-                keepCurrentPage: true,
                 shrinkWrap: true,
                 onProfileAdded: _handleAdded,
               ),
             ),
-            const SizedBox(height: 12),
             SetupCard(
               child: ListItem(
                 leading: const Icon(Icons.settings_backup_restore_sharp),
@@ -137,7 +148,6 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
             ),
           ] else if (selected != null) ...[
             _AddedProfile(profile: selected, count: profiles.length),
-            const SizedBox(height: 12),
             SetupCard(
               child: Column(
                 children: [
@@ -161,13 +171,13 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
               ),
             ),
           ],
-          if (profiles.isEmpty) ...[
-            const SizedBox(height: 12),
+          if (profiles.isEmpty)
             SetupCard(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 4,
                   children: [
                     Text(
                       appLocalizations.setupContinueWithoutProfile,
@@ -175,13 +185,11 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(appLocalizations.setupContinueWithoutProfileDesc),
                   ],
                 ),
               ),
             ),
-          ],
         ],
       ),
       actions: [
@@ -210,6 +218,8 @@ class _AddedProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
+    final warning = profile.undialableNodes;
+    final tone = warning ? colorScheme.error : colorScheme.primary;
     return SetupCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -220,16 +230,21 @@ class _AddedProfile extends StatelessWidget {
               spacing: 8,
               children: [
                 Icon(
-                  Icons.check_circle_rounded,
+                  warning
+                      ? Icons.warning_amber_rounded
+                      : Icons.check_circle_rounded,
                   size: 20,
-                  color: colorScheme.primary,
+                  color: tone,
                 ),
                 Expanded(
                   child: Text(
-                    profile.label.takeFirstValid([
-                      appLocalizations.setupSubscriptionReady,
-                    ]),
+                    warning
+                        ? appLocalizations.subscriptionUndialable
+                        : profile.label.takeFirstValid([
+                            appLocalizations.setupSubscriptionReady,
+                          ]),
                     style: context.textTheme.titleMedium?.copyWith(
+                      color: warning ? tone : null,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

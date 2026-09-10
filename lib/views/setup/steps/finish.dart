@@ -69,18 +69,21 @@ class SetupFinishStep extends ConsumerStatefulWidget {
     super.key,
     required this.onDone,
     required this.onBack,
+    this.revisit = false,
     this.permissionGateway = const SystemSetupPermissionGateway(),
   });
 
   final VoidCallback onDone;
   final VoidCallback onBack;
+  final bool revisit;
   final SetupPermissionGateway permissionGateway;
 
   @override
   ConsumerState<SetupFinishStep> createState() => _SetupFinishStepState();
 }
 
-class _SetupFinishStepState extends ConsumerState<SetupFinishStep> {
+class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
+    with WidgetsBindingObserver {
   _PermissionState _notifications = _PermissionState.checking;
   bool _notificationRequested = false;
   bool _batteryPending = false;
@@ -88,16 +91,42 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (ref.read(profilesProvider).isEmpty &&
+      if (!widget.revisit &&
+          ref.read(profilesProvider).isEmpty &&
           ref.read(appSettingProvider).autoRun) {
         ref
             .read(appSettingProvider.notifier)
             .update((state) => state.copyWith(autoRun: false));
       }
-      unawaited(_checkNotifications());
+      unawaited(_refreshPermissions());
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refreshPermissions());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  Future<void> _refreshPermissions() async {
+    await _checkNotifications();
+    if (!widget.permissionGateway.isAndroid) return;
+    try {
+      final granted = await widget.permissionGateway
+          .isBatteryOptimizationDisabled();
+      if (!mounted) return;
+      ref.read(batteryOptimizationDisableProvider.notifier).value = granted;
+    } catch (_) {}
   }
 
   void _selectPreset(SmartRoutingPreset value) {
@@ -143,6 +172,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep> {
     }
     if (_notificationRequested || _notifications == _PermissionState.error) {
       await widget.permissionGateway.openAppSettings();
+      if (mounted) await _refreshPermissions();
       return;
     }
     setState(() => _notifications = _PermissionState.pending);
@@ -205,138 +235,187 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep> {
     final profile = ref.watch(currentProfileProvider) ?? profiles.firstOrNull;
     final hasProfile = profile != null;
     final autoRun = hasProfile && appSetting.autoRun;
-    final recommendation = smartRoutingPresetForLocale(appSetting.locale);
+    final storedAutoRun = appSetting.autoRun;
+    final recommendation = smartRoutingPresetForLocale(
+      appSetting.locale ?? Localizations.localeOf(context).toLanguageTag(),
+    );
     final battery = ref.watch(batteryOptimizationDisableProvider);
+    final systemProxy = ref.watch(
+      networkSettingProvider.select((state) => state.systemProxy),
+    );
+    final tun = ref.watch(
+      patchClashConfigProvider.select((state) => state.tun.enable),
+    );
     return SetupStepScaffold(
       title: appLocalizations.setupFinishTitle,
-      subtitle: appLocalizations.setupRegionDesc,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 20,
         children: [
-          Text(
-            appLocalizations.setupRegionTitle,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SetupCard(
-            child: RadioGroup<SmartRoutingPreset>(
-              groupValue: preset,
-              onChanged: (value) {
-                if (value != null) _selectPreset(value);
-              },
-              child: Column(
-                children: [
-                  for (final value in SmartRoutingPreset.values)
-                    ListItem<SmartRoutingPreset>.radio(
-                      title: Text(
-                        value == SmartRoutingPreset.off
-                            ? appLocalizations.setupRegionNone
-                            : value.label,
+          SetupSection(
+            caption: appLocalizations.setupRegionTitle,
+            description: appLocalizations.setupRegionDesc,
+            child: SetupCard(
+              child: RadioGroup<SmartRoutingPreset>(
+                groupValue: preset,
+                onChanged: (value) {
+                  if (value != null) _selectPreset(value);
+                },
+                child: Column(
+                  children: [
+                    for (final value in SmartRoutingPreset.values)
+                      ListItem<SmartRoutingPreset>.radio(
+                        title: Text(
+                          value == SmartRoutingPreset.off
+                              ? appLocalizations.setupRegionNone
+                              : value.label,
+                        ),
+                        subtitle: value == recommendation
+                            ? Text(appLocalizations.setupRegionRecommended)
+                            : null,
+                        value: value,
+                        onTap: () => _selectPreset(value),
                       ),
-                      subtitle: value == recommendation
-                          ? Text(appLocalizations.setupRegionRecommended)
-                          : null,
-                      value: value,
-                      onTap: () => _selectPreset(value),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          SetupCard(
-            child: ListItem.toggle(
-              title: Text(appLocalizations.setupAutoRun),
-              subtitle: Text(
-                hasProfile
-                    ? appLocalizations.setupAutoRunDesc
-                    : appLocalizations.setupAutoRunUnavailable,
-              ),
-              value: autoRun,
-              onChanged: hasProfile
-                  ? (value) => ref
-                        .read(appSettingProvider.notifier)
-                        .update((state) => state.copyWith(autoRun: value))
-                  : null,
-            ),
-          ),
-          if (widget.permissionGateway.isAndroid) ...[
-            const SizedBox(height: 12),
-            SetupCard(
+          SetupSection(
+            caption: appLocalizations.connection,
+            child: SetupCard(
               child: Column(
                 children: [
-                  _PermissionRow(
-                    title: appLocalizations.setupPermissionVpn,
-                    desc: appLocalizations.setupPermissionVpnDesc,
-                    status: appLocalizations.setupPermissionDeferred,
-                    trailing: const Icon(Icons.schedule_rounded, size: 20),
-                  ),
-                  _PermissionRow(
-                    title: appLocalizations.setupPermissionNotifications,
-                    desc: appLocalizations.setupPermissionNotificationsDesc,
-                    status: _permissionLabel(appLocalizations, _notifications),
-                    pending:
-                        _notifications == _PermissionState.pending ||
-                        _notifications == _PermissionState.checking,
-                    onPressed:
-                        _notifications == _PermissionState.granted ||
-                            _notifications == _PermissionState.unavailable
-                        ? null
-                        : _handleNotifications,
-                  ),
-                  _PermissionRow(
-                    title: appLocalizations.setupPermissionBattery,
-                    desc: appLocalizations.setupPermissionBatteryDesc,
-                    status: battery
-                        ? appLocalizations.setupPermissionGranted
-                        : _batteryPending
-                        ? appLocalizations.setupPermissionChecking
-                        : appLocalizations.setupPermissionRequest,
-                    pending: _batteryPending,
-                    onPressed: battery ? null : _handleBattery,
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          SetupCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    appLocalizations.setupSummaryTitle,
-                    style: context.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  ListItem.toggle(
+                    title: Text(appLocalizations.setupAutoRun),
+                    subtitle: Text(
+                      hasProfile
+                          ? appLocalizations.setupAutoRunDesc
+                          : appLocalizations.setupAutoRunUnavailable,
                     ),
+                    value: autoRun,
+                    onChanged: hasProfile
+                        ? (value) => ref
+                              .read(appSettingProvider.notifier)
+                              .update((state) => state.copyWith(autoRun: value))
+                        : null,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    profile == null
-                        ? appLocalizations.setupSummaryNoProfile
-                        : appLocalizations.setupSummaryProfile(
-                            profile.label.takeFirstValid([
-                              appLocalizations.profile,
-                            ]),
+                  if (system.isDesktop) ...[
+                    ListItem.toggle(
+                      title: Text(appLocalizations.systemProxy),
+                      subtitle: Text(appLocalizations.setupSystemProxyDesc),
+                      value: systemProxy,
+                      onChanged: (value) => ref
+                          .read(networkSettingProvider.notifier)
+                          .update(
+                            (state) => state.copyWith(systemProxy: value),
                           ),
-                  ),
-                  Text(
-                    appLocalizations.setupSummaryRouting(
-                      preset == SmartRoutingPreset.off
-                          ? appLocalizations.setupRegionNone
-                          : preset.label,
                     ),
-                  ),
-                  Text(
-                    autoRun
-                        ? appLocalizations.setupSummaryAutoRunOn
-                        : appLocalizations.setupSummaryAutoRunOff,
-                  ),
+                    ListItem.toggle(
+                      title: Text(appLocalizations.tun),
+                      subtitle: Text(appLocalizations.setupTunDesc),
+                      value: tun,
+                      onChanged: (value) => ref
+                          .read(patchClashConfigProvider.notifier)
+                          .update((state) => state.copyWith.tun(enable: value)),
+                    ),
+                  ],
                 ],
+              ),
+            ),
+          ),
+          if (widget.permissionGateway.isAndroid)
+            SetupSection(
+              caption: appLocalizations.setupPermissionsTitle,
+              child: SetupCard(
+                child: Column(
+                  children: [
+                    _PermissionRow(
+                      title: appLocalizations.setupPermissionVpn,
+                      desc: appLocalizations.setupPermissionVpnDesc,
+                      status: appLocalizations.setupPermissionDeferred,
+                      trailing: const Icon(Icons.schedule_rounded, size: 20),
+                    ),
+                    _PermissionRow(
+                      title: appLocalizations.setupPermissionNotifications,
+                      desc: appLocalizations.setupPermissionNotificationsDesc,
+                      status: _permissionLabel(
+                        appLocalizations,
+                        _notifications,
+                      ),
+                      granted: _notifications == _PermissionState.granted,
+                      failed: _notifications == _PermissionState.error,
+                      pending:
+                          _notifications == _PermissionState.pending ||
+                          _notifications == _PermissionState.checking,
+                      onPressed:
+                          _notifications == _PermissionState.granted ||
+                              _notifications == _PermissionState.unavailable
+                          ? null
+                          : _handleNotifications,
+                    ),
+                    _PermissionRow(
+                      title: appLocalizations.setupPermissionBattery,
+                      desc: appLocalizations.setupPermissionBatteryDesc,
+                      status: battery
+                          ? appLocalizations.setupPermissionGranted
+                          : _batteryPending
+                          ? appLocalizations.setupPermissionChecking
+                          : appLocalizations.setupPermissionRequest,
+                      granted: battery,
+                      pending: _batteryPending,
+                      onPressed: battery ? null : _handleBattery,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          SetupSection(
+            caption: appLocalizations.setupSummaryTitle,
+            child: SetupCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      profile == null
+                          ? appLocalizations.setupSummaryNoProfile
+                          : appLocalizations.setupSummaryProfile(
+                              profile.label.takeFirstValid([
+                                appLocalizations.profile,
+                              ]),
+                            ),
+                    ),
+                    Text(
+                      appLocalizations.setupSummaryRouting(
+                        preset == SmartRoutingPreset.off
+                            ? appLocalizations.setupRegionNone
+                            : preset.label,
+                      ),
+                    ),
+                    if (system.isDesktop) ...[
+                      Text(
+                        systemProxy
+                            ? appLocalizations.setupSummarySystemProxyOn
+                            : appLocalizations.setupSummarySystemProxyOff,
+                      ),
+                      Text(
+                        tun
+                            ? appLocalizations.setupSummaryTunOn
+                            : appLocalizations.setupSummaryTunOff,
+                      ),
+                    ],
+                    Text(
+                      widget.revisit && !hasProfile && storedAutoRun
+                          ? appLocalizations.setupAutoRunUnavailable
+                          : autoRun
+                          ? appLocalizations.setupSummaryAutoRunOn
+                          : appLocalizations.setupSummaryAutoRunOff,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -344,7 +423,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep> {
       ),
       actions: [
         SetupPrimaryButton(
-          label: autoRun
+          label: autoRun && !widget.revisit
               ? appLocalizations.setupDoneConnect
               : appLocalizations.setupDone,
           onPressed: widget.onDone,
@@ -363,6 +442,8 @@ class _PermissionRow extends StatelessWidget {
     required this.title,
     required this.desc,
     required this.status,
+    this.granted = false,
+    this.failed = false,
     this.pending = false,
     this.onPressed,
     this.trailing,
@@ -371,26 +452,45 @@ class _PermissionRow extends StatelessWidget {
   final String title;
   final String desc;
   final String status;
+  final bool granted;
+  final bool failed;
   final bool pending;
   final VoidCallback? onPressed;
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) => ListItem(
-    title: Text(title),
-    subtitle: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [Text(desc), Text(status)],
-    ),
-    onTap: pending ? null : onPressed,
-    trailing: pending
-        ? const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : trailing ??
-              (onPressed == null
-                  ? const Icon(Icons.check_rounded, size: 20)
-                  : const Icon(Icons.chevron_right_rounded, size: 20)),
-  );
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final tone = failed
+        ? colorScheme.error
+        : granted
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
+    return ListItem(
+      title: Text(title),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(desc),
+          Text(
+            status,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: tone,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+      onTap: pending ? null : onPressed,
+      trailing: pending
+          ? const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : trailing ??
+                (onPressed == null
+                    ? Icon(Icons.check_rounded, size: 20, color: tone)
+                    : const Icon(Icons.chevron_right_rounded, size: 20)),
+    );
+  }
 }

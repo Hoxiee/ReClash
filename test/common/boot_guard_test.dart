@@ -189,10 +189,37 @@ void main() {
     expect(store.record?.handledExitAt, 900);
   });
 
-  test('markRunning and markClosed do nothing without a record', () async {
+  test('the wizard parks the stage and re-arms it untouched', () async {
+    final store = _RecordStore()
+      ..record = const BootRecord(
+        stage: BootStage.starting,
+        profileId: 7,
+        startedAt: 1000,
+        failureCount: 1,
+        lastFailedProfileId: 3,
+        handledExitAt: 900,
+      );
+    final guard = _guard(store);
+
+    await guard.markSetup();
+    expect(store.record?.stage, BootStage.setup);
+
+    await guard.markStarting();
+
+    expect(store.record?.stage, BootStage.starting);
+    expect(store.record?.profileId, 7);
+    expect(store.record?.startedAt, 1000);
+    expect(store.record?.failureCount, 1);
+    expect(store.record?.lastFailedProfileId, 3);
+    expect(store.record?.handledExitAt, 900);
+  });
+
+  test('every stage mark does nothing without a record', () async {
     final store = _RecordStore();
     final guard = _guard(store);
 
+    await guard.markSetup();
+    await guard.markStarting();
     await guard.markRunning();
     await guard.markClosed();
 

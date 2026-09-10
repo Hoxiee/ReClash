@@ -75,6 +75,30 @@ class BootGuard {
     return decision;
   }
 
+  Future<void> markSetup() => _restage(BootStage.setup);
+
+  Future<void> markStarting() => _restage(BootStage.starting);
+
+  Future<void> _restage(BootStage stage) async {
+    if (!_supported) {
+      return;
+    }
+    final record = await _readRecord();
+    if (record == null) {
+      return;
+    }
+    await _writeRecord(
+      BootRecord(
+        stage: stage,
+        profileId: record.profileId,
+        startedAt: record.startedAt,
+        failureCount: record.failureCount,
+        lastFailedProfileId: record.lastFailedProfileId,
+        handledExitAt: record.handledExitAt,
+      ),
+    );
+  }
+
   Future<void> markRunning() async {
     if (!_supported) {
       return;

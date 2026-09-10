@@ -76,125 +76,164 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m22(name) => "${name} guruldy";
 
-  static String m23(label) => "${label} boş bolup bilmez";
+  static String m23(count) =>
+      "${count} evidence events were dropped under load; confidence was not increased.";
 
-  static String m24(count) =>
+  static String m24(completed, total) =>
+      "Checking connection: ${completed}/${total}";
+
+  static String m25(layer) => "Connection issue: ${layer}";
+
+  static String m26(completed, total) => "Step ${completed} of ${total}";
+
+  static String m27(label) => "${label} boş bolup bilmez";
+
+  static String m28(count) =>
       "${Intl.plural(count, one: '1 ýazgy', other: '${count} ýazgy')}";
 
-  static String m25(label) => "${label} eýýäm bar";
+  static String m29(label) => "${label} eýýäm bar";
 
-  static String m26(name) => "${name} eýýäm täze";
+  static String m30(name) => "${name} eýýäm täze";
 
-  static String m27(name) => "${name} täzelendi";
+  static String m31(name) => "${name} täzelendi";
 
-  static String m28(time) => "${time} öň";
+  static String m32(time) => "${time} öň";
 
-  static String m29(count) =>
+  static String m33(count) =>
       "${Intl.plural(count, one: '1 sagat öň', other: '${count} sagat öň')}";
 
-  static String m30(count) =>
+  static String m34(count) =>
       "${Intl.plural(count, one: '1 sagat', other: '${count} sagat')}";
 
-  static String m31(target) => "«${target}» nädogry syýasat";
+  static String m35(target) => "«${target}» nädogry syýasat";
 
-  static String m32(proxyName) => "«${proxyName}» nädogry proksi";
+  static String m36(proxyName) => "«${proxyName}» nädogry proksi";
 
-  static String m33(providerName) =>
+  static String m37(providerName) =>
       "«${providerName}» nädogry proksi üpjün edijisi";
 
-  static String m34(subRule) => "«${subRule}» nädogry SUB_RULE";
+  static String m38(subRule) => "«${subRule}» nädogry SUB_RULE";
 
-  static String m35(address) =>
+  static String m39(address) =>
       "Ýa-da JSON maglumatyny ${address} salgysyna iberiň";
 
-  static String m36(appName) =>
+  static String m40(appName) =>
       "1. Ulgam sazlamalaryny açyň > Gizlinlik we howpsuzlyk\n2. Ýerleşýän ýer hyzmatlaryny saýlaň\n3. Sanawdan ${appName} atly programmany tapyp saýlaň\n\nGutaranyňyzdan soň programmaga gaýdyp geliň we dowam ediň. Golduşyňyz üçin sag boluň.";
 
-  static String m37(label, max) => "${label} ${max} belgiden geçmeli däl";
+  static String m41(label, max) => "${label} ${max} belgiden geçmeli däl";
 
-  static String m38(count) =>
+  static String m42(count) =>
       "${Intl.plural(count, one: '1 minut öň', other: '${count} minut öň')}";
 
-  static String m39(count) =>
+  static String m43(count) =>
       "${Intl.plural(count, one: '1 aý öň', other: '${count} aý öň')}";
 
-  static String m40(label) => "Häzir ${label} ýok";
+  static String m44(label) => "Häzir ${label} ýok";
 
-  static String m41(label) => "${label} san bolmaly";
+  static String m45(label) => "${label} san bolmaly";
 
-  static String m42(label) => "${label} 1024 bilen 49151 arasynda bolmaly";
+  static String m46(label) => "${label} 1024 bilen 49151 arasynda bolmaly";
 
-  static String m43(count) =>
+  static String m47(count) =>
+      "Profil import edildi; goldanylmaýan ${count} düwün geçirildi";
+
+  static String m48(format, client, nodes, groups) =>
+      "Import edildi: ${format} · ${client} · ${nodes} düwün · ${groups} topar";
+
+  static String m49(count) =>
       "${Intl.plural(count, one: '1 wekil', other: '${count} wekil')}";
 
-  static String m44(count) =>
+  static String m50(count) => "Profiller: ${count}";
+
+  static String m51(count) => "Proksi toparlary: ${count}";
+
+  static String m52(count) => "Düzgünler: ${count}";
+
+  static String m53(count) => "Skriptler: ${count}";
+
+  static String m54(count) =>
       "${Intl.plural(count, one: '1 düzgün', other: '${count} düzgün')}";
 
-  static String m45(darkAt, lightAt) =>
+  static String m55(darkAt, lightAt) =>
       "Garaňky tema ${darkAt}-dan ${lightAt}-a çenli";
 
-  static String m46(count) =>
+  static String m56(count) =>
       "${Intl.plural(count, one: '1 sekunt', other: '${count} sekunt')}";
 
-  static String m47(count) => "${count} saýlandy";
+  static String m57(count) => "${count} saýlandy";
 
-  static String m48(count) => "${count} profil taýýar";
+  static String m58(count) => "${count} profil taýýar";
 
-  static String m49(step, count) => "${count} ädimden ${step}-nji ädim";
+  static String m59(step, count) => "${count} ädimden ${step}-nji ädim";
 
-  static String m50(name) => "Profil: ${name}";
+  static String m60(name) => "Profil: ${name}";
 
-  static String m51(value) => "Akylly ugrukdyrma: ${value}";
+  static String m61(value) => "Akylly ugrukdyrma: ${value}";
 
-  static String m52(alive, total) =>
+  static String m62(alive, total) =>
       "Şu wagtda ${total} serwerden ${alive} işleýär";
 
-  static String m53(percent, duration) => "${duration} dowamynda ${percent}%";
+  static String m63(percent, duration) => "${duration} dowamynda ${percent}%";
 
-  static String m54(band) => "dereje ${band}";
+  static String m64(band) => "dereje ${band}";
 
-  static String m55(bands) => "Derejeler: ${bands}";
+  static String m65(bands) => "Derejeler: ${bands}";
 
-  static String m56(count) => "${count} şowsuzlykdan soň sowalýar";
+  static String m66(count) => "${count} şowsuzlykdan soň sowalýar";
 
-  static String m57(answered, total) =>
+  static String m67(answered, total) =>
       "${answered} jogap berdi, jemi ${total}";
 
-  static String m58(seconds) => "${seconds} s galdy";
+  static String m68(seconds) => "${seconds} s galdy";
 
-  static String m59(count) => "Yzly-yzyna ${count} şowsuzlyk";
+  static String m69(count) => "Yzly-yzyna ${count} şowsuzlyk";
 
-  static String m60(measured, total) => "${measured} ölçendi, jemi ${total}";
+  static String m70(duration) => "${duration} dowamynda ölçenildi";
 
-  static String m61(preset) => "${preset} · sazlandy";
+  static String m71(measured, total) => "${measured} ölçendi, jemi ${total}";
 
-  static String m62(left, cap) => "Bu sagatda ${cap} synagyň ${left} galan";
+  static String m72(preset) => "${preset} · sazlandy";
 
-  static String m63(seconds) => "${seconds} s";
+  static String m73(left, cap) => "Bu sagatda ${cap} synagyň ${left} galan";
 
-  static String m64(eligible, total) => "${eligible} ýaranly, jemi ${total}";
+  static String m74(seconds) => "${seconds} s";
 
-  static String m65(eligible, total, blocked) =>
+  static String m75(eligible, total) => "${eligible} ýaranly, jemi ${total}";
+
+  static String m76(count) => "Ýörite serwer nyşanlary: ${count}";
+
+  static String m77(provider) => "Üpçün ediji: ${provider}";
+
+  static String m78(count) => "Üçünji tarapdan gelen nyşanlar: ${count}";
+
+  static String m79(eligible, total) => "${total} serwerden ${eligible} taýýar";
+
+  static String m80(label) =>
+      "«${label}» UTF-8 boýunça 64 baýtdan köp bolmaly däl";
+
+  static String m81(node) => "${node} arkaly";
+
+  static String m82(eligible, total, blocked) =>
       "${total} serwerden ${eligible} geçdi, ${blocked} saklandy";
 
-  static String m66(from, to) => "${from} → ${to}";
+  static String m83(from, to) => "${from} → ${to}";
 
-  static String m67(time) => "${time} öň çalyşyldy";
+  static String m84(time) => "${time} öň çalyşyldy";
 
-  static String m68(count) => "${count} serwer";
+  static String m85(count) => "${count} serwer";
 
-  static String m69(host) => "Üpjün ediji ${host} salgyna geçdi";
+  static String m86(host) => "Üpjün ediji ${host} salgyna geçdi";
 
-  static String m70(count) =>
+  static String m87(count) =>
       "${Intl.plural(count, one: 'Abunaňyz ertir gutarýar', other: 'Abunaňyz ${count} günden soň gutarýar')}";
 
-  static String m71(value) => "Üpjün edijiniň teklifi: ${value}";
+  static String m88(value) => "Üpjün edijiniň teklifi: ${value}";
 
-  static String m72(total) => "galýan, umumy ${total}";
+  static String m89(total) => "galýan, umumy ${total}";
 
-  static String m73(label) => "${label} URL bolmaly";
+  static String m90(label) => "${label} URL bolmaly";
 
-  static String m74(count) =>
+  static String m91(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -277,15 +316,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Programmalaryň elýetmäsine gözegçilik",
     ),
-    "appIcon": MessageLookupByLibrary.simpleMessage("Programma nyşany"),
     "appIconChangeNote": MessageLookupByLibrary.simpleMessage(
       "Launcher nyşany birnäçe sekunddan soň täzeden çizilýär. Käbir launcherlarda berkidilen gysga ýollar ýok bolup biler.",
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("Zynjyr"),
+    "appIconEcho": MessageLookupByLibrary.simpleMessage("Ýaňlanma"),
     "appIconGlacier": MessageLookupByLibrary.simpleMessage("Buzluk"),
+    "appIconInstall": MessageLookupByLibrary.simpleMessage("Gurmak"),
     "appIconObsidian": MessageLookupByLibrary.simpleMessage("Obsidian"),
-    "appIconPrism": MessageLookupByLibrary.simpleMessage("Prizma"),
+    "appIconPreview": MessageLookupByLibrary.simpleMessage(
+      "Nyşanyň deslapky görnüşi",
+    ),
     "appIconPulse": MessageLookupByLibrary.simpleMessage("Impuls"),
+    "appIconShift": MessageLookupByLibrary.simpleMessage("Süýşme"),
     "appIconSolar": MessageLookupByLibrary.simpleMessage("Güneş"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("Mahmal"),
     "appearance": MessageLookupByLibrary.simpleMessage("Görnüş"),
@@ -489,6 +532,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "connectedFor": m1,
     "connecting": MessageLookupByLibrary.simpleMessage("Baglanylýar..."),
     "connection": MessageLookupByLibrary.simpleMessage("Baglanyşyk"),
+    "connectionDoctor": MessageLookupByLibrary.simpleMessage(
+      "Birikme diagnostikasy",
+    ),
     "connections": MessageLookupByLibrary.simpleMessage("Baglanyşyklar"),
     "connectionsDesc": MessageLookupByLibrary.simpleMessage(
       "Häzirki baglanyşyk maglumatlaryny gör",
@@ -568,10 +614,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "dashboardNoProfileTitle": MessageLookupByLibrary.simpleMessage(
       "Birikmäni sazlaň",
     ),
+    "dashboardProviderDetails": MessageLookupByLibrary.simpleMessage(
+      "Giňişleýin",
+    ),
     "dashboardSelectProfile": MessageLookupByLibrary.simpleMessage(
       "Profili saýlamak",
     ),
+    "dashboardShowConnection": MessageLookupByLibrary.simpleMessage(
+      "Birikmä gaýt",
+    ),
+    "dashboardShowProvider": MessageLookupByLibrary.simpleMessage(
+      "Abuna maglumatlaryny görkez",
+    ),
     "dashboardStyle": MessageLookupByLibrary.simpleMessage("Panel stili"),
+    "dashboardSubscriptionAttention": MessageLookupByLibrary.simpleMessage(
+      "Üns berilmeli",
+    ),
+    "dashboardSubscriptionCurrent": MessageLookupByLibrary.simpleMessage(
+      "Abuna işjeň",
+    ),
+    "dashboardSubscriptionExpired": MessageLookupByLibrary.simpleMessage(
+      "Abunanyň möhleti gutardy",
+    ),
     "dashboardUseByedpi": MessageLookupByLibrary.simpleMessage(
       "ByeDPI ulanmak",
     ),
@@ -757,6 +821,191 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS-i ele geçirmek"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS usuly"),
+    "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
+      "The Doctor confirmed the first failing layer.",
+    ),
+    "doctorBrokenTitle": MessageLookupByLibrary.simpleMessage(
+      "Birikme meselesi tapyldy",
+    ),
+    "doctorCancelExam": MessageLookupByLibrary.simpleMessage("Barlagy ýatyr"),
+    "doctorCancelledDesc": MessageLookupByLibrary.simpleMessage(
+      "No diagnosis was changed. You can start another check.",
+    ),
+    "doctorCancelledTitle": MessageLookupByLibrary.simpleMessage(
+      "Check cancelled",
+    ),
+    "doctorCaptureActive": MessageLookupByLibrary.simpleMessage("Işjeň"),
+    "doctorCaptureInactive": MessageLookupByLibrary.simpleMessage("Işjeň däl"),
+    "doctorCaptureNotApplicable": MessageLookupByLibrary.simpleMessage(
+      "Ulanylmaýar",
+    ),
+    "doctorConfidence": MessageLookupByLibrary.simpleMessage("Confidence"),
+    "doctorConfidenceConfirmed": MessageLookupByLibrary.simpleMessage(
+      "Confirmed",
+    ),
+    "doctorConfidenceInsufficient": MessageLookupByLibrary.simpleMessage(
+      "Insufficient",
+    ),
+    "doctorConfidenceProbable": MessageLookupByLibrary.simpleMessage(
+      "Probable",
+    ),
+    "doctorDeepExam": MessageLookupByLibrary.simpleMessage("Çuňňur barlag"),
+    "doctorDegradedDesc": MessageLookupByLibrary.simpleMessage(
+      "The Doctor found a probable problem on the network path.",
+    ),
+    "doctorDegradedTitle": MessageLookupByLibrary.simpleMessage(
+      "Birikmäniň hili peseldi",
+    ),
+    "doctorDetails": MessageLookupByLibrary.simpleMessage("Diagnoz"),
+    "doctorEndpointReachableDesc": MessageLookupByLibrary.simpleMessage(
+      "Core barlag salgysyna ýetdi, emma doly goralan ýol tassyklanmady.",
+    ),
+    "doctorEndpointReachableTitle": MessageLookupByLibrary.simpleMessage(
+      "Barlag salgysy elýeterli",
+    ),
+    "doctorEvidence": MessageLookupByLibrary.simpleMessage("Subutnamalar"),
+    "doctorEvidenceConsequence": MessageLookupByLibrary.simpleMessage(
+      "Consequence of an earlier fault",
+    ),
+    "doctorEvidenceDropped": m23,
+    "doctorExaminingDesc": MessageLookupByLibrary.simpleMessage(
+      "The Doctor is following the network path with bounded probes.",
+    ),
+    "doctorExaminingTitle": MessageLookupByLibrary.simpleMessage(
+      "Birikme barlanýar",
+    ),
+    "doctorExportConfirm": MessageLookupByLibrary.simpleMessage(
+      "The report contains diagnostic codes, timing buckets, platform details and recent redacted evidence. It never includes addresses, hostnames, profile, node or app names. Save it as JSON?",
+    ),
+    "doctorExportReport": MessageLookupByLibrary.simpleMessage(
+      "Hasabaty eksport et",
+    ),
+    "doctorFlushDns": MessageLookupByLibrary.simpleMessage("Flush DNS cache"),
+    "doctorFresh": MessageLookupByLibrary.simpleMessage("Täze"),
+    "doctorHealthyDesc": MessageLookupByLibrary.simpleMessage(
+      "The observed path completed successfully.",
+    ),
+    "doctorHealthyEasterEgg": MessageLookupByLibrary.simpleMessage(
+      "Näsag şübheli derejede sagdyn.",
+    ),
+    "doctorHealthyTitle": MessageLookupByLibrary.simpleMessage(
+      "Birikme kadaly",
+    ),
+    "doctorHeroExamining": m24,
+    "doctorHeroIssue": m25,
+    "doctorInconclusiveDesc": MessageLookupByLibrary.simpleMessage(
+      "The check could not prove a fault without guessing.",
+    ),
+    "doctorInconclusiveTitle": MessageLookupByLibrary.simpleMessage(
+      "Subutnama ýeterlik däl",
+    ),
+    "doctorIpUnavailable": MessageLookupByLibrary.simpleMessage(
+      "Jemgyýetçilik IP-si ölçelmedi",
+    ),
+    "doctorLayer": MessageLookupByLibrary.simpleMessage("Causal layer"),
+    "doctorLayerCapture": MessageLookupByLibrary.simpleMessage("Capture"),
+    "doctorLayerDial": MessageLookupByLibrary.simpleMessage("Connection setup"),
+    "doctorLayerDns": MessageLookupByLibrary.simpleMessage("DNS"),
+    "doctorLayerIngress": MessageLookupByLibrary.simpleMessage("VPN ingress"),
+    "doctorLayerMarker": MessageLookupByLibrary.simpleMessage(
+      "Application response",
+    ),
+    "doctorLayerRoute": MessageLookupByLibrary.simpleMessage("Routing"),
+    "doctorLayerTransport": MessageLookupByLibrary.simpleMessage("Transport"),
+    "doctorLimitations": MessageLookupByLibrary.simpleMessage(
+      "Bu nämäni aňladýar",
+    ),
+    "doctorModeDeep": MessageLookupByLibrary.simpleMessage("Deep"),
+    "doctorModeStandard": MessageLookupByLibrary.simpleMessage("Standard"),
+    "doctorNoEvidence": MessageLookupByLibrary.simpleMessage(
+      "No usable evidence yet",
+    ),
+    "doctorNoIncidents": MessageLookupByLibrary.simpleMessage(
+      "No completed checks yet",
+    ),
+    "doctorObservingDesc": MessageLookupByLibrary.simpleMessage(
+      "No active probes are running. Evidence appears as the app is used.",
+    ),
+    "doctorObservingTitle": MessageLookupByLibrary.simpleMessage(
+      "Hakyky trafik synlanýar",
+    ),
+    "doctorOutcomeDropped": MessageLookupByLibrary.simpleMessage("Dropped"),
+    "doctorOutcomeFailed": MessageLookupByLibrary.simpleMessage("Failed"),
+    "doctorOutcomeNotApplicable": MessageLookupByLibrary.simpleMessage(
+      "Not applicable",
+    ),
+    "doctorOutcomeSeen": MessageLookupByLibrary.simpleMessage("Observed"),
+    "doctorOutcomeSucceeded": MessageLookupByLibrary.simpleMessage("Succeeded"),
+    "doctorPassiveHint": MessageLookupByLibrary.simpleMessage(
+      "Passive observation creates no additional network traffic. Start a check only when you want active probes.",
+    ),
+    "doctorPathApp": MessageLookupByLibrary.simpleMessage("Programma"),
+    "doctorPathChecking": MessageLookupByLibrary.simpleMessage("Barlanýar"),
+    "doctorPathConsequence": MessageLookupByLibrary.simpleMessage(
+      "Öňki mesele sebäpli barlanmady",
+    ),
+    "doctorPathFailed": MessageLookupByLibrary.simpleMessage("Mesele şu ýerde"),
+    "doctorPathIngress": MessageLookupByLibrary.simpleMessage(
+      "VPN / ýerli giriş",
+    ),
+    "doctorPathIngressByeDpi": MessageLookupByLibrary.simpleMessage("ByeDPI"),
+    "doctorPathIngressDirect": MessageLookupByLibrary.simpleMessage("Göni"),
+    "doctorPathIngressLocalProxy": MessageLookupByLibrary.simpleMessage(
+      "Ýerli proksi",
+    ),
+    "doctorPathIngressTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "doctorPathIngressVpn": MessageLookupByLibrary.simpleMessage("VPN"),
+    "doctorPathInternet": MessageLookupByLibrary.simpleMessage(
+      "Proksi / Internet",
+    ),
+    "doctorPathNotApplicable": MessageLookupByLibrary.simpleMessage(
+      "Gerek däl",
+    ),
+    "doctorPathPassed": MessageLookupByLibrary.simpleMessage("Işleýär"),
+    "doctorPathResponse": MessageLookupByLibrary.simpleMessage("Jogap"),
+    "doctorPathRoute": MessageLookupByLibrary.simpleMessage("DNS / ugur"),
+    "doctorPathTitle": MessageLookupByLibrary.simpleMessage("Birikme ýoly"),
+    "doctorPathUnknown": MessageLookupByLibrary.simpleMessage("Barlanmady"),
+    "doctorProgress": m26,
+    "doctorProtection": MessageLookupByLibrary.simpleMessage("Gorag"),
+    "doctorRecentChecks": MessageLookupByLibrary.simpleMessage(
+      "Soňky barlaglar",
+    ),
+    "doctorRefresh": MessageLookupByLibrary.simpleMessage("Diagnozy täzele"),
+    "doctorScope": MessageLookupByLibrary.simpleMessage("Evidence scope"),
+    "doctorScopeApp": MessageLookupByLibrary.simpleMessage("This app"),
+    "doctorScopeInbound": MessageLookupByLibrary.simpleMessage("Local inbound"),
+    "doctorStale": MessageLookupByLibrary.simpleMessage("Köneldi"),
+    "doctorStaleHint": MessageLookupByLibrary.simpleMessage(
+      "The environment may have changed. Refresh or run a new check before acting on this result.",
+    ),
+    "doctorStandardExam": MessageLookupByLibrary.simpleMessage(
+      "Barlagy başlat",
+    ),
+    "doctorSupersededDesc": MessageLookupByLibrary.simpleMessage(
+      "The check stopped because the network or configuration changed.",
+    ),
+    "doctorSupersededTitle": MessageLookupByLibrary.simpleMessage(
+      "Environment changed",
+    ),
+    "doctorTechnicalDetails": MessageLookupByLibrary.simpleMessage(
+      "Tehniki maglumatlar",
+    ),
+    "doctorUnsupportedDesc": MessageLookupByLibrary.simpleMessage(
+      "This Core version does not support connection diagnosis.",
+    ),
+    "doctorUnsupportedHint": MessageLookupByLibrary.simpleMessage(
+      "Update Core to use connection diagnosis.",
+    ),
+    "doctorUnsupportedTitle": MessageLookupByLibrary.simpleMessage(
+      "Diagnostika elýeterli däl",
+    ),
+    "doctorVpnInactiveDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN goragy garaşylýardy, emma TUN ýoly işjeň däl.",
+    ),
+    "doctorVpnInactiveTitle": MessageLookupByLibrary.simpleMessage(
+      "VPN işjeň däl",
+    ),
     "domain": MessageLookupByLibrary.simpleMessage("Domen"),
     "download": MessageLookupByLibrary.simpleMessage("Göçürip al"),
     "downloadingUpdate": MessageLookupByLibrary.simpleMessage(
@@ -772,11 +1021,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Proksiler toparyny düzet",
     ),
     "editRule": MessageLookupByLibrary.simpleMessage("Düzgüni düzet"),
-    "emptyTip": m23,
+    "emptyTip": m27,
     "en": MessageLookupByLibrary.simpleMessage("Iňlis dili"),
     "enterManually": MessageLookupByLibrary.simpleMessage("El bilen giriz"),
     "entries": MessageLookupByLibrary.simpleMessage(" ýazgy"),
-    "entriesCount": m24,
+    "entriesCount": m28,
     "exclude": MessageLookupByLibrary.simpleMessage(
       "Soňky tapsyryklardan gizle",
     ),
@@ -787,7 +1036,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Proksi çykarma süzgüji",
     ),
     "excludeType": MessageLookupByLibrary.simpleMessage("Çykarma görnüşi"),
-    "existsTip": m25,
+    "existsTip": m29,
     "exit": MessageLookupByLibrary.simpleMessage("Çyk"),
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("Doly ekrandan çyk"),
     "expand": MessageLookupByLibrary.simpleMessage("Standart"),
@@ -847,8 +1096,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "geoOptions": MessageLookupByLibrary.simpleMessage("Geo sazlamalary"),
     "geoResources": MessageLookupByLibrary.simpleMessage("Geo resurslary"),
-    "geoSkipped": m26,
-    "geoUpdated": m27,
+    "geoSkipped": m30,
+    "geoUpdated": m31,
     "geodataLoader": MessageLookupByLibrary.simpleMessage(
       "GeoIP az ýatly usuly",
     ),
@@ -904,9 +1153,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "heroReconnectingHint": MessageLookupByLibrary.simpleMessage(
       "Tonnel dikeldilýär",
     ),
-    "heroRoutingAgo": m28,
+    "heroRoutingAgo": m32,
     "heroRoutingStub": MessageLookupByLibrary.simpleMessage(
       "Akylly marşrut ýapyk",
+    ),
+    "heroStatusEasterEgg": MessageLookupByLibrary.simpleMessage(
+      "Şu gün paketler aýratyn gulak asýar.",
     ),
     "heroTapToConnect": MessageLookupByLibrary.simpleMessage(
       "Goragy işletmek üçin basyň",
@@ -927,8 +1179,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hour": MessageLookupByLibrary.simpleMessage("sagat"),
     "hours": MessageLookupByLibrary.simpleMessage("sagat"),
-    "hoursAgo": m29,
-    "hoursCount": m30,
+    "hoursAgo": m33,
+    "hoursCount": m34,
     "hoursGenitive": MessageLookupByLibrary.simpleMessage("sagat"),
     "hoursPlural": MessageLookupByLibrary.simpleMessage("sagat"),
     "icon": MessageLookupByLibrary.simpleMessage("Nyşan"),
@@ -1001,10 +1253,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "invalidBackupFile": MessageLookupByLibrary.simpleMessage(
       "Nädogry nusga faýly",
     ),
-    "invalidPolicy": m31,
-    "invalidProxy": m32,
-    "invalidProxyProvider": m33,
-    "invalidSubRule": m34,
+    "invalidPolicy": m35,
+    "invalidProxy": m36,
+    "invalidProxyProvider": m37,
+    "invalidSubRule": m38,
     "ipcidr": MessageLookupByLibrary.simpleMessage("IP/CIDR"),
     "ipv6Desc": MessageLookupByLibrary.simpleMessage(
       "Açyk bolanda IPv6 trafigini kabul etmek mümkin",
@@ -1023,7 +1275,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "lanProfileImport": MessageLookupByLibrary.simpleMessage(
       "Telefondan almak",
     ),
-    "lanProfileImportAddress": m35,
+    "lanProfileImportAddress": m39,
     "lanProfileImportDesc": MessageLookupByLibrary.simpleMessage(
       "Ýerli tor arkaly abuna URL salgysyny ibermek üçin bir gezeklik QR koduny görkezmek",
     ),
@@ -1080,7 +1332,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "locationPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgam Wi-Fi adyny okamak üçin ýer rugsaty gerek. Android-de \"Ähli wagt rugsat ber\" wariantyny saýlaň, ýogsam programma fonda işleýände Wi-Fi adyny okap bolmaýar.",
     ),
-    "locationPermissionGuide": m36,
+    "locationPermissionGuide": m40,
     "locationPermissionRequired": MessageLookupByLibrary.simpleMessage(
       "Ýerleşýän ýer rugsaty gerek",
     ),
@@ -1110,7 +1362,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "maxFailedTimes": MessageLookupByLibrary.simpleMessage(
       "Iň köp şowsuzlyk sany",
     ),
-    "maxLengthTip": m37,
+    "maxLengthTip": m41,
     "maximize": MessageLookupByLibrary.simpleMessage("Ulalt"),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Ýat maglumaty"),
     "messageTest": MessageLookupByLibrary.simpleMessage("Habar synagy"),
@@ -1123,13 +1375,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ulgamyň adaty çykyş hereketiniň üstünden ýazýar",
     ),
     "minute": MessageLookupByLibrary.simpleMessage("minut"),
-    "minutesAgo": m38,
+    "minutesAgo": m42,
     "minutesGenitive": MessageLookupByLibrary.simpleMessage("minut"),
     "minutesPlural": MessageLookupByLibrary.simpleMessage("minut"),
     "mixedPort": MessageLookupByLibrary.simpleMessage("Garyşyk port"),
     "mode": MessageLookupByLibrary.simpleMessage("Usul"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Birreňk"),
-    "monthsAgo": m39,
+    "monthsAgo": m43,
     "more": MessageLookupByLibrary.simpleMessage("Giňişleýin"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Birnäçe bahany otur bilen aýryň",
@@ -1193,11 +1445,264 @@ class MessageLookup extends MessageLookupByLibrary {
     "notTrustedNow": MessageLookupByLibrary.simpleMessage(
       "Häzirki tor ynamly däl",
     ),
+    "notification": MessageLookupByLibrary.simpleMessage("Duýduryş"),
+    "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
+      "Komponent goş",
+    ),
+    "notificationAndroidOnly": MessageLookupByLibrary.simpleMessage(
+      "Android ulgamynda elýeterli",
+    ),
+    "notificationAndroidOnlyDesc": MessageLookupByLibrary.simpleMessage(
+      "Öňdäki duýduryş sazlamalary diňe Android VPN hyzmatyna degişlidir.",
+    ),
+    "notificationAutomaticGroup": MessageLookupByLibrary.simpleMessage(
+      "Awtomatiki topar",
+    ),
+    "notificationBlockedNoServerGroup": MessageLookupByLibrary.simpleMessage(
+      "Serwer topary kesgitlenmedik, şonuň üçin bu setir görkezilmeýär",
+    ),
+    "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
+      "Akylly marşrut öçürilen, şonuň üçin bu setir görkezilmeýär",
+    ),
+    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
+      "Bildiriş ýygnalanda görünýär",
+    ),
+    "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
+      "Häsiýeti",
+    ),
+    "notificationComponents": MessageLookupByLibrary.simpleMessage(
+      "Duýduryş komponentleri",
+    ),
+    "notificationComponentsActive": MessageLookupByLibrary.simpleMessage(
+      "Bildirişde",
+    ),
+    "notificationComponentsDesc": MessageLookupByLibrary.simpleMessage(
+      "Duýduryşy göni ýagdaý komponentlerinden düzüň.",
+    ),
+    "notificationComponentsEmpty": MessageLookupByLibrary.simpleMessage(
+      "Komponent goşulmady",
+    ),
+    "notificationComponentsEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Komponentler bolmasa, bildiriş diňe goragyň ýagdaýyny görkezýär.",
+    ),
+    "notificationComponentsOrderHint": MessageLookupByLibrary.simpleMessage(
+      "Setirler şu tertipde görkezilýär. Bildiriş ýygnalanda maglumatly ilkinji setir görünýär.",
+    ),
+    "notificationConnectionDoctor": MessageLookupByLibrary.simpleMessage(
+      "Birikme diagnostikasy",
+    ),
+    "notificationConnectionDoctorDesc": MessageLookupByLibrary.simpleMessage(
+      "Birikme anyklaýşynyň netijesini görkezmek",
+    ),
+    "notificationContent": MessageLookupByLibrary.simpleMessage("Mazmun"),
+    "notificationControls": MessageLookupByLibrary.simpleMessage("Dolandyryş"),
+    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
+      "Duýduryşdan göni elýeterli hereketleri saýlaň.",
+    ),
+    "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
+      "Häzirki serwer",
+    ),
+    "notificationCurrentServerDesc": MessageLookupByLibrary.simpleMessage(
+      "Toparda saýlanan düwüni görkezmek",
+    ),
+    "notificationDelivery": MessageLookupByLibrary.simpleMessage(
+      "Android duýduryşynyň eltilmegi",
+    ),
+    "notificationDeliveryChecking": MessageLookupByLibrary.simpleMessage(
+      "Android duýduryş rugsady barlanýar",
+    ),
+    "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("Düzet"),
+    "notificationDeliveryPermissionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "ReClash duýduryşlary petiklenendir",
+        ),
+    "notificationDeliveryReady": MessageLookupByLibrary.simpleMessage(
+      "Duýduryşlary eltmek bolýar",
+    ),
+    "notificationDeliveryServiceDisabled": MessageLookupByLibrary.simpleMessage(
+      "ReClash hyzmat kanaly öçürilendir",
+    ),
+    "notificationDeliverySubscriptionDisabled":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýazylma ýatlatmalary kanaly öçürilendir",
+        ),
+    "notificationDetailed": MessageLookupByLibrary.simpleMessage(
+      "Jikme-jik duýduryş",
+    ),
+    "notificationDetailedDesc": MessageLookupByLibrary.simpleMessage(
+      "Janly ýagdaý setirleri we çalt hereketler görkezilýär",
+    ),
+    "notificationDoctorPriority": MessageLookupByLibrary.simpleMessage(
+      "Birikme diagnostikasynyň ileri tutulmagy",
+    ),
+    "notificationDoctorPriorityAlways": MessageLookupByLibrary.simpleMessage(
+      "Hemişe",
+    ),
+    "notificationDoctorPriorityProblems": MessageLookupByLibrary.simpleMessage(
+      "Diňe meseleler",
+    ),
+    "notificationHideIdleSpeed": MessageLookupByLibrary.simpleMessage(
+      "Boş wagty tizligi gizlemek",
+    ),
+    "notificationHideIdleSpeedDesc": MessageLookupByLibrary.simpleMessage(
+      "Trafik ýok wagty tizlik bahalaryny gizlemek",
+    ),
+    "notificationHideSensitive": MessageLookupByLibrary.simpleMessage(
+      "Gulp ekranynda gizlin maglumatlary gizlemek",
+    ),
+    "notificationHideSensitiveDesc": MessageLookupByLibrary.simpleMessage(
+      "Enjam gulply wagty profil, marşrut we diagnostika maglumatlaryny gizlemek",
+    ),
+    "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
+      "Android duýduryşy saklaýar, şonuň üçin diňe goragyň ýagdaýy galýar",
+    ),
+    "notificationMoveDown": MessageLookupByLibrary.simpleMessage("Aşak süýşür"),
+    "notificationMoveUp": MessageLookupByLibrary.simpleMessage("Ýokary süýşür"),
+    "notificationNetworkNormal": MessageLookupByLibrary.simpleMessage("Kadaly"),
+    "notificationNetworkOffline": MessageLookupByLibrary.simpleMessage(
+      "Oflayn",
+    ),
+    "notificationNetworkPortal": MessageLookupByLibrary.simpleMessage(
+      "Giriş portaly",
+    ),
+    "notificationNetworkSpeed": MessageLookupByLibrary.simpleMessage(
+      "Tor tizligi",
+    ),
+    "notificationNetworkSpeedDesc": MessageLookupByLibrary.simpleMessage(
+      "Häzirki ýükleme we iberme tizligini görkezmek",
+    ),
+    "notificationNetworkState": MessageLookupByLibrary.simpleMessage(
+      "Tor ýagdaýy",
+    ),
+    "notificationNetworkStateDesc": MessageLookupByLibrary.simpleMessage(
+      "Häzirki RCX tor şertlerini görkezmek",
+    ),
+    "notificationNetworkUnknown": MessageLookupByLibrary.simpleMessage(
+      "Näbelli",
+    ),
+    "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
+      "Rugsat sanawy",
+    ),
+    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
+      "Wagtlaýyn duruzmak ýa-da dowam etdirmek",
+    ),
+    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN-i wagtlaýyn duruzmak ýa-da dowam etdirmek hereketini görkezmek",
+    ),
+    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
+      "Birikme diagnostikasy: mesele ýok",
+    ),
+    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
+      "ReClash · Goralýan maglumatlar gizlenen",
+    ),
+    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
+      "Tor · Kadaly",
+    ),
+    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
+      "ReClash · Gorag wagtlaýyn duruzylan",
+    ),
+    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
+      "Birikme diagnostikasy: mesele tapyldy",
+    ),
+    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
+      "ReClash · Häzirki profil",
+    ),
+    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
+      "Akylly marşrut · Awtomatiki ugur",
+    ),
+    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
+      "Öňünden görmek ssenariýasy",
+    ),
+    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
+      "Serwer · Tokio 01",
+    ),
+    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
+      "Sessiýa · ↓ 1,2 GB  ↑ 184 MB",
+    ),
+    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
+      "↓ 12,4 MB/s  ↑ 1,8 MB/s",
+    ),
+    "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Gizlinlik"),
+    "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
+      "Hemişelik duýduryş goragyň işjeňdigini görkezýär.",
+    ),
+    "notificationProtectionTitle": MessageLookupByLibrary.simpleMessage(
+      "Gorag ýagdaýy",
+    ),
+    "notificationRemoveComponent": MessageLookupByLibrary.simpleMessage(
+      "Bildirişden aýyr",
+    ),
+    "notificationReorder": MessageLookupByLibrary.simpleMessage(
+      "Tertibini üýtget",
+    ),
+    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
+      "Gulp ekrany",
+    ),
+    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("Adaty"),
+    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
+      "Wagtlaýyn duruzylan",
+    ),
+    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
+      "Mesele",
+    ),
+    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
+      "Marşrutlaşdyrma",
+    ),
+    "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
+      "Serwer toparyny saýla",
+    ),
+    "notificationServerGroupMissing": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan topar profilde ýok",
+    ),
+    "notificationServiceChannel": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat kanaly",
+    ),
+    "notificationSessionTraffic": MessageLookupByLibrary.simpleMessage(
+      "Sessiýa trafigi",
+    ),
+    "notificationSessionTrafficDesc": MessageLookupByLibrary.simpleMessage(
+      "Şu sessiýada ýüklenen we iberilen trafigi görkezmek",
+    ),
+    "notificationSmartRouting": MessageLookupByLibrary.simpleMessage(
+      "Akylly marşrut",
+    ),
+    "notificationSmartRoutingDesc": MessageLookupByLibrary.simpleMessage(
+      "Häzirki akylly marşrut kararyny görkezmek",
+    ),
+    "notificationSubscriptionChannel": MessageLookupByLibrary.simpleMessage(
+      "Ýazylma ýatlatmalary kanaly",
+    ),
+    "notificationSubscriptionReminders": MessageLookupByLibrary.simpleMessage(
+      "Ýazylma ýatlatmalary",
+    ),
+    "notificationSubscriptionRemindersDesc":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýazylma üns talap edende habar bermek",
+        ),
+    "notificationVisibilityAlways": MessageLookupByLibrary.simpleMessage(
+      "Elmydama görkezilýär",
+    ),
+    "notificationVisibilityCurrentServer": MessageLookupByLibrary.simpleMessage(
+      "Serwer topary kesgitlenende görkezilýär",
+    ),
+    "notificationVisibilityDoctorProblems":
+        MessageLookupByLibrary.simpleMessage("Mesele ýüze çykanda görkezilýär"),
+    "notificationVisibilitySessionTraffic":
+        MessageLookupByLibrary.simpleMessage(
+          "Sessiýada trafik bar wagty görkezilýär",
+        ),
+    "notificationVisibilitySmartRoutingOn":
+        MessageLookupByLibrary.simpleMessage(
+          "Akylly marşrut açykka görkezilýär",
+        ),
+    "notificationVisibilitySpeedIdle": MessageLookupByLibrary.simpleMessage(
+      "Trafik ýok wagty gizlenýär",
+    ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Häzirçe profil ýok, ilki bilen bir profil goşuň",
     ),
-    "nullTip": m40,
-    "numberTip": m41,
+    "nullTip": m44,
+    "numberTip": m45,
     "off": MessageLookupByLibrary.simpleMessage("Ýapyk"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Diňe nyşan"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -1280,7 +1785,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Başga port giriziň",
     ),
-    "portTip": m42,
+    "portTip": m46,
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH üçin HTTP/3-i ileri tutmak",
     ),
@@ -1300,6 +1805,37 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "profileHasUpdate": MessageLookupByLibrary.simpleMessage(
       "Profil üýtgedildi. Awtomatiki täzelenmäni öçürmek isleýärsiňizmi?",
+    ),
+    "profileImportEmptyResponse": MessageLookupByLibrary.simpleMessage(
+      "Serwer boş profil gaýtardy",
+    ),
+    "profileImportFailed": MessageLookupByLibrary.simpleMessage(
+      "Profili import edip bolmady",
+    ),
+    "profileImportFileReadFailed": MessageLookupByLibrary.simpleMessage(
+      "Saýlanan faýly okap bolmady",
+    ),
+    "profileImportFormatClash": MessageLookupByLibrary.simpleMessage("Clash"),
+    "profileImportFormatLinks": MessageLookupByLibrary.simpleMessage(
+      "Paýlaşma salgylary",
+    ),
+    "profileImportFormatSingbox": MessageLookupByLibrary.simpleMessage(
+      "sing-box",
+    ),
+    "profileImportFormatWireguard": MessageLookupByLibrary.simpleMessage(
+      "WireGuard",
+    ),
+    "profileImportFormatXray": MessageLookupByLibrary.simpleMessage("Xray"),
+    "profileImportInvalidConfig": MessageLookupByLibrary.simpleMessage(
+      "Profil konfigurasiýasy nädogry",
+    ),
+    "profileImportSkippedNodes": m47,
+    "profileImportSuccess": MessageLookupByLibrary.simpleMessage(
+      "Profil import edildi",
+    ),
+    "profileImportSuccessSummary": m48,
+    "profileImportUnsupportedLink": MessageLookupByLibrary.simpleMessage(
+      "Import salgysy zeper ýeten ýa-da goldanylmaýar",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Profil adyny giriziň",
@@ -1321,7 +1857,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providers": MessageLookupByLibrary.simpleMessage("Daşarky çeşmeler"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proksiler"),
-    "proxiesCount": m43,
+    "proxiesCount": m49,
     "proxiesEmpty": MessageLookupByLibrary.simpleMessage("Proksiler boş"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Proksi zynjyry"),
     "proxyDetectedAbnormal": MessageLookupByLibrary.simpleMessage(
@@ -1426,6 +1962,22 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "restoreOnlyConfig": MessageLookupByLibrary.simpleMessage(
       "Diňe profilleri dikelt",
+    ),
+    "restorePreviewDescription": MessageLookupByLibrary.simpleMessage(
+      "Tassyklamaňyzdan öň hiç zat üýtgemez.",
+    ),
+    "restorePreviewTitle": MessageLookupByLibrary.simpleMessage(
+      "Dikeltmegi gözden geçirmek",
+    ),
+    "restoreProfilesCount": m50,
+    "restoreProxyGroupsCount": m51,
+    "restoreRulesCount": m52,
+    "restoreScriptsCount": m53,
+    "restoreSettingsIncluded": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalar bar",
+    ),
+    "restoreSettingsNotIncluded": MessageLookupByLibrary.simpleMessage(
+      "Bu ätiýaçlykda sazlamalar ýok",
     ),
     "restoreStrategy": MessageLookupByLibrary.simpleMessage("Dikeldiş usuly"),
     "restoreStrategyCompatible": MessageLookupByLibrary.simpleMessage(
@@ -1568,13 +2120,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleSet": MessageLookupByLibrary.simpleMessage("Düzgünler toplumy"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Düzgüniň nyşany"),
     "rules": MessageLookupByLibrary.simpleMessage("Düzgünler"),
-    "rulesCount": m44,
+    "rulesCount": m54,
     "save": MessageLookupByLibrary.simpleMessage("Ýatda sakla"),
     "saveChanges": MessageLookupByLibrary.simpleMessage(
       "Üýtgeşmeleri ýatda saklamak isleýärsiňizmi?",
     ),
     "schedule": MessageLookupByLibrary.simpleMessage("Meýilleşdirilen"),
-    "scheduleDesc": m45,
+    "scheduleDesc": m55,
     "script": MessageLookupByLibrary.simpleMessage("Skript"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Skript usuly: daşarky giňeltme skriptleri arkaly sazlamany bir basyşda üstünden ýazýar",
@@ -1585,7 +2137,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "search": MessageLookupByLibrary.simpleMessage("Gözle"),
     "searchApps": MessageLookupByLibrary.simpleMessage("Programmalary gözle"),
     "seconds": MessageLookupByLibrary.simpleMessage("sekunt"),
-    "secondsCount": m46,
+    "secondsCount": m56,
     "selectAll": MessageLookupByLibrary.simpleMessage("Ählisini saýla"),
     "selectMatchTarget": MessageLookupByLibrary.simpleMessage(
       "MATCH-TARGET saýla",
@@ -1604,7 +2156,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Içki düzgüni saýlaň",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Saýlanan"),
-    "selectedCountTitle": m47,
+    "selectedCountTitle": m57,
     "sendDeviceIdentity": MessageLookupByLibrary.simpleMessage("HWID ýolla"),
     "sendDeviceIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "Enjam belgisini, programmanyň wersiýasyny we enjamyň adyny proksi üpjün edijiniň serwerine ýolla",
@@ -1698,10 +2250,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupPermissionVpnDesc": MessageLookupByLibrary.simpleMessage(
       "Ulgam ilkinji birikmede sorar",
     ),
+    "setupPermissionsTitle": MessageLookupByLibrary.simpleMessage("Rugsatlar"),
     "setupProfileSourceNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash VPN hyzmatyny satmaýar. Ynanýan üpjün edijiňiziň salgysyny, QR koduny ýa-da konfigurasiýa faýlyny ulanyň. Profil saklanmazdan öň barlanýar.",
     ),
-    "setupProfilesReady": m48,
+    "setupProfilesReady": m58,
+    "setupRawConfig": MessageLookupByLibrary.simpleMessage(
+      "Konfigurasiýa teksti",
+    ),
+    "setupRawConfigDesc": MessageLookupByLibrary.simpleMessage(
+      "Clash bilen gabat gelýän YAML konfigurasiýasyny goýuň",
+    ),
     "setupRegionDesc": MessageLookupByLibrary.simpleMessage(
       "Akylly ugrukdyrma bu sebiti ugur saýlamagyň başlangyjy hökmünde ulanýar. Dil diňe teklip berýär.",
     ),
@@ -1731,7 +2290,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ReClash, FlClashX ýa-da FlClash nusgasyndan sazlamalary we profilleri dikelt",
     ),
     "setupSkip": MessageLookupByLibrary.simpleMessage("Profilsiz dowam et"),
-    "setupStepProgress": m49,
+    "setupStepProgress": m59,
     "setupSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
       "Profil birikmek üçin gerekli serwerleri we düzgünleri saklaýar. Ony üpjün edijiden ýa-da ätiýaçlyk nusgadan import ediň.",
     ),
@@ -1750,12 +2309,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "VPN profili ýok — VPN öçük galar; diňe ByeDPI tertibi elýeterli",
     ),
-    "setupSummaryProfile": m50,
-    "setupSummaryRouting": m51,
+    "setupSummaryProfile": m60,
+    "setupSummaryRouting": m61,
+    "setupSummarySystemProxyOff": MessageLookupByLibrary.simpleMessage(
+      "Ulgam proksisi: öçük",
+    ),
+    "setupSummarySystemProxyOn": MessageLookupByLibrary.simpleMessage(
+      "Ulgam proksisi: açyk",
+    ),
     "setupSummaryTitle": MessageLookupByLibrary.simpleMessage(
       "Sazlamanyň jemleri",
     ),
+    "setupSummaryTunOff": MessageLookupByLibrary.simpleMessage("TUN: öçük"),
+    "setupSummaryTunOn": MessageLookupByLibrary.simpleMessage("TUN: açyk"),
     "setupSystemLanguage": MessageLookupByLibrary.simpleMessage("Ulgam dili"),
+    "setupSystemProxyDesc": MessageLookupByLibrary.simpleMessage(
+      "Administrator hukuklary bolmazdan goldanýan programmalary ReClash arkaly ugrukdyrýar",
+    ),
+    "setupTunDesc": MessageLookupByLibrary.simpleMessage(
+      "Enjamyň ähli trafigini ugrukdyrýar; birikdirilende ulgam administrator hukuklaryny sorap biler",
+    ),
     "setupWelcome": MessageLookupByLibrary.simpleMessage(
       "Birkaç düşnükli ädimden soň hemme zat taýýar",
     ),
@@ -1790,27 +2363,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingActiveMarkers": MessageLookupByLibrary.simpleMessage(
       "Wagtlaýyn saklanan barlaglar",
     ),
-    "smartRoutingAliveCount": m52,
+    "smartRoutingAliveCount": m62,
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "Ähli serwerler",
     ),
     "smartRoutingAvailability": MessageLookupByLibrary.simpleMessage(
       "Elýeterlilik",
     ),
-    "smartRoutingAvailabilityValue": m53,
+    "smartRoutingAvailabilityValue": m63,
+    "smartRoutingAverageFailover": MessageLookupByLibrary.simpleMessage(
+      "Ortaça geçiş",
+    ),
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Ortaça dikeldiş",
     ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Awtomatiki saýlawa dolan",
     ),
-    "smartRoutingBandLabel": m54,
-    "smartRoutingBands": m55,
+    "smartRoutingBandLabel": m64,
+    "smartRoutingBands": m65,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Hereket"),
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Häzirki serwer sanawynda ýok",
     ),
-    "smartRoutingBlockCooling": m56,
+    "smartRoutingBlockCooling": m66,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Bu ýerde barlaglaryndan geçip bilmedi",
     ),
@@ -1841,7 +2417,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage(
       "Kanareýka salgylary",
     ),
-    "smartRoutingCanariesAnswered": m57,
+    "smartRoutingCanariesAnswered": m67,
     "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
       "Ýerli kanareýkalary",
     ),
@@ -1870,7 +2446,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "Heniz serwer saýlanmady",
     ),
-    "smartRoutingCoolFor": m58,
+    "smartRoutingCoolFor": m68,
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Her bir serweri barla",
     ),
@@ -1907,6 +2483,36 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingEmpty": MessageLookupByLibrary.simpleMessage(
       "Heniz ölçeg alynmady",
+    ),
+    "smartRoutingEngineAvailable": MessageLookupByLibrary.simpleMessage(
+      "Ugruň işlän wagty",
+    ),
+    "smartRoutingEngineDeepScan": MessageLookupByLibrary.simpleMessage(
+      "Doly barlag",
+    ),
+    "smartRoutingEngineLanes": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat zolaklary",
+    ),
+    "smartRoutingEngineLinkAge": MessageLookupByLibrary.simpleMessage(
+      "Baglanyşygyň ýaşy",
+    ),
+    "smartRoutingEngineMode": MessageLookupByLibrary.simpleMessage(
+      "Ýadronyň tertibi",
+    ),
+    "smartRoutingEnginePin": MessageLookupByLibrary.simpleMessage(
+      "Berkidilen serwer",
+    ),
+    "smartRoutingEnginePreset": MessageLookupByLibrary.simpleMessage(
+      "Sebit şablony",
+    ),
+    "smartRoutingEngineReportAge": MessageLookupByLibrary.simpleMessage(
+      "Hasabatyň ýaşy",
+    ),
+    "smartRoutingEngineTerrain": MessageLookupByLibrary.simpleMessage(
+      "Tor kody",
+    ),
+    "smartRoutingEngineTransport": MessageLookupByLibrary.simpleMessage(
+      "Baglanyşyk görnüşi",
     ),
     "smartRoutingEnvKey": MessageLookupByLibrary.simpleMessage(
       "Tor ýatynyň açary",
@@ -1947,7 +2553,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "Ulgam internete girişi tassyklady",
     ),
-    "smartRoutingFails": m59,
+    "smartRoutingFails": m69,
     "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage(
       "Baglanyşyk ýok",
     ),
@@ -2014,6 +2620,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bu tor üçin laýyklyk",
     ),
     "smartRoutingKeyVerdict": MessageLookupByLibrary.simpleMessage("Hökm"),
+    "smartRoutingLastFailover": MessageLookupByLibrary.simpleMessage(
+      "Soňky geçiş",
+    ),
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Soňky dikeldiş",
     ),
@@ -2057,6 +2666,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Serweri subutlanan hökmünde hasaplamak üçin, şu statuslaryň birini gaýtarmaly",
     ),
+    "smartRoutingMeasuredOver": m70,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage(
       "Tölegli baglanyşyk",
     ),
@@ -2076,7 +2686,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("UDP ýok"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m60,
+    "smartRoutingNodesMeasured": m71,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "Umumy maksatly",
     ),
@@ -2094,11 +2704,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Taýynlama"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Çin"),
-    "smartRoutingPresetEdited": m61,
+    "smartRoutingPresetEdited": m72,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Eýran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Ýapyk"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russiýa"),
-    "smartRoutingProbeBudget": m62,
+    "smartRoutingProbeBudget": m73,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Synaglar"),
     "smartRoutingProviderIncidents": MessageLookupByLibrary.simpleMessage(
       "Üpjün ediji goragynyň işjeňleşmegi",
@@ -2175,7 +2785,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Serwer saýlanýar…",
     ),
-    "smartRoutingSeconds": m63,
+    "smartRoutingSeconds": m74,
+    "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage(
+      "Mehanizm",
+    ),
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
       "Serwerler",
     ),
@@ -2188,14 +2801,102 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("Karar"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Serwerler"),
-    "smartRoutingServersCount": m64,
+    "smartRoutingServersCount": m75,
+    "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
+      "Islendik üpjün ediji",
+    ),
+    "smartRoutingServiceCandidates": m76,
+    "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat ugruny ulan",
+    ),
+    "smartRoutingServiceEnabledDesc": MessageLookupByLibrary.simpleMessage(
+      "Hyzmaty gabat gelýän ýörite serwer arkaly geçir",
+    ),
+    "smartRoutingServiceFallback": MessageLookupByLibrary.simpleMessage(
+      "Ýörite serwer elýeterli bolmasa",
+    ),
+    "smartRoutingServiceFallbackActiveMain":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýörite serwer taýýar däl · esasy marşrut",
+        ),
+    "smartRoutingServiceFallbackActiveReject":
+        MessageLookupByLibrary.simpleMessage(
+          "Ýörite serwer taýýar däl · hyzmat petiklendi",
+        ),
+    "smartRoutingServiceFallbackDesc": MessageLookupByLibrary.simpleMessage(
+      "Ýörite serwer ýok wagty gizlin hyzmat toparynyň ulanýan ugry",
+    ),
+    "smartRoutingServiceFallbackMain": MessageLookupByLibrary.simpleMessage(
+      "Smart Routing esasy serwerini ulan",
+    ),
+    "smartRoutingServiceFallbackReject": MessageLookupByLibrary.simpleMessage(
+      "Hyzmaty petikle",
+    ),
+    "smartRoutingServiceGemini": MessageLookupByLibrary.simpleMessage(
+      "Gemini elýeterliligi",
+    ),
+    "smartRoutingServiceManual": MessageLookupByLibrary.simpleMessage(
+      "El bilen nyşanlar",
+    ),
+    "smartRoutingServiceManualEmpty": MessageLookupByLibrary.simpleMessage(
+      "El bilen nyşan ýok",
+    ),
+    "smartRoutingServiceManualEmptyDesc": MessageLookupByLibrary.simpleMessage(
+      "Adyň bölegini we zerur bolsa üpjün edijini goşuň",
+    ),
+    "smartRoutingServiceManualSelector": MessageLookupByLibrary.simpleMessage(
+      "El bilen ýörite serwer nyşany",
+    ),
+    "smartRoutingServiceMatchedNone": MessageLookupByLibrary.simpleMessage(
+      "Heniz laýyk serwer ýok",
+    ),
+    "smartRoutingServiceNameContains": MessageLookupByLibrary.simpleMessage(
+      "Adynda bar",
+    ),
+    "smartRoutingServiceNameContainsDesc": MessageLookupByLibrary.simpleMessage(
+      "Registr tapawudyny saklaýan serwer adynyň bölegi",
+    ),
+    "smartRoutingServiceNoCandidates": MessageLookupByLibrary.simpleMessage(
+      "Ýörite serwer nyşanlary ýok",
+    ),
+    "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
+      "Dwijoga garaşylýar",
+    ),
+    "smartRoutingServiceProvider": m77,
+    "smartRoutingServiceProviderCandidates": m78,
+    "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "Üpçün edijiniň takyk ady; islendigine gabat gelmek üçin boş goýuň",
+    ),
+    "smartRoutingServiceProviderOptional": MessageLookupByLibrary.simpleMessage(
+      "Üpçün ediji (hökmany däl)",
+    ),
+    "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
+      "Abuna manifesti",
+    ),
+    "smartRoutingServiceReady": m79,
+    "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("Ugur"),
+    "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat ugurlary",
+    ),
+    "smartRoutingServiceRoutesEmpty": MessageLookupByLibrary.simpleMessage(
+      "Hyzmat ugurlary düzülmedik",
+    ),
+    "smartRoutingServiceSources": MessageLookupByLibrary.simpleMessage(
+      "Nyşan çeşmeleri",
+    ),
+    "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("Ýagdaý"),
+    "smartRoutingServiceTokenTooLong": m80,
+    "smartRoutingServiceVia": m81,
+    "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
+      "Mahabatsyz YouTube",
+    ),
     "smartRoutingStandbyHits": MessageLookupByLibrary.simpleMessage(
       "Ýyly ätiýaç bilen dikeldildi",
     ),
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Kimiň geçýändigini anyklady",
     ),
-    "smartRoutingStepAdmitBody": m65,
+    "smartRoutingStepAdmitBody": m82,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Şu ýere gelip çykdy",
     ),
@@ -2218,9 +2919,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Iň pes saklanma",
     ),
-    "smartRoutingSwitchLine": m66,
+    "smartRoutingSwitchLine": m83,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("çalyşyldy"),
-    "smartRoutingSwitchedAgo": m67,
+    "smartRoutingSwitchedAgo": m84,
+    "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage(
+      "Jikme-jiklik",
+    ),
+    "smartRoutingTabOverview": MessageLookupByLibrary.simpleMessage(
+      "Umumy syn",
+    ),
     "smartRoutingTechnical": MessageLookupByLibrary.simpleMessage(
       "Tehniki jikme-jiklik",
     ),
@@ -2237,13 +2944,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingVerdictViable": MessageLookupByLibrary.simpleMessage(
       "Ulanylmaga ýaranýar",
     ),
+    "smartRoutingWaitingNetwork": MessageLookupByLibrary.simpleMessage(
+      "Akylly marşrut tora garaşýar",
+    ),
+    "smartRoutingWaitingTunnel": MessageLookupByLibrary.simpleMessage(
+      "Akylly marşrut açyk · tunnele garaşýar",
+    ),
     "smartRoutingWave": MessageLookupByLibrary.simpleMessage(
       "Bir barlagda serwer sany",
     ),
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "Bir barlag näçe serweri ölçeýär",
     ),
-    "smartRoutingWaveNodes": m68,
+    "smartRoutingWaveNodes": m85,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Baglanyşyk barlagy",
     ),
@@ -2304,11 +3017,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionClientV2rayNG": MessageLookupByLibrary.simpleMessage(
       "v2rayNG",
     ),
-    "subscriptionDomainMoved": m69,
+    "subscriptionConfigurationSource": MessageLookupByLibrary.simpleMessage(
+      "berlen konfigurasiýa",
+    ),
+    "subscriptionDomainMoved": m86,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Abunaňyz möhleti gutardy",
     ),
-    "subscriptionExpiresInDays": m70,
+    "subscriptionExpiresInDays": m87,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Abunaňyz şu gün gutarýar",
     ),
@@ -2319,7 +3035,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Abuna ýatlatmalary",
     ),
-    "subscriptionProviderInterval": m71,
+    "subscriptionProviderInterval": m88,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Bu abunalykdaky düwünlere baglanyp bolmaýar — başga klient formatyny synap görüň",
     ),
@@ -2372,7 +3088,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Fonar"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jemi trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy porty"),
-    "trafficFreeOfTotal": m72,
+    "trafficFreeOfTotal": m89,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Ynamly torlar"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
@@ -2460,7 +3176,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Beslenen bolsa baglanýar, işleýän bolsa aýrylýar",
     ),
-    "urlTip": m73,
+    "urlTip": m90,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -2498,7 +3214,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Panel heniz elýeterli däl",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
-    "yearsAgo": m74,
+    "yearsAgo": m91,
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };
 }

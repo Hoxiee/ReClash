@@ -26,6 +26,40 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_color_utilities/palettes/tonal_palette.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+enum StartupOutcome { completed, exitRequested }
+
+@visibleForTesting
+class StartupCoordinator {
+  const StartupCoordinator();
+
+  Future<StartupOutcome> run({
+    required Future<void> Function() startCore,
+    required Future<bool> Function() handleFailedPreference,
+    required Future<void> Function() handleSetupWizard,
+    required Future<bool> Function() handleDisclaimer,
+    required Future<void> Function() showCrashRecoveryTip,
+    required Future<void> Function() showCrashlyticsTip,
+    required Future<void> Function() initializeRuntime,
+    required Future<void> Function() applyWindowVisibility,
+    required void Function() startOptionalEffects,
+  }) async {
+    if (!await handleFailedPreference()) return StartupOutcome.exitRequested;
+    final coreStart = startCore();
+    await handleSetupWizard();
+    if (!await handleDisclaimer()) {
+      await coreStart;
+      return StartupOutcome.exitRequested;
+    }
+    await showCrashRecoveryTip();
+    await showCrashlyticsTip();
+    await coreStart;
+    await initializeRuntime();
+    await applyWindowVisibility();
+    startOptionalEffects();
+    return StartupOutcome.completed;
+  }
+}
+
 class Bootstrap {
   static Bootstrap? _instance;
 
@@ -136,7 +170,6 @@ class Bootstrap {
       getLocaleForString(config.appSettingProps.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
     );
-    unawaited(runSubscriptionReminderSweep(profiles: profiles));
     await window?.init(version, config.windowProps);
     if (system.isAndroid) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -148,17 +181,47 @@ class Bootstrap {
     if (globalState.isAttach == true) {
       return;
     }
-    await _initApp();
-    globalState.isAttach = true;
+    final outcome = await _initApp();
+    if (outcome == StartupOutcome.completed) {
+      globalState.isAttach = true;
+    }
   }
 
   ProviderContainer get _container => globalState.container;
 
-  Future<void> _initApp() async {
-    // The wizard and autoUpdateProfiles validate imported profiles through
-    // Core; against a core that was never launched validateConfig only waits
-    // out its connect window and fails as no_response.
-    final coreStart = _container.read(coreActionProvider.notifier).startCore();
+  Future<StartupOutcome> _initApp() {
+    return const StartupCoordinator().run(
+      startCore: () async {
+        await _container.read(coreActionProvider.notifier).startCore();
+      },
+      handleFailedPreference: _handleFailedPreference,
+      handleSetupWizard: _handleSetupWizard,
+      handleDisclaimer: _handleDisclaimer,
+      showCrashRecoveryTip: _showCrashRecoveryTip,
+      showCrashlyticsTip: _showCrashlyticsTip,
+      initializeRuntime: _initializeRuntime,
+      applyWindowVisibility: _applyWindowVisibility,
+      startOptionalEffects: _startOptionalEffects,
+    );
+  }
+
+  Future<void> _initializeRuntime() async {
+    if (!_bootDecision.isDegraded) {
+      await _container.read(setupActionProvider.notifier).initStatus();
+    }
+    _container.read(initProvider.notifier).value = true;
+    await bootGuard.markRunning();
+  }
+
+  Future<void> _applyWindowVisibility() async {
+    if (_container.read(appSettingProvider).silentLaunch) {
+      await windowPort?.hide();
+    } else {
+      await windowPort?.show();
+    }
+  }
+
+  void _startOptionalEffects() {
     unawaited(_container.read(systemActionProvider.notifier).updateTray());
     unawaited(
       _container.read(profilesActionProvider.notifier).autoUpdateProfiles(),
@@ -172,23 +235,20 @@ class Bootstrap {
         app?.setIconVariant(_container.read(appSettingProvider).iconVariant),
       );
     }
-    if (!_container.read(appSettingProvider).silentLaunch) {
-      unawaited(window?.show());
-    } else {
-      unawaited(window?.hide());
-    }
-    await _handleFailedPreference();
-    await _handleSetupWizard();
-    await _handlerDisclaimer();
-    await _showCrashRecoveryTip();
-    await _showCrashlyticsTip();
-    await coreStart;
-    if (!_bootDecision.isDegraded) {
-      await _container.read(setupActionProvider.notifier).initStatus();
-    }
-    _container.read(initProvider.notifier).value = true;
-    await bootGuard.markRunning();
+    unawaited(
+      runSubscriptionReminderSweep(
+        profiles: _container.read(profilesProvider),
+        enabled: _container
+            .read(appSettingProvider)
+            .notificationSettings
+            .subscriptionReminders,
+      ),
+    );
     permissions.check(_container.read);
+  }
+
+  Future<void> _showMandatoryUi() async {
+    await windowPort?.show();
   }
 
   /// A degraded launch already tells the user the previous run did not finish;
@@ -201,7 +261,18 @@ class Bootstrap {
     if (context == null) {
       return;
     }
-    await SetupWizard.show(context);
+    await _showMandatoryUi();
+    // The wizard can hold the screen for minutes and sends the user to system
+    // settings, so a kill here is not a failed launch; the guard stays armed
+    // for the runtime that follows.
+    await bootGuard.markSetup();
+    try {
+      if (!context.mounted) return;
+      await SetupWizard.show(context);
+    } finally {
+      await bootGuard.markStarting();
+      await _container.read(storeActionProvider.notifier).savePreferences();
+    }
   }
 
   Future<void> _showCrashRecoveryTip() async {
@@ -209,6 +280,7 @@ class Bootstrap {
       case BootRecovery.none:
         return;
       case BootRecovery.skipAutoSetup:
+        await _showMandatoryUi();
         await dialogs.showMessage(
           title: currentAppLocalizations.launchInterrupted,
           cancelable: false,
@@ -216,6 +288,7 @@ class Bootstrap {
           message: TextSpan(text: currentAppLocalizations.launchInterruptedTip),
         );
       case BootRecovery.clearProfile:
+        await _showMandatoryUi();
         await dialogs.showMessage(
           title: currentAppLocalizations.crashDetected,
           cancelable: false,
@@ -236,8 +309,9 @@ class Bootstrap {
     return profile?.label.takeFirstValid(['$profileId']) ?? '$profileId';
   }
 
-  Future<void> _handleFailedPreference() async {
-    if (await preferences.isInit) return;
+  Future<bool> _handleFailedPreference() async {
+    if (await preferences.isInit) return true;
+    await _showMandatoryUi();
     final res = await dialogs.showMessage(
       title: currentAppLocalizations.tip,
       message: TextSpan(text: currentAppLocalizations.cacheCorrupt),
@@ -248,6 +322,7 @@ class Bootstrap {
     }
     // Saving here would rewrite the preferences file the user just chose to delete.
     await _container.read(systemActionProvider.notifier).handleExit(false);
+    return false;
   }
 
   Future<void> _showCrashlyticsTip() async {
@@ -257,6 +332,7 @@ class Bootstrap {
     )) {
       return;
     }
+    await _showMandatoryUi();
     await dialogs.showMessage(
       title: currentAppLocalizations.dataCollectionTip,
       cancelable: false,
@@ -267,19 +343,22 @@ class Bootstrap {
         .update((state) => state.copyWith(crashlyticsTip: true));
   }
 
-  Future<void> _handlerDisclaimer() async {
+  Future<bool> _handleDisclaimer() async {
     if (_container.read(
       appSettingProvider.select((state) => state.disclaimerAccepted),
     )) {
-      return;
+      return true;
     }
+    await _showMandatoryUi();
     final isDisclaimerAccepted = await dialogs.showDisclaimer();
     if (!isDisclaimerAccepted) {
       await _container.read(systemActionProvider.notifier).handleExit();
+      return false;
     }
     _container
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(disclaimerAccepted: true));
+    return true;
   }
 }
 

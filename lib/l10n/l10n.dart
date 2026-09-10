@@ -830,6 +830,16 @@ class AppLocalizations {
     );
   }
 
+  /// `the supplied configuration`
+  String get subscriptionConfigurationSource {
+    return Intl.message(
+      'the supplied configuration',
+      name: 'subscriptionConfigurationSource',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create`
   String get create {
     return Intl.message('Create', name: 'create', desc: '', args: []);
@@ -1448,6 +1458,896 @@ class AppLocalizations {
   /// `General`
   String get general {
     return Intl.message('General', name: 'general', desc: '', args: []);
+  }
+
+  /// `Notification`
+  String get notification {
+    return Intl.message(
+      'Notification',
+      name: 'notification',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Problems only`
+  String get notificationDoctorPriorityProblems {
+    return Intl.message(
+      'Problems only',
+      name: 'notificationDoctorPriorityProblems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Always`
+  String get notificationDoctorPriorityAlways {
+    return Intl.message(
+      'Always',
+      name: 'notificationDoctorPriorityAlways',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available on Android`
+  String get notificationAndroidOnly {
+    return Intl.message(
+      'Available on Android',
+      name: 'notificationAndroidOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Foreground notification settings apply only to the Android VPN service.`
+  String get notificationAndroidOnlyDesc {
+    return Intl.message(
+      'Foreground notification settings apply only to the Android VPN service.',
+      name: 'notificationAndroidOnlyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Content`
+  String get notificationContent {
+    return Intl.message(
+      'Content',
+      name: 'notificationContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed notification`
+  String get notificationDetailed {
+    return Intl.message(
+      'Detailed notification',
+      name: 'notificationDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Live status lines and quick actions are shown`
+  String get notificationDetailedDesc {
+    return Intl.message(
+      'Live status lines and quick actions are shown',
+      name: 'notificationDetailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android keeps the notification, so only the protection status stays`
+  String get notificationMinimalDesc {
+    return Intl.message(
+      'Android keeps the notification, so only the protection status stays',
+      name: 'notificationMinimalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection Doctor priority`
+  String get notificationDoctorPriority {
+    return Intl.message(
+      'Connection Doctor priority',
+      name: 'notificationDoctorPriority',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notification components`
+  String get notificationComponents {
+    return Intl.message(
+      'Notification components',
+      name: 'notificationComponents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Build the notification from live status components.`
+  String get notificationComponentsDesc {
+    return Intl.message(
+      'Build the notification from live status components.',
+      name: 'notificationComponentsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add component`
+  String get notificationAddComponent {
+    return Intl.message(
+      'Add component',
+      name: 'notificationAddComponent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No components added`
+  String get notificationComponentsEmpty {
+    return Intl.message(
+      'No components added',
+      name: 'notificationComponentsEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection Doctor`
+  String get notificationConnectionDoctor {
+    return Intl.message(
+      'Connection Doctor',
+      name: 'notificationConnectionDoctor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network state`
+  String get notificationNetworkState {
+    return Intl.message(
+      'Network state',
+      name: 'notificationNetworkState',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show the current RCX network terrain`
+  String get notificationNetworkStateDesc {
+    return Intl.message(
+      'Show the current RCX network terrain',
+      name: 'notificationNetworkStateDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current server`
+  String get notificationCurrentServer {
+    return Intl.message(
+      'Current server',
+      name: 'notificationCurrentServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show the node selected in the group`
+  String get notificationCurrentServerDesc {
+    return Intl.message(
+      'Show the node selected in the group',
+      name: 'notificationCurrentServerDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart Routing`
+  String get notificationSmartRouting {
+    return Intl.message(
+      'Smart Routing',
+      name: 'notificationSmartRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network speed`
+  String get notificationNetworkSpeed {
+    return Intl.message(
+      'Network speed',
+      name: 'notificationNetworkSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic group`
+  String get notificationAutomaticGroup {
+    return Intl.message(
+      'Automatic group',
+      name: 'notificationAutomaticGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose server group`
+  String get notificationSelectServerGroup {
+    return Intl.message(
+      'Choose server group',
+      name: 'notificationSelectServerGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Normal`
+  String get notificationNetworkNormal {
+    return Intl.message(
+      'Normal',
+      name: 'notificationNetworkNormal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Whitelist`
+  String get notificationNetworkWhitelist {
+    return Intl.message(
+      'Whitelist',
+      name: 'notificationNetworkWhitelist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Captive portal`
+  String get notificationNetworkPortal {
+    return Intl.message(
+      'Captive portal',
+      name: 'notificationNetworkPortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Offline`
+  String get notificationNetworkOffline {
+    return Intl.message(
+      'Offline',
+      name: 'notificationNetworkOffline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown`
+  String get notificationNetworkUnknown {
+    return Intl.message(
+      'Unknown',
+      name: 'notificationNetworkUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move up`
+  String get notificationMoveUp {
+    return Intl.message(
+      'Move up',
+      name: 'notificationMoveUp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move down`
+  String get notificationMoveDown {
+    return Intl.message(
+      'Move down',
+      name: 'notificationMoveDown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reorder`
+  String get notificationReorder {
+    return Intl.message(
+      'Reorder',
+      name: 'notificationReorder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network · Normal`
+  String get notificationPreviewNetwork {
+    return Intl.message(
+      'Network · Normal',
+      name: 'notificationPreviewNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server · Tokyo 01`
+  String get notificationPreviewServer {
+    return Intl.message(
+      'Server · Tokyo 01',
+      name: 'notificationPreviewServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show the active Smart Routing decision`
+  String get notificationSmartRoutingDesc {
+    return Intl.message(
+      'Show the active Smart Routing decision',
+      name: 'notificationSmartRoutingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show current upload and download speed`
+  String get notificationNetworkSpeedDesc {
+    return Intl.message(
+      'Show current upload and download speed',
+      name: 'notificationNetworkSpeedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session traffic`
+  String get notificationSessionTraffic {
+    return Intl.message(
+      'Session traffic',
+      name: 'notificationSessionTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show uploaded and downloaded traffic for this session`
+  String get notificationSessionTrafficDesc {
+    return Intl.message(
+      'Show uploaded and downloaded traffic for this session',
+      name: 'notificationSessionTrafficDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide idle speed`
+  String get notificationHideIdleSpeed {
+    return Intl.message(
+      'Hide idle speed',
+      name: 'notificationHideIdleSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide speed values while no traffic is flowing`
+  String get notificationHideIdleSpeedDesc {
+    return Intl.message(
+      'Hide speed values while no traffic is flowing',
+      name: 'notificationHideIdleSpeedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Controls`
+  String get notificationControls {
+    return Intl.message(
+      'Controls',
+      name: 'notificationControls',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose actions available directly from the notification.`
+  String get notificationControlsDesc {
+    return Intl.message(
+      'Choose actions available directly from the notification.',
+      name: 'notificationControlsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pause or resume`
+  String get notificationPauseAction {
+    return Intl.message(
+      'Pause or resume',
+      name: 'notificationPauseAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show an action that pauses or resumes the VPN`
+  String get notificationPauseActionDesc {
+    return Intl.message(
+      'Show an action that pauses or resumes the VPN',
+      name: 'notificationPauseActionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Privacy`
+  String get notificationPrivacy {
+    return Intl.message(
+      'Privacy',
+      name: 'notificationPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide sensitive details on lock screen`
+  String get notificationHideSensitive {
+    return Intl.message(
+      'Hide sensitive details on lock screen',
+      name: 'notificationHideSensitive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide profile, routing and diagnostic details while the device is locked`
+  String get notificationHideSensitiveDesc {
+    return Intl.message(
+      'Hide profile, routing and diagnostic details while the device is locked',
+      name: 'notificationHideSensitiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash · Current profile`
+  String get notificationPreviewProfile {
+    return Intl.message(
+      'ReClash · Current profile',
+      name: 'notificationPreviewProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection Doctor: no problems`
+  String get notificationPreviewDoctor {
+    return Intl.message(
+      'Connection Doctor: no problems',
+      name: 'notificationPreviewDoctor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart Routing · Automatic route`
+  String get notificationPreviewRoute {
+    return Intl.message(
+      'Smart Routing · Automatic route',
+      name: 'notificationPreviewRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `↓ 12.4 MB/s  ↑ 1.8 MB/s`
+  String get notificationPreviewSpeed {
+    return Intl.message(
+      '↓ 12.4 MB/s  ↑ 1.8 MB/s',
+      name: 'notificationPreviewSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session · ↓ 1.2 GB  ↑ 184 MB`
+  String get notificationPreviewSession {
+    return Intl.message(
+      'Session · ↓ 1.2 GB  ↑ 184 MB',
+      name: 'notificationPreviewSession',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection status`
+  String get notificationProtectionTitle {
+    return Intl.message(
+      'Protection status',
+      name: 'notificationProtectionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The persistent notification shows whether your protection is active.`
+  String get notificationProtectionDesc {
+    return Intl.message(
+      'The persistent notification shows whether your protection is active.',
+      name: 'notificationProtectionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service channel`
+  String get notificationServiceChannel {
+    return Intl.message(
+      'Service channel',
+      name: 'notificationServiceChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription reminders channel`
+  String get notificationSubscriptionChannel {
+    return Intl.message(
+      'Subscription reminders channel',
+      name: 'notificationSubscriptionChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription reminders`
+  String get notificationSubscriptionReminders {
+    return Intl.message(
+      'Subscription reminders',
+      name: 'notificationSubscriptionReminders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notify when a subscription needs attention`
+  String get notificationSubscriptionRemindersDesc {
+    return Intl.message(
+      'Notify when a subscription needs attention',
+      name: 'notificationSubscriptionRemindersDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android delivery`
+  String get notificationDelivery {
+    return Intl.message(
+      'Android delivery',
+      name: 'notificationDelivery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking Android notification access`
+  String get notificationDeliveryChecking {
+    return Intl.message(
+      'Checking Android notification access',
+      name: 'notificationDeliveryChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications are blocked for ReClash`
+  String get notificationDeliveryPermissionDisabled {
+    return Intl.message(
+      'Notifications are blocked for ReClash',
+      name: 'notificationDeliveryPermissionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The ReClash service channel is disabled`
+  String get notificationDeliveryServiceDisabled {
+    return Intl.message(
+      'The ReClash service channel is disabled',
+      name: 'notificationDeliveryServiceDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription reminders channel is disabled`
+  String get notificationDeliverySubscriptionDisabled {
+    return Intl.message(
+      'The subscription reminders channel is disabled',
+      name: 'notificationDeliverySubscriptionDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications can be delivered`
+  String get notificationDeliveryReady {
+    return Intl.message(
+      'Notifications can be delivered',
+      name: 'notificationDeliveryReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fix`
+  String get notificationDeliveryFix {
+    return Intl.message(
+      'Fix',
+      name: 'notificationDeliveryFix',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview scenario`
+  String get notificationPreviewScenario {
+    return Intl.message(
+      'Preview scenario',
+      name: 'notificationPreviewScenario',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Normal`
+  String get notificationScenarioNormal {
+    return Intl.message(
+      'Normal',
+      name: 'notificationScenarioNormal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Routing`
+  String get notificationScenarioRouting {
+    return Intl.message(
+      'Routing',
+      name: 'notificationScenarioRouting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Problem`
+  String get notificationScenarioProblem {
+    return Intl.message(
+      'Problem',
+      name: 'notificationScenarioProblem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paused`
+  String get notificationScenarioPaused {
+    return Intl.message(
+      'Paused',
+      name: 'notificationScenarioPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lock screen`
+  String get notificationScenarioLockScreen {
+    return Intl.message(
+      'Lock screen',
+      name: 'notificationScenarioLockScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash · Protected details hidden`
+  String get notificationPreviewLocked {
+    return Intl.message(
+      'ReClash · Protected details hidden',
+      name: 'notificationPreviewLocked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash · Protection paused`
+  String get notificationPreviewPaused {
+    return Intl.message(
+      'ReClash · Protection paused',
+      name: 'notificationPreviewPaused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection Doctor: problem detected`
+  String get notificationPreviewProblem {
+    return Intl.message(
+      'Connection Doctor: problem detected',
+      name: 'notificationPreviewProblem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show the Connection Doctor verdict`
+  String get notificationConnectionDoctorDesc {
+    return Intl.message(
+      'Show the Connection Doctor verdict',
+      name: 'notificationConnectionDoctorDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the notification`
+  String get notificationComponentsActive {
+    return Intl.message(
+      'In the notification',
+      name: 'notificationComponentsActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lines follow this order. The first line that has data is shown while the notification is collapsed.`
+  String get notificationComponentsOrderHint {
+    return Intl.message(
+      'Lines follow this order. The first line that has data is shown while the notification is collapsed.',
+      name: 'notificationComponentsOrderHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Without components the notification shows only the protection status.`
+  String get notificationComponentsEmptyDesc {
+    return Intl.message(
+      'Without components the notification shows only the protection status.',
+      name: 'notificationComponentsEmptyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Behaviour`
+  String get notificationComponentBehaviour {
+    return Intl.message(
+      'Behaviour',
+      name: 'notificationComponentBehaviour',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shown while the notification is collapsed`
+  String get notificationCollapsedLine {
+    return Intl.message(
+      'Shown while the notification is collapsed',
+      name: 'notificationCollapsedLine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove from notification`
+  String get notificationRemoveComponent {
+    return Intl.message(
+      'Remove from notification',
+      name: 'notificationRemoveComponent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Always shown`
+  String get notificationVisibilityAlways {
+    return Intl.message(
+      'Always shown',
+      name: 'notificationVisibilityAlways',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shown while a problem is detected`
+  String get notificationVisibilityDoctorProblems {
+    return Intl.message(
+      'Shown while a problem is detected',
+      name: 'notificationVisibilityDoctorProblems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shown while Smart routing is on`
+  String get notificationVisibilitySmartRoutingOn {
+    return Intl.message(
+      'Shown while Smart routing is on',
+      name: 'notificationVisibilitySmartRoutingOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shown while a server group is resolved`
+  String get notificationVisibilityCurrentServer {
+    return Intl.message(
+      'Shown while a server group is resolved',
+      name: 'notificationVisibilityCurrentServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hidden while no traffic is flowing`
+  String get notificationVisibilitySpeedIdle {
+    return Intl.message(
+      'Hidden while no traffic is flowing',
+      name: 'notificationVisibilitySpeedIdle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shown while the session has traffic`
+  String get notificationVisibilitySessionTraffic {
+    return Intl.message(
+      'Shown while the session has traffic',
+      name: 'notificationVisibilitySessionTraffic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing is off, so this line is hidden`
+  String get notificationBlockedSmartRoutingOff {
+    return Intl.message(
+      'Smart routing is off, so this line is hidden',
+      name: 'notificationBlockedSmartRoutingOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No server group is resolved, so this line is hidden`
+  String get notificationBlockedNoServerGroup {
+    return Intl.message(
+      'No server group is resolved, so this line is hidden',
+      name: 'notificationBlockedNoServerGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The chosen group is missing from the profile`
+  String get notificationServerGroupMissing {
+    return Intl.message(
+      'The chosen group is missing from the profile',
+      name: 'notificationServerGroupMissing',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Identity`
@@ -6169,6 +7069,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Smart routing is on · waiting for the tunnel`
+  String get smartRoutingWaitingTunnel {
+    return Intl.message(
+      'Smart routing is on · waiting for the tunnel',
+      name: 'smartRoutingWaitingTunnel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing is waiting for a network`
+  String get smartRoutingWaitingNetwork {
+    return Intl.message(
+      'Smart routing is waiting for a network',
+      name: 'smartRoutingWaitingNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Smart routing is on`
   String get smartRoutingOn {
     return Intl.message(
@@ -7554,6 +8474,176 @@ class AppLocalizations {
     );
   }
 
+  /// `Overview`
+  String get smartRoutingTabOverview {
+    return Intl.message(
+      'Overview',
+      name: 'smartRoutingTabOverview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Details`
+  String get smartRoutingTabDetails {
+    return Intl.message(
+      'Details',
+      name: 'smartRoutingTabDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Engine`
+  String get smartRoutingSectionEngine {
+    return Intl.message(
+      'Engine',
+      name: 'smartRoutingSectionEngine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No service routes are set up`
+  String get smartRoutingServiceRoutesEmpty {
+    return Intl.message(
+      'No service routes are set up',
+      name: 'smartRoutingServiceRoutesEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Measured over {duration}`
+  String smartRoutingMeasuredOver(String duration) {
+    return Intl.message(
+      'Measured over $duration',
+      name: 'smartRoutingMeasuredOver',
+      desc: '',
+      args: [duration],
+    );
+  }
+
+  /// `Last switchover`
+  String get smartRoutingLastFailover {
+    return Intl.message(
+      'Last switchover',
+      name: 'smartRoutingLastFailover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Average switchover`
+  String get smartRoutingAverageFailover {
+    return Intl.message(
+      'Average switchover',
+      name: 'smartRoutingAverageFailover',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time with a working route`
+  String get smartRoutingEngineAvailable {
+    return Intl.message(
+      'Time with a working route',
+      name: 'smartRoutingEngineAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report age`
+  String get smartRoutingEngineReportAge {
+    return Intl.message(
+      'Report age',
+      name: 'smartRoutingEngineReportAge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region preset`
+  String get smartRoutingEnginePreset {
+    return Intl.message(
+      'Region preset',
+      name: 'smartRoutingEnginePreset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core mode`
+  String get smartRoutingEngineMode {
+    return Intl.message(
+      'Core mode',
+      name: 'smartRoutingEngineMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terrain code`
+  String get smartRoutingEngineTerrain {
+    return Intl.message(
+      'Terrain code',
+      name: 'smartRoutingEngineTerrain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link transport`
+  String get smartRoutingEngineTransport {
+    return Intl.message(
+      'Link transport',
+      name: 'smartRoutingEngineTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Link age`
+  String get smartRoutingEngineLinkAge {
+    return Intl.message(
+      'Link age',
+      name: 'smartRoutingEngineLinkAge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pinned server`
+  String get smartRoutingEnginePin {
+    return Intl.message(
+      'Pinned server',
+      name: 'smartRoutingEnginePin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deep scan`
+  String get smartRoutingEngineDeepScan {
+    return Intl.message(
+      'Deep scan',
+      name: 'smartRoutingEngineDeepScan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Service lanes`
+  String get smartRoutingEngineLanes {
+    return Intl.message(
+      'Service lanes',
+      name: 'smartRoutingEngineLanes',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Link check`
   String get smartRoutingWhatWasTested {
     return Intl.message(
@@ -8164,6 +9254,336 @@ class AppLocalizations {
     );
   }
 
+  /// `Service routes`
+  String get smartRoutingServiceRoutes {
+    return Intl.message(
+      'Service routes',
+      name: 'smartRoutingServiceRoutes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `YouTube without ads`
+  String get smartRoutingServiceYouTube {
+    return Intl.message(
+      'YouTube without ads',
+      name: 'smartRoutingServiceYouTube',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gemini access`
+  String get smartRoutingServiceGemini {
+    return Intl.message(
+      'Gemini access',
+      name: 'smartRoutingServiceGemini',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No specialist selectors`
+  String get smartRoutingServiceNoCandidates {
+    return Intl.message(
+      'No specialist selectors',
+      name: 'smartRoutingServiceNoCandidates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} specialist selectors`
+  String smartRoutingServiceCandidates(int count) {
+    return Intl.message(
+      '$count specialist selectors',
+      name: 'smartRoutingServiceCandidates',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Status`
+  String get smartRoutingServiceStatus {
+    return Intl.message(
+      'Status',
+      name: 'smartRoutingServiceStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Through {node}`
+  String smartRoutingServiceVia(String node) {
+    return Intl.message(
+      'Through $node',
+      name: 'smartRoutingServiceVia',
+      desc: '',
+      args: [node],
+    );
+  }
+
+  /// `Waiting for the engine`
+  String get smartRoutingServicePending {
+    return Intl.message(
+      'Waiting for the engine',
+      name: 'smartRoutingServicePending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No specialist ready · using the main route`
+  String get smartRoutingServiceFallbackActiveMain {
+    return Intl.message(
+      'No specialist ready · using the main route',
+      name: 'smartRoutingServiceFallbackActiveMain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No specialist ready · service blocked`
+  String get smartRoutingServiceFallbackActiveReject {
+    return Intl.message(
+      'No specialist ready · service blocked',
+      name: 'smartRoutingServiceFallbackActiveReject',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{eligible} of {total} servers ready`
+  String smartRoutingServiceReady(int eligible, int total) {
+    return Intl.message(
+      '$eligible of $total servers ready',
+      name: 'smartRoutingServiceReady',
+      desc: '',
+      args: [eligible, total],
+    );
+  }
+
+  /// `No servers match yet`
+  String get smartRoutingServiceMatchedNone {
+    return Intl.message(
+      'No servers match yet',
+      name: 'smartRoutingServiceMatchedNone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Route`
+  String get smartRoutingServiceRoute {
+    return Intl.message(
+      'Route',
+      name: 'smartRoutingServiceRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use service route`
+  String get smartRoutingServiceEnabled {
+    return Intl.message(
+      'Use service route',
+      name: 'smartRoutingServiceEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send this service through a matching specialist node`
+  String get smartRoutingServiceEnabledDesc {
+    return Intl.message(
+      'Send this service through a matching specialist node',
+      name: 'smartRoutingServiceEnabledDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When no specialist works`
+  String get smartRoutingServiceFallback {
+    return Intl.message(
+      'When no specialist works',
+      name: 'smartRoutingServiceFallback',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose what the hidden service selector uses while specialists are unavailable`
+  String get smartRoutingServiceFallbackDesc {
+    return Intl.message(
+      'Choose what the hidden service selector uses while specialists are unavailable',
+      name: 'smartRoutingServiceFallbackDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use the main Smart Routing node`
+  String get smartRoutingServiceFallbackMain {
+    return Intl.message(
+      'Use the main Smart Routing node',
+      name: 'smartRoutingServiceFallbackMain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block the service`
+  String get smartRoutingServiceFallbackReject {
+    return Intl.message(
+      'Block the service',
+      name: 'smartRoutingServiceFallbackReject',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Specialist sources`
+  String get smartRoutingServiceSources {
+    return Intl.message(
+      'Specialist sources',
+      name: 'smartRoutingServiceSources',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription manifest`
+  String get smartRoutingServiceProviderSource {
+    return Intl.message(
+      'Subscription manifest',
+      name: 'smartRoutingServiceProviderSource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} selectors supplied by the provider`
+  String smartRoutingServiceProviderCandidates(int count) {
+    return Intl.message(
+      '$count selectors supplied by the provider',
+      name: 'smartRoutingServiceProviderCandidates',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Manual selectors`
+  String get smartRoutingServiceManual {
+    return Intl.message(
+      'Manual selectors',
+      name: 'smartRoutingServiceManual',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No manual selectors`
+  String get smartRoutingServiceManualEmpty {
+    return Intl.message(
+      'No manual selectors',
+      name: 'smartRoutingServiceManualEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a name fragment and, optionally, its provider`
+  String get smartRoutingServiceManualEmptyDesc {
+    return Intl.message(
+      'Add a name fragment and, optionally, its provider',
+      name: 'smartRoutingServiceManualEmptyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Any provider`
+  String get smartRoutingServiceAnyProvider {
+    return Intl.message(
+      'Any provider',
+      name: 'smartRoutingServiceAnyProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider: {provider}`
+  String smartRoutingServiceProvider(String provider) {
+    return Intl.message(
+      'Provider: $provider',
+      name: 'smartRoutingServiceProvider',
+      desc: '',
+      args: [provider],
+    );
+  }
+
+  /// `{label} must be at most 64 UTF-8 bytes`
+  String smartRoutingServiceTokenTooLong(String label) {
+    return Intl.message(
+      '$label must be at most 64 UTF-8 bytes',
+      name: 'smartRoutingServiceTokenTooLong',
+      desc: '',
+      args: [label],
+    );
+  }
+
+  /// `Manual specialist selector`
+  String get smartRoutingServiceManualSelector {
+    return Intl.message(
+      'Manual specialist selector',
+      name: 'smartRoutingServiceManualSelector',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name contains`
+  String get smartRoutingServiceNameContains {
+    return Intl.message(
+      'Name contains',
+      name: 'smartRoutingServiceNameContains',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Case-sensitive fragment of the node name`
+  String get smartRoutingServiceNameContainsDesc {
+    return Intl.message(
+      'Case-sensitive fragment of the node name',
+      name: 'smartRoutingServiceNameContainsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider (optional)`
+  String get smartRoutingServiceProviderOptional {
+    return Intl.message(
+      'Provider (optional)',
+      name: 'smartRoutingServiceProviderOptional',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exact provider name; leave empty to match any provider`
+  String get smartRoutingServiceProviderDesc {
+    return Intl.message(
+      'Exact provider name; leave empty to match any provider',
+      name: 'smartRoutingServiceProviderDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Appearance`
   String get appearance {
     return Intl.message('Appearance', name: 'appearance', desc: '', args: []);
@@ -8264,11 +9684,6 @@ class AppLocalizations {
     return Intl.message('System seed', name: 'systemSeed', desc: '', args: []);
   }
 
-  /// `App icon`
-  String get appIcon {
-    return Intl.message('App icon', name: 'appIcon', desc: '', args: []);
-  }
-
   /// `The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.`
   String get appIconChangeNote {
     return Intl.message(
@@ -8314,9 +9729,14 @@ class AppLocalizations {
     return Intl.message('Circuit', name: 'appIconCircuit', desc: '', args: []);
   }
 
-  /// `Prism`
-  String get appIconPrism {
-    return Intl.message('Prism', name: 'appIconPrism', desc: '', args: []);
+  /// `Echo`
+  String get appIconEcho {
+    return Intl.message('Echo', name: 'appIconEcho', desc: '', args: []);
+  }
+
+  /// `Shift`
+  String get appIconShift {
+    return Intl.message('Shift', name: 'appIconShift', desc: '', args: []);
   }
 
   /// `Dashboard style`
@@ -9605,6 +11025,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Permissions`
+  String get setupPermissionsTitle {
+    return Intl.message(
+      'Permissions',
+      name: 'setupPermissionsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `No VPN profile — VPN remains off; ByeDPI-only is available`
   String get setupSummaryNoProfile {
     return Intl.message(
@@ -9650,6 +11080,301 @@ class AppLocalizations {
     return Intl.message(
       'Automatic connection: off',
       name: 'setupSummaryAutoRunOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review restore`
+  String get restorePreviewTitle {
+    return Intl.message(
+      'Review restore',
+      name: 'restorePreviewTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The profile configuration is invalid`
+  String get profileImportInvalidConfig {
+    return Intl.message(
+      'The profile configuration is invalid',
+      name: 'profileImportInvalidConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read the selected file`
+  String get profileImportFileReadFailed {
+    return Intl.message(
+      'Could not read the selected file',
+      name: 'profileImportFileReadFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The server returned an empty profile`
+  String get profileImportEmptyResponse {
+    return Intl.message(
+      'The server returned an empty profile',
+      name: 'profileImportEmptyResponse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The import link is damaged or unsupported`
+  String get profileImportUnsupportedLink {
+    return Intl.message(
+      'The import link is damaged or unsupported',
+      name: 'profileImportUnsupportedLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not import the profile`
+  String get profileImportFailed {
+    return Intl.message(
+      'Could not import the profile',
+      name: 'profileImportFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile imported`
+  String get profileImportSuccess {
+    return Intl.message(
+      'Profile imported',
+      name: 'profileImportSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Imported {format} · {client} · {nodes} nodes · {groups} groups`
+  String profileImportSuccessSummary(
+    String format,
+    String client,
+    int nodes,
+    int groups,
+  ) {
+    return Intl.message(
+      'Imported $format · $client · $nodes nodes · $groups groups',
+      name: 'profileImportSuccessSummary',
+      desc: '',
+      args: [format, client, nodes, groups],
+    );
+  }
+
+  /// `Clash`
+  String get profileImportFormatClash {
+    return Intl.message(
+      'Clash',
+      name: 'profileImportFormatClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share links`
+  String get profileImportFormatLinks {
+    return Intl.message(
+      'Share links',
+      name: 'profileImportFormatLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Xray`
+  String get profileImportFormatXray {
+    return Intl.message(
+      'Xray',
+      name: 'profileImportFormatXray',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `sing-box`
+  String get profileImportFormatSingbox {
+    return Intl.message(
+      'sing-box',
+      name: 'profileImportFormatSingbox',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `WireGuard`
+  String get profileImportFormatWireguard {
+    return Intl.message(
+      'WireGuard',
+      name: 'profileImportFormatWireguard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile imported with {count} unsupported nodes skipped`
+  String profileImportSkippedNodes(int count) {
+    return Intl.message(
+      'Profile imported with $count unsupported nodes skipped',
+      name: 'profileImportSkippedNodes',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Nothing will change until you confirm.`
+  String get restorePreviewDescription {
+    return Intl.message(
+      'Nothing will change until you confirm.',
+      name: 'restorePreviewDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profiles: {count}`
+  String restoreProfilesCount(Object count) {
+    return Intl.message(
+      'Profiles: $count',
+      name: 'restoreProfilesCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Scripts: {count}`
+  String restoreScriptsCount(Object count) {
+    return Intl.message(
+      'Scripts: $count',
+      name: 'restoreScriptsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Rules: {count}`
+  String restoreRulesCount(Object count) {
+    return Intl.message(
+      'Rules: $count',
+      name: 'restoreRulesCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Proxy groups: {count}`
+  String restoreProxyGroupsCount(Object count) {
+    return Intl.message(
+      'Proxy groups: $count',
+      name: 'restoreProxyGroupsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Settings included`
+  String get restoreSettingsIncluded {
+    return Intl.message(
+      'Settings included',
+      name: 'restoreSettingsIncluded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This backup does not contain settings`
+  String get restoreSettingsNotIncluded {
+    return Intl.message(
+      'This backup does not contain settings',
+      name: 'restoreSettingsNotIncluded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Raw configuration`
+  String get setupRawConfig {
+    return Intl.message(
+      'Raw configuration',
+      name: 'setupRawConfig',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste a Clash-compatible YAML configuration`
+  String get setupRawConfigDesc {
+    return Intl.message(
+      'Paste a Clash-compatible YAML configuration',
+      name: 'setupRawConfigDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Routes supported apps through ReClash without administrator access`
+  String get setupSystemProxyDesc {
+    return Intl.message(
+      'Routes supported apps through ReClash without administrator access',
+      name: 'setupSystemProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Routes all device traffic; your system may request administrator access when connecting`
+  String get setupTunDesc {
+    return Intl.message(
+      'Routes all device traffic; your system may request administrator access when connecting',
+      name: 'setupTunDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System proxy: on`
+  String get setupSummarySystemProxyOn {
+    return Intl.message(
+      'System proxy: on',
+      name: 'setupSummarySystemProxyOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System proxy: off`
+  String get setupSummarySystemProxyOff {
+    return Intl.message(
+      'System proxy: off',
+      name: 'setupSummarySystemProxyOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN: on`
+  String get setupSummaryTunOn {
+    return Intl.message(
+      'TUN: on',
+      name: 'setupSummaryTunOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN: off`
+  String get setupSummaryTunOff {
+    return Intl.message(
+      'TUN: off',
+      name: 'setupSummaryTunOff',
       desc: '',
       args: [],
     );
@@ -9890,6 +11615,971 @@ class AppLocalizations {
     return Intl.message(
       'Could not import the subscription',
       name: 'lanProfileImportFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Icon preview`
+  String get appIconPreview {
+    return Intl.message(
+      'Icon preview',
+      name: 'appIconPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Install`
+  String get appIconInstall {
+    return Intl.message('Install', name: 'appIconInstall', desc: '', args: []);
+  }
+
+  /// `Connection Doctor`
+  String get connectionDoctor {
+    return Intl.message(
+      'Connection Doctor',
+      name: 'connectionDoctor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Doctor unavailable`
+  String get doctorUnsupportedTitle {
+    return Intl.message(
+      'Doctor unavailable',
+      name: 'doctorUnsupportedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This Core version does not support connection diagnosis.`
+  String get doctorUnsupportedDesc {
+    return Intl.message(
+      'This Core version does not support connection diagnosis.',
+      name: 'doctorUnsupportedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking the connection`
+  String get doctorExaminingTitle {
+    return Intl.message(
+      'Checking the connection',
+      name: 'doctorExaminingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Doctor is following the network path with bounded probes.`
+  String get doctorExaminingDesc {
+    return Intl.message(
+      'The Doctor is following the network path with bounded probes.',
+      name: 'doctorExaminingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not enough evidence`
+  String get doctorInconclusiveTitle {
+    return Intl.message(
+      'Not enough evidence',
+      name: 'doctorInconclusiveTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The check could not prove a fault without guessing.`
+  String get doctorInconclusiveDesc {
+    return Intl.message(
+      'The check could not prove a fault without guessing.',
+      name: 'doctorInconclusiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Environment changed`
+  String get doctorSupersededTitle {
+    return Intl.message(
+      'Environment changed',
+      name: 'doctorSupersededTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The check stopped because the network or configuration changed.`
+  String get doctorSupersededDesc {
+    return Intl.message(
+      'The check stopped because the network or configuration changed.',
+      name: 'doctorSupersededDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check cancelled`
+  String get doctorCancelledTitle {
+    return Intl.message(
+      'Check cancelled',
+      name: 'doctorCancelledTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No diagnosis was changed. You can start another check.`
+  String get doctorCancelledDesc {
+    return Intl.message(
+      'No diagnosis was changed. You can start another check.',
+      name: 'doctorCancelledDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection looks healthy`
+  String get doctorHealthyTitle {
+    return Intl.message(
+      'Connection looks healthy',
+      name: 'doctorHealthyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The observed path completed successfully.`
+  String get doctorHealthyDesc {
+    return Intl.message(
+      'The observed path completed successfully.',
+      name: 'doctorHealthyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The patient is suspiciously healthy.`
+  String get doctorHealthyEasterEgg {
+    return Intl.message(
+      'The patient is suspiciously healthy.',
+      name: 'doctorHealthyEasterEgg',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The packets are unusually well-behaved today.`
+  String get heroStatusEasterEgg {
+    return Intl.message(
+      'The packets are unusually well-behaved today.',
+      name: 'heroStatusEasterEgg',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection is degraded`
+  String get doctorDegradedTitle {
+    return Intl.message(
+      'Connection is degraded',
+      name: 'doctorDegradedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Doctor found a probable problem on the network path.`
+  String get doctorDegradedDesc {
+    return Intl.message(
+      'The Doctor found a probable problem on the network path.',
+      name: 'doctorDegradedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection problem found`
+  String get doctorBrokenTitle {
+    return Intl.message(
+      'Connection problem found',
+      name: 'doctorBrokenTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Doctor confirmed the first failing layer.`
+  String get doctorBrokenDesc {
+    return Intl.message(
+      'The Doctor confirmed the first failing layer.',
+      name: 'doctorBrokenDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Watching real traffic`
+  String get doctorObservingTitle {
+    return Intl.message(
+      'Watching real traffic',
+      name: 'doctorObservingTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No active probes are running. Evidence appears as the app is used.`
+  String get doctorObservingDesc {
+    return Intl.message(
+      'No active probes are running. Evidence appears as the app is used.',
+      name: 'doctorObservingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking connection: {completed}/{total}`
+  String doctorHeroExamining(num completed, num total) {
+    return Intl.message(
+      'Checking connection: $completed/$total',
+      name: 'doctorHeroExamining',
+      desc: '',
+      args: [completed, total],
+    );
+  }
+
+  /// `Connection issue: {layer}`
+  String doctorHeroIssue(String layer) {
+    return Intl.message(
+      'Connection issue: $layer',
+      name: 'doctorHeroIssue',
+      desc: '',
+      args: [layer],
+    );
+  }
+
+  /// `Refresh diagnosis`
+  String get doctorRefresh {
+    return Intl.message(
+      'Refresh diagnosis',
+      name: 'doctorRefresh',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Step {completed} of {total}`
+  String doctorProgress(num completed, num total) {
+    return Intl.message(
+      'Step $completed of $total',
+      name: 'doctorProgress',
+      desc: '',
+      args: [completed, total],
+    );
+  }
+
+  /// `Run check`
+  String get doctorStandardExam {
+    return Intl.message(
+      'Run check',
+      name: 'doctorStandardExam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deep check`
+  String get doctorDeepExam {
+    return Intl.message(
+      'Deep check',
+      name: 'doctorDeepExam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel check`
+  String get doctorCancelExam {
+    return Intl.message(
+      'Cancel check',
+      name: 'doctorCancelExam',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flush DNS cache`
+  String get doctorFlushDns {
+    return Intl.message(
+      'Flush DNS cache',
+      name: 'doctorFlushDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export report`
+  String get doctorExportReport {
+    return Intl.message(
+      'Export report',
+      name: 'doctorExportReport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The report contains diagnostic codes, timing buckets, platform details and recent redacted evidence. It never includes addresses, hostnames, profile, node or app names. Save it as JSON?`
+  String get doctorExportConfirm {
+    return Intl.message(
+      'The report contains diagnostic codes, timing buckets, platform details and recent redacted evidence. It never includes addresses, hostnames, profile, node or app names. Save it as JSON?',
+      name: 'doctorExportConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Diagnosis`
+  String get doctorDetails {
+    return Intl.message('Diagnosis', name: 'doctorDetails', desc: '', args: []);
+  }
+
+  /// `Causal layer`
+  String get doctorLayer {
+    return Intl.message(
+      'Causal layer',
+      name: 'doctorLayer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Evidence scope`
+  String get doctorScope {
+    return Intl.message(
+      'Evidence scope',
+      name: 'doctorScope',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confidence`
+  String get doctorConfidence {
+    return Intl.message(
+      'Confidence',
+      name: 'doctorConfidence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current`
+  String get doctorFresh {
+    return Intl.message('Current', name: 'doctorFresh', desc: '', args: []);
+  }
+
+  /// `Outdated`
+  String get doctorStale {
+    return Intl.message('Outdated', name: 'doctorStale', desc: '', args: []);
+  }
+
+  /// `Evidence`
+  String get doctorEvidence {
+    return Intl.message('Evidence', name: 'doctorEvidence', desc: '', args: []);
+  }
+
+  /// `No usable evidence yet`
+  String get doctorNoEvidence {
+    return Intl.message(
+      'No usable evidence yet',
+      name: 'doctorNoEvidence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Consequence of an earlier fault`
+  String get doctorEvidenceConsequence {
+    return Intl.message(
+      'Consequence of an earlier fault',
+      name: 'doctorEvidenceConsequence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recent checks`
+  String get doctorRecentChecks {
+    return Intl.message(
+      'Recent checks',
+      name: 'doctorRecentChecks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No completed checks yet`
+  String get doctorNoIncidents {
+    return Intl.message(
+      'No completed checks yet',
+      name: 'doctorNoIncidents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What this means`
+  String get doctorLimitations {
+    return Intl.message(
+      'What this means',
+      name: 'doctorLimitations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Core to use connection diagnosis.`
+  String get doctorUnsupportedHint {
+    return Intl.message(
+      'Update Core to use connection diagnosis.',
+      name: 'doctorUnsupportedHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passive observation creates no additional network traffic. Start a check only when you want active probes.`
+  String get doctorPassiveHint {
+    return Intl.message(
+      'Passive observation creates no additional network traffic. Start a check only when you want active probes.',
+      name: 'doctorPassiveHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The environment may have changed. Refresh or run a new check before acting on this result.`
+  String get doctorStaleHint {
+    return Intl.message(
+      'The environment may have changed. Refresh or run a new check before acting on this result.',
+      name: 'doctorStaleHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} evidence events were dropped under load; confidence was not increased.`
+  String doctorEvidenceDropped(num count) {
+    return Intl.message(
+      '$count evidence events were dropped under load; confidence was not increased.',
+      name: 'doctorEvidenceDropped',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Capture`
+  String get doctorLayerCapture {
+    return Intl.message(
+      'Capture',
+      name: 'doctorLayerCapture',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN ingress`
+  String get doctorLayerIngress {
+    return Intl.message(
+      'VPN ingress',
+      name: 'doctorLayerIngress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS`
+  String get doctorLayerDns {
+    return Intl.message('DNS', name: 'doctorLayerDns', desc: '', args: []);
+  }
+
+  /// `Routing`
+  String get doctorLayerRoute {
+    return Intl.message(
+      'Routing',
+      name: 'doctorLayerRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection setup`
+  String get doctorLayerDial {
+    return Intl.message(
+      'Connection setup',
+      name: 'doctorLayerDial',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transport`
+  String get doctorLayerTransport {
+    return Intl.message(
+      'Transport',
+      name: 'doctorLayerTransport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Application response`
+  String get doctorLayerMarker {
+    return Intl.message(
+      'Application response',
+      name: 'doctorLayerMarker',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This app`
+  String get doctorScopeApp {
+    return Intl.message('This app', name: 'doctorScopeApp', desc: '', args: []);
+  }
+
+  /// `Local inbound`
+  String get doctorScopeInbound {
+    return Intl.message(
+      'Local inbound',
+      name: 'doctorScopeInbound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirmed`
+  String get doctorConfidenceConfirmed {
+    return Intl.message(
+      'Confirmed',
+      name: 'doctorConfidenceConfirmed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Probable`
+  String get doctorConfidenceProbable {
+    return Intl.message(
+      'Probable',
+      name: 'doctorConfidenceProbable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Insufficient`
+  String get doctorConfidenceInsufficient {
+    return Intl.message(
+      'Insufficient',
+      name: 'doctorConfidenceInsufficient',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Observed`
+  String get doctorOutcomeSeen {
+    return Intl.message(
+      'Observed',
+      name: 'doctorOutcomeSeen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Succeeded`
+  String get doctorOutcomeSucceeded {
+    return Intl.message(
+      'Succeeded',
+      name: 'doctorOutcomeSucceeded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed`
+  String get doctorOutcomeFailed {
+    return Intl.message(
+      'Failed',
+      name: 'doctorOutcomeFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dropped`
+  String get doctorOutcomeDropped {
+    return Intl.message(
+      'Dropped',
+      name: 'doctorOutcomeDropped',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not applicable`
+  String get doctorOutcomeNotApplicable {
+    return Intl.message(
+      'Not applicable',
+      name: 'doctorOutcomeNotApplicable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Standard`
+  String get doctorModeStandard {
+    return Intl.message(
+      'Standard',
+      name: 'doctorModeStandard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Deep`
+  String get doctorModeDeep {
+    return Intl.message('Deep', name: 'doctorModeDeep', desc: '', args: []);
+  }
+
+  /// `Public IP not measured`
+  String get doctorIpUnavailable {
+    return Intl.message(
+      'Public IP not measured',
+      name: 'doctorIpUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection path`
+  String get doctorPathTitle {
+    return Intl.message(
+      'Connection path',
+      name: 'doctorPathTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App`
+  String get doctorPathApp {
+    return Intl.message('App', name: 'doctorPathApp', desc: '', args: []);
+  }
+
+  /// `VPN / local entry`
+  String get doctorPathIngress {
+    return Intl.message(
+      'VPN / local entry',
+      name: 'doctorPathIngress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS / route`
+  String get doctorPathRoute {
+    return Intl.message(
+      'DNS / route',
+      name: 'doctorPathRoute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy / Internet`
+  String get doctorPathInternet {
+    return Intl.message(
+      'Proxy / Internet',
+      name: 'doctorPathInternet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Response`
+  String get doctorPathResponse {
+    return Intl.message(
+      'Response',
+      name: 'doctorPathResponse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Working`
+  String get doctorPathPassed {
+    return Intl.message(
+      'Working',
+      name: 'doctorPathPassed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Problem here`
+  String get doctorPathFailed {
+    return Intl.message(
+      'Problem here',
+      name: 'doctorPathFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking`
+  String get doctorPathChecking {
+    return Intl.message(
+      'Checking',
+      name: 'doctorPathChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not checked`
+  String get doctorPathUnknown {
+    return Intl.message(
+      'Not checked',
+      name: 'doctorPathUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not required`
+  String get doctorPathNotApplicable {
+    return Intl.message(
+      'Not required',
+      name: 'doctorPathNotApplicable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not checked after an earlier problem`
+  String get doctorPathConsequence {
+    return Intl.message(
+      'Not checked after an earlier problem',
+      name: 'doctorPathConsequence',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Technical details`
+  String get doctorTechnicalDetails {
+    return Intl.message(
+      'Technical details',
+      name: 'doctorTechnicalDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN is not active`
+  String get doctorVpnInactiveTitle {
+    return Intl.message(
+      'VPN is not active',
+      name: 'doctorVpnInactiveTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app expected VPN protection, but the TUN path is not active.`
+  String get doctorVpnInactiveDesc {
+    return Intl.message(
+      'The app expected VPN protection, but the TUN path is not active.',
+      name: 'doctorVpnInactiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test address is reachable`
+  String get doctorEndpointReachableTitle {
+    return Intl.message(
+      'Test address is reachable',
+      name: 'doctorEndpointReachableTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core reached the test address, but the complete protected path was not proven.`
+  String get doctorEndpointReachableDesc {
+    return Intl.message(
+      'Core reached the test address, but the complete protected path was not proven.',
+      name: 'doctorEndpointReachableDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection`
+  String get doctorProtection {
+    return Intl.message(
+      'Protection',
+      name: 'doctorProtection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Active`
+  String get doctorCaptureActive {
+    return Intl.message(
+      'Active',
+      name: 'doctorCaptureActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Inactive`
+  String get doctorCaptureInactive {
+    return Intl.message(
+      'Inactive',
+      name: 'doctorCaptureInactive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not applicable`
+  String get doctorCaptureNotApplicable {
+    return Intl.message(
+      'Not applicable',
+      name: 'doctorCaptureNotApplicable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `VPN`
+  String get doctorPathIngressVpn {
+    return Intl.message(
+      'VPN',
+      name: 'doctorPathIngressVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN`
+  String get doctorPathIngressTun {
+    return Intl.message(
+      'TUN',
+      name: 'doctorPathIngressTun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local proxy`
+  String get doctorPathIngressLocalProxy {
+    return Intl.message(
+      'Local proxy',
+      name: 'doctorPathIngressLocalProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct`
+  String get doctorPathIngressDirect {
+    return Intl.message(
+      'Direct',
+      name: 'doctorPathIngressDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ByeDPI`
+  String get doctorPathIngressByeDpi {
+    return Intl.message(
+      'ByeDPI',
+      name: 'doctorPathIngressByeDpi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show subscription details`
+  String get dashboardShowProvider {
+    return Intl.message(
+      'Show subscription details',
+      name: 'dashboardShowProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Return to connection`
+  String get dashboardShowConnection {
+    return Intl.message(
+      'Return to connection',
+      name: 'dashboardShowConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription active`
+  String get dashboardSubscriptionCurrent {
+    return Intl.message(
+      'Subscription active',
+      name: 'dashboardSubscriptionCurrent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription expired`
+  String get dashboardSubscriptionExpired {
+    return Intl.message(
+      'Subscription expired',
+      name: 'dashboardSubscriptionExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Needs attention`
+  String get dashboardSubscriptionAttention {
+    return Intl.message(
+      'Needs attention',
+      name: 'dashboardSubscriptionAttention',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More details`
+  String get dashboardProviderDetails {
+    return Intl.message(
+      'More details',
+      name: 'dashboardProviderDetails',
       desc: '',
       args: [],
     );

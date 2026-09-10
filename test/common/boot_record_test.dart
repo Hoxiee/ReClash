@@ -101,6 +101,17 @@ void main() {
       expect(decision.failureCount, 0);
     });
 
+    test('does nothing while the last run was parked in the wizard', () {
+      final decision = resolveBootDecision(
+        record: const BootRecord(stage: BootStage.setup, profileId: 7),
+        exitInfo: _exit(AppExitReason.crash),
+        crashReported: true,
+      );
+
+      expect(decision.recovery, BootRecovery.none);
+      expect(decision.failureCount, 0);
+    });
+
     test('does nothing on a first launch', () {
       final decision = resolveBootDecision(
         record: null,

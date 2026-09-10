@@ -104,6 +104,7 @@
   "pasteFromClipboard": "Paste",
   "submit": "Submit",
   "createProfileFromUrlTip": "Do you want to create a profile from {url}?",
+  "subscriptionConfigurationSource": "the supplied configuration",
   "create": "Create",
   "pleaseUploadValidQrcode": "Please upload a valid QR code",
   "blacklistMode": "Blacklist mode",
@@ -182,6 +183,95 @@
   "ipv6Desc": "When enabled, IPv6 traffic can be received",
   "app": "App",
   "general": "General",
+  "notification": "Notification",
+  "notificationDoctorPriorityProblems": "Problems only",
+  "notificationDoctorPriorityAlways": "Always",
+  "notificationAndroidOnly": "Available on Android",
+  "notificationAndroidOnlyDesc": "Foreground notification settings apply only to the Android VPN service.",
+  "notificationContent": "Content",
+  "notificationDetailed": "Detailed notification",
+  "notificationDetailedDesc": "Live status lines and quick actions are shown",
+  "notificationMinimalDesc": "Android keeps the notification, so only the protection status stays",
+  "notificationDoctorPriority": "Connection Doctor priority",
+  "notificationComponents": "Notification components",
+  "notificationComponentsDesc": "Build the notification from live status components.",
+  "notificationAddComponent": "Add component",
+  "notificationComponentsEmpty": "No components added",
+  "notificationConnectionDoctor": "Connection Doctor",
+  "notificationNetworkState": "Network state",
+  "notificationNetworkStateDesc": "Show the current RCX network terrain",
+  "notificationCurrentServer": "Current server",
+  "notificationCurrentServerDesc": "Show the node selected in the group",
+  "notificationSmartRouting": "Smart Routing",
+  "notificationNetworkSpeed": "Network speed",
+  "notificationAutomaticGroup": "Automatic group",
+  "notificationSelectServerGroup": "Choose server group",
+  "notificationNetworkNormal": "Normal",
+  "notificationNetworkWhitelist": "Whitelist",
+  "notificationNetworkPortal": "Captive portal",
+  "notificationNetworkOffline": "Offline",
+  "notificationNetworkUnknown": "Unknown",
+  "notificationMoveUp": "Move up",
+  "notificationMoveDown": "Move down",
+  "notificationReorder": "Reorder",
+  "notificationPreviewNetwork": "Network · Normal",
+  "notificationPreviewServer": "Server · Tokyo 01",
+  "notificationSmartRoutingDesc": "Show the active Smart Routing decision",
+  "notificationNetworkSpeedDesc": "Show current upload and download speed",
+  "notificationSessionTraffic": "Session traffic",
+  "notificationSessionTrafficDesc": "Show uploaded and downloaded traffic for this session",
+  "notificationHideIdleSpeed": "Hide idle speed",
+  "notificationHideIdleSpeedDesc": "Hide speed values while no traffic is flowing",
+  "notificationControls": "Controls",
+  "notificationControlsDesc": "Choose actions available directly from the notification.",
+  "notificationPauseAction": "Pause or resume",
+  "notificationPauseActionDesc": "Show an action that pauses or resumes the VPN",
+  "notificationPrivacy": "Privacy",
+  "notificationHideSensitive": "Hide sensitive details on lock screen",
+  "notificationHideSensitiveDesc": "Hide profile, routing and diagnostic details while the device is locked",
+  "notificationPreviewProfile": "ReClash · Current profile",
+  "notificationPreviewDoctor": "Connection Doctor: no problems",
+  "notificationPreviewRoute": "Smart Routing · Automatic route",
+  "notificationPreviewSpeed": "↓ 12.4 MB/s  ↑ 1.8 MB/s",
+  "notificationPreviewSession": "Session · ↓ 1.2 GB  ↑ 184 MB",
+  "notificationProtectionTitle": "Protection status",
+  "notificationProtectionDesc": "The persistent notification shows whether your protection is active.",
+  "notificationServiceChannel": "Service channel",
+  "notificationSubscriptionChannel": "Subscription reminders channel",
+  "notificationSubscriptionReminders": "Subscription reminders",
+  "notificationSubscriptionRemindersDesc": "Notify when a subscription needs attention",
+  "notificationDelivery": "Android delivery",
+  "notificationDeliveryChecking": "Checking Android notification access",
+  "notificationDeliveryPermissionDisabled": "Notifications are blocked for ReClash",
+  "notificationDeliveryServiceDisabled": "The ReClash service channel is disabled",
+  "notificationDeliverySubscriptionDisabled": "The subscription reminders channel is disabled",
+  "notificationDeliveryReady": "Notifications can be delivered",
+  "notificationDeliveryFix": "Fix",
+  "notificationPreviewScenario": "Preview scenario",
+  "notificationScenarioNormal": "Normal",
+  "notificationScenarioRouting": "Routing",
+  "notificationScenarioProblem": "Problem",
+  "notificationScenarioPaused": "Paused",
+  "notificationScenarioLockScreen": "Lock screen",
+  "notificationPreviewLocked": "ReClash · Protected details hidden",
+  "notificationPreviewPaused": "ReClash · Protection paused",
+  "notificationPreviewProblem": "Connection Doctor: problem detected",
+  "notificationConnectionDoctorDesc": "Show the Connection Doctor verdict",
+  "notificationComponentsActive": "In the notification",
+  "notificationComponentsOrderHint": "Lines follow this order. The first line that has data is shown while the notification is collapsed.",
+  "notificationComponentsEmptyDesc": "Without components the notification shows only the protection status.",
+  "notificationComponentBehaviour": "Behaviour",
+  "notificationCollapsedLine": "Shown while the notification is collapsed",
+  "notificationRemoveComponent": "Remove from notification",
+  "notificationVisibilityAlways": "Always shown",
+  "notificationVisibilityDoctorProblems": "Shown while a problem is detected",
+  "notificationVisibilitySmartRoutingOn": "Shown while Smart routing is on",
+  "notificationVisibilityCurrentServer": "Shown while a server group is resolved",
+  "notificationVisibilitySpeedIdle": "Hidden while no traffic is flowing",
+  "notificationVisibilitySessionTraffic": "Shown while the session has traffic",
+  "notificationBlockedSmartRoutingOff": "Smart routing is off, so this line is hidden",
+  "notificationBlockedNoServerGroup": "No server group is resolved, so this line is hidden",
+  "notificationServerGroupMissing": "The chosen group is missing from the profile",
   "identity": "Identity",
   "animations": "Animations",
   "extra": "Extra",
@@ -753,6 +843,8 @@
   "smartRoutingIntro": "Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.",
   "smartRoutingRuleOnly": "Available in Rule mode only",
   "smartRoutingSearching": "Picking a server…",
+  "smartRoutingWaitingTunnel": "Smart routing is on · waiting for the tunnel",
+  "smartRoutingWaitingNetwork": "Smart routing is waiting for a network",
   "smartRoutingOn": "Smart routing is on",
   "smartRoutingRestricted": "Restricted network · local services stay direct",
   "smartRoutingPortal": "Wi-Fi sign-in required",
@@ -968,6 +1060,30 @@
   "smartRoutingSectionHealth": "Servers",
   "smartRoutingSectionRound": "Decision",
   "smartRoutingSectionHistory": "Earlier switches",
+  "smartRoutingTabOverview": "Overview",
+  "smartRoutingTabDetails": "Details",
+  "smartRoutingSectionEngine": "Engine",
+  "smartRoutingServiceRoutesEmpty": "No service routes are set up",
+  "smartRoutingMeasuredOver": "Measured over {duration}",
+  "@smartRoutingMeasuredOver": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingLastFailover": "Last switchover",
+  "smartRoutingAverageFailover": "Average switchover",
+  "smartRoutingEngineAvailable": "Time with a working route",
+  "smartRoutingEngineReportAge": "Report age",
+  "smartRoutingEnginePreset": "Region preset",
+  "smartRoutingEngineMode": "Core mode",
+  "smartRoutingEngineTerrain": "Terrain code",
+  "smartRoutingEngineTransport": "Link transport",
+  "smartRoutingEngineLinkAge": "Link age",
+  "smartRoutingEnginePin": "Pinned server",
+  "smartRoutingEngineDeepScan": "Deep scan",
+  "smartRoutingEngineLanes": "Service lanes",
   "smartRoutingWhatWasTested": "Link check",
   "smartRoutingCanariesAnswered": "{answered} of {total} answered",
   "smartRoutingNodeChecks": "Server checks",
@@ -1030,6 +1146,84 @@
   "smartRoutingResetSection": "Reset to preset",
   "smartRoutingResetSectionDesc": "Restores the region defaults and keeps smart routing on",
   "smartRoutingEmpty": "Nothing measured yet",
+  "smartRoutingServiceRoutes": "Service routes",
+  "smartRoutingServiceYouTube": "YouTube without ads",
+  "smartRoutingServiceGemini": "Gemini access",
+  "smartRoutingServiceNoCandidates": "No specialist selectors",
+  "smartRoutingServiceCandidates": "{count} specialist selectors",
+  "smartRoutingServiceStatus": "Status",
+  "smartRoutingServiceVia": "Through {node}",
+  "@smartRoutingServiceVia": {
+    "placeholders": {
+      "node": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingServicePending": "Waiting for the engine",
+  "smartRoutingServiceFallbackActiveMain": "No specialist ready · using the main route",
+  "smartRoutingServiceFallbackActiveReject": "No specialist ready · service blocked",
+  "smartRoutingServiceReady": "{eligible} of {total} servers ready",
+  "@smartRoutingServiceReady": {
+    "placeholders": {
+      "eligible": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "smartRoutingServiceMatchedNone": "No servers match yet",
+  "smartRoutingServiceRoute": "Route",
+  "smartRoutingServiceEnabled": "Use service route",
+  "smartRoutingServiceEnabledDesc": "Send this service through a matching specialist node",
+  "smartRoutingServiceFallback": "When no specialist works",
+  "smartRoutingServiceFallbackDesc": "Choose what the hidden service selector uses while specialists are unavailable",
+  "smartRoutingServiceFallbackMain": "Use the main Smart Routing node",
+  "smartRoutingServiceFallbackReject": "Block the service",
+  "smartRoutingServiceSources": "Specialist sources",
+  "smartRoutingServiceProviderSource": "Subscription manifest",
+  "smartRoutingServiceProviderCandidates": "{count} selectors supplied by the provider",
+  "smartRoutingServiceManual": "Manual selectors",
+  "smartRoutingServiceManualEmpty": "No manual selectors",
+  "smartRoutingServiceManualEmptyDesc": "Add a name fragment and, optionally, its provider",
+  "smartRoutingServiceAnyProvider": "Any provider",
+  "smartRoutingServiceProvider": "Provider: {provider}",
+  "smartRoutingServiceTokenTooLong": "{label} must be at most 64 UTF-8 bytes",
+  "smartRoutingServiceManualSelector": "Manual specialist selector",
+  "smartRoutingServiceNameContains": "Name contains",
+  "smartRoutingServiceNameContainsDesc": "Case-sensitive fragment of the node name",
+  "smartRoutingServiceProviderOptional": "Provider (optional)",
+  "smartRoutingServiceProviderDesc": "Exact provider name; leave empty to match any provider",
+  "@smartRoutingServiceCandidates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingServiceProviderCandidates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@smartRoutingServiceProvider": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "@smartRoutingServiceTokenTooLong": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "@smartRoutingCanariesAnswered": {
     "placeholders": {
       "answered": {
@@ -1116,7 +1310,6 @@
   "systemColor": "Use system color",
   "systemColorDesc": "Take the accent color from the OS (Material You)",
   "systemSeed": "System seed",
-  "appIcon": "App icon",
   "appIconChangeNote": "The launcher redraws the icon in a few seconds. A pinned shortcut may disappear on some launchers.",
   "appIconPulse": "Pulse",
   "appIconGlacier": "Glacier",
@@ -1124,7 +1317,8 @@
   "appIconVelvet": "Velvet",
   "appIconSolar": "Solar",
   "appIconCircuit": "Circuit",
-  "appIconPrism": "Prism",
+  "appIconEcho": "Echo",
+  "appIconShift": "Shift",
   "dashboardStyle": "Dashboard style",
   "classicDashboard": "Classic",
   "classicDashboardDesc": "Tile grid with a start button",
@@ -1304,11 +1498,64 @@
   "setupRegionRecommended": "Recommended for your language",
   "setupAutoRunUnavailable": "Add a profile to enable automatic connection",
   "setupSummaryTitle": "Setup summary",
+  "setupPermissionsTitle": "Permissions",
   "setupSummaryNoProfile": "No VPN profile — VPN remains off; ByeDPI-only is available",
   "setupSummaryProfile": "Profile: {name}",
   "setupSummaryRouting": "Smart Routing: {value}",
   "setupSummaryAutoRunOn": "Automatic connection: on",
   "setupSummaryAutoRunOff": "Automatic connection: off",
+  "restorePreviewTitle": "Review restore",
+  "profileImportInvalidConfig": "The profile configuration is invalid",
+  "profileImportFileReadFailed": "Could not read the selected file",
+  "profileImportEmptyResponse": "The server returned an empty profile",
+  "profileImportUnsupportedLink": "The import link is damaged or unsupported",
+  "profileImportFailed": "Could not import the profile",
+  "profileImportSuccess": "Profile imported",
+  "profileImportSuccessSummary": "Imported {format} · {client} · {nodes} nodes · {groups} groups",
+  "@profileImportSuccessSummary": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      },
+      "client": {
+        "type": "String"
+      },
+      "nodes": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "profileImportFormatClash": "Clash",
+  "profileImportFormatLinks": "Share links",
+  "profileImportFormatXray": "Xray",
+  "profileImportFormatSingbox": "sing-box",
+  "profileImportFormatWireguard": "WireGuard",
+  "profileImportSkippedNodes": "Profile imported with {count} unsupported nodes skipped",
+  "@profileImportSkippedNodes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restorePreviewDescription": "Nothing will change until you confirm.",
+  "restoreProfilesCount": "Profiles: {count}",
+  "restoreScriptsCount": "Scripts: {count}",
+  "restoreRulesCount": "Rules: {count}",
+  "restoreProxyGroupsCount": "Proxy groups: {count}",
+  "restoreSettingsIncluded": "Settings included",
+  "restoreSettingsNotIncluded": "This backup does not contain settings",
+  "setupRawConfig": "Raw configuration",
+  "setupRawConfigDesc": "Paste a Clash-compatible YAML configuration",
+  "setupSystemProxyDesc": "Routes supported apps through ReClash without administrator access",
+  "setupTunDesc": "Routes all device traffic; your system may request administrator access when connecting",
+  "setupSummarySystemProxyOn": "System proxy: on",
+  "setupSummarySystemProxyOff": "System proxy: off",
+  "setupSummaryTunOn": "TUN: on",
+  "setupSummaryTunOff": "TUN: off",
   "setupPermissionDeferred": "Requested on first connection",
   "setupPermissionBattery": "Battery optimization",
   "setupPermissionBatteryDesc": "Allow ReClash to keep the VPN active in the background",
@@ -1370,5 +1617,140 @@
     }
   },
   "lanProfileImportStartFailed": "Could not start local sharing",
-  "lanProfileImportFailed": "Could not import the subscription"
+  "lanProfileImportFailed": "Could not import the subscription",
+  "appIconPreview": "Icon preview",
+  "appIconInstall": "Install",
+  "connectionDoctor": "Connection Doctor",
+  "doctorUnsupportedTitle": "Doctor unavailable",
+  "doctorUnsupportedDesc": "This Core version does not support connection diagnosis.",
+  "doctorExaminingTitle": "Checking the connection",
+  "doctorExaminingDesc": "The Doctor is following the network path with bounded probes.",
+  "doctorInconclusiveTitle": "Not enough evidence",
+  "doctorInconclusiveDesc": "The check could not prove a fault without guessing.",
+  "doctorSupersededTitle": "Environment changed",
+  "doctorSupersededDesc": "The check stopped because the network or configuration changed.",
+  "doctorCancelledTitle": "Check cancelled",
+  "doctorCancelledDesc": "No diagnosis was changed. You can start another check.",
+  "doctorHealthyTitle": "Connection looks healthy",
+  "doctorHealthyDesc": "The observed path completed successfully.",
+  "doctorHealthyEasterEgg": "The patient is suspiciously healthy.",
+  "heroStatusEasterEgg": "The packets are unusually well-behaved today.",
+  "doctorDegradedTitle": "Connection is degraded",
+  "doctorDegradedDesc": "The Doctor found a probable problem on the network path.",
+  "doctorBrokenTitle": "Connection problem found",
+  "doctorBrokenDesc": "The Doctor confirmed the first failing layer.",
+  "doctorObservingTitle": "Watching real traffic",
+  "doctorObservingDesc": "No active probes are running. Evidence appears as the app is used.",
+  "doctorHeroExamining": "Checking connection: {completed}/{total}",
+  "@doctorHeroExamining": {
+    "placeholders": {
+      "completed": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "doctorHeroIssue": "Connection issue: {layer}",
+  "@doctorHeroIssue": {
+    "placeholders": {
+      "layer": {
+        "type": "String"
+      }
+    }
+  },
+  "doctorRefresh": "Refresh diagnosis",
+  "doctorProgress": "Step {completed} of {total}",
+  "@doctorProgress": {
+    "placeholders": {
+      "completed": {
+        "type": "num"
+      },
+      "total": {
+        "type": "num"
+      }
+    }
+  },
+  "doctorStandardExam": "Run check",
+  "doctorDeepExam": "Deep check",
+  "doctorCancelExam": "Cancel check",
+  "doctorFlushDns": "Flush DNS cache",
+  "doctorExportReport": "Export report",
+  "doctorExportConfirm": "The report contains diagnostic codes, timing buckets, platform details and recent redacted evidence. It never includes addresses, hostnames, profile, node or app names. Save it as JSON?",
+  "doctorDetails": "Diagnosis",
+  "doctorLayer": "Causal layer",
+  "doctorScope": "Evidence scope",
+  "doctorConfidence": "Confidence",
+  "doctorFresh": "Current",
+  "doctorStale": "Outdated",
+  "doctorEvidence": "Evidence",
+  "doctorNoEvidence": "No usable evidence yet",
+  "doctorEvidenceConsequence": "Consequence of an earlier fault",
+  "doctorRecentChecks": "Recent checks",
+  "doctorNoIncidents": "No completed checks yet",
+  "doctorLimitations": "What this means",
+  "doctorUnsupportedHint": "Update Core to use connection diagnosis.",
+  "doctorPassiveHint": "Passive observation creates no additional network traffic. Start a check only when you want active probes.",
+  "doctorStaleHint": "The environment may have changed. Refresh or run a new check before acting on this result.",
+  "doctorEvidenceDropped": "{count} evidence events were dropped under load; confidence was not increased.",
+  "@doctorEvidenceDropped": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "doctorLayerCapture": "Capture",
+  "doctorLayerIngress": "VPN ingress",
+  "doctorLayerDns": "DNS",
+  "doctorLayerRoute": "Routing",
+  "doctorLayerDial": "Connection setup",
+  "doctorLayerTransport": "Transport",
+  "doctorLayerMarker": "Application response",
+  "doctorScopeApp": "This app",
+  "doctorScopeInbound": "Local inbound",
+  "doctorConfidenceConfirmed": "Confirmed",
+  "doctorConfidenceProbable": "Probable",
+  "doctorConfidenceInsufficient": "Insufficient",
+  "doctorOutcomeSeen": "Observed",
+  "doctorOutcomeSucceeded": "Succeeded",
+  "doctorOutcomeFailed": "Failed",
+  "doctorOutcomeDropped": "Dropped",
+  "doctorOutcomeNotApplicable": "Not applicable",
+  "doctorModeStandard": "Standard",
+  "doctorModeDeep": "Deep",
+  "doctorIpUnavailable": "Public IP not measured",
+  "doctorPathTitle": "Connection path",
+  "doctorPathApp": "App",
+  "doctorPathIngress": "VPN / local entry",
+  "doctorPathRoute": "DNS / route",
+  "doctorPathInternet": "Proxy / Internet",
+  "doctorPathResponse": "Response",
+  "doctorPathPassed": "Working",
+  "doctorPathFailed": "Problem here",
+  "doctorPathChecking": "Checking",
+  "doctorPathUnknown": "Not checked",
+  "doctorPathNotApplicable": "Not required",
+  "doctorPathConsequence": "Not checked after an earlier problem",
+  "doctorTechnicalDetails": "Technical details",
+  "doctorVpnInactiveTitle": "VPN is not active",
+  "doctorVpnInactiveDesc": "The app expected VPN protection, but the TUN path is not active.",
+  "doctorEndpointReachableTitle": "Test address is reachable",
+  "doctorEndpointReachableDesc": "Core reached the test address, but the complete protected path was not proven.",
+  "doctorProtection": "Protection",
+  "doctorCaptureActive": "Active",
+  "doctorCaptureInactive": "Inactive",
+  "doctorCaptureNotApplicable": "Not applicable",
+  "doctorPathIngressVpn": "VPN",
+  "doctorPathIngressTun": "TUN",
+  "doctorPathIngressLocalProxy": "Local proxy",
+  "doctorPathIngressDirect": "Direct",
+  "doctorPathIngressByeDpi": "ByeDPI",
+  "dashboardShowProvider": "Show subscription details",
+  "dashboardShowConnection": "Return to connection",
+  "dashboardSubscriptionCurrent": "Subscription active",
+  "dashboardSubscriptionExpired": "Subscription expired",
+  "dashboardSubscriptionAttention": "Needs attention",
+  "dashboardProviderDetails": "More details"
 }

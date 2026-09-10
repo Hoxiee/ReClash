@@ -8,6 +8,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/application_setting.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/views/setup/steps/finish.dart';
+import 'package:reclash/views/setup/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,24 +29,29 @@ class _ExitingSystemAction extends SystemAction {
 }
 
 class _RecordingProfilesAction extends ProfilesAction {
-  static final List<bool> urlKeepCurrentPage = [];
+  static final List<ProfileImportRequest> requests = [];
   static final List<int> deletedIds = [];
   static Profile? nextProfile;
 
   @override
-  Future<Profile?> addProfileFormURL(
-    String url, {
-    SubscriptionClient client = SubscriptionClient.auto,
-    String? name,
-    String customUserAgent = '',
-    bool keepCurrentPage = false,
-  }) async {
-    urlKeepCurrentPage.add(keepCurrentPage);
+  Future<ProfileImportResult> importProfile(
+    ProfileImportRequest request,
+  ) async {
+    requests.add(request);
     final profile = nextProfile;
     if (profile != null) {
       ref.read(profilesProvider.notifier).put(profile);
+      return ProfileImportResult.imported(
+        profile,
+        const ProfileImportSummary(
+          format: ProfileImportFormat.clash,
+          nodeCount: 0,
+          groupCount: 0,
+          hasProviders: false,
+        ),
+      );
     }
-    return profile;
+    return const ProfileImportResult.cancelled();
   }
 
   @override
@@ -56,26 +62,58 @@ class _RecordingProfilesAction extends ProfilesAction {
 }
 
 class _RestoringBackupAction extends BackupAction {
+  static int prepareCalls = 0;
+  static int discardCalls = 0;
+  static int applyCalls = 0;
+  static RestoreOption? appliedOption;
+  static const prepared = PreparedRestore(
+    stagingPath: '/tmp/setup-restore',
+    data: MigrationData(),
+    summary: RestoreSummary(
+      profiles: 1,
+      scripts: 0,
+      rules: 0,
+      proxyGroups: 0,
+      hasSettings: true,
+    ),
+  );
+
   @override
-  Future<bool> restorePickedFile(RestoreOption option) async {
-    ref
-        .read(appSettingProvider.notifier)
-        .update(
-          (state) => state.copyWith(
-            disclaimerAccepted: false,
-            crashlyticsTip: false,
-            crashlytics: true,
-            setupCompleted: true,
-            setupStep: 0,
-          ),
+  Future<PreparedRestore?> preparePickedRestore() async {
+    prepareCalls++;
+    return prepared;
+  }
+
+  @override
+  Future<void> discardPreparedRestore(PreparedRestore prepared) async {
+    discardCalls++;
+  }
+
+  @override
+  Future<void> applyPreparedRestore(
+    PreparedRestore prepared,
+    RestoreOption option, {
+    RestoreApplyContext context = const RestoreApplyContext(),
+  }) async {
+    applyCalls++;
+    appliedOption = option;
+    final restored = ref
+        .read(appSettingProvider)
+        .copyWith(
+          disclaimerAccepted: false,
+          crashlyticsTip: false,
+          crashlytics: true,
+          setupCompleted: true,
+          setupStep: 0,
         );
-    return true;
+    ref.read(appSettingProvider.notifier).value =
+        context.mergeAppSettings?.call(restored) ?? restored;
   }
 }
 
 class _TestPermissionGateway implements SetupPermissionGateway {
   bool notificationGranted;
-  bool batteryGranted;
+  bool batteryGranted = false;
   Error? notificationCheckError;
   Error? notificationRequestError;
   Error? batteryOpenError;
@@ -86,10 +124,7 @@ class _TestPermissionGateway implements SetupPermissionGateway {
   int appSettingsOpens = 0;
   int batterySettingsOpens = 0;
 
-  _TestPermissionGateway({
-    this.notificationGranted = false,
-    this.batteryGranted = false,
-  });
+  _TestPermissionGateway({this.notificationGranted = false});
 
   @override
   bool get isAndroid => true;
@@ -135,6 +170,7 @@ Future<ProviderContainer> _pump(
   Size size = const Size(1000, 1600),
   double textScale = 1,
   bool disableAnimations = false,
+  Locale? locale,
   List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
@@ -156,10 +192,13 @@ Future<ProviderContainer> _pump(
   // them, so the test has to hold them too or a step's write is thrown away.
   container.listen(appSettingProvider, (_, _) {});
   container.listen(smartRoutingSettingProvider, (_, _) {});
+  container.listen(networkSettingProvider, (_, _) {});
+  container.listen(patchClashConfigProvider, (_, _) {});
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
       child: TestApp(
+        locale: locale,
         homeBuilder: (child) => MediaQuery(
           data: MediaQueryData(
             size: size,
@@ -187,6 +226,10 @@ Future<void> _toSubscription(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+Future<void> _toRevisitSubscription(WidgetTester tester) async {
+  await _toLegal(tester);
+}
+
 Future<void> _toFinish(WidgetTester tester) async {
   await _toSubscription(tester);
   await tester.tap(
@@ -194,6 +237,22 @@ Future<void> _toFinish(WidgetTester tester) async {
   );
   await tester.pumpAndSettle();
 }
+
+ScrollPosition _cardScroll(WidgetTester tester) {
+  return tester
+      .state<ScrollableState>(
+        find.descendant(
+          of: find.byType(SetupScrollCard),
+          matching: find.byType(Scrollable),
+        ),
+      )
+      .position;
+}
+
+Finder _stepScroll() => find.descendant(
+  of: find.byType(SetupStepScaffold),
+  matching: find.byType(SingleChildScrollView),
+);
 
 Future<ProviderContainer> _pumpFinish(
   WidgetTester tester,
@@ -212,9 +271,13 @@ Future<ProviderContainer> _pumpFinish(
 void main() {
   setUp(() {
     _ExitingSystemAction.calls.clear();
-    _RecordingProfilesAction.urlKeepCurrentPage.clear();
+    _RecordingProfilesAction.requests.clear();
     _RecordingProfilesAction.deletedIds.clear();
     _RecordingProfilesAction.nextProfile = null;
+    _RestoringBackupAction.prepareCalls = 0;
+    _RestoringBackupAction.discardCalls = 0;
+    _RestoringBackupAction.applyCalls = 0;
+    _RestoringBackupAction.appliedOption = null;
   });
 
   testWidgets('the first step picks a language and applies it at once', (
@@ -227,6 +290,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(appSettingProvider).locale, 'ru');
+  });
+
+  testWidgets('the language list scrolls inside its own bounded card', (
+    tester,
+  ) async {
+    await _pump(tester, size: const Size(400, 900));
+
+    expect(_stepScroll(), findsNothing);
+    expect(_cardScroll(tester).maxScrollExtent, greaterThan(0));
+    expect(find.text('System language'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Next'), findsOneWidget);
+  });
+
+  testWidgets('the stored language is scrolled into view on open', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      appSettings: const AppSettingProps(locale: 'zh_CN'),
+      size: const Size(400, 900),
+    );
+
+    expect(_cardScroll(tester).pixels, greaterThan(0));
+    expect(find.text('简体中文'), findsOneWidget);
+  });
+
+  testWidgets('a screen too short for a bounded list scrolls as one page', (
+    tester,
+  ) async {
+    await _pump(tester, size: const Size(360, 520), textScale: 1.5);
+
+    expect(_stepScroll(), findsOneWidget);
+    expect(_cardScroll(tester).maxScrollExtent, 0);
   });
 
   testWidgets('refusing the disclaimer exits without recording consent', (
@@ -254,6 +350,43 @@ void main() {
     expect(find.text('Add a connection profile'), findsOne);
   });
 
+  testWidgets('revisit skips legal and preserves privacy settings', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      appSettings: const AppSettingProps(
+        disclaimerAccepted: true,
+        crashlytics: true,
+        setupCompleted: true,
+      ),
+      child: const SetupWizard(revisit: true),
+    );
+    await _toRevisitSubscription(tester);
+
+    final settings = container.read(appSettingProvider);
+    expect(find.text('Before you continue'), findsNothing);
+    expect(find.text('Add a connection profile'), findsOneWidget);
+    expect(settings.disclaimerAccepted, isTrue);
+    expect(settings.crashlytics, isTrue);
+  });
+
+  testWidgets('revisit has no consent exit action', (tester) async {
+    final container = await _pump(
+      tester,
+      appSettings: const AppSettingProps(
+        disclaimerAccepted: true,
+        setupCompleted: true,
+      ),
+      child: const SetupWizard(revisit: true),
+    );
+    await _toRevisitSubscription(tester);
+
+    expect(find.text('Do not agree and exit'), findsNothing);
+    expect(container.read(appSettingProvider).disclaimerAccepted, isTrue);
+    expect(_ExitingSystemAction.calls, isEmpty);
+  });
+
   testWidgets('an empty profile list offers the three ways to add one', (
     tester,
   ) async {
@@ -263,6 +396,7 @@ void main() {
     expect(find.text('QR code'), findsOne);
     expect(find.text('File'), findsOne);
     expect(find.text('URL'), findsOne);
+    expect(find.text('Raw configuration'), findsOne);
     expect(find.text('Continue without a profile'), findsNWidgets(2));
   });
 
@@ -283,8 +417,51 @@ void main() {
     await tester.tap(find.text('Submit'));
     await tester.pumpAndSettle();
 
-    expect(_RecordingProfilesAction.urlKeepCurrentPage, [true]);
+    expect(_RecordingProfilesAction.requests, [
+      isA<ProfileLinkImportRequest>().having(
+        (request) => request.url,
+        'url',
+        'https://example.com/sub',
+      ),
+    ]);
     expect(find.byType(SetupWizard), findsOne);
+  });
+
+  testWidgets('desktop QR import keeps the wizard on screen', (tester) async {
+    if (!system.isDesktop) return;
+    await _pump(
+      tester,
+      overrides: [
+        profilesActionProvider.overrideWith(_RecordingProfilesAction.new),
+      ],
+    );
+    await _toSubscription(tester);
+
+    await tester.tap(find.text('QR code'));
+    await tester.pumpAndSettle();
+
+    expect(_RecordingProfilesAction.requests, [
+      isA<ProfileQrCodeImportRequest>(),
+    ]);
+    expect(find.byType(SetupWizard), findsOneWidget);
+  });
+
+  testWidgets('empty and malformed URLs show inline validation', (
+    tester,
+  ) async {
+    await _pump(tester);
+    await _toSubscription(tester);
+    await tester.tap(find.text('URL'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Submit'));
+    await tester.pump();
+    expect(find.text('Please enter the profile URL'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'htps://example.com/sub');
+    await tester.tap(find.text('Submit'));
+    await tester.pump();
+    expect(find.text('Please enter a valid profile URL'), findsOneWidget);
   });
 
   testWidgets('the empty step offers restoring from a backup', (tester) async {
@@ -294,21 +471,28 @@ void main() {
     expect(find.text('Restore from a backup'), findsOne);
   });
 
-  testWidgets('declining a file after restore leaves the wizard intact', (
+  testWidgets('cancelling restore preview leaves the wizard intact', (
     tester,
   ) async {
-    await _pump(tester);
+    await _pump(
+      tester,
+      overrides: [
+        backupActionProvider.overrideWith(_RestoringBackupAction.new),
+      ],
+    );
     await _toSubscription(tester);
 
     await tester.tap(find.text('Restore from a backup'));
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Restore all data'), findsOne);
 
-    await tester.tap(find.text('Restore all data'));
-    // The loading overlay's minimum display time is a one-second timer.
-    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
+    expect(_RestoringBackupAction.prepareCalls, 1);
+    expect(_RestoringBackupAction.discardCalls, 1);
+    expect(_RestoringBackupAction.applyCalls, 0);
     expect(find.byType(SetupWizard), findsOne);
     expect(find.text('Restore all data'), findsNothing);
   });
@@ -329,11 +513,17 @@ void main() {
     await _toSubscription(tester);
 
     await tester.tap(find.text('Restore from a backup'));
+    await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Restore all data'));
+    await tester.tap(find.text('Confirm'));
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
+    expect(_RestoringBackupAction.prepareCalls, 1);
+    expect(_RestoringBackupAction.discardCalls, 0);
+    expect(_RestoringBackupAction.applyCalls, 1);
+    expect(_RestoringBackupAction.appliedOption, RestoreOption.all);
     final settings = container.read(appSettingProvider);
     expect(settings.disclaimerAccepted, isTrue);
     expect(settings.crashlyticsTip, isTrue);
@@ -361,6 +551,35 @@ void main() {
     expect(find.text('QR code'), findsNothing);
     expect(find.text('Provider'), findsOne);
     expect(find.text('Next'), findsOne);
+  });
+
+  testWidgets('undialable profile warns and leaves auto-run disabled', (
+    tester,
+  ) async {
+    const imported = Profile(
+      id: 1,
+      label: 'Blocked provider',
+      autoUpdateDuration: defaultUpdateDuration,
+      undialableNodes: true,
+    );
+    _RecordingProfilesAction.nextProfile = imported;
+    final container = await _pump(
+      tester,
+      overrides: [
+        profilesActionProvider.overrideWith(_RecordingProfilesAction.new),
+      ],
+    );
+    await _toSubscription(tester);
+
+    await tester.tap(find.text('URL'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'https://example.com/sub');
+    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('None of the nodes'), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(container.read(appSettingProvider).autoRun, isFalse);
   });
 
   testWidgets('picking a region writes the preset and turns the engine on', (
@@ -654,6 +873,25 @@ void main() {
     expect(props.enabled, isFalse);
   });
 
+  testWidgets('system locale is used for the region recommendation', (
+    tester,
+  ) async {
+    final container = await _pump(tester, locale: const Locale('ru'));
+    await tester.tap(find.text('Далее'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Согласен'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Продолжить без профиля'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Рекомендуется для вашего языка'), findsOneWidget);
+    final props = container.read(smartRoutingSettingProvider);
+    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.enabled, isFalse);
+  });
+
   testWidgets('auto-run is disabled without a profile and summarized', (
     tester,
   ) async {
@@ -693,6 +931,33 @@ void main() {
     expect(find.text('Done and connect'), findsOneWidget);
   });
 
+  testWidgets('revisit never promises to connect on completion', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      profiles: const [
+        Profile(
+          id: 1,
+          label: 'Provider',
+          autoUpdateDuration: defaultUpdateDuration,
+        ),
+      ],
+      appSettings: const AppSettingProps(
+        autoRun: true,
+        disclaimerAccepted: true,
+        setupCompleted: true,
+      ),
+      child: const SetupWizard(revisit: true),
+    );
+    await _toRevisitSubscription(tester);
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Done'), findsOneWidget);
+    expect(find.text('Done and connect'), findsNothing);
+  });
+
   testWidgets('panel defaults take priority over auto-run recommendation', (
     tester,
   ) async {
@@ -721,20 +986,29 @@ void main() {
     expect(container.read(profilesProvider), [imported]);
   });
 
-  testWidgets('reduced motion expands the disclaimer without resizing', (
+  testWidgets('the disclaimer reads in place with the licence outside it', (
     tester,
   ) async {
-    await _pump(tester, disableAnimations: true);
+    await _pump(tester);
     await _toLegal(tester);
-    expect(find.byType(AnimatedSize), findsNothing);
 
-    await tester.tap(find.text('Read the full disclaimer'));
-    await tester.pump();
-
-    expect(find.byType(AnimatedSize), findsNothing);
     expect(
-      find.textContaining('non-commercial uses', findRichText: true),
+      find.descendant(
+        of: find.byType(SetupScrollCard),
+        matching: find.textContaining(
+          'non-commercial uses',
+          findRichText: true,
+        ),
+      ),
       findsOneWidget,
+    );
+    expect(find.text('GPL-3.0'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(SetupScrollCard),
+        matching: find.text('GPL-3.0'),
+      ),
+      findsNothing,
     );
   });
 
@@ -775,6 +1049,65 @@ void main() {
       isA<Text>().having((text) => text.data, 'label', 'Next'),
     );
   });
+
+  testWidgets('desktop routing controls update settings and summary', (
+    tester,
+  ) async {
+    if (!system.isDesktop) return;
+    final container = await _pump(tester);
+    await _toFinish(tester);
+
+    expect(find.text('Connection'), findsOneWidget);
+    expect(find.text('Setup summary'), findsOneWidget);
+    expect(find.text('System proxy'), findsOneWidget);
+    expect(find.text('TUN'), findsOneWidget);
+    await tester.tap(find.text('System proxy'));
+    await tester.tap(find.text('TUN'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(networkSettingProvider).systemProxy, isFalse);
+    expect(container.read(patchClashConfigProvider).tun.enable, isTrue);
+    expect(find.text('System proxy: off'), findsOneWidget);
+    expect(find.text('TUN: on'), findsOneWidget);
+  });
+
+  testWidgets('revisit without a profile preserves stored auto-run', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      appSettings: const AppSettingProps(
+        autoRun: true,
+        disclaimerAccepted: true,
+        setupCompleted: true,
+      ),
+      child: const SetupWizard.revisit(),
+    );
+    await _toRevisitSubscription(tester);
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Continue without a profile'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(container.read(appSettingProvider).autoRun, isTrue);
+    expect(
+      find.text('Add a profile to enable automatic connection'),
+      findsNWidgets(2),
+    );
+  });
+
+  testWidgets(
+    'sticky footer keeps the primary action outside the scroll view',
+    (tester) async {
+      await _pump(tester, size: const Size(360, 520), textScale: 1.5);
+      await _toLegal(tester);
+
+      final action = find.widgetWithText(FilledButton, 'Agree');
+      final scrollable = find.byType(SingleChildScrollView);
+      expect(action, findsOneWidget);
+      expect(find.descendant(of: scrollable, matching: action), findsNothing);
+    },
+  );
 
   group('finish permissions', () {
     testWidgets('shows deferred VPN and granted notification states', (
@@ -844,12 +1177,30 @@ void main() {
       expect(gateway.appSettingsOpens, 1);
     });
 
+    testWidgets('permission states refresh after returning to the app', (
+      tester,
+    ) async {
+      final gateway = _TestPermissionGateway();
+      final container = await _pumpFinish(tester, gateway);
+      expect(gateway.notificationChecks, 1);
+
+      gateway.notificationGranted = true;
+      gateway.batteryGranted = true;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(gateway.notificationChecks, 2);
+      expect(container.read(batteryOptimizationDisableProvider), isTrue);
+      expect(find.text('Allowed'), findsNWidgets(2));
+    });
+
     testWidgets('battery result refreshes immediately after settings', (
       tester,
     ) async {
-      final gateway = _TestPermissionGateway(batteryGranted: true);
+      final gateway = _TestPermissionGateway();
       final container = await _pumpFinish(tester, gateway);
 
+      gateway.batteryGranted = true;
       await tester.tap(find.text('Allow').last);
       await tester.pumpAndSettle();
 

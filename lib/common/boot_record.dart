@@ -92,7 +92,9 @@ class AppExitInfo {
       'AppExitInfo(${reason.name}, $timestamp, ${description ?? '-'})';
 }
 
-enum BootStage { starting, running }
+/// [setup] parks the guard while the wizard holds the screen: that stretch
+/// can outlive the process without the launch itself having failed.
+enum BootStage { starting, setup, running }
 
 class BootRecord {
   final BootStage? stage;

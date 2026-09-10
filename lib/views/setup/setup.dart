@@ -11,13 +11,23 @@ import 'steps/legal.dart';
 import 'steps/subscription.dart';
 import 'widgets.dart';
 
-class SetupWizard extends ConsumerStatefulWidget {
-  const SetupWizard({super.key, this.revisit = false});
+enum SetupWizardMode { firstRun, revisit }
 
-  final bool revisit;
+class SetupWizard extends ConsumerStatefulWidget {
+  const SetupWizard({super.key, bool revisit = false})
+    : mode = revisit ? SetupWizardMode.revisit : SetupWizardMode.firstRun;
+
+  const SetupWizard.revisit({super.key}) : mode = SetupWizardMode.revisit;
+
+  final SetupWizardMode mode;
+
+  bool get revisit => mode == SetupWizardMode.revisit;
 
   static Future<void> show(BuildContext context, {bool revisit = false}) =>
-      BaseNavigator.push<void>(context, SetupWizard(revisit: revisit));
+      BaseNavigator.push<void>(
+        context,
+        revisit ? const SetupWizard.revisit() : const SetupWizard(),
+      );
 
   @override
   ConsumerState<SetupWizard> createState() => _SetupWizardState();
@@ -25,18 +35,28 @@ class SetupWizard extends ConsumerStatefulWidget {
 
 class _SetupWizardState extends ConsumerState<SetupWizard>
     with SingleTickerProviderStateMixin {
-  static const _stepCount = 4;
+  static const _firstRunStepCount = 4;
+  static const _revisitStepCount = 3;
+  static const _switchDuration = Duration(milliseconds: 140);
+
+  int get _stepCount => widget.revisit ? _revisitStepCount : _firstRunStepCount;
 
   late final int _initialIndex;
   late final PageController _controller;
-  late final AnimationController _fadeController = AnimationController(
+  late final AnimationController _switchController = AnimationController(
     vsync: this,
-    duration: commonDuration,
+    duration: _switchDuration,
     value: 1,
   );
-  late final Animation<double> _fade = CurvedAnimation(
-    parent: _fadeController,
-    curve: Curves.easeOutCubic,
+  late final CurvedAnimation _switchIn = CurvedAnimation(
+    parent: _switchController,
+    curve: Easing.standardDecelerate,
+  );
+  late final Animation<double> _fade = _switchIn.drive(
+    Tween(begin: 0.4, end: 1),
+  );
+  late Animation<Offset> _slide = _switchIn.drive(
+    Tween(begin: Offset.zero, end: Offset.zero),
   );
   late int _index;
 
@@ -50,20 +70,18 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fadeController.duration = context.motionDuration(commonDuration);
-  }
-
-  @override
   void dispose() {
-    _fadeController.dispose();
+    _switchIn.dispose();
+    _switchController.dispose();
     _controller.dispose();
     super.dispose();
   }
 
+  // The same fade-forwards a tab switch uses: a jump, never a scroll, so the
+  // steps in between are never built.
   void _toStep(int index) {
     if (index < 0 || index >= _stepCount || index == _index) return;
+    final direction = (index - _index).sign.toDouble();
     setState(() => _index = index);
     if (!widget.revisit) {
       ref
@@ -72,11 +90,15 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     }
     _controller.jumpToPage(index);
     FocusManager.instance.primaryFocus?.unfocus();
-    if (context.disableAnimations) {
-      _fadeController.value = 1;
-    } else {
-      _fadeController.forward(from: 0);
+    if (context.disableAnimations ||
+        !ref.read(appSettingProvider).isAnimateToPage) {
+      _switchController.value = 1;
+      return;
     }
+    _slide = _switchIn.drive(
+      Tween(begin: Offset(direction * 0.08, 0), end: Offset.zero),
+    );
+    _switchController.forward(from: 0);
   }
 
   Future<bool> _handlePop(BuildContext context) async {
@@ -93,11 +115,39 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
   }
 
   void _handleDone() {
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(setupCompleted: true, setupStep: 0));
+    if (!widget.revisit) {
+      ref
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(setupCompleted: true, setupStep: 0),
+          );
+    }
     Navigator.of(context).pop();
   }
+
+  List<Widget> _steps() => widget.revisit
+      ? [
+          SetupLanguageStep(onNext: () => _toStep(1)),
+          SetupSubscriptionStep(
+            recommendAutoRun: false,
+            onNext: () => _toStep(2),
+            onBack: () => _toStep(0),
+          ),
+          SetupFinishStep(
+            revisit: true,
+            onDone: _handleDone,
+            onBack: () => _toStep(1),
+          ),
+        ]
+      : [
+          SetupLanguageStep(onNext: () => _toStep(1)),
+          SetupLegalStep(onAgree: () => _toStep(2), onBack: () => _toStep(0)),
+          SetupSubscriptionStep(
+            onNext: () => _toStep(3),
+            onBack: () => _toStep(1),
+          ),
+          SetupFinishStep(onDone: _handleDone, onBack: () => _toStep(2)),
+        ];
 
   @override
   Widget build(BuildContext context) {
@@ -127,26 +177,15 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                         ),
                       ),
                       Expanded(
-                        child: FadeTransition(
-                          opacity: _fade,
-                          child: PageView(
-                            controller: _controller,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              SetupLanguageStep(onNext: () => _toStep(1)),
-                              SetupLegalStep(
-                                onAgree: () => _toStep(2),
-                                onBack: () => _toStep(0),
-                              ),
-                              SetupSubscriptionStep(
-                                onNext: () => _toStep(3),
-                                onBack: () => _toStep(1),
-                              ),
-                              SetupFinishStep(
-                                onDone: _handleDone,
-                                onBack: () => _toStep(2),
-                              ),
-                            ],
+                        child: SlideTransition(
+                          position: _slide,
+                          child: FadeTransition(
+                            opacity: _fade,
+                            child: PageView(
+                              controller: _controller,
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: _steps(),
+                            ),
                           ),
                         ),
                       ),
