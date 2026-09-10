@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Android で利用できます",
   "notificationAndroidOnlyDesc": "フォアグラウンド通知の設定は Android VPN サービスにのみ適用されます。",
   "notificationContent": "内容",
-  "notificationDetailed": "詳細な通知",
-  "notificationDetailedDesc": "ライブのステータス行とクイック操作を表示します",
-  "notificationMinimalDesc": "Android は通知を残すため、保護状態のみが表示されます",
+  "notificationVisibility": "通知レベル",
+  "notificationDetailedDesc": "ライブのステータス行、クイック操作、ステータスバーのアイコンを表示します",
+  "notificationMinimalDesc": "通知シェードの下部に静かな 1 行だけを残し、ステータスバーのアイコンは出しません",
+  "notificationOffDesc": "通知シェードには何も出ません。保護は動き続け、リマインダーも届きます",
+  "notificationVisibilityDetailed": "詳細",
+  "notificationVisibilityMinimal": "最小",
+  "notificationVisibilityOff": "オフ",
   "notificationDoctorPriority": "接続ドクターの優先度",
   "notificationComponents": "通知コンポーネント",
   "notificationComponentsDesc": "リアルタイムのステータス部品で通知を構成します。",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "一時停止または再開",
   "notificationPauseActionDesc": "VPN を一時停止または再開する操作を表示します",
   "notificationPrivacy": "プライバシー",
+  "notificationReminders": "リマインダー",
+  "notificationRemindersDesc": "リマインダーは専用チャンネルを使い、どの通知レベルでも届きます。",
   "notificationHideSensitive": "ロック画面で機密情報を隠す",
   "notificationHideSensitiveDesc": "端末のロック中はプロファイル、ルーティング、診断の詳細を隠します",
   "notificationPreviewProfile": "ReClash · 現在のプロファイル",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash サービスチャンネルは無効です",
   "notificationDeliverySubscriptionDisabled": "サブスクリプション通知チャンネルは無効です",
   "notificationDeliveryReady": "通知を配信できます",
+  "notificationDeliveryOff": "サービス通知は ReClash でオフになっています",
   "notificationDeliveryFix": "修正",
   "notificationPreviewScenario": "プレビューの場面",
+  "notificationPreviewHidden": "通知シェードには何も表示されません",
   "notificationScenarioNormal": "通常",
   "notificationScenarioRouting": "ルーティング中",
   "notificationScenarioProblem": "問題",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "残りを並べ替え",
   "smartRoutingStepDecision": "これに決定",
   "smartRoutingStepAdmitBody": "{total} 台のうち {eligible} 台が通過、{blocked} 台を除外",
-  "smartRoutingStepRankBody": "まず判定、次にこのネットワークへの適合、続いて証拠、次に遅延帯、最後に履歴",
+  "smartRoutingStepRankBody": "2 つのサーバーが最初に違った行が結果を決めます",
   "smartRoutingAllServers": "すべてのサーバー",
   "smartRoutingRankOrder": "比較の順序",
+  "smartRoutingTabRanking": "選定",
+  "smartRoutingLadderHint": "2 つのサーバーを 1 行ずつ読み比べます。最初に違いが出た行で決まり、それより下の行は一切読みません。",
+  "smartRoutingKeyAdmission": "比較の対象",
+  "smartRoutingAdmittedYes": "対象",
+  "smartRoutingKeyUnproven": "通信の実績",
+  "smartRoutingKeyIncumbent": "使用中",
+  "smartRoutingIncumbentYes": "使用中",
+  "smartRoutingKeyTiebreak": "安定した同点処理",
+  "smartRoutingSectionLadder": "サーバーの比べ方",
+  "smartRoutingSectionRivals": "選ばれたサーバーとの比較",
+  "smartRoutingLostAt": "敗れた行: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "上位の行: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "すべての行で同一",
+  "smartRoutingRungVersus": "{value} 対 {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "比較できる他のサーバーがありません",
+  "smartRoutingFitYes": "適合",
+  "smartRoutingFitNo": "不適合",
+  "smartRoutingProvenYes": "あり",
+  "smartRoutingProvenNo": "まだなし",
+  "smartRoutingIncumbentNo": "挑戦側",
   "smartRoutingKeyVerdict": "判定",
   "smartRoutingKeyMisfit": "ネットワーク適合",
   "smartRoutingKeyEvidence": "証拠",
   "smartRoutingKeyBand": "遅延帯",
-  "smartRoutingKeyHistory": "このネットワークでの履歴",
   "smartRoutingBands": "遅延帯: {bands}",
   "smartRoutingSwitchedAgo": "{time}前に切り替え",
   "smartRoutingNeverSwitched": "このネットワークでの切り替えはまだありません",
@@ -1121,12 +1172,14 @@
   "appIconChangeNote": "ランチャーは数秒後にアイコンを再描画します。一部のランチャーではピン留めショートカットが消えることがあります。",
   "appIconPulse": "パルス",
   "appIconGlacier": "グレイシャー",
-  "appIconObsidian": "オブシディアン",
+  "appIconPorcelain": "ポーセリン",
   "appIconVelvet": "ベルベット",
   "appIconSolar": "ソーラー",
   "appIconCircuit": "サーキット",
   "appIconEcho": "エコー",
-  "appIconShift": "シフト",
+  "appIconGlass": "ガラス",
+  "appIconInk": "インク",
+  "appIconBlueprint": "ブループリント",
   "dashboardStyle": "ダッシュボードのスタイル",
   "classicDashboard": "クラシック",
   "classicDashboardDesc": "タイル配置と開始ボタン",

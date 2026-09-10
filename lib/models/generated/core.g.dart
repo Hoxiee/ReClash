@@ -204,6 +204,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.crash: 'crash',
   CoreEventType.geoUpdate: 'geoUpdate',
   CoreEventType.rcxStatus: 'rcxStatus',
+  CoreEventType.doctorStatus: 'doctorStatus',
 };
 
 _InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>
@@ -321,6 +322,35 @@ _RcxMarker _$RcxMarkerFromJson(Map<String, dynamic> json) => _RcxMarker(
 Map<String, dynamic> _$RcxMarkerToJson(_RcxMarker instance) =>
     <String, dynamic>{'url': instance.url, 'statuses': instance.statuses};
 
+_RcxLaneSelector _$RcxLaneSelectorFromJson(Map<String, dynamic> json) =>
+    _RcxLaneSelector(
+      provider: json['p'] as String?,
+      nameContains: json['has'] as String?,
+    );
+
+Map<String, dynamic> _$RcxLaneSelectorToJson(_RcxLaneSelector instance) =>
+    <String, dynamic>{'p': instance.provider, 'has': instance.nameContains};
+
+_RcxLaneConfig _$RcxLaneConfigFromJson(Map<String, dynamic> json) =>
+    _RcxLaneConfig(
+      capabilityId: json['id'] as String,
+      group: json['g'] as String,
+      fallback: json['fb'] as String,
+      selectors:
+          (json['sel'] as List<dynamic>?)
+              ?.map((e) => RcxLaneSelector.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$RcxLaneConfigToJson(_RcxLaneConfig instance) =>
+    <String, dynamic>{
+      'id': instance.capabilityId,
+      'g': instance.group,
+      'fb': instance.fallback,
+      'sel': instance.selectors,
+    };
+
 _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
     _RcxConfigParams(
       enabled: json['on'] as bool,
@@ -342,6 +372,9 @@ _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
       domesticMarkers: (json['dm'] as List<dynamic>)
           .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
           .toList(),
+      egressEchoes:
+          (json['ee'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
       breakerPatterns: (json['bp'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
@@ -350,6 +383,11 @@ _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
       respectPick: json['rpk'] as bool,
       dwellSeconds: (json['dwl'] as num).toInt(),
       waveWidth: (json['ww'] as num).toInt(),
+      lanes:
+          (json['ln'] as List<dynamic>?)
+              ?.map((e) => RcxLaneConfig.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
@@ -363,17 +401,48 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'cd': instance.canaryDomestic,
       'om': instance.openMarkers,
       'dm': instance.domesticMarkers,
+      'ee': instance.egressEchoes,
       'bp': instance.breakerPatterns,
       'dlr': instance.allowDomesticLastResort,
       'udp': instance.requireUdp,
       'rpk': instance.respectPick,
       'dwl': instance.dwellSeconds,
       'ww': instance.waveWidth,
+      'ln': instance.lanes,
+    };
+
+_RcxLaneStatus _$RcxLaneStatusFromJson(Map<String, dynamic> json) =>
+    _RcxLaneStatus(
+      id: json['id'] as String? ?? '',
+      group: json['group'] as String? ?? '',
+      state: json['state'] as String? ?? 'empty',
+      node: json['node'] as String? ?? '',
+      candidates: (json['candidates'] as num?)?.toInt() ?? 0,
+      eligible: (json['eligible'] as num?)?.toInt() ?? 0,
+      searching: json['searching'] as bool? ?? false,
+      fallback: json['fallback'] as String? ?? 'main',
+      reason: json['reason'] as String? ?? '',
+      switchedAt: (json['switchedAt'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$RcxLaneStatusToJson(_RcxLaneStatus instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'group': instance.group,
+      'state': instance.state,
+      'node': instance.node,
+      'candidates': instance.candidates,
+      'eligible': instance.eligible,
+      'searching': instance.searching,
+      'fallback': instance.fallback,
+      'reason': instance.reason,
+      'switchedAt': instance.switchedAt,
     };
 
 _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
   enabled: json['enabled'] as bool? ?? false,
   preset: json['preset'] as String? ?? 'off',
+  strategy: json['strategy'] as String? ?? 'balanced',
   mode: json['mode'] as String? ?? '',
   terrain: json['terrain'] as String? ?? 'unknown',
   env: json['env'] as String? ?? '',
@@ -388,12 +457,18 @@ _RcxStatus _$RcxStatusFromJson(Map<String, dynamic> json) => _RcxStatus(
   candidates: (json['candidates'] as num?)?.toInt() ?? 0,
   eligible: (json['eligible'] as num?)?.toInt() ?? 0,
   switchedAt: (json['switchedAt'] as num?)?.toInt() ?? 0,
+  lanes:
+      (json['lanes'] as List<dynamic>?)
+          ?.map((e) => RcxLaneStatus.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
       'preset': instance.preset,
+      'strategy': instance.strategy,
       'mode': instance.mode,
       'terrain': instance.terrain,
       'env': instance.env,
@@ -408,12 +483,14 @@ Map<String, dynamic> _$RcxStatusToJson(_RcxStatus instance) =>
       'candidates': instance.candidates,
       'eligible': instance.eligible,
       'switchedAt': instance.switchedAt,
+      'lanes': instance.lanes,
     };
 
 _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
     _RcxCandidateReport(
       node: json['node'] as String? ?? '',
       country: json['country'] as String? ?? '',
+      exit: json['exit'] as String? ?? '',
       origin: json['origin'] as String? ?? 'unknown',
       verdict: json['verdict'] as String? ?? 'reject',
       evidence: json['evidence'] as String? ?? 'none',
@@ -421,6 +498,8 @@ _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
       delay: (json['delay'] as num?)?.toInt() ?? 0,
       hostDelay: (json['hostDelay'] as num?)?.toInt() ?? 0,
       band: (json['band'] as num?)?.toInt() ?? 0,
+      unproven: json['unproven'] as bool? ?? false,
+      order: (json['order'] as num?)?.toInt() ?? 0,
       degraded: json['degraded'] as bool? ?? false,
       breaker: json['breaker'] as bool? ?? false,
       udp: json['udp'] as bool? ?? false,
@@ -433,6 +512,7 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
     <String, dynamic>{
       'node': instance.node,
       'country': instance.country,
+      'exit': instance.exit,
       'origin': instance.origin,
       'verdict': instance.verdict,
       'evidence': instance.evidence,
@@ -440,6 +520,8 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
       'delay': instance.delay,
       'hostDelay': instance.hostDelay,
       'band': instance.band,
+      'unproven': instance.unproven,
+      'order': instance.order,
       'degraded': instance.degraded,
       'breaker': instance.breaker,
       'udp': instance.udp,

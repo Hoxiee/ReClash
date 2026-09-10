@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Android ulgamynda elýeterli",
   "notificationAndroidOnlyDesc": "Öňdäki duýduryş sazlamalary diňe Android VPN hyzmatyna degişlidir.",
   "notificationContent": "Mazmun",
-  "notificationDetailed": "Jikme-jik duýduryş",
-  "notificationDetailedDesc": "Janly ýagdaý setirleri we çalt hereketler görkezilýär",
-  "notificationMinimalDesc": "Android duýduryşy saklaýar, şonuň üçin diňe goragyň ýagdaýy galýar",
+  "notificationVisibility": "Duýduryş derejesi",
+  "notificationDetailedDesc": "Janly ýagdaý setirleri, çalt hereketler we ýagdaý zolagyndaky nyşan görkezilýär",
+  "notificationMinimalDesc": "Perdäniň aşagynda bir ümsüm setir galýar, ýagdaý zolagynda nyşan bolmaýar",
+  "notificationOffDesc": "Perdede hiç zat ýok. Gorag işlemegini dowam etdirýär, ýatlatmalar gelýär",
+  "notificationVisibilityDetailed": "Jikme-jik",
+  "notificationVisibilityMinimal": "Minimal",
+  "notificationVisibilityOff": "Öçürilen",
   "notificationDoctorPriority": "Birikme diagnostikasynyň ileri tutulmagy",
   "notificationComponents": "Duýduryş komponentleri",
   "notificationComponentsDesc": "Duýduryşy göni ýagdaý komponentlerinden düzüň.",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "Wagtlaýyn duruzmak ýa-da dowam etdirmek",
   "notificationPauseActionDesc": "VPN-i wagtlaýyn duruzmak ýa-da dowam etdirmek hereketini görkezmek",
   "notificationPrivacy": "Gizlinlik",
+  "notificationReminders": "Ýatlatmalar",
+  "notificationRemindersDesc": "Ýatlatmalar öz kanalyny ulanýar we islendik duýduryş derejesinde gelýär.",
   "notificationHideSensitive": "Gulp ekranynda gizlin maglumatlary gizlemek",
   "notificationHideSensitiveDesc": "Enjam gulply wagty profil, marşrut we diagnostika maglumatlaryny gizlemek",
   "notificationPreviewProfile": "ReClash · Häzirki profil",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash hyzmat kanaly öçürilendir",
   "notificationDeliverySubscriptionDisabled": "Ýazylma ýatlatmalary kanaly öçürilendir",
   "notificationDeliveryReady": "Duýduryşlary eltmek bolýar",
+  "notificationDeliveryOff": "Hyzmat duýduryşy ReClash-da öçürilen",
   "notificationDeliveryFix": "Düzet",
   "notificationPreviewScenario": "Öňünden görmek ssenariýasy",
+  "notificationPreviewHidden": "Perde boş galýar",
   "notificationScenarioNormal": "Adaty",
   "notificationScenarioRouting": "Marşrutlaşdyrma",
   "notificationScenarioProblem": "Mesele",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "Galanlary tertipledi",
   "smartRoutingStepDecision": "Şu ýere gelip çykdy",
   "smartRoutingStepAdmitBody": "{total} serwerden {eligible} geçdi, {blocked} saklandy",
-  "smartRoutingStepRankBody": "Ilki hökm, soň laýyklyk, subutnama, gijäşme derejesi, taryh iň soň",
+  "smartRoutingStepRankBody": "Iki serweriň ilkinji tapawutlanan hatary çözýär",
   "smartRoutingAllServers": "Ähli serwerler",
   "smartRoutingRankOrder": "Reýting tertibi",
+  "smartRoutingTabRanking": "Saýlaw",
+  "smartRoutingLadderHint": "Iki server hatar-hatar deňeşdirilýär. Olaryň ilkinji tapawutlanan hatary çözýär, ondan aşakdakylar asla okalmaýar.",
+  "smartRoutingKeyAdmission": "Deňeşdirmä goýberilen",
+  "smartRoutingAdmittedYes": "Goýberilen",
+  "smartRoutingKeyUnproven": "Trafik geçiren",
+  "smartRoutingKeyIncumbent": "Eýýäm ulanylýar",
+  "smartRoutingIncumbentYes": "Ulanylýar",
+  "smartRoutingKeyTiebreak": "Durnukly deňlik çözgüdi",
+  "smartRoutingSectionLadder": "Serwerler nähili deňeşdirilýär",
+  "smartRoutingSectionRivals": "Saýlanan serwere garşy",
+  "smartRoutingLostAt": "Utulan hatar: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "Ýokarda duran hatar: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "Ähli hatarda birmeňzeş",
+  "smartRoutingRungVersus": "{value} — {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "Deňeşdirer ýaly başga serwer ýok",
+  "smartRoutingFitYes": "Gabat gelýär",
+  "smartRoutingFitNo": "Gabat gelenok",
+  "smartRoutingProvenYes": "Hawa",
+  "smartRoutingProvenNo": "Heniz ýok",
+  "smartRoutingIncumbentNo": "Dalaşgär",
   "smartRoutingKeyVerdict": "Hökm",
   "smartRoutingKeyMisfit": "Bu tor üçin laýyklyk",
   "smartRoutingKeyEvidence": "Subutnama",
   "smartRoutingKeyBand": "Gijäşme derejesi",
-  "smartRoutingKeyHistory": "Bu toryň taryhy",
   "smartRoutingBands": "Derejeler: {bands}",
   "smartRoutingSwitchedAgo": "{time} öň çalyşyldy",
   "smartRoutingNeverSwitched": "Bu torda heniz çalyşyk bolmady",
@@ -1111,12 +1162,14 @@
   "appIconChangeNote": "Launcher nyşany birnäçe sekunddan soň täzeden çizilýär. Käbir launcherlarda berkidilen gysga ýollar ýok bolup biler.",
   "appIconPulse": "Impuls",
   "appIconGlacier": "Buzluk",
-  "appIconObsidian": "Obsidian",
+  "appIconPorcelain": "Farfor",
   "appIconVelvet": "Mahmal",
   "appIconSolar": "Güneş",
   "appIconCircuit": "Zynjyr",
   "appIconEcho": "Ýaňlanma",
-  "appIconShift": "Süýşme",
+  "appIconGlass": "Aýna",
+  "appIconInk": "Syýa",
+  "appIconBlueprint": "Çyzgy",
   "dashboardStyle": "Panel stili",
   "classicDashboard": "Klassiki",
   "classicDashboardDesc": "Başlat düwmeli kwadratlar toru",

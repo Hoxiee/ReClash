@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Доступно на Android",
   "notificationAndroidOnlyDesc": "Настройки постоянного уведомления применяются только к VPN-сервису Android.",
   "notificationContent": "Содержимое",
-  "notificationDetailed": "Подробное уведомление",
-  "notificationDetailedDesc": "Показываются живые строки статуса и быстрые действия",
-  "notificationMinimalDesc": "Android оставляет уведомление, поэтому остаётся только статус защиты",
+  "notificationVisibility": "Уровень уведомления",
+  "notificationDetailedDesc": "Живые строки статуса, быстрые действия и значок в статус-баре",
+  "notificationMinimalDesc": "Одна тихая строка внизу шторки, без значка в статус-баре",
+  "notificationOffDesc": "В шторке ничего нет. Защита продолжает работать, напоминания приходят",
+  "notificationVisibilityDetailed": "Подробно",
+  "notificationVisibilityMinimal": "Минимум",
+  "notificationVisibilityOff": "Выключено",
   "notificationDoctorPriority": "Приоритет Доктора соединения",
   "notificationComponents": "Компоненты уведомления",
   "notificationComponentsDesc": "Соберите уведомление из компонентов с актуальными данными.",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "Пауза и продолжение",
   "notificationPauseActionDesc": "Показывать кнопку паузы или продолжения VPN",
   "notificationPrivacy": "Конфиденциальность",
+  "notificationReminders": "Напоминания",
+  "notificationRemindersDesc": "Напоминания идут по своему каналу и приходят при любом уровне уведомления.",
   "notificationHideSensitive": "Скрывать личные данные на экране блокировки",
   "notificationHideSensitiveDesc": "Скрывать профиль, маршрутизацию и диагностику, пока устройство заблокировано",
   "notificationPreviewProfile": "ReClash · Текущий профиль",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "Канал сервиса ReClash отключён",
   "notificationDeliverySubscriptionDisabled": "Канал напоминаний о подписке отключён",
   "notificationDeliveryReady": "Уведомления могут доставляться",
+  "notificationDeliveryOff": "Уведомление сервиса выключено в ReClash",
   "notificationDeliveryFix": "Исправить",
   "notificationPreviewScenario": "Сценарий просмотра",
+  "notificationPreviewHidden": "Шторка остаётся пустой",
   "notificationScenarioNormal": "Обычный",
   "notificationScenarioRouting": "Маршрутизация",
   "notificationScenarioProblem": "Проблема",
@@ -1020,14 +1028,57 @@
   "smartRoutingStepRank": "Выстроил оставшихся по порядку",
   "smartRoutingStepDecision": "Остановился на этом",
   "smartRoutingStepAdmitBody": "прошли {eligible} из {total}, отсеяно {blocked}",
-  "smartRoutingStepRankBody": "Сначала вердикт, потом пригодность для сети, доказательства и полоса задержки, история — в самом конце",
+  "smartRoutingStepRankBody": "Решает первая строка, на которой два сервера разошлись",
   "smartRoutingAllServers": "Все серверы",
   "smartRoutingRankOrder": "Порядок сравнения",
+  "smartRoutingTabRanking": "Подбор",
+  "smartRoutingLadderHint": "Два сервера читаются строка за строкой. Решает первая строка, где они разошлись, и всё, что ниже неё, не читается вовсе.",
+  "smartRoutingKeyAdmission": "Допущен к сравнению",
+  "smartRoutingAdmittedYes": "Допущен",
+  "smartRoutingKeyUnproven": "Пропускал трафик",
+  "smartRoutingKeyIncumbent": "Уже используется",
+  "smartRoutingIncumbentYes": "В работе",
+  "smartRoutingKeyTiebreak": "Устойчивый разрыв ничьей",
+  "smartRoutingSectionLadder": "Как сравниваются серверы",
+  "smartRoutingSectionRivals": "Против выбранного сервера",
+  "smartRoutingLostAt": "Проиграл на строке: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "Стоит выше на строке: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "Совпадает по всем строкам",
+  "smartRoutingRungVersus": "{value} против {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "Больше не с чем сравнивать",
+  "smartRoutingFitYes": "Подходит",
+  "smartRoutingFitNo": "Не подходит",
+  "smartRoutingProvenYes": "Да",
+  "smartRoutingProvenNo": "Пока нет",
+  "smartRoutingIncumbentNo": "Претендент",
   "smartRoutingKeyVerdict": "Вердикт",
   "smartRoutingKeyMisfit": "Пригодность для сети",
   "smartRoutingKeyEvidence": "Доказательства",
   "smartRoutingKeyBand": "Полоса задержки",
-  "smartRoutingKeyHistory": "История в этой сети",
   "smartRoutingBands": "Полосы: {bands}",
   "smartRoutingSwitchedAgo": "Смена сервера {time} назад",
   "smartRoutingNeverSwitched": "В этой сети сервер ещё не менялся",
@@ -1125,12 +1176,14 @@
   "appIconChangeNote": "Лаунчер перерисует иконку через несколько секунд. На некоторых лаунчерах закреплённый ярлык может пропасть.",
   "appIconPulse": "Пульс",
   "appIconGlacier": "Ледник",
-  "appIconObsidian": "Обсидиан",
+  "appIconPorcelain": "Фарфор",
   "appIconVelvet": "Бархат",
   "appIconSolar": "Солнце",
   "appIconCircuit": "Контур",
   "appIconEcho": "Эхо",
-  "appIconShift": "Сдвиг",
+  "appIconGlass": "Стекло",
+  "appIconInk": "Тушь",
+  "appIconBlueprint": "Чертёж",
   "dashboardStyle": "Вид панели",
   "classicDashboard": "Классическая",
   "classicDashboardDesc": "Сетка плиток и кнопка запуска",

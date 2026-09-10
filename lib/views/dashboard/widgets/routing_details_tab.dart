@@ -140,7 +140,7 @@ class RoutingRoundCard extends StatelessWidget {
           if (technical && bands.isNotEmpty) bands,
         ].join(' · '),
         childLabel: appLocalizations.smartRoutingRankOrder,
-        child: const RoutingRankOrder(),
+        child: RoutingRankOrder(strategy: status.strategy),
       ),
       RoutingStepData(
         icon: failed ? Icons.error_outline_rounded : Icons.verified_rounded,
@@ -165,20 +165,20 @@ class RoutingRoundCard extends StatelessWidget {
 }
 
 /// The comparison order, spelled out: the first line that differs between two
-/// servers is the reason one of them won.
+/// servers is the reason one of them won. Latency ranks by a shorter ladder
+/// than balanced does, so the list is read from the strategy, never fixed.
 class RoutingRankOrder extends StatelessWidget {
-  const RoutingRankOrder({super.key});
+  const RoutingRankOrder({super.key, required this.strategy});
+
+  final String strategy;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final rows = [
-      appLocalizations.smartRoutingKeyVerdict,
-      appLocalizations.smartRoutingKeyMisfit,
-      appLocalizations.smartRoutingKeyEvidence,
-      appLocalizations.smartRoutingKeyBand,
-      appLocalizations.smartRoutingKeyHistory,
+      for (final rung in routingLadder(strategy))
+        routingRungLabel(appLocalizations, rung),
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

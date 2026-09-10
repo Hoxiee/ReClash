@@ -62,6 +62,52 @@ String routingOriginLabel(AppLocalizations l10n, String origin) =>
       _ => l10n.unknown,
     };
 
+String routingRungLabel(AppLocalizations l10n, RoutingRung rung) =>
+    switch (rung) {
+      RoutingRung.admission => l10n.smartRoutingKeyAdmission,
+      RoutingRung.verdict => l10n.smartRoutingKeyVerdict,
+      RoutingRung.misfit => l10n.smartRoutingKeyMisfit,
+      RoutingRung.evidence => l10n.smartRoutingKeyEvidence,
+      RoutingRung.band => l10n.smartRoutingKeyBand,
+      RoutingRung.unproven => l10n.smartRoutingKeyUnproven,
+      RoutingRung.incumbent => l10n.smartRoutingKeyIncumbent,
+      RoutingRung.tiebreak => l10n.smartRoutingKeyTiebreak,
+    };
+
+/// What one server reads as on one rung. The gate replaces the admission word
+/// the same way it replaces the verdict in a row: a held-back node is not
+/// "allowed, but", it is stopped by a named gate.
+String routingRungValueLabel(
+  AppLocalizations l10n,
+  RoutingRung rung,
+  RcxCandidateReport candidate,
+  String terrain,
+) => switch (rung) {
+  RoutingRung.admission =>
+    candidate.eligible
+        ? l10n.smartRoutingAdmittedYes
+        : routingBlockLabel(l10n, candidate),
+  RoutingRung.verdict => routingVerdictLabel(l10n, candidate.verdict),
+  RoutingRung.misfit =>
+    routingRungValue(rung, candidate, terrain) == 0
+        ? l10n.smartRoutingFitYes
+        : l10n.smartRoutingFitNo,
+  RoutingRung.evidence => routingEvidenceLabel(l10n, candidate.evidence),
+  RoutingRung.band => l10n.smartRoutingBandLabel(candidate.band),
+  RoutingRung.unproven =>
+    candidate.unproven ? l10n.smartRoutingProvenNo : l10n.smartRoutingProvenYes,
+  RoutingRung.incumbent =>
+    candidate.current
+        ? l10n.smartRoutingIncumbentYes
+        : l10n.smartRoutingIncumbentNo,
+  RoutingRung.tiebreak => '#${candidate.order}',
+};
+
+String routingStrategyLabel(AppLocalizations l10n, String strategy) =>
+    strategy == 'lowest-latency'
+    ? l10n.smartRoutingStrategyLowestLatency
+    : l10n.smartRoutingStrategyBalanced;
+
 NetworkFormat routingFormatOf(RcxReport report) =>
     networkFormatOf(report.status.terrain);
 
@@ -124,6 +170,16 @@ Widget routingHeader(String title) => SliverPadding(
   ),
 );
 
+ShapeDecoration routingCardDecoration(BuildContext context, {Color? accent}) =>
+    ShapeDecoration(
+      shape: AppShape.xl,
+      color: accent == null
+          ? context.colorScheme.surfaceContainerHigh
+          : accent.withValues(alpha: 0.10),
+    );
+
+const routingCardPadding = EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+
 class RoutingCard extends StatelessWidget {
   const RoutingCard({super.key, required this.child, this.accent});
 
@@ -131,21 +187,10 @@ class RoutingCard extends StatelessWidget {
   final Color? accent;
 
   @override
-  Widget build(BuildContext context) {
-    final accent = this.accent;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: AppShape.xl,
-        color: accent == null
-            ? context.colorScheme.surfaceContainerHigh
-            : accent.withValues(alpha: 0.10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: child,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: routingCardDecoration(context, accent: accent),
+    child: Padding(padding: routingCardPadding, child: child),
+  );
 }
 
 class RoutingNotice extends StatelessWidget {

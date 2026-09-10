@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Android жүйесінде қолжетімді",
   "notificationAndroidOnlyDesc": "Алдыңғы жоспар хабарламасының параметрлері тек Android VPN қызметіне қолданылады.",
   "notificationContent": "Мазмұн",
-  "notificationDetailed": "Толық хабарлама",
-  "notificationDetailedDesc": "Тікелей күй жолдары мен жылдам әрекеттер көрсетіледі",
-  "notificationMinimalDesc": "Android хабарламаны қалдырады, сондықтан тек қорғаныс күйі қалады",
+  "notificationVisibility": "Хабарлама деңгейі",
+  "notificationDetailedDesc": "Тікелей күй жолдары, жылдам әрекеттер және күй жолағындағы белгіше көрсетіледі",
+  "notificationMinimalDesc": "Шымылдықтың төменінде бір тыныш жол қалады, күй жолағында белгіше болмайды",
+  "notificationOffDesc": "Шымылдықта ештеңе жоқ. Қорғаныс жұмысын жалғастырады, еске салғыштар келеді",
+  "notificationVisibilityDetailed": "Толық",
+  "notificationVisibilityMinimal": "Ең аз",
+  "notificationVisibilityOff": "Өшірулі",
   "notificationDoctorPriority": "Қосылым диагностикасының басымдығы",
   "notificationComponents": "Хабарлама компоненттері",
   "notificationComponentsDesc": "Хабарламаны нақты уақыттағы күй компоненттерінен құрастырыңыз.",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "Кідірту немесе жалғастыру",
   "notificationPauseActionDesc": "VPN-ді кідірту немесе жалғастыру әрекетін көрсету",
   "notificationPrivacy": "Құпиялылық",
+  "notificationReminders": "Еске салғыштар",
+  "notificationRemindersDesc": "Еске салғыштар өз арнасын пайдаланады және кез келген хабарлама деңгейінде келеді.",
   "notificationHideSensitive": "Құлып экранында құпия мәліметтерді жасыру",
   "notificationHideSensitiveDesc": "Құрылғы құлыптаулы кезде профиль, бағыттау және диагностика мәліметтерін жасыру",
   "notificationPreviewProfile": "ReClash · Ағымдағы профиль",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash қызмет арнасы өшірілген",
   "notificationDeliverySubscriptionDisabled": "Жазылым еске салғыштары арнасы өшірілген",
   "notificationDeliveryReady": "Хабарламаларды жеткізуге болады",
+  "notificationDeliveryOff": "Қызмет хабарламасы ReClash ішінде өшірілген",
   "notificationDeliveryFix": "Түзету",
   "notificationPreviewScenario": "Алдын ала көру сценарийі",
+  "notificationPreviewHidden": "Шымылдық бос қалады",
   "notificationScenarioNormal": "Қалыпты",
   "notificationScenarioRouting": "Бағыттау",
   "notificationScenarioProblem": "Мәселе",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "Қалғандарын реттеді",
   "smartRoutingStepDecision": "Осында тоқтады",
   "smartRoutingStepAdmitBody": "{total} сервердің ішінен {eligible} өтті, {blocked} ұсталды",
-  "smartRoutingStepRankBody": "Әуелі вердикт, сосын желіге сәйкестігі, кейін дәлелдер, содан кідіріс жолағы, ең соңы — тарих",
+  "smartRoutingStepRankBody": "Екі сервер алғаш өзгешеленген жол шешеді",
   "smartRoutingAllServers": "Барлық серверлер",
   "smartRoutingRankOrder": "Реттеу реті",
+  "smartRoutingTabRanking": "Іріктеу",
+  "smartRoutingLadderHint": "Екі сервер жол-жолмен салыстырылады. Олар алғаш өзгешеленген жол шешеді, одан төмендегілер мүлде оқылмайды.",
+  "smartRoutingKeyAdmission": "Салыстыруға жіберілген",
+  "smartRoutingAdmittedYes": "Жіберілген",
+  "smartRoutingKeyUnproven": "Трафик өткізген",
+  "smartRoutingKeyIncumbent": "Қазір қолданылуда",
+  "smartRoutingIncumbentYes": "Жұмыста",
+  "smartRoutingKeyTiebreak": "Тұрақты тең түсуді шешу",
+  "smartRoutingSectionLadder": "Серверлер қалай салыстырылады",
+  "smartRoutingSectionRivals": "Таңдалған серверге қарсы",
+  "smartRoutingLostAt": "Ұтылған жол: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "Жоғары тұрған жол: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "Барлық жолда бірдей",
+  "smartRoutingRungVersus": "{value} — {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "Салыстыратын басқа сервер жоқ",
+  "smartRoutingFitYes": "Келеді",
+  "smartRoutingFitNo": "Келмейді",
+  "smartRoutingProvenYes": "Иә",
+  "smartRoutingProvenNo": "Әзірге жоқ",
+  "smartRoutingIncumbentNo": "Үміткер",
   "smartRoutingKeyVerdict": "Вердикт",
   "smartRoutingKeyMisfit": "Осы желіге сәйкестігі",
   "smartRoutingKeyEvidence": "Дәлелдер",
   "smartRoutingKeyBand": "Кідіріс жолағы",
-  "smartRoutingKeyHistory": "Осы желідегі тарих",
   "smartRoutingBands": "Жолақтар: {bands}",
   "smartRoutingSwitchedAgo": "{time} бұрын ауыстырылды",
   "smartRoutingNeverSwitched": "Осы желіде әлі ауыспаған",
@@ -1111,12 +1162,14 @@
   "appIconChangeNote": "Лаунчер таңбашаны бірнеше секундта қайта салады. Бекітілген таңбашалар кейбір лаунчерлерде жоғалып кетуі мүмкін.",
   "appIconPulse": "Импульс",
   "appIconGlacier": "Мұздық",
-  "appIconObsidian": "Обсидиан",
+  "appIconPorcelain": "Фарфор",
   "appIconVelvet": "Барқыт",
   "appIconSolar": "Күн",
   "appIconCircuit": "Сұлба",
   "appIconEcho": "Жаңғырық",
-  "appIconShift": "Ығысу",
+  "appIconGlass": "Шыны",
+  "appIconInk": "Сия",
+  "appIconBlueprint": "Сызба",
   "dashboardStyle": "Бақылау тақтасының стилі",
   "classicDashboard": "Дәстүрлі",
   "classicDashboardDesc": "Іске қосу түймесі бар плитка торы",

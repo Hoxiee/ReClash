@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Android에서 사용 가능",
   "notificationAndroidOnlyDesc": "포그라운드 알림 설정은 Android VPN 서비스에만 적용됩니다.",
   "notificationContent": "내용",
-  "notificationDetailed": "상세 알림",
-  "notificationDetailedDesc": "실시간 상태 줄과 빠른 작업을 표시합니다",
-  "notificationMinimalDesc": "Android가 알림을 유지하므로 보호 상태만 남습니다",
+  "notificationVisibility": "알림 수준",
+  "notificationDetailedDesc": "실시간 상태 줄과 빠른 작업, 상태 표시줄 아이콘을 표시합니다",
+  "notificationMinimalDesc": "알림 창 아래쪽에 조용한 한 줄만 남고 상태 표시줄 아이콘은 없습니다",
+  "notificationOffDesc": "알림 창에 아무것도 표시되지 않습니다. 보호는 계속 작동하고 구독 알림도 도착합니다",
+  "notificationVisibilityDetailed": "상세",
+  "notificationVisibilityMinimal": "최소",
+  "notificationVisibilityOff": "끄기",
   "notificationDoctorPriority": "연결 진단 우선순위",
   "notificationComponents": "알림 구성 요소",
   "notificationComponentsDesc": "실시간 상태 구성 요소로 알림을 구성하세요.",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "일시 중지 또는 재개",
   "notificationPauseActionDesc": "VPN을 일시 중지하거나 재개하는 작업을 표시합니다",
   "notificationPrivacy": "개인정보",
+  "notificationReminders": "리마인더",
+  "notificationRemindersDesc": "리마인더는 별도 채널을 사용하며 어떤 알림 수준에서도 도착합니다.",
   "notificationHideSensitive": "잠금 화면에서 민감한 정보 숨기기",
   "notificationHideSensitiveDesc": "기기가 잠겨 있을 때 프로필, 라우팅 및 진단 세부 정보를 숨깁니다",
   "notificationPreviewProfile": "ReClash · 현재 프로필",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash 서비스 채널이 사용 중지되었습니다",
   "notificationDeliverySubscriptionDisabled": "구독 알림 채널이 사용 중지되었습니다",
   "notificationDeliveryReady": "알림을 전달할 수 있습니다",
+  "notificationDeliveryOff": "서비스 알림이 ReClash에서 꺼져 있습니다",
   "notificationDeliveryFix": "해결",
   "notificationPreviewScenario": "미리보기 상황",
+  "notificationPreviewHidden": "알림 창에는 아무것도 남지 않습니다",
   "notificationScenarioNormal": "일반",
   "notificationScenarioRouting": "라우팅",
   "notificationScenarioProblem": "문제",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "남은 서버 순위 결정",
   "smartRoutingStepDecision": "최종 선택",
   "smartRoutingStepAdmitBody": "서버 {total}개 중 {eligible}개가 통과했고 {blocked}개는 보류됐습니다",
-  "smartRoutingStepRankBody": "판정, 적합성, 증거, 지연 시간 대역, 기록 순으로 평가합니다",
+  "smartRoutingStepRankBody": "두 서버가 처음으로 달라진 줄이 결과를 정합니다",
   "smartRoutingAllServers": "모든 서버",
   "smartRoutingRankOrder": "순위 기준",
+  "smartRoutingTabRanking": "선정",
+  "smartRoutingLadderHint": "두 서버를 한 줄씩 비교합니다. 처음으로 달라진 줄에서 결정되며, 그 아래 줄은 전혀 읽지 않습니다.",
+  "smartRoutingKeyAdmission": "비교 대상",
+  "smartRoutingAdmittedYes": "허용",
+  "smartRoutingKeyUnproven": "트래픽 전달 이력",
+  "smartRoutingKeyIncumbent": "이미 사용 중",
+  "smartRoutingIncumbentYes": "사용 중",
+  "smartRoutingKeyTiebreak": "안정적인 동점 처리",
+  "smartRoutingSectionLadder": "서버를 비교하는 방식",
+  "smartRoutingSectionRivals": "선택된 서버와 비교",
+  "smartRoutingLostAt": "밀린 줄: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "더 높은 줄: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "모든 줄에서 동일",
+  "smartRoutingRungVersus": "{value} 대 {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "비교할 다른 서버가 없습니다",
+  "smartRoutingFitYes": "적합",
+  "smartRoutingFitNo": "부적합",
+  "smartRoutingProvenYes": "예",
+  "smartRoutingProvenNo": "아직 없음",
+  "smartRoutingIncumbentNo": "도전자",
   "smartRoutingKeyVerdict": "판정",
   "smartRoutingKeyMisfit": "현재 네트워크 적합성",
   "smartRoutingKeyEvidence": "증거",
   "smartRoutingKeyBand": "지연 시간 대역",
-  "smartRoutingKeyHistory": "현재 네트워크 기록",
   "smartRoutingBands": "대역: {bands}",
   "smartRoutingSwitchedAgo": "{time} 전에 전환됨",
   "smartRoutingNeverSwitched": "이 네트워크에서 아직 전환되지 않음",
@@ -1111,12 +1162,14 @@
   "appIconChangeNote": "런처는 몇 초 안에 아이콘을 다시 그립니다. 일부 런처에서는 고정된 바로가기가 사라질 수 있습니다.",
   "appIconPulse": "펄스",
   "appIconGlacier": "글레이셔",
-  "appIconObsidian": "옵시디언",
+  "appIconPorcelain": "포슬린",
   "appIconVelvet": "벨벳",
   "appIconSolar": "솔라",
   "appIconCircuit": "서킷",
   "appIconEcho": "에코",
-  "appIconShift": "시프트",
+  "appIconGlass": "글래스",
+  "appIconInk": "잉크",
+  "appIconBlueprint": "블루프린트",
   "dashboardStyle": "대시보드 스타일",
   "classicDashboard": "클래식",
   "classicDashboardDesc": "시작 버튼이 있는 타일 그리드",

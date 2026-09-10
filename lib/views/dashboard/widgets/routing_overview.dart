@@ -7,6 +7,7 @@ import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview_parts.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview_tab.dart';
+import 'package:reclash/views/dashboard/widgets/routing_ranking_tab.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,12 +100,13 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
               : appLocalizations.smartRoutingWaitingTunnel,
         ),
         (true, final RcxReport report) => DefaultTabController(
-          length: 2,
+          length: 3,
           child: Column(
             children: [
               SettingsTabs(
                 labels: [
                   appLocalizations.smartRoutingTabOverview,
+                  appLocalizations.smartRoutingTabRanking,
                   appLocalizations.smartRoutingTabDetails,
                 ],
               ),
@@ -116,6 +118,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
                       technical: _technical,
                       onDeepScan: _handleDeepScan,
                     ),
+                    RoutingRankingTab(report: report),
                     RoutingDetailsTab(report: report, technical: _technical),
                   ],
                 ),

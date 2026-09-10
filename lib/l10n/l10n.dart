@@ -1520,31 +1520,71 @@ class AppLocalizations {
     );
   }
 
-  /// `Detailed notification`
-  String get notificationDetailed {
+  /// `Notification level`
+  String get notificationVisibility {
     return Intl.message(
-      'Detailed notification',
-      name: 'notificationDetailed',
+      'Notification level',
+      name: 'notificationVisibility',
       desc: '',
       args: [],
     );
   }
 
-  /// `Live status lines and quick actions are shown`
+  /// `Live status lines, quick actions and an icon in the status bar`
   String get notificationDetailedDesc {
     return Intl.message(
-      'Live status lines and quick actions are shown',
+      'Live status lines, quick actions and an icon in the status bar',
       name: 'notificationDetailedDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Android keeps the notification, so only the protection status stays`
+  /// `One quiet line at the bottom of the shade, without a status bar icon`
   String get notificationMinimalDesc {
     return Intl.message(
-      'Android keeps the notification, so only the protection status stays',
+      'One quiet line at the bottom of the shade, without a status bar icon',
       name: 'notificationMinimalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nothing in the shade. Protection keeps running and reminders still arrive`
+  String get notificationOffDesc {
+    return Intl.message(
+      'Nothing in the shade. Protection keeps running and reminders still arrive',
+      name: 'notificationOffDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Detailed`
+  String get notificationVisibilityDetailed {
+    return Intl.message(
+      'Detailed',
+      name: 'notificationVisibilityDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Minimal`
+  String get notificationVisibilityMinimal {
+    return Intl.message(
+      'Minimal',
+      name: 'notificationVisibilityMinimal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Off`
+  String get notificationVisibilityOff {
+    return Intl.message(
+      'Off',
+      name: 'notificationVisibilityOff',
       desc: '',
       args: [],
     );
@@ -1900,6 +1940,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Reminders`
+  String get notificationReminders {
+    return Intl.message(
+      'Reminders',
+      name: 'notificationReminders',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reminders use their own channel and arrive at every notification level.`
+  String get notificationRemindersDesc {
+    return Intl.message(
+      'Reminders use their own channel and arrive at every notification level.',
+      name: 'notificationRemindersDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Hide sensitive details on lock screen`
   String get notificationHideSensitive {
     return Intl.message(
@@ -2090,6 +2150,16 @@ class AppLocalizations {
     );
   }
 
+  /// `The service notification is turned off in ReClash`
+  String get notificationDeliveryOff {
+    return Intl.message(
+      'The service notification is turned off in ReClash',
+      name: 'notificationDeliveryOff',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Fix`
   String get notificationDeliveryFix {
     return Intl.message(
@@ -2105,6 +2175,16 @@ class AppLocalizations {
     return Intl.message(
       'Preview scenario',
       name: 'notificationPreviewScenario',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The notification shade stays empty`
+  String get notificationPreviewHidden {
+    return Intl.message(
+      'The notification shade stays empty',
+      name: 'notificationPreviewHidden',
       desc: '',
       args: [],
     );
@@ -8824,10 +8904,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Verdict first, then specialist fit, then evidence, then latency band, history last`
+  /// `The first line where two servers differ is the one that decides`
   String get smartRoutingStepRankBody {
     return Intl.message(
-      'Verdict first, then specialist fit, then evidence, then latency band, history last',
+      'The first line where two servers differ is the one that decides',
       name: 'smartRoutingStepRankBody',
       desc: '',
       args: [],
@@ -8849,6 +8929,201 @@ class AppLocalizations {
     return Intl.message(
       'Ranking order',
       name: 'smartRoutingRankOrder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ranking`
+  String get smartRoutingTabRanking {
+    return Intl.message(
+      'Ranking',
+      name: 'smartRoutingTabRanking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Two servers are read line by line. The first line where they differ decides it, and nothing below that line is read at all.`
+  String get smartRoutingLadderHint {
+    return Intl.message(
+      'Two servers are read line by line. The first line where they differ decides it, and nothing below that line is read at all.',
+      name: 'smartRoutingLadderHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allowed to compete`
+  String get smartRoutingKeyAdmission {
+    return Intl.message(
+      'Allowed to compete',
+      name: 'smartRoutingKeyAdmission',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allowed`
+  String get smartRoutingAdmittedYes {
+    return Intl.message(
+      'Allowed',
+      name: 'smartRoutingAdmittedYes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Has carried traffic`
+  String get smartRoutingKeyUnproven {
+    return Intl.message(
+      'Has carried traffic',
+      name: 'smartRoutingKeyUnproven',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Already in use`
+  String get smartRoutingKeyIncumbent {
+    return Intl.message(
+      'Already in use',
+      name: 'smartRoutingKeyIncumbent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In use`
+  String get smartRoutingIncumbentYes {
+    return Intl.message(
+      'In use',
+      name: 'smartRoutingIncumbentYes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stable tiebreak`
+  String get smartRoutingKeyTiebreak {
+    return Intl.message(
+      'Stable tiebreak',
+      name: 'smartRoutingKeyTiebreak',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How servers are compared`
+  String get smartRoutingSectionLadder {
+    return Intl.message(
+      'How servers are compared',
+      name: 'smartRoutingSectionLadder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Against the chosen server`
+  String get smartRoutingSectionRivals {
+    return Intl.message(
+      'Against the chosen server',
+      name: 'smartRoutingSectionRivals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Lost at: {step}`
+  String smartRoutingLostAt(String step) {
+    return Intl.message(
+      'Lost at: $step',
+      name: 'smartRoutingLostAt',
+      desc: '',
+      args: [step],
+    );
+  }
+
+  /// `Ranks higher at: {step}`
+  String smartRoutingWinsAt(String step) {
+    return Intl.message(
+      'Ranks higher at: $step',
+      name: 'smartRoutingWinsAt',
+      desc: '',
+      args: [step],
+    );
+  }
+
+  /// `Identical on every line`
+  String get smartRoutingTiedAll {
+    return Intl.message(
+      'Identical on every line',
+      name: 'smartRoutingTiedAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{value} vs {against}`
+  String smartRoutingRungVersus(String value, String against) {
+    return Intl.message(
+      '$value vs $against',
+      name: 'smartRoutingRungVersus',
+      desc: '',
+      args: [value, against],
+    );
+  }
+
+  /// `No other servers to compare with`
+  String get smartRoutingNoRivals {
+    return Intl.message(
+      'No other servers to compare with',
+      name: 'smartRoutingNoRivals',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fits`
+  String get smartRoutingFitYes {
+    return Intl.message('Fits', name: 'smartRoutingFitYes', desc: '', args: []);
+  }
+
+  /// `Does not fit`
+  String get smartRoutingFitNo {
+    return Intl.message(
+      'Does not fit',
+      name: 'smartRoutingFitNo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get smartRoutingProvenYes {
+    return Intl.message(
+      'Yes',
+      name: 'smartRoutingProvenYes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not yet`
+  String get smartRoutingProvenNo {
+    return Intl.message(
+      'Not yet',
+      name: 'smartRoutingProvenNo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Challenger`
+  String get smartRoutingIncumbentNo {
+    return Intl.message(
+      'Challenger',
+      name: 'smartRoutingIncumbentNo',
       desc: '',
       args: [],
     );
@@ -8889,16 +9164,6 @@ class AppLocalizations {
     return Intl.message(
       'Latency band',
       name: 'smartRoutingKeyBand',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `History on this network`
-  String get smartRoutingKeyHistory {
-    return Intl.message(
-      'History on this network',
-      name: 'smartRoutingKeyHistory',
       desc: '',
       args: [],
     );
@@ -9704,11 +9969,11 @@ class AppLocalizations {
     return Intl.message('Glacier', name: 'appIconGlacier', desc: '', args: []);
   }
 
-  /// `Obsidian`
-  String get appIconObsidian {
+  /// `Porcelain`
+  String get appIconPorcelain {
     return Intl.message(
-      'Obsidian',
-      name: 'appIconObsidian',
+      'Porcelain',
+      name: 'appIconPorcelain',
       desc: '',
       args: [],
     );
@@ -9734,9 +9999,24 @@ class AppLocalizations {
     return Intl.message('Echo', name: 'appIconEcho', desc: '', args: []);
   }
 
-  /// `Shift`
-  String get appIconShift {
-    return Intl.message('Shift', name: 'appIconShift', desc: '', args: []);
+  /// `Glass`
+  String get appIconGlass {
+    return Intl.message('Glass', name: 'appIconGlass', desc: '', args: []);
+  }
+
+  /// `Ink`
+  String get appIconInk {
+    return Intl.message('Ink', name: 'appIconInk', desc: '', args: []);
+  }
+
+  /// `Blueprint`
+  String get appIconBlueprint {
+    return Intl.message(
+      'Blueprint',
+      name: 'appIconBlueprint',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Dashboard style`

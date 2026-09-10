@@ -79,6 +79,8 @@ type rcxCandidateReport struct {
 	DelayMs  int    `json:"delay"`
 	HostMs   int    `json:"hostDelay"`
 	Band     int    `json:"band"`
+	Unproven bool   `json:"unproven"`
+	Order    int    `json:"order"`
 	Degraded bool   `json:"degraded"`
 	Breaker  bool   `json:"breaker"`
 	UDP      bool   `json:"udp"`
@@ -2061,6 +2063,8 @@ func (e *rcxEngine) candidateReports(
 			DelayMs:  candidate.MedianMs,
 			HostMs:   candidate.HostMs,
 			Band:     int(row.Key.latBucket),
+			Unproven: row.Key.unproven,
+			Order:    int(row.Key.order),
 			Breaker:  candidate.Facts.Breaker,
 			Degraded: candidate.Degraded,
 			UDP:      candidate.Facts.SupportsUDP,

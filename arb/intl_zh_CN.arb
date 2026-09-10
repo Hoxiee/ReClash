@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "仅适用于 Android",
   "notificationAndroidOnlyDesc": "前台通知设置仅适用于 Android VPN 服务。",
   "notificationContent": "内容",
-  "notificationDetailed": "详细通知",
-  "notificationDetailedDesc": "显示实时状态行与快捷操作",
-  "notificationMinimalDesc": "Android 会保留该通知，因此只剩下保护状态",
+  "notificationVisibility": "通知级别",
+  "notificationDetailedDesc": "显示实时状态行、快捷操作和状态栏图标",
+  "notificationMinimalDesc": "仅在通知栏底部保留一行安静通知，不显示状态栏图标",
+  "notificationOffDesc": "通知栏中什么都不显示。保护继续运行，提醒照常送达",
+  "notificationVisibilityDetailed": "详细",
+  "notificationVisibilityMinimal": "精简",
+  "notificationVisibilityOff": "关闭",
   "notificationDoctorPriority": "连接诊断优先级",
   "notificationComponents": "通知组件",
   "notificationComponentsDesc": "使用实时状态组件构建通知。",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "暂停或继续",
   "notificationPauseActionDesc": "显示暂停或继续 VPN 的操作",
   "notificationPrivacy": "隐私",
+  "notificationReminders": "提醒",
+  "notificationRemindersDesc": "提醒使用独立渠道，在任何通知级别下都会送达。",
   "notificationHideSensitive": "在锁屏上隐藏敏感信息",
   "notificationHideSensitiveDesc": "设备锁定时隐藏配置、路由和诊断详情",
   "notificationPreviewProfile": "ReClash · 当前配置",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash 服务渠道已被停用",
   "notificationDeliverySubscriptionDisabled": "订阅提醒渠道已被停用",
   "notificationDeliveryReady": "可以投递通知",
+  "notificationDeliveryOff": "服务通知已在 ReClash 中关闭",
   "notificationDeliveryFix": "修复",
   "notificationPreviewScenario": "预览场景",
+  "notificationPreviewHidden": "通知栏中不会出现任何内容",
   "notificationScenarioNormal": "正常",
   "notificationScenarioRouting": "路由中",
   "notificationScenarioProblem": "出现问题",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "对余下的排序",
   "smartRoutingStepDecision": "最终选择",
   "smartRoutingStepAdmitBody": "{total} 个中 {eligible} 个通过，{blocked} 个被拦下",
-  "smartRoutingStepRankBody": "先看结论，再看是否适配本网络，然后是证据，接着是延迟档，最后才是历史",
+  "smartRoutingStepRankBody": "两台服务器第一处不同的行决定结果",
   "smartRoutingAllServers": "所有服务器",
   "smartRoutingRankOrder": "排序顺序",
+  "smartRoutingTabRanking": "选取",
+  "smartRoutingLadderHint": "两台服务器逐行比对。第一处不同的行即为结果，该行以下的内容完全不再读取。",
+  "smartRoutingKeyAdmission": "允许参与比较",
+  "smartRoutingAdmittedYes": "允许",
+  "smartRoutingKeyUnproven": "承载过流量",
+  "smartRoutingKeyIncumbent": "正在使用",
+  "smartRoutingIncumbentYes": "使用中",
+  "smartRoutingKeyTiebreak": "稳定的平局处理",
+  "smartRoutingSectionLadder": "服务器如何比较",
+  "smartRoutingSectionRivals": "与所选服务器对比",
+  "smartRoutingLostAt": "落败于：{step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "排名更高于：{step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "每一行都相同",
+  "smartRoutingRungVersus": "{value} 对 {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "没有其他服务器可比较",
+  "smartRoutingFitYes": "契合",
+  "smartRoutingFitNo": "不契合",
+  "smartRoutingProvenYes": "有",
+  "smartRoutingProvenNo": "尚无",
+  "smartRoutingIncumbentNo": "挑战者",
   "smartRoutingKeyVerdict": "结论",
   "smartRoutingKeyMisfit": "对本网络的适配",
   "smartRoutingKeyEvidence": "证据",
   "smartRoutingKeyBand": "延迟档",
-  "smartRoutingKeyHistory": "本网络的历史",
   "smartRoutingBands": "延迟档：{bands}",
   "smartRoutingSwitchedAgo": "{time}前切换",
   "smartRoutingNeverSwitched": "此网络尚未切换过",
@@ -1121,12 +1172,14 @@
   "appIconChangeNote": "启动器会在几秒后重绘图标。部分启动器上固定的快捷方式可能消失。",
   "appIconPulse": "脉冲",
   "appIconGlacier": "冰川",
-  "appIconObsidian": "黑曜石",
+  "appIconPorcelain": "瓷白",
   "appIconVelvet": "天鹅绒",
   "appIconSolar": "日耀",
   "appIconCircuit": "电路",
   "appIconEcho": "回响",
-  "appIconShift": "偏移",
+  "appIconGlass": "玻璃",
+  "appIconInk": "墨迹",
+  "appIconBlueprint": "蓝图",
   "dashboardStyle": "面板样式",
   "classicDashboard": "经典",
   "classicDashboardDesc": "磁贴网格与启动按钮",

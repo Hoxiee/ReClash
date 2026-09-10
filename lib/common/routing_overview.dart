@@ -42,6 +42,10 @@ extension RcxCandidateReportView on RcxCandidateReport {
   bool get eligible => block.isEmpty;
 
   bool get proven => verdict == 'preferred' || verdict == 'viable';
+
+  /// The endpoint country names the front a relay-fronted node advertises, so a
+  /// measured egress replaces it rather than joining it.
+  String get region => exit.isNotEmpty ? exit : country;
 }
 
 class RoutingCounts {
@@ -86,4 +90,91 @@ RoutingCounts routingCountsOf(RcxReport report) {
     blocked: rows.length - eligible,
     unknown: unknown,
   );
+}
+
+enum RoutingRung {
+  admission,
+  verdict,
+  misfit,
+  evidence,
+  band,
+  unproven,
+  incumbent,
+  tiebreak,
+}
+
+const _balancedLadder = [
+  RoutingRung.admission,
+  RoutingRung.verdict,
+  RoutingRung.misfit,
+  RoutingRung.evidence,
+  RoutingRung.band,
+  RoutingRung.unproven,
+  RoutingRung.incumbent,
+  RoutingRung.tiebreak,
+];
+
+const _latencyLadder = [
+  RoutingRung.admission,
+  RoutingRung.verdict,
+  RoutingRung.evidence,
+  RoutingRung.unproven,
+  RoutingRung.band,
+  RoutingRung.incumbent,
+  RoutingRung.tiebreak,
+];
+
+List<RoutingRung> routingLadder(String strategy) =>
+    strategy == 'lowest-latency' ? _latencyLadder : _balancedLadder;
+
+/// Ranking, never filtering: only a whitelist network wants the specialist.
+int _routingMisfit(String terrain, bool breaker) =>
+    terrain == 'whitelist' ? (breaker ? 0 : 1) : (breaker ? 1 : 0);
+
+int _routingVerdictRank(String verdict) => switch (verdict) {
+  'preferred' => 0,
+  'viable' => 1,
+  'last-resort' => 2,
+  _ => 3,
+};
+
+int _routingEvidenceRank(String evidence) => switch (evidence) {
+  'live' => 0,
+  'fresh' => 1,
+  'stale' => 2,
+  _ => 3,
+};
+
+int routingRungValue(
+  RoutingRung rung,
+  RcxCandidateReport candidate,
+  String terrain,
+) => switch (rung) {
+  RoutingRung.admission => candidate.eligible ? 0 : 1,
+  RoutingRung.verdict => _routingVerdictRank(candidate.verdict),
+  RoutingRung.misfit => _routingMisfit(terrain, candidate.breaker),
+  RoutingRung.evidence => _routingEvidenceRank(candidate.evidence),
+  RoutingRung.band => candidate.band,
+  RoutingRung.unproven => candidate.unproven ? 1 : 0,
+  RoutingRung.incumbent => candidate.current ? 0 : 1,
+  RoutingRung.tiebreak => candidate.order,
+};
+
+typedef RoutingDuel = ({RoutingRung? rung, bool won});
+
+/// The first rung [candidate] and [rival] differ on; a null rung means none does.
+RoutingDuel routingDuel(
+  RcxCandidateReport candidate,
+  RcxCandidateReport rival, {
+  required String terrain,
+  required String strategy,
+}) {
+  for (final rung in routingLadder(strategy)) {
+    final mine = routingRungValue(rung, candidate, terrain);
+    final theirs = routingRungValue(rung, rival, terrain);
+    if (mine != theirs) {
+      return (rung: rung, won: mine < theirs);
+    }
+  }
+  return (rung: null, won: false);
 }

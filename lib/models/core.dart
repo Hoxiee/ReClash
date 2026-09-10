@@ -215,6 +215,30 @@ abstract class RcxMarker with _$RcxMarker {
 }
 
 @freezed
+abstract class RcxLaneSelector with _$RcxLaneSelector {
+  const factory RcxLaneSelector({
+    @JsonKey(name: 'p') String? provider,
+    @JsonKey(name: 'has') String? nameContains,
+  }) = _RcxLaneSelector;
+
+  factory RcxLaneSelector.fromJson(Map<String, Object?> json) =>
+      _$RcxLaneSelectorFromJson(json);
+}
+
+@freezed
+abstract class RcxLaneConfig with _$RcxLaneConfig {
+  const factory RcxLaneConfig({
+    @JsonKey(name: 'id') required String capabilityId,
+    @JsonKey(name: 'g') required String group,
+    @JsonKey(name: 'fb') required String fallback,
+    @JsonKey(name: 'sel') @Default([]) List<RcxLaneSelector> selectors,
+  }) = _RcxLaneConfig;
+
+  factory RcxLaneConfig.fromJson(Map<String, Object?> json) =>
+      _$RcxLaneConfigFromJson(json);
+}
+
+@freezed
 abstract class RcxConfigParams with _$RcxConfigParams {
   const factory RcxConfigParams({
     @JsonKey(name: 'on') required bool enabled,
@@ -226,12 +250,14 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'cd') required List<String> canaryDomestic,
     @JsonKey(name: 'om') required List<RcxMarker> openMarkers,
     @JsonKey(name: 'dm') required List<RcxMarker> domesticMarkers,
+    @JsonKey(name: 'ee') @Default([]) List<String> egressEchoes,
     @JsonKey(name: 'bp') required List<String> breakerPatterns,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
     @JsonKey(name: 'udp') required bool requireUdp,
     @JsonKey(name: 'rpk') required bool respectPick,
     @JsonKey(name: 'dwl') required int dwellSeconds,
     @JsonKey(name: 'ww') required int waveWidth,
+    @JsonKey(name: 'ln') @Default([]) List<RcxLaneConfig> lanes,
   }) = _RcxConfigParams;
 
   factory RcxConfigParams.fromJson(Map<String, Object?> json) =>
@@ -239,10 +265,30 @@ abstract class RcxConfigParams with _$RcxConfigParams {
 }
 
 @freezed
+abstract class RcxLaneStatus with _$RcxLaneStatus {
+  const factory RcxLaneStatus({
+    @Default('') String id,
+    @Default('') String group,
+    @Default('empty') String state,
+    @Default('') String node,
+    @Default(0) int candidates,
+    @Default(0) int eligible,
+    @Default(false) bool searching,
+    @Default('main') String fallback,
+    @Default('') String reason,
+    @Default(0) int switchedAt,
+  }) = _RcxLaneStatus;
+
+  factory RcxLaneStatus.fromJson(Map<String, Object?> json) =>
+      _$RcxLaneStatusFromJson(json);
+}
+
+@freezed
 abstract class RcxStatus with _$RcxStatus {
   const factory RcxStatus({
     @Default(false) bool enabled,
     @Default('off') String preset,
+    @Default('balanced') String strategy,
     @Default('') String mode,
     @Default('unknown') String terrain,
     @Default('') String env,
@@ -257,6 +303,7 @@ abstract class RcxStatus with _$RcxStatus {
     @Default(0) int candidates,
     @Default(0) int eligible,
     @Default(0) int switchedAt,
+    @Default([]) List<RcxLaneStatus> lanes,
   }) = _RcxStatus;
 
   factory RcxStatus.fromJson(Map<String, Object?> json) =>
@@ -270,6 +317,7 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
   const factory RcxCandidateReport({
     @Default('') String node,
     @Default('') String country,
+    @Default('') String exit,
     @Default('unknown') String origin,
     @Default('reject') String verdict,
     @Default('none') String evidence,
@@ -277,6 +325,8 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default(0) int delay,
     @Default(0) int hostDelay,
     @Default(0) int band,
+    @Default(false) bool unproven,
+    @Default(0) int order,
     @Default(false) bool degraded,
     @Default(false) bool breaker,
     @Default(false) bool udp,

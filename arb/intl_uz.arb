@@ -189,9 +189,13 @@
   "notificationAndroidOnly": "Androidda mavjud",
   "notificationAndroidOnlyDesc": "Oldingi reja bildirishnomasi sozlamalari faqat Android VPN xizmatiga tegishli.",
   "notificationContent": "Tarkib",
-  "notificationDetailed": "Batafsil bildirishnoma",
-  "notificationDetailedDesc": "Jonli holat qatorlari va tezkor amallar ko‘rsatiladi",
-  "notificationMinimalDesc": "Android bildirishnomani saqlaydi, shuning uchun faqat himoya holati qoladi",
+  "notificationVisibility": "Bildirishnoma darajasi",
+  "notificationDetailedDesc": "Jonli holat qatorlari, tezkor amallar va holat panelidagi belgi ko‘rsatiladi",
+  "notificationMinimalDesc": "Pardaning pastida bitta jim qator qoladi, holat panelida belgi bo‘lmaydi",
+  "notificationOffDesc": "Pardada hech narsa yo‘q. Himoya ishlashda davom etadi, eslatmalar keladi",
+  "notificationVisibilityDetailed": "Batafsil",
+  "notificationVisibilityMinimal": "Minimal",
+  "notificationVisibilityOff": "O‘chirilgan",
   "notificationDoctorPriority": "Ulanish diagnostikasi ustuvorligi",
   "notificationComponents": "Bildirishnoma komponentlari",
   "notificationComponentsDesc": "Bildirishnomani jonli holat komponentlaridan tuzing.",
@@ -227,6 +231,8 @@
   "notificationPauseAction": "To‘xtatib turish yoki davom ettirish",
   "notificationPauseActionDesc": "VPNni to‘xtatib turish yoki davom ettirish amalini ko‘rsatish",
   "notificationPrivacy": "Maxfiylik",
+  "notificationReminders": "Eslatmalar",
+  "notificationRemindersDesc": "Eslatmalar o‘z kanalidan foydalanadi va istalgan bildirishnoma darajasida keladi.",
   "notificationHideSensitive": "Qulf ekranida maxfiy ma’lumotlarni yashirish",
   "notificationHideSensitiveDesc": "Qurilma qulflanganda profil, marshrutlash va diagnostika tafsilotlarini yashirish",
   "notificationPreviewProfile": "ReClash · Joriy profil",
@@ -246,8 +252,10 @@
   "notificationDeliveryServiceDisabled": "ReClash xizmat kanali o‘chirilgan",
   "notificationDeliverySubscriptionDisabled": "Obuna eslatmalari kanali o‘chirilgan",
   "notificationDeliveryReady": "Bildirishnomalarni yetkazish mumkin",
+  "notificationDeliveryOff": "Xizmat bildirishnomasi ReClash’da o‘chirilgan",
   "notificationDeliveryFix": "Tuzatish",
   "notificationPreviewScenario": "Ko‘rish ssenariysi",
+  "notificationPreviewHidden": "Parda bo‘sh qoladi",
   "notificationScenarioNormal": "Oddiy",
   "notificationScenarioRouting": "Marshrutlash",
   "notificationScenarioProblem": "Muammo",
@@ -1016,14 +1024,57 @@
   "smartRoutingStepRank": "Qolganlarini saraladi",
   "smartRoutingStepDecision": "Buni tanladi",
   "smartRoutingStepAdmitBody": "{total} ta serverdan {eligible} tasi oʻtdi, {blocked} tasi ushlab turildi",
-  "smartRoutingStepRankBody": "Avval hukm, soʻng tarmoqqa mosligi, soʻng dalil, keyin kechikish oraligʻi, eng oxirida tarix",
+  "smartRoutingStepRankBody": "Ikki server birinchi marta farq qilgan qator hal qiladi",
   "smartRoutingAllServers": "Barcha serverlar",
   "smartRoutingRankOrder": "Saralash tartibi",
+  "smartRoutingTabRanking": "Tanlov",
+  "smartRoutingLadderHint": "Ikki server qatorma-qator solishtiriladi. Ular birinchi marta farq qilgan qator hal qiladi, undan pastdagilar umuman o‘qilmaydi.",
+  "smartRoutingKeyAdmission": "Solishtiruvga qo‘yilgan",
+  "smartRoutingAdmittedYes": "Qo‘yilgan",
+  "smartRoutingKeyUnproven": "Trafik o‘tkazgan",
+  "smartRoutingKeyIncumbent": "Allaqachon ishlatilmoqda",
+  "smartRoutingIncumbentYes": "Ishlamoqda",
+  "smartRoutingKeyTiebreak": "Barqaror tenglik yechimi",
+  "smartRoutingSectionLadder": "Serverlar qanday solishtiriladi",
+  "smartRoutingSectionRivals": "Tanlangan serverga qarshi",
+  "smartRoutingLostAt": "Yutqazgan qator: {step}",
+  "@smartRoutingLostAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingWinsAt": "Yuqoriroq turgan qator: {step}",
+  "@smartRoutingWinsAt": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingTiedAll": "Barcha qatorlarda bir xil",
+  "smartRoutingRungVersus": "{value} — {against}",
+  "@smartRoutingRungVersus": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "against": {
+        "type": "String"
+      }
+    }
+  },
+  "smartRoutingNoRivals": "Solishtirish uchun boshqa server yo‘q",
+  "smartRoutingFitYes": "Mos",
+  "smartRoutingFitNo": "Mos emas",
+  "smartRoutingProvenYes": "Ha",
+  "smartRoutingProvenNo": "Hali yo‘q",
+  "smartRoutingIncumbentNo": "Da’vogar",
   "smartRoutingKeyVerdict": "Hukm",
   "smartRoutingKeyMisfit": "Bu tarmoqqa mosligi",
   "smartRoutingKeyEvidence": "Dalil",
   "smartRoutingKeyBand": "Kechikish oraligʻi",
-  "smartRoutingKeyHistory": "Bu tarmoqdagi tarix",
   "smartRoutingBands": "Oraliqlar: {bands}",
   "smartRoutingSwitchedAgo": "{time} oldin almashtirildi",
   "smartRoutingNeverSwitched": "Bu tarmoqda hali almashtirilmagan",
@@ -1111,12 +1162,14 @@
   "appIconChangeNote": "Belgi bir necha soniya ichida qayta chiziladi. Qadalgan yorliq ayrim bosh ekran ilovalarida yoʻqolib qolishi mumkin.",
   "appIconPulse": "Impuls",
   "appIconGlacier": "Muzlik",
-  "appIconObsidian": "Obsidian",
+  "appIconPorcelain": "Farfor",
   "appIconVelvet": "Baxmal",
   "appIconSolar": "Quyosh",
   "appIconCircuit": "Sxema",
   "appIconEcho": "Aks-sado",
-  "appIconShift": "Siljish",
+  "appIconGlass": "Shisha",
+  "appIconInk": "Siyoh",
+  "appIconBlueprint": "Chizma",
   "dashboardStyle": "Boshqaruv paneli uslubi",
   "classicDashboard": "Klassik",
   "classicDashboardDesc": "Kataklar panjarasi va boshlash tugmasi",

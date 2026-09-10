@@ -2,6 +2,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
+import 'package:reclash/views/dashboard/widgets/routing_ranking_tab.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,6 +128,16 @@ Future<void> _openDetails(WidgetTester tester) async {
   await tester.tap(find.text('Details'));
   await tester.pumpAndSettle();
 }
+
+Future<void> _openRanking(WidgetTester tester) async {
+  await tester.tap(find.text('Ranking'));
+  await tester.pumpAndSettle();
+}
+
+final _rankingScroll = find.descendant(
+  of: find.byType(RoutingRankingTab),
+  matching: find.byType(Scrollable),
+);
 
 Future<void> _toggleTechnical(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.code_rounded));
@@ -463,5 +474,108 @@ void main() {
     expect(find.text('wifi'), findsOne);
     expect(find.text('rule'), findsOne);
     expect(find.text('Last switchover'), findsOne);
+  });
+
+  testWidgets('the ranking tab reads the ladder the strategy actually uses', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await _openRanking(tester);
+
+    expect(find.text('Balanced'), findsOne);
+    expect(find.text('Allowed to compete'), findsOne);
+    expect(find.text('Fit for this network'), findsOne);
+    expect(find.text('Stable tiebreak'), findsOne);
+    expect(find.text('Reaches the open internet'), findsOne);
+    expect(find.text('Does not fit'), findsOne);
+  });
+
+  testWidgets('lowest latency never ranks by a terrain fit it ignores', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      enabled: true,
+      report: _report.copyWith(
+        status: _report.status.copyWith(strategy: 'lowest-latency'),
+      ),
+    );
+    await _openRanking(tester);
+
+    expect(find.text('Lowest latency'), findsOne);
+    expect(find.text('Fit for this network'), findsNothing);
+    expect(find.text('Has carried traffic'), findsOne);
+  });
+
+  testWidgets('a rival names the line it lost on and both readings of it', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await _openRanking(tester);
+    await tester.scrollUntilVisible(
+      find.text('Frankfurt #1'),
+      200,
+      scrollable: _rankingScroll,
+    );
+
+    expect(find.text('Lost at: Verdict'), findsOne);
+    expect(find.text('Usable vs Reaches the open internet'), findsOne);
+  });
+
+  testWidgets('a gated rival loses before any comparison is made', (
+    tester,
+  ) async {
+    await _pump(tester, enabled: true, report: _report);
+    await _openRanking(tester);
+    await tester.scrollUntilVisible(
+      find.text('Paris #7'),
+      200,
+      scrollable: _rankingScroll,
+    );
+
+    expect(find.text('Lost at: Allowed to compete'), findsOne);
+    expect(find.text('Cooling down after 4 failures vs Allowed'), findsOne);
+  });
+
+  testWidgets(
+    'a server held out of use is shown ranking above the one in use',
+    (tester) async {
+      await _pump(
+        tester,
+        enabled: true,
+        report: _report.copyWith(
+          status: _report.status.copyWith(reason: 'dwell-hold'),
+          candidates: [
+            const RcxCandidateReport(
+              node: 'Amsterdam #3',
+              verdict: 'viable',
+              evidence: 'fresh',
+              current: true,
+            ),
+            const RcxCandidateReport(
+              node: 'Oslo #2',
+              verdict: 'preferred',
+              evidence: 'live',
+            ),
+          ],
+        ),
+      );
+      await _openRanking(tester);
+
+      expect(find.text('Ranks higher at: Verdict'), findsOne);
+    },
+  );
+
+  testWidgets('a park of one states there is nothing to compare against', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      enabled: true,
+      report: _report.copyWith(candidates: [_report.candidates.first]),
+    );
+    await _openRanking(tester);
+
+    expect(find.text('No other servers to compare with'), findsOne);
   });
 }
