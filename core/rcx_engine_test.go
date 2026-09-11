@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -11,44 +13,61 @@ import (
 )
 
 type fakeRuntime struct {
-	mu        sync.Mutex
-	members   []rcxMember
-	selected  string
-	selects   []string
-	selectErr error
-	mode      string
-	countries map[string]string
-	results   map[string]rcxProbeResult
-	reach     map[string]rcxProbeOutcome
-	conns     map[string]rcxConnSample
-	hang      map[string]bool
-	panics    map[string]bool
-	closed    []string
-	published []rcxStatus
-	link      rcxNetworkPayload
-	linked    bool
-	now       time.Time
-	tested    []string
+	mu            sync.Mutex
+	members       []rcxMember
+	memberReads   int
+	topologyValid bool
+	selected      string
+	selects       []string
+	selectErr     error
+	mode          string
+	countries     map[string]string
+	exits         map[string]string
+	results       map[string]rcxProbeResult
+	reach         map[string]rcxProbeOutcome
+	conns         map[string]rcxConnSample
+	hang          map[string]bool
+	panics        map[string]bool
+	closed        []string
+	published     []rcxStatus
+	link          rcxNetworkPayload
+	linked        bool
+	now           time.Time
+	tested        []string
+	testStarted   chan string
+	testRelease   chan struct{}
+	swept         [][]string
+	sweepStarted  chan struct{}
+	sweepRelease  chan struct{}
 
 	groupSelected map[string]string
 }
 
 func newFakeRuntime() *fakeRuntime {
 	return &fakeRuntime{
-		mode:      "rule",
-		countries: map[string]string{},
-		results:   map[string]rcxProbeResult{},
-		reach:     map[string]rcxProbeOutcome{},
-		conns:     map[string]rcxConnSample{},
-		hang:      map[string]bool{},
-		panics:    map[string]bool{},
-		now:       time.Unix(1_700_000_000, 0),
+		topologyValid: true,
+		mode:          "rule",
+		countries:     map[string]string{},
+		exits:         map[string]string{},
+		results:       map[string]rcxProbeResult{},
+		reach:         map[string]rcxProbeOutcome{},
+		conns:         map[string]rcxConnSample{},
+		hang:          map[string]bool{},
+		panics:        map[string]bool{},
+		now:           time.Unix(1_700_000_000, 0),
 	}
+}
+
+func (r *fakeRuntime) TopologyValid(rcxConfig) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.topologyValid
 }
 
 func (r *fakeRuntime) Members() []rcxMember {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.memberReads++
 	return append([]rcxMember(nil), r.members...)
 }
 
@@ -92,11 +111,29 @@ func (r *fakeRuntime) Mode() string { return r.mode }
 
 func (r *fakeRuntime) Country(node string) string { return r.countries[node] }
 
-func (r *fakeRuntime) Test(_ context.Context, node string, _ rcxMarker) (int, bool, error) {
+func (r *fakeRuntime) Locate(_ context.Context, node, _ string) string {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.exits[node]
+}
+
+func (r *fakeRuntime) Test(ctx context.Context, node string, _ rcxMarker) (int, bool, error) {
+	r.mu.Lock()
 	r.tested = append(r.tested, node)
+	started := r.testStarted
+	release := r.testRelease
 	result, ok := r.results[node]
+	r.mu.Unlock()
+	if started != nil {
+		started <- node
+	}
+	if release != nil {
+		select {
+		case <-release:
+		case <-ctx.Done():
+			return 0, false, ctx.Err()
+		}
+	}
 	if !ok {
 		return 0, false, context.DeadlineExceeded
 	}
@@ -108,6 +145,39 @@ func (r *fakeRuntime) Test(_ context.Context, node string, _ rcxMarker) (int, bo
 	default:
 		return 0, false, context.DeadlineExceeded
 	}
+}
+
+func (r *fakeRuntime) testedNodes() []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]string(nil), r.tested...)
+}
+
+func (r *fakeRuntime) Sweep(ctx context.Context, nodes []string) {
+	r.mu.Lock()
+	r.swept = append(r.swept, append([]string(nil), nodes...))
+	started, release := r.sweepStarted, r.sweepRelease
+	r.mu.Unlock()
+	if started != nil {
+		select {
+		case started <- struct{}{}:
+		case <-ctx.Done():
+			return
+		}
+	}
+	if release == nil {
+		return
+	}
+	select {
+	case <-release:
+	case <-ctx.Done():
+	}
+}
+
+func (r *fakeRuntime) sweptNodes() [][]string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([][]string(nil), r.swept...)
 }
 
 func (r *fakeRuntime) Reach(ctx context.Context, addr string, domestic bool) rcxProbeOutcome {
@@ -265,6 +335,485 @@ func providerMembers(provider string, names ...string) []rcxMember {
 	return members
 }
 
+func TestWakeStandbyPrefersLowestKnownDelay(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "current", ID: "current-id", SupportsUDP: true},
+		{Name: "slow", ID: "slow-id", SupportsUDP: true, HostMs: 120, HostAt: runtime.Now()},
+		{Name: "fast", ID: "fast-id", SupportsUDP: true, HostMs: 30, HostAt: runtime.Now()},
+	}
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.candidates(runtime.members)
+	engine.snapshot.Standbys[engine.envKey] = []string{"slow-id", "fast-id"}
+	for index, node := range []string{"slow", "fast"} {
+		engine.ledger.NoteProbe(engine.key(node), engine.envKey, rcxRoleOpen, rcxProbeOK, runtime.members[index+1].HostMs, runtime.Now())
+	}
+
+	if got := engine.selectWakeStandby(runtime.Now()); got != "fast" {
+		t.Fatalf("standby = %q, want lowest known-delay proven standby", got)
+	}
+}
+
+func TestScreenOffKeepsLivingIncumbentAcrossLatencyGain(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "faster")
+	runtime.selected = "current"
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 400, runtime.Now())
+	engine.ledger.NoteProbe("faster", engine.envKey, rcxRoleOpen, rcxProbeOK, 20, runtime.Now())
+	engine.applyScreenOff(true)
+
+	engine.reconsider()
+	if runtime.selected != "current" || len(runtime.selects) != 0 {
+		t.Fatalf("selected = %q, selects = %v, background latency gain displaced a living incumbent", runtime.selected, runtime.selects)
+	}
+}
+
+func TestScreenOffAlternativeSuccessNeedsIncumbentDeath(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	runtime.selected = "current"
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.applyScreenOff(true)
+	engine.probing = true
+	engine.probeKind = rcxWaveIncident
+	engine.probeScreenOff = true
+	engine.probeScreenEpisode = engine.screenEpisode
+	engine.probeIncumbent = "current"
+	engine.probeStarted = map[string]struct{}{}
+
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{Node: "standby", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 30}}})
+
+	if runtime.selected != "current" || engine.probeDecisionClosed {
+		t.Fatalf("selected = %q, closed = %v, alternative success acted as incumbent death", runtime.selected, engine.probeDecisionClosed)
+	}
+}
+
+func TestScreenOffProbeEpisodeCommitsOnlyOneFailover(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "first", "late")
+	runtime.selected = "current"
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.applyScreenOff(true)
+	engine.probing = true
+	engine.probeKind = rcxWaveIncident
+	engine.probeScreenOff = true
+	engine.probeScreenEpisode = engine.screenEpisode
+	engine.probeIncumbent = "current"
+	engine.probeStarted = map[string]struct{}{}
+
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail}}})
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{Node: "first", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40}}})
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{Node: "late", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 20}}})
+
+	if runtime.selected != "first" || len(runtime.selects) != 1 || !engine.probeDecisionClosed {
+		t.Fatalf("selected = %q, selects = %v, closed = %v, want one background failover", runtime.selected, runtime.selects, engine.probeDecisionClosed)
+	}
+	facts := engine.ledger.Facts("late", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofProven {
+		t.Fatalf("late result was not retained as evidence: %+v", facts)
+	}
+}
+
+func TestScreenOffFailedSelectDoesNotSpendEpisode(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	runtime.selected = "current"
+	runtime.selectErr = context.DeadlineExceeded
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.applyScreenOff(true)
+	engine.screenDead = "current"
+	engine.ledger.NoteProbe("standby", engine.envKey, rcxRoleOpen, rcxProbeOK, 30, runtime.Now())
+
+	if engine.tryAutomaticMainSelect("standby", rcxReasonIncumbentDead, runtime.Now()) || engine.screenFailedOver {
+		t.Fatal("failed selector write spent the background episode")
+	}
+	runtime.selectErr = nil
+	if !engine.tryAutomaticMainSelect("standby", rcxReasonIncumbentDead, runtime.Now()) || !engine.screenFailedOver {
+		t.Fatal("successful retry was blocked after a failed selector write")
+	}
+}
+
+func waitForWakeEvent(t *testing.T, engine *rcxEngine) rcxEvent {
+	t.Helper()
+	select {
+	case event := <-engine.events:
+		return event
+	case <-time.After(time.Second):
+		t.Fatal("wake probe did not finish")
+		return rcxEvent{}
+	}
+}
+
+func armWakeStandby(engine *rcxEngine, runtime *fakeRuntime, incumbent, standby string) {
+	engine.incumbent = incumbent
+	runtime.selected = incumbent
+	engine.candidates(runtime.members)
+	engine.snapshot.Standbys[engine.envKey] = []string{standby}
+	engine.ledger.NoteProbe(standby, engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+}
+
+func TestWakeProbeTestsIncumbentAndStandbyInParallel(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	runtime.results["current"] = rcxProbeResult{Outcome: rcxProbeOK, DelayMs: 100}
+	runtime.results["standby"] = rcxProbeResult{Outcome: rcxProbeOK, DelayMs: 30}
+	runtime.testStarted = make(chan string, 2)
+	runtime.testRelease = make(chan struct{})
+	engine := newTestEngine(runtime, "ru")
+	armWakeStandby(engine, runtime, "current", "standby")
+	engine.screenOff = true
+	engine.screenEpisode = 1
+	previous := rcxWakeSettleDelay
+	rcxWakeSettleDelay = 0
+	defer func() { rcxWakeSettleDelay = previous }()
+
+	engine.applyScreenOff(false)
+	started := map[string]bool{}
+	for len(started) < 2 {
+		select {
+		case node := <-runtime.testStarted:
+			started[node] = true
+		case <-time.After(time.Second):
+			t.Fatalf("started = %v, want both named outbounds before either finishes", started)
+		}
+	}
+	if runtime.selected != "current" {
+		t.Fatalf("selected = %q before wake results, named tests mutated the selector", runtime.selected)
+	}
+	close(runtime.testRelease)
+	engine.handle(waitForWakeEvent(t, engine))
+
+	if got := runtime.testedNodes(); len(got) != 2 || !started["current"] || !started["standby"] {
+		t.Fatalf("tested = %v, want current and remembered standby", got)
+	}
+	if len(runtime.selects) != 0 || runtime.selected != "current" {
+		t.Fatalf("selects = %v, selected = %q, faster standby displaced a live incumbent", runtime.selects, runtime.selected)
+	}
+}
+
+func TestWakeProbeSwitchesOnceOnlyAfterIncumbentFailure(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	runtime.results["current"] = rcxProbeResult{Outcome: rcxProbeFail}
+	runtime.results["standby"] = rcxProbeResult{Outcome: rcxProbeOK, DelayMs: 30}
+	engine := newTestEngine(runtime, "ru")
+	armWakeStandby(engine, runtime, "current", "standby")
+	engine.screenOff = true
+	engine.screenEpisode = 4
+	previous := rcxWakeSettleDelay
+	rcxWakeSettleDelay = 0
+	defer func() { rcxWakeSettleDelay = previous }()
+
+	engine.applyScreenOff(false)
+	event := waitForWakeEvent(t, engine)
+	engine.handle(event)
+	engine.handle(event)
+
+	if runtime.selected != "standby" || len(runtime.selects) != 1 {
+		t.Fatalf("selected = %q, selects = %v, want one confirmed-death wake failover", runtime.selected, runtime.selects)
+	}
+	if !engine.screenFailedOver || engine.incumbent != "standby" {
+		t.Fatalf("episode state = used:%v incumbent:%q", engine.screenFailedOver, engine.incumbent)
+	}
+}
+
+func TestWakeProbeTreatsTimeoutAsEvidenceOnly(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	engine := newTestEngine(runtime, "ru")
+	armWakeStandby(engine, runtime, "current", "standby")
+	engine.screenOff = true
+	engine.screenEpisode = 2
+	engine.applyScreenOff(false)
+	defer engine.supersedeWake()
+
+	engine.applyWakeResults(rcxEvent{
+		Kind: rcxEventWakeResults, Gen: engine.wakeGen, ConfigGen: engine.configGen, Episode: engine.screenEpisode,
+		Wake: []rcxWakeResult{{Node: "current", Outcome: rcxProbeOverloaded}, {Node: "standby", Outcome: rcxProbeOK, DelayMs: 20}},
+	})
+
+	if runtime.selected != "current" || len(runtime.selects) != 0 {
+		t.Fatalf("selected = %q, selects = %v, timeout displaced an unproven incumbent", runtime.selected, runtime.selects)
+	}
+}
+
+func TestCapabilityLaneSelectsSpecialistAndKeepsBaseSelector(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "plain", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Selectors: []rcxLaneSelector{{Provider: "premium", NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	for _, member := range runtime.members {
+		engine.ledger.NoteProbe(member.key(), engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+	}
+
+	engine.reconsider()
+
+	if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != "premium ⭐" {
+		t.Fatalf("lane selected = %q, want its specialist", got)
+	}
+	if runtime.selected != "plain" {
+		t.Fatalf("base selected = %q, want its independent incumbent", runtime.selected)
+	}
+	status := engine.Status()
+	if len(status.Lanes) != 1 || status.Lanes[0].Node != "premium ⭐" || status.Lanes[0].State != "active" {
+		t.Fatalf("lanes = %+v, want the active specialist status", status.Lanes)
+	}
+}
+
+func TestCapabilityLaneUsesConfiguredFallbackWithoutSpecialists(t *testing.T) {
+	for _, tc := range []struct {
+		fallback string
+		want     string
+	}{
+		{fallback: "main", want: rcxGroupNode},
+		{fallback: "reject", want: "REJECT"},
+	} {
+		t.Run(tc.fallback, func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = foreignMembers("plain")
+			runtime.selected = "plain"
+			engine := newTestEngine(runtime, "ru")
+			config := engine.cfg
+			config.Lanes = []rcxLaneConfig{{
+				ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: tc.fallback,
+			}}
+			engine.applyConfigLocked(config)
+
+			engine.reconsider()
+
+			if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != tc.want {
+				t.Fatalf("selected = %q, want fallback %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCapabilityLaneRidesFallbackWhileItsMatchesAreUnproven(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "plain", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	runtime.groupSelected = map[string]string{"RCX-CAP-YOUTUBE_ADFREE": "REJECT"}
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "youtube-adfree", Group: "RCX-CAP-YOUTUBE_ADFREE", Fallback: "main",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+
+	engine.reconsider()
+
+	if got := runtime.SelectedIn("RCX-CAP-YOUTUBE_ADFREE"); got != rcxGroupNode {
+		t.Fatalf("selected = %q, want the configured fallback while no match is proven yet", got)
+	}
+	status := engine.Status()
+	if len(status.Lanes) != 1 || status.Lanes[0].State != "searching" {
+		t.Fatalf("lanes = %+v, want a searching lane rather than a settled fallback", status.Lanes)
+	}
+}
+
+func TestCapabilityLaneProbesItsOwnUnprovenMatches(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "plain", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "youtube-adfree", Group: "RCX-CAP-YOUTUBE_ADFREE", Fallback: "main",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	engine.ledger.NoteProbe(runtime.members[0].key(), engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+
+	engine.reconsiderLanes(runtime.members, runtime.Now())
+	engine.queueLaneRecovery()
+
+	if !engine.probing || engine.probeLane != "youtube-adfree" {
+		t.Fatalf("probing = %v, lane = %q, want the lane measuring its own claim",
+			engine.probing, engine.probeLane)
+	}
+	if _, queued := engine.laneProbeSeen["youtube-adfree"]["premium ⭐"]; !queued {
+		t.Fatalf("seen = %v, want the unproven specialist in the wave",
+			engine.laneProbeSeen["youtube-adfree"])
+	}
+}
+
+func TestCapabilityLaneReleasesGroupWhenItsIncumbentDies(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "plain", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	runtime.groupSelected = map[string]string{"RCX-CAP-YOUTUBE_ADFREE": "premium ⭐"}
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "youtube-adfree", Group: "RCX-CAP-YOUTUBE_ADFREE", Fallback: "main",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	lane := engine.lanes["youtube-adfree"]
+	lane.incumbent = "premium ⭐"
+	key := runtime.members[1].key()
+	engine.ledger.NoteProbe(key, engine.envKey, rcxRoleOpen, rcxProbeFail, 0, runtime.Now())
+
+	engine.reconsider()
+
+	if got := runtime.SelectedIn("RCX-CAP-YOUTUBE_ADFREE"); got != rcxGroupNode {
+		t.Fatalf("selected = %q, want the fallback after its only specialist died", got)
+	}
+	if lane.incumbent != "" {
+		t.Fatalf("incumbent = %q, want a released lane", lane.incumbent)
+	}
+}
+
+func TestCapabilityLaneFallbackKeepsStateWhenSelectorWriteFails(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("plain")
+	runtime.groupSelected = map[string]string{"RCX-CAP-GEMINI_ACCESS": "old-specialist"}
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Selectors: []rcxLaneSelector{{NameContains: "star"}},
+	}}
+	engine.applyConfigLocked(config)
+	lane := engine.lanes["gemini-access"]
+	lane.incumbent = "old-specialist"
+	runtime.selectErr = errors.New("selector unavailable")
+
+	engine.reconsider()
+
+	if lane.incumbent != "old-specialist" {
+		t.Fatalf("incumbent = %q, want state preserved after failed fallback", lane.incumbent)
+	}
+	if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != "old-specialist" {
+		t.Fatalf("selected = %q, want unchanged selector", got)
+	}
+}
+
+func TestCapabilityLaneRestoresItsEnvironmentPick(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{{Name: "premium ⭐", ID: "premium-id", Provider: "premium", SupportsUDP: true}}
+	runtime.selected = "premium ⭐"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "main",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	engine.candidates(runtime.members)
+	engine.snapshot.LanePicks["gemini-access"] = map[string]string{"w:Cell": "premium-id"}
+
+	engine.applyNetwork(rcxNetworkPayload{Transport: "wifi", SSID: "Cell", Validated: true})
+
+	lane := engine.lanes["gemini-access"]
+	if lane == nil || lane.incumbent != "premium ⭐" {
+		t.Fatalf("lane = %+v, want its remembered endpoint restored", lane)
+	}
+}
+
+func TestCapabilityLaneProbeResultSwitchesOnlyItsSelector(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{{Name: "premium ⭐", Provider: "premium", SupportsUDP: true}}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	engine.candidates(runtime.members)
+	engine.probing = true
+	engine.probeKind = rcxWaveRescue
+	engine.probeLane = "gemini-access"
+	engine.probeStarted = map[string]struct{}{}
+	cancelled := false
+	engine.probeCancel = func() { cancelled = true }
+
+	engine.applyProbeResult(rcxEvent{
+		Gen: engine.probeGen, ConfigGen: engine.configGen, Lane: "gemini-access",
+		Results: []rcxProbeResult{{Node: "premium ⭐", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40}},
+	})
+
+	if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != "premium ⭐" || !cancelled {
+		t.Fatalf("selected = %q, cancelled = %v, want early lane recovery", got, cancelled)
+	}
+	if runtime.selected != "plain" {
+		t.Fatalf("base selected = %q, lane recovery changed it", runtime.selected)
+	}
+}
+
+func TestProbeResultForReplacedEndpointNameIsIgnored(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{{Name: "same", ID: "new-id", SupportsUDP: true}}
+	engine := newTestEngine(runtime, "ru")
+	engine.syncIdentity(runtime.members)
+	engine.probing = true
+
+	engine.applyProbeResult(rcxEvent{
+		Gen: engine.probeGen,
+		Results: []rcxProbeResult{{
+			Node: "same", Key: "old-id", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40,
+		}},
+	})
+
+	if len(engine.probeResults) != 0 {
+		t.Fatal("stale endpoint result entered the active wave")
+	}
+	facts := engine.ledger.Facts("new-id", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofUnknown {
+		t.Fatalf("new endpoint inherited stale proof: %+v", facts)
+	}
+}
+
+func TestProbeResultsRefreshTheAppliedMemberState(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.handle(rcxEvent{Kind: rcxEventProvidersLoaded})
+	reads := runtime.memberReads
+
+	engine.probeGen = 1
+	engine.handle(rcxEvent{
+		Kind: rcxEventProbeResults,
+		Gen:  1,
+		Results: []rcxProbeResult{
+			{Node: "a", Outcome: rcxProbeOK},
+			{Node: "b", Outcome: rcxProbeOK},
+		},
+	})
+
+	if runtime.memberReads <= reads {
+		t.Fatal("probe completion reused stale member metadata")
+	}
+}
+
 func TestProviderCircuitNeedsIndependentFailures(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = providerMembers("one", "a", "b")
@@ -350,6 +899,21 @@ func TestProviderSuccessClosesItsCircuit(t *testing.T) {
 	}
 }
 
+func TestHarvestedSuccessClosesItsProviderCircuit(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.syncIdentity(runtime.members)
+	engine.noteProviderNodeFailure("a", runtime.Now())
+	engine.noteProviderNodeFailure("b", runtime.Now())
+
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "a", DelayMs: 80})
+
+	if engine.providerCircuitOpen("one", "b", runtime.Now()) {
+		t.Error("returned host payload must close the provider-wide circuit")
+	}
+}
+
 func TestEnvironmentMigrationMergesEveryPersistedDomain(t *testing.T) {
 	runtime := newFakeRuntime()
 	engine := newTestEngine(runtime, "ru")
@@ -431,8 +995,9 @@ func TestEngineHoldsAStrandedIncumbentInsteadOfLeaking(t *testing.T) {
 	if len(runtime.selects) != 0 {
 		t.Errorf("selects = %v, want none: DIRECT would put the real SNI on the wire", runtime.selects)
 	}
-	if got := runtime.lastStatus().Reason; got != string(rcxReasonStranded) {
-		t.Errorf("reason = %q, want stranded", got)
+	status := runtime.lastStatus()
+	if status.Reason != string(rcxReasonMeasuring) || !status.Searching {
+		t.Errorf("status = %+v, want measuring while bounded recovery runs", status)
 	}
 }
 
@@ -467,6 +1032,31 @@ func TestEngineKeepsFailureMemoryPerNetwork(t *testing.T) {
 	}
 	if !engine.ledger.CoolUntil("node", "c:25001", engine.runtime.Now()).IsZero() {
 		t.Error("a whitelist episode on wifi must not condemn the node on LTE")
+	}
+}
+
+func TestEngineKeepsCarrierMemoryWhenCellularDetailsChange(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("node", "spare")
+	engine := newTestEngine(runtime, "ru")
+	engine.envKey = ""
+	first := rcxNetworkPayload{Transport: "cellular", Carrier: "25001", Gateways: []string{"10.1.0.1"}, IPv4: []string{"10.1.0.2"}, Validated: true}
+	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: first})
+	key := engine.envKey
+	engine.snapshot.Picks[key] = "node"
+	engine.snapshot.Pins[key] = "node"
+	engine.snapshot.Standbys[key] = []string{"spare"}
+	engine.ledger.NoteProbe("node", key, rcxRoleOpen, rcxProbeOK, 80, runtime.Now())
+	engine.ledger.NoteProbe("spare", key, rcxRoleOpen, rcxProbeOK, 90, runtime.Now())
+
+	second := rcxNetworkPayload{Transport: "cellular", Carrier: "25001", Gateways: []string{"10.99.0.1"}, IPv4: []string{"10.99.0.2"}, Validated: true}
+	engine.handle(rcxEvent{Kind: rcxEventNetwork, Payload: second})
+
+	if engine.envKey != key || engine.snapshot.Picks[key] != "node" || engine.snapshot.Pins[key] != "node" || len(engine.snapshot.Standbys[key]) != 1 {
+		t.Fatalf("carrier memory was split: env=%q pick=%q pin=%q standby=%v", engine.envKey, engine.snapshot.Picks[key], engine.snapshot.Pins[key], engine.snapshot.Standbys[key])
+	}
+	if engine.ledger.Facts("node", key, true, runtime.Now(), rcxLedgerProofTTL).OpenWorld != rcxProofProven {
+		t.Error("carrier ledger was lost when cellular details changed")
 	}
 }
 
@@ -604,6 +1194,108 @@ func cellularHandoff(engine *rcxEngine) string {
 	return key
 }
 
+func TestHandoffBudgetFitsTenSeconds(t *testing.T) {
+	if rcxHostSweepWindow+rcxHandoffWave > 10*time.Second {
+		t.Fatalf("handoff budget = %v, want at most 10s", rcxHostSweepWindow+rcxHandoffWave)
+	}
+}
+
+func TestHandoffMarkerGeometryFinishesInItsWindow(t *testing.T) {
+	batches := (rcxHandoffWidth + rcxHandoffParallel - 1) / rcxHandoffParallel
+	if time.Duration(batches)*rcxHandoffTimeout > rcxHandoffWave {
+		t.Fatalf("handoff marker geometry cannot finish in %v", rcxHandoffWave)
+	}
+}
+
+func TestEngineHandoffStartsAHostSweep(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("a", "b")
+	runtime.sweepStarted = make(chan struct{}, 1)
+	engine := newTestEngine(runtime, "ru")
+
+	cellularHandoff(engine)
+	select {
+	case <-runtime.sweepStarted:
+	case <-time.After(time.Second):
+		t.Fatal("host sweep did not start")
+	}
+
+	sweeps := runtime.sweptNodes()
+	if len(sweeps) != 1 || !reflect.DeepEqual(sweeps[0], []string{"a", "b"}) {
+		t.Fatalf("sweeps = %v, want one whole-park sweep", sweeps)
+	}
+}
+
+func TestEngineDropsHostReadingsFromThePreviousLink(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{{
+		Name: "node", SupportsUDP: true, HostMs: 40, HostAt: runtime.Now(),
+	}}
+	engine := newTestEngine(runtime, "ru")
+	runtime.advance(time.Second)
+	engine.envSince = runtime.Now()
+
+	candidate := engine.candidates(runtime.members)[0]
+	if candidate.HostMs != 0 || candidate.HostDead {
+		t.Fatalf("host reading = %d dead=%v, want no reading from the old link", candidate.HostMs, candidate.HostDead)
+	}
+}
+
+func TestEngineHoldsHandoffProbeUntilHostSweepLands(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("a", "b")
+	runtime.reach["1.1.1.1:443"] = rcxProbeOK
+	runtime.sweepStarted = make(chan struct{}, 1)
+	runtime.sweepRelease = make(chan struct{})
+	engine := newTestEngine(runtime, "ru")
+	engine.quit = make(chan struct{})
+
+	cellularHandoff(engine)
+	select {
+	case <-runtime.sweepStarted:
+	case <-time.After(time.Second):
+		t.Fatal("host sweep did not start")
+	}
+	if engine.probing {
+		t.Fatal("handoff marker wave started before the host sweep landed")
+	}
+
+	close(runtime.sweepRelease)
+	deadline := time.After(time.Second)
+	for engine.sweeping {
+		select {
+		case event := <-engine.events:
+			engine.handle(event)
+		case <-deadline:
+			t.Fatal("host sweep did not finish")
+		}
+	}
+	if !engine.probing {
+		t.Fatal("handoff marker wave did not start after the host sweep")
+	}
+}
+
+func drainHostSweep(t *testing.T, engine *rcxEngine) {
+	t.Helper()
+	deadline := time.After(time.Second)
+	for engine.sweeping {
+		select {
+		case event := <-engine.events:
+			engine.handle(event)
+		case <-deadline:
+			t.Fatal("host sweep did not finish")
+		}
+	}
+	for engine.pendingHandoff {
+		select {
+		case event := <-engine.events:
+			engine.handle(event)
+		case <-deadline:
+			t.Fatal("handoff did not leave the host-sweep gate")
+		}
+	}
+}
+
 func TestEngineDropsTheWaveTheOldNetworkBought(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "b")
@@ -630,27 +1322,29 @@ func TestEngineDropsTheWaveTheOldNetworkBought(t *testing.T) {
 	if got := engine.ledger.Facts("a", "w:Home", true, runtime.Now(), rcxLedgerProofTTL).OpenWorld; got == rcxProofDisproven {
 		t.Error("the wave outlived the network it measured: its verdicts are about nothing")
 	}
-	if !engine.probing {
-		t.Error("a stale wave must not unlatch the live one")
+	if !engine.sweeping && !engine.probing {
+		t.Error("a stale wave must not unlatch the new network measurement")
 	}
 	if got := engine.budget.Remaining(runtime.Now()); got != left {
 		t.Errorf("budget left = %d, want %d: a discarded wave refunds nothing", got, left)
 	}
 }
 
-func TestEngineMeasuresAtOnceOnTheNetworkThatArrived(t *testing.T) {
+func TestEngineMeasuresAfterTheHostSweepOnTheNetworkThatArrived(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "b")
+	runtime.reach["1.1.1.1:443"] = rcxProbeOK
 	engine := newTestEngine(runtime, "ru")
+	engine.quit = make(chan struct{})
 	members := runtime.members
-	// The free cold-start wave first, so what the handoff buys is a paid one.
 	engine.reconsider()
 	before := engine.budget.Remaining(runtime.Now())
 
 	cellularHandoff(engine)
+	drainHostSweep(t, engine)
 
 	if !engine.probing {
-		t.Fatal("the network that arrived is unmeasured: its own wave must go out at once")
+		t.Fatal("the new network did not start its marker wave after the host sweep")
 	}
 	if got := before - engine.budget.Remaining(runtime.Now()); got != len(members) {
 		t.Errorf("probes spent = %d, want %d: one per node on the new network", got, len(members))
@@ -705,16 +1399,23 @@ func TestEngineRetiresTheDeepScanTheHandoffSuperseded(t *testing.T) {
 func TestEngineDeliversTheWaveTheNewNetworkBought(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("a", "b")
+	runtime.reach["1.1.1.1:443"] = rcxProbeOK
 	runtime.results = map[string]rcxProbeResult{
 		"a": {Node: "a", Outcome: rcxProbeOK, DelayMs: 120},
 	}
+	runtime.testStarted = make(chan string, 2)
+	runtime.testRelease = make(chan struct{})
 	engine := newTestEngine(runtime, "ru")
 	engine.quit = make(chan struct{})
 
 	cellularKey := cellularHandoff(engine)
-	if !engine.probing {
+	drainHostSweep(t, engine)
+	select {
+	case <-runtime.testStarted:
+	case <-time.After(time.Second):
 		t.Fatal("want the new network's own wave in flight")
 	}
+	close(runtime.testRelease)
 
 	deadline := time.After(2 * time.Second)
 	for engine.probing {
@@ -1255,6 +1956,41 @@ func TestEngineSplitsDirectOnlyWhenTheHomePathIsDead(t *testing.T) {
 	}
 }
 
+func TestEngineImmediatelyConfirmsAWhitelistSighting(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.reach["1.1.1.1:443"] = rcxProbeFail
+	runtime.reach["77.88.8.8:443"] = rcxProbeOK
+	engine := newTestEngine(runtime, "ru")
+	engine.quit = make(chan struct{})
+	engine.reaching = true
+	engine.validated = true
+
+	engine.handle(rcxEvent{
+		Kind: rcxEventTerrainReach, Gen: engine.reachGen,
+		Foreign: rcxProbeFail, Domestic: rcxProbeOK,
+	})
+
+	if !engine.reaching {
+		t.Fatal("second whitelist confirmation round did not start immediately")
+	}
+}
+
+func TestEngineRetriesABlindCanaryRoundImmediately(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	engine.quit = make(chan struct{})
+	engine.reaching = true
+
+	engine.handle(rcxEvent{
+		Kind: rcxEventTerrainReach, Gen: engine.reachGen,
+		Foreign: rcxProbeOverloaded, Domestic: rcxProbeOverloaded,
+	})
+
+	if !engine.reaching || engine.reachBlind != 1 {
+		t.Fatalf("reaching=%v blind=%d, want one immediate retry", engine.reaching, engine.reachBlind)
+	}
+}
+
 func TestEngineGivesEachCanaryGroupItsOwnDeadline(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.reach = map[string]rcxProbeOutcome{
@@ -1368,73 +2104,168 @@ func rescuePark(t *testing.T) (*fakeRuntime, *rcxEngine, []rcxMember) {
 	return runtime, engine, runtime.members
 }
 
-func TestEngineRepeatsAFailedRescueOnlyAfterAFloor(t *testing.T) {
+func TestEngineWalksRescueInBoundedBatchesBeforeTheFloor(t *testing.T) {
 	runtime, engine, members := rescuePark(t)
-
-	first := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
-	if len(first) != len(members) {
-		t.Fatalf("rescue wave = %d nodes, want the whole park on the first ask", len(first))
+	seen := map[string]bool{}
+	for batch := 0; batch < 3; batch++ {
+		wave := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+		if len(wave) != rcxWaveWidth && batch < 2 {
+			t.Fatalf("batch %d = %d nodes, want the configured width", batch, len(wave))
+		}
+		for _, node := range wave {
+			if seen[node.Name] {
+				t.Fatalf("batch %d repeated %q before exhausting the park", batch, node.Name)
+			}
+			seen[node.Name] = true
+		}
 	}
-
-	runtime.advance(rcxTickInterval)
+	if len(seen) != len(members) {
+		t.Fatalf("rescue covered %d of %d nodes before the floor", len(seen), len(members))
+	}
 	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); got != nil {
-		t.Errorf("second rescue = %d nodes, want none: a sweep that found nothing is not worth repeating per tick", len(got))
+		t.Errorf("post-exhaustion rescue = %d nodes, want the floor", len(got))
 	}
 	if got := engine.planWave(engine.candidates(members), members, rcxWaveDeep); len(got) != len(members) {
-		t.Errorf("deep sweep = %d nodes, want the whole park: the user asked for this one", len(got))
+		t.Errorf("deep sweep = %d nodes, want the whole park", len(got))
 	}
 
 	runtime.advance(rcxRescueRepeat)
-	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(got) != len(members) {
-		t.Errorf("third rescue = %d nodes, want the whole park: the floor is a delay, not a lock", len(got))
+	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(got) != rcxWaveWidth {
+		t.Errorf("rescue after floor = %d nodes, want a fresh bounded batch", len(got))
 	}
 }
 
-func TestEngineRescuesAgainTheMomentSomethingChanged(t *testing.T) {
+func TestEngineResetsRecoveryWhenTerrainChanges(t *testing.T) {
 	runtime, engine, members := rescuePark(t)
-	engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+	first := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+	if len(first) != rcxWaveWidth {
+		t.Fatalf("first rescue = %d nodes, want a bounded batch", len(first))
+	}
 
 	runtime.advance(rcxTickInterval)
 	engine.terrain.observe(rcxTerrainWhitelist, runtime.Now())
-
-	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(got) != len(members) {
-		t.Errorf("rescue = %d nodes, want the whole park: the canaries came back with something new", len(got))
+	second := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+	if len(second) != rcxWaveWidth {
+		t.Fatalf("rescue after terrain change = %d nodes", len(second))
+	}
+	if second[0].Name != first[0].Name {
+		t.Errorf("first node = %q, want %q: a new terrain starts a new episode", second[0].Name, first[0].Name)
 	}
 }
 
-func TestEngineLiftsTheRescueFloorOnceAWaveAnswered(t *testing.T) {
-	runtime, engine, members := rescuePark(t)
-	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(got) != len(members) {
-		t.Fatalf("first rescue = %d nodes, want the whole park", len(got))
-	}
-
-	engine.handle(rcxEvent{Kind: rcxEventProbeResults, Results: []rcxProbeResult{{
-		Node: members[0].Name, Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 120,
+func TestEngineResetsRecoveryAfterASuitableAnswer(t *testing.T) {
+	_, engine, members := rescuePark(t)
+	first := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+	engine.probing = true
+	engine.probeKind = rcxWaveRescue
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+		Node: first[0].Name, Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 120,
 	}}})
-	runtime.advance(2 * time.Duration(rcxLiveWindowSeconds) * time.Second)
 
-	if got := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(got) != len(members) {
-		t.Errorf("rescue = %d nodes, want the whole park: a link that answered is worth asking again", len(got))
+	if len(engine.rescueSeen) != 0 || engine.rescueExhausted {
+		t.Fatal("a suitable answer must close the recovery episode")
 	}
 }
 
-func TestEngineSweepsTheWholeParkWhenNothingIsRoutable(t *testing.T) {
+func TestEngineKeepsRescueOutsideTheHourlyCap(t *testing.T) {
+	runtime, engine, members := rescuePark(t)
+	wave := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
+
+	if len(wave) != rcxWaveWidth {
+		t.Errorf("rescue wave = %d nodes, want a bounded batch", len(wave))
+	}
+	if got := engine.budget.Remaining(runtime.Now()); got != rcxProbeBudgetCap {
+		t.Errorf("budget left = %d, want recovery outside the hourly cap", got)
+	}
+}
+
+func TestRecoveryWaveUsesMemoryAndGreenOriginTiers(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "unknown", Provider: "p-unknown", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "green-home", Provider: "p-home", Type: "Vless", Port: 443, SupportsUDP: true, HostMs: 50, HostAt: runtime.Now()},
+		{Name: "green-away", Provider: "p-away", Type: "Vless", Port: 443, SupportsUDP: true, HostMs: 80, HostAt: runtime.Now()},
+		{Name: "known", Provider: "p-known", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "standby", Provider: "p-standby", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "remembered", Provider: "p-memory", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.countries = map[string]string{"green-away": "NL", "green-home": "RU"}
+	engine := newTestEngine(runtime, "ru")
+	engine.cfg.WaveWidth = len(runtime.members)
+	engine.candidates(runtime.members)
+	engine.snapshot.Picks[engine.envKey] = "remembered"
+	engine.snapshot.Standbys[engine.envKey] = []string{"standby"}
+	engine.ledger.NoteProbe("known", engine.envKey, rcxRoleOpen, rcxProbeOK, 120, runtime.Now())
+
+	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveHandoff)
+	positions := map[string]int{}
+	for i, node := range wave {
+		positions[node.Name] = i
+	}
+	order := []string{"remembered", "standby", "known", "green-away", "green-home", "unknown"}
+	for i := 1; i < len(order); i++ {
+		if positions[order[i-1]] >= positions[order[i]] {
+			t.Fatalf("wave = %v, want %q before %q", wave, order[i-1], order[i])
+		}
+	}
+}
+
+func TestHandoffWaveLeavesFreshHostTimeoutsOut(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "dead", Type: "Vless", Port: 443, SupportsUDP: true, HostDead: true, HostAt: runtime.Now()},
+		{Name: "live", Type: "Vless", Port: 443, SupportsUDP: true, HostMs: 80, HostAt: runtime.Now()},
+	}
+	engine := newTestEngine(runtime, "ru")
+
+	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveHandoff)
+	if len(wave) < 2 || wave[0].Name != "live" || wave[len(wave)-1].Name != "dead" {
+		t.Fatalf("wave = %v, want live first and dead last", wave)
+	}
+}
+
+func TestRecoveryWaveProbesInsideAProviderCircuit(t *testing.T) {
 	runtime := newFakeRuntime()
 	names := make([]string, 0, 30)
 	for i := 0; i < 30; i++ {
 		names = append(names, "n"+string(rune('a'+i)))
 	}
-	runtime.members = foreignMembers(names...)
+	runtime.members = providerMembers("one", names...)
 	engine := newTestEngine(runtime, "ru")
-	members := runtime.members
+	engine.noteProviderNodeFailure(names[0], runtime.Now())
+	engine.noteProviderNodeFailure(names[1], runtime.Now())
 
-	wave := engine.planWave(engine.candidates(members), members, rcxWaveRescue)
-
-	if len(wave) != len(names) {
-		t.Errorf("rescue wave = %d nodes, want the whole park", len(wave))
+	if wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRoutine); len(wave) != 0 {
+		t.Fatalf("routine wave = %d nodes, want the open circuit held", len(wave))
 	}
-	if got := engine.budget.Remaining(runtime.Now()); got != rcxProbeBudgetCap {
-		t.Errorf("budget left = %d, want a rescue to ride outside the hourly cap", got)
+	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRescue)
+	if len(wave) != rcxWaveWidth {
+		t.Fatalf("recovery wave = %d nodes, want a bounded circuit probe", len(wave))
+	}
+}
+
+func TestRecoveryReportsMeasuringUntilTheEpisodeIsExhausted(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("only")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "only"
+	engine.ledger.NoteProbe("only", engine.envKey, rcxRoleOpen, rcxProbeFail, 0, runtime.Now())
+
+	engine.reconsider()
+	status := runtime.lastStatus()
+	if status.Reason != string(rcxReasonMeasuring) || !status.Searching {
+		t.Fatalf("status = %+v, want measuring while recovery is active", status)
+	}
+	engine.supersedeProbe()
+	engine.pendingGrant = false
+	engine.startProbe(engine.candidates(runtime.members), runtime.members, rcxWaveRescue)
+	if !engine.rescueExhausted {
+		t.Fatalf("rescue did not exhaust its one-node park: %v", engine.rescueSeen)
+	}
+	engine.finishProbe()
+	status = runtime.lastStatus()
+	if status.Reason != string(rcxReasonStranded) || status.Searching {
+		t.Fatalf("status = %+v, want final stranded after exhaustion", status)
 	}
 }
 
@@ -1808,8 +2639,8 @@ func TestEngineKeepsTheTrickleInsideAReserveForReactiveWaves(t *testing.T) {
 	if wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain); len(wave) != 0 {
 		t.Errorf("wave = %d nodes, want none: the reserve belongs to the waves that answer an event", len(wave))
 	}
-	if wave := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(wave) != len(names) {
-		t.Errorf("rescue wave = %d nodes, want the whole park: the reserve was kept for it", len(wave))
+	if wave := engine.planWave(engine.candidates(members), members, rcxWaveRescue); len(wave) != rcxWaveWidth {
+		t.Errorf("rescue wave = %d nodes, want a bounded reactive batch", len(wave))
 	}
 }
 
@@ -2277,7 +3108,7 @@ func TestCanaryGroupOutlivesABlackHoledAddress(t *testing.T) {
 	defer cancel()
 
 	var rows []rcxCanaryReport
-	got := engine.reachAny(ctx, []string{"1.1.1.1:443", "9.9.9.9:443"}, false, &rows)
+	got := engine.reachAny(ctx, []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows)
 
 	if got != rcxProbeOK {
 		t.Errorf("outcome = %s, want ok: a black hole must not spend the whole round",
@@ -2289,7 +3120,7 @@ func TestCanaryGroupReportsMeasuredAddressesInOrder(t *testing.T) {
 	engine := newTestEngine(newFakeRuntime(), "ru")
 
 	var rows []rcxCanaryReport
-	engine.reachAny(context.Background(), []string{"1.1.1.1:443", "9.9.9.9:443"}, false, &rows)
+	engine.reachAny(context.Background(), []string{"1.1.1.1:443", "9.9.9.9:443"}, false, time.Second, &rows)
 
 	if len(rows) != 2 {
 		t.Fatalf("rows = %d, want one per measured address", len(rows))
@@ -2343,7 +3174,7 @@ func TestCanaryRoundOutlivesAPanickingDial(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 
 	var rows []rcxCanaryReport
-	got := engine.reachAny(context.Background(), []string{"1.1.1.1:443"}, false, &rows)
+	got := engine.reachAny(context.Background(), []string{"1.1.1.1:443"}, false, time.Second, &rows)
 
 	if got != rcxProbeOverloaded {
 		t.Errorf("outcome = %s, want overloaded: a panicked dial measured nothing",
@@ -2404,22 +3235,163 @@ func TestEngineReportsOnlyTheTerrainItStillTrusts(t *testing.T) {
 	}
 }
 
-func TestEngineMarksFailuresOnAStaleTerrainProvisional(t *testing.T) {
+func TestEngineDoesNotLearnFailuresFromAStaleTerrain(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("node")
 	engine := newTestEngine(runtime, "ru")
 	engine.lastReachAt = runtime.Now()
 
 	failDial(engine, runtime, "node")
-	if got := engine.ledger.envState("w:Home", "node").provisionalFails; got != 0 {
-		t.Fatalf("provisional = %d, want 0: a fresh normal reading blames the node", got)
+	if got := engine.ledger.FailStreak("node", "w:Home"); got != 1 {
+		t.Fatalf("streak = %d, want one failure under a measured normal terrain", got)
 	}
 
 	runtime.advance(rcxTerrainMaxAge + time.Minute)
 	failDial(engine, runtime, "node")
 
-	if got := engine.ledger.envState("w:Home", "node").provisionalFails; got != 1 {
-		t.Errorf("provisional = %d, want 1: a reading the engine distrusts cannot condemn a node for good", got)
+	if got := engine.ledger.FailStreak("node", "w:Home"); got != 1 {
+		t.Errorf("streak = %d, want stale unknown terrain to add no failure", got)
+	}
+}
+
+func TestEngineDoesNotLearnDialFailuresWithoutATrustedTerrain(t *testing.T) {
+	for _, terrain := range []rcxTerrain{rcxTerrainUnknown, rcxTerrainPortal, rcxTerrainOffline} {
+		t.Run(terrain.String(), func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = providerMembers("one", "node")
+			engine := newTestEngine(runtime, "ru")
+			engine.terrain.observe(terrain, runtime.Now())
+
+			failDial(engine, runtime, "node")
+
+			if got := engine.ledger.FailStreak("node", engine.envKey); got != 0 {
+				t.Errorf("streak = %d, want no negative learning", got)
+			}
+			if len(engine.providerFails) != 0 || len(engine.charged) != 0 {
+				t.Errorf("provider failures = %v, escrow = %v", engine.providerFails, engine.charged)
+			}
+		})
+	}
+}
+
+func TestEngineDoesNotLearnProbeFailuresWithoutATrustedTerrain(t *testing.T) {
+	for _, terrain := range []rcxTerrain{rcxTerrainUnknown, rcxTerrainPortal} {
+		t.Run(terrain.String(), func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = providerMembers("one", "node")
+			engine := newTestEngine(runtime, "ru")
+			engine.terrain.observe(terrain, runtime.Now())
+			engine.probing = true
+			engine.probeScreenOff = true
+			engine.probeScreenEpisode = engine.screenEpisode
+			engine.probeIncumbent = "node"
+			engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{
+				Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeStatusMismatch,
+			}}})
+			engine.finishProbe()
+
+			facts := engine.ledger.Facts("node", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+			if facts.OpenWorld != rcxProofUnknown {
+				t.Errorf("open proof = %v, want unknown", facts.OpenWorld)
+			}
+			if len(engine.providerFails) != 0 || len(engine.charged) != 0 || engine.screenDead != "" {
+				t.Errorf("provider failures = %v, escrow = %v, screen dead = %q", engine.providerFails, engine.charged, engine.screenDead)
+			}
+		})
+	}
+}
+
+func TestEngineDoesNotLearnMarkerFailuresWithoutATrustedTerrain(t *testing.T) {
+	for _, terrain := range []rcxTerrain{rcxTerrainUnknown, rcxTerrainPortal} {
+		t.Run(terrain.String(), func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = providerMembers("one", "node")
+			engine := newTestEngine(runtime, "ru")
+			markerID := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+			engine.ledger.NoteProbe("node", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+			engine.terrain.observe(terrain, runtime.Now())
+			engine.probing = true
+			engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{
+				Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeStatusMismatch,
+				Attempts: []rcxMarkerAttempt{{ID: markerID, Outcome: rcxProbeStatusMismatch}},
+			}}})
+			engine.finishProbe()
+
+			state := engine.ledger.envState(engine.envKey, "node")
+			if _, exists := state.Markers[markerID]; exists {
+				t.Error("an untrusted marker failure was persisted")
+			}
+			if state.OpenWorld != rcxProofProven {
+				t.Errorf("open proof = %v, want prior positive proof preserved", state.OpenWorld)
+			}
+			if len(engine.snapshot.Quarantines) != 0 || len(engine.providerFails) != 0 {
+				t.Errorf("quarantines = %v, provider failures = %v", engine.snapshot.Quarantines, engine.providerFails)
+			}
+		})
+	}
+}
+
+func TestEngineDoesNotLearnHarvestedOrFrozenFailuresWithoutATrustedTerrain(t *testing.T) {
+	for _, terrain := range []rcxTerrain{rcxTerrainUnknown, rcxTerrainPortal} {
+		t.Run(terrain.String(), func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = providerMembers("one", "node")
+			engine := newTestEngine(runtime, "ru")
+			engine.syncIdentity(runtime.members)
+			engine.terrain.observe(terrain, runtime.Now())
+
+			engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "node", DelayMs: 0})
+			engine.trackFrozenPayload("node", runtime.Now())
+			runtime.advance(time.Duration(engine.cfg.DegradeConfirmSeconds)*time.Second + time.Second)
+			engine.trackFrozenPayload("node", runtime.Now())
+
+			facts := engine.ledger.Facts("node", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+			if facts.OpenWorld != rcxProofUnknown || engine.ledger.Stalled("node", engine.envKey) {
+				t.Errorf("facts = %+v, stalled = %v", facts, engine.ledger.Stalled("node", engine.envKey))
+			}
+			if len(engine.downFrozen) != 0 || len(engine.charged) != 0 {
+				t.Errorf("frozen = %v, escrow = %v", engine.downFrozen, engine.charged)
+			}
+		})
+	}
+}
+
+func TestEngineAcceptsPositiveProbeWithoutATrustedTerrain(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "node")
+	engine := newTestEngine(runtime, "ru")
+	engine.terrain.observe(rcxTerrainUnknown, runtime.Now())
+	engine.probing = true
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, Results: []rcxProbeResult{{
+		Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40,
+	}}})
+
+	facts := engine.ledger.Facts("node", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofProven {
+		t.Errorf("open proof = %v, want positive evidence retained", facts.OpenWorld)
+	}
+}
+
+func TestEngineRequiresAValidTopologyAndRechecksAfterApply(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.topologyValid = false
+	runtime.members = foreignMembers("node")
+	engine := newRcxEngine(runtime)
+	engine.snapshot = rcxEmptySnapshot()
+	engine.applyConfigLocked(testConfig("ru"))
+
+	if engine.Enabled() {
+		t.Fatal("an invalid reserved topology activated RCX")
+	}
+	engine.reconsider()
+	if len(runtime.selects) != 0 || runtime.lastStatus().Enabled {
+		t.Fatalf("selects = %v, status = %+v", runtime.selects, runtime.lastStatus())
+	}
+
+	runtime.topologyValid = true
+	engine.handle(rcxEvent{Kind: rcxEventConfigApplied})
+	if !engine.Enabled() || !runtime.lastStatus().Enabled {
+		t.Fatalf("enabled = %v, status = %+v: valid applied skeleton did not activate requested RCX", engine.Enabled(), runtime.lastStatus())
 	}
 }
 
@@ -2588,5 +3560,62 @@ func TestConfigEditInvalidatesOnlyItsProofAndOriginDomains(t *testing.T) {
 	engine.applyConfigLocked(config)
 	if got := engine.ledger.Origin("node"); got != rcxOriginUnknown {
 		t.Fatalf("origin = %v, want reevaluation after country edit", got)
+	}
+}
+
+func TestEngineBarsAProvenNodeMeasuredEgressingAtHome(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("spb", "nl")
+	engine := newTestEngine(runtime, "ru")
+	engine.syncIdentity(runtime.members)
+	engine.probing = true
+	now := runtime.Now()
+
+	for _, result := range []rcxProbeResult{
+		{Node: "spb", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 59, ExitCountry: "RU"},
+		{Node: "nl", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 120},
+	} {
+		engine.applyProbeResult(rcxEvent{
+			Gen:     engine.probeGen,
+			Lane:    engine.probeLane,
+			Results: []rcxProbeResult{result},
+		})
+	}
+
+	if engine.provesOpenRecovery("spb", now) {
+		t.Error("a node whose packets never leave the country must not win the open race on latency")
+	}
+	if !engine.provesOpenRecovery("nl", now) {
+		t.Error("an unmeasured egress must not bar a node that answered the open marker")
+	}
+	candidates := engine.candidates(runtime.Members())
+	input := rcxDecisionInput{
+		Terrain:    engine.terrainCurrent(),
+		Candidates: candidates,
+		Policy:     engine.cfg.policy(),
+		Now:        now,
+	}
+	for _, report := range engine.candidateReports(rcxRank(input), input, now) {
+		if report.Node != "spb" {
+			continue
+		}
+		if report.Exit != "RU" || report.Block != string(rcxBlockLastResort) {
+			t.Errorf("report = %+v, want the measured exit and the last-resort bar", report)
+		}
+	}
+}
+
+func TestEngineRidesTheEchoOnWhicheverProbeCarriesTheOpenRole(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	engine.cfg.EgressEchoes = []string{"https://echo.example/"}
+	engine.ledger.SetOrigin("home", "RU", rcxOriginDomestic)
+	wave := []rcxProbeNode{{Name: "home", Key: "home"}}
+
+	targets := engine.probeTargets(wave, rcxTerrainWhitelist, rcxWaveRoutine)
+	for _, target := range targets {
+		if (len(target.Echoes) > 0) != (target.Role == rcxRoleOpen) {
+			t.Errorf("target %v carries the wrong echo set: %v", target.Role, target.Echoes)
+		}
 	}
 }

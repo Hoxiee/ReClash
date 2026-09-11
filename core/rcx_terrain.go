@@ -9,19 +9,6 @@ import (
 	"time"
 )
 
-type rcxNetworkPayload struct {
-	Transport     string   `json:"transport"`
-	SSID          string   `json:"ssid"`
-	Carrier       string   `json:"carrier"`
-	Gateways      []string `json:"gateways"`
-	DHCPServer    string   `json:"dhcp"`
-	DNSServers    []string `json:"dns"`
-	IPv4          []string `json:"ipv4"`
-	Validated     bool     `json:"validated"`
-	CaptivePortal bool     `json:"portal"`
-	Metered       bool     `json:"metered"`
-}
-
 // A /24 alone is not an identity: home, office and cafe are commonly all
 // 192.168.1.0/24. Gateway plus DHCP server plus resolver set separates them.
 func rcxLinkFingerprint(payload rcxNetworkPayload) string {
@@ -89,6 +76,17 @@ func rcxEnvKeys(payload rcxNetworkPayload) (primary string, aliases []string) {
 	case "wifi":
 		prefix = "w"
 		label = strings.TrimSpace(payload.SSID)
+	}
+	if transport == "cellular" && label != "" {
+		primary = "v2:" + prefix + ":" + label
+		aliases = append(aliases,
+			prefix+":"+label,
+			"v2:"+prefix+":"+label+"#"+stable,
+			"v2:"+prefix+":#"+stable,
+			prefix+":#"+legacy,
+			prefix+":#"+stable,
+		)
+		return primary, rcxUniqueStrings(aliases, primary)
 	}
 	primary = "v2:" + prefix + ":"
 	if label != "" {
@@ -176,7 +174,9 @@ const (
 
 func (s *rcxTerrainState) settle(terrain rcxTerrain, measured bool) rcxTerrain {
 	if terrain != rcxTerrainWhitelist {
-		s.whitelistSeen = 0
+		if measured || terrain != rcxTerrainUnknown {
+			s.whitelistSeen = 0
+		}
 		return terrain
 	}
 	if s.terrain == rcxTerrainWhitelist {
@@ -189,6 +189,22 @@ func (s *rcxTerrainState) settle(terrain rcxTerrain, measured bool) rcxTerrain {
 		return terrain
 	}
 	return rcxTerrainUnknown
+}
+
+func (s *rcxTerrainState) witnessWhitelist() bool {
+	if s.terrain == rcxTerrainWhitelist || s.whitelistSeen >= rcxWhitelistConfirm {
+		return false
+	}
+	s.whitelistSeen++
+	return true
+}
+
+func (s *rcxTerrainState) forget() {
+	s.whitelistSeen = 0
+}
+
+func (s *rcxTerrainState) confirming() bool {
+	return s.terrain != rcxTerrainWhitelist && s.whitelistSeen > 0
 }
 
 func (s *rcxTerrainState) portalExpired(now time.Time) bool {

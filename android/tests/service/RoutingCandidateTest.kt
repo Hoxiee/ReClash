@@ -22,6 +22,22 @@ class RoutingCandidateTest {
     }
 
     @Test
+    fun `validation class outranks transport preference`() {
+        val wifi = routingValidationPenalty(validated = false, portal = false)
+        val cellular = routingValidationPenalty(validated = true, portal = false) + 4
+
+        assertEquals(true, cellular < wifi)
+    }
+
+    @Test
+    fun `portal stays above an unvalidated dead link`() {
+        val portal = routingValidationPenalty(validated = false, portal = true)
+        val dead = routingValidationPenalty(validated = false, portal = false)
+
+        assertEquals(true, portal < dead)
+    }
+
+    @Test
     fun `priority still orders the networks that have reported`() {
         val infos = mapOf(
             "cellular" to NetworkInfo(transport = "cellular"),

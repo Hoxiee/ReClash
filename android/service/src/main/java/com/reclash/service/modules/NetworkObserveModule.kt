@@ -45,6 +45,30 @@ internal fun <K> routingCandidate(
     .filter { it.value.transport.isNotEmpty() }
     .minByOrNull(priority)?.value
 
+internal fun routingValidationPenalty(validated: Boolean, portal: Boolean): Int = when {
+    validated -> 0
+    portal -> PORTAL_PENALTY
+    else -> UNVALIDATED_PENALTY
+}
+
+internal fun routingFacts(
+    info: NetworkInfo?,
+    carrier: String = "",
+): NetworkFacts = info?.let {
+    NetworkFacts(
+        transport = it.transport,
+        ssid = it.ssid.orEmpty(),
+        carrier = if (it.transport == "cellular") carrier else "",
+        gateways = it.gateways,
+        dhcp = it.dhcpServer,
+        dns = it.dnsList.mapNotNull { address -> address.hostAddress },
+        ipv4 = it.ipv4List,
+        validated = it.validated,
+        portal = it.portal,
+        metered = it.metered,
+    )
+} ?: NetworkFacts()
+
 private data class PrimaryNetwork(
     val network: Network?,
     val transport: String,
@@ -56,7 +80,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     // Union across all networks: a phone on wifi+cellular belongs to both LANs at once.
     var onPhysicalNetworksChanged: ((ips: List<String>, ssids: List<String>) -> Unit)? = null
 
-    var onRoutingFactsChanged: ((RcxNetworkFacts) -> Unit)? = null
+    var onNetworkFactsChanged: ((NetworkFacts) -> Unit)? = null
 
     private val networkInfos = ConcurrentHashMap<Network, NetworkInfo>()
     private val connectivity by lazy {
@@ -66,7 +90,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     private var currentDnsList = listOf<String>()
     private var lastIpv4Union = emptyList<String>()
     private var lastSsidUnion = emptyList<String>()
-    private var lastRcxFacts: RcxNetworkFacts? = null
+    private var lastNetworkFacts: NetworkFacts? = null
     private var lastPrimary: PrimaryNetwork? = null
     private val resetThrottle = ConnectionResetThrottle()
     private val telephony by lazy {
@@ -138,10 +162,12 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
         val info = networkInfos[network] ?: return
         info.losingUntilMillis = System.currentTimeMillis() + maxMsToLive
         updateDns()
+        updateRouting()
         if (maxMsToLive > 0) {
             mainHandler.postDelayed({
                 if (networkInfos.containsKey(network)) {
                     updateDns()
+                    updateRouting()
                 }
             }, maxMsToLive.toLong() + 50)
         }
@@ -211,8 +237,14 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
 
     private fun networkPriority(entry: Map.Entry<Network, NetworkInfo>): Int {
         val capabilities = connectivity?.getNetworkCapabilities(entry.key)
+        val validationPenalty = capabilities?.let {
+            routingValidationPenalty(
+                validated = it.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED),
+                portal = it.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL),
+            )
+        } ?: 0
         return when {
-            capabilities == null -> 100
+            capabilities == null -> 1000
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> 90
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> 0
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> 1
@@ -225,7 +257,7 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
                 capabilities.hasTransport(TRANSPORT_SATELLITE) -> 5
 
             else -> 20
-        } + entry.value.priorityPenalty
+        } + validationPenalty + entry.value.priorityPenalty
     }
 
     @Synchronized
@@ -260,29 +292,21 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
     // facts it classifies terrain from have to come from here.
     @Synchronized
     private fun updateRouting() {
-        val info = routingCandidate(networkInfos, ::networkPriority) ?: return
-        val facts = RcxNetworkFacts(
-            transport = info.transport,
-            ssid = info.ssid.orEmpty(),
-            carrier = if (info.transport == "cellular") {
+        val info = routingCandidate(networkInfos, ::networkPriority)
+        val facts = routingFacts(
+            info,
+            carrier = if (info?.transport == "cellular") {
                 runCatching { telephony?.simOperator }.getOrNull().orEmpty()
             } else {
                 ""
             },
-            gateways = info.gateways,
-            dhcp = info.dhcpServer,
-            dns = info.dnsList.mapNotNull { it.hostAddress },
-            ipv4 = info.ipv4List,
-            validated = info.validated,
-            portal = info.portal,
-            metered = info.metered,
         )
-        if (facts == lastRcxFacts) {
+        if (facts == lastNetworkFacts) {
             return
         }
-        lastRcxFacts = facts
+        lastNetworkFacts = facts
         Core.rcxNetwork(facts.toJson())
-        onRoutingFactsChanged?.invoke(facts)
+        onNetworkFactsChanged?.invoke(facts)
     }
 
     // Sockets bound to the interface that just went away hang until their own timeouts.
@@ -322,9 +346,9 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
             connectivity?.unregisterNetworkCallback(callback)
         } finally {
             networkInfos.clear()
+            updateRouting()
             lastIpv4Union = emptyList()
             lastSsidUnion = emptyList()
-            lastRcxFacts = null
             lastPrimary = null
             resetThrottle.reset()
             updateDns()
@@ -333,6 +357,9 @@ internal class NetworkObserveModule(private val service: Service) : ServiceModul
 }
 
 private const val DNS_PORT = 53
+
+private const val PORTAL_PENALTY = 100
+private const val UNVALIDATED_PENALTY = 200
 
 private fun InetAddress.asSocketAddressText(port: Int): String = when (this) {
     is Inet6Address -> "[$hostAddress]:$port"

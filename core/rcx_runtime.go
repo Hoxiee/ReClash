@@ -4,9 +4,12 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/netip"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -28,7 +31,12 @@ const (
 	rcxResolveTimeout = 3 * time.Second
 	rcxResolveRetry   = 10 * time.Minute
 	rcxMmdbRecheck    = time.Minute
+	rcxLocateTimeout  = 6 * time.Second
+	rcxLocateBodyCap  = 256
+	rcxHostProbeDial  = 3 * time.Second
 )
+
+var errEchoScheme = errors.New("rcx: echo url needs http or https")
 
 const rcxHostDelayUnknown = 0xffff
 
@@ -62,6 +70,65 @@ func rcxNodeGroupAdapter() (*adapter.Proxy, bool) {
 	return rcxGroupAdapter(rcxGroupNode)
 }
 
+func rcxSelectorMembers(name string) ([]string, bool) {
+	proxy, ok := rcxGroupAdapter(name)
+	if !ok {
+		return nil, false
+	}
+	selector, ok := proxy.ProxyAdapter.(*outboundgroup.Selector)
+	if !ok {
+		return nil, false
+	}
+	proxies := selector.Proxies()
+	names := make([]string, len(proxies))
+	for i, proxy := range proxies {
+		names[i] = proxy.Name()
+	}
+	return names, len(names) > 0
+}
+
+func rcxMembersEqual(got []string, want ...string) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (rcxCoreRuntime) TopologyValid(config rcxConfig) bool {
+	if _, ok := rcxSelectorMembers(rcxGroupNode); !ok {
+		return false
+	}
+	direct, ok := rcxSelectorMembers(rcxGroupDirect)
+	if !ok || !rcxMembersEqual(direct, "DIRECT", rcxGroupNode) {
+		return false
+	}
+	final, ok := rcxSelectorMembers(rcxGroupFinal)
+	if !ok || !rcxMembersEqual(final, rcxGroupNode, "DIRECT") {
+		return false
+	}
+	for _, lane := range config.Lanes {
+		members, ok := rcxSelectorMembers(lane.Group)
+		if !ok || members[0] != "REJECT" {
+			return false
+		}
+		hasMain := len(members) > 1 && members[1] == rcxGroupNode
+		if hasMain != (lane.Fallback == rcxLaneFallbackMain) {
+			return false
+		}
+		for _, member := range members[1:] {
+			if lane.Fallback == rcxLaneReject && member == rcxGroupNode {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Placeholders that keep index 0 of the skeleton meaningful are not candidates.
 func rcxRoutableNode(proxy constant.Proxy) bool {
 	switch proxy.Type() {
@@ -88,7 +155,7 @@ func (rcxCoreRuntime) Members() []rcxMember {
 		if !rcxRoutableNode(node) {
 			continue
 		}
-		hostMs, hostDead := rcxHostDelay(node, url)
+		hostMs, hostDead, hostAt := rcxHostDelayInfo(node, url)
 		info := node.ProxyInfo()
 		provider := strings.TrimSpace(info.ProviderName)
 		if provider == "" {
@@ -103,6 +170,7 @@ func (rcxCoreRuntime) Members() []rcxMember {
 			Port:        rcxPortOf(node.Addr()),
 			SupportsUDP: node.SupportUDP(),
 			HostMs:      hostMs,
+			HostAt:      hostAt,
 			HostDead:    hostDead,
 			Order:       uint16(len(members)),
 		})
@@ -114,13 +182,24 @@ func (rcxCoreRuntime) Members() []rcxMember {
 // probe budget can. A missing entry is silence, not a verdict: mihomo folds
 // every test URL into one global alive flag, so only a record here condemns.
 func rcxHostDelay(node constant.Proxy, url string) (int, bool) {
+	delay, dead, _ := rcxHostDelayInfo(node, url)
+	return delay, dead
+}
+
+func rcxHostDelayInfo(node constant.Proxy, url string) (int, bool, time.Time) {
+	state, recorded := node.ExtraDelayHistories()[url]
 	if !node.AliveForTestUrl(url) {
-		if _, recorded := node.ExtraDelayHistories()[url]; !recorded {
-			return 0, false
-		}
-		return 0, true
+		return 0, recorded, rcxLastDelayAt(state.History)
 	}
-	return rcxHostDelayValue(node.LastDelayForTestUrl(url))
+	delay, dead := rcxHostDelayValue(node.LastDelayForTestUrl(url))
+	return delay, dead, rcxLastDelayAt(state.History)
+}
+
+func rcxLastDelayAt(history []constant.DelayHistory) time.Time {
+	if len(history) == 0 {
+		return time.Time{}
+	}
+	return history[len(history)-1].Time
 }
 
 func rcxHostDelayValue(delay uint16) (int, bool) {
@@ -317,6 +396,127 @@ func (rcxCoreRuntime) Country(node string) string {
 	return strings.ToUpper(codes[0])
 }
 
+// Where the traffic leaves, not where the tunnel starts: a relay-fronted node
+// advertises the front's address, so Country() can read US for a node whose
+// packets egress at home. Only an echo through the node itself sees the exit.
+func (rcxCoreRuntime) Locate(ctx context.Context, node, echo string) string {
+	proxy, ok := lookupProxy(node).(*adapter.Proxy)
+	if !ok {
+		return ""
+	}
+	address := rcxEchoAddress(ctx, proxy, echo)
+	if !address.IsValid() || !rcxMmdbUsable(time.Now()) {
+		return ""
+	}
+	codes := mmdb.IPInstance().LookupCode(address.AsSlice())
+	if len(codes) == 0 {
+		return ""
+	}
+	return strings.ToUpper(codes[0])
+}
+
+// The handshake is driven here rather than left to the transport: mihomo builds
+// against its own TLS fork, whose config the standard transport will not take.
+func rcxEchoAddress(ctx context.Context, proxy *adapter.Proxy, echo string) netip.Addr {
+	metadata, err := rcxEchoMetadata(echo)
+	if err != nil {
+		return netip.Addr{}
+	}
+	conn, err := proxy.DialContext(ctx, &metadata)
+	if err != nil {
+		return netip.Addr{}
+	}
+	defer conn.Close()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, echo, nil)
+	if err != nil {
+		return netip.Addr{}
+	}
+	transport := &http.Transport{
+		DialContext: func(context.Context, string, string) (net.Conn, error) {
+			return conn, nil
+		},
+		DisableKeepAlives: true,
+	}
+	if req.URL.Scheme == "https" {
+		tlsConfig, err := ca.GetTLSConfig(ca.Option{})
+		if err != nil {
+			return netip.Addr{}
+		}
+		tlsConfig.ServerName = req.URL.Hostname()
+		tlsConn := mihomoTLS.Client(conn, tlsConfig)
+		if err := tlsConn.HandshakeContext(ctx); err != nil {
+			return netip.Addr{}
+		}
+		transport.DialTLSContext = func(context.Context, string, string) (net.Conn, error) {
+			return tlsConn, nil
+		}
+	}
+	client := http.Client{
+		Transport: transport,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	defer client.CloseIdleConnections()
+	resp, err := client.Do(req)
+	if err != nil {
+		return netip.Addr{}
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return netip.Addr{}
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, rcxLocateBodyCap))
+	if err != nil {
+		return netip.Addr{}
+	}
+	return rcxParseEchoIP(body)
+}
+
+func rcxEchoMetadata(echo string) (constant.Metadata, error) {
+	parsed, err := url.Parse(echo)
+	if err != nil {
+		return constant.Metadata{}, err
+	}
+	port := parsed.Port()
+	if port == "" {
+		switch parsed.Scheme {
+		case "https":
+			port = "443"
+		case "http":
+			port = "80"
+		default:
+			return constant.Metadata{}, errEchoScheme
+		}
+	}
+	metadata := constant.Metadata{}
+	if err := metadata.SetRemoteAddress(net.JoinHostPort(parsed.Hostname(), port)); err != nil {
+		return constant.Metadata{}, err
+	}
+	return metadata, nil
+}
+
+// An echo answers with the address alone, but a stray label would parse as one
+// too, so a private or loopback token is dropped rather than trusted.
+func rcxParseEchoIP(body []byte) netip.Addr {
+	text := strings.TrimSpace(string(body))
+	if address, err := netip.ParseAddr(text); err == nil {
+		return address
+	}
+	tokens := strings.FieldsFunc(text, func(char rune) bool {
+		return char != '.' && char != ':' &&
+			(char < '0' || char > '9') && (char < 'a' || char > 'f') && (char < 'A' || char > 'F')
+	})
+	for _, token := range tokens {
+		address, err := netip.ParseAddr(token)
+		if err != nil || !address.IsGlobalUnicast() || address.IsPrivate() {
+			continue
+		}
+		return address
+	}
+	return netip.Addr{}
+}
+
 func (rcxCoreRuntime) Test(
 	ctx context.Context,
 	node string,
@@ -364,9 +564,7 @@ func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) 
 		DstIP:   target.Addr(),
 		DstPort: target.Port(),
 	}
-	dialCtx, cancel := context.WithTimeout(ctx, rcxCanaryTimeout)
-	defer cancel()
-	conn, err := direct.DialContext(dialCtx, metadata)
+	conn, err := direct.DialContext(ctx, metadata)
 	if err != nil {
 		if ctx.Err() != nil {
 			return rcxProbeOverloaded
@@ -378,7 +576,44 @@ func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) 
 		return rcxProbeOK
 	}
 	defer conn.Close()
-	return rcxVerifyTLS(dialCtx, conn, address)
+	return rcxVerifyTLS(ctx, conn, address)
+}
+
+// The host's delay test over the whole park, run on the engine's own schedule
+// rather than the health-check cadence. The window gates queueing only: a
+// cancelled URLTest is recorded as dead by the adapter, so a dial already in
+// flight must be left to answer honestly instead of being stamped as a timeout
+// the engine would then believe.
+func (rcxCoreRuntime) Sweep(ctx context.Context, nodes []string) {
+	url := currentTestURL()
+	var probes sync.WaitGroup
+	for _, name := range nodes {
+		proxy, ok := lookupProxy(name).(*adapter.Proxy)
+		if !ok {
+			continue
+		}
+		probes.Add(1)
+		node := proxy
+		safeGoDetached("rcx host probe", func() {
+			defer probes.Done()
+			if !acquireDelayTestSlot(ctx) {
+				return
+			}
+			defer releaseDelayTestSlot()
+			probeCtx, cancel := context.WithTimeout(ctx, rcxHostProbeDial)
+			defer cancel()
+			_, _ = node.URLTest(probeCtx, url, anyDelayTestStatus)
+		})
+	}
+	done := make(chan struct{})
+	safeGoDetached("rcx host sweep wait", func() {
+		probes.Wait()
+		close(done)
+	})
+	select {
+	case <-done:
+	case <-ctx.Done():
+	}
 }
 
 // Only the foreign canaries verify: their hosts carry public-root IP-SAN

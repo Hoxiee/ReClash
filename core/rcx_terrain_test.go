@@ -87,9 +87,25 @@ func TestEnvKeysUseTheCarrierOnCellular(t *testing.T) {
 
 	primary, _ := rcxEnvKeys(payload)
 
-	want := "v2:c:25001#" + rcxStableLinkFingerprint(payload)
-	if primary != want {
-		t.Errorf("primary = %s, want %s", primary, want)
+	if primary != "v2:c:25001" {
+		t.Errorf("primary = %s, want a carrier-stable identity", primary)
+	}
+}
+
+func TestEnvKeysKeepCellularMemoryAcrossAddressChanges(t *testing.T) {
+	first := rcxNetworkPayload{
+		Transport: "cellular", Carrier: "25001", Gateways: []string{"10.132.7.1"},
+		DHCPServer: "10.132.7.1", IPv4: []string{"10.132.7.9"},
+	}
+	second := rcxNetworkPayload{
+		Transport: "cellular", Carrier: "25001", Gateways: []string{"10.211.3.1"},
+		DHCPServer: "10.211.3.1", IPv4: []string{"10.211.3.22"},
+	}
+
+	firstKey, _ := rcxEnvKeys(first)
+	secondKey, _ := rcxEnvKeys(second)
+	if firstKey != secondKey {
+		t.Errorf("cellular keys = %q and %q, want one carrier profile", firstKey, secondKey)
 	}
 }
 
@@ -214,6 +230,34 @@ func TestTerrainStateChargesTwoRoundsToEnterAWhitelist(t *testing.T) {
 	}
 	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainWhitelist {
 		t.Errorf("terrain = %s, want whitelist once a second round agrees", got)
+	}
+}
+
+func TestTerrainStateKeepsConfirmationThroughABlindRound(t *testing.T) {
+	state := &rcxTerrainState{terrain: rcxTerrainNormal}
+
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainUnknown {
+		t.Fatalf("first terrain = %s, want unknown", got)
+	}
+	if got := state.settle(rcxTerrainUnknown, false); got != rcxTerrainUnknown {
+		t.Fatalf("blind terrain = %s, want unknown", got)
+	}
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist after two measured sightings", got)
+	}
+}
+
+func TestTerrainStateCanUseADomesticWitness(t *testing.T) {
+	state := &rcxTerrainState{terrain: rcxTerrainNormal}
+
+	if got := state.settle(rcxTerrainWhitelist, true); got != rcxTerrainUnknown {
+		t.Fatalf("first terrain = %s, want unknown", got)
+	}
+	if !state.witnessWhitelist() {
+		t.Fatal("domestic witness did not confirm the outstanding sighting")
+	}
+	if got := state.settle(rcxTerrainWhitelist, false); got != rcxTerrainWhitelist {
+		t.Errorf("terrain = %s, want whitelist after the witness", got)
 	}
 }
 

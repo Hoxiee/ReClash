@@ -191,6 +191,41 @@ func TestDeathSwitchDrainsOnlyStalledTrackerIDs(t *testing.T) {
 	}
 }
 
+func TestFailedWaveStillCountsIndependentProviderFailures(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = providerMembers("one", "a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.syncIdentity(runtime.members)
+	engine.probeResults = []rcxProbeResult{
+		{Node: "a", Key: "a", Outcome: rcxProbeFail, chargeNegative: true},
+		{Node: "b", Key: "b", Outcome: rcxProbeStatusMismatch, chargeNegative: true},
+	}
+
+	engine.finishProbe()
+
+	if !engine.providerCircuitOpen("one", "other", runtime.Now()) {
+		t.Fatal("fully failed wave did not open the provider circuit")
+	}
+}
+
+func TestSupersededPaidWaveCannotRefundTheNextGeneration(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	if got := engine.budget.Take(3, runtime.Now()); got != 3 {
+		t.Fatalf("budget take = %d, want 3", got)
+	}
+	engine.paidWave = 3
+	engine.paidWaveGen = engine.probeGen
+	engine.supersedeProbe()
+
+	engine.probeResults = nil
+	engine.finishProbe()
+
+	if got := engine.budget.Remaining(runtime.Now()); got != rcxProbeBudgetCap-3 {
+		t.Fatalf("remaining = %d, want superseded charge retained", got)
+	}
+}
+
 func TestIncidentResultSwitchesEarlyAndCompletionRefundsUnstartedTargets(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("dead", "warm", "later")
@@ -224,5 +259,96 @@ func TestIncidentResultSwitchesEarlyAndCompletionRefundsUnstartedTargets(t *test
 	}
 	if got := engine.budget.Remaining(runtime.Now()); got != rcxProbeBudgetCap {
 		t.Fatalf("remaining = %d, want unstarted targets refunded", got)
+	}
+}
+
+func TestDomesticProofDoesNotEndOpenRecovery(t *testing.T) {
+	for name, kind := range map[string]rcxWaveKind{
+		"handoff":  rcxWaveHandoff,
+		"incident": rcxWaveIncident,
+		"rescue":   rcxWaveRescue,
+	} {
+		t.Run(name, func(t *testing.T) {
+			runtime := newFakeRuntime()
+			runtime.members = foreignMembers("dead", "home", "open")
+			runtime.countries = map[string]string{"dead": "NL", "home": "RU", "open": "NL"}
+			engine := newTestEngine(runtime, "ru")
+			engine.incumbent = "dead"
+			runtime.selected = "dead"
+			engine.terrain.observe(rcxTerrainWhitelist, runtime.Now())
+			engine.candidates(runtime.members)
+			engine.probing = true
+			engine.probeKind = kind
+			engine.probeStarted = map[string]struct{}{}
+			cancelled := false
+			engine.probeCancel = func() { cancelled = true }
+
+			engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+				Node: "home", Role: rcxRoleDomestic, Outcome: rcxProbeOK, DelayMs: 20,
+			}}})
+
+			if engine.probeRecovered || cancelled {
+				t.Fatalf("recovered = %v, cancelled = %v, domestic proof ended open recovery", engine.probeRecovered, cancelled)
+			}
+			if runtime.selected != "dead" {
+				t.Fatalf("selected = %q, want recovery to keep searching", runtime.selected)
+			}
+			facts := engine.ledger.Facts("home", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+			if facts.Domestic != rcxProofProven || facts.OpenWorld == rcxProofProven {
+				t.Fatalf("facts = %+v, want domestic proof without open proof", facts)
+			}
+		})
+	}
+}
+
+func TestOpenProofEndsRecoveryAfterDomesticProof(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("dead", "home", "open")
+	runtime.countries = map[string]string{"dead": "NL", "home": "RU", "open": "NL"}
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "dead"
+	runtime.selected = "dead"
+	engine.terrain.observe(rcxTerrainWhitelist, runtime.Now())
+	engine.candidates(runtime.members)
+	engine.probing = true
+	engine.probeKind = rcxWaveIncident
+	engine.probeStarted = map[string]struct{}{}
+	cancelled := false
+	engine.probeCancel = func() { cancelled = true }
+
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+		Node: "home", Role: rcxRoleDomestic, Outcome: rcxProbeOK, DelayMs: 20,
+	}}})
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+		Node: "open", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 80,
+	}}})
+
+	if !engine.probeRecovered || !cancelled {
+		t.Fatalf("recovered = %v, cancelled = %v, open proof did not end recovery", engine.probeRecovered, cancelled)
+	}
+	if runtime.selected != "open" {
+		t.Fatalf("selected = %q, want the open-world node", runtime.selected)
+	}
+}
+
+func TestHandoffResultSwitchesEarly(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("dead", "remembered", "later")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "dead"
+	runtime.selected = "dead"
+	engine.candidates(runtime.members)
+	engine.probing = true
+	engine.probeKind = rcxWaveHandoff
+	engine.probeStarted = map[string]struct{}{}
+	cancelled := false
+	engine.probeCancel = func() { cancelled = true }
+
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+		Node: "remembered", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40,
+	}}})
+
+	if runtime.selected != "remembered" || !cancelled {
+		t.Fatalf("selected = %q, cancelled = %v, want an early handoff", runtime.selected, cancelled)
 	}
 }

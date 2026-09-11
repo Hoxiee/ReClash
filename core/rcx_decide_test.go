@@ -484,6 +484,24 @@ func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 	}
 }
 
+func TestDecideRejectsANodeTheCurrentHostSweepTimedOut(t *testing.T) {
+	dead := rcxNode("dead", foreignUntested())
+	dead.HostDead = true
+	live := rcxNode("live", foreignUntested())
+	live.HostMs = 120
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain: rcxTerrainNormal, Candidates: []rcxCandidate{dead, live},
+	})
+
+	if !got.Switch || got.To != "live" {
+		t.Fatalf("decision = %+v, want the node with a live host reading", got)
+	}
+	if block := rcxBlockOf(dead, rcxDecisionInput{Terrain: rcxTerrainNormal}); block != rcxBlockDisproven {
+		t.Errorf("block = %q, want %q", block, rcxBlockDisproven)
+	}
+}
+
 func TestDecideSkipsNodesMissingFromTheSkeleton(t *testing.T) {
 	absent := rcxNode("de-1", foreignProven())
 	absent.MedianMs = 40
@@ -648,5 +666,87 @@ func TestCompareRanksAProvenNodeAboveANeverSeenOneInTheSameBand(t *testing.T) {
 	}
 	if rcxCompareLatency(proven, stranger) >= 0 {
 		t.Error("the latency strategy must break a band tie on history too")
+	}
+}
+
+func TestAdmitBarsANodeMeasuredEgressingInsideTheCountry(t *testing.T) {
+	// The open marker answered because the home network leaves that host alone.
+	fronted := rcxFacts{
+		Origin:      rcxOriginForeign,
+		Exit:        rcxOriginDomestic,
+		OpenWorld:   rcxProofProven,
+		Transit:     rcxProofProven,
+		SupportsUDP: true,
+	}
+
+	if got := rcxAdmit(rcxTerrainNormal, fronted); got != rcxVerdictLastResort {
+		t.Errorf("normal verdict = %v, want last-resort: the traffic never leaves the country", got)
+	}
+	if got := rcxAdmit(rcxTerrainWhitelist, fronted); got != rcxVerdictLastResort {
+		t.Errorf("whitelist verdict = %v, want last-resort until a domestic marker answers", got)
+	}
+	fronted.Domestic = rcxProofProven
+	if got := rcxAdmit(rcxTerrainWhitelist, fronted); got != rcxVerdictViable {
+		t.Errorf("whitelist verdict = %v, want viable: domestic services are the point there", got)
+	}
+}
+
+func TestAdmitLetsAMeasuredForeignEgressVoidTheDomesticPrior(t *testing.T) {
+	relayed := rcxFacts{
+		Origin:      rcxOriginDomestic,
+		Exit:        rcxOriginForeign,
+		SupportsUDP: true,
+	}
+
+	if got := rcxAdmit(rcxTerrainNormal, relayed); got != rcxVerdictViable {
+		t.Errorf("verdict = %v, want viable: the endpoint prior lost to a measurement", got)
+	}
+}
+
+func TestCompareStableKeepsTheIncumbentAcrossLatencyBands(t *testing.T) {
+	incumbent := rcxKey{latBucket: 2}
+	fasterRival := rcxKey{latBucket: 0, challenger: true}
+
+	if rcxCompareStable(incumbent, fasterRival) >= 0 {
+		t.Error("stable must not swap a working server for a faster band")
+	}
+	if rcxCompare(incumbent, fasterRival) <= 0 {
+		t.Error("balanced still reads the band before it reads who is in use")
+	}
+
+	betterEvidence := rcxKey{latBucket: 2, evidence: rcxEvidenceNone, challenger: true}
+	if rcxCompareStable(betterEvidence, incumbent) <= 0 {
+		t.Error("stable must still be moved by evidence the incumbent lacks")
+	}
+}
+
+func TestCompareForNamesOneComparatorPerStrategy(t *testing.T) {
+	sticky := rcxKey{latBucket: 2}
+	quick := rcxKey{latBucket: 0, challenger: true}
+
+	for _, tc := range []struct {
+		strategy string
+		holds    bool
+	}{
+		{rcxStrategyBalanced, false},
+		{rcxStrategyLatency, false},
+		{rcxStrategyStable, true},
+		{rcxStrategySaver, true},
+		{"", false},
+	} {
+		if holds := rcxCompareFor(tc.strategy)(sticky, quick) < 0; holds != tc.holds {
+			t.Errorf("%q: holds incumbent = %v, want %v", tc.strategy, holds, tc.holds)
+		}
+	}
+}
+
+func TestNormalizedKeepsEveryShippedStrategy(t *testing.T) {
+	for _, name := range []string{rcxStrategyBalanced, rcxStrategyLatency, rcxStrategyStable, rcxStrategySaver} {
+		if got := (rcxConfig{Strategy: name}).normalized().Strategy; got != name {
+			t.Errorf("%q normalized to %q", name, got)
+		}
+	}
+	if got := (rcxConfig{Strategy: "invented"}).normalized().Strategy; got != rcxStrategyBalanced {
+		t.Errorf("an unknown strategy degraded to %q", got)
 	}
 }

@@ -127,6 +127,7 @@ const (
 
 type rcxFacts struct {
 	Origin      rcxOrigin
+	Exit        rcxOrigin
 	OpenedOnce  bool
 	OpenWorld   rcxProof
 	Domestic    rcxProof
@@ -201,6 +202,12 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 	if f.OpenWorld == rcxProofDisproven && f.Domestic != rcxProofProven {
 		return rcxVerdictReject
 	}
+	if f.Exit == rcxOriginDomestic {
+		if f.Domestic == rcxProofProven {
+			return row.domesticProven
+		}
+		return row.domesticPrior
+	}
 	if f.OpenWorld == rcxProofProven {
 		if f.Breaker {
 			return row.breakerProven
@@ -210,8 +217,7 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 	if f.Domestic == rcxProofProven {
 		return row.domesticProven
 	}
-	// One measurement outranks the database: OpenedOnce voids the domestic prior.
-	if f.Origin == rcxOriginDomestic && !f.OpenedOnce {
+	if f.Exit == rcxOriginUnknown && f.Origin == rcxOriginDomestic && !f.OpenedOnce {
 		return row.domesticPrior
 	}
 	return row.foreignPrior
@@ -304,6 +310,7 @@ type rcxCandidate struct {
 	Evidence   rcxEvidence
 	MedianMs   int
 	HostMs     int
+	HostAt     time.Time
 	HostDead   bool
 	CoolUntil  time.Time
 	InSkeleton bool
@@ -347,6 +354,9 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 		return false
 	}
 	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
+		return false
+	}
+	if c.HostDead {
 		return false
 	}
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
@@ -408,10 +418,7 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	incumbentEligible := false
 	incumbentPenalised := false
 	pinEligible := false
-	compare := rcxCompare
-	if in.Policy.Strategy == rcxStrategyLatency {
-		compare = rcxCompareLatency
-	}
+	compare := rcxCompareFor(in.Policy.Strategy)
 	for i := range in.Candidates {
 		c := &in.Candidates[i]
 		if !rcxEligible(*c, in) {
@@ -557,6 +564,65 @@ func rcxCompareLatency(a, b rcxKey) int {
 	return 0
 }
 
+// Holding still is worth more than a latency band here: the incumbent outranks a
+// challenger before either is read for speed, so nothing but a better verdict,
+// fit, evidence or proof can move the engine off a server that works.
+func rcxCompareStable(a, b rcxKey) int {
+	if a.verdict != b.verdict {
+		if a.verdict > b.verdict {
+			return -1
+		}
+		return 1
+	}
+	if a.misfit != b.misfit {
+		if a.misfit < b.misfit {
+			return -1
+		}
+		return 1
+	}
+	if a.evidence != b.evidence {
+		if a.evidence < b.evidence {
+			return -1
+		}
+		return 1
+	}
+	if a.unproven != b.unproven {
+		if !a.unproven {
+			return -1
+		}
+		return 1
+	}
+	if a.challenger != b.challenger {
+		if !a.challenger {
+			return -1
+		}
+		return 1
+	}
+	if a.latBucket != b.latBucket {
+		if a.latBucket < b.latBucket {
+			return -1
+		}
+		return 1
+	}
+	if a.order != b.order {
+		if a.order < b.order {
+			return -1
+		}
+		return 1
+	}
+	return 0
+}
+
+func rcxCompareFor(strategy string) func(a, b rcxKey) int {
+	switch strategy {
+	case rcxStrategyLatency:
+		return rcxCompareLatency
+	case rcxStrategyStable, rcxStrategySaver:
+		return rcxCompareStable
+	}
+	return rcxCompare
+}
+
 type rcxBlock string
 
 const (
@@ -579,6 +645,9 @@ func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	}
 	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
 		return rcxBlockCooling
+	}
+	if c.HostDead {
+		return rcxBlockDisproven
 	}
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return rcxBlockProviderCircuit
@@ -605,10 +674,7 @@ type rcxRanked struct {
 
 // The decision's own key and order: a second ordering would drift from it.
 func rcxRank(in rcxDecisionInput) []rcxRanked {
-	compare := rcxCompare
-	if in.Policy.Strategy == rcxStrategyLatency {
-		compare = rcxCompareLatency
-	}
+	compare := rcxCompareFor(in.Policy.Strategy)
 	ranked := make([]rcxRanked, 0, len(in.Candidates))
 	for _, c := range in.Candidates {
 		ranked = append(ranked, rcxRanked{
