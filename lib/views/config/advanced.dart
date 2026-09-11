@@ -19,9 +19,6 @@ class AdvancedConfigView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final developerMode = ref.watch(
-      appSettingProvider.select((state) => state.developerMode),
-    );
     final generalItems = [
       DecorationListItem.open(
         title: Text(appLocalizations.network),
@@ -97,7 +94,7 @@ class AdvancedConfigView extends ConsumerWidget {
       ),
       // The engine is an Android JNI module; on desktop the entry would only
       // produce rules pointing at a listener that never exists.
-      if (system.isAndroid && developerMode)
+      if (ref.watch(byeDpiSupportedProvider))
         DecorationListItem.open(
           title: Text(appLocalizations.desync),
           subtitle: Text(appLocalizations.desyncDesc),

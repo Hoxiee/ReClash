@@ -32,10 +32,20 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 
 	snapshot := store.Load()
+	snapshot.Config.Strategy = "invented"
+	snapshot.Config.DefaultsVersion = 0
+	snapshot.Config.DwellSeconds = 0
+	fingerprints := snapshot.Fingerprints
 	snapshot.Picks["w:Home"] = "Amsterdam #3"
 	snapshot.Regimes["w:Home"] = rcxRegimeMemory{Terrain: rcxTerrainWhitelist, At: now}
 	snapshot.Global["Amsterdam #3"] = &rcxNodeGlobal{Origin: rcxOriginForeign, EverGood: true}
 	snapshot.Standbys["w:Home"] = []string{"endpoint-de-1", "endpoint-us-1"}
+	snapshot.LanePicks["service:telegram"] = map[string]string{
+		"w:Home": "endpoint-nl-1",
+	}
+	snapshot.LaneStandbys["service:telegram"] = map[string][]string{
+		"w:Home": {"endpoint-de-1", "endpoint-us-1"},
+	}
 	snapshot.Quarantines["open:telegram"] = rcxMarkerQuarantine{
 		Until:    now.Add(10 * time.Minute),
 		Failures: []rcxMarkerFailure{{Bucket: "provider-a", At: now}},
@@ -55,6 +65,12 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 
 	restored := testStore(storage).Load()
 
+	if restored.Config.DefaultsVersion != rcxDefaultsVersion || restored.Config.Strategy != rcxStrategyBalanced || restored.Config.DwellSeconds != rcxDwellSeconds {
+		t.Errorf("config = %+v, want current defaults and normalized values", restored.Config)
+	}
+	if restored.Fingerprints != fingerprints {
+		t.Errorf("fingerprints = %+v, want stored %+v", restored.Fingerprints, fingerprints)
+	}
 	if got := restored.Picks["w:Home"]; got != "Amsterdam #3" {
 		t.Errorf("pick = %q, want the remembered node: a cold start must not re-search", got)
 	}
@@ -70,12 +86,32 @@ func TestStoreRoundTripsWhatTheEngineOwns(t *testing.T) {
 	if got := restored.Standbys["w:Home"]; len(got) != 2 || got[0] != "endpoint-de-1" {
 		t.Errorf("standbys = %v, want the warm replacement order preserved", got)
 	}
+	if got := restored.LanePicks["service:telegram"]["w:Home"]; got != "endpoint-nl-1" {
+		t.Errorf("lane pick = %q, want the capability-specific node preserved", got)
+	}
+	if got := restored.LaneStandbys["service:telegram"]["w:Home"]; len(got) != 2 || got[0] != "endpoint-de-1" {
+		t.Errorf("lane standbys = %v, want the capability-specific order preserved", got)
+	}
 	quarantine := restored.Quarantines["open:telegram"]
 	if !quarantine.Until.Equal(now.Add(10*time.Minute)) || len(quarantine.Failures) != 1 {
 		t.Errorf("quarantine = %+v, want its expiry and bounded evidence preserved", quarantine)
 	}
 	if got := restored.Metrics; got.EnabledMillis != 60_000 || got.AvailableMillis != 55_000 || got.Incidents != 2 || got.StandbyHits != 1 || got.LastFailoverMillis != 2_300 || got.LastOutageMillis != 3_100 {
 		t.Errorf("metrics = %+v, want local availability and incident counters preserved", got)
+	}
+}
+
+func TestStoreIgnoresTheOldNamespace(t *testing.T) {
+	storage := newFakeStorage()
+	storage.values["rcx.v1"] = []byte(`{"v":1,"p":{"w:Home":"legacy"}}`)
+
+	snapshot := testStore(storage).Load()
+
+	if len(snapshot.Picks) != 0 {
+		t.Errorf("picks = %v, want the old namespace ignored", snapshot.Picks)
+	}
+	if _, readNewNamespace := storage.values[rcxStoreKey]; readNewNamespace {
+		t.Error("loading must not eagerly write the new namespace")
 	}
 }
 
@@ -124,9 +160,18 @@ func TestStoreDebouncesWritesAndForcesOnDemand(t *testing.T) {
 		t.Error("a debounced save must stay pending")
 	}
 
-	store.Save(snapshot, now.Add(rcxFlushDebounce+time.Second), false)
+	store.Save(snapshot, now.Add(2*time.Second), true)
 	if storage.writes != 2 {
-		t.Errorf("writes = %d, want the write once the window passed", storage.writes)
+		t.Errorf("writes = %d, want a forced flush inside the debounce window", storage.writes)
+	}
+	if store.Pending() {
+		t.Error("a forced flush must clear the pending flag")
+	}
+
+	store.Save(snapshot, now.Add(3*time.Second), false)
+	store.Save(snapshot, now.Add(rcxFlushDebounce+3*time.Second), false)
+	if storage.writes != 3 {
+		t.Errorf("writes = %d, want the pending write once the window passed", storage.writes)
 	}
 	if store.Pending() {
 		t.Error("a completed save must clear the pending flag")
@@ -176,24 +221,5 @@ func TestStoreKeepsTheTieBreakSeedItHandedOut(t *testing.T) {
 	}
 	if got := testStore(storage).Load().Pins["w:Home"]; got != "endpoint-nl-1" {
 		t.Errorf("pin = %q, want it to survive the round trip", got)
-	}
-}
-
-func TestStoreMigratesV1WithoutTrustingUnstampedRoleProofs(t *testing.T) {
-	raw := []byte(`{"v":1,"cfg":{"on":true,"preset":"ru","om":[{"url":"https://old.example/","statuses":[204]}]},"g":{"n":{"g":true,"eo":true}},"e":{"w:Home":{"n":{"w":1,"m":1,"l":"2023-11-14T22:13:20Z","oa":"2023-11-14T22:13:20Z","ma":"2023-11-14T22:13:20Z"}}},"p":{"w:Home":"n"}}`)
-
-	snapshot := rcxDecodeSnapshot(raw)
-	state := snapshot.Envs["w:Home"]["n"]
-	if snapshot.Version != rcxStoreVersion {
-		t.Fatalf("version = %d, want %d", snapshot.Version, rcxStoreVersion)
-	}
-	if snapshot.Picks["w:Home"] != "n" || !snapshot.Global["n"].EverGood {
-		t.Fatal("v1 migration discarded marker-independent state")
-	}
-	if state.OpenWorld != rcxProofUnknown || state.Domestic != rcxProofUnknown {
-		t.Fatalf("unstamped v1 proofs survived: %+v", state)
-	}
-	if snapshot.Fingerprints.Open == "" {
-		t.Fatal("migration did not seed semantic fingerprints")
 	}
 }

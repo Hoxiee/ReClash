@@ -21,7 +21,7 @@ abstract interface class SetupPermissionGateway {
 
   Future<void> openAppSettings();
 
-  Future<bool> isBatteryOptimizationDisabled();
+  Future<void> checkBatteryOptimizationDisable(ProviderReader read);
 
   Future<void> openBatteryOptimizationSettings();
 }
@@ -47,8 +47,8 @@ class SystemSetupPermissionGateway implements SetupPermissionGateway {
   }
 
   @override
-  Future<bool> isBatteryOptimizationDisabled() async =>
-      await app?.isBatteryOptimizationDisabled() ?? false;
+  Future<void> checkBatteryOptimizationDisable(ProviderReader read) =>
+      permissions.checkBatteryOptimizationDisable(read);
 
   @override
   Future<void> openBatteryOptimizationSettings() async {
@@ -122,10 +122,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
     await _checkNotifications();
     if (!widget.permissionGateway.isAndroid) return;
     try {
-      final granted = await widget.permissionGateway
-          .isBatteryOptimizationDisabled();
-      if (!mounted) return;
-      ref.read(batteryOptimizationDisableProvider.notifier).value = granted;
+      await widget.permissionGateway.checkBatteryOptimizationDisable(ref.read);
     } catch (_) {}
   }
 
@@ -199,10 +196,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
     setState(() => _batteryPending = true);
     try {
       await widget.permissionGateway.openBatteryOptimizationSettings();
-      final granted = await widget.permissionGateway
-          .isBatteryOptimizationDisabled();
-      if (!mounted) return;
-      ref.read(batteryOptimizationDisableProvider.notifier).value = granted;
+      await widget.permissionGateway.checkBatteryOptimizationDisable(ref.read);
     } catch (_) {
       return;
     } finally {

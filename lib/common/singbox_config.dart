@@ -35,7 +35,7 @@ SingboxConfigResult? tryConvertSingboxConfig(String body) {
 
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
-  final seen = <String>{};
+  final seen = <String>{'PROXY', 'DIRECT'};
   for (final outbound in outbounds) {
     if (outbound is! Map<String, Object?>) continue;
     if (_serviceTypes.contains(outbound['type'])) continue;
@@ -47,8 +47,16 @@ SingboxConfigResult? tryConvertSingboxConfig(String body) {
       continue;
     }
     if (proxy == null) continue;
-    final name = proxy['name']! as String;
-    if (!seen.add(name)) continue;
+    var name = proxy['name']! as String;
+    if (seen.contains(name) && name != 'PROXY' && name != 'DIRECT') continue;
+    if (name == 'PROXY' || name == 'DIRECT') name = '$name node';
+    final base = name;
+    var suffix = 2;
+    while (!seen.add(name)) {
+      name = '$base $suffix';
+      suffix++;
+    }
+    proxy['name'] = name;
     proxies.add(proxy);
   }
 
@@ -134,7 +142,13 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
       proxy['udp'] = true;
       _set(proxy, 'cipher', outbound['method']);
       _set(proxy, 'password', outbound['password']);
-      _set(proxy, 'plugin', outbound['plugin']);
+      final plugin = outbound['plugin']?.toString() ?? '';
+      if (plugin.isNotEmpty &&
+          plugin != 'obfs-local' &&
+          plugin != 'v2ray-plugin') {
+        unsupported('plugin $plugin', SkippedNodeReason.transport);
+      }
+      _set(proxy, 'plugin', plugin == 'obfs-local' ? 'obfs' : plugin);
       final pluginOpts = _pluginOpts(outbound['plugin_opts']);
       if (pluginOpts != null) proxy['plugin-opts'] = pluginOpts;
     case 'hysteria2':
@@ -209,7 +223,9 @@ Map<String, Object?>? _convertOutbound(Map<String, Object?> outbound) {
   // TUIC is QUIC-native: TLS is always on, with h3 as the default ALPN.
   if (proxy['type'] == 'tuic' && proxy['tls'] != true) {
     proxy['tls'] = true;
-    proxy['sni'] = proxy['sni'] ?? server;
+    proxy['sni'] = server;
+    proxy['alpn'] = ['h3'];
+  } else if (proxy['type'] == 'tuic') {
     proxy['alpn'] = proxy['alpn'] ?? ['h3'];
   }
   return proxy;
@@ -277,7 +293,7 @@ List<Map<String, Object?>> _wireguardPeers(Map<String, Object?> outbound) {
       if ((entry['pre_shared_key'] ?? '').toString().isNotEmpty)
         'pre-shared-key': entry['pre_shared_key'].toString(),
       'reserved': ?reserved,
-      'allowed-ips': allowedIps.isEmpty ? ['0.0.0.0/0,::/0'] : allowedIps,
+      'allowed-ips': allowedIps.isEmpty ? ['0.0.0.0/0', '::/0'] : allowedIps,
     });
   }
   return peers;
@@ -304,11 +320,13 @@ void _applyTls(
   if (tlsValue['enabled'] != true) return;
 
   proxy['tls'] = true;
-  final sni = tlsValue['disable_sni'] == true
+  final disableSni = tlsValue['disable_sni'] == true;
+  final type = proxy['type']?.toString() ?? '';
+  if (disableSni && type == 'tuic') proxy['disable-sni'] = true;
+  final sni = disableSni
       ? ''
       : tlsValue['server_name']?.toString() ?? fallbackSni;
   // Only vmess/vless take servername; the rest spell it sni, socks5 none.
-  final type = proxy['type']?.toString() ?? '';
   if (sni.isNotEmpty && type != 'socks5') {
     final key = type == 'vmess' || type == 'vless' ? 'servername' : 'sni';
     proxy[key] = sni;

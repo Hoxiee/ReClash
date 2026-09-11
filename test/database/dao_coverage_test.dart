@@ -32,6 +32,27 @@ void main() {
           total: 3,
           expire: 4,
         ),
+        capabilityManifest: ProviderCapabilityManifest(
+          version: 1,
+          claims: const [
+            CapabilityClaim(
+              capabilityId: 'youtube-adfree',
+              selectors: [CapabilitySelector(nameContains: '⚡')],
+            ),
+          ],
+          receivedAt: DateTime.utc(2026, 1, 2),
+          sourceHost: 'first.example',
+        ),
+        serviceRoutePolicies: const [
+          ServiceRoutePolicy(capabilityId: 'youtube-adfree', enabled: true),
+        ],
+        manualCapabilitySelectors: const [
+          ManualCapabilitySelector(
+            capabilityId: 'gemini-access',
+            nameContains: '⭐',
+          ),
+        ],
+        capabilityManifestIssue: CapabilityManifestIssue.invalidHeader,
         autoUpdate: false,
         selectedMap: const {'Selector': 'Proxy'},
         unfoldSet: const {'Selector'},

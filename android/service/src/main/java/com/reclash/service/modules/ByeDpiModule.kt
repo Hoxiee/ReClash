@@ -3,6 +3,7 @@ package com.reclash.service.modules
 import com.reclash.common.GlobalState
 import com.reclash.service.ServiceConfig
 import com.reclash.service.models.VpnOptions
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,11 +26,32 @@ internal object ByeDpiPolicy {
 
     fun backoffMs(attempt: Int): Long =
         (1_000L shl attempt.coerceAtMost(5)).coerceAtMost(MAX_BACKOFF_MS)
+
+}
+
+private val byeDpiStatusGeneration = AtomicLong()
+
+internal enum class ByeDpiState(val wireName: String) {
+    STOPPED("stopped"),
+    STARTING("starting"),
+    HEALTHY("healthy"),
+    RECOVERING("recovering"),
+    FAILED("failed"),
+}
+
+internal data class ByeDpiStatusProjection(
+    val state: ByeDpiState,
+    val generation: Long,
+    val at: Long,
+) {
+    fun toJson(): String =
+        """{"state":"${state.wireName}","generation":$generation,"at":$at}"""
 }
 
 internal class ByeDpiModule(
     private val scope: CoroutineScope,
     private val engine: Engine,
+    private val status: (ByeDpiStatusProjection) -> Unit = {},
     private val log: (String) -> Unit = GlobalState::log,
 ) : ServiceModule {
 
@@ -53,6 +75,7 @@ internal class ByeDpiModule(
     @Volatile private var requested: ByeDpiTarget? = null
     @Volatile private var envKey = ""
     private var startFailures = 0
+    private var lastStatus: ByeDpiState? = null
 
     // Blocks a parked apply coroutine from resurrecting the branch after stop().
     @Volatile private var stopped = false
@@ -70,6 +93,7 @@ internal class ByeDpiModule(
 
     override fun start() {
         stopped = false
+        publishStatus(ByeDpiState.STOPPED)
         configJob = scope.launch {
             ServiceConfig.vpnOptionsFlow.collect { options -> apply(targetOf(options)) }
         }
@@ -89,6 +113,7 @@ internal class ByeDpiModule(
                 current = null
                 runCatching { engine.stop() }
             }
+            publishStatus(ByeDpiState.STOPPED)
         }
     }
 
@@ -123,7 +148,11 @@ internal class ByeDpiModule(
                 runCatching { engine.stop() }
                     .onFailure { error -> log("Desync stop failed: $error") }
             }
-            if (target == null) return
+            if (target == null) {
+                publishStatus(ByeDpiState.STOPPED)
+                return
+            }
+            publishStatus(ByeDpiState.STARTING)
             launchBranch(target)
         }
     }
@@ -152,8 +181,10 @@ internal class ByeDpiModule(
             current = target
             retryJob = null
             startFailures = 0
+            publishStatus(ByeDpiState.HEALTHY)
         } else {
             current = null
+            publishStatus(ByeDpiState.FAILED)
             scheduleStartRetry(target)
         }
         return started
@@ -166,6 +197,7 @@ internal class ByeDpiModule(
             synchronized(applyLock) {
                 if (stopped || requested != target || current != null) return@launch
                 retryJob = null
+                publishStatus(ByeDpiState.STARTING)
                 launchBranch(target)
             }
         }
@@ -174,6 +206,7 @@ internal class ByeDpiModule(
     private fun restart(target: ByeDpiTarget) {
         synchronized(applyLock) {
             if (current != target) return
+            publishStatus(ByeDpiState.RECOVERING)
             probeJob?.cancel()
             probeJob = null
             current = null
@@ -183,6 +216,18 @@ internal class ByeDpiModule(
                 probeJob = scope.launch { watch(target) }
             }
         }
+    }
+
+    private fun publishStatus(state: ByeDpiState) {
+        if (lastStatus == state) return
+        lastStatus = state
+        val projection = ByeDpiStatusProjection(
+            state = state,
+            generation = byeDpiStatusGeneration.incrementAndGet(),
+            at = System.currentTimeMillis(),
+        )
+        runCatching { status(projection) }
+            .onFailure { error -> log("Desync status publish failed: $error") }
     }
 
     // The thread outliving its listener is the failure Doze produces, so liveness is

@@ -60,6 +60,22 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 4,
       child: ChangeServerButton(),
     ),
+    DashboardWidget.smartRouting => const GridItem(
+      crossAxisCellCount: 4,
+      child: SmartRoutingCard(),
+    ),
+    DashboardWidget.desyncStrategy => const GridItem(
+      crossAxisCellCount: 8,
+      child: DesyncStrategyCard(),
+    ),
+    DashboardWidget.desyncTest => const GridItem(
+      crossAxisCellCount: 4,
+      child: DesyncTestCard(),
+    ),
+    DashboardWidget.desyncEngine => const GridItem(
+      crossAxisCellCount: 4,
+      child: DesyncEngineCard(),
+    ),
   };
 }
 

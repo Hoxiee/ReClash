@@ -208,6 +208,24 @@ void main() {
       expect(androidTypes, isNot(contains(InterfaceNameModeItem)));
       expect(androidTypes, isNot(contains(InterfaceNameItem)));
     });
+
+    test('hidden conditional rows do not occupy a group position', () {
+      final desktopTypes = networkOptionsItems(
+        isDesktop: true,
+        isMacOS: false,
+        showInterfaceName: false,
+      ).map((item) => item.runtimeType);
+      expect(desktopTypes.last, InterfaceNameModeItem);
+      expect(desktopTypes, isNot(contains(InterfaceNameItem)));
+
+      final androidTypes = networkOptionsItems(
+        isDesktop: false,
+        isMacOS: false,
+        showRouteAddress: false,
+      ).map((item) => item.runtimeType);
+      expect(androidTypes.last, RouteModeItem);
+      expect(androidTypes, isNot(contains(RouteAddressItem)));
+    });
   });
 
   group('route address visibility', () {

@@ -10,9 +10,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 class _RecordingListener with ServiceListener {
   final events = <CoreEvent>[];
+  final widgetSelections = <Map<String, String>>[];
 
   @override
   void onServiceEvent(CoreEvent event) => events.add(event);
+
+  @override
+  void onWidgetSelections(Map<String, String> selections) {
+    widgetSelections.add(selections);
+  }
 }
 
 class _ThrowingListener with ServiceListener {
@@ -53,16 +59,20 @@ void main() {
         });
   }
 
+  Future<ByteData?> callFromPlatform(String method, [Object? arguments]) {
+    return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          channelName,
+          codec.encodeMethodCall(MethodCall(method, arguments)),
+          null,
+        );
+  }
+
   Future<void> emitFromPlatform(Object? arguments) async {
     final payload = json.encode(
       CoreMethodCall(method: CoreMethod.message, arguments: arguments).toJson(),
     );
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(
-          channelName,
-          codec.encodeMethodCall(MethodCall('event', payload)),
-          null,
-        );
+    await callFromPlatform('event', payload);
   }
 
   setUp(() {
@@ -148,6 +158,14 @@ void main() {
 
       final sent = json.decode(calls.single.arguments as String);
       expect(sent['currentProfileName'], 'profile');
+      expect(sent['networkStateText'], 'Network');
+      expect(sent['currentServerText'], 'Current server');
+      expect(sent['networkNormalText'], 'Normal');
+      expect(sent['networkWhitelistText'], 'Whitelist');
+      expect(sent['networkPortalText'], 'Captive portal');
+      expect(sent['networkOfflineText'], 'Offline');
+      expect(sent['networkUnknownText'], 'Unknown');
+      expect(sent['activeServerGroup'], isNull);
       expect(sent['onlyStatisticsProxy'], isTrue);
     });
   });
@@ -230,6 +248,62 @@ void main() {
       expect(response!.error, isNotNull);
       expect(response.error!.code, 'unavailable');
       expect(response.error!.message, 'core down');
+    });
+  });
+
+  group('widget selections', () {
+    const batch = {
+      'token': 'batch-1',
+      'selections': {'proxy': 'node-a'},
+    };
+
+    test('peek is acknowledged only after listener delivery', () async {
+      mockChannel(
+        (call) async => switch (call.method) {
+          'peekWidgetSelections' => batch,
+          'ackWidgetSelections' => true,
+          _ => null,
+        },
+      );
+      final listener = _RecordingListener();
+      Service().addListener(listener);
+      addTearDown(() => Service().removeListener(listener));
+
+      await Service().deliverPendingWidgetSelections();
+
+      expect(listener.widgetSelections, [batch['selections']]);
+      expect(calls.map((call) => call.method), [
+        'peekWidgetSelections',
+        'ackWidgetSelections',
+      ]);
+      expect(calls.last.arguments, 'batch-1');
+    });
+
+    test('a peek without a listener stays unacknowledged for retry', () async {
+      mockChannel(
+        (call) async => call.method == 'peekWidgetSelections' ? batch : true,
+      );
+
+      await Service().deliverPendingWidgetSelections();
+
+      expect(calls.map((call) => call.method), ['peekWidgetSelections']);
+    });
+
+    test('push asks native to retry when no listener is attached', () async {
+      final reply = await callFromPlatform('widgetSelections', batch);
+
+      expect(codec.decodeEnvelope(reply!), isFalse);
+    });
+
+    test('push acknowledges only after successful listener delivery', () async {
+      final listener = _RecordingListener();
+      Service().addListener(listener);
+      addTearDown(() => Service().removeListener(listener));
+
+      final reply = await callFromPlatform('widgetSelections', batch);
+
+      expect(codec.decodeEnvelope(reply!), isTrue);
+      expect(listener.widgetSelections, [batch['selections']]);
     });
   });
 

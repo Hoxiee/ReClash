@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:emoji_regex/emoji_regex.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -9,6 +11,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
+
+const _lineSpacing = 1.35;
 
 class Announce extends ConsumerWidget {
   const Announce({super.key});
@@ -43,21 +47,28 @@ class Announce extends ConsumerWidget {
       onPressed: hasAnnouncement
           ? () => _showAnnounceSheet(context, text)
           : null,
-      child: Align(
-        alignment: Alignment.topLeft,
-        child: AnnounceText(
-          text: hasAnnouncement
-              ? text
-              : context.appLocalizations.noAnnouncements,
-          maxLines: 7,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.bodyMedium?.copyWith(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final style = context.textTheme.bodyMedium?.copyWith(
             color: hasAnnouncement
                 ? context.colorScheme.onSurface
                 : context.colorScheme.onSurfaceVariant,
-            height: 1.35,
-          ),
-        ),
+            height: _lineSpacing,
+          );
+          final lineHeight = (style?.fontSize ?? 14) * _lineSpacing;
+          return Align(
+            alignment: Alignment.topLeft,
+            child: AnnounceText(
+              text: hasAnnouncement
+                  ? text
+                  : context.appLocalizations.noAnnouncements,
+              // A clipped half line reads as a rendering fault, so whole ones only.
+              maxLines: max(1, constraints.maxHeight ~/ lineHeight),
+              overflow: TextOverflow.ellipsis,
+              style: style,
+            ),
+          );
+        },
       ),
     );
   }

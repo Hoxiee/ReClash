@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:reclash/common/app_localizations.dart';
+import 'package:reclash/common/exception.dart';
+import 'package:reclash/common/incy_links.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';
@@ -78,6 +80,75 @@ void main() {
       ),
       'proxy 0: unsupported type',
     );
+  });
+
+  group('profile import failures', () {
+    test('maps every failure to a localized safe message', () {
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.invalidUrl,
+          appLocalizations,
+        ),
+        appLocalizations.profileUrlInvalidValidationDesc,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.invalidQrCode,
+          appLocalizations,
+        ),
+        appLocalizations.pleaseUploadValidQrcode,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.invalidConfig,
+          appLocalizations,
+        ),
+        appLocalizations.profileImportInvalidConfig,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.fetchRejected,
+          appLocalizations,
+        ),
+        appLocalizations.networkException,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.fetchFailed,
+          appLocalizations,
+        ),
+        appLocalizations.unknownNetworkError,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.emptyResponse,
+          appLocalizations,
+        ),
+        appLocalizations.profileImportEmptyResponse,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.fileReadFailed,
+          appLocalizations,
+        ),
+        appLocalizations.profileImportFileReadFailed,
+      );
+      expect(
+        profileImportFailureMessage(
+          ProfileImportFailure.unexpected,
+          appLocalizations,
+        ),
+        appLocalizations.profileImportFailed,
+      );
+    });
+
+    test('does not expose details from unsupported import links', () {
+      const error = IncyLinkException('sensitive parser diagnostic');
+      expect(
+        incyLinkErrorMessage(error, appLocalizations),
+        appLocalizations.profileImportUnsupportedLink,
+      );
+    });
   });
 
   group('policy-blocked Core launch', () {

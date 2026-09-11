@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_connected">已连接</string>
+    <string name="widget_connecting">连接中…</string>
+    <string name="widget_disconnecting">断开中…</string>
+    <string name="widget_disconnected">已断开</string>
+    <string name="widget_paused">已暂停</string>
+    <string name="widget_start">启动</string>
+    <string name="widget_stop">停止</string>
+    <string name="widget_wait">请稍候</string>
+    <string name="widget_resume">恢复</string>
+    <string name="widget_pause">暂停</string>
+    <string name="widget_check">检查</string>
+    <string name="widget_open">打开</string>
+    <string name="widget_refresh">刷新</string>
+
+    <string name="widget_app_name">@string/app_name</string>
+
+    <string name="widget_label_switch">ReClash 开关</string>
+    <string name="widget_label_control">ReClash 控制</string>
+    <string name="widget_label_nodes">ReClash 节点</string>
+    <string name="widget_label_traffic">ReClash 流量</string>
+    <string name="widget_description_switch">一键连接，并显示运行时长与实时速度。</string>
+    <string name="widget_description_control">连接状态、速度、运行时长与四个快捷操作。</string>
+    <string name="widget_description_nodes">从当前分组选择代理并重新测试延迟。</string>
+    <string name="widget_description_traffic">速度曲线、本次会话流量与运行时长。</string>
+
+    <string name="widget_placeholder_speed">0 B/s</string>
+    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_metric_down">下载</string>
+    <string name="widget_metric_up">上传</string>
+    <string name="widget_metric_uptime">运行时长</string>
+    <string name="widget_metric_session">会话</string>
+
+    <string name="widget_no_nodes">没有可用节点</string>
+    <string name="widget_service_off">服务未运行</string>
+    <string name="widget_state">状态</string>
+
+    <string name="widget_terrain_normal">直连网络</string>
+    <string name="widget_terrain_whitelist">白名单</string>
+    <string name="widget_terrain_portal">认证门户</string>
+    <string name="widget_terrain_offline">离线</string>
+    <string name="widget_terrain_unknown">网络未知</string>
+
+    <string name="widget_doctor_healthy">正常</string>
+    <string name="widget_doctor_degraded">不稳定</string>
+    <string name="widget_doctor_broken">存在问题</string>
+    <string name="widget_doctor_examining">检查中…</string>
+    <string name="widget_doctor_observing">观察中</string>
+</resources>

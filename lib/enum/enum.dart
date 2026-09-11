@@ -94,9 +94,18 @@ enum Mode { rule, global, direct }
 /// with smart routing on, so an inconsistent pair cannot be expressed.
 enum UiOutboundMode { auto, rule, global, direct }
 
-enum NotificationContentMode { adaptive, traffic, minimal }
+enum NotificationComponentType {
+  connectionDoctor,
+  networkState,
+  currentServer,
+  smartRouting,
+  speed,
+  sessionTraffic,
+}
 
-enum DoctorNotificationPriority { problems, always, never }
+enum DoctorNotificationPriority { problems, always }
+
+enum NotificationVisibility { detailed, minimal, off }
 
 extension UiOutboundModeExt on UiOutboundMode {
   Mode get coreMode => switch (this) {
@@ -127,10 +136,14 @@ enum SmartRoutingPreset {
 }
 
 enum SmartRoutingStrategy {
+  @JsonValue('stable')
+  stable,
   @JsonValue('balanced')
   balanced,
   @JsonValue('lowest-latency')
   lowestLatency,
+  @JsonValue('saver')
+  saver,
 }
 
 enum ViewMode { mobile, laptop, desktop }
@@ -215,7 +228,16 @@ enum ProfileType { file, url }
 
 /// Compatibility preset for subscription servers that vary by User-Agent.
 /// A profile can request a specific response format or use [auto] selection.
-enum SubscriptionClient { auto, clash, happ, incy, singbox, v2rayng, custom }
+enum SubscriptionClient {
+  auto,
+  clashMeta,
+  clash,
+  happ,
+  incy,
+  singbox,
+  v2rayng,
+  custom,
+}
 
 enum ResultType {
   @JsonValue(0)
@@ -333,10 +355,16 @@ enum FunctionTag {
   coreErrorNotifier,
 }
 
+/// ByeDPI-only runs without a profile, so server tiles have nothing to say.
+enum DashboardMode { vpn, byedpi }
+
+const _vpnOnly = [DashboardMode.vpn];
+const _byedpiOnly = [DashboardMode.byedpi];
+
 enum DashboardWidget {
   networkSpeed,
-  outboundModeV2,
-  outboundMode,
+  outboundModeV2(modes: _vpnOnly),
+  outboundMode(modes: _vpnOnly),
   trafficUsage,
   networkDetection,
   tunButton(platforms: desktopPlatforms),
@@ -344,14 +372,26 @@ enum DashboardWidget {
   systemProxyButton(platforms: desktopPlatforms),
   intranetIp,
   memoryInfo,
-  metaInfo,
-  announce,
-  serviceInfo,
-  changeServerButton;
+  metaInfo(modes: _vpnOnly),
+  announce(modes: _vpnOnly),
+  serviceInfo(modes: _vpnOnly),
+  changeServerButton(modes: _vpnOnly),
+  smartRouting(modes: _vpnOnly),
+  desyncStrategy(modes: _byedpiOnly),
+  desyncTest(modes: _byedpiOnly),
+  desyncEngine(modes: _byedpiOnly);
 
   final List<SupportPlatform> platforms;
+  final List<DashboardMode> modes;
 
-  const DashboardWidget({this.platforms = SupportPlatform.values});
+  const DashboardWidget({
+    this.platforms = SupportPlatform.values,
+    this.modes = DashboardMode.values,
+  });
+
+  bool visibleIn(DashboardMode mode) =>
+      platforms.contains(SupportPlatform.currentPlatform) &&
+      modes.contains(mode);
 }
 
 enum GeodataLoader { standard, memconservative }

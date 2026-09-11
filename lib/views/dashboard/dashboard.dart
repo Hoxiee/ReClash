@@ -8,9 +8,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'widget_registry.dart';
+import 'widgets/connection_mode.dart';
 import 'widgets/core_status_button.dart';
-import 'widgets/hero_connect.dart';
-import 'widgets/hero_surface.dart';
+import 'widgets/dashboard_pager.dart';
 import 'widgets/start_button.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
@@ -39,20 +39,22 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     super.initState();
     ref.listenManual(
       dashboardStateProvider.select((state) => state.dashboardWidgets),
-      (_, dashboardWidgets) => _syncAddedWidgets(dashboardWidgets),
+      (_, _) => _syncAddedWidgets(),
       fireImmediately: true,
     );
+    ref.listenManual(dashboardModeProvider, (_, _) => _syncAddedWidgets());
   }
 
-  void _syncAddedWidgets(List<DashboardWidget> dashboardWidgets) {
-    bool onThisPlatform(DashboardWidget item) =>
-        item.platforms.contains(SupportPlatform.currentPlatform);
-    final shown = dashboardWidgets
-        .where(onThisPlatform)
+  void _syncAddedWidgets() {
+    final mode = ref.read(dashboardModeProvider);
+    final shown = ref
+        .read(dashboardStateProvider)
+        .dashboardWidgets
+        .where((item) => item.visibleIn(mode))
         .map((item) => item.widget)
         .toSet();
     _addedWidgetsNotifier.value = DashboardWidget.values
-        .where((item) => onThisPlatform(item) && !shown.contains(item.widget))
+        .where((item) => item.visibleIn(mode) && !shown.contains(item.widget))
         .map((item) => item.widget)
         .toList();
   }
@@ -194,41 +196,52 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
     return children.map(dashboardWidgetOf).toList();
   }
 
+  /// The grid only ever holds the tiles this mode and platform can show, so a
+  /// save has to put the rest back where the user left them.
+  List<DashboardWidget> _restoreHidden(List<DashboardWidget> visible) {
+    final mode = ref.read(dashboardModeProvider);
+    final hiddenAt = <int, List<DashboardWidget>>{};
+    var seen = 0;
+    for (final item in ref.read(dashboardStateProvider).dashboardWidgets) {
+      if (item.visibleIn(mode)) {
+        seen++;
+      } else {
+        final anchor = seen.clamp(0, visible.length);
+        (hiddenAt[anchor] ??= []).add(item);
+      }
+    }
+    if (hiddenAt.isEmpty) {
+      return visible;
+    }
+    final merged = <DashboardWidget>[];
+    for (var index = 0; index <= visible.length; index++) {
+      merged.addAll(hiddenAt[index] ?? const []);
+      if (index < visible.length) {
+        merged.add(visible[index]);
+      }
+    }
+    return merged;
+  }
+
   void _saveDashboardWidgets(List<DashboardWidget> dashboardWidgets) {
+    final merged = _restoreHidden(dashboardWidgets);
     ref
         .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(dashboardWidgets: dashboardWidgets));
+        .update((state) => state.copyWith(dashboardWidgets: merged));
   }
 
   @override
   Widget build(BuildContext context) {
     final newDashboard = ref.watch(newDashboardEnabledProvider);
     if (newDashboard) {
-      final isMobileView = ref.watch(isMobileViewProvider);
-      return Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isMobileView ? double.infinity : heroBoardMaxWidth,
-                ),
-                child: const HeroConnect(),
-              ),
-            ),
-          ),
-        ),
-      );
+      return const Scaffold(body: SafeArea(child: DashboardPager()));
     }
     final dashboardState = ref.watch(dashboardStateProvider);
+    final mode = ref.watch(dashboardModeProvider);
     final spacing = 14.mAp;
     final children = [
       ...dashboardState.dashboardWidgets
-          .where(
-            (item) => item.platforms.contains(SupportPlatform.currentPlatform),
-          )
+          .where((item) => item.visibleIn(mode))
           .map((item) => item.widget),
     ];
     return _buildIsEdit(

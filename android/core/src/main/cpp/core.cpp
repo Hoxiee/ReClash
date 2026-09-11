@@ -54,6 +54,13 @@ Java_com_reclash_core_Core_setEventListener(JNIEnv *env, jobject thiz, jobject c
 
 extern "C"
 JNIEXPORT jstring JNICALL
+Java_com_reclash_core_Core_getActiveServer(JNIEnv *env, jobject thiz, jstring group_hint) {
+    scoped_string server = getActiveServer(get_string(group_hint));
+    return new_string(server);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
 Java_com_reclash_core_Core_getTraffic(JNIEnv *env, jobject thiz,
                                            const jboolean only_statistics_proxy) {
     scoped_string traffic = getTraffic(only_statistics_proxy);
@@ -92,6 +99,8 @@ Java_com_reclash_core_Core_quickSetup(JNIEnv *env, jobject thiz, jstring init_pa
 static jmethodID m_tun_interface_protect;
 static jmethodID m_tun_interface_resolve_uid;
 static jmethodID m_tun_interface_resolve_package;
+static jmethodID m_tun_interface_run_doctor_probe;
+static jmethodID m_tun_interface_cancel_doctor_probe;
 static jmethodID m_invoke_interface_result;
 
 
@@ -161,6 +170,48 @@ static char *call_tun_interface_resolve_package_impl(void *tun_interface, const 
     return result;
 }
 
+static char *call_tun_interface_doctor_probe_impl(void *tun_interface, const char *request) {
+    if (tun_interface == nullptr) {
+        return strdup("");
+    }
+    ATTACH_JNI();
+    const auto request_string = new_string(request);
+    const auto response = reinterpret_cast<jstring>(env->CallObjectMethod(
+            static_cast<jobject>(tun_interface),
+            m_tun_interface_run_doctor_probe,
+            request_string));
+    const auto failed = jni_clear_exception(env);
+    if (request_string != nullptr) {
+        env->DeleteLocalRef(request_string);
+    }
+    if (failed || response == nullptr) {
+        if (response != nullptr) {
+            env->DeleteLocalRef(response);
+        }
+        return strdup("");
+    }
+    const auto result = get_string(response);
+    if (response != nullptr) {
+        env->DeleteLocalRef(response);
+    }
+    return result;
+}
+
+static void call_tun_interface_cancel_doctor_probe_impl(void *tun_interface, const char *probe_id) {
+    if (tun_interface == nullptr) {
+        return;
+    }
+    ATTACH_JNI();
+    const auto probe_id_string = new_string(probe_id);
+    env->CallVoidMethod(static_cast<jobject>(tun_interface),
+                        m_tun_interface_cancel_doctor_probe,
+                        probe_id_string);
+    jni_clear_exception(env);
+    if (probe_id_string != nullptr) {
+        env->DeleteLocalRef(probe_id_string);
+    }
+}
+
 static void call_invoke_interface_result_impl(void *invoke_interface, const char *data) {
     if (invoke_interface == nullptr) {
         return;
@@ -195,6 +246,10 @@ JNI_OnLoad(JavaVM *vm, void *) {
                                               "(ILjava/lang/String;Ljava/lang/String;)I");
     m_tun_interface_resolve_package = find_method(c_tun_interface, "resolvePackage",
                                                   "(I)Ljava/lang/String;");
+    m_tun_interface_run_doctor_probe = find_method(c_tun_interface, "runDoctorProbe",
+                                                   "(Ljava/lang/String;)Ljava/lang/String;");
+    m_tun_interface_cancel_doctor_probe = find_method(c_tun_interface, "cancelDoctorProbe",
+                                                      "(Ljava/lang/String;)V");
     m_invoke_interface_result = find_method(c_invoke_interface, "onResult",
                                             "(Ljava/lang/String;)V");
 
@@ -202,6 +257,8 @@ JNI_OnLoad(JavaVM *vm, void *) {
     protect_func = &call_tun_interface_protect_impl;
     resolve_uid_func = &call_tun_interface_resolve_uid_impl;
     resolve_package_func = &call_tun_interface_resolve_package_impl;
+    doctor_probe_func = &call_tun_interface_doctor_probe_impl;
+    cancel_doctor_probe_func = &call_tun_interface_cancel_doctor_probe_impl;
     result_func = &call_invoke_interface_result_impl;
     release_object_func = &release_jni_object_impl;
     free_string_func = &free_string_impl;

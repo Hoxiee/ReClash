@@ -70,6 +70,16 @@ mixin CoreInterface {
 
   Future<bool> smartRoutingDeepScan();
 
+  Future<DoctorSnapshot> doctorSnapshot();
+
+  Future<DoctorSnapshot> startDoctor(DoctorStartParams params);
+
+  Future<DoctorSnapshot> cancelDoctor(DoctorCancelParams params);
+
+  Future<DoctorSnapshot> flushDoctorDns(DoctorHealParams params);
+
+  Future<DoctorReport> exportDoctorReport();
+
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
@@ -323,6 +333,75 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> smartRoutingDeepScan() async {
     return await _invokeMethod<bool>(method: CoreMethod.rcxDeepScan) ?? false;
+  }
+
+  @override
+  Future<DoctorSnapshot> doctorSnapshot() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.doctorSnapshot,
+    );
+    if (data == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty doctor snapshot',
+      );
+    }
+    return DoctorSnapshot.fromJson(data);
+  }
+
+  @override
+  Future<DoctorSnapshot> startDoctor(DoctorStartParams params) async {
+    return _doctorSnapshotResult(
+      CoreMethod.doctorStart,
+      arguments: params.toJson(),
+    );
+  }
+
+  @override
+  Future<DoctorSnapshot> cancelDoctor(DoctorCancelParams params) async {
+    return _doctorSnapshotResult(
+      CoreMethod.doctorCancel,
+      arguments: params.toJson(),
+    );
+  }
+
+  @override
+  Future<DoctorSnapshot> flushDoctorDns(DoctorHealParams params) async {
+    return _doctorSnapshotResult(
+      CoreMethod.doctorFlushDns,
+      arguments: params.toJson(),
+    );
+  }
+
+  Future<DoctorSnapshot> _doctorSnapshotResult(
+    CoreMethod method, {
+    Object? arguments,
+  }) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: method,
+      arguments: arguments,
+    );
+    if (data == null) {
+      throw CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty ${method.name} result',
+      );
+    }
+    return DoctorSnapshot.fromJson(data);
+  }
+
+  @override
+  Future<DoctorReport> exportDoctorReport() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.doctorExport,
+    );
+    if (data == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty doctor report',
+      );
+    }
+    return DoctorReport.fromJson(data);
   }
 
   @override

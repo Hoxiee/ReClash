@@ -11,4 +11,8 @@ interface TunInterface {
     fun resolveUid(protocol: Int, source: String, target: String): Int
 
     fun resolvePackage(uid: Int): String
+
+    fun runDoctorProbe(requestJson: String): String
+
+    fun cancelDoctorProbe(probeId: String)
 }

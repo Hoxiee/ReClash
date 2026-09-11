@@ -41,6 +41,27 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   panelMeta: json['panelMeta'] == null
       ? null
       : PanelMeta.fromJson(json['panelMeta'] as Map<String, dynamic>),
+  capabilityManifest: json['capabilityManifest'] == null
+      ? null
+      : ProviderCapabilityManifest.fromJson(
+          json['capabilityManifest'] as Map<String, dynamic>,
+        ),
+  serviceRoutePolicies:
+      (json['serviceRoutePolicies'] as List<dynamic>?)
+          ?.map((e) => ServiceRoutePolicy.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  manualCapabilitySelectors:
+      (json['manualCapabilitySelectors'] as List<dynamic>?)
+          ?.map(
+            (e) => ManualCapabilitySelector.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
+  capabilityManifestIssue: $enumDecodeNullable(
+    _$CapabilityManifestIssueEnumMap,
+    json['capabilityManifestIssue'],
+  ),
   autoUpdate: json['autoUpdate'] as bool? ?? true,
   selectedMap:
       (json['selectedMap'] as Map<String, dynamic>?)?.map(
@@ -79,6 +100,11 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'autoUpdateDuration': instance.autoUpdateDuration.inMicroseconds,
   'subscriptionInfo': instance.subscriptionInfo,
   'panelMeta': instance.panelMeta,
+  'capabilityManifest': instance.capabilityManifest,
+  'serviceRoutePolicies': instance.serviceRoutePolicies,
+  'manualCapabilitySelectors': instance.manualCapabilitySelectors,
+  'capabilityManifestIssue':
+      _$CapabilityManifestIssueEnumMap[instance.capabilityManifestIssue],
   'autoUpdate': instance.autoUpdate,
   'selectedMap': instance.selectedMap,
   'unfoldSet': instance.unfoldSet.toList(),
@@ -93,6 +119,10 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'userLabel': instance.userLabel,
 };
 
+const _$CapabilityManifestIssueEnumMap = {
+  CapabilityManifestIssue.invalidHeader: 'invalidHeader',
+};
+
 const _$OverwriteTypeEnumMap = {
   OverwriteType.standard: 'standard',
   OverwriteType.script: 'script',
@@ -101,6 +131,7 @@ const _$OverwriteTypeEnumMap = {
 
 const _$SubscriptionClientEnumMap = {
   SubscriptionClient.auto: 'auto',
+  SubscriptionClient.clashMeta: 'clashMeta',
   SubscriptionClient.clash: 'clash',
   SubscriptionClient.happ: 'happ',
   SubscriptionClient.incy: 'incy',

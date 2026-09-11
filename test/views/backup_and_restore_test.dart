@@ -1,6 +1,7 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
@@ -50,17 +51,21 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('RestoreOptionsDialog', () {
-    Future<RestoreOption?> openAndChoose(
-      WidgetTester tester,
-      String label,
-    ) async {
-      tester.view.physicalSize = const Size(1200, 1400);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+  group('RestorePreviewDialog', () {
+    const summary = RestoreSummary(
+      profiles: 3,
+      scripts: 2,
+      rules: 4,
+      proxyGroups: 1,
+      hasSettings: true,
+    );
 
-      RestoreOption? chosen;
+    Future<RestoreOption?> openPreview(
+      WidgetTester tester, {
+      String? choose,
+      required String action,
+    }) async {
+      RestoreOption? result;
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -69,39 +74,58 @@ void main() {
               builder: (context) => Scaffold(
                 body: TextButton(
                   onPressed: () async {
-                    chosen = await showDialog<RestoreOption>(
+                    result = await showDialog<RestoreOption>(
                       context: context,
-                      builder: (_) => const RestoreOptionsDialog(),
+                      builder: (_) =>
+                          const RestorePreviewDialog(summary: summary),
                     );
                   },
-                  child: const Text('open'),
+                  child: const Text('open preview'),
                 ),
               ),
             ),
           ),
         ),
       );
-      await tester.pump();
-      await tester.tap(find.text('open'));
+      await tester.tap(find.text('open preview'));
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text(label));
+      if (choose != null) {
+        await tester.tap(find.text(choose));
+        await tester.pump();
+      }
+      await tester.tap(find.text(action));
       await tester.pumpAndSettle();
-      return chosen;
+      return result;
     }
 
-    testWidgets('returns onlyProfiles for the config-only option', (
-      tester,
-    ) async {
+    testWidgets('shows the staged backup summary', (tester) async {
+      await pumpDialog(tester, const RestorePreviewDialog(summary: summary));
+
+      expect(find.text('Profiles: 3'), findsOneWidget);
+      expect(find.text('Scripts: 2'), findsOneWidget);
+      expect(find.text('Rules: 4'), findsOneWidget);
+      expect(find.text('Proxy groups: 1'), findsOneWidget);
+      expect(find.text('Settings included'), findsOneWidget);
+    });
+
+    testWidgets('cancelling returns no restore option', (tester) async {
+      expect(await openPreview(tester, action: 'Cancel'), isNull);
+    });
+
+    testWidgets('confirms profiles only by default', (tester) async {
       expect(
-        await openAndChoose(tester, 'Restore profiles only'),
+        await openPreview(tester, action: 'Confirm'),
         RestoreOption.onlyProfiles,
       );
     });
 
-    testWidgets('returns all for the full-data option', (tester) async {
+    testWidgets('confirms the selected full restore', (tester) async {
       expect(
-        await openAndChoose(tester, 'Restore all data'),
+        await openPreview(
+          tester,
+          choose: 'Restore all data',
+          action: 'Confirm',
+        ),
         RestoreOption.all,
       );
     });

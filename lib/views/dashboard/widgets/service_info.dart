@@ -13,12 +13,21 @@ class ServiceInfo extends ConsumerWidget {
     final panelMeta = ref.watch(
       currentProfileProvider.select((state) => state?.panelMeta),
     );
+    final profileLabel = ref.watch(
+      currentProfileProvider.select((state) => state?.label.trim() ?? ''),
+    );
+    final appLocalizations = context.appLocalizations;
     final supportUrl = panelMeta?.supportUrl;
-    final serviceName = panelMeta?.serviceName?.trim();
+    final account = panelMeta?.accountUsername?.trim();
+    final title = [panelMeta?.serviceName?.trim() ?? '', profileLabel]
+        .firstWhere(
+          (value) => value.isNotEmpty,
+          orElse: () => appLocalizations.unknown,
+        );
     return DashboardInfoCard(
       height: getWidgetHeight(1),
       icon: Icons.dns_outlined,
-      label: context.appLocalizations.serviceInfo,
+      label: appLocalizations.serviceInfo,
       action: supportUrl == null
           ? null
           : const Icon(Icons.open_in_new_rounded, size: 18),
@@ -39,17 +48,32 @@ class ServiceInfo extends ConsumerWidget {
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: TooltipText(
-              text: Text(
-                serviceName == null || serviceName.isEmpty
-                    ? context.appLocalizations.unknown
-                    : serviceName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TooltipText(
+                  text: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+                if (account != null && account.isNotEmpty)
+                  TooltipText(
+                    text: Text(
+                      account,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

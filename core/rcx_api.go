@@ -22,8 +22,8 @@ func init() {
 		rcxEngineInstance.Configure(*config)
 		response.success(true)
 	}))
-	registerMethod(rcxNetworkMethod, withArguments(func(payload *rcxNetworkPayload, response MethodResponse) {
-		rcxEngineInstance.Network(*payload)
+	registerMethod(rcxNetworkMethod, withArguments(func(payload *networkFactsPayload, response MethodResponse) {
+		coreNetworkFacts.Update(*payload)
 		response.success(true)
 	}))
 	registerMethod(rcxSetEnabledMethod, withArguments(func(enabled *bool, response MethodResponse) {

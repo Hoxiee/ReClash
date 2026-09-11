@@ -19,8 +19,8 @@ String sanitizeNoticeText(
 }
 
 class NoticeRequest {
-  /// Android channel name, which is also the label the user turns it off by.
   final String channelName;
+  final String notificationKey;
   final String title;
   final String message;
   final String? actionLabel;
@@ -28,6 +28,7 @@ class NoticeRequest {
 
   const NoticeRequest({
     required this.channelName,
+    required this.notificationKey,
     required this.title,
     required this.message,
     this.actionLabel,
@@ -77,6 +78,7 @@ class SystemNotice {
       if (system.isAndroid) {
         return await app?.showNotice(
               channelName: notice.channelName,
+              notificationKey: notice.notificationKey,
               title: notice.title,
               message: notice.message,
               actionLabel: notice.actionLabel,

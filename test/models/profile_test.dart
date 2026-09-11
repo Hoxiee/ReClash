@@ -28,6 +28,17 @@ void main() {
       expect(info.total, 0);
       expect(info.expire, 0);
     });
+
+    test('ignores malformed and empty segments', () {
+      final info = SubscriptionInfo.formHString(
+        'upload=10; malformed; ; download=20; trailing;',
+      );
+
+      expect(info.upload, 10);
+      expect(info.download, 20);
+      expect(info.total, 0);
+      expect(info.expire, 0);
+    });
   });
 
   group('ProfileExtension', () {
@@ -53,6 +64,29 @@ void main() {
       expect(urlProfile.type, ProfileType.url);
       expect(urlProfile.realAutoUpdate, true);
       expect(urlProfile.realLabel, 'Remote');
+    });
+
+    test('a pinned preset is the effective client, probing or not', () {
+      const pinned = Profile(
+        id: 1,
+        autoUpdateDuration: defaultUpdateDuration,
+        clientEmulation: SubscriptionClient.happ,
+        lastWorkingClient: SubscriptionClient.incy,
+      );
+
+      expect(pinned.effectiveClient, SubscriptionClient.happ);
+    });
+
+    test('auto reports the format it settled on, null until it does', () {
+      const probed = Profile(
+        id: 2,
+        autoUpdateDuration: defaultUpdateDuration,
+        lastWorkingClient: SubscriptionClient.singbox,
+      );
+      const fresh = Profile(id: 3, autoUpdateDuration: defaultUpdateDuration);
+
+      expect(probed.effectiveClient, SubscriptionClient.singbox);
+      expect(fresh.effectiveClient, isNull);
     });
   });
 

@@ -25,10 +25,15 @@ LocationPermissionFollowUp getLocationPermissionFollowUp(
 class Permissions {
   static Permissions? _instance;
 
-  Permissions._internal({bool Function()? supportsLocationPermissions})
-    : _supportsLocationPermissions =
-          supportsLocationPermissions ??
-          (() => system.isAndroid || system.isMacOS);
+  Permissions._internal({
+    bool Function()? supportsLocationPermissions,
+    Future<bool> Function()? isBatteryOptimizationDisabled,
+  }) : _supportsLocationPermissions =
+           supportsLocationPermissions ??
+           (() => system.isAndroid || system.isMacOS),
+       _isBatteryOptimizationDisabled =
+           isBatteryOptimizationDisabled ??
+           (() async => await app?.isBatteryOptimizationDisabled() ?? false);
 
   factory Permissions() {
     _instance ??= Permissions._internal();
@@ -36,47 +41,56 @@ class Permissions {
   }
 
   @visibleForTesting
-  factory Permissions.test({required bool supportsLocationPermissions}) {
+  factory Permissions.test({
+    required bool supportsLocationPermissions,
+    Future<bool> Function()? isBatteryOptimizationDisabled,
+  }) {
     return Permissions._internal(
       supportsLocationPermissions: () => supportsLocationPermissions,
+      isBatteryOptimizationDisabled: isBatteryOptimizationDisabled,
     );
   }
 
   final bool Function() _supportsLocationPermissions;
+  final Future<bool> Function() _isBatteryOptimizationDisabled;
 
   bool _isRequestingLocation = false;
   bool _autoRequestedLocation = false;
   bool _hadSsidRules = false;
   bool needWaitingBatteryOptimizationSettings = false;
+  Future<void>? _batteryOptimizationCheck;
 
   void check(ProviderReader read) {
     checkLocationPermissions(read);
     checkBatteryOptimizationDisable(read);
   }
 
-  Future<void> checkBatteryOptimizationDisable(ProviderReader read) async {
-    await _checkBatteryOptimizationDisable(read);
+  Future<void> checkBatteryOptimizationDisable(ProviderReader read) {
+    return _batteryOptimizationCheck ??= _checkBatteryOptimizationDisable(
+      read,
+    ).whenComplete(() => _batteryOptimizationCheck = null);
   }
 
   Future<void> _checkBatteryOptimizationDisable(ProviderReader read) async {
     const tag = LoadingTag.batteryOptimization;
+    final waitForSettings = needWaitingBatteryOptimizationSettings;
     try {
-      if (needWaitingBatteryOptimizationSettings) {
+      if (waitForSettings) {
         read(loadingProvider(tag).notifier).value = true;
       }
       read(
         batteryOptimizationDisableProvider.notifier,
       ).value = await retry<bool>(
-        task: () async {
-          return await app?.isBatteryOptimizationDisabled() ?? false;
-        },
+        task: _isBatteryOptimizationDisabled,
         retryIf: (res) => res == false,
         delay: const Duration(milliseconds: 500),
-        maxAttempts: needWaitingBatteryOptimizationSettings ? 5 : 1,
+        maxAttempts: waitForSettings ? 5 : 1,
       );
     } finally {
       read(loadingProvider(tag).notifier).value = false;
-      needWaitingBatteryOptimizationSettings = false;
+      if (waitForSettings) {
+        needWaitingBatteryOptimizationSettings = false;
+      }
     }
   }
 

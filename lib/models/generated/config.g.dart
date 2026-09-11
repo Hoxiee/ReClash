@@ -6,6 +6,77 @@ part of '../config.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_NotificationComponent _$NotificationComponentFromJson(
+  Map<String, dynamic> json,
+) => _NotificationComponent(
+  type: $enumDecode(_$NotificationComponentTypeEnumMap, json['type']),
+  doctorPriority: $enumDecodeNullable(
+    _$DoctorNotificationPriorityEnumMap,
+    json['doctorPriority'],
+  ),
+  hideWhenIdle: json['hideWhenIdle'] as bool?,
+  group: json['group'] as String?,
+);
+
+Map<String, dynamic> _$NotificationComponentToJson(
+  _NotificationComponent instance,
+) => <String, dynamic>{
+  'type': _$NotificationComponentTypeEnumMap[instance.type]!,
+  'doctorPriority':
+      _$DoctorNotificationPriorityEnumMap[instance.doctorPriority],
+  'hideWhenIdle': instance.hideWhenIdle,
+  'group': instance.group,
+};
+
+const _$NotificationComponentTypeEnumMap = {
+  NotificationComponentType.connectionDoctor: 'connectionDoctor',
+  NotificationComponentType.networkState: 'networkState',
+  NotificationComponentType.currentServer: 'currentServer',
+  NotificationComponentType.smartRouting: 'smartRouting',
+  NotificationComponentType.speed: 'speed',
+  NotificationComponentType.sessionTraffic: 'sessionTraffic',
+};
+
+const _$DoctorNotificationPriorityEnumMap = {
+  DoctorNotificationPriority.problems: 'problems',
+  DoctorNotificationPriority.always: 'always',
+};
+
+_NotificationSettings _$NotificationSettingsFromJson(
+  Map<String, dynamic> json,
+) => _NotificationSettings(
+  components: json['components'] == null
+      ? defaultNotificationComponents
+      : notificationComponentsSafeFromJson(json['components']),
+  visibility:
+      $enumDecodeNullable(
+        _$NotificationVisibilityEnumMap,
+        json['visibility'],
+      ) ??
+      NotificationVisibility.detailed,
+  showPauseAction: json['showPauseAction'] as bool? ?? true,
+  showStopAction: json['showStopAction'] as bool? ?? true,
+  hideSensitiveOnLockScreen: json['hideSensitiveOnLockScreen'] as bool? ?? true,
+  subscriptionReminders: json['subscriptionReminders'] as bool? ?? true,
+);
+
+Map<String, dynamic> _$NotificationSettingsToJson(
+  _NotificationSettings instance,
+) => <String, dynamic>{
+  'components': instance.components,
+  'visibility': _$NotificationVisibilityEnumMap[instance.visibility]!,
+  'showPauseAction': instance.showPauseAction,
+  'showStopAction': instance.showStopAction,
+  'hideSensitiveOnLockScreen': instance.hideSensitiveOnLockScreen,
+  'subscriptionReminders': instance.subscriptionReminders,
+};
+
+const _$NotificationVisibilityEnumMap = {
+  NotificationVisibility.detailed: 'detailed',
+  NotificationVisibility.minimal: 'minimal',
+  NotificationVisibility.off: 'off',
+};
+
 _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
     _AppSettingProps(
       locale: json['locale'] as String?,
@@ -13,8 +84,11 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
           ? defaultDashboardWidgets
           : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
       onlyStatisticsProxy: json['onlyStatisticsProxy'] as bool? ?? false,
-      showNotificationStopAction:
-          json['showNotificationStopAction'] as bool? ?? true,
+      notificationSettings: json['notificationSettings'] == null
+          ? defaultNotificationSettings
+          : NotificationSettings.fromJson(
+              json['notificationSettings'] as Map<String, dynamic>,
+            ),
       autoLaunch: json['autoLaunch'] as bool? ?? false,
       silentLaunch: json['silentLaunch'] as bool? ?? false,
       autoRun: json['autoRun'] as bool? ?? false,
@@ -54,7 +128,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
       'onlyStatisticsProxy': instance.onlyStatisticsProxy,
-      'showNotificationStopAction': instance.showNotificationStopAction,
+      'notificationSettings': instance.notificationSettings,
       'autoLaunch': instance.autoLaunch,
       'silentLaunch': instance.silentLaunch,
       'autoRun': instance.autoRun,
@@ -102,6 +176,10 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.announce: 'announce',
   DashboardWidget.serviceInfo: 'serviceInfo',
   DashboardWidget.changeServerButton: 'changeServerButton',
+  DashboardWidget.smartRouting: 'smartRouting',
+  DashboardWidget.desyncStrategy: 'desyncStrategy',
+  DashboardWidget.desyncTest: 'desyncTest',
+  DashboardWidget.desyncEngine: 'desyncEngine',
 };
 
 _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>
@@ -234,6 +312,11 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      egressEchoes:
+          (json['egressEchoes'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       breakerPatterns:
           (json['breakerPatterns'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -257,6 +340,7 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'canaryDomestic': instance.canaryDomestic,
   'openMarkers': instance.openMarkers.map((e) => e.toJson()).toList(),
   'domesticMarkers': instance.domesticMarkers.map((e) => e.toJson()).toList(),
+  'egressEchoes': instance.egressEchoes,
   'breakerPatterns': instance.breakerPatterns,
   'allowDomesticLastResort': instance.allowDomesticLastResort,
   'requireUdp': instance.requireUdp,
@@ -273,8 +357,10 @@ const _$SmartRoutingPresetEnumMap = {
 };
 
 const _$SmartRoutingStrategyEnumMap = {
+  SmartRoutingStrategy.stable: 'stable',
   SmartRoutingStrategy.balanced: 'balanced',
   SmartRoutingStrategy.lowestLatency: 'lowest-latency',
+  SmartRoutingStrategy.saver: 'saver',
 };
 
 _AuthenticationProps _$AuthenticationPropsFromJson(Map<String, dynamic> json) =>

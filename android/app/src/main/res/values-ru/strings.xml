@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_connected">Подключено</string>
+    <string name="widget_connecting">Подключение…</string>
+    <string name="widget_disconnecting">Отключение…</string>
+    <string name="widget_disconnected">Отключено</string>
+    <string name="widget_paused">На паузе</string>
+    <string name="widget_start">Старт</string>
+    <string name="widget_stop">Стоп</string>
+    <string name="widget_wait">Подождите</string>
+    <string name="widget_resume">Продолжить</string>
+    <string name="widget_pause">Пауза</string>
+    <string name="widget_check">Проверить</string>
+    <string name="widget_open">Открыть</string>
+    <string name="widget_refresh">Обновить</string>
+
+    <string name="widget_app_name">@string/app_name</string>
+
+    <string name="widget_label_switch">ReClash Переключатель</string>
+    <string name="widget_label_control">ReClash Управление</string>
+    <string name="widget_label_nodes">ReClash Узлы</string>
+    <string name="widget_label_traffic">ReClash Трафик</string>
+    <string name="widget_description_switch">Одно касание для подключения, время работы и текущая скорость.</string>
+    <string name="widget_description_control">Состояние соединения, скорость, время работы и четыре быстрых действия.</string>
+    <string name="widget_description_nodes">Выбор прокси из текущей группы и повторный тест задержек.</string>
+    <string name="widget_description_traffic">График скорости, итоги сеанса и время работы.</string>
+
+    <string name="widget_placeholder_speed">0 B/s</string>
+    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_metric_down">Приём</string>
+    <string name="widget_metric_up">Отдача</string>
+    <string name="widget_metric_uptime">В работе</string>
+    <string name="widget_metric_session">Сеанс</string>
+
+    <string name="widget_no_nodes">Нет доступных узлов</string>
+    <string name="widget_service_off">Служба не запущена</string>
+    <string name="widget_state">Состояние</string>
+
+    <string name="widget_terrain_normal">Прямая сеть</string>
+    <string name="widget_terrain_whitelist">Белый список</string>
+    <string name="widget_terrain_portal">Портал авторизации</string>
+    <string name="widget_terrain_offline">Нет сети</string>
+    <string name="widget_terrain_unknown">Сеть неизвестна</string>
+
+    <string name="widget_doctor_healthy">Исправно</string>
+    <string name="widget_doctor_degraded">Нестабильно</string>
+    <string name="widget_doctor_broken">Проблема</string>
+    <string name="widget_doctor_examining">Проверяем…</string>
+    <string name="widget_doctor_observing">Наблюдение</string>
+</resources>

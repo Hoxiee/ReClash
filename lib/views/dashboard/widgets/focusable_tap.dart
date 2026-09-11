@@ -43,22 +43,37 @@ class _FocusableTapState extends State<FocusableTap> {
           },
         ),
       },
-      child: AnimatedContainer(
-        duration: context.motionDuration(_borderDuration),
-        curve: Easing.standard,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(widget.borderRadius + 4),
-          border: Border.all(
-            color: _focused ? context.colorScheme.primary : Colors.transparent,
-            width: 2,
+      // A border in the layout would inset every tappable card by 2px.
+      child: Stack(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            onLongPress: widget.onLongPress,
+            child: widget.child,
           ),
-        ),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          onLongPress: widget.onLongPress,
-          child: widget.child,
-        ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: context.motionDuration(_borderDuration),
+                curve: Easing.standard,
+                decoration: ShapeDecoration(
+                  shape: RoundedSuperellipseBorder(
+                    borderRadius: BorderRadius.circular(
+                      widget.borderRadius + 4,
+                    ),
+                    side: BorderSide(
+                      color: _focused
+                          ? context.colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

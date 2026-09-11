@@ -78,6 +78,63 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'rule': ['MATCH,DIRECT'],
       },
       CoreMethod.getMemory => 2048,
+      CoreMethod.doctorSnapshot ||
+      CoreMethod.doctorStart ||
+      CoreMethod.doctorCancel ||
+      CoreMethod.doctorFlushDns => {
+        'schemaVersion': 1,
+        'revision': 12,
+        'supported': true,
+        'state': 'complete',
+        'health': 'healthy',
+        'confidence': 'confirmed',
+        'severity': 'info',
+        'scope': 'app',
+        'pathKind': 'vpn',
+        'captureState': 'active',
+        'stages': [
+          {'id': 'ingress', 'state': 'passed', 'layer': 'ingress'},
+        ],
+        'mode': 'standard',
+        'layer': 'marker',
+        'progress': {'phase': 'done', 'completed': 2, 'total': 2},
+        'capabilities': {'explicitExam': true},
+        'generations': {'environment': 3},
+        'startGenerations': {'environment': 3},
+        'evidence': [
+          {
+            'kind': 'marker',
+            'layer': 'marker',
+            'outcome': 'succeeded',
+            'confidence': 'confirmed',
+          },
+        ],
+        'actions': [],
+        'healAudit': [],
+        'incidents': [],
+      },
+      CoreMethod.doctorExport => {
+        'schemaVersion': 1,
+        'coreVersion': '1.0.0',
+        'platform': 'linux',
+        'architecture': 'amd64',
+        'generatedAt': 42,
+        'state': 'complete',
+        'health': 'healthy',
+        'confidence': 'confirmed',
+        'scope': 'app',
+        'pathKind': 'vpn',
+        'captureState': 'active',
+        'stages': [
+          {'id': 'ingress', 'state': 'passed', 'layer': 'ingress'},
+        ],
+        'mode': 'standard',
+        'layer': 'marker',
+        'generations': {'environment': 3},
+        'evidence': [],
+        'healAudit': [],
+        'incidents': [],
+      },
       _ => '',
     };
     return result as T;
@@ -170,6 +227,59 @@ void main() {
     expect(handler.calls[CoreMethod.setUiActive], isTrue);
   });
 
+  test('RCX lane config and status keep their additive wire contract', () {
+    const config = RcxLaneConfig(
+      capabilityId: 'gemini-access',
+      group: 'RCX-CAP-GEMINI_ACCESS',
+      fallback: 'reject',
+      selectors: [RcxLaneSelector(provider: 'premium', nameContains: '⭐')],
+    );
+
+    final configWire = jsonDecode(jsonEncode(config)) as Map<String, Object?>;
+    expect(configWire, {
+      'id': 'gemini-access',
+      'g': 'RCX-CAP-GEMINI_ACCESS',
+      'fb': 'reject',
+      'sel': [
+        {'p': 'premium', 'has': '⭐'},
+      ],
+    });
+    expect(RcxStatus.fromJson(const {}).lanes, isEmpty);
+
+    final status = RcxStatus.fromJson({
+      'lanes': [
+        {
+          'id': 'gemini-access',
+          'group': 'RCX-CAP-GEMINI_ACCESS',
+          'state': 'active',
+          'node': 'premium ⭐',
+          'candidates': 3,
+          'eligible': 2,
+          'searching': true,
+          'fallback': 'reject',
+          'reason': 'better',
+          'switchedAt': 42,
+        },
+      ],
+    });
+
+    expect(
+      status.lanes.single,
+      const RcxLaneStatus(
+        id: 'gemini-access',
+        group: 'RCX-CAP-GEMINI_ACCESS',
+        state: 'active',
+        node: 'premium ⭐',
+        candidates: 3,
+        eligible: 2,
+        searching: true,
+        fallback: 'reject',
+        reason: 'better',
+        switchedAt: 42,
+      ),
+    );
+  });
+
   test('event contract accepts batches and legacy single events', () async {
     final fixture =
         json.decode(
@@ -222,6 +332,85 @@ void main() {
       'rule': ['MATCH,DIRECT'],
     });
     expect(await handler.getMemory(), 2048);
+  });
+
+  test(
+    'doctor interface keeps action arguments and converts results',
+    () async {
+      final handler = _RecordingCoreHandler();
+
+      final snapshot = await handler.doctorSnapshot();
+      await handler.startDoctor(
+        const DoctorStartParams(mode: DoctorExamMode.deep),
+      );
+      await handler.cancelDoctor(const DoctorCancelParams(examId: 'exam-12'));
+      await handler.flushDoctorDns(
+        const DoctorHealParams(examId: 'exam-12', revision: 12),
+      );
+      final report = await handler.exportDoctorReport();
+
+      expect(snapshot.revision, 12);
+      expect(snapshot.health, DoctorHealth.healthy);
+      expect(snapshot.pathKind, DoctorPathKind.vpn);
+      expect(snapshot.captureState, DoctorCaptureState.active);
+      expect(snapshot.stages.single.state, DoctorStageState.passed);
+      expect(
+        snapshot.progress,
+        const DoctorProgress(phase: 'done', completed: 2, total: 2),
+      );
+      expect(snapshot.evidence.single.kind, DoctorEvidenceKind.marker);
+      expect(handler.calls[CoreMethod.doctorStart], {'mode': 'deep'});
+      expect(handler.calls[CoreMethod.doctorCancel], {'examId': 'exam-12'});
+      expect(handler.calls[CoreMethod.doctorFlushDns], {
+        'examId': 'exam-12',
+        'revision': 12,
+        'actionId': 'flushDns',
+      });
+      expect(report.coreVersion, '1.0.0');
+      expect(report.pathKind, DoctorPathKind.vpn);
+      expect(report.captureState, DoctorCaptureState.active);
+      expect(report.stages.single.id, 'ingress');
+      expect(report.generations.environment, 3);
+    },
+  );
+
+  test('doctor models tolerate unknown enum values', () {
+    final snapshot = DoctorSnapshot.fromJson({
+      'state': 'future-state',
+      'health': 'future-health',
+      'confidence': 'future-confidence',
+      'severity': 'future-severity',
+      'scope': 'future-scope',
+      'mode': 'future-mode',
+      'layer': 'future-layer',
+      'pathKind': 'future-path',
+      'captureState': 'future-capture',
+      'stages': [
+        {'id': 'future', 'state': 'future-stage', 'layer': 'future-layer'},
+      ],
+      'evidence': [
+        {
+          'kind': 'future-kind',
+          'layer': 'future-layer',
+          'outcome': 'future-outcome',
+          'confidence': 'future-confidence',
+        },
+      ],
+    });
+
+    expect(snapshot.state, DoctorExamState.unknown);
+    expect(snapshot.health, DoctorHealth.unknown);
+    expect(snapshot.confidence, DoctorConfidence.unknown);
+    expect(snapshot.severity, DoctorSeverity.unknown);
+    expect(snapshot.scope, DoctorScope.unknown);
+    expect(snapshot.mode, DoctorExamMode.unknown);
+    expect(snapshot.layer, DoctorLayer.unknown);
+    expect(snapshot.pathKind, DoctorPathKind.unknown);
+    expect(snapshot.captureState, DoctorCaptureState.unknown);
+    expect(snapshot.stages.single.state, DoctorStageState.unknown);
+    expect(snapshot.stages.single.layer, DoctorLayer.unknown);
+    expect(snapshot.evidence.single.kind, DoctorEvidenceKind.unknown);
+    expect(snapshot.evidence.single.outcome, DoctorEvidenceOutcome.unknown);
   });
 
   test('getConfig preserves structured core errors', () async {

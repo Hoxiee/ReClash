@@ -148,8 +148,7 @@ class AboutView extends ConsumerWidget {
                   showLicensePage(
                     context: context,
                     applicationName: appName,
-                    applicationVersion:
-                        'v${globalState.packageInfo.version}',
+                    applicationVersion: 'v${globalState.packageInfo.version}',
                     applicationIcon: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Image.asset(

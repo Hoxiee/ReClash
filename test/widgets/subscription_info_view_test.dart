@@ -111,6 +111,68 @@ void main() {
     expect(find.text('Perpetual subscription'), findsOneWidget);
   });
 
+  testWidgets('an unlimited plan shows its usage instead of collapsing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        builder: (context, child) {
+          globalState.measure = Measure.of(context, 1);
+          globalState.theme = CommonTheme.of(context, 1);
+          return child!;
+        },
+        home: const Scaffold(
+          body: SizedBox(
+            width: 500,
+            child: SubscriptionInfoView(
+              subscriptionInfo: SubscriptionInfo(
+                download: 12814319,
+                expire: 1790274625,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('12.2MB / \u221E'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+  });
+
+  testWidgets('a subscription that reports nothing stays hidden', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: AppLocalizations.delegate.supportedLocales,
+        home: const Scaffold(
+          body: SizedBox(
+            width: 500,
+            child: SubscriptionInfoView(subscriptionInfo: SubscriptionInfo()),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(SubscriptionInfoView),
+        matching: find.byType(Text),
+      ),
+      findsNothing,
+    );
+  });
+
   testWidgets('shows full subscription details in information rows', (
     tester,
   ) async {

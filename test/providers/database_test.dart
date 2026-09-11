@@ -118,6 +118,25 @@ void main() {
       expect(read().single.label, 'First');
     });
 
+    test('put persists import metadata through the stream', () async {
+      final imported = profile(1, label: 'Imported').copyWith(
+        lastWorkingClient: SubscriptionClient.happ,
+        undialableNodes: true,
+        userLabel: true,
+      );
+
+      await notifier.putAsync(imported);
+      await pumpEventQueue();
+
+      final stored = (await testDatabase.profilesDao.query().get()).single;
+      expect(stored.lastWorkingClient, SubscriptionClient.happ);
+      expect(stored.undialableNodes, isTrue);
+      expect(stored.userLabel, isTrue);
+      expect(read().single.lastWorkingClient, SubscriptionClient.happ);
+      expect(read().single.undialableNodes, isTrue);
+      expect(read().single.userLabel, isTrue);
+    });
+
     test(
       'put de-duplicates a label already taken by another profile',
       () async {
@@ -168,6 +187,174 @@ void main() {
 
       await failure;
       expect(read().map((item) => item.id), [1], reason: 'rolled back');
+    });
+
+    test(
+      'serializes overlapping failed writes and restores the base',
+      () async {
+        await notifier.putAsync(profile(1, label: 'Base'));
+        await pumpEventQueue();
+
+        final transactionStarted = Completer<void>();
+        final releaseTransaction = Completer<void>();
+        final blocker = testDatabase.transaction(() async {
+          transactionStarted.complete();
+          await releaseTransaction.future;
+          await testDatabase.customStatement('DROP TABLE profiles');
+        });
+        await transactionStarted.future;
+
+        final first = notifier.putAsync(profile(1, label: 'First failed'));
+        final firstError = first.then<Object?>((_) => null, onError: (e) => e);
+        await pumpEventQueue();
+        expect(read().single.label, 'First failed', reason: 'first optimistic');
+
+        final second = notifier.putAsync(profile(1, label: 'Second failed'));
+        final secondError = second.then<Object?>(
+          (_) => null,
+          onError: (e) => e,
+        );
+        await pumpEventQueue();
+        expect(read().single.label, 'Second failed', reason: 'both optimistic');
+
+        releaseTransaction.complete();
+        await blocker;
+        expect(await firstError, isA<Exception>());
+        expect(await secondError, isA<Exception>());
+        expect(read().single.label, 'Base', reason: 'both rolled back');
+      },
+    );
+
+    test('queued puts remain immediately visible and all persist', () async {
+      await notifier.putAsync(profile(1, label: 'Base'));
+      final transactionStarted = Completer<void>();
+      final releaseTransaction = Completer<void>();
+      addTearDown(() {
+        if (!releaseTransaction.isCompleted) releaseTransaction.complete();
+      });
+      final blocker = testDatabase.transaction(() async {
+        transactionStarted.complete();
+        await releaseTransaction.future;
+      });
+      await transactionStarted.future;
+
+      final first = notifier.putAsync(profile(2, label: 'Second'));
+      final second = notifier.putAsync(profile(3, label: 'Third'));
+      expect(read().map((item) => item.id), [3, 2, 1]);
+
+      releaseTransaction.complete();
+      await blocker;
+      await Future.wait([first, second]);
+      await pumpEventQueue();
+      final rows = await testDatabase.profilesDao.query().get();
+      expect(rows.map((item) => item.id), [1, 2, 3]);
+      expect(read().map((item) => item.id).toSet(), {1, 2, 3});
+    });
+
+    test('reorder intent does not resurrect a failed optimistic put', () async {
+      await notifier.putAsync(profile(1, label: 'Base', order: 0));
+      final transactionStarted = Completer<void>();
+      final releaseTransaction = Completer<void>();
+      addTearDown(() {
+        if (!releaseTransaction.isCompleted) releaseTransaction.complete();
+      });
+      final blocker = testDatabase.transaction(() async {
+        transactionStarted.complete();
+        await releaseTransaction.future;
+        await testDatabase.customStatement('DROP TABLE profiles');
+      });
+      await transactionStarted.future;
+
+      final failed = notifier.putAsync(profile(2, label: 'Transient'));
+      final failedError = failed.then<Object?>((_) => null, onError: (e) => e);
+      final reordered = read().reversed.toList();
+      final reorder = notifier.reorderAsync(reordered);
+      final reorderError = reorder.then<Object?>(
+        (_) => null,
+        onError: (e) => e,
+      );
+      expect(read().map((item) => item.id), [1, 2]);
+
+      releaseTransaction.complete();
+      await blocker;
+      expect(await failedError, isA<Exception>());
+      expect(await reorderError, isA<Exception>());
+      expect(read().map((item) => item.id), [1]);
+    });
+
+    test('queued update rebases after an earlier put fails', () async {
+      await notifier.putAsync(profile(1, label: 'Base'));
+      final transactionStarted = Completer<void>();
+      final releaseTransaction = Completer<void>();
+      addTearDown(() {
+        if (!releaseTransaction.isCompleted) releaseTransaction.complete();
+      });
+      await testDatabase.customStatement('''
+        CREATE TRIGGER reject_transient_label
+        BEFORE UPDATE ON profiles
+        WHEN NEW.label = 'Transient'
+        BEGIN
+          SELECT RAISE(ABORT, 'rejected');
+        END
+      ''');
+      final blocker = testDatabase.transaction(() async {
+        transactionStarted.complete();
+        await releaseTransaction.future;
+      });
+      await transactionStarted.future;
+
+      final failed = notifier.putAsync(profile(1, label: 'Transient'));
+      final failedError = failed.then<Object?>((_) => null, onError: (e) => e);
+      notifier.updateProfile(1, (item) => item.copyWith(scriptId: 7));
+      expect(read().single.label, 'Transient');
+      expect(read().single.scriptId, 7);
+
+      releaseTransaction.complete();
+      await blocker;
+      expect(await failedError, isA<Exception>());
+      await pumpEventQueue();
+      final stored = (await testDatabase.profilesDao.query().get()).single;
+      expect(stored.label, 'Base');
+      expect(stored.scriptId, 7);
+      expect(read().single.label, 'Base');
+      expect(read().single.scriptId, 7);
+    });
+
+    test('queued update does not recreate a failed insertion', () async {
+      await notifier.putAsync(profile(1, label: 'Base'));
+      final transactionStarted = Completer<void>();
+      final releaseTransaction = Completer<void>();
+      addTearDown(() {
+        if (!releaseTransaction.isCompleted) releaseTransaction.complete();
+      });
+      await testDatabase.customStatement('''
+        CREATE TRIGGER reject_transient_insert
+        BEFORE INSERT ON profiles
+        WHEN NEW.id = 2
+        BEGIN
+          SELECT RAISE(ABORT, 'rejected');
+        END
+      ''');
+      final blocker = testDatabase.transaction(() async {
+        transactionStarted.complete();
+        await releaseTransaction.future;
+      });
+      await transactionStarted.future;
+
+      final failed = notifier.putAsync(profile(2, label: 'Transient'));
+      final failedError = failed.then<Object?>((_) => null, onError: (e) => e);
+      notifier.updateProfile(2, (item) => item.copyWith(scriptId: 7));
+      expect(read().getProfile(2)?.scriptId, 7);
+
+      releaseTransaction.complete();
+      await blocker;
+      expect(await failedError, isA<Exception>());
+      await pumpEventQueue();
+      expect(read().getProfile(2), isNull);
+      expect(
+        (await testDatabase.profilesDao.query().get()).getProfile(2),
+        isNull,
+      );
     });
 
     test('del awaits the write and rethrows after rolling back', () async {

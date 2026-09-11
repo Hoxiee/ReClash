@@ -111,6 +111,25 @@ func TestLedgerSamplesAHarvestTheAppYardstickMeasured(t *testing.T) {
 	}
 }
 
+func TestLedgerHarvestProvesTransportWithoutOpenWorld(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	last := rcxChargeFailures(ledger, "nl-1", "wifi:home", rcxTerrainNormal, now, 4)
+	at := last.Add(time.Minute)
+	ledger.NoteHarvestedProbe("nl-1", "wifi:home", 120, at)
+
+	state := ledger.envState("wifi:home", "nl-1")
+	if state.FailStreak != 0 || !state.CoolUntil.IsZero() || state.ProofStall {
+		t.Fatalf("harvest left failure state: %+v", state)
+	}
+	facts := ledger.Facts("nl-1", "wifi:home", true, at, rcxLedgerProofTTL)
+	if facts.Transit != rcxProofProven {
+		t.Errorf("transit = %v, want proven by returned payload", facts.Transit)
+	}
+	if facts.OpenWorld == rcxProofProven {
+		t.Error("an arbitrary HTTP status must not prove the open-world marker")
+	}
+}
+
 func TestLedgerRefusesAProbeFasterThanAnyRemoteExchange(t *testing.T) {
 	ledger, now := rcxTestLedger()
 
@@ -567,10 +586,45 @@ func TestLedgerInvalidatesOnlyTheEditedProofDomain(t *testing.T) {
 	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleOpen, rcxProbeOK, 90, now)
 	ledger.NoteProbe("nl-1", "wifi:home", rcxRoleDomestic, rcxProbeOK, 90, now)
 
-	ledger.Invalidate(true, false, false)
+	ledger.Invalidate(true, false, false, false)
 	ledger.SetFingerprints("open-v2", "home-v1")
 	facts := ledger.Facts("nl-1", "wifi:home", true, now, rcxLedgerProofTTL)
 	if facts.OpenWorld != rcxProofUnknown || facts.Domestic != rcxProofProven || facts.Transit != rcxProofProven {
 		t.Fatalf("selective invalidation crossed domains: %+v", facts)
+	}
+}
+
+func TestLedgerKeepsAnEgressTheMarkerProofCannotSee(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.SetOrigin("spb", "US", rcxOriginForeign)
+	ledger.SetExit("spb", "RU", rcxOriginDomestic, now)
+	ledger.NoteProbe("spb", "wifi:home", rcxRoleOpen, rcxProbeOK, 59, now)
+
+	facts := ledger.Facts("spb", "wifi:home", true, now, rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofProven {
+		t.Fatalf("open proof = %v, want proven: the marker did answer", facts.OpenWorld)
+	}
+	if facts.Exit != rcxOriginDomestic {
+		t.Errorf("exit = %v, want domestic: the probe it fooled must not clear it", facts.Exit)
+	}
+
+	aged := ledger.Facts("spb", "wifi:home", true, now.Add(rcxExitTTL+time.Minute), rcxLedgerProofTTL)
+	if aged.Exit != rcxOriginUnknown {
+		t.Errorf("aged exit = %v, want unknown: an endpoint can be re-homed", aged.Exit)
+	}
+}
+
+func TestLedgerDropsMeasuredEgressWhenTheEchoSetChanges(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.SetExit("spb", "RU", rcxOriginDomestic, now)
+
+	ledger.Invalidate(true, true, false, false)
+	if got := ledger.Facts("spb", "wifi:home", true, now, rcxLedgerProofTTL).Exit; got != rcxOriginDomestic {
+		t.Fatalf("exit = %v, want domestic: a marker edit says nothing about the egress", got)
+	}
+
+	ledger.Invalidate(false, false, false, true)
+	if got := ledger.Facts("spb", "wifi:home", true, now, rcxLedgerProofTTL).Exit; got != rcxOriginUnknown {
+		t.Errorf("exit = %v, want unknown: another echo may read another address", got)
 	}
 }

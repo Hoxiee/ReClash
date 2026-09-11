@@ -12,6 +12,10 @@ extern int (*resolve_uid_func)(void *tun_interface, int protocol, const char *so
 
 extern char* (*resolve_package_func)(void *tun_interface, int uid);
 
+extern char* (*doctor_probe_func)(void *tun_interface, const char *request);
+
+extern void (*cancel_doctor_probe_func)(void *tun_interface, const char *probe_id);
+
 extern void (*result_func)(void *invoke_Interface, const char *data);
 
 extern int protect(void *tun_interface, int fd);
@@ -20,6 +24,10 @@ extern int protect(void *tun_interface, int fd);
 extern int resolve_uid(void *tun_interface, int protocol, const char *source, const char *target);
 
 extern char* resolve_package(void *tun_interface, int uid);
+
+extern char* doctor_probe(void *tun_interface, const char *request);
+
+extern void cancel_doctor_probe(void *tun_interface, const char *probe_id);
 
 extern void release_object(void *obj);
 

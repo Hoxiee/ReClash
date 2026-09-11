@@ -1,54 +1,31 @@
 package com.reclash
 
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
-import com.reclash.common.GlobalState
-import com.reclash.common.quickIntent
-import com.reclash.common.toPendingIntent
-import kotlinx.coroutines.launch
+import com.reclash.widgets.PumpWidgetProvider
+import com.reclash.widgets.WidgetRenderer
+import com.reclash.widgets.WidgetSnapshot
+import com.reclash.widgets.orientationViews
+import com.reclash.widgets.widgetIds
 
-class HomeWidgetProvider : AppWidgetProvider() {
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray,
-    ) {
-        GlobalState.launch {
-            ServiceState.refresh()
-            update(context, appWidgetManager, appWidgetIds, ServiceState.runState.value)
-        }
-    }
+// Declared minimum from res/xml/home_widget_info, and the only honest guess at
+// a placement's size on launchers that report none.
+private const val switchWidthDp = 180
+private const val switchHeightDp = 48
 
+class HomeWidgetProvider : PumpWidgetProvider() {
     companion object {
-        fun updateAll(context: Context, runState: RunState) {
-            val manager = AppWidgetManager.getInstance(context)
-            val component = ComponentName(context, HomeWidgetProvider::class.java)
-            update(context, manager, manager.getAppWidgetIds(component), runState)
-        }
-
-        private fun update(
+        internal fun updateAll(
             context: Context,
             manager: AppWidgetManager,
-            widgetIds: IntArray,
-            runState: RunState,
+            snapshot: WidgetSnapshot,
         ) {
-            if (widgetIds.isEmpty()) return
-            val presentation = runState.toHomeWidgetPresentation()
-            val views = RemoteViews(context.packageName, R.layout.home_widget).apply {
-                setTextViewText(R.id.widget_status, context.getText(presentation.statusRes))
-                setTextViewText(
-                    R.id.widget_action,
-                    context.getText(presentation.actionLabelRes),
-                )
-                setOnClickPendingIntent(
-                    R.id.widget_root,
-                    presentation.action.quickIntent.toPendingIntent,
-                )
+            manager.widgetIds(context, HomeWidgetProvider::class.java).forEach { id ->
+                val views = manager.orientationViews(id, switchWidthDp, switchHeightDp) { box ->
+                    WidgetRenderer.switchWidget(context, snapshot, box)
+                }
+                manager.updateAppWidget(id, views)
             }
-            manager.updateAppWidget(widgetIds, views)
         }
     }
 }

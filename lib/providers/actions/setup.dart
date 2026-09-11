@@ -120,11 +120,20 @@ class SetupAction extends _$SetupAction {
       previousStartTime: _startTime,
     );
     _latestRunRequest = request;
+    final requestRevision = ref
+        .read(runRequestStateProvider.notifier)
+        .begin(running);
+    if (running && !request.initialize) {
+      ref.read(connectionDoctorProvider.notifier).resetForTunnelSession();
+    }
     _setLocalRunning(running);
     if (request.initialize) {
       globalState.needInitStatus = false;
     }
-    return running ? _start(request) : _stop(request);
+    final operation = running ? _start(request) : _stop(request);
+    return operation.whenComplete(
+      () => ref.read(runRequestStateProvider.notifier).finish(requestRevision),
+    );
   }
 
   Future<bool> _start(_RunRequest request) async {
@@ -326,7 +335,7 @@ class SetupAction extends _$SetupAction {
     required PatchClashConfig patchConfig,
   }) async {
     final profileId = setupState.profileId;
-    final desync = ref.read(desyncSettingProvider);
+    final desync = ref.read(effectiveDesyncSettingProvider);
     // Only-dpi mode is the subscription-free use of the app: no profile to
     // fetch, the whole config is synthesized from the empty map.
     if (profileId == null && !(desync.enabled && desync.onlyDpi)) {
@@ -387,6 +396,7 @@ class SetupAction extends _$SetupAction {
         addedRules: addedRules,
         defaultUA: defaultUA,
         smartRouting: smartRouting,
+        serviceRoutePolicies: setupState.serviceRoutePolicies,
         authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
         desync: desync.enabled,
@@ -494,15 +504,15 @@ class SetupAction extends _$SetupAction {
   }) async {
     var profile = ref.read(currentProfileProvider) ?? recoverMissingProfile();
     // A refresh failure is surfaced by safeRun; setup keeps the old profile.
+    final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
     final nextProfile = await globalState.safeRun(
       () async => profile?.checkAndUpdateAndCopy(
         validate: (path) => _core.validateConfig(path),
         inspect: (path) => _core.inspectConfig(path),
         requestHeaders: await deviceIdentity.subscriptionHeaders(
-          includeDeviceIdentity: ref
-              .read(appSettingProvider)
-              .sendDeviceIdentity,
+          includeDeviceIdentity: allowDeviceIdentity,
         ),
+        allowDeviceIdentityRetry: allowDeviceIdentity,
       ),
     );
     if (nextProfile != null) {

@@ -48,7 +48,22 @@ class SharedStateTest {
               "currentProfileName": "Work",
               "stopText": "Halt",
               "onlyStatisticsProxy": true,
-              "showStopAction": false,
+              "notificationSettings": {
+                "components": [
+                  {"type": "currentServer", "group": "GLOBAL"},
+                  {"type": "speed", "hideWhenIdle": false}
+                ],
+                "contentMode": "traffic",
+                "doctorPriority": "always",
+                "showSessionTraffic": false,
+                "hideIdleSpeed": false,
+                "showPauseAction": false,
+                "showStopAction": false,
+                "hideSensitiveOnLockScreen": false,
+                "visibility": "off",
+                "subscriptionReminders": false
+              },
+              "activeText": "Protected",
               "vpnOptions": {
                 "enable": true,
                 "port": 7890,
@@ -79,7 +94,22 @@ class SharedStateTest {
         assertEquals("Work", state.currentProfileName)
         assertEquals(false, state.crashlytics)
         assertEquals(true, state.onlyStatisticsProxy)
-        assertEquals(false, state.showStopAction)
+        assertEquals("Protected", state.activeText)
+        assertEquals("traffic", state.notificationSettings.contentMode)
+        assertEquals(
+            listOf("currentServer", "speed"),
+            state.notificationSettings.components?.map { it.type },
+        )
+        assertEquals("GLOBAL", state.notificationSettings.components?.first()?.group)
+        assertEquals(false, state.notificationSettings.components?.last()?.hideWhenIdle)
+        assertEquals("always", state.notificationSettings.doctorPriority)
+        assertFalse(state.notificationSettings.showSessionTraffic)
+        assertFalse(state.notificationSettings.hideIdleSpeed)
+        assertFalse(state.notificationSettings.showPauseAction)
+        assertFalse(state.notificationSettings.showStopAction)
+        assertFalse(state.notificationSettings.hideSensitiveOnLockScreen)
+        assertEquals("off", state.notificationSettings.visibility)
+        assertFalse(state.notificationSettings.subscriptionReminders)
         assertEquals(7890, state.vpnOptions?.port)
         assertEquals("gvisor", state.vpnOptions?.stack)
         assertEquals(
@@ -96,12 +126,54 @@ class SharedStateTest {
 
         assertEquals("ReClash", defaults.currentProfileName)
         assertEquals("Stop", defaults.stopText)
-        assertEquals(true, defaults.crashlytics)
+        assertEquals(false, defaults.crashlytics)
         assertEquals(false, defaults.onlyStatisticsProxy)
-        assertEquals(true, defaults.showStopAction)
+        assertEquals("Protection active", defaults.activeText)
+        assertEquals("adaptive", defaults.notificationSettings.contentMode)
+        assertEquals("problems", defaults.notificationSettings.doctorPriority)
+        assertTrue(defaults.notificationSettings.showSessionTraffic)
+        assertTrue(defaults.notificationSettings.hideIdleSpeed)
+        assertTrue(defaults.notificationSettings.showPauseAction)
+        assertTrue(defaults.notificationSettings.showStopAction)
+        assertTrue(defaults.notificationSettings.hideSensitiveOnLockScreen)
+        assertEquals("detailed", defaults.notificationSettings.visibility)
+        assertTrue(defaults.notificationSettings.subscriptionReminders)
         assertEquals(false, defaults.autoRun)
         assertNull(defaults.vpnOptions)
         assertNull(defaults.setupParams)
+    }
+
+    @Test
+    fun `legacy notification payload keeps defaults for new settings`() {
+        val state = gson.fromJson(
+            """{"notificationSettings":{"contentMode":"minimal"}}""",
+            SharedState::class.java,
+        )
+
+        assertEquals("minimal", state.notificationSettings.contentMode)
+        assertEquals("problems", state.notificationSettings.doctorPriority)
+        assertTrue(state.notificationSettings.showSessionTraffic)
+        assertTrue(state.notificationSettings.hideIdleSpeed)
+        assertTrue(state.notificationSettings.showPauseAction)
+        assertTrue(state.notificationSettings.showStopAction)
+        assertTrue(state.notificationSettings.hideSensitiveOnLockScreen)
+        assertEquals("detailed", state.notificationSettings.visibility)
+        assertTrue(state.notificationSettings.subscriptionReminders)
+    }
+
+    @Test
+    fun `notification components distinguish absent from explicit empty`() {
+        val absent = gson.fromJson(
+            """{"notificationSettings":{}}""",
+            SharedState::class.java,
+        )
+        val empty = gson.fromJson(
+            """{"notificationSettings":{"components":[]}}""",
+            SharedState::class.java,
+        )
+
+        assertNull(absent.notificationSettings.components)
+        assertEquals(emptyList<NotificationComponent>(), empty.notificationSettings.components)
     }
 
     @Test
@@ -122,7 +194,16 @@ class SharedStateTest {
         assertNotNull(state)
         assertEquals("Starting VPN...", state.startTip)
         assertEquals("ReClash", state.currentProfileName)
-        assertEquals(true, state.crashlytics)
+        assertEquals("Protection active", state.activeText)
+        assertEquals("adaptive", state.notificationSettings.contentMode)
+        assertEquals("problems", state.notificationSettings.doctorPriority)
+        assertTrue(state.notificationSettings.showSessionTraffic)
+        assertTrue(state.notificationSettings.hideIdleSpeed)
+        assertTrue(state.notificationSettings.showPauseAction)
+        assertTrue(state.notificationSettings.showStopAction)
+        assertTrue(state.notificationSettings.hideSensitiveOnLockScreen)
+        assertTrue(state.notificationSettings.subscriptionReminders)
+        assertEquals(false, state.crashlytics)
         assertNull(state.vpnOptions)
         assertNull(state.setupParams)
     }

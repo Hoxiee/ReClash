@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,40 +12,52 @@ class ChangeServerButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
     final server = ref.watch(activeServerProvider);
-    final code = server.countryCode;
+    final smartRouting = server.smartRouting;
+    final flag = countryCodeToEmoji(server.countryCode ?? '');
     final name = server.displayName.isEmpty
-        ? context.appLocalizations.unknown
+        ? appLocalizations.unknown
         : server.displayName;
     final delay = server.measuring
-        ? context.appLocalizations.heroChecking
+        ? appLocalizations.heroChecking
         : switch (server.delay) {
             final value? when value > 0 => '${value}ms',
-            _ => context.appLocalizations.timeout,
+            _ => appLocalizations.timeout,
           };
     return DashboardInfoCard(
       height: getWidgetHeight(1),
-      icon: Icons.swap_horiz_rounded,
-      label: context.appLocalizations.changeServer,
+      icon: smartRouting ? Icons.auto_mode_rounded : Icons.swap_horiz_rounded,
+      label: appLocalizations.changeServer,
       action: const Icon(Icons.chevron_right_rounded, size: 20),
-      onPressed: () =>
-          ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies),
+      onPressed: () => ref
+          .read(currentPageLabelProvider.notifier)
+          .toPage(PageLabel.proxies, returnable: true),
       child: Row(
         children: [
-          Text(
-            code == null ? '🌐' : _countryCodeToEmoji(code),
-            style: context.textTheme.titleLarge?.copyWith(
-              fontFamily: FontFamily.twEmoji.value,
+          if (flag == null)
+            Icon(
+              Icons.public_rounded,
+              size: 20,
+              color: context.colorScheme.onSurfaceVariant,
+            )
+          else
+            Text(
+              flag,
+              style: context.textTheme.titleLarge?.copyWith(
+                fontFamily: FontFamily.twEmoji.value,
+              ),
             ),
-          ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+            child: TooltipText(
+              text: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -63,13 +76,4 @@ class ChangeServerButton extends ConsumerWidget {
       ),
     );
   }
-}
-
-String _countryCodeToEmoji(String code) {
-  if (code.length != 2) return '🌐';
-  final upper = code.toUpperCase();
-  return String.fromCharCodes([
-    0x1F1E6 - 0x41 + upper.codeUnitAt(0),
-    0x1F1E6 - 0x41 + upper.codeUnitAt(1),
-  ]);
 }

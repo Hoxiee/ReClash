@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">#F2F2F5FA</color>
+    <color name="widget_surface_alt">#14101828</color>
+    <color name="widget_surface_press">#29101828</color>
+    <color name="widget_on_surface">#FF101828</color>
+    <color name="widget_on_surface_variant">#A6101828</color>
+    <color name="widget_accent">#FF1C6FD1</color>
+    <color name="widget_accent_press">#FF14538F</color>
+    <color name="widget_on_accent">#FFFFFFFF</color>
+
+    <color name="widget_tone_idle">#FF6C7789</color>
+    <color name="widget_tone_pending">#FF0E93A8</color>
+    <color name="widget_tone_active">#FF1C74DE</color>
+    <color name="widget_tone_paused">#FFC57F0A</color>
+    <color name="widget_tone_degraded">#FFDE5A0B</color>
+    <color name="widget_tone_broken">#FFD32F2F</color>
+
+    <color name="widget_delay_good">#FF2F8B3A</color>
+    <color name="widget_delay_medium">#FFC57F0A</color>
+    <color name="widget_delay_bad">#FFD32F2F</color>
+
+    <color name="widget_chart_down">#FF1C74DE</color>
+    <color name="widget_chart_up">#FF0E8F76</color>
+    <color name="widget_chart_grid">#1A101828</color>
+</resources>

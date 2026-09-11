@@ -79,10 +79,16 @@ void main() {
     test('detects by host', () {
       expect(PanelKind.detect('panel.remnawave.app', {}), PanelKind.remnawave);
       expect(PanelKind.detect('sub.marzban.io', {}), PanelKind.marzban);
-      expect(PanelKind.detect('marzneshin.example.com', {}), PanelKind.marzneshin);
+      expect(
+        PanelKind.detect('marzneshin.example.com', {}),
+        PanelKind.marzneshin,
+      );
       expect(PanelKind.detect('panel.3x-ui.host', {}), PanelKind.threeXui);
       expect(PanelKind.detect('x-ui.example.com', {}), PanelKind.threeXui);
-      expect(PanelKind.detect('subconverter.example.dev', {}), PanelKind.subconverter);
+      expect(
+        PanelKind.detect('subconverter.example.dev', {}),
+        PanelKind.subconverter,
+      );
       expect(PanelKind.detect('plain.host', {}), PanelKind.other);
     });
 

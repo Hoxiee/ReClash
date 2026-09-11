@@ -7,6 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/connection_doctor.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
@@ -24,6 +25,25 @@ class CoreManager extends ConsumerStatefulWidget {
 class _CoreContainerState extends ConsumerState<CoreManager>
     with CoreEventListener {
   CoreController get _core => ref.read(coreHandlerProvider);
+  int? _profileSetupId;
+
+  void _scheduleFullSetup() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+    });
+  }
+
+  void _scheduleProfileSetup(int? profileId) {
+    _profileSetupId = profileId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_profileSetupId == profileId) {
+        _profileSetupId = null;
+      }
+      unawaited(ref.read(setupActionProvider.notifier).fullSetup());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +59,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     // the previous one hides the error and looks like the switch was lost.
     ref.listenManual(currentProfileIdProvider, (prev, next) {
       if (prev == next) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-      });
+      _scheduleProfileSetup(next);
     });
     ref.listenManual(updateParamsProvider, (prev, next) {
       if (prev != next) {
@@ -55,7 +73,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       if (ref.read(coreStatusProvider) == CoreStatus.connected) {
         unawaited(
           _core
-              .configureSmartRouting(next.rcxParams)
+              .configureSmartRouting(
+                next.rcxParamsFor(ref.read(currentProfileProvider)),
+              )
               .then(
                 (_) {},
                 // An older core without the rcx methods keeps tunneling; the
@@ -70,17 +90,45 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       // The RCX groups only exist in profiles built while enabled, so the
       // flip has to rebuild the whole profile, not just the engine config.
       if (prev?.enabled != next.enabled) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-        });
+        _scheduleFullSetup();
       }
     });
+    ref.listenManual(
+      currentProfileProvider.select(
+        (profile) => (
+          policies: profile?.serviceRoutePolicies,
+          manifest: profile?.capabilityManifest,
+          manual: profile?.manualCapabilitySelectors,
+        ),
+      ),
+      (prev, next) {
+        if (prev == next) return;
+        if (ref.read(coreStatusProvider) == CoreStatus.connected) {
+          final params = ref
+              .read(smartRoutingSettingProvider)
+              .rcxParamsFor(ref.read(currentProfileProvider));
+          unawaited(
+            _core.configureSmartRouting(params).catchError((Object error) {
+              commonPrint.log(
+                'smart routing lane sync skipped: $error',
+                logLevel: LogLevel.warning,
+              );
+              return false;
+            }),
+          );
+        }
+        final profileId = ref.read(currentProfileIdProvider);
+        if (_profileSetupId != profileId) {
+          _scheduleFullSetup();
+        }
+      },
+    );
     // Rules and the outbound only exist in profiles built while it was on, so the
     // flip has to rebuild the config, not just push options to the service.
     // Strategy and cache keys are engine-only: they reach the listener through
     // VpnOptions, and the strategy tester flips them dozens of times a run.
     ref.listenManual(
-      desyncSettingProvider.select(
+      effectiveDesyncSettingProvider.select(
         (state) => (
           enabled: state.enabled,
           onlyDpi: state.onlyDpi,
@@ -92,9 +140,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       ),
       (prev, next) {
         if (prev == next) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-        });
+        _scheduleFullSetup();
       },
     );
     ref.listenManual(appSettingProvider.select((state) => state.openLogs), (
@@ -180,6 +226,26 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       return status.enabled ? rcxTrailWith(trail, status.node) : const [];
     });
     super.onRcxStatus(status);
+  }
+
+  @override
+  void onDoctorStatus(DoctorStatus status) {
+    final snapshot = ref.read(connectionDoctorProvider);
+    if (status.revision > snapshot.revision) {
+      unawaited(
+        ref
+            .read(connectionDoctorProvider.notifier)
+            .refresh(minimumRevision: status.revision)
+            .catchError((Object error) {
+              commonPrint.log(
+                'Connection doctor refresh failed: $error',
+                logLevel: coreFailureLogLevel(error),
+              );
+              return snapshot;
+            }),
+      );
+    }
+    super.onDoctorStatus(status);
   }
 
   @override

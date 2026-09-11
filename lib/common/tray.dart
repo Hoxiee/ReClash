@@ -18,15 +18,24 @@ class AppTray implements TrayPort {
 
   final bool isMacOS;
   final bool isWindows;
+  final Future<void> Function(String title) _setTitle;
 
   bool _isShutDown = false;
+  String? _lastTrayTitle;
 
-  AppTray._internal({required this.isMacOS, required this.isWindows});
+  AppTray._internal({
+    required this.isMacOS,
+    required this.isWindows,
+    required Future<void> Function(String title) setTitle,
+  }) : _setTitle = setTitle;
 
   factory AppTray() {
     _instance ??= AppTray._internal(
       isMacOS: system.isMacOS,
       isWindows: system.isWindows,
+      setTitle: (title) async {
+        await Tray.instance.setTitle(title);
+      },
     );
     return _instance!;
   }
@@ -35,8 +44,17 @@ class AppTray implements TrayPort {
   factory AppTray.forPlatform({
     required bool isMacOS,
     required bool isWindows,
+    Future<void> Function(String title)? setTitle,
   }) {
-    return AppTray._internal(isMacOS: isMacOS, isWindows: isWindows);
+    return AppTray._internal(
+      isMacOS: isMacOS,
+      isWindows: isWindows,
+      setTitle:
+          setTitle ??
+          (title) async {
+            await Tray.instance.setTitle(title);
+          },
+    );
   }
 
   String get _trayIconSuffix {
@@ -64,6 +82,7 @@ class AppTray implements TrayPort {
   @override
   Future<void> shutdown() async {
     _isShutDown = true;
+    _lastTrayTitle = null;
     await Tray.instance.hide();
   }
 
@@ -100,7 +119,12 @@ class AppTray implements TrayPort {
     if (_isShutDown || !isMacOS) {
       return;
     }
-    await Tray.instance.setTitle(showTrayTitle ? traffic.trayTitle : '');
+    final title = showTrayTitle ? traffic.trayTitle : '';
+    if (_lastTrayTitle == title) {
+      return;
+    }
+    await _setTitle(title);
+    _lastTrayTitle = title;
   }
 
   List<TrayMenuItem> _buildMenu({

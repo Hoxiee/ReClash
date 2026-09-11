@@ -204,8 +204,19 @@ class CurrentPageLabel extends _$CurrentPageLabel
     return PageLabel.dashboard;
   }
 
-  void toPage(PageLabel pageLabel) {
+  PageLabel? _returnTo;
+
+  /// A page opened from another one's card is a detour, not a destination: the
+  /// back button has to undo it instead of leaving the app.
+  void toPage(PageLabel pageLabel, {bool returnable = false}) {
+    _returnTo = returnable && pageLabel != value ? value : null;
     value = pageLabel;
+  }
+
+  PageLabel? takeReturnPage() {
+    final pageLabel = _returnTo;
+    _returnTo = null;
+    return pageLabel;
   }
 
   void toProfiles() {

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
@@ -14,13 +17,60 @@ import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
-import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:riverpod/riverpod.dart';
 
+import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+
+class _RecordingImportProfilesAction extends ProfilesAction {
+  ({PreparedProfileImport prepared, Profile profile})? result;
+  Exception? error;
+
+  @override
+  Future<({PreparedProfileImport prepared, Profile profile})?>
+  performProfileImport(ProfileImportRequest request) async {
+    final currentError = error;
+    if (currentError != null) throw currentError;
+    return result;
+  }
+}
+
+class _ControlledUpdateProfilesAction extends ProfilesAction {
+  final preparations = <int, Queue<Completer<PreparedProfileImport>>>{};
+
+  Completer<PreparedProfileImport> enqueue(Profile profile) {
+    final completer = Completer<PreparedProfileImport>();
+    preparations.putIfAbsent(profile.id, Queue.new).add(completer);
+    return completer;
+  }
+
+  @override
+  Future<PreparedProfileImport> prepareProfileUpdate(Profile profile) {
+    final queue = preparations[profile.id];
+    if (queue == null || queue.isEmpty) {
+      throw StateError('No prepared update for ${profile.id}');
+    }
+    return queue.removeFirst().future;
+  }
+}
+
+PreparedProfileImport _preparedUpdate(Profile profile, String marker) {
+  return PreparedProfileImport(
+    profile: profile,
+    content: 'proxies: []\n# $marker',
+    skippedNodes: const [],
+    summary: const ProfileImportSummary(
+      format: ProfileImportFormat.clash,
+      nodeCount: 0,
+      groupCount: 0,
+      hasProviders: false,
+    ),
+  );
+}
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
@@ -41,6 +91,11 @@ class _FakePathProvider extends PathProviderPlatform {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    await AppLocalizations.load(const Locale('en'));
+  });
+
   group('ProfilesAction', () {
     test('keeps edited profile data when remote update fails', () async {
       final original = Profile.normal(label: 'old label', url: 'bad-url');
@@ -199,7 +254,141 @@ void main() {
       ]);
     });
 
-    test('panel settings become app defaults at add time', () {
+    test('classifies profile import failures without raw diagnostics', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final action = container.read(profilesActionProvider.notifier);
+      const request = ProfileImportRequest.link('https://example.com/sub');
+
+      expect(
+        action.profileImportFailure(
+          const ProfileValidationException(diagnostic: 'secret detail'),
+          request,
+        ),
+        ProfileImportFailure.invalidConfig,
+      );
+      expect(
+        action.profileImportFailure(
+          DioException(
+            requestOptions: RequestOptions(path: '/'),
+            type: DioExceptionType.badResponse,
+          ),
+          request,
+        ),
+        ProfileImportFailure.fetchRejected,
+      );
+      expect(
+        action.profileImportFailure(
+          DioException(
+            requestOptions: RequestOptions(path: '/'),
+            type: DioExceptionType.connectionError,
+          ),
+          request,
+        ),
+        ProfileImportFailure.fetchFailed,
+      );
+      expect(
+        action.profileImportFailure(
+          const ProfileFetchException.emptyResponse(),
+          request,
+        ),
+        ProfileImportFailure.emptyResponse,
+      );
+      expect(
+        action.profileImportFailure(
+          const FileSystemException('denied'),
+          const ProfileImportRequest.file(),
+        ),
+        ProfileImportFailure.fileReadFailed,
+      );
+      expect(
+        action.profileImportFailure(
+          const MessageException('invalid QR'),
+          const ProfileImportRequest.qrCode(),
+        ),
+        ProfileImportFailure.invalidQrCode,
+      );
+    });
+
+    test('returns imported and cancelled results and cleans loading', () async {
+      final profile = Profile.normal(label: 'Imported');
+      final prepared = PreparedProfileImport(
+        profile: profile,
+        content: 'proxies: []',
+        skippedNodes: const [],
+        summary: const ProfileImportSummary(
+          format: ProfileImportFormat.clash,
+          nodeCount: 0,
+          groupCount: 0,
+          hasProviders: false,
+        ),
+      );
+      final action = _RecordingImportProfilesAction()
+        ..result = (prepared: prepared, profile: profile);
+      final container = ProviderContainer(
+        overrides: [profilesActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(profilesActionProvider.notifier);
+
+      final imported = await notifier.importProfile(
+        const ProfileImportRequest.raw('proxies: []'),
+      );
+      expect(imported.profile, profile);
+      expect(imported.isImported, isTrue);
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(container.read(loadingProvider(LoadingTag.profiles)), isFalse);
+
+      action.result = null;
+      final cancelled = await notifier.importProfile(
+        const ProfileImportRequest.file(),
+      );
+      expect(cancelled.isCancelled, isTrue);
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(container.read(loadingProvider(LoadingTag.profiles)), isFalse);
+    });
+
+    testWidgets('returns a typed failed result and cleans loading', (
+      tester,
+    ) async {
+      final action = _RecordingImportProfilesAction()
+        ..error = const ProfileImportUrlException();
+      final container = ProviderContainer(
+        overrides: [profilesActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      globalState.container = container;
+      container.read(viewSizeProvider.notifier).value = const Size(1200, 1000);
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: Scaffold()),
+        ),
+      );
+      await tester.pump();
+      final notifier = container.read(profilesActionProvider.notifier);
+
+      final future = notifier.importProfile(
+        const ProfileImportRequest.link('not-a-url'),
+      );
+      await tester.pump();
+      expect(container.read(loadingProvider(LoadingTag.profiles)), isTrue);
+      expect(find.text(AppLocalizations.current.addProfile), findsOneWidget);
+      Navigator.of(globalState.navigatorKey.currentContext!).pop(true);
+      await tester.pumpAndSettle();
+      final failed = await future;
+
+      expect(failed.failure, ProfileImportFailure.invalidUrl);
+      expect(failed.isFailed, isTrue);
+      await tester.pump(const Duration(seconds: 1));
+      expect(container.read(loadingProvider(LoadingTag.profiles)), isFalse);
+    });
+
+    testWidgets('panel settings require explicit consent', (tester) async {
       final container = ProviderContainer(
         overrides: [
           currentProfileIdProvider.overrideWithBuild((_, _) => null),
@@ -207,12 +396,38 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
+      container.listen(appSettingProvider, (_, _) {});
+      globalState.container = container;
+      container.read(viewSizeProvider.notifier).value = const Size(1200, 1000);
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: Scaffold()),
+        ),
+      );
+      final notifier = container.read(profilesActionProvider.notifier);
+      const meta = PanelMeta(settings: ['minimize', 'autorun', 'openlogs']);
 
-      container
-          .read(profilesActionProvider.notifier)
-          .applyPanelSettingsDefaults(
-            const PanelMeta(settings: ['minimize', 'autorun', 'openlogs']),
-          );
+      final declined = notifier.confirmAndApplyPanelSettings(meta);
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining(AppLocalizations.current.autoRun),
+        findsOneWidget,
+      );
+      Navigator.of(globalState.navigatorKey.currentContext!).pop(false);
+      await tester.pumpAndSettle();
+      expect(await declined, isFalse);
+      expect(container.read(appSettingProvider).autoRun, isFalse);
+
+      final accepted = notifier.confirmAndApplyPanelSettings(meta);
+      await tester.pumpAndSettle();
+      Navigator.of(globalState.navigatorKey.currentContext!).pop(true);
+      await tester.pumpAndSettle();
+      expect(await accepted, isTrue);
 
       final state = container.read(appSettingProvider);
       expect(state.minimizeOnExit, isTrue);
@@ -221,7 +436,150 @@ void main() {
       expect(state.silentLaunch, isFalse);
       expect(state.autoLaunch, isFalse);
       expect(state.autoCheckUpdate, isFalse);
-      expect(state.closeConnections, isFalse);
+      expect(state.closeConnections, isTrue);
+    });
+  });
+
+  group('ProfilesAction lifecycle', () {
+    late Directory tempDir;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('profile_lifecycle_test');
+      PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    });
+
+    tearDown(() {
+      try {
+        tempDir.deleteSync(recursive: true);
+      } catch (_) {}
+    });
+
+    ProviderContainer containerFor(
+      Profile profile,
+      _ControlledUpdateProfilesAction action,
+    ) {
+      return ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => null),
+          profilesProvider.overrideWith(() => TestProfiles([profile])),
+          profilesActionProvider.overrideWith(() => action),
+        ],
+      );
+    }
+
+    test('latest update wins when an older fetch completes last', () async {
+      final original = Profile.normal(label: 'Original', url: 'https://old');
+      final action = _ControlledUpdateProfilesAction();
+      final firstPreparation = action.enqueue(original);
+      final secondPreparation = action.enqueue(original);
+      final container = containerFor(original, action);
+      addTearDown(container.dispose);
+      final notifier = container.read(profilesActionProvider.notifier);
+
+      final first = notifier.updateProfile(original);
+      final second = notifier.updateProfile(original);
+      secondPreparation.complete(
+        _preparedUpdate(
+          original.copyWith(
+            url: 'https://second',
+            subscriptionInfo: const SubscriptionInfo(download: 2),
+          ),
+          'second',
+        ),
+      );
+      await second;
+      firstPreparation.complete(
+        _preparedUpdate(
+          original.copyWith(
+            url: 'https://first',
+            subscriptionInfo: const SubscriptionInfo(download: 1),
+          ),
+          'first',
+        ),
+      );
+      await first;
+
+      final saved = container.read(profilesProvider).single;
+      expect(saved.url, 'https://second');
+      expect(saved.subscriptionInfo?.download, 2);
+      expect(
+        await saved.file.then((file) => file.readAsString()),
+        contains('second'),
+      );
+    });
+
+    test('delete supersedes a pending update without resurrection', () async {
+      final original = Profile.normal(label: 'Original', url: 'https://old');
+      final action = _ControlledUpdateProfilesAction();
+      final preparation = action.enqueue(original);
+      final core = _MockCoreHandlerInterface();
+      when(() => core.clearEffect(original.id)).thenAnswer((_) async => '');
+      final container = ProviderContainer(
+        overrides: [
+          currentProfileIdProvider.overrideWithBuild((_, _) => null),
+          profilesProvider.overrideWith(() => TestProfiles([original])),
+          profilesActionProvider.overrideWith(() => action),
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(profilesActionProvider.notifier);
+      final file = await original.file;
+      await file.writeAsString('old');
+
+      final update = notifier.updateProfile(original, showLoading: true);
+      await notifier.deleteProfile(original.id);
+      preparation.complete(
+        _preparedUpdate(original.copyWith(url: 'https://late'), 'late'),
+      );
+      await update;
+
+      expect(container.read(profilesProvider), isEmpty);
+      expect(await file.exists(), isFalse);
+      expect(
+        container.read(updatingKeysProvider).contains(original.updatingKey),
+        isFalse,
+      );
+    });
+
+    test('remote update preserves concurrent user-owned fields', () async {
+      final original = Profile.normal(label: 'Original', url: 'https://old');
+      final action = _ControlledUpdateProfilesAction();
+      final preparation = action.enqueue(original);
+      final container = containerFor(original, action);
+      addTearDown(container.dispose);
+      final notifier = container.read(profilesActionProvider.notifier);
+
+      final update = notifier.updateProfile(original);
+      container
+          .read(profilesProvider.notifier)
+          .put(
+            original.copyWith(
+              label: 'User label',
+              userLabel: true,
+              selectedMap: {'Auto': 'Manual choice'},
+              autoUpdate: false,
+            ),
+          );
+      preparation.complete(
+        _preparedUpdate(
+          original.copyWith(
+            label: 'Remote label',
+            url: 'https://migrated',
+            subscriptionInfo: const SubscriptionInfo(download: 9),
+          ),
+          'remote',
+        ),
+      );
+      await update;
+
+      final saved = container.read(profilesProvider).single;
+      expect(saved.label, 'User label');
+      expect(saved.userLabel, isTrue);
+      expect(saved.selectedMap, {'Auto': 'Manual choice'});
+      expect(saved.autoUpdate, isFalse);
+      expect(saved.url, 'https://migrated');
+      expect(saved.subscriptionInfo?.download, 9);
     });
   });
 
@@ -268,7 +626,7 @@ void main() {
       final reinstalled = container.read(profilesProvider).single;
       expect(reinstalled.id, first.id);
       expect(container.read(profilesProvider), hasLength(1));
-      verify(() => core.validateConfig(any())).called(4);
+      verify(() => core.validateConfig(any())).called(2);
     });
 
     test(

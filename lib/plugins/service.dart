@@ -13,6 +13,8 @@ abstract mixin class ServiceListener {
   void onServiceEvent(CoreEvent event) {}
 
   void onPauseStateChanged(bool paused) {}
+
+  void onWidgetSelections(Map<String, String> selections) {}
 }
 
 class Service {
@@ -43,6 +45,8 @@ class Service {
             listener.onPauseStateChanged(paused);
           }
           break;
+        case 'widgetSelections':
+          return _deliverWidgetSelections(call.arguments);
         case 'event':
           final data = call.arguments as String? ?? '';
           final methodCall = CoreMethodCall.fromJson(
@@ -100,6 +104,60 @@ class Service {
     return methodChannel.invokeMethod<bool>('getPauseState');
   }
 
+  /// Node picks made from the home-screen widget while Flutter was not running.
+  Future<void> deliverPendingWidgetSelections() async {
+    final batch = await methodChannel.invokeMethod<Object?>(
+      'peekWidgetSelections',
+    );
+    final decoded = _decodeSelectionBatch(batch);
+    if (decoded == null || !_dispatchWidgetSelections(decoded.selections)) {
+      return;
+    }
+    await methodChannel.invokeMethod<bool>(
+      'ackWidgetSelections',
+      decoded.token,
+    );
+  }
+
+  Future<bool> _deliverWidgetSelections(Object? data) async {
+    final decoded = _decodeSelectionBatch(data);
+    return decoded != null && _dispatchWidgetSelections(decoded.selections);
+  }
+
+  bool _dispatchWidgetSelections(Map<String, String> selections) {
+    if (selections.isEmpty || _listeners.isEmpty) {
+      return false;
+    }
+    for (final listener in List.of(_listeners)) {
+      listener.onWidgetSelections(selections);
+    }
+    return true;
+  }
+
+  _WidgetSelectionBatch? _decodeSelectionBatch(Object? data) {
+    try {
+      final decoded = Map<String, Object?>.from(data! as Map);
+      final token = decoded['token'];
+      final selections = Map<String, Object?>.from(
+        decoded['selections']! as Map,
+      );
+      if (token is! String || token.isEmpty) {
+        return null;
+      }
+      return _WidgetSelectionBatch(token, {
+        for (final entry in selections.entries)
+          if (entry.value is String && (entry.value! as String).isNotEmpty)
+            entry.key: entry.value! as String,
+      });
+    } catch (error) {
+      commonPrint.log(
+        'Unable to decode widget selections: $error',
+        logLevel: LogLevel.error,
+      );
+      return null;
+    }
+  }
+
   Future<String> init() async {
     return await methodChannel.invokeMethod<String>('init') ?? '';
   }
@@ -135,6 +193,13 @@ class Service {
   void removeListener(ServiceListener listener) {
     _listeners.remove(listener);
   }
+}
+
+class _WidgetSelectionBatch {
+  final String token;
+  final Map<String, String> selections;
+
+  const _WidgetSelectionBatch(this.token, this.selections);
 }
 
 Service? get service => system.isAndroid ? Service() : null;

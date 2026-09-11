@@ -92,6 +92,28 @@ void main() {
       }
     });
 
+    test('normalizes plain and base64 active text', () {
+      final encoded = base64Encode(utf8.encode('  Защищено провайдером  '));
+      expect(
+        normalizePanelHeaders({
+          'ReClash-ActiveText': ['  Protected by provider  '],
+        })['activeText'],
+        'Protected by provider',
+      );
+      expect(
+        normalizePanelHeaders({
+          'reclash-activetext': ['base64:$encoded'],
+        })['activeText'],
+        'Защищено провайдером',
+      );
+      expect(
+        normalizePanelHeaders({
+          'reclash-activetext': ['   '],
+        }),
+        isEmpty,
+      );
+    });
+
     test('drops unknown and empty headers', () {
       final map = normalizePanelHeaders({
         'x-unknown-panel-header': ['value'],
@@ -221,6 +243,16 @@ void main() {
         const PanelMeta(heroRing: ring).toJson(),
       );
       expect(restored.heroRing, ring);
+      expect(restored.hasContent, isTrue);
+    });
+
+    test('keeps active text through headers and JSON serialization', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-activetext': ['Protected by provider'],
+      });
+      final restored = PanelMeta.fromJson(meta.toJson());
+
+      expect(restored.activeText, 'Protected by provider');
       expect(restored.hasContent, isTrue);
     });
 

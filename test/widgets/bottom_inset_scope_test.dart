@@ -1,3 +1,4 @@
+import 'package:reclash/providers/database.dart';
 import 'package:reclash/widgets/float_layout.dart';
 import 'package:reclash/widgets/inherited.dart';
 import 'package:reclash/widgets/scaffold.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 void main() {
   const navigationInset = 92.0;
@@ -25,6 +27,15 @@ void main() {
     contentInset = null;
   });
 
+  TestApp testApp({required Widget child}) {
+    return TestApp(
+      includeNavigatorKey: false,
+      wrapInProviderScope: true,
+      overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+      child: child,
+    );
+  }
+
   testWidgets('lifts the FAB above the reserved bottom space', (tester) async {
     Widget buildWith({double? inset}) {
       final scaffold = CommonScaffold(
@@ -35,8 +46,7 @@ void main() {
           child: const Icon(Icons.add),
         ),
       );
-      return TestApp(
-        includeNavigatorKey: false,
+      return testApp(
         child: inset == null
             ? scaffold
             : BottomInsetScope(inset: inset, child: scaffold),
@@ -59,8 +69,7 @@ void main() {
     tester,
   ) async {
     Widget buildWith({double inset = 0, bool withFab = false}) {
-      return TestApp(
-        includeNavigatorKey: false,
+      return testApp(
         child: BottomInsetScope(
           inset: inset,
           child: CommonScaffold(
@@ -100,8 +109,7 @@ void main() {
     tester,
   ) async {
     Widget buildWith({double inset = 0, bool withFab = false}) {
-      return TestApp(
-        includeNavigatorKey: false,
+      return testApp(
         child: BottomInsetScope(
           inset: inset,
           child: CommonScaffold(
@@ -131,8 +139,7 @@ void main() {
 
   testWidgets('does not reserve FAB space on TV', (tester) async {
     await tester.pumpWidget(
-      TestApp(
-        includeNavigatorKey: false,
+      testApp(
         child: BottomInsetScope(
           inset: navigationInset,
           child: CommonScaffold(
@@ -156,8 +163,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      TestApp(
-        includeNavigatorKey: false,
+      testApp(
         child: BottomInsetScope(
           inset: navigationInset,
           child: Scaffold(

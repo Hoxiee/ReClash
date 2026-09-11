@@ -42,16 +42,61 @@ void main() {
 
   setUpAll(() => source = File(_decide).readAsStringSync());
 
-  test('both ladders are the ones the core compares by', () {
-    expect(routingLadder('balanced'), [
-      RoutingRung.admission,
-      ..._goLadder(source, 'rcxCompare'),
-    ]);
-    expect(routingLadder('lowest-latency'), [
-      RoutingRung.admission,
-      ..._goLadder(source, 'rcxCompareLatency'),
-    ]);
+  test('every ladder is the one the core compares by', () {
+    const comparators = {
+      'balanced': 'rcxCompare',
+      'lowest-latency': 'rcxCompareLatency',
+      'stable': 'rcxCompareStable',
+      'saver': 'rcxCompareStable',
+    };
+    for (final entry in comparators.entries) {
+      expect(routingLadder(entry.key), [
+        RoutingRung.admission,
+        ..._goLadder(source, entry.value),
+      ], reason: entry.key);
+    }
     expect(routingLadder(''), routingLadder('balanced'));
+  });
+
+  test('the core dispatches the same comparator this page reads', () {
+    final dispatch = RegExp(
+      r'func rcxCompareFor\(strategy string\).*?\n\}',
+      dotAll: true,
+    ).firstMatch(source);
+    expect(dispatch, isNotNull, reason: 'rcxCompareFor is gone from $_decide');
+    for (final name in ['rcxCompareLatency', 'rcxCompareStable']) {
+      expect(dispatch!.group(0), contains(name));
+    }
+  });
+
+  test('holding still outranks a faster band, and evidence outranks both', () {
+    const ladder = 'stable';
+    final incumbent = _base.copyWith(current: true, band: 3);
+    final faster = _base.copyWith(band: 0);
+    final betterEvidence = _base.copyWith(band: 3, evidence: 'live');
+
+    expect(
+      routingDuel(faster, incumbent, terrain: 'normal', strategy: ladder).won,
+      isFalse,
+    );
+    expect(
+      routingDuel(
+        faster,
+        incumbent,
+        terrain: 'normal',
+        strategy: 'balanced',
+      ).won,
+      isTrue,
+    );
+    expect(
+      routingDuel(
+        betterEvidence,
+        incumbent,
+        terrain: 'normal',
+        strategy: ladder,
+      ).won,
+      isTrue,
+    );
   });
 
   test('a gate outranks every comparison the core would have made', () {

@@ -51,6 +51,35 @@ func TestRunLeavesUnstartedTargetsOverloaded(t *testing.T) {
 	}
 }
 
+func TestStreamWaitsForResultDelivery(t *testing.T) {
+	prober := testProber(func(context.Context, string, rcxMarker) (int, bool, error) {
+		return 40, true, nil
+	})
+	deliverEntered := make(chan struct{})
+	releaseDeliver := make(chan struct{})
+	streamDone := make(chan struct{})
+	go func() {
+		prober.Stream(context.Background(), []rcxProbeTarget{{Node: "a"}}, func(_ int, _ rcxProbeResult) {
+			close(deliverEntered)
+			<-releaseDeliver
+		})
+		close(streamDone)
+	}()
+	<-deliverEntered
+
+	returnedEarly := false
+	select {
+	case <-streamDone:
+		returnedEarly = true
+	case <-time.After(50 * time.Millisecond):
+	}
+	close(releaseDeliver)
+	<-streamDone
+	if returnedEarly {
+		t.Fatal("Stream returned before its result was delivered")
+	}
+}
+
 func TestRunKeepsAtMostConcurrencyInFlight(t *testing.T) {
 	var mu sync.Mutex
 	inFlight, peak := 0, 0
@@ -258,7 +287,7 @@ func TestProberEndsTheWaveOnceItHasLearnedEnough(t *testing.T) {
 		}
 		<-ctx.Done()
 		return 0, false, ctx.Err()
-	})
+	}, nil)
 	prober.staggerMs = 0
 	prober.timeout = time.Second
 	prober.enough = func(result rcxProbeResult) bool { return result.Outcome == rcxProbeOK }
@@ -344,5 +373,45 @@ func TestProbeStopsTheMarkerChainAtTheFirstSuccess(t *testing.T) {
 
 	if result.Outcome != rcxProbeOK || asked != 2 || len(result.Attempts) != 2 {
 		t.Fatalf("result = %+v, asked = %d, want no request after success", result, asked)
+	}
+}
+
+func TestProbeEchoesOnlyThroughAnAnsweredOpenMarker(t *testing.T) {
+	asked := 0
+	prober := testProber(func(_ context.Context, node string, _ rcxMarker) (int, bool, error) {
+		if node == "mute" {
+			return 0, false, errors.New("no answer")
+		}
+		return 59, true, nil
+	})
+	prober.echoTimeout = time.Second
+	prober.locate = func(_ context.Context, _, _ string) string {
+		asked++
+		return "RU"
+	}
+	target := rcxProbeTarget{
+		Node:   "spb",
+		Role:   rcxRoleOpen,
+		Marker: rcxMarker{URL: "https://open.example/"},
+		Echoes: []string{"https://echo.example/"},
+	}
+
+	if got := prober.probe(context.Background(), target).ExitCountry; got != "RU" {
+		t.Errorf("exit = %q, want the measured egress on an answered open marker", got)
+	}
+
+	domestic := target
+	domestic.Role = rcxRoleDomestic
+	if got := prober.probe(context.Background(), domestic).ExitCountry; got != "" {
+		t.Errorf("exit = %q, want none: a domestic marker measures nothing about the egress", got)
+	}
+
+	mute := target
+	mute.Node = "mute"
+	if got := prober.probe(context.Background(), mute).ExitCountry; got != "" {
+		t.Errorf("exit = %q, want none: a node that answered nothing costs no echo", got)
+	}
+	if asked != 1 {
+		t.Errorf("echoes asked = %d, want one", asked)
 	}
 }

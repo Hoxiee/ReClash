@@ -107,7 +107,7 @@ void main() {
         peers.single['pre-shared-key'],
         'FpCyjIcAwSgZRZpxSa7piP4cNT0AGHliS5eQ5jbbNnc=',
       );
-      expect(peers.single['allowed-ips'], ['0.0.0.0/0,::/0']);
+      expect(peers.single['allowed-ips'], ['0.0.0.0/0', '::/0']);
       expect(proxy['amnezia-wg-option'], containsPair('jc', 4));
       final option = proxy['amnezia-wg-option']! as Map<String, Object?>;
       expect(option['jmin'], 40);

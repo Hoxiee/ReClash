@@ -12,6 +12,10 @@ int (*resolve_uid_func)(void *tun_interface, int protocol, const char *source, c
 
 char* (*resolve_package_func)(void *tun_interface, int uid);
 
+char* (*doctor_probe_func)(void *tun_interface, const char *request);
+
+void (*cancel_doctor_probe_func)(void *tun_interface, const char *probe_id);
+
 void (*result_func)(void *invoke_Interface, const char *data);
 
 int protect(void *tun_interface, int fd) {
@@ -34,6 +38,21 @@ char* resolve_package(void *tun_interface, int uid) {
     }
     return resolve_package_func(tun_interface, uid);
 }
+
+char* doctor_probe(void *tun_interface, const char *request) {
+    if (doctor_probe_func == NULL) {
+        return NULL;
+    }
+    return doctor_probe_func(tun_interface, request);
+}
+
+void cancel_doctor_probe(void *tun_interface, const char *probe_id) {
+    if (cancel_doctor_probe_func == NULL) {
+        return;
+    }
+    cancel_doctor_probe_func(tun_interface, probe_id);
+}
+
 
 void release_object(void *obj) {
     if (release_object_func == NULL) {

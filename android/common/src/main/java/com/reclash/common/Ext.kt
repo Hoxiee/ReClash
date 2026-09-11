@@ -59,27 +59,50 @@ val Intent.toPendingIntent: PendingIntent
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
-fun Service.startForeground(notification: Notification) {
+// Channel importance is immutable and AMS drops the old post only when the id changes.
+fun serviceChannelImportance(channelId: String): Int = when (channelId) {
+    GlobalState.NOTIFICATION_CHANNEL_QUIET -> NotificationManager.IMPORTANCE_MIN
+    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> NotificationManager.IMPORTANCE_NONE
+    else -> NotificationManager.IMPORTANCE_LOW
+}
+
+fun serviceChannelName(channelId: String): Int = when (channelId) {
+    GlobalState.NOTIFICATION_CHANNEL_QUIET -> R.string.service_channel_quiet_name
+    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> R.string.service_channel_hidden_name
+    else -> R.string.service_channel_name
+}
+
+fun serviceNotificationId(channelId: String): Int = when (channelId) {
+    GlobalState.NOTIFICATION_CHANNEL_QUIET -> GlobalState.NOTIFICATION_ID_QUIET
+    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> GlobalState.NOTIFICATION_ID_HIDDEN
+    else -> GlobalState.NOTIFICATION_ID
+}
+
+fun Service.startForeground(
+    notification: Notification,
+    channelId: String = GlobalState.NOTIFICATION_CHANNEL,
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val manager = getSystemService(NotificationManager::class.java)
-        var channel = manager?.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL)
-        if (channel == null) {
-            channel = NotificationChannel(
-                GlobalState.NOTIFICATION_CHANNEL,
-                getString(R.string.service_channel_name),
-                NotificationManager.IMPORTANCE_LOW,
+        if (manager?.getNotificationChannel(channelId) == null) {
+            manager?.createNotificationChannel(
+                NotificationChannel(
+                    channelId,
+                    getString(serviceChannelName(channelId)),
+                    serviceChannelImportance(channelId),
+                ),
             )
-            manager?.createNotificationChannel(channel)
         }
     }
+    val notificationId = serviceNotificationId(channelId)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         startForeground(
-            GlobalState.NOTIFICATION_ID,
+            notificationId,
             notification,
             FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
     } else {
-        startForeground(GlobalState.NOTIFICATION_ID, notification)
+        startForeground(notificationId, notification)
     }
 }
 

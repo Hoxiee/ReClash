@@ -1,9 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
+
+func BenchmarkEngineReconsiderUnchanged(b *testing.B) {
+	for _, size := range []int{100, 250} {
+		b.Run(fmt.Sprintf("park-%d", size), func(b *testing.B) {
+			runtime := newFakeRuntime()
+			runtime.members = make([]rcxMember, size)
+			for i := range runtime.members {
+				runtime.members[i] = rcxMember{Name: fmt.Sprintf("node-%d", i), SupportsUDP: true}
+			}
+			engine := newTestEngine(runtime, "ru-home")
+			engine.handle(rcxEvent{Kind: rcxEventProvidersLoaded})
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				engine.reconsider()
+			}
+		})
+	}
+}
 
 func TestConfigWithoutAMarkerIsNotOperable(t *testing.T) {
 	config := rcxDefaultConfig()
@@ -121,6 +140,26 @@ func TestReportCarriesTheReasoningBehindTheChoice(t *testing.T) {
 	}
 	if report.Link.Foreign == "" || report.ProbeCap != rcxProbeBudgetCap {
 		t.Errorf("link/budget = %+v/%d, want the network facts too", report.Link, report.ProbeCap)
+	}
+}
+
+func TestReportBuildsCandidateDetailsOnlyWhenRead(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("chosen", "cold")
+	engine := newTestEngine(runtime, "ru-home")
+	engine.reconsider()
+
+	if engine.report.Candidates != nil {
+		t.Fatal("publish built candidate details before the report was requested")
+	}
+	first := engine.Report()
+	if len(first.Candidates) != 2 {
+		t.Fatalf("candidates = %d, want the current park", len(first.Candidates))
+	}
+	cached := engine.report.Candidates
+	engine.Report()
+	if len(cached) > 0 && &engine.report.Candidates[0] != &cached[0] {
+		t.Fatal("an unchanged report poll rebuilt candidate details")
 	}
 }
 

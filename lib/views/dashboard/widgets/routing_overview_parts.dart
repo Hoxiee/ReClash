@@ -104,9 +104,12 @@ String routingRungValueLabel(
 };
 
 String routingStrategyLabel(AppLocalizations l10n, String strategy) =>
-    strategy == 'lowest-latency'
-    ? l10n.smartRoutingStrategyLowestLatency
-    : l10n.smartRoutingStrategyBalanced;
+    switch (strategy) {
+      'lowest-latency' => l10n.smartRoutingStrategyLowestLatency,
+      'stable' => l10n.smartRoutingStrategyStable,
+      'saver' => l10n.smartRoutingStrategySaver,
+      _ => l10n.smartRoutingStrategyBalanced,
+    };
 
 NetworkFormat routingFormatOf(RcxReport report) =>
     networkFormatOf(report.status.terrain);
@@ -235,8 +238,8 @@ class RoutingBadge extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size / 2.8),
+      decoration: ShapeDecoration(
+        shape: AppShape.all(size / 2.8),
         color: tone.withValues(alpha: 0.14),
       ),
       child: busy
@@ -424,8 +427,8 @@ class RoutingCandidateList extends StatelessWidget {
     return Container(
       height: 280,
       margin: const EdgeInsets.only(top: 2),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.sm,
+      decoration: ShapeDecoration(
+        shape: AppShape.sm,
         color: context.colorScheme.surfaceContainerHighest.withValues(
           alpha: 0.35,
         ),

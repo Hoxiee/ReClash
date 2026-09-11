@@ -1,8 +1,11 @@
 export 'app.dart';
+export 'capability.dart';
+export 'capability_headers.dart';
 export 'changelog.dart';
 export 'clash_config.dart';
 export 'common.dart';
 export 'config.dart';
+export 'connection_doctor.dart';
 export 'core.dart';
 export 'desync.dart';
 export 'developer_subscription.dart';

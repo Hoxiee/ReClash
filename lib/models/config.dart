@@ -37,6 +37,56 @@ const defaultProxiesStyleProps = ProxiesStyleProps();
 const defaultWindowProps = WindowProps();
 const defaultAccessControlProps = AccessControlProps();
 const defaultThemeProps = ThemeProps(primaryColor: defaultPrimaryColor);
+const defaultNotificationComponents = [
+  NotificationComponent(
+    type: NotificationComponentType.connectionDoctor,
+    doctorPriority: DoctorNotificationPriority.problems,
+  ),
+  NotificationComponent(type: NotificationComponentType.smartRouting),
+  NotificationComponent(
+    type: NotificationComponentType.speed,
+    hideWhenIdle: true,
+  ),
+  NotificationComponent(type: NotificationComponentType.sessionTraffic),
+];
+const defaultNotificationSettings = NotificationSettings();
+
+Map<String, Object?> migrateNotificationSettingsJson(
+  Map<String, Object?> json,
+) {
+  final migrated = Map<String, Object?>.of(json);
+  final components = migrated['components'];
+  migrated['components'] = components is List
+      ? _normalizeNotificationComponents(components)
+      : defaultNotificationComponents.map((item) => item.toJson()).toList();
+  migrated
+    ..remove('contentMode')
+    ..remove('doctorPriority')
+    ..remove('showSessionTraffic')
+    ..remove('hideIdleSpeed');
+  final legacyEnabled = migrated.remove('enabled');
+  final legacyDetailed = migrated.remove('detailed');
+  // The old switch promised an off state it never delivered; honour that intent
+  // now that a level exists for it.
+  if (!NotificationVisibility.values.any(
+    (item) => item.name == migrated['visibility'],
+  )) {
+    migrated['visibility'] = switch ((legacyEnabled, legacyDetailed)) {
+      (false, _) => NotificationVisibility.off.name,
+      (_, false) => NotificationVisibility.minimal.name,
+      _ => NotificationVisibility.detailed.name,
+    };
+  }
+  for (final field in const [
+    'showPauseAction',
+    'showStopAction',
+    'hideSensitiveOnLockScreen',
+    'subscriptionReminders',
+  ]) {
+    if (migrated[field] is! bool) migrated.remove(field);
+  }
+  return migrated;
+}
 
 const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkSpeed,
@@ -46,6 +96,10 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkDetection,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
+  DashboardWidget.smartRouting,
+  DashboardWidget.desyncStrategy,
+  DashboardWidget.desyncTest,
+  DashboardWidget.desyncEngine,
 ];
 
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
@@ -63,6 +117,119 @@ List<DashboardWidget> dashboardWidgetsSafeFormJson(
 }
 
 @freezed
+abstract class NotificationComponent with _$NotificationComponent {
+  const factory NotificationComponent({
+    required NotificationComponentType type,
+    DoctorNotificationPriority? doctorPriority,
+    bool? hideWhenIdle,
+    String? group,
+  }) = _NotificationComponent;
+
+  factory NotificationComponent.fromJson(Map<String, Object?> json) =>
+      _$NotificationComponentFromJson(json);
+}
+
+List<NotificationComponent> notificationComponentsSafeFromJson(Object? value) {
+  if (value is! List) return defaultNotificationComponents;
+  return _normalizeNotificationComponents(value);
+}
+
+List<NotificationComponent> _normalizeNotificationComponents(List value) {
+  final components = <NotificationComponent>[];
+  final seen = <NotificationComponentType>{};
+  for (final item in value) {
+    final component = _notificationComponentSafeFromJson(item);
+    if (component != null && seen.add(component.type)) {
+      components.add(component);
+    }
+  }
+  return components;
+}
+
+NotificationComponent? _notificationComponentSafeFromJson(Object? value) {
+  if (value is NotificationComponent) return value;
+  if (value is! Map) return null;
+  late final Map<Object?, Object?> json;
+  try {
+    json = value.cast<Object?, Object?>();
+  } catch (_) {
+    return null;
+  }
+  final typeName = json['type'];
+  final type = typeName is String
+      ? NotificationComponentType.values
+            .where((candidate) => candidate.name == typeName)
+            .firstOrNull
+      : null;
+  if (type == null) return null;
+  final doctorPriority = json['doctorPriority'];
+  final hideWhenIdle = json['hideWhenIdle'];
+  final group = json['group'];
+  return switch (type) {
+    NotificationComponentType.connectionDoctor => switch (doctorPriority) {
+      null || 'problems' => NotificationComponent(
+        type: type,
+        doctorPriority: DoctorNotificationPriority.problems,
+      ),
+      'always' => NotificationComponent(
+        type: type,
+        doctorPriority: DoctorNotificationPriority.always,
+      ),
+      _ => null,
+    },
+    NotificationComponentType.speed => switch (hideWhenIdle) {
+      null => NotificationComponent(type: type, hideWhenIdle: true),
+      final bool value => NotificationComponent(
+        type: type,
+        hideWhenIdle: value,
+      ),
+      _ => null,
+    },
+    NotificationComponentType.currentServer => switch (group) {
+      null => NotificationComponent(type: type),
+      final String value when value.isNotEmpty => NotificationComponent(
+        type: type,
+        group: value,
+      ),
+      _ => null,
+    },
+    _ => NotificationComponent(type: type),
+  };
+}
+
+@freezed
+abstract class NotificationSettings with _$NotificationSettings {
+  const factory NotificationSettings({
+    @JsonKey(fromJson: notificationComponentsSafeFromJson)
+    @Default(defaultNotificationComponents)
+    List<NotificationComponent> components,
+    @Default(NotificationVisibility.detailed) NotificationVisibility visibility,
+    @Default(true) bool showPauseAction,
+    @Default(true) bool showStopAction,
+    @Default(true) bool hideSensitiveOnLockScreen,
+    @Default(true) bool subscriptionReminders,
+  }) = _NotificationSettings;
+
+  factory NotificationSettings.fromJson(Map<String, Object?> json) =>
+      _$NotificationSettingsFromJson(migrateNotificationSettingsJson(json));
+}
+
+/// A foreground service has to post a notification, so the lower levels move it
+/// to a quieter channel instead of skipping the post; the content still has to
+/// be stripped here so the service never renders what the level hides.
+extension NotificationSettingsProjection on NotificationSettings {
+  bool get detailed => visibility == NotificationVisibility.detailed;
+
+  NotificationSettings get projected => detailed
+      ? this
+      : copyWith(
+          components: const [],
+          showPauseAction: false,
+          showStopAction: false,
+        );
+}
+
+@freezed
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
@@ -70,7 +237,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
     @Default(false) bool onlyStatisticsProxy,
-    @Default(true) bool showNotificationStopAction,
+    @Default(defaultNotificationSettings)
+    NotificationSettings notificationSettings,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,
     @Default(false) bool autoRun,
@@ -111,34 +279,55 @@ abstract class AppSettingProps with _$AppSettingProps {
       migrated['iconVariant'] = _normalizeIconVariant(
         iconVariant is String ? iconVariant : null,
       );
+      migrated['notificationSettings'] = _notificationSettingsSafeJson(
+        migrated['notificationSettings'],
+        migrated['showNotificationStopAction'],
+      );
+      migrated.remove('showNotificationStopAction');
       return AppSettingProps.fromJson(migrated);
     }, () => defaultAppSettingProps);
   }
 }
 
+Map<String, Object?> _notificationSettingsSafeJson(
+  Object? value,
+  Object? legacyShowStopAction,
+) {
+  if (value is Map) {
+    try {
+      return Map<String, Object?>.from(value);
+    } catch (_) {
+      return {
+        'showStopAction': legacyShowStopAction is bool
+            ? legacyShowStopAction
+            : true,
+      };
+    }
+  }
+  return {
+    'showStopAction': legacyShowStopAction is bool
+        ? legacyShowStopAction
+        : true,
+  };
+}
+
 const _iconVariants = {
   'default',
-  'pulse',
-  'glacier',
-  'obsidian',
   'velvet',
   'solar',
   'circuit',
-  'prism',
+  'echo',
+  'ink',
+  'blueprint',
+  'mesh',
+  'facet',
+  'strata',
+  'shatter',
+  'trace',
 };
 
-const _legacyIconVariants = {
-  'mono': 'pulse',
-  'sepia': 'glacier',
-  'inverted': 'obsidian',
-  'dark_mono': 'velvet',
-  'cool': 'solar',
-};
-
-String _normalizeIconVariant(String? value) {
-  final migrated = _legacyIconVariants[value] ?? value;
-  return _iconVariants.contains(migrated) ? migrated! : 'default';
-}
+String _normalizeIconVariant(String? value) =>
+    _iconVariants.contains(value) ? value! : 'default';
 
 @freezed
 abstract class AccessControlProps with _$AccessControlProps {
@@ -221,6 +410,7 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default([]) List<String> canaryDomestic,
     @Default([]) List<RcxMarker> openMarkers,
     @Default([]) List<RcxMarker> domesticMarkers,
+    @Default([]) List<String> egressEchoes,
     @Default([]) List<String> breakerPatterns,
     @Default(true) bool allowDomesticLastResort,
     @Default(false) bool requireUdp,

@@ -6,6 +6,7 @@ export 'color.dart';
 export 'client_emulation.dart';
 export 'incy_links.dart';
 export 'compute.dart';
+export 'connection_answer.dart';
 export 'constant.dart';
 export 'desync.dart';
 export 'desync_tester.dart';

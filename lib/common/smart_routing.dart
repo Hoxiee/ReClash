@@ -13,12 +13,11 @@ class SmartRoutingBundle {
     this.canaryDomestic = const [],
     this.openMarkers = const [],
     this.domesticMarkers = const [],
+    this.egressEchoes = const [],
     this.breakerPatterns = const [],
     this.allowDomesticLastResort = true,
     this.requireUdp = false,
     this.respectPick = true,
-    this.dwellSeconds = 90,
-    this.waveWidth = 12,
   });
 
   final List<String> censorCountries;
@@ -26,13 +25,21 @@ class SmartRoutingBundle {
   final List<String> canaryDomestic;
   final List<RcxMarker> openMarkers;
   final List<RcxMarker> domesticMarkers;
+  final List<String> egressEchoes;
   final List<String> breakerPatterns;
   final bool allowDomesticLastResort;
   final bool requireUdp;
   final bool respectPick;
-  final int dwellSeconds;
-  final int waveWidth;
 }
+
+// An endpoint address names the front, not the exit, so a relay-fronted home
+// server reads as foreign in the database while its traffic never leaves the
+// country. These answer with the caller's own address through the node itself,
+// which is the only way the engine sees where a node actually egresses.
+const _egressEchoes = [
+  'https://checkip.amazonaws.com/',
+  'https://api.ipify.org/',
+];
 
 // Canaries are IP literals: DNS often answers while transit is dead, so a
 // hostname would measure the resolver instead of the network.
@@ -56,6 +63,7 @@ const _russia = SmartRoutingBundle(
   domesticMarkers: [
     RcxMarker(url: 'https://ya.ru/', statuses: [200, 301, 302]),
   ],
+  egressEchoes: _egressEchoes,
   breakerPatterns: ['lte', 'обход', 'глушил', 'bypass', 'breaker', 'unblock'],
 );
 
@@ -77,6 +85,7 @@ const _smartRoutingBundles = {
     domesticMarkers: [
       RcxMarker(url: 'https://www.aparat.com/', statuses: [200, 301, 302]),
     ],
+    egressEchoes: _egressEchoes,
   ),
   SmartRoutingPreset.china: SmartRoutingBundle(
     censorCountries: ['CN'],
@@ -93,6 +102,7 @@ const _smartRoutingBundles = {
     domesticMarkers: [
       RcxMarker(url: 'https://www.baidu.com/', statuses: [200, 301, 302]),
     ],
+    egressEchoes: _egressEchoes,
   ),
 };
 
@@ -104,10 +114,42 @@ SmartRoutingPreset smartRoutingPresetForLocale(String? locale) {
   return SmartRoutingPreset.off;
 }
 
+/// The pace belongs to the strategy, not to the region that seeds the rest.
+class SmartRoutingPacing {
+  const SmartRoutingPacing({
+    required this.dwellSeconds,
+    required this.waveWidth,
+  });
+
+  final int dwellSeconds;
+  final int waveWidth;
+}
+
 extension SmartRoutingStrategyWire on SmartRoutingStrategy {
   String get wire => switch (this) {
+    SmartRoutingStrategy.stable => 'stable',
     SmartRoutingStrategy.balanced => 'balanced',
     SmartRoutingStrategy.lowestLatency => 'lowest-latency',
+    SmartRoutingStrategy.saver => 'saver',
+  };
+
+  SmartRoutingPacing get pacing => switch (this) {
+    SmartRoutingStrategy.stable => const SmartRoutingPacing(
+      dwellSeconds: 180,
+      waveWidth: 8,
+    ),
+    SmartRoutingStrategy.balanced => const SmartRoutingPacing(
+      dwellSeconds: 90,
+      waveWidth: 12,
+    ),
+    SmartRoutingStrategy.lowestLatency => const SmartRoutingPacing(
+      dwellSeconds: 30,
+      waveWidth: 20,
+    ),
+    SmartRoutingStrategy.saver => const SmartRoutingPacing(
+      dwellSeconds: 600,
+      waveWidth: 4,
+    ),
   };
 }
 
@@ -136,18 +178,25 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       canaryDomestic: bundle.canaryDomestic,
       openMarkers: bundle.openMarkers,
       domesticMarkers: bundle.domesticMarkers,
+      egressEchoes: bundle.egressEchoes,
       breakerPatterns: bundle.breakerPatterns,
       allowDomesticLastResort: bundle.allowDomesticLastResort,
       requireUdp: bundle.requireUdp,
       respectPick: bundle.respectPick,
-      dwellSeconds: bundle.dwellSeconds,
-      waveWidth: bundle.waveWidth,
     );
   }
 
   bool get matchesPreset => this == applyPreset(preset);
 
-  RcxConfigParams get rcxParams => RcxConfigParams(
+  SmartRoutingProps applyStrategy(SmartRoutingStrategy value) => copyWith(
+    strategy: value,
+    dwellSeconds: value.pacing.dwellSeconds,
+    waveWidth: value.pacing.waveWidth,
+  );
+
+  bool get matchesStrategy => this == applyStrategy(strategy);
+
+  RcxConfigParams rcxParamsFor(Profile? profile) => RcxConfigParams(
     enabled: enabled,
     preset: preset.wire,
     strategy: strategy.wire,
@@ -157,13 +206,81 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     canaryDomestic: canaryDomestic,
     openMarkers: openMarkers,
     domesticMarkers: domesticMarkers,
+    egressEchoes: egressEchoes,
     breakerPatterns: breakerPatterns,
     allowDomesticLastResort: allowDomesticLastResort,
     requireUdp: requireUdp,
     respectPick: respectPick,
     dwellSeconds: dwellSeconds,
     waveWidth: waveWidth,
+    lanes: _effectiveRcxLanes(profile),
   );
+
+  RcxConfigParams get rcxParams => rcxParamsFor(null);
+}
+
+List<RcxLaneConfig> _effectiveRcxLanes(Profile? profile) {
+  if (profile == null) return const [];
+  final selectorsByCapability = <String, List<RcxLaneSelector>>{};
+  final selectorKeys = <String, Set<(String?, String?)>>{};
+
+  void addSelector(
+    String capabilityId, {
+    String? provider,
+    String? nameContains,
+  }) {
+    if (!supportedCapabilityIds.contains(capabilityId)) return;
+    final normalizedProvider = provider?.trim();
+    final normalizedName = nameContains?.trim();
+    final effectiveProvider = normalizedProvider?.isNotEmpty == true
+        ? normalizedProvider
+        : null;
+    final effectiveName = normalizedName?.isNotEmpty == true
+        ? normalizedName
+        : null;
+    if (effectiveProvider == null && effectiveName == null) return;
+    final key = (effectiveProvider, effectiveName);
+    if (!selectorKeys.putIfAbsent(capabilityId, () => {}).add(key)) return;
+    selectorsByCapability
+        .putIfAbsent(capabilityId, () => [])
+        .add(
+          RcxLaneSelector(
+            provider: effectiveProvider,
+            nameContains: effectiveName,
+          ),
+        );
+  }
+
+  final manifest = profile.capabilityManifest;
+  if (manifest != null && !manifest.stale) {
+    for (final claim in manifest.claims) {
+      for (final selector in claim.selectors) {
+        addSelector(
+          claim.capabilityId,
+          provider: selector.provider,
+          nameContains: selector.nameContains,
+        );
+      }
+    }
+  }
+  for (final selector in profile.manualCapabilitySelectors) {
+    addSelector(
+      selector.capabilityId,
+      provider: selector.provider,
+      nameContains: selector.nameContains,
+    );
+  }
+  return [
+    for (final policy in profile.serviceRoutePolicies)
+      if (policy.enabled &&
+          supportedCapabilityIds.contains(policy.capabilityId))
+        RcxLaneConfig(
+          capabilityId: policy.capabilityId,
+          group: capabilityGroupName(policy.capabilityId),
+          fallback: policy.fallback.name,
+          selectors: selectorsByCapability[policy.capabilityId] ?? const [],
+        ),
+  ];
 }
 
 const rcxTrailLimit = 4;

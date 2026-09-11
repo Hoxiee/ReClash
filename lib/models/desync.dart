@@ -27,46 +27,6 @@ const desyncDefaultStrategy = <String>[
   '-a1',
 ];
 
-// Saved by earlier installs with no editor to change them by hand.
-const desyncLegacyLadder = <String>[
-  '-A',
-  'torst,redirect,ssl_err,conn',
-  '-L',
-  's,o',
-  '--split',
-  '1',
-  '-A',
-  'torst,redirect,ssl_err,conn',
-  '-L',
-  's,o',
-  '--disorder',
-  '1',
-  '-A',
-  'torst,redirect,ssl_err,conn',
-  '-L',
-  's,o',
-  '--fake',
-  '-1',
-  '--ttl',
-  '8',
-  '-A',
-  'torst,redirect,ssl_err,conn',
-  '-L',
-  's,o',
-  '--oob',
-  '1',
-  '-A',
-  'torst,redirect,ssl_err,conn',
-  '-L',
-  's,o',
-  '--tlsrec',
-  '1+s',
-];
-
-const desyncLegacyByedpi = <String>['-o1', '-a1', '-r-5+se'];
-
-const desyncLegacyTlsrec = <String>['-r-5+se'];
-
 enum DesyncCategory {
   @JsonValue('youtube')
   youtube,
@@ -237,10 +197,7 @@ const desyncTestSiteLists = <DesyncTestSiteList>[
 
 // Telegram stays reachable when a VPN subscription lapses, so it rides along
 // the YouTube default instead of ByeByeDPI's youtube+googlevideo pair.
-const defaultDesyncTestSiteLists = <String>[
-  'youtube',
-  'googlevideo',
-];
+const defaultDesyncTestSiteLists = <String>['youtube', 'googlevideo'];
 
 @freezed
 abstract class DesyncStrategy with _$DesyncStrategy {
@@ -259,10 +216,7 @@ abstract class DesyncProps with _$DesyncProps {
     @Default(false) bool enabled,
     @Default(false) bool onlyDpi,
     @Default(defaultDesyncPort) int port,
-    @Default([
-      DesyncCategory.youtube,
-      DesyncCategory.discord,
-    ])
+    @Default([DesyncCategory.youtube, DesyncCategory.discord])
     List<DesyncCategory> categories,
     @Default(true) bool forceTcp,
     @Default(desyncDefaultStrategy) List<String> strategyArgs,
@@ -276,9 +230,8 @@ abstract class DesyncProps with _$DesyncProps {
     @Default(null) List<String>? testRestoreArgs,
   }) = _DesyncProps;
 
-  factory DesyncProps.fromJson(Map<String, Object?>? json) => json == null
-      ? defaultDesyncProps
-      : migrateDesyncProps(_$DesyncPropsFromJson(json));
+  factory DesyncProps.fromJson(Map<String, Object?>? json) =>
+      json == null ? defaultDesyncProps : _$DesyncPropsFromJson(json);
 
   static DesyncProps safeFromJson(Map<String, Object?>? json) {
     if (json == null) {
@@ -291,16 +244,6 @@ abstract class DesyncProps with _$DesyncProps {
       () => defaultDesyncProps,
     );
   }
-}
-
-DesyncProps migrateDesyncProps(DesyncProps props) {
-  final legacy = props.strategyArgs;
-  if (listEquals(legacy, desyncLegacyLadder) ||
-      listEquals(legacy, desyncLegacyByedpi) ||
-      listEquals(legacy, desyncLegacyTlsrec)) {
-    return props.copyWith(strategyArgs: desyncDefaultStrategy);
-  }
-  return props;
 }
 
 Map<String, Object?> stripSavedTelegram(Map<String, Object?> json) {

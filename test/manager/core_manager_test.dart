@@ -9,6 +9,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/core_manager.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
@@ -25,6 +26,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+class _RecordingSetupAction extends SetupAction {
+  int fullSetupCalls = 0;
+
+  @override
+  Future<bool> fullSetup() async {
+    fullSetupCalls++;
+    return true;
+  }
+}
 
 class _FakePathProvider extends PathProviderPlatform {
   final String root;
@@ -83,6 +94,8 @@ Future<ProviderContainer> _pumpCoreManager(
   CoreHandlerInterface coreInterface, {
   List<Override> overrides = const [],
 }) async {
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump();
   final container = ProviderContainer(
     overrides: [
       coreHandlerProvider.overrideWithValue(
@@ -91,7 +104,11 @@ Future<ProviderContainer> _pumpCoreManager(
       ...overrides,
     ],
   );
+  globalState.container = container;
+  globalState.lastConfigMd5 = null;
   addTearDown(container.dispose);
+  container.listen(currentProfileIdProvider, (_, _) {});
+  container.listen(initProvider, (_, _) {});
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -119,20 +136,10 @@ Future<void> _waitForSetupToSettle(
   WidgetTester tester,
   bool Function() condition,
 ) async {
-  await tester.runAsync(() async {
-    final deadline = DateTime.now().add(const Duration(seconds: 10));
-    while (!condition() && DateTime.now().isBefore(deadline)) {
-      await tester.pump();
-      await Future<void>.delayed(const Duration(milliseconds: 5));
-    }
-    final drainDeadline = DateTime.now().add(
-      const Duration(milliseconds: 1100),
-    );
-    while (DateTime.now().isBefore(drainDeadline)) {
-      await tester.pump();
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-    }
-  });
+  for (var attempt = 0; attempt < 2000 && !condition(); attempt++) {
+    await tester.pump(const Duration(milliseconds: 10));
+  }
+  await tester.pump(const Duration(milliseconds: 1100));
 }
 
 void main() {
@@ -333,22 +340,27 @@ void main() {
       profilesProvider.overrideWith(() => TestProfiles([previous, next])),
       currentProfileIdProvider.overrideWithBuild((_, _) => previous.id),
       setupStateProvider.overrideWith((_, _) => _nullProfileSetupState),
+      setupActionProvider.overrideWith(_RecordingSetupAction.new),
+      byeDpiSupportedProvider.overrideWithValue(true),
     ];
 
     setUp(() {
-      previous = Profile.normal(label: 'previous');
-      next = Profile.normal(label: 'next');
+      previous = const Profile(
+        id: 1001,
+        label: 'previous',
+        autoUpdateDuration: defaultUpdateDuration,
+      );
+      next = const Profile(
+        id: 1002,
+        label: 'next',
+        autoUpdateDuration: defaultUpdateDuration,
+      );
     });
 
     testWidgets('keeps the selected profile when Core rejects it', (
       tester,
     ) async {
       final coreInterface = _coreInterface();
-      var setupCalls = 0;
-      when(() => coreInterface.setupConfig(any())).thenAnswer((_) async {
-        setupCalls++;
-        return 'rejected';
-      });
       final container = await _pumpCoreManager(
         tester,
         coreInterface,
@@ -356,27 +368,65 @@ void main() {
       );
       globalState.container = container;
 
+      final setup =
+          container.read(setupActionProvider.notifier) as _RecordingSetupAction;
       container.read(currentProfileIdProvider.notifier).value = next.id;
-      await _waitForSetupToSettle(tester, () => setupCalls >= 1);
+      await tester.pump();
 
       expect(container.read(currentProfileIdProvider), next.id);
-      expect(setupCalls, 1);
+      expect(setup.fullSetupCalls, 1);
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
-    testWidgets('rapid A -> B -> C settles on C even when both are rejected', (
+    testWidgets('profile metadata change schedules only one full setup', (
       tester,
     ) async {
       final coreInterface = _coreInterface();
-      var setupCalls = 0;
-      when(() => coreInterface.setupConfig(any())).thenAnswer((_) async {
-        setupCalls++;
-        return 'rejected';
-      });
-      final a = Profile.normal(label: 'a');
-      final b = Profile.normal(label: 'b');
-      final c = Profile.normal(label: 'c');
+      final enriched = next.copyWith(
+        capabilityManifest: ProviderCapabilityManifest(
+          version: 1,
+          receivedAt: DateTime.utc(2026, 9, 11),
+          sourceHost: 'provider.test',
+        ),
+      );
+      final container = await _pumpCoreManager(
+        tester,
+        coreInterface,
+        overrides: profileOverrides(),
+      );
+      globalState.container = container;
+
+      final setup =
+          container.read(setupActionProvider.notifier) as _RecordingSetupAction;
+      container.read(profilesProvider.notifier).put(enriched);
+      container.read(currentProfileIdProvider.notifier).value = next.id;
+      await tester.pump();
+
+      expect(setup.fullSetupCalls, 1);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('rapid A -> B -> C schedules both profile setups', (
+      tester,
+    ) async {
+      final coreInterface = _coreInterface();
+      const a = Profile(
+        id: 2001,
+        label: 'a',
+        autoUpdateDuration: defaultUpdateDuration,
+      );
+      const b = Profile(
+        id: 2002,
+        label: 'b',
+        autoUpdateDuration: defaultUpdateDuration,
+      );
+      const c = Profile(
+        id: 2003,
+        label: 'c',
+        autoUpdateDuration: defaultUpdateDuration,
+      );
       final container = await _pumpCoreManager(
         tester,
         coreInterface,
@@ -385,16 +435,21 @@ void main() {
           profilesProvider.overrideWith(() => TestProfiles([a, b, c])),
           currentProfileIdProvider.overrideWithBuild((_, _) => a.id),
           setupStateProvider.overrideWith((_, _) => _nullProfileSetupState),
+          setupActionProvider.overrideWith(_RecordingSetupAction.new),
+          byeDpiSupportedProvider.overrideWithValue(true),
         ],
       );
       globalState.container = container;
 
+      final setup =
+          container.read(setupActionProvider.notifier) as _RecordingSetupAction;
       container.read(currentProfileIdProvider.notifier).value = b.id;
+      await tester.pump();
       container.read(currentProfileIdProvider.notifier).value = c.id;
-      await _waitForSetupToSettle(tester, () => setupCalls >= 2);
+      await tester.pump();
 
       expect(container.read(currentProfileIdProvider), c.id);
-      expect(setupCalls, 2);
+      expect(setup.fullSetupCalls, 2);
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
@@ -418,6 +473,7 @@ void main() {
             profilesProvider.overrideWith(() => TestProfiles([previous])),
             currentProfileIdProvider.overrideWithBuild((_, _) => null),
             setupStateProvider.overrideWith((_, _) => _nullProfileSetupState),
+            byeDpiSupportedProvider.overrideWithValue(true),
           ],
         );
         globalState.container = container;

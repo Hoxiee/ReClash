@@ -64,6 +64,30 @@ func selectorGroup(t *testing.T, name string, members ...string) constant.Proxy 
 	return adapter.NewProxy(group)
 }
 
+func loadBalanceGroup(t *testing.T, name string, members ...string) constant.Proxy {
+	t.Helper()
+
+	proxies := make([]constant.Proxy, 0, len(members))
+	for _, member := range members {
+		proxies = append(proxies, namedProxy(member))
+	}
+	health := provider.NewHealthCheck(proxies, "", 0, 0, true, nil)
+	pd, err := provider.NewCompatibleProvider(name+"-provider", proxies, health)
+	if err != nil {
+		t.Fatalf("NewCompatibleProvider: %v", err)
+	}
+	group, err := outboundgroup.NewLoadBalance(
+		outboundgroup.GroupCommonOption{Name: name},
+		outboundgroup.LoadBalanceOption{},
+		nil,
+		[]cp.ProxyProvider{pd},
+	)
+	if err != nil {
+		t.Fatalf("NewLoadBalance: %v", err)
+	}
+	return adapter.NewProxy(group)
+}
+
 func groupNow(t *testing.T, proxy constant.Proxy) string {
 	t.Helper()
 
@@ -76,6 +100,99 @@ func groupNow(t *testing.T, proxy constant.Proxy) string {
 		t.Fatalf("proxy %q is not a group", proxy.Name())
 	}
 	return group.Now()
+}
+
+func TestHandleGetActiveServerRejectsMissingAndNonGroup(t *testing.T) {
+	tunnel.UpdateProxies(
+		map[string]constant.Proxy{"node": namedProxy("node")},
+		nil,
+	)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	for _, group := range []string{"", "missing", "node"} {
+		if got := handleGetActiveServer(group); got != nil {
+			t.Errorf("handleGetActiveServer(%q) = %+v, want nil", group, got)
+		}
+	}
+}
+
+func TestHandleGetActiveServerUsesSelectorNow(t *testing.T) {
+	group := selectorGroup(t, "group", "node-a", "node-b")
+	tunnel.UpdateProxies(map[string]constant.Proxy{"group": group}, nil)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	selector, err := selectableGroup("group")
+	if err != nil {
+		t.Fatalf("selectableGroup: %v", err)
+	}
+	if err := selector.Set("node-b"); err != nil {
+		t.Fatalf("select node-b: %v", err)
+	}
+
+	got := handleGetActiveServer("group")
+	if got == nil || got.Group != "group" || got.Name != "node-b" {
+		t.Fatalf("handleGetActiveServer(group) = %+v, want group/node-b", got)
+	}
+}
+
+func TestHandleGetActiveServerRepresentsLoadBalanceGroup(t *testing.T) {
+	balance := loadBalanceGroup(t, "balance", "node-a", "node-b")
+	tunnel.UpdateProxies(map[string]constant.Proxy{"balance": balance}, nil)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	got := handleGetActiveServer("balance")
+	if got == nil || got.Group != "balance" || got.Name != "balance" {
+		t.Fatalf("handleGetActiveServer(balance) = %+v, want balance/balance", got)
+	}
+}
+
+func TestHandleGetActiveServerRepresentsNestedLoadBalanceGroup(t *testing.T) {
+	balance := loadBalanceGroup(t, "balance", "node-a", "node-b")
+	outer := selectorGroup(t, "outer", "balance")
+	tunnel.UpdateProxies(
+		map[string]constant.Proxy{"outer": outer, "balance": balance},
+		nil,
+	)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	got := handleGetActiveServer("outer")
+	if got == nil || got.Group != "outer" || got.Name != "balance" {
+		t.Fatalf("handleGetActiveServer(outer) = %+v, want outer/balance", got)
+	}
+}
+
+func TestHandleGetActiveServerResolvesNestedGroups(t *testing.T) {
+	inner := selectorGroup(t, "inner", "leaf")
+	outer := selectorGroup(t, "outer", "inner")
+	tunnel.UpdateProxies(
+		map[string]constant.Proxy{"outer": outer, "inner": inner},
+		nil,
+	)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	got := handleGetActiveServer("outer")
+	if got == nil || got.Group != "outer" || got.Name != "leaf" {
+		t.Fatalf("handleGetActiveServer(outer) = %+v, want outer/leaf", got)
+	}
+}
+
+func TestHandleGetActiveServerStopsAtCycleAndDepthLimit(t *testing.T) {
+	self := selectorGroup(t, "self", "self")
+	proxies := map[string]constant.Proxy{"self": self}
+	previous := "leaf"
+	for index := activeServerMaxDepth; index >= 0; index-- {
+		name := fmt.Sprintf("level-%d", index)
+		proxies[name] = selectorGroup(t, name, previous)
+		previous = name
+	}
+	tunnel.UpdateProxies(proxies, nil)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	for _, group := range []string{"self", "level-0"} {
+		if got := handleGetActiveServer(group); got != nil {
+			t.Errorf("handleGetActiveServer(%q) = %+v, want nil", group, got)
+		}
+	}
 }
 
 // patchSelectGroup restores selections before the providers behind the groups
@@ -678,6 +795,11 @@ func TestLookupProxyFollowsAProviderUpdate(t *testing.T) {
 func TestHandleShutdownTearsDownBackgroundWork(t *testing.T) {
 	withCurrentConfig(t, &config.Config{General: &config.General{}, Controller: &config.Controller{}})
 	isInit.Store(true)
+	doctorReset()
+	doctorBumpGeneration(doctorConfigGeneration)
+	if connectionDoctor.Snapshot().Generations.Config == 0 {
+		t.Fatal("doctor config generation did not change before shutdown")
+	}
 
 	cancelled := false
 	logMu.Lock()
@@ -702,6 +824,9 @@ func TestHandleShutdownTearsDownBackgroundWork(t *testing.T) {
 	}
 	if !cancelled {
 		t.Error("shutdown never cancelled the log pump")
+	}
+	if snapshot := connectionDoctor.Snapshot(); snapshot.Generations != (doctorGenerations{}) || snapshot.State != doctorObserving || snapshot.Health != doctorUnknown {
+		t.Errorf("shutdown retained doctor state: %+v", snapshot)
 	}
 }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:reclash/common/common.dart';
@@ -8,7 +9,11 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
+import 'package:reclash/views/dashboard/widgets/dashboard_centered_scroll_view.dart';
+import 'package:reclash/views/dashboard/widgets/connection_mode.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
+import 'package:reclash/views/dashboard/widgets/hero_elastic_flow.dart';
+import 'package:reclash/views/dashboard/widgets/hero_layout.dart';
 import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
@@ -16,62 +21,64 @@ import 'package:reclash/views/dashboard/widgets/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
+import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-String _countryCodeToEmoji(String code) {
-  if (code.length != 2) return '🌐';
-  final upper = code.toUpperCase();
-  final first = 0x1F1E6 - 0x41 + upper.codeUnitAt(0);
-  final second = 0x1F1E6 - 0x41 + upper.codeUnitAt(1);
-  return String.fromCharCodes([first, second]);
-}
+/// `splitLeft` is the left half of the two-column board: the orb keeps its
+/// caption and the connection chips, while the panels move to the right column.
+enum HeroLayoutMode { column, splitLeft }
 
 class HeroConnect extends ConsumerStatefulWidget {
-  const HeroConnect({super.key});
+  const HeroConnect({
+    super.key,
+    this.scrollController,
+    this.onShowProvider,
+    this.mode = HeroLayoutMode.column,
+  });
+
+  final ScrollController? scrollController;
+  final VoidCallback? onShowProvider;
+  final HeroLayoutMode mode;
 
   @override
   ConsumerState<HeroConnect> createState() => _HeroConnectState();
 }
 
 class _HeroConnectState extends ConsumerState<HeroConnect> {
-  /// Owned by the orb after seeding: it holds the optimistic `connecting` too.
   late HeroOrbPhase _phase = ref.read(heroLifecycleProvider);
 
-  Future<void> _showModePicker() async {
-    final appLocalizations = context.appLocalizations;
-    const modes = ['vpn', 'byedpi'];
-    final current =
-        ref.read(
-          desyncSettingProvider.select(
-            (state) => state.enabled && state.onlyDpi,
-          ),
-        )
-        ? 'byedpi'
-        : 'vpn';
-    final mode = await dialogs.showCommonDialog<String>(
-      context: context,
-      child: OptionsDialog<String>(
-        title: appLocalizations.desyncModeTitle,
-        options: modes,
-        value: current,
-        textBuilder: (value) => value == 'byedpi'
-            ? appLocalizations.desyncModeByedpi
-            : appLocalizations.desyncModeVpn,
-      ),
-    );
-    if (mode == null || mode == current) return;
-    ref
-        .read(desyncSettingProvider.notifier)
-        .update(
-          (state) => mode == 'byedpi'
-              ? state.copyWith(enabled: true, onlyDpi: true)
-              : state.copyWith(enabled: false, onlyDpi: false),
-        );
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(heroLifecycleProvider, (_, phase) {
+      final hasHero =
+          ref.read(currentProfileProvider) != null ||
+          ref.read(
+            effectiveDesyncSettingProvider.select(
+              (state) => state.enabled && state.onlyDpi,
+            ),
+          );
+      final delaysVisibleConnection =
+          hasHero &&
+          _phase == HeroOrbPhase.connecting &&
+          (phase == HeroOrbPhase.on || phase == HeroOrbPhase.reconnecting);
+      if (mounted && phase != _phase && !delaysVisibleConnection) {
+        setState(() => _phase = phase);
+      }
+    });
+  }
+
+  void _handleShowSubscription() {
+    final onShowProvider = widget.onShowProvider;
+    if (onShowProvider != null) {
+      onShowProvider();
+      return;
+    }
+    showExtend(context, builder: (_) => const SubscriptionOverviewView());
   }
 
   @override
@@ -81,36 +88,49 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       profilesProvider.select((state) => state.isNotEmpty),
     );
     final byedpiMode = ref.watch(
-      desyncSettingProvider.select((state) => state.enabled && state.onlyDpi),
+      effectiveDesyncSettingProvider.select(
+        (state) => state.enabled && state.onlyDpi,
+      ),
     );
     if (profile == null && !byedpiMode) {
-      return _EmptyHero(hasSavedProfiles: hasSavedProfiles);
+      return _EmptyHero(
+        hasSavedProfiles: hasSavedProfiles,
+        scrollController: widget.scrollController,
+      );
     }
 
+    final split = widget.mode == HeroLayoutMode.splitLeft;
     final isReady = ref.watch(initProvider);
+    final doctor = ref.watch(connectionDoctorProvider);
+    final health = heroDoctorHealthOf(doctor);
     if (byedpiMode) {
-      const health = HeroHealth.unknown;
       final status = heroStatusOf(_phase, health);
       final palette = byedpiHeroPaletteOf(context, status);
-      return SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            _OrbSection(
-              isReady: isReady,
-              displayName: context.appLocalizations.desyncModeByedpi,
-              status: status,
-              health: health,
-              palette: palette,
-              variant: HeroOrbVariant.byedpi,
-              onPhaseChanged: (phase) => setState(() => _phase = phase),
-              onLongPress: () => _showModePicker(),
-            ),
-            const SizedBox(height: 16),
-            const _ByeDpiDashboard(),
-            SizedBox(height: 12 + BottomInsetScope.of(context)),
-          ],
+      return _HeroBoard(
+        controller: widget.scrollController,
+        split: split,
+        head: _OrbSlot(
+          isReady: isReady,
+          status: status,
+          health: health,
+          variant: HeroOrbVariant.byedpi,
+          onPhaseChanged: (phase) => setState(() => _phase = phase),
         ),
+        tail: (metrics) => [
+          _OrbCaption(
+            displayName: context.appLocalizations.desyncModeByedpi,
+            status: status,
+            palette: palette,
+            metrics: metrics,
+            variant: HeroOrbVariant.byedpi,
+          ),
+          SizedBox(height: metrics.gapCard),
+          if (!split) ...[
+            const _ByeDpiDashboard(),
+            SizedBox(height: metrics.gapCard),
+          ],
+          const _HeroActionRow(showUpdate: false),
+        ],
       );
     }
 
@@ -118,95 +138,237 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final panelMeta = activeProfile.panelMeta;
     final announce = panelMeta?.announce?.trim();
     final sub = activeProfile.subscriptionInfo;
-    final hasSub = sub != null && (sub.total > 0 || sub.expire > 0);
+    final hasSub = sub != null && sub.hasFacts;
 
     final buyPlanUrl = panelMeta?.buyPlanUrl;
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
 
     final activeServer = ref.watch(activeServerProvider);
-    final smartRoutingEnabled = activeServer.smartRouting;
     final displayName = activeServer.displayName;
-    final nameCountryCode = activeServer.countryCode;
-    final otherCodes = activeServer.otherCodes;
-    final otherLocations = activeServer.otherLocations;
-    final delay = activeServer.delay;
-    final measuring = activeServer.measuring;
     final isUpdating = ref.watch(isUpdatingProvider(activeProfile.updatingKey));
-    final health = heroHealthOf(delay: delay, measuring: measuring);
     final status = heroStatusOf(_phase, health);
     final heroRing = parsePanelHeroRing(panelMeta?.heroRing);
     final palette = heroPaletteOf(context, status, heroRing: heroRing);
     final accent = status.isAlert ? palette.accent : null;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          _OrbSection(
-            isReady: isReady,
-            displayName: displayName,
-            status: status,
-            health: health,
-            palette: palette,
-            serviceLogo: panelMeta?.serviceLogo,
-            heroRing: heroRing,
-            onPhaseChanged: (phase) => setState(() => _phase = phase),
-            onLongPress: () => _showModePicker(),
-          ),
-          const SizedBox(height: 16),
+    return _HeroBoard(
+      controller: widget.scrollController,
+      split: split,
+      head: _OrbSlot(
+        isReady: isReady,
+        status: status,
+        health: health,
+        serviceLogo: panelMeta?.serviceLogo,
+        heroRing: heroRing,
+        onPhaseChanged: (phase) => setState(() => _phase = phase),
+      ),
+      tail: (metrics) => [
+        _OrbCaption(
+          displayName: displayName,
+          status: status,
+          palette: palette,
+          metrics: metrics,
+        ),
+        SizedBox(height: metrics.gapCard),
+        if (!split) ...[
           _ServerPanel(
             displayName: displayName,
-            nameCountryCode: nameCountryCode,
-            delay: delay,
+            nameCountryCode: activeServer.countryCode,
+            delay: activeServer.delay,
             status: status,
             accent: accent,
-            otherCodes: otherCodes,
-            otherLocations: otherLocations,
-            smartRouting: smartRoutingEnabled,
+            otherCodes: activeServer.otherCodes,
+            otherLocations: activeServer.otherLocations,
+            smartRouting: activeServer.smartRouting,
           ),
-          if (hasSub) ...[
-            const SizedBox(height: 12),
-            FocusableTap(
-              borderRadius: heroCardRadius,
-              onTap: () {
-                showExtend(
-                  context,
-                  builder: (_) => const SubscriptionOverviewView(),
-                );
-              },
-              child: _TrafficCard(
-                sub: sub,
-                buyPlanUrl: buyPlanUrl,
-                buyTrafficUrl: buyTrafficUrl,
-                hasAnnounce: announce != null && announce.isNotEmpty,
-              ),
-            ),
-          ] else if (announce != null && announce.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            FocusableTap(
-              borderRadius: heroCardRadius,
-              onTap: () {
-                showExtend(
-                  context,
-                  builder: (_) => const SubscriptionOverviewView(),
-                );
-              },
-              child: _NoticeOpenCard(text: announce),
-            ),
-          ],
-          const SizedBox(height: 12),
-          _HeroActionRow(
-            isUpdating: isUpdating,
-            onUpdate: () => unawaited(
-              ref
-                  .read(profilesActionProvider.notifier)
-                  .updateProfile(activeProfile, showLoading: true),
-            ),
-            supportUrl: panelMeta?.supportUrl,
-          ),
-          SizedBox(height: 12 + BottomInsetScope.of(context)),
+          SizedBox(height: metrics.gapCard),
         ],
+        if (hasSub) ...[
+          FocusableTap(
+            borderRadius: heroCardRadius,
+            onTap: _handleShowSubscription,
+            child: _SubscriptionStrip(
+              key: const ValueKey('hero-subscription-strip'),
+              sub: sub,
+              buyPlanUrl: buyPlanUrl,
+              buyTrafficUrl: buyTrafficUrl,
+              hasAnnounce: !split && announce != null && announce.isNotEmpty,
+            ),
+          ),
+          SizedBox(height: metrics.gapCard),
+        ] else if (!split && announce != null && announce.isNotEmpty) ...[
+          FocusableTap(
+            borderRadius: heroCardRadius,
+            onTap: _handleShowSubscription,
+            child: _NoticeOpenCard(text: announce),
+          ),
+          SizedBox(height: metrics.gapCard),
+        ],
+        _HeroActionRow(
+          isUpdating: isUpdating,
+          onUpdate: () => unawaited(
+            ref
+                .read(profilesActionProvider.notifier)
+                .updateProfile(activeProfile, showLoading: true),
+          ),
+          supportUrl: panelMeta?.supportUrl,
+        ),
+      ],
+    );
+  }
+}
+
+/// The right column of the two-column board: what the pager would otherwise
+/// hide behind its second page, in one scroll.
+class HeroSplitDetails extends ConsumerWidget {
+  const HeroSplitDetails({super.key, this.scrollController});
+
+  final ScrollController? scrollController;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final byedpiMode = ref.watch(
+      effectiveDesyncSettingProvider.select(
+        (state) => state.enabled && state.onlyDpi,
       ),
+    );
+    final profile = ref.watch(currentProfileProvider);
+    final bottomInset = BottomInsetScope.of(context);
+    if (byedpiMode) {
+      return _DetailsScroll(
+        controller: scrollController,
+        bottomInset: bottomInset,
+        children: (metrics) => const [_ByeDpiDashboard()],
+      );
+    }
+    final activeServer = ref.watch(activeServerProvider);
+    final health = heroDoctorHealthOf(ref.watch(connectionDoctorProvider));
+    final status = heroStatusOf(ref.watch(heroLifecycleProvider), health);
+    final palette = heroPaletteOf(
+      context,
+      status,
+      heroRing: parsePanelHeroRing(profile?.panelMeta?.heroRing),
+    );
+    final accent = status.isAlert ? palette.accent : null;
+    return _DetailsScroll(
+      controller: scrollController,
+      bottomInset: bottomInset,
+      children: (metrics) => [
+        _ServerPanel(
+          displayName: activeServer.displayName,
+          nameCountryCode: activeServer.countryCode,
+          delay: activeServer.delay,
+          status: status,
+          accent: accent,
+          otherCodes: activeServer.otherCodes,
+          otherLocations: activeServer.otherLocations,
+          smartRouting: activeServer.smartRouting,
+        ),
+        if (profile != null) ...[
+          SizedBox(height: metrics.gapCard),
+          ...providerSummaryCards(
+            context,
+            profile,
+            gap: metrics.gapCard,
+            showQuota: false,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _DetailsScroll extends StatelessWidget {
+  const _DetailsScroll({
+    required this.controller,
+    required this.bottomInset,
+    required this.children,
+  });
+
+  final ScrollController? controller;
+  final double bottomInset;
+  final List<Widget> Function(HeroMetrics metrics) children;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        final metrics = HeroMetrics.of(
+          box,
+          MediaQuery.textScalerOf(context),
+          split: true,
+        );
+        final top = metrics.gapEdge;
+        final bottom = metrics.gapCard + bottomInset;
+        final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
+        return SingleChildScrollView(
+          controller: controller,
+          primary: false,
+          padding: EdgeInsets.only(top: top, bottom: bottom),
+          child: ConstrainedBox(
+            // The orb column centres its whole board, so a shorter card column
+            // pinned to the top would sit visibly higher than its neighbour.
+            constraints: BoxConstraints(
+              minHeight: math.max(0, height - top - bottom),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: children(metrics),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Scroll plus elastic flow: the orb takes the height the rest leaves over, and
+/// when the rest alone outgrows the viewport the scroll takes over instead of
+/// the board overflowing.
+class _HeroBoard extends StatelessWidget {
+  const _HeroBoard({
+    required this.controller,
+    required this.split,
+    required this.head,
+    required this.tail,
+  });
+
+  final ScrollController? controller;
+  final bool split;
+  final Widget head;
+  final List<Widget> Function(HeroMetrics metrics) tail;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = BottomInsetScope.of(context);
+    // The window decides, not the board's own box: the left column of the
+    // two-column layout is tall and narrow inside a landscape window.
+    final portrait = MediaQuery.orientationOf(context) == Orientation.portrait;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final metrics = HeroMetrics.of(
+          box,
+          MediaQuery.textScalerOf(context),
+          split: split,
+          portrait: portrait,
+        );
+        final top = metrics.gapEdge;
+        final bottom = metrics.gapCard + bottomInset;
+        final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
+        return SingleChildScrollView(
+          controller: controller,
+          primary: false,
+          padding: EdgeInsets.only(top: top, bottom: bottom),
+          child: HeroElasticFlow(
+            viewportHeight: math.max(0, height - top - bottom),
+            headMin: metrics.orbMin,
+            headMax: metrics.orbMax,
+            head: head,
+            tail: tail(metrics),
+          ),
+        );
+      },
     );
   }
 }
@@ -218,19 +380,10 @@ class _ByeDpiDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
-    final matchingStrategy = props.savedStrategies.where(
-      (strategy) => listEquals(strategy.args, props.strategyArgs),
-    );
-    final strategyName = listEquals(props.strategyArgs, desyncDefaultStrategy)
-        ? appLocalizations.desyncDefaultName
-        : matchingStrategy.isEmpty
-        ? appLocalizations.custom
-        : matchingStrategy.first.name;
-
     return Column(
       children: [
         _ByeDpiStrategyCard(
-          name: strategyName,
+          name: desyncStrategyName(appLocalizations, props),
           argsCount: appLocalizations.desyncArgsCount(
             props.strategyArgs.length,
           ),
@@ -239,31 +392,36 @@ class _ByeDpiDashboard extends ConsumerWidget {
           },
         ),
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: _ByeDpiActionCard(
-                icon: Icons.bolt_rounded,
-                title: appLocalizations.desyncTestSection,
-                subtitle: appLocalizations.desyncTestTitle,
-                onTap: () {
-                  showExtend(context, builder: (_) => const DesyncTestView());
-                },
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _ByeDpiActionCard(
+                  icon: Icons.bolt_rounded,
+                  title: appLocalizations.desyncTestSection,
+                  subtitle: appLocalizations.desyncTestTitle,
+                  onTap: () {
+                    showExtend(context, builder: (_) => const DesyncTestView());
+                  },
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ByeDpiActionCard(
-                icon: Icons.settings_rounded,
-                title: appLocalizations.desyncEngine,
-                subtitle: '${appLocalizations.port} ${props.port}',
-                onTap: () {
-                  showExtend(context, builder: (_) => const DesyncEngineView());
-                },
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ByeDpiActionCard(
+                  icon: Icons.settings_rounded,
+                  title: appLocalizations.desyncEngine,
+                  subtitle: '${appLocalizations.port} ${props.port}',
+                  onTap: () {
+                    showExtend(
+                      context,
+                      builder: (_) => const DesyncEngineView(),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -359,7 +517,6 @@ class _ByeDpiActionCard extends StatelessWidget {
       borderRadius: heroCardRadius,
       onTap: onTap,
       child: HeroSurface(
-        height: 116,
         padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +532,7 @@ class _ByeDpiActionCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Spacer(),
+            const SizedBox(height: 18),
             Text(
               title,
               maxLines: 1,
@@ -426,34 +583,80 @@ class _ByeDpiCardIcon extends StatelessWidget {
   }
 }
 
-class _OrbSection extends ConsumerWidget {
-  const _OrbSection({
+/// Traffic only matters while the tunnel is up: watching it otherwise would
+/// rebuild the orb once a second for numbers nothing is showing.
+Traffic? _heroTraffic(WidgetRef ref, HeroStatus status) {
+  final running = ref.watch(runTimeProvider.select((value) => value != null));
+  if (!running || status == HeroStatus.paused) return null;
+  return ref.watch(
+    trafficsProvider.select(
+      (state) => state.list.isEmpty ? null : state.list.last,
+    ),
+  );
+}
+
+/// The elastic head of the board. Kept apart from its caption because the flow
+/// hands the orb a square of its own and measures the caption separately.
+class _OrbSlot extends ConsumerWidget {
+  const _OrbSlot({
     required this.isReady,
-    required this.displayName,
     required this.status,
     required this.health,
-    required this.palette,
+    required this.onPhaseChanged,
     this.serviceLogo,
     this.heroRing,
     this.variant = HeroOrbVariant.vpn,
-    required this.onPhaseChanged,
-    this.onLongPress,
   });
 
   final bool isReady;
-  final String displayName;
   final HeroStatus status;
   final HeroHealth health;
-  final HeroPalette palette;
+  final ValueChanged<HeroOrbPhase> onPhaseChanged;
   final String? serviceLogo;
   final List<Color>? heroRing;
   final HeroOrbVariant variant;
-  final ValueChanged<HeroOrbPhase> onPhaseChanged;
-  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activity = heroActivityOf(_heroTraffic(ref, status));
+    return HeroOrbSlot(
+      min: heroOrbMinSize,
+      max: heroOrbMaxSize,
+      builder: (context, size) => HeroOrb(
+        size: size,
+        enabled: isReady,
+        health: health,
+        activity: activity,
+        serviceLogo: serviceLogo,
+        heroRing: heroRing,
+        variant: variant,
+        onPhaseChanged: onPhaseChanged,
+      ),
+    );
+  }
+}
+
+class _OrbCaption extends ConsumerWidget {
+  const _OrbCaption({
+    required this.displayName,
+    required this.status,
+    required this.palette,
+    required this.metrics,
+    this.variant = HeroOrbVariant.vpn,
+  });
+
+  final String displayName;
+  final HeroStatus status;
+  final HeroPalette palette;
+  final HeroMetrics metrics;
+  final HeroOrbVariant variant;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final activeText = ref.watch(
+      sharedStateProvider.select((state) => state.activeText),
+    );
     final colorScheme = context.colorScheme;
     final runMinutes = ref.watch(
       runTimeProvider.select((value) => value == null ? null : value ~/ 60000),
@@ -465,10 +668,11 @@ class _OrbSection extends ConsumerWidget {
             HeroStatus.offline => appLocalizations.noNetwork,
             HeroStatus.off => appLocalizations.byedpiOff,
             HeroStatus.checking => appLocalizations.byedpiChecking,
+            HeroStatus.diagnosing => appLocalizations.byedpiChecking,
             HeroStatus.connecting => appLocalizations.byedpiStarting,
             HeroStatus.reconnecting => appLocalizations.byedpiReconnecting,
             HeroStatus.paused => appLocalizations.byedpiPaused,
-            HeroStatus.broken => appLocalizations.byedpiEngineError,
+            HeroStatus.broken => appLocalizations.heroLinkBroken,
             HeroStatus.secured ||
             HeroStatus.degraded => appLocalizations.byedpiActive,
           }
@@ -476,18 +680,19 @@ class _OrbSection extends ConsumerWidget {
             HeroStatus.offline => appLocalizations.noNetwork,
             HeroStatus.off => appLocalizations.heroNotProtected,
             HeroStatus.checking => appLocalizations.heroChecking,
+            HeroStatus.diagnosing => appLocalizations.heroChecking,
             HeroStatus.connecting => appLocalizations.heroConnecting,
             HeroStatus.reconnecting => appLocalizations.heroReconnecting,
             HeroStatus.paused => appLocalizations.heroPaused,
             HeroStatus.broken => appLocalizations.heroLinkBroken,
-            HeroStatus.secured ||
-            HeroStatus.degraded => appLocalizations.heroProtected,
+            HeroStatus.secured || HeroStatus.degraded => activeText,
           };
     final subtitle = variant == HeroOrbVariant.byedpi
         ? switch (status) {
             HeroStatus.offline => appLocalizations.heroNoNetworkHint,
             HeroStatus.off => appLocalizations.byedpiTapToStart,
             HeroStatus.checking => displayName,
+            HeroStatus.diagnosing => displayName,
             HeroStatus.connecting => displayName,
             HeroStatus.reconnecting => displayName,
             HeroStatus.paused => appLocalizations.byedpiTapToResume,
@@ -501,39 +706,25 @@ class _OrbSection extends ConsumerWidget {
             HeroStatus.offline => appLocalizations.heroNoNetworkHint,
             HeroStatus.off => appLocalizations.heroTapToConnect,
             HeroStatus.checking => appLocalizations.heroCheckingHint,
+            HeroStatus.diagnosing => appLocalizations.doctorExaminingTitle,
             HeroStatus.connecting => displayName,
             HeroStatus.reconnecting => appLocalizations.heroReconnectingHint,
             HeroStatus.paused => appLocalizations.heroTapToResume,
-            HeroStatus.secured || HeroStatus.degraded || HeroStatus.broken =>
+            HeroStatus.secured || HeroStatus.degraded =>
               appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
+            HeroStatus.broken =>
+              ref.watch(isStartProvider)
+                  ? appLocalizations.stop
+                  : appLocalizations.heroTapToConnect,
           };
     final accent = status.isAlert ? palette.accent : null;
-
-    final lastTraffic = isConnected
-        ? ref.watch(
-            trafficsProvider.select(
-              (state) => state.list.isEmpty ? null : state.list.last,
-            ),
-          )
-        : null;
+    final lastTraffic = _heroTraffic(ref, status);
 
     return Column(
       children: [
-        const SizedBox(height: 18),
-        HeroOrb(
-          size: 220,
-          enabled: isReady,
-          health: health,
-          activity: heroActivityOf(lastTraffic),
-          serviceLogo: serviceLogo,
-          heroRing: heroRing,
-          variant: variant,
-          onPhaseChanged: onPhaseChanged,
-          onLongPress: onLongPress,
-        ),
-        const SizedBox(height: 18),
-        SizedBox(
-          height: 58,
+        SizedBox(height: metrics.gapCaption),
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: metrics.captionMinHeight),
           child: FadeThroughBox(
             alignment: Alignment.topCenter,
             child: Column(
@@ -566,7 +757,7 @@ class _OrbSection extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: metrics.gapCard),
         RepaintBoundary(
           child: AnimatedSlide(
             duration: context.motionDuration(const Duration(milliseconds: 320)),
@@ -657,8 +848,9 @@ class _Logo extends StatelessWidget {
   }
 }
 
-class _TrafficCard extends StatelessWidget {
-  const _TrafficCard({
+class _SubscriptionStrip extends StatelessWidget {
+  const _SubscriptionStrip({
+    super.key,
     required this.sub,
     this.buyPlanUrl,
     this.buyTrafficUrl,
@@ -677,30 +869,30 @@ class _TrafficCard extends StatelessWidget {
     final used = sub.upload + sub.download;
     final total = sub.total;
     final unlimited = total <= 0;
-    final progress = total > 0 ? (used / total).clamp(0.0, 1.0) : 0.0;
+    final progress = unlimited ? 0.0 : (used / total).clamp(0.0, 1.0);
     final barColor = progress > 0.9
         ? colorScheme.error
         : progress > 0.7
         ? const Color(0xFFC57F0A)
         : colorScheme.primary;
 
-    int? daysLeft;
-    if (sub.expire > 0) {
-      daysLeft = DateTime.fromMillisecondsSinceEpoch(
-        sub.expire * 1000,
-      ).difference(DateTime.now()).inDays;
-      if (daysLeft < 0) daysLeft = 0;
-    }
-
+    final expireDate = subscriptionExpireDate(sub.expire);
+    final expiresIn = expireDate?.difference(DateTime.now()).inDays;
+    final daysLeft = expiresIn == null || expiresIn > 0 ? expiresIn : 0;
     final daysUrgent = daysLeft != null && daysLeft <= heroRenewDaysThreshold;
     final daysColor = daysUrgent ? colorScheme.error : colorScheme.primary;
-    final free = total > 0 ? (total - used).clamp(0, total) : 0;
+
+    final free = unlimited ? 0 : (total - used).clamp(0, total);
     final offers = heroBuyOffers(
       hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
       hasTrafficUrl: buyTrafficUrl?.isNotEmpty ?? false,
       daysLeft: daysLeft,
       total: total,
       used: used,
+    );
+    final valueStyle = context.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      fontFamily: FontFamily.jetBrainsMono.value,
     );
 
     return HeroSurface(
@@ -710,42 +902,29 @@ class _TrafficCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              // A wrap instead of a row: at large text scales the caption and
+              // the pill no longer share one line, and neither may be clipped.
               Expanded(
-                child: Text(
-                  appLocalizations.subscriptionCaption,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      appLocalizations.subscriptionCaption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (daysLeft != null)
+                      _DaysPill(days: daysLeft, color: daysColor),
+                  ],
                 ),
               ),
-              if (daysLeft != null) ...[
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(heroPillRadius),
-                    color: daysColor.withValues(alpha: 0.14),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.event_rounded, size: 14, color: daysColor),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
-                        style: context.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: daysColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
               if (hasAnnounce) ...[
                 const SizedBox(width: 8),
                 Icon(
@@ -768,22 +947,13 @@ class _TrafficCard extends StatelessWidget {
               used.traffic.show,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontFamily: FontFamily.jetBrainsMono.value,
-              ),
+              style: valueStyle,
             )
           else
             Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: free.traffic.show,
-                    style: context.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontFamily: FontFamily.jetBrainsMono.value,
-                    ),
-                  ),
+                  TextSpan(text: free.traffic.show, style: valueStyle),
                   const TextSpan(text: ' '),
                   TextSpan(
                     text: appLocalizations.trafficFreeOfTotal(
@@ -828,6 +998,40 @@ class _TrafficCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DaysPill extends StatelessWidget {
+  const _DaysPill({required this.days, required this.color});
+
+  final int days;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(heroPillRadius),
+      color: color.withValues(alpha: 0.14),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.event_rounded, size: 14, color: color),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            '${context.appLocalizations.remaining} $days ${heroDaysWord(days)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _SubscriptionBar extends StatelessWidget {
@@ -909,20 +1113,10 @@ class _BuyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final (icon, label) = switch (offer) {
-      HeroBuyOffer.renewPlan => (
-        Icons.autorenew_rounded,
-        appLocalizations.renewSubscription,
-      ),
-      HeroBuyOffer.topUpTraffic => (
-        Icons.add_shopping_cart_rounded,
-        appLocalizations.topUpTraffic,
-      ),
-    };
+    final view = heroBuyOfferViewOf(context.appLocalizations, offer);
     return _ActionChip(
-      icon: icon,
-      label: label,
+      icon: view.icon,
+      label: view.label,
       compact: true,
       onTap: () => unawaited(dialogs.openUrl(url)),
     );
@@ -963,7 +1157,7 @@ class _ServerPanel extends StatelessWidget {
           smartRouting: smartRouting,
         ),
         const HeroCardDivider(),
-        _HeroInfoRow(
+        HeroServiceRow(
           status: status,
           accent: accent ?? context.colorScheme.onSurfaceVariant,
         ),
@@ -980,24 +1174,6 @@ class _ServerPanel extends StatelessWidget {
               child: panel,
             ),
     );
-  }
-}
-
-/// The line under the divider belongs to smart routing while it runs; the
-/// tunnel's own faults keep the old link line so they are never hidden.
-class _HeroInfoRow extends ConsumerWidget {
-  const _HeroInfoRow({required this.status, required this.accent});
-
-  final HeroStatus status;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref.watch(smartRoutingSettingProvider).enabled;
-    if (enabled && status.isLive && status != HeroStatus.paused) {
-      return HeroRoutingRow(accent: accent);
-    }
-    return HeroLinkRow(status: status, accent: accent);
   }
 }
 
@@ -1030,7 +1206,6 @@ class _ServerZone extends ConsumerWidget {
     final ipInfo = networkState.ipInfo;
 
     final code = nameCountryCode ?? ipInfo?.countryCode ?? '';
-    final flag = _countryCodeToEmoji(code);
     final title = displayName.isNotEmpty ? displayName : '—';
 
     return FocusableTap(
@@ -1040,7 +1215,9 @@ class _ServerZone extends ConsumerWidget {
           showExtend(context, builder: (_) => const RoutingOverviewView());
           return;
         }
-        ref.read(currentPageLabelProvider.notifier).toPage(PageLabel.proxies);
+        ref
+            .read(currentPageLabelProvider.notifier)
+            .toPage(PageLabel.proxies, returnable: true);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -1048,7 +1225,6 @@ class _ServerZone extends ConsumerWidget {
           children: [
             _FlagCircle(
               countryCode: code,
-              fallbackEmoji: flag,
               otherCodes: otherCodes,
               stackCount: otherLocations,
               size: 44,
@@ -1153,14 +1329,12 @@ class _ServerZone extends ConsumerWidget {
 class _FlagCircle extends StatelessWidget {
   const _FlagCircle({
     required this.countryCode,
-    required this.fallbackEmoji,
     this.otherCodes = const [],
     this.stackCount = 0,
     this.size = 52,
   });
 
   final String countryCode;
-  final String fallbackEmoji;
   final List<String> otherCodes;
   final int stackCount;
   final double size;
@@ -1171,28 +1345,25 @@ class _FlagCircle extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final cc = countryCode.trim().toLowerCase();
 
-    Widget fallback() => Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: colorScheme.surfaceContainerHighest,
-      ),
-      alignment: Alignment.center,
-      child: EmojiText(fallbackEmoji, style: TextStyle(fontSize: size * 0.5)),
-    );
-
     // The emoji stands in until the image lands, so no frame shows a grey disc.
-    Widget emojiFill(double side, String code) => Container(
-      width: side,
-      height: side,
-      color: colorScheme.surfaceContainerHighest,
-      alignment: Alignment.center,
-      child: EmojiText(
-        _countryCodeToEmoji(code),
-        style: TextStyle(fontSize: side * 0.5),
-      ),
-    );
+    Widget emojiFill(double side, String code) {
+      final emoji = countryCodeToEmoji(code);
+      return Container(
+        width: side,
+        height: side,
+        color: colorScheme.surfaceContainerHighest,
+        alignment: Alignment.center,
+        child: emoji == null
+            ? Icon(
+                Icons.public_rounded,
+                size: side * 0.5,
+                color: colorScheme.onSurfaceVariant,
+              )
+            : EmojiText(emoji, style: TextStyle(fontSize: side * 0.5)),
+      );
+    }
+
+    Widget fallback() => ClipOval(child: emojiFill(size, cc));
 
     final active = cc.length != 2
         ? fallback()
@@ -1328,7 +1499,7 @@ class _SignalBars extends StatelessWidget {
       color = dim;
     } else if (delay! < 0) {
       level = 0;
-      color = Colors.red.shade400;
+      color = dim;
     } else {
       color = getDelayColor(delay) ?? Colors.green;
       level = delay! < 150
@@ -1363,16 +1534,20 @@ class _SignalBars extends StatelessWidget {
 }
 
 class _EmptyHero extends ConsumerWidget {
-  const _EmptyHero({required this.hasSavedProfiles});
+  const _EmptyHero({
+    required this.hasSavedProfiles,
+    required this.scrollController,
+  });
 
   final bool hasSavedProfiles;
+  final ScrollController? scrollController;
 
   void _showAddProfile(BuildContext context) {
     showExtend(
       context,
       builder: (context) => AdaptiveSheetScaffold(
         title: context.appLocalizations.addProfile,
-        body: AddProfileView(context: context),
+        body: const AddProfileView(),
       ),
     );
   }
@@ -1386,7 +1561,8 @@ class _EmptyHero extends ConsumerWidget {
     final description = hasSavedProfiles
         ? appLocalizations.dashboardNoActiveProfileDesc
         : appLocalizations.dashboardNoProfileDesc;
-    return SingleChildScrollView(
+    return DashboardCenteredScrollView(
+      controller: scrollController,
       child: Column(
         children: [
           const SizedBox(height: 16),
@@ -1450,49 +1626,47 @@ class _EmptyHero extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          FocusableTap(
-            borderRadius: heroCardRadius,
-            onTap: () => ref
-                .read(desyncSettingProvider.notifier)
-                .update(
-                  (state) => state.copyWith(enabled: true, onlyDpi: true),
-                ),
-            child: HeroSurface(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 44),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          appLocalizations.dashboardByedpiTitle,
-                          style: context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+          if (ref.watch(byeDpiSupportedProvider)) ...[
+            const SizedBox(height: 12),
+            FocusableTap(
+              borderRadius: heroCardRadius,
+              onTap: () => changeDashboardMode(ref, DashboardMode.byedpi),
+              child: HeroSurface(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 44),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            appLocalizations.dashboardByedpiTitle,
+                            style: context.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          appLocalizations.dashboardByedpiDesc,
-                          style: context.textTheme.bodySmall?.copyWith(
-                            color: context.colorScheme.onSurfaceVariant,
+                          const SizedBox(height: 3),
+                          Text(
+                            appLocalizations.dashboardByedpiDesc,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
           SizedBox(height: 12 + BottomInsetScope.of(context)),
         ],
       ),
@@ -1547,16 +1721,20 @@ class _NoticeOpenCard extends StatelessWidget {
   }
 }
 
+/// The split board turns update and support off: the right column already
+/// carries them on the provider actions card.
 class _HeroActionRow extends ConsumerWidget {
   const _HeroActionRow({
-    required this.isUpdating,
-    required this.onUpdate,
+    this.isUpdating = false,
+    this.onUpdate,
     this.supportUrl,
+    this.showUpdate = true,
   });
 
   final bool isUpdating;
   final VoidCallback? onUpdate;
   final String? supportUrl;
+  final bool showUpdate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1565,8 +1743,8 @@ class _HeroActionRow extends ConsumerWidget {
     final showPauseChip =
         ref.watch(isStartProvider) &&
         (ref.watch(tunEnabledProvider) || ref.watch(pausedProvider));
-    return Row(
-      children: [
+    final chips = <Widget>[
+      if (showUpdate)
         Expanded(
           child: _ActionChip(
             icon: Icons.refresh_rounded,
@@ -1575,19 +1753,24 @@ class _HeroActionRow extends ConsumerWidget {
             onTap: onUpdate,
           ),
         ),
-        if (hasSupport) ...[
-          const SizedBox(width: 10),
-          Expanded(
-            child: _ActionChip(
-              icon: Icons.support_agent_rounded,
-              label: appLocalizations.support,
-              onTap: () => unawaited(dialogs.openUrl(supportUrl!)),
-            ),
+      if (hasSupport)
+        Expanded(
+          child: _ActionChip(
+            icon: Icons.support_agent_rounded,
+            label: appLocalizations.support,
+            onTap: () => unawaited(dialogs.openUrl(supportUrl!)),
           ),
+        ),
+      if (showPauseChip) const _PauseChip(),
+      const _ModeChip(),
+    ];
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < chips.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          chips[i],
         ],
-        if (showPauseChip) ...[const SizedBox(width: 10), const _PauseChip()],
-        const SizedBox(width: 10),
-        const _ModeChip(),
       ],
     );
   }
@@ -1595,43 +1778,6 @@ class _HeroActionRow extends ConsumerWidget {
 
 class _PauseChip extends ConsumerWidget {
   const _PauseChip();
-
-  void _showSmartPauseSheet(BuildContext context, WidgetRef ref) {
-    showSheet(
-      context: context,
-      props: const SheetProps(maxHeight: 520),
-      builder: (sheetContext) {
-        return SizedBox(
-          height: 460,
-          child: AdaptiveSheetScaffold(
-            title: sheetContext.appLocalizations.pickNetwork,
-            body: SmartPauseNetworkPicker(
-              selected: ref
-                  .read(
-                    vpnSettingProvider.select(
-                      (state) => state.smartPauseNetworks,
-                    ),
-                  )
-                  .toSet(),
-              onSelected: (ssid) {
-                Navigator.of(sheetContext).maybePop();
-                ref.read(vpnSettingProvider.notifier).update((state) {
-                  if (state.smartPauseNetworks.any(
-                    (item) => item.trim().toLowerCase() == ssid.toLowerCase(),
-                  )) {
-                    return state;
-                  }
-                  return state.copyWith(
-                    smartPauseNetworks: [...state.smartPauseNetworks, ssid],
-                  );
-                });
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1643,7 +1789,7 @@ class _PauseChip extends ConsumerWidget {
       child: FocusableTap(
         borderRadius: heroPillRadius,
         onTap: () => ref.read(commonActionProvider.notifier).togglePaused(),
-        onLongPress: () => _showSmartPauseSheet(context, ref),
+        onLongPress: () => showSmartPauseNetworkSheet(context, ref),
         child: HeroSurface(
           radius: heroPillRadius,
           width: 44,
@@ -1670,13 +1816,32 @@ class _ModeChip extends ConsumerWidget {
     UiOutboundMode.direct => Icons.flash_on,
   };
 
+  void _selectOutboundMode(WidgetRef ref, UiOutboundMode mode) {
+    final lifecycle = ref.read(heroLifecycleProvider);
+    if (lifecycle == HeroOrbPhase.connecting ||
+        lifecycle == HeroOrbPhase.reconnecting) {
+      return;
+    }
+    ref.read(setupActionProvider.notifier).changeUiMode(mode);
+    changeDashboardMode(ref, DashboardMode.vpn);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
-    final mode = ref.watch(uiOutboundModeProvider);
+    final appLocalizations = context.appLocalizations;
+    final dashboardMode = ref.watch(dashboardModeProvider);
+    final outboundMode = ref.watch(uiOutboundModeProvider);
+    final byedpi = dashboardMode == DashboardMode.byedpi;
+    final label = byedpi
+        ? connectionModeLabel(appLocalizations, dashboardMode)
+        : outboundMode.label;
+    final icon = byedpi
+        ? connectionModeIcon(dashboardMode)
+        : _modeIcon(outboundMode);
     return CommonPopupBox(
       targetBuilder: (open) => Tooltip(
-        message: mode.label,
+        message: label,
         child: FocusableTap(
           borderRadius: heroPillRadius,
           onTap: () => open(offset: const Offset(0, 20)),
@@ -1685,7 +1850,7 @@ class _ModeChip extends ConsumerWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            child: Icon(_modeIcon(mode), size: 18, color: colorScheme.primary),
+            child: Icon(icon, size: 18, color: colorScheme.primary),
           ),
         ),
       ),
@@ -1695,9 +1860,16 @@ class _ModeChip extends ConsumerWidget {
             CommonPopupMenuItem(
               icon: _modeIcon(item),
               label: item.label,
-              onPressed: () {
-                ref.read(setupActionProvider.notifier).changeUiMode(item);
-              },
+              onPressed: () => _selectOutboundMode(ref, item),
+            ),
+          if (ref.watch(byeDpiSupportedProvider))
+            CommonPopupMenuItem(
+              icon: connectionModeIcon(DashboardMode.byedpi),
+              label: connectionModeLabel(
+                appLocalizations,
+                DashboardMode.byedpi,
+              ),
+              onPressed: () => changeDashboardMode(ref, DashboardMode.byedpi),
             ),
         ],
       ),

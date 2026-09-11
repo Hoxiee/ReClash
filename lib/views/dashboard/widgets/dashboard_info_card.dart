@@ -9,6 +9,7 @@ class DashboardInfoCard extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.child,
+    this.leading,
     this.action,
     this.onPressed,
   });
@@ -17,6 +18,10 @@ class DashboardInfoCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final Widget child;
+
+  /// Stands in for [icon] when a tile has something better to identify itself
+  /// with, such as the flag of the country it is reporting on.
+  final Widget? leading;
   final Widget? action;
   final VoidCallback? onPressed;
 
@@ -35,11 +40,12 @@ class DashboardInfoCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
+                    leading ??
+                        Icon(
+                          icon,
+                          size: 20,
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

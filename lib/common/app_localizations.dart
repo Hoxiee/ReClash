@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:reclash/common/exception.dart';
+import 'package:reclash/common/incy_links.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/models/profile.dart';
 import 'package:material_ui/material_ui.dart';
 
 final currentAppLocalizations = AppLocalizations.current;
@@ -58,6 +62,56 @@ String? coreLaunchBlockedMessage(
     _ => appLocalizations.coreBlockedByPolicyTip(launchOsError(error)!),
   };
 }
+
+String profileImportFailureMessage(
+  ProfileImportFailure failure,
+  AppLocalizations appLocalizations,
+) => switch (failure) {
+  ProfileImportFailure.invalidUrl =>
+    appLocalizations.profileUrlInvalidValidationDesc,
+  ProfileImportFailure.invalidQrCode =>
+    appLocalizations.pleaseUploadValidQrcode,
+  ProfileImportFailure.invalidConfig =>
+    appLocalizations.profileImportInvalidConfig,
+  ProfileImportFailure.fetchRejected => appLocalizations.networkException,
+  ProfileImportFailure.fetchFailed => appLocalizations.unknownNetworkError,
+  ProfileImportFailure.emptyResponse =>
+    appLocalizations.profileImportEmptyResponse,
+  ProfileImportFailure.fileReadFailed =>
+    appLocalizations.profileImportFileReadFailed,
+  ProfileImportFailure.unexpected => appLocalizations.profileImportFailed,
+};
+
+String profileImportFormatLabel(
+  ProfileImportFormat format,
+  AppLocalizations appLocalizations,
+) => switch (format) {
+  ProfileImportFormat.clash => appLocalizations.profileImportFormatClash,
+  ProfileImportFormat.shareLinks => appLocalizations.profileImportFormatLinks,
+  ProfileImportFormat.xray => appLocalizations.profileImportFormatXray,
+  ProfileImportFormat.singbox => appLocalizations.profileImportFormatSingbox,
+  ProfileImportFormat.wireguard =>
+    appLocalizations.profileImportFormatWireguard,
+};
+
+String subscriptionClientLabel(
+  SubscriptionClient client,
+  AppLocalizations appLocalizations,
+) => switch (client) {
+  SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
+  SubscriptionClient.clashMeta => appLocalizations.subscriptionClientClashMeta,
+  SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
+  SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
+  SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
+  SubscriptionClient.singbox => appLocalizations.subscriptionClientSingbox,
+  SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayNG,
+  SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
+};
+
+String incyLinkErrorMessage(
+  IncyLinkException _,
+  AppLocalizations appLocalizations,
+) => appLocalizations.profileImportUnsupportedLink;
 
 String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
   return networkErrorMessage(error, appLocalizations) ??

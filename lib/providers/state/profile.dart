@@ -79,6 +79,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     script: script,
     overrideDns: overrideDns,
     dns: dns,
+    serviceRoutePolicies: profile?.serviceRoutePolicies ?? const [],
     matchTarget: overwriteType == OverwriteType.standard
         ? profile?.matchTarget
         : null,

@@ -60,7 +60,10 @@ const _genericTitles = {
   'support',
 };
 
-final _accountUsername = RegExp(r'^\d{4,}[_-][0-9a-z]{4,}$', caseSensitive: false);
+final _accountUsername = RegExp(
+  r'^\d{4,}[_-][0-9a-z]{4,}$',
+  caseSensitive: false,
+);
 
 final _telegramHandle = RegExp(
   r'^(?:@|t\.me\/|https?://(?:t|telegram)\.me\/)\w{3,}$',
@@ -83,7 +86,8 @@ bool isAccountUsername(String? value) {
 /// back to the raw text, as the v2ray.ang family of parsers does.
 String decodePanelTitle(String value) {
   final trimmed = value.trim();
-  final prefixed = trimmed.startsWith('base64:') || trimmed.startsWith('base64,');
+  final prefixed =
+      trimmed.startsWith('base64:') || trimmed.startsWith('base64,');
   final payload = prefixed ? trimmed.substring(7).trim() : trimmed;
   if (payload.isEmpty) return trimmed;
   try {

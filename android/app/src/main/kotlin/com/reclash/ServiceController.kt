@@ -32,6 +32,11 @@ object ServiceController {
     private var binding: ManagedServiceBinding? = null
     @Volatile
     private var runTimeMillis = 0L
+    private val doctorPathStatus = DoctorPathStatusProjection()
+    @Volatile
+    private var flutterEventSink: ((String?) -> Unit)? = null
+    @Volatile
+    private var coreEventListenerInstalled = false
 
     suspend fun unbind() = lock.withLock {
         clearBinding()
@@ -52,6 +57,8 @@ object ServiceController {
         initParams: String,
         setupParams: String,
     ): Result<String> = runCatching {
+        ensureCoreEventListener()
+        ServiceConfig.resetCoreStatuses()
         suspendCancellableCoroutine { continuation ->
             Core.quickSetup(initParams, setupParams) { result ->
                 continuation.resume(result.orEmpty())
@@ -60,7 +67,53 @@ object ServiceController {
     }
 
     fun setEventListener(callback: ((String?) -> Unit)?): Result<Unit> = runCatching {
-        Core.updateEventListener(callback)
+        flutterEventSink = callback
+        ensureCoreEventListener()
+    }
+
+    private fun ensureCoreEventListener() {
+        if (coreEventListenerInstalled) {
+            return
+        }
+        synchronized(this) {
+            if (!coreEventListenerInstalled) {
+                Core.updateEventListener(::onCoreEvent)
+                coreEventListenerInstalled = true
+            }
+        }
+    }
+
+    private fun onCoreEvent(value: String?) {
+        ServiceConfig.acceptCoreEvent(value)
+        flutterEventSink?.invoke(value)
+    }
+
+    private fun publishDoctorPathStatus(
+        pathKind: DoctorPathKind,
+        phase: DoctorPathPhase,
+    ) {
+        doctorPathStatus.update(pathKind, phase)?.let { status ->
+            Core.doctorPathStatus(
+                status.pathKind,
+                status.phase,
+                status.generation,
+                status.timestamp,
+            )
+        }
+    }
+
+    private fun pathKind(options: VpnOptions): DoctorPathKind = if (options.enable) {
+        DoctorPathKind.VPN
+    } else {
+        DoctorPathKind.LOCAL_PROXY
+    }
+
+    private fun pathKind(binding: ManagedServiceBinding?): DoctorPathKind? = when (
+        binding?.component
+    ) {
+        VpnService::class.intent.component -> DoctorPathKind.VPN
+        ProxyService::class.intent.component -> DoctorPathKind.LOCAL_PROXY
+        else -> null
     }
 
     suspend fun start(options: VpnOptions): Long = lock.withLock {
@@ -72,6 +125,7 @@ object ServiceController {
         }
 
         if (binding?.component != nextIntent.component) {
+            ServiceConfig.resetCoreStatuses()
             if (binding != null) {
                 tearDownServices()
             }
@@ -84,6 +138,7 @@ object ServiceController {
                 GlobalState.log("Unable to bind background service: $error")
                 clearBinding()
                 runTimeMillis = 0L
+                publishDoctorPathStatus(pathKind(options), DoctorPathPhase.INACTIVE)
                 return@withLock runTimeMillis
             }
         }
@@ -98,12 +153,14 @@ object ServiceController {
                 }
             clearBinding()
             runTimeMillis = 0L
+            publishDoctorPathStatus(pathKind(options), DoctorPathPhase.INACTIVE)
             return@withLock runTimeMillis
         }
 
         if (runTimeMillis == 0L) {
             runTimeMillis = System.currentTimeMillis()
         }
+        publishDoctorPathStatus(pathKind(options), DoctorPathPhase.ACTIVE)
         runTimeMillis
     }
 
@@ -113,30 +170,48 @@ object ServiceController {
     }
 
     private suspend fun tearDownServices() {
+        val activePath = pathKind(binding) ?: ServiceConfig.vpnOptions?.let(::pathKind)
         binding?.useService { service -> service.stop() }
             ?.onFailure { error ->
                 GlobalState.log("Unable to stop background service: $error")
             }
         clearBinding()
         stopServices()
+        activePath?.let { pathKind ->
+            publishDoctorPathStatus(pathKind, DoctorPathPhase.INACTIVE)
+        }
     }
 
     // A pause keeps the binding and run time; only the service knows it is paused.
     suspend fun pause(manual: Boolean) {
         lock.withLock {
-            binding?.useService { service -> service.pause(manual) }
-                ?.onFailure { error ->
-                    GlobalState.log("Unable to pause background service: $error")
-                }
+            val result = binding?.useService { service -> service.pause(manual) }
+            result?.onFailure { error ->
+                GlobalState.log("Unable to pause background service: $error")
+            }
+            if (
+                result?.isSuccess == true &&
+                pathKind(binding) == DoctorPathKind.VPN &&
+                ServiceConfig.pauseState.value.paused
+            ) {
+                publishDoctorPathStatus(DoctorPathKind.VPN, DoctorPathPhase.PAUSED)
+            }
         }
     }
 
     suspend fun resume(manual: Boolean) {
         lock.withLock {
-            binding?.useService { service -> service.resume(manual) }
-                ?.onFailure { error ->
-                    GlobalState.log("Unable to resume background service: $error")
-                }
+            val result = binding?.useService { service -> service.resume(manual) }
+            result?.onFailure { error ->
+                GlobalState.log("Unable to resume background service: $error")
+            }
+            if (
+                result?.isSuccess == true &&
+                pathKind(binding) == DoctorPathKind.VPN &&
+                !ServiceConfig.pauseState.value.paused
+            ) {
+                publishDoctorPathStatus(DoctorPathKind.VPN, DoctorPathPhase.ACTIVE)
+            }
         }
     }
 
@@ -169,8 +244,12 @@ object ServiceController {
                     return@withLock false
                 }
                 GlobalState.log("Background service disconnected: $message")
+                val activePath = pathKind(disconnectedBinding)
                 clearBinding()
                 runTimeMillis = 0L
+                activePath?.let { pathKind ->
+                    publishDoctorPathStatus(pathKind, DoctorPathPhase.INACTIVE)
+                }
                 true
             }
             if (wasCurrent) {

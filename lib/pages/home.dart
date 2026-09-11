@@ -311,9 +311,15 @@ class HomeBackScopeContainer extends ConsumerWidget {
         final canPop = Navigator.canPop(realContext);
         if (canPop) {
           Navigator.of(realContext).pop();
-        } else {
-          await ref.read(systemActionProvider.notifier).handleClose();
+          return false;
         }
+        final notifier = ref.read(currentPageLabelProvider.notifier);
+        final returnPage = notifier.takeReturnPage();
+        if (returnPage != null) {
+          notifier.toPage(returnPage);
+          return false;
+        }
+        await ref.read(systemActionProvider.notifier).handleClose();
         return false;
       },
       child: child,

@@ -211,6 +211,19 @@ void main() {
       expect(checked, isEmpty);
     });
 
+    test('skips every profile when reminders are disabled', () async {
+      final checked = <int>[];
+
+      await runSubscriptionReminderSweep(
+        profiles: profiles,
+        enabled: false,
+        isAndroid: true,
+        check: (profile) async => checked.add(profile.id),
+      );
+
+      expect(checked, isEmpty);
+    });
+
     test('visits every profile sequentially and isolates failures', () async {
       final checked = <int>[];
       var active = 0;

@@ -3,12 +3,14 @@ import 'package:material_ui/material_ui.dart';
 
 class CommonChip extends StatelessWidget {
   final String label;
+  final IconData? icon;
   final VoidCallback? onPressed;
   final VoidCallback? onDeleted;
 
   const CommonChip({
     super.key,
     required this.label,
+    this.icon,
     this.onPressed,
     this.onDeleted,
   });
@@ -19,7 +21,7 @@ class CommonChip extends StatelessWidget {
     final foregroundColor = colorScheme.onSurfaceVariant;
     final content = Padding(
       padding: EdgeInsets.only(
-        left: 8,
+        left: icon != null ? 6 : 8,
         right: onDeleted != null ? 6 : 8,
         top: 3,
         bottom: 3,
@@ -28,6 +30,7 @@ class CommonChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 4,
         children: [
+          if (icon != null) Icon(icon, size: 13, color: foregroundColor),
           Flexible(
             child: Text(
               label,

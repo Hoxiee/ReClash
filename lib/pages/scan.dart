@@ -1,24 +1,20 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:reclash/common/color.dart';
-import 'package:reclash/common/context.dart';
-import 'package:reclash/common/shape.dart';
-import 'package:reclash/providers/action.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/widgets/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-class ScanPage extends ConsumerStatefulWidget {
+class ScanPage extends StatefulWidget {
   const ScanPage({super.key});
 
   @override
-  ConsumerState<ScanPage> createState() => _ScanPageState();
+  State<ScanPage> createState() => _ScanPageState();
 }
 
-class _ScanPageState extends ConsumerState<ScanPage>
-    with WidgetsBindingObserver {
+class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   MobileScannerController controller = MobileScannerController(
     autoStart: false,
     detectionSpeed: DetectionSpeed.noDuplicates,
@@ -39,11 +35,9 @@ class _ScanPageState extends ConsumerState<ScanPage>
     if (!mounted) {
       return;
     }
-    final barcode = barcodeCapture.barcodes.first;
-    if (barcode.type == BarcodeType.url) {
-      Navigator.pop<String>(context, barcode.rawValue);
-    } else {
-      Navigator.pop(context);
+    final value = barcodeCapture.barcodes.first.rawValue;
+    if (value?.isProfileImportLink ?? false) {
+      Navigator.pop<String>(context, value);
     }
   }
 
@@ -154,9 +148,14 @@ class _ScanPageState extends ConsumerState<ScanPage>
               ),
               padding: const EdgeInsets.all(16),
               iconSize: 32.0,
-              onPressed: ref
-                  .read(profilesActionProvider.notifier)
-                  .addProfileFormQrCode,
+              onPressed: () async {
+                final result = await globalState.safeRun(
+                  picker.pickerConfigQRCode,
+                );
+                if (result != null && context.mounted) {
+                  Navigator.of(context).pop(result);
+                }
+              },
               icon: const Icon(Icons.photo_camera_back),
             ),
           ),

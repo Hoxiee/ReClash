@@ -29,6 +29,20 @@ class Profiles extends Table {
   TextColumn get panelMeta =>
       text().map(const PanelMetaConverter()).nullable()();
 
+  TextColumn get capabilityManifest =>
+      text().map(const CapabilityManifestConverter()).nullable()();
+
+  TextColumn get serviceRoutePolicies => text()
+      .map(const ServiceRoutePoliciesConverter())
+      .withDefault(const Constant('[]'))();
+
+  TextColumn get manualCapabilitySelectors => text()
+      .map(const ManualCapabilitySelectorsConverter())
+      .withDefault(const Constant('[]'))();
+
+  TextColumn get capabilityManifestIssue =>
+      textEnum<CapabilityManifestIssue>().nullable()();
+
   BoolColumn get autoUpdate => boolean()();
 
   TextColumn get selectedMap => text().map(const StringMapConverter())();
@@ -45,6 +59,14 @@ class Profiles extends Table {
   TextColumn get skippedNodes => text()
       .map(const SkippedNodesSqlConverter())
       .withDefault(const Constant('[]'))();
+
+  BoolColumn get undialableNodes =>
+      boolean().withDefault(const Constant(false))();
+
+  BoolColumn get userLabel => boolean().withDefault(const Constant(false))();
+
+  TextColumn get lastWorkingClient =>
+      textEnum<SubscriptionClient>().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -81,6 +103,62 @@ class PanelMetaConverter extends TypeConverter<PanelMeta?, String?> {
     if (value == null) return null;
     return json.encode(value.toJson());
   }
+}
+
+class CapabilityManifestConverter
+    extends TypeConverter<ProviderCapabilityManifest?, String?> {
+  const CapabilityManifestConverter();
+
+  @override
+  ProviderCapabilityManifest? fromSql(String? fromDb) {
+    if (fromDb == null) return null;
+    return ProviderCapabilityManifest.fromJson(json.decode(fromDb));
+  }
+
+  @override
+  String? toSql(ProviderCapabilityManifest? value) {
+    if (value == null) return null;
+    return json.encode(value.toJson());
+  }
+}
+
+class ServiceRoutePoliciesConverter
+    extends TypeConverter<List<ServiceRoutePolicy>, String> {
+  const ServiceRoutePoliciesConverter();
+
+  @override
+  List<ServiceRoutePolicy> fromSql(String fromDb) {
+    final decoded = json.decode(fromDb);
+    if (decoded is! List) return const [];
+    return [
+      for (final item in decoded)
+        if (item is Map<String, Object?>) ServiceRoutePolicy.fromJson(item),
+    ];
+  }
+
+  @override
+  String toSql(List<ServiceRoutePolicy> value) =>
+      json.encode([for (final item in value) item.toJson()]);
+}
+
+class ManualCapabilitySelectorsConverter
+    extends TypeConverter<List<ManualCapabilitySelector>, String> {
+  const ManualCapabilitySelectorsConverter();
+
+  @override
+  List<ManualCapabilitySelector> fromSql(String fromDb) {
+    final decoded = json.decode(fromDb);
+    if (decoded is! List) return const [];
+    return [
+      for (final item in decoded)
+        if (item is Map<String, Object?>)
+          ManualCapabilitySelector.fromJson(item),
+    ];
+  }
+
+  @override
+  String toSql(List<ManualCapabilitySelector> value) =>
+      json.encode([for (final item in value) item.toJson()]);
 }
 
 class SkippedNodesSqlConverter
@@ -164,6 +242,10 @@ extension RawProfilExt on RawProfile {
       autoUpdateDuration: Duration(milliseconds: autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo,
       panelMeta: panelMeta,
+      capabilityManifest: capabilityManifest,
+      serviceRoutePolicies: serviceRoutePolicies,
+      manualCapabilitySelectors: manualCapabilitySelectors,
+      capabilityManifestIssue: capabilityManifestIssue,
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
@@ -173,7 +255,10 @@ extension RawProfilExt on RawProfile {
       order: order,
       clientEmulation: clientEmulation,
       customUserAgent: customUserAgent,
+      lastWorkingClient: lastWorkingClient,
       skippedNodes: skippedNodes,
+      undialableNodes: undialableNodes,
+      userLabel: userLabel,
     );
   }
 }
@@ -189,6 +274,10 @@ extension ProfilesCompanionExt on Profile {
       autoUpdateDurationMillis: autoUpdateDuration.inMilliseconds,
       subscriptionInfo: Value(subscriptionInfo),
       panelMeta: Value(panelMeta),
+      capabilityManifest: Value(capabilityManifest),
+      serviceRoutePolicies: Value(serviceRoutePolicies),
+      manualCapabilitySelectors: Value(manualCapabilitySelectors),
+      capabilityManifestIssue: Value(capabilityManifestIssue),
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
@@ -198,7 +287,10 @@ extension ProfilesCompanionExt on Profile {
       order: Value(order ?? this.order),
       clientEmulation: Value(clientEmulation),
       customUserAgent: Value(customUserAgent),
+      lastWorkingClient: Value(lastWorkingClient),
       skippedNodes: Value(skippedNodes),
+      undialableNodes: Value(undialableNodes),
+      userLabel: Value(userLabel),
     );
   }
 }

@@ -102,7 +102,17 @@ struct ManagedCore {
 impl ManagedCore {
     fn adopt(session_id: String, child: Child) -> Result<Self, Error> {
         #[cfg(windows)]
-        let job = CoreJob::bind(&child)?;
+        let (child, job) = {
+            let mut child = child;
+            let job = match CoreJob::bind(&child) {
+                Ok(job) => job,
+                Err(error) => {
+                    terminate_unmanaged_core(&mut child);
+                    return Err(error);
+                }
+            };
+            (child, job)
+        };
         Ok(Self {
             session_id,
             child,
@@ -138,6 +148,11 @@ impl ManagedCore {
     fn request_exit(&mut self) -> bool {
         false
     }
+}
+
+fn terminate_unmanaged_core(child: &mut Child) {
+    let _ = child.kill();
+    let _ = child.wait();
 }
 
 /// Windows has no cgroup to take the Core down with a crashed Helper, so the
@@ -1002,6 +1017,15 @@ mod tests {
         assert_eq!(core.session_id, "fedcba9876543210fedcba9876543210");
         assert!(core.child.try_wait().unwrap().is_none());
         release_managed_core(&mut managed).unwrap();
+    }
+
+    #[test]
+    fn unmanaged_core_cleanup_confirms_termination() {
+        let mut child = spawn_running_core();
+
+        terminate_unmanaged_core(&mut child);
+
+        assert!(child.try_wait().unwrap().is_some());
     }
 
     #[cfg(windows)]

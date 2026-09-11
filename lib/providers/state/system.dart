@@ -73,10 +73,18 @@ TrayTitleState trayTitleState(Ref ref) {
   final showTrayTitle = ref.watch(
     appSettingProvider.select((state) => state.showTrayTitle),
   );
+  if (!showTrayTitle) {
+    return const TrayTitleState(showTrayTitle: false, traffic: Traffic());
+  }
   final traffic = ref.watch(
-    trafficsProvider.select((state) => state.list.safeLast(const Traffic())),
+    trafficsProvider.select(
+      (state) => (
+        revision: state.revision,
+        traffic: state.list.safeLast(const Traffic()),
+      ),
+    ),
   );
-  return TrayTitleState(showTrayTitle: showTrayTitle, traffic: traffic);
+  return TrayTitleState(showTrayTitle: true, traffic: traffic.traffic);
 }
 
 @riverpod
@@ -157,16 +165,19 @@ SharedState sharedState(Ref ref) {
   final currentProfile = ref.watch(
     currentProfileProvider.select(
       (state) => CurrentProfileSelectorState(
-        label: state?.label ?? '',
+        label: state?.realLabel ?? appName,
         selectedMap: state?.selectedMap ?? {},
       ),
     ),
+  );
+  final activeText = ref.watch(
+    currentProfileProvider.select((state) => state?.panelMeta?.activeText),
   );
   final appSetting = ref.watch(
     appSettingProvider.select(
       (state) => (
         onlyStatisticsProxy: state.onlyStatisticsProxy,
-        showStopAction: state.showNotificationStopAction,
+        notificationSettings: state.notificationSettings,
         crashlytics: state.crashlytics,
         testUrl: state.testUrl,
         autoRun: state.autoRun,
@@ -195,7 +206,7 @@ SharedState sharedState(Ref ref) {
     ),
   );
   final vpnSetting = ref.watch(vpnSettingProvider);
-  final desyncSetting = ref.watch(desyncSettingProvider);
+  final desyncSetting = ref.watch(effectiveDesyncSettingProvider);
   final currentProfileName = currentProfile.label;
   final selectedMap = currentProfile.selectedMap;
   final onlyStatisticsProxy = appSetting.onlyStatisticsProxy;
@@ -206,11 +217,29 @@ SharedState sharedState(Ref ref) {
   return SharedState(
     currentProfileName: currentProfileName,
     onlyStatisticsProxy: onlyStatisticsProxy,
-    showStopAction: appSetting.showStopAction,
+    notificationSettings: appSetting.notificationSettings.projected,
     stopText: currentAppLocalizations.stop,
     pauseText: currentAppLocalizations.pause,
     resumeText: currentAppLocalizations.resume,
     pausedText: currentAppLocalizations.paused,
+    smartRoutingText: currentAppLocalizations.smartRouting,
+    smartRoutingSearchingText: currentAppLocalizations.smartRoutingSearching,
+    connectionDoctorText: currentAppLocalizations.connectionDoctor,
+    doctorExaminingText: currentAppLocalizations.doctorExaminingTitle,
+    doctorHealthyText: currentAppLocalizations.doctorHealthyTitle,
+    doctorDegradedText: currentAppLocalizations.doctorDegradedTitle,
+    doctorBrokenText: currentAppLocalizations.doctorBrokenTitle,
+    doctorObservingText: currentAppLocalizations.doctorObservingTitle,
+    sessionTrafficText: currentAppLocalizations.notificationSessionTraffic,
+    networkStateText: currentAppLocalizations.notificationNetworkState,
+    currentServerText: currentAppLocalizations.notificationCurrentServer,
+    networkNormalText: currentAppLocalizations.notificationNetworkNormal,
+    networkWhitelistText: currentAppLocalizations.notificationNetworkWhitelist,
+    networkPortalText: currentAppLocalizations.notificationNetworkPortal,
+    networkOfflineText: currentAppLocalizations.notificationNetworkOffline,
+    networkUnknownText: currentAppLocalizations.notificationNetworkUnknown,
+    activeText: activeText ?? currentAppLocalizations.heroProtected,
+    activeServerGroup: ref.watch(activeServerGroupProvider),
     crashlytics: crashlytics,
     pureBlackTheme: pureBlackTheme,
     autoRun: appSetting.autoRun,

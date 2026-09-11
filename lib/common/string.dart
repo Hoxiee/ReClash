@@ -17,6 +17,15 @@ extension StringExtension on String {
         uri.host.isNotEmpty;
   }
 
+  bool get isProfileImportLink {
+    final uri = Uri.tryParse(this);
+    final isHttpUrl =
+        uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty;
+    return isHttpUrl || startsWith('incy://') || startsWith('happ://');
+  }
+
   dynamic get splitByMultipleSeparators {
     final parts = split(
       RegExp(r'[, ;]+'),

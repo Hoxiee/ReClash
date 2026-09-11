@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -116,10 +117,6 @@ class _StartButtonState extends ConsumerState<StartButton>
   }
 
   void handleSwitchStart() {
-    if (ref.read(pausedProvider)) {
-      ref.read(commonActionProvider.notifier).togglePaused();
-      return;
-    }
     ref.read(commonActionProvider.notifier).toggleRunning();
   }
 
@@ -187,14 +184,17 @@ class _StartButtonState extends ConsumerState<StartButton>
       profilesProvider.select((state) => state.isNotEmpty),
     );
     final byedpiMode = ref.watch(
-      desyncSettingProvider.select((state) => state.enabled && state.onlyDpi),
+      effectiveDesyncSettingProvider.select(
+        (state) => state.enabled && state.onlyDpi,
+      ),
     );
     if (!hasProfile && !byedpiMode) {
       return Container();
     }
     final paused = ref.watch(pausedProvider);
     final isStart = ref.watch(isStartProvider);
-    final showPauseButton = isStart && !paused && ref.watch(tunEnabledProvider);
+    final showPauseButton =
+        isStart && (ref.watch(tunEnabledProvider) || paused);
     final hasThreeDigitHours =
         (_displayRunTime ?? 0) >= _threeDigitHourThreshold;
     final theme = Theme.of(context);
@@ -203,43 +203,18 @@ class _StartButtonState extends ConsumerState<StartButton>
         ? _getPausedTextWidth(context, appLocalizations.paused)
         : _getRunTimeTextWidth(context, hasThreeDigitHours: hasThreeDigitHours);
     final widthDuration = context.motionDuration(_widthAnimationDuration);
-    // While paused the service still runs, so the text panel stays open but
-    // the glyph flips to play — the next tap resumes.
-    final iconAnimation = paused
-        ? const AlwaysStoppedAnimation<double>(0)
-        : _animation;
     return RepaintBoundary(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           widthDuration == Duration.zero
-              ? (showPauseButton
-                    ? FloatingActionButton.small(
-                        heroTag: null,
-                        tooltip: appLocalizations.pause,
-                        onPressed: () {
-                          ref
-                              .read(commonActionProvider.notifier)
-                              .togglePaused();
-                        },
-                        child: const Icon(Icons.pause_rounded),
-                      )
-                    : const SizedBox(width: 8))
+              ? (showPauseButton ? const _PauseFab() : const SizedBox(width: 8))
               : AnimatedSize(
                   duration: widthDuration,
                   curve: Easing.standard,
                   alignment: Alignment.centerRight,
                   child: showPauseButton
-                      ? FloatingActionButton.small(
-                          heroTag: null,
-                          tooltip: appLocalizations.pause,
-                          onPressed: () {
-                            ref
-                                .read(commonActionProvider.notifier)
-                                .togglePaused();
-                          },
-                          child: const Icon(Icons.pause_rounded),
-                        )
+                      ? const _PauseFab()
                       : const SizedBox(width: 8),
                 ),
           Theme(
@@ -258,11 +233,7 @@ class _StartButtonState extends ConsumerState<StartButton>
               clipBehavior: Clip.antiAlias,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               heroTag: null,
-              tooltip: paused
-                  ? appLocalizations.resume
-                  : isStart
-                  ? appLocalizations.stop
-                  : appLocalizations.start,
+              tooltip: isStart ? appLocalizations.stop : appLocalizations.start,
               onPressed: () {
                 handleSwitchStart();
               },
@@ -270,13 +241,13 @@ class _StartButtonState extends ConsumerState<StartButton>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   AnimatedBuilder(
-                    animation: iconAnimation,
+                    animation: _animation,
                     builder: (_, child) {
                       return Container(
                         height: _buttonHeight,
                         padding: EdgeInsets.only(
                           left: 16,
-                          right: 16 - 8 * iconAnimation.value,
+                          right: 16 - 8 * _animation.value,
                         ),
                         alignment: Alignment.centerLeft,
                         child: child,
@@ -284,7 +255,7 @@ class _StartButtonState extends ConsumerState<StartButton>
                     },
                     child: AnimatedIcon(
                       icon: AnimatedIcons.play_pause,
-                      progress: iconAnimation,
+                      progress: _animation,
                     ),
                   ),
                   SizeTransition(
@@ -312,6 +283,26 @@ class _StartButtonState extends ConsumerState<StartButton>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Stays on screen while paused: pause keeps the service alive to resume.
+class _PauseFab extends ConsumerWidget {
+  const _PauseFab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final paused = ref.watch(pausedProvider);
+    return GestureDetector(
+      onLongPress: () => showSmartPauseNetworkSheet(context, ref),
+      child: FloatingActionButton.small(
+        heroTag: null,
+        tooltip: paused ? appLocalizations.resume : appLocalizations.pause,
+        onPressed: () => ref.read(commonActionProvider.notifier).togglePaused(),
+        child: Icon(paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
       ),
     );
   }

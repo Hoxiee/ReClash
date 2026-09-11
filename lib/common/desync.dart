@@ -57,22 +57,24 @@ List<String> desyncArgsFromText(String text) {
 
 /// Joins tokens back into a line; a token with both quote kinds is left raw.
 String desyncArgsToText(List<String> args) {
-  return args.map((arg) {
-    if (arg.isEmpty) {
-      return '""';
-    }
-    final needsQuoting = arg.contains(RegExp(r'\s'));
-    if (!needsQuoting) {
-      return arg;
-    }
-    if (!arg.contains("'")) {
-      return "'$arg'";
-    }
-    if (!arg.contains('"')) {
-      return '"$arg"';
-    }
-    return arg;
-  }).join(' ');
+  return args
+      .map((arg) {
+        if (arg.isEmpty) {
+          return '""';
+        }
+        final needsQuoting = arg.contains(RegExp(r'\s'));
+        if (!needsQuoting) {
+          return arg;
+        }
+        if (!arg.contains("'")) {
+          return "'$arg'";
+        }
+        if (!arg.contains('"')) {
+          return '"$arg"';
+        }
+        return arg;
+      })
+      .join(' ');
 }
 
 enum DesyncArgsIssueKind { unknownFlag, appOwnedFlag, missingValue, positional }
@@ -87,14 +89,46 @@ class DesyncArgsIssue {
 
 // The vendored v0.17.3 option table as it lands on Android: __linux__ defines
 // E/S/Y/P, FAKE_SUPPORT f/n, TIMEOUT_SUPPORT T; DAEMON stays off.
-const _desyncFlagOptions = {
-  'N', 'X', 'U', 'h', 'v', 'E', 'F', 'S', 'Y', 'Z',
-};
+const _desyncFlagOptions = {'N', 'X', 'U', 'h', 'v', 'E', 'F', 'S', 'Y', 'Z'};
 
 const _desyncValueOptions = {
-  'i', 'p', 'I', 'b', 'x', 'A', 'L', 'u', 'T', 'B', 'y', 'K', 'H', 'V', 'R',
-  's', 'd', 'o', 'q', 'f', 'n', 't', 'l', 'O', 'Q', 'e', 'M', 'r', 'm', 'a',
-  'g', 'W', 'P', 'j', 'C', '#', '/',
+  'i',
+  'p',
+  'I',
+  'b',
+  'x',
+  'A',
+  'L',
+  'u',
+  'T',
+  'B',
+  'y',
+  'K',
+  'H',
+  'V',
+  'R',
+  's',
+  'd',
+  'o',
+  'q',
+  'f',
+  'n',
+  't',
+  'l',
+  'O',
+  'Q',
+  'e',
+  'M',
+  'r',
+  'm',
+  'a',
+  'g',
+  'W',
+  'P',
+  'j',
+  'C',
+  '#',
+  '/',
 };
 
 const _desyncLongOptions = {
@@ -169,16 +203,12 @@ List<DesyncArgsIssue> desyncValidateArgs(List<String> args) {
     if (token.startsWith('--')) {
       final name = token.substring(2).split('=').first;
       if (_desyncAppOwnedLong.contains(name)) {
-        issues.add(
-          DesyncArgsIssue(DesyncArgsIssueKind.appOwnedFlag, token),
-        );
+        issues.add(DesyncArgsIssue(DesyncArgsIssueKind.appOwnedFlag, token));
       } else if (!_desyncLongOptions.containsKey(name)) {
         issues.add(DesyncArgsIssue(DesyncArgsIssueKind.unknownFlag, token));
       } else if (_desyncLongOptions[name]! && !token.contains('=')) {
         if (++i >= args.length) {
-          issues.add(
-            DesyncArgsIssue(DesyncArgsIssueKind.missingValue, token),
-          );
+          issues.add(DesyncArgsIssue(DesyncArgsIssueKind.missingValue, token));
         }
       }
       continue;
@@ -189,9 +219,7 @@ List<DesyncArgsIssue> desyncValidateArgs(List<String> args) {
         // A rejected flag still owns its value: otherwise the value would
         // pile on as a second, noisier positional complaint.
         if (_desyncAppOwnedShort.contains(flag)) {
-          issues.add(
-            DesyncArgsIssue(DesyncArgsIssueKind.appOwnedFlag, token),
-          );
+          issues.add(DesyncArgsIssue(DesyncArgsIssueKind.appOwnedFlag, token));
           if (c + 1 >= token.length && i + 1 < args.length) i++;
           break;
         }

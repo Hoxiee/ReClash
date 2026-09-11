@@ -12,17 +12,23 @@ import 'package:material_color_utilities/hct/hct.dart';
 
 const _iconVariants = [
   'default',
-  'pulse',
-  'glacier',
-  'obsidian',
   'velvet',
   'solar',
   'circuit',
-  'prism',
+  'echo',
+  'ink',
+  'blueprint',
+  'mesh',
+  'facet',
+  'strata',
+  'shatter',
+  'trace',
 ];
 
 class AppearanceColorSections extends ConsumerStatefulWidget {
-  const AppearanceColorSections({super.key});
+  const AppearanceColorSections({super.key, this.isAndroid});
+
+  final bool? isAndroid;
 
   @override
   ConsumerState<AppearanceColorSections> createState() =>
@@ -142,6 +148,16 @@ class _AppearanceColorSectionsState
   }
 
   Future<void> _handleSelectIcon(String variant) async {
+    final asset = 'assets/images/icon_variants/$variant.png';
+    final confirmed = await dialogs.showCommonDialog<bool>(
+      child: _AppIconPreviewDialog(
+        asset: asset,
+        label: _iconVariantLabel(context, variant),
+      ),
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
     ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(iconVariant: variant));
@@ -262,22 +278,32 @@ class _AppearanceColorSectionsState
             ),
           ],
         ),
-        if (system.isAndroid)
+        if (widget.isAndroid ?? system.isAndroid)
           SettingSection.sliver(
             title: appLocalizations.appearanceIcon,
             items: [
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (final variant in _iconVariants)
-                    _AppIconTile(
-                      asset: 'assets/images/icon_variants/$variant.png',
-                      label: _iconVariantLabel(context, variant),
-                      isSelected: iconVariant == variant,
-                      onPressed: () => _handleSelectIcon(variant),
-                    ),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  const spacing = 12.0;
+                  final columns = max((constraints.maxWidth / 112).floor(), 2);
+                  final tileWidth =
+                      (constraints.maxWidth - spacing * (columns - 1)) /
+                      columns;
+                  return Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: [
+                      for (final variant in _iconVariants)
+                        _AppIconTile(
+                          asset: 'assets/images/icon_variants/$variant.png',
+                          label: _iconVariantLabel(context, variant),
+                          width: tileWidth,
+                          isSelected: iconVariant == variant,
+                          onPressed: () => _handleSelectIcon(variant),
+                        ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -289,13 +315,17 @@ class _AppearanceColorSectionsState
 String _iconVariantLabel(BuildContext context, String variant) {
   final appLocalizations = context.appLocalizations;
   return switch (variant) {
-    'pulse' => appLocalizations.appIconPulse,
-    'glacier' => appLocalizations.appIconGlacier,
-    'obsidian' => appLocalizations.appIconObsidian,
     'velvet' => appLocalizations.appIconVelvet,
     'solar' => appLocalizations.appIconSolar,
     'circuit' => appLocalizations.appIconCircuit,
-    'prism' => appLocalizations.appIconPrism,
+    'echo' => appLocalizations.appIconEcho,
+    'ink' => appLocalizations.appIconInk,
+    'blueprint' => appLocalizations.appIconBlueprint,
+    'mesh' => appLocalizations.appIconMesh,
+    'facet' => appLocalizations.appIconFacet,
+    'strata' => appLocalizations.appIconStrata,
+    'shatter' => appLocalizations.appIconShatter,
+    'trace' => appLocalizations.appIconTrace,
     _ => appLocalizations.defaultText,
   };
 }
@@ -465,33 +495,97 @@ class _AppIconTile extends StatelessWidget {
   const _AppIconTile({
     required this.asset,
     required this.label,
+    required this.width,
     required this.isSelected,
     required this.onPressed,
   });
 
   final String asset;
   final String label;
+  final double width;
   final bool isSelected;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return CommonCard(
-      isSelected: isSelected,
-      onPressed: onPressed,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 8,
-          children: [
-            ClipRSuperellipse(
-              borderRadius: AppRadius.xs,
-              child: Image.asset(asset, width: 56, height: 56),
-            ),
-            Text(label, style: context.textTheme.labelMedium),
-          ],
+    return SizedBox(
+      width: width,
+      height: 112,
+      child: CommonCard(
+        isSelected: isSelected,
+        onPressed: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            spacing: 8,
+            children: [
+              ClipRSuperellipse(
+                borderRadius: AppRadius.xs,
+                child: Image.asset(asset, width: 56, height: 56),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.labelMedium,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _AppIconPreviewDialog extends StatelessWidget {
+  const _AppIconPreviewDialog({required this.asset, required this.label});
+
+  final String asset;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return CommonDialog(
+      title: appLocalizations.appIconPreview,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(appLocalizations.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(appLocalizations.appIconInstall),
+        ),
+      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 20,
+        children: [
+          DecoratedBox(
+            decoration: ShapeDecoration(
+              color: context.colorScheme.surfaceContainerHigh,
+              shape: AppShape.xxl,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: ClipRSuperellipse(
+                borderRadius: AppRadius.xxl,
+                child: Image.asset(asset, width: 220, height: 220),
+              ),
+            ),
+          ),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleLarge,
+          ),
+        ],
       ),
     );
   }

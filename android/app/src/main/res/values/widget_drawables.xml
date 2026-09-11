@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="widget_ic_mark" type="drawable">@drawable/ic_service</item>
+    <item name="widget_ic_start" type="drawable">@drawable/ic_action_resume</item>
+    <item name="widget_ic_stop" type="drawable">@drawable/ic_action_stop</item>
+    <item name="widget_ic_pause" type="drawable">@drawable/ic_action_pause</item>
+</resources>

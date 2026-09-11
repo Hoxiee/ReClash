@@ -386,10 +386,13 @@ class _SetupScrollCardState extends State<SetupScrollCard> {
   }
 
   void _reveal() {
-    if (_revealed || !mounted) return;
-    _revealed = true;
+    if (_revealed || !mounted || widget.revealIndex == null) return;
     final target = _revealKey.currentContext?.findRenderObject();
-    if (target == null || !_controller.hasClients) return;
+    if (target == null || !_controller.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _reveal());
+      return;
+    }
+    _revealed = true;
     _controller.position.ensureVisible(
       target,
       alignment: 0.5,

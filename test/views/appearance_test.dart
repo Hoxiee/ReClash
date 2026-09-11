@@ -4,6 +4,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/appearance/appearance.dart';
+import 'package:reclash/views/appearance/color_sections.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -137,6 +138,84 @@ void main() {
       Theme.of(tester.element(focusRing())).colorScheme.primary,
     );
     expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  group('app icon', () {
+    Future<void> pumpIconSections(
+      WidgetTester tester, {
+      Locale locale = const Locale('en'),
+    }) async {
+      tester.view.physicalSize = const Size(360, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: TestApp(
+            locale: locale,
+            child: const Scaffold(
+              body: CustomScrollView(
+                slivers: [AppearanceColorSections(isAndroid: true)],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text(locale.languageCode == 'ru' ? 'По умолчанию' : 'Default'),
+        300,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('cancels installation without changing the selected icon', (
+      tester,
+    ) async {
+      await pumpIconSections(tester);
+
+      await tester.tap(find.text('Velvet'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Icon preview'), findsOneWidget);
+      expect(container.read(appSettingProvider).iconVariant, 'default');
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Icon preview'), findsNothing);
+      expect(container.read(appSettingProvider).iconVariant, 'default');
+    });
+
+    testWidgets('installs the icon only after confirmation', (tester) async {
+      await pumpIconSections(tester);
+
+      await tester.tap(find.text('Echo'));
+      await tester.pumpAndSettle();
+      expect(container.read(appSettingProvider).iconVariant, 'default');
+
+      await tester.tap(find.text('Install'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(appSettingProvider).iconVariant, 'echo');
+    });
+
+    testWidgets('keeps Russian icon cards aligned without overflow', (
+      tester,
+    ) async {
+      await pumpIconSections(tester, locale: const Locale('ru'));
+
+      expect(tester.takeException(), isNull);
+      final cards = find.byWidgetPredicate(
+        (widget) => widget is SizedBox && widget.height == 112,
+      );
+      expect(cards, findsNWidgets(12));
+      for (var index = 0; index < 12; index++) {
+        expect(tester.getSize(cards.at(index)).height, 112);
+      }
+    });
   });
 
   group('theme mode', () {

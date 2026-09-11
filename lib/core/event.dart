@@ -40,6 +40,8 @@ abstract mixin class CoreEventListener {
   ) {}
 
   void onRcxStatus(RcxStatus status) {}
+
+  void onDoctorStatus(DoctorStatus status) {}
 }
 
 class CoreEventManager {
@@ -68,6 +70,13 @@ class CoreEventManager {
             case CoreEventType.rcxStatus:
               listener.onRcxStatus(
                 RcxStatus.fromJson(
+                  Map<String, Object?>.from(event.data as Map),
+                ),
+              );
+              break;
+            case CoreEventType.doctorStatus:
+              listener.onDoctorStatus(
+                DoctorStatus.fromJson(
                   Map<String, Object?>.from(event.data as Map),
                 ),
               );

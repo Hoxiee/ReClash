@@ -1,6 +1,8 @@
 package com.reclash
 
 import com.reclash.common.AccessControlMode
+import com.reclash.models.NotificationComponent
+import com.reclash.models.NotificationSettings
 import com.reclash.models.SetupParams
 import com.reclash.models.SharedState
 import com.reclash.service.PauseState
@@ -217,19 +219,123 @@ class ServiceStateMachineTest {
                 pauseText = "Пауза",
                 resumeText = "Продолжить",
                 pausedText = "На паузе",
+                smartRoutingText = "Автомаршрут",
+                smartRoutingSearchingText = "Поиск",
+                connectionDoctorText = "Доктор соединения",
+                doctorExaminingText = "Проверка",
+                doctorHealthyText = "Исправно",
+                doctorDegradedText = "Снижено",
+                doctorBrokenText = "Сбой",
+                doctorObservingText = "Наблюдение",
+                sessionTrafficText = "Трафик сеанса",
+                activeText = "Защита включена",
+                activeServerGroup = "GLOBAL",
+                notificationSettings = NotificationSettings(
+                    components = listOf(
+                        NotificationComponent(type = "networkState", group = "ignored"),
+                        NotificationComponent(
+                            type = "connectionDoctor",
+                            doctorPriority = "always",
+                            hideWhenIdle = false,
+                        ),
+                        NotificationComponent(
+                            type = "currentServer",
+                            group = "Proxy",
+                        ),
+                        NotificationComponent(type = "speed", hideWhenIdle = false),
+                        NotificationComponent(type = "networkState"),
+                        NotificationComponent(type = "future"),
+                    ),
+                    contentMode = "traffic",
+                    doctorPriority = "always",
+                    showSessionTraffic = false,
+                    hideIdleSpeed = false,
+                    showPauseAction = false,
+                    showStopAction = false,
+                    hideSensitiveOnLockScreen = false,
+                    subscriptionReminders = false,
+                ),
             ),
         )
 
+        assertEquals("Work", params.title)
+        assertEquals("Disconnect", params.stopText)
+        assertEquals(true, params.onlyStatisticsProxy)
+        assertEquals("Пауза", params.pauseText)
+        assertEquals("Продолжить", params.resumeText)
+        assertEquals("На паузе", params.pausedText)
+        assertEquals("Автомаршрут", params.smartRoutingText)
+        assertEquals("Поиск", params.smartRoutingSearchingText)
+        assertEquals("Доктор соединения", params.connectionDoctorText)
+        assertEquals("Проверка", params.doctorExaminingText)
+        assertEquals("Исправно", params.doctorHealthyText)
+        assertEquals("Снижено", params.doctorDegradedText)
+        assertEquals("Сбой", params.doctorBrokenText)
+        assertEquals("Наблюдение", params.doctorObservingText)
+        assertEquals("Трафик сеанса", params.sessionTrafficText)
+        assertEquals("Защита включена", params.activeText)
+        assertEquals("GLOBAL", params.activeServerGroup)
         assertEquals(
-            NotificationParams("Work", "Disconnect", true, "Пауза", "Продолжить", "На паузе"),
-            params,
+            listOf("networkState", "connectionDoctor", "currentServer", "speed"),
+            params.components.map { it.type },
         )
+        assertEquals(null, params.components[0].group)
+        assertEquals("always", params.components[1].doctorPriority)
+        assertEquals(null, params.components[1].hideWhenIdle)
+        assertEquals("Proxy", params.components[2].group)
+        assertEquals(false, params.components[3].hideWhenIdle)
+        assertEquals(false, params.showPauseAction)
+        assertEquals(false, params.showStopAction)
+        assertEquals(false, params.hideSensitiveOnLockScreen)
+    }
+
+    @Test
+    fun `notification params preserve explicit empty components`() {
+        val params = ServiceStateMachine.notificationParams(
+            SharedState(
+                notificationSettings = NotificationSettings(components = emptyList()),
+            ),
+        )
+
+        assertEquals(emptyList<com.reclash.service.models.NotificationComponent>(), params.components)
+    }
+
+    @Test
+    fun `notification params map legacy modes to components`() {
+        val traffic = ServiceStateMachine.notificationParams(
+            SharedState(
+                notificationSettings = NotificationSettings(
+                    contentMode = "traffic",
+                    doctorPriority = "never",
+                    showSessionTraffic = false,
+                    hideIdleSpeed = false,
+                ),
+            ),
+        )
+        val defaults = ServiceStateMachine.notificationParams(SharedState())
+        val minimal = ServiceStateMachine.notificationParams(
+            SharedState(
+                notificationSettings = NotificationSettings(contentMode = "minimal"),
+            ),
+        )
+
+        assertEquals(listOf("speed"), traffic.components.map { it.type })
+        assertEquals(false, traffic.components.single().hideWhenIdle)
+        assertEquals(
+            listOf("connectionDoctor", "smartRouting", "speed", "sessionTraffic"),
+            defaults.components.map { it.type },
+        )
+        assertEquals("problems", defaults.components.first().doctorPriority)
+        assertEquals(true, defaults.components[2].hideWhenIdle)
+        assertEquals(emptyList<com.reclash.service.models.NotificationComponent>(), minimal.components)
     }
 
     @Test
     fun `notification params carry the stop action switch`() {
         val params = ServiceStateMachine.notificationParams(
-            SharedState(showStopAction = false),
+            SharedState(
+                notificationSettings = NotificationSettings(showStopAction = false),
+            ),
         )
 
         assertEquals(false, params.showStopAction)
@@ -595,7 +701,15 @@ class ServiceStateMachineTest {
         )
 
         assertEquals(listOf(false), host.crashlytics)
-        assertEquals(listOf(NotificationParams("Work", "Disconnect", true)), host.notificationParams)
+        assertEquals(1, host.notificationParams.size)
+        assertEquals("Work", host.notificationParams.single().title)
+        assertEquals("Disconnect", host.notificationParams.single().stopText)
+        assertEquals(true, host.notificationParams.single().onlyStatisticsProxy)
+        assertEquals(
+            listOf("connectionDoctor", "smartRouting", "speed", "sessionTraffic"),
+            host.notificationParams.single().components.map { it.type },
+        )
+        assertEquals("Protection active", host.notificationParams.single().activeText)
     }
 
     @Test

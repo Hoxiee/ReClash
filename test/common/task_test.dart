@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path/path.dart';
 import 'package:yaml/yaml.dart';
 
 int _double(int value) => value * 2;
@@ -587,80 +584,6 @@ void main() {
       );
 
       expect(config['interface-name'], 'eth0');
-    });
-  });
-
-  group('makeRealProfileTask legacy provider file migration', () {
-    late Directory tempDir;
-    const url = 'https://example.com/proxy.yaml';
-    const name = 'remote';
-
-    setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('task_test_providers');
-    });
-
-    tearDown(() {
-      if (tempDir.existsSync()) {
-        tempDir.deleteSync(recursive: true);
-      }
-    });
-
-    Future<({String legacyPath, String newPath})> runMigration() async {
-      final providerDir = join(
-        tempDir.path,
-        providersDirectoryName,
-        '17',
-        proxiesProviderDirectoryName,
-      );
-      final legacyPath = join(providerDir, url.toMd5());
-      final newPath = join(providerDir, '$name@$url'.toMd5());
-
-      final result = await makeRealProfileTask(
-        MakeRealProfileState(
-          profilesPath: tempDir.path,
-          profileId: 17,
-          rawConfig: {
-            'proxy-providers': {
-              name: {'type': 'http', 'url': url},
-            },
-          },
-          realPatchConfig: const PatchClashConfig(),
-          overrideDns: false,
-          appendSystemDns: false,
-          proxyGroups: const [],
-          rules: const [],
-          addedRules: const [],
-          defaultUA: 'ReClash-Test',
-        ),
-      );
-      final config = loadYaml(result.yaml) as YamlMap;
-      expect(config['proxy-providers'][name]['path'], newPath);
-      return (legacyPath: legacyPath, newPath: newPath);
-    }
-
-    test('renames a file cached under the legacy url-only key', () async {
-      final providerDir = join(
-        tempDir.path,
-        providersDirectoryName,
-        '17',
-        proxiesProviderDirectoryName,
-      );
-      await Directory(providerDir).create(recursive: true);
-      final legacyFile = File(join(providerDir, url.toMd5()));
-      await legacyFile.writeAsString('cached-provider-data');
-
-      final paths = await runMigration();
-
-      expect(File(paths.newPath).existsSync(), isTrue);
-      expect(await File(paths.newPath).readAsString(), 'cached-provider-data');
-      expect(File(paths.legacyPath).existsSync(), isFalse);
-    });
-
-    test('is a no-op when no legacy file exists', () async {
-      final paths = await runMigration();
-
-      expect(File(paths.legacyPath).existsSync(), isFalse);
-      expect(File(paths.newPath).existsSync(), isFalse);
     });
   });
 

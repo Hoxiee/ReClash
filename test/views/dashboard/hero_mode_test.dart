@@ -6,6 +6,7 @@ import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,15 @@ class _TestDesyncSetting extends DesyncSetting {
   DesyncProps build() => _initial;
 }
 
+class _ModeSetupAction extends SetupAction {
+  static UiOutboundMode? selected;
+
+  @override
+  void changeUiMode(UiOutboundMode mode) {
+    selected = mode;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -30,6 +40,7 @@ void main() {
     DesyncProps desync = const DesyncProps(),
     List<Profile> profiles = const [],
     int? currentProfileId,
+    bool byeDpiSupported = true,
   }) async {
     tester.view.physicalSize = const Size(900, 1600);
     tester.view.devicePixelRatio = 1;
@@ -41,10 +52,13 @@ void main() {
         profilesProvider.overrideWith(() => TestProfiles(profiles)),
         currentProfileIdProvider.overrideWithBuild((_, _) => currentProfileId),
         desyncSettingProvider.overrideWith(() => _TestDesyncSetting(desync)),
+        byeDpiSupportedProvider.overrideWithValue(byeDpiSupported),
+        setupActionProvider.overrideWith(_ModeSetupAction.new),
         groupsProvider.overrideWithValue(const []),
         tunEnabledProvider.overrideWith((ref) => true),
         initProvider.overrideWithBuild((_, _) => true),
         isStartProvider.overrideWithValue(true),
+        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
       ],
     );
     addTearDown(container.dispose);
@@ -56,15 +70,39 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(
-          includeNavigatorKey: false,
-          child: Scaffold(body: HeroConnect()),
-        ),
+        child: const TestApp(child: Scaffold(body: HeroConnect())),
       ),
     );
     await tester.pump();
     return container;
   }
+
+  testWidgets('the orb keeps its authored size in both modes', (tester) async {
+    const profile = Profile(
+      id: 7,
+      label: 'Local profile',
+      autoUpdateDuration: Duration.zero,
+    );
+    final container = await pumpHero(
+      tester,
+      profiles: const [profile],
+      currentProfileId: profile.id,
+    );
+    final vpnSize = tester.widget<HeroOrb>(find.byType(HeroOrb)).size;
+
+    container
+        .read(desyncSettingProvider.notifier)
+        .update((state) => state.copyWith(enabled: true, onlyDpi: true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    final byedpiSize = tester.widget<HeroOrb>(find.byType(HeroOrb)).size;
+
+    expect(vpnSize, heroOrbBaseSize);
+    expect(byedpiSize, heroOrbBaseSize);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 2));
+  });
 
   testWidgets('only-dpi mode shows the orb without any profile', (
     tester,
@@ -122,24 +160,94 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
   });
 
-  testWidgets('a long press on the orb switches the mode', (tester) async {
+  testWidgets('the mode chip enters only-dpi from the outbound menu', (
+    tester,
+  ) async {
+    const profile = Profile(
+      id: 7,
+      label: 'Local profile',
+      autoUpdateDuration: Duration.zero,
+    );
+    final container = await pumpHero(
+      tester,
+      profiles: const [profile],
+      currentProfileId: profile.id,
+    );
+
+    await tester.tap(find.byTooltip('Rule'));
+    await tester.pump();
+
+    final popup = tester
+        .widgetList<CommonPopupMenu>(find.byType(CommonPopupMenu))
+        .last;
+    expect(popup.items.last.label, 'ByeDPI');
+    popup.items.last.onPressed!();
+    await tester.pump();
+
+    expect(container.read(desyncSettingProvider).enabled, isTrue);
+    expect(container.read(desyncSettingProvider).onlyDpi, isTrue);
+    expect(find.byTooltip('ByeDPI'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('unsupported platforms hide and ignore ByeDPI mode', (
+    tester,
+  ) async {
+    const profile = Profile(
+      id: 7,
+      label: 'Local profile',
+      autoUpdateDuration: Duration.zero,
+    );
+    await pumpHero(
+      tester,
+      desync: const DesyncProps(enabled: true, onlyDpi: true),
+      profiles: const [profile],
+      currentProfileId: profile.id,
+      byeDpiSupported: false,
+    );
+
+    expect(find.byTooltip('Rule'), findsOneWidget);
+    expect(find.text('DPI bypass without VPN'), findsNothing);
+
+    await tester.tap(find.byTooltip('Rule'));
+    await tester.pump();
+
+    final popup = tester
+        .widgetList<CommonPopupMenu>(find.byType(CommonPopupMenu))
+        .last;
+    expect(popup.items.map((item) => item.label), isNot(contains('ByeDPI')));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('the mode chip leaves only-dpi for an outbound mode', (
+    tester,
+  ) async {
+    _ModeSetupAction.selected = null;
     final container = await pumpHero(
       tester,
       desync: const DesyncProps(enabled: true, onlyDpi: true),
     );
 
-    await tester.longPress(find.byType(HeroOrb));
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.pump(const Duration(milliseconds: 400));
-
-    expect(find.text('Connection mode'), findsOneWidget);
-
-    await tester.tap(find.text('VPN'));
+    await tester.tap(find.byTooltip('ByeDPI'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('ByeDPI'), findsOneWidget);
+    expect(find.text('Rule'), findsOneWidget);
+    expect(find.text('Direct'), findsOneWidget);
+    expect(find.text('Global'), findsOneWidget);
+
+    final popup = tester
+        .widgetList<CommonPopupMenu>(find.byType(CommonPopupMenu))
+        .last;
+    popup.items.singleWhere((item) => item.label == 'Direct').onPressed!();
+    await tester.pump();
 
     expect(container.read(desyncSettingProvider).enabled, isFalse);
     expect(container.read(desyncSettingProvider).onlyDpi, isFalse);
+    expect(_ModeSetupAction.selected, UiOutboundMode.direct);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(seconds: 2));

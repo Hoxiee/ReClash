@@ -59,6 +59,20 @@ void main() {
       expect(isShareLinkInput(blob), isTrue);
     });
 
+    test('accepts MIME-wrapped base64 blobs', () {
+      final blob = base64.encode(
+        utf8.encode('vless://a@b:1\ntrojan://secret@c:2'),
+      );
+      final wrapped = blob.replaceAllMapped(
+        RegExp(r'.{1,12}'),
+        (match) => '${match.group(0)}\r\n',
+      );
+
+      expect(isShareLinkInput(wrapped), isTrue);
+      expect(tryConvertShareLinks(wrapped)?.config, contains('type: "vless"'));
+      expect(tryConvertShareLinks(wrapped)?.config, contains('type: "trojan"'));
+    });
+
     test('rejects base64 of non-links', () {
       expect(isShareLinkInput(base64.encode(utf8.encode('hello'))), isFalse);
     });
@@ -612,7 +626,7 @@ void main() {
       expect(config, contains('mtu: 1420'));
       expect(config, contains('dns: ["1.1.1.1"]'));
       expect(config, contains('remote-dns-resolve: true'));
-      expect(config, contains('allowed-ips: ["0.0.0.0/0,::/0"]'));
+      expect(config, contains('allowed-ips: ["0.0.0.0/0", "::/0"]'));
     });
 
     test('wireguard keeps only the first address per family', () {
@@ -710,6 +724,17 @@ void main() {
       expect(_proxiesNames(result!.config), ['same', 'same 2']);
       // Both entries must survive in the group.
       expect(result.config, contains('"same", "same 2", DIRECT'));
+    });
+
+    test('reserved group and built-in names are renamed', () {
+      final result = tryConvertShareLinks(
+        'trojan://p@h:1#PROXY\nvless://u@h:2#DIRECT',
+      );
+
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['PROXY node', 'DIRECT node']);
+      expect(result.config, contains('name: "PROXY"'));
+      expect(result.config, contains('"PROXY node", "DIRECT node", DIRECT'));
     });
 
     test('names needing yaml quoting survive emission', () {

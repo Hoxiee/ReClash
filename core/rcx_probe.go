@@ -8,9 +8,11 @@ import (
 
 type rcxProbeTarget struct {
 	Node    string
+	Key     string
 	Role    rcxRole
 	Marker  rcxMarker
 	Markers []rcxMarker
+	Echoes  []string
 }
 
 type rcxMarkerAttempt struct {
@@ -20,32 +22,41 @@ type rcxMarkerAttempt struct {
 }
 
 type rcxProbeResult struct {
-	Node        string
-	Role        rcxRole
-	Fingerprint string
-	Outcome     rcxProbeOutcome
-	DelayMs     int
-	Attempts    []rcxMarkerAttempt
+	Node           string
+	Key            string
+	Role           rcxRole
+	Fingerprint    string
+	Outcome        rcxProbeOutcome
+	DelayMs        int
+	Attempts       []rcxMarkerAttempt
+	ExitCountry    string
+	chargeNegative bool
 }
 
 type rcxTestFunc func(ctx context.Context, node string, marker rcxMarker) (delayMs int, satisfied bool, err error)
 
+type rcxLocateFunc func(ctx context.Context, node, echo string) string
+
 type rcxProber struct {
 	test        rcxTestFunc
+	locate      rcxLocateFunc
 	concurrency int
 	staggerMs   int
 	timeout     time.Duration
+	echoTimeout time.Duration
 	jitter      func(spread int) int
 	sleep       func(ctx context.Context, d time.Duration) bool
 	enough      func(rcxProbeResult) bool
 }
 
-func newRcxProber(test rcxTestFunc) *rcxProber {
+func newRcxProber(test rcxTestFunc, locate rcxLocateFunc) *rcxProber {
 	return &rcxProber{
 		test:        test,
+		locate:      locate,
 		concurrency: rcxProbeConcurrency,
 		staggerMs:   rcxProbeStaggerMs,
 		timeout:     10 * time.Second,
+		echoTimeout: rcxLocateTimeout,
 	}
 }
 
@@ -122,12 +133,12 @@ dispatch:
 		safeGoDetached("rcx probe", func() {
 			result := rcxUnmeasuredProbe(targets[index])
 			defer func() {
-				<-slots
-				wg.Done()
 				deliver(index, result)
 				if p.enough != nil && p.enough(result) {
 					cancel()
 				}
+				<-slots
+				wg.Done()
 			}()
 			result = p.probe(ctx, targets[index])
 		})
@@ -138,6 +149,7 @@ dispatch:
 func rcxUnmeasuredProbe(target rcxProbeTarget) rcxProbeResult {
 	return rcxProbeResult{
 		Node:        target.Node,
+		Key:         target.Key,
 		Role:        target.Role,
 		Fingerprint: rcxMarkersFingerprint(rcxTargetMarkers(target)),
 		Outcome:     rcxProbeOverloaded,
@@ -167,7 +179,30 @@ func (p *rcxProber) probe(parent context.Context, target rcxProbeTarget) rcxProb
 			break
 		}
 	}
+	if result.Outcome == rcxProbeOK {
+		result.ExitCountry = p.echo(parent, target)
+	}
 	return result
+}
+
+// Ridden on the open probe on purpose: the event that grants the open proof
+// carries the egress with it, so no tick ranks a fronted node while unmeasured.
+func (p *rcxProber) echo(parent context.Context, target rcxProbeTarget) string {
+	if p.locate == nil || target.Role != rcxRoleOpen {
+		return ""
+	}
+	for _, echo := range target.Echoes {
+		ctx, cancel := context.WithTimeout(parent, p.echoTimeout)
+		country := p.locate(ctx, target.Node, echo)
+		cancel()
+		if country != "" {
+			return country
+		}
+		if parent.Err() != nil {
+			break
+		}
+	}
+	return ""
 }
 
 func (p *rcxProber) probeMarker(

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -40,13 +43,29 @@ class SmartRoutingView extends ConsumerWidget {
     if (confirmed != true) {
       return;
     }
-    _update(ref, (state) => state.applyPreset(state.preset));
+    _update(
+      ref,
+      (state) => state.applyPreset(state.preset).applyStrategy(state.strategy),
+    );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
+    final profile = ref.watch(currentProfileProvider);
+    final servicePolicies = {
+      for (final policy in profile?.serviceRoutePolicies ?? const [])
+        policy.capabilityId: policy,
+    };
+    final laneStatusById = {
+      for (final lane in ref.watch(
+        smartRoutingStatusProvider.select(
+          (status) => status?.lanes ?? const <RcxLaneStatus>[],
+        ),
+      ))
+        lane.id: lane,
+    };
     final slivers = <Widget>[
       SettingSection.sliver(
         top: 16,
@@ -69,7 +88,7 @@ class SmartRoutingView extends ConsumerWidget {
             const SizedBox(width: 8),
             CommonMinFilledButtonTheme(
               child: FilledButton.tonal(
-                onPressed: props.matchesPreset
+                onPressed: props.matchesPreset && props.matchesStrategy
                     ? null
                     : () => _handleReset(context, ref),
                 child: Text(appLocalizations.reset),
@@ -90,23 +109,36 @@ class SmartRoutingView extends ConsumerWidget {
               options: SmartRoutingPreset.values,
               value: props.preset,
               textBuilder: (value) => (value as SmartRoutingPreset).label,
-              onChanged: (value) => _update(
-                ref,
-                (state) => state.applyPreset(value as SmartRoutingPreset),
-              ),
+              onChanged: (value) {
+                if (value == null) return;
+                _update(
+                  ref,
+                  (state) => state.applyPreset(value as SmartRoutingPreset),
+                );
+              },
             ),
             DecorationListItem.options(
               title: Text(appLocalizations.smartRoutingStrategy),
-              subtitle: Text(appLocalizations.smartRoutingStrategyDesc),
+              subtitle: Text(
+                props.matchesStrategy
+                    ? props.strategy.description
+                    : appLocalizations.smartRoutingStrategyEdited(
+                        props.strategy.label,
+                      ),
+              ),
               dialogTitle: appLocalizations.smartRoutingStrategy,
               options: SmartRoutingStrategy.values,
               value: props.strategy,
               textBuilder: (value) => (value as SmartRoutingStrategy).label,
-              onChanged: (value) => _update(
-                ref,
-                (state) =>
-                    state.copyWith(strategy: value as SmartRoutingStrategy),
-              ),
+              subtitleBuilder: (value) =>
+                  (value as SmartRoutingStrategy).description,
+              onChanged: (value) {
+                if (value == null) return;
+                _update(
+                  ref,
+                  (state) => state.applyStrategy(value as SmartRoutingStrategy),
+                );
+              },
             ),
           ],
         ),
@@ -144,11 +176,29 @@ class SmartRoutingView extends ConsumerWidget {
               value: props.dwellSeconds,
               textBuilder: (value) =>
                   appLocalizations.smartRoutingSeconds(value as int),
-              onChanged: (value) => _update(
-                ref,
-                (state) => state.copyWith(dwellSeconds: value as int),
-              ),
+              onChanged: (value) {
+                if (value == null) return;
+                _update(
+                  ref,
+                  (state) => state.copyWith(dwellSeconds: value as int),
+                );
+              },
             ),
+          ],
+        ),
+        SettingSection.sliver(
+          title: appLocalizations.smartRoutingServiceRoutes,
+          items: [
+            for (final capabilityId in supportedCapabilityIds)
+              _ServiceRouteItem(
+                capabilityId: capabilityId,
+                policy:
+                    servicePolicies[capabilityId] ??
+                    ServiceRoutePolicy(capabilityId: capabilityId),
+                laneStatus: laneStatusById[capabilityId],
+                manifest: profile?.capabilityManifest,
+                manualSelectors: profile?.manualCapabilitySelectors ?? const [],
+              ),
           ],
         ),
         SettingSection.sliver(
@@ -162,10 +212,13 @@ class SmartRoutingView extends ConsumerWidget {
               value: props.waveWidth,
               textBuilder: (value) =>
                   appLocalizations.smartRoutingWaveNodes(value as int),
-              onChanged: (value) => _update(
-                ref,
-                (state) => state.copyWith(waveWidth: value as int),
-              ),
+              onChanged: (value) {
+                if (value == null) return;
+                _update(
+                  ref,
+                  (state) => state.copyWith(waveWidth: value as int),
+                );
+              },
             ),
           ],
         ),
@@ -255,6 +308,497 @@ class SmartRoutingView extends ConsumerWidget {
       title: appLocalizations.smartRouting,
       body: CustomScrollView(
         slivers: [...slivers, const SettingBottomInset.sliver()],
+      ),
+    );
+  }
+}
+
+typedef _LaneView = ({IconData icon, Color color, String text});
+
+/// One reading of a lane for the row and its detail header: the toggle state,
+/// then whichever live verdict the engine last reported. Without a status the
+/// route is enabled but the core has not spoken yet, so it reads as pending
+/// rather than as working or broken.
+_LaneView _laneView(
+  BuildContext context, {
+  required bool enabled,
+  required ServiceRouteFallback fallback,
+  required RcxLaneStatus? status,
+  required int selectorCount,
+}) {
+  final appLocalizations = context.appLocalizations;
+  final colorScheme = context.colorScheme;
+  final muted = colorScheme.onSurfaceVariant;
+  if (!enabled) {
+    return (
+      icon: Icons.circle_outlined,
+      color: muted,
+      text: selectorCount == 0
+          ? appLocalizations.smartRoutingServiceNoCandidates
+          : appLocalizations.smartRoutingServiceCandidates(selectorCount),
+    );
+  }
+  switch (status?.state) {
+    case 'active':
+      final node = status!.node.trim();
+      return (
+        icon: Icons.bolt_rounded,
+        color: colorScheme.primary,
+        text: node.isEmpty
+            ? appLocalizations.smartRoutingOn
+            : appLocalizations.smartRoutingServiceVia(node),
+      );
+    case 'searching':
+      return (
+        icon: Icons.autorenew_rounded,
+        color: muted,
+        text: appLocalizations.smartRoutingSearching,
+      );
+    case 'fallback':
+      final reject = (status?.fallback ?? fallback.name) == 'reject';
+      return reject
+          ? (
+              icon: Icons.block_rounded,
+              color: colorScheme.error,
+              text: appLocalizations.smartRoutingServiceFallbackActiveReject,
+            )
+          : (
+              icon: Icons.alt_route_rounded,
+              color: muted,
+              text: appLocalizations.smartRoutingServiceFallbackActiveMain,
+            );
+    default:
+      return (
+        icon: Icons.hourglass_empty_rounded,
+        color: muted,
+        text: appLocalizations.smartRoutingServicePending,
+      );
+  }
+}
+
+int _providerSelectorCount(
+  ProviderCapabilityManifest? manifest,
+  String capabilityId,
+) =>
+    manifest?.claims
+        .where((claim) => claim.capabilityId == capabilityId)
+        .fold<int>(0, (total, claim) => total + claim.selectors.length) ??
+    0;
+
+String capabilityTitle(BuildContext context, String capabilityId) =>
+    switch (capabilityId) {
+      'youtube-adfree' => context.appLocalizations.smartRoutingServiceYouTube,
+      'gemini-access' => context.appLocalizations.smartRoutingServiceGemini,
+      _ => capabilityId,
+    };
+
+String _fallbackText(BuildContext context, ServiceRouteFallback fallback) =>
+    switch (fallback) {
+      ServiceRouteFallback.main =>
+        context.appLocalizations.smartRoutingServiceFallbackMain,
+      ServiceRouteFallback.reject =>
+        context.appLocalizations.smartRoutingServiceFallbackReject,
+    };
+
+class _ServiceRouteItem extends StatelessWidget {
+  const _ServiceRouteItem({
+    required this.capabilityId,
+    required this.policy,
+    required this.laneStatus,
+    required this.manifest,
+    required this.manualSelectors,
+  });
+
+  final String capabilityId;
+  final ServiceRoutePolicy policy;
+  final RcxLaneStatus? laneStatus;
+  final ProviderCapabilityManifest? manifest;
+  final List<ManualCapabilitySelector> manualSelectors;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectorCount =
+        _providerSelectorCount(manifest, capabilityId) +
+        manualSelectors
+            .where((selector) => selector.capabilityId == capabilityId)
+            .length;
+    final view = _laneView(
+      context,
+      enabled: policy.enabled,
+      fallback: policy.fallback,
+      status: laneStatus,
+      selectorCount: selectorCount,
+    );
+    return DecorationListItem.open(
+      leading: Icon(view.icon, color: view.color),
+      title: Text(capabilityTitle(context, capabilityId)),
+      subtitle: Text(view.text),
+      blur: false,
+      widget: _ServiceRoutePage(
+        title: capabilityTitle(context, capabilityId),
+        capabilityId: capabilityId,
+      ),
+    );
+  }
+}
+
+/// Reads the profile rather than the values the row held when it was tapped:
+/// the pushed page outlives that build, so a captured copy would keep showing
+/// the old policy and would let one edit overwrite the previous one.
+class _ServiceRoutePage extends ConsumerWidget {
+  const _ServiceRoutePage({required this.title, required this.capabilityId});
+
+  final String title;
+  final String capabilityId;
+
+  void _updateProfile(WidgetRef ref, Profile Function(Profile profile) update) {
+    final profile = ref.read(currentProfileProvider);
+    if (profile == null) return;
+    ref.read(profilesProvider.notifier).updateProfile(profile.id, update);
+  }
+
+  void _updatePolicy(
+    WidgetRef ref,
+    ServiceRoutePolicy Function(ServiceRoutePolicy policy) update,
+  ) {
+    _updateProfile(ref, (profile) {
+      final policies = [...profile.serviceRoutePolicies];
+      final index = policies.indexWhere(
+        (policy) => policy.capabilityId == capabilityId,
+      );
+      final current = index < 0
+          ? ServiceRoutePolicy(capabilityId: capabilityId)
+          : policies[index];
+      final next = update(current);
+      if (index < 0) {
+        policies.add(next);
+      } else {
+        policies[index] = next;
+      }
+      return profile.copyWith(serviceRoutePolicies: policies);
+    });
+  }
+
+  void _updateManual(
+    WidgetRef ref,
+    List<ManualCapabilitySelector> Function(
+      List<ManualCapabilitySelector> current,
+    )
+    update,
+  ) {
+    _updateProfile(ref, (profile) {
+      final mine = <ManualCapabilitySelector>[];
+      final others = <ManualCapabilitySelector>[];
+      for (final selector in profile.manualCapabilitySelectors) {
+        (selector.capabilityId == capabilityId ? mine : others).add(selector);
+      }
+      return profile.copyWith(
+        manualCapabilitySelectors: [...others, ...update(mine)],
+      );
+    });
+  }
+
+  Future<void> _addManual(WidgetRef ref) async {
+    final result = await dialogs.showCommonDialog<ManualCapabilitySelector>(
+      child: _ManualCapabilitySelectorDialog(capabilityId: capabilityId),
+    );
+    if (result == null) return;
+    _updateManual(ref, (current) => [...current, result]);
+  }
+
+  Future<void> _editManual(
+    WidgetRef ref,
+    ManualCapabilitySelector selector,
+  ) async {
+    final result = await dialogs.showCommonDialog<ManualCapabilitySelector>(
+      child: _ManualCapabilitySelectorDialog(
+        capabilityId: capabilityId,
+        selector: selector,
+      ),
+    );
+    if (result == null) return;
+    _updateManual(ref, (current) {
+      final index = current.indexOf(selector);
+      if (index < 0) return current;
+      return [...current]..[index] = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final profile = ref.watch(currentProfileProvider);
+    final policy =
+        profile?.serviceRoutePolicies.firstWhereOrNull(
+          (policy) => policy.capabilityId == capabilityId,
+        ) ??
+        ServiceRoutePolicy(capabilityId: capabilityId);
+    final manualSelectors = [
+      for (final selector
+          in profile?.manualCapabilitySelectors ??
+              const <ManualCapabilitySelector>[])
+        if (selector.capabilityId == capabilityId) selector,
+    ];
+    final providerSelectors = _providerSelectorCount(
+      profile?.capabilityManifest,
+      capabilityId,
+    );
+    final status = ref.watch(
+      smartRoutingStatusProvider.select(
+        (status) =>
+            status?.lanes.firstWhereOrNull((lane) => lane.id == capabilityId),
+      ),
+    );
+    final view = _laneView(
+      context,
+      enabled: policy.enabled,
+      fallback: policy.fallback,
+      status: status,
+      selectorCount: providerSelectors + manualSelectors.length,
+    );
+    return CommonScaffold(
+      title: title,
+      actions: [
+        CommonMinFilledButtonTheme(
+          child: FilledButton.tonal(
+            onPressed: () => _addManual(ref),
+            child: Text(appLocalizations.add),
+          ),
+        ),
+        const SizedBox(width: 8),
+      ],
+      body: ListView(
+        children: [
+          if (policy.enabled)
+            SettingSection(
+              top: 16,
+              title: appLocalizations.smartRoutingServiceStatus,
+              items: [
+                DecorationListItem(
+                  leading: Icon(view.icon, color: view.color),
+                  title: Text(view.text),
+                  subtitle: status == null
+                      ? null
+                      : Text(
+                          status.candidates == 0
+                              ? appLocalizations.smartRoutingServiceMatchedNone
+                              : appLocalizations.smartRoutingServiceReady(
+                                  status.eligible,
+                                  status.candidates,
+                                ),
+                        ),
+                ),
+              ],
+            ),
+          SettingSection(
+            top: policy.enabled ? 0 : 16,
+            title: appLocalizations.smartRoutingServiceRoute,
+            items: [
+              DecorationListItem.toggle(
+                title: Text(appLocalizations.smartRoutingServiceEnabled),
+                subtitle: Text(appLocalizations.smartRoutingServiceEnabledDesc),
+                value: policy.enabled,
+                onChanged: (value) => _updatePolicy(
+                  ref,
+                  (policy) => policy.copyWith(enabled: value),
+                ),
+              ),
+              DecorationListItem.options(
+                title: Text(appLocalizations.smartRoutingServiceFallback),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(appLocalizations.smartRoutingServiceFallbackDesc),
+                    const SizedBox(height: 4),
+                    Text(
+                      _fallbackText(context, policy.fallback),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurface.opacity60,
+                      ),
+                    ),
+                  ],
+                ),
+                dialogTitle: appLocalizations.smartRoutingServiceFallback,
+                options: ServiceRouteFallback.values,
+                value: policy.fallback,
+                textBuilder: (value) =>
+                    _fallbackText(context, value as ServiceRouteFallback),
+                onChanged: (value) {
+                  if (value == null) return;
+                  _updatePolicy(
+                    ref,
+                    (policy) => policy.copyWith(
+                      fallback: value as ServiceRouteFallback,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingServiceSources,
+            items: [
+              DecorationListItem(
+                title: Text(appLocalizations.smartRoutingServiceProviderSource),
+                subtitle: Text(
+                  appLocalizations.smartRoutingServiceProviderCandidates(
+                    providerSelectors,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingServiceManual,
+            bottom: 24,
+            items: manualSelectors.isEmpty
+                ? [
+                    DecorationListItem(
+                      title: Text(
+                        appLocalizations.smartRoutingServiceManualEmpty,
+                      ),
+                      subtitle: Text(
+                        appLocalizations.smartRoutingServiceManualEmptyDesc,
+                      ),
+                    ),
+                  ]
+                : [
+                    for (final selector in manualSelectors)
+                      DecorationListItem(
+                        title: Text(selector.nameContains),
+                        subtitle: Text(_selectorSummary(context, selector)),
+                        trailing: IconButton(
+                          tooltip: appLocalizations.delete,
+                          onPressed: () => _updateManual(
+                            ref,
+                            (current) => current
+                                .where((item) => item != selector)
+                                .toList(),
+                          ),
+                          icon: const Icon(Icons.delete_outline_rounded),
+                        ),
+                        onPressed: () => _editManual(ref, selector),
+                      ),
+                  ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _selectorSummary(
+  BuildContext context,
+  ManualCapabilitySelector selector,
+) {
+  final provider = selector.provider;
+  if (provider == null || provider.isEmpty) {
+    return context.appLocalizations.smartRoutingServiceAnyProvider;
+  }
+  return context.appLocalizations.smartRoutingServiceProvider(provider);
+}
+
+class _ManualCapabilitySelectorDialog extends StatefulWidget {
+  const _ManualCapabilitySelectorDialog({
+    required this.capabilityId,
+    this.selector,
+  });
+
+  final String capabilityId;
+  final ManualCapabilitySelector? selector;
+
+  @override
+  State<_ManualCapabilitySelectorDialog> createState() =>
+      _ManualCapabilitySelectorDialogState();
+}
+
+class _ManualCapabilitySelectorDialogState
+    extends State<_ManualCapabilitySelectorDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameContains;
+  late final TextEditingController _provider;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameContains = TextEditingController(
+      text: widget.selector?.nameContains ?? '',
+    );
+    _provider = TextEditingController(text: widget.selector?.provider ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameContains.dispose();
+    _provider.dispose();
+    super.dispose();
+  }
+
+  int _utf8Length(String value) => utf8.encode(value.trim()).length;
+
+  String? _validateToken(String? value, String label, {bool optional = false}) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) {
+      return optional ? null : context.appLocalizations.emptyTip(label);
+    }
+    if (_utf8Length(normalized) > 64) {
+      return context.appLocalizations.smartRoutingServiceTokenTooLong(label);
+    }
+    return null;
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() != true) return;
+    final provider = _provider.text.trim();
+    Navigator.of(context).pop(
+      ManualCapabilitySelector(
+        capabilityId: widget.capabilityId,
+        provider: provider.isEmpty ? null : provider,
+        nameContains: _nameContains.text.trim(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return CommonDialog(
+      title: appLocalizations.smartRoutingServiceManualSelector,
+      actions: [
+        TextButton(onPressed: _submit, child: Text(appLocalizations.confirm)),
+      ],
+      child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          spacing: 16,
+          children: [
+            TextFormField(
+              controller: _nameContains,
+              decoration: InputDecoration(
+                labelText: appLocalizations.smartRoutingServiceNameContains,
+                helperText:
+                    appLocalizations.smartRoutingServiceNameContainsDesc,
+              ),
+              validator: (value) => _validateToken(
+                value,
+                appLocalizations.smartRoutingServiceNameContains,
+              ),
+            ),
+            TextFormField(
+              controller: _provider,
+              decoration: InputDecoration(
+                labelText: appLocalizations.smartRoutingServiceProviderOptional,
+                helperText: appLocalizations.smartRoutingServiceProviderDesc,
+              ),
+              validator: (value) => _validateToken(
+                value,
+                appLocalizations.smartRoutingServiceProviderOptional,
+                optional: true,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_connected">Ulangan</string>
+    <string name="widget_connecting">Ulanmoqda…</string>
+    <string name="widget_disconnecting">Uzilmoqda…</string>
+    <string name="widget_disconnected">Uzilgan</string>
+    <string name="widget_paused">Toʻxtatilgan</string>
+    <string name="widget_start">Yoqish</string>
+    <string name="widget_stop">Oʻchirish</string>
+    <string name="widget_wait">Kuting</string>
+    <string name="widget_resume">Davom ettirish</string>
+    <string name="widget_pause">Toʻxtatish</string>
+    <string name="widget_check">Tekshirish</string>
+    <string name="widget_open">Ochish</string>
+    <string name="widget_refresh">Yangilash</string>
+
+    <string name="widget_app_name">@string/app_name</string>
+
+    <string name="widget_label_switch">ReClash Kalit</string>
+    <string name="widget_label_control">ReClash Boshqaruv</string>
+    <string name="widget_label_nodes">ReClash Tugunlar</string>
+    <string name="widget_label_traffic">ReClash Trafik</string>
+    <string name="widget_description_switch">Bir bosishda ulanish, ishlash vaqti va joriy tezlik.</string>
+    <string name="widget_description_control">Ulanish holati, tezlik, ishlash vaqti va toʻrtta tezkor amal.</string>
+    <string name="widget_description_nodes">Joriy guruhdan proksi tanlash va kechikishlarni qayta tekshirish.</string>
+    <string name="widget_description_traffic">Tezlik grafigi, seans jamlanmasi va ishlash vaqti.</string>
+
+    <string name="widget_placeholder_speed">0 B/s</string>
+    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_metric_down">Qabul</string>
+    <string name="widget_metric_up">Uzatish</string>
+    <string name="widget_metric_uptime">Ishlash vaqti</string>
+    <string name="widget_metric_session">Seans</string>
+
+    <string name="widget_no_nodes">Mavjud tugunlar yoʻq</string>
+    <string name="widget_service_off">Xizmat ishga tushmagan</string>
+    <string name="widget_state">Holat</string>
+
+    <string name="widget_terrain_normal">Toʻgʻridan-toʻgʻri tarmoq</string>
+    <string name="widget_terrain_whitelist">Ruxsat roʻyxati</string>
+    <string name="widget_terrain_portal">Kirish portali</string>
+    <string name="widget_terrain_offline">Oflayn</string>
+    <string name="widget_terrain_unknown">Tarmoq aniqlanmadi</string>
+
+    <string name="widget_doctor_healthy">Sogʻlom</string>
+    <string name="widget_doctor_degraded">Beqaror</string>
+    <string name="widget_doctor_broken">Muammo bor</string>
+    <string name="widget_doctor_examining">Tekshirilmoqda…</string>
+    <string name="widget_doctor_observing">Kuzatilmoqda</string>
+</resources>

@@ -1,7 +1,9 @@
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
+import 'connection_answer.dart';
 import 'routing_overview.dart';
 import 'task.dart';
 
@@ -81,10 +83,27 @@ extension SmartRoutingStrategyL10n on SmartRoutingStrategy {
   String get label {
     final appLocalizations = currentAppLocalizations;
     return switch (this) {
+      SmartRoutingStrategy.stable =>
+        appLocalizations.smartRoutingStrategyStable,
       SmartRoutingStrategy.balanced =>
         appLocalizations.smartRoutingStrategyBalanced,
       SmartRoutingStrategy.lowestLatency =>
         appLocalizations.smartRoutingStrategyLowestLatency,
+      SmartRoutingStrategy.saver => appLocalizations.smartRoutingStrategySaver,
+    };
+  }
+
+  String get description {
+    final appLocalizations = currentAppLocalizations;
+    return switch (this) {
+      SmartRoutingStrategy.stable =>
+        appLocalizations.smartRoutingStrategyStableDesc,
+      SmartRoutingStrategy.balanced =>
+        appLocalizations.smartRoutingStrategyBalancedDesc,
+      SmartRoutingStrategy.lowestLatency =>
+        appLocalizations.smartRoutingStrategyLowestLatencyDesc,
+      SmartRoutingStrategy.saver =>
+        appLocalizations.smartRoutingStrategySaverDesc,
     };
   }
 }
@@ -229,3 +248,69 @@ extension LocaleL10n on Locale {
     };
   }
 }
+
+DoctorAnswerText doctorAnswerText(AppLocalizations appLocalizations) =>
+    DoctorAnswerText(
+      unsupportedHeadline: appLocalizations.doctorUnsupportedTitle,
+      unsupportedMeaning: appLocalizations.doctorUnsupportedDesc,
+      examiningHeadline: appLocalizations.doctorExaminingTitle,
+      examiningMeaning: appLocalizations.doctorExaminingDesc,
+      staleHeadline: appLocalizations.doctorStaleTitle,
+      staleMeaning: appLocalizations.doctorStaleHint,
+      idleHeadline: appLocalizations.doctorObservingTitle,
+      idleMeaning: appLocalizations.doctorObservingDesc,
+      healthyHeadline: appLocalizations.doctorHealthyTitle,
+      healthyMeaning: appLocalizations.doctorHealthyDesc,
+      reachableHeadline: appLocalizations.doctorEndpointReachableTitle,
+      reachableMeaning: appLocalizations.doctorEndpointReachableDesc,
+      inconclusiveHeadline: appLocalizations.doctorInconclusiveTitle,
+      inconclusiveMeaning: appLocalizations.doctorInconclusiveDesc,
+      supersededHeadline: appLocalizations.doctorSupersededTitle,
+      supersededMeaning: appLocalizations.doctorSupersededDesc,
+      cancelledHeadline: appLocalizations.doctorCancelledTitle,
+      cancelledMeaning: appLocalizations.doctorCancelledDesc,
+      vpnInactiveHeadline: appLocalizations.doctorVpnInactiveTitle,
+      vpnInactiveMeaning: appLocalizations.doctorVpnInactiveDesc,
+      noNetworkHeadline: appLocalizations.doctorNoNetworkTitle,
+      noNetworkMeaning: appLocalizations.doctorNoNetworkDesc,
+      portalHeadline: appLocalizations.doctorPortalTitle,
+      portalMeaning: appLocalizations.doctorPortalDesc,
+      unvalidatedHeadline: appLocalizations.doctorUnvalidatedTitle,
+      unvalidatedMeaning: appLocalizations.doctorUnvalidatedDesc,
+      byeDpiFailedHeadline: appLocalizations.doctorByeDpiFailedTitle,
+      byeDpiFailedMeaning: appLocalizations.doctorByeDpiFailedDesc,
+      noNodeHeadline: appLocalizations.doctorNoNodeTitle,
+      noNodeMeaning: appLocalizations.doctorNoNodeDesc,
+      dnsStaleHeadline: appLocalizations.doctorDnsStaleTitle,
+      dnsStaleMeaning: appLocalizations.doctorDnsStaleDesc,
+      dnsFailedHeadline: appLocalizations.doctorDnsFailedTitle,
+      dnsFailedMeaning: appLocalizations.doctorDnsFailedDesc,
+      nodeDownHeadline: appLocalizations.doctorNodeDownTitle,
+      nodeDownMeaning: appLocalizations.doctorNodeDownDesc,
+      nodeRefusedHeadline: appLocalizations.doctorNodeRefusedTitle,
+      nodeRefusedMeaning: appLocalizations.doctorNodeRefusedDesc,
+      slowHeadline: appLocalizations.doctorSlowTitle,
+      slowMeaning: appLocalizations.doctorSlowDesc,
+      routeHeadline: appLocalizations.doctorRouteTitle,
+      routeMeaning: appLocalizations.doctorRouteDesc,
+      ingressHeadline: appLocalizations.doctorIngressTitle,
+      ingressMeaning: appLocalizations.doctorIngressDesc,
+      captureHeadline: appLocalizations.doctorVpnInactiveTitle,
+      captureMeaning: appLocalizations.doctorVpnInactiveDesc,
+      genericHeadline: appLocalizations.doctorBrokenTitle,
+      genericMeaning: appLocalizations.doctorGenericDesc,
+      stepStartVpn: appLocalizations.doctorStepStartVpn,
+      stepCheckWifi: appLocalizations.doctorStepCheckWifi,
+      stepSignInPortal: appLocalizations.doctorStepSignInPortal,
+      stepSwitchNetwork: appLocalizations.doctorStepSwitchNetwork,
+      stepRestartByeDpi: appLocalizations.doctorStepRestartByeDpi,
+      stepPickNode: appLocalizations.doctorStepPickNode,
+      stepUpdateSubscription: appLocalizations.doctorStepUpdateSubscription,
+      stepFlushDns: appLocalizations.doctorStepFlushDns,
+      stepChangeDns: appLocalizations.doctorStepChangeDns,
+      stepCheckRules: appLocalizations.doctorStepCheckRules,
+      stepRestartTunnel: appLocalizations.doctorStepRestartTunnel,
+      stepRecheckLater: appLocalizations.doctorStepRecheckLater,
+      stepDeepCheck: appLocalizations.doctorStepDeepCheck,
+      stepUseAppThenRecheck: appLocalizations.doctorStepUseAppThenRecheck,
+    );

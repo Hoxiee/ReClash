@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_surface">@android:color/system_accent2_50</color>
+    <color name="widget_surface_alt">@android:color/system_accent2_100</color>
+    <color name="widget_surface_press">@android:color/system_accent2_200</color>
+    <color name="widget_on_surface">@android:color/system_neutral1_900</color>
+    <color name="widget_on_surface_variant">@android:color/system_neutral2_700</color>
+    <color name="widget_accent">@android:color/system_accent1_600</color>
+    <color name="widget_accent_press">@android:color/system_accent1_700</color>
+    <color name="widget_on_accent">@android:color/system_accent1_0</color>
+    <color name="widget_tone_active">@android:color/system_accent1_600</color>
+    <color name="widget_chart_down">@android:color/system_accent1_600</color>
+    <color name="widget_chart_grid">@android:color/system_neutral2_300</color>
+</resources>

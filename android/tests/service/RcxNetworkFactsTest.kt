@@ -8,7 +8,7 @@ class RcxNetworkFactsTest {
 
     @Test
     fun `json field names match the core payload`() {
-        val json = RcxNetworkFacts(
+        val json = NetworkFacts(
             transport = "wifi",
             ssid = "Home",
             gateways = listOf("192.168.1.1"),
@@ -30,7 +30,7 @@ class RcxNetworkFactsTest {
 
     @Test
     fun `an ssid cannot break out of the json string`() {
-        val json = RcxNetworkFacts(transport = "wifi", ssid = """Cafe "free"\wifi""").toJson()
+        val json = NetworkFacts(transport = "wifi", ssid = """Cafe "free"\wifi""").toJson()
 
         assertTrue(json, json.contains("""\"free\"\\wifi"""))
     }
@@ -42,10 +42,26 @@ class RcxNetworkFactsTest {
     }
 
     @Test
+    fun `missing routing candidate becomes the empty network payload`() {
+        assertEquals(
+            """{"transport":"","ssid":"","carrier":"","gateways":[],""" +
+                """"dhcp":"","dns":[],"ipv4":[],"validated":false,"portal":false,"metered":false}""",
+            routingFacts(null).toJson(),
+        )
+    }
+
+    @Test
     fun `equal facts compare equal so an unchanged network sends nothing`() {
-        val first = RcxNetworkFacts(transport = "cellular", carrier = "25001")
-        val second = RcxNetworkFacts(transport = "cellular", carrier = "25001")
+        val first = NetworkFacts(transport = "cellular", carrier = "25001")
+        val second = NetworkFacts(transport = "cellular", carrier = "25001")
 
         assertEquals(first, second)
     }
+    @Test
+    fun `the rcx name remains a compatibility alias`() {
+        val facts: RcxNetworkFacts = NetworkFacts(transport = "wifi")
+
+        assertEquals("wifi", facts.transport)
+    }
+
 }

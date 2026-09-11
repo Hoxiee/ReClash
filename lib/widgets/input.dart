@@ -21,6 +21,7 @@ class OptionsDialog<T> extends StatelessWidget {
   final List<T> options;
   final T value;
   final String Function(T value) textBuilder;
+  final String Function(T value)? subtitleBuilder;
 
   const OptionsDialog({
     super.key,
@@ -28,6 +29,7 @@ class OptionsDialog<T> extends StatelessWidget {
     required this.options,
     required this.textBuilder,
     required this.value,
+    this.subtitleBuilder,
   });
 
   @override
@@ -50,12 +52,14 @@ class OptionsDialog<T> extends StatelessWidget {
                       Scrollable.ensureVisible(context);
                     });
                   }
+                  final subtitle = subtitleBuilder?.call(option);
                   return ListItem.radio(
                     value: option,
                     onTap: () {
                       Navigator.of(context).pop(option);
                     },
                     title: Text(textBuilder(option)),
+                    subtitle: subtitle == null ? null : Text(subtitle),
                   );
                 },
               ),

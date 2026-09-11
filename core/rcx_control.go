@@ -5,15 +5,17 @@ import "sync"
 // The event channel streams and drops, and a park-wide delay test is what fills
 // it: control intents are latest-wins, so they wait in slots instead of a queue.
 type rcxControl struct {
-	mu      sync.Mutex
-	config  *rcxConfig
-	enabled *bool
-	network *rcxNetworkPayload
-	frozen  bool
-	thawed  bool
-	pick    *rcxEvent
-	deep    bool
-	wake    chan struct{}
+	mu        sync.Mutex
+	config    *rcxConfig
+	enabled   *bool
+	network   *rcxNetworkPayload
+	screenOff bool
+	screenOn  bool
+	frozen    bool
+	thawed    bool
+	pick      *rcxEvent
+	deep      bool
+	wake      chan struct{}
 }
 
 func newRcxControl() *rcxControl {
@@ -50,6 +52,17 @@ func (c *rcxControl) Network(payload rcxNetworkPayload) {
 	c.signal()
 }
 
+func (c *rcxControl) ScreenOff(off bool) {
+	c.mu.Lock()
+	if off {
+		c.screenOff = true
+	} else {
+		c.screenOn = true
+	}
+	c.mu.Unlock()
+	c.signal()
+}
+
 // A pair of edges, not a state: collapsing loses the window or the recovery probe.
 func (c *rcxControl) Suspend(suspended bool) {
 	c.mu.Lock()
@@ -81,7 +94,7 @@ func (c *rcxControl) take() []rcxEvent {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	events := make([]rcxEvent, 0, 7)
+	events := make([]rcxEvent, 0, 9)
 	if c.config != nil {
 		events = append(events, rcxEvent{Kind: rcxEventConfigure, Config: *c.config})
 		c.config = nil
@@ -94,6 +107,10 @@ func (c *rcxControl) take() []rcxEvent {
 		events = append(events, rcxEvent{Kind: rcxEventNetwork, Payload: *c.network})
 		c.network = nil
 	}
+	if c.screenOff {
+		events = append(events, rcxEvent{Kind: rcxEventScreenOff, Flag: true})
+		c.screenOff = false
+	}
 	if c.frozen {
 		events = append(events, rcxEvent{Kind: rcxEventSuspend, Flag: true})
 		c.frozen = false
@@ -101,6 +118,10 @@ func (c *rcxControl) take() []rcxEvent {
 	if c.thawed {
 		events = append(events, rcxEvent{Kind: rcxEventSuspend, Flag: false})
 		c.thawed = false
+	}
+	if c.screenOn {
+		events = append(events, rcxEvent{Kind: rcxEventScreenOff, Flag: false})
+		c.screenOn = false
 	}
 	if c.pick != nil {
 		events = append(events, *c.pick)

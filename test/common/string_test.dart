@@ -28,6 +28,24 @@ void main() {
     });
   });
 
+  group('StringExtension.isProfileImportLink', () {
+    test('accepts HTTP and HTTPS subscription URLs', () {
+      expect('http://example.com/sub'.isProfileImportLink, isTrue);
+      expect('https://example.com/sub'.isProfileImportLink, isTrue);
+    });
+
+    test('accepts supported external import schemes', () {
+      expect('incy://import?url=test'.isProfileImportLink, isTrue);
+      expect('happ://import?url=test'.isProfileImportLink, isTrue);
+    });
+
+    test('rejects FTP, missing hosts, and plain text', () {
+      expect('ftp://files.example.com/sub'.isProfileImportLink, isFalse);
+      expect('https://'.isProfileImportLink, isFalse);
+      expect('example.com/sub'.isProfileImportLink, isFalse);
+    });
+  });
+
   group('StringExtension.splitByMultipleSeparators', () {
     test('splits on comma', () {
       final result = 'a,b,c'.splitByMultipleSeparators;

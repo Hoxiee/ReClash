@@ -261,10 +261,7 @@ void main() {
         config.patchClashConfig,
       );
       expect(overrideContainer.read(vpnSettingProvider), config.vpnProps);
-      expect(
-        overrideContainer.read(desyncSettingProvider),
-        config.desyncProps,
-      );
+      expect(overrideContainer.read(desyncSettingProvider), config.desyncProps);
       expect(
         overrideContainer.read(appSettingProvider).onlyStatisticsProxy,
         false,

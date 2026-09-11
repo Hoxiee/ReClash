@@ -8,13 +8,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 void main() {
   Future<void> pumpView(WidgetTester tester, List<Override> overrides) async {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        overrides: overrides,
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          ...overrides,
+        ],
         child: const LocaleView(),
       ),
     );

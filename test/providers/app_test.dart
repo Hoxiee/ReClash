@@ -226,6 +226,20 @@ void main() {
       container.read(currentPageLabelProvider.notifier).toProfiles();
       expect(container.read(currentPageLabelProvider), PageLabel.profiles);
     });
+
+    test('a returnable page hands its origin back once', () {
+      final notifier = container.read(currentPageLabelProvider.notifier);
+      notifier.toPage(PageLabel.proxies, returnable: true);
+      expect(notifier.takeReturnPage(), PageLabel.dashboard);
+      expect(notifier.takeReturnPage(), isNull);
+    });
+
+    test('a plain page clears an earlier return marker', () {
+      final notifier = container.read(currentPageLabelProvider.notifier);
+      notifier.toPage(PageLabel.proxies, returnable: true);
+      notifier.toPage(PageLabel.tools);
+      expect(notifier.takeReturnPage(), isNull);
+    });
   });
 
   group('SortNum provider', () {

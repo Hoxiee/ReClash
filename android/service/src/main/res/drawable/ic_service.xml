@@ -4,19 +4,28 @@
     android:height="24dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
-    <path
-        android:pathData="M137.3,225.8L184.5,355.5"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="62.1"
-        android:strokeLineCap="round" />
-    <path
-        android:pathData="M208.8,126.3L303.2,385.7"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="62.1"
-        android:strokeLineCap="round" />
-    <path
-        android:pathData="M335.3,178.1L366.7,264.6"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="62.1"
-        android:strokeLineCap="round" />
+    <!-- Scaled to the 22dp live area of a 24dp system icon: the unscaled mark
+         only covered 15dp and read as a thin smudge in the status bar. -->
+    <group
+        android:pivotX="252"
+        android:pivotY="256"
+        android:scaleX="1.45"
+        android:scaleY="1.45"
+        android:translateX="4">
+        <path
+            android:pathData="M137.3,225.8L184.5,355.5"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="62.1"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M208.8,126.3L303.2,385.7"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="62.1"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M335.3,178.1L366.7,264.6"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="62.1"
+            android:strokeLineCap="round" />
+    </group>
 </vector>

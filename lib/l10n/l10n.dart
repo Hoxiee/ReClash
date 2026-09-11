@@ -725,6 +725,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Emulation is experimental: the provider serves another client's format, which ReClash converts.`
+  String get subscriptionClientExperimentalTip {
+    return Intl.message(
+      'Emulation is experimental: the provider serves another client\'s format, which ReClash converts.',
+      name: 'subscriptionClientExperimentalTip',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Auto`
   String get subscriptionClientAuto {
     return Intl.message(
@@ -740,6 +750,16 @@ class AppLocalizations {
     return Intl.message(
       'Clash',
       name: 'subscriptionClientClash',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clash Meta`
+  String get subscriptionClientClashMeta {
+    return Intl.message(
+      'Clash Meta',
+      name: 'subscriptionClientClashMeta',
       desc: '',
       args: [],
     );
@@ -7339,33 +7359,93 @@ class AppLocalizations {
     );
   }
 
-  /// `How the engine trades latency for stability`
-  String get smartRoutingStrategyDesc {
+  /// `Reliable`
+  String get smartRoutingStrategyStable {
     return Intl.message(
-      'How the engine trades latency for stability',
-      name: 'smartRoutingStrategyDesc',
+      'Reliable',
+      name: 'smartRoutingStrategyStable',
       desc: '',
       args: [],
     );
   }
 
-  /// `Balanced`
+  /// `Keeps a working server and changes it less often`
+  String get smartRoutingStrategyStableDesc {
+    return Intl.message(
+      'Keeps a working server and changes it less often',
+      name: 'smartRoutingStrategyStableDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Everyday`
   String get smartRoutingStrategyBalanced {
     return Intl.message(
-      'Balanced',
+      'Everyday',
       name: 'smartRoutingStrategyBalanced',
       desc: '',
       args: [],
     );
   }
 
-  /// `Lowest latency`
+  /// `Suits everything — leave this if you are not sure`
+  String get smartRoutingStrategyBalancedDesc {
+    return Intl.message(
+      'Suits everything — leave this if you are not sure',
+      name: 'smartRoutingStrategyBalancedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fast`
   String get smartRoutingStrategyLowestLatency {
     return Intl.message(
-      'Lowest latency',
+      'Fast',
       name: 'smartRoutingStrategyLowestLatency',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Takes the quickest of the servers that work`
+  String get smartRoutingStrategyLowestLatencyDesc {
+    return Intl.message(
+      'Takes the quickest of the servers that work',
+      name: 'smartRoutingStrategyLowestLatencyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Saver`
+  String get smartRoutingStrategySaver {
+    return Intl.message(
+      'Saver',
+      name: 'smartRoutingStrategySaver',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checks servers less often, saving data and battery`
+  String get smartRoutingStrategySaverDesc {
+    return Intl.message(
+      'Checks servers less often, saving data and battery',
+      name: 'smartRoutingStrategySaverDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{strategy} · adjusted`
+  String smartRoutingStrategyEdited(String strategy) {
+    return Intl.message(
+      '$strategy · adjusted',
+      name: 'smartRoutingStrategyEdited',
+      desc: '',
+      args: [strategy],
     );
   }
 
@@ -9959,26 +10039,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Pulse`
-  String get appIconPulse {
-    return Intl.message('Pulse', name: 'appIconPulse', desc: '', args: []);
-  }
-
-  /// `Glacier`
-  String get appIconGlacier {
-    return Intl.message('Glacier', name: 'appIconGlacier', desc: '', args: []);
-  }
-
-  /// `Porcelain`
-  String get appIconPorcelain {
-    return Intl.message(
-      'Porcelain',
-      name: 'appIconPorcelain',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Velvet`
   String get appIconVelvet {
     return Intl.message('Velvet', name: 'appIconVelvet', desc: '', args: []);
@@ -9999,11 +10059,6 @@ class AppLocalizations {
     return Intl.message('Echo', name: 'appIconEcho', desc: '', args: []);
   }
 
-  /// `Glass`
-  String get appIconGlass {
-    return Intl.message('Glass', name: 'appIconGlass', desc: '', args: []);
-  }
-
   /// `Ink`
   String get appIconInk {
     return Intl.message('Ink', name: 'appIconInk', desc: '', args: []);
@@ -10017,6 +10072,31 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Mesh`
+  String get appIconMesh {
+    return Intl.message('Mesh', name: 'appIconMesh', desc: '', args: []);
+  }
+
+  /// `Facet`
+  String get appIconFacet {
+    return Intl.message('Facet', name: 'appIconFacet', desc: '', args: []);
+  }
+
+  /// `Strata`
+  String get appIconStrata {
+    return Intl.message('Strata', name: 'appIconStrata', desc: '', args: []);
+  }
+
+  /// `Shatter`
+  String get appIconShatter {
+    return Intl.message('Shatter', name: 'appIconShatter', desc: '', args: []);
+  }
+
+  /// `Trace`
+  String get appIconTrace {
+    return Intl.message('Trace', name: 'appIconTrace', desc: '', args: []);
   }
 
   /// `Dashboard style`
@@ -11955,10 +12035,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The Doctor is following the network path with bounded probes.`
+  /// `Testing each part of the connection path. This usually takes a few seconds.`
   String get doctorExaminingDesc {
     return Intl.message(
-      'The Doctor is following the network path with bounded probes.',
+      'Testing each part of the connection path. This usually takes a few seconds.',
       name: 'doctorExaminingDesc',
       desc: '',
       args: [],
@@ -12035,10 +12115,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The observed path completed successfully.`
+  /// `The app reached the internet through the expected connection path.`
   String get doctorHealthyDesc {
     return Intl.message(
-      'The observed path completed successfully.',
+      'The app reached the internet through the expected connection path.',
       name: 'doctorHealthyDesc',
       desc: '',
       args: [],
@@ -12095,10 +12175,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The Doctor confirmed the first failing layer.`
+  /// `The check found where the connection stops working.`
   String get doctorBrokenDesc {
     return Intl.message(
-      'The Doctor confirmed the first failing layer.',
+      'The check found where the connection stops working.',
       name: 'doctorBrokenDesc',
       desc: '',
       args: [],
@@ -12115,10 +12195,10 @@ class AppLocalizations {
     );
   }
 
-  /// `No active probes are running. Evidence appears as the app is used.`
+  /// `Run a check to test the connection now, or use the app to collect evidence from real traffic.`
   String get doctorObservingDesc {
     return Intl.message(
-      'No active probes are running. Evidence appears as the app is used.',
+      'Run a check to test the connection now, or use the app to collect evidence from real traffic.',
       name: 'doctorObservingDesc',
       desc: '',
       args: [],
@@ -12335,10 +12415,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Passive observation creates no additional network traffic. Start a check only when you want active probes.`
+  /// `Opening this screen runs one check. Between checks the Doctor only watches real traffic and creates no extra network activity.`
   String get doctorPassiveHint {
     return Intl.message(
-      'Passive observation creates no additional network traffic. Start a check only when you want active probes.',
+      'Opening this screen runs one check. Between checks the Doctor only watches real traffic and creates no extra network activity.',
       name: 'doctorPassiveHint',
       desc: '',
       args: [],
@@ -12675,6 +12755,36 @@ class AppLocalizations {
     );
   }
 
+  /// `What to try`
+  String get doctorWhatToTry {
+    return Intl.message(
+      'What to try',
+      name: 'doctorWhatToTry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start VPN`
+  String get doctorRemedyStartVpn {
+    return Intl.message(
+      'Start VPN',
+      name: 'doctorRemedyStartVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS settings`
+  String get doctorRemedyOpenDns {
+    return Intl.message(
+      'DNS settings',
+      name: 'doctorRemedyOpenDns',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `VPN is not active`
   String get doctorVpnInactiveTitle {
     return Intl.message(
@@ -12690,6 +12800,406 @@ class AppLocalizations {
     return Intl.message(
       'The app expected VPN protection, but the TUN path is not active.',
       name: 'doctorVpnInactiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Result is outdated`
+  String get doctorStaleTitle {
+    return Intl.message(
+      'Result is outdated',
+      name: 'doctorStaleTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection`
+  String get doctorNoNetworkTitle {
+    return Intl.message(
+      'No internet connection',
+      name: 'doctorNoNetworkTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The device is not connected to Wi-Fi or mobile data.`
+  String get doctorNoNetworkDesc {
+    return Intl.message(
+      'The device is not connected to Wi-Fi or mobile data.',
+      name: 'doctorNoNetworkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wi-Fi needs sign-in`
+  String get doctorPortalTitle {
+    return Intl.message(
+      'Wi-Fi needs sign-in',
+      name: 'doctorPortalTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The network is blocking internet access until you sign in.`
+  String get doctorPortalDesc {
+    return Intl.message(
+      'The network is blocking internet access until you sign in.',
+      name: 'doctorPortalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Network has no internet access`
+  String get doctorUnvalidatedTitle {
+    return Intl.message(
+      'Network has no internet access',
+      name: 'doctorUnvalidatedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The device is connected to a network, but Android cannot reach the internet through it.`
+  String get doctorUnvalidatedDesc {
+    return Intl.message(
+      'The device is connected to a network, but Android cannot reach the internet through it.',
+      name: 'doctorUnvalidatedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ByeDPI did not start`
+  String get doctorByeDpiFailedTitle {
+    return Intl.message(
+      'ByeDPI did not start',
+      name: 'doctorByeDpiFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The local ByeDPI proxy is unavailable, so traffic cannot pass through it.`
+  String get doctorByeDpiFailedDesc {
+    return Intl.message(
+      'The local ByeDPI proxy is unavailable, so traffic cannot pass through it.',
+      name: 'doctorByeDpiFailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No proxy server selected`
+  String get doctorNoNodeTitle {
+    return Intl.message(
+      'No proxy server selected',
+      name: 'doctorNoNodeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `There is no active proxy server to carry this connection.`
+  String get doctorNoNodeDesc {
+    return Intl.message(
+      'There is no active proxy server to carry this connection.',
+      name: 'doctorNoNodeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS data is outdated`
+  String get doctorDnsStaleTitle {
+    return Intl.message(
+      'DNS data is outdated',
+      name: 'doctorDnsStaleTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A cached address no longer matches the current network.`
+  String get doctorDnsStaleDesc {
+    return Intl.message(
+      'A cached address no longer matches the current network.',
+      name: 'doctorDnsStaleDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DNS is not working`
+  String get doctorDnsFailedTitle {
+    return Intl.message(
+      'DNS is not working',
+      name: 'doctorDnsFailedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app could not resolve the test address.`
+  String get doctorDnsFailedDesc {
+    return Intl.message(
+      'The app could not resolve the test address.',
+      name: 'doctorDnsFailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy server is unavailable`
+  String get doctorNodeDownTitle {
+    return Intl.message(
+      'Proxy server is unavailable',
+      name: 'doctorNodeDownTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The selected proxy server did not accept or answer the connection.`
+  String get doctorNodeDownDesc {
+    return Intl.message(
+      'The selected proxy server did not accept or answer the connection.',
+      name: 'doctorNodeDownDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test address was rejected`
+  String get doctorNodeRefusedTitle {
+    return Intl.message(
+      'Test address was rejected',
+      name: 'doctorNodeRefusedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The proxy connected, but the test address did not return the expected response.`
+  String get doctorNodeRefusedDesc {
+    return Intl.message(
+      'The proxy connected, but the test address did not return the expected response.',
+      name: 'doctorNodeRefusedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection is too slow`
+  String get doctorSlowTitle {
+    return Intl.message(
+      'Connection is too slow',
+      name: 'doctorSlowTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The test did not finish before the time limit.`
+  String get doctorSlowDesc {
+    return Intl.message(
+      'The test did not finish before the time limit.',
+      name: 'doctorSlowDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic was routed incorrectly`
+  String get doctorRouteTitle {
+    return Intl.message(
+      'Traffic was routed incorrectly',
+      name: 'doctorRouteTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The current profile could not choose a working route for this connection.`
+  String get doctorRouteDesc {
+    return Intl.message(
+      'The current profile could not choose a working route for this connection.',
+      name: 'doctorRouteDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic did not enter the tunnel`
+  String get doctorIngressTitle {
+    return Intl.message(
+      'Traffic did not enter the tunnel',
+      name: 'doctorIngressTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The app sent traffic, but it did not reach the expected VPN or local proxy entry.`
+  String get doctorIngressDesc {
+    return Intl.message(
+      'The app sent traffic, but it did not reach the expected VPN or local proxy entry.',
+      name: 'doctorIngressDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The check found a connection problem but could not identify a more specific cause.`
+  String get doctorGenericDesc {
+    return Intl.message(
+      'The check found a connection problem but could not identify a more specific cause.',
+      name: 'doctorGenericDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Start VPN and check again.`
+  String get doctorStepStartVpn {
+    return Intl.message(
+      'Start VPN and check again.',
+      name: 'doctorStepStartVpn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect to Wi-Fi or mobile data, then check again.`
+  String get doctorStepCheckWifi {
+    return Intl.message(
+      'Connect to Wi-Fi or mobile data, then check again.',
+      name: 'doctorStepCheckWifi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open the network sign-in page, then check again.`
+  String get doctorStepSignInPortal {
+    return Intl.message(
+      'Open the network sign-in page, then check again.',
+      name: 'doctorStepSignInPortal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch to another network or restore internet access.`
+  String get doctorStepSwitchNetwork {
+    return Intl.message(
+      'Switch to another network or restore internet access.',
+      name: 'doctorStepSwitchNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart ByeDPI in advanced settings.`
+  String get doctorStepRestartByeDpi {
+    return Intl.message(
+      'Restart ByeDPI in advanced settings.',
+      name: 'doctorStepRestartByeDpi',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose another proxy server.`
+  String get doctorStepPickNode {
+    return Intl.message(
+      'Choose another proxy server.',
+      name: 'doctorStepPickNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update the subscription if other servers also fail.`
+  String get doctorStepUpdateSubscription {
+    return Intl.message(
+      'Update the subscription if other servers also fail.',
+      name: 'doctorStepUpdateSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear the DNS cache and check again.`
+  String get doctorStepFlushDns {
+    return Intl.message(
+      'Clear the DNS cache and check again.',
+      name: 'doctorStepFlushDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Try another DNS server in profile settings.`
+  String get doctorStepChangeDns {
+    return Intl.message(
+      'Try another DNS server in profile settings.',
+      name: 'doctorStepChangeDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check the profile rules and routing mode.`
+  String get doctorStepCheckRules {
+    return Intl.message(
+      'Check the profile rules and routing mode.',
+      name: 'doctorStepCheckRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart the connection and check again.`
+  String get doctorStepRestartTunnel {
+    return Intl.message(
+      'Restart the connection and check again.',
+      name: 'doctorStepRestartTunnel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again later or on another network.`
+  String get doctorStepRecheckLater {
+    return Intl.message(
+      'Check again later or on another network.',
+      name: 'doctorStepRecheckLater',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Run a deep check to compare DNS paths.`
+  String get doctorStepDeepCheck {
+    return Intl.message(
+      'Run a deep check to compare DNS paths.',
+      name: 'doctorStepDeepCheck',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use the affected app, then return and check again.`
+  String get doctorStepUseAppThenRecheck {
+    return Intl.message(
+      'Use the affected app, then return and check again.',
+      name: 'doctorStepUseAppThenRecheck',
       desc: '',
       args: [],
     );
@@ -12862,6 +13372,46 @@ class AppLocalizations {
       name: 'dashboardProviderDetails',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Confirm external action`
+  String get externalActionConfirmTitle {
+    return Intl.message(
+      'Confirm external action',
+      name: 'externalActionConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow this external link to perform: {action}?`
+  String externalActionConfirmMessage(Object action) {
+    return Intl.message(
+      'Allow this external link to perform: $action?',
+      name: 'externalActionConfirmMessage',
+      desc: '',
+      args: [action],
+    );
+  }
+
+  /// `Apply provider settings`
+  String get panelSettingsConfirmTitle {
+    return Intl.message(
+      'Apply provider settings',
+      name: 'panelSettingsConfirmTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This subscription requests these app-wide settings:\n{settings}`
+  String panelSettingsConfirmMessage(Object settings) {
+    return Intl.message(
+      'This subscription requests these app-wide settings:\n$settings',
+      name: 'panelSettingsConfirmMessage',
+      desc: '',
+      args: [settings],
     );
   }
 }

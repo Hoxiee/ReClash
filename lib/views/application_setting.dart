@@ -1,6 +1,8 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/views/application_notification.dart';
+import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -24,6 +26,33 @@ ConfigToggleItem _appSettingToggle({
 
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return BaseScaffold(
+      title: appLocalizations.application,
+      body: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            SettingsTabs(
+              labels: [appLocalizations.general, appLocalizations.notification],
+            ),
+            const Expanded(
+              child: TabBarView(
+                children: [_ApplicationGeneralTab(), NotificationSettingsTab()],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ApplicationGeneralTab extends StatelessWidget {
+  const _ApplicationGeneralTab();
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +97,6 @@ class ApplicationSettingView extends StatelessWidget {
         select: (state) => state.closeConnections,
         update: (state, value) => state.copyWith(closeConnections: value),
       ),
-      if (system.isAndroid)
-        _appSettingToggle(
-          title: (l) => l.showNotificationStopAction,
-          subtitle: (l) => l.showNotificationStopActionDesc,
-          select: (state) => state.showNotificationStopAction,
-          update: (state, value) =>
-              state.copyWith(showNotificationStopAction: value),
-        ),
     ];
     final otherItems = <Widget>[
       _appSettingToggle(
@@ -110,27 +131,25 @@ class ApplicationSettingView extends StatelessWidget {
         update: (state, value) => state.copyWith(checkCertificate: value),
       ),
     ];
-    return BaseScaffold(
-      title: context.appLocalizations.application,
-      body: ListView(
-        children: [
-          SettingSection(top: 16, items: behaviorItems),
-          SettingSection(title: appLocalizations.other, items: otherItems),
-          SettingSection(
-            title: appLocalizations.settings,
-            items: [
-              DecorationListItem(
-                title: Text(appLocalizations.setupRerun),
-                subtitle: Text(appLocalizations.setupRerunDesc),
-                leading: const Icon(Icons.restart_alt_rounded),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                onPressed: () => SetupWizard.show(context, revisit: true),
-              ),
-            ],
-          ),
-          const SettingBottomInset(),
-        ],
-      ),
+    return CustomScrollView(
+      primary: false,
+      slivers: [
+        SettingSection.sliver(top: 12, items: behaviorItems),
+        SettingSection.sliver(title: appLocalizations.other, items: otherItems),
+        SettingSection.sliver(
+          title: appLocalizations.settings,
+          items: [
+            DecorationListItem(
+              title: Text(appLocalizations.setupRerun),
+              subtitle: Text(appLocalizations.setupRerunDesc),
+              leading: const Icon(Icons.restart_alt_rounded),
+              trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+              onPressed: () => SetupWizard.show(context, revisit: true),
+            ),
+          ],
+        ),
+        const SettingBottomInset.sliver(),
+      ],
     );
   }
 }

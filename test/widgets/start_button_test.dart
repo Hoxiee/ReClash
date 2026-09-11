@@ -263,6 +263,60 @@ void main() {
     expect(action.requests, [false, true]);
     expect(container.read(isStartProvider), isTrue);
   });
+  testWidgets('pause stays reachable while paused and stop stays on the fab', (
+    tester,
+  ) async {
+    final container = ProviderContainer(
+      overrides: [
+        profilesProvider.overrideWithValue([
+          const Profile(id: 1, autoUpdateDuration: Duration.zero),
+        ]),
+        initProvider.overrideWithBuild((_, _) => true),
+        tunEnabledProvider.overrideWith((_) => true),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(runTimeProvider.notifier).value = 1;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          includeNavigatorKey: false,
+          setTheme: false,
+          homeBuilder: (child) => Scaffold(floatingActionButton: child),
+          child: const StartButton(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    String mainTooltip() => tester
+        .widget<FloatingActionButton>(find.byType(FloatingActionButton).last)
+        .tooltip!;
+
+    expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+    expect(mainTooltip(), 'Stop');
+
+    await tester.tap(find.byIcon(Icons.pause_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(container.read(pausedProvider), isTrue);
+    expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+    expect(find.text('Paused'), findsOneWidget);
+    expect(mainTooltip(), 'Stop');
+
+    await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(container.read(pausedProvider), isFalse);
+    expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
 
 class _RecordingSetupAction extends SetupAction {

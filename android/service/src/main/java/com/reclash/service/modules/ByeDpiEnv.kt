@@ -4,7 +4,7 @@ import java.security.MessageDigest
 
 // Link facts like the Go core's fingerprint, salted with the SSID: same-model routers
 // in different venues must not share a strategy cache, and a rename only costs a re-probe.
-internal fun byeDpiEnvKey(facts: RcxNetworkFacts): String {
+internal fun byeDpiEnvKey(facts: NetworkFacts): String {
     val parts = buildList {
         addAll(facts.gateways)
         add(facts.dhcp)

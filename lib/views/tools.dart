@@ -18,6 +18,7 @@ import 'package:path/path.dart' show dirname, join;
 import 'appearance/appearance.dart';
 import 'config/advanced.dart';
 import 'developer.dart';
+import 'tools/connection_doctor.dart';
 import 'url_scheme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     return SettingSection(
       top: 16,
       items: [
+        const _ConnectionDoctorItem(),
         for (final navigationItem in navigationItems)
           DecorationListItem.open(
             leading: navigationItem.icon,
@@ -69,6 +71,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         top: first ? 16 : 0,
         title: first ? null : context.appLocalizations.settings,
         items: [
+          if (first) const _ConnectionDoctorItem(),
           const _LocaleItem(),
           const _ThemeItem(),
           const _BackupItem(),
@@ -117,6 +120,22 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         itemCount: items.length,
         itemBuilder: (_, index) => items[index],
       ),
+    );
+  }
+}
+
+class _ConnectionDoctorItem extends ConsumerWidget {
+  const _ConnectionDoctorItem();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final snapshot = ref.watch(connectionDoctorProvider);
+    return DecorationListItem.open(
+      leading: const Icon(Icons.monitor_heart_outlined),
+      title: Text(appLocalizations.connectionDoctor),
+      subtitle: Text(connectionDoctorTitle(appLocalizations, snapshot)),
+      widget: const ConnectionDoctorView(),
     );
   }
 }

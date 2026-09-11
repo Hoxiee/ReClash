@@ -1,4 +1,5 @@
 import 'package:reclash/common/permission.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +33,29 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
     container.dispose();
+  });
+
+  test('battery refresh retries and coalesces resumed checks', () async {
+    var checks = 0;
+    final permissions = Permissions.test(
+      supportsLocationPermissions: false,
+      isBatteryOptimizationDisabled: () async {
+        checks++;
+        return checks >= 2;
+      },
+    )..needWaitingBatteryOptimizationSettings = true;
+
+    final first = permissions.checkBatteryOptimizationDisable(container.read);
+    final resumed = permissions.checkBatteryOptimizationDisable(container.read);
+    await Future.wait([first, resumed]);
+
+    expect(checks, 2);
+    expect(container.read(batteryOptimizationDisableProvider), isTrue);
+    expect(
+      container.read(loadingProvider(LoadingTag.batteryOptimization)),
+      isFalse,
+    );
+    expect(permissions.needWaitingBatteryOptimizationSettings, isFalse);
   });
 
   test('maps permission results to the correct UI follow-up', () {

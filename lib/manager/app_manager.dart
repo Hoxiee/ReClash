@@ -104,11 +104,28 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     ref.listenManual(isStartProvider, (prev, next) {
       if (prev != next && !next) {
         ref.read(manualPauseProvider.notifier).clear();
+        ref.read(smartRoutingStatusProvider.notifier).value = null;
       }
     });
     ref.listenManual(coreStatusProvider, (prev, next) {
-      if (next == CoreStatus.connected && prev != next) {
+      if (prev == next) {
+        return;
+      }
+      final doctor = ref.read(connectionDoctorProvider.notifier);
+      if (prev != null) {
+        doctor.resetForCoreConnection();
+      }
+      if (next == CoreStatus.connected) {
         _requestUiActiveSync(force: true);
+        unawaited(
+          doctor.refresh().catchError((Object error) {
+            commonPrint.log(
+              'Connection doctor reconnect refresh failed: $error',
+              logLevel: coreFailureLogLevel(error),
+            );
+            return ref.read(connectionDoctorProvider);
+          }),
+        );
       }
     }, fireImmediately: true);
     final systemDns = systemDnsCoordinator;

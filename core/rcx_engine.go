@@ -1875,6 +1875,7 @@ func (e *rcxEngine) startLaneProbe(lane *rcxLaneState, members []rcxMember) bool
 		return byName[pool[i].Name].Evidence < byName[pool[j].Name].Evidence
 	})
 	wave := rcxDiverseWave(pool, width)
+	wave = e.afford(wave, 0, e.runtime.Now())
 	if len(wave) == 0 {
 		return false
 	}

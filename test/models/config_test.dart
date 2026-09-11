@@ -98,6 +98,13 @@ void main() {
         AppSettingProps.fromJson,
       );
       expect(restored.onlyStatisticsProxy, false);
+      expect(
+        restored.notificationSettings.components,
+        defaultNotificationComponents,
+      );
+      expect(restored.notificationSettings.showPauseAction, true);
+      expect(restored.notificationSettings.showStopAction, true);
+      expect(restored.notificationSettings.hideSensitiveOnLockScreen, true);
       expect(restored.autoLaunch, false);
       expect(restored.silentLaunch, false);
       expect(restored.autoRun, false);
@@ -118,6 +125,21 @@ void main() {
       const props = AppSettingProps(
         locale: 'zh_CN',
         onlyStatisticsProxy: true,
+        notificationSettings: NotificationSettings(
+          components: [
+            NotificationComponent(type: NotificationComponentType.networkState),
+            NotificationComponent(
+              type: NotificationComponentType.currentServer,
+              group: 'Proxy',
+            ),
+            NotificationComponent(
+              type: NotificationComponentType.speed,
+              hideWhenIdle: false,
+            ),
+          ],
+          showStopAction: false,
+          subscriptionReminders: false,
+        ),
         autoLaunch: true,
         closeConnections: false,
         setupStep: 3,
@@ -130,6 +152,21 @@ void main() {
       );
       expect(restored.locale, 'zh_CN');
       expect(restored.onlyStatisticsProxy, true);
+      expect(restored.notificationSettings.components, [
+        const NotificationComponent(
+          type: NotificationComponentType.networkState,
+        ),
+        const NotificationComponent(
+          type: NotificationComponentType.currentServer,
+          group: 'Proxy',
+        ),
+        const NotificationComponent(
+          type: NotificationComponentType.speed,
+          hideWhenIdle: false,
+        ),
+      ]);
+      expect(restored.notificationSettings.showStopAction, false);
+      expect(restored.notificationSettings.subscriptionReminders, false);
       expect(restored.autoLaunch, true);
       expect(restored.closeConnections, false);
       expect(restored.setupStep, 3);
@@ -148,25 +185,143 @@ void main() {
       expect(result, isA<AppSettingProps>());
     });
 
-    test('safeFromJson migrates legacy icon variants', () {
-      const legacyVariants = {
-        'mono': 'pulse',
-        'sepia': 'glacier',
-        'inverted': 'obsidian',
-        'dark_mono': 'velvet',
-        'cool': 'solar',
-      };
+    test('safeFromJson migrates the legacy notification stop action', () {
+      final hidden = AppSettingProps.safeFromJson({
+        'showNotificationStopAction': false,
+      });
+      final shown = AppSettingProps.safeFromJson({
+        'showNotificationStopAction': true,
+      });
 
-      for (final entry in legacyVariants.entries) {
-        final result = AppSettingProps.safeFromJson({'iconVariant': entry.key});
-        expect(result.iconVariant, entry.value);
+      expect(hidden.notificationSettings.showStopAction, false);
+      expect(shown.notificationSettings.showStopAction, true);
+      expect(hidden.toJson(), isNot(contains('showNotificationStopAction')));
+    });
+
+    test(
+      'safeFromJson keeps explicit notification settings over legacy data',
+      () {
+        final result = AppSettingProps.safeFromJson({
+          'showNotificationStopAction': true,
+          'notificationSettings': {'showStopAction': false},
+        });
+
+        expect(result.notificationSettings.showStopAction, false);
+      },
+    );
+
+    test('safeFromJson recovers malformed notification settings only', () {
+      final result = AppSettingProps.safeFromJson({
+        'locale': 'ru',
+        'notificationSettings': 'damaged',
+      });
+
+      expect(result.locale, 'ru');
+      expect(
+        result.notificationSettings.components,
+        defaultNotificationComponents,
+      );
+    });
+
+    test('safeFromJson defaults notification components when absent', () {
+      final settings = AppSettingProps.safeFromJson({
+        'notificationSettings': {
+          'contentMode': 'minimal',
+          'doctorPriority': 'never',
+          'showSessionTraffic': false,
+        },
+      });
+
+      expect(
+        settings.notificationSettings.components,
+        defaultNotificationComponents,
+      );
+    });
+
+    test('notification component decoder keeps first valid unique items', () {
+      final settings = NotificationSettings.fromJson({
+        'components': [
+          {'type': 'networkState'},
+          {'type': 'unknown'},
+          'malformed',
+          {'type': 'speed', 'hideWhenIdle': false},
+          {'type': 'speed', 'hideWhenIdle': true},
+          {'type': 'connectionDoctor', 'doctorPriority': 'never'},
+          {'type': 'currentServer', 'group': 42},
+          {'type': 'smartRouting', 'hideWhenIdle': 'invalid'},
+        ],
+      });
+
+      expect(settings.components, [
+        const NotificationComponent(
+          type: NotificationComponentType.networkState,
+        ),
+        const NotificationComponent(
+          type: NotificationComponentType.speed,
+          hideWhenIdle: false,
+        ),
+        const NotificationComponent(
+          type: NotificationComponentType.smartRouting,
+        ),
+      ]);
+    });
+
+    test('notification component decoder preserves explicit empty list', () {
+      expect(
+        NotificationSettings.fromJson({'components': []}).components,
+        isEmpty,
+      );
+    });
+
+    test('notification component decoder recovers malformed non-list', () {
+      final restored = NotificationSettings.fromJson({
+        'components': 'damaged',
+        'contentMode': 'traffic',
+        'showSessionTraffic': false,
+      });
+
+      expect(restored.components, defaultNotificationComponents);
+    });
+
+    test('safeFromJson preserves current icon variants', () {
+      for (final variant in const [
+        'default',
+        'velvet',
+        'solar',
+        'circuit',
+        'echo',
+        'ink',
+        'blueprint',
+        'mesh',
+        'facet',
+        'strata',
+        'shatter',
+        'trace',
+      ]) {
+        final result = AppSettingProps.safeFromJson({'iconVariant': variant});
+        expect(result.iconVariant, variant);
       }
     });
 
-    test('safeFromJson resets unknown icon variants', () {
-      final result = AppSettingProps.safeFromJson({'iconVariant': 'eclipse'});
-
-      expect(result.iconVariant, 'default');
+    test('safeFromJson resets retired and unknown icon variants', () {
+      for (final variant in const [
+        'mono',
+        'sepia',
+        'inverted',
+        'obsidian',
+        'dark_mono',
+        'cool',
+        'shift',
+        'pulse',
+        'glacier',
+        'porcelain',
+        'glass',
+        'prism',
+        'eclipse',
+      ]) {
+        final result = AppSettingProps.safeFromJson({'iconVariant': variant});
+        expect(result.iconVariant, 'default');
+      }
     });
   });
 
@@ -423,20 +578,6 @@ void main() {
   });
 
   group('DesyncProps', () {
-    test('saved legacy strategies are migrated to the working default', () {
-      for (final legacy in [
-        desyncLegacyLadder,
-        desyncLegacyByedpi,
-        desyncLegacyTlsrec,
-      ]) {
-        final props = DesyncProps(enabled: true, strategyArgs: legacy);
-
-        final restored = roundTrip(props.toJson, DesyncProps.fromJson);
-
-        expect(restored.strategyArgs, desyncDefaultStrategy);
-      }
-    });
-
     test('the default site-list selection survives the round-trip', () {
       const props = DesyncProps(enabled: true);
 

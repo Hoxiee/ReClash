@@ -6,6 +6,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/models/core.dart';
+import 'package:reclash/models/profile.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
@@ -219,7 +220,7 @@ class ProviderItem extends ConsumerWidget {
             _handleUpdateProvider(ref);
           },
         ),
-      if (subscriptionInfo != null && subscriptionInfo.total > 0)
+      if (subscriptionInfo != null && subscriptionInfo.hasFacts)
         CommonPopupMenuItem(
           icon: Icons.data_usage_outlined,
           label: appLocalizations.subscriptionInfo,

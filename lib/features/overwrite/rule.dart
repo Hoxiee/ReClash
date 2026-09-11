@@ -249,11 +249,11 @@ class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
   }
 
   void _initState() {
-    final desync = ref.read(desyncSettingProvider).enabled;
+    final desync = ref.read(effectiveDesyncSettingProvider).enabled;
     _targetItems = [
-      ...RuleTarget.targetNames(desync: desync).map(
-        (name) => DropdownMenuEntry(value: name, label: name),
-      ),
+      ...RuleTarget.targetNames(
+        desync: desync,
+      ).map((name) => DropdownMenuEntry(value: name, label: name)),
       DropdownMenuEntry(
         value: RuleAction.MATCH.value,
         label: context.appLocalizations.matchTarget,

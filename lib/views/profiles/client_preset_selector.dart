@@ -1,6 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 class ClientPresetSelector extends StatelessWidget {
@@ -25,7 +25,7 @@ class ClientPresetSelector extends StatelessWidget {
     final chips = [
       for (final client in SubscriptionClient.values)
         ChoiceChip(
-          label: Text(_labelOf(client, appLocalizations)),
+          label: Text(subscriptionClientLabel(client, appLocalizations)),
           selected: selected == client,
           onSelected: (_) => onChanged(client),
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -33,12 +33,30 @@ class ClientPresetSelector extends StatelessWidget {
           labelStyle: Theme.of(context).textTheme.bodyMedium,
         ),
     ];
+    final emulated = !isNativeSubscriptionClient(selected);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(appLocalizations.subscriptionClientLabel),
+        Row(
+          spacing: 8,
+          children: [
+            Flexible(child: Text(appLocalizations.subscriptionClientLabel)),
+            if (emulated)
+              const CommonChip(
+                label: 'Experimental',
+                icon: Icons.science_outlined,
+              ),
+          ],
+        ),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: chips),
+        if (emulated) ...[
+          const SizedBox(height: 8),
+          Text(
+            appLocalizations.subscriptionClientExperimentalTip,
+            style: context.textTheme.bodySmall?.toLighter,
+          ),
+        ],
         if (selected == SubscriptionClient.custom &&
             customUserAgentController != null) ...[
           const SizedBox(height: 8),
@@ -54,17 +72,4 @@ class ClientPresetSelector extends StatelessWidget {
       ],
     );
   }
-
-  String _labelOf(
-    SubscriptionClient client,
-    AppLocalizations appLocalizations,
-  ) => switch (client) {
-    SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
-    SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
-    SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
-    SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
-    SubscriptionClient.singbox => appLocalizations.subscriptionClientSingbox,
-    SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayNG,
-    SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
-  };
 }

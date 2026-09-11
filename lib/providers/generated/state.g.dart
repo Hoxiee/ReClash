@@ -130,7 +130,7 @@ final class TrayTitleStateProvider
   }
 }
 
-String _$trayTitleStateHash() => r'aacf3779c879f7f1144484a80043679020bf8424';
+String _$trayTitleStateHash() => r'c76af9e46959a1e8f61a9c0fd686b18c7fe6e0b1';
 
 @ProviderFor(vpnState)
 final vpnStateProvider = VpnStateProvider._();
@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'9aa7e1c4d0b792e22622dd09162d8dcdb295c135';
+String _$sharedStateHash() => r'206815a92bc032575380aa3db55c596d7936a8cc';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1103,7 +1103,7 @@ final class CustomOverwriteDateProvider
 }
 
 String _$customOverwriteDateHash() =>
-    r'05a7e5838e1c22ebadf8b03bd4f9c4c94395eb20';
+    r'e40519cfcf528958e48efba67a1e3d700f1f3d70';
 
 final class CustomOverwriteDateFamily extends $Family
     with $FunctionalFamilyOverride<CustomOverwriteDate, int> {
@@ -2858,6 +2858,47 @@ final class NeedUpdateGroupsProvider
 
 String _$needUpdateGroupsHash() => r'463e62346f371713b14ab774c2ad9c465113d6db';
 
+@ProviderFor(activeServerGroup)
+final activeServerGroupProvider = ActiveServerGroupProvider._();
+
+final class ActiveServerGroupProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  ActiveServerGroupProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'activeServerGroupProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$activeServerGroupHash();
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    return activeServerGroup(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$activeServerGroupHash() => r'8b83d5348a9a1ab29569c7d1e042d2f733edca20';
+
 @ProviderFor(navigationItemsState)
 final navigationItemsStateProvider = NavigationItemsStateProvider._();
 
@@ -3635,7 +3676,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'2c7e491f0c373a8ad8f982f1571bf35c30b3447b';
+String _$setupStateHash() => r'41f7d4efc2351fc781029cbf424b158c96ececd3';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

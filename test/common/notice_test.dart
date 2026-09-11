@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _notice = NoticeRequest(
   channelName: 'Subscription reminders',
+  notificationKey: 'subscription:42',
   title: 'Kiwi VPN',
   message: 'Your subscription expires today',
 );

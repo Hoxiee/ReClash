@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,40 @@ import 'package:wifi_ssid/wifi_ssid.dart';
 typedef SsidListReader = Future<List<String>> Function();
 
 enum _ScanPhase { scanning, ready }
+
+/// Reached by a long press on the pause button, on either dashboard.
+void showSmartPauseNetworkSheet(BuildContext context, WidgetRef ref) {
+  showSheet(
+    context: context,
+    props: const SheetProps(maxHeight: 520),
+    builder: (sheetContext) => SizedBox(
+      height: 460,
+      child: AdaptiveSheetScaffold(
+        title: sheetContext.appLocalizations.pickNetwork,
+        body: SmartPauseNetworkPicker(
+          selected: ref
+              .read(
+                vpnSettingProvider.select((state) => state.smartPauseNetworks),
+              )
+              .toSet(),
+          onSelected: (ssid) {
+            Navigator.of(sheetContext).maybePop();
+            ref.read(vpnSettingProvider.notifier).update((state) {
+              if (state.smartPauseNetworks.any(
+                (item) => item.trim().toLowerCase() == ssid.toLowerCase(),
+              )) {
+                return state;
+              }
+              return state.copyWith(
+                smartPauseNetworks: [...state.smartPauseNetworks, ssid],
+              );
+            });
+          },
+        ),
+      ),
+    ),
+  );
+}
 
 class SmartPauseNetworkPicker extends ConsumerStatefulWidget {
   const SmartPauseNetworkPicker({

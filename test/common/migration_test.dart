@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:reclash/common/migration.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -276,25 +275,26 @@ void main() {
       },
     );
 
-    test('v2 to v3 marks an existing install as already set up', () async {
-      final store = _FakeMigrationStore(
-        configMap: _createConfigMap(),
-        version: 2,
-      );
+    test('v1 to v2 applies setup and privacy defaults', () async {
+      final configMap = _createConfigMap();
+      final settings = configMap['appSettingProps']! as Map<String, Object?>;
+      settings
+        ..['setupCompleted'] = false
+        ..['autoCheckUpdate'] = true
+        ..['sendDeviceIdentity'] = true
+        ..['showNotificationStopAction'] = false;
+      final store = _FakeMigrationStore(configMap: configMap, version: 1);
 
       final config = await Migration(store: store).run();
+      final notification = config.appSettingProps.notificationSettings;
 
       expect(config.appSettingProps.setupCompleted, isTrue);
-      expect(store.savedConfig?.appSettingProps.setupCompleted, isTrue);
-      expect(store.version, Migration.currentVersion);
-    });
-
-    test('v2 to v3 leaves a clean install to the wizard', () async {
-      final store = _FakeMigrationStore(configMap: null, version: 2);
-
-      final config = await Migration(store: store).run();
-
-      expect(config.appSettingProps.setupCompleted, isFalse);
+      expect(config.appSettingProps.autoCheckUpdate, isFalse);
+      expect(config.appSettingProps.sendDeviceIdentity, isFalse);
+      expect(notification.showStopAction, isFalse);
+      expect(notification.showPauseAction, isTrue);
+      expect(notification.hideSensitiveOnLockScreen, isTrue);
+      expect(notification.subscriptionReminders, isTrue);
     });
 
     test('v1 to v2 keeps a user-chosen global-ua', () async {
@@ -337,66 +337,6 @@ void main() {
 
       expect(config.vpnProps.smartPauseEnabled, isTrue);
       expect(config.vpnProps.smartPauseNetworks, ['Cafe']);
-    });
-
-    test('v4 to v5 re-parses the seeded routing bundle in-process', () async {
-      final configMap = _createConfigMap();
-      configMap['smartRoutingProps'] = {'enabled': true, 'preset': 'ru'};
-      final store = _FakeMigrationStore(configMap: configMap, version: 4);
-
-      final config = await Migration(store: store).run();
-
-      expect(store.version, Migration.currentVersion);
-      expect(store.savedConfig?.smartRoutingProps.enabled, isTrue);
-      expect(
-        store.savedConfig?.smartRoutingProps.preset,
-        SmartRoutingPreset.russia,
-      );
-      expect(store.savedConfig?.smartRoutingProps.openMarkers, isNotEmpty);
-      expect(config.smartRoutingProps.openMarkers, isNotEmpty);
-    });
-
-    test('v5 to v6 drops the youtube open marker and keeps Telegram', () async {
-      final configMap = _createConfigMap();
-      configMap['smartRoutingProps'] = {
-        'enabled': true,
-        'preset': 'ru',
-        'openMarkers': [
-          {
-            'url': 'https://www.youtube.com/generate_204',
-            'statuses': [204],
-          },
-          {
-            'url': 'https://api.telegram.org/',
-            'statuses': [200, 404],
-          },
-        ],
-      };
-      final store = _FakeMigrationStore(configMap: configMap, version: 5);
-
-      final config = await Migration(store: store).run();
-
-      expect(store.version, Migration.currentVersion);
-      final markers = config.smartRoutingProps.openMarkers;
-      expect(markers, isNotEmpty);
-      expect(markers.any((marker) => marker.url.contains('youtube')), isFalse);
-      expect(markers.first.url, contains('telegram'));
-    });
-
-    test('v6 to v7 disables implicit network metadata sharing', () async {
-      final configMap = _createConfigMap();
-      final settings = configMap['appSettingProps']! as Map<String, Object?>;
-      settings['autoCheckUpdate'] = true;
-      settings['sendDeviceIdentity'] = true;
-      final store = _FakeMigrationStore(configMap: configMap, version: 6);
-
-      final config = await Migration(store: store).run();
-
-      expect(config.appSettingProps.autoCheckUpdate, isFalse);
-      expect(config.appSettingProps.sendDeviceIdentity, isFalse);
-      expect(store.savedConfig?.appSettingProps.autoCheckUpdate, isFalse);
-      expect(store.savedConfig?.appSettingProps.sendDeviceIdentity, isFalse);
-      expect(store.version, Migration.currentVersion);
     });
   });
 }

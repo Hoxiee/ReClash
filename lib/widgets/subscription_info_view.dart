@@ -9,6 +9,7 @@ import 'list.dart';
 import 'text.dart';
 
 const _expireGap = 12.0;
+const _unlimitedGlyph = '\u221E';
 const _trafficWarnRatio = 0.75;
 const _trafficCriticalRatio = 0.95;
 
@@ -43,15 +44,16 @@ class SubscriptionInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = subscriptionInfo;
-    if (info == null || info.total == 0) {
+    if (info == null || !info.hasFacts) {
       return const SizedBox.shrink();
     }
-    final use = info.upload + info.download;
+    final use = info.used;
     final total = info.total;
-    final progress = (use / total).clamp(0.0, 1.0).toDouble();
+    final unlimited = info.unlimited;
+    final progress = unlimited ? 0.0 : (use / total).clamp(0.0, 1.0).toDouble();
 
     final useShow = use.traffic.show;
-    final totalShow = total.traffic.show;
+    final totalShow = unlimited ? _unlimitedGlyph : total.traffic.show;
     final expireDate = info.expire == 0
         ? null
         : DateTime.fromMillisecondsSinceEpoch(info.expire * 1000);
@@ -99,13 +101,15 @@ class SubscriptionInfoView extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 4),
-        LinearProgressIndicator(
-          minHeight: 4,
-          value: progress,
-          color: _trafficColor(context, progress),
-          backgroundColor: _trafficColor(context, progress).opacity15,
-        ),
+        if (!unlimited) ...[
+          const SizedBox(height: 4),
+          LinearProgressIndicator(
+            minHeight: 4,
+            value: progress,
+            color: _trafficColor(context, progress),
+            backgroundColor: _trafficColor(context, progress).opacity15,
+          ),
+        ],
       ],
     );
   }
@@ -157,7 +161,7 @@ class SubscriptionInfoDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final used = subscriptionInfo.upload + subscriptionInfo.download;
+    final used = subscriptionInfo.used;
     final expireDate = subscriptionInfo.expire == 0
         ? null
         : DateTime.fromMillisecondsSinceEpoch(subscriptionInfo.expire * 1000);
@@ -179,7 +183,9 @@ class SubscriptionInfoDetailView extends StatelessWidget {
               ),
               _buildItem(
                 label: appLocalizations.totalTraffic,
-                value: subscriptionInfo.total.traffic.show,
+                value: subscriptionInfo.unlimited
+                    ? _unlimitedGlyph
+                    : subscriptionInfo.total.traffic.show,
               ),
             ],
           ),

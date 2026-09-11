@@ -19,12 +19,14 @@ void main() {
       }
     });
 
-    test('auto probes clash, happ, incy, singbox', () {
+    test('auto probes every compatible client format', () {
       expect(probeOrder(SubscriptionClient.auto), [
+        SubscriptionClient.clashMeta,
         SubscriptionClient.clash,
         SubscriptionClient.happ,
         SubscriptionClient.incy,
         SubscriptionClient.singbox,
+        SubscriptionClient.v2rayng,
       ]);
     });
 
@@ -36,9 +38,11 @@ void main() {
         ),
         [
           SubscriptionClient.incy,
+          SubscriptionClient.clashMeta,
           SubscriptionClient.clash,
           SubscriptionClient.happ,
           SubscriptionClient.singbox,
+          SubscriptionClient.v2rayng,
         ],
       );
       expect(
@@ -48,23 +52,63 @@ void main() {
         ),
         [
           SubscriptionClient.clash,
+          SubscriptionClient.clashMeta,
           SubscriptionClient.happ,
           SubscriptionClient.incy,
           SubscriptionClient.singbox,
+          SubscriptionClient.v2rayng,
         ],
       );
     });
   });
 
+  group('isNativeSubscriptionClient', () {
+    test('the clash family needs no conversion', () {
+      for (final client in [
+        SubscriptionClient.auto,
+        SubscriptionClient.clashMeta,
+        SubscriptionClient.clash,
+      ]) {
+        expect(isNativeSubscriptionClient(client), isTrue, reason: client.name);
+      }
+    });
+
+    test('every emulated preset is flagged, custom included', () {
+      for (final client in [
+        SubscriptionClient.happ,
+        SubscriptionClient.incy,
+        SubscriptionClient.singbox,
+        SubscriptionClient.v2rayng,
+        SubscriptionClient.custom,
+      ]) {
+        expect(
+          isNativeSubscriptionClient(client),
+          isFalse,
+          reason: client.name,
+        );
+      }
+    });
+  });
+
   group('buildSubscriptionHeaders', () {
-    test('clash preset sends the identity UA over the app default', () {
+    test('clash meta preset sends a mihomo-era UA', () {
+      final headers = buildSubscriptionHeaders(
+        SubscriptionClient.clashMeta,
+        deviceDetails: details(),
+        defaultUa: 'ReClash/v1.0.0 core/v1.19.13 Platform/android',
+      );
+      expect(headers['User-Agent'], metaClashUserAgent);
+      expect(headers['User-Agent'], isNot(legacyClashUserAgent));
+    });
+
+    test('clash preset sends a legacy Clash UA', () {
       final headers = buildSubscriptionHeaders(
         SubscriptionClient.clash,
         deviceDetails: details(),
         defaultUa: 'ReClash/v1.0.0 core/v1.19.13 Platform/android',
         identityUserAgent: 'MyCustom/UA',
       );
-      expect(headers['User-Agent'], 'MyCustom/UA');
+      expect(headers['User-Agent'], legacyClashUserAgent);
     });
 
     test('auto preset falls back to the default UA', () {
@@ -179,6 +223,19 @@ void main() {
       expect(headers['x-hwid'], 'HWID1234');
       expect(headers['x-device-os'], 'Android');
       expect(headers['x-ver-os'], '16');
+      expect(headers['x-device-model'], 'Pixel 9');
+    });
+
+    test('device headers can be added to an already built request', () {
+      final headers = withDeviceIdentityHeaders(
+        buildSubscriptionHeaders(
+          SubscriptionClient.clashMeta,
+          deviceDetails: details(),
+        ),
+        details(),
+      );
+      expect(headers['User-Agent'], metaClashUserAgent);
+      expect(headers['x-hwid'], 'HWID1234');
       expect(headers['x-device-model'], 'Pixel 9');
     });
 

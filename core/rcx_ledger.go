@@ -11,11 +11,16 @@ type rcxSample struct {
 	At      time.Time `json:"t"`
 }
 
+// Exit lives here, not per environment: noteProbeLocked clears the whole env
+// row when a marker answers, so a measured egress must outlive that reset.
 type rcxNodeGlobal struct {
 	Origin      rcxOrigin `json:"o"`
 	Country     string    `json:"c"`
 	EverGood    bool      `json:"g"`
 	OpenedUnder string    `json:"of,omitempty"`
+	Exit        rcxOrigin `json:"x,omitempty"`
+	ExitCountry string    `json:"xc,omitempty"`
+	ExitAt      time.Time `json:"xa,omitempty"`
 }
 
 // Per (node x environment) on purpose: the dominant cause of a dial failure here
@@ -155,7 +160,30 @@ func (l *rcxLedger) Origin(node string) rcxOrigin {
 	return l.globalState(node).Origin
 }
 
+func (l *rcxLedger) SetExit(node, country string, exit rcxOrigin, now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	state.Exit = exit
+	state.ExitCountry = country
+	state.ExitAt = now
+}
+
+func (l *rcxLedger) ExitCountry(node string) string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.globalState(node).ExitCountry
+}
+
+func (l *rcxLedger) ExitAt(node string) time.Time {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.globalState(node).ExitAt
+}
+
 const rcxDegradedWindow = 10 * time.Minute
+
+const rcxExitTTL = 6 * time.Hour
 
 func (l *rcxLedger) NoteDegraded(node, envKey string, now time.Time) {
 	l.mu.Lock()
@@ -588,9 +616,6 @@ func (l *rcxLedger) noteProbeLocked(
 	}
 }
 
-// Only lowers a class: UrlTestHook fires before URLTest stores its verdict, and
-// the UI's delay test accepts any HTTP status, so a success seen here proves
-// nothing.
 func (l *rcxLedger) NoteHarvestedProbe(node, envKey string, delayMs int, now time.Time) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -600,6 +625,15 @@ func (l *rcxLedger) NoteHarvestedProbe(node, envKey string, delayMs int, now tim
 	}
 	state := l.envState(envKey, node)
 	if delayMs > 0 {
+		state.LastGoodAt = now
+		state.ProgressAt = now
+		state.FailStreak = 0
+		state.provisionalFails = 0
+		state.LastFailAt = time.Time{}
+		state.CoolUntil = time.Time{}
+		state.DegradedAt = time.Time{}
+		state.ProofStall = false
+		l.globalState(node).EverGood = true
 		l.addSampleLocked(state, delayMs, now)
 		return
 	}
@@ -638,6 +672,7 @@ func (l *rcxLedger) Facts(
 	global := l.globalState(node)
 	facts := rcxFacts{
 		Origin:      global.Origin,
+		Exit:        rcxExitAged(global.Exit, global.ExitAt, now),
 		OpenedOnce:  global.OpenedUnder != "" && global.OpenedUnder == l.openFingerprint,
 		OpenWorld:   rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, proofTTL),
 		Domestic:    rcxProofForFingerprint(state.Domestic, state.DomesticAt, state.HomeUnder, l.homeFingerprint, now, proofTTL),
@@ -653,6 +688,13 @@ func (l *rcxLedger) Facts(
 		facts.Transit = rcxProofProven
 	}
 	return facts
+}
+
+func rcxExitAged(exit rcxOrigin, measuredAt, now time.Time) rcxOrigin {
+	if exit == rcxOriginUnknown || measuredAt.IsZero() || now.Sub(measuredAt) > rcxExitTTL {
+		return rcxOriginUnknown
+	}
+	return exit
 }
 
 func rcxProofForFingerprint(proof rcxProof, provenAt time.Time, stored, active string, now time.Time, ttl time.Duration) rcxProof {
@@ -797,13 +839,20 @@ func (l *rcxLedger) MarkMembers(nodes map[string]struct{}, now time.Time) {
 	}
 }
 
-func (l *rcxLedger) Invalidate(openChanged, domesticChanged, countriesChanged bool) {
+func (l *rcxLedger) Invalidate(openChanged, domesticChanged, countriesChanged, egressChanged bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if countriesChanged {
 		for _, global := range l.global {
 			global.Origin = rcxOriginUnknown
 			global.Country = ""
+		}
+	}
+	if countriesChanged || egressChanged {
+		for _, global := range l.global {
+			global.Exit = rcxOriginUnknown
+			global.ExitCountry = ""
+			global.ExitAt = time.Time{}
 		}
 	}
 	if !openChanged && !domesticChanged {

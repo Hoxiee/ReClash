@@ -26,7 +26,9 @@ class CoreAction extends _$CoreAction {
     // is best-effort, never a gate on startup.
     try {
       await _core.configureSmartRouting(
-        ref.read(smartRoutingSettingProvider).rcxParams,
+        ref
+            .read(smartRoutingSettingProvider)
+            .rcxParamsFor(ref.read(currentProfileProvider)),
       );
     } on CoreMethodException catch (error) {
       commonPrint.log(

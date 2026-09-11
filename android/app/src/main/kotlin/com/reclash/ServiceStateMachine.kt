@@ -1,7 +1,10 @@
 package com.reclash
 
 import com.reclash.common.RunIntentArbiter
+import com.reclash.models.NotificationComponent as RawNotificationComponent
+import com.reclash.models.NotificationSettings
 import com.reclash.models.SharedState
+import com.reclash.service.models.NotificationComponent
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.VpnOptions
 import com.google.gson.Gson
@@ -459,7 +462,100 @@ internal class ServiceStateMachine(private val host: ServiceStateHost) {
             pauseText = state.pauseText,
             resumeText = state.resumeText,
             pausedText = state.pausedText,
-            showStopAction = state.showStopAction,
+            smartRoutingText = state.smartRoutingText,
+            smartRoutingSearchingText = state.smartRoutingSearchingText,
+            connectionDoctorText = state.connectionDoctorText,
+            doctorExaminingText = state.doctorExaminingText,
+            doctorHealthyText = state.doctorHealthyText,
+            doctorDegradedText = state.doctorDegradedText,
+            doctorBrokenText = state.doctorBrokenText,
+            doctorObservingText = state.doctorObservingText,
+            sessionTrafficText = state.sessionTrafficText,
+            networkStateText = state.networkStateText,
+            currentServerText = state.currentServerText,
+            networkNormalText = state.networkNormalText,
+            networkWhitelistText = state.networkWhitelistText,
+            networkPortalText = state.networkPortalText,
+            networkOfflineText = state.networkOfflineText,
+            networkUnknownText = state.networkUnknownText,
+            activeText = state.activeText,
+            activeServerGroup = state.activeServerGroup,
+            components = notificationComponents(state.notificationSettings),
+            showPauseAction = state.notificationSettings.showPauseAction,
+            showStopAction = state.notificationSettings.showStopAction,
+            hideSensitiveOnLockScreen = state.notificationSettings.hideSensitiveOnLockScreen,
+            visibility = state.notificationSettings.visibility,
         )
+
+        private val notificationComponentTypes = setOf(
+            "connectionDoctor",
+            "networkState",
+            "currentServer",
+            "smartRouting",
+            "speed",
+            "sessionTraffic",
+        )
+
+        private fun notificationComponents(
+            settings: NotificationSettings,
+        ): List<NotificationComponent> = settings.components
+            ?.normalizeNotificationComponents()
+            ?: legacyNotificationComponents(settings)
+
+        private fun List<RawNotificationComponent>.normalizeNotificationComponents(): List<NotificationComponent> {
+            val seen = mutableSetOf<String>()
+            return mapNotNull { component ->
+                component.takeIf {
+                    it.type in notificationComponentTypes && seen.add(it.type)
+                }?.normalize()
+            }
+        }
+
+        private fun RawNotificationComponent.normalize(): NotificationComponent = when (type) {
+            "connectionDoctor" -> NotificationComponent(
+                type = type,
+                doctorPriority = doctorPriority.takeIf { it == "always" } ?: "problems",
+            )
+            "speed" -> NotificationComponent(
+                type = type,
+                hideWhenIdle = hideWhenIdle ?: true,
+            )
+            "currentServer" -> NotificationComponent(
+                type = type,
+                group = group?.takeIf(String::isNotBlank),
+            )
+            else -> NotificationComponent(type = type)
+        }
+
+        // Boot and the quick tile read the sharedState JSON an older build left
+        // behind, so the pre-component shape still has to produce a notification.
+        private fun legacyNotificationComponents(
+            settings: NotificationSettings,
+        ): List<NotificationComponent> {
+            if (settings.contentMode == "minimal") return emptyList()
+            return buildList {
+                if (settings.doctorPriority != "never") {
+                    add(
+                        NotificationComponent(
+                            type = "connectionDoctor",
+                            doctorPriority = settings.doctorPriority.takeIf { it == "always" }
+                                ?: "problems",
+                        ),
+                    )
+                }
+                if (settings.contentMode !in setOf("traffic", "speed")) {
+                    add(NotificationComponent(type = "smartRouting"))
+                }
+                add(
+                    NotificationComponent(
+                        type = "speed",
+                        hideWhenIdle = settings.hideIdleSpeed,
+                    ),
+                )
+                if (settings.showSessionTraffic) {
+                    add(NotificationComponent(type = "sessionTraffic"))
+                }
+            }
+        }
     }
 }

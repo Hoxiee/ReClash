@@ -1,3 +1,6 @@
+import 'package:reclash/l10n/l10n.dart';
+import 'package:material_ui/material_ui.dart';
+
 enum HeroBuyOffer { renewPlan, topUpTraffic }
 
 const heroRenewDaysThreshold = 3;
@@ -22,3 +25,19 @@ List<HeroBuyOffer> heroBuyOffers({
       HeroBuyOffer.topUpTraffic,
   ];
 }
+
+typedef HeroBuyOfferView = ({IconData icon, String label});
+
+HeroBuyOfferView heroBuyOfferViewOf(
+  AppLocalizations appLocalizations,
+  HeroBuyOffer offer,
+) => switch (offer) {
+  HeroBuyOffer.renewPlan => (
+    icon: Icons.autorenew_rounded,
+    label: appLocalizations.renewSubscription,
+  ),
+  HeroBuyOffer.topUpTraffic => (
+    icon: Icons.add_shopping_cart_rounded,
+    label: appLocalizations.topUpTraffic,
+  ),
+};

@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:reclash/features/overwrite/overwrite.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 class _EditorHarness extends StatelessWidget {
   final ValueNotifier<List<String>> items;
@@ -20,6 +22,7 @@ class _EditorHarness extends StatelessWidget {
       wrapInProviderScope: true,
       overrides: [
         viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 800)),
+        profilesProvider.overrideWith(TestProfiles.new),
       ],
       child: OverwriteEditorPage<String>(
         title: 'Editor',

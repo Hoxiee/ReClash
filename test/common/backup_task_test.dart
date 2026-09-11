@@ -156,6 +156,49 @@ void main() {
     });
   });
 
+  test('database snapshot waits for an in-flight transaction', () async {
+    final directory = makeDir('snapshot');
+    final livePath = join(directory.path, 'live.sqlite');
+    final snapshotPath = join(directory.path, 'snapshot.sqlite');
+    final database = db.Database(NativeDatabase(File(livePath)));
+    addTearDown(database.close);
+    await database.profilesDao.putAll([
+      const Profile(
+        id: 1,
+        label: 'committed',
+        autoUpdateDuration: Duration.zero,
+      ).toCompanion(),
+    ]);
+
+    final writeStarted = Completer<void>();
+    final releaseWrite = Completer<void>();
+    final write = database.transaction(() async {
+      await database.profilesDao.putAll([
+        const Profile(
+          id: 2,
+          label: 'pending',
+          autoUpdateDuration: Duration.zero,
+        ).toCompanion(),
+      ]);
+      writeStarted.complete();
+      await releaseWrite.future;
+    });
+    await writeStarted.future;
+    final snapshot = createDatabaseSnapshot(database, snapshotPath);
+    await Future<void>.delayed(Duration.zero);
+    expect(File(snapshotPath).existsSync(), isFalse);
+    releaseWrite.complete();
+    await write;
+    await snapshot;
+
+    final copied = db.Database(NativeDatabase(File(snapshotPath)));
+    addTearDown(copied.close);
+    expect(
+      (await copied.profilesDao.query().get()).map((profile) => profile.label),
+      ['committed', 'pending'],
+    );
+  });
+
   group('migrateLegacyConfig', () {
     late Directory source;
     late Directory target;
@@ -446,7 +489,7 @@ void main() {
     }
 
     Future<String> backup({
-      Map<String, dynamic> configMap = const {'version': 1},
+      Map<String, dynamic> configMap = const {'version': currentDataVersion},
       Iterable<String> fileNames = const ['1.yaml', '2.js'],
     }) {
       return writeBackupArchive(
@@ -493,30 +536,28 @@ void main() {
       expect(leftovers, isEmpty);
     });
 
-    test('restoring returns the rows and copies the files home', () async {
+    test('preparing returns rows and keeps files in staging', () async {
       await seedDatabase();
       writeFile(join(home.path, 'profiles', '1.yaml'), 'proxies: []');
       writeFile(join(home.path, 'scripts', '2.js'), 'body');
       final archivePath = await backup();
-      final target = makeDir('restore_target');
 
       final data = await readBackupArchive(
         backupFilePath: archivePath,
         restoreDirPath: restore.path,
-        homeDirPath: target.path,
       );
 
       expect(data.profiles.single.label, 'Backed up');
       expect(data.scripts.single.label, 'Script');
       expect(data.rules.single.content, 'example.com');
       expect(data.links.single.ruleId, 3);
-      expect(data.configMap?['version'], 1);
+      expect(data.configMap?['version'], currentDataVersion);
       expect(
-        File(join(target.path, 'profiles', '1.yaml')).readAsStringSync(),
+        File(join(restore.path, 'profiles', '1.yaml')).readAsStringSync(),
         'proxies: []',
       );
       expect(
-        File(join(target.path, 'scripts', '2.js')).readAsStringSync(),
+        File(join(restore.path, 'scripts', '2.js')).readAsStringSync(),
         'body',
       );
     });
@@ -533,12 +574,10 @@ void main() {
         },
         fileNames: const ['legacy.yaml'],
       );
-      final target = makeDir('restore_target');
 
       final data = await readBackupArchive(
         backupFilePath: archivePath,
         restoreDirPath: restore.path,
-        homeDirPath: target.path,
       );
 
       final profile = data.profiles.single;
@@ -550,9 +589,180 @@ void main() {
       );
       expect(
         File(
-          join(target.path, 'profiles', '${profile.id}.yaml'),
+          join(restore.path, 'profiles', '${profile.id}.yaml'),
         ).readAsStringSync(),
         'proxies: []',
+      );
+    });
+
+    test('imports confirmed FlClashX override data and clash config', () async {
+      writeFile(join(home.path, 'profiles', 'legacy.yaml'), 'proxies: []');
+      final archivePath = join(root.path, 'archive', '$uniqueId.zip');
+      final configFile = writeFile(
+        join(root.path, 'tmp', '$uniqueId.json'),
+        json.encode({
+          'version': 0,
+          'profiles': [
+            {
+              'id': 'legacy',
+              'label': 'Old',
+              'autoUpdateDuration': 0,
+              'overrideData': {
+                'enable': true,
+                'rule': {
+                  'type': 'custom',
+                  'overrideRules': [],
+                  'addedRules': [],
+                },
+                'custom': {
+                  'proxyGroups': [
+                    {
+                      'name': 'Custom',
+                      'type': 'select',
+                      'proxies': ['DIRECT'],
+                    },
+                  ],
+                  'rules': [
+                    {'id': 'rule', 'value': 'DOMAIN,example.com,Custom'},
+                  ],
+                },
+              },
+            },
+          ],
+        }),
+      );
+      final clashConfigFile = writeFile(
+        join(root.path, 'tmp', '$uniqueId-clash.json'),
+        json.encode({'mixed-port': 1234}),
+      );
+      final encoder = ZipFileEncoder()..create(archivePath);
+      await encoder.addFile(configFile, configJsonName);
+      await encoder.addFile(clashConfigFile, 'clashConfig.json');
+      await encoder.addFile(
+        File(join(home.path, 'profiles', 'legacy.yaml')),
+        'profiles/legacy.yaml',
+      );
+      await encoder.close();
+
+      final data = await readBackupArchive(
+        backupFilePath: archivePath,
+        restoreDirPath: restore.path,
+      );
+
+      final profile = data.profiles.single;
+      expect(profile.overwriteType, OverwriteType.custom);
+      expect(data.rules.single.ruleTarget, 'Custom');
+      expect(data.links.single.scene, RuleScene.custom);
+      expect(data.proxyGroups.single.profileId, profile.id);
+      expect(data.proxyGroups.single.name, 'Custom');
+      expect(data.configMap?['version'], currentDataVersion);
+      expect((data.configMap?['patchClashConfig'] as Map)['mixed-port'], 1234);
+    });
+
+    test('ignores disabled FlClashX override data', () async {
+      await seedDatabase();
+      writeFile(join(home.path, 'profiles', 'legacy.yaml'), 'proxies: []');
+      final archivePath = await backup(
+        configMap: {
+          'version': 0,
+          'profiles': [
+            {
+              'id': 'legacy',
+              'label': 'Old',
+              'autoUpdateDuration': 0,
+              'overrideData': {
+                'enable': false,
+                'rule': {
+                  'type': 'added',
+                  'addedRules': [
+                    {'id': 'rule', 'value': 'DOMAIN,example.com,DIRECT'},
+                  ],
+                },
+              },
+            },
+          ],
+        },
+        fileNames: const ['legacy.yaml'],
+      );
+
+      final data = await readBackupArchive(
+        backupFilePath: archivePath,
+        restoreDirPath: restore.path,
+      );
+
+      expect(data.rules, isEmpty);
+      expect(data.links, isEmpty);
+      expect(data.proxyGroups, isEmpty);
+    });
+
+    test('normalizes v1 and current backups to current config', () async {
+      await seedDatabase();
+      for (final version in [1, currentDataVersion]) {
+        final archivePath = await backup(
+          configMap: {
+            'version': version,
+            'themeProps': defaultThemeProps.toJson(),
+            'appSettingProps': {
+              if (version == 1) ...{
+                'setupCompleted': false,
+                'autoCheckUpdate': true,
+                'sendDeviceIdentity': true,
+                'showNotificationStopAction': false,
+              },
+              'notificationSettings': {
+                'components': [
+                  {'type': 'sessionTraffic'},
+                  {'type': 'sessionTraffic'},
+                  {'type': 'speed', 'hideWhenIdle': 'bad'},
+                ],
+              },
+            },
+          },
+        );
+
+        final data = await readBackupArchive(
+          backupFilePath: archivePath,
+          restoreDirPath: makeDir('restore').path,
+        );
+        final settings =
+            (data.configMap?['appSettingProps'] as Map)['notificationSettings']
+                as Map;
+        final components = settings['components'] as List;
+        expect(data.configMap?['version'], currentDataVersion);
+        expect(components, hasLength(1));
+        expect((components.single as Map)['type'], 'sessionTraffic');
+        if (version == 1) {
+          expect(
+            (data.configMap?['patchClashConfig'] as Map)['global-ua'],
+            flClashXCompatUa,
+          );
+          final appSettings = data.configMap?['appSettingProps'] as Map;
+          expect(appSettings['setupCompleted'], isTrue);
+          expect(appSettings['autoCheckUpdate'], isFalse);
+          expect(appSettings['sendDeviceIdentity'], isFalse);
+          expect(settings['showStopAction'], isFalse);
+          expect(settings['showPauseAction'], isTrue);
+          expect(settings['hideSensitiveOnLockScreen'], isTrue);
+          expect(settings['subscriptionReminders'], isTrue);
+        }
+      }
+    });
+
+    test('rejects a future backup version', () async {
+      await seedDatabase();
+      final archivePath = await backup(
+        configMap: {
+          'version': currentDataVersion + 1,
+          'themeProps': defaultThemeProps.toJson(),
+        },
+      );
+
+      await expectLater(
+        readBackupArchive(
+          backupFilePath: archivePath,
+          restoreDirPath: makeDir('restore').path,
+        ),
+        throwsA(isA<MessageException>()),
       );
     });
 
@@ -570,7 +780,6 @@ void main() {
         readBackupArchive(
           backupFilePath: archivePath,
           restoreDirPath: makeDir('restore').path,
-          homeDirPath: makeDir('home').path,
         ),
         throwsA(
           isA<MessageException>().having(
@@ -589,7 +798,7 @@ void main() {
       await encoder.addFile(
         writeFile(
           join(root.path, 'tmp', '$uniqueId.json'),
-          json.encode({'version': 1}),
+          json.encode({'version': 1, 'themeProps': defaultThemeProps.toJson()}),
         ),
         configJsonName,
       );
@@ -598,10 +807,9 @@ void main() {
       final data = await readBackupArchive(
         backupFilePath: archivePath,
         restoreDirPath: makeDir('restore').path,
-        homeDirPath: makeDir('home').path,
       );
 
-      expect(data.configMap?['version'], 1);
+      expect(data.configMap?['version'], currentDataVersion);
       expect(data.profiles, isEmpty);
       expect(data.scripts, isEmpty);
     });

@@ -1,9 +1,7 @@
 import 'package:reclash/database/database.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 
 import 'preferences.dart';
-import 'smart_routing.dart';
 import 'task.dart';
 
 typedef MigrationTransform =
@@ -74,7 +72,7 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 7;
+  static const currentVersion = currentDataVersion;
 
   Future<Config> run() async {
     final configMap = await _store.getConfigMap();
@@ -128,23 +126,10 @@ class Migration {
         shouldClearClashConfig = true;
       }
     }
-    if (oldVersion < 2) {
+    if (oldVersion == 1) {
+      data = data.copyWith(configMap: _upgradeUpstreamV1(data.configMap));
+    } else {
       data = data.copyWith(configMap: _withFlClashXUa(data.configMap));
-    }
-    if (oldVersion < 3) {
-      data = data.copyWith(configMap: _withSetupCompleted(data.configMap));
-    }
-    if (oldVersion < 4) {
-      data = data.copyWith(configMap: _withMergedRussianPreset(data.configMap));
-    }
-    if (oldVersion < 5) {
-      data = data.copyWith(configMap: _withSeededRoutingBundle(data.configMap));
-    }
-    if (oldVersion < 6) {
-      data = data.copyWith(configMap: _withTelegramOpenMarker(data.configMap));
-    }
-    if (oldVersion < 7) {
-      data = data.copyWith(configMap: _withPrivacyDefaults(data.configMap));
     }
 
     config = Config.realFromJson(data.configMap);
@@ -199,92 +184,36 @@ Map<String, Object?>? _withFlClashXUa(Map<String, Object?>? configMap) {
   return map;
 }
 
-// v2→v3: an install that already has a config went through the first-run
-// dialogs, so the wizard that replaced them must not greet it again. An empty
-// map is a clean install and keeps the default.
-Map<String, Object?>? _withSetupCompleted(Map<String, Object?>? configMap) {
-  if (configMap == null || configMap.isEmpty) {
-    return configMap;
-  }
-  final map = Map<String, Object?>.from(configMap);
-  final appSetting = map['appSettingProps'];
-  final appSettingCopy = appSetting is Map
-      ? Map<String, Object?>.from(appSetting)
-      : <String, Object?>{};
-  appSettingCopy['setupCompleted'] = true;
-  map['appSettingProps'] = appSettingCopy;
-  return map;
-}
-
-// v3→v4: the mobile/home split described the network, which the engine already
-// learns per network, so both stored values name the one Russian preset now.
-Map<String, Object?>? _withMergedRussianPreset(
-  Map<String, Object?>? configMap,
-) {
-  final routing = configMap?['smartRoutingProps'];
-  if (configMap == null || routing is! Map) {
-    return configMap;
-  }
-  final preset = routing['preset'];
-  if (preset != 'ru-mobile' && preset != 'ru-home') {
-    return configMap;
-  }
-  final map = Map<String, Object?>.from(configMap);
-  map['smartRoutingProps'] = Map<String, Object?>.from(routing)
-    ..['preset'] = 'ru';
-  return map;
-}
-
-// v4→v5: canaries and markers moved out of the core into the stored settings,
-// so an install that only ever named a preset carries none of them yet.
-Map<String, Object?>? _withSeededRoutingBundle(
-  Map<String, Object?>? configMap,
-) {
-  final routing = configMap?['smartRoutingProps'];
-  if (configMap == null || routing is! Map) {
-    return configMap;
-  }
-  final stored = SmartRoutingProps.fromJson(Map<String, Object?>.from(routing));
-  final map = Map<String, Object?>.from(configMap);
-  map['smartRoutingProps'] = stored.applyPreset(stored.preset).toJson();
-  return map;
-}
-
-// v5→v6: youtube proved open from Russia too, so drop it, leaving Telegram.
-Map<String, Object?>? _withTelegramOpenMarker(Map<String, Object?>? configMap) {
-  final routing = configMap?['smartRoutingProps'];
-  if (configMap == null || routing is! Map) {
-    return configMap;
-  }
-  final stored = SmartRoutingProps.fromJson(Map<String, Object?>.from(routing));
-  final kept = stored.openMarkers
-      .where((marker) => !marker.url.contains('youtube.com'))
-      .toList();
-  if (stored.preset != SmartRoutingPreset.russia ||
-      kept.length == stored.openMarkers.length) {
-    return configMap;
-  }
-  final map = Map<String, Object?>.from(configMap);
-  map['smartRoutingProps'] = stored
-      .copyWith(
-        openMarkers: kept.isEmpty
-            ? SmartRoutingPreset.russia.bundle.openMarkers
-            : kept,
-      )
-      .toJson();
-  return map;
-}
-
-Map<String, Object?>? _withPrivacyDefaults(Map<String, Object?>? configMap) {
-  if (configMap == null) {
-    return null;
-  }
-  final map = Map<String, Object?>.from(configMap);
-  final settings = map['appSettingProps'];
-  map['appSettingProps'] =
-      Map<String, Object?>.from(settings is Map ? settings : const {})
-        ..['autoCheckUpdate'] = false
-        ..['sendDeviceIdentity'] = false;
+Map<String, Object?>? _upgradeUpstreamV1(Map<String, Object?>? configMap) {
+  final withUa = _withFlClashXUa(configMap);
+  if (withUa == null) return null;
+  final map = Map<String, Object?>.from(withUa);
+  final rawSettings = map['appSettingProps'];
+  final settings = Map<String, Object?>.from(
+    rawSettings is Map ? rawSettings : const {},
+  );
+  settings
+    ..['setupCompleted'] = true
+    ..['autoCheckUpdate'] = defaultAppSettingProps.autoCheckUpdate
+    ..['sendDeviceIdentity'] = defaultAppSettingProps.sendDeviceIdentity;
+  final legacyStopAction = settings['showNotificationStopAction'];
+  final rawNotification = settings['notificationSettings'];
+  final notification = Map<String, Object?>.from(
+    rawNotification is Map ? rawNotification : const {},
+  );
+  notification
+    ..['showStopAction'] = legacyStopAction is bool
+        ? legacyStopAction
+        : defaultNotificationSettings.showStopAction
+    ..['showPauseAction'] = defaultNotificationSettings.showPauseAction
+    ..['hideSensitiveOnLockScreen'] =
+        defaultNotificationSettings.hideSensitiveOnLockScreen
+    ..['subscriptionReminders'] =
+        defaultNotificationSettings.subscriptionReminders;
+  settings
+    ..remove('showNotificationStopAction')
+    ..['notificationSettings'] = notification;
+  map['appSettingProps'] = settings;
   return map;
 }
 

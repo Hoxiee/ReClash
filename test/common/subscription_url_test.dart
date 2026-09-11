@@ -153,6 +153,115 @@ void main() {
     });
   });
 
+  group('subscriptionDisplaySource', () {
+    test('removes credentials, query parameters and fragments', () {
+      expect(
+        subscriptionDisplaySource(
+          'https://user:secret@panel.test:8443/sub/path?token=abc#node',
+        ),
+        'https://panel.test:8443/sub/path',
+      );
+      expect(
+        subscriptionDisplaySource(
+          'vless://uuid@node.test:443?security=tls#Node',
+        ),
+        'vless://node.test:443',
+      );
+    });
+
+    test('does not expose raw configuration and bounds displayed URLs', () {
+      expect(subscriptionDisplaySource('proxies:\n  - name: secret'), isNull);
+      expect(
+        subscriptionDisplaySource(
+          'https://panel.test/${List.filled(200, 'a').join()}',
+        )!.length,
+        120,
+      );
+    });
+  });
+
+  group('subscription redirects', () {
+    test('cross-origin redirects strip client and device identity', () {
+      final headers = subscriptionRedirectHeaders(
+        {
+          'User-Agent': 'INCY/3.3.1/Android',
+          'x-client': 'INCY',
+          'x-app-version': '3.3.1',
+          'x-hwid': 'secret-hwid',
+          'x-device-os': 'Android',
+          'x-device-model': 'Phone',
+          'Accept-Language': 'ru-RU',
+          'Accept': 'application/yaml',
+        },
+        from: Uri.parse('https://primary.test/sub'),
+        to: Uri.parse('https://cdn.test/sub'),
+      );
+
+      expect(headers, {
+        'Accept-Language': 'ru-RU',
+        'Accept': 'application/yaml',
+      });
+    });
+
+    test('same-origin redirects preserve request headers', () {
+      final headers = {'User-Agent': 'ReClash/1.0', 'x-hwid': 'secret'};
+
+      expect(
+        subscriptionRedirectHeaders(
+          headers,
+          from: Uri.parse('https://panel.test/sub'),
+          to: Uri.parse('https://panel.test/moved'),
+        ),
+        same(headers),
+      );
+    });
+
+    test('rejects HTTPS downgrade and non-HTTP destinations', () {
+      expect(
+        isAllowedSubscriptionRedirect(
+          Uri.parse('https://panel.test/sub'),
+          Uri.parse('http://panel.test/sub'),
+        ),
+        isFalse,
+      );
+      expect(
+        isAllowedSubscriptionRedirect(
+          Uri.parse('https://panel.test/sub'),
+          Uri.parse('file:///tmp/config'),
+        ),
+        isFalse,
+      );
+      expect(
+        isAllowedSubscriptionRedirect(
+          Uri.parse('http://panel.test/sub'),
+          Uri.parse('https://panel.test/sub'),
+        ),
+        isTrue,
+      );
+    });
+  });
+
+  group('shouldTryNextSubscriptionClient', () {
+    test('client-specific rejections permit another preset', () {
+      expect(shouldTryNextSubscriptionClient(_badResponse(400)), isTrue);
+      expect(shouldTryNextSubscriptionClient(_badResponse(401)), isTrue);
+      expect(shouldTryNextSubscriptionClient(_badResponse(403)), isTrue);
+    });
+
+    test(
+      'missing subscriptions and transport failures keep their semantics',
+      () {
+        expect(shouldTryNextSubscriptionClient(_badResponse(404)), isFalse);
+        expect(shouldTryNextSubscriptionClient(_badResponse(410)), isFalse);
+        expect(shouldTryNextSubscriptionClient(_badResponse(503)), isFalse);
+        expect(
+          shouldTryNextSubscriptionClient(const SocketException('reset')),
+          isFalse,
+        );
+      },
+    );
+  });
+
   group('shouldTryFallbackHost', () {
     test(
       'transport failures and an overloaded host are worth another host',

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	rcxStoreKey      = "rcx.v1"
-	rcxStoreVersion  = 2
+	rcxStoreKey      = "rcx.v2"
+	rcxStoreVersion  = 1
 	rcxFlushDebounce = 30 * time.Second
 )
 
@@ -26,6 +26,8 @@ type rcxSnapshot struct {
 	Envs         map[string]map[string]*rcxNodeEnv `json:"e"`
 	Picks        map[string]string                 `json:"p"`
 	Pins         map[string]string                 `json:"pn"`
+	LanePicks    map[string]map[string]string      `json:"lp"`
+	LaneStandbys map[string]map[string][]string    `json:"ls"`
 	Seed         uint64                            `json:"sd"`
 	Regimes      map[string]rcxRegimeMemory        `json:"r"`
 	Circuits     map[string]rcxProviderCircuit     `json:"pc"`
@@ -104,7 +106,7 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
 		return rcxEmptySnapshot()
 	}
-	if header.Version != 1 && header.Version != rcxStoreVersion {
+	if header.Version != rcxStoreVersion {
 		log.Infoln("[RCX] discarding state from schema v%d", header.Version)
 		return rcxEmptySnapshot()
 	}
@@ -113,24 +115,10 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
 		return rcxEmptySnapshot()
 	}
-	if header.Version == 1 {
-		rcxMigrateSnapshotV1(snapshot)
-	}
+	snapshot.Config.DefaultsVersion = rcxDefaultsVersion
+	snapshot.Config = snapshot.Config.normalized()
 	rcxFillSnapshot(snapshot)
 	return snapshot
-}
-
-func rcxMigrateSnapshotV1(snapshot *rcxSnapshot) {
-	snapshot.Version = rcxStoreVersion
-	for _, nodes := range snapshot.Envs {
-		for _, state := range nodes {
-			state.OpenWorld = rcxProofUnknown
-			state.Domestic = rcxProofUnknown
-			state.OpenAt = time.Time{}
-			state.DomesticAt = time.Time{}
-		}
-	}
-	snapshot.Fingerprints = snapshot.Config.fingerprints()
 }
 
 func rcxEmptySnapshot() *rcxSnapshot {
@@ -152,6 +140,12 @@ func rcxFillSnapshot(snapshot *rcxSnapshot) {
 	}
 	if snapshot.Pins == nil {
 		snapshot.Pins = map[string]string{}
+	}
+	if snapshot.LanePicks == nil {
+		snapshot.LanePicks = map[string]map[string]string{}
+	}
+	if snapshot.LaneStandbys == nil {
+		snapshot.LaneStandbys = map[string]map[string][]string{}
 	}
 	if snapshot.Seed == 0 {
 		snapshot.Seed = rcxNewSeed()

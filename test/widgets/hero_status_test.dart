@@ -15,6 +15,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
+DoctorSnapshot _doctorSnapshot({
+  bool supported = true,
+  bool fresh = true,
+  DoctorExamState state = DoctorExamState.complete,
+  DoctorHealth health = DoctorHealth.healthy,
+  DoctorPathKind pathKind = DoctorPathKind.unknown,
+  DoctorCaptureState captureState = DoctorCaptureState.unknown,
+  DoctorLayer layer = DoctorLayer.unknown,
+  DoctorProgress progress = const DoctorProgress(),
+}) {
+  final now = DateTime.now().millisecondsSinceEpoch;
+  return DoctorSnapshot(
+    revision: 1,
+    supported: supported,
+    state: state,
+    health: health,
+    confidence: DoctorConfidence.confirmed,
+    pathKind: pathKind,
+    captureState: captureState,
+    layer: layer,
+    progress: progress,
+    freshUntil: fresh ? now + 60000 : now - 1,
+  );
+}
+
+// The orb is elastic, so the core mark can only be pinned to the core it sits
+// in, never to a diameter.
+double _coreExtent(WidgetTester tester) =>
+    tester.getSize(find.byKey(const ValueKey('orb-core'))).width;
+
 void main() {
   group('hero health', () {
     test('withholds a verdict while nothing has been measured', () {
@@ -26,12 +56,12 @@ void main() {
     test('a live measurement becomes the checking status', () {
       expect(
         heroStatusOf(HeroOrbPhase.on, HeroHealth.checking),
-        HeroStatus.checking,
+        HeroStatus.diagnosing,
       );
     });
 
-    test('reads a failed measurement as broken', () {
-      expect(heroHealthOf(delay: -1, measuring: false), HeroHealth.broken);
+    test('treats a failed measurement as unavailable', () {
+      expect(heroHealthOf(delay: -1, measuring: false), HeroHealth.unknown);
     });
 
     test('splits healthy from degraded at the amber threshold', () {
@@ -46,10 +76,55 @@ void main() {
     });
   });
 
+  group('hero doctor health', () {
+    test('withholds unsupported and stale verdicts', () {
+      expect(heroDoctorHealthOf(const DoctorSnapshot()), HeroHealth.unknown);
+      expect(
+        heroDoctorHealthOf(
+          _doctorSnapshot(health: DoctorHealth.broken, fresh: false),
+        ),
+        HeroHealth.unknown,
+      );
+    });
+
+    test('maps a fresh authoritative snapshot', () {
+      expect(
+        heroDoctorHealthOf(_doctorSnapshot(state: DoctorExamState.examining)),
+        HeroHealth.checking,
+      );
+      expect(heroDoctorHealthOf(_doctorSnapshot()), HeroHealth.healthy);
+      expect(
+        heroDoctorHealthOf(_doctorSnapshot(health: DoctorHealth.degraded)),
+        HeroHealth.degraded,
+      );
+      expect(
+        heroDoctorHealthOf(_doctorSnapshot(health: DoctorHealth.broken)),
+        HeroHealth.broken,
+      );
+    });
+
+    test('does not invent a capture verdict absent from Core', () {
+      expect(
+        heroDoctorHealthOf(
+          _doctorSnapshot(
+            health: DoctorHealth.unknown,
+            pathKind: DoctorPathKind.tun,
+            captureState: DoctorCaptureState.inactive,
+          ),
+        ),
+        HeroHealth.unknown,
+      );
+    });
+  });
+
   group('hero core mark', () {
     test('a flowing tunnel wears the panel logo, else the app mark', () {
       expect(
         heroCoreMarkOf(HeroStatus.secured, 'https://x/l.png'),
+        HeroCoreMark.serviceLogo,
+      );
+      expect(
+        heroCoreMarkOf(HeroStatus.diagnosing, 'https://x/l.png'),
         HeroCoreMark.serviceLogo,
       );
       expect(
@@ -106,17 +181,19 @@ void main() {
       expect(HeroStatus.paused.isAlert, isTrue);
       expect(HeroStatus.degraded.isAlert, isTrue);
       expect(HeroStatus.broken.isAlert, isTrue);
-      expect(HeroStatus.offline.isAlert, isTrue);
+      expect(HeroStatus.offline.isAlert, isFalse);
       expect(HeroStatus.secured.isAlert, isFalse);
       expect(HeroStatus.off.isLive, isFalse);
       expect(HeroStatus.offline.isLive, isFalse);
       expect(HeroStatus.offline.flows, isFalse);
+      expect(HeroStatus.diagnosing.flows, isTrue);
       expect(HeroStatus.degraded.flows, isTrue);
       expect(HeroStatus.broken.flows, isFalse);
     });
 
     test('a probe is not a live tunnel', () {
       expect(HeroStatus.checking.isLive, isFalse);
+      expect(HeroStatus.diagnosing.isLive, isTrue);
       expect(HeroStatus.checking.isTransitioning, isFalse);
       expect(HeroStatus.reconnecting.isLive, isTrue);
       expect(HeroStatus.reconnecting.isTransitioning, isTrue);
@@ -127,6 +204,7 @@ void main() {
         expect(
           status.isSweeping,
           status == HeroStatus.checking ||
+              status == HeroStatus.diagnosing ||
               status == HeroStatus.connecting ||
               status == HeroStatus.reconnecting,
           reason: '$status',
@@ -182,6 +260,18 @@ void main() {
       }
     });
 
+    test('fault destination outranks the previous topology', () {
+      for (final from in HeroStatus.values.where(
+        (status) => status != HeroStatus.broken,
+      )) {
+        expect(
+          heroOrbTransitionOf(from, HeroStatus.broken),
+          HeroOrbTransition.fault,
+          reason: '$from → ${HeroStatus.broken}',
+        );
+      }
+    });
+
     test('leaves an unchanged status steady', () {
       for (final status in HeroStatus.values) {
         expect(
@@ -219,6 +309,71 @@ void main() {
       );
     });
 
+    test('a disconnected core outranks pause', () {
+      expect(
+        heroLifecycleOf(
+          isStart: true,
+          paused: true,
+          coreConnecting: false,
+          coreDisconnected: true,
+        ),
+        HeroOrbPhase.failed,
+      );
+    });
+
+    test('a disconnected core cannot appear protected', () {
+      expect(
+        heroLifecycleOf(
+          isStart: true,
+          paused: false,
+          coreConnecting: false,
+          coreDisconnected: true,
+        ),
+        HeroOrbPhase.failed,
+      );
+      expect(
+        heroStatusOf(HeroOrbPhase.failed, HeroHealth.unknown),
+        HeroStatus.broken,
+      );
+    });
+
+    test('provider projects the authoritative start request', () {
+      final container = ProviderContainer(
+        overrides: [
+          isStartProvider.overrideWithValue(false),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          initProvider.overrideWithBuild((_, _) => true),
+          networkReachableProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.off);
+      final revision = container
+          .read(runRequestStateProvider.notifier)
+          .begin(true);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.connecting);
+      container.read(runRequestStateProvider.notifier).finish(revision);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.off);
+    });
+
+    test('a disconnected core outranks a pending start request', () {
+      final container = ProviderContainer(
+        overrides: [
+          isStartProvider.overrideWithValue(false),
+          coreStatusProvider.overrideWithBuild(
+            (_, _) => CoreStatus.disconnected,
+          ),
+          initProvider.overrideWithBuild((_, _) => true),
+          networkReachableProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(runRequestStateProvider.notifier).begin(true);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.failed);
+    });
+
     test('a probe only shows while the tunnel is down', () {
       expect(heroPhaseWithProbe(HeroOrbPhase.off, true), HeroOrbPhase.checking);
       expect(heroPhaseWithProbe(HeroOrbPhase.off, false), HeroOrbPhase.off);
@@ -227,6 +382,7 @@ void main() {
         HeroOrbPhase.paused,
         HeroOrbPhase.connecting,
         HeroOrbPhase.reconnecting,
+        HeroOrbPhase.failed,
       ]) {
         expect(heroPhaseWithProbe(phase, true), phase, reason: '$phase');
       }
@@ -355,17 +511,24 @@ void main() {
     });
   });
 
-  group('HeroLinkRow', () {
-    Future<void> pumpRow(WidgetTester tester, HeroStatus status) {
+  group('HeroServiceRow', () {
+    Future<void> pumpRow(
+      WidgetTester tester,
+      HeroStatus status, {
+      DoctorSnapshot doctor = const DoctorSnapshot(),
+    }) {
       return tester.pumpWidget(
         TestApp(
           includeNavigatorKey: false,
           setTheme: false,
+          wrapInProviderScope: true,
+          overrides: [connectionDoctorProvider.overrideWithValue(doctor)],
           child: Builder(
             builder: (context) => Scaffold(
-              body: HeroLinkRow(
+              body: HeroServiceRow(
                 status: status,
                 accent: heroPaletteOf(context, status).accent,
+                easterEggRoll: 1,
               ),
             ),
           ),
@@ -373,7 +536,7 @@ void main() {
       );
     }
 
-    testWidgets('holds the routing line while nothing is wrong', (
+    testWidgets('holds the routing line while Doctor has no verdict', (
       tester,
     ) async {
       for (final status in [
@@ -387,17 +550,81 @@ void main() {
       }
     });
 
-    testWidgets('names the fault for every alert state', (tester) async {
-      await pumpRow(tester, HeroStatus.paused);
+    testWidgets('shows the rare calm status only on its winning roll', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestApp(
+          includeNavigatorKey: false,
+          setTheme: false,
+          wrapInProviderScope: true,
+          overrides: [
+            connectionDoctorProvider.overrideWithValue(const DoctorSnapshot()),
+          ],
+          child: Builder(
+            builder: (context) => Scaffold(
+              body: HeroServiceRow(
+                status: HeroStatus.secured,
+                accent: heroPaletteOf(context, HeroStatus.secured).accent,
+                easterEggRoll: 0,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('The packets are unusually well-behaved today.'),
+        findsOne,
+      );
+    });
+
+    testWidgets('shows fresh Doctor progress and causal layer', (tester) async {
+      await pumpRow(
+        tester,
+        HeroStatus.secured,
+        doctor: _doctorSnapshot(
+          state: DoctorExamState.examining,
+          progress: const DoctorProgress(completed: 2, total: 5),
+        ),
+      );
+      expect(find.text('Checking connection: 2/5'), findsOne);
+
+      await pumpRow(
+        tester,
+        HeroStatus.broken,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.broken,
+          layer: DoctorLayer.dns,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Connection issue: DNS'), findsOne);
+    });
+
+    testWidgets('lifecycle and freshness outrank Doctor takeover', (
+      tester,
+    ) async {
+      final broken = _doctorSnapshot(
+        health: DoctorHealth.broken,
+        layer: DoctorLayer.dns,
+      );
+      await pumpRow(tester, HeroStatus.paused, doctor: broken);
       expect(find.text('Traffic is paused, protection is on hold'), findsOne);
+      expect(find.text('Connection issue: DNS'), findsNothing);
 
-      await pumpRow(tester, HeroStatus.degraded);
+      await pumpRow(
+        tester,
+        HeroStatus.secured,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.broken,
+          layer: DoctorLayer.dns,
+          fresh: false,
+        ),
+      );
       await tester.pumpAndSettle();
-      expect(find.text('The node is responding slowly'), findsOne);
-
-      await pumpRow(tester, HeroStatus.broken);
-      await tester.pumpAndSettle();
-      expect(find.text('The node is not responding'), findsOne);
+      expect(find.text('Smart routing is off'), findsOne);
+      expect(find.text('Connection issue: DNS'), findsNothing);
     });
   });
 
@@ -413,6 +640,8 @@ void main() {
       RcxStatus? rcxStatus,
       String? serviceLogo,
       String? heroRing,
+      String? activeText,
+      DoctorSnapshot doctor = const DoctorSnapshot(),
     }) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1;
@@ -421,12 +650,13 @@ void main() {
 
       final profile = Profile.normal().copyWith(
         selectedMap: const {'Selector': 'Node A'},
-        panelMeta: serviceLogo == null && heroRing == null
+        panelMeta: serviceLogo == null && heroRing == null && activeText == null
             ? null
             : PanelMeta(
                 serviceName: 'Panel',
                 serviceLogo: serviceLogo,
                 heroRing: heroRing,
+                activeText: activeText,
               ),
       );
       const group = Group(
@@ -454,6 +684,7 @@ void main() {
           if (rcxStatus != null)
             smartRoutingStatusProvider.overrideWithBuild((_, _) => rcxStatus),
           initProvider.overrideWithBuild((_, _) => true),
+          connectionDoctorProvider.overrideWithValue(doctor),
         ],
       );
       addTearDown(container.dispose);
@@ -480,6 +711,14 @@ void main() {
       expect(find.text('Smart routing is off'), findsOne);
     });
 
+    testWidgets('uses the provider active text for a healthy tunnel', (
+      tester,
+    ) async {
+      await pumpHero(tester, delay: 140, activeText: 'Protected by provider');
+      expect(find.text('Protected by provider'), findsOne);
+      expect(find.text('You are protected'), findsNothing);
+    });
+
     testWidgets('the flowing core shows the panel logo, not the power icon', (
       tester,
     ) async {
@@ -488,15 +727,16 @@ void main() {
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
       final markBox = tester.widget<SizedBox>(mark);
-      expect(markBox.width, 96.12);
-      expect(markBox.height, 96.12);
-      expect(
-        find.descendant(of: mark, matching: find.byType(ColorFiltered)),
-        findsOne,
+      expect(markBox.width, closeTo(_coreExtent(tester) * 0.54, 0.01));
+      expect(markBox.height, markBox.width);
+      final cachedLogo = find.descendant(
+        of: mark,
+        matching: find.byType(ImageCacheWidget),
       );
+      expect(cachedLogo, findsOne);
       expect(
-        find.descendant(of: mark, matching: find.byType(ImageCacheWidget)),
-        findsOne,
+        find.descendant(of: cachedLogo, matching: find.byType(ColorFiltered)),
+        findsNothing,
       );
     });
 
@@ -507,13 +747,14 @@ void main() {
       expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
+      final core = _coreExtent(tester);
       final markBox = tester.widget<SizedBox>(mark);
-      expect(markBox.width, 96.12);
-      expect(markBox.height, 96.12);
+      expect(markBox.width, closeTo(core * 0.54, 0.01));
+      expect(markBox.height, markBox.width);
       final padding = tester.widget<Padding>(
         find.descendant(of: mark, matching: find.byType(Padding)),
       );
-      expect(padding.padding, const EdgeInsets.all(9.612));
+      expect(padding.padding, EdgeInsets.all(core * 0.0216));
       expect(
         find.descendant(of: mark, matching: find.byType(ColorFiltered)),
         findsOne,
@@ -537,7 +778,10 @@ void main() {
         delay: 140,
         paused: true,
         serviceLogo: 'https://p/l.png',
+        activeText: 'Protected by provider',
       );
+      expect(find.text('Paused — trusted network'), findsOne);
+      expect(find.text('Protected by provider'), findsNothing);
       final orbScope = find.byType(HeroOrb);
       expect(
         find.descendant(
@@ -590,32 +834,86 @@ void main() {
       expect(find.text('Not protected'), findsOne);
     });
 
-    testWidgets('keeps protection wording while the node is slow', (
+    testWidgets('keeps latency informational when the node is slow', (
       tester,
     ) async {
       await pumpHero(tester, delay: 1200);
       expect(find.text('You are protected'), findsOne);
-      expect(find.text('The node is responding slowly'), findsOne);
+      expect(find.text('1200 ms'), findsOne);
+      expect(find.text('The node is responding slowly'), findsNothing);
     });
 
-    testWidgets('accuses the link only when a test actually failed', (
+    testWidgets('an unavailable latency measurement is not a link failure', (
       tester,
     ) async {
       await pumpHero(tester, delay: -1);
-      expect(find.text('Connection is not working'), findsOne);
-      expect(find.text('The node is not responding'), findsOne);
+      expect(find.text('You are protected'), findsOne);
+      expect(find.text('Connection is not working'), findsNothing);
+      expect(find.text('The node is not responding'), findsNothing);
     });
 
-    testWidgets('a stale failure cannot accuse a stopped tunnel', (
+    testWidgets('fresh Doctor verdict controls live connectivity', (
       tester,
     ) async {
-      await pumpHero(tester, delay: -1, running: false);
+      await pumpHero(
+        tester,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.broken,
+          layer: DoctorLayer.dns,
+        ),
+      );
+      expect(find.text('Connection is not working'), findsOne);
+      expect(find.text('Stop'), findsOne);
+      expect(find.text('Tap to turn protection on'), findsNothing);
+      expect(find.text('Connection issue: DNS'), findsOne);
+
+      await pumpHero(
+        tester,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.degraded,
+          layer: DoctorLayer.transport,
+        ),
+      );
+      expect(find.text('You are protected'), findsOne);
+      expect(find.text('Connection issue: Transport'), findsOne);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('stale Doctor verdict cannot accuse a live tunnel', (
+      tester,
+    ) async {
+      await pumpHero(
+        tester,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.broken,
+          layer: DoctorLayer.dns,
+          fresh: false,
+        ),
+      );
+      expect(find.text('You are protected'), findsOne);
+      expect(find.text('Connection is not working'), findsNothing);
+      expect(find.text('Connection issue: DNS'), findsNothing);
+    });
+
+    testWidgets('a stopped tunnel outranks a fresh Doctor failure', (
+      tester,
+    ) async {
+      await pumpHero(
+        tester,
+        running: false,
+        doctor: _doctorSnapshot(health: DoctorHealth.broken),
+      );
       expect(find.text('Not protected'), findsOne);
       expect(find.text('Connection is not working'), findsNothing);
     });
 
-    testWidgets('pause outranks the delay verdict', (tester) async {
-      await pumpHero(tester, delay: -1, paused: true);
+    testWidgets('pause outranks a fresh Doctor failure', (tester) async {
+      await pumpHero(
+        tester,
+        paused: true,
+        doctor: _doctorSnapshot(health: DoctorHealth.broken),
+      );
       expect(find.text('Paused — trusted network'), findsOne);
       expect(find.text('Traffic is paused, protection is on hold'), findsOne);
     });
@@ -633,15 +931,48 @@ void main() {
       expect(find.text('Checking the network…'), findsOne);
     });
 
-    testWidgets('the selected-node probe diagnoses a live tunnel', (
+    testWidgets('a selected-node probe does not become connectivity', (
       tester,
     ) async {
       await pumpHero(
         tester,
         pendingTests: {delayTestKey(defaultTestUrl, 'Node A')},
       );
+      expect(find.text('You are protected'), findsOne);
+      expect(find.text('Checking the network…'), findsNothing);
+    });
+
+    testWidgets('a live Doctor exam becomes the checking state', (
+      tester,
+    ) async {
+      await pumpHero(
+        tester,
+        doctor: _doctorSnapshot(
+          state: DoctorExamState.examining,
+          progress: const DoctorProgress(completed: 3, total: 8),
+        ),
+      );
       expect(find.text('Checking the network…'), findsOne);
-      expect(find.text('You are protected'), findsNothing);
+    });
+
+    testWidgets('Doctor takes over Smart Route only for actionable state', (
+      tester,
+    ) async {
+      const routing = RcxStatus(enabled: true, node: 'Engine Node', delay: 90);
+      await pumpHero(tester, rcxStatus: routing);
+      expect(find.text('Connection issue: DNS'), findsNothing);
+
+      await pumpHero(
+        tester,
+        rcxStatus: routing,
+        doctor: _doctorSnapshot(
+          health: DoctorHealth.broken,
+          layer: DoctorLayer.dns,
+        ),
+      );
+      expect(find.text('Connection issue: DNS'), findsOne);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
     });
 
     testWidgets('an unrelated live probe leaves the wording alone', (

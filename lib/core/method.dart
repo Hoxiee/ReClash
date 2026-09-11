@@ -46,6 +46,11 @@ enum CoreMethod {
   rcxReport,
   rcxDeepScan,
   rcxSetEnabled,
+  doctorSnapshot,
+  doctorStart,
+  doctorCancel,
+  doctorFlushDns,
+  doctorExport,
 }
 
 class CoreMethodCall {

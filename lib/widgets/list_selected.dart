@@ -111,6 +111,7 @@ class DecorationListItem extends StatelessWidget {
     required List<Object?> options,
     required Object? value,
     required String Function(Object? value) textBuilder,
+    String Function(Object? value)? subtitleBuilder,
     required ValueChanged<Object?> onChanged,
     this.isSelected,
     this.horizontalTitleGap,
@@ -122,6 +123,7 @@ class DecorationListItem extends StatelessWidget {
          options: options,
          value: value,
          textBuilder: textBuilder,
+         subtitleBuilder: subtitleBuilder,
          onChanged: onChanged,
        );
 
@@ -236,6 +238,7 @@ class DecorationListItem extends StatelessWidget {
               title: options.title,
               options: options.options,
               textBuilder: options.textBuilder,
+              subtitleBuilder: options.subtitleBuilder,
               value: options.value,
             ),
           );

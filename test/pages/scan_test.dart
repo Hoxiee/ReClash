@@ -180,7 +180,7 @@ void main() {
       expect(result, 'https://sub.example/x');
     });
 
-    testWidgets('a non-url barcode pops without a value', (tester) async {
+    testWidgets('a non-url barcode leaves the scanner open', (tester) async {
       String? result = 'unset';
       var popped = false;
       await pumpScanPage(
@@ -194,8 +194,21 @@ void main() {
       platform.emit(_capture(type: BarcodeType.text, rawValue: 'plain text'));
       await tester.pumpAndSettle();
 
-      expect(popped, isTrue);
-      expect(result, isNull);
+      expect(popped, isFalse);
+      expect(result, 'unset');
+      expect(find.byType(ScanPage), findsOneWidget);
+    });
+
+    testWidgets('a supported custom scheme pops its raw value', (tester) async {
+      String? result;
+      await pumpScanPage(tester, onPopped: (value) => result = value);
+
+      platform.emit(
+        _capture(type: BarcodeType.text, rawValue: 'incy://subscription'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(result, 'incy://subscription');
     });
   });
 

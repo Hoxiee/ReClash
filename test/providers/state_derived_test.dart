@@ -446,15 +446,193 @@ void main() {
     expect(container.read(updateParamsProvider).authentication, isEmpty);
   });
 
-  test('shared state carries the notification stop action switch', () async {
+  test(
+    'current-server group hint follows explicit, profile, and fallback policy',
+    () {
+      final profile = Profile.normal().copyWith(
+        panelMeta: const PanelMeta(serverInfoGroup: 'Preferred'),
+        currentGroupName: 'Ignored',
+      );
+      _profiles(container).replace([profile]);
+      container
+          .read(currentProfileIdProvider.notifier)
+          .update((_) => profile.id);
+      container
+          .read(groupsProvider.notifier)
+          .update(
+            (_) => const [
+              Group(
+                name: 'Fallback',
+                type: GroupType.Selector,
+                now: 'Node A',
+                hidden: false,
+              ),
+              Group(
+                name: 'Preferred',
+                type: GroupType.Selector,
+                now: 'Node B',
+                hidden: false,
+              ),
+              Group(
+                name: 'Hidden',
+                type: GroupType.Selector,
+                now: 'Node C',
+                hidden: true,
+              ),
+              Group(name: 'GLOBAL', type: GroupType.Selector, now: 'Node D'),
+            ],
+          );
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(mode: Mode.rule));
+
+      expect(container.read(activeServerGroupProvider), 'Preferred');
+
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              notificationSettings: state.notificationSettings.copyWith(
+                components: const [
+                  NotificationComponent(
+                    type: NotificationComponentType.currentServer,
+                    group: '  Fallback  ',
+                  ),
+                ],
+              ),
+            ),
+          );
+      expect(container.read(activeServerGroupProvider), 'Fallback');
+
+      container
+          .read(appSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              notificationSettings: state.notificationSettings.copyWith(
+                components: const [
+                  NotificationComponent(
+                    type: NotificationComponentType.currentServer,
+                    group: '   ',
+                  ),
+                ],
+              ),
+            ),
+          );
+      _profiles(container).replace([
+        profile.copyWith(
+          panelMeta: const PanelMeta(serverInfoGroup: 'Missing'),
+          currentGroupName: 'Preferred',
+        ),
+      ]);
+      expect(container.read(activeServerGroupProvider), 'Fallback');
+
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(mode: Mode.direct));
+      expect(container.read(activeServerGroupProvider), isNull);
+
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(mode: Mode.global));
+      _profiles(container).replace([
+        profile.copyWith(panelMeta: const PanelMeta(serverInfoGroup: 'GLOBAL')),
+      ]);
+      expect(container.read(activeServerGroupProvider), 'GLOBAL');
+    },
+  );
+
+  test(
+    'shared state carries notification strings and active server group',
+    () async {
+      await AppLocalizations.load(const Locale('en'));
+      final profile = Profile.normal().copyWith(
+        panelMeta: const PanelMeta(
+          serverInfoGroup: 'Preferred',
+          activeText: 'Protected by provider',
+        ),
+      );
+      _profiles(container).replace([profile]);
+      container
+          .read(currentProfileIdProvider.notifier)
+          .update((_) => profile.id);
+      container
+          .read(groupsProvider.notifier)
+          .update(
+            (_) => const [
+              Group(
+                name: 'Preferred',
+                type: GroupType.Selector,
+                now: 'Node',
+                hidden: false,
+              ),
+            ],
+          );
+      container.listen(sharedStateProvider, (_, _) {});
+
+      final sharedState = container.read(sharedStateProvider);
+      final l10n = AppLocalizations.current;
+      expect(sharedState.activeServerGroup, 'Preferred');
+      expect(sharedState.activeText, 'Protected by provider');
+      expect(sharedState.networkStateText, l10n.notificationNetworkState);
+      expect(sharedState.currentServerText, l10n.notificationCurrentServer);
+      expect(sharedState.networkNormalText, l10n.notificationNetworkNormal);
+      expect(
+        sharedState.networkWhitelistText,
+        l10n.notificationNetworkWhitelist,
+      );
+      expect(sharedState.networkPortalText, l10n.notificationNetworkPortal);
+      expect(sharedState.networkOfflineText, l10n.notificationNetworkOffline);
+      expect(sharedState.networkUnknownText, l10n.notificationNetworkUnknown);
+    },
+  );
+
+  test('shared state carries nested notification settings', () async {
     await AppLocalizations.load(const Locale('en'));
     container.listen(sharedStateProvider, (_, _) {});
-    expect(container.read(sharedStateProvider).showStopAction, true);
+    expect(
+      container.read(sharedStateProvider).notificationSettings.showStopAction,
+      true,
+    );
 
     container
         .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(showNotificationStopAction: false));
-    expect(container.read(sharedStateProvider).showStopAction, false);
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              showStopAction: false,
+            ),
+          ),
+        );
+    final sharedState = container.read(sharedStateProvider);
+    expect(sharedState.notificationSettings.showStopAction, false);
+  });
+
+  test('shared state strips detail down to the protection line', () async {
+    await AppLocalizations.load(const Locale('en'));
+    container.listen(sharedStateProvider, (_, _) {});
+    expect(
+      container.read(sharedStateProvider).notificationSettings.components,
+      isNotEmpty,
+    );
+
+    container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            notificationSettings: state.notificationSettings.copyWith(
+              visibility: NotificationVisibility.minimal,
+            ),
+          ),
+        );
+    final projected = container.read(sharedStateProvider).notificationSettings;
+    expect(projected.components, isEmpty);
+    expect(projected.showPauseAction, false);
+    expect(projected.showStopAction, false);
+    expect(
+      container.read(appSettingProvider).notificationSettings.components,
+      isNotEmpty,
+      reason: 'stored components survive so re-enabling restores them',
+    );
   });
 
   test('shared state follows the locale whose messages are loaded', () async {

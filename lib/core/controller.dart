@@ -106,10 +106,12 @@ class CoreController {
   Future<String> validateConfigWithData(String data) async {
     final path = await appPath.tempFilePath;
     final file = File(path);
-    await file.safeWriteAsString(data);
-    final res = await _interface.validateConfig(path);
-    await File(path).safeDelete();
-    return res;
+    try {
+      await file.safeWriteAsString(data);
+      return await _interface.validateConfig(path);
+    } finally {
+      await file.safeDelete();
+    }
   }
 
   Future<String> updateConfig(UpdateParams updateParams) async {
@@ -230,6 +232,26 @@ class CoreController {
 
   Future<bool> smartRoutingDeepScan() {
     return _interface.smartRoutingDeepScan();
+  }
+
+  Future<DoctorSnapshot> doctorSnapshot() {
+    return _interface.doctorSnapshot();
+  }
+
+  Future<DoctorSnapshot> startDoctor(DoctorStartParams params) {
+    return _interface.startDoctor(params);
+  }
+
+  Future<DoctorSnapshot> cancelDoctor(DoctorCancelParams params) {
+    return _interface.cancelDoctor(params);
+  }
+
+  Future<DoctorSnapshot> flushDoctorDns(DoctorHealParams params) {
+    return _interface.flushDoctorDns(params);
+  }
+
+  Future<DoctorReport> exportDoctorReport() {
+    return _interface.exportDoctorReport();
   }
 
   Future<Delay?> getDelay(String url, String proxyName) async {

@@ -647,6 +647,7 @@ func TestCapabilityLaneProbesItsOwnUnprovenMatches(t *testing.T) {
 	engine.applyConfigLocked(config)
 	engine.ledger.NoteProbe(runtime.members[0].key(), engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
 
+	before := engine.budget.Remaining(runtime.Now())
 	engine.reconsiderLanes(runtime.members, runtime.Now())
 	engine.queueLaneRecovery()
 
@@ -657,6 +658,39 @@ func TestCapabilityLaneProbesItsOwnUnprovenMatches(t *testing.T) {
 	if _, queued := engine.laneProbeSeen["youtube-adfree"]["premium ⭐"]; !queued {
 		t.Fatalf("seen = %v, want the unproven specialist in the wave",
 			engine.laneProbeSeen["youtube-adfree"])
+	}
+	if got := engine.budget.Remaining(runtime.Now()); got != before-1 {
+		t.Fatalf("budget left = %d, want the lane wave charged one probe", got)
+	}
+}
+
+func TestCapabilityLaneWaitsWhenProbeBudgetIsSpent(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "plain", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "youtube-adfree", Group: "RCX-CAP-YOUTUBE_ADFREE", Fallback: "main",
+		Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+	engine.budget.Take(rcxProbeBudgetCap, runtime.Now())
+	engine.reconsiderLanes(runtime.members, runtime.Now())
+
+	engine.queueLaneRecovery()
+
+	if engine.probing {
+		t.Fatal("lane probe started after the shared budget was spent")
+	}
+	if _, queued := engine.laneProbeSeen["youtube-adfree"]["premium ⭐"]; queued {
+		t.Fatal("an unaffordable specialist was marked as measured")
+	}
+	if engine.laneExhausted("youtube-adfree") {
+		t.Fatal("budget starvation must not exhaust the lane search")
 	}
 }
 

@@ -45,6 +45,9 @@ String _decodeBase64Header(String value) {
   }
 }
 
+String _decodeTrimmedBase64Header(String value) =>
+    _decodeBase64Header(value).trim();
+
 const _minUnprefixedBase64 = 8;
 
 bool _hasControlChars(String value) => value.runes.any(
@@ -92,6 +95,11 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     sourceKeys: ['reclash-serverinfo', 'flclashx-serverinfo'],
     canonicalKey: 'serverInfoGroup',
     convertValue: _decodeBase64Header,
+  ),
+  _PanelHeaderConverter(
+    sourceKeys: ['reclash-activetext'],
+    canonicalKey: 'activeText',
+    convertValue: _decodeTrimmedBase64Header,
   ),
   _PanelHeaderConverter(
     sourceKeys: ['reclash-buyplan', 'flclashx-buyplan'],

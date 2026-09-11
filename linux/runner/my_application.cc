@@ -56,6 +56,8 @@ static void my_application_activate(GApplication* application) {
   gtk_window_set_default_size(window, 680, 580);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
+  // Flutter 3.47's Linux Impeller backend corrupts oversized animated layers.
+  fl_dart_project_set_enable_impeller(project, FALSE);
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
 
   FlView* view = fl_view_new(project);

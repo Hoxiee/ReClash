@@ -38,7 +38,7 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
       context,
       builder: (context) => AdaptiveSheetScaffold(
         title: context.appLocalizations.addProfile,
-        body: AddProfileView(context: context),
+        body: const AddProfileView(),
       ),
     );
   }
@@ -246,7 +246,7 @@ class ProfileItem extends ConsumerWidget {
   List<Widget> _buildUrlProfileInfo(BuildContext context) {
     final subscriptionInfo = profile.subscriptionInfo;
     return [
-      if (subscriptionInfo != null && subscriptionInfo.total > 0) ...[
+      if (subscriptionInfo != null && subscriptionInfo.hasFacts) ...[
         SubscriptionInfoView(subscriptionInfo: subscriptionInfo),
         const SizedBox(height: 6),
       ],
@@ -304,7 +304,7 @@ class ProfileItem extends ConsumerWidget {
     final isUrl = profile.type == ProfileType.url;
     final subscriptionInfo = profile.subscriptionInfo;
     final hasSubscriptionInfo =
-        isUrl && subscriptionInfo != null && subscriptionInfo.total > 0;
+        isUrl && subscriptionInfo != null && subscriptionInfo.hasFacts;
     final supportUrl = profile.panelMeta?.supportUrl;
     return [
       CommonPopupMenuItem(
@@ -457,15 +457,33 @@ class _ProfileCardTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = profile.type == ProfileType.url
+        ? profile.effectiveClient
+        : null;
+    final native = client == null || isNativeSubscriptionClient(client);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          profile.realLabel,
-          style: context.textTheme.titleMedium,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        Row(
+          spacing: 6,
+          children: [
+            Flexible(
+              child: Text(
+                profile.realLabel,
+                style: context.textTheme.titleMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (client != null)
+              CommonChip(
+                label:
+                    '${subscriptionClientLabel(client, context.appLocalizations)}'
+                    '${native ? '' : ' · Experimental'}',
+                icon: native ? null : Icons.science_outlined,
+              ),
+          ],
         ),
         const SizedBox(height: 6),
         ...info,

@@ -85,6 +85,7 @@ class ApplicationState extends ConsumerState<Application> {
       } else {
         exit(0);
       }
+      if (!globalState.isAttach) return;
       _autoUpdateProfilesTask();
       _initLink();
       unawaited(app?.initShortcuts());
@@ -105,10 +106,12 @@ class ApplicationState extends ConsumerState<Application> {
       ResolvedExternalLink? resolved;
       try {
         resolved = await resolveExternalLink(link.payload);
-      } on IncyLinkException catch (e) {
+      } on IncyLinkException catch (error) {
         await dialogs.showMessage(
           title: currentAppLocalizations.addProfile,
-          message: TextSpan(text: e.message),
+          message: TextSpan(
+            text: incyLinkErrorMessage(error, currentAppLocalizations),
+          ),
         );
         return;
       }
@@ -126,20 +129,48 @@ class ApplicationState extends ConsumerState<Application> {
     });
   }
 
+  Future<bool> _confirmExternalAction(ReClashCommand command) async {
+    if (!command.requiresConfirmation) return true;
+    final label = switch (command) {
+      ReClashCommand.connect => currentAppLocalizations.urlSchemeConnect,
+      ReClashCommand.disconnect => currentAppLocalizations.urlSchemeDisconnect,
+      ReClashCommand.toggle => currentAppLocalizations.urlSchemeToggle,
+      ReClashCommand.close => currentAppLocalizations.urlSchemeClose,
+      ReClashCommand.open ||
+      ReClashCommand.importProfile ||
+      ReClashCommand.addProfile => '',
+    };
+    return await dialogs.showMessage(
+          title: currentAppLocalizations.externalActionConfirmTitle,
+          message: TextSpan(
+            text: currentAppLocalizations.externalActionConfirmMessage(label),
+          ),
+        ) ==
+        true;
+  }
+
   Future<void> _handleReClashCommand(IncomingCommand command) async {
     final action = ref.read(systemActionProvider.notifier);
     switch (command.command) {
       case ReClashCommand.connect:
+        await window?.show();
+        if (!await _confirmExternalAction(command.command)) return;
         await ref
             .read(setupActionProvider.notifier)
             .setRunning(true, initialize: true);
       case ReClashCommand.disconnect:
+        await window?.show();
+        if (!await _confirmExternalAction(command.command)) return;
         await ref.read(setupActionProvider.notifier).setRunning(false);
       case ReClashCommand.toggle:
+        await window?.show();
+        if (!await _confirmExternalAction(command.command)) return;
         ref.read(commonActionProvider.notifier).toggleRunning();
       case ReClashCommand.open:
         await window?.show();
       case ReClashCommand.close:
+        await window?.show();
+        if (!await _confirmExternalAction(command.command)) return;
         await action.handleClose();
       case ReClashCommand.importProfile:
         final payload = command.payload!;
@@ -187,10 +218,9 @@ class ApplicationState extends ConsumerState<Application> {
     required SubscriptionClient preset,
     required Color color,
   }) async {
-    // A share link or an inlined config can be arbitrarily long.
-    final trimmed = source.length > 120
-        ? '${source.substring(0, 119)}…'
-        : source;
+    final trimmed =
+        subscriptionDisplaySource(source) ??
+        currentAppLocalizations.subscriptionConfigurationSource;
     final message = currentAppLocalizations.createProfileFromUrlTip(trimmed);
     final parts = message.split(trimmed);
     final res = await dialogs.showMessage(
@@ -212,11 +242,10 @@ class ApplicationState extends ConsumerState<Application> {
     );
     if (res != true) return;
     final action = ref.read(profilesActionProvider.notifier);
-    if (content != null) {
-      unawaited(action.addProfileFromLocalContent(content));
-      return;
-    }
-    unawaited(action.addProfileFormURL(target, client: preset, name: name));
+    final request = content != null
+        ? ProfileImportRequest.raw(content)
+        : ProfileImportRequest.link(target, client: preset, name: name);
+    unawaited(action.importProfile(request));
   }
 
   void _autoUpdateProfilesTask() {
@@ -236,7 +265,7 @@ class ApplicationState extends ConsumerState<Application> {
     unawaited(systemDnsCoordinator?.resync() ?? Future.value());
     unawaited(ref.read(systemActionProvider.notifier).updateLocalIp());
     final hasVpn = results.contains(ConnectivityResult.vpn);
-    if (_preHasVpn == hasVpn) {
+    if (_preHasVpn != hasVpn) {
       ref.read(checkIpNumProvider.notifier).add();
     }
     _preHasVpn = hasVpn;

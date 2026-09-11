@@ -32,7 +32,7 @@ extension BuildContextExtension on BuildContext {
   }
 
   double get sheetTopPadding {
-    final sheetType = SheetProvider.of(this)!.type;
+    final sheetType = SheetProvider.of(this)?.type;
     if (sheetType == SheetType.bottomSheet) {
       return sheetAppBarHeight;
     } else {

@@ -7,6 +7,7 @@ import android.net.ProxyInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.getSystemService
@@ -28,8 +29,7 @@ import android.net.VpnService as SystemVpnService
 class VpnService : SystemVpnService(), ManagedService {
     private val modules = ServiceModules(this)
     private val binder = LocalBinder()
-    private val tunLock = Any()
-    private var tunRunning = false
+    private val tunLifecycle = TunLifecycle()
 
     override fun onDestroy() {
         try {
@@ -122,15 +122,19 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     private fun stopTunOffMainThread() {
+        tunLifecycle.beginStop()
         val worker = thread(name = TEARDOWN_THREAD, isDaemon = true) {
-            synchronized(tunLock) { stopTunLocked() }
+            tunLifecycle.stop(Core::stopTun)
         }
         // Core.stopTun blocks on the core's own tun locks, and this runs on the main thread
         // from onDestroy and onRevoke; past the cap the descriptor dies with the process.
         worker.join(TEARDOWN_JOIN_MILLIS)
     }
 
-    private fun handleStart(options: VpnOptions) {
+    private fun handleStart(options: VpnOptions): Boolean {
+        if (!tunLifecycle.canStart()) {
+            return false
+        }
         val fd = with(Builder()) {
             addAddressAndRoutes(options)
             addDnsServers(options)
@@ -157,14 +161,8 @@ class VpnService : SystemVpnService(), ManagedService {
             establish()?.detachFd()
                 ?: error("VPN establishment was rejected by the system")
         }
-        synchronized(tunLock) {
-            tunRunning = true
-            try {
-                // A Core that fails to take the descriptor leaves the system
-                // routes pointing at an interface nothing reads, and it no
-                // longer keeps its own sockets out of them: every connection
-                // then hangs until it times out. Tear the VPN down instead of
-                // reporting a start that only looks successful.
+        return tunLifecycle.start(
+            start = {
                 check(
                     Core.startTun(
                         fd = fd,
@@ -176,9 +174,11 @@ class VpnService : SystemVpnService(), ManagedService {
                         dns = options.tunDns,
                     ),
                 ) { "Core rejected the tun file descriptor" }
-            } catch (error: Exception) {
-                stopTunLocked()
-                throw error
+            },
+            rollback = Core::stopTun,
+        ).also { started ->
+            if (!started) {
+                ParcelFileDescriptor.adoptFd(fd).close()
             }
         }
     }
@@ -265,7 +265,11 @@ class VpnService : SystemVpnService(), ManagedService {
         try {
             ServiceConfig.updateSessionStartedAt(SystemClock.uptimeMillis())
             modules.start()
-            handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
+            check(
+                handleStart(
+                    requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" },
+                ),
+            ) { "VPN service is stopping" }
         } catch (error: Exception) {
             stop()
             throw error
@@ -274,11 +278,7 @@ class VpnService : SystemVpnService(), ManagedService {
 
     // Tears only the TUN down; never marks paused a service whose TUN a stop already removed.
     override fun pause(manual: Boolean) {
-        val hadTun = synchronized(tunLock) {
-            val wasRunning = tunRunning
-            stopTunLocked()
-            wasRunning
-        }
+        val hadTun = tunLifecycle.pause(Core::stopTun)
         if (!hadTun) {
             return
         }
@@ -294,10 +294,16 @@ class VpnService : SystemVpnService(), ManagedService {
 
     // A manual resume stays manual: the policy has to see the override to respect it.
     override fun resume(manual: Boolean) {
-        if (!ServiceConfig.pauseState.value.paused) {
+        if (!ServiceConfig.pauseState.value.paused || !tunLifecycle.canStart()) {
             return
         }
-        handleStart(requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" })
+        if (
+            !handleStart(
+                requireNotNull(ServiceConfig.vpnOptions) { "VPN options are missing" },
+            )
+        ) {
+            return
+        }
         ServiceConfig.updatePauseState(PauseState(paused = false, manual = manual))
     }
 
@@ -310,18 +316,12 @@ class VpnService : SystemVpnService(), ManagedService {
     }
 
     private fun cleanup() {
+        tunLifecycle.beginStop()
         try {
             ServiceConfig.updatePauseState(PauseState())
             modules.stop()
         } finally {
             stopTunOffMainThread()
-        }
-    }
-
-    private fun stopTunLocked() {
-        if (tunRunning) {
-            Core.stopTun()
-            tunRunning = false
         }
     }
 

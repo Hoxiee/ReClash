@@ -70,7 +70,7 @@ func handleStopListener() bool {
 	isRunning.Store(false)
 	tunPaused.Store(false)
 	listener.StopListener()
-	tunUp.Store(false)
+	setTunUp(false)
 	resolver.ResetConnection()
 	return true
 }
@@ -135,13 +135,14 @@ func handleShutdown() bool {
 	isRunning.Store(false)
 	tunPaused.Store(false)
 	listener.StopListener()
-	tunUp.Store(false)
+	setTunUp(false)
 	updater.StopGeoUpdater()
 	executor.Shutdown()
 	currentConfig = nil
 	isInit.Store(false)
 	configMu.Unlock()
 
+	doctorReset()
 	handleForceGC()
 	return true
 }
@@ -235,6 +236,83 @@ func handleGetProxies() ProxiesData {
 	}
 }
 
+const activeServerMaxDepth = 16
+
+type ActiveServer struct {
+	Group string `json:"group"`
+	Name  string `json:"name"`
+}
+
+func activeServerForGroup(groupHint string, group outboundgroup.ProxyGroup) *ActiveServer {
+	if group.Type() == constant.LoadBalance {
+		return &ActiveServer{Group: groupHint, Name: group.Name()}
+	}
+	return nil
+}
+
+func proxyGroup(proxy constant.Proxy) (outboundgroup.ProxyGroup, bool) {
+	if proxy == nil {
+		return nil, false
+	}
+	group, ok := proxy.Adapter().(outboundgroup.ProxyGroup)
+	return group, ok
+}
+
+func selectedGroupMember(group outboundgroup.ProxyGroup) (selected constant.Proxy) {
+	defer func() {
+		if recover() != nil {
+			selected = nil
+		}
+	}()
+
+	members := group.Proxies()
+	if len(members) == 0 {
+		return nil
+	}
+	name := group.Now()
+	if name == "" {
+		return nil
+	}
+	for _, member := range members {
+		if member != nil && member.Name() == name {
+			return member
+		}
+	}
+	return nil
+}
+
+func handleGetActiveServer(groupHint string) *ActiveServer {
+	if groupHint == "" {
+		return nil
+	}
+	proxies := tunnel.AllProxies()
+	group, ok := proxyGroup(proxies[groupHint])
+	if !ok {
+		return nil
+	}
+
+	seen := map[string]struct{}{groupHint: {}}
+	for depth := 0; depth < activeServerMaxDepth; depth++ {
+		if active := activeServerForGroup(groupHint, group); active != nil {
+			return active
+		}
+		selected := selectedGroupMember(group)
+		if selected == nil {
+			return nil
+		}
+		nested, nestedGroup := proxyGroup(proxies[selected.Name()])
+		if !nestedGroup {
+			return &ActiveServer{Group: groupHint, Name: selected.Name()}
+		}
+		if _, exists := seen[selected.Name()]; exists {
+			return nil
+		}
+		seen[selected.Name()] = struct{}{}
+		group = nested
+	}
+	return nil
+}
+
 var (
 	errGroupNotFound    = errors.New("Not found group")
 	errGroupInvalidType = errors.New("Group has invalid proxy type")
@@ -296,6 +374,7 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 	if params.GroupName == rcxGroupNode {
 		rcxEngineInstance.OnManualAsserted(params.ProxyName)
 	}
+	doctorBumpGeneration(doctorRoutingGeneration)
 	return ""
 }
 
@@ -705,6 +784,7 @@ func stopHealthCheckCadence() {
 // suspension alone still probes every provider from a pocketed phone.
 func handleScreenOff(off bool) {
 	provider.SetScreenOff(off)
+	rcxEngineInstance.OnScreenOff(off)
 }
 
 func handleSuspend(suspended bool) bool {
@@ -818,6 +898,9 @@ func handleUpdateConfig(params *UpdateParams) string {
 	if err := updateConfig(params); err != nil {
 		return err.Error()
 	}
+	if change := doctorGenerationForUpdate(params); change != (doctorGenerationChange{}) {
+		doctorBumpGenerations(change)
+	}
 	return ""
 }
 
@@ -874,12 +957,17 @@ func init() {
 			},
 		})
 	}
+	tunnel.DefaultFlowEvidenceNotify = connectionDoctor.ObserveFlow
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
+		connectionDoctor.ObserveTracker(c, false)
 		rcxEngineInstance.NoteTracker(c)
 		sendMessage(Message{
 			Type: RequestMessage,
 			Data: c,
 		})
+	}
+	statistic.DefaultFirstProgressNotify = func(c statistic.Tracker) {
+		connectionDoctor.ObserveTracker(c, true)
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()

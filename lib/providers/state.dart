@@ -15,6 +15,7 @@ import 'database.dart';
 
 part 'generated/state.g.dart';
 part 'state/proxies.dart';
+part 'state/current_server.dart';
 part 'state/navigation.dart';
 part 'state/system.dart';
 part 'state/theme.dart';

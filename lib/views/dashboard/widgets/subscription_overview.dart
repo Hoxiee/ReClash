@@ -36,12 +36,7 @@ class SubscriptionOverviewView extends ConsumerWidget {
 
     final panelMeta = profile.panelMeta;
     final subscriptionInfo = profile.subscriptionInfo;
-    final hasDetails =
-        subscriptionInfo != null &&
-        (subscriptionInfo.upload != 0 ||
-            subscriptionInfo.download != 0 ||
-            subscriptionInfo.total != 0 ||
-            subscriptionInfo.expire != 0);
+    final hasDetails = subscriptionInfo != null && subscriptionInfo.hasFacts;
     final offers = _offersOf(context, panelMeta);
     return CommonScaffold(
       title: appLocalizations.metaInfo,
@@ -424,9 +419,7 @@ class _AccountDetailsCard extends StatelessWidget {
     final panelMeta = profile.panelMeta;
     final username = panelMeta?.accountUsername?.trim();
     final host = Uri.tryParse(profile.url)?.host ?? '';
-    final client = profile.clientEmulation == SubscriptionClient.auto
-        ? profile.lastWorkingClient ?? profile.clientEmulation
-        : profile.clientEmulation;
+    final client = profile.effectiveClient ?? SubscriptionClient.auto;
     return _Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +447,7 @@ class _AccountDetailsCard extends StatelessWidget {
             const SizedBox(height: 10),
             _DetailRow(
               label: appLocalizations.subscriptionClientLabel,
-              value: _clientLabel(context, client),
+              value: subscriptionClientLabel(client, context.appLocalizations),
             ),
           ],
           if (client == SubscriptionClient.custom &&
@@ -469,19 +462,6 @@ class _AccountDetailsCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _clientLabel(BuildContext context, SubscriptionClient client) {
-  final appLocalizations = context.appLocalizations;
-  return switch (client) {
-    SubscriptionClient.auto => appLocalizations.subscriptionClientAuto,
-    SubscriptionClient.clash => appLocalizations.subscriptionClientClash,
-    SubscriptionClient.happ => appLocalizations.subscriptionClientHapp,
-    SubscriptionClient.incy => appLocalizations.subscriptionClientIncy,
-    SubscriptionClient.singbox => appLocalizations.subscriptionClientSingbox,
-    SubscriptionClient.v2rayng => appLocalizations.subscriptionClientV2rayNG,
-    SubscriptionClient.custom => appLocalizations.subscriptionClientCustom,
-  };
 }
 
 class _RefreshCard extends ConsumerWidget {

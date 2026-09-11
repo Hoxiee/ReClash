@@ -6,11 +6,25 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 type rcxMarker struct {
 	URL      string `json:"url"`
 	Statuses []int  `json:"statuses"`
+}
+
+type rcxLaneSelector struct {
+	Provider     string `json:"p"`
+	NameContains string `json:"has"`
+}
+
+type rcxLaneConfig struct {
+	ID        string            `json:"id"`
+	Group     string            `json:"g"`
+	Fallback  string            `json:"fb"`
+	Selectors []rcxLaneSelector `json:"sel"`
 }
 
 // The version of the shipped preset data. A bump makes the engine drop the
@@ -23,6 +37,8 @@ type rcxConfigFingerprints struct {
 	Domestic  string `json:"d"`
 	Canaries  string `json:"c"`
 	Countries string `json:"r"`
+	Lanes     string `json:"l"`
+	Egress    string `json:"e"`
 }
 
 func (c rcxConfig) fingerprints() rcxConfigFingerprints {
@@ -31,6 +47,8 @@ func (c rcxConfig) fingerprints() rcxConfigFingerprints {
 		Domestic:  rcxMarkersFingerprint(c.DomesticMarkers),
 		Canaries:  rcxStringsFingerprint(c.CanaryForeign, c.CanaryDomestic),
 		Countries: rcxStringsFingerprint(c.CensorCountries),
+		Lanes:     rcxLanesFingerprint(c.Lanes),
+		Egress:    rcxStringsFingerprint(c.EgressEchoes),
 	}
 }
 
@@ -68,34 +86,53 @@ func rcxStringsFingerprint(groups ...[]string) string {
 	return rcxFingerprint(values)
 }
 
+func rcxLanesFingerprint(lanes []rcxLaneConfig) string {
+	values := make([]string, 0, len(lanes))
+	for _, lane := range lanes {
+		parts := []string{lane.ID, lane.Group, lane.Fallback}
+		for _, selector := range lane.Selectors {
+			parts = append(parts, selector.Provider, selector.NameContains)
+		}
+		values = append(values, strings.Join(parts, "\x00"))
+	}
+	return rcxFingerprint(values)
+}
+
 func rcxFingerprint(values []string) string {
 	sum := sha256.Sum256([]byte(strings.Join(values, "\x1f")))
 	return hex.EncodeToString(sum[:8])
 }
 
 type rcxConfig struct {
-	Enabled                 bool        `json:"on"`
-	Preset                  string      `json:"preset"`
-	DefaultsVersion         int         `json:"dv"`
-	Strategy                string      `json:"st"`
-	CensorCountries         []string    `json:"cc"`
-	CanaryForeign           []string    `json:"cf"`
-	CanaryDomestic          []string    `json:"cd"`
-	OpenMarkers             []rcxMarker `json:"om"`
-	DomesticMarkers         []rcxMarker `json:"dm"`
-	BreakerPatterns         []string    `json:"bp"`
-	AllowDomesticLastResort bool        `json:"dlr"`
-	RequireUDP              bool        `json:"udp"`
-	RespectPick             bool        `json:"rpk"`
-	DwellSeconds            int         `json:"dwl"`
-	WaveWidth               int         `json:"ww"`
-	ProofTTLMinutes         int         `json:"pttl"`
-	DegradeConfirmSeconds   int         `json:"dgc"`
+	Enabled                 bool            `json:"on"`
+	Preset                  string          `json:"preset"`
+	DefaultsVersion         int             `json:"dv"`
+	Strategy                string          `json:"st"`
+	CensorCountries         []string        `json:"cc"`
+	CanaryForeign           []string        `json:"cf"`
+	CanaryDomestic          []string        `json:"cd"`
+	OpenMarkers             []rcxMarker     `json:"om"`
+	DomesticMarkers         []rcxMarker     `json:"dm"`
+	EgressEchoes            []string        `json:"ee"`
+	BreakerPatterns         []string        `json:"bp"`
+	Lanes                   []rcxLaneConfig `json:"ln"`
+	AllowDomesticLastResort bool            `json:"dlr"`
+	RequireUDP              bool            `json:"udp"`
+	RespectPick             bool            `json:"rpk"`
+	DwellSeconds            int             `json:"dwl"`
+	WaveWidth               int             `json:"ww"`
+	ProofTTLMinutes         int             `json:"pttl"`
+	DegradeConfirmSeconds   int             `json:"dgc"`
 }
 
 const (
 	rcxStrategyBalanced = "balanced"
 	rcxStrategyLatency  = "lowest-latency"
+	rcxStrategyStable   = "stable"
+	rcxStrategySaver    = "saver"
+	rcxLaneFallbackMain = "main"
+	rcxLaneReject       = "reject"
+	rcxLaneGroupPrefix  = "RCX-CAP-"
 
 	rcxDwellSeconds       = 90
 	rcxWaveWidth          = 12
@@ -111,6 +148,16 @@ const (
 // Not a setting: a knob here lets milliseconds outrank whether a node works.
 func rcxLatencyBands() []int {
 	return []int{150, 300, 600, 1200}
+}
+
+// A strategy the host does not know must rank by the shipped order rather than
+// by a zero key, so an unnamed one degrades to balanced instead of to nothing.
+func rcxKnownStrategy(name string) bool {
+	switch name {
+	case rcxStrategyBalanced, rcxStrategyLatency, rcxStrategyStable, rcxStrategySaver:
+		return true
+	}
+	return false
 }
 
 func rcxDefaultConfig() rcxConfig {
@@ -142,10 +189,78 @@ func (c rcxConfig) normalized() rcxConfig {
 	if c.DegradeConfirmSeconds <= 0 {
 		c.DegradeConfirmSeconds = rcxDegradeConfirmSec
 	}
-	if c.Strategy != rcxStrategyLatency {
+	if !rcxKnownStrategy(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
 	}
+	c.Lanes = rcxNormalizeLanes(c.Lanes)
 	return c
+}
+
+func rcxNormalizeLanes(lanes []rcxLaneConfig) []rcxLaneConfig {
+	normalized := make([]rcxLaneConfig, 0, len(lanes))
+	seenIDs := make(map[string]struct{}, len(lanes))
+	seenGroups := make(map[string]struct{}, len(lanes))
+	for _, lane := range lanes {
+		lane.ID = strings.TrimSpace(lane.ID)
+		lane.Group = strings.TrimSpace(lane.Group)
+		if !rcxValidLaneID(lane.ID) || !rcxValidLaneGroup(lane.Group) {
+			continue
+		}
+		if _, exists := seenIDs[lane.ID]; exists {
+			continue
+		}
+		if _, exists := seenGroups[lane.Group]; exists {
+			continue
+		}
+		seenIDs[lane.ID] = struct{}{}
+		seenGroups[lane.Group] = struct{}{}
+		if strings.TrimSpace(lane.Fallback) == rcxLaneReject {
+			lane.Fallback = rcxLaneReject
+		} else {
+			lane.Fallback = rcxLaneFallbackMain
+		}
+		selectors := make([]rcxLaneSelector, 0, len(lane.Selectors))
+		seenSelectors := make(map[rcxLaneSelector]struct{}, len(lane.Selectors))
+		for _, selector := range lane.Selectors {
+			selector.Provider = norm.NFC.String(strings.TrimSpace(selector.Provider))
+			selector.NameContains = norm.NFC.String(strings.TrimSpace(selector.NameContains))
+			if selector.Provider == "" && selector.NameContains == "" {
+				continue
+			}
+			if _, exists := seenSelectors[selector]; exists {
+				continue
+			}
+			seenSelectors[selector] = struct{}{}
+			selectors = append(selectors, selector)
+		}
+		lane.Selectors = selectors
+		normalized = append(normalized, lane)
+	}
+	return normalized
+}
+
+func rcxValidLaneID(value string) bool {
+	if len(value) == 0 || len(value) > 64 || (value[0] < 'a' || value[0] > 'z') && (value[0] < '0' || value[0] > '9') {
+		return false
+	}
+	for _, char := range value {
+		if (char < 'a' || char > 'z') && (char < '0' || char > '9') && char != '.' && char != '-' {
+			return false
+		}
+	}
+	return true
+}
+
+func rcxValidLaneGroup(value string) bool {
+	if !strings.HasPrefix(value, rcxLaneGroupPrefix) || len(value) == len(rcxLaneGroupPrefix) {
+		return false
+	}
+	for _, char := range value[len(rcxLaneGroupPrefix):] {
+		if (char < 'A' || char > 'Z') && (char < '0' || char > '9') && char != '_' {
+			return false
+		}
+	}
+	return true
 }
 
 // Without a marker no node can earn a verdict, so the engine is not running.

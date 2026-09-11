@@ -125,6 +125,13 @@ const (
 	rcxSetEnabledMethod            CoreMethod = "rcxSetEnabled"
 	rcxReportMethod                CoreMethod = "rcxReport"
 	rcxDeepScanMethod              CoreMethod = "rcxDeepScan"
+	doctorSnapshotMethod           CoreMethod = "doctorSnapshot"
+	doctorStartMethod              CoreMethod = "doctorStart"
+	doctorCancelMethod             CoreMethod = "doctorCancel"
+	doctorFlushDNSMethod           CoreMethod = "doctorFlushDns"
+	doctorExportMethod             CoreMethod = "doctorExport"
+	doctorPlatformStatusMethod     CoreMethod = "doctorPlatformStatus"
+	doctorPathStatusMethod         CoreMethod = "doctorPathStatus"
 )
 
 type CoreMethod string
@@ -143,12 +150,13 @@ type Message struct {
 }
 
 const (
-	LogMessage       MessageType = "log"
-	DelayMessage     MessageType = "delay"
-	RequestMessage   MessageType = "request"
-	LoadedMessage    MessageType = "loaded"
-	GeoUpdateMessage MessageType = "geoUpdate"
-	RcxStatusMessage MessageType = "rcxStatus"
+	LogMessage          MessageType = "log"
+	DelayMessage        MessageType = "delay"
+	RequestMessage      MessageType = "request"
+	LoadedMessage       MessageType = "loaded"
+	GeoUpdateMessage    MessageType = "geoUpdate"
+	RcxStatusMessage    MessageType = "rcxStatus"
+	DoctorStatusMessage MessageType = "doctorStatus"
 )
 
 type GeoUpdateStatus struct {

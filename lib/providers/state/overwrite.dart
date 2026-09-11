@@ -28,7 +28,7 @@ CustomOverwriteDate customOverwriteDate(Ref ref, int profileId) {
     proxyTypes[proxy.name] = proxy.type;
   }
   final desync = ref.watch(
-    desyncSettingProvider.select((state) => state.enabled),
+    effectiveDesyncSettingProvider.select((state) => state.enabled),
   );
   final ruleTargets = {
     ...RuleTarget.targetNames(desync: desync),

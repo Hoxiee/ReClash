@@ -1,9 +1,11 @@
 import 'package:reclash/pages/editor.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 final _viewSizeOverride = viewSizeProvider.overrideWithBuild(
   (_, _) => const Size(1200, 1000),
@@ -15,7 +17,10 @@ void main() {
   ) async {
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: const EditorPage(
           title: 'Editor',
           content: '',

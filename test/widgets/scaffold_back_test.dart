@@ -360,6 +360,7 @@ void main() {
             dashboardWidgets: [
               DashboardWidget.networkSpeed,
               DashboardWidget.outboundModeV2,
+              DashboardWidget.desyncStrategy,
             ],
           ),
         ),
@@ -403,6 +404,7 @@ void main() {
     expect(find.byKey(const ValueKey('edit-icon')), findsOneWidget);
     expect(container.read(appSettingProvider).dashboardWidgets, [
       DashboardWidget.outboundModeV2,
+      DashboardWidget.desyncStrategy,
     ]);
   });
 }

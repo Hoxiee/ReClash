@@ -26,18 +26,22 @@ void _downgradeToV1(Database raw) {
   raw.execute('PRAGMA user_version = 1');
 }
 
-void _dropV6Columns(Database raw) {
-  raw.execute('ALTER TABLE profiles DROP COLUMN capability_manifest');
-  raw.execute('ALTER TABLE profiles DROP COLUMN service_route_policies');
-  raw.execute('ALTER TABLE profiles DROP COLUMN manual_capability_selectors');
-  raw.execute('ALTER TABLE profiles DROP COLUMN capability_manifest_issue');
-}
-
-void _dropV5Columns(Database raw) {
-  _dropV6Columns(raw);
-  raw.execute('ALTER TABLE profiles DROP COLUMN client_emulation');
-  raw.execute('ALTER TABLE profiles DROP COLUMN custom_user_agent');
-  raw.execute('ALTER TABLE profiles DROP COLUMN skipped_nodes');
+void _dropCurrentColumns(Database raw) {
+  for (final column in const [
+    'panel_meta',
+    'client_emulation',
+    'custom_user_agent',
+    'skipped_nodes',
+    'capability_manifest',
+    'service_route_policies',
+    'manual_capability_selectors',
+    'capability_manifest_issue',
+    'undialable_nodes',
+    'user_label',
+    'last_working_client',
+  ]) {
+    raw.execute('ALTER TABLE profiles DROP COLUMN $column');
+  }
 }
 
 void _downgradeToV2(Database raw) {
@@ -47,19 +51,8 @@ void _downgradeToV2(Database raw) {
 }
 
 void _downgradeToV3(Database raw) {
-  raw.execute('ALTER TABLE profiles DROP COLUMN panel_meta');
-  _dropV5Columns(raw);
+  _dropCurrentColumns(raw);
   raw.execute('PRAGMA user_version = 3');
-}
-
-void _downgradeToV4(Database raw) {
-  _dropV5Columns(raw);
-  raw.execute('PRAGMA user_version = 4');
-}
-
-void _downgradeToV5(Database raw) {
-  _dropV6Columns(raw);
-  raw.execute('PRAGMA user_version = 5');
 }
 
 Set<String> _columnsOf(Database raw, String table) => {
@@ -106,42 +99,32 @@ void main() {
 
     await openAndMigrate();
 
-    expect(_userVersion(raw), 6);
+    expect(_userVersion(raw), 4);
   });
 
-  test('the v6 upgrade adds capability columns to profiles', () async {
-    _downgradeToV5(raw);
-    expect(_columnsOf(raw, 'profiles'), isNot(contains('capability_manifest')));
+  test('the v4 upgrade adds every ReClash profile column', () async {
+    _downgradeToV3(raw);
+    expect(_columnsOf(raw, 'profiles'), isNot(contains('panel_meta')));
 
     await openAndMigrate();
 
     expect(
       _columnsOf(raw, 'profiles'),
       containsAll(<String>[
+        'panel_meta',
+        'client_emulation',
+        'custom_user_agent',
+        'skipped_nodes',
         'capability_manifest',
         'service_route_policies',
         'manual_capability_selectors',
         'capability_manifest_issue',
+        'undialable_nodes',
+        'user_label',
+        'last_working_client',
       ]),
     );
-    expect(_userVersion(raw), 6);
-  });
-
-  test('the v5 upgrade adds the compatibility columns to profiles', () async {
-    _downgradeToV4(raw);
-    expect(_columnsOf(raw, 'profiles'), isNot(contains('client_emulation')));
-
-    await openAndMigrate();
-
-    expect(
-      _columnsOf(raw, 'profiles'),
-      containsAll(<String>[
-        'client_emulation',
-        'custom_user_agent',
-        'skipped_nodes',
-      ]),
-    );
-    expect(_userVersion(raw), 6);
+    expect(_userVersion(raw), 4);
   });
 
   test('the v3 upgrade adds match_target to profiles', () async {
@@ -151,17 +134,7 @@ void main() {
     await openAndMigrate();
 
     expect(_columnsOf(raw, 'profiles'), contains('match_target'));
-    expect(_userVersion(raw), 6);
-  });
-
-  test('the v4 upgrade adds panel_meta to profiles', () async {
-    _downgradeToV3(raw);
-    expect(_columnsOf(raw, 'profiles'), isNot(contains('panel_meta')));
-
-    await openAndMigrate();
-
-    expect(_columnsOf(raw, 'profiles'), contains('panel_meta'));
-    expect(_userVersion(raw), 6);
+    expect(_userVersion(raw), 4);
   });
 
   test(
@@ -173,8 +146,7 @@ void main() {
       await openAndMigrate();
 
       expect(_columnsOf(raw, 'profiles'), contains('match_target'));
-      // Our schema is at v5 (upstream stops at 3); the walk runs through.
-      expect(_userVersion(raw), 6);
+      expect(_userVersion(raw), 4);
     },
   );
 
@@ -249,7 +221,7 @@ void main() {
 
     final database = await openAndMigrate();
 
-    expect(_userVersion(raw), 6);
+    expect(_userVersion(raw), 4);
     expect(await database.customSelect('SELECT * FROM rules').get(), isEmpty);
   });
 
@@ -259,7 +231,7 @@ void main() {
     await openAndMigrate();
 
     expect(_columnsOf(raw, 'rules'), before);
-    expect(_userVersion(raw), 6);
+    expect(_userVersion(raw), 4);
     expect(_hasTable(raw, 'proxy_groups'), isTrue);
   });
 }

@@ -1,4 +1,5 @@
 import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/about.dart';
 import 'package:material_ui/material_ui.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 void main() {
   setUpAll(() {
@@ -19,7 +21,11 @@ void main() {
 
   Future<AppLocalizations> pumpAbout(WidgetTester tester) async {
     await tester.pumpWidget(
-      const TestApp(wrapInProviderScope: true, child: AboutView()),
+      TestApp(
+        wrapInProviderScope: true,
+        overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+        child: const AboutView(),
+      ),
     );
     await tester.pump();
     return AppLocalizations.load(const Locale('en'));

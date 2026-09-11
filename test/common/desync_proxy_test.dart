@@ -73,7 +73,10 @@ void main() {
   });
 
   test('telegram is no longer a category', () {
-    expect(DesyncCategory.values.map((e) => e.name), isNot(contains('telegram')));
+    expect(
+      DesyncCategory.values.map((e) => e.name),
+      isNot(contains('telegram')),
+    );
 
     final saved = {
       'enabled': true,
@@ -83,10 +86,7 @@ void main() {
     final cleaned = stripSavedTelegram(saved);
     expect(cleaned['categories'], ['youtube']);
     expect(cleaned['testSiteLists'], ['youtube']);
-    expect(
-      () => DesyncProps.fromJson(saved),
-      throwsA(anything),
-    );
+    expect(() => DesyncProps.fromJson(saved), throwsA(anything));
     expect(DesyncProps.fromJson(cleaned).categories, [DesyncCategory.youtube]);
   });
 

@@ -43,7 +43,7 @@ func runBatcherUntilDrained(t *testing.T, state, priority, bulk chan Message) *b
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		runMessageBatcher(state, priority, bulk, collector.send)
+		runMessageBatcher(state, closedMessages(), priority, bulk, collector.send)
 	}()
 	select {
 	case <-done:
@@ -55,12 +55,13 @@ func runBatcherUntilDrained(t *testing.T, state, priority, bulk chan Message) *b
 
 func TestClassOfMessageRoutesEachTier(t *testing.T) {
 	for messageType, want := range map[MessageType]messageClass{
-		LoadedMessage:    stateMessageClass,
-		GeoUpdateMessage: stateMessageClass,
-		DelayMessage:     priorityMessageClass,
-		RcxStatusMessage: priorityMessageClass,
-		LogMessage:       bulkMessageClass,
-		RequestMessage:   bulkMessageClass,
+		LoadedMessage:       stateMessageClass,
+		GeoUpdateMessage:    stateMessageClass,
+		DoctorStatusMessage: stateMessageClass,
+		DelayMessage:        priorityMessageClass,
+		RcxStatusMessage:    priorityMessageClass,
+		LogMessage:          bulkMessageClass,
+		RequestMessage:      bulkMessageClass,
 	} {
 		if got := classOfMessage(Message{Type: messageType}); got != want {
 			t.Errorf("classOfMessage(%s) = %d, want %d", messageType, got, want)
@@ -81,6 +82,7 @@ func TestUiActivityOnlyGatesOptionalBulkMessages(t *testing.T) {
 	for _, messageType := range []MessageType{
 		LoadedMessage,
 		GeoUpdateMessage,
+		DoctorStatusMessage,
 		DelayMessage,
 		RcxStatusMessage,
 	} {
@@ -258,7 +260,7 @@ func TestRunMessageBatcherFlushesOnInterval(t *testing.T) {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		runMessageBatcher(closedMessages(), priority, bulk, collector.send)
+		runMessageBatcher(closedMessages(), closedMessages(), priority, bulk, collector.send)
 	}()
 
 	for i := 0; i < 3; i++ {
@@ -304,5 +306,27 @@ func TestRunMessageBatcherDrainsBulkAfterPriorityCloses(t *testing.T) {
 		if message.Type != RequestMessage || message.Data != i {
 			t.Errorf("message %d = {%s %v}, want {request %d}", i, message.Type, message.Data, i)
 		}
+	}
+}
+
+func TestDoctorStatusLatestDeliveryDoesNotEvictGenericState(t *testing.T) {
+	doctorStatusQueueMu.Lock()
+	oldQueue := doctorStatusMessageQueue
+	doctorStatusMessageQueue = make(chan Message, 1)
+	doctorStatusQueueMu.Unlock()
+	t.Cleanup(func() {
+		doctorStatusQueueMu.Lock()
+		doctorStatusMessageQueue = oldQueue
+		doctorStatusQueueMu.Unlock()
+	})
+	state := make(chan Message, 1)
+	enqueueState(state, Message{Type: GeoUpdateMessage, Data: "existing"})
+	enqueueDoctorStatus(Message{Type: DoctorStatusMessage, Data: 1})
+	enqueueDoctorStatus(Message{Type: DoctorStatusMessage, Data: 2})
+	if len(state) == 0 || (<-state).Data != "existing" {
+		t.Fatal("Doctor delivery evicted generic state")
+	}
+	if len(doctorStatusMessageQueue) != 1 || (<-doctorStatusMessageQueue).Data.(int) != 2 {
+		t.Fatal("Doctor delivery did not retain the latest status")
 	}
 }

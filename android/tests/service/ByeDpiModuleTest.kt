@@ -80,6 +80,15 @@ class ByeDpiModuleTest {
     // The default log seam hits android.util.Log, which is not mocked on the JVM.
     private fun TestScope.module() = ByeDpiModule(backgroundScope, engine) { logs += it }
 
+    private fun TestScope.module(
+        statuses: MutableList<ByeDpiStatusProjection>,
+    ) = ByeDpiModule(
+        backgroundScope,
+        engine,
+        status = statuses::add,
+        log = { logs += it },
+    )
+
     @Before
     fun setUp() {
         engine = FakeEngine()
@@ -90,6 +99,53 @@ class ByeDpiModuleTest {
     @After
     fun tearDown() {
         ServiceConfig.updateVpnOptions(options(enabled = false))
+    }
+
+    @Test
+    fun `status follows successful listener transitions`() = runTest {
+        val statuses = mutableListOf<ByeDpiStatusProjection>()
+        val module = module(statuses)
+        module.start()
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        module.stop()
+
+        assertEquals(
+            listOf(ByeDpiState.STOPPED, ByeDpiState.STARTING, ByeDpiState.HEALTHY, ByeDpiState.STOPPED),
+            statuses.map { it.state },
+        )
+        assertTrue(statuses.zipWithNext().all { (first, second) -> first.generation < second.generation })
+        assertTrue(statuses.all { it.at > 0 })
+    }
+
+    @Test
+    fun `status exposes failure retry and recovery without another probe loop`() = runTest {
+        val statuses = mutableListOf<ByeDpiStatusProjection>()
+        val module = module(statuses)
+        module.start()
+        engine.startResult = false
+        ServiceConfig.updateVpnOptions(options())
+        runCurrent()
+        engine.startResult = true
+        advanceTimeBy(ByeDpiPolicy.backoffMs(0))
+        runCurrent()
+
+        engine.alive = false
+        advanceTimeBy(ByeDpiPolicy.PROBE_INTERVAL_MS * ByeDpiPolicy.PROBE_MISSES + 1)
+        runCurrent()
+
+        assertEquals(
+            listOf(
+                ByeDpiState.STOPPED,
+                ByeDpiState.STARTING,
+                ByeDpiState.FAILED,
+                ByeDpiState.STARTING,
+                ByeDpiState.HEALTHY,
+                ByeDpiState.RECOVERING,
+                ByeDpiState.HEALTHY,
+            ),
+            statuses.map { it.state },
+        )
     }
 
     @Test

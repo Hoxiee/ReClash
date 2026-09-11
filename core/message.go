@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"sync"
 	"time"
 )
 
@@ -14,13 +15,15 @@ const (
 )
 
 var (
-	stateMessageQueue    = make(chan Message, messageQueueSize)
-	priorityMessageQueue = make(chan Message, messageQueueSize)
-	bulkMessageQueue     = make(chan Message, messageQueueSize)
+	stateMessageQueue        = make(chan Message, messageQueueSize)
+	doctorStatusMessageQueue = make(chan Message, 1)
+	priorityMessageQueue     = make(chan Message, messageQueueSize)
+	bulkMessageQueue         = make(chan Message, messageQueueSize)
+	doctorStatusQueueMu      sync.Mutex
 )
 
 func init() {
-	go runMessageBatcher(stateMessageQueue, priorityMessageQueue, bulkMessageQueue, sendMessageBatch)
+	go runMessageBatcher(stateMessageQueue, doctorStatusMessageQueue, priorityMessageQueue, bulkMessageQueue, sendMessageBatch)
 }
 
 type messageClass int
@@ -33,7 +36,7 @@ const (
 
 func classOfMessage(message Message) messageClass {
 	switch message.Type {
-	case LoadedMessage, GeoUpdateMessage:
+	case LoadedMessage, GeoUpdateMessage, DoctorStatusMessage:
 		return stateMessageClass
 	case LogMessage, RequestMessage:
 		return bulkMessageClass
@@ -53,6 +56,10 @@ func sendMessage(message Message) {
 	messageClass := classOfMessage(message)
 	switch messageClass {
 	case stateMessageClass:
+		if message.Type == DoctorStatusMessage {
+			enqueueDoctorStatus(message)
+			return
+		}
 		enqueueState(stateMessageQueue, message)
 	case bulkMessageClass:
 		enqueueLatest(bulkMessageQueue, message)
@@ -66,6 +73,16 @@ func enqueueState(queue chan Message, message Message) {
 	case queue <- message:
 	default:
 	}
+}
+
+func enqueueDoctorStatus(message Message) {
+	doctorStatusQueueMu.Lock()
+	defer doctorStatusQueueMu.Unlock()
+	select {
+	case <-doctorStatusMessageQueue:
+	default:
+	}
+	doctorStatusMessageQueue <- message
 }
 
 func enqueueLatest(queue chan Message, message Message) {
@@ -85,6 +102,7 @@ func enqueueLatest(queue chan Message, message Message) {
 
 func runMessageBatcher(
 	stateMessages <-chan Message,
+	doctorStatusMessages <-chan Message,
 	priorityMessages <-chan Message,
 	bulkMessages <-chan Message,
 	send func([]Message),
@@ -125,11 +143,22 @@ func runMessageBatcher(
 	}
 
 	priorityBurst := 0
-	for stateMessages != nil || priorityMessages != nil || bulkMessages != nil {
+	for stateMessages != nil || doctorStatusMessages != nil || priorityMessages != nil || bulkMessages != nil {
 		select {
 		case message, ok := <-stateMessages:
 			if !ok {
 				stateMessages = nil
+			} else {
+				appendMessage(message)
+			}
+			continue
+		default:
+		}
+
+		select {
+		case message, ok := <-doctorStatusMessages:
+			if !ok {
+				doctorStatusMessages = nil
 			} else {
 				appendMessage(message)
 			}
@@ -170,6 +199,12 @@ func runMessageBatcher(
 		case message, ok := <-stateMessages:
 			if !ok {
 				stateMessages = nil
+			} else {
+				appendMessage(message)
+			}
+		case message, ok := <-doctorStatusMessages:
+			if !ok {
+				doctorStatusMessages = nil
 			} else {
 				appendMessage(message)
 			}

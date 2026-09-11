@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'app.dart';
+import 'capability.dart';
 import 'clash_config.dart';
 import 'common.dart';
 import 'config.dart';
@@ -324,8 +325,27 @@ abstract class SharedState with _$SharedState {
     required String pauseText,
     required String resumeText,
     required String pausedText,
+    @Default('Smart Routing') String smartRoutingText,
+    @Default('Searching') String smartRoutingSearchingText,
+    @Default('Connection Doctor') String connectionDoctorText,
+    @Default('Checking connection') String doctorExaminingText,
+    @Default('Connection healthy') String doctorHealthyText,
+    @Default('Connection degraded') String doctorDegradedText,
+    @Default('Problem found') String doctorBrokenText,
+    @Default('Observing traffic') String doctorObservingText,
+    @Default('Session traffic') String sessionTrafficText,
+    @Default('Network') String networkStateText,
+    @Default('Current server') String currentServerText,
+    @Default('Normal') String networkNormalText,
+    @Default('Whitelist') String networkWhitelistText,
+    @Default('Captive portal') String networkPortalText,
+    @Default('Offline') String networkOfflineText,
+    @Default('Unknown') String networkUnknownText,
+    @Default('Protection active') String activeText,
+    String? activeServerGroup,
     required bool onlyStatisticsProxy,
-    @Default(true) bool showStopAction,
+    @Default(defaultNotificationSettings)
+    NotificationSettings notificationSettings,
     required bool crashlytics,
     @Default(false) bool pureBlackTheme,
     @Default(false) bool autoRun,
@@ -365,6 +385,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required List<Rule> addedRules,
     required String defaultUA,
     @Default(false) bool smartRouting,
+    @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
     @Default([]) List<String> authentication,
     String? matchTarget,
     @Default(false) bool desync,
@@ -399,6 +420,7 @@ abstract class SetupState with _$SetupState {
     required Script? script,
     required bool overrideDns,
     required Dns dns,
+    @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
     String? matchTarget,
   }) = _SetupState;
 }

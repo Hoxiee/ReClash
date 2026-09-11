@@ -106,8 +106,8 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
               SettingsTabs(
                 labels: [
                   appLocalizations.smartRoutingTabOverview,
-                  appLocalizations.smartRoutingTabRanking,
                   appLocalizations.smartRoutingTabDetails,
+                  appLocalizations.smartRoutingTabRanking,
                 ],
               ),
               Expanded(
@@ -118,8 +118,8 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
                       technical: _technical,
                       onDeepScan: _handleDeepScan,
                     ),
-                    RoutingRankingTab(report: report),
                     RoutingDetailsTab(report: report, technical: _technical),
+                    RoutingRankingTab(report: report),
                   ],
                 ),
               ),

@@ -36,6 +36,7 @@ _PanelMeta _$PanelMetaFromJson(Map<String, dynamic> json) => _PanelMeta(
   themeHex: json['themeHex'] as String?,
   background: json['background'] as String?,
   heroRing: json['heroRing'] as String?,
+  activeText: json['activeText'] as String?,
 );
 
 Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
@@ -61,6 +62,7 @@ Map<String, dynamic> _$PanelMetaToJson(_PanelMeta instance) =>
       'themeHex': instance.themeHex,
       'background': instance.background,
       'heroRing': instance.heroRing,
+      'activeText': instance.activeText,
     };
 
 const _$PanelWidgetsApplyModeEnumMap = {

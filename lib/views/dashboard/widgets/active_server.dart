@@ -18,17 +18,15 @@ final activeServerProvider = Provider<ActiveServerInfo>((ref) {
     currentProfileProvider.select((state) => state?.panelMeta?.serverInfoGroup),
   );
   final selected = ref.watch(
-    groupsProvider.select(
-      (state) => _selectServerInfo(switch (mode) {
-        Mode.direct => const <Group>[],
-        Mode.global => state.toList(),
-        Mode.rule =>
-          state
-              .where((item) => item.hidden == false)
-              .where((item) => item.name != GroupName.GLOBAL.name)
-              .toList(),
-      }, serverInfoHeader),
-    ),
+    groupsProvider.select((state) {
+      final displayGroups = displayServerGroups(mode, state);
+      final groupHint = selectCurrentServerGroupHint(
+        mode: mode,
+        groups: state,
+        profileGroup: serverInfoHeader,
+      );
+      return _selectServerInfo(displayGroups, groupHint);
+    }),
   );
   final serverName = engineDecided ? engineNode : selected.serverName;
   final testUrl = selected.testUrl;
@@ -186,6 +184,18 @@ String? flagToCountryCode(String text) {
     }
   }
   return null;
+}
+
+/// Null rather than a globe fallback: callers draw their own placeholder.
+String? countryCodeToEmoji(String code) {
+  final upper = code.trim().toUpperCase();
+  if (upper.length != 2) {
+    return null;
+  }
+  return String.fromCharCodes([
+    0x1F1E6 - 0x41 + upper.codeUnitAt(0),
+    0x1F1E6 - 0x41 + upper.codeUnitAt(1),
+  ]);
 }
 
 String stripLeadingEmoji(String text) {

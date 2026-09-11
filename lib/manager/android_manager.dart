@@ -48,6 +48,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     service?.addListener(this);
     app?.onPackagesChanged = _reloadPackages;
     unawaited(_syncPauseState());
+    unawaited(service?.deliverPendingWidgetSelections());
   }
 
   void _reloadPackages() {
@@ -68,6 +69,14 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
     }
   }
 
+  void _applyWidgetSelections(Map<String, String> selections) {
+    final profilesAction = ref.read(profilesActionProvider.notifier);
+    for (final entry in selections.entries) {
+      profilesAction.updateCurrentSelectedMap(entry.key, entry.value);
+    }
+    ref.read(proxiesActionProvider.notifier).updateGroupsDebounce();
+  }
+
   @override
   void dispose() {
     if (app?.onPackagesChanged == _reloadPackages) {
@@ -86,6 +95,14 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   @override
   void onPauseStateChanged(bool paused) {
     ref.read(nativePauseProvider.notifier).value = paused;
+  }
+
+  @override
+  void onWidgetSelections(Map<String, String> selections) {
+    if (!mounted) {
+      return;
+    }
+    _applyWidgetSelections(selections);
   }
 
   @override

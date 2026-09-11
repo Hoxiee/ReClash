@@ -68,7 +68,7 @@ void main() {
   ) async {
     await pumpHero(tester);
 
-    await tester.tap(find.text('Subscription'));
+    await tester.tap(find.byKey(const ValueKey('hero-subscription-strip')));
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
 

@@ -119,6 +119,62 @@ class $ProfilesTable extends Profiles
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       ).withConverter<PanelMeta?>($ProfilesTable.$converterpanelMeta);
+  @override
+  late final GeneratedColumnWithTypeConverter<
+    ProviderCapabilityManifest?,
+    String
+  >
+  capabilityManifest =
+      GeneratedColumn<String>(
+        'capability_manifest',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<ProviderCapabilityManifest?>(
+        $ProfilesTable.$convertercapabilityManifest,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<ServiceRoutePolicy>, String>
+  serviceRoutePolicies =
+      GeneratedColumn<String>(
+        'service_route_policies',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<ServiceRoutePolicy>>(
+        $ProfilesTable.$converterserviceRoutePolicies,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<
+    List<ManualCapabilitySelector>,
+    String
+  >
+  manualCapabilitySelectors =
+      GeneratedColumn<String>(
+        'manual_capability_selectors',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<ManualCapabilitySelector>>(
+        $ProfilesTable.$convertermanualCapabilitySelectors,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<CapabilityManifestIssue?, String>
+  capabilityManifestIssue =
+      GeneratedColumn<String>(
+        'capability_manifest_issue',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<CapabilityManifestIssue?>(
+        $ProfilesTable.$convertercapabilityManifestIssuen,
+      );
   static const VerificationMeta _autoUpdateMeta = const VerificationMeta(
     'autoUpdate',
   );
@@ -192,6 +248,48 @@ class $ProfilesTable extends Profiles
     requiredDuringInsert: false,
     defaultValue: const Constant('[]'),
   ).withConverter<List<SkippedNode>>($ProfilesTable.$converterskippedNodes);
+  static const VerificationMeta _undialableNodesMeta = const VerificationMeta(
+    'undialableNodes',
+  );
+  @override
+  late final GeneratedColumn<bool> undialableNodes = GeneratedColumn<bool>(
+    'undialable_nodes',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("undialable_nodes" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _userLabelMeta = const VerificationMeta(
+    'userLabel',
+  );
+  @override
+  late final GeneratedColumn<bool> userLabel = GeneratedColumn<bool>(
+    'user_label',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("user_label" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<SubscriptionClient?, String>
+  lastWorkingClient =
+      GeneratedColumn<String>(
+        'last_working_client',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<SubscriptionClient?>(
+        $ProfilesTable.$converterlastWorkingClientn,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -205,6 +303,10 @@ class $ProfilesTable extends Profiles
     autoUpdateDurationMillis,
     subscriptionInfo,
     panelMeta,
+    capabilityManifest,
+    serviceRoutePolicies,
+    manualCapabilitySelectors,
+    capabilityManifestIssue,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -212,6 +314,9 @@ class $ProfilesTable extends Profiles
     clientEmulation,
     customUserAgent,
     skippedNodes,
+    undialableNodes,
+    userLabel,
+    lastWorkingClient,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -311,6 +416,21 @@ class $ProfilesTable extends Profiles
         ),
       );
     }
+    if (data.containsKey('undialable_nodes')) {
+      context.handle(
+        _undialableNodesMeta,
+        undialableNodes.isAcceptableOrUnknown(
+          data['undialable_nodes']!,
+          _undialableNodesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('user_label')) {
+      context.handle(
+        _userLabelMeta,
+        userLabel.isAcceptableOrUnknown(data['user_label']!, _userLabelMeta),
+      );
+    }
     return context;
   }
 
@@ -370,6 +490,34 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}panel_meta'],
         ),
       ),
+      capabilityManifest: $ProfilesTable.$convertercapabilityManifest.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}capability_manifest'],
+        ),
+      ),
+      serviceRoutePolicies: $ProfilesTable.$converterserviceRoutePolicies
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}service_route_policies'],
+            )!,
+          ),
+      manualCapabilitySelectors: $ProfilesTable
+          .$convertermanualCapabilitySelectors
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}manual_capability_selectors'],
+            )!,
+          ),
+      capabilityManifestIssue: $ProfilesTable.$convertercapabilityManifestIssuen
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}capability_manifest_issue'],
+            ),
+          ),
       autoUpdate: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}auto_update'],
@@ -406,6 +554,20 @@ class $ProfilesTable extends Profiles
           data['${effectivePrefix}skipped_nodes'],
         )!,
       ),
+      undialableNodes: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}undialable_nodes'],
+      )!,
+      userLabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}user_label'],
+      )!,
+      lastWorkingClient: $ProfilesTable.$converterlastWorkingClientn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}last_working_client'],
+        ),
+      ),
     );
   }
 
@@ -422,6 +584,22 @@ class $ProfilesTable extends Profiles
       const SubscriptionInfoConverter();
   static TypeConverter<PanelMeta?, String?> $converterpanelMeta =
       const PanelMetaConverter();
+  static TypeConverter<ProviderCapabilityManifest?, String?>
+  $convertercapabilityManifest = const CapabilityManifestConverter();
+  static TypeConverter<List<ServiceRoutePolicy>, String>
+  $converterserviceRoutePolicies = const ServiceRoutePoliciesConverter();
+  static TypeConverter<List<ManualCapabilitySelector>, String>
+  $convertermanualCapabilitySelectors =
+      const ManualCapabilitySelectorsConverter();
+  static JsonTypeConverter2<CapabilityManifestIssue, String, String>
+  $convertercapabilityManifestIssue =
+      const EnumNameConverter<CapabilityManifestIssue>(
+        CapabilityManifestIssue.values,
+      );
+  static JsonTypeConverter2<CapabilityManifestIssue?, String?, String?>
+  $convertercapabilityManifestIssuen = JsonTypeConverter2.asNullable(
+    $convertercapabilityManifestIssue,
+  );
   static TypeConverter<Map<String, String>, String> $converterselectedMap =
       const StringMapConverter();
   static TypeConverter<Set<String>, String> $converterunfoldSet =
@@ -432,6 +610,14 @@ class $ProfilesTable extends Profiles
   );
   static TypeConverter<List<SkippedNode>, String> $converterskippedNodes =
       const SkippedNodesSqlConverter();
+  static JsonTypeConverter2<SubscriptionClient, String, String>
+  $converterlastWorkingClient = const EnumNameConverter<SubscriptionClient>(
+    SubscriptionClient.values,
+  );
+  static JsonTypeConverter2<SubscriptionClient?, String?, String?>
+  $converterlastWorkingClientn = JsonTypeConverter2.asNullable(
+    $converterlastWorkingClient,
+  );
 }
 
 class RawProfile extends DataClass implements Insertable<RawProfile> {
@@ -446,6 +632,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final int autoUpdateDurationMillis;
   final SubscriptionInfo? subscriptionInfo;
   final PanelMeta? panelMeta;
+  final ProviderCapabilityManifest? capabilityManifest;
+  final List<ServiceRoutePolicy> serviceRoutePolicies;
+  final List<ManualCapabilitySelector> manualCapabilitySelectors;
+  final CapabilityManifestIssue? capabilityManifestIssue;
   final bool autoUpdate;
   final Map<String, String> selectedMap;
   final Set<String> unfoldSet;
@@ -453,6 +643,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final SubscriptionClient clientEmulation;
   final String customUserAgent;
   final List<SkippedNode> skippedNodes;
+  final bool undialableNodes;
+  final bool userLabel;
+  final SubscriptionClient? lastWorkingClient;
   const RawProfile({
     required this.id,
     required this.label,
@@ -465,6 +658,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.autoUpdateDurationMillis,
     this.subscriptionInfo,
     this.panelMeta,
+    this.capabilityManifest,
+    required this.serviceRoutePolicies,
+    required this.manualCapabilitySelectors,
+    this.capabilityManifestIssue,
     required this.autoUpdate,
     required this.selectedMap,
     required this.unfoldSet,
@@ -472,6 +669,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     required this.clientEmulation,
     required this.customUserAgent,
     required this.skippedNodes,
+    required this.undialableNodes,
+    required this.userLabel,
+    this.lastWorkingClient,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -509,6 +709,32 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         $ProfilesTable.$converterpanelMeta.toSql(panelMeta),
       );
     }
+    if (!nullToAbsent || capabilityManifest != null) {
+      map['capability_manifest'] = Variable<String>(
+        $ProfilesTable.$convertercapabilityManifest.toSql(capabilityManifest),
+      );
+    }
+    {
+      map['service_route_policies'] = Variable<String>(
+        $ProfilesTable.$converterserviceRoutePolicies.toSql(
+          serviceRoutePolicies,
+        ),
+      );
+    }
+    {
+      map['manual_capability_selectors'] = Variable<String>(
+        $ProfilesTable.$convertermanualCapabilitySelectors.toSql(
+          manualCapabilitySelectors,
+        ),
+      );
+    }
+    if (!nullToAbsent || capabilityManifestIssue != null) {
+      map['capability_manifest_issue'] = Variable<String>(
+        $ProfilesTable.$convertercapabilityManifestIssuen.toSql(
+          capabilityManifestIssue,
+        ),
+      );
+    }
     map['auto_update'] = Variable<bool>(autoUpdate);
     {
       map['selected_map'] = Variable<String>(
@@ -532,6 +758,13 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     {
       map['skipped_nodes'] = Variable<String>(
         $ProfilesTable.$converterskippedNodes.toSql(skippedNodes),
+      );
+    }
+    map['undialable_nodes'] = Variable<bool>(undialableNodes);
+    map['user_label'] = Variable<bool>(userLabel);
+    if (!nullToAbsent || lastWorkingClient != null) {
+      map['last_working_client'] = Variable<String>(
+        $ProfilesTable.$converterlastWorkingClientn.toSql(lastWorkingClient),
       );
     }
     return map;
@@ -562,6 +795,14 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       panelMeta: panelMeta == null && nullToAbsent
           ? const Value.absent()
           : Value(panelMeta),
+      capabilityManifest: capabilityManifest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capabilityManifest),
+      serviceRoutePolicies: Value(serviceRoutePolicies),
+      manualCapabilitySelectors: Value(manualCapabilitySelectors),
+      capabilityManifestIssue: capabilityManifestIssue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capabilityManifestIssue),
       autoUpdate: Value(autoUpdate),
       selectedMap: Value(selectedMap),
       unfoldSet: Value(unfoldSet),
@@ -571,6 +812,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       clientEmulation: Value(clientEmulation),
       customUserAgent: Value(customUserAgent),
       skippedNodes: Value(skippedNodes),
+      undialableNodes: Value(undialableNodes),
+      userLabel: Value(userLabel),
+      lastWorkingClient: lastWorkingClient == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastWorkingClient),
     );
   }
 
@@ -597,6 +843,20 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         json['subscriptionInfo'],
       ),
       panelMeta: serializer.fromJson<PanelMeta?>(json['panelMeta']),
+      capabilityManifest: serializer.fromJson<ProviderCapabilityManifest?>(
+        json['capabilityManifest'],
+      ),
+      serviceRoutePolicies: serializer.fromJson<List<ServiceRoutePolicy>>(
+        json['serviceRoutePolicies'],
+      ),
+      manualCapabilitySelectors: serializer
+          .fromJson<List<ManualCapabilitySelector>>(
+            json['manualCapabilitySelectors'],
+          ),
+      capabilityManifestIssue: $ProfilesTable.$convertercapabilityManifestIssuen
+          .fromJson(
+            serializer.fromJson<String?>(json['capabilityManifestIssue']),
+          ),
       autoUpdate: serializer.fromJson<bool>(json['autoUpdate']),
       selectedMap: serializer.fromJson<Map<String, String>>(
         json['selectedMap'],
@@ -609,6 +869,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       customUserAgent: serializer.fromJson<String>(json['customUserAgent']),
       skippedNodes: serializer.fromJson<List<SkippedNode>>(
         json['skippedNodes'],
+      ),
+      undialableNodes: serializer.fromJson<bool>(json['undialableNodes']),
+      userLabel: serializer.fromJson<bool>(json['userLabel']),
+      lastWorkingClient: $ProfilesTable.$converterlastWorkingClientn.fromJson(
+        serializer.fromJson<String?>(json['lastWorkingClient']),
       ),
     );
   }
@@ -633,6 +898,19 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         subscriptionInfo,
       ),
       'panelMeta': serializer.toJson<PanelMeta?>(panelMeta),
+      'capabilityManifest': serializer.toJson<ProviderCapabilityManifest?>(
+        capabilityManifest,
+      ),
+      'serviceRoutePolicies': serializer.toJson<List<ServiceRoutePolicy>>(
+        serviceRoutePolicies,
+      ),
+      'manualCapabilitySelectors': serializer
+          .toJson<List<ManualCapabilitySelector>>(manualCapabilitySelectors),
+      'capabilityManifestIssue': serializer.toJson<String?>(
+        $ProfilesTable.$convertercapabilityManifestIssuen.toJson(
+          capabilityManifestIssue,
+        ),
+      ),
       'autoUpdate': serializer.toJson<bool>(autoUpdate),
       'selectedMap': serializer.toJson<Map<String, String>>(selectedMap),
       'unfoldSet': serializer.toJson<Set<String>>(unfoldSet),
@@ -642,6 +920,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       ),
       'customUserAgent': serializer.toJson<String>(customUserAgent),
       'skippedNodes': serializer.toJson<List<SkippedNode>>(skippedNodes),
+      'undialableNodes': serializer.toJson<bool>(undialableNodes),
+      'userLabel': serializer.toJson<bool>(userLabel),
+      'lastWorkingClient': serializer.toJson<String?>(
+        $ProfilesTable.$converterlastWorkingClientn.toJson(lastWorkingClient),
+      ),
     };
   }
 
@@ -657,6 +940,12 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     int? autoUpdateDurationMillis,
     Value<SubscriptionInfo?> subscriptionInfo = const Value.absent(),
     Value<PanelMeta?> panelMeta = const Value.absent(),
+    Value<ProviderCapabilityManifest?> capabilityManifest =
+        const Value.absent(),
+    List<ServiceRoutePolicy>? serviceRoutePolicies,
+    List<ManualCapabilitySelector>? manualCapabilitySelectors,
+    Value<CapabilityManifestIssue?> capabilityManifestIssue =
+        const Value.absent(),
     bool? autoUpdate,
     Map<String, String>? selectedMap,
     Set<String>? unfoldSet,
@@ -664,6 +953,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     SubscriptionClient? clientEmulation,
     String? customUserAgent,
     List<SkippedNode>? skippedNodes,
+    bool? undialableNodes,
+    bool? userLabel,
+    Value<SubscriptionClient?> lastWorkingClient = const Value.absent(),
   }) => RawProfile(
     id: id ?? this.id,
     label: label ?? this.label,
@@ -683,6 +975,15 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
         ? subscriptionInfo.value
         : this.subscriptionInfo,
     panelMeta: panelMeta.present ? panelMeta.value : this.panelMeta,
+    capabilityManifest: capabilityManifest.present
+        ? capabilityManifest.value
+        : this.capabilityManifest,
+    serviceRoutePolicies: serviceRoutePolicies ?? this.serviceRoutePolicies,
+    manualCapabilitySelectors:
+        manualCapabilitySelectors ?? this.manualCapabilitySelectors,
+    capabilityManifestIssue: capabilityManifestIssue.present
+        ? capabilityManifestIssue.value
+        : this.capabilityManifestIssue,
     autoUpdate: autoUpdate ?? this.autoUpdate,
     selectedMap: selectedMap ?? this.selectedMap,
     unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -690,6 +991,11 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     clientEmulation: clientEmulation ?? this.clientEmulation,
     customUserAgent: customUserAgent ?? this.customUserAgent,
     skippedNodes: skippedNodes ?? this.skippedNodes,
+    undialableNodes: undialableNodes ?? this.undialableNodes,
+    userLabel: userLabel ?? this.userLabel,
+    lastWorkingClient: lastWorkingClient.present
+        ? lastWorkingClient.value
+        : this.lastWorkingClient,
   );
   RawProfile copyWithCompanion(ProfilesCompanion data) {
     return RawProfile(
@@ -716,6 +1022,18 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ? data.subscriptionInfo.value
           : this.subscriptionInfo,
       panelMeta: data.panelMeta.present ? data.panelMeta.value : this.panelMeta,
+      capabilityManifest: data.capabilityManifest.present
+          ? data.capabilityManifest.value
+          : this.capabilityManifest,
+      serviceRoutePolicies: data.serviceRoutePolicies.present
+          ? data.serviceRoutePolicies.value
+          : this.serviceRoutePolicies,
+      manualCapabilitySelectors: data.manualCapabilitySelectors.present
+          ? data.manualCapabilitySelectors.value
+          : this.manualCapabilitySelectors,
+      capabilityManifestIssue: data.capabilityManifestIssue.present
+          ? data.capabilityManifestIssue.value
+          : this.capabilityManifestIssue,
       autoUpdate: data.autoUpdate.present
           ? data.autoUpdate.value
           : this.autoUpdate,
@@ -733,6 +1051,13 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       skippedNodes: data.skippedNodes.present
           ? data.skippedNodes.value
           : this.skippedNodes,
+      undialableNodes: data.undialableNodes.present
+          ? data.undialableNodes.value
+          : this.undialableNodes,
+      userLabel: data.userLabel.present ? data.userLabel.value : this.userLabel,
+      lastWorkingClient: data.lastWorkingClient.present
+          ? data.lastWorkingClient.value
+          : this.lastWorkingClient,
     );
   }
 
@@ -750,19 +1075,26 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('panelMeta: $panelMeta, ')
+          ..write('capabilityManifest: $capabilityManifest, ')
+          ..write('serviceRoutePolicies: $serviceRoutePolicies, ')
+          ..write('manualCapabilitySelectors: $manualCapabilitySelectors, ')
+          ..write('capabilityManifestIssue: $capabilityManifestIssue, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
           ..write('order: $order, ')
           ..write('clientEmulation: $clientEmulation, ')
           ..write('customUserAgent: $customUserAgent, ')
-          ..write('skippedNodes: $skippedNodes')
+          ..write('skippedNodes: $skippedNodes, ')
+          ..write('undialableNodes: $undialableNodes, ')
+          ..write('userLabel: $userLabel, ')
+          ..write('lastWorkingClient: $lastWorkingClient')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     label,
     currentGroupName,
@@ -774,6 +1106,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     autoUpdateDurationMillis,
     subscriptionInfo,
     panelMeta,
+    capabilityManifest,
+    serviceRoutePolicies,
+    manualCapabilitySelectors,
+    capabilityManifestIssue,
     autoUpdate,
     selectedMap,
     unfoldSet,
@@ -781,7 +1117,10 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     clientEmulation,
     customUserAgent,
     skippedNodes,
-  );
+    undialableNodes,
+    userLabel,
+    lastWorkingClient,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -797,13 +1136,20 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.autoUpdateDurationMillis == this.autoUpdateDurationMillis &&
           other.subscriptionInfo == this.subscriptionInfo &&
           other.panelMeta == this.panelMeta &&
+          other.capabilityManifest == this.capabilityManifest &&
+          other.serviceRoutePolicies == this.serviceRoutePolicies &&
+          other.manualCapabilitySelectors == this.manualCapabilitySelectors &&
+          other.capabilityManifestIssue == this.capabilityManifestIssue &&
           other.autoUpdate == this.autoUpdate &&
           other.selectedMap == this.selectedMap &&
           other.unfoldSet == this.unfoldSet &&
           other.order == this.order &&
           other.clientEmulation == this.clientEmulation &&
           other.customUserAgent == this.customUserAgent &&
-          other.skippedNodes == this.skippedNodes);
+          other.skippedNodes == this.skippedNodes &&
+          other.undialableNodes == this.undialableNodes &&
+          other.userLabel == this.userLabel &&
+          other.lastWorkingClient == this.lastWorkingClient);
 }
 
 class ProfilesCompanion extends UpdateCompanion<RawProfile> {
@@ -818,6 +1164,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<int> autoUpdateDurationMillis;
   final Value<SubscriptionInfo?> subscriptionInfo;
   final Value<PanelMeta?> panelMeta;
+  final Value<ProviderCapabilityManifest?> capabilityManifest;
+  final Value<List<ServiceRoutePolicy>> serviceRoutePolicies;
+  final Value<List<ManualCapabilitySelector>> manualCapabilitySelectors;
+  final Value<CapabilityManifestIssue?> capabilityManifestIssue;
   final Value<bool> autoUpdate;
   final Value<Map<String, String>> selectedMap;
   final Value<Set<String>> unfoldSet;
@@ -825,6 +1175,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<SubscriptionClient> clientEmulation;
   final Value<String> customUserAgent;
   final Value<List<SkippedNode>> skippedNodes;
+  final Value<bool> undialableNodes;
+  final Value<bool> userLabel;
+  final Value<SubscriptionClient?> lastWorkingClient;
   const ProfilesCompanion({
     this.id = const Value.absent(),
     this.label = const Value.absent(),
@@ -837,6 +1190,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.autoUpdateDurationMillis = const Value.absent(),
     this.subscriptionInfo = const Value.absent(),
     this.panelMeta = const Value.absent(),
+    this.capabilityManifest = const Value.absent(),
+    this.serviceRoutePolicies = const Value.absent(),
+    this.manualCapabilitySelectors = const Value.absent(),
+    this.capabilityManifestIssue = const Value.absent(),
     this.autoUpdate = const Value.absent(),
     this.selectedMap = const Value.absent(),
     this.unfoldSet = const Value.absent(),
@@ -844,6 +1201,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.clientEmulation = const Value.absent(),
     this.customUserAgent = const Value.absent(),
     this.skippedNodes = const Value.absent(),
+    this.undialableNodes = const Value.absent(),
+    this.userLabel = const Value.absent(),
+    this.lastWorkingClient = const Value.absent(),
   });
   ProfilesCompanion.insert({
     this.id = const Value.absent(),
@@ -857,6 +1217,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     required int autoUpdateDurationMillis,
     this.subscriptionInfo = const Value.absent(),
     this.panelMeta = const Value.absent(),
+    this.capabilityManifest = const Value.absent(),
+    this.serviceRoutePolicies = const Value.absent(),
+    this.manualCapabilitySelectors = const Value.absent(),
+    this.capabilityManifestIssue = const Value.absent(),
     required bool autoUpdate,
     required Map<String, String> selectedMap,
     required Set<String> unfoldSet,
@@ -864,6 +1228,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.clientEmulation = const Value.absent(),
     this.customUserAgent = const Value.absent(),
     this.skippedNodes = const Value.absent(),
+    this.undialableNodes = const Value.absent(),
+    this.userLabel = const Value.absent(),
+    this.lastWorkingClient = const Value.absent(),
   }) : label = Value(label),
        url = Value(url),
        overwriteType = Value(overwriteType),
@@ -883,6 +1250,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<int>? autoUpdateDurationMillis,
     Expression<String>? subscriptionInfo,
     Expression<String>? panelMeta,
+    Expression<String>? capabilityManifest,
+    Expression<String>? serviceRoutePolicies,
+    Expression<String>? manualCapabilitySelectors,
+    Expression<String>? capabilityManifestIssue,
     Expression<bool>? autoUpdate,
     Expression<String>? selectedMap,
     Expression<String>? unfoldSet,
@@ -890,6 +1261,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? clientEmulation,
     Expression<String>? customUserAgent,
     Expression<String>? skippedNodes,
+    Expression<bool>? undialableNodes,
+    Expression<bool>? userLabel,
+    Expression<String>? lastWorkingClient,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -904,6 +1278,13 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         'auto_update_duration_millis': autoUpdateDurationMillis,
       if (subscriptionInfo != null) 'subscription_info': subscriptionInfo,
       if (panelMeta != null) 'panel_meta': panelMeta,
+      if (capabilityManifest != null) 'capability_manifest': capabilityManifest,
+      if (serviceRoutePolicies != null)
+        'service_route_policies': serviceRoutePolicies,
+      if (manualCapabilitySelectors != null)
+        'manual_capability_selectors': manualCapabilitySelectors,
+      if (capabilityManifestIssue != null)
+        'capability_manifest_issue': capabilityManifestIssue,
       if (autoUpdate != null) 'auto_update': autoUpdate,
       if (selectedMap != null) 'selected_map': selectedMap,
       if (unfoldSet != null) 'unfold_set': unfoldSet,
@@ -911,6 +1292,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (clientEmulation != null) 'client_emulation': clientEmulation,
       if (customUserAgent != null) 'custom_user_agent': customUserAgent,
       if (skippedNodes != null) 'skipped_nodes': skippedNodes,
+      if (undialableNodes != null) 'undialable_nodes': undialableNodes,
+      if (userLabel != null) 'user_label': userLabel,
+      if (lastWorkingClient != null) 'last_working_client': lastWorkingClient,
     });
   }
 
@@ -926,6 +1310,10 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<int>? autoUpdateDurationMillis,
     Value<SubscriptionInfo?>? subscriptionInfo,
     Value<PanelMeta?>? panelMeta,
+    Value<ProviderCapabilityManifest?>? capabilityManifest,
+    Value<List<ServiceRoutePolicy>>? serviceRoutePolicies,
+    Value<List<ManualCapabilitySelector>>? manualCapabilitySelectors,
+    Value<CapabilityManifestIssue?>? capabilityManifestIssue,
     Value<bool>? autoUpdate,
     Value<Map<String, String>>? selectedMap,
     Value<Set<String>>? unfoldSet,
@@ -933,6 +1321,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<SubscriptionClient>? clientEmulation,
     Value<String>? customUserAgent,
     Value<List<SkippedNode>>? skippedNodes,
+    Value<bool>? undialableNodes,
+    Value<bool>? userLabel,
+    Value<SubscriptionClient?>? lastWorkingClient,
   }) {
     return ProfilesCompanion(
       id: id ?? this.id,
@@ -947,6 +1338,12 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           autoUpdateDurationMillis ?? this.autoUpdateDurationMillis,
       subscriptionInfo: subscriptionInfo ?? this.subscriptionInfo,
       panelMeta: panelMeta ?? this.panelMeta,
+      capabilityManifest: capabilityManifest ?? this.capabilityManifest,
+      serviceRoutePolicies: serviceRoutePolicies ?? this.serviceRoutePolicies,
+      manualCapabilitySelectors:
+          manualCapabilitySelectors ?? this.manualCapabilitySelectors,
+      capabilityManifestIssue:
+          capabilityManifestIssue ?? this.capabilityManifestIssue,
       autoUpdate: autoUpdate ?? this.autoUpdate,
       selectedMap: selectedMap ?? this.selectedMap,
       unfoldSet: unfoldSet ?? this.unfoldSet,
@@ -954,6 +1351,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       clientEmulation: clientEmulation ?? this.clientEmulation,
       customUserAgent: customUserAgent ?? this.customUserAgent,
       skippedNodes: skippedNodes ?? this.skippedNodes,
+      undialableNodes: undialableNodes ?? this.undialableNodes,
+      userLabel: userLabel ?? this.userLabel,
+      lastWorkingClient: lastWorkingClient ?? this.lastWorkingClient,
     );
   }
 
@@ -1001,6 +1401,34 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         $ProfilesTable.$converterpanelMeta.toSql(panelMeta.value),
       );
     }
+    if (capabilityManifest.present) {
+      map['capability_manifest'] = Variable<String>(
+        $ProfilesTable.$convertercapabilityManifest.toSql(
+          capabilityManifest.value,
+        ),
+      );
+    }
+    if (serviceRoutePolicies.present) {
+      map['service_route_policies'] = Variable<String>(
+        $ProfilesTable.$converterserviceRoutePolicies.toSql(
+          serviceRoutePolicies.value,
+        ),
+      );
+    }
+    if (manualCapabilitySelectors.present) {
+      map['manual_capability_selectors'] = Variable<String>(
+        $ProfilesTable.$convertermanualCapabilitySelectors.toSql(
+          manualCapabilitySelectors.value,
+        ),
+      );
+    }
+    if (capabilityManifestIssue.present) {
+      map['capability_manifest_issue'] = Variable<String>(
+        $ProfilesTable.$convertercapabilityManifestIssuen.toSql(
+          capabilityManifestIssue.value,
+        ),
+      );
+    }
     if (autoUpdate.present) {
       map['auto_update'] = Variable<bool>(autoUpdate.value);
     }
@@ -1030,6 +1458,19 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
         $ProfilesTable.$converterskippedNodes.toSql(skippedNodes.value),
       );
     }
+    if (undialableNodes.present) {
+      map['undialable_nodes'] = Variable<bool>(undialableNodes.value);
+    }
+    if (userLabel.present) {
+      map['user_label'] = Variable<bool>(userLabel.value);
+    }
+    if (lastWorkingClient.present) {
+      map['last_working_client'] = Variable<String>(
+        $ProfilesTable.$converterlastWorkingClientn.toSql(
+          lastWorkingClient.value,
+        ),
+      );
+    }
     return map;
   }
 
@@ -1047,13 +1488,20 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('autoUpdateDurationMillis: $autoUpdateDurationMillis, ')
           ..write('subscriptionInfo: $subscriptionInfo, ')
           ..write('panelMeta: $panelMeta, ')
+          ..write('capabilityManifest: $capabilityManifest, ')
+          ..write('serviceRoutePolicies: $serviceRoutePolicies, ')
+          ..write('manualCapabilitySelectors: $manualCapabilitySelectors, ')
+          ..write('capabilityManifestIssue: $capabilityManifestIssue, ')
           ..write('autoUpdate: $autoUpdate, ')
           ..write('selectedMap: $selectedMap, ')
           ..write('unfoldSet: $unfoldSet, ')
           ..write('order: $order, ')
           ..write('clientEmulation: $clientEmulation, ')
           ..write('customUserAgent: $customUserAgent, ')
-          ..write('skippedNodes: $skippedNodes')
+          ..write('skippedNodes: $skippedNodes, ')
+          ..write('undialableNodes: $undialableNodes, ')
+          ..write('userLabel: $userLabel, ')
+          ..write('lastWorkingClient: $lastWorkingClient')
           ..write(')'))
         .toString();
   }
@@ -3740,6 +4188,10 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       required int autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
       Value<PanelMeta?> panelMeta,
+      Value<ProviderCapabilityManifest?> capabilityManifest,
+      Value<List<ServiceRoutePolicy>> serviceRoutePolicies,
+      Value<List<ManualCapabilitySelector>> manualCapabilitySelectors,
+      Value<CapabilityManifestIssue?> capabilityManifestIssue,
       required bool autoUpdate,
       required Map<String, String> selectedMap,
       required Set<String> unfoldSet,
@@ -3747,6 +4199,9 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<SubscriptionClient> clientEmulation,
       Value<String> customUserAgent,
       Value<List<SkippedNode>> skippedNodes,
+      Value<bool> undialableNodes,
+      Value<bool> userLabel,
+      Value<SubscriptionClient?> lastWorkingClient,
     });
 typedef $$ProfilesTableUpdateCompanionBuilder =
     ProfilesCompanion Function({
@@ -3761,6 +4216,10 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<int> autoUpdateDurationMillis,
       Value<SubscriptionInfo?> subscriptionInfo,
       Value<PanelMeta?> panelMeta,
+      Value<ProviderCapabilityManifest?> capabilityManifest,
+      Value<List<ServiceRoutePolicy>> serviceRoutePolicies,
+      Value<List<ManualCapabilitySelector>> manualCapabilitySelectors,
+      Value<CapabilityManifestIssue?> capabilityManifestIssue,
       Value<bool> autoUpdate,
       Value<Map<String, String>> selectedMap,
       Value<Set<String>> unfoldSet,
@@ -3768,6 +4227,9 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<SubscriptionClient> clientEmulation,
       Value<String> customUserAgent,
       Value<List<SkippedNode>> skippedNodes,
+      Value<bool> undialableNodes,
+      Value<bool> userLabel,
+      Value<SubscriptionClient?> lastWorkingClient,
     });
 
 final class $$ProfilesTableReferences
@@ -3880,6 +4342,46 @@ class $$ProfilesTableFilterComposer
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
+  ColumnWithTypeConverterFilters<
+    ProviderCapabilityManifest?,
+    ProviderCapabilityManifest,
+    String
+  >
+  get capabilityManifest => $composableBuilder(
+    column: $table.capabilityManifest,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    List<ServiceRoutePolicy>,
+    List<ServiceRoutePolicy>,
+    String
+  >
+  get serviceRoutePolicies => $composableBuilder(
+    column: $table.serviceRoutePolicies,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    List<ManualCapabilitySelector>,
+    List<ManualCapabilitySelector>,
+    String
+  >
+  get manualCapabilitySelectors => $composableBuilder(
+    column: $table.manualCapabilitySelectors,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    CapabilityManifestIssue?,
+    CapabilityManifestIssue,
+    String
+  >
+  get capabilityManifestIssue => $composableBuilder(
+    column: $table.capabilityManifestIssue,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
     builder: (column) => ColumnFilters(column),
@@ -3920,6 +4422,26 @@ class $$ProfilesTableFilterComposer
   ColumnWithTypeConverterFilters<List<SkippedNode>, List<SkippedNode>, String>
   get skippedNodes => $composableBuilder(
     column: $table.skippedNodes,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get undialableNodes => $composableBuilder(
+    column: $table.undialableNodes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get userLabel => $composableBuilder(
+    column: $table.userLabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    SubscriptionClient?,
+    SubscriptionClient,
+    String
+  >
+  get lastWorkingClient => $composableBuilder(
+    column: $table.lastWorkingClient,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -4038,6 +4560,26 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get capabilityManifest => $composableBuilder(
+    column: $table.capabilityManifest,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serviceRoutePolicies => $composableBuilder(
+    column: $table.serviceRoutePolicies,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get manualCapabilitySelectors => $composableBuilder(
+    column: $table.manualCapabilitySelectors,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get capabilityManifestIssue => $composableBuilder(
+    column: $table.capabilityManifestIssue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
     builder: (column) => ColumnOrderings(column),
@@ -4070,6 +4612,21 @@ class $$ProfilesTableOrderingComposer
 
   ColumnOrderings<String> get skippedNodes => $composableBuilder(
     column: $table.skippedNodes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get undialableNodes => $composableBuilder(
+    column: $table.undialableNodes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get userLabel => $composableBuilder(
+    column: $table.userLabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastWorkingClient => $composableBuilder(
+    column: $table.lastWorkingClient,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -4130,6 +4687,30 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<PanelMeta?, String> get panelMeta =>
       $composableBuilder(column: $table.panelMeta, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<ProviderCapabilityManifest?, String>
+  get capabilityManifest => $composableBuilder(
+    column: $table.capabilityManifest,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<ServiceRoutePolicy>, String>
+  get serviceRoutePolicies => $composableBuilder(
+    column: $table.serviceRoutePolicies,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<ManualCapabilitySelector>, String>
+  get manualCapabilitySelectors => $composableBuilder(
+    column: $table.manualCapabilitySelectors,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<CapabilityManifestIssue?, String>
+  get capabilityManifestIssue => $composableBuilder(
+    column: $table.capabilityManifestIssue,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get autoUpdate => $composableBuilder(
     column: $table.autoUpdate,
     builder: (column) => column,
@@ -4161,6 +4742,20 @@ class $$ProfilesTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<SkippedNode>, String>
   get skippedNodes => $composableBuilder(
     column: $table.skippedNodes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get undialableNodes => $composableBuilder(
+    column: $table.undialableNodes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get userLabel =>
+      $composableBuilder(column: $table.userLabel, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SubscriptionClient?, String>
+  get lastWorkingClient => $composableBuilder(
+    column: $table.lastWorkingClient,
     builder: (column) => column,
   );
 
@@ -4258,6 +4853,15 @@ class $$ProfilesTableTableManager
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
                 Value<PanelMeta?> panelMeta = const Value.absent(),
+                Value<ProviderCapabilityManifest?> capabilityManifest =
+                    const Value.absent(),
+                Value<List<ServiceRoutePolicy>> serviceRoutePolicies =
+                    const Value.absent(),
+                Value<List<ManualCapabilitySelector>>
+                    manualCapabilitySelectors =
+                    const Value.absent(),
+                Value<CapabilityManifestIssue?> capabilityManifestIssue =
+                    const Value.absent(),
                 Value<bool> autoUpdate = const Value.absent(),
                 Value<Map<String, String>> selectedMap = const Value.absent(),
                 Value<Set<String>> unfoldSet = const Value.absent(),
@@ -4266,6 +4870,10 @@ class $$ProfilesTableTableManager
                     const Value.absent(),
                 Value<String> customUserAgent = const Value.absent(),
                 Value<List<SkippedNode>> skippedNodes = const Value.absent(),
+                Value<bool> undialableNodes = const Value.absent(),
+                Value<bool> userLabel = const Value.absent(),
+                Value<SubscriptionClient?> lastWorkingClient =
+                    const Value.absent(),
               }) => ProfilesCompanion(
                 id: id,
                 label: label,
@@ -4278,6 +4886,10 @@ class $$ProfilesTableTableManager
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 panelMeta: panelMeta,
+                capabilityManifest: capabilityManifest,
+                serviceRoutePolicies: serviceRoutePolicies,
+                manualCapabilitySelectors: manualCapabilitySelectors,
+                capabilityManifestIssue: capabilityManifestIssue,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
@@ -4285,6 +4897,9 @@ class $$ProfilesTableTableManager
                 clientEmulation: clientEmulation,
                 customUserAgent: customUserAgent,
                 skippedNodes: skippedNodes,
+                undialableNodes: undialableNodes,
+                userLabel: userLabel,
+                lastWorkingClient: lastWorkingClient,
               ),
           createCompanionCallback:
               ({
@@ -4300,6 +4915,15 @@ class $$ProfilesTableTableManager
                 Value<SubscriptionInfo?> subscriptionInfo =
                     const Value.absent(),
                 Value<PanelMeta?> panelMeta = const Value.absent(),
+                Value<ProviderCapabilityManifest?> capabilityManifest =
+                    const Value.absent(),
+                Value<List<ServiceRoutePolicy>> serviceRoutePolicies =
+                    const Value.absent(),
+                Value<List<ManualCapabilitySelector>>
+                    manualCapabilitySelectors =
+                    const Value.absent(),
+                Value<CapabilityManifestIssue?> capabilityManifestIssue =
+                    const Value.absent(),
                 required bool autoUpdate,
                 required Map<String, String> selectedMap,
                 required Set<String> unfoldSet,
@@ -4308,6 +4932,10 @@ class $$ProfilesTableTableManager
                     const Value.absent(),
                 Value<String> customUserAgent = const Value.absent(),
                 Value<List<SkippedNode>> skippedNodes = const Value.absent(),
+                Value<bool> undialableNodes = const Value.absent(),
+                Value<bool> userLabel = const Value.absent(),
+                Value<SubscriptionClient?> lastWorkingClient =
+                    const Value.absent(),
               }) => ProfilesCompanion.insert(
                 id: id,
                 label: label,
@@ -4320,6 +4948,10 @@ class $$ProfilesTableTableManager
                 autoUpdateDurationMillis: autoUpdateDurationMillis,
                 subscriptionInfo: subscriptionInfo,
                 panelMeta: panelMeta,
+                capabilityManifest: capabilityManifest,
+                serviceRoutePolicies: serviceRoutePolicies,
+                manualCapabilitySelectors: manualCapabilitySelectors,
+                capabilityManifestIssue: capabilityManifestIssue,
                 autoUpdate: autoUpdate,
                 selectedMap: selectedMap,
                 unfoldSet: unfoldSet,
@@ -4327,6 +4959,9 @@ class $$ProfilesTableTableManager
                 clientEmulation: clientEmulation,
                 customUserAgent: customUserAgent,
                 skippedNodes: skippedNodes,
+                undialableNodes: undialableNodes,
+                userLabel: userLabel,
+                lastWorkingClient: lastWorkingClient,
               ),
           withReferenceMapper: (p0) => p0
               .map(

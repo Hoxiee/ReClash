@@ -9,6 +9,21 @@ const _githubFileMarkers = {'blob', 'raw'};
 
 const maxFallbackHosts = 4;
 
+const _sensitiveSubscriptionHeaders = {
+  'authorization',
+  'cookie',
+  'proxy-authorization',
+  'user-agent',
+  'x-api-key',
+  'x-app-version',
+  'x-client',
+  'x-device-locale',
+  'x-device-model',
+  'x-device-os',
+  'x-hwid',
+  'x-ver-os',
+};
+
 final _hostname = RegExp(
   r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$',
 );
@@ -103,6 +118,59 @@ List<String> subscriptionUrlCandidates(String url, List<String> hosts) {
     for (final host in hosts)
       if (seen.add(host)) uri.replace(host: host).toString(),
   ];
+}
+
+String? subscriptionDisplaySource(String source, {int maxLength = 120}) {
+  final trimmed = source.trim();
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null || uri.host.isEmpty) return null;
+  final value = Uri(
+    scheme: uri.scheme,
+    host: uri.host,
+    port: uri.hasPort ? uri.port : null,
+    path: uri.path,
+  ).toString();
+  if (value.length <= maxLength) return value;
+  return '${value.substring(0, maxLength - 1)}…';
+}
+
+Map<String, String> subscriptionRedirectHeaders(
+  Map<String, String> headers, {
+  required Uri from,
+  required Uri to,
+}) {
+  if (_sameSubscriptionOrigin(from, to)) return headers;
+  return Map<String, String>.from(headers)..removeWhere(
+    (name, _) => _sensitiveSubscriptionHeaders.contains(name.toLowerCase()),
+  );
+}
+
+bool isAllowedSubscriptionRedirect(Uri from, Uri to) {
+  if (to.scheme != 'http' && to.scheme != 'https') return false;
+  return from.scheme != 'https' || to.scheme == 'https';
+}
+
+bool _sameSubscriptionOrigin(Uri left, Uri right) =>
+    left.scheme.toLowerCase() == right.scheme.toLowerCase() &&
+    left.host.toLowerCase() == right.host.toLowerCase() &&
+    left.port == right.port;
+
+bool shouldTryNextSubscriptionClient(Object error) {
+  if (error is! DioException) return false;
+  return switch (error.type) {
+    DioExceptionType.badResponse => switch (error.response?.statusCode ?? 0) {
+      HttpStatus.badRequest ||
+      HttpStatus.unauthorized ||
+      HttpStatus.forbidden ||
+      HttpStatus.notAcceptable ||
+      HttpStatus.unsupportedMediaType => true,
+      _ => false,
+    },
+    // Panels that cannot render a format tear the body down mid-stream
+    // instead of answering with a status the next client could read.
+    DioExceptionType.unknown => error.error is HttpException,
+    _ => false,
+  };
 }
 
 /// Whether the host itself is what failed, rather than the subscription being

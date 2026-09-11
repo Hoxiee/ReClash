@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_connected">Bagly</string>
+    <string name="widget_connecting">Baglanylýar…</string>
+    <string name="widget_disconnecting">Aýrylýar…</string>
+    <string name="widget_disconnected">Bagly däl</string>
+    <string name="widget_paused">Bes edilen</string>
+    <string name="widget_start">Başla</string>
+    <string name="widget_stop">Bes et</string>
+    <string name="widget_wait">Garaşyň</string>
+    <string name="widget_resume">Dowam et</string>
+    <string name="widget_pause">Wagtlaýyn bes et</string>
+    <string name="widget_check">Barla</string>
+    <string name="widget_open">Aç</string>
+    <string name="widget_refresh">Täzele</string>
+
+    <string name="widget_app_name">@string/app_name</string>
+
+    <string name="widget_label_switch">ReClash Çalyşgyç</string>
+    <string name="widget_label_control">ReClash Dolandyryş</string>
+    <string name="widget_label_nodes">ReClash Düwünler</string>
+    <string name="widget_label_traffic">ReClash Trafik</string>
+    <string name="widget_description_switch">Bir basyşda birikmek, işleýiş wagty we häzirki tizlik.</string>
+    <string name="widget_description_control">Birikme ýagdaýy, tizlik, işleýiş wagty we dört çalt hereket.</string>
+    <string name="widget_description_nodes">Häzirki topardan proksi saýlamak we gijikmeleri täzeden barlamak.</string>
+    <string name="widget_description_traffic">Tizlik grafigi, sessiýa jemi we işleýiş wagty.</string>
+
+    <string name="widget_placeholder_speed">0 B/s</string>
+    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_metric_down">Alyş</string>
+    <string name="widget_metric_up">Iberiş</string>
+    <string name="widget_metric_uptime">Işleýiş wagty</string>
+    <string name="widget_metric_session">Sessiýa</string>
+
+    <string name="widget_no_nodes">Elýeterli düwün ýok</string>
+    <string name="widget_service_off">Hyzmat işlemeýär</string>
+    <string name="widget_state">Ýagdaý</string>
+
+    <string name="widget_terrain_normal">Göni tor</string>
+    <string name="widget_terrain_whitelist">Rugsat sanawy</string>
+    <string name="widget_terrain_portal">Giriş portaly</string>
+    <string name="widget_terrain_offline">Oflayn</string>
+    <string name="widget_terrain_unknown">Tor näbelli</string>
+
+    <string name="widget_doctor_healthy">Kadaly</string>
+    <string name="widget_doctor_degraded">Durnuksyz</string>
+    <string name="widget_doctor_broken">Mesela bar</string>
+    <string name="widget_doctor_examining">Barlanýar…</string>
+    <string name="widget_doctor_observing">Synlanýar</string>
+</resources>

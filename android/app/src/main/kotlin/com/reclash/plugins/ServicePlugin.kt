@@ -1,14 +1,17 @@
 package com.reclash.plugins
 
+import android.content.Context
 import com.reclash.ServiceController
 import com.reclash.ServiceState
 import com.reclash.common.Components
 import com.reclash.models.SharedState
 import com.reclash.service.ServiceConfig
+import com.reclash.widgets.WidgetStore
 import com.google.gson.Gson
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,11 +20,15 @@ import kotlinx.coroutines.launch
 
 class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private lateinit var channel: MethodChannel
+    private lateinit var context: Context
     private lateinit var scope: CoroutineScope
     private val gson = Gson()
+    private val widgetDeliveryInFlight = AtomicBoolean()
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        widgetDeliveryInFlight.set(false)
+        context = binding.applicationContext
         channel = MethodChannel(binding.binaryMessenger, "${Components.PACKAGE_NAME}/service")
         channel.setMethodCallHandler(this)
         // The service pauses itself natively; Flutter only projects that state.
@@ -29,6 +36,9 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             ServiceConfig.pauseState.collect { state ->
                 sendPauseState(state.paused)
             }
+        }
+        scope.launch {
+            WidgetStore.selectionRecorded.collect { sendWidgetSelections() }
         }
     }
 
@@ -54,6 +64,8 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             "pause" -> pause(result)
             "resume" -> resume(result)
             "getPauseState" -> result.success(ServiceConfig.pauseState.value.paused)
+            "peekWidgetSelections" -> result.success(widgetSelections())
+            "ackWidgetSelections" -> acknowledgeWidgetSelections(call, result)
             else -> result.notImplemented()
         }
     }
@@ -132,6 +144,54 @@ class ServicePlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
             channel.invokeMethod("event", value)
         }
     }
+
+    private fun sendWidgetSelections() {
+        if (!widgetDeliveryInFlight.compareAndSet(false, true)) return
+        val payload = widgetSelections()
+        if (payload == null) {
+            widgetDeliveryInFlight.set(false)
+            return
+        }
+        scope.launch(Dispatchers.Main) {
+            channel.invokeMethod(
+                "widgetSelections",
+                payload,
+                object : MethodChannel.Result {
+                    override fun success(result: Any?) {
+                        if (result == true) {
+                            acknowledgeWidgetSelections(payload.getValue("token") as String)
+                        }
+                        widgetDeliveryInFlight.set(false)
+                        if (result == true) sendWidgetSelections()
+                    }
+
+                    override fun error(code: String, message: String?, details: Any?) {
+                        widgetDeliveryInFlight.set(false)
+                    }
+
+                    override fun notImplemented() {
+                        widgetDeliveryInFlight.set(false)
+                    }
+                },
+            )
+        }
+    }
+
+    private fun widgetSelections(): Map<String, Any>? =
+        WidgetStore.peekSelections(context)?.let { batch ->
+            mapOf(
+                "token" to batch.token,
+                "selections" to batch.selections,
+            )
+        }
+
+    private fun acknowledgeWidgetSelections(call: MethodCall, result: MethodChannel.Result) {
+        val token = call.arguments as? String
+        result.success(token != null && acknowledgeWidgetSelections(token))
+    }
+
+    private fun acknowledgeWidgetSelections(token: String): Boolean =
+        WidgetStore.acknowledgeSelections(context, token)
 
     private fun sendPauseState(paused: Boolean) {
         scope.launch(Dispatchers.Main) {

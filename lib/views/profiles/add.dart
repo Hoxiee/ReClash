@@ -16,28 +16,31 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'client_preset_selector.dart';
 
 class AddProfileView extends ConsumerWidget {
-  final BuildContext context;
-  final bool keepCurrentPage;
-  final bool shrinkWrap;
-  final ValueChanged<Profile>? onProfileAdded;
-
   const AddProfileView({
     super.key,
-    required this.context,
-    this.keepCurrentPage = false,
     this.shrinkWrap = false,
     this.onProfileAdded,
   });
 
-  Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
-    final profile = await ref
+  final bool shrinkWrap;
+  final ValueChanged<Profile>? onProfileAdded;
+
+  Future<Profile?> _import(WidgetRef ref, ProfileImportRequest request) async {
+    final result = await ref
         .read(profilesActionProvider.notifier)
-        .addProfileFormFile(keepCurrentPage: keepCurrentPage);
+        .importProfile(request);
+    final profile = result.profile;
     if (profile != null) onProfileAdded?.call(profile);
+    return profile;
+  }
+
+  Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
+    await _import(ref, const ProfileImportRequest.file());
   }
 
   Future<void> _handleAddUrl(
-    ProfilesAction profilesAction,
+    WidgetRef ref,
+    BuildContext context,
     String url, {
     SubscriptionClient client = SubscriptionClient.auto,
     String customUserAgent = '',
@@ -46,90 +49,75 @@ class AddProfileView extends ConsumerWidget {
     ResolvedExternalLink? resolved;
     try {
       resolved = await resolveExternalLink(url);
-    } on IncyLinkException catch (e) {
+    } on IncyLinkException catch (error) {
       await dialogs.showMessage(
         title: appLocalizations.addProfile,
-        message: TextSpan(text: e.message),
+        message: TextSpan(text: incyLinkErrorMessage(error, appLocalizations)),
       );
       return;
     }
     final target = resolved?.url ?? url;
-    if (target.isEmpty) {
-      final profile = await profilesAction.addProfileFromLocalContent(
-        resolved!.data!,
-        keepCurrentPage: keepCurrentPage,
-      );
-      if (profile != null) onProfileAdded?.call(profile);
-      return;
-    }
-    final profile = await profilesAction.addProfileFormURL(
-      target,
-      client: resolved?.preset ?? client,
-      name: resolved?.name,
-      customUserAgent: customUserAgent,
-      keepCurrentPage: keepCurrentPage,
-    );
-    if (profile != null) onProfileAdded?.call(profile);
+    final request = target.isEmpty
+        ? ProfileImportRequest.raw(resolved!.data!)
+        : ProfileImportRequest.link(
+            target,
+            client: resolved?.preset ?? client,
+            name: resolved?.name,
+            customUserAgent: customUserAgent,
+          );
+    await _import(ref, request);
   }
 
-  Future<void> _toScan(WidgetRef ref) async {
-    final profilesAction = ref.read(profilesActionProvider.notifier);
+  Future<void> _toScan(WidgetRef ref, BuildContext context) async {
     if (system.isDesktop) {
-      final profile = await profilesAction.addProfileFormQrCode();
-      if (profile != null) onProfileAdded?.call(profile);
+      await _import(ref, const ProfileImportRequest.qrCode());
       return;
     }
-    final url = await BaseNavigator.push(context, const ScanPage());
-    if (url != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_handleAddUrl(profilesAction, url));
-      });
+    final url = await BaseNavigator.push<String>(context, const ScanPage());
+    if (url != null && context.mounted) {
+      await _handleAddUrl(ref, context, url);
     }
   }
 
   Future<void> _toLanImport(WidgetRef ref) async {
-    final profilesAction = ref.read(profilesActionProvider.notifier);
     await dialogs.showCommonDialog<void>(
       dismissible: false,
       child: LanProfileImportDialog(
         onImport: (target) async {
-          final profile = await profilesAction.addProfileFormURL(
-            target.url,
-            client: target.client,
-            name: target.name,
-            keepCurrentPage: keepCurrentPage,
+          final profile = await _import(
+            ref,
+            ProfileImportRequest.link(
+              target.url,
+              client: target.client,
+              name: target.name,
+            ),
           );
           if (profile == null) throw StateError('Profile import failed');
-          onProfileAdded?.call(profile);
         },
       ),
     );
   }
 
-  Future<void> _toAdd(WidgetRef ref) async {
-    final profilesAction = ref.read(profilesActionProvider.notifier);
+  Future<void> _toAdd(WidgetRef ref, BuildContext context) async {
     final result = await dialogs.showCommonDialog<URLFormDialogResult>(
       child: const URLFormDialog(),
     );
-    if (result == null) return;
-    final url = result.url.trim();
-    if (url.isEmpty) return;
-    if (!url.isUrl &&
-        !url.startsWith('incy://') &&
-        !url.startsWith('happ://')) {
-      final profile = await profilesAction.addProfileFromLocalContent(
-        url,
-        keepCurrentPage: keepCurrentPage,
-      );
-      if (profile != null) onProfileAdded?.call(profile);
-      return;
-    }
+    if (result == null || !context.mounted) return;
     await _handleAddUrl(
-      profilesAction,
-      url,
+      ref,
+      context,
+      result.url,
       client: result.client,
       customUserAgent: result.customUserAgent,
     );
+  }
+
+  Future<void> _toRaw(WidgetRef ref) async {
+    final content = await dialogs.showCommonDialog<String>(
+      child: const RawProfileDialog(),
+    );
+    if (content == null) return;
+    await _import(ref, ProfileImportRequest.raw(content));
   }
 
   @override
@@ -151,7 +139,13 @@ class AddProfileView extends ConsumerWidget {
           leading: const Icon(Icons.qr_code_sharp),
           title: Text(appLocalizations.qrcode),
           subtitle: Text(appLocalizations.qrcodeDesc),
-          onTap: () => _toScan(ref),
+          onTap: () => _toScan(ref, context),
+        ),
+        ListItem(
+          leading: const Icon(Icons.cloud_download_sharp),
+          title: Text(appLocalizations.url),
+          subtitle: Text(appLocalizations.urlDesc),
+          onTap: () => _toAdd(ref, context),
         ),
         ListItem(
           leading: const Icon(Icons.upload_file_sharp),
@@ -160,12 +154,84 @@ class AddProfileView extends ConsumerWidget {
           onTap: () => _handleAddProfileFormFile(ref),
         ),
         ListItem(
-          leading: const Icon(Icons.cloud_download_sharp),
-          title: Text(appLocalizations.url),
-          subtitle: Text(appLocalizations.urlDesc),
-          onTap: () => _toAdd(ref),
+          leading: const Icon(Icons.data_object_rounded),
+          title: Text(appLocalizations.setupRawConfig),
+          subtitle: Text(appLocalizations.setupRawConfigDesc),
+          onTap: () => _toRaw(ref),
         ),
       ],
+    );
+  }
+}
+
+class RawProfileDialog extends StatefulWidget {
+  const RawProfileDialog({super.key});
+
+  @override
+  State<RawProfileDialog> createState() => _RawProfileDialogState();
+}
+
+class _RawProfileDialogState extends State<RawProfileDialog> {
+  final _controller = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleSubmit() {
+    final content = _controller.text.trim();
+    if (content.isEmpty) {
+      setState(() => _errorText = context.appLocalizations.contentNotEmpty);
+      return;
+    }
+    Navigator.of(context).pop(content);
+  }
+
+  Future<void> _handlePaste() async {
+    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!mounted) return;
+    final text = clipboardData?.text?.trim();
+    if (text != null && text.isNotEmpty) {
+      _controller.text = text;
+      if (_errorText != null) setState(() => _errorText = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return CommonDialog(
+      title: appLocalizations.setupRawConfig,
+      actions: [
+        IconButton.filledTonal(
+          tooltip: appLocalizations.pasteFromClipboard,
+          onPressed: _handlePaste,
+          icon: const Icon(Icons.content_paste),
+        ),
+        TextButton(
+          onPressed: _handleSubmit,
+          child: Text(appLocalizations.submit),
+        ),
+      ],
+      child: SizedBox(
+        width: 420,
+        child: TextField(
+          controller: _controller,
+          autofocus: true,
+          minLines: 10,
+          maxLines: 18,
+          onChanged: (_) {
+            if (_errorText != null) setState(() => _errorText = null);
+          },
+          decoration: InputDecoration(
+            labelText: appLocalizations.content,
+            errorText: _errorText,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -202,6 +268,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
   final _customUserAgentController = TextEditingController();
   SubscriptionClient _client = SubscriptionClient.auto;
   bool _isMore = false;
+  String? _errorText;
 
   @override
   void dispose() {
@@ -212,7 +279,19 @@ class _URLFormDialogState extends State<URLFormDialog> {
 
   void _handleSubmit() {
     final url = _urlController.text.trim();
-    if (url.isEmpty) return;
+    if (url.isEmpty) {
+      setState(() {
+        _errorText = context.appLocalizations.profileUrlNullValidationDesc;
+      });
+      return;
+    }
+    final looksLikeUrl = RegExp(r'^[A-Za-z][A-Za-z0-9+.-]*://').hasMatch(url);
+    if (!looksLikeUrl || !url.isProfileImportLink) {
+      setState(() {
+        _errorText = context.appLocalizations.profileUrlInvalidValidationDesc;
+      });
+      return;
+    }
     Navigator.of(context).pop<URLFormDialogResult>(
       URLFormDialogResult(
         url: url,
@@ -228,6 +307,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
     final text = clipboardData?.text?.trim();
     if (text != null && text.isNotEmpty) {
       _urlController.text = text;
+      if (_errorText != null) setState(() => _errorText = null);
     }
   }
 
@@ -282,8 +362,14 @@ class _URLFormDialogState extends State<URLFormDialog> {
               maxLines: 5,
               inputFormatters: TextInputLimits.limit(TextInputLimits.url),
               onSubmitted: (_) => _handleSubmit(),
+              onChanged: (_) {
+                if (_errorText != null) setState(() => _errorText = null);
+              },
               controller: _urlController,
-              decoration: InputDecoration(labelText: appLocalizations.url),
+              decoration: InputDecoration(
+                labelText: appLocalizations.url,
+                errorText: _errorText,
+              ),
             ),
             context.disableAnimations
                 ? _moreBody

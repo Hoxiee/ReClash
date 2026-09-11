@@ -44,15 +44,11 @@ class StartupCoordinator {
     required void Function() startOptionalEffects,
   }) async {
     if (!await handleFailedPreference()) return StartupOutcome.exitRequested;
-    final coreStart = startCore();
     await handleSetupWizard();
-    if (!await handleDisclaimer()) {
-      await coreStart;
-      return StartupOutcome.exitRequested;
-    }
+    if (!await handleDisclaimer()) return StartupOutcome.exitRequested;
     await showCrashRecoveryTip();
     await showCrashlyticsTip();
-    await coreStart;
+    await startCore();
     await initializeRuntime();
     await applyWindowVisibility();
     startOptionalEffects();

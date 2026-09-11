@@ -482,7 +482,7 @@ void main() {
     await _pump(tester, enabled: true, report: _report);
     await _openRanking(tester);
 
-    expect(find.text('Balanced'), findsOne);
+    expect(find.text('Everyday'), findsOne);
     expect(find.text('Allowed to compete'), findsOne);
     expect(find.text('Fit for this network'), findsOne);
     expect(find.text('Stable tiebreak'), findsOne);
@@ -502,7 +502,7 @@ void main() {
     );
     await _openRanking(tester);
 
-    expect(find.text('Lowest latency'), findsOne);
+    expect(find.text('Fast'), findsOne);
     expect(find.text('Fit for this network'), findsNothing);
     expect(find.text('Has carried traffic'), findsOne);
   });

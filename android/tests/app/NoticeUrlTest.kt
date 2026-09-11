@@ -1,10 +1,22 @@
 package com.reclash
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NoticeUrlTest {
+
+    @Test
+    fun `subscription reminders use their dedicated stable channel and ids`() {
+        val profile = "subscription:work"
+
+        assertEquals("reclash_subscription_reminders", SUBSCRIPTION_NOTICE_CHANNEL)
+        assertEquals(subscriptionNoticeId(profile), subscriptionNoticeId(profile))
+        assertNotEquals(subscriptionNoticeId("subscription:personal"), subscriptionNoticeId(profile))
+        assertTrue(subscriptionNoticeId(profile) >= 2_000)
+    }
 
     @Test
     fun `a web link is opened as the panel wrote it, trimmed`() {

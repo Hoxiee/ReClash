@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -29,17 +31,76 @@ void main() {
 
       expect(applied.enabled, isTrue);
       expect(applied.preset, SmartRoutingPreset.russia);
-      expect(applied.waveWidth, SmartRoutingPreset.russia.bundle.waveWidth);
+    });
+
+    test('a region says nothing about how often the engine looks', () {
+      const props = SmartRoutingProps(
+        enabled: true,
+        dwellSeconds: 600,
+        waveWidth: 4,
+      );
+      final applied = props.applyPreset(SmartRoutingPreset.russia);
+
+      expect(applied.dwellSeconds, 600);
+      expect(applied.waveWidth, 4);
+      expect(applied.matchesPreset, isTrue);
     });
 
     test('a moved knob is visible, and resetting puts it back', () {
       final edited = const SmartRoutingProps(
         enabled: true,
-      ).applyPreset(SmartRoutingPreset.russia).copyWith(dwellSeconds: 600);
+      ).applyPreset(SmartRoutingPreset.russia).copyWith(requireUdp: true);
 
       expect(edited.matchesPreset, isFalse);
       expect(edited.applyPreset(edited.preset).matchesPreset, isTrue);
       expect(edited.applyPreset(edited.preset).enabled, isTrue);
+    });
+
+    test('every strategy is a pace as much as an order', () {
+      for (final strategy in SmartRoutingStrategy.values) {
+        final applied = const SmartRoutingProps(
+          enabled: true,
+        ).applyStrategy(strategy);
+
+        expect(applied.strategy, strategy);
+        expect(applied.matchesStrategy, isTrue, reason: strategy.name);
+        expect(
+          applied.rcxParams.strategy,
+          strategy.wire,
+          reason: strategy.name,
+        );
+        expect(applied.dwellSeconds, strategy.pacing.dwellSeconds);
+        expect(applied.waveWidth, strategy.pacing.waveWidth);
+      }
+    });
+
+    test('a steadier strategy waits longer and probes fewer servers', () {
+      const order = [
+        SmartRoutingStrategy.saver,
+        SmartRoutingStrategy.stable,
+        SmartRoutingStrategy.balanced,
+        SmartRoutingStrategy.lowestLatency,
+      ];
+      for (var at = 1; at < order.length; at++) {
+        expect(
+          order[at].pacing.dwellSeconds,
+          lessThan(order[at - 1].pacing.dwellSeconds),
+        );
+        expect(
+          order[at].pacing.waveWidth,
+          greaterThan(order[at - 1].pacing.waveWidth),
+        );
+      }
+    });
+
+    test('a hand-moved pace unsticks the strategy it belonged to', () {
+      final edited = const SmartRoutingProps(
+        enabled: true,
+      ).applyStrategy(SmartRoutingStrategy.saver).copyWith(dwellSeconds: 30);
+
+      expect(edited.matchesStrategy, isFalse);
+      expect(edited.matchesPreset, isTrue);
+      expect(edited.applyStrategy(edited.strategy).matchesStrategy, isTrue);
     });
 
     test('the wire payload carries the stored data, not the preset name', () {
@@ -63,6 +124,105 @@ void main() {
 
       expect(corrected.matchesPreset, isFalse);
       expect(corrected.rcxParams.canaryForeign, ['8.8.8.8:443']);
+    });
+
+    test('profile capabilities use the compact lane wire format', () {
+      final profile = Profile.normal().copyWith(
+        capabilityManifest: ProviderCapabilityManifest(
+          version: 1,
+          receivedAt: DateTime.utc(2026, 9, 9),
+          sourceHost: 'provider.test',
+          claims: const [
+            CapabilityClaim(
+              capabilityId: 'gemini-access',
+              selectors: [
+                CapabilitySelector(provider: 'premium', nameContains: '⭐'),
+                CapabilitySelector(provider: ' premium ', nameContains: ' ⭐ '),
+              ],
+            ),
+          ],
+        ),
+        serviceRoutePolicies: const [
+          ServiceRoutePolicy(
+            capabilityId: 'gemini-access',
+            enabled: true,
+            fallback: ServiceRouteFallback.reject,
+          ),
+        ],
+        manualCapabilitySelectors: const [
+          ManualCapabilitySelector(
+            capabilityId: 'gemini-access',
+            nameContains: 'manual',
+          ),
+        ],
+      );
+
+      final wire =
+          jsonDecode(
+                jsonEncode(
+                  const SmartRoutingProps(enabled: true).rcxParamsFor(profile),
+                ),
+              )
+              as Map<String, Object?>;
+      expect(wire['ln'], [
+        {
+          'id': 'gemini-access',
+          'g': 'RCX-CAP-GEMINI_ACCESS',
+          'fb': 'reject',
+          'sel': [
+            {'p': 'premium', 'has': '⭐'},
+            {'p': null, 'has': 'manual'},
+          ],
+        },
+      ]);
+    });
+
+    test('stale provider claims do not affect capability lanes', () {
+      final profile = Profile.normal().copyWith(
+        capabilityManifest: ProviderCapabilityManifest(
+          version: 1,
+          receivedAt: DateTime.utc(2026, 9, 9),
+          sourceHost: 'provider.test',
+          stale: true,
+          claims: const [
+            CapabilityClaim(
+              capabilityId: 'gemini-access',
+              selectors: [CapabilitySelector(provider: 'stale-provider')],
+            ),
+          ],
+        ),
+        serviceRoutePolicies: const [
+          ServiceRoutePolicy(capabilityId: 'gemini-access', enabled: true),
+        ],
+        manualCapabilitySelectors: const [
+          ManualCapabilitySelector(
+            capabilityId: 'gemini-access',
+            nameContains: 'manual',
+          ),
+        ],
+      );
+
+      expect(
+        const SmartRoutingProps().rcxParamsFor(profile).lanes.single.selectors,
+        const [RcxLaneSelector(nameContains: 'manual')],
+      );
+    });
+
+    test('an enabled lane reaches the core even without specialists', () {
+      final profile = Profile.normal().copyWith(
+        serviceRoutePolicies: const [
+          ServiceRoutePolicy(capabilityId: 'youtube-adfree', enabled: true),
+        ],
+      );
+
+      expect(
+        const SmartRoutingProps().rcxParamsFor(profile).lanes.single,
+        const RcxLaneConfig(
+          capabilityId: 'youtube-adfree',
+          group: 'RCX-CAP-YOUTUBE_ADFREE',
+          fallback: 'main',
+        ),
+      );
     });
   });
 

@@ -17,6 +17,7 @@ ReClash-SupportURL: https://support.example.com
 ReClash-ServiceName: Example VPN
 ReClash-ServiceLogo: https://cdn.example.com/logo.svg
 ReClash-ServerInfo: Proxy
+ReClash-ActiveText: Protected by Example VPN
 ReClash-BuyPlan: https://example.com/plans
 ReClash-BuyTraffic: https://example.com/traffic
 ReClash-View: type:list; sort:delay; layout:tight; icon:none; card:min
@@ -53,6 +54,7 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 | `reclash-servicename` | Plain text or Base64 | Provider name shown in the dashboard. |
 | `reclash-servicelogo` | Absolute HTTPS image URL | Provider logo shown in the dashboard and connection control. |
 | `reclash-serverinfo` | Proxy-group name, plain text or Base64 | Group used to resolve the active server shown in the dashboard. |
+| `reclash-activetext` | Plain text or Base64 | Replaces the active protection caption under the hero orb and in the Android notification. |
 | `reclash-buyplan` | Provider URL | Subscription renewal or plan purchase action. Use an absolute HTTPS URL. |
 | `reclash-buytraffic` | Provider URL | Extra-traffic purchase action. Use an absolute HTTPS URL. |
 | `reclash-view` | Proxy-page tokens | Suggests the proxy-page presentation for this profile. |
@@ -67,13 +69,13 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 
 ## Text and Base64
 
-`reclash-announce`, `reclash-servicename`, and `reclash-serverinfo` accept plain text and Base64. `profile-title` follows the same practical convention. Prefix encoded values with `base64:` or `base64,`:
+`reclash-announce`, `reclash-servicename`, `reclash-serverinfo`, and `reclash-activetext` accept plain text and Base64. `profile-title` follows the same practical convention. Prefix encoded values with `base64:` or `base64,`:
 
 ```http
 ReClash-ServiceName: base64:0J/RgNC40LzQtdGAIFZQTg==
 ```
 
-The prefix is recommended even though ReClash can recognize some unprefixed Base64 values. Invalid payloads remain plain text instead of failing the subscription update.
+The prefix is recommended even though ReClash can recognize some unprefixed Base64 values. Invalid payloads remain plain text instead of failing the subscription update. `reclash-activetext` is trimmed after decoding. If it is absent or empty, ReClash uses its localized protection caption; a later successful refresh without the header clears the previous override.
 
 ## Appearance
 
@@ -152,7 +154,7 @@ Unsupported names and widgets unavailable on the current platform are ignored. D
 
 ## Initial application settings
 
-`reclash-settings` is applied only when a URL profile is first added. Later subscription updates do not overwrite these user-owned settings.
+`reclash-settings` is offered only when a URL profile is first added. ReClash shows the requested app-wide changes and applies them only after the user confirms. Later subscription updates do not overwrite these user-owned settings.
 
 | Token | Initial value enabled |
 | --- | --- |
@@ -164,7 +166,7 @@ Unsupported names and widgets unavailable on the current platform are ignored. D
 | `openlogs` | Open logs with the connection |
 | `closeconnections` | Close existing connections when the VPN pauses |
 
-When this header is present, omitted tokens are initialized as disabled. Token matching is case-insensitive.
+Only listed tokens are enabled; unlisted app settings keep their current values. Token matching is case-insensitive.
 
 ## Domain migration and fallback hosts
 
@@ -193,7 +195,7 @@ Sending device identity is disabled by default and controlled by the user in ReC
 | `x-ver-os` | Operating-system version |
 | `x-device-model` | Device model or host name |
 
-The initial profile import does not send these identity headers. A provider can return either verdict below with the value `true`:
+The initial profile import sends identity headers only when the user enabled the setting. A provider can return either verdict below with the value `true`:
 
 | Response header | Effect |
 | --- | --- |
@@ -214,6 +216,7 @@ ReClash accepts selected Clash and FlClashX spellings for interoperability. This
 | Service name | `reclash-servicename`, `flclashx-servicename` |
 | Service logo | `reclash-servicelogo`, `flclashx-servicelogo` |
 | Server-info group | `reclash-serverinfo`, `flclashx-serverinfo` |
+| Active protection text | `reclash-activetext` |
 | Plan URL | `reclash-buyplan`, `flclashx-buyplan` |
 | Traffic URL | `reclash-buytraffic`, `flclashx-buytraffic` |
 | Proxy view | `reclash-view`, `flclashx-view` |
@@ -221,7 +224,7 @@ ReClash accepts selected Clash and FlClashX spellings for interoperability. This
 | Background | `reclash-background`, `flclashx-background` |
 | New domain | `reclash-newdomain`, `flclashx-newdomain` |
 
-There are no FlClashX aliases for the hero ring, widget list, widget merge mode, initial settings, or fallback hosts.
+There are no FlClashX aliases for the active protection text, hero ring, widget list, widget merge mode, initial settings, or fallback hosts.
 
 ## Security and privacy
 

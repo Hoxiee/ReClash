@@ -34,6 +34,8 @@ import com.reclash.common.quickIntent
 import com.reclash.common.registerReceiverCompat
 import com.reclash.getPackageIconPath
 import com.reclash.packages.PackageResolver
+import com.reclash.SUBSCRIPTION_NOTICE_CHANNEL
+import com.reclash.isChannelEnabled
 import com.reclash.showNotice
 import com.reclash.showToast
 import com.google.gson.Gson
@@ -136,8 +138,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 if (variant == null) {
                     result.error("INVALID_ARGUMENT", "Icon variant must be a string", null)
                 } else {
-                    setIconVariant(variant)
-                    result.success(true)
+                    reply(result) {
+                        setIconVariant(variant)
+                        true
+                    }
                 }
             }
 
@@ -171,6 +175,14 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
 
             "isNotificationsPermissionGranted" -> {
                 result.success(isNotificationsPermissionGranted())
+            }
+
+            "getNotificationStatus" -> {
+                result.success(notificationStatus(call.argument("serviceChannelId")))
+            }
+
+            "openNotificationSettings" -> {
+                result.success(openNotificationSettings(call.argument("channelId")))
             }
 
             "requestNotificationsPermission" -> {
@@ -227,6 +239,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             "showNotice" -> reply(result) {
                 GlobalState.application.showNotice(
                     channelName = call.argument<String>("channelName").orEmpty(),
+                    notificationKey = call.argument<String>("notificationKey").orEmpty(),
                     title = call.argument<String>("title").orEmpty(),
                     message = call.argument<String>("message").orEmpty(),
                     actionLabel = call.argument<String>("actionLabel"),
@@ -265,60 +278,85 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         }
     }
 
-    private val iconVariantAliases = mapOf(
-        "default" to ".icons.DefaultAlias",
-        "pulse" to ".icons.MonoAlias",
-        "glacier" to ".icons.SepiaAlias",
-        "obsidian" to ".icons.InvertedAlias",
-        "velvet" to ".icons.DarkMonoAlias",
-        "solar" to ".icons.CoolAlias",
-        "circuit" to ".icons.CircuitAlias",
-        "prism" to ".icons.PrismAlias",
-        "mono" to ".icons.MonoAlias",
-        "sepia" to ".icons.SepiaAlias",
-        "inverted" to ".icons.InvertedAlias",
-        "dark_mono" to ".icons.DarkMonoAlias",
-        "cool" to ".icons.CoolAlias",
-    )
-
     private fun setIconVariant(variant: String) {
         val manager = GlobalState.application.packageManager
-        val target = iconVariantAliases[variant]?.let(::aliasComponent) ?: return
+        val targetSuffix = LauncherIconAliases.targetFor(variant) ?: return
+        val components = aliasComponents()
+        val target = components[targetSuffix] ?: return
+        val stale = LauncherIconAliases.aliasesToDisable(variant)
+            .mapNotNull(components::get)
+            .filter { isAliasEnabled(manager, it) }
+        val enableTarget = !isAliasEnabled(manager, target)
+        if (!enableTarget && stale.isEmpty()) {
+            return
+        }
+        // A single batched change reaches the launcher as one package update,
+        // so it never has a moment with two enabled entries to draw.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            manager.setComponentEnabledSettings(
+                buildList {
+                    if (enableTarget) {
+                        add(
+                            PackageManager.ComponentEnabledSetting(
+                                target,
+                                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                                PackageManager.DONT_KILL_APP,
+                            ),
+                        )
+                    }
+                    for (component in stale) {
+                        add(
+                            PackageManager.ComponentEnabledSetting(
+                                component,
+                                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                                PackageManager.DONT_KILL_APP,
+                            ),
+                        )
+                    }
+                },
+            )
+            return
+        }
         // Enabling first keeps a launcher entry alive throughout the swap.
-        manager.setComponentEnabledSetting(
-            target,
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP,
-        )
-        for (suffix in iconVariantAliases.values.toSet()) {
-            val component = aliasComponent(suffix) ?: continue
-            if (component == target) continue
-            if (manager.getComponentEnabledSetting(component) !=
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-            ) {
-                manager.setComponentEnabledSetting(
-                    component,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP,
-                )
-            }
+        if (enableTarget) {
+            manager.setComponentEnabledSetting(
+                target,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP,
+            )
+        }
+        for (component in stale) {
+            manager.setComponentEnabledSetting(
+                component,
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                PackageManager.DONT_KILL_APP,
+            )
         }
     }
 
+    // Only the manifest default alias ships enabled, so an untouched component
+    // reports DEFAULT rather than ENABLED.
+    private fun isAliasEnabled(manager: PackageManager, component: ComponentName): Boolean =
+        when (manager.getComponentEnabledSetting(component)) {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
+            PackageManager.COMPONENT_ENABLED_STATE_DEFAULT ->
+                component.className.endsWith(LauncherIconAliases.defaultAlias)
+
+            else -> false
+        }
+
     // The aliases are declared under the manifest package, which the debug
     // applicationId suffix does not carry, so they resolve by suffix match.
-    private fun aliasComponent(suffix: String): ComponentName? {
+    private fun aliasComponents(): Map<String, ComponentName> {
         val packageName = GlobalState.application.packageName
-        val manager = GlobalState.application.packageManager
-        val info = manager.getPackageInfo(
+        val activities = GlobalState.application.packageManager.getPackageInfo(
             packageName,
             PackageManager.GET_ACTIVITIES or PackageManager.GET_DISABLED_COMPONENTS,
-        )
-        val className = info.activities
-            ?.firstOrNull { it.name.endsWith(suffix) }
-            ?.name
-            ?: return null
-        return ComponentName(packageName, className)
+        ).activities ?: return emptyMap()
+        return LauncherIconAliases.allAliases.mapNotNull { suffix ->
+            activities.firstOrNull { it.name.endsWith(suffix) }
+                ?.let { suffix to ComponentName(packageName, it.name) }
+        }.toMap()
     }
 
     private fun initShortcuts(label: String) {
@@ -327,7 +365,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             setIcon(
                 IconCompat.createWithResource(
                     GlobalState.application,
-                    R.mipmap.ic_launcher_round,
+                    R.mipmap.ic_launcher,
                 ),
             )
             setIntent(QuickAction.TOGGLE.quickIntent)
@@ -434,6 +472,40 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
             }
         }
         task?.setExcludeFromRecents(value ?: false)
+    }
+
+    private fun notificationStatus(serviceChannelId: String?): Map<String, Boolean> {
+        val context = GlobalState.application
+        val channelId = serviceChannelId?.takeIf(String::isNotBlank)
+            ?: GlobalState.NOTIFICATION_CHANNEL
+        return mapOf(
+            "permissionGranted" to isNotificationsPermissionGranted(),
+            "serviceChannelEnabled" to context.isChannelEnabled(channelId),
+            "subscriptionChannelEnabled" to context.isChannelEnabled(SUBSCRIPTION_NOTICE_CHANNEL),
+        )
+    }
+
+    private fun openNotificationSettings(channelId: String?): Boolean {
+        val activity = activity ?: return false
+        return try {
+            val intent = if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !channelId.isNullOrBlank()
+            ) {
+                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, GlobalState.application.packageName)
+                    putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
+                }
+            } else {
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, GlobalState.application.packageName)
+                }
+            }
+            activity.startActivity(intent)
+            true
+        } catch (_: Exception) {
+            openAppSettings()
+        }
     }
 
     private fun isNotificationsPermissionGranted(): Boolean {

@@ -5,8 +5,10 @@ import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/connection_doctor.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
@@ -37,6 +39,9 @@ void main() {
     when(
       () => coreInterface.closeConnections(),
     ).thenAnswer((_) => log('close'));
+    when(() => coreInterface.doctorSnapshot()).thenAnswer(
+      (_) async => const DoctorSnapshot(revision: 1, supported: true),
+    );
     when(() => coreInterface.setUiActive(any())).thenAnswer((invocation) {
       final active = invocation.positionalArguments.single as bool;
       calls.add('ui:$active');
@@ -93,6 +98,27 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(calls, ['ui:true', 'ui:false', 'ui:false']);
+  });
+
+  testWidgets('refreshes the doctor after every reconnect', (tester) async {
+    var revision = 1;
+    when(() => coreInterface.doctorSnapshot()).thenAnswer(
+      (_) async => DoctorSnapshot(revision: revision++, supported: true),
+    );
+    final container = await pumpManager(tester);
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    await tester.pump();
+    await tester.pump();
+    expect(container.read(connectionDoctorProvider).revision, 1);
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    await tester.pump();
+    await tester.pump();
+
+    verify(() => coreInterface.doctorSnapshot()).called(2);
+    expect(container.read(connectionDoctorProvider).revision, 2);
   });
 
   testWidgets('late old-Core reply does not suppress reconnect sync', (

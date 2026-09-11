@@ -5,28 +5,6 @@
     android:viewportWidth="768"
     android:viewportHeight="768">
     <group
-        android:translateX="465"
-        android:translateY="279"
-        android:rotation="-20"
-        android:scaleX="0.48"
-        android:scaleY="0.48">
-        <path
-            android:pathData="M-88,-60 L-88,60"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="48"
-            android:strokeLineCap="round" />
-        <path
-            android:pathData="M0,-120 L0,120"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="48"
-            android:strokeLineCap="round" />
-        <path
-            android:pathData="M88,-40 L88,40"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="48"
-            android:strokeLineCap="round" />
-    </group>
-    <group
         android:translateX="344"
         android:translateY="404"
         android:rotation="-20"

@@ -213,46 +213,7 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".icons.MonoAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_pulse"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
-            android:name=".icons.SepiaAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_glacier"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
-            android:name=".icons.InvertedAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_obsidian"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
-            android:name=".icons.DarkMonoAlias"
+            android:name=".icons.VelvetAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_velvet"
@@ -265,7 +226,7 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".icons.CoolAlias"
+            android:name=".icons.SolarAlias"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_solar"
@@ -304,10 +265,88 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".icons.ShiftAlias"
+            android:name=".icons.InkAlias"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_shift"
+            android:icon="@mipmap/ic_launcher_ink"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.BlueprintAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_blueprint"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.MeshAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_mesh"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.FacetAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_facet"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.StrataAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_strata"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.ShatterAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_shatter"
+            android:label="@string/app_name"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".icons.TraceAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_trace"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -320,29 +359,8 @@
         <activity
             android:name=".QuickActionActivity"
             android:excludeFromRecents="true"
-            android:exported="true"
-            android:theme="@style/TransparentTheme">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="${applicationId}.action.START" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="${applicationId}.action.STOP" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="${applicationId}.action.TOGGLE" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="${applicationId}.action.PAUSE" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
-                <action android:name="${applicationId}.action.RESUME" />
-            </intent-filter>
-        </activity>
+            android:exported="false"
+            android:theme="@style/TransparentTheme" />
 
         <receiver
             android:name=".HomeWidgetProvider"
@@ -356,10 +374,52 @@
                 android:resource="@xml/home_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".widgets.ControlWidgetProvider"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_control_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.NodesWidgetProvider"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_nodes_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.TrafficWidgetProvider"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_traffic_info" />
+        </receiver>
+        <receiver
+            android:name=".widgets.WidgetActionReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".widgets.NodesWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <service
             android:name=".TileService"
             android:exported="true"
-            android:icon="@drawable/ic_quick_settings"
+            android:icon="@drawable/ic_service"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -405,6 +465,9 @@
 
         <meta-data
             android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
         <meta-data
             android:name="flutterEmbedding"

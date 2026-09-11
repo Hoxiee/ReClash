@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/link.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -50,6 +51,24 @@ void main() {
     ]);
   });
 
+  test('deep-link logs omit credentials and payload', () async {
+    final output = <String>[];
+    final previousDebugPrint = debugPrint;
+    debugPrint = (message, {wrapWidth}) {
+      if (message != null) output.add(message);
+    };
+    try {
+      await listen();
+      await emit('vless://private-id@example.com:443?token=secret#Node');
+    } finally {
+      debugPrint = previousDebugPrint;
+    }
+
+    expect(output.join('\n'), contains('vless://example.com'));
+    expect(output.join('\n'), isNot(contains('private-id')));
+    expect(output.join('\n'), isNot(contains('secret')));
+  });
+
   test('an unclaimed scheme is ignored', () async {
     await listen();
 
@@ -57,10 +76,7 @@ void main() {
     await emit('https://example.com/a.yaml');
     await emit('reclash://toggle');
 
-    expect(
-      payloads(),
-      everyElement(isNot(startsWith('socks://'))),
-    );
+    expect(payloads(), everyElement(isNot(startsWith('socks://'))));
   });
 
   test('listening again replaces the previous subscription', () async {
@@ -88,11 +104,15 @@ void main() {
 
       await listen();
 
-      expect(payloads(), ['reclash://install-config?url=https://example.com/a.yaml']);
+      expect(payloads(), [
+        'reclash://install-config?url=https://example.com/a.yaml',
+      ]);
 
       await listen();
 
-      expect(payloads(), ['reclash://install-config?url=https://example.com/a.yaml']);
+      expect(payloads(), [
+        'reclash://install-config?url=https://example.com/a.yaml',
+      ]);
     },
   );
 
@@ -139,11 +159,19 @@ void main() {
       }
     });
 
+    test('only state-changing automation requires confirmation', () {
+      expect(ReClashCommand.connect.requiresConfirmation, isTrue);
+      expect(ReClashCommand.disconnect.requiresConfirmation, isTrue);
+      expect(ReClashCommand.toggle.requiresConfirmation, isTrue);
+      expect(ReClashCommand.close.requiresConfirmation, isTrue);
+      expect(ReClashCommand.open.requiresConfirmation, isFalse);
+      expect(ReClashCommand.importProfile.requiresConfirmation, isFalse);
+      expect(ReClashCommand.addProfile.requiresConfirmation, isFalse);
+    });
+
     test('carries the path argument for import and add', () {
       final config = base64Encode('proxies: []'.codeUnits);
-      final import = parseReClashCommand(
-        Uri.parse('reclash://import/$config'),
-      );
+      final import = parseReClashCommand(Uri.parse('reclash://import/$config'));
       expect(import?.command, ReClashCommand.importProfile);
       expect(import?.payload, config);
 
@@ -194,10 +222,7 @@ void main() {
     });
 
     test('an install-config link without a url is ignored', () {
-      expect(
-        parseIncomingLink(Uri.parse('reclash://install-config')),
-        isNull,
-      );
+      expect(parseIncomingLink(Uri.parse('reclash://install-config')), isNull);
     });
 
     test('a link for another host is ignored', () {

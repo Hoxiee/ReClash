@@ -124,8 +124,22 @@ const _latencyLadder = [
   RoutingRung.tiebreak,
 ];
 
-List<RoutingRung> routingLadder(String strategy) =>
-    strategy == 'lowest-latency' ? _latencyLadder : _balancedLadder;
+const _stableLadder = [
+  RoutingRung.admission,
+  RoutingRung.verdict,
+  RoutingRung.misfit,
+  RoutingRung.evidence,
+  RoutingRung.unproven,
+  RoutingRung.incumbent,
+  RoutingRung.band,
+  RoutingRung.tiebreak,
+];
+
+List<RoutingRung> routingLadder(String strategy) => switch (strategy) {
+  'lowest-latency' => _latencyLadder,
+  'stable' || 'saver' => _stableLadder,
+  _ => _balancedLadder,
+};
 
 /// Ranking, never filtering: only a whitelist network wants the specialist.
 int _routingMisfit(String terrain, bool breaker) =>

@@ -4,10 +4,16 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/state.dart';
+
+const subscriptionConnectTimeout = Duration(seconds: 12);
+const subscriptionReceiveTimeout = Duration(seconds: 30);
+const subscriptionRedirectLimit = 5;
+const maxSubscriptionResponseBytes = 16 * 1024 * 1024;
 
 class Request {
   late final Dio dio;
@@ -16,13 +22,29 @@ class Request {
 
   ProviderReader? _read;
 
+  @visibleForTesting
+  ({Duration? connect, Duration? receive}) get subscriptionTimeouts => (
+    connect: _clashDio.options.connectTimeout,
+    receive: _clashDio.options.receiveTimeout,
+  );
+
+  @visibleForTesting
+  set subscriptionAdapter(HttpClientAdapter adapter) {
+    _clashDio.httpClientAdapter = adapter;
+  }
+
   void attach(ProviderReader read) {
     _read = read;
   }
 
   Request() {
     dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
-    _clashDio = Dio();
+    _clashDio = Dio(
+      BaseOptions(
+        connectTimeout: subscriptionConnectTimeout,
+        receiveTimeout: subscriptionReceiveTimeout,
+      ),
+    );
     _clashDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
@@ -68,11 +90,71 @@ class Request {
     String url, {
     Map<String, String>? headers,
   }) async {
+    final initialUri = Uri.parse(url);
+    var currentUri = initialUri;
+    var currentHeaders = Map<String, String>.from(headers ?? const {});
+    final redirects = <RedirectRecord>[];
     try {
-      return await _clashDio.get<Uint8List>(
-        url,
-        options: Options(responseType: ResponseType.bytes, headers: headers),
-      );
+      for (var redirectCount = 0; ; redirectCount++) {
+        final requestToken = CancelToken();
+        final response = await _clashDio.get<ResponseBody>(
+          currentUri.toString(),
+          cancelToken: requestToken,
+          options: Options(
+            responseType: ResponseType.stream,
+            headers: currentHeaders,
+            followRedirects: false,
+            validateStatus: (status) =>
+                status != null &&
+                ((status >= 200 && status < 300) || _isRedirectStatus(status)),
+          ),
+        );
+        final body = response.data;
+        if (body == null) {
+          return Response<Uint8List>(
+            requestOptions: response.requestOptions,
+            statusCode: response.statusCode,
+            statusMessage: response.statusMessage,
+            isRedirect: response.isRedirect,
+            redirects: redirects,
+            extra: response.extra,
+            headers: response.headers,
+          );
+        }
+        final location = response.headers.value(HttpHeaders.locationHeader);
+        if (_isRedirectStatus(response.statusCode)) {
+          requestToken.cancel();
+        } else {
+          final data = await _readSubscriptionBody(body, requestToken);
+          return Response<Uint8List>(
+            data: data,
+            requestOptions: response.requestOptions,
+            statusCode: response.statusCode,
+            statusMessage: response.statusMessage,
+            isRedirect: redirects.isNotEmpty,
+            redirects: redirects,
+            extra: response.extra,
+            headers: response.headers,
+          );
+        }
+        if (location == null) {
+          throw const MessageException('subscription redirect has no location');
+        }
+        if (redirectCount >= subscriptionRedirectLimit) {
+          throw const MessageException('too many subscription redirects');
+        }
+        final nextUri = currentUri.resolve(location);
+        if (!isAllowedSubscriptionRedirect(currentUri, nextUri)) {
+          throw const MessageException('unsafe subscription redirect');
+        }
+        redirects.add(RedirectRecord(response.statusCode!, 'GET', nextUri));
+        currentHeaders = subscriptionRedirectHeaders(
+          currentHeaders,
+          from: currentUri,
+          to: nextUri,
+        );
+        currentUri = nextUri;
+      }
     } catch (e) {
       commonPrint.log(
         'getFileResponseForUrl error ${compactError(e)}',
@@ -159,7 +241,6 @@ class Request {
     'https://api.myip.com': IpInfo.fromMyIpJson,
     'https://ipapi.co/json': IpInfo.fromIpApiCoJson,
     'https://ident.me/json': IpInfo.fromIdentMeJson,
-    'http://ip-api.com/json': IpInfo.fromIpAPIJson,
     'https://api.ip.sb/geoip': IpInfo.fromIpSbJson,
     'https://ipinfo.io/json': IpInfo.fromIpInfoIoJson,
   };
@@ -212,6 +293,53 @@ class Request {
 }
 
 final request = Request();
+
+bool _isRedirectStatus(int? status) =>
+    status == HttpStatus.movedPermanently ||
+    status == HttpStatus.found ||
+    status == HttpStatus.seeOther ||
+    status == HttpStatus.temporaryRedirect ||
+    status == HttpStatus.permanentRedirect;
+
+Future<Uint8List> _readSubscriptionBody(
+  ResponseBody body,
+  CancelToken cancelToken,
+) async {
+  final declaredLength = _contentLength(body.headers);
+  if (declaredLength != null && declaredLength > maxSubscriptionResponseBytes) {
+    cancelToken.cancel();
+    throw const MessageException('subscription response is too large');
+  }
+  final builder = BytesBuilder(copy: false);
+  var received = 0;
+  final iterator = StreamIterator(body.stream);
+  try {
+    while (await iterator.moveNext()) {
+      final chunk = iterator.current;
+      received += chunk.length;
+      if (received > maxSubscriptionResponseBytes) {
+        throw const MessageException('subscription response is too large');
+      }
+      builder.add(chunk);
+    }
+  } finally {
+    await iterator.cancel();
+  }
+  return builder.takeBytes();
+}
+
+int? _contentLength(Map<String, List<String>> headers) {
+  final values = headers.entries
+      .where(
+        (entry) => entry.key.toLowerCase() == HttpHeaders.contentLengthHeader,
+      )
+      .expand((entry) => entry.value);
+  for (final value in values) {
+    final parsed = int.tryParse(value.trim());
+    if (parsed != null && parsed >= 0) return parsed;
+  }
+  return null;
+}
 
 String? getFileNameForDisposition(String? disposition) {
   if (disposition == null) return null;

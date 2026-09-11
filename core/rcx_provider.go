@@ -203,7 +203,11 @@ func (e *rcxEngine) noteProviderNodeFailure(node string, now time.Time) {
 }
 
 func (e *rcxEngine) providerCircuitOpen(provider, node string, now time.Time) bool {
-	if e.snapshot == nil || provider == "" || node == e.incumbent {
+	return e.providerCircuitOpenFor(provider, node, e.incumbent, now)
+}
+
+func (e *rcxEngine) providerCircuitOpenFor(provider, node, incumbent string, now time.Time) bool {
+	if e.snapshot == nil || provider == "" || node == incumbent {
 		return false
 	}
 	circuit, ok := e.snapshot.Circuits[rcxCircuitKey(e.envKey, provider)]

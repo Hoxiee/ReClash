@@ -29,6 +29,8 @@ void main() {
         supportUrl: 'https://support.example.com',
         updateIntervalMinutes: 30,
       ),
+      serviceRoutePolicies: const [],
+      manualCapabilitySelectors: const [],
       autoUpdate: true,
       selectedMap: const {'Select': 'DIRECT'},
       unfoldSet: const {'Select'},
@@ -36,10 +38,13 @@ void main() {
       clientEmulation: SubscriptionClient.happ,
       customUserAgent: 'Custom/1.0',
       skippedNodes: <SkippedNode>[],
+      undialableNodes: true,
+      userLabel: true,
+      lastWorkingClient: SubscriptionClient.clash,
     );
 
-    expect(profile.toColumns(true), hasLength(18));
-    expect(profile.toCompanion(true).toColumns(true), hasLength(18));
+    expect(profile.toColumns(true), hasLength(23));
+    expect(profile.toCompanion(true).toColumns(true), hasLength(23));
     expect(RawProfile.fromJson(profile.toJson()).toJson(), profile.toJson());
     expect(profile.copyWith(label: 'Next').label, 'Next');
     expect(
@@ -67,13 +72,17 @@ void main() {
       autoUpdate: false,
       selectedMap: {},
       unfoldSet: {},
+      serviceRoutePolicies: <ServiceRoutePolicy>[],
+      manualCapabilitySelectors: <ManualCapabilitySelector>[],
       clientEmulation: SubscriptionClient.auto,
       customUserAgent: '',
       skippedNodes: <SkippedNode>[],
+      undialableNodes: false,
+      userLabel: false,
     );
-    expect(emptyProfile.toColumns(true), hasLength(11));
-    expect(emptyProfile.toColumns(false), hasLength(18));
-    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(11));
+    expect(emptyProfile.toColumns(true), hasLength(15));
+    expect(emptyProfile.toColumns(false), hasLength(25));
+    expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(15));
 
     final insertedProfile = ProfilesCompanion.insert(
       label: 'Inserted',
@@ -99,12 +108,16 @@ void main() {
         autoUpdateDurationMillis: const Variable(60),
         subscriptionInfo: const Variable('{}'),
         panelMeta: const Variable('{}'),
+        capabilityManifest: const Variable('{}'),
+        serviceRoutePolicies: const Variable('[]'),
+        manualCapabilitySelectors: const Variable('[]'),
+        capabilityManifestIssue: const Variable('invalidHeader'),
         autoUpdate: const Variable(true),
         selectedMap: const Variable('{}'),
         unfoldSet: const Variable('[]'),
         order: const Variable(1),
       ).toColumns(false),
-      hasLength(15),
+      hasLength(19),
     );
 
     final script = RawScript(id: 2, label: 'Script', lastUpdateTime: date);

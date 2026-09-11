@@ -72,6 +72,7 @@ final class _OptionsAction<T> extends _ListItemAction {
   final String title;
   final T value;
   final String Function(T value) textBuilder;
+  final String Function(T value)? subtitleBuilder;
   final ValueChanged<T?> onChanged;
 
   const _OptionsAction({
@@ -80,6 +81,7 @@ final class _OptionsAction<T> extends _ListItemAction {
     required this.textBuilder,
     required this.value,
     required this.onChanged,
+    this.subtitleBuilder,
   });
 }
 
@@ -206,6 +208,7 @@ class ListItem<T> extends StatelessWidget {
     required T value,
     required String Function(T value) textBuilder,
     required ValueChanged<T?> onChanged,
+    String Function(T value)? subtitleBuilder,
     this.horizontalTitleGap,
     this.dense,
     this.titleTextStyle,
@@ -220,6 +223,7 @@ class ListItem<T> extends StatelessWidget {
          options: options,
          value: value,
          textBuilder: textBuilder,
+         subtitleBuilder: subtitleBuilder,
          onChanged: onChanged,
        ),
        onTap = null;
@@ -412,6 +416,7 @@ class ListItem<T> extends StatelessWidget {
                 title: optionsDelegate.title,
                 options: optionsDelegate.options,
                 textBuilder: optionsDelegate.textBuilder,
+                subtitleBuilder: optionsDelegate.subtitleBuilder,
                 value: optionsDelegate.value,
               ),
             );

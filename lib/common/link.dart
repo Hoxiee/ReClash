@@ -31,8 +31,15 @@ enum ReClashCommand {
   /// The `reclash://<host>` segment the command is written as.
   final String host;
 
+  bool get requiresConfirmation => switch (this) {
+    connect || disconnect || toggle || close => true,
+    open || importProfile || addProfile => false,
+  };
+
   static ReClashCommand? tryParse(String value) {
-    return ReClashCommand.values.where((item) => item.host == value).firstOrNull;
+    return ReClashCommand.values
+        .where((item) => item.host == value)
+        .firstOrNull;
   }
 }
 
@@ -139,7 +146,7 @@ class LinkManager {
   }
 
   void _handle(Uri uri, IncomingLinkCallback onLink) {
-    commonPrint.log('onAppLink: $uri');
+    commonPrint.log('onAppLink: ${uri.scheme}://${uri.host}');
     if (!allProtocolSchemes.contains(uri.scheme)) {
       return;
     }

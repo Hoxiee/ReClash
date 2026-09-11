@@ -19,7 +19,7 @@ class AppearanceView extends StatelessWidget {
         length: 3,
         child: Column(
           children: [
-            _AppearanceTabs(
+            SettingsTabs(
               labels: [
                 appLocalizations.appearanceTheme,
                 appLocalizations.appearanceLayout,
@@ -52,16 +52,16 @@ class _MoveTabIntent extends Intent {
 /// no focus handling of its own, so arrow keys and the focus ring live here.
 const _focusDuration = Duration(milliseconds: 150);
 
-class _AppearanceTabs extends StatefulWidget {
-  const _AppearanceTabs({required this.labels});
+class SettingsTabs extends StatefulWidget {
+  const SettingsTabs({super.key, required this.labels});
 
   final List<String> labels;
 
   @override
-  State<_AppearanceTabs> createState() => _AppearanceTabsState();
+  State<SettingsTabs> createState() => _SettingsTabsState();
 }
 
-class _AppearanceTabsState extends State<_AppearanceTabs> {
+class _SettingsTabsState extends State<SettingsTabs> {
   TabController? _controller;
   int _index = 0;
   bool _focused = false;

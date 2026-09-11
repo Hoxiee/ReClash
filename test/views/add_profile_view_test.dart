@@ -38,15 +38,11 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: TestApp(
-            child: Scaffold(
-              body: Builder(
-                builder: (context) => AddProfileView(context: context),
-              ),
-            ),
+            child: Scaffold(body: AddProfileView(key: UniqueKey())),
           ),
         ),
       );
-      await tester.pump();
+      await tester.pumpAndSettle();
     }
 
     system.isTVForTesting = false;
@@ -116,9 +112,7 @@ void main() {
         container: container,
         child: TestApp(
           child: Scaffold(
-            body: Builder(
-              builder: (context) => AddProfileView(context: context),
-            ),
+            body: Builder(builder: (context) => const AddProfileView()),
           ),
         ),
       ),
@@ -129,7 +123,50 @@ void main() {
     expect(find.text(l10n.qrcode), findsOne);
     expect(find.text(l10n.file), findsOne);
     expect(find.text(l10n.url), findsOne);
+    expect(find.text(l10n.setupRawConfig), findsOne);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('raw configuration dialog validates and returns content', (
+    tester,
+  ) async {
+    final container = _containerFor(tester);
+    String? popped;
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () async {
+                  popped = await showDialog<String>(
+                    context: context,
+                    builder: (_) => const RawProfileDialog(),
+                  );
+                },
+                child: const Text('open raw'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open raw'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(currentAppLocalizations.submit));
+    await tester.pump();
+    expect(find.text(currentAppLocalizations.contentNotEmpty), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'proxies: []');
+    await tester.tap(find.text(currentAppLocalizations.submit));
+    await tester.pumpAndSettle();
+
+    expect(popped, 'proxies: []');
+    expect(find.byType(RawProfileDialog), findsNothing);
   });
 
   testWidgets('URL import dialog rejects an empty value and keeps the sheet', (

@@ -8,7 +8,6 @@ import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// No health: `broken` is a verdict on a tunnel that is still `on`.
 enum HeroOrbPhase {
   offline,
   off,
@@ -17,6 +16,7 @@ enum HeroOrbPhase {
   reconnecting,
   on,
   paused,
+  failed,
 }
 
 /// `unknown` is not a middle ground: it withholds the verdict, so a missing or
@@ -29,6 +29,7 @@ enum HeroStatus {
   offline,
   off,
   checking,
+  diagnosing,
   connecting,
   reconnecting,
   secured,
@@ -46,18 +47,21 @@ extension HeroStatusExt on HeroStatus {
   bool get isAlert =>
       this == HeroStatus.paused ||
       this == HeroStatus.degraded ||
-      this == HeroStatus.broken ||
-      this == HeroStatus.offline;
+      this == HeroStatus.broken;
 
   bool get isSweeping =>
       this == HeroStatus.checking ||
+      this == HeroStatus.diagnosing ||
       this == HeroStatus.connecting ||
       this == HeroStatus.reconnecting;
 
   bool get isTransitioning =>
       this == HeroStatus.connecting || this == HeroStatus.reconnecting;
 
-  bool get flows => this == HeroStatus.secured || this == HeroStatus.degraded;
+  bool get flows =>
+      this == HeroStatus.diagnosing ||
+      this == HeroStatus.secured ||
+      this == HeroStatus.degraded;
 }
 
 /// Only the breathe period reads this: `repeat` captures its period.
@@ -82,13 +86,13 @@ HeroOrbTransition heroOrbTransitionOf(HeroStatus from, HeroStatus to) {
   if (from == to) return HeroOrbTransition.steady;
   if (to == HeroStatus.offline) return HeroOrbTransition.networkLoss;
   if (to == HeroStatus.off) return HeroOrbTransition.shutdown;
-  if (from == HeroStatus.offline) return HeroOrbTransition.networkReturn;
-  if (to == HeroStatus.paused) return HeroOrbTransition.pause;
-  if (from == HeroStatus.paused) return HeroOrbTransition.resume;
   if (to == HeroStatus.broken) return HeroOrbTransition.fault;
+  if (from == HeroStatus.offline) return HeroOrbTransition.networkReturn;
   if (from == HeroStatus.broken || to == HeroStatus.reconnecting) {
     return HeroOrbTransition.recovery;
   }
+  if (to == HeroStatus.paused) return HeroOrbTransition.pause;
+  if (from == HeroStatus.paused) return HeroOrbTransition.resume;
   if (to == HeroStatus.connecting) return HeroOrbTransition.ignition;
   if (from.isSweeping && to.flows) return HeroOrbTransition.lockOn;
   if (from.flows && to.flows) return HeroOrbTransition.healthShift;
@@ -109,21 +113,38 @@ const heroDegradedDelay = 600;
 HeroHealth heroHealthOf({required int? delay, required bool measuring}) {
   if (measuring) return HeroHealth.checking;
   if (delay == null || delay == 0) return HeroHealth.unknown;
-  if (delay < 0) return HeroHealth.broken;
+  if (delay < 0) return HeroHealth.unknown;
   if (delay >= heroDegradedDelay) return HeroHealth.degraded;
   return HeroHealth.healthy;
+}
+
+HeroHealth heroDoctorHealthOf(DoctorSnapshot snapshot) {
+  if (!snapshot.supported || !snapshot.isFresh) return HeroHealth.unknown;
+  if (snapshot.state == DoctorExamState.examining) return HeroHealth.checking;
+  return switch (snapshot.health) {
+    DoctorHealth.healthy => HeroHealth.healthy,
+    DoctorHealth.degraded => HeroHealth.degraded,
+    DoctorHealth.broken => HeroHealth.broken,
+    DoctorHealth.unknown => HeroHealth.unknown,
+  };
 }
 
 final heroLifecycleProvider = Provider<HeroOrbPhase>((ref) {
   final reachable = ref.watch(networkReachableProvider) ?? true;
   if (!reachable) return HeroOrbPhase.offline;
-  final phase = heroLifecycleOf(
-    isStart: ref.watch(isStartProvider),
-    paused: ref.watch(pausedProvider),
-    coreConnecting:
-        ref.watch(coreStatusProvider) == CoreStatus.connecting &&
-        ref.watch(initProvider),
-  );
+  final coreStatus = ref.watch(coreStatusProvider);
+  final request = ref.watch(runRequestStateProvider);
+  final phase = coreStatus == CoreStatus.disconnected
+      ? HeroOrbPhase.failed
+      : request.isStarting
+      ? HeroOrbPhase.connecting
+      : heroLifecycleOf(
+          isStart: ref.watch(isStartProvider),
+          paused: ref.watch(pausedProvider),
+          coreConnecting:
+              coreStatus == CoreStatus.connecting && ref.watch(initProvider),
+          coreDisconnected: coreStatus == CoreStatus.disconnected,
+        );
   final probing = ref.watch(
     pendingDelayTestsProvider.select((state) => state.isNotEmpty),
   );
@@ -135,10 +156,13 @@ HeroOrbPhase heroLifecycleOf({
   required bool isStart,
   required bool paused,
   required bool coreConnecting,
+  bool coreDisconnected = false,
 }) {
   if (!isStart) return HeroOrbPhase.off;
+  if (coreDisconnected) return HeroOrbPhase.failed;
   if (paused) return HeroOrbPhase.paused;
-  return coreConnecting ? HeroOrbPhase.reconnecting : HeroOrbPhase.on;
+  if (coreConnecting) return HeroOrbPhase.reconnecting;
+  return HeroOrbPhase.on;
 }
 
 HeroOrbPhase heroPhaseWithProbe(HeroOrbPhase phase, bool probing) =>
@@ -163,8 +187,9 @@ HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
       HeroOrbPhase.connecting => HeroStatus.connecting,
       HeroOrbPhase.reconnecting => HeroStatus.reconnecting,
       HeroOrbPhase.paused => HeroStatus.paused,
+      HeroOrbPhase.failed => HeroStatus.broken,
       HeroOrbPhase.on => switch (health) {
-        HeroHealth.checking => HeroStatus.checking,
+        HeroHealth.checking => HeroStatus.diagnosing,
         HeroHealth.broken => HeroStatus.broken,
         HeroHealth.degraded => HeroStatus.degraded,
         HeroHealth.healthy || HeroHealth.unknown => HeroStatus.secured,
@@ -212,9 +237,9 @@ const List<Color> _brokenRing = [
 ];
 
 const List<Color> _reconnectingRing = [
+  Color(0xFF9BF6FF),
   Color(0xFF10EDF8),
   Color(0xFFFFC93C),
-  Color(0xFFF03E3E),
 ];
 
 const List<Color> _checkingRing = [
@@ -268,7 +293,9 @@ class HeroPalette {
 }
 
 HeroPalette byedpiHeroPaletteOf(BuildContext context, HeroStatus status) {
-  if (status != HeroStatus.connecting && status != HeroStatus.secured) {
+  if (status != HeroStatus.connecting &&
+      status != HeroStatus.diagnosing &&
+      status != HeroStatus.secured) {
     return heroPaletteOf(context, status);
   }
   final colorScheme = context.colorScheme;
@@ -330,6 +357,7 @@ HeroPalette heroPaletteOf(
       );
     case HeroStatus.connecting:
     case HeroStatus.secured:
+    case HeroStatus.diagnosing:
       final ring = heroRing ?? tuned(heroRingColors);
       return HeroPalette(
         ring: ring,

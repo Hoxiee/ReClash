@@ -7,14 +7,17 @@ const androidResRoot = 'android/app/src/main/res';
 
 const launcherVariants = <String>[
   'default',
-  'pulse',
-  'glacier',
-  'obsidian',
   'velvet',
   'solar',
   'circuit',
   'echo',
-  'shift',
+  'ink',
+  'blueprint',
+  'mesh',
+  'facet',
+  'strata',
+  'shatter',
+  'trace',
 ];
 
 const launcherDensities = <String, double>{
@@ -94,9 +97,10 @@ class IconPixels {
     for (var y = 0; y < height; y++) {
       for (var x = 0; x < width; x++) {
         if (alphaAt(x, y) == 0) continue;
-        radius = math.max(radius, math.sqrt(
-          math.pow(x - centerX, 2) + math.pow(y - centerY, 2),
-        ));
+        radius = math.max(
+          radius,
+          math.sqrt(math.pow(x - centerX, 2) + math.pow(y - centerY, 2)),
+        );
       }
     }
     return radius / width;
@@ -149,9 +153,7 @@ class AndroidVectorIcon {
         final path = match.group(0)!;
         final strokeWidth = _androidNumber(path, 'strokeWidth') ?? 0;
         final data = androidAttribute(path, 'path', 'pathData');
-        for (final point in RegExp(
-          r'(-?[\d.]+),(-?[\d.]+)',
-        ).allMatches(data)) {
+        for (final point in RegExp(r'(-?[\d.]+),(-?[\d.]+)').allMatches(data)) {
           final x = (double.parse(point.group(1)!) - pivotX) * scale;
           final y = (double.parse(point.group(2)!) - pivotY) * scale;
           final dx =

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/singbox_config.dart';
+import 'package:reclash/common/skipped_node.dart';
 
 String _json(Object? o) => jsonEncode(o);
 
@@ -237,6 +238,33 @@ void main() {
       expect(config, contains('plugin-opts: {mode: "websocket", path: "/s"}'));
     });
 
+    test('unsupported ss plugin is skipped instead of degraded', () {
+      final result = tryConvertSingboxConfig(
+        _json({
+          'outbounds': [
+            outbound(
+              'shadowsocks',
+              'unsupported-plugin',
+              extra: {
+                'method': 'aes-128-gcm',
+                'password': 'ss-pw',
+                'plugin': 'shadow-tls',
+              },
+            ),
+            outbound(
+              'shadowsocks',
+              'plain',
+              extra: {'method': 'aes-128-gcm', 'password': 'ss-pw'},
+            ),
+          ],
+        }),
+      );
+
+      expect(result, isNotNull);
+      expect(_proxiesNames(result!.config), ['plain']);
+      expect(result.skipped.single.reason, SkippedNodeReason.transport);
+    });
+
     test('hysteria2 with salamander obfs and bandwidth', () {
       final result = tryConvertSingboxConfig(
         _json({
@@ -372,6 +400,27 @@ void main() {
       expect(config, contains('sni: "sb.example.com"'));
     });
 
+    test('tuic preserves disabled SNI from its TLS block', () {
+      final result = tryConvertSingboxConfig(
+        _json({
+          'outbounds': [
+            outbound(
+              'tuic',
+              'TUIC-no-sni',
+              extra: {'uuid': 'uuid-t', 'password': 'pw'},
+              tls: tls({'disable_sni': true}),
+            ),
+          ],
+        }),
+      );
+
+      expect(result, isNotNull);
+      final config = result!.config;
+      expect(config, contains('disable-sni: true'));
+      expect(config, isNot(contains('sni: "sb.example.com"')));
+      expect(config, contains('alpn: ["h3"]'));
+    });
+
     test('wireguard with one peer and both address families', () {
       final result = tryConvertSingboxConfig(
         _json({
@@ -462,10 +511,13 @@ void main() {
       expect(config, contains('ipv6: "fd00::2/128"'));
       // A peer without allowed_ips defaults to routing everything, and a
       // malformed reserved list is dropped rather than failing the proxy.
-      expect(config, contains('allowed-ips: ["0.0.0.0/0,::/0"]'));
+      expect(config, contains('allowed-ips: ["0.0.0.0/0", "::/0"]'));
       expect(config, isNot(contains('reserved: [7, 8]')));
       // No flat peer fields sit outside the peers array.
-      expect(config, isNot(contains('allowed-ips: ["0.0.0.0/0,::/0"], udp')));
+      expect(
+        config,
+        isNot(contains('allowed-ips: ["0.0.0.0/0", "::/0"], udp')),
+      );
       expect(config, contains('peers: [{server: "wg1.example.com"'));
     });
 

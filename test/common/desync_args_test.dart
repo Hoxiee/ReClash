@@ -5,10 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('desyncArgsFromText', () {
     test('splits on whitespace', () {
-      expect(
-        desyncArgsFromText('-A torst,conn -L s,o --split 1'),
-        ['-A', 'torst,conn', '-L', 's,o', '--split', '1'],
-      );
+      expect(desyncArgsFromText('-A torst,conn -L s,o --split 1'), [
+        '-A',
+        'torst,conn',
+        '-L',
+        's,o',
+        '--split',
+        '1',
+      ]);
     });
 
     test('a quoted value with spaces stays one token', () {
@@ -90,8 +94,14 @@ void main() {
     // The ByeByeDPI tester's top preset on a live network: fake- and oob-free,
     // since those families trip the TSPU's fake-packet detectors.
     test('is a split/disorder ladder without fake or oob', () {
-      expect(desyncDefaultStrategy.where((t) => t.startsWith('-d')), isNotEmpty);
-      expect(desyncDefaultStrategy.where((t) => t.startsWith('-s')), isNotEmpty);
+      expect(
+        desyncDefaultStrategy.where((t) => t.startsWith('-d')),
+        isNotEmpty,
+      );
+      expect(
+        desyncDefaultStrategy.where((t) => t.startsWith('-s')),
+        isNotEmpty,
+      );
       expect(
         desyncDefaultStrategy.where(
           (t) => t.startsWith('-f') || t.startsWith('-o') || t.startsWith('-q'),

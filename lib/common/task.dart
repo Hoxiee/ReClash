@@ -13,6 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
+const currentDataVersion = 2;
+
 Future<T> decodeJSONTask<T>(String data) async {
   return compute<String, T>(_decodeJSON, data);
 }
@@ -113,11 +115,26 @@ String? _proxyGroupName(Object? group) => switch (group) {
 List<String> injectRcxSkeleton({
   required Map<dynamic, dynamic> rawConfig,
   required List<String> rules,
+  List<ServiceRoutePolicy> serviceRoutes = const [],
+  int userRuleCount = 0,
 }) {
   final groups = rawConfig['proxy-groups'];
   final existing = groups is List ? groups : const [];
   final names = existing.map(_proxyGroupName).whereType<String>().toSet();
-  if (names.contains(rcxNodeGroupName) || names.contains(rcxFinalGroupName)) {
+  final enabledRoutes = serviceRoutes
+      .where(
+        (route) =>
+            route.enabled &&
+            supportedCapabilityIds.contains(route.capabilityId),
+      )
+      .toList();
+  final reservedNames = {
+    rcxNodeGroupName,
+    rcxDirectGroupName,
+    rcxFinalGroupName,
+    for (final route in enabledRoutes) capabilityGroupName(route.capabilityId),
+  };
+  if (names.intersection(reservedNames).isNotEmpty) {
     return rules;
   }
 
@@ -140,6 +157,20 @@ List<String> injectRcxSkeleton({
   // Index 0 is where an unknown selection lands: a node keeps it proxied, and
   // REJECT stands in while a provider loads because DIRECT would leak.
   final members = inline.isNotEmpty ? inline : const ['REJECT'];
+  final capabilityGroups = [
+    for (final route in enabledRoutes)
+      <String, Object?>{
+        'name': capabilityGroupName(route.capabilityId),
+        'type': 'select',
+        'hidden': true,
+        'proxies': <String>[
+          'REJECT',
+          if (route.fallback == ServiceRouteFallback.main) rcxNodeGroupName,
+          ...inline,
+        ],
+        if (providers.isNotEmpty) 'use': providers,
+      },
+  ];
   rawConfig['proxy-groups'] = <Object?>[
     ...existing,
     <String, Object?>{
@@ -148,6 +179,7 @@ List<String> injectRcxSkeleton({
       'proxies': members,
       if (providers.isNotEmpty) 'use': providers,
     },
+    ...capabilityGroups,
     <String, Object?>{
       'name': rcxDirectGroupName,
       'type': 'select',
@@ -162,10 +194,14 @@ List<String> injectRcxSkeleton({
     },
   ];
 
-  return _patchRcxRules(rules);
+  return _patchRcxRules(rules, enabledRoutes, userRuleCount);
 }
 
-List<String> _patchRcxRules(List<String> rules) {
+List<String> _patchRcxRules(
+  List<String> rules,
+  List<ServiceRoutePolicy> serviceRoutes,
+  int userRuleCount,
+) {
   final patched = List<String>.from(rules);
   for (var i = 0; i < patched.length; i++) {
     final parts = patched[i].split(',');
@@ -179,14 +215,30 @@ List<String> _patchRcxRules(List<String> rules) {
     parts[target] = rcxDirectGroupName;
     patched[i] = parts.join(',');
   }
-  for (var i = 0; i < patched.length; i++) {
-    if (patched[i].split(',').first.trim().toUpperCase() != 'MATCH') {
-      continue;
+  final capabilityRules = [
+    for (final route in serviceRoutes)
+      for (final rule in capabilityServiceRules[route.capabilityId] ?? const [])
+        '$rule,${capabilityGroupName(route.capabilityId)}',
+  ];
+  final protected = userRuleCount.clamp(0, patched.length);
+  final capabilitySet = capabilityRules.toSet();
+  for (var i = patched.length - 1; i >= protected; i--) {
+    if (capabilitySet.contains(patched[i])) {
+      patched.removeAt(i);
     }
-    patched[i] = 'MATCH,$rcxFinalGroupName';
-    return patched;
   }
-  patched.add('MATCH,$rcxFinalGroupName');
+  final matchIndex = patched.indexWhere(
+    (rule) => rule.split(',').first.trim().toUpperCase() == 'MATCH',
+  );
+  if (matchIndex >= 0) {
+    patched[matchIndex] = 'MATCH,$rcxFinalGroupName';
+  } else {
+    patched.add('MATCH,$rcxFinalGroupName');
+  }
+  // Nothing below the catch-all is ever evaluated, so a protected prefix that
+  // reaches past MATCH cannot push the service rules there.
+  final ceiling = matchIndex >= 0 ? matchIndex : patched.length - 1;
+  patched.insertAll(protected < ceiling ? protected : ceiling, capabilityRules);
   return patched;
 }
 
@@ -286,8 +338,7 @@ List<String> desyncRules({
         if (forceTcp)
           'AND,((NETWORK,udp),(DST-PORT,443),(IP-CIDR,$cidr)),REJECT',
     for (final category in categories)
-      for (final cidr in category.cidrs)
-        'IP-CIDR,$cidr,$desyncOutboundName',
+      for (final cidr in category.cidrs) 'IP-CIDR,$cidr,$desyncOutboundName',
   ];
 }
 
@@ -342,12 +393,6 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
         type,
         hasUrl ? '$name@$url' : '$section/$name',
       );
-      if (hasUrl) {
-        _migrateLegacyProviderFile(
-          legacyPath: getProvidersFilePathInner(type, url),
-          newPath: path,
-        );
-      }
       provider['path'] = path;
     }
   }
@@ -463,6 +508,7 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
     rawConfig['dns']['enhanced-mode'] = 'redir-host';
   }
   List<String> rules = [];
+  var userRuleCount = 0;
   if (data.rules.isEmpty) {
     if (rawConfig['rules'] != null) {
       rules = List<String>.from(rawConfig['rules']);
@@ -506,15 +552,24 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
         finalAddedRules = addedRules.map((e) => e.rawValue).toList();
       }
       rules = [...finalAddedRules, ...rules];
+      userRuleCount = finalAddedRules.length;
     }
   } else {
+    // A custom overwrite replaces the rule list outright, so every entry here
+    // is the user's own and outranks the skeleton's service rules.
     rules = data.rules.map((item) => item.rawValue).toList();
+    userRuleCount = rules.length;
   }
   if (data.proxyGroups.isNotEmpty) {
     rawConfig['proxy-groups'] = data.proxyGroups;
   }
   if (data.smartRouting) {
-    rules = injectRcxSkeleton(rawConfig: rawConfig, rules: rules);
+    rules = injectRcxSkeleton(
+      rawConfig: rawConfig,
+      rules: rules,
+      serviceRoutes: data.serviceRoutePolicies,
+      userRuleCount: userRuleCount,
+    );
   }
   // After the skeleton: an outbound present while it is built is ranked as a node.
   if (data.desync) {
@@ -613,24 +668,6 @@ List<String> shakeOrphanFiles({
   return targets;
 }
 
-// Best-effort: a legacy url shared by two providers, or any rename failure,
-// just leaves the file to be re-downloaded under the new path.
-void _migrateLegacyProviderFile({
-  required String legacyPath,
-  required String newPath,
-}) {
-  if (legacyPath == newPath || File(newPath).existsSync()) {
-    return;
-  }
-  try {
-    final legacyFile = File(legacyPath);
-    if (legacyFile.existsSync()) {
-      Directory(dirname(newPath)).createSync(recursive: true);
-      legacyFile.renameSync(newPath);
-    }
-  } catch (_) {}
-}
-
 Future<String> encodeLogsTask(List<Log> data) async {
   return compute<List<Log>, String>(_encodeLogsTask, data);
 }
@@ -711,6 +748,7 @@ Future<MigrationData> migrateLegacyConfig({
   final List rawRules = configMap['rules'] as List<dynamic>? ?? [];
   final List<Rule> rules = [];
   final List<ProfileRuleLink> links = [];
+  final List<ProxyGroup> proxyGroups = [];
   for (final rawRule in rawRules) {
     final id = idMap.updateCacheValue(rawRule['id'], () => snowflake.id);
     rawRule['id'] = id;
@@ -767,6 +805,43 @@ Future<MigrationData> migrateLegacyConfig({
       }
       rawProfile['overwriteType'] = overwrite['type'];
     }
+    final overrideData = rawProfile['overrideData'];
+    if (overrideData is Map && overrideData['enable'] == true) {
+      final ruleData = overrideData['rule'];
+      final customData = overrideData['custom'];
+      final ruleType = ruleData is Map ? ruleData['type'] : null;
+      if (ruleType == 'override' && ruleData is Map) {
+        _addLegacyOverrideRules(
+          ruleData['overrideRules'],
+          profileId,
+          RuleScene.custom,
+          rules,
+          links,
+        );
+        rawProfile['overwriteType'] = OverwriteType.custom.name;
+      } else if (ruleType == 'added' && ruleData is Map) {
+        _addLegacyOverrideRules(
+          ruleData['addedRules'],
+          profileId,
+          RuleScene.added,
+          rules,
+          links,
+        );
+        rawProfile['overwriteType'] = OverwriteType.standard.name;
+      } else if (ruleType == 'custom' && customData is Map) {
+        _addLegacyOverrideRules(
+          customData['rules'],
+          profileId,
+          RuleScene.custom,
+          rules,
+          links,
+        );
+        proxyGroups.addAll(
+          _legacyProxyGroups(customData['proxyGroups'], profileId),
+        );
+        rawProfile['overwriteType'] = OverwriteType.custom.name;
+      }
+    }
 
     final sourceFile = File(_getProfilePath(sourcePath, rawId));
     final targetFilePath = _getProfilePath(targetPath, profileId.toString());
@@ -783,23 +858,67 @@ Future<MigrationData> migrateLegacyConfig({
     rules: rules,
     scripts: scripts,
     links: links,
+    proxyGroups: proxyGroups,
   );
+}
+
+void _addLegacyOverrideRules(
+  Object? rawRules,
+  int profileId,
+  RuleScene scene,
+  List<Rule> rules,
+  List<ProfileRuleLink> links,
+) {
+  if (rawRules is! List) return;
+  for (final rawRule in rawRules.whereType<Map>()) {
+    final value = rawRule['value'];
+    if (value is! String) continue;
+    final rule = Rule.parse(value);
+    rules.add(rule);
+    links.add(
+      ProfileRuleLink(profileId: profileId, ruleId: rule.id, scene: scene),
+    );
+  }
+}
+
+List<ProxyGroup> _legacyProxyGroups(Object? rawGroups, int profileId) {
+  if (rawGroups is! List) return const [];
+  return [
+    for (final rawGroup in rawGroups.whereType<Map>())
+      if (rawGroup['name'] is String && rawGroup['type'] is String)
+        ProxyGroup.fromJson({
+          ...Map<String, Object?>.from(rawGroup),
+          'profileId': profileId,
+          'type': GroupType.parse(rawGroup['type'] as String).value,
+        }),
+  ];
+}
+
+Future<void> createDatabaseSnapshot(
+  Database database,
+  String snapshotPath,
+) async {
+  await File(snapshotPath).safeDelete();
+  await database.customStatement('VACUUM INTO ?', [snapshotPath]);
 }
 
 Future<String> backupTask(
   Map<String, dynamic> configMap,
-  Iterable<String> fileNames,
-) async {
+  Iterable<String> fileNames, {
+  String? databasePath,
+}) async {
   return compute<
     ({
       Map<String, dynamic> configMap,
       Iterable<String> fileNames,
+      String? databasePath,
       RootIsolateToken token,
     }),
     String
   >(_backupTask, (
     configMap: configMap,
     fileNames: fileNames,
+    databasePath: databasePath,
     token: RootIsolateToken.instance!,
   ));
 }
@@ -808,6 +927,7 @@ Future<String> _backupTask<T>(
   ({
     Map<String, dynamic> configMap,
     Iterable<String> fileNames,
+    String? databasePath,
     RootIsolateToken token,
   })
   args,
@@ -818,7 +938,7 @@ Future<String> _backupTask<T>(
   return writeBackupArchive(
     configMap: args.configMap,
     fileNames: args.fileNames,
-    databasePath: await appPath.databasePath,
+    databasePath: args.databasePath ?? await appPath.databasePath,
     profilesDirPath: await appPath.profilesPath,
     scriptsDirPath: await appPath.scriptsDirPath,
     zipFilePath: join(tempPath, '$prefix.zip'),
@@ -871,19 +991,27 @@ Future<String> writeBackupArchive({
   return zipFilePath;
 }
 
-Future<MigrationData> restoreTask() async {
-  return compute<RootIsolateToken, MigrationData>(
-    _restoreTask,
-    RootIsolateToken.instance!,
-  );
+Future<MigrationData> restoreTask({
+  required String backupFilePath,
+  required String restoreDirPath,
+}) async {
+  return compute<
+    ({RootIsolateToken token, String backupFilePath, String restoreDirPath}),
+    MigrationData
+  >(_restoreTask, (
+    token: RootIsolateToken.instance!,
+    backupFilePath: backupFilePath,
+    restoreDirPath: restoreDirPath,
+  ));
 }
 
-Future<MigrationData> _restoreTask(RootIsolateToken token) async {
-  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+Future<MigrationData> _restoreTask(
+  ({RootIsolateToken token, String backupFilePath, String restoreDirPath}) args,
+) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(args.token);
   return readBackupArchive(
-    backupFilePath: await appPath.backupFilePath,
-    restoreDirPath: await appPath.restoreDirPath,
-    homeDirPath: await appPath.homeDirPath,
+    backupFilePath: args.backupFilePath,
+    restoreDirPath: args.restoreDirPath,
   );
 }
 
@@ -906,17 +1034,63 @@ String? _restoreEntryPath(String restoreDirPath, String name) {
   return outPath;
 }
 
+Map<String, Object?> _upgradeUpstreamBackupConfig(
+  Map<String, Object?> configMap,
+) {
+  final map = Map<String, Object?>.from(configMap);
+  final patch = map['patchClashConfig'];
+  if (patch is Map && patch['global-ua'] == null) {
+    map['patchClashConfig'] = Map<String, Object?>.from(patch)
+      ..['global-ua'] = flClashXCompatUa;
+  }
+  final rawSettings = map['appSettingProps'];
+  final settings = Map<String, Object?>.from(
+    rawSettings is Map ? rawSettings : const {},
+  );
+  settings
+    ..['setupCompleted'] = true
+    ..['autoCheckUpdate'] = defaultAppSettingProps.autoCheckUpdate
+    ..['sendDeviceIdentity'] = defaultAppSettingProps.sendDeviceIdentity;
+  final legacyStopAction = settings['showNotificationStopAction'];
+  final rawNotification = settings['notificationSettings'];
+  final notification = Map<String, Object?>.from(
+    rawNotification is Map ? rawNotification : const {},
+  );
+  notification
+    ..['showStopAction'] = legacyStopAction is bool
+        ? legacyStopAction
+        : defaultNotificationSettings.showStopAction
+    ..['showPauseAction'] = defaultNotificationSettings.showPauseAction
+    ..['hideSensitiveOnLockScreen'] =
+        defaultNotificationSettings.hideSensitiveOnLockScreen
+    ..['subscriptionReminders'] =
+        defaultNotificationSettings.subscriptionReminders;
+  settings
+    ..remove('showNotificationStopAction')
+    ..['notificationSettings'] = notification;
+  map['appSettingProps'] = settings;
+  return map;
+}
+
+Map<String, Object?> _normalizeBackupConfig(Map<String, Object?> configMap) {
+  final normalized =
+      jsonDecode(jsonEncode(Config.realFromJson(configMap)))
+          as Map<String, Object?>;
+  normalized['version'] = currentDataVersion;
+  return normalized;
+}
+
 @visibleForTesting
 Future<MigrationData> readBackupArchive({
   required String backupFilePath,
   required String restoreDirPath,
-  required String homeDirPath,
 }) async {
+  final dir = Directory(restoreDirPath);
+  await dir.safeDelete(recursive: true);
+  await dir.create(recursive: true);
   final zipDecoder = ZipDecoder();
   final input = InputFileStream(backupFilePath);
   final archive = zipDecoder.decodeStream(input);
-  final dir = Directory(restoreDirPath);
-  await dir.create(recursive: true);
   for (final file in archive.files) {
     final outPath = _restoreEntryPath(restoreDirPath, file.name);
     if (outPath == null) {
@@ -931,19 +1105,41 @@ Future<MigrationData> readBackupArchive({
   if (!await restoreConfigFile.exists()) {
     throw MessageException(currentAppLocalizations.invalidBackupFile);
   }
-  final restoreConfigMap =
-      json.decode(await restoreConfigFile.readAsString())
-          as Map<String, Object?>?;
-  final version = restoreConfigMap?['version'] ?? 0;
-  MigrationData migrationData = MigrationData(configMap: restoreConfigMap);
-  if (version == 0 && restoreConfigMap != null) {
-    migrationData = await migrateLegacyConfig(
-      configMap: restoreConfigMap,
-      sourcePath: restoreDirPath,
-      targetPath: homeDirPath,
-    );
-    return migrationData;
+  final decoded = json.decode(await restoreConfigFile.readAsString());
+  if (decoded is! Map<String, Object?>) {
+    throw MessageException(currentAppLocalizations.invalidBackupFile);
   }
+  final rawVersion = decoded['version'] ?? 0;
+  if (rawVersion is! int || rawVersion < 0 || rawVersion > currentDataVersion) {
+    throw MessageException(currentAppLocalizations.invalidBackupFile);
+  }
+  MigrationData migrationData;
+  if (rawVersion == 0) {
+    final clashConfigFile = File(join(restoreDirPath, 'clashConfig.json'));
+    if (await clashConfigFile.exists()) {
+      final clashConfig = json.decode(await clashConfigFile.readAsString());
+      if (clashConfig is! Map<String, Object?>) {
+        throw MessageException(currentAppLocalizations.invalidBackupFile);
+      }
+      decoded['patchClashConfig'] = clashConfig;
+    }
+    migrationData = await migrateLegacyConfig(
+      configMap: decoded,
+      sourcePath: restoreDirPath,
+      targetPath: restoreDirPath,
+    );
+  } else {
+    final currentMap = Map<String, Object?>.from(decoded);
+    migrationData = MigrationData(
+      configMap: rawVersion == 1
+          ? _upgradeUpstreamBackupConfig(currentMap)
+          : currentMap,
+    );
+  }
+  migrationData = migrationData.copyWith(
+    configMap: _normalizeBackupConfig(migrationData.configMap ?? const {}),
+  );
+  if (rawVersion == 0) return migrationData;
   final backupDatabaseFile = File(join(restoreDirPath, backupDatabaseName));
   if (!await backupDatabaseFile.exists()) {
     return migrationData;
@@ -966,19 +1162,6 @@ Future<MigrationData> readBackupArchive({
     ]);
     final profiles = results[0].cast<Profile>();
     final scripts = results[1].cast<Script>();
-    final profilesMigration = profiles.map(
-      (item) => (
-        from: _getProfilePath(restoreDirPath, item.id.toString()),
-        to: _getProfilePath(homeDirPath, item.id.toString()),
-      ),
-    );
-    final scriptsMigration = scripts.map(
-      (item) => (
-        from: _getScriptPath(restoreDirPath, item.id.toString()),
-        to: _getScriptPath(homeDirPath, item.id.toString()),
-      ),
-    );
-    await _copyWithMapList([...profilesMigration, ...scriptsMigration]);
     return migrationData.copyWith(
       profiles: profiles,
       scripts: scripts,
@@ -989,14 +1172,6 @@ Future<MigrationData> readBackupArchive({
   } finally {
     await database.close();
   }
-}
-
-Future<void> _copyWithMapList(
-  List<({String from, String to})> copyMapList,
-) async {
-  await Future.wait(
-    copyMapList.map((item) => File(item.from).safeCopy(item.to)).toList(),
-  );
 }
 
 String _getScriptPath(String root, String fileName) {

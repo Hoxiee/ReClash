@@ -22,6 +22,18 @@ func resolvePackage(callback unsafe.Pointer, uid int) string {
 	return takeCString(C.resolve_package(callback, C.int(uid)))
 }
 
+func runDoctorProbe(callback unsafe.Pointer, request string) string {
+	value := C.CString(request)
+	defer C.free(unsafe.Pointer(value))
+	return takeCString(C.doctor_probe(callback, value))
+}
+
+func cancelDoctorProbe(callback unsafe.Pointer, probeID string) {
+	value := C.CString(probeID)
+	defer C.free(unsafe.Pointer(value))
+	C.cancel_doctor_probe(callback, value)
+}
+
 func invokeResult(callback unsafe.Pointer, data string) {
 	s := C.CString(data)
 	defer C.free(unsafe.Pointer(s))

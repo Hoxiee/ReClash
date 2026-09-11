@@ -53,13 +53,12 @@ bool isShareLinkInput(String input) {
   final trimmed = input.trim();
   if (trimmed.isEmpty) return false;
   if (_isLinkLine(trimmed)) return true;
-  if (trimmed.contains('\n')) {
-    return trimmed
-        .split(RegExp(r'[\r\n]+'))
-        .any((line) => _isLinkLine(line.trim()));
-  }
-  final decoded = tryBase64Decode(trimmed);
-  return decoded != null && isShareLinkInput(decoded);
+  final compact = trimmed.replaceAll(RegExp(r'\s+'), '');
+  final decoded = tryBase64Decode(compact);
+  if (decoded != null && isShareLinkInput(decoded)) return true;
+  return trimmed
+      .split(RegExp(r'[\r\n]+'))
+      .any((line) => _isLinkLine(line.trim()));
 }
 
 ShareLinksResult? tryConvertShareLinks(String raw) {
@@ -76,11 +75,12 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
 (List<Map<String, Object?>>, List<SkippedNode>) _scanShareLinks(String raw) {
   final proxies = <Map<String, Object?>>[];
   final skipped = <SkippedNode>[];
-  final seen = <String>{};
+  final seen = <String>{'PROXY', 'DIRECT'};
 
   void addProxy(Map<String, Object?>? proxy) {
     if (proxy == null) return;
     var name = proxy['name']! as String;
+    if (name == 'PROXY' || name == 'DIRECT') name = '$name node';
     // Duplicates would collapse into one entry in any group; number them.
     var suffix = 2;
     while (seen.contains(name)) {
@@ -124,7 +124,8 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
   if (_isLinkLine(trimmed)) {
     addFrom(trimmed);
   } else {
-    final decoded = tryBase64Decode(trimmed);
+    final compact = trimmed.replaceAll(RegExp(r'\s+'), '');
+    final decoded = tryBase64Decode(compact);
     if (decoded != null && isShareLinkInput(decoded)) {
       addFrom(decoded);
     } else {
@@ -228,6 +229,11 @@ Map<String, Object?>? _parseWireguard(String uri) {
 
   final reservedValue = params['reserved'] ?? '';
   final reserved = reservedValue.isEmpty ? null : _parseReserved(reservedValue);
+  final allowedIps = (params['allowed-ips'] ?? '0.0.0.0/0,::/0')
+      .split(',')
+      .map((entry) => entry.trim())
+      .where((entry) => entry.isNotEmpty)
+      .toList(growable: false);
   final peers = <String, Object?>{
     'server': server,
     'port': port,
@@ -236,7 +242,7 @@ Map<String, Object?>? _parseWireguard(String uri) {
     if ((params['presharedkey'] ?? '').isNotEmpty)
       'pre-shared-key': params['presharedkey'],
     // Without allowed-ips the peer routes nothing; /0 tunnels everything.
-    'allowed-ips': [(params['allowed-ips'] ?? '0.0.0.0/0,::/0')],
+    'allowed-ips': allowedIps,
     'reserved': ?reserved,
   };
 
@@ -1020,6 +1026,7 @@ Map<String, String> _splitQuery(String query) {
 String emitProxiesConfig(
   List<Map<String, Object?>> proxies, {
   List<Map<String, Object?>> groups = const [],
+  List<String> rules = const [],
 }) {
   final buffer = StringBuffer()..writeln('proxies:');
   for (final proxy in proxies) {
@@ -1047,8 +1054,13 @@ String emitProxiesConfig(
     ..writeln('  - name: "PROXY"')
     ..writeln('    type: select')
     ..writeln('    proxies: [$groupEntries]')
-    ..writeln('rules:')
-    ..writeln('  - MATCH,PROXY');
+    ..writeln('rules:');
+  for (final rule in rules) {
+    buffer.writeln('  - ${_yamlString(rule)}');
+  }
+  if (!rules.any((rule) => rule == 'MATCH,PROXY')) {
+    buffer.writeln('  - MATCH,PROXY');
+  }
   return buffer.toString();
 }
 

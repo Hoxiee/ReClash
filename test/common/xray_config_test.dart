@@ -635,6 +635,18 @@ void main() {
       expect(config, contains('public-key: "PUBKEY"'));
       expect(config, contains('server: "wg.example.com"'));
       expect(config, contains('port: 51820'));
+      expect(config, contains('allowed-ips: ["0.0.0.0/0", "::/0"]'));
+    });
+
+    test('tls serverName maps to sni', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [vlessOutbound(security: 'tls')],
+        }),
+      );
+
+      expect(result, isNotNull);
+      expect(result!.config, contains('servername: "tls.example.com"'));
     });
 
     test('http and socks dialer outbounds map with users', () {
@@ -765,6 +777,157 @@ void main() {
       );
       expect(tryConvertXrayConfig(_json({'outbounds': []})), isNull);
       expect(tryConvertXrayConfig('not json'), isNull);
+    });
+  });
+
+  group('routing rules', () {
+    test('preserves supported field rules and their source order', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            {'tag': 'direct', 'protocol': 'freedom'},
+          ],
+          'routing': {
+            'rules': [
+              {
+                'type': 'field',
+                'domain': [
+                  'domain:example.com',
+                  'full:api.example.net',
+                  'keyword:video',
+                  r'regexp:^cdn\d+\.example$',
+                ],
+                'outboundTag': 'proxy',
+              },
+              {
+                'type': 'field',
+                'ip': ['10.0.0.0/8', '2001:db8::/32'],
+                'outboundTag': 'direct',
+              },
+              {'type': 'field', 'port': '80,443', 'outboundTag': 'proxy'},
+              {'type': 'field', 'network': 'udp', 'outboundTag': 'direct'},
+            ],
+          },
+        }),
+      );
+
+      expect(result, isNotNull);
+      final config = result!.config;
+      final rules = [
+        'DOMAIN-SUFFIX,example.com,a.example.com',
+        'DOMAIN,api.example.net,a.example.com',
+        'DOMAIN-KEYWORD,video,a.example.com',
+        r'DOMAIN-REGEX,^cdn\\d+\\.example$,a.example.com',
+        'IP-CIDR,10.0.0.0/8,DIRECT',
+        'IP-CIDR6,2001:db8::/32,DIRECT',
+        'DST-PORT,80,a.example.com',
+        'DST-PORT,443,a.example.com',
+        'NETWORK,udp,DIRECT',
+        'MATCH,PROXY',
+      ];
+      var position = -1;
+      for (final rule in rules) {
+        final next = config.indexOf(rule);
+        expect(next, greaterThan(position), reason: rule);
+        position = next;
+      }
+    });
+
+    test('targets the emitted balancer name', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'remarks': 'Smart',
+          'outbounds': [_node('proxy', 'a.example.com')],
+          'routing': {
+            'balancers': [
+              {
+                'tag': 'AUTO',
+                'selector': ['proxy'],
+              },
+            ],
+            'rules': [
+              {
+                'type': 'field',
+                'domain': ['domain:example.com'],
+                'balancerTag': 'AUTO',
+              },
+            ],
+          },
+        }),
+      );
+
+      expect(result!.config, contains('DOMAIN-SUFFIX,example.com,Smart'));
+    });
+
+    test('preserves AND across fields and OR within each field', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [_node('proxy', 'a.example.com')],
+          'routing': {
+            'rules': [
+              {
+                'type': 'field',
+                'domain': ['domain:one.example', 'domain:two.example'],
+                'network': ['tcp', 'udp'],
+                'outboundTag': 'proxy',
+              },
+            ],
+          },
+        }),
+      );
+
+      expect(
+        result!.config,
+        contains(
+          'AND,((OR,((DOMAIN-SUFFIX,one.example),(DOMAIN-SUFFIX,two.example))),(OR,((NETWORK,tcp),(NETWORK,udp)))),a.example.com',
+        ),
+      );
+    });
+
+    test('maps blackhole and targetless final network catch-all', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [
+            _node('proxy', 'a.example.com'),
+            {'tag': 'blocked', 'protocol': 'blackhole'},
+          ],
+          'routing': {
+            'rules': [
+              {
+                'type': 'field',
+                'domain': ['domain:ads.example'],
+                'outboundTag': 'blocked',
+              },
+              {'type': 'field', 'network': 'tcp,udp'},
+            ],
+          },
+        }),
+      );
+
+      expect(result!.config, contains('DOMAIN-SUFFIX,ads.example,REJECT'));
+      expect(RegExp(r'MATCH,PROXY').allMatches(result.config), hasLength(1));
+    });
+
+    test('drops rules with unsupported predicates', () {
+      final result = tryConvertXrayConfig(
+        _json({
+          'outbounds': [_node('proxy', 'a.example.com')],
+          'routing': {
+            'rules': [
+              {
+                'type': 'field',
+                'domain': ['domain:unsupported.example'],
+                'inboundTag': ['api'],
+                'outboundTag': 'proxy',
+              },
+            ],
+          },
+        }),
+      );
+
+      expect(result!.config, isNot(contains('unsupported.example')));
+      expect(result.config, contains('MATCH,PROXY'));
     });
   });
 
@@ -956,7 +1119,9 @@ void main() {
       );
       expect(
         config,
-        contains('strategy: "round-robin", proxies: ["g.example.com"], hidden: true'),
+        contains(
+          'strategy: "round-robin", proxies: ["g.example.com"], hidden: true',
+        ),
       );
     });
 

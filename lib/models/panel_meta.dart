@@ -30,6 +30,7 @@ abstract class PanelMeta with _$PanelMeta {
     String? themeHex,
     String? background,
     String? heroRing,
+    String? activeText,
   }) = _PanelMeta;
 
   factory PanelMeta.fromJson(Map<String, Object?> json) =>
@@ -73,11 +74,14 @@ abstract class PanelMeta with _$PanelMeta {
       themeHex: map['themeHex'],
       background: map['background'],
       heroRing: map['heroRing'],
+      activeText: map['activeText'],
     );
   }
 }
 
 extension PanelMetaExt on PanelMeta {
+  bool get explainsUndialableNodes => hwidMaxDevicesReached || hwidNotSupported;
+
   bool get hasContent =>
       hwidMaxDevicesReached ||
       hwidNotSupported ||
@@ -97,5 +101,6 @@ extension PanelMetaExt on PanelMeta {
       themeHex != null ||
       background != null ||
       heroRing != null ||
+      activeText != null ||
       settings != null;
 }

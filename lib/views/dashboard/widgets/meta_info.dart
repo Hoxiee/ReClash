@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
+import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -16,6 +17,7 @@ class MetaInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(currentProfileProvider);
+    final panelMeta = profile?.panelMeta;
     return DashboardInfoCard(
       height: getWidgetHeight(2),
       icon: Icons.event_available_rounded,
@@ -28,6 +30,8 @@ class MetaInfo extends ConsumerWidget {
       child: _MetaInfoBody(
         profileLabel: profile?.realLabel ?? '',
         subscriptionInfo: profile?.subscriptionInfo,
+        buyPlanUrl: panelMeta?.buyPlanUrl,
+        buyTrafficUrl: panelMeta?.buyTrafficUrl,
       ),
     );
   }
@@ -37,10 +41,14 @@ class _MetaInfoBody extends StatelessWidget {
   const _MetaInfoBody({
     required this.profileLabel,
     required this.subscriptionInfo,
+    required this.buyPlanUrl,
+    required this.buyTrafficUrl,
   });
 
   final String profileLabel;
   final SubscriptionInfo? subscriptionInfo;
+  final String? buyPlanUrl;
+  final String? buyTrafficUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -63,11 +71,27 @@ class _MetaInfoBody extends StatelessWidget {
         !isPerpetual && daysLeft != null && daysLeft <= _expiringSoonDays
         ? context.colorScheme.error
         : context.colorScheme.onSurface;
-    final hasQuota = info != null && info.total > 0;
-    final used = hasQuota ? info.upload + info.download : 0;
+    final hasQuota = info != null && !info.unlimited;
+    final used = info?.used ?? 0;
     final progress = hasQuota
         ? (used / info.total).clamp(0.0, 1.0).toDouble()
         : 0.0;
+    final trafficCaption = info == null || hasQuota
+        ? appLocalizations.remainingTraffic
+        : appLocalizations.usedTraffic;
+    final trafficValue = info == null
+        ? '\u2014'
+        : hasQuota
+        ? '${(info.total - used).clamp(0, info.total).traffic.show} / '
+              '${info.total.traffic.show}'
+        : used.traffic.show;
+    final offers = heroBuyOffers(
+      hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
+      hasTrafficUrl: buyTrafficUrl?.isNotEmpty ?? false,
+      daysLeft: isPerpetual ? null : daysLeft,
+      total: hasQuota ? info.total : 0,
+      used: used,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,57 +115,89 @@ class _MetaInfoBody extends StatelessWidget {
           ),
         ),
         const Spacer(),
+        Row(
+          children: [
+            Expanded(
+              child: offers.isEmpty
+                  ? Text(
+                      trafficCaption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    )
+                  // The caption only names the number beside it; an offer that
+                  // is live right now is worth more than the repetition.
+                  : _BuyOfferRow(
+                      offers: offers,
+                      buyPlanUrl: buyPlanUrl,
+                      buyTrafficUrl: buyTrafficUrl,
+                    ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              trafficValue,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
         if (hasQuota) ...[
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  appLocalizations.remainingTraffic,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '${(info.total - used).clamp(0, info.total).traffic.show} / '
-                '${info.total.traffic.show}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 6),
           LinearProgressIndicator(value: progress, minHeight: 4),
-        ] else
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  appLocalizations.remainingTraffic,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
+        ],
+      ],
+    );
+  }
+}
+
+class _BuyOfferRow extends StatelessWidget {
+  const _BuyOfferRow({
+    required this.offers,
+    required this.buyPlanUrl,
+    required this.buyTrafficUrl,
+  });
+
+  final List<HeroBuyOffer> offers;
+  final String? buyPlanUrl;
+  final String? buyTrafficUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final offer in offers) ...[
+          if (offer != offers.first) const SizedBox(width: 4),
+          Flexible(
+            child: TextButton.icon(
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 28),
+                textStyle: context.textTheme.bodySmall,
               ),
-              const SizedBox(width: 12),
-              Text(
-                appLocalizations.infiniteTime,
+              onPressed: () => dialogs.openUrl(
+                offer == HeroBuyOffer.renewPlan ? buyPlanUrl! : buyTrafficUrl!,
+              ),
+              icon: Icon(
+                heroBuyOfferViewOf(appLocalizations, offer).icon,
+                size: 16,
+              ),
+              label: Text(
+                heroBuyOfferViewOf(appLocalizations, offer).label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
               ),
-            ],
+            ),
           ),
+        ],
       ],
     );
   }

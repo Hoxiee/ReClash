@@ -2,12 +2,14 @@ import 'dart:ui' as ui;
 
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 final _viewSizeOverride = viewSizeProvider.overrideWithBuild(
   (_, _) => const Size(1200, 1000),
@@ -19,7 +21,10 @@ void main() {
 
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Scaffold(
           body: ListItem.toggle(
             title: const Text('Enabled'),
@@ -40,7 +45,10 @@ void main() {
   testWidgets('ListItem.toggle is disabled without onChanged', (tester) async {
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Scaffold(
           body: ListItem.toggle(title: const Text('Disabled'), value: false),
         ),
@@ -62,7 +70,10 @@ void main() {
 
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Scaffold(
           body: ListItem.checkbox(
             title: const Text('Selected'),
@@ -92,6 +103,7 @@ void main() {
             viewSizeProvider.overrideWithBuild(
               (_, _) => const Size(1200, 1000),
             ),
+            profilesProvider.overrideWith(TestProfiles.new),
           ],
           child: Scaffold(
             body: ListItem.input(
@@ -127,18 +139,15 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      ProviderScope(
-        child: TestApp(
-          overrides: [
-            viewSizeProvider.overrideWithBuild(
-              (_, _) => const Size(1200, 1000),
-            ),
-          ],
-          child: const ListInputPage(
-            title: 'Items',
-            items: ['a', 'b', 'c'],
-            titleBuilder: _textBuilder,
-          ),
+      TestApp(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
+        child: const ListInputPage(
+          title: 'Items',
+          items: ['a', 'b', 'c'],
+          titleBuilder: _textBuilder,
         ),
       ),
     );
@@ -159,7 +168,10 @@ void main() {
 
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Builder(
           builder: (context) {
             return FilledButton(
@@ -196,7 +208,10 @@ void main() {
 
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Builder(
           builder: (context) {
             return FilledButton(
@@ -244,7 +259,10 @@ void main() {
 
     await tester.pumpWidget(
       TestApp(
-        overrides: [_viewSizeOverride],
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
         child: Builder(
           builder: (context) {
             return Column(
@@ -309,21 +327,18 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      ProviderScope(
-        child: TestApp(
-          overrides: [
-            viewSizeProvider.overrideWithBuild(
-              (_, _) => const Size(1200, 1000),
-            ),
-          ],
-          child: const ListInputPage(
-            title: 'Items',
-            items: ['a', 'b'],
-            titleBuilder: _textBuilder,
-            subtitleBuilder: _textBuilder,
-            leadingBuilder: _textBuilder,
-            itemMaxLength: 4,
-          ),
+      TestApp(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
+        child: const ListInputPage(
+          title: 'Items',
+          items: ['a', 'b'],
+          titleBuilder: _textBuilder,
+          subtitleBuilder: _textBuilder,
+          leadingBuilder: _textBuilder,
+          itemMaxLength: 4,
         ),
       ),
     );
@@ -374,22 +389,19 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      ProviderScope(
-        child: TestApp(
-          overrides: [
-            viewSizeProvider.overrideWithBuild(
-              (_, _) => const Size(1200, 1000),
-            ),
-          ],
-          child: const MapInputPage(
-            title: 'Map',
-            map: {'a': '1', 'b': '2'},
-            titleBuilder: _entryTitle,
-            subtitleBuilder: _entrySubtitle,
-            leadingBuilder: _entryTitle,
-            keyMaxLength: 4,
-            valueMaxLength: 4,
-          ),
+      TestApp(
+        overrides: [
+          viewSizeProvider.overrideWithBuild((_, _) => const Size(1200, 1000)),
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
+        child: const MapInputPage(
+          title: 'Map',
+          map: {'a': '1', 'b': '2'},
+          titleBuilder: _entryTitle,
+          subtitleBuilder: _entrySubtitle,
+          leadingBuilder: _entryTitle,
+          keyMaxLength: 4,
+          valueMaxLength: 4,
         ),
       ),
     );

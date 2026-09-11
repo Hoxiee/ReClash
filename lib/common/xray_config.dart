@@ -29,6 +29,8 @@ class XrayConfigResult implements ConvertedSubscription {
   final List<SkippedNode> skipped;
 }
 
+String _scopedTag(int index, Object? tag) => '$index:${tag ?? ''}';
+
 XrayConfigResult? tryConvertXrayConfig(String body) {
   final decoded = _tryJson(body);
   if (decoded == null) return null;
@@ -128,12 +130,12 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
         proxy['name']! as String,
         generic: _isGenericTag(tag, roles),
       );
-      if (tag.isNotEmpty) tagKeys['$index\u0000$tag'] = key;
+      if (tag.isNotEmpty) tagKeys[_scopedTag(index, tag)] = key;
     }
   }
 
   final proxies = <Map<String, Object?>>[];
-  final seen = <String>{};
+  final seen = <String>{'PROXY', 'DIRECT'};
   final tagNames = <String, String>{};
   for (final entry in groups.entries) {
     final (proxy, candidates) = entry.value;
@@ -152,10 +154,12 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
   }
 
   if (proxies.isEmpty) return null;
+  final balancerGroups = _balancerGroups(configs, tagNames, seen);
   return XrayConfigResult(
     config: emitProxiesConfig(
       proxies,
-      groups: _balancerGroups(configs, tagNames, seen),
+      groups: balancerGroups.groups,
+      rules: _routingRules(configs, tagNames, balancerGroups.names),
     ),
     skipped: skipped.values.toList(growable: false),
   );
@@ -164,12 +168,14 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
 /// A balancer is the panel's real topology: tag prefixes plus a strategy. Each
 /// becomes one group; per config they nest under a select named by `remarks` —
 /// the single entry Happ would have shown for that mode.
-List<Map<String, Object?>> _balancerGroups(
+({List<Map<String, Object?>> groups, Map<String, String> names})
+_balancerGroups(
   List<Map<String, Object?>> configs,
   Map<String, String> tagNames,
   Set<String> taken,
 ) {
   final result = <Map<String, Object?>>[];
+  final names = <String, String>{};
   for (var index = 0; index < configs.length; index++) {
     final config = configs[index];
     final balancers = _asMap(config['routing'])?['balancers'];
@@ -184,17 +190,29 @@ List<Map<String, Object?>> _balancerGroups(
     final configGroups = <Map<String, Object?>>[];
     for (final balancer in balancers) {
       if (balancer is! Map<String, Object?>) continue;
+      final sourceTag = balancer['tag']?.toString() ?? '';
       final group = _balancerGroup(balancer, index, tags, tagNames);
       if (group == null) continue;
       group['name'] = _uniqueName(group['name']! as String, taken);
+      if (sourceTag.isNotEmpty) {
+        names[_scopedTag(index, sourceTag)] = group['name']! as String;
+      }
       configGroups.add(group);
     }
     final remarks = config['remarks']?.toString() ?? '';
     if (remarks.isEmpty) {
       result.addAll(configGroups);
     } else if (configGroups.length == 1) {
-      configGroups.single['name'] = _uniqueName(remarks, taken);
-      result.add(configGroups.single);
+      final group = configGroups.single;
+      final oldName = group['name']! as String;
+      group['name'] = _uniqueName(remarks, taken);
+      names.updateAll(
+        (key, value) =>
+            key.startsWith(_scopedTag(index, null)) && value == oldName
+            ? group['name']! as String
+            : value,
+      );
+      result.add(group);
     } else if (configGroups.isNotEmpty) {
       result.add({
         'name': _uniqueName(remarks, taken),
@@ -209,7 +227,172 @@ List<Map<String, Object?>> _balancerGroups(
       result.addAll(configGroups);
     }
   }
+  return (groups: result, names: names);
+}
+
+List<String> _routingRules(
+  List<Map<String, Object?>> configs,
+  Map<String, String> tagNames,
+  Map<String, String> balancerNames,
+) {
+  final result = <String>[];
+  for (var index = 0; index < configs.length; index++) {
+    final rules = _asMap(configs[index]['routing'])?['rules'];
+    if (rules is! List) continue;
+    for (var ruleIndex = 0; ruleIndex < rules.length; ruleIndex++) {
+      final value = rules[ruleIndex];
+      if (value is! Map<String, Object?> || value['type'] != 'field') continue;
+      if (!_supportedRoutingRule(value)) continue;
+      final target = _routingTarget(
+        value,
+        configs[index],
+        index,
+        tagNames,
+        balancerNames,
+      );
+      if (target == null &&
+          ruleIndex == rules.length - 1 &&
+          _isNetworkCatchAll(value)) {
+        result.add('MATCH,PROXY');
+        continue;
+      }
+      if (target == null) continue;
+      final predicates = <List<String>>[
+        _domainPredicates(value['domain']),
+        _cidrPredicates(value['ip']),
+        _portPredicates(value['port']),
+        _networkPredicates(value['network']),
+      ].where((items) => items.isNotEmpty).toList();
+      result.addAll(_combineRoutingPredicates(predicates, target));
+    }
+  }
   return result;
+}
+
+String? _routingTarget(
+  Map<String, Object?> rule,
+  Map<String, Object?> config,
+  int index,
+  Map<String, String> tagNames,
+  Map<String, String> balancerNames,
+) {
+  final balancerTag = rule['balancerTag']?.toString() ?? '';
+  if (balancerTag.isNotEmpty) {
+    return balancerNames[_scopedTag(index, balancerTag)];
+  }
+  final outboundTag = rule['outboundTag']?.toString() ?? '';
+  if (outboundTag.isEmpty) return null;
+  final service = _serviceTarget(outboundTag, config);
+  if (service != null) return service;
+  return tagNames[_scopedTag(index, outboundTag)];
+}
+
+String? _serviceTarget(String tag, Map<String, Object?> config) {
+  final outbounds = config['outbounds'];
+  if (outbounds is! List) return null;
+  for (final outbound in outbounds) {
+    if (outbound is! Map<String, Object?> || outbound['tag'] != tag) continue;
+    return switch (outbound['protocol']?.toString()) {
+      'freedom' => 'DIRECT',
+      'blackhole' => 'REJECT',
+      _ => null,
+    };
+  }
+  return switch (tag.toLowerCase()) {
+    'direct' => 'DIRECT',
+    'block' || 'blocked' || 'blackhole' => 'REJECT',
+    _ => null,
+  };
+}
+
+bool _supportedRoutingRule(Map<String, Object?> rule) {
+  const conditions = {'domain', 'ip', 'port', 'network'};
+  const metadata = {'type', 'outboundTag', 'balancerTag', 'ruleTag'};
+  return rule.keys.every(
+    (key) => conditions.contains(key) || metadata.contains(key),
+  );
+}
+
+List<String> _domainPredicates(Object? value) {
+  if (value is! List) return const [];
+  return [for (final entry in value) ?_domainPredicate(entry.toString())];
+}
+
+String? _domainPredicate(String value) {
+  if (value.startsWith('full:')) return 'DOMAIN,${value.substring(5)}';
+  if (value.startsWith('domain:')) {
+    return 'DOMAIN-SUFFIX,${value.substring(7)}';
+  }
+  if (value.startsWith('keyword:')) {
+    return 'DOMAIN-KEYWORD,${value.substring(8)}';
+  }
+  if (value.startsWith('regexp:')) {
+    return 'DOMAIN-REGEX,${value.substring(7)}';
+  }
+  return value.contains(':') ? null : 'DOMAIN-SUFFIX,$value';
+}
+
+List<String> _cidrPredicates(Object? value) {
+  if (value is! List) return const [];
+  return [
+    for (final entry in value)
+      if (entry.toString().contains('/'))
+        '${entry.toString().contains(':') ? 'IP-CIDR6' : 'IP-CIDR'},${entry.toString()}',
+  ];
+}
+
+List<String> _portPredicates(Object? value) {
+  final ports = switch (value) {
+    String() => value.split(','),
+    List() => value.map((entry) => entry.toString()),
+    _ => const Iterable<String>.empty(),
+  };
+  return [
+    for (final port in ports)
+      if (port.trim().isNotEmpty) 'DST-PORT,${port.trim()}',
+  ];
+}
+
+List<String> _networkPredicates(Object? value) {
+  final networks = switch (value) {
+    String() => value.split(','),
+    List() => value.map((entry) => entry.toString()),
+    _ => const Iterable<String>.empty(),
+  };
+  return [
+    for (final network in networks)
+      if (network.trim() == 'tcp' || network.trim() == 'udp')
+        'NETWORK,${network.trim()}',
+  ];
+}
+
+List<String> _combineRoutingPredicates(
+  List<List<String>> predicates,
+  String target,
+) {
+  if (predicates.isEmpty) return const [];
+  if (predicates.length == 1) {
+    return [for (final predicate in predicates.single) '$predicate,$target'];
+  }
+  final fields = [
+    for (final alternatives in predicates)
+      alternatives.length == 1
+          ? alternatives.single
+          : 'OR,(${alternatives.map((item) => '($item)').join(',')})',
+  ];
+  if (fields.length == 1) return ['${fields.single},$target'];
+  return ['AND,(${fields.map((item) => '($item)').join(',')}),$target'];
+}
+
+bool _isNetworkCatchAll(Map<String, Object?> rule) {
+  if (rule['outboundTag'] != null || rule['balancerTag'] != null) return false;
+  if (rule.keys.any(
+    (key) => !const {'type', 'network', 'ruleTag'}.contains(key),
+  )) {
+    return false;
+  }
+  final networks = _networkPredicates(rule['network']).toSet();
+  return networks.containsAll({'NETWORK,tcp', 'NETWORK,udp'});
 }
 
 Map<String, Object?>? _balancerGroup(
@@ -238,13 +421,13 @@ Map<String, Object?>? _balancerGroup(
   for (final prefix in ranked.prefixes) {
     for (final candidate in tags) {
       if (!candidate.startsWith(prefix)) continue;
-      final name = tagNames['$index\u0000$candidate'];
+      final name = tagNames[_scopedTag(index, candidate)];
       if (name == null || members.contains(name)) continue;
       members.add(name);
     }
   }
   // The xray fallback is a last resort, and `block` resolves to no node at all.
-  final fallback = tagNames['$index\u0000${balancer['fallbackTag']}'];
+  final fallback = tagNames[_scopedTag(index, balancer['fallbackTag'])];
   if (fallback != null && !members.contains(fallback)) members.add(fallback);
   if (members.isEmpty) return null;
 
@@ -612,7 +795,7 @@ Map<String, Object?>? _convertWireguardOutbound(
     'port': port,
     if ((publicKey ?? '').isNotEmpty) 'public-key': publicKey,
     if ((presharedKey ?? '').isNotEmpty) 'pre-shared-key': presharedKey,
-    'allowed-ips': ['0.0.0.0/0,::/0'],
+    'allowed-ips': ['0.0.0.0/0', '::/0'],
   };
 
   return <String, Object?>{
@@ -639,8 +822,12 @@ void _applyStreamSettings(
   if (streamSettings is! Map<String, Object?>) return;
 
   final security = streamSettings['security']?.toString() ?? 'none';
+  final tlsSettings = _asMap(streamSettings['tlsSettings']);
   final sni =
-      (streamSettings['servername'] ?? streamSettings['host'] ?? fallbackSni)
+      (tlsSettings?['serverName'] ??
+              streamSettings['servername'] ??
+              streamSettings['host'] ??
+              fallbackSni)
           .toString();
 
   if (security == 'reality') {

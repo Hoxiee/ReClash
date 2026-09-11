@@ -176,11 +176,17 @@ func updateListeners(cfg *config.Config) {
 	}
 }
 
+func setTunUp(up bool) {
+	if tunUp.Swap(up) != up {
+		doctorBumpGeneration(doctorTunGeneration)
+	}
+}
+
 func syncTunUp() {
 	if features.Android {
 		return
 	}
-	tunUp.Store(isRunning.Load() && listener.GetTunConf().Enable)
+	setTunUp(isRunning.Load() && listener.GetTunConf().Enable)
 }
 
 // A closed TUN netdevice unregisters asynchronously (~2s on Linux); creating while the dying device still holds the name attaches to it and wedges netlink — create only on a free name, and treat a free-name failure as a real error.
@@ -451,6 +457,7 @@ func applyConfig(params *SetupParams) error {
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	rcxEngineInstance.OnConfigApplied()
+	doctorBumpGenerations(doctorGenerationChange{Config: true, Routing: true})
 	return err
 }
 

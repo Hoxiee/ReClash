@@ -80,7 +80,7 @@ class DesyncEngineView extends StatelessWidget {
 
 enum _DesyncSection { strategy, test, engine }
 
-String _desyncStrategyName(
+String desyncStrategyName(
   AppLocalizations appLocalizations,
   DesyncProps props,
 ) {
@@ -181,7 +181,7 @@ class _DesyncStrategyOverview extends ConsumerWidget {
     return _DesyncOverviewCard(
       icon: Icons.tune_rounded,
       title: appLocalizations.desyncActiveStrategy,
-      subtitle: _desyncStrategyName(appLocalizations, props),
+      subtitle: desyncStrategyName(appLocalizations, props),
       detail: appLocalizations.desyncArgsCount(props.strategyArgs.length),
     );
   }
@@ -290,6 +290,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
         if (widget._section == null ||
             widget._section == _DesyncSection.strategy)
           SettingSection(
+            title: appLocalizations.desyncStrategySection,
             top: 16,
             actions: [
               const SizedBox(width: 8),

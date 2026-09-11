@@ -10,6 +10,26 @@ import 'package:flutter/services.dart';
 
 const _platformProbeTimeout = Duration(seconds: 2);
 
+class AndroidNotificationStatus {
+  final bool permissionGranted;
+  final bool serviceChannelEnabled;
+  final bool subscriptionChannelEnabled;
+
+  const AndroidNotificationStatus({
+    required this.permissionGranted,
+    required this.serviceChannelEnabled,
+    required this.subscriptionChannelEnabled,
+  });
+
+  factory AndroidNotificationStatus.fromMap(Map<Object?, Object?>? value) {
+    return AndroidNotificationStatus(
+      permissionGranted: value?['permissionGranted'] == true,
+      serviceChannelEnabled: value?['serviceChannelEnabled'] != false,
+      subscriptionChannelEnabled: value?['subscriptionChannelEnabled'] != false,
+    );
+  }
+}
+
 class App {
   static App? _instance;
   late MethodChannel methodChannel;
@@ -86,6 +106,23 @@ class App {
 
   Future<bool?> requestNotificationsPermission() async {
     return methodChannel.invokeMethod<bool>('requestNotificationsPermission');
+  }
+
+  Future<AndroidNotificationStatus> getNotificationStatus({
+    String? serviceChannelId,
+  }) async {
+    final value = await methodChannel.invokeMapMethod<Object?, Object?>(
+      'getNotificationStatus',
+      {'serviceChannelId': serviceChannelId},
+    );
+    return AndroidNotificationStatus.fromMap(value);
+  }
+
+  Future<bool?> openNotificationSettings({String? channelId}) async {
+    if (!Platform.isAndroid) return false;
+    return methodChannel.invokeMethod<bool>('openNotificationSettings', {
+      'channelId': channelId,
+    });
   }
 
   Future<bool> openFile(String path) async {
@@ -229,6 +266,7 @@ class App {
 
   Future<bool> showNotice({
     required String channelName,
+    required String notificationKey,
     required String title,
     required String message,
     String? actionLabel,
@@ -237,6 +275,7 @@ class App {
     try {
       return await methodChannel.invokeMethod<bool>('showNotice', {
             'channelName': channelName,
+            'notificationKey': notificationKey,
             'title': title,
             'message': message,
             'actionLabel': actionLabel,

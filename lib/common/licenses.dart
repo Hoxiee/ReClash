@@ -14,9 +14,7 @@ Future<void> registerAppLicenses() async {
     for (final entry in _appLicenses.entries)
       rootBundle.loadString(entry.value).then((text) {
         LicenseRegistry.addLicense(
-          () => Stream.value(
-            LicenseEntryWithLineBreaks([entry.key], text),
-          ),
+          () => Stream.value(LicenseEntryWithLineBreaks([entry.key], text)),
         );
       }),
   ]);

@@ -34,7 +34,7 @@ class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 4;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -57,12 +57,21 @@ class Database extends _$Database {
           await _addColumnIfMissing(m, profiles, profiles.matchTarget);
         }
         if (from < 4) {
-          await _addColumnIfMissing(m, profiles, profiles.panelMeta);
-        }
-        if (from < 5) {
-          await _addColumnIfMissing(m, profiles, profiles.clientEmulation);
-          await _addColumnIfMissing(m, profiles, profiles.customUserAgent);
-          await _addColumnIfMissing(m, profiles, profiles.skippedNodes);
+          for (final column in [
+            profiles.panelMeta,
+            profiles.clientEmulation,
+            profiles.customUserAgent,
+            profiles.skippedNodes,
+            profiles.capabilityManifest,
+            profiles.serviceRoutePolicies,
+            profiles.manualCapabilitySelectors,
+            profiles.capabilityManifestIssue,
+            profiles.undialableNodes,
+            profiles.userLabel,
+            profiles.lastWorkingClient,
+          ]) {
+            await _addColumnIfMissing(m, profiles, column);
+          }
         }
       },
     );
@@ -135,6 +144,23 @@ class Database extends _$Database {
 
   Future<void> _resetOrders() async {
     await rulesDao.resetOrders();
+  }
+
+  Future<void> restoreProfiles(
+    List<Profile> profiles, {
+    bool isOverride = false,
+  }) async {
+    if (profiles.isEmpty && !isOverride) return;
+    await batch((b) {
+      if (isOverride) {
+        profilesDao.setAllWithBatch(b, profiles);
+      } else {
+        profilesDao.putAllWithBatch(
+          b,
+          profiles.map((item) => item.toCompanion()),
+        );
+      }
+    });
   }
 
   Future<void> restore(

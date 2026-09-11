@@ -57,7 +57,10 @@ void main() {
         .update((state) => state.copyWith(primaryColor: 0xFF123456));
 
     switchTo([profileWith(themeHex: '6E55F5', id: 1), profileWith(id: 2)], 1);
-    expect(container.read(effectiveThemePropsProvider).primaryColor, 0xFF6E55F5);
+    expect(
+      container.read(effectiveThemePropsProvider).primaryColor,
+      0xFF6E55F5,
+    );
 
     container.read(currentProfileIdProvider.notifier).value = 2;
     expect(

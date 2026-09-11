@@ -79,22 +79,28 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     );
   }
 
-  Future<void> _restoreOnWebDAV(RestoreOption option) async {
+  Future<void> _applyPrepared(PreparedRestore prepared) async {
     final appLocalizations = context.appLocalizations;
-    final res = await globalState.loadingRun<bool>(
+    final option = await dialogs.showCommonDialog<RestoreOption>(
+      child: RestorePreviewDialog(summary: prepared.summary),
+    );
+    if (option == null) {
+      await ref
+          .read(backupActionProvider.notifier)
+          .discardPreparedRestore(prepared);
+      return;
+    }
+    final restored = await globalState.loadingRun<bool>(
       () async {
-        final client = _davConnection.client;
-        if (client == null) {
-          return false;
-        }
-        await client.restore();
-        await ref.read(backupActionProvider.notifier).restore(option);
+        await ref
+            .read(backupActionProvider.notifier)
+            .applyPreparedRestore(prepared, option);
         return true;
       },
       tag: LoadingTag.backup_restore,
       title: appLocalizations.restore,
     );
-    if (res != true) return;
+    if (restored != true) return;
     unawaited(
       dialogs.showMessage(
         title: appLocalizations.restore,
@@ -103,12 +109,22 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     );
   }
 
-  Future<void> _handleRestoreOnWebDAV() async {
-    final restoreOption = await dialogs.showCommonDialog<RestoreOption>(
-      child: const RestoreOptionsDialog(),
+  Future<void> _restoreOnWebDAV() async {
+    final appLocalizations = context.appLocalizations;
+    final prepared = await globalState.loadingRun<PreparedRestore?>(
+      () async {
+        final client = _davConnection.client;
+        if (client == null) return null;
+        await client.restore();
+        return ref
+            .read(backupActionProvider.notifier)
+            .prepareRestoreFromPath(await appPath.backupFilePath);
+      },
+      tag: LoadingTag.backup_restore,
+      title: appLocalizations.restore,
     );
-    if (restoreOption == null || !context.mounted) return;
-    unawaited(_restoreOnWebDAV(restoreOption));
+    if (prepared == null || !mounted) return;
+    await _applyPrepared(prepared);
   }
 
   Future<void> _backupOnLocal() async {
@@ -137,28 +153,15 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
     );
   }
 
-  Future<void> _restoreOnLocal(RestoreOption option) async {
+  Future<void> _restoreOnLocal() async {
     final appLocalizations = context.appLocalizations;
-    final res = await globalState.loadingRun<bool>(
-      () => ref.read(backupActionProvider.notifier).restorePickedFile(option),
+    final prepared = await globalState.loadingRun<PreparedRestore?>(
+      () => ref.read(backupActionProvider.notifier).preparePickedRestore(),
       tag: LoadingTag.backup_restore,
       title: appLocalizations.restore,
     );
-    if (res != true) return;
-    unawaited(
-      dialogs.showMessage(
-        title: appLocalizations.restore,
-        message: TextSpan(text: appLocalizations.restoreSuccess),
-      ),
-    );
-  }
-
-  Future<void> _handleRestoreOnLocal() async {
-    final option = await dialogs.showCommonDialog<RestoreOption>(
-      child: const RestoreOptionsDialog(),
-    );
-    if (option == null || !mounted) return;
-    unawaited(_restoreOnLocal(option));
+    if (prepared == null || !mounted) return;
+    await _applyPrepared(prepared);
   }
 
   void _handleChange(String? value, WidgetRef ref) {
@@ -262,7 +265,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                 ),
                 DecorationListItem(
                   onPressed: () {
-                    _handleRestoreOnWebDAV();
+                    _restoreOnWebDAV();
                   },
                   title: Text(appLocalizations.restore),
                   subtitle: Text(appLocalizations.restoreFromWebDAVDesc),
@@ -282,7 +285,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
               ),
               DecorationListItem(
                 onPressed: () {
-                  _handleRestoreOnLocal();
+                  _restoreOnLocal();
                 },
                 title: Text(appLocalizations.restore),
                 subtitle: Text(appLocalizations.restoreFromFileDesc),
@@ -362,40 +365,75 @@ class _RestoreStrategyItem extends ConsumerWidget {
   }
 }
 
-class RestoreOptionsDialog extends StatefulWidget {
-  const RestoreOptionsDialog({super.key});
+class RestorePreviewDialog extends StatefulWidget {
+  const RestorePreviewDialog({super.key, required this.summary});
+
+  final RestoreSummary summary;
 
   @override
-  State<RestoreOptionsDialog> createState() => _RestoreOptionsDialogState();
+  State<RestorePreviewDialog> createState() => _RestorePreviewDialogState();
 }
 
-class _RestoreOptionsDialogState extends State<RestoreOptionsDialog> {
-  void _handleOnTab(RestoreOption? option) {
-    if (option == null) return;
-    Navigator.of(context).pop(option);
-  }
+class _RestorePreviewDialogState extends State<RestorePreviewDialog> {
+  RestoreOption _option = RestoreOption.onlyProfiles;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final summary = widget.summary;
     return CommonDialog(
-      title: appLocalizations.restore,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: Wrap(
-        children: [
-          ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.onlyProfiles);
-            },
-            title: Text(appLocalizations.restoreOnlyConfig),
-          ),
-          ListItem(
-            onTap: () {
-              _handleOnTab(RestoreOption.all);
-            },
-            title: Text(appLocalizations.restoreAllData),
-          ),
-        ],
+      title: appLocalizations.restorePreviewTitle,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_option),
+          child: Text(appLocalizations.confirm),
+        ),
+      ],
+      child: SizedBox(
+        width: 420,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(appLocalizations.restorePreviewDescription),
+            const SizedBox(height: 12),
+            Text(appLocalizations.restoreProfilesCount(summary.profiles)),
+            Text(appLocalizations.restoreScriptsCount(summary.scripts)),
+            Text(appLocalizations.restoreRulesCount(summary.rules)),
+            Text(appLocalizations.restoreProxyGroupsCount(summary.proxyGroups)),
+            Text(
+              summary.hasSettings
+                  ? appLocalizations.restoreSettingsIncluded
+                  : appLocalizations.restoreSettingsNotIncluded,
+            ),
+            const SizedBox(height: 12),
+            RadioGroup<RestoreOption>(
+              groupValue: _option,
+              onChanged: (value) {
+                if (value != null) setState(() => _option = value);
+              },
+              child: Column(
+                children: [
+                  ListItem<RestoreOption>.radio(
+                    title: Text(appLocalizations.restoreOnlyConfig),
+                    value: RestoreOption.onlyProfiles,
+                    onTap: () =>
+                        setState(() => _option = RestoreOption.onlyProfiles),
+                  ),
+                  ListItem<RestoreOption>.radio(
+                    title: Text(appLocalizations.restoreAllData),
+                    value: RestoreOption.all,
+                    onTap: () => setState(() => _option = RestoreOption.all),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -14,9 +14,11 @@ import com.reclash.common.intent
 import com.reclash.common.toPendingIntent
 import com.reclash.service.R as ServiceR
 
-// Apart from the service notification, which owns id 1 while the tunnel runs.
-private const val NOTICE_CHANNEL = "ReClashNotice"
-private const val NOTICE_ID = 2
+internal const val SUBSCRIPTION_NOTICE_CHANNEL = "reclash_subscription_reminders"
+private const val SUBSCRIPTION_NOTICE_ID_BASE = 2_000
+
+internal fun subscriptionNoticeId(key: String): Int =
+    SUBSCRIPTION_NOTICE_ID_BASE + (key.hashCode() and 0x3fffffff)
 
 // Panels supply this URL, so any other scheme could aim the button anywhere.
 internal fun openableUrl(url: String?): String? {
@@ -30,6 +32,7 @@ internal fun openableUrl(url: String?): String? {
 
 internal fun Context.showNotice(
     channelName: String,
+    notificationKey: String,
     title: String,
     message: String,
     actionLabel: String?,
@@ -37,8 +40,9 @@ internal fun Context.showNotice(
 ): Boolean {
     val manager = NotificationManagerCompat.from(this)
     if (!manager.areNotificationsEnabled()) return false
-    ensureNoticeChannel(channelName)
-    val builder = NotificationCompat.Builder(this, NOTICE_CHANNEL)
+    ensureSubscriptionChannel(channelName)
+    if (!isChannelEnabled(SUBSCRIPTION_NOTICE_CHANNEL)) return false
+    val builder = NotificationCompat.Builder(this, SUBSCRIPTION_NOTICE_CHANNEL)
         .setSmallIcon(ServiceR.drawable.ic_service)
         .setContentTitle(title)
         .setContentText(message)
@@ -53,17 +57,23 @@ internal fun Context.showNotice(
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         builder.addAction(0, actionLabel, open.toPendingIntent)
     }
-    manager.notify(NOTICE_ID, builder.build())
+    manager.notify(subscriptionNoticeId(notificationKey), builder.build())
     return true
 }
 
-// Re-creating it relabels the channel; the user's own choices survive that.
-private fun Context.ensureNoticeChannel(channelName: String) {
+internal fun Context.isChannelEnabled(channelId: String): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return true
+    val manager = getSystemService(NotificationManager::class.java) ?: return false
+    val channel = manager.getNotificationChannel(channelId) ?: return true
+    return channel.importance != NotificationManager.IMPORTANCE_NONE
+}
+
+private fun Context.ensureSubscriptionChannel(channelName: String) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
     val manager = getSystemService(NotificationManager::class.java) ?: return
     manager.createNotificationChannel(
         NotificationChannel(
-            NOTICE_CHANNEL,
+            SUBSCRIPTION_NOTICE_CHANNEL,
             channelName.ifBlank { getString(CommonR.string.service_channel_name) },
             NotificationManager.IMPORTANCE_DEFAULT,
         ),

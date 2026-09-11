@@ -228,6 +228,60 @@ void main() {
     );
   });
 
+  group('run request state', () {
+    test('tracks a pending start until its operation finishes', () async {
+      markInitialized();
+      action.blockCoreCalls = true;
+
+      final starting = container
+          .read(setupActionProvider.notifier)
+          .setRunning(true);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        container.read(runRequestStateProvider).phase,
+        RunRequestPhase.starting,
+      );
+
+      action.blockCoreCalls = false;
+      for (final gate in action.pendingCoreCalls) {
+        gate.complete();
+      }
+      await starting;
+
+      expect(
+        container.read(runRequestStateProvider).phase,
+        RunRequestPhase.idle,
+      );
+    });
+
+    test('an older completion cannot clear a newer request', () async {
+      markInitialized();
+      action.blockCoreCalls = true;
+      final notifier = container.read(setupActionProvider.notifier);
+
+      final starting = notifier.setRunning(true);
+      await Future<void>.delayed(Duration.zero);
+      final stopping = notifier.setRunning(false);
+      await Future<void>.delayed(Duration.zero);
+
+      action.blockCoreCalls = false;
+      for (final gate in action.pendingCoreCalls) {
+        if (!gate.isCompleted) gate.complete();
+      }
+      await starting;
+      expect(
+        container.read(runRequestStateProvider).phase,
+        RunRequestPhase.stopping,
+      );
+      await stopping;
+      expect(
+        container.read(runRequestStateProvider).phase,
+        RunRequestPhase.idle,
+      );
+    });
+  });
+
   group('stop cleanup', () {
     test('resets traffic counters and re-checks the ip', () async {
       markInitialized();

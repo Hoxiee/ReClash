@@ -58,6 +58,18 @@ class TrafficTest {
     }
 
     @Test
+    fun `renders total traffic without per-second suffixes`() {
+        assertEquals("1.0KB↑  2.0KB↓", Traffic(up = 1024, down = 2048).totalText)
+    }
+
+    @Test
+    fun `marks only an all-zero sample as idle`() {
+        assertTrue(Traffic(up = 0, down = 0).isIdle)
+        assertTrue(!Traffic(up = 1, down = 0).isIdle)
+        assertTrue(!Traffic(up = 0, down = 1).isIdle)
+    }
+
+    @Test
     fun `labels upload before download`() {
         val text = Traffic(up = 1, down = 2).speedText
 

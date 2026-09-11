@@ -1,6 +1,7 @@
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../helpers/test_app.dart';
+import '../helpers/test_profiles.dart';
 
 const _runningVersion = '0.8.95';
 
@@ -33,7 +35,9 @@ Map<String, dynamic> release(String? body) => <String, dynamic>{
 };
 
 Future<ProviderContainer> pumpApp(WidgetTester tester, {Locale? locale}) async {
-  final container = ProviderContainer();
+  final container = ProviderContainer(
+    overrides: [profilesProvider.overrideWith(TestProfiles.new)],
+  );
   addTearDown(container.dispose);
   globalState.container = container;
   // appSettingProvider is autoDispose; in the app `configProvider` keeps it
@@ -144,6 +148,13 @@ void main() {
     tester,
   ) async {
     final container = await pumpApp(tester);
+
+    // The setting has to start enabled, otherwise "keeps the setting" cannot
+    // tell a preserved value from a cleared one.
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(autoCheckUpdate: true));
+    await tester.pump();
 
     final shown = container
         .read(commonActionProvider.notifier)

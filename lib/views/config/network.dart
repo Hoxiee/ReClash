@@ -320,6 +320,8 @@ class RouteAddressItem extends ConsumerWidget {
 List<Widget> networkOptionsItems({
   required bool isDesktop,
   required bool isMacOS,
+  bool showInterfaceName = true,
+  bool showRouteAddress = true,
 }) {
   return [
     if (isDesktop) const TUNItem(),
@@ -331,18 +333,31 @@ List<Widget> networkOptionsItems({
     // apply on desktop.
     if (isDesktop) ...[
       const InterfaceNameModeItem(),
-      const InterfaceNameItem(),
+      if (showInterfaceName) const InterfaceNameItem(),
     ],
-    if (!isDesktop) ...[const RouteModeItem(), const RouteAddressItem()],
+    if (!isDesktop) ...[
+      const RouteModeItem(),
+      if (showRouteAddress) const RouteAddressItem(),
+    ],
   ];
 }
 
-class NetworkListView extends StatelessWidget {
+class NetworkListView extends ConsumerWidget {
   const NetworkListView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final showInterfaceName = ref.watch(
+      patchClashConfigProvider.select(
+        (state) => state.interfaceNameMode == InterfaceNameMode.custom,
+      ),
+    );
+    final showRouteAddress = ref.watch(
+      networkSettingProvider.select(
+        (state) => state.routeMode != RouteMode.bypassPrivate,
+      ),
+    );
     return ListView(
       children: [
         if (system.isAndroid) ...[
@@ -362,6 +377,8 @@ class NetworkListView extends StatelessWidget {
             items: networkOptionsItems(
               isDesktop: system.isDesktop,
               isMacOS: system.isMacOS,
+              showInterfaceName: showInterfaceName,
+              showRouteAddress: showRouteAddress,
             ),
             enterDelay: const Duration(milliseconds: 50),
           ),
@@ -376,6 +393,8 @@ class NetworkListView extends StatelessWidget {
             items: networkOptionsItems(
               isDesktop: system.isDesktop,
               isMacOS: system.isMacOS,
+              showInterfaceName: showInterfaceName,
+              showRouteAddress: showRouteAddress,
             ),
             enterDelay: const Duration(milliseconds: 50),
           ),

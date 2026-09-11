@@ -243,6 +243,45 @@ void main() {
     expect(calls.where((call) => call.method == 'show'), hasLength(1));
   });
 
+  test('skips unchanged macOS tray titles', () async {
+    final titles = <String>[];
+    final titleTray = AppTray.forPlatform(
+      isMacOS: true,
+      isWindows: false,
+      setTitle: (title) async => titles.add(title),
+    );
+    const traffic = Traffic(up: 1024, down: 2048);
+
+    await titleTray.updateTitle(showTrayTitle: true, traffic: traffic);
+    await titleTray.updateTitle(showTrayTitle: true, traffic: traffic);
+
+    expect(titles, hasLength(1));
+  });
+
+  test('retries a macOS tray title after a platform failure', () async {
+    var failures = 1;
+    final titles = <String>[];
+    final titleTray = AppTray.forPlatform(
+      isMacOS: true,
+      isWindows: false,
+      setTitle: (title) async {
+        titles.add(title);
+        if (failures-- > 0) {
+          throw PlatformException(code: 'set-title-failed');
+        }
+      },
+    );
+    const traffic = Traffic(up: 1024, down: 2048);
+
+    await expectLater(
+      titleTray.updateTitle(showTrayTitle: true, traffic: traffic),
+      throwsA(isA<PlatformException>()),
+    );
+    await titleTray.updateTitle(showTrayTitle: true, traffic: traffic);
+
+    expect(titles, hasLength(2));
+  });
+
   test('menu item ids are stable across identical rebuilds', () async {
     await update(_trayState());
     final first = _items(showCall()).map((item) => item['id']).toList();

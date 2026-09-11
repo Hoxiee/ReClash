@@ -61,7 +61,7 @@ Map<String, Object?>? parseAwgConf(String conf, {String? name}) {
     if ((publicKey ?? '').isNotEmpty) 'public-key': _normalizeKey(publicKey!),
     if ((presharedKey ?? '').isNotEmpty)
       'pre-shared-key': _normalizeKey(presharedKey!),
-    'allowed-ips': [_normalizeAllowedIps(peer['allowedips'])],
+    'allowed-ips': _splitAllowedIps(peer['allowedips']),
   };
 
   final proxy = <String, Object?>{
@@ -149,12 +149,12 @@ String? _commentName(List<String> comments) {
   return null;
 }
 
-String _normalizeAllowedIps(String? allowedIps) {
-  final joined = [
+List<String> _splitAllowedIps(String? allowedIps) {
+  final entries = [
     for (final entry in (allowedIps ?? '').split(','))
       if (entry.trim().isNotEmpty) entry.trim(),
-  ].join(',');
-  return joined.isEmpty ? '0.0.0.0/0,::/0' : joined;
+  ];
+  return entries.isEmpty ? const ['0.0.0.0/0', '::/0'] : entries;
 }
 
 int? _leadingInt(String? value) {

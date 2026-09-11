@@ -37,10 +37,14 @@ type TunHandler struct {
 	listener *sing_tun.Listener
 	callback unsafe.Pointer
 
-	mu sync.RWMutex
+	mu           sync.RWMutex
+	probeCond    *sync.Cond
+	activeProbes int
+	closing      bool
 }
 
 func (th *TunHandler) start(fd int, stack, address, dns string) bool {
+	th.probeCond = sync.NewCond(&th.mu)
 	configMu.Lock()
 	defer configMu.Unlock()
 
@@ -68,8 +72,16 @@ func (th *TunHandler) start(fd int, stack, address, dns string) bool {
 
 func (th *TunHandler) close() {
 	th.mu.Lock()
-	defer th.mu.Unlock()
+	th.closing = true
+	th.removeHook()
+	if th.callback != nil {
+		cancelDoctorProbe(th.callback, "")
+	}
+	for th.activeProbes != 0 {
+		th.probeCond.Wait()
+	}
 	th.clear()
+	th.mu.Unlock()
 }
 
 func (th *TunHandler) clear() {
@@ -140,6 +152,35 @@ func (th *TunHandler) handleResolveProcess(source, target net.Addr) (int, string
 	return uid, resolvePackage(th.callback, uid)
 }
 
+func (th *TunHandler) handleDoctorProbe(request string) string {
+	th.mu.Lock()
+	if th.listener == nil || th.callback == nil || th.closing {
+		th.mu.Unlock()
+		return ""
+	}
+	callback := th.callback
+	th.activeProbes++
+	th.mu.Unlock()
+
+	result := runDoctorProbe(callback, request)
+
+	th.mu.Lock()
+	th.activeProbes--
+	if th.activeProbes == 0 {
+		th.probeCond.Broadcast()
+	}
+	th.mu.Unlock()
+	return result
+}
+
+func (th *TunHandler) cancelDoctorProbe(probeID string) {
+	th.mu.RLock()
+	defer th.mu.RUnlock()
+	if th.callback != nil {
+		cancelDoctorProbe(th.callback, probeID)
+	}
+}
+
 var (
 	installHooksOnce sync.Once
 	activeTunHandler atomic.Pointer[TunHandler]
@@ -202,6 +243,21 @@ var (
 	tunHandler        *TunHandler
 )
 
+func handleDoctorProbe(request string) string {
+	th := activeTunHandler.Load()
+	if th == nil {
+		return ""
+	}
+	return th.handleDoctorProbe(request)
+}
+
+func handleCancelDoctorProbe(probeID string) {
+	th := activeTunHandler.Load()
+	if th != nil {
+		th.cancelDoctorProbe(probeID)
+	}
+}
+
 func handleStopTun() {
 	tunLock.Lock()
 	defer tunLock.Unlock()
@@ -209,11 +265,11 @@ func handleStopTun() {
 }
 
 func stopTunLocked() {
+	setTunUp(false)
 	if tunHandler != nil {
 		tunHandler.close()
 		tunHandler = nil
 	}
-	tunUp.Store(false)
 }
 
 func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string) bool {
@@ -231,14 +287,14 @@ func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string)
 		callback: callback,
 	}
 	if tunHandler.start(fd, stack, address, dns) {
-		tunUp.Store(true)
+		setTunUp(true)
 		return true
 	}
 	// start() already cleared the handler, so nothing protects sockets from
 	// here on. Android has the routes up regardless, so the caller has to tear
 	// the VPN down rather than leave the device pointed at a black hole.
 	tunHandler = nil
-	tunUp.Store(false)
+	setTunUp(false)
 	return false
 }
 
@@ -339,6 +395,11 @@ func setEventListener(listener unsafe.Pointer) {
 		releaseObject(eventListener)
 	}
 	eventListener = listener
+}
+
+//export getActiveServer
+func getActiveServer(groupHintChar *C.char) *C.char {
+	return C.CString(marshalResult(handleGetActiveServer(takeCString(groupHintChar))))
 }
 
 //export getTotalTraffic

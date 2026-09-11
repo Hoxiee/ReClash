@@ -8,11 +8,17 @@ class _RecordingListener with CoreEventListener {
 
   final void Function()? onLoadedCallback;
   final List<String> loaded = [];
+  final List<DoctorStatus> doctorStatuses = [];
 
   @override
   void onLoaded(String providerName) {
     loaded.add(providerName);
     onLoadedCallback?.call();
+  }
+
+  @override
+  void onDoctorStatus(DoctorStatus status) {
+    doctorStatuses.add(status);
   }
 }
 
@@ -50,4 +56,29 @@ void main() {
       expect(second.loaded, ['provider-a', 'provider-b']);
     },
   );
+  test('doctor status events decode tolerant projections', () async {
+    final listener = _RecordingListener();
+    coreEventManager.addListener(listener);
+    addTearDown(() => coreEventManager.removeListener(listener));
+
+    coreEventManager.sendEvent(
+      const CoreEvent(
+        type: CoreEventType.doctorStatus,
+        data: {
+          'revision': 9,
+          'state': 'future-state',
+          'health': 'degraded',
+          'confidence': 'probable',
+          'causeCode': 'resolverFailure',
+        },
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(listener.doctorStatuses, hasLength(1));
+    expect(listener.doctorStatuses.single.revision, 9);
+    expect(listener.doctorStatuses.single.state, DoctorExamState.unknown);
+    expect(listener.doctorStatuses.single.health, DoctorHealth.degraded);
+    expect(listener.doctorStatuses.single.causeCode, 'resolverFailure');
+  });
 }

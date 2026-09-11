@@ -6,6 +6,13 @@ const double heroCardRadius = AppCorner.lg;
 const double heroInlayRadius = AppCorner.sm;
 const double heroBoardMaxWidth = 560;
 
+/// Ceilings for the two-column board. The left one stops just past the widest
+/// orb plus its caption; the right one keeps card text at a readable measure
+/// on a 1600px window instead of stretching it edge to edge.
+const double heroSplitLeftMaxWidth = 420;
+const double heroSplitRightMaxWidth = 560;
+const double heroSplitGap = 24;
+
 BoxDecoration heroSurfaceDecoration(
   BuildContext context, {
   double radius = heroCardRadius,

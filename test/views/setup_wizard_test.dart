@@ -123,6 +123,7 @@ class _TestPermissionGateway implements SetupPermissionGateway {
   int notificationRequests = 0;
   int appSettingsOpens = 0;
   int batterySettingsOpens = 0;
+  int batteryChecks = 0;
 
   _TestPermissionGateway({this.notificationGranted = false});
 
@@ -151,7 +152,10 @@ class _TestPermissionGateway implements SetupPermissionGateway {
   }
 
   @override
-  Future<bool> isBatteryOptimizationDisabled() async => batteryGranted;
+  Future<void> checkBatteryOptimizationDisable(ProviderReader read) async {
+    batteryChecks++;
+    read(batteryOptimizationDisableProvider.notifier).value = batteryGranted;
+  }
 
   @override
   Future<void> openBatteryOptimizationSettings() async {
@@ -1012,6 +1016,38 @@ void main() {
     );
   });
 
+  testWidgets('scroll card retries reveal after the target becomes ready', (
+    tester,
+  ) async {
+    final target = GlobalKey();
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: SizedBox(
+            height: 220,
+            child: SetupScrollCard(
+              revealIndex: 2,
+              children: [
+                const SizedBox(height: 300),
+                const SizedBox(height: 300),
+                SizedBox(key: target, height: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final position = _cardScroll(tester);
+    expect(position.pixels, greaterThan(0));
+    expect(target.currentContext, isNotNull);
+  });
+
   testWidgets('reduced motion changes steps without a fade frame', (
     tester,
   ) async {
@@ -1190,6 +1226,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(gateway.notificationChecks, 2);
+      expect(gateway.batteryChecks, 2);
       expect(container.read(batteryOptimizationDisableProvider), isTrue);
       expect(find.text('Allowed'), findsNWidgets(2));
     });
@@ -1205,6 +1242,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(gateway.batterySettingsOpens, 1);
+      expect(gateway.batteryChecks, 2);
       expect(container.read(batteryOptimizationDisableProvider), isTrue);
       expect(find.text('Allowed'), findsOneWidget);
     });

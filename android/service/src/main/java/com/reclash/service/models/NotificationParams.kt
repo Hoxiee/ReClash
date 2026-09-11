@@ -1,5 +1,12 @@
 package com.reclash.service.models
 
+data class NotificationComponent(
+    val type: String,
+    val doctorPriority: String? = null,
+    val hideWhenIdle: Boolean? = null,
+    val group: String? = null,
+)
+
 data class NotificationParams(
     val title: String = "ReClash",
     val stopText: String = "STOP",
@@ -7,5 +14,27 @@ data class NotificationParams(
     val pauseText: String = "Pause",
     val resumeText: String = "Resume",
     val pausedText: String = "Paused",
+    val smartRoutingText: String = "Smart Routing",
+    val smartRoutingSearchingText: String = "Searching",
+    val connectionDoctorText: String = "Connection Doctor",
+    val doctorExaminingText: String = "Checking connection",
+    val doctorHealthyText: String = "Connection healthy",
+    val doctorDegradedText: String = "Connection degraded",
+    val doctorBrokenText: String = "Problem found",
+    val doctorObservingText: String = "Observing traffic",
+    val sessionTrafficText: String = "Session traffic",
+    val networkStateText: String = "Network",
+    val currentServerText: String = "Current server",
+    val networkNormalText: String = "Normal",
+    val networkWhitelistText: String = "Whitelist",
+    val networkPortalText: String = "Captive portal",
+    val networkOfflineText: String = "Offline",
+    val networkUnknownText: String = "Unknown",
+    val activeText: String = "Protection active",
+    val activeServerGroup: String? = null,
+    val components: List<NotificationComponent> = emptyList(),
+    val showPauseAction: Boolean = true,
     val showStopAction: Boolean = true,
+    val hideSensitiveOnLockScreen: Boolean = true,
+    val visibility: String = "detailed",
 )

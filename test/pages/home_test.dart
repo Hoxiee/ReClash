@@ -1145,6 +1145,80 @@ void main() {
     expect(find.text('page:tools'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('back undoes a page opened from another page card', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var closeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.equalizer),
+                label: PageLabel.proxies,
+                builder: (_) => const Text('page:proxies'),
+              ),
+            ],
+          ),
+        ),
+        systemActionProvider.overrideWith(
+          () => _TestSystemAction(() => closeCount++),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(includeNavigatorKey: false, child: HomePage()),
+      ),
+    );
+    await tester.pump();
+
+    container
+        .read(currentPageLabelProvider.notifier)
+        .toPage(PageLabel.proxies, returnable: true);
+    await tester.pumpAndSettle();
+    expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    expect(closeCount, 0);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(closeCount, 1, reason: 'the marker is spent, back leaves the app');
+  });
+}
+
+class _TestSystemAction extends SystemAction {
+  _TestSystemAction(this.onClose);
+
+  final VoidCallback onClose;
+
+  @override
+  void build() {}
+
+  @override
+  Future<void> handleClose([bool exit = true]) async => onClose();
 }
 
 class _ThemeManagedTestApp extends StatelessWidget {

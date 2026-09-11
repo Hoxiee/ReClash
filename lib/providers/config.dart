@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:riverpod/riverpod.dart' show Provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/config.g.dart';
@@ -45,6 +46,13 @@ class DesyncSetting extends _$DesyncSetting with AutoDisposeNotifierMixin {
     return const DesyncProps();
   }
 }
+
+final byeDpiSupportedProvider = Provider<bool>((_) => system.isAndroid);
+
+final effectiveDesyncSettingProvider = Provider<DesyncProps>((ref) {
+  if (!ref.watch(byeDpiSupportedProvider)) return defaultDesyncProps;
+  return ref.watch(desyncSettingProvider);
+});
 
 @riverpod
 class NetworkSetting extends _$NetworkSetting with AutoDisposeNotifierMixin {

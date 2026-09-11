@@ -1,7 +1,9 @@
 export 'active_server.dart';
 export 'announce.dart';
 export 'change_server_button.dart';
+export 'connection_mode.dart';
 export 'dashboard_info_card.dart';
+export 'desync_cards.dart';
 export 'focusable_tap.dart';
 export 'hero_connect.dart';
 export 'hero_offers.dart';
@@ -18,4 +20,5 @@ export 'network_speed.dart';
 export 'outbound_mode.dart';
 export 'quick_options.dart';
 export 'service_info.dart';
+export 'smart_routing_card.dart';
 export 'traffic_usage.dart';

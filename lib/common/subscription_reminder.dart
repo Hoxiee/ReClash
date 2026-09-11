@@ -7,10 +7,11 @@ typedef CheckSubscriptionReminder = Future<void> Function(Profile profile);
 
 Future<void> runSubscriptionReminderSweep({
   required List<Profile> profiles,
+  bool enabled = true,
   bool? isAndroid,
   CheckSubscriptionReminder? check,
 }) async {
-  if (!(isAndroid ?? system.isAndroid)) return;
+  if (!enabled || !(isAndroid ?? system.isAndroid)) return;
   final checkProfile = check ?? subscriptionReminder.check;
   for (final profile in profiles) {
     try {
@@ -83,6 +84,7 @@ class SubscriptionReminder {
     }
     return NoticeRequest(
       channelName: localizations.subscriptionNoticeChannel,
+      notificationKey: 'subscription:${profile.id}',
       title: sanitizeNoticeText(displayName.takeFirstValid([appName])),
       message: sanitizeNoticeText(switch (day) {
         subscriptionExpiredDay => localizations.subscriptionExpired,
