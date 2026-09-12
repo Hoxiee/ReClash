@@ -4,7 +4,9 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -92,6 +94,33 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
       shortcuts: {
         controlSingleActivator(LogicalKeyboardKey.keyW):
             const CloseWindowIntent(),
+        controlSingleActivator(LogicalKeyboardKey.digit1): const ToPageIntent(
+          0,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit2): const ToPageIntent(
+          1,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit3): const ToPageIntent(
+          2,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit4): const ToPageIntent(
+          3,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit5): const ToPageIntent(
+          4,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit6): const ToPageIntent(
+          5,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit7): const ToPageIntent(
+          6,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit8): const ToPageIntent(
+          7,
+        ),
+        controlSingleActivator(LogicalKeyboardKey.digit9): const ToPageIntent(
+          8,
+        ),
         const SingleActivator(LogicalKeyboardKey.escape):
             const EscapeBackIntent(),
       },
@@ -103,6 +132,16 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
           ),
           EscapeBackIntent: CallbackAction<EscapeBackIntent>(
             onInvoke: (_) => globalState.navigatorKey.currentState?.maybePop(),
+          ),
+          ToPageIntent: CallbackAction<ToPageIntent>(
+            onInvoke: (intent) {
+              final items = ref.read(currentNavigationItemsStateProvider).value;
+              if (intent.index >= items.length) return null;
+              ref
+                  .read(currentPageLabelProvider.notifier)
+                  .toPage(items[intent.index].label);
+              return null;
+            },
           ),
           DoNothingIntent: CallbackAction<DoNothingIntent>(
             onInvoke: (_) => null,

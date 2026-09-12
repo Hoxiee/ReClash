@@ -568,6 +568,12 @@ class EscapeBackIntent extends Intent {
   const EscapeBackIntent();
 }
 
+class ToPageIntent extends Intent {
+  const ToPageIntent(this.index);
+
+  final int index;
+}
+
 @freezed
 abstract class Result<T> with _$Result<T> {
   const factory Result({

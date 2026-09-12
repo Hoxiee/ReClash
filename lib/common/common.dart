@@ -38,6 +38,7 @@ export 'lock.dart';
 export 'measure.dart';
 export 'mixin.dart';
 export 'nav_bar_metrics.dart';
+export 'nav_rail_metrics.dart';
 export 'navigator.dart';
 export 'network.dart';
 export 'num.dart';

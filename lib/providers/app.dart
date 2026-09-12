@@ -161,14 +161,6 @@ class ViewSize extends _$ViewSize with AutoDisposeNotifierMixin {
 }
 
 @Riverpod(keepAlive: true)
-class SideWidth extends _$SideWidth with AutoDisposeNotifierMixin {
-  @override
-  double build() {
-    return 0;
-  }
-}
-
-@Riverpod(keepAlive: true)
 double viewWidth(Ref ref) {
   return ref.watch(viewSizeProvider).width;
 }
@@ -650,7 +642,6 @@ List<Override> buildAppStateOverrides(AppState appState) {
     packagesProvider.overrideWithBuild((_, _) => appState.packages),
     sortNumProvider.overrideWithBuild((_, _) => appState.sortNum),
     viewSizeProvider.overrideWithBuild((_, _) => appState.viewSize),
-    sideWidthProvider.overrideWithBuild((_, _) => appState.sideWidth),
     delayDataSourceProvider.overrideWithBuild((_, _) => appState.delayMap),
     groupsProvider.overrideWithBuild((_, _) => appState.groups),
     checkIpNumProvider.overrideWithBuild((_, _) => appState.checkIpNum),

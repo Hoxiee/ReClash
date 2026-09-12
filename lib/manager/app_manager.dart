@@ -5,11 +5,10 @@ import 'package:reclash/common/permission.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/manager/window_manager.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/animated_visibility.dart';
+import 'package:reclash/widgets/app_nav_rail.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -241,54 +240,6 @@ class AppEnvManager extends StatelessWidget {
   }
 }
 
-class _SidebarRail extends StatelessWidget {
-  const _SidebarRail({
-    required this.items,
-    required this.currentIndex,
-    required this.showLabel,
-    required this.onSelected,
-  });
-
-  final List<NavigationItem> items;
-  final int currentIndex;
-  final bool showLabel;
-  final void Function(int index) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final labelStyle = context.textTheme.labelLarge!.copyWith(
-      color: context.colorScheme.onSurface,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: NavigationRail(
-            scrollable: true,
-            minExtendedWidth: 200,
-            backgroundColor: Colors.transparent,
-            selectedLabelTextStyle: labelStyle,
-            unselectedLabelTextStyle: labelStyle,
-            destinations: [
-              for (final item in items)
-                NavigationRailDestination(
-                  icon: item.icon,
-                  label: Text(item.label.label),
-                ),
-            ],
-            onDestinationSelected: onSelected,
-            extended: false,
-            selectedIndex: currentIndex,
-            labelType: showLabel
-                ? NavigationRailLabelType.all
-                : NavigationRailLabelType.none,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class AppSidebarContainer extends ConsumerWidget {
   final Widget child;
 
@@ -298,22 +249,25 @@ class AppSidebarContainer extends ConsumerWidget {
     required BuildContext context,
     required Widget child,
   }) {
-    return Material(color: context.colorScheme.surfaceContainer, child: child);
-  }
-
-  void _updateSideBarWidth(WidgetRef ref, double contentWidth) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(sideWidthProvider.notifier).value =
-          ref.read(viewSizeProvider.select((state) => state.width)) -
-          contentWidth;
-    });
+    return Material(
+      color: context.colorScheme.surfaceContainer,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            right: BorderSide(
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+        child: child,
+      ),
+    );
   }
 
   void _handleToPage(WidgetRef ref, PageLabel pageLabel) {
     final focusNode = FocusManager.instance.primaryFocus;
     final preserveNavigationFocus =
-        focusNode?.context?.findAncestorWidgetOfExactType<NavigationRail>() !=
-        null;
+        focusNode?.context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
     ref.read(currentPageLabelProvider.notifier).toPage(pageLabel);
     if (!preserveNavigationFocus || focusNode == null) {
       return;
@@ -327,11 +281,7 @@ class AppSidebarContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final navigationState = ref.watch(navigationStateProvider);
-    final navigationItems = navigationState.navigationItems;
-    final isMobileView = navigationState.viewMode == ViewMode.mobile;
-    final currentIndex = navigationState.currentIndex;
-    final showLabel = ref.watch(appSettingProvider).showLabel;
+    final isMobileView = ref.watch(isMobileViewProvider);
     return Container(
       color: context.colorScheme.surfaceContainer,
       child: Row(
@@ -342,60 +292,24 @@ class AppSidebarContainer extends ConsumerWidget {
               context: context,
               child: SafeArea(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (system.isMacOS) const SizedBox(height: 22),
                     const SizedBox(height: 10),
-                    if (!system.isMacOS) ...[
-                      const ClipRect(child: AppIcon()),
-                      const SizedBox(height: 12),
-                    ],
                     Expanded(
                       child: ScrollConfiguration(
                         behavior: const HiddenBarScrollBehavior(),
-                        child: _SidebarRail(
-                          items: navigationItems,
-                          currentIndex: currentIndex,
-                          showLabel: showLabel,
-                          onSelected: (index) {
-                            _handleToPage(ref, navigationItems[index].label);
-                          },
+                        child: AppNavRail(
+                          leading: navigationPort?.buildStatusMark(),
+                          onToPage: (label) => _handleToPage(ref, label),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    IconButton(
-                      tooltip: context.appLocalizations.toggleLabel,
-                      onPressed: () {
-                        ref
-                            .read(appSettingProvider.notifier)
-                            .update(
-                              (state) =>
-                                  state.copyWith(showLabel: !state.showLabel),
-                            );
-                      },
-                      icon: Icon(
-                        Icons.menu,
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                   ],
                 ),
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: ClipRect(
-              child: LayoutBuilder(
-                builder: (_, constraints) {
-                  _updateSideBarWidth(ref, constraints.maxWidth);
-                  return child;
-                },
-              ),
-            ),
-          ),
+          Expanded(flex: 1, child: ClipRect(child: child)),
         ],
       ),
     );

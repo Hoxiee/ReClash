@@ -103,7 +103,6 @@ void main() {
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(1000, 800));
-    container.read(sideWidthProvider.notifier).update((_) => 200);
 
     final profiles = container.read(profilesStateProvider);
     expect(profiles.profiles.single.label, 'Primary');

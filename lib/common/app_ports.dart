@@ -1,5 +1,6 @@
 import 'package:reclash/common/provider_reader.dart';
 import 'package:reclash/models/models.dart';
+import 'package:flutter/widgets.dart';
 
 abstract interface class WindowPort {
   Future<WindowProps?> captureNormalGeometry(WindowProps current);
@@ -27,6 +28,10 @@ abstract interface class TrayPort {
 
 abstract interface class NavigationPort {
   List<NavigationItem> getItems({bool openLogs, bool hasProxies});
+
+  /// The rail's status mark. Injected because it speaks the dashboard's hero
+  /// vocabulary, which widgets and managers must not import.
+  Widget buildStatusMark();
 }
 
 WindowPort? windowPort;

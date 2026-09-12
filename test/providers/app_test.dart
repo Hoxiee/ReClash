@@ -170,17 +170,6 @@ void main() {
     });
   });
 
-  group('SideWidth provider', () {
-    test('default is 0', () {
-      expect(container.read(sideWidthProvider), 0.0);
-    });
-
-    test('can update side width', () {
-      container.read(sideWidthProvider.notifier).update((_) => 300.0);
-      expect(container.read(sideWidthProvider), 300.0);
-    });
-  });
-
   group('viewWidth provider (derived)', () {
     test('derives from viewSize width', () {
       container

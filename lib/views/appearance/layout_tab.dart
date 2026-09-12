@@ -22,7 +22,6 @@ class AppearanceLayoutTab extends ConsumerWidget {
     final textScale = ref.watch(
       themeSettingProvider.select((state) => state.textScale),
     );
-    final isMobileView = ref.watch(isMobileViewProvider);
     return CustomScrollView(
       primary: false,
       slivers: [
@@ -67,9 +66,6 @@ class AppearanceLayoutTab extends ConsumerWidget {
         ),
         SettingSection.sliver(
           items: [
-            // Подписи рисует только боковая панель, поэтому на телефоне
-            // настройке нечем управлять.
-            if (!isMobileView) const _SidebarLabelsItem(),
             DecorationListItem.toggle(
               leading: const Icon(Icons.text_fields),
               title: Text(appLocalizations.textScale),
@@ -93,22 +89,6 @@ class AppearanceLayoutTab extends ConsumerWidget {
         ),
         const SettingBottomInset.sliver(),
       ],
-    );
-  }
-}
-
-class _SidebarLabelsItem extends ConsumerWidget {
-  const _SidebarLabelsItem();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DecorationListItem.toggle(
-      leading: const Icon(Icons.menu),
-      title: Text(context.appLocalizations.showLabels),
-      value: ref.watch(appSettingProvider.select((state) => state.showLabel)),
-      onChanged: (value) => ref
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(showLabel: value)),
     );
   }
 }

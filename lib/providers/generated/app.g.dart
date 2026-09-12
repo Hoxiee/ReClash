@@ -632,57 +632,6 @@ abstract class _$ViewSize extends $Notifier<Size> {
   }
 }
 
-@ProviderFor(SideWidth)
-final sideWidthProvider = SideWidthProvider._();
-
-final class SideWidthProvider extends $NotifierProvider<SideWidth, double> {
-  SideWidthProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'sideWidthProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$sideWidthHash();
-
-  @$internal
-  @override
-  SideWidth create() => SideWidth();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(double value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<double>(value),
-    );
-  }
-}
-
-String _$sideWidthHash() => r'2f849d52dab271831bad68b07c1f90b5c18c0cc4';
-
-abstract class _$SideWidth extends $Notifier<double> {
-  double build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<double, double>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<double, double>,
-              double,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(viewWidth)
 final viewWidthProvider = ViewWidthProvider._();
 

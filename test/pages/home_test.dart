@@ -70,7 +70,7 @@ void main() {
 
     await tester.pump();
 
-    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(AppNavRail), findsOneWidget);
     expect(find.byType(AppNavBar), findsNothing);
 
     await tester.pump(const Duration(milliseconds: 150));
@@ -140,7 +140,7 @@ void main() {
       await tester.tap(find.text('count: 0'));
       await tester.pump();
       expect(find.text('count: 1'), findsOneWidget);
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
       expect(find.byType(AppNavBar), findsNothing);
 
       for (var width = 1180.0; width >= 500; width -= 20) {
@@ -151,21 +151,23 @@ void main() {
       }
 
       expect(find.text('count: 1'), findsOneWidget);
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
       expect(find.byType(AppNavBar), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 150));
       expect(tester.takeException(), isNull);
 
-      final outgoingTools = find.descendant(
-        of: find.byType(NavigationRail),
-        matching: find.byIcon(Icons.construction),
-      );
+      final outgoingTools = find
+          .descendant(
+            of: find.byType(AppNavRail),
+            matching: find.byIcon(Icons.construction),
+          )
+          .first;
       await tester.tap(outgoingTools, warnIfMissed: false);
       await tester.pump();
       expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
 
       await tester.pump(const Duration(milliseconds: 301));
-      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(AppNavRail), findsNothing);
       expect(find.byType(AppNavBar), findsOneWidget);
 
       tester.view.physicalSize = const Size(1200, 800);
@@ -173,11 +175,11 @@ void main() {
       await tester.pump();
 
       expect(find.text('count: 1'), findsOneWidget);
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
       expect(find.byType(AppNavBar), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 301));
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
       expect(find.byType(AppNavBar), findsNothing);
       expect(tester.takeException(), isNull);
     },
@@ -305,7 +307,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 301));
       expect(tester.takeException(), isNull);
       expect(find.byType(ToolsView), findsOneWidget);
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
       expect(container.read(currentPageLabelProvider), PageLabel.tools);
 
       for (var width = 1180.0; width >= 500; width -= 20) {
@@ -462,11 +464,11 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
 
       bool focusInRail() {
         final context = FocusManager.instance.primaryFocus?.context;
-        return context?.findAncestorWidgetOfExactType<NavigationRail>() != null;
+        return context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
       }
 
       IconData? focusedRailIcon() {
@@ -476,11 +478,11 @@ void main() {
         }
         return [Icons.space_dashboard, Icons.article].reduce((closest, icon) {
           final closestDistance =
-              (tester.getCenter(find.byIcon(closest)).dy -
+              (tester.getCenter(find.byIcon(closest).first).dy -
                       focusNode.rect.center.dy)
                   .abs();
           final distance =
-              (tester.getCenter(find.byIcon(icon)).dy -
+              (tester.getCenter(find.byIcon(icon).first).dy -
                       focusNode.rect.center.dy)
                   .abs();
           return distance < closestDistance ? icon : closest;
@@ -501,8 +503,12 @@ void main() {
       await tester.pump();
 
       expect(container.read(currentPageLabelProvider), PageLabel.proxies);
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.selectedIndex, 1);
+      expect(
+        find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.selected == true,
+        ),
+        findsOneWidget,
+      );
       expect(focusedRailIcon(), Icons.article);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -776,21 +782,25 @@ void main() {
     await tester.enterText(find.byType(TextField), 'needle');
     expect(query, 'needle');
 
-    final navigationRail = find.byType(NavigationRail);
+    final navigationRail = find.byType(AppNavRail);
     await tester.tap(
-      find.descendant(
-        of: navigationRail,
-        matching: find.byIcon(Icons.construction),
-      ),
+      find
+          .descendant(
+            of: navigationRail,
+            matching: find.byIcon(Icons.construction),
+          )
+          .first,
     );
     await tester.pumpAndSettle();
     expect(query, isEmpty);
 
     await tester.tap(
-      find.descendant(
-        of: navigationRail,
-        matching: find.byIcon(Icons.space_dashboard),
-      ),
+      find
+          .descendant(
+            of: navigationRail,
+            matching: find.byIcon(Icons.space_dashboard),
+          )
+          .first,
     );
     await tester.pumpAndSettle();
 
@@ -850,12 +860,11 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.byType(NavigationRail), findsOneWidget);
+      expect(find.byType(AppNavRail), findsOneWidget);
 
-      Finder railIcon(IconData icon) => find.descendant(
-        of: find.byType(NavigationRail),
-        matching: find.byIcon(icon),
-      );
+      Finder railIcon(IconData icon) => find
+          .descendant(of: find.byType(AppNavRail), matching: find.byIcon(icon))
+          .first;
 
       // Visit another page so its content stays alive in the PageView cache.
       await tester.tap(railIcon(Icons.folder));
@@ -867,7 +876,7 @@ void main() {
 
       bool focusInRail() {
         final context = FocusManager.instance.primaryFocus?.context;
-        return context?.findAncestorWidgetOfExactType<NavigationRail>() != null;
+        return context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
       }
 
       for (var i = 0; i < 40 && !focusInRail(); i++) {

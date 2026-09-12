@@ -10,6 +10,7 @@ export 'hero_offers.dart';
 export 'hero_orb.dart';
 export 'hero_routing.dart';
 export 'hero_status.dart';
+export 'hero_status_mark.dart';
 export 'hero_surface.dart';
 export 'hero_words.dart';
 export 'intranet_ip.dart';

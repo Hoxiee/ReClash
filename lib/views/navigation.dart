@@ -1,6 +1,7 @@
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/views/dashboard/widgets/hero_status_mark.dart';
 import 'package:reclash/views/views.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -72,6 +73,9 @@ class Navigation implements NavigationPort {
       ),
     ];
   }
+
+  @override
+  Widget buildStatusMark() => const HeroStatusMark();
 
   Navigation._internal();
 
