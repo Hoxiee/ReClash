@@ -278,6 +278,13 @@ void main() {
     });
   });
 
+  test(
+    'Windows Helper stays disabled until privileged IPC is authenticated',
+    () {
+      expect(system.hasHelperService, isFalse);
+    },
+  );
+
   group(
     'checkIsAdmin',
     () {

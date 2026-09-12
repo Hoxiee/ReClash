@@ -42,7 +42,14 @@ class BuildConfig {
   );
 
   static BuildConfig load({required String rootDir}) {
-    final configPath = p.join(rootDir, 'build_config.yaml');
+    final configPath = p.join(
+      rootDir,
+      'plugins',
+      'setup',
+      'buildkit',
+      'build_tool',
+      'build_config.yaml',
+    );
     final file = File(configPath);
     if (!file.existsSync()) {
       _log.fine('No build_config.yaml found, using defaults');

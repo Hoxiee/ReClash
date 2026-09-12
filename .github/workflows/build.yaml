@@ -232,8 +232,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [[ -z "$KEYSTORE" || -z "$KEY_ALIAS" || -z "$STORE_PASSWORD" || -z "$KEY_PASSWORD" ]]; then
-            echo '::notice::Android signing secrets are incomplete; building a debug-signed development APK.'
-            exit 0
+            echo '::error::Android signing secrets are required for release tags.'
+            exit 1
           fi
           echo "$KEYSTORE" | base64 --decode > android/app/keystore.jks
           {
@@ -281,6 +281,15 @@ jobs:
 
       - name: Setup
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
+
+      - name: Reject unsafe Windows Helper releases
+        if: startsWith(matrix.platform, 'windows')
+        shell: bash
+        run: |
+          if find dist -type f -iname 'ReClashHelperService.exe' -print -quit | grep -q .; then
+            echo '::error::Windows Helper publishing is disabled until its privileged IPC is authenticated.'
+            exit 1
+          fi
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -343,6 +352,7 @@ jobs:
             | xargs -0 sha256sum > SHA256SUMS
 
       - name: Publish GitHub release
+        if: env.IS_STABLE == 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: ./dist/*

@@ -226,7 +226,7 @@ void main() {
 
   test('publishes freshness expiry without another Core event', () async {
     final core = _MockCoreHandler();
-    final freshUntil = DateTime.now().millisecondsSinceEpoch + 30;
+    final freshUntil = DateTime.now().millisecondsSinceEpoch + 500;
     when(() => core.doctorSnapshot()).thenAnswer(
       (_) async => DoctorSnapshot(
         revision: 4,
@@ -244,7 +244,7 @@ void main() {
     );
 
     await notifier.refresh();
-    await Future<void>.delayed(const Duration(milliseconds: 60));
+    await Future<void>.delayed(const Duration(milliseconds: 750));
 
     expect(container.read(connectionDoctorProvider).isFresh, isFalse);
     expect(revisions.length, greaterThanOrEqualTo(2));

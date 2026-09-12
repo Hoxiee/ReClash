@@ -91,6 +91,31 @@ void main() {
     );
   });
 
+  test('direct lease confirms an exit after escalating to SIGKILL', () async {
+    final exitCode = Completer<int>();
+    late _FakeProcess process;
+    process = _FakeProcess(
+      pid: 42,
+      exitCode: exitCode.future,
+      onKill: (signal) {
+        if (signal == ProcessSignal.sigkill) exitCode.complete(137);
+      },
+    );
+    final launcher = DirectCoreLauncher(
+      startProcess: (_, _) async => process,
+      corePath: 'ReClashCore',
+    );
+    final lease = await launcher.start(
+      sessionId: '0123456789abcdef0123456789abcdef',
+      address: 'test-address',
+    );
+
+    final result = await lease.stop(const Duration(milliseconds: 10));
+
+    expect(result.stopped, isTrue);
+    expect(result.exitConfirmed, isTrue);
+  });
+
   test('direct lease reports an unconfirmed exit after timeout', () async {
     final process = _FakeProcess(pid: 42, exitCode: Completer<int>().future);
     final launcher = DirectCoreLauncher(
@@ -143,12 +168,14 @@ class _FakeProcess implements Process {
   final Stream<List<int>> stderr = const Stream.empty();
 
   bool killed = false;
+  final void Function(ProcessSignal signal)? onKill;
 
-  _FakeProcess({required this.pid, required this.exitCode});
+  _FakeProcess({required this.pid, required this.exitCode, this.onKill});
 
   @override
   bool kill([ProcessSignal signal = ProcessSignal.sigterm]) {
     killed = true;
+    onKill?.call(signal);
     return true;
   }
 

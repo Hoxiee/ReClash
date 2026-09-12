@@ -23,6 +23,7 @@ function(apply_buildkit)
   if(WIN32)
     set(_outputs
       "${PROJECT_ROOT}/libclash/windows/ReClashCore.exe"
+      "${PROJECT_ROOT}/libclash/windows/ReClashHelperService.exe"
       "${PROJECT_ROOT}/libclash/windows/manifest.json"
     )
     set(_platform_args "windows")
@@ -48,5 +49,5 @@ function(apply_buildkit)
   # Match Cargokit's symbolic-output and ALL-target structure so the native
   # generator reevaluates this build rule on each build.
   set_source_files_properties("${_phony}" PROPERTIES SYMBOLIC TRUE)
-  add_custom_target(setup_buildkit_build ALL DEPENDS ${_outputs})
+  add_custom_target(setup_buildkit_build ALL DEPENDS "${_phony}")
 endfunction()

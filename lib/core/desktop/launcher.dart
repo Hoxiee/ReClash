@@ -111,9 +111,12 @@ final class DirectCoreLease implements CoreProcessLease {
       // routes still installed. Escalate to SIGKILL, mirroring the Helper's
       // terminate ladder, before reporting an unconfirmed exit.
       _process.kill(ProcessSignal.sigkill);
-      // Best effort: report the unconfirmed exit either way.
-      await _process.exitCode.timeout(timeout).catchError((_) => 0);
-      return CoreProcessStopResult(stopped: stopped, exitConfirmed: false);
+      try {
+        await _process.exitCode.timeout(timeout);
+        return CoreProcessStopResult(stopped: stopped, exitConfirmed: true);
+      } on TimeoutException {
+        return CoreProcessStopResult(stopped: stopped, exitConfirmed: false);
+      }
     }
   }
 }

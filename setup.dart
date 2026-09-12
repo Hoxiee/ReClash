@@ -25,6 +25,7 @@ const _hostPlatform = {
 
 Future<void> main(List<String> args) async {
   final parser = createSetupArgParser();
+  final rootDir = setupRootDirectory();
 
   if (args.contains('--help') || args.contains('-h')) {
     _showHelp(parser);
@@ -52,9 +53,12 @@ Future<void> main(List<String> args) async {
   }
 
   final env = results['env'] as String;
-  final rootDir = Directory.current.path;
   final arch = _detectArch();
-  final targets = createPackageTargets(platform, results['targets']);
+  final targets = createPackageTargets(
+    platform,
+    results['targets'],
+    arch: arch,
+  );
   final androidArch = results['arch'] as String?;
   final verbose = results['verbose'] as bool;
 
@@ -115,7 +119,37 @@ Map<String, String> createBuildEnvironment(String env) {
   return {'APP_ENV': env};
 }
 
-String createPackageTargets(String platform, String? customTargets) {
+Map<String, String> createPackageProcessEnvironment({
+  required String rootDir,
+  required String platform,
+  String? androidArch,
+}) {
+  return {
+    'ANDROID_ARCH': ?androidArch,
+    if (platform == 'linux')
+      'PATH': [
+        p.join(rootDir, '.dart_tool', 'release_tools', 'bin'),
+        Platform.environment['PATH'] ?? '',
+      ].join(':'),
+  };
+}
+
+String setupRootDirectory() => p.dirname(Platform.script.toFilePath());
+
+String createPackageTargets(
+  String platform,
+  String? customTargets, {
+  required String arch,
+}) {
+  if (platform == 'linux' && arch == 'arm64') {
+    if (customTargets?.split(',').contains('appimage') ?? false) {
+      throw UnsupportedError(
+        'ARM64 AppImage packaging is disabled because the pinned packager '
+        'forces ARCH=x86_64.',
+      );
+    }
+    return customTargets ?? 'deb,rpm';
+  }
   return customTargets ?? _allTargets[platform]!;
 }
 
@@ -150,7 +184,7 @@ Future<int> _package(
     descriptionArgs.addAll(['--description', arch]);
   }
 
-  final depExit = await _ensureDependencies(platform);
+  final depExit = await _ensureDependencies(platform, rootDir);
   if (depExit != 0) return depExit;
 
   final activateResult = await Process.run('dart', [
@@ -186,7 +220,12 @@ Future<int> _package(
       ...descriptionArgs,
     ],
     includeParentEnvironment: true,
-    environment: {'ANDROID_ARCH': ?androidArch},
+    environment: createPackageProcessEnvironment(
+      rootDir: rootDir,
+      platform: platform,
+      androidArch: androidArch,
+    ),
+    workingDirectory: rootDir,
     runInShell: Platform.isWindows,
   );
 
@@ -219,12 +258,12 @@ Future<bool> _hasCommand(String cmd) async {
   return result.exitCode == 0;
 }
 
-Future<int> _ensureDependencies(String platform) async {
+Future<int> _ensureDependencies(String platform, String rootDir) async {
   switch (platform) {
     case 'macos':
       return _ensureMacosDependencies();
     case 'linux':
-      return _ensureLinuxDependencies();
+      return _ensureLinuxDependencies(rootDir);
     default:
       return 0;
   }
@@ -243,7 +282,7 @@ Future<int> _ensureMacosDependencies() async {
   return result.exitCode;
 }
 
-Future<int> _ensureLinuxDependencies() async {
+Future<int> _ensureLinuxDependencies(String rootDir) async {
   const pkgGroups = <List<String>>[
     ['ninja-build', 'libgtk-3-dev'],
     ['libayatana-appindicator3-dev'],
@@ -292,11 +331,18 @@ Future<int> _ensureLinuxDependencies() async {
     }
   }
 
-  const appimagetool = '/usr/local/bin/appimagetool';
-  if (File(appimagetool).existsSync()) {
+  if (await _hasCommand('appimagetool')) {
     stdout.writeln('appimagetool already installed, skipping.');
     return 0;
   }
+  final appimagetool = p.join(
+    rootDir,
+    '.dart_tool',
+    'release_tools',
+    'bin',
+    'appimagetool',
+  );
+  await File(appimagetool).parent.create(recursive: true);
   stdout.writeln('Downloading appimagetool...');
   final downloadName =
       'appimagetool-${appImageToolArch(_detectArch())}.AppImage';
@@ -309,8 +355,11 @@ Future<int> _ensureLinuxDependencies() async {
     stderr.write(dlResult.stderr);
     return dlResult.exitCode;
   }
-  await Process.run('chmod', ['+x', appimagetool]);
-  return 0;
+  final chmodResult = await Process.run('chmod', ['+x', appimagetool]);
+  if (chmodResult.exitCode != 0) {
+    stderr.write(chmodResult.stderr);
+  }
+  return chmodResult.exitCode;
 }
 
 String appImageToolArch(String arch) {

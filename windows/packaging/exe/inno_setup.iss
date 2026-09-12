@@ -33,30 +33,45 @@ begin
   end;
 end;
 
-procedure UnregisterHelperService;
+function UnregisterHelperService(): Boolean;
 var
   HelperPath: String;
   ResultCode: Integer;
 begin
   HelperPath := ExpandConstant('{app}\\ReClashHelperService.exe');
-  if FileExists(HelperPath) then
+  if not FileExists(HelperPath) then
   begin
-    Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Result := True;
+    Exit;
   end;
+  Result := Exec(
+    HelperPath,
+    'uninstall',
+    '',
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode
+  ) and (ResultCode = 0);
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
-  UnregisterHelperService;
+  if not UnregisterHelperService then
+  begin
+    Result := 'Could not remove the legacy ReClash Helper service.';
+    Exit;
+  end;
   KillProcesses;
   Result := '';
 end;
 
 function InitializeUninstall(): Boolean;
 begin
-  UnregisterHelperService;
-  KillProcesses;
-  Result := True;
+  Result := UnregisterHelperService;
+  if Result then
+  begin
+    KillProcesses;
+  end;
 end;
 
 [Languages]

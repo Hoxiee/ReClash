@@ -105,7 +105,7 @@ class System {
     return parts[0] == 'root' && (mode & 0x800) != 0;
   }
 
-  bool get hasHelperService => isWindows;
+  bool get hasHelperService => false;
 
   Future<bool> checkIsAdmin() async {
     if (hasHelperService) {
@@ -181,7 +181,7 @@ class System {
       return AuthorizeCode.error;
     }
     if (system.isWindows) {
-      return await windows?.registerService() ?? AuthorizeCode.error;
+      return AuthorizeCode.error;
     }
     final isAdmin = await checkIsAdmin();
     if (isAdmin) {
