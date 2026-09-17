@@ -48,7 +48,7 @@ class DoctorAnswer {
 
 /// Cause codes that mean "the node answered nothing", whatever the transport
 /// error underneath was. The core mints these as prefix + error class from
-/// `flowErrorClass` in `core/Clash.Meta/tunnel/evidence.go`.
+/// `flowErrorClass` in `core/mihomo/tunnel/evidence.go`.
 const _nodeUnreachableCauses = {
   'outerDialTimeout',
   'outerDialRefused',

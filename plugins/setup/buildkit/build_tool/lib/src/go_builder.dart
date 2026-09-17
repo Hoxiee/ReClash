@@ -45,7 +45,7 @@ class GoBuilder {
   String get _outputPath => p.join(rootDir, config.outputDir);
 
   static String coreLdflags(String corePath, String configuredFlags) {
-    final mihomoPath = p.join(corePath, 'Clash.Meta');
+    final mihomoPath = p.join(corePath, 'mihomo');
     if (FileSystemEntity.typeSync(p.join(mihomoPath, '.git')) ==
         FileSystemEntityType.notFound) {
       throw BuildException('Missing mihomo Git metadata in $mihomoPath');

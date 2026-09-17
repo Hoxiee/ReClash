@@ -28,7 +28,7 @@ void main() {
   setUp(() {
     directory = Directory.systemTemp.createTempSync('mihomo-version-test-');
     corePath = p.join(directory.path, 'core');
-    mihomoPath = p.join(corePath, 'Clash.Meta');
+    mihomoPath = p.join(corePath, 'mihomo');
     Directory(mihomoPath).createSync(recursive: true);
     git(['init']);
     File(

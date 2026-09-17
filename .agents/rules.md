@@ -123,7 +123,7 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
 
 ## Core API Safety
 
-- `core/Clash.Meta` is a fork of mihomo, and changes to it are budgeted for features, not repairs. Fixing a bug there is
+- `core/mihomo` is a fork of mihomo, and changes to it are budgeted for features, not repairs. Fixing a bug there is
   low priority even when the bug is real and the fix is small: every patch is one more thing to carry across an upstream
   rebase. Solve it on the ReClash side of the boundary and note the mihomo behaviour you are working around. Reach into
   the submodule only for a feature that has nowhere else to live, or when the problem is one the FlClash patches

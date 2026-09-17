@@ -5,7 +5,7 @@ import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _evidence = 'core/doctor_evidence.go';
-const _flow = 'core/Clash.Meta/tunnel/evidence.go';
+const _flow = 'core/mihomo/tunnel/evidence.go';
 const _heal = 'core/doctor_heal.go';
 const _runtime = 'core/doctor_runtime.go';
 const _reducer = 'core/doctor_reducer.go';

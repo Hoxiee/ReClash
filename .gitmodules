@@ -1,4 +1,4 @@
-[submodule "core/Clash.Meta"]
-	path = core/Clash.Meta
-	url = https://github.com/Hoxiee/Clash.Meta.git
-	branch = reclash
+[submodule "core/mihomo"]
+	path = core/mihomo
+	url = https://github.com/Hoxiee/mihomo.git
+	branch = ReClash

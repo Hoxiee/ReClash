@@ -119,7 +119,7 @@ class AboutView extends ConsumerWidget {
                 trailing: const Icon(Icons.launch, size: 20),
                 onPressed: () {
                   dialogs.openUrl(
-                    'https://github.com/Hoxiee/Clash.Meta/tree/reclash',
+                    'https://github.com/Hoxiee/mihomo/tree/ReClash',
                   );
                 },
               ),
