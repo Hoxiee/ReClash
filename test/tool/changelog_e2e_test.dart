@@ -199,6 +199,58 @@ void main() {
     );
   });
 
+  test('keeps a commit boundary after upstream tags are removed', () {
+    final boundary = Process.runSync('git', [
+      'rev-parse',
+      'v1.0.0',
+    ], workingDirectory: repo.path).stdout.toString().trim();
+    git(['tag', '-d', 'v1.0.0', 'v1.1.0', 'v1.1.0-pre.1']);
+
+    final result =
+        ChangelogBuilder(
+          Git(workingDirectory: repo.path),
+          boundary: boundary,
+        ).build(
+          pending: const PendingVersion(
+            version: '0.1.0-pre.1',
+            date: '2026-01-02',
+            prerelease: true,
+          ),
+        );
+
+    expect(result.changelog.versions.single.tag, 'v0.1.0-pre.1');
+    final features = result.changelog.versions.single.groups
+        .firstWhere((group) => group.type == ChangelogType.feat)
+        .entries
+        .map((entry) => entry.text);
+    expect(features, ['Second feature', 'First feature']);
+  });
+
+  test('verifies a prerelease at its tag rather than the latest HEAD', () {
+    commit('feat: first standalone prerelease');
+    git(['tag', 'v0.1.0-pre.1']);
+    commit('feat: unreleased follow-up');
+
+    final result =
+        ChangelogBuilder(
+          Git(workingDirectory: repo.path),
+          boundary: 'v1.0.0',
+        ).build(
+          revision: 'v0.1.0-pre.1',
+          pending: const PendingVersion(
+            version: '0.1.0-pre.1',
+            date: '2026-01-02',
+            prerelease: true,
+          ),
+        );
+
+    expect(result.changelog.versions.first.tag, 'v0.1.0-pre.1');
+    expect(
+      result.changelog.versions.first.groups.single.entries.single.text,
+      'First standalone prerelease',
+    );
+  });
+
   test('is deterministic across runs', () {
     expect(
       encodeChangelog(build().changelog),

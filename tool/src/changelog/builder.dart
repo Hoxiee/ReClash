@@ -6,9 +6,7 @@ import 'models.dart';
 import 'parser.dart';
 import 'render.dart';
 
-/// Versions up to and including this tag are frozen: they predate the
-/// structured pipeline and are kept verbatim at the bottom of `CHANGELOG.md`.
-const frozenBoundaryTag = 'v0.8.95';
+const frozenBoundaryRevision = 'aee7ee264330d41f821961f71c79ec93d0a73d3f';
 
 const changelogDataPath = 'changelog.json';
 
@@ -45,14 +43,16 @@ class ChangelogBuildResult {
 }
 
 class ChangelogBuilder {
-  ChangelogBuilder(this.git, {this.boundary = frozenBoundaryTag});
+  ChangelogBuilder(this.git, {this.boundary = frozenBoundaryRevision});
 
   final Git git;
   final String boundary;
 
-  ChangelogBuildResult build({PendingVersion? pending}) {
-    final boundaryTag = VersionTag.tryParse(boundary);
-    final stable = git.stableTags(after: boundaryTag?.name);
+  ChangelogBuildResult build({
+    PendingVersion? pending,
+    String revision = 'HEAD',
+  }) {
+    final stable = git.stableTags(revision: revision, after: boundary);
     final parser = ChangelogParser();
     final versions = <ChangelogVersion>[];
     final commitIdsByTag = <String, Set<String>>{};
@@ -61,8 +61,8 @@ class ChangelogBuilder {
         (!git.tagExists(pending.tag) ||
             (VersionTag.tryParse(pending.tag)?.isPrerelease ?? false))) {
       final commits = git.commits(
-        from: stable.isEmpty ? boundaryTag?.name : stable.first.name,
-        to: 'HEAD',
+        from: stable.isEmpty ? boundary : stable.first.name,
+        to: revision,
       );
       commitIdsByTag[pending.tag] = _idsOf(commits);
       versions.add(
@@ -80,7 +80,7 @@ class ChangelogBuilder {
       final tag = stable[index];
       final previous = index + 1 < stable.length
           ? stable[index + 1].name
-          : boundaryTag?.name;
+          : boundary;
       final commits = git.commits(from: previous, to: tag.name);
       commitIdsByTag[tag.name] = _idsOf(commits);
       versions.add(

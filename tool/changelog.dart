@@ -7,7 +7,7 @@ import 'src/changelog/git.dart';
 import 'src/changelog/models.dart';
 import 'src/changelog/render.dart';
 
-const _repository = 'chen08209/ReClash';
+const _repository = 'Hoxiee/ReClash';
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
@@ -63,6 +63,7 @@ int _release(String root, ArgResults command) {
     pending: PendingVersion(
       version: version,
       date: command.option('date') ?? today(),
+      prerelease: VersionTag.tryParse('v$version')?.isPrerelease ?? false,
     ),
   );
   _printWarnings(result.warnings);
@@ -176,7 +177,19 @@ int _verify(String root) {
       }
       continue;
     }
-    final reference = expectedByTag[version.tag];
+    final expectedVersion = version.prerelease
+        ? ChangelogBuilder(git).build(
+            revision: version.tag,
+            pending: PendingVersion(
+              version: version.version,
+              date: version.date,
+              prerelease: true,
+            ),
+          )
+        : expected;
+    final reference = version.prerelease
+        ? expectedVersion.changelog.versions.first
+        : expectedByTag[version.tag];
     if (reference == null) {
       problems.add(
         '${version.tag} is in changelog.json but not derivable from git',
@@ -193,7 +206,8 @@ int _verify(String root) {
       );
     }
 
-    final known = expected.commitIdsByTag[version.tag] ?? const <String>{};
+    final known =
+        expectedVersion.commitIdsByTag[version.tag] ?? const <String>{};
     final unknown = <String>[
       for (final group in version.groups)
         for (final entry in group.entries)

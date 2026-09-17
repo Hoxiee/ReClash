@@ -401,10 +401,15 @@ jobs:
           else
             dart run tool/changelog.dart build --unreleased
           fi
-          dart run tool/changelog.dart render release "${target[@]}" --out release.md
-          version="$(dart run tool/check_release_version.dart "$TAG")"
-          sed "s|VERSION|$version|g; s|/download/v$version/|/download/$TAG/|g" \
-            .github/release_template.md >> release.md
+          notes=".github/release_notes/$TAG.md"
+          if [[ -f "$notes" ]]; then
+            cp "$notes" release.md
+          else
+            dart run tool/changelog.dart render release "${target[@]}" --out release.md
+            version="$(dart run tool/check_release_version.dart "$TAG")"
+            sed "s|VERSION|$version|g; s|/download/v$version/|/download/$TAG/|g" \
+              .github/release_template.md >> release.md
+          fi
 
       - name: Generate checksums
         shell: bash

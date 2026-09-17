@@ -1,9 +1,10 @@
 # Changelog
 
-## v0.1.0-pre.1 (2026-09-15)
+## v0.1.0-pre.1 (2026-09-17)
 
 **Features**
 
+- Cosmetic findings, regional setup, resilient routing and Linux Helper support (dd1afa7)
 - **navigation** Redesigned desktop navigation rail (6bf871b)
 - A suspiciously large pile of reliability and UX upgrades (fe0778b)
 - Explain smart routing picks on their own tab (f06c6d9)
