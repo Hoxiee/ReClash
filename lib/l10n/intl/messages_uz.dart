@@ -880,6 +880,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "Provayder vidjetlari, serverni almashtirish va proksi ko‘rinishi",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "Barcha panel bir vaqtda: kvota, vidjetlar, mavzu va mahalliy fon",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "Kvota, amal qilish muddati, eʼlon, domen ko‘chirish va takliflar",
@@ -1542,9 +1545,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),

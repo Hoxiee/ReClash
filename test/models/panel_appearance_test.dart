@@ -34,6 +34,20 @@ void main() {
       );
     });
 
+    test('accepts a bundled asset background', () {
+      final background = parsePanelBackground(
+        'asset:assets/images/developer/developer_ember_bg.svg,22',
+      );
+
+      expect(background?.url, 'asset:assets/images/developer/developer_ember_bg.svg');
+      expect(background?.opacity, 0.22);
+      expect(
+        parsePanelBackground('asset:assets/images/logo.svg')?.opacity,
+        0.1,
+      );
+      expect(parsePanelBackground('asset:'), isNull);
+    });
+
     test('rejects unsafe and malformed URLs', () {
       for (final value in [
         'file:///tmp/background.jpg',

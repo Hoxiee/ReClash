@@ -10,7 +10,8 @@ class PanelBackground {
   final double opacity;
 }
 
-/// `https://example.com/image.jpg[,opacity 1-100]`.
+/// `https://example.com/image.jpg[,opacity 1-100]` or a bundled
+/// `asset:assets/images/background.svg[,opacity 1-100]`.
 PanelBackground? parsePanelBackground(String? value) {
   if (value == null) return null;
   final separator = value.lastIndexOf(',');
@@ -20,10 +21,11 @@ PanelBackground? parsePanelBackground(String? value) {
   final rawUrl =
       (suppliedOpacity == null ? value : value.substring(0, separator)).trim();
   final uri = Uri.tryParse(rawUrl);
-  if (uri == null ||
-      (uri.scheme != 'http' && uri.scheme != 'https') ||
-      uri.host.isEmpty ||
-      uri.userInfo.isNotEmpty) {
+  if (uri == null || uri.userInfo.isNotEmpty) return null;
+  if (uri.scheme == 'asset') {
+    if (uri.path.isEmpty) return null;
+  } else if ((uri.scheme != 'http' && uri.scheme != 'https') ||
+      uri.host.isEmpty) {
     return null;
   }
   final opacity = (suppliedOpacity ?? 10).clamp(1, 100) / 100;

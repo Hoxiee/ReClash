@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "브랜드 색상, 사용자 지정 Hero Ring 및 로컬 로고",
   "developerSubscriptionOrbitDesc": "할당량, 만료, 공지, 도메인 이전 및 상품",
   "developerSubscriptionAtlasDesc": "공급자 위젯, 서버 전환 및 프록시 레이아웃",
+  "developerSubscriptionEmberDesc": "모든 패널 요소를 한 번에: 할당량, 위젯, 테마 및 로컬 배경",
   "developerSubscriptionInstalled": "{name} 설치 완료",
   "messageTest": "메시지 테스트",
   "messageTestTip": "메시지입니다",

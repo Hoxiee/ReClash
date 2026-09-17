@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "Цвета бренда, свой Hero Ring и локальный логотип",
   "developerSubscriptionOrbitDesc": "Квота, срок действия, объявления, смена домена и предложения",
   "developerSubscriptionAtlasDesc": "Виджеты провайдера, выбор сервера и вид прокси",
+  "developerSubscriptionEmberDesc": "Всё сразу: квота, виджеты, тема и локальный фон",
   "developerSubscriptionInstalled": "«{name}» установлена",
   "messageTest": "Тест сообщения",
   "messageTestTip": "Это сообщение.",

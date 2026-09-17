@@ -105,10 +105,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/
+    - assets/data/developer/
     - assets/data/licenses/
     - assets/fonts/
     - assets/images/
     - assets/images/avatar/
+    - assets/images/developer/
     - assets/images/empty/
     - assets/images/icon_variants/
     - assets/images/marks/

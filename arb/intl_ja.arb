@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "ブランドカラー、カスタム Hero Ring、ローカルロゴ",
   "developerSubscriptionOrbitDesc": "通信量、有効期限、お知らせ、ドメイン移行、オファー",
   "developerSubscriptionAtlasDesc": "プロバイダーウィジェット、サーバー切替、プロキシ表示",
+  "developerSubscriptionEmberDesc": "パネル全体を一括確認：通信量、ウィジェット、テーマ、ローカル背景",
   "developerSubscriptionInstalled": "{name} をインストールしました",
   "messageTest": "メッセージテスト",
   "messageTestTip": "これはメッセージです。",

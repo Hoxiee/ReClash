@@ -8,14 +8,14 @@ void main() {
   test(
     'developer subscriptions have unique bundled configs and logos',
     () async {
-      expect(developerSubscriptions, hasLength(3));
+      expect(developerSubscriptions, hasLength(4));
       expect(
         developerSubscriptions.map((fixture) => fixture.id).toSet(),
-        hasLength(3),
+        hasLength(4),
       );
       expect(
         developerSubscriptions.map((fixture) => fixture.logo).toSet(),
-        hasLength(3),
+        hasLength(4),
       );
 
       for (final fixture in developerSubscriptions) {
@@ -35,6 +35,7 @@ void main() {
     final prism = developerSubscriptions[0];
     final orbit = developerSubscriptions[1];
     final atlas = developerSubscriptions[2];
+    final ember = developerSubscriptions[3];
 
     expect(prism.panelMeta.themeHex, isNotNull);
     expect(prism.panelMeta.heroRing, isNotNull);
@@ -47,5 +48,15 @@ void main() {
     expect(atlas.panelMeta.widgetsApplyMode, PanelWidgetsApplyMode.update);
     expect(atlas.panelMeta.serverInfoGroup, 'Atlas Select');
     expect(atlas.panelMeta.proxiesView, isNotNull);
+
+    expect(ember.subscriptionInfo?.total, greaterThan(0));
+    expect(ember.panelMeta.themeHex, 'FF6B1A:vibrant');
+    expect(ember.panelMeta.heroRing, isNotNull);
+    expect(ember.panelMeta.widgetsApplyMode, PanelWidgetsApplyMode.update);
+    expect(ember.panelMeta.serverInfoGroup, 'Ember Select');
+    expect(ember.panelMeta.proxiesView, isNotNull);
+    expect(ember.panelMeta.background, startsWith('asset:'));
+    expect(ember.panelMeta.activeText, isNotNull);
+    expect(ember.panelMeta.settings, isNotEmpty);
   });
 }

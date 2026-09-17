@@ -4379,6 +4379,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Everything at once: quota, widgets, theme, and a local background`
+  String get developerSubscriptionEmberDesc {
+    return Intl.message(
+      'Everything at once: quota, widgets, theme, and a local background',
+      name: 'developerSubscriptionEmberDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{name} installed`
   String developerSubscriptionInstalled(Object name) {
     return Intl.message(

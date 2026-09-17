@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "Brend ranglari, maxsus Hero Ring va mahalliy logotip",
   "developerSubscriptionOrbitDesc": "Kvota, amal qilish muddati, eʼlon, domen ko‘chirish va takliflar",
   "developerSubscriptionAtlasDesc": "Provayder vidjetlari, serverni almashtirish va proksi ko‘rinishi",
+  "developerSubscriptionEmberDesc": "Barcha panel bir vaqtda: kvota, vidjetlar, mavzu va mahalliy fon",
   "developerSubscriptionInstalled": "{name} o‘rnatildi",
   "messageTest": "Xabar testi",
   "messageTestTip": "Bu xabar.",

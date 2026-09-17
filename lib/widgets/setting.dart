@@ -31,10 +31,16 @@ class SettingInfoCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Flexible(child: Icon(info.iconData)),
+            Icon(info.iconData),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(info.label, style: context.textTheme.bodyMedium),
+              child: Text(
+                info.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: context.textTheme.bodyMedium,
+              ),
             ),
           ],
         ),
@@ -62,7 +68,13 @@ class SettingTextCard extends StatelessWidget {
       isSelected: isSelected,
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Text(text, style: context.textTheme.bodyMedium),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          softWrap: false,
+          style: context.textTheme.bodyMedium,
+        ),
       ),
     );
   }

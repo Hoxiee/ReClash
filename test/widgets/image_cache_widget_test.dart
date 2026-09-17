@@ -13,7 +13,7 @@ void main() {
       const TestApp(
         includeNavigatorKey: false,
         child: ImageCacheWidget(
-          src: 'asset:assets/images/developer_prism.svg',
+          src: 'asset:assets/images/developer/developer_prism.svg',
           fit: BoxFit.contain,
           defaultWidget: Icon(Icons.error_outline),
         ),

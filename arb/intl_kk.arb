@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "Бренд түстері, жеке Hero Ring және жергілікті логотип",
   "developerSubscriptionOrbitDesc": "Квота, жарамдылық мерзімі, хабарландыру, домен көшіру және ұсыныстар",
   "developerSubscriptionAtlasDesc": "Провайдер виджеттері, сервер ауыстыру және прокси көрінісі",
+  "developerSubscriptionEmberDesc": "Панельдің бәрі бірден: квота, виджеттер, тақырып және жергілікті фон",
   "developerSubscriptionInstalled": "{name} орнатылды",
   "messageTest": "Хабарлама тесті",
   "messageTestTip": "Бұл — хабарлама.",

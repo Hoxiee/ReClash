@@ -631,6 +631,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "服务商组件、服务器切换和代理布局",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "一次覆盖所有面板：配额、组件、主题和本地背景",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "流量、到期时间、公告、域名迁移和套餐入口",

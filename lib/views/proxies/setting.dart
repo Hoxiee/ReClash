@@ -63,16 +63,16 @@ class ProxiesSetting extends StatelessWidget {
       isFirst: true,
       title: appLocalizations.style,
       items: [
-        SingleChildScrollView(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
           child: Consumer(
             builder: (_, ref, _) {
               final proxiesType = ref.watch(
                 effectiveProxiesStyleProvider.select((state) => state.type),
               );
               return Wrap(
-                spacing: 16,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final item in ProxiesType.values)
                     SettingInfoCard(
@@ -105,16 +105,16 @@ class ProxiesSetting extends StatelessWidget {
     return generateSection(
       title: appLocalizations.sort,
       items: [
-        SingleChildScrollView(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
           child: Consumer(
             builder: (_, ref, _) {
               final sortType = ref.watch(
                 effectiveProxiesStyleProvider.select((state) => state.sortType),
               );
               return Wrap(
-                spacing: 16,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final item in ProxiesSortType.values)
                     SettingInfoCard(
@@ -147,16 +147,16 @@ class ProxiesSetting extends StatelessWidget {
     return generateSection(
       title: appLocalizations.size,
       items: [
-        SingleChildScrollView(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
           child: Consumer(
             builder: (_, ref, _) {
               final cardType = ref.watch(
                 effectiveProxiesStyleProvider.select((state) => state.cardType),
               );
               return Wrap(
-                spacing: 16,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final item in ProxyCardType.values)
                     SettingTextCard(
@@ -186,16 +186,16 @@ class ProxiesSetting extends StatelessWidget {
     return generateSection(
       title: appLocalizations.layout,
       items: [
-        SingleChildScrollView(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
           child: Consumer(
             builder: (_, ref, _) {
               final layout = ref.watch(
                 effectiveProxiesStyleProvider.select((state) => state.layout),
               );
               return Wrap(
-                spacing: 16,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final item in ProxiesLayout.values)
                     SettingTextCard(
@@ -225,9 +225,8 @@ class ProxiesSetting extends StatelessWidget {
     return generateSection(
       title: appLocalizations.iconStyle,
       items: [
-        SingleChildScrollView(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          scrollDirection: Axis.horizontal,
           child: Consumer(
             builder: (_, ref, _) {
               final iconStyle = ref.watch(
@@ -236,7 +235,8 @@ class ProxiesSetting extends StatelessWidget {
                 ),
               );
               return Wrap(
-                spacing: 16,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final item in ProxiesIconStyle.values)
                     SettingTextCard(
@@ -286,21 +286,18 @@ class ProxiesSetting extends StatelessWidget {
               );
         }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: generateSection(
-            items: [
-              DecorationListItem(
-                minVerticalPadding: 8,
-                contentPadding: const EdgeInsets.only(left: 16, right: 8),
-                title: Text(appLocalizations.providerView),
-                subtitle: Text(appLocalizations.providerViewDesc),
-                onPressed: () => update(!followPanel),
-                trailing: Switch(value: followPanel, onChanged: update),
-              ),
-            ],
-          ),
+        return SettingSection(
+          top: 12,
+          items: [
+            DecorationListItem(
+              minVerticalPadding: 8,
+              contentPadding: const EdgeInsets.only(left: 16, right: 8),
+              title: Text(appLocalizations.providerView),
+              subtitle: Text(appLocalizations.providerViewDesc),
+              onPressed: () => update(!followPanel),
+              trailing: Switch(value: followPanel, onChanged: update),
+            ),
+          ],
         );
       },
     );

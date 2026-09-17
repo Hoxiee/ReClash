@@ -702,6 +702,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "공급자 위젯, 서버 전환 및 프록시 레이아웃",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "모든 패널 요소를 한 번에: 할당량, 위젯, 테마 및 로컬 배경",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "할당량, 만료, 공지, 도메인 이전 및 상품",

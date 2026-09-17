@@ -2,6 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
@@ -45,6 +46,14 @@ Profile _profile({PanelMeta? panelMeta, SubscriptionInfo? subscriptionInfo}) {
   );
 }
 
+const _group = Group(
+  name: 'Selector',
+  type: GroupType.Selector,
+  hidden: false,
+  now: 'Node A',
+  all: [Proxy(name: 'Node A', type: 'Shadowsocks')],
+);
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -62,13 +71,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
-    const group = Group(
-      name: 'Selector',
-      type: GroupType.Selector,
-      hidden: false,
-      now: 'Node A',
-      all: [Proxy(name: 'Node A', type: 'Shadowsocks')],
-    );
+    const group = _group;
     final container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(() => TestProfiles([?profile])),
@@ -525,6 +528,58 @@ void main() {
     await tester.pumpAndSettle();
     while (tester.takeException() != null) {}
     await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('new dashboard renders the provider background behind hero', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(900, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final container = ProviderContainer(
+      overrides: [
+        newDashboardEnabledProvider.overrideWithValue(true),
+        profilesProvider.overrideWith(
+          () => TestProfiles([
+            _profile(
+              panelMeta: const PanelMeta(
+                background: 'https://cdn.example.com/background.webp,25',
+              ),
+            ),
+          ]),
+        ),
+        currentProfileIdProvider.overrideWithBuild((_, _) => 1),
+        desyncSettingProvider.overrideWith(
+          () => _TestDesyncSetting(const DesyncProps()),
+        ),
+        byeDpiSupportedProvider.overrideWithValue(true),
+        groupsProvider.overrideWithValue(const [_group]),
+        tunEnabledProvider.overrideWith((ref) => true),
+        initProvider.overrideWithBuild((_, _) => true),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(900, 1200);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const TestApp(
+          includeNavigatorKey: false,
+          child: DashboardView(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('panel-profile-background')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 }

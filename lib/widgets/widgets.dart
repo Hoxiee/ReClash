@@ -31,6 +31,7 @@ export 'null_status.dart';
 export 'open_container.dart';
 export 'paged_sheet.dart';
 export 'palette.dart';
+export 'panel_background.dart';
 export 'pop_scope.dart';
 export 'popup.dart';
 export 'scaffold.dart';

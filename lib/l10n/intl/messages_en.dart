@@ -828,6 +828,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "Provider dashboard widgets, server switching, and proxy layout",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "Everything at once: quota, widgets, theme, and a local background",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "Quota, expiration, announcements, domain migration, and offers",
@@ -1444,9 +1447,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),

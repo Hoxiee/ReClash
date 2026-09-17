@@ -865,6 +865,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "Üçünji tarap widjetleri, serwer çalşygy we proksi görnüşi",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "Paneliň hemmesi birbada: kwota, widjetler, tema we ýerli fon",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "Kwota, möhlet, bildiriş, domen göçürmesi we teklipler",
@@ -1505,9 +1508,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),

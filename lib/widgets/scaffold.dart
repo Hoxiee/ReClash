@@ -1,14 +1,13 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/pop_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'chip.dart';
-import 'icon.dart';
 import 'inherited.dart';
+import 'panel_background.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -380,7 +379,6 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       },
       child: widget.floatingActionButton,
     );
-    final background = ref.watch(panelBackgroundProvider);
     final foreground = NotificationListener<UserScrollNotification>(
       child: hasFab
           ? BottomInsetScope(
@@ -399,36 +397,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
     return Scaffold(
       appBar: _buildAppBar(backActionProvider?.backAction),
-      body: background == null
-          ? foreground
-          : Stack(
-              children: [
-                Positioned.fill(
-                  key: const ValueKey('panel-profile-background'),
-                  child: ExcludeSemantics(
-                    child: IgnorePointer(
-                      child: ImageCacheWidget(
-                        src: background.url,
-                        fit: BoxFit.cover,
-                        defaultWidget: ColoredBox(
-                          color: context.colorScheme.surface,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: ColoredBox(
-                      color: context.colorScheme.surface.withValues(
-                        alpha: 1 - background.opacity,
-                      ),
-                    ),
-                  ),
-                ),
-                foreground,
-              ],
-            ),
+      body: PanelProfileBackground(child: foreground),
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       backgroundColor: widget.backgroundColor,
       floatingActionButton: hasFab

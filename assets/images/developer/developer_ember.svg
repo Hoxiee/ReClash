@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="ember-mark" x1="48" y1="208" x2="208" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC46B"/>
+      <stop offset=".55" stop-color="#FF7A1A"/>
+      <stop offset="1" stop-color="#E8380D"/>
+    </linearGradient>
+  </defs>
+  <polygon fill="none" stroke="url(#ember-mark)" stroke-width="22" stroke-dasharray="150 30" stroke-dashoffset="75" stroke-linejoin="round" points="218,128 173,205.9 83,205.9 38,128 83,50.1 173,50.1"/>
+  <polygon fill="none" stroke="url(#ember-mark)" stroke-width="3.5" points="175.65,128 151.8,169.3 104.2,169.3 80.35,128 104.2,86.7 151.8,86.7"/>
+  <polygon fill="url(#ember-mark)" points="155.5,128 141.75,151.8 114.25,151.8 100.5,128 114.25,104.2 141.75,104.2"/>
+</svg>

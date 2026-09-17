@@ -235,7 +235,9 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   Widget build(BuildContext context) {
     final newDashboard = ref.watch(newDashboardEnabledProvider);
     if (newDashboard) {
-      return const Scaffold(body: SafeArea(child: DashboardPager()));
+      return const Scaffold(
+        body: SafeArea(child: PanelProfileBackground(child: DashboardPager())),
+      );
     }
     final dashboardState = ref.watch(dashboardStateProvider);
     final mode = ref.watch(dashboardModeProvider);

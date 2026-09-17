@@ -524,6 +524,7 @@
   "developerSubscriptionPrismDesc": "Brand colors, a custom Hero Ring, and local logo rendering",
   "developerSubscriptionOrbitDesc": "Quota, expiration, announcements, domain migration, and offers",
   "developerSubscriptionAtlasDesc": "Provider dashboard widgets, server switching, and proxy layout",
+  "developerSubscriptionEmberDesc": "Everything at once: quota, widgets, theme, and a local background",
   "developerSubscriptionInstalled": "{name} installed",
   "messageTest": "Message test",
   "messageTestTip": "This is a message.",

@@ -1,0 +1,33 @@
+mixed-port: 7890
+mode: rule
+log-level: info
+proxies:
+  - name: Ember Berlin
+    type: ss
+    server: 127.0.0.1
+    port: 8395
+    cipher: aes-256-gcm
+    password: ember-berlin
+  - name: Ember Tokyo
+    type: ss
+    server: 127.0.0.1
+    port: 8396
+    cipher: aes-256-gcm
+    password: ember-tokyo
+  - name: Ember Seattle
+    type: ss
+    server: 127.0.0.1
+    port: 8397
+    cipher: aes-256-gcm
+    password: ember-seattle
+proxy-groups:
+  - name: Ember Select
+    type: select
+    proxies: [Ember Berlin, Ember Tokyo, Ember Seattle, DIRECT]
+  - name: Ember Fastest
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    proxies: [Ember Berlin, Ember Tokyo, Ember Seattle]
+rules:
+  - MATCH,Ember Select

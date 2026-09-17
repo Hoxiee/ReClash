@@ -26,6 +26,8 @@ class DeveloperView extends ConsumerWidget {
       appLocalizations.developerSubscriptionOrbitDesc,
     DeveloperSubscriptionId.atlas =>
       appLocalizations.developerSubscriptionAtlasDesc,
+    DeveloperSubscriptionId.ember =>
+      appLocalizations.developerSubscriptionEmberDesc,
   };
 
   Widget _getSubscriptionsList(BuildContext context, WidgetRef ref) {

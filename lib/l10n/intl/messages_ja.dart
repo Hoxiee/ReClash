@@ -694,6 +694,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerSubscriptionAtlasDesc": MessageLookupByLibrary.simpleMessage(
       "プロバイダーウィジェット、サーバー切替、プロキシ表示",
     ),
+    "developerSubscriptionEmberDesc": MessageLookupByLibrary.simpleMessage(
+      "パネル全体を一括確認：通信量、ウィジェット、テーマ、ローカル背景",
+    ),
     "developerSubscriptionInstalled": m25,
     "developerSubscriptionOrbitDesc": MessageLookupByLibrary.simpleMessage(
       "通信量、有効期限、お知らせ、ドメイン移行、オファー",

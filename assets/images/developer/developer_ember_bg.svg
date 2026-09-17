@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="ember-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#120704"/>
+      <stop offset=".5" stop-color="#331206"/>
+      <stop offset=".8" stop-color="#8a320a"/>
+      <stop offset="1" stop-color="#c85a14"/>
+    </linearGradient>
+    <radialGradient id="ember-vig" cx=".5" cy=".45" r=".75">
+      <stop offset=".6" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity=".55"/>
+    </radialGradient>
+    <filter id="ember-soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#ember-sky)"/>
+  <g filter="url(#ember-soft)">
+    <circle cx="240" cy="220" r="54" fill="#FF7A1A" opacity=".75"/>
+    <circle cx="520" cy="120" r="30" fill="#FFC46B" opacity=".9"/>
+    <circle cx="800" cy="240" r="66" fill="#E8380D" opacity=".5"/>
+    <circle cx="1080" cy="140" r="36" fill="#FFD9A0" opacity=".85"/>
+    <circle cx="1340" cy="260" r="58" fill="#FF7A1A" opacity=".65"/>
+    <circle cx="1500" cy="140" r="30" fill="#FFC46B" opacity=".85"/>
+    <circle cx="140" cy="540" r="76" fill="#FF7A1A" opacity=".3"/>
+    <circle cx="640" cy="500" r="40" fill="#FFD9A0" opacity=".65"/>
+    <circle cx="960" cy="560" r="62" fill="#FF6B1A" opacity=".4"/>
+    <circle cx="1260" cy="520" r="36" fill="#FFC46B" opacity=".7"/>
+    <circle cx="420" cy="740" r="86" fill="#FF7A1A" opacity=".28"/>
+    <circle cx="880" cy="780" r="64" fill="#FFC46B" opacity=".35"/>
+    <circle cx="1300" cy="760" r="70" fill="#E8380D" opacity=".32"/>
+  </g>
+  <ellipse cx="800" cy="990" rx="920" ry="230" fill="#FF6B1A" opacity=".26" filter="url(#ember-soft)"/>
+  <rect width="1600" height="900" fill="url(#ember-vig)"/>
+</svg>
