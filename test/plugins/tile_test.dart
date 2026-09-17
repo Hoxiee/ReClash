@@ -37,6 +37,8 @@ class _MutatingTileListener with TileListener {
   }
 }
 
+class _DefaultTileListener with TileListener {}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -51,6 +53,15 @@ void main() {
           null,
         );
   }
+
+  test('default listener callbacks are safe no-ops', () {
+    final listener = _DefaultTileListener();
+    expect(() {
+      listener.onStart();
+      listener.onStop();
+      listener.onDetached();
+    }, returnsNormally);
+  });
 
   test('routes every quick settings action to its listener callback', () async {
     final listener = _RecordingListener();

@@ -56,6 +56,12 @@ Widget _stack({required bool isDesktop}) {
 }
 
 void main() {
+  test('createState builds the application state', () {
+    final state = const Application().createState();
+
+    expect(state, isA<ApplicationState>());
+  });
+
   test('the desktop manager stack nests in ownership order', () {
     expect(_chainFrom(_stack(isDesktop: true)), [
       AppEnvManager,

@@ -42,6 +42,15 @@ class _MutatingListener with ServiceListener {
   }
 }
 
+class _DefaultListener with ServiceListener {}
+
+class _PauseListener with ServiceListener {
+  final states = <bool>[];
+
+  @override
+  void onPauseStateChanged(bool paused) => states.add(paused);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -86,6 +95,31 @@ void main() {
 
   test('is a singleton so the platform handler is installed once', () {
     expect(Service(), same(Service()));
+  });
+
+  test('default listener callbacks are safe no-ops', () {
+    final listener = _DefaultListener();
+    expect(() {
+      listener.onServiceEvent(
+        const CoreEvent(type: CoreEventType.crash, data: 'boom'),
+      );
+      listener.onPauseStateChanged(true);
+      listener.onWidgetSelections(const {'proxy': 'node-a'});
+    }, returnsNormally);
+  });
+
+  test('pauseState reports the native flag to listeners', () async {
+    final listener = _PauseListener();
+    Service().addListener(listener);
+    addTearDown(() => Service().removeListener(listener));
+
+    await callFromPlatform('pauseState', true);
+    expect(Service().nativePaused, isTrue);
+    expect(listener.states, [true]);
+
+    await callFromPlatform('pauseState', false);
+    expect(Service().nativePaused, isFalse);
+    expect(listener.states, [true, false]);
   });
 
   group('lifecycle commands', () {
