@@ -43,7 +43,9 @@ class SetupRegionSettings extends ConsumerWidget {
               subtitle: Text(l10n.sendDeviceIdentityDesc),
               value: sendIdentity,
               onChanged: (value) async {
-                if (!value) {
+                // Only Russian providers rely on HWID; elsewhere the warning
+                // would cry wolf on every toggle.
+                if (!value && region == AppRegion.russia) {
                   final confirmed = await dialogs.showMessage(
                     context: context,
                     title: l10n.sendDeviceIdentity,

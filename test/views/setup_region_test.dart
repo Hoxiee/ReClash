@@ -133,6 +133,8 @@ void main() {
     await _select(tester, 'Russia');
     await tester.tap(find.byKey(const ValueKey('setup-send-hwid')).last);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Turn off'));
+    await tester.pumpAndSettle();
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
 
     container
@@ -152,6 +154,21 @@ void main() {
     expect(_ImportAction.identities, [false]);
   });
 
+  testWidgets('HWID off outside Russia applies without confirmation', (
+    tester,
+  ) async {
+    final container = await _pump(tester);
+    await _select(tester, 'Russia');
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+    await _select(tester, 'Iran');
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+
+    await tester.tap(find.byKey(const ValueKey('setup-send-hwid')).last);
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(find.text('Turn off'), findsNothing);
+  });
+
   testWidgets(
     'Other keeps routing independent and supplies operational markers',
     (tester) async {
@@ -166,6 +183,7 @@ void main() {
       expect(props.censorCountries, isEmpty);
       expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
 
+      await _show(tester, container, _subscription());
       await _select(tester, 'Iran');
       expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
       await _select(tester, 'Other');
@@ -177,7 +195,7 @@ void main() {
     },
   );
 
-  testWidgets('finish links to existing presets without enabling routing', (
+  testWidgets('finish preset opens the strategy dialog without enabling', (
     tester,
   ) async {
     final container = await _pump(tester, child: _finish());
@@ -188,7 +206,8 @@ void main() {
     );
     await tester.tap(find.text('Preset'));
     await tester.pumpAndSettle();
-    expect(find.byType(SmartRoutingView), findsOneWidget);
+    expect(find.byType(SmartRoutingView), findsNothing);
+    expect(find.text('Saver'), findsOneWidget);
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
     expect(container.read(desyncSettingProvider).enabled, isFalse);
   });

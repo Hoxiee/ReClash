@@ -638,11 +638,15 @@ void main() {
     tester,
   ) async {
     final container = await _pump(tester);
-    await _toFinish(tester);
+    await _toSubscription(tester);
 
     await tester.tap(find.byKey(const ValueKey('setup-app-region')).last);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Iran'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Continue without a profile'),
+    );
     await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
@@ -658,7 +662,10 @@ void main() {
     await _toFinish(tester);
 
     expect(container.read(appSettingProvider).region, isNull);
-    expect(find.text('Other'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('setup-smart-routing-preset')),
+      findsWidgets,
+    );
 
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
@@ -924,7 +931,10 @@ void main() {
 
     expect(container.read(appSettingProvider).region, isNull);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-    expect(find.text('Other'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('setup-smart-routing-preset')),
+      findsWidgets,
+    );
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
     expect(props.enabled, isFalse);
@@ -945,7 +955,10 @@ void main() {
 
     expect(container.read(appSettingProvider).region, isNull);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-    expect(find.text('Другое'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('setup-smart-routing-preset')),
+      findsWidgets,
+    );
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
     expect(props.enabled, isFalse);
