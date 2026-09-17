@@ -53,6 +53,7 @@ type SideLoadParams struct {
 type ChangeProxyParams struct {
 	GroupName string `json:"group-name"`
 	ProxyName string `json:"proxy-name"`
+	Manual    bool   `json:"manual"`
 }
 
 type TestDelayParams struct {
@@ -90,6 +91,7 @@ const (
 	shutdownMethod                 CoreMethod = "shutdown"
 	validateConfigMethod           CoreMethod = "validateConfig"
 	inspectConfigMethod            CoreMethod = "inspectConfig"
+	fetchSubscriptionMethod        CoreMethod = "fetchSubscription"
 	updateConfigMethod             CoreMethod = "updateConfig"
 	getProxiesMethod               CoreMethod = "getProxies"
 	changeProxyMethod              CoreMethod = "changeProxy"
@@ -132,6 +134,8 @@ const (
 	doctorExportMethod             CoreMethod = "doctorExport"
 	doctorPlatformStatusMethod     CoreMethod = "doctorPlatformStatus"
 	doctorPathStatusMethod         CoreMethod = "doctorPathStatus"
+	odometerReportMethod           CoreMethod = "odometerReport"
+	odometerSignalMethod           CoreMethod = "odometerSignal"
 )
 
 type CoreMethod string

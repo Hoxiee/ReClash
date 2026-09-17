@@ -7,6 +7,7 @@ import 'package:reclash/common/boot_record.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/system_dns.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/core/desktop/linux_helper.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -73,60 +74,20 @@ class System {
     return app?.getLastExitInfo();
   }
 
-  /// [corePath] is handed to `Process.run` as an argv entry, so it must stay
-  /// verbatim. Shell-quoting or escaping it here reaches `stat` as part of the
-  /// file name and turns every path containing a space into a miss.
-  /// Linux asks for the octal mode: a setuid core without an owner write
-  /// bit (4555, `-r-sr-sr-x`) defeats permission-string matching.
-  @visibleForTesting
-  static List<String> statArguments(String corePath, {required bool isMacOS}) {
-    return isMacOS
-        ? ['-f', '%Su:%Sg %Sp', corePath]
-        : ['-c', '%U %a', corePath];
-  }
+  bool Function() hasSystemd = () =>
+      Directory('/run/systemd/system').existsSync();
 
-  @visibleForTesting
-  static bool isPrivilegedStatOutput(
-    String output, {
-    required String ownerPrefix,
-  }) {
-    final trimmed = output.trim();
-    return trimmed.startsWith(ownerPrefix) && trimmed.contains('rws');
-  }
+  Future<HelperReadiness> Function() helperReadiness = () =>
+      helperClient.readiness();
 
-  @visibleForTesting
-  static bool isPrivilegedLinuxStatOutput(String output) {
-    final parts = output.trim().split(' ');
-    if (parts.length != 2) {
-      return false;
-    }
-    final mode = int.tryParse(parts[1], radix: 8) ?? 0;
-    // 0x800 = setuid (0o4000): Dart has no octal literals.
-    return parts[0] == 'root' && (mode & 0x800) != 0;
-  }
-
-  bool get hasHelperService => false;
+  bool get hasHelperService => isLinux && hasSystemd();
 
   Future<bool> checkIsAdmin() async {
     if (hasHelperService) {
-      return await helperClient.readiness() == HelperReadiness.ready;
+      return await helperReadiness() == HelperReadiness.ready;
     }
-    if (system.isMacOS) {
-      final result = await runProcess(
-        'stat',
-        statArguments(appPath.corePath, isMacOS: true),
-      );
-      return isPrivilegedStatOutput(
-        result.stdout.toString(),
-        ownerPrefix: 'root:admin',
-      );
-    }
-    if (system.isLinux) {
-      final result = await runProcess(
-        'stat',
-        statArguments(appPath.corePath, isMacOS: false),
-      );
-      return isPrivilegedLinuxStatOutput(result.stdout.toString());
+    if (system.isMacOS || system.isLinux) {
+      return false;
     }
     return true;
   }
@@ -172,58 +133,9 @@ class System {
     }
   }
 
-  static String _shellEscape(String value) {
-    return "'${value.replaceAll("'", "'\\''")}'";
-  }
-
   Future<AuthorizeCode> authorizeCore() async {
-    if (system.isAndroid) {
-      return AuthorizeCode.error;
-    }
-    if (system.isWindows) {
-      return AuthorizeCode.error;
-    }
-    final isAdmin = await checkIsAdmin();
-    if (isAdmin) {
-      return AuthorizeCode.none;
-    }
-
-    if (system.isMacOS) {
-      final escapedPath = _shellEscape(appPath.corePath);
-      final shell = 'chown root:admin $escapedPath && chmod +sx $escapedPath';
-      final arguments = [
-        '-e',
-        'do shell script "$shell" with administrator privileges',
-      ];
-      final result = await runProcess('osascript', arguments);
-      if (result.exitCode != 0) {
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
-    } else if (system.isLinux) {
-      final escapedCorePath = _shellEscape(appPath.corePath);
-      final ProcessResult result;
-      try {
-        result = await runProcess('pkexec', [
-          '/bin/sh',
-          '-c',
-          'chown root:root $escapedCorePath && chmod +sx $escapedCorePath',
-        ]);
-      } on ProcessException catch (error) {
-        commonPrint.log(
-          'pkexec is unavailable: ${compactError(error)}',
-          logLevel: LogLevel.error,
-        );
-        return AuthorizeCode.error;
-      }
-      if (result.exitCode != 0) {
-        commonPrint.log(
-          'pkexec refused to elevate the Core: ${result.exitCode}',
-          logLevel: LogLevel.error,
-        );
-        return AuthorizeCode.error;
-      }
-      return AuthorizeCode.success;
+    if (isLinux && hasHelperService) {
+      return Linux().registerService();
     }
     return AuthorizeCode.error;
   }
@@ -379,7 +291,18 @@ Future<bool> _waitForHelperService() async {
 
 final windows = system.isWindows ? Windows() : null;
 
-// TODO: Linux Helper cluster — no service binary or unit ships yet.
+enum LinuxHelperInstallResult {
+  ready,
+  installed,
+  cancelled,
+  systemdUnavailable,
+  pkexecUnavailable,
+  agentUnavailable,
+  bundleInvalid,
+  failed,
+  notReady,
+}
+
 class Linux {
   static Linux? _instance;
 
@@ -393,35 +316,127 @@ class Linux {
     return _instance!;
   }
 
-  Future<AuthorizeCode> registerService() {
-    return registerHelperService(installService);
+  Future<AuthorizeCode> registerService() async {
+    return switch (await registerWithResult()) {
+      LinuxHelperInstallResult.ready => AuthorizeCode.none,
+      LinuxHelperInstallResult.installed => AuthorizeCode.success,
+      _ => AuthorizeCode.error,
+    };
   }
 
-  /// pkexec raises the system polkit prompt and names the requesting user to
-  /// the installer, which is where the unit takes the account it grants the
-  /// Helper socket to.
   @visibleForTesting
-  Future<bool> installService() async {
+  Future<bool> Function() waitForHelperService = _waitForHelperService;
+
+  Future<LinuxHelperInstallResult> registerWithResult() async {
+    if (!system.hasSystemd()) {
+      return LinuxHelperInstallResult.systemdUnavailable;
+    }
     try {
-      final result = await runProcess('pkexec', [
-        appPath.helperPath,
-        'install',
-      ]);
-      if (result.exitCode == 0) {
-        return true;
+      switch (await system.helperReadiness()) {
+        case HelperReadiness.ready:
+          return LinuxHelperInstallResult.ready;
+        case HelperReadiness.manifestMissing:
+          return LinuxHelperInstallResult.bundleInvalid;
+        case HelperReadiness.notReady:
+          break;
       }
-      commonPrint.log(
-        'pkexec helper install exited with ${result.exitCode}: '
-        '${result.stderr.toString().trim()}',
-        logLevel: LogLevel.error,
-      );
+      final result = await installWithResult();
+      if (result != LinuxHelperInstallResult.installed) return result;
+      return await waitForHelperService()
+          ? LinuxHelperInstallResult.installed
+          : LinuxHelperInstallResult.notReady;
     } catch (error) {
       commonPrint.log(
-        'pkexec is unavailable: ${compactError(error)}',
+        'Linux Helper registration failed: ${compactError(error)}',
         logLevel: LogLevel.error,
       );
+      return LinuxHelperInstallResult.failed;
     }
-    return false;
+  }
+
+  @visibleForTesting
+  Future<Directory> Function() stageHelperBundle = () =>
+      LinuxHelperEnvironment().stageBundle();
+
+  @visibleForTesting
+  Future<bool> installService() async =>
+      await installWithResult() == LinuxHelperInstallResult.installed;
+
+  Future<LinuxHelperInstallResult> installWithResult() async {
+    if (!system.hasSystemd()) {
+      return LinuxHelperInstallResult.systemdUnavailable;
+    }
+    Directory? stage;
+    try {
+      try {
+        stage = await stageHelperBundle();
+      } on FormatException catch (error) {
+        commonPrint.log(
+          'Linux Helper bundle is invalid: ${compactError(error)}',
+          logLevel: LogLevel.error,
+        );
+        return LinuxHelperInstallResult.bundleInvalid;
+      }
+      final helperPath = '${stage.path}/$appHelperService';
+      final chmod = await runProcess('chmod', ['700', helperPath]);
+      if (chmod.exitCode != 0) {
+        commonPrint.log(
+          'chmod helper exited with ${chmod.exitCode}: '
+          '${chmod.stderr.toString().trim()}',
+          logLevel: LogLevel.error,
+        );
+        return LinuxHelperInstallResult.failed;
+      }
+      final ProcessResult result;
+      try {
+        result = await runProcess('pkexec', [
+          '--disable-internal-agent',
+          helperPath,
+          'install',
+        ]);
+      } on ProcessException catch (error) {
+        commonPrint.log(
+          'pkexec helper install failed: ${compactError(error)}',
+          logLevel: LogLevel.error,
+        );
+        return error.errorCode == 2
+            ? LinuxHelperInstallResult.pkexecUnavailable
+            : LinuxHelperInstallResult.failed;
+      }
+      if (result.exitCode == 0) {
+        return LinuxHelperInstallResult.installed;
+      }
+      final stderr = result.stderr.toString();
+      commonPrint.log(
+        'pkexec helper install exited with ${result.exitCode}: '
+        '${stderr.trim()}',
+        logLevel: LogLevel.error,
+      );
+      if (result.exitCode == 126) return LinuxHelperInstallResult.cancelled;
+      final diagnostic = stderr.toLowerCase();
+      if (diagnostic.contains('no authentication agent found') ||
+          diagnostic.contains('no authentication agent available') ||
+          diagnostic.contains('no authentication agent is available')) {
+        return LinuxHelperInstallResult.agentUnavailable;
+      }
+    } catch (error) {
+      commonPrint.log(
+        'Linux Helper installation failed: ${compactError(error)}',
+        logLevel: LogLevel.error,
+      );
+    } finally {
+      if (stage != null) {
+        try {
+          await stage.delete(recursive: true);
+        } catch (error) {
+          commonPrint.log(
+            'Linux Helper staging cleanup failed: ${compactError(error)}',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
+    }
+    return LinuxHelperInstallResult.failed;
   }
 }
 

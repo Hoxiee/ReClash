@@ -297,6 +297,10 @@ void main() {
         'strata',
         'shatter',
         'trace',
+        'vigil',
+        'topo',
+        'spark',
+        'fractal',
       ]) {
         final result = AppSettingProps.safeFromJson({'iconVariant': variant});
         expect(result.iconVariant, variant);

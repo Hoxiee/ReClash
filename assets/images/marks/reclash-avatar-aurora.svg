@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>ReClash Aurora</title><desc>Северное сияние для яркого канала или чата</desc>
+  <defs><radialGradient id="au-bg" cx="0" cy="0" r="1" gradientTransform="translate(92 62) rotate(44) scale(610)" gradientUnits="userSpaceOnUse"><stop stop-color="#754BEE"/><stop offset=".48" stop-color="#3158C9"/><stop offset="1" stop-color="#082F46"/></radialGradient><clipPath id="au-clip"><circle cx="256" cy="256" r="256"/></clipPath></defs>
+  <circle cx="256" cy="256" r="256" fill="url(#au-bg)"/>
+  <g clip-path="url(#au-clip)" fill="none" stroke-linecap="round"><path d="M-33 418C92 310 116 91 238 67S379 243 548 101" stroke="#55F4DA" stroke-opacity=".34" stroke-width="36"/><path d="M-40 456C92 348 142 150 260 129S393 287 550 164" stroke="#B482FF" stroke-opacity=".28" stroke-width="22"/></g>
+  <circle cx="256" cy="256" r="232" fill="none" stroke="#FFFFFF" stroke-opacity=".2" stroke-width="2"/>
+  <g transform="translate(256 256) rotate(-20) scale(1.12)" fill="none" stroke="#FFFFFF" stroke-width="54" stroke-linecap="round">
+    <path d="M-88 -60 V60"/><path d="M0 -120 V120"/><path d="M88 -40 V40"/>
+  </g>
+</svg>

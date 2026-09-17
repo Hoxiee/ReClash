@@ -102,7 +102,7 @@ List<Widget> _notices(BuildContext context, PanelMeta? panelMeta) {
     if (panelMeta.hwidNotSupported)
       _NoticeCard(
         icon: Icons.report_gmailerrorred_rounded,
-        text: appLocalizations.clientNotSupported,
+        text: appLocalizations.panelHwidNotSupported,
         tone: colorScheme.tertiary,
       ),
     if (announce != null && announce.isNotEmpty)

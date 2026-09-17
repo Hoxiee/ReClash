@@ -12,10 +12,18 @@ class SetupLanguageStep extends ConsumerWidget {
 
   final VoidCallback onNext;
 
-  void _select(WidgetRef ref, Locale? locale) {
+  void _select(BuildContext context, WidgetRef ref, Locale? locale) {
+    final primaryFocus = FocusManager.instance.primaryFocus;
     ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(locale: locale?.toString()));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (primaryFocus?.context != null && primaryFocus!.canRequestFocus) {
+        primaryFocus.requestFocus();
+      } else if (context.mounted) {
+        FocusScope.of(context).requestFocus();
+      }
+    });
   }
 
   @override
@@ -38,7 +46,7 @@ class SetupLanguageStep extends ConsumerWidget {
       ),
       fillBody: RadioGroup<Locale?>(
         groupValue: selected,
-        onChanged: (value) => _select(ref, value),
+        onChanged: (value) => _select(context, ref, value),
         child: SetupScrollCard(
           revealIndex: options.indexOf(selected),
           children: [
@@ -49,7 +57,7 @@ class SetupLanguageStep extends ConsumerWidget {
                 ),
                 subtitle: locale == null ? null : Text(locale.englishLabel),
                 value: locale,
-                onTap: () => _select(ref, locale),
+                onTap: () => _select(context, ref, locale),
               ),
           ],
         ),

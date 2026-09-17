@@ -57,8 +57,10 @@ Read `.agents/architecture.md` for the current core modes, manager stack, build 
   termination cannot be confirmed the Helper keeps the child and answers `coreStopFailed`, and `/start` reports the same
   code instead of spawning a replacement. Keep that code out of the Dart pre-spawn fallback set in
   `helper_client.dart`, or the direct launch will race a Core the Helper still owns.
-- TUN is not a required run condition. Degrading to the unelevated direct Core — and silently losing TUN — is the
-  expected outcome whenever the Helper path fails; do not fail the launch instead.
+- Direct Core fallback is valid for local proxy use. When TUN is requested, a missing privileged session or TUN listener
+  is a tunnel startup failure, never a successful connection without TUN.
+- Linux Helper runs as the user's UID through systemd with CAP_NET_ADMIN/CAP_NET_RAW; root Core is forbidden.
+  Install its bundle outside the AppImage in a root-owned directory and verify both UID and PID over IPC.
 - A desktop process lease with unconfirmed exit must remain owned until cleanup succeeds. Do not discard it and start a
   replacement Core.
 - `CoreController.close()` is terminal. Do not call it from a reusable manager lifecycle or recover by starting it again.

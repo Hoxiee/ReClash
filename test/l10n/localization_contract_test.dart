@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:reclash/l10n/intl/messages_en.dart' as messages_en;
 import 'package:reclash/l10n/intl/messages_ja.dart' as messages_ja;
+import 'package:reclash/l10n/intl/messages_kk.dart' as messages_kk;
+import 'package:reclash/l10n/intl/messages_ko.dart' as messages_ko;
+import 'package:reclash/l10n/intl/messages_tk.dart' as messages_tk;
+import 'package:reclash/l10n/intl/messages_uz.dart' as messages_uz;
 import 'package:reclash/l10n/intl/messages_ru.dart' as messages_ru;
 import 'package:reclash/l10n/intl/messages_zh_CN.dart' as messages_zh_cn;
 import 'package:flutter_test/flutter_test.dart';
@@ -12,9 +16,37 @@ void main() {
   final lookups = <String, MessageLookupByLibrary>{
     'en': messages_en.messages,
     'ja': messages_ja.messages,
+    'kk': messages_kk.messages,
+    'ko': messages_ko.messages,
+    'tk': messages_tk.messages,
+    'uz': messages_uz.messages,
     'ru': messages_ru.messages,
     'zh_CN': messages_zh_cn.messages,
   };
+
+  test('client compatibility copy avoids misleading terminology', () {
+    final forbidden = RegExp(
+      'эмуляци|emulation|emulýasiýa|emulyatsiya|エミュレーション|에뮬레이션|模拟',
+      caseSensitive: false,
+    );
+    for (final locale in lookups.keys) {
+      final source =
+          jsonDecode(File('arb/intl_$locale.arb').readAsStringSync())
+              as Map<String, dynamic>;
+      for (final entry in source.entries) {
+        if (entry.value is! String) continue;
+        expect(
+          forbidden.hasMatch(entry.value as String),
+          isFalse,
+          reason: '$locale.${entry.key}',
+        );
+      }
+    }
+    final russian =
+        jsonDecode(File('arb/intl_ru.arb').readAsStringSync())
+            as Map<String, dynamic>;
+    expect(russian['roleAuthor'], 'Автор и мейнтейнер');
+  });
 
   test('every generated locale exposes and evaluates every source message', () {
     final arbByLocale = <String, Map<String, dynamic>>{

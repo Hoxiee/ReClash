@@ -158,6 +158,9 @@ func withoutArguments(handle func(response MethodResponse)) methodHandler {
 }
 
 var methodHandlers = map[CoreMethod]methodHandler{
+	fetchSubscriptionMethod: withArguments(func(params *SubscriptionFetchParams, response MethodResponse) {
+		safeGo(response, func() { handleFetchSubscription(params, response) })
+	}),
 	initClashMethod: withArguments(func(params *InitParams, response MethodResponse) {
 		response.success(handleInitClash(params))
 	}),

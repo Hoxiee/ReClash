@@ -19,6 +19,8 @@ import 'appearance/appearance.dart';
 import 'config/advanced.dart';
 import 'developer.dart';
 import 'tools/connection_doctor.dart';
+import 'tools/core.dart';
+import 'tools/findings.dart';
 import 'url_scheme.dart';
 
 class ToolsView extends ConsumerStatefulWidget {
@@ -50,11 +52,12 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     );
   }
 
-  List<Widget> _getOtherList(bool enableDeveloperMode) {
+  List<Widget> _getOtherList(bool enableDeveloperMode, bool hasFindings) {
     return [
       SettingSection(
         title: context.appLocalizations.other,
         items: [
+          if (hasFindings) const _FindingsItem(),
           const _DisclaimerItem(),
           const _UrlSchemeItem(),
           if (enableDeveloperMode) const _DeveloperItem(),
@@ -94,6 +97,9 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         (state) => (locale: state.locale, developerMode: state.developerMode),
       ),
     );
+    final hasFindings = ref.watch(
+      visibleMilestonesProvider.select((state) => state.revealedAt.isNotEmpty),
+    );
     final items = [
       Consumer(
         builder: (_, ref, _) {
@@ -110,7 +116,8 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             .navigationItems
             .isEmpty,
       ),
-      ..._getOtherList(appSetting.developerMode),
+      ..._getOtherList(appSetting.developerMode, hasFindings),
+      const CoreSection(),
       const SettingBottomInset(),
     ];
     return CommonScaffold(
@@ -136,6 +143,19 @@ class _ConnectionDoctorItem extends ConsumerWidget {
       title: Text(appLocalizations.connectionDoctor),
       subtitle: Text(connectionDoctorTitle(appLocalizations, snapshot)),
       widget: const ConnectionDoctorView(),
+    );
+  }
+}
+
+class _FindingsItem extends StatelessWidget {
+  const _FindingsItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecorationListItem.open(
+      leading: const Icon(Icons.auto_awesome_outlined),
+      title: Text(context.appLocalizations.findings),
+      widget: const FindingsView(),
     );
   }
 }

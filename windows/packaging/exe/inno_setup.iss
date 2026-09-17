@@ -1,6 +1,8 @@
 [Setup]
 AppId={{APP_ID}}
 AppVersion={{APP_VERSION}}
+VersionInfoVersion={#GetVersionNumbersString("{{SOURCE_DIR}}\\{{EXECUTABLE_NAME}}")}
+VersionInfoProductTextVersion={{APP_VERSION}}
 AppName={{DISPLAY_NAME}}
 AppPublisher={{PUBLISHER_NAME}}
 AppPublisherURL={{PUBLISHER_URL}}
@@ -19,13 +21,23 @@ ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
+const
+  ServiceMissing = 1060;
+  ServiceNotActive = 1062;
+  ServiceMarkedForDelete = 1072;
+
 procedure KillProcesses;
 var
   Processes: TArrayOfString;
   i: Integer;
   ResultCode: Integer;
 begin
-  Processes := ['ReClash.exe', 'ReClashCore.exe', 'ReClashHelperService.exe'];
+  Processes := [
+    'ReClash.exe',
+    'ReClashCore.exe',
+    'ReClashHelperService.exe',
+    'FlClashHelperService.exe'
+  ];
 
   for i := 0 to GetArrayLength(Processes)-1 do
   begin
@@ -33,25 +45,92 @@ begin
   end;
 end;
 
-function UnregisterHelperService(): Boolean;
-var
-  HelperPath: String;
-  ResultCode: Integer;
+function RunServiceCommand(Command: String; ServiceName: String; var ResultCode: Integer): Boolean;
 begin
-  HelperPath := ExpandConstant('{app}\\ReClashHelperService.exe');
-  if not FileExists(HelperPath) then
-  begin
-    Result := True;
-    Exit;
-  end;
   Result := Exec(
-    HelperPath,
-    'uninstall',
+    ExpandConstant('{sys}\\sc.exe'),
+    Command + ' "' + ServiceName + '"',
     '',
     SW_HIDE,
     ewWaitUntilTerminated,
     ResultCode
-  ) and (ResultCode = 0);
+  );
+end;
+
+function WaitForServiceRemoval(ServiceName: String): Boolean;
+var
+  Attempts: Integer;
+  ResultCode: Integer;
+begin
+  for Attempts := 1 to 50 do
+  begin
+    if not RunServiceCommand('query', ServiceName, ResultCode) then
+    begin
+      Result := False;
+      Exit;
+    end;
+    if ResultCode = ServiceMissing then
+    begin
+      Result := True;
+      Exit;
+    end;
+    if (ResultCode <> 0) and (ResultCode <> ServiceMarkedForDelete) then
+    begin
+      Result := False;
+      Exit;
+    end;
+    Sleep(100);
+  end;
+  Result := False;
+end;
+
+function RemoveHelperService(ServiceName: String): Boolean;
+var
+  ResultCode: Integer;
+begin
+  if not RunServiceCommand('stop', ServiceName, ResultCode) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if (ResultCode = ServiceMissing) then
+  begin
+    Result := True;
+    Exit;
+  end;
+  if (ResultCode <> 0) and
+     (ResultCode <> ServiceNotActive) and
+     (ResultCode <> ServiceMarkedForDelete) then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  if not RunServiceCommand('delete', ServiceName, ResultCode) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  if ResultCode = ServiceMissing then
+  begin
+    Result := True;
+    Exit;
+  end;
+  if (ResultCode <> 0) and (ResultCode <> ServiceMarkedForDelete) then
+  begin
+    Result := False;
+    Exit;
+  end;
+  Result := WaitForServiceRemoval(ServiceName);
+end;
+
+function UnregisterHelperService(): Boolean;
+begin
+  Result := RemoveHelperService('ReClashHelperService');
+  if not RemoveHelperService('FlClashHelperService') then
+  begin
+    Result := False;
+  end;
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
@@ -110,6 +189,14 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[InstallDelete]
+Type: files; Name: "{app}\\ReClashHelperService.exe"
+Type: files; Name: "{app}\\FlClashHelperService.exe"
+
+[UninstallDelete]
+Type: files; Name: "{app}\\ReClashHelperService.exe"
+Type: files; Name: "{app}\\FlClashHelperService.exe"
 
 [Icons]
 Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"

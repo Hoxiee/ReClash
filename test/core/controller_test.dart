@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
@@ -139,7 +140,7 @@ void main() {
       final events = <String>[];
       when(() => mock.setupConfig(params)).thenAnswer((_) {
         events.add('setup');
-        return Future.value('ok');
+        return Future.value('');
       });
 
       final setupFuture = controller.setupConfig(
@@ -157,8 +158,42 @@ void main() {
       expect(completed, isFalse);
 
       preloadCompleter.complete();
-      expect(await setupFuture, 'ok');
+      expect(await setupFuture, '');
     });
+
+    test('Linux applies configuration before starting listeners', () async {
+      const params = SetupParams(selectedMap: {}, testUrl: 'http://x.com');
+      final configured = Completer<String>();
+      var starts = 0;
+      when(() => mock.setupConfig(params)).thenAnswer((_) => configured.future);
+      final operation = controller.setupConfig(
+        params: params,
+        preloadInvoke: () async {
+          starts++;
+        },
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(starts, 0);
+      configured.complete('');
+      expect(await operation, '');
+      expect(starts, 1);
+    }, skip: !Platform.isLinux);
+
+    test('Linux skips listener startup when configuration fails', () async {
+      const params = SetupParams(selectedMap: {}, testUrl: 'http://x.com');
+      when(() => mock.setupConfig(params)).thenAnswer((_) async => 'invalid');
+      var starts = 0;
+      expect(
+        await controller.setupConfig(
+          params: params,
+          preloadInvoke: () async {
+            starts++;
+          },
+        ),
+        'invalid',
+      );
+      expect(starts, 0);
+    }, skip: !Platform.isLinux);
   });
 
   group('proxy methods', () {

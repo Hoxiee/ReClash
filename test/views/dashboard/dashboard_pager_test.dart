@@ -411,7 +411,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
     expect(
-      find.textContaining('None of the nodes in this subscription'),
+      find.textContaining('No regular node addresses were found'),
       findsOneWidget,
     );
     expect(find.text('Perpetual subscription'), findsOneWidget);

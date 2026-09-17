@@ -84,6 +84,7 @@ abstract class ChangeProxyParams with _$ChangeProxyParams {
   const factory ChangeProxyParams({
     @JsonKey(name: 'group-name') required String groupName,
     @JsonKey(name: 'proxy-name') required String proxyName,
+    @Default(false) bool manual,
   }) = _ChangeProxyParams;
 
   factory ChangeProxyParams.fromJson(Map<String, Object?> json) =>
@@ -325,9 +326,12 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default(0) int delay,
     @Default(0) int hostDelay,
     @Default(0) int band,
+    @Default(0) int latencyMs,
     @Default(false) bool unproven,
     @Default(0) int order,
     @Default(false) bool degraded,
+    @Default(0) int recurrence,
+    @Default(false) bool confirmed,
     @Default(false) bool breaker,
     @Default(false) bool udp,
     @Default(0) int fails,
@@ -404,6 +408,20 @@ abstract class RcxMetricsReport with _$RcxMetricsReport {
 }
 
 @freezed
+abstract class RcxDiscoveryReport with _$RcxDiscoveryReport {
+  const factory RcxDiscoveryReport({
+    @Default(0) int covered,
+    @Default(0) int pending,
+    @Default(0) int attempts,
+    @Default(0) int confirmations,
+    @Default('') String state,
+  }) = _RcxDiscoveryReport;
+
+  factory RcxDiscoveryReport.fromJson(Map<String, Object?> json) =>
+      _$RcxDiscoveryReportFromJson(json);
+}
+
+@freezed
 abstract class RcxReport with _$RcxReport {
   const factory RcxReport({
     @Default(RcxStatus()) RcxStatus status,
@@ -416,6 +434,7 @@ abstract class RcxReport with _$RcxReport {
     @Default(0) int probesLeft,
     @Default(0) int probeCap,
     @Default(false) bool manual,
+    @Default(RcxDiscoveryReport()) RcxDiscoveryReport discovery,
     @Default(0) int at,
   }) = _RcxReport;
 

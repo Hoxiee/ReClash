@@ -44,7 +44,17 @@ Map<String, Object?> tls(
 void main() {
   group('isSingboxConfigInput', () {
     test('accepts a config object, rejects arrays, yaml and junk', () {
-      expect(isSingboxConfigInput(_json({'outbounds': []})), isTrue);
+      expect(
+        isSingboxConfigInput(
+          _json({
+            'outbounds': [
+              {'type': 'direct'},
+            ],
+          }),
+        ),
+        isTrue,
+      );
+      expect(isSingboxConfigInput(_json({'outbounds': []})), isFalse);
       expect(
         isSingboxConfigInput(
           _json([

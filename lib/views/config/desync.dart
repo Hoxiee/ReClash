@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -596,13 +598,30 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
   }
 }
 
-/// Runs the preset battery against the live engine and lets the user apply a
-/// winner; the strategy in force when the test started is restored at the end.
+class DesyncLadderPreview extends StatelessWidget {
+  const DesyncLadderPreview({super.key});
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.developerFindings,
+    body: SingleChildScrollView(
+      child: _DesyncTester(
+        showOverview: false,
+        preview: true,
+        onRunningChanged: (_) {},
+      ),
+    ),
+  );
+}
+
 class _DesyncTester extends ConsumerStatefulWidget {
   const _DesyncTester({
     required this.showOverview,
     required this.onRunningChanged,
+    this.preview = false,
   });
+
+  final bool preview;
 
   final bool showOverview;
   final ValueChanged<bool> onRunningChanged;
@@ -695,6 +714,13 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
             _index = index + 1;
             _outcomes.add(outcome);
           });
+          unawaited(
+            container
+                .read(coreHandlerProvider)
+                .signalOdometer(
+                  OdometerSignal(OdometerSignalKind.ladder, value: index + 1),
+                ),
+          );
         },
       );
     } catch (error, stackTrace) {
@@ -716,6 +742,25 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
           outcomes.length < desyncTestPresets.length && !_stoppedByUser;
     });
     widget.onRunningChanged(false);
+    if (failure == null &&
+        !_stoppedByUser &&
+        outcomes.length == desyncTestPresets.length &&
+        listEquals(
+          props.strategyArgs,
+          desyncTestArgs(desyncTestPresets.first),
+        )) {
+      unawaited(
+        container
+            .read(coreHandlerProvider)
+            .signalOdometer(
+              const OdometerSignal(
+                OdometerSignalKind.ladder,
+                reason: 'completed',
+                value: 1,
+              ),
+            ),
+      );
+    }
     if (failure case final failure?) {
       commonPrint.log(
         'DPI strategy test failed: ${compactError(failure)}, $failureStack',
@@ -761,9 +806,22 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
         : sites.isEmpty
         ? appLocalizations.desyncTestNoLists
         : appLocalizations.desyncTestHint(sites.length);
-    final outcomes =
-        _running || _outcomes.length < 2 ? _outcomes : [..._outcomes]
-          ..sort((a, b) => b.score.compareTo(a.score));
+    final outcomes = widget.preview
+        ? [
+            for (var index = 0; index < desyncTestPresets.length; index++)
+              DesyncTestOutcome(
+                text: desyncTestPresets[index],
+                failedSites: List.filled(
+                  index < 3 ? 3 - index : 0,
+                  'example.invalid',
+                ),
+                passedOnRetry: 0,
+                total: 5,
+                engineUp: true,
+                elapsed: Duration(milliseconds: 120 + index * 35),
+              ),
+          ]
+        : _outcomes;
     final selectedLists = [
       for (final list in desyncTestSiteLists)
         if (props.contains(list.id)) list,
@@ -786,10 +844,16 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
           items: [
             DecorationListItem(
               title: Text(appLocalizations.desyncTestTitle),
-              subtitle: Text(subtitle),
+              subtitle: Text(
+                widget.preview
+                    ? appLocalizations.developerFindingsDesc
+                    : subtitle,
+              ),
               trailing: CommonMinFilledButtonTheme(
                 child: FilledButton.tonal(
-                  onPressed: _running
+                  onPressed: widget.preview
+                      ? null
+                      : _running
                       ? _handleStop
                       : sites.isEmpty
                       ? null
@@ -802,18 +866,20 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
                 ),
               ),
             ),
-            DecorationListItem.open(
-              title: Text(appLocalizations.desyncTestDomains),
-              subtitle: Text(
-                appLocalizations.desyncTestDomainsCount(sites.length),
+            if (!widget.preview)
+              DecorationListItem.open(
+                title: Text(appLocalizations.desyncTestDomains),
+                subtitle: Text(
+                  appLocalizations.desyncTestDomainsCount(sites.length),
+                ),
+                widget: const _DesyncTestSitesPage(),
               ),
-              widget: const _DesyncTestSitesPage(),
-            ),
             for (final outcome in outcomes)
               DecorationListItem(
-                leading: outcome.engineUp && outcome.passed == outcome.total
-                    ? const Icon(Icons.check_rounded)
-                    : null,
+                leading: CircleAvatar(
+                  radius: 14,
+                  child: Text('${outcomes.indexOf(outcome) + 1}'),
+                ),
                 title: Text(
                   outcome.text.replaceAll('{sni}', desyncTestFakeSni),
                   maxLines: 1,
@@ -822,20 +888,20 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
                 ),
                 subtitle: Text(
                   outcome.engineUp
-                      ? appLocalizations.desyncTestScore(
-                          outcome.passed,
-                          outcome.total,
-                        )
+                      ? '${appLocalizations.desyncLadderResult(outcome.passed, outcome.total)}'
+                            '${outcome.elapsed > Duration.zero ? ' · ${outcome.elapsed.inMilliseconds} ms' : ''}'
                       : appLocalizations.desyncTestEngineCrashed,
                 ),
-                trailing: outcome.failedSites.isEmpty
+                trailing: widget.preview || outcome.failedSites.isEmpty
                     ? null
                     : IconButton(
                         icon: const Icon(Icons.info_outline_rounded),
                         tooltip: appLocalizations.desyncTestFailedTitle,
                         onPressed: () => _showFailed(outcome),
                       ),
-                onPressed: _running ? null : () => _applyOutcome(outcome),
+                onPressed: _running || widget.preview
+                    ? null
+                    : () => _applyOutcome(outcome),
               ),
           ],
         ),

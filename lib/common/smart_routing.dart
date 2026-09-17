@@ -67,6 +67,19 @@ const _russia = SmartRoutingBundle(
   breakerPatterns: ['lte', 'обход', 'глушил', 'bypass', 'breaker', 'unblock'],
 );
 
+const _neutral = SmartRoutingBundle(
+  canaryForeign: [
+    '1.1.1.1:443',
+    '9.9.9.9:443',
+    '8.8.8.8:443',
+    '94.140.14.14:443',
+  ],
+  openMarkers: [
+    RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
+  ],
+  egressEchoes: _egressEchoes,
+);
+
 const _smartRoutingBundles = {
   SmartRoutingPreset.off: SmartRoutingBundle(),
   SmartRoutingPreset.russia: _russia,
@@ -170,7 +183,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
   /// canaries and markers the user could since have edited. Enablement is the
   /// user's, never the preset's.
   SmartRoutingProps applyPreset(SmartRoutingPreset value) {
-    final bundle = value.bundle;
+    final bundle = value == SmartRoutingPreset.off ? _neutral : value.bundle;
     return copyWith(
       preset: value,
       censorCountries: bundle.censorCountries,
@@ -185,6 +198,18 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       respectPick: bundle.respectPick,
     );
   }
+
+  SmartRoutingProps withEnabled(bool value) => copyWith(
+    enabled: value,
+    canaryForeign:
+        value && preset == SmartRoutingPreset.off && canaryForeign.isEmpty
+        ? _neutral.canaryForeign
+        : canaryForeign,
+    openMarkers:
+        value && preset == SmartRoutingPreset.off && openMarkers.isEmpty
+        ? _neutral.openMarkers
+        : openMarkers,
+  );
 
   bool get matchesPreset => this == applyPreset(preset);
 

@@ -30,6 +30,9 @@ _Profile _$ProfileFromJson(Map<String, dynamic> json) => _Profile(
   lastUpdateDate: json['lastUpdateDate'] == null
       ? null
       : DateTime.parse(json['lastUpdateDate'] as String),
+  lastUsedAt: json['lastUsedAt'] == null
+      ? null
+      : DateTime.parse(json['lastUsedAt'] as String),
   autoUpdateDuration: Duration(
     microseconds: (json['autoUpdateDuration'] as num).toInt(),
   ),
@@ -97,6 +100,7 @@ Map<String, dynamic> _$ProfileToJson(_Profile instance) => <String, dynamic>{
   'currentGroupName': instance.currentGroupName,
   'url': instance.url,
   'lastUpdateDate': instance.lastUpdateDate?.toIso8601String(),
+  'lastUsedAt': instance.lastUsedAt?.toIso8601String(),
   'autoUpdateDuration': instance.autoUpdateDuration.inMicroseconds,
   'subscriptionInfo': instance.subscriptionInfo,
   'panelMeta': instance.panelMeta,

@@ -48,9 +48,12 @@ class Request {
     _clashDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
+        final read = _read;
+        if (read != null) {
+          ReClashHttpOverrides.applyProxyAuthentication(client, read);
+        }
         client.findProxy = (Uri uri) {
           client.userAgent = globalState.ua;
-          final read = _read;
           if (read == null) {
             return 'DIRECT';
           }
@@ -89,15 +92,17 @@ class Request {
   Future<Response<Uint8List>> getFileResponseForUrl(
     String url, {
     Map<String, String>? headers,
+    Dio? transport,
   }) async {
     final initialUri = Uri.parse(url);
     var currentUri = initialUri;
     var currentHeaders = Map<String, String>.from(headers ?? const {});
     final redirects = <RedirectRecord>[];
+    var receivedResponse = false;
     try {
       for (var redirectCount = 0; ; redirectCount++) {
         final requestToken = CancelToken();
-        final response = await _clashDio.get<ResponseBody>(
+        final response = await (transport ?? _clashDio).get<ResponseBody>(
           currentUri.toString(),
           cancelToken: requestToken,
           options: Options(
@@ -109,6 +114,7 @@ class Request {
                 ((status >= 200 && status < 300) || _isRedirectStatus(status)),
           ),
         );
+        receivedResponse = true;
         final body = response.data;
         if (body == null) {
           return Response<Uint8List>(
@@ -156,6 +162,9 @@ class Request {
         currentUri = nextUri;
       }
     } catch (e) {
+      if (e is DioException && receivedResponse) {
+        e.requestOptions.extra['subscriptionReceivedResponse'] = true;
+      }
       commonPrint.log(
         'getFileResponseForUrl error ${compactError(e)}',
         logLevel: LogLevel.warning,
@@ -187,10 +196,11 @@ class Request {
       );
       if (response.statusCode != 200) return null;
       final data = response.data as Map<String, dynamic>;
-      final remoteVersion = data['tag_name'];
-      final version = globalState.packageInfo.version;
-      final hasUpdate =
-          compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
+      final hasUpdate = isNewerAppRelease(
+        remoteVersion: data['tag_name'] as String,
+        installedVersion: globalState.packageInfo.version,
+        body: data['body'] as String?,
+      );
       if (!hasUpdate) return null;
       return data;
     } catch (e) {

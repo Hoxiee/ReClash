@@ -178,6 +178,9 @@ func (runtime coreDoctorRuntime) DoctorPathContext() doctorPathContext {
 	if tunUp.Load() {
 		return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureActive}
 	}
+	if tunRequested.Load() {
+		return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureInactive}
+	}
 	ports := listener.GetPorts()
 	if isRunning.Load() && (ports.Port != 0 || ports.SocksPort != 0 || ports.MixedPort != 0) {
 		return doctorPathContext{PathKind: doctorPathLocalProxy, CaptureState: doctorCaptureNotApplicable}

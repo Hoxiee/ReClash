@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "绕过 VPN 重试？",
+  "subscriptionDirectRetryMessage": "无法通过当前连接访问订阅。是否在不关闭 VPN 的情况下直接重试此次下载？面板将看到您所在网络的 IP 地址。其他流量的路由不会改变。",
+  "subscriptionDirectRetryConfirm": "直接重试",
+  "appRegion": "应用地区",
+  "appRegionDesc": "选择网络所在地区。选择俄罗斯会启用 HWID，您可以在下方关闭。智能路由单独设置。",
+  "appRegionOther": "其他",
+  "setupRegionSettings": "地区快捷设置",
+  "setupRegionSettingsDesc": "查看地理数据、路由预设和应用访问设置。不会自动添加任何内容。",
+  "lanProfileImportPhoneHint": "粘贴订阅链接，将其导入电视。",
+  "lanProfileImportSend": "导入电视",
+  "lanProfileImportPhoneSuccess": "订阅已导入。您可以返回电视并关闭此页面。",
+  "lanProfileImportPhoneFailed": "无法导入订阅。请检查链接后重试。",
+  "lanProfileImportPhoneUnreachable": "无法连接电视。请检查网络连接，并在此页面重试以确认结果。",
+  "panelHwidNotSupported": "面板报告了 HWID 限制",
+  "panelHwidNotSupportedTip": "面板返回了 x-hwid-not-supported。这并不能证明客户端不兼容。请检查 HWID 设置和订阅要求。",
+  "panelHwidIdentityDisabled": "HWID 发送已关闭。仅在信任面板时启用。",
+  "networkDefaultLanBypass": "未设置自定义路由时，局域网绕过 VPN。若要让其经过 VPN，请显式设置路由。",
+  "subscriptionClientExperimentalLabel": "实验性",
   "rule": "规则",
   "rules": "规则",
   "global": "全局",
@@ -93,7 +111,7 @@
   "importFromURL": "从URL导入",
   "subscriptionClientLabel": "客户端格式",
   "subscriptionClientDesc": "应用会以此客户端的格式获取订阅",
-  "subscriptionClientExperimentalTip": "模拟为实验性功能：提供方会下发其他客户端的格式，由 ReClash 转换。",
+  "subscriptionClientExperimentalTip": "客户端兼容性为实验性功能：提供方下发所选客户端的格式，由 ReClash 转换。",
   "subscriptionClientAuto": "自动",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -289,6 +307,7 @@
   "userAgent": "用户代理",
   "sendDeviceIdentity": "发送 HWID",
   "sendDeviceIdentityDesc": "将设备标识符、应用版本和设备名称发送到订阅服务器",
+  "sendDeviceIdentityDisableWarning": "关闭 HWID 后，大多数订阅将无法使用。要继续吗？",
   "unifiedDelay": "统一延迟",
   "unifiedDelayDesc": "去除握手等额外延迟",
   "tcpConcurrent": "TCP并发",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "您确定要强制重启核心吗？",
   "dnsHijacking": "DNS劫持",
   "coreStatus": "核心状态",
+  "coreRunning": "运行中",
+  "coreStarting": "启动中…",
+  "coreStopped": "已停止",
   "dataCollectionTip": "数据收集说明",
   "dataCollectionContent": "本应用使用 Firebase Crashlytics 收集崩溃信息以改进应用稳定性。\n收集的数据包括设备信息和崩溃详情，不包含个人敏感数据。\n您可以在设置中关闭此功能。",
   "crashlytics": "崩溃分析",
@@ -633,6 +655,15 @@
   "expectedStatus": "预期状态",
   "selectProxies": "选择代理",
   "inputProxyGroupName": "输入策略组名称",
+  "helperAuthorizationTitle": "允许设置 Helper？",
+  "helperAuthorizationMessage": "TUN 模式需要安装或更新 ReClash Helper 服务。点击「继续」以打开系统授权对话框。请仅在系统对话框中输入密码，ReClash 不会收集密码。",
+  "helperAuthorizationContinue": "继续",
+  "helperAuthorizationLater": "稍后",
+  "helperSystemdUnavailable": "TUN 模式需要 systemd，但当前系统无法使用 systemd。",
+  "helperPkexecUnavailable": "pkexec 不可用。请安装适用于当前发行版的 polkit 软件包，然后重试。",
+  "helperAgentUnavailable": "系统授权代理不可用。请在桌面会话中启动 polkit 身份验证代理，然后重试。",
+  "helperInstallFailed": "无法安装或更新 Helper 服务。请检查日志后重试。",
+  "helperInstallNotReady": "Helper 设置已完成，但服务尚未就绪。请检查日志后重试。",
   "helperCorruptTip": "Helper 服务不可用，无法启用 TUN 模式，请重新安装 ReClash。",
   "coreBlockedByPolicyTip": "Windows 拒绝运行 ReClashCore.exe（错误 {code}）。智能应用控制、AppLocker 等应用控制策略会拦截未签名程序，请在该策略中放行 ReClash 或关闭策略后重试。",
   "coreBlockedBySmartAppControlTip": "Windows 智能应用控制拦截了未签名的 ReClashCore.exe。请打开 Windows 安全中心 → 应用和浏览器控制 → 智能应用控制设置，选择「关闭」后重新启动 ReClash。智能应用控制关闭后无法再开启，除非重装 Windows。",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "服务器无响应，正在寻找替代",
   "smartRoutingNoServers": "没有可用的服务器",
   "smartRoutingPreset": "预设",
-  "smartRoutingPresetOff": "关闭",
+  "smartRoutingPresetOff": "其他",
   "smartRoutingPresetRussia": "俄罗斯",
   "smartRoutingPresetIran": "伊朗",
   "smartRoutingPresetChina": "中国",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "运行正常，没有更好的选择",
   "smartRoutingReasonIncumbentDead": "上一台服务器不再响应",
   "smartRoutingReasonVerdictGain": "这台已证实可通往开放互联网",
-  "smartRoutingReasonLatencyGain": "这台快了一个延迟档",
+  "smartRoutingReasonLatencyGain": "多次检查确认延迟更低",
+  "smartRoutingReasonReliabilityGain": "多次检查确认有更稳定的替代服务器",
+  "smartRoutingReasonQualityConfirming": "正在通过多次比较确认改善",
+  "smartRoutingReasonHandoffRecovery": "网络切换后连接已恢复",
   "smartRoutingReasonTerrainChanged": "网络发生了变化",
   "smartRoutingReasonStranded": "没有可用目标，保持当前服务器",
   "smartRoutingReasonNoCandidate": "没有服务器通过检查",
@@ -985,8 +1019,8 @@
   "setupRestore": "从备份恢复",
   "setupRestoreDesc": "从 ReClash、FlClashX 或 FlClash 备份恢复设置和配置",
   "setupFinishTitle": "检查设置",
-  "setupRegionDesc": "智能路由会以此作为选择路径的起点。界面语言只用于给出建议。",
-  "setupRegionNone": "其他地区或不使用智能路由",
+  "setupRegionDesc": "选择网络所在地区。选择俄罗斯会启用 HWID，您可以在下方关闭。智能路由单独设置。",
+  "setupRegionNone": "其他",
   "setupAutoRun": "打开 ReClash 时连接",
   "setupAutoRunDesc": "载入有效配置后自动启动 VPN",
   "setupPermissionVpn": "VPN 权限",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "主题",
   "appearanceIcon": "图标",
   "appearanceLayout": "布局",
-  "appearanceMotion": "动效",
   "schedule": "按时间",
   "scheduleDesc": "{darkAt} 至 {lightAt} 使用深色",
   "@scheduleDesc": {
@@ -1216,7 +1249,7 @@
   "openInBrowser": "在浏览器中打开",
   "off": "关闭",
   "subscriptionNoQuota": "此订阅未提供流量额度或到期时间",
-  "subscriptionUndialable": "该订阅没有任何可连接的节点 — 请尝试其他客户端格式",
+  "subscriptionUndialable": "订阅中未找到常规节点地址。面板可能返回了占位配置。尚未测试服务器连接。",
   "@subscriptionUndialable": {
     "type": "text"
   },
@@ -1478,10 +1511,10 @@
     }
   },
   "lanProfileImport": "从手机接收",
-  "lanProfileImportDesc": "显示一次性二维码，通过局域网发送订阅网址",
+  "lanProfileImportDesc": "显示一次性网页，通过局域网从手机发送订阅",
   "lanProfileImportTitle": "接收订阅",
-  "lanProfileImportScan": "请使用同一网络中的手机扫描此二维码",
-  "lanProfileImportAddress": "或将 JSON 发送到 {address}",
+  "lanProfileImportScan": "请使用同一网络中的手机扫描此二维码，然后粘贴订阅网址",
+  "lanProfileImportAddress": "或在手机浏览器中打开 {address}",
   "lanProfileImportWaiting": "正在等待订阅…",
   "lanProfileImportImporting": "正在导入订阅…",
   "lanProfileImportImported": "已接收订阅",
@@ -1676,5 +1709,133 @@
   "externalActionConfirmTitle": "确认外部操作",
   "externalActionConfirmMessage": "允许此外部链接执行“{action}”吗？",
   "panelSettingsConfirmTitle": "应用服务商设置",
-  "panelSettingsConfirmMessage": "此订阅请求以下全局应用设置：\n{settings}"
+  "panelSettingsConfirmMessage": "此订阅请求以下全局应用设置：\n{settings}",
+  "milestoneDecorations": "隐藏发现",
+  "milestoneDecorationsDesc": "显示使用 ReClash 时获得的发现",
+  "seasonalDecorations": "季节外观",
+  "seasonalDecorationsDesc": "在主界面显示轻微的季节装饰",
+  "lastUsed": "上次使用",
+  "neverUsed": "尚未使用",
+  "profileUnusedForDays": "已有 {days} 天未使用",
+  "profileUnusedForMonths": "已有 {months} 个月未使用",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "九十天，从未中断。",
+  "milestoneRevealAuscultation": "一百次检查。网络脉搏依然清晰。",
+  "milestoneRevealFullLadder": "走过每一级，又回到第一级。",
+  "milestoneRevealSilentAutopilot": "一千次决策，无需干预。",
+  "milestoneRevealOdometer": "已有一太字节流量经过。",
+  "milestoneRevealMeridian": "跨越了五条经线。",
+  "milestoneRevealPorcelain": "安静的七天。",
+  "milestoneRevealCrown": "整整一年的覆盖时间。",
+  "findings": "发现",
+  "findingsDesc": "使用 ReClash 时悄然发现的细节",
+  "findingsCount": "已发现 {found}/{total}",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "已发现",
+  "findingDiscoveredOn": "发现于 {date}",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "重置发现",
+  "resetFindingsDesc": "再次显示发现时刻，但不重置使用记录",
+  "resetFindingsTitle": "重置发现？",
+  "resetFindingsConfirm": "已发现的条目将隐藏，并可再次出现。使用记录不会改变。",
+  "findingVigil": "守望",
+  "findingAuscultation": "听诊",
+  "findingFullLadder": "完整阶梯",
+  "findingSilentAutopilot": "静默自动驾驶",
+  "findingOdometer": "里程计",
+  "findingMeridian": "五条经线",
+  "findingPorcelain": "瓷白",
+  "findingCrown": "冠冕",
+  "findingOscilloscope": "示波器",
+  "findingMarks": "标记",
+  "findingPi": "圆周率",
+  "findingTurn": "跨年",
+  "findingStorm": "风暴",
+  "findingLoopback": "回环",
+  "findingOscilloscopeDesc": "圆环聆听了六秒实时流量。",
+  "findingMarksDesc": "发现了 ReClash 标记集。",
+  "findingPiDesc": "仪表板打开时，会话越过了 3:14:15。",
+  "findingTurnDesc": "会话跨过了新年午夜。",
+  "findingStormDesc": "所有诊断层同时失效。",
+  "findingLoopbackDesc": "配置文件指回了本地监听端口。",
+  "appIconVigil": "守望",
+  "appIconTopo": "地形",
+  "appIconFractal": "分形",
+  "appIconSpark": "火花",
+  "crownHistory": "始于 {date} · 已覆盖 {days} 天",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "阶梯结果：{passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "应用冷色、近乎单色的配色",
+  "developerFindings": "发现预览",
+  "developerFindingsDesc": "仅临时预览：不会更改计数、已获得的发现或网络设置。重置或关闭开发者模式即可退出。效果会等待主页可见且连接正常，并遵循外观设置。在外观中选择的图标或主题仍会保存。",
+  "developerAllRewards": "预览所有奖励",
+  "developerPreviewReset": "清除预览",
+  "developerPreviewAutomatic": "自动",
+  "developerSeasonNewYear": "新年",
+  "developerSeasonBirthday": "ReClash 生日",
+  "developerSeasonAnniversary": "首次启动周年",
+  "developerSeasonDrift": "季节色调",
+  "developerPatina": "配置积尘",
+  "developerPatinaDays": "{days} 天",
+  "developerFindingEvents": "重放发现",
+  "developerFindingQueued": "已排队，等待主页可见且连接正常。可再次重放此发现。",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "连接的所有阶段均不可用",
+  "findingStormVerdict": "检查未找到可用路径。后续阶段的失败可能由最初的故障引起。",
+  "findingLoopbackWarning": "此配置地址指向 ReClash 自身的代理端口。请检查订阅链接。",
+  "seasonBirthdayNote": "今天是 ReClash 的生日。",
+  "seasonFirstRunNote": "今天是您首次启动的周年纪念日。"
 }

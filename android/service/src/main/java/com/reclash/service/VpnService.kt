@@ -167,6 +167,11 @@ class VpnService : SystemVpnService(), ManagedService {
                     Core.startTun(
                         fd = fd,
                         protect = this::protect,
+                        protectSubscription = { socket ->
+                            options.allowBypass &&
+                                (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || !isLockdownEnabled) &&
+                                protect(socket)
+                        },
                         resolveUid = this::resolveUid,
                         resolvePackage = this::resolvePackage,
                         stack = options.stack,

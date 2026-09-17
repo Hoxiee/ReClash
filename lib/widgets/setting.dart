@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
 import 'fade_box.dart';
+import 'focus.dart';
 import 'inherited.dart';
 import 'list.dart';
 import 'theme.dart';
@@ -175,14 +176,23 @@ class SettingSliderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slider = SliderTheme(
-      data: SliderDefaultsM3(context),
-      child: Slider(
-        padding: EdgeInsets.zero,
-        min: min,
-        max: max,
-        value: value.clamp(min, max),
-        onChanged: onChanged,
+    final slider = TvFocusOutline(
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          navigationMode: system.isTV
+              ? NavigationMode.directional
+              : MediaQuery.navigationModeOf(context),
+        ),
+        child: SliderTheme(
+          data: SliderDefaultsM3(context),
+          child: Slider(
+            padding: EdgeInsets.zero,
+            min: min,
+            max: max,
+            value: value.clamp(min, max),
+            onChanged: onChanged,
+          ),
+        ),
       ),
     );
     final title = this.title;

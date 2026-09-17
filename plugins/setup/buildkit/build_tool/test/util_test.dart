@@ -67,6 +67,56 @@ void main() {
       }
     });
 
+    test('writes the Linux bundle hashes', () {
+      final directory = Directory.systemTemp.createTempSync(
+        'build_tool_linux_manifest_test_',
+      );
+      const coreHash =
+          '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+      const helperHash =
+          'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+      final path = '${directory.path}/manifest.json';
+      try {
+        writeCoreManifest(
+          path: path,
+          coreSha256: coreHash,
+          helperSha256: helperHash,
+        );
+        expect(
+          File(path).readAsStringSync(),
+          '{"coreSha256":"$coreHash","helperSha256":"$helperHash"}\n',
+        );
+      } finally {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    test('rejects an invalid Helper hash without replacing the manifest', () {
+      final directory = Directory.systemTemp.createTempSync(
+        'build_tool_invalid_manifest_test_',
+      );
+      final path = '${directory.path}/manifest.json';
+      const hash =
+          '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+      try {
+        writeCoreManifest(path: path, coreSha256: hash);
+        final previous = File(path).readAsStringSync();
+        for (final invalid in ['', 'bad', hash.toUpperCase()]) {
+          expect(
+            () => writeCoreManifest(
+              path: path,
+              coreSha256: hash,
+              helperSha256: invalid,
+            ),
+            throwsA(isA<BuildException>()),
+          );
+          expect(File(path).readAsStringSync(), previous);
+        }
+      } finally {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
     test('rejects an invalid Core SHA256', () {
       expect(
         () => writeCoreManifest(path: '/tmp/manifest.json', coreSha256: 'bad'),

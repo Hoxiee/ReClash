@@ -13,7 +13,10 @@ import '../../helpers/test_profiles.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<ProviderContainer> pumpHero(WidgetTester tester) async {
+  Future<ProviderContainer> pumpHero(
+    WidgetTester tester, {
+    int expire = 0,
+  }) async {
     tester.view.physicalSize = const Size(900, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -21,10 +24,11 @@ void main() {
 
     final profile = Profile.normal().copyWith(
       url: 'https://example.com/sub',
-      subscriptionInfo: const SubscriptionInfo(
+      subscriptionInfo: SubscriptionInfo(
         upload: 25,
         download: 45,
         total: 100,
+        expire: expire,
       ),
     );
     const group = Group(
@@ -40,6 +44,9 @@ void main() {
         currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
         groupsProvider.overrideWithValue([group]),
         tunEnabledProvider.overrideWith((ref) => true),
+        isStartProvider.overrideWithValue(true),
+        coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+        networkReachableProvider.overrideWithBuild((_, _) => true),
         initProvider.overrideWithBuild((_, _) => true),
       ],
     );
@@ -62,6 +69,22 @@ void main() {
     await tester.pump();
     return container;
   }
+
+  testWidgets('an expired plan is explicit in the traffic card and orb', (
+    tester,
+  ) async {
+    final expire =
+        DateTime.now()
+            .subtract(const Duration(days: 1))
+            .millisecondsSinceEpoch ~/
+        1000;
+
+    await pumpHero(tester, expire: expire);
+
+    expect(find.text('Subscription expired'), findsNWidgets(2));
+    expect(find.text('Remaining 0 days'), findsNothing);
+    expect(find.byIcon(Icons.event_busy_rounded), findsNWidgets(2));
+  });
 
   testWidgets('a tap on the traffic card opens the subscription overview', (
     tester,

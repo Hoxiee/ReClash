@@ -25,6 +25,71 @@ void main() {
       },
     );
 
+    test(
+      'Other can enable without a country and without erasing custom data',
+      () {
+        const original = SmartRoutingProps(
+          canaryForeign: ['9.9.9.9:443'],
+          egressEchoes: ['https://example.com/echo'],
+          waveWidth: 7,
+        );
+        final enabled = original.withEnabled(true);
+        expect(enabled.enabled, isTrue);
+        expect(enabled.openMarkers, isNotEmpty);
+        expect(enabled.censorCountries, isEmpty);
+        expect(enabled.canaryDomestic, isEmpty);
+        expect(enabled.domesticMarkers, isEmpty);
+        expect(enabled.canaryForeign, original.canaryForeign);
+        expect(enabled.egressEchoes, original.egressEchoes);
+        expect(enabled.waveWidth, 7);
+        expect(original.withEnabled(false), original);
+      },
+    );
+
+    test(
+      'enable preserves existing markers and does not seed a country preset',
+      () {
+        const custom = SmartRoutingProps(
+          openMarkers: [
+            RcxMarker(url: 'https://example.com/', statuses: [204]),
+          ],
+        );
+        final enabled = custom.withEnabled(true);
+        expect(enabled.openMarkers, custom.openMarkers);
+        expect(enabled.canaryForeign, isNotEmpty);
+        expect(custom.withEnabled(false), custom);
+        const emptyCountry = SmartRoutingProps(
+          preset: SmartRoutingPreset.russia,
+        );
+        expect(emptyCountry.withEnabled(true).openMarkers, isEmpty);
+      },
+    );
+
+    test('default Other seeds reachability as well as operational markers', () {
+      final enabled = const SmartRoutingProps().withEnabled(true);
+      expect(enabled.enabled, isTrue);
+      expect(enabled.canaryForeign, isNotEmpty);
+      expect(enabled.openMarkers, isNotEmpty);
+      expect(enabled.canaryDomestic, isEmpty);
+      expect(enabled.censorCountries, isEmpty);
+      expect(enabled.withEnabled(false).withEnabled(true), enabled);
+    });
+
+    test('neutral preset is operable without a country classification', () {
+      final other = const SmartRoutingProps(enabled: true)
+          .applyPreset(SmartRoutingPreset.russia)
+          .applyPreset(SmartRoutingPreset.off);
+      expect(other.rcxParams.enabled, isTrue);
+      expect(other.rcxParams.openMarkers, isNotEmpty);
+      expect(other.censorCountries, isEmpty);
+      expect(other.canaryForeign, isNotEmpty);
+      expect(other.canaryDomestic, isEmpty);
+      expect(other.domesticMarkers, isEmpty);
+      expect(other.breakerPatterns, isEmpty);
+      expect(other.matchesPreset, isTrue);
+      expect(SmartRoutingPreset.off.bundle.openMarkers, isEmpty);
+    });
+
     test('picking a region never turns the engine off', () {
       const props = SmartRoutingProps(enabled: true, waveWidth: 4);
       final applied = props.applyPreset(SmartRoutingPreset.russia);
@@ -94,9 +159,10 @@ void main() {
     });
 
     test('a hand-moved pace unsticks the strategy it belonged to', () {
-      final edited = const SmartRoutingProps(
-        enabled: true,
-      ).applyStrategy(SmartRoutingStrategy.saver).copyWith(dwellSeconds: 30);
+      final edited = const SmartRoutingProps(enabled: true)
+          .applyPreset(SmartRoutingPreset.off)
+          .applyStrategy(SmartRoutingStrategy.saver)
+          .copyWith(dwellSeconds: 30);
 
       expect(edited.matchesStrategy, isFalse);
       expect(edited.matchesPreset, isTrue);

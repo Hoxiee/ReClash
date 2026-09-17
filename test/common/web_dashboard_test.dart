@@ -198,6 +198,13 @@ void main() {
   });
 
   group('WebDashboard', () {
+    test('pins and verifies the downloaded release archive', () async {
+      expect(webDashboardUrl, contains('/releases/download/v3.26.0/'));
+      final archive = File(writeArchive({'index.html': 'dashboard'}));
+
+      expect(await hasWebDashboardDigest(archive, webDashboardSha256), isFalse);
+    });
+
     test('reports and removes the dashboard in the core home dir', () async {
       expect(await webDashboard.isInstalled, isFalse);
 

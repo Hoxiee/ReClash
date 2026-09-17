@@ -199,23 +199,29 @@ func TestCompareIsAStrictWeakOrdering(t *testing.T) {
 		keys = append(keys, rcxKey{
 			verdict:    rcxVerdict(random.Intn(4)),
 			evidence:   rcxEvidence(random.Intn(4)),
-			latBucket:  uint8(random.Intn(5)),
+			latencyMs:  random.Intn(1000),
+			recurrence: random.Intn(7),
+			degraded:   random.Intn(2) == 1,
+			misfit:     uint8(random.Intn(2)),
+			unproven:   random.Intn(2) == 1,
 			challenger: random.Intn(2) == 1,
-			order:      uint16(random.Intn(4)),
+			order:      random.Intn(100_000),
 		})
 	}
 
-	for _, a := range keys {
-		if rcxCompare(a, a) != 0 {
-			t.Fatalf("compare(%v, %v) != 0: the order must be irreflexive", a, a)
-		}
-		for _, b := range keys {
-			if rcxCompare(a, b) != -rcxCompare(b, a) {
-				t.Fatalf("compare is not antisymmetric for %v vs %v", a, b)
+	for _, compare := range []func(rcxKey, rcxKey) int{rcxCompare, rcxCompareLatency, rcxCompareStable} {
+		for _, a := range keys {
+			if compare(a, a) != 0 {
+				t.Fatalf("compare(%v, %v) != 0: the order must be irreflexive", a, a)
 			}
-			for _, c := range keys {
-				if rcxCompare(a, b) < 0 && rcxCompare(b, c) < 0 && rcxCompare(a, c) >= 0 {
-					t.Fatalf("compare is not transitive for %v < %v < %v", a, b, c)
+			for _, b := range keys {
+				if compare(a, b) != -compare(b, a) {
+					t.Fatalf("compare is not antisymmetric for %v vs %v", a, b)
+				}
+				for _, c := range keys {
+					if compare(a, b) < 0 && compare(b, c) < 0 && compare(a, c) >= 0 {
+						t.Fatalf("compare is not transitive for %v < %v < %v", a, b, c)
+					}
 				}
 			}
 		}
@@ -223,21 +229,24 @@ func TestCompareIsAStrictWeakOrdering(t *testing.T) {
 }
 
 func TestCompareRanksVerdictAboveLatency(t *testing.T) {
-	slowButOpen := rcxKey{verdict: rcxVerdictPreferred, latBucket: 3}
-	fastButUnproven := rcxKey{verdict: rcxVerdictViable, latBucket: 0}
+	slowButOpen := rcxKey{verdict: rcxVerdictPreferred, latencyMs: 3}
+	fastButUnproven := rcxKey{verdict: rcxVerdictViable, latencyMs: 0}
 
 	if rcxCompare(slowButOpen, fastButUnproven) >= 0 {
 		t.Error("a proven-open node must beat a faster unproven one: reachability is not tradeable for latency")
 	}
 }
 
-func TestCompareRanksLiveTrafficAboveAFasterProbe(t *testing.T) {
-	provenByTraffic := rcxKey{verdict: rcxVerdictViable, evidence: rcxEvidenceLiveTraffic, latBucket: 2}
-	provenByProbe := rcxKey{verdict: rcxVerdictViable, evidence: rcxEvidenceFreshProbe, latBucket: 0}
-
-	if rcxCompare(provenByTraffic, provenByProbe) >= 0 {
-		t.Error("evidence outranks latency: a censor can answer a marker but not the user's own connection")
+func TestCompareRanksAFasterProbeAlongsideLiveTraffic(t *testing.T) {
+	live := rcxNode("live", foreignProven())
+	live.Evidence, live.MedianMs = rcxEvidenceLiveTraffic, 249
+	fresh := rcxNode("fresh", foreignProven())
+	fresh.MedianMs = 69
+	in := rcxDecisionInput{Terrain: rcxTerrainNormal, Policy: rcxTestPolicy()}
+	if rcxCompare(rcxKeyOf(live, in), rcxKeyOf(fresh, in)) <= 0 {
+		t.Error("a fresh proven challenger must not be locked out by live traffic")
 	}
+
 }
 
 func rcxDecideAt(in rcxDecisionInput) rcxDecision {
@@ -308,6 +317,7 @@ func TestDecideMakesALatencyGainWaitOutDwell(t *testing.T) {
 	slow.MedianMs = 900
 	fast := rcxNode("de-1", foreignProven())
 	fast.MedianMs = 90
+	fast.QualityConfirmed = true
 
 	input := rcxDecisionInput{
 		Terrain:        rcxTerrainNormal,
@@ -333,6 +343,7 @@ func TestDecideRespectsAManualPinForLatencyOnly(t *testing.T) {
 	slow.MedianMs = 900
 	fast := rcxNode("de-1", foreignProven())
 	fast.MedianMs = 90
+	fast.QualityConfirmed = true
 
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:        rcxTerrainNormal,
@@ -467,6 +478,7 @@ func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 	throttled.Degraded = true
 	healthy := rcxNode("de-1", foreignProven())
 	healthy.MedianMs = 280
+	healthy.QualityConfirmed = true
 
 	got := rcxDecideAt(rcxDecisionInput{
 		Terrain:        rcxTerrainNormal,
@@ -479,8 +491,8 @@ func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 	if !got.Switch || got.To != "de-1" {
 		t.Errorf("decision = %+v, want the throttled incumbent outranked by a slower healthy node", got)
 	}
-	if got.Reason != rcxReasonLatencyGain {
-		t.Errorf("reason = %s, want %s", got.Reason, rcxReasonLatencyGain)
+	if got.Reason != rcxReasonReliabilityGain {
+		t.Errorf("reason = %s, want %s", got.Reason, rcxReasonReliabilityGain)
 	}
 }
 
@@ -646,8 +658,8 @@ func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
 }
 
 func TestCompareLatencyKeepsReliabilityAboveLatency(t *testing.T) {
-	fastAndNew := rcxKey{latBucket: 0, evidence: rcxEvidenceNone, unproven: true}
-	slowAndKnown := rcxKey{latBucket: 1, evidence: rcxEvidenceFreshProbe}
+	fastAndNew := rcxKey{latencyMs: 0, evidence: rcxEvidenceNone, unproven: true}
+	slowAndKnown := rcxKey{latencyMs: 1, evidence: rcxEvidenceFreshProbe}
 
 	if rcxCompare(fastAndNew, slowAndKnown) <= 0 {
 		t.Error("a measured working node must beat a faster stranger")
@@ -657,15 +669,15 @@ func TestCompareLatencyKeepsReliabilityAboveLatency(t *testing.T) {
 	}
 }
 
-func TestCompareRanksAProvenNodeAboveANeverSeenOneInTheSameBand(t *testing.T) {
-	proven := rcxKey{latBucket: 2, order: 60_000}
-	stranger := rcxKey{latBucket: 2, unproven: true, order: 1}
+func TestCompareRanksAProvenNodeAboveANeverSeenOne(t *testing.T) {
+	proven := rcxKey{latencyMs: 2, order: 60_000}
+	stranger := rcxKey{latencyMs: 2, unproven: true, order: 1}
 
 	if rcxCompare(proven, stranger) >= 0 {
-		t.Error("inside one band the node that carried traffic here beats a hash winner: order is the last word, not the first")
+		t.Error("a proven node must outrank an unproven node regardless of source position")
 	}
 	if rcxCompareLatency(proven, stranger) >= 0 {
-		t.Error("the latency strategy must break a band tie on history too")
+		t.Error("the latency strategy must rank proof before latency too")
 	}
 }
 
@@ -703,26 +715,26 @@ func TestAdmitLetsAMeasuredForeignEgressVoidTheDomesticPrior(t *testing.T) {
 	}
 }
 
-func TestCompareStableKeepsTheIncumbentAcrossLatencyBands(t *testing.T) {
-	incumbent := rcxKey{latBucket: 2}
-	fasterRival := rcxKey{latBucket: 0, challenger: true}
+func TestCompareStableRanksLatencyBeforeIncumbency(t *testing.T) {
+	incumbent := rcxKey{latencyMs: 2}
+	fasterRival := rcxKey{latencyMs: 0, challenger: true}
 
-	if rcxCompareStable(incumbent, fasterRival) >= 0 {
-		t.Error("stable must not swap a working server for a faster band")
+	if rcxCompareStable(incumbent, fasterRival) <= 0 {
+		t.Error("stable must shortlist a faster challenger before applying promotion gates")
 	}
 	if rcxCompare(incumbent, fasterRival) <= 0 {
-		t.Error("balanced still reads the band before it reads who is in use")
+		t.Error("balanced must also rank latency before incumbency")
 	}
 
-	betterEvidence := rcxKey{latBucket: 2, evidence: rcxEvidenceNone, challenger: true}
+	betterEvidence := rcxKey{latencyMs: 2, evidence: rcxEvidenceNone, challenger: true}
 	if rcxCompareStable(betterEvidence, incumbent) <= 0 {
 		t.Error("stable must still be moved by evidence the incumbent lacks")
 	}
 }
 
 func TestCompareForNamesOneComparatorPerStrategy(t *testing.T) {
-	sticky := rcxKey{latBucket: 2}
-	quick := rcxKey{latBucket: 0, challenger: true}
+	sticky := rcxKey{latencyMs: 2}
+	quick := rcxKey{latencyMs: 0, challenger: true}
 
 	for _, tc := range []struct {
 		strategy string
@@ -730,8 +742,8 @@ func TestCompareForNamesOneComparatorPerStrategy(t *testing.T) {
 	}{
 		{rcxStrategyBalanced, false},
 		{rcxStrategyLatency, false},
-		{rcxStrategyStable, true},
-		{rcxStrategySaver, true},
+		{rcxStrategyStable, false},
+		{rcxStrategySaver, false},
 		{"", false},
 	} {
 		if holds := rcxCompareFor(tc.strategy)(sticky, quick) < 0; holds != tc.holds {

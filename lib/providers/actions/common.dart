@@ -10,6 +10,8 @@ class CommonAction extends _$CommonAction {
 
   void toggleRunning() {
     final running = !ref.read(isStartProvider);
+    final setup = ref.read(setupActionProvider.notifier);
+    setup.beginTunAuthorization(allowPrompt: running);
     unawaited(
       globalState.safeRun(
         () => ref

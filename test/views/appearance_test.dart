@@ -97,7 +97,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (final label in ['Layout', 'Motion', 'Theme']) {
+    for (final label in ['Layout', 'Other', 'Theme']) {
       await openTab(tester, label);
       expect(tester.takeException(), isNull, reason: label);
     }
@@ -170,6 +170,31 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
+
+    testWidgets('shows reward icons only after their findings unlock', (
+      tester,
+    ) async {
+      await pumpIconSections(tester);
+
+      expect(find.text('Vigil'), findsNothing);
+      expect(find.text('Topo'), findsNothing);
+      expect(find.text('Spark'), findsNothing);
+      expect(find.text('Fractal'), findsNothing);
+
+      container
+          .read(milestoneSettingProvider.notifier)
+          .update(
+            (state) => state.copyWith(
+              unlocked: {'vigil', 'fullLadder', 'silentAutopilot', 'crown'},
+            ),
+          );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vigil'), findsOneWidget);
+      expect(find.text('Topo'), findsOneWidget);
+      expect(find.text('Spark'), findsOneWidget);
+      expect(find.text('Fractal'), findsOneWidget);
+    });
 
     testWidgets('cancels installation without changing the selected icon', (
       tester,
@@ -379,7 +404,7 @@ void main() {
   group('motion', () {
     testWidgets('reduce motion is left to the user', (tester) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Motion');
+      await openTab(tester, 'Other');
 
       expect(container.read(appSettingProvider).reduceMotion, isFalse);
 

@@ -25,7 +25,11 @@ var (
 )
 
 func isElevated() bool {
-	return os.Geteuid() == 0 && realUid != 0
+	return elevatedIDs(realUid, os.Geteuid())
+}
+
+func elevatedIDs(uid int, euid int) bool {
+	return uid == 0 || euid == 0 || uid != euid
 }
 
 func canReclaim(homeDir string, uid int) bool {

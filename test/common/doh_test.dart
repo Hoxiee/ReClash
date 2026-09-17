@@ -81,6 +81,27 @@ void main() {
       },
     );
 
+    test('the cache evicts its least recently used hostname', () async {
+      final asked = <String>[];
+      final resolver = DohResolver(
+        query: (url) async {
+          asked.add(url.queryParameters['name']!);
+          return _answer('203.0.113.7');
+        },
+      );
+
+      for (var index = 0; index < dohCacheCapacity; index++) {
+        await resolver.lookup('host-$index.test');
+      }
+      await resolver.lookup('host-0.test');
+      await resolver.lookup('overflow.test');
+      await resolver.lookup('host-1.test');
+      await resolver.lookup('host-0.test');
+
+      expect(asked.where((host) => host == 'host-1.test'), hasLength(2));
+      expect(asked.where((host) => host == 'host-0.test'), hasLength(1));
+    });
+
     test(
       'an endpoint that cannot answer hands the query to the next',
       () async {

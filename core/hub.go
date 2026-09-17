@@ -28,7 +28,6 @@ import (
 	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/hub/executor"
-	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
@@ -40,7 +39,11 @@ var (
 	logCancel     context.CancelFunc
 )
 
+const coreMemoryLimit = 96 * 1024 * 1024
+
 func handleInitClash(params *InitParams) bool {
+	debug.SetGCPercent(50)
+	debug.SetMemoryLimit(coreMemoryLimit)
 	startHealthCheckCadence()
 	func() {
 		configMu.Lock()
@@ -57,20 +60,21 @@ func handleInitClash(params *InitParams) bool {
 func handleStartListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
+	odometerInstance.NoteUp(time.Now(), takeOdoStartReason())
 	isRunning.Store(true)
 	updateListeners(currentConfig)
 	syncTunUp()
 	resolver.ResetConnection()
-	return true
+	return requestedTunError() == nil
 }
 
 func handleStopListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
+	odometerInstance.NoteDown(time.Now(), false)
 	isRunning.Store(false)
 	tunPaused.Store(false)
-	listener.StopListener()
-	setTunUp(false)
+	stopListeners()
 	resolver.ResetConnection()
 	return true
 }
@@ -105,7 +109,7 @@ func handleResumeTun() bool {
 	}
 	updateListeners(currentConfig)
 	syncTunUp()
-	return true
+	return requestedTunError() == nil
 }
 
 func handleSetUiActive(active bool) bool {
@@ -127,6 +131,8 @@ func handleForceGC() {
 }
 
 func handleShutdown() bool {
+	odometerInstance.NoteDown(time.Now(), false)
+	odometerInstance.Flush()
 	stopHealthCheckCadence()
 	handleStopLog()
 	rcxEngineInstance.Stop()
@@ -134,11 +140,11 @@ func handleShutdown() bool {
 	configMu.Lock()
 	isRunning.Store(false)
 	tunPaused.Store(false)
-	listener.StopListener()
-	setTunUp(false)
+	stopListeners()
 	updater.StopGeoUpdater()
 	executor.Shutdown()
 	currentConfig = nil
+	tunRequested.Store(false)
 	isInit.Store(false)
 	configMu.Unlock()
 
@@ -373,6 +379,9 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 	// The host already wrote the selector: the engine only learns the pick.
 	if params.GroupName == rcxGroupNode {
 		rcxEngineInstance.OnManualAsserted(params.ProxyName)
+	}
+	if params.Manual && params.ProxyName != "" {
+		odometerInstance.NoteManualSwitch(time.Now())
 	}
 	doctorBumpGeneration(doctorRoutingGeneration)
 	return ""
@@ -762,7 +771,7 @@ func startHealthCheckCadence() {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				if tunUp.Load() {
+				if tunUp.Load() && !isScreenOff.Load() && !isSuspended.Load() {
 					refreshHealthChecks()
 				}
 			}
@@ -783,8 +792,12 @@ func stopHealthCheckCadence() {
 // Doze is minutes away when a screen goes off, so a health check gated on
 // suspension alone still probes every provider from a pocketed phone.
 func handleScreenOff(off bool) {
+	wasOff := isScreenOff.Swap(off)
 	provider.SetScreenOff(off)
 	rcxEngineInstance.OnScreenOff(off)
+	if wasOff && !off && tunUp.Load() && !isSuspended.Load() && !rcxEngineInstance.Enabled() {
+		refreshHealthChecks()
+	}
 }
 
 func handleSuspend(suspended bool) bool {
@@ -804,7 +817,7 @@ func handleSuspend(suspended bool) bool {
 	// listeners are stopped, since the service also resumes the core on its way
 	// down, and not when the routing engine is on: it buys one probe for the
 	// node in use instead of one per provider.
-	if wasSuspended && isRunning.Load() && !rcxEngineInstance.Enabled() {
+	if wasSuspended && !isScreenOff.Load() && isRunning.Load() && !rcxEngineInstance.Enabled() {
 		refreshHealthChecks()
 	}
 	rcxEngineInstance.OnSuspend(false)
@@ -895,11 +908,15 @@ func handleCrash() {
 }
 
 func handleUpdateConfig(params *UpdateParams) string {
-	if err := updateConfig(params); err != nil {
+	err := updateConfig(params)
+	if err != nil && !errors.Is(err, errTunNotActive) {
 		return err.Error()
 	}
 	if change := doctorGenerationForUpdate(params); change != (doctorGenerationChange{}) {
 		doctorBumpGenerations(change)
+	}
+	if err != nil {
+		return err.Error()
 	}
 	return ""
 }

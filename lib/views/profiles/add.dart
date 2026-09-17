@@ -25,20 +25,24 @@ class AddProfileView extends ConsumerWidget {
   final bool shrinkWrap;
   final ValueChanged<Profile>? onProfileAdded;
 
-  Future<Profile?> _import(WidgetRef ref, ProfileImportRequest request) async {
-    final result = await ref
-        .read(profilesActionProvider.notifier)
-        .importProfile(request);
-    final profile = result.profile;
+  Future<ProfileImportResult> _import(
+    WidgetRef ref,
+    ProfileImportRequest request,
+  ) => ref.read(profilesActionProvider.notifier).importProfile(request);
+
+  void _notifyAdded(Profile? profile) {
     if (profile != null) onProfileAdded?.call(profile);
-    return profile;
   }
 
-  Future<void> _handleAddProfileFormFile(WidgetRef ref) async {
-    await _import(ref, const ProfileImportRequest.file());
+  Future<void> _handleAddProfileFormFile(
+    WidgetRef ref,
+    BuildContext context,
+  ) async {
+    final result = await _import(ref, const ProfileImportRequest.file());
+    if (context.mounted) _notifyAdded(result.profile);
   }
 
-  Future<void> _handleAddUrl(
+  Future<ProfileImportResult> _handleAddUrl(
     WidgetRef ref,
     BuildContext context,
     String url, {
@@ -50,12 +54,14 @@ class AddProfileView extends ConsumerWidget {
     try {
       resolved = await resolveExternalLink(url);
     } on IncyLinkException catch (error) {
+      if (!context.mounted) return const ProfileImportResult.cancelled();
       await dialogs.showMessage(
         title: appLocalizations.addProfile,
         message: TextSpan(text: incyLinkErrorMessage(error, appLocalizations)),
       );
-      return;
+      return const ProfileImportResult.failed(ProfileImportFailure.invalidUrl);
     }
+    if (!context.mounted) return const ProfileImportResult.cancelled();
     final target = resolved?.url ?? url;
     final request = target.isEmpty
         ? ProfileImportRequest.raw(resolved!.data!)
@@ -65,115 +71,178 @@ class AddProfileView extends ConsumerWidget {
             name: resolved?.name,
             customUserAgent: customUserAgent,
           );
-    await _import(ref, request);
+    return _import(ref, request);
   }
 
   Future<void> _toScan(WidgetRef ref, BuildContext context) async {
     if (system.isDesktop) {
-      await _import(ref, const ProfileImportRequest.qrCode());
+      final result = await _import(ref, const ProfileImportRequest.qrCode());
+      if (context.mounted) _notifyAdded(result.profile);
       return;
     }
     final url = await BaseNavigator.push<String>(context, const ScanPage());
     if (url != null && context.mounted) {
-      await _handleAddUrl(ref, context, url);
+      final result = await _handleAddUrl(ref, context, url);
+      if (context.mounted) _notifyAdded(result.profile);
     }
   }
 
-  Future<void> _toLanImport(WidgetRef ref) async {
-    await dialogs.showCommonDialog<void>(
+  Future<void> _toLanImport(WidgetRef ref, BuildContext context) async {
+    Profile? imported;
+    final confirmed = await dialogs.showCommonDialog<bool>(
       dismissible: false,
       child: LanProfileImportDialog(
         onImport: (target) async {
-          final profile = await _import(
-            ref,
-            ProfileImportRequest.link(
-              target.url,
-              client: target.client,
-              name: target.name,
-            ),
-          );
-          if (profile == null) throw StateError('Profile import failed');
+          if (!context.mounted) return false;
+          final request = target.localContent != null
+              ? ProfileImportRequest.raw(target.localContent!)
+              : ProfileImportRequest.link(
+                  target.url,
+                  client: target.client,
+                  name: target.name,
+                );
+          final result = await _import(ref, request);
+          imported = result.profile;
+          return result.isImported;
         },
       ),
     );
+    if (confirmed == true && context.mounted) _notifyAdded(imported);
   }
 
   Future<void> _toAdd(WidgetRef ref, BuildContext context) async {
-    final result = await dialogs.showCommonDialog<URLFormDialogResult>(
-      child: const URLFormDialog(),
+    final profile = await dialogs.showCommonDialog<Profile>(
+      child: Builder(
+        builder: (formContext) => URLFormDialog(
+          onSubmit: (value) => _handleAddUrl(
+            ref,
+            formContext,
+            value.url,
+            client: value.client,
+            customUserAgent: value.customUserAgent,
+          ),
+        ),
+      ),
     );
-    if (result == null || !context.mounted) return;
-    await _handleAddUrl(
-      ref,
-      context,
-      result.url,
-      client: result.client,
-      customUserAgent: result.customUserAgent,
-    );
+    if (context.mounted) _notifyAdded(profile);
   }
 
-  Future<void> _toRaw(WidgetRef ref) async {
-    final content = await dialogs.showCommonDialog<String>(
-      child: const RawProfileDialog(),
+  Future<void> _toRaw(WidgetRef ref, BuildContext context) async {
+    final profile = await dialogs.showCommonDialog<Profile>(
+      child: RawProfileDialog(
+        onSubmit: (content) => _import(ref, ProfileImportRequest.raw(content)),
+      ),
     );
-    if (content == null) return;
-    await _import(ref, ProfileImportRequest.raw(content));
+    if (context.mounted) _notifyAdded(profile);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    return ListView(
-      shrinkWrap: shrinkWrap,
-      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
-      children: [
-        if (system.isTV)
-          ListItem(
-            key: const Key('lan-profile-import'),
-            leading: const Icon(Icons.wifi_tethering),
-            title: Text(appLocalizations.lanProfileImport),
-            subtitle: Text(appLocalizations.lanProfileImportDesc),
-            onTap: () => _toLanImport(ref),
-          ),
+    final items = <Widget>[
+      if (system.isTV)
+        ListItem(
+          key: const Key('lan-profile-import'),
+          leading: const Icon(Icons.wifi_tethering),
+          title: Text(appLocalizations.lanProfileImport),
+          subtitle: Text(appLocalizations.lanProfileImportDesc),
+          onTap: () => _toLanImport(ref, context),
+        ),
+      if (!system.isTV)
         ListItem(
           leading: const Icon(Icons.qr_code_sharp),
           title: Text(appLocalizations.qrcode),
           subtitle: Text(appLocalizations.qrcodeDesc),
           onTap: () => _toScan(ref, context),
         ),
-        ListItem(
-          leading: const Icon(Icons.cloud_download_sharp),
-          title: Text(appLocalizations.url),
-          subtitle: Text(appLocalizations.urlDesc),
-          onTap: () => _toAdd(ref, context),
-        ),
-        ListItem(
-          leading: const Icon(Icons.upload_file_sharp),
-          title: Text(appLocalizations.file),
-          subtitle: Text(appLocalizations.fileDesc),
-          onTap: () => _handleAddProfileFormFile(ref),
-        ),
-        ListItem(
-          leading: const Icon(Icons.data_object_rounded),
-          title: Text(appLocalizations.setupRawConfig),
-          subtitle: Text(appLocalizations.setupRawConfigDesc),
-          onTap: () => _toRaw(ref),
-        ),
-      ],
-    );
+      ListItem(
+        leading: const Icon(Icons.cloud_download_sharp),
+        title: Text(appLocalizations.url),
+        subtitle: Text(appLocalizations.urlDesc),
+        onTap: () => _toAdd(ref, context),
+      ),
+      ListItem(
+        leading: const Icon(Icons.upload_file_sharp),
+        title: Text(appLocalizations.file),
+        subtitle: Text(appLocalizations.fileDesc),
+        onTap: () => _handleAddProfileFormFile(ref, context),
+      ),
+      ListItem(
+        leading: const Icon(Icons.data_object_rounded),
+        title: Text(appLocalizations.setupRawConfig),
+        subtitle: Text(appLocalizations.setupRawConfigDesc),
+        onTap: () => _toRaw(ref, context),
+      ),
+    ];
+    return shrinkWrap ? Column(children: items) : ListView(children: items);
+  }
+}
+
+void closeProfileImportRoute<T>(BuildContext context, [T? result]) {
+  if (!context.mounted) return;
+  final route = ModalRoute.of(context);
+  if (route == null || !route.isActive) return;
+  final navigator = route.navigator;
+  if (navigator == null) return;
+  if (route.isCurrent) {
+    navigator.pop(result);
+  } else {
+    navigator.removeRoute(route, result);
+  }
+}
+
+mixin _ProfileFormSubmit<T extends StatefulWidget> on State<T> {
+  bool _pending = false;
+  bool _completed = false;
+  String? _errorText;
+
+  Future<void> _submit(Future<ProfileImportResult> Function() action) async {
+    if (_pending || _completed) return;
+    setState(() {
+      _pending = true;
+      _errorText = null;
+    });
+    try {
+      final result = await action();
+      if (!mounted) return;
+      if (result.isImported) {
+        _completed = true;
+        closeProfileImportRoute(context, result.profile);
+      } else if (result.failure case final failure?) {
+        setState(() {
+          _errorText = profileImportFailureMessage(
+            failure,
+            context.appLocalizations,
+          );
+        });
+      }
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _errorText = profileImportFailureMessage(
+            ProfileImportFailure.unexpected,
+            context.appLocalizations,
+          );
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _pending = false);
+    }
   }
 }
 
 class RawProfileDialog extends StatefulWidget {
-  const RawProfileDialog({super.key});
+  const RawProfileDialog({super.key, required this.onSubmit});
+
+  final Future<ProfileImportResult> Function(String content) onSubmit;
 
   @override
   State<RawProfileDialog> createState() => _RawProfileDialogState();
 }
 
-class _RawProfileDialogState extends State<RawProfileDialog> {
+class _RawProfileDialogState extends State<RawProfileDialog>
+    with _ProfileFormSubmit<RawProfileDialog> {
   final _controller = TextEditingController();
-  String? _errorText;
 
   @override
   void dispose() {
@@ -181,18 +250,19 @@ class _RawProfileDialogState extends State<RawProfileDialog> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
+    if (_pending || _completed) return;
     final content = _controller.text.trim();
     if (content.isEmpty) {
       setState(() => _errorText = context.appLocalizations.contentNotEmpty);
       return;
     }
-    Navigator.of(context).pop(content);
+    await _submit(() => widget.onSubmit(content));
   }
 
   Future<void> _handlePaste() async {
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    if (!mounted) return;
+    if (!mounted || _pending) return;
     final text = clipboardData?.text?.trim();
     if (text != null && text.isNotEmpty) {
       _controller.text = text;
@@ -208,18 +278,24 @@ class _RawProfileDialogState extends State<RawProfileDialog> {
       actions: [
         IconButton.filledTonal(
           tooltip: appLocalizations.pasteFromClipboard,
-          onPressed: _handlePaste,
+          onPressed: _pending ? null : _handlePaste,
           icon: const Icon(Icons.content_paste),
         ),
         TextButton(
-          onPressed: _handleSubmit,
-          child: Text(appLocalizations.submit),
+          onPressed: _pending ? null : _handleSubmit,
+          child: _pending
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : Text(appLocalizations.submit),
         ),
       ],
       child: SizedBox(
         width: 420,
         child: TextField(
           controller: _controller,
+          readOnly: _pending,
           autofocus: true,
           minLines: 10,
           maxLines: 18,
@@ -249,18 +325,28 @@ class URLFormDialogResult {
 }
 
 class URLFormDialog extends StatefulWidget {
-  const URLFormDialog({super.key});
+  const URLFormDialog({super.key, required this.onSubmit});
+
+  final Future<ProfileImportResult> Function(URLFormDialogResult value)
+  onSubmit;
 
   @override
   State<URLFormDialog> createState() => _URLFormDialogState();
 }
 
-class _URLFormDialogState extends State<URLFormDialog> {
+class _URLFormDialogState extends State<URLFormDialog>
+    with _ProfileFormSubmit<URLFormDialog> {
   Widget get _moreBody => _isMore
-      ? ClientPresetSelector(
-          selected: _client,
-          onChanged: (value) => setState(() => _client = value),
-          customUserAgentController: _customUserAgentController,
+      ? AbsorbPointer(
+          absorbing: _pending,
+          child: ExcludeFocus(
+            excluding: _pending,
+            child: ClientPresetSelector(
+              selected: _client,
+              onChanged: (value) => setState(() => _client = value),
+              customUserAgentController: _customUserAgentController,
+            ),
+          ),
         )
       : const SizedBox(width: double.infinity);
 
@@ -268,7 +354,6 @@ class _URLFormDialogState extends State<URLFormDialog> {
   final _customUserAgentController = TextEditingController();
   SubscriptionClient _client = SubscriptionClient.auto;
   bool _isMore = false;
-  String? _errorText;
 
   @override
   void dispose() {
@@ -277,7 +362,8 @@ class _URLFormDialogState extends State<URLFormDialog> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
+    if (_pending || _completed) return;
     final url = _urlController.text.trim();
     if (url.isEmpty) {
       setState(() {
@@ -292,18 +378,17 @@ class _URLFormDialogState extends State<URLFormDialog> {
       });
       return;
     }
-    Navigator.of(context).pop<URLFormDialogResult>(
-      URLFormDialogResult(
-        url: url,
-        client: _client,
-        customUserAgent: _customUserAgentController.text.trim(),
-      ),
+    final value = URLFormDialogResult(
+      url: url,
+      client: _client,
+      customUserAgent: _customUserAgentController.text.trim(),
     );
+    await _submit(() => widget.onSubmit(value));
   }
 
   Future<void> _handlePaste() async {
     final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    if (!mounted) return;
+    if (!mounted || _pending) return;
     final text = clipboardData?.text?.trim();
     if (text != null && text.isNotEmpty) {
       _urlController.text = text;
@@ -333,19 +418,24 @@ class _URLFormDialogState extends State<URLFormDialog> {
                   tooltip: _isMore
                       ? appLocalizations.showLess
                       : appLocalizations.showMore,
-                  onPressed: _handleMore,
+                  onPressed: _pending ? null : _handleMore,
                   icon: CommonExpandIcon(expand: _isMore),
                 ),
                 IconButton.filledTonal(
                   tooltip: appLocalizations.pasteFromClipboard,
-                  onPressed: _handlePaste,
+                  onPressed: _pending ? null : _handlePaste,
                   icon: const Icon(Icons.content_paste),
                 ),
               ],
             ),
             TextButton(
-              onPressed: _handleSubmit,
-              child: Text(appLocalizations.submit),
+              onPressed: _pending ? null : _handleSubmit,
+              child: _pending
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(appLocalizations.submit),
             ),
           ],
         ),
@@ -366,6 +456,7 @@ class _URLFormDialogState extends State<URLFormDialog> {
                 if (_errorText != null) setState(() => _errorText = null);
               },
               controller: _urlController,
+              readOnly: _pending,
               decoration: InputDecoration(
                 labelText: appLocalizations.url,
                 errorText: _errorText,
@@ -412,26 +503,39 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
   Object? _startError;
   LanProfileImportState _state = LanProfileImportState.waiting;
   late int _secondsLeft;
+  bool _completed = false;
 
   @override
   void initState() {
     super.initState();
     _secondsLeft = widget.timeout.inSeconds;
-    unawaited(_start());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_server == null) unawaited(_start());
   }
 
   Future<void> _start() async {
     final server = LanProfileImportServer(
       onImport: widget.onImport,
       resolve: widget.resolve,
+      page: buildLanProfileImportPage(
+        localizations: context.appLocalizations,
+        colors: context.colorScheme,
+      ),
       timeout: widget.timeout,
     );
     _server = server;
     _subscription = server.state.stream.listen((state) {
-      if (!mounted || state == LanProfileImportState.closed) return;
+      if (!mounted || _completed || state == LanProfileImportState.closed) {
+        return;
+      }
       setState(() => _state = state);
       if (state == LanProfileImportState.imported) {
-        Navigator.of(context).pop();
+        _completed = true;
+        closeProfileImportRoute(context, true);
       }
     });
     try {
@@ -466,6 +570,7 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
         '${appLocalizations.lanProfileImportWaiting} ${_secondsLeft}s',
       LanProfileImportState.importing =>
         appLocalizations.lanProfileImportImporting,
+      LanProfileImportState.awaitingConfirmation ||
       LanProfileImportState.imported =>
         appLocalizations.lanProfileImportImported,
       LanProfileImportState.failed => appLocalizations.lanProfileImportFailed,
@@ -483,7 +588,11 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
       title: appLocalizations.lanProfileImportTitle,
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (_completed) return;
+            _completed = true;
+            closeProfileImportRoute(context);
+          },
           child: Text(appLocalizations.close),
         ),
       ],
@@ -501,10 +610,19 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
               size: 220,
               backgroundColor: Colors.white,
             )
-          else
+          else if (_startError == null)
             const SizedBox.square(
               dimension: 220,
               child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            SizedBox.square(
+              dimension: 220,
+              child: Icon(
+                Icons.wifi_off_rounded,
+                size: 72,
+                color: context.colorScheme.error,
+              ),
             ),
           Text(
             _status(appLocalizations),

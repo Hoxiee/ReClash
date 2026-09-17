@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "VPN を経由せずに再試行しますか？",
+  "subscriptionDirectRetryMessage": "現在の接続ではサブスクリプションにアクセスできませんでした。VPN を無効にせず、このダウンロードだけを直接再試行しますか？パネルにはご利用のネットワークの IP アドレスが伝わります。他の通信経路は変わりません。",
+  "subscriptionDirectRetryConfirm": "直接再試行",
+  "appRegion": "アプリの地域",
+  "appRegionDesc": "ネットワークの地域を選択してください。ロシアを選ぶと HWID が有効になりますが、下で無効にできます。スマートルーティングは別に設定します。",
+  "appRegionOther": "その他",
+  "setupRegionSettings": "地域のクイック設定",
+  "setupRegionSettingsDesc": "地域データ、ルーティングプリセット、アプリのアクセスを確認します。自動では追加されません。",
+  "lanProfileImportPhoneHint": "サブスクリプション URL を貼り付けて、テレビにインポートします。",
+  "lanProfileImportSend": "テレビにインポート",
+  "lanProfileImportPhoneSuccess": "サブスクリプションをインポートしました。テレビに戻り、このページを閉じてください。",
+  "lanProfileImportPhoneFailed": "サブスクリプションをインポートできませんでした。URL を確認して再試行してください。",
+  "lanProfileImportPhoneUnreachable": "テレビに接続できませんでした。接続を確認し、このページで再試行して結果を確認してください。",
+  "panelHwidNotSupported": "パネルが HWID の制限を報告しました",
+  "panelHwidNotSupportedTip": "パネルが x-hwid-not-supported を返しました。これだけではクライアントの非互換性は判断できません。HWID の設定とサブスクリプションの条件を確認してください。",
+  "panelHwidIdentityDisabled": "HWID の送信は無効です。パネルを信頼できる場合にのみ有効にしてください。",
+  "networkDefaultLanBypass": "カスタムルートがない場合、ローカルネットワークは VPN を経由しません。VPN を経由させるにはルートを明示的に設定してください。",
+  "subscriptionClientExperimentalLabel": "実験的",
   "rule": "ルール",
   "rules": "ルール",
   "global": "グローバル",
@@ -93,7 +111,7 @@
   "importFromURL": "URLからインポート",
   "subscriptionClientLabel": "クライアント形式",
   "subscriptionClientDesc": "このクライアントの形式で購読を取得します",
-  "subscriptionClientExperimentalTip": "エミュレーションは実験的な機能です。プロバイダーは他のクライアントの形式を返し、ReClash がそれを変換します。",
+  "subscriptionClientExperimentalTip": "他のクライアントとの互換性は実験的です。プロバイダーが選択したクライアントの形式を返し、ReClash が変換します。",
   "subscriptionClientAuto": "自動",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "HWID を送信",
   "sendDeviceIdentityDesc": "デバイス識別子・アプリのバージョン・端末名をプロバイダーのサーバーに送信します",
+  "sendDeviceIdentityDisableWarning": "HWID の送信をオフにすると、ほとんどのサブスクリプションが使えなくなります。続行しますか？",
   "unifiedDelay": "統一遅延",
   "unifiedDelayDesc": "ハンドシェイクなどの余分な遅延を除きます",
   "tcpConcurrent": "TCP同時接続",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "コアを強制再起動してもよろしいですか？",
   "dnsHijacking": "DNSハイジャック",
   "coreStatus": "コアの状態",
+  "coreRunning": "稼働中",
+  "coreStarting": "起動中…",
+  "coreStopped": "停止中",
   "dataCollectionTip": "データ収集について",
   "dataCollectionContent": "本アプリは、安定性向上のために Firebase Crashlytics を使用してクラッシュ情報を収集します。\n収集されるデータにはデバイス情報とクラッシュの詳細が含まれますが、個人の機密データは含まれません。\nこの機能は設定で無効にできます。",
   "crashlytics": "クラッシュ分析",
@@ -633,6 +655,15 @@
   "expectedStatus": "期待するステータス",
   "selectProxies": "プロキシを選択",
   "inputProxyGroupName": "プロキシグループ名を入力してください",
+  "helperAuthorizationTitle": "Helper の設定を許可しますか？",
+  "helperAuthorizationMessage": "TUN モードには ReClash Helper サービスのインストールまたは更新が必要です。「続行」を押すと、システムの認証ダイアログが開きます。パスワードはそのダイアログにのみ入力してください。ReClash がパスワードを収集することはありません。",
+  "helperAuthorizationContinue": "続行",
+  "helperAuthorizationLater": "後で",
+  "helperSystemdUnavailable": "TUN モードには systemd が必要ですが、このシステムでは利用できません。",
+  "helperPkexecUnavailable": "pkexec が利用できません。お使いのディストリビューションの polkit パッケージをインストールしてから、再試行してください。",
+  "helperAgentUnavailable": "システムの認証エージェントが利用できません。デスクトップセッションで polkit 認証エージェントを起動してから、再試行してください。",
+  "helperInstallFailed": "Helper サービスをインストールまたは更新できませんでした。ログを確認して再試行してください。",
+  "helperInstallNotReady": "Helper の設定は完了しましたが、サービスが準備できていません。ログを確認して再試行してください。",
   "helperCorruptTip": "Helper サービスが利用できないため、TUN モードを有効にできません。ReClash を再インストールしてください。",
   "coreBlockedByPolicyTip": "Windows が ReClashCore.exe の実行を拒否しました（エラー {code}）。スマート アプリ コントロールや AppLocker などのアプリ制御ポリシーは未署名のプログラムをブロックします。ポリシーで ReClash を許可するか、ポリシーを無効にしてから再試行してください。",
   "coreBlockedBySmartAppControlTip": "Windows のスマート アプリ コントロールが、署名されていない ReClashCore.exe をブロックしました。Windows セキュリティ → アプリとブラウザーの制御 → スマート アプリ コントロールの設定で「オフ」を選び、ReClash を再起動してください。一度オフにすると、Windows を再インストールしない限り再度オンにはできません。",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "サーバーが応答しません。別のサーバーを探しています",
   "smartRoutingNoServers": "利用できるサーバーがありません",
   "smartRoutingPreset": "プリセット",
-  "smartRoutingPresetOff": "オフ",
+  "smartRoutingPresetOff": "その他",
   "smartRoutingPresetRussia": "ロシア",
   "smartRoutingPresetIran": "イラン",
   "smartRoutingPresetChina": "中国",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "問題なく動作中で、これより良い候補はありません",
   "smartRoutingReasonIncumbentDead": "前のサーバーが応答しなくなりました",
   "smartRoutingReasonVerdictGain": "こちらは開かれたインターネットへの到達が確認済みです",
-  "smartRoutingReasonLatencyGain": "こちらは遅延が 1 段速いです",
+  "smartRoutingReasonLatencyGain": "繰り返しの検査で遅延の改善を確認しました",
+  "smartRoutingReasonReliabilityGain": "繰り返しの検査でより安定した候補を確認しました",
+  "smartRoutingReasonQualityConfirming": "比較を繰り返して改善を確認しています",
+  "smartRoutingReasonHandoffRecovery": "ネットワーク変更後に接続が復旧しました",
   "smartRoutingReasonTerrainChanged": "ネットワークが変わりました",
   "smartRoutingReasonStranded": "到達先がないため現在のサーバーを維持します",
   "smartRoutingReasonNoCandidate": "検査を通過したサーバーがありません",
@@ -985,8 +1019,8 @@
   "setupRestore": "バックアップから復元",
   "setupRestoreDesc": "ReClash、FlClashX、FlClash のバックアップから設定とプロファイルを復元",
   "setupFinishTitle": "設定内容を確認",
-  "setupRegionDesc": "スマートルーティングが経路を選ぶ際の初期値です。言語は候補の提案にのみ使われます。",
-  "setupRegionNone": "その他の地域、またはスマートルーティングを使わない",
+  "setupRegionDesc": "ネットワークの地域を選択してください。ロシアを選ぶと HWID が有効になりますが、下で無効にできます。スマートルーティングは別に設定します。",
+  "setupRegionNone": "その他",
   "setupAutoRun": "ReClash 起動時に接続",
   "setupAutoRunDesc": "有効なプロファイルの読み込み後、VPN を自動的に開始します",
   "setupPermissionVpn": "VPN の許可",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "テーマ",
   "appearanceIcon": "アイコン",
   "appearanceLayout": "レイアウト",
-  "appearanceMotion": "モーション",
   "schedule": "スケジュール",
   "scheduleDesc": "{darkAt} から {lightAt} までダーク",
   "@scheduleDesc": {
@@ -1216,7 +1249,7 @@
   "openInBrowser": "ブラウザーで開く",
   "off": "オフ",
   "subscriptionNoQuota": "このサブスクリプションはトラフィック上限も有効期限も返しません",
-  "subscriptionUndialable": "このサブスクリプションのノードにはどれも接続できません。クライアント形式を変更してください",
+  "subscriptionUndialable": "このサブスクリプションに通常のノードアドレスが見つかりません。パネルが仮の設定を返した可能性があります。サーバーへの接続はテストしていません。",
   "@subscriptionUndialable": {
     "type": "text"
   },
@@ -1478,10 +1511,10 @@
     }
   },
   "lanProfileImport": "スマートフォンから受信",
-  "lanProfileImportDesc": "ローカルネットワーク経由でサブスクリプション URL を送信するための一回限りの QR コードを表示します",
+  "lanProfileImportDesc": "ローカルネットワーク経由でスマートフォンからサブスクリプションを送信する一回限りのページを表示します",
   "lanProfileImportTitle": "サブスクリプションを受信",
-  "lanProfileImportScan": "同じネットワーク上のスマートフォンでこの QR コードをスキャンしてください",
-  "lanProfileImportAddress": "または {address} に JSON を送信してください",
+  "lanProfileImportScan": "同じネットワーク上のスマートフォンでこの QR コードをスキャンし、サブスクリプション URL を貼り付けてください",
+  "lanProfileImportAddress": "またはスマートフォンのブラウザで {address} を開いてください",
   "lanProfileImportWaiting": "サブスクリプションを待機中…",
   "lanProfileImportImporting": "サブスクリプションをインポート中…",
   "lanProfileImportImported": "サブスクリプションを受信しました",
@@ -1676,5 +1709,133 @@
   "externalActionConfirmTitle": "外部操作の確認",
   "externalActionConfirmMessage": "外部リンクによる「{action}」の実行を許可しますか？",
   "panelSettingsConfirmTitle": "プロバイダー設定を適用",
-  "panelSettingsConfirmMessage": "このサブスクリプションは次のアプリ全体の設定を要求しています：\n{settings}"
+  "panelSettingsConfirmMessage": "このサブスクリプションは次のアプリ全体の設定を要求しています：\n{settings}",
+  "milestoneDecorations": "隠された発見",
+  "milestoneDecorationsDesc": "ReClash の使用中に獲得した発見を表示します",
+  "seasonalDecorations": "季節の外観",
+  "seasonalDecorationsDesc": "ホーム画面にさりげない季節の装飾を表示します",
+  "lastUsed": "最終使用",
+  "neverUsed": "まだ使用されていません",
+  "profileUnusedForDays": "{days} 日間使用されていません",
+  "profileUnusedForMonths": "{months} か月使用されていません",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "途切れずに九十日。",
+  "milestoneRevealAuscultation": "百回の検査。ネットワークには脈がある。",
+  "milestoneRevealFullLadder": "すべての段を上り、最初の段へ。",
+  "milestoneRevealSilentAutopilot": "千回の判断、介入なし。",
+  "milestoneRevealOdometer": "一テラバイトが通過した。",
+  "milestoneRevealMeridian": "五つの子午線を越えた。",
+  "milestoneRevealPorcelain": "静かな七日間。",
+  "milestoneRevealCrown": "保護された時間、一年分。",
+  "findings": "発見",
+  "findingsDesc": "ReClash の使用中に静かに見つかった細部",
+  "findingsCount": "{total} 件中 {found} 件を発見",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "発見済み",
+  "findingDiscoveredOn": "{date} に発見",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "発見をリセット",
+  "resetFindingsDesc": "使用履歴を消さず、発見の瞬間をもう一度表示します",
+  "resetFindingsTitle": "発見をリセットしますか？",
+  "resetFindingsConfirm": "発見済みの項目は非表示になり、再び現れるようになります。使用履歴は変わりません。",
+  "findingVigil": "見張り",
+  "findingAuscultation": "聴診",
+  "findingFullLadder": "完全な梯子",
+  "findingSilentAutopilot": "静かな自動操縦",
+  "findingOdometer": "走行計",
+  "findingMeridian": "五つの子午線",
+  "findingPorcelain": "磁器",
+  "findingCrown": "冠",
+  "findingOscilloscope": "オシロスコープ",
+  "findingMarks": "マーク",
+  "findingPi": "円周率",
+  "findingTurn": "年越し",
+  "findingStorm": "嵐",
+  "findingLoopback": "ループ",
+  "findingOscilloscopeDesc": "リングが六秒間、実際の通信を聴きました。",
+  "findingMarksDesc": "ReClash のマークシートが見つかりました。",
+  "findingPiDesc": "ダッシュボードを開いたまま、セッションが 3:14:15 を越えました。",
+  "findingTurnDesc": "セッションが新年の午前零時を越えました。",
+  "findingStormDesc": "すべての診断レイヤーが同時に停止しました。",
+  "findingLoopbackDesc": "プロファイルがローカル待受ポートを指していました。",
+  "appIconVigil": "見張り",
+  "appIconTopo": "地形",
+  "appIconFractal": "フラクタル",
+  "appIconSpark": "スパーク",
+  "crownHistory": "{date} から · 稼働 {days} 日",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "ラダー結果: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "冷たく、ほぼモノクロの配色を適用",
+  "developerFindings": "発見のプレビュー",
+  "developerFindingsDesc": "一時的なプレビューです。カウンター、獲得済みの発見、ネットワーク設定は変更しません。リセットまたは開発者モードの無効化で終了します。効果は正常な接続のダッシュボード表示を待ち、外観設定に従います。外観で選択したアイコンやテーマは保存されます。",
+  "developerAllRewards": "すべての報酬をプレビュー",
+  "developerPreviewReset": "プレビューを解除",
+  "developerPreviewAutomatic": "自動",
+  "developerSeasonNewYear": "新年",
+  "developerSeasonBirthday": "ReClash の誕生日",
+  "developerSeasonAnniversary": "初回起動の記念日",
+  "developerSeasonDrift": "季節の色合い",
+  "developerPatina": "プロファイルのほこり",
+  "developerPatinaDays": "{days} 日",
+  "developerFindingEvents": "発見を再生",
+  "developerFindingQueued": "正常な接続のダッシュボード表示を待っています。何度でも再生できます。",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "接続のすべての段階が利用できません",
+  "findingStormVerdict": "利用可能な経路が見つかりませんでした。後続の失敗は最初の障害に起因している可能性があります。",
+  "findingLoopbackWarning": "このプロファイルの URL は ReClash 自身のプロキシポートを指しています。サブスクリプションの URL を確認してください。",
+  "seasonBirthdayNote": "今日は ReClash の誕生日です。",
+  "seasonFirstRunNote": "今日は初回起動の周年記念日です。"
 }

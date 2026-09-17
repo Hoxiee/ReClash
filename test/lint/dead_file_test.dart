@@ -10,7 +10,8 @@ const _entryPoints = ['lib/main.dart'];
 final _declaration = RegExp(
   r'^(?:abstract |sealed |final |base |mixin )*'
   r'(?:(?:class|enum|mixin)\s+([A-Za-z]\w*)'
-  r'|(?:final|const)\s+(?:[\w<>,\s\[\]?]+\s+)?([a-z]\w*)\s*=)',
+  r'|(?:final|const)\s+(?:[\w<>,\s\[\]?]+\s+)?([a-z]\w*)\s*='
+  r'|(?:[\w<>,\s\[\]?]+\s+)?([a-z]\w*)\s*\([^;{}]*\)\s*(?:=>|\{))',
   multiLine: true,
 );
 
@@ -72,7 +73,7 @@ void main() {
       // this way.
       final names = _declaration
           .allMatches(source)
-          .map((match) => match.group(1) ?? match.group(2)!)
+          .map((match) => match.group(1) ?? match.group(2) ?? match.group(3)!)
           .toSet();
       if (names.isEmpty) continue;
 

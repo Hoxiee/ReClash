@@ -4,8 +4,12 @@ use sha2::{Digest, Sha256};
 use std::collections::VecDeque;
 use std::convert::Infallible;
 use std::fs::{File, OpenOptions};
-#[cfg(not(all(feature = "windows-service", target_os = "windows")))]
+#[cfg(not(any(
+    all(feature = "windows-service", target_os = "windows"),
+    all(feature = "linux-service", target_os = "linux")
+)))]
 use std::future::pending;
+#[cfg(not(all(feature = "linux-service", target_os = "linux")))]
 use std::future::Future;
 use std::io::{BufRead, Error, Read};
 #[cfg(windows)]
@@ -30,7 +34,9 @@ use windows_sys::Win32::System::JobObjects::{
     JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
 };
 
+#[cfg(not(all(feature = "linux-service", target_os = "linux")))]
 const LISTEN_PORT: u16 = 47890;
+#[cfg(any(test, not(all(feature = "linux-service", target_os = "linux"))))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\ReClashCore_";
 const PROTOCOL_VERSION_HEADER: &str = "x-reclash-helper-protocol";
 const PROTOCOL_VERSION: &str = "6";
@@ -122,6 +128,9 @@ impl ManagedCore {
     }
 
     fn terminate(&mut self) -> Result<(), Error> {
+        if self.child.try_wait()?.is_some() {
+            return Ok(());
+        }
         if self.request_exit() && self.wait_for_exit(CORE_GRACEFUL_EXIT_TIMEOUT)? {
             return Ok(());
         }
@@ -146,10 +155,16 @@ impl ManagedCore {
     }
 
     fn request_exit(&mut self) -> bool {
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        {
+            unsafe { libc::kill(self.child.id() as libc::pid_t, libc::SIGTERM) == 0 }
+        }
+        #[cfg(not(all(feature = "linux-service", target_os = "linux")))]
         false
     }
 }
 
+#[cfg(any(test, windows))]
 fn terminate_unmanaged_core(child: &mut Child) {
     let _ = child.kill();
     let _ = child.wait();
@@ -208,6 +223,8 @@ struct VerifiedCore {
 impl VerifiedCore {
     fn open() -> Result<Self, Error> {
         let path = core_path()?;
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        super::linux::verify_installed_file(&path).map_err(Error::other)?;
         let directory = path
             .parent()
             .ok_or_else(|| Error::other("Core executable has no parent directory"))?
@@ -221,7 +238,12 @@ impl VerifiedCore {
     }
 
     fn spawn(&self, address: &str) -> Result<Child, Error> {
-        Command::new(&self.path)
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        super::linux::ensure_owner_socket(address)?;
+        let mut command = Command::new(&self.path);
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        command.env_clear().env("PATH", "/usr/bin:/bin");
+        command
             .current_dir(&self.directory)
             .stderr(Stdio::piped())
             .arg(address)
@@ -278,6 +300,14 @@ fn open_verified_core(path: &Path, expected_sha256: &str) -> Result<File, Error>
     Ok(core_file)
 }
 
+fn is_allowed_core_address(address: &str) -> bool {
+    #[cfg(all(feature = "linux-service", target_os = "linux"))]
+    return super::linux::ensure_owner_socket(address).is_ok();
+    #[cfg(not(all(feature = "linux-service", target_os = "linux")))]
+    is_allowed_core_pipe(address)
+}
+
+#[cfg(any(test, not(all(feature = "linux-service", target_os = "linux"))))]
 fn is_allowed_core_pipe(address: &str) -> bool {
     let Some(suffix) = address.strip_prefix(CORE_PIPE_PREFIX) else {
         return false;
@@ -303,6 +333,8 @@ fn stop_decision(current: Option<&str>, requested: &str) -> StopDecision {
 static LOGS: Lazy<Mutex<VecDeque<String>>> =
     Lazy::new(|| Mutex::new(VecDeque::with_capacity(LOG_CAPACITY)));
 static MANAGED_CORE: Lazy<Mutex<Option<ManagedCore>>> = Lazy::new(|| Mutex::new(None));
+#[cfg(all(feature = "linux-service", target_os = "linux"))]
+static SHUTTING_DOWN: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 fn lock_surviving_poison<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
     mutex
@@ -354,7 +386,7 @@ fn launch_failure_response(error: &Error) -> warp::reply::Response {
 }
 
 fn start(start_params: StartParams) -> warp::reply::Response {
-    if !is_allowed_core_pipe(&start_params.address) {
+    if !is_allowed_core_address(&start_params.address) {
         return error_response(
             "invalidRequest",
             "invalid Core pipe address",
@@ -370,6 +402,14 @@ fn start(start_params: StartParams) -> warp::reply::Response {
     }
 
     let mut managed = lock_surviving_poison(&MANAGED_CORE);
+    #[cfg(all(feature = "linux-service", target_os = "linux"))]
+    if SHUTTING_DOWN.load(std::sync::atomic::Ordering::SeqCst) {
+        return error_response(
+            "helperStopping",
+            "Helper is shutting down",
+            StatusCode::SERVICE_UNAVAILABLE,
+        );
+    }
     if let Err(error) = release_managed_core(&mut managed) {
         log_message(format!(
             "Helper could not release the managed Core: {error}"
@@ -588,6 +628,15 @@ async fn ping_request(ping_params: PingParams) -> Result<warp::reply::Response, 
 }
 
 async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response, Infallible> {
+    if rejection.find::<warp::reject::LengthRequired>().is_some()
+        || rejection.find::<warp::reject::PayloadTooLarge>().is_some()
+    {
+        return Ok(error_response(
+            "invalidRequest",
+            "request body is missing or too large",
+            StatusCode::BAD_REQUEST,
+        ));
+    }
     if rejection.find::<warp::reject::InvalidQuery>().is_some() {
         return Ok(warp::reply::with_header(
             error_response(
@@ -631,7 +680,7 @@ async fn handle_rejection(rejection: Rejection) -> Result<warp::reply::Response,
     ))
 }
 
-fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
+pub(super) fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone {
     // Path before method, so an unknown path rejects as not-found, not as 405.
     let api_ping = warp::path("ping")
         .and(warp::path::end())
@@ -642,12 +691,14 @@ fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone 
     let api_start = warp::path("start")
         .and(warp::path::end())
         .and(warp::post())
+        .and(warp::body::content_length_limit(4096))
         .and(warp::body::json())
         .and_then(start_request);
 
     let api_stop = warp::path("stop")
         .and(warp::path::end())
         .and(warp::post())
+        .and(warp::body::content_length_limit(4096))
         .and(warp::body::json())
         .and_then(stop_request);
 
@@ -663,11 +714,22 @@ fn routes() -> impl Filter<Extract = (impl Reply,), Error = Infallible> + Clone 
         .recover(handle_rejection)
 }
 
-#[cfg(not(all(feature = "windows-service", target_os = "windows")))]
+#[cfg(not(any(
+    all(feature = "windows-service", target_os = "windows"),
+    all(feature = "linux-service", target_os = "linux")
+)))]
 pub async fn run_service() -> anyhow::Result<()> {
     run_service_until(pending(), || Ok(())).await
 }
 
+#[cfg(all(feature = "linux-service", target_os = "linux"))]
+pub(super) fn shutdown_managed_core() -> Result<(), Error> {
+    let mut managed = lock_surviving_poison(&MANAGED_CORE);
+    SHUTTING_DOWN.store(true, std::sync::atomic::Ordering::SeqCst);
+    release_managed_core(&mut managed)
+}
+
+#[cfg(not(all(feature = "linux-service", target_os = "linux")))]
 pub(super) async fn run_service_until<F, S>(shutdown: F, on_started: S) -> anyhow::Result<()>
 where
     F: Future<Output = ()> + Send + 'static,
@@ -954,15 +1016,30 @@ mod tests {
             .unwrap(),
         );
 
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        let (address, _socket) = {
+            use std::os::unix::fs::PermissionsExt;
+            let address = std::env::temp_dir().join(format!(
+                "reclash-helper-core-test-{}.sock",
+                std::process::id()
+            ));
+            let socket = std::os::unix::net::UnixListener::bind(&address).unwrap();
+            std::fs::set_permissions(&address, std::fs::Permissions::from_mode(0o600)).unwrap();
+            (address.to_string_lossy().into_owned(), socket)
+        };
+        #[cfg(not(all(feature = "linux-service", target_os = "linux")))]
+        let address = r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef".to_string();
         let response = warp::test::request()
             .method("POST")
             .path("/start")
             .json(&StartParams {
-                address: r"\\.\pipe\ReClashCore_0123456789abcdef0123456789abcdef".to_string(),
+                address: address.clone(),
                 session_id: "0123456789abcdef0123456789abcdef".to_string(),
             })
             .reply(&routes())
             .await;
+        #[cfg(all(feature = "linux-service", target_os = "linux"))]
+        std::fs::remove_file(address).unwrap();
 
         assert_eq!(response.status(), StatusCode::CONFLICT);
         let body: serde_json::Value = serde_json::from_slice(response.body()).unwrap();

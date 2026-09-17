@@ -81,7 +81,7 @@ void main() {
       userLabel: false,
     );
     expect(emptyProfile.toColumns(true), hasLength(15));
-    expect(emptyProfile.toColumns(false), hasLength(25));
+    expect(emptyProfile.toColumns(false), hasLength(26));
     expect(emptyProfile.toCompanion(true).toColumns(true), hasLength(15));
 
     final insertedProfile = ProfilesCompanion.insert(

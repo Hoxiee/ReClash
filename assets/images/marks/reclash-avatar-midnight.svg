@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>ReClash Midnight</title><desc>Глубокий ночной аватар для спокойного канала</desc>
+  <defs><radialGradient id="mn-bg" cx="0" cy="0" r="1" gradientTransform="translate(374 116) rotate(128) scale(485)" gradientUnits="userSpaceOnUse"><stop stop-color="#3855A3"/><stop offset=".55" stop-color="#17264F"/><stop offset="1" stop-color="#090E20"/></radialGradient><linearGradient id="mn-moon" x1="330" y1="57" x2="431" y2="190" gradientUnits="userSpaceOnUse"><stop stop-color="#F3ECFF"/><stop offset="1" stop-color="#9CD8FF"/></linearGradient></defs>
+  <circle cx="256" cy="256" r="256" fill="url(#mn-bg)"/>
+  <path d="M397 69A76 76 0 1 0 442 183 66 66 0 1 1 397 69Z" fill="url(#mn-moon)" opacity=".9"/>
+  <g fill="#BCD8FF"><circle cx="93" cy="124" r="4"/><circle cx="154" cy="70" r="6"/><circle cx="429" cy="311" r="5"/><circle cx="376" cy="420" r="3"/><circle cx="78" cy="361" r="3"/></g>
+  <circle cx="256" cy="256" r="232" fill="none" stroke="#C7D2FF" stroke-opacity=".2" stroke-width="2"/>
+  <g transform="translate(256 256) rotate(-20) scale(1.12)" fill="none" stroke="#FFFFFF" stroke-width="54" stroke-linecap="round">
+    <path d="M-88 -60 V60"/><path d="M0 -120 V120"/><path d="M88 -40 V40"/>
+  </g>
+</svg>

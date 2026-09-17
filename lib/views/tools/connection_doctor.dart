@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/finding_events.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -15,6 +16,18 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'connection_doctor_path.dart';
+
+DoctorAnswer connectionDoctorAnswer(
+  AppLocalizations localizations,
+  DoctorSnapshot snapshot,
+) => allDoctorLayersFailed(snapshot)
+    ? DoctorAnswer(
+        tone: DoctorAnswerTone.bad,
+        headline: localizations.findingStormTitle,
+        meaning: localizations.findingStormVerdict,
+        steps: [localizations.doctorStepSwitchNetwork],
+      )
+    : doctorAnswerOf(snapshot, doctorAnswerText(localizations));
 
 String connectionDoctorTitle(
   AppLocalizations appLocalizations,
@@ -296,7 +309,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final snapshot = ref.watch(connectionDoctorProvider);
-    final answer = doctorAnswerOf(snapshot, doctorAnswerText(appLocalizations));
+    final answer = connectionDoctorAnswer(appLocalizations, snapshot);
     return CommonScaffold(
       title: appLocalizations.connectionDoctor,
       isLoading: _initializing,
@@ -419,6 +432,7 @@ class _DoctorAnswerCard extends StatelessWidget {
         : null;
     final remedies = answer.remedies.where(_remedyActive).toList();
     final showStart =
+        !allDoctorLayersFailed(snapshot) &&
         snapshot.supported &&
         canStart &&
         !examining &&
@@ -720,6 +734,88 @@ class _DoctorDetails extends StatelessWidget {
       ],
     );
   }
+}
+
+class DoctorStormPreview extends StatelessWidget {
+  const DoctorStormPreview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final snapshot = DoctorSnapshot(
+      supported: true,
+      state: DoctorExamState.complete,
+      health: DoctorHealth.broken,
+      stages: [
+        const DoctorStage(id: 'app', state: DoctorStageState.failed),
+        for (final id in ['ingress', 'route', 'internet', 'response'])
+          DoctorStage(id: id, state: DoctorStageState.consequence),
+      ],
+    );
+    return CommonScaffold(
+      title: context.appLocalizations.developerFindings,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(context.appLocalizations.developerFindingsDesc),
+            const SizedBox(height: 16),
+            _DoctorAnswerCard(
+              snapshot: snapshot,
+              answer: connectionDoctorAnswer(
+                context.appLocalizations,
+                snapshot,
+              ),
+              busy: false,
+              canStart: false,
+              canFlushDns: false,
+              canCancel: false,
+              onRemedy: (_) {},
+              onStart: () {},
+              onCancel: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DoctorTimingPreview extends StatelessWidget {
+  const DoctorTimingPreview({super.key});
+
+  @override
+  Widget build(BuildContext context) => CommonScaffold(
+    title: context.appLocalizations.developerFindings,
+    body: SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(context.appLocalizations.developerFindingsDesc),
+          ),
+          _DoctorEvidenceSection(
+            snapshot: DoctorSnapshot(
+              supported: true,
+              evidence: [
+                for (final (index, layer) in [
+                  DoctorLayer.dns,
+                  DoctorLayer.route,
+                  DoctorLayer.dial,
+                  DoctorLayer.transport,
+                  DoctorLayer.marker,
+                ].indexed)
+                  DoctorEvidence(
+                    layer: layer,
+                    durationBucketMs: (index + 1) * 25,
+                    offsetMillis: index * 100,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _DoctorEvidenceSection extends StatelessWidget {

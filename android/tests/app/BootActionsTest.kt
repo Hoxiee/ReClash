@@ -8,10 +8,8 @@ import org.junit.Test
 class BootActionsTest {
 
     @Test
-    fun `every boot spelling an oem may send is accepted`() {
+    fun `protected system boot broadcast is accepted`() {
         assertTrue(BootActions.isBoot(Intent.ACTION_BOOT_COMPLETED))
-        assertTrue(BootActions.isBoot(BootActions.QUICK_BOOT))
-        assertTrue(BootActions.isBoot(BootActions.HTC_QUICK_BOOT))
     }
 
     @Test
@@ -22,6 +20,8 @@ class BootActionsTest {
     @Test
     fun `unrelated broadcasts never start anything`() {
         assertFalse(BootActions.isBoot(Intent.ACTION_PACKAGE_REPLACED))
+        assertFalse(BootActions.isBoot("android.intent.action.QUICKBOOT_POWERON"))
+        assertFalse(BootActions.isBoot("com.htc.intent.action.QUICKBOOT_POWERON"))
         assertFalse(BootActions.isBoot(Intent.ACTION_SCREEN_ON))
         assertFalse(BootActions.isBoot(""))
     }

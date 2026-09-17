@@ -6,6 +6,7 @@ import 'package:reclash/views/config/smart_routing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -415,16 +416,66 @@ void main() {
   });
 
   testWidgets(
-    'turning it on from off adopts a preset instead of an empty one',
+    'region selection shares HWID consent and preserves manual edits',
     (tester) async {
-      final container = await _pump(tester, props: const SmartRoutingProps());
-
-      await tester.tap(find.byType(Switch), warnIfMissed: false);
+      final container = await _pump(
+        tester,
+        props: const SmartRoutingProps(enabled: true)
+            .applyPreset(SmartRoutingPreset.iran)
+            .applyStrategy(SmartRoutingStrategy.saver),
+      );
+      await tester.tap(find.text('Region'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Russia').last);
+      await tester.pumpAndSettle();
+      expect(container.read(appSettingProvider).region, AppRegion.russia);
+      expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+      expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
+      expect(
+        container.read(smartRoutingSettingProvider).strategy,
+        SmartRoutingStrategy.saver,
+      );
 
-      final props = container.read(smartRoutingSettingProvider);
-      expect(props.enabled, isTrue);
-      expect(props.rcxParams.enabled, isTrue);
+      container
+          .read(appSettingProvider.notifier)
+          .update((state) => state.copyWith(sendDeviceIdentity: false));
+      final edited = container
+          .read(smartRoutingSettingProvider)
+          .copyWith(
+            openMarkers: const [
+              RcxMarker(url: 'https://example.com/', statuses: [204]),
+            ],
+          );
+      container.read(smartRoutingSettingProvider.notifier).value = edited;
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Region'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Russia').last);
+      await tester.pumpAndSettle();
+      expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+      expect(container.read(smartRoutingSettingProvider), edited);
     },
   );
+
+  testWidgets('turning it on from Other uses neutral markers, not the locale', (
+    tester,
+  ) async {
+    final container = await _pump(tester, props: const SmartRoutingProps());
+    final previousLocale = Intl.defaultLocale;
+    addTearDown(() => Intl.defaultLocale = previousLocale);
+    Intl.defaultLocale = 'ru';
+
+    await tester.tap(find.byType(Switch), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    final props = container.read(smartRoutingSettingProvider);
+    expect(props.enabled, isTrue);
+    expect(props.rcxParams.enabled, isTrue);
+    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.openMarkers, isNotEmpty);
+    expect(props.canaryForeign, isNotEmpty);
+    expect(props.censorCountries, isEmpty);
+    expect(container.read(appSettingProvider).region, isNull);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+  });
 }

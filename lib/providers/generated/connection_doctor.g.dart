@@ -41,7 +41,7 @@ final class ConnectionDoctorProvider
   }
 }
 
-String _$connectionDoctorHash() => r'1001c6e524e28e182513da77d0d43fbeff15dde2';
+String _$connectionDoctorHash() => r'fdcee4df5202f9c99e8cd1e2bc82c9e6f78f2a58';
 
 abstract class _$ConnectionDoctor extends $Notifier<DoctorSnapshot> {
   DoctorSnapshot build();

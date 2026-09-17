@@ -341,7 +341,16 @@ class GeneralListView extends ConsumerWidget {
           ),
         SettingSection(
           title: appLocalizations.identity,
+          subTitle: appLocalizations.appRegionDesc,
           items: [
+            ConfigOptionsItem<AppRegion>(
+              leading: const Icon(Icons.public_outlined),
+              title: (l) => l.appRegion,
+              options: AppRegion.values,
+              textBuilder: (region) => region.label(context),
+              selector: appRegionProvider,
+              onChanged: (ref, value) => selectAppRegion(ref.read, value),
+            ),
             const UaItem(),
             ConfigToggleItem(
               leading: const Icon(Icons.perm_device_information_outlined),

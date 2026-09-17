@@ -65,6 +65,18 @@ void main() {
 
   final remote = Uri.parse('https://example.com/path');
 
+  test('redacts URL credentials, path tokens and query data from logs', () {
+    final redacted = redactUrlForLog(
+      Uri.parse(
+        'https://user:pass@example.com/sub/path-secret?token=secret#private',
+      ),
+    );
+
+    expect(redacted, 'https://example.com');
+    expect(redacted, isNot(contains('user')));
+    expect(redacted, isNot(contains('secret')));
+  });
+
   test('loopback traffic always bypasses the proxy', () {
     final container = buildContainer();
 
@@ -82,11 +94,11 @@ void main() {
 
     expect(
       ReClashHttpOverrides.findProxyFor(container, remote),
-      'PROXY localhost:7891',
+      'PROXY $localhost:7891',
     );
   });
 
-  test('carries credentials when local authentication is enabled', () {
+  test('holds credentials out of the proxy string', () {
     final container = buildContainer();
     container.read(networkSettingProvider.notifier).value = const NetworkProps()
         .copyWith(
@@ -99,7 +111,7 @@ void main() {
 
     expect(
       ReClashHttpOverrides.findProxyFor(container, remote),
-      'PROXY user:pass@localhost:7890',
+      'PROXY $localhost:7890',
     );
 
     container.read(networkSettingProvider.notifier).value = const NetworkProps()
@@ -111,7 +123,7 @@ void main() {
         );
     expect(
       ReClashHttpOverrides.findProxyFor(container, remote),
-      'PROXY localhost:7890',
+      'PROXY $localhost:7890',
     );
   });
 
@@ -138,7 +150,7 @@ void main() {
 
     expect(
       ReClashHttpOverrides.findProxyFor(container, remote),
-      'PROXY localhost:7890',
+      'PROXY $localhost:7890',
     );
   });
 

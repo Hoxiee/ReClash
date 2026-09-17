@@ -6,6 +6,15 @@ void (*release_object_func)(void *obj);
 
 void (*free_string_func)(char *data);
 
+int (*protect_subscription_func)(void *tun_interface, int fd);
+
+int protect_subscription(void *tun_interface, int fd) {
+    if (protect_subscription_func == NULL) {
+        return 0;
+    }
+    return protect_subscription_func(tun_interface, fd);
+}
+
 int (*protect_func)(void *tun_interface, int fd);
 
 int (*resolve_uid_func)(void *tun_interface, int protocol, const char *source, const char *target);

@@ -586,7 +586,7 @@ as bool,
 /// @nodoc
 mixin _$AppSettingProps {
 
- String? get locale;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; NotificationSettings get notificationSettings; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; bool get newDashboard; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get setupCompleted; int get setupStep; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RestoreStrategy get restoreStrategy; bool get showTrayTitle; bool get checkCertificate; String get customUserAgent; bool get sendDeviceIdentity; String get iconVariant; bool get reduceMotion;
+ String? get locale;@JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) AppRegion? get region;@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets; bool get onlyStatisticsProxy; NotificationSettings get notificationSettings; bool get autoLaunch; bool get silentLaunch; bool get autoRun; bool get openLogs; bool get closeConnections; bool get newDashboard; String get testUrl; bool get isAnimateToPage; bool get autoCheckUpdate; bool get showLabel; bool get disclaimerAccepted; bool get setupCompleted; int get setupStep; bool get crashlyticsTip; bool get crashlytics; bool get minimizeOnExit; bool get hidden; bool get developerMode; RestoreStrategy get restoreStrategy; bool get showTrayTitle; bool get checkCertificate; String get customUserAgent; bool get sendDeviceIdentity; String get iconVariant; bool get reduceMotion;
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -600,20 +600,20 @@ $AppSettingPropsCopyWith<AppSettingProps> get copyWith => _$AppSettingPropsCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as AppSettingProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _this.dashboardWidgets)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy)&&(identical(other.notificationSettings, _this.notificationSettings) || other.notificationSettings == _this.notificationSettings)&&(identical(other.autoLaunch, _this.autoLaunch) || other.autoLaunch == _this.autoLaunch)&&(identical(other.silentLaunch, _this.silentLaunch) || other.silentLaunch == _this.silentLaunch)&&(identical(other.autoRun, _this.autoRun) || other.autoRun == _this.autoRun)&&(identical(other.openLogs, _this.openLogs) || other.openLogs == _this.openLogs)&&(identical(other.closeConnections, _this.closeConnections) || other.closeConnections == _this.closeConnections)&&(identical(other.newDashboard, _this.newDashboard) || other.newDashboard == _this.newDashboard)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.isAnimateToPage, _this.isAnimateToPage) || other.isAnimateToPage == _this.isAnimateToPage)&&(identical(other.autoCheckUpdate, _this.autoCheckUpdate) || other.autoCheckUpdate == _this.autoCheckUpdate)&&(identical(other.showLabel, _this.showLabel) || other.showLabel == _this.showLabel)&&(identical(other.disclaimerAccepted, _this.disclaimerAccepted) || other.disclaimerAccepted == _this.disclaimerAccepted)&&(identical(other.setupCompleted, _this.setupCompleted) || other.setupCompleted == _this.setupCompleted)&&(identical(other.setupStep, _this.setupStep) || other.setupStep == _this.setupStep)&&(identical(other.crashlyticsTip, _this.crashlyticsTip) || other.crashlyticsTip == _this.crashlyticsTip)&&(identical(other.crashlytics, _this.crashlytics) || other.crashlytics == _this.crashlytics)&&(identical(other.minimizeOnExit, _this.minimizeOnExit) || other.minimizeOnExit == _this.minimizeOnExit)&&(identical(other.hidden, _this.hidden) || other.hidden == _this.hidden)&&(identical(other.developerMode, _this.developerMode) || other.developerMode == _this.developerMode)&&(identical(other.restoreStrategy, _this.restoreStrategy) || other.restoreStrategy == _this.restoreStrategy)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle)&&(identical(other.checkCertificate, _this.checkCertificate) || other.checkCertificate == _this.checkCertificate)&&(identical(other.customUserAgent, _this.customUserAgent) || other.customUserAgent == _this.customUserAgent)&&(identical(other.sendDeviceIdentity, _this.sendDeviceIdentity) || other.sendDeviceIdentity == _this.sendDeviceIdentity)&&(identical(other.iconVariant, _this.iconVariant) || other.iconVariant == _this.iconVariant)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettingProps&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&(identical(other.region, _this.region) || other.region == _this.region)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _this.dashboardWidgets)&&(identical(other.onlyStatisticsProxy, _this.onlyStatisticsProxy) || other.onlyStatisticsProxy == _this.onlyStatisticsProxy)&&(identical(other.notificationSettings, _this.notificationSettings) || other.notificationSettings == _this.notificationSettings)&&(identical(other.autoLaunch, _this.autoLaunch) || other.autoLaunch == _this.autoLaunch)&&(identical(other.silentLaunch, _this.silentLaunch) || other.silentLaunch == _this.silentLaunch)&&(identical(other.autoRun, _this.autoRun) || other.autoRun == _this.autoRun)&&(identical(other.openLogs, _this.openLogs) || other.openLogs == _this.openLogs)&&(identical(other.closeConnections, _this.closeConnections) || other.closeConnections == _this.closeConnections)&&(identical(other.newDashboard, _this.newDashboard) || other.newDashboard == _this.newDashboard)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&(identical(other.isAnimateToPage, _this.isAnimateToPage) || other.isAnimateToPage == _this.isAnimateToPage)&&(identical(other.autoCheckUpdate, _this.autoCheckUpdate) || other.autoCheckUpdate == _this.autoCheckUpdate)&&(identical(other.showLabel, _this.showLabel) || other.showLabel == _this.showLabel)&&(identical(other.disclaimerAccepted, _this.disclaimerAccepted) || other.disclaimerAccepted == _this.disclaimerAccepted)&&(identical(other.setupCompleted, _this.setupCompleted) || other.setupCompleted == _this.setupCompleted)&&(identical(other.setupStep, _this.setupStep) || other.setupStep == _this.setupStep)&&(identical(other.crashlyticsTip, _this.crashlyticsTip) || other.crashlyticsTip == _this.crashlyticsTip)&&(identical(other.crashlytics, _this.crashlytics) || other.crashlytics == _this.crashlytics)&&(identical(other.minimizeOnExit, _this.minimizeOnExit) || other.minimizeOnExit == _this.minimizeOnExit)&&(identical(other.hidden, _this.hidden) || other.hidden == _this.hidden)&&(identical(other.developerMode, _this.developerMode) || other.developerMode == _this.developerMode)&&(identical(other.restoreStrategy, _this.restoreStrategy) || other.restoreStrategy == _this.restoreStrategy)&&(identical(other.showTrayTitle, _this.showTrayTitle) || other.showTrayTitle == _this.showTrayTitle)&&(identical(other.checkCertificate, _this.checkCertificate) || other.checkCertificate == _this.checkCertificate)&&(identical(other.customUserAgent, _this.customUserAgent) || other.customUserAgent == _this.customUserAgent)&&(identical(other.sendDeviceIdentity, _this.sendDeviceIdentity) || other.sendDeviceIdentity == _this.sendDeviceIdentity)&&(identical(other.iconVariant, _this.iconVariant) || other.iconVariant == _this.iconVariant)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as AppSettingProps;
-  return Object.hashAll([runtimeType,_this.locale,const DeepCollectionEquality().hash(_this.dashboardWidgets),_this.onlyStatisticsProxy,_this.notificationSettings,_this.autoLaunch,_this.silentLaunch,_this.autoRun,_this.openLogs,_this.closeConnections,_this.newDashboard,_this.testUrl,_this.isAnimateToPage,_this.autoCheckUpdate,_this.showLabel,_this.disclaimerAccepted,_this.setupCompleted,_this.setupStep,_this.crashlyticsTip,_this.crashlytics,_this.minimizeOnExit,_this.hidden,_this.developerMode,_this.restoreStrategy,_this.showTrayTitle,_this.checkCertificate,_this.customUserAgent,_this.sendDeviceIdentity,_this.iconVariant,_this.reduceMotion]);
+  return Object.hashAll([runtimeType,_this.locale,_this.region,const DeepCollectionEquality().hash(_this.dashboardWidgets),_this.onlyStatisticsProxy,_this.notificationSettings,_this.autoLaunch,_this.silentLaunch,_this.autoRun,_this.openLogs,_this.closeConnections,_this.newDashboard,_this.testUrl,_this.isAnimateToPage,_this.autoCheckUpdate,_this.showLabel,_this.disclaimerAccepted,_this.setupCompleted,_this.setupStep,_this.crashlyticsTip,_this.crashlytics,_this.minimizeOnExit,_this.hidden,_this.developerMode,_this.restoreStrategy,_this.showTrayTitle,_this.checkCertificate,_this.customUserAgent,_this.sendDeviceIdentity,_this.iconVariant,_this.reduceMotion]);
 }
 
 @override
 String toString() {
   final _this = this as AppSettingProps;
-  return 'AppSettingProps(locale: ${_this.locale}, dashboardWidgets: ${_this.dashboardWidgets}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy}, notificationSettings: ${_this.notificationSettings}, autoLaunch: ${_this.autoLaunch}, silentLaunch: ${_this.silentLaunch}, autoRun: ${_this.autoRun}, openLogs: ${_this.openLogs}, closeConnections: ${_this.closeConnections}, newDashboard: ${_this.newDashboard}, testUrl: ${_this.testUrl}, isAnimateToPage: ${_this.isAnimateToPage}, autoCheckUpdate: ${_this.autoCheckUpdate}, showLabel: ${_this.showLabel}, disclaimerAccepted: ${_this.disclaimerAccepted}, setupCompleted: ${_this.setupCompleted}, setupStep: ${_this.setupStep}, crashlyticsTip: ${_this.crashlyticsTip}, crashlytics: ${_this.crashlytics}, minimizeOnExit: ${_this.minimizeOnExit}, hidden: ${_this.hidden}, developerMode: ${_this.developerMode}, restoreStrategy: ${_this.restoreStrategy}, showTrayTitle: ${_this.showTrayTitle}, checkCertificate: ${_this.checkCertificate}, customUserAgent: ${_this.customUserAgent}, sendDeviceIdentity: ${_this.sendDeviceIdentity}, iconVariant: ${_this.iconVariant}, reduceMotion: ${_this.reduceMotion})';
+  return 'AppSettingProps(locale: ${_this.locale}, region: ${_this.region}, dashboardWidgets: ${_this.dashboardWidgets}, onlyStatisticsProxy: ${_this.onlyStatisticsProxy}, notificationSettings: ${_this.notificationSettings}, autoLaunch: ${_this.autoLaunch}, silentLaunch: ${_this.silentLaunch}, autoRun: ${_this.autoRun}, openLogs: ${_this.openLogs}, closeConnections: ${_this.closeConnections}, newDashboard: ${_this.newDashboard}, testUrl: ${_this.testUrl}, isAnimateToPage: ${_this.isAnimateToPage}, autoCheckUpdate: ${_this.autoCheckUpdate}, showLabel: ${_this.showLabel}, disclaimerAccepted: ${_this.disclaimerAccepted}, setupCompleted: ${_this.setupCompleted}, setupStep: ${_this.setupStep}, crashlyticsTip: ${_this.crashlyticsTip}, crashlytics: ${_this.crashlytics}, minimizeOnExit: ${_this.minimizeOnExit}, hidden: ${_this.hidden}, developerMode: ${_this.developerMode}, restoreStrategy: ${_this.restoreStrategy}, showTrayTitle: ${_this.showTrayTitle}, checkCertificate: ${_this.checkCertificate}, customUserAgent: ${_this.customUserAgent}, sendDeviceIdentity: ${_this.sendDeviceIdentity}, iconVariant: ${_this.iconVariant}, reduceMotion: ${_this.reduceMotion})';
 }
 
 
@@ -624,7 +624,7 @@ abstract mixin class $AppSettingPropsCopyWith<$Res>  {
   factory $AppSettingPropsCopyWith(AppSettingProps value, $Res Function(AppSettingProps) _then) = _$AppSettingPropsCopyWithImpl;
 @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, NotificationSettings notificationSettings, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, int setupStep, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity, String iconVariant, bool reduceMotion
+ String? locale,@JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) AppRegion? region,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, NotificationSettings notificationSettings, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, int setupStep, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity, String iconVariant, bool reduceMotion
 });
 
 
@@ -641,10 +641,11 @@ class _$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? notificationSettings = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? setupStep = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,Object? iconVariant = null,Object? reduceMotion = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? locale = freezed,Object? region = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? notificationSettings = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? setupStep = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,Object? iconVariant = null,Object? reduceMotion = null,}) {
   return _then(AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
-as String?,dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
+as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as AppRegion?,dashboardWidgets: null == dashboardWidgets ? _self.dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
 as List<DashboardWidget>,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
 as bool,notificationSettings: null == notificationSettings ? _self.notificationSettings : notificationSettings // ignore: cast_nullable_to_non_nullable
 as NotificationSettings,autoLaunch: null == autoLaunch ? _self.autoLaunch : autoLaunch // ignore: cast_nullable_to_non_nullable
@@ -766,10 +767,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)  AppRegion? region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
+return $default(_that.locale,_that.region,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
   return orElse();
 
 }
@@ -787,10 +788,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)  AppRegion? region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps():
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
+return $default(_that.locale,_that.region,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -807,10 +808,10 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)  AppRegion? region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets,  bool onlyStatisticsProxy,  NotificationSettings notificationSettings,  bool autoLaunch,  bool silentLaunch,  bool autoRun,  bool openLogs,  bool closeConnections,  bool newDashboard,  String testUrl,  bool isAnimateToPage,  bool autoCheckUpdate,  bool showLabel,  bool disclaimerAccepted,  bool setupCompleted,  int setupStep,  bool crashlyticsTip,  bool crashlytics,  bool minimizeOnExit,  bool hidden,  bool developerMode,  RestoreStrategy restoreStrategy,  bool showTrayTitle,  bool checkCertificate,  String customUserAgent,  bool sendDeviceIdentity,  String iconVariant,  bool reduceMotion)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettingProps() when $default != null:
-return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
+return $default(_that.locale,_that.region,_that.dashboardWidgets,_that.onlyStatisticsProxy,_that.notificationSettings,_that.autoLaunch,_that.silentLaunch,_that.autoRun,_that.openLogs,_that.closeConnections,_that.newDashboard,_that.testUrl,_that.isAnimateToPage,_that.autoCheckUpdate,_that.showLabel,_that.disclaimerAccepted,_that.setupCompleted,_that.setupStep,_that.crashlyticsTip,_that.crashlytics,_that.minimizeOnExit,_that.hidden,_that.developerMode,_that.restoreStrategy,_that.showTrayTitle,_that.checkCertificate,_that.customUserAgent,_that.sendDeviceIdentity,_that.iconVariant,_that.reduceMotion);case _:
   return null;
 
 }
@@ -822,10 +823,11 @@ return $default(_that.locale,_that.dashboardWidgets,_that.onlyStatisticsProxy,_t
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.notificationSettings = defaultNotificationSettings, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = false, this.showLabel = false, this.disclaimerAccepted = false, this.setupCompleted = false, this.setupStep = 0, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, this.customUserAgent = '', this.sendDeviceIdentity = false, this.iconVariant = 'default', this.reduceMotion = false}): _dashboardWidgets = dashboardWidgets;
+  const _AppSettingProps({this.locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) this.region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.notificationSettings = defaultNotificationSettings, this.autoLaunch = false, this.silentLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = false, this.showLabel = false, this.disclaimerAccepted = false, this.setupCompleted = false, this.setupStep = 0, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, this.customUserAgent = '', this.sendDeviceIdentity = false, this.iconVariant = 'default', this.reduceMotion = false}): _dashboardWidgets = dashboardWidgets;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
+@override@JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) final  AppRegion? region;
  final  List<DashboardWidget> _dashboardWidgets;
 @override@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> get dashboardWidgets {
   if (_dashboardWidgets is EqualUnmodifiableListView) return _dashboardWidgets;
@@ -874,18 +876,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.notificationSettings, notificationSettings) || other.notificationSettings == notificationSettings)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.newDashboard, newDashboard) || other.newDashboard == newDashboard)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.setupCompleted, setupCompleted) || other.setupCompleted == setupCompleted)&&(identical(other.setupStep, setupStep) || other.setupStep == setupStep)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle)&&(identical(other.checkCertificate, checkCertificate) || other.checkCertificate == checkCertificate)&&(identical(other.customUserAgent, customUserAgent) || other.customUserAgent == customUserAgent)&&(identical(other.sendDeviceIdentity, sendDeviceIdentity) || other.sendDeviceIdentity == sendDeviceIdentity)&&(identical(other.iconVariant, iconVariant) || other.iconVariant == iconVariant)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettingProps&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.region, region) || other.region == region)&&const DeepCollectionEquality().equals(other.dashboardWidgets, _dashboardWidgets)&&(identical(other.onlyStatisticsProxy, onlyStatisticsProxy) || other.onlyStatisticsProxy == onlyStatisticsProxy)&&(identical(other.notificationSettings, notificationSettings) || other.notificationSettings == notificationSettings)&&(identical(other.autoLaunch, autoLaunch) || other.autoLaunch == autoLaunch)&&(identical(other.silentLaunch, silentLaunch) || other.silentLaunch == silentLaunch)&&(identical(other.autoRun, autoRun) || other.autoRun == autoRun)&&(identical(other.openLogs, openLogs) || other.openLogs == openLogs)&&(identical(other.closeConnections, closeConnections) || other.closeConnections == closeConnections)&&(identical(other.newDashboard, newDashboard) || other.newDashboard == newDashboard)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&(identical(other.isAnimateToPage, isAnimateToPage) || other.isAnimateToPage == isAnimateToPage)&&(identical(other.autoCheckUpdate, autoCheckUpdate) || other.autoCheckUpdate == autoCheckUpdate)&&(identical(other.showLabel, showLabel) || other.showLabel == showLabel)&&(identical(other.disclaimerAccepted, disclaimerAccepted) || other.disclaimerAccepted == disclaimerAccepted)&&(identical(other.setupCompleted, setupCompleted) || other.setupCompleted == setupCompleted)&&(identical(other.setupStep, setupStep) || other.setupStep == setupStep)&&(identical(other.crashlyticsTip, crashlyticsTip) || other.crashlyticsTip == crashlyticsTip)&&(identical(other.crashlytics, crashlytics) || other.crashlytics == crashlytics)&&(identical(other.minimizeOnExit, minimizeOnExit) || other.minimizeOnExit == minimizeOnExit)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&(identical(other.developerMode, developerMode) || other.developerMode == developerMode)&&(identical(other.restoreStrategy, restoreStrategy) || other.restoreStrategy == restoreStrategy)&&(identical(other.showTrayTitle, showTrayTitle) || other.showTrayTitle == showTrayTitle)&&(identical(other.checkCertificate, checkCertificate) || other.checkCertificate == checkCertificate)&&(identical(other.customUserAgent, customUserAgent) || other.customUserAgent == customUserAgent)&&(identical(other.sendDeviceIdentity, sendDeviceIdentity) || other.sendDeviceIdentity == sendDeviceIdentity)&&(identical(other.iconVariant, iconVariant) || other.iconVariant == iconVariant)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,locale,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,notificationSettings,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,newDashboard,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,setupCompleted,setupStep,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle,checkCertificate,customUserAgent,sendDeviceIdentity,iconVariant,reduceMotion]);
+    return Object.hashAll([runtimeType,locale,region,const DeepCollectionEquality().hash(_dashboardWidgets),onlyStatisticsProxy,notificationSettings,autoLaunch,silentLaunch,autoRun,openLogs,closeConnections,newDashboard,testUrl,isAnimateToPage,autoCheckUpdate,showLabel,disclaimerAccepted,setupCompleted,setupStep,crashlyticsTip,crashlytics,minimizeOnExit,hidden,developerMode,restoreStrategy,showTrayTitle,checkCertificate,customUserAgent,sendDeviceIdentity,iconVariant,reduceMotion]);
 }
 
 @override
 String toString() {
-    return 'AppSettingProps(locale: $locale, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, notificationSettings: $notificationSettings, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, newDashboard: $newDashboard, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, setupCompleted: $setupCompleted, setupStep: $setupStep, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle, checkCertificate: $checkCertificate, customUserAgent: $customUserAgent, sendDeviceIdentity: $sendDeviceIdentity, iconVariant: $iconVariant, reduceMotion: $reduceMotion)';
+    return 'AppSettingProps(locale: $locale, region: $region, dashboardWidgets: $dashboardWidgets, onlyStatisticsProxy: $onlyStatisticsProxy, notificationSettings: $notificationSettings, autoLaunch: $autoLaunch, silentLaunch: $silentLaunch, autoRun: $autoRun, openLogs: $openLogs, closeConnections: $closeConnections, newDashboard: $newDashboard, testUrl: $testUrl, isAnimateToPage: $isAnimateToPage, autoCheckUpdate: $autoCheckUpdate, showLabel: $showLabel, disclaimerAccepted: $disclaimerAccepted, setupCompleted: $setupCompleted, setupStep: $setupStep, crashlyticsTip: $crashlyticsTip, crashlytics: $crashlytics, minimizeOnExit: $minimizeOnExit, hidden: $hidden, developerMode: $developerMode, restoreStrategy: $restoreStrategy, showTrayTitle: $showTrayTitle, checkCertificate: $checkCertificate, customUserAgent: $customUserAgent, sendDeviceIdentity: $sendDeviceIdentity, iconVariant: $iconVariant, reduceMotion: $reduceMotion)';
 }
 
 
@@ -896,7 +898,7 @@ abstract mixin class _$AppSettingPropsCopyWith<$Res> implements $AppSettingProps
   factory _$AppSettingPropsCopyWith(_AppSettingProps value, $Res Function(_AppSettingProps) _then) = __$AppSettingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- String? locale,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, NotificationSettings notificationSettings, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, int setupStep, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity, String iconVariant, bool reduceMotion
+ String? locale,@JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) AppRegion? region,@JsonKey(fromJson: dashboardWidgetsSafeFormJson) List<DashboardWidget> dashboardWidgets, bool onlyStatisticsProxy, NotificationSettings notificationSettings, bool autoLaunch, bool silentLaunch, bool autoRun, bool openLogs, bool closeConnections, bool newDashboard, String testUrl, bool isAnimateToPage, bool autoCheckUpdate, bool showLabel, bool disclaimerAccepted, bool setupCompleted, int setupStep, bool crashlyticsTip, bool crashlytics, bool minimizeOnExit, bool hidden, bool developerMode, RestoreStrategy restoreStrategy, bool showTrayTitle, bool checkCertificate, String customUserAgent, bool sendDeviceIdentity, String iconVariant, bool reduceMotion
 });
 
 
@@ -913,10 +915,11 @@ class __$AppSettingPropsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? notificationSettings = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? setupStep = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,Object? iconVariant = null,Object? reduceMotion = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? locale = freezed,Object? region = freezed,Object? dashboardWidgets = null,Object? onlyStatisticsProxy = null,Object? notificationSettings = null,Object? autoLaunch = null,Object? silentLaunch = null,Object? autoRun = null,Object? openLogs = null,Object? closeConnections = null,Object? newDashboard = null,Object? testUrl = null,Object? isAnimateToPage = null,Object? autoCheckUpdate = null,Object? showLabel = null,Object? disclaimerAccepted = null,Object? setupCompleted = null,Object? setupStep = null,Object? crashlyticsTip = null,Object? crashlytics = null,Object? minimizeOnExit = null,Object? hidden = null,Object? developerMode = null,Object? restoreStrategy = null,Object? showTrayTitle = null,Object? checkCertificate = null,Object? customUserAgent = null,Object? sendDeviceIdentity = null,Object? iconVariant = null,Object? reduceMotion = null,}) {
   return _then(_AppSettingProps(
 locale: freezed == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
-as String?,dashboardWidgets: null == dashboardWidgets ? _self._dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
+as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as AppRegion?,dashboardWidgets: null == dashboardWidgets ? _self._dashboardWidgets : dashboardWidgets // ignore: cast_nullable_to_non_nullable
 as List<DashboardWidget>,onlyStatisticsProxy: null == onlyStatisticsProxy ? _self.onlyStatisticsProxy : onlyStatisticsProxy // ignore: cast_nullable_to_non_nullable
 as bool,notificationSettings: null == notificationSettings ? _self.notificationSettings : notificationSettings // ignore: cast_nullable_to_non_nullable
 as NotificationSettings,autoLaunch: null == autoLaunch ? _self.autoLaunch : autoLaunch // ignore: cast_nullable_to_non_nullable
@@ -3689,9 +3692,309 @@ $TextScaleCopyWith<$Res> get textScale {
 
 
 /// @nodoc
+mixin _$MilestoneProps {
+
+ Set<String> get unlocked; Map<String, int> get revealedAt; List<String> get revealQueue; bool get findingsEnabled; bool get seasonalEnabled;
+/// Create a copy of MilestoneProps
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MilestonePropsCopyWith<MilestoneProps> get copyWith => _$MilestonePropsCopyWithImpl<MilestoneProps>(this as MilestoneProps, _$identity);
+
+  /// Serializes this MilestoneProps to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MilestoneProps;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _this.unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _this.revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _this.revealQueue)&&(identical(other.findingsEnabled, _this.findingsEnabled) || other.findingsEnabled == _this.findingsEnabled)&&(identical(other.seasonalEnabled, _this.seasonalEnabled) || other.seasonalEnabled == _this.seasonalEnabled));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MilestoneProps;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.unlocked),const DeepCollectionEquality().hash(_this.revealedAt),const DeepCollectionEquality().hash(_this.revealQueue),_this.findingsEnabled,_this.seasonalEnabled);
+}
+
+@override
+String toString() {
+  final _this = this as MilestoneProps;
+  return 'MilestoneProps(unlocked: ${_this.unlocked}, revealedAt: ${_this.revealedAt}, revealQueue: ${_this.revealQueue}, findingsEnabled: ${_this.findingsEnabled}, seasonalEnabled: ${_this.seasonalEnabled})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MilestonePropsCopyWith<$Res>  {
+  factory $MilestonePropsCopyWith(MilestoneProps value, $Res Function(MilestoneProps) _then) = _$MilestonePropsCopyWithImpl;
+@useResult
+$Res call({
+ Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled
+});
+
+
+
+
+}
+/// @nodoc
+class _$MilestonePropsCopyWithImpl<$Res>
+    implements $MilestonePropsCopyWith<$Res> {
+  _$MilestonePropsCopyWithImpl(this._self, this._then);
+
+  final MilestoneProps _self;
+  final $Res Function(MilestoneProps) _then;
+
+/// Create a copy of MilestoneProps
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,}) {
+  return _then(MilestoneProps(
+unlocked: null == unlocked ? _self.unlocked : unlocked // ignore: cast_nullable_to_non_nullable
+as Set<String>,revealedAt: null == revealedAt ? _self.revealedAt : revealedAt // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,revealQueue: null == revealQueue ? _self.revealQueue : revealQueue // ignore: cast_nullable_to_non_nullable
+as List<String>,findingsEnabled: null == findingsEnabled ? _self.findingsEnabled : findingsEnabled // ignore: cast_nullable_to_non_nullable
+as bool,seasonalEnabled: null == seasonalEnabled ? _self.seasonalEnabled : seasonalEnabled // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MilestoneProps].
+extension MilestonePropsPatterns on MilestoneProps {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MilestoneProps value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MilestoneProps() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MilestoneProps value)  $default,){
+final _that = this;
+switch (_that) {
+case _MilestoneProps():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MilestoneProps value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MilestoneProps() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MilestoneProps() when $default != null:
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)  $default,) {final _that = this;
+switch (_that) {
+case _MilestoneProps():
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)?  $default,) {final _that = this;
+switch (_that) {
+case _MilestoneProps() when $default != null:
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MilestoneProps implements MilestoneProps {
+  const _MilestoneProps({ Set<String> unlocked = const <String>{},  Map<String, int> revealedAt = const <String, int>{},  List<String> revealQueue = const <String>[], this.findingsEnabled = true, this.seasonalEnabled = true}): _unlocked = unlocked,_revealedAt = revealedAt,_revealQueue = revealQueue;
+  factory _MilestoneProps.fromJson(Map<String, dynamic> json) => _$MilestonePropsFromJson(json);
+
+ final  Set<String> _unlocked;
+@override@JsonKey() Set<String> get unlocked {
+  if (_unlocked is EqualUnmodifiableSetView) return _unlocked;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_unlocked);
+}
+
+ final  Map<String, int> _revealedAt;
+@override@JsonKey() Map<String, int> get revealedAt {
+  if (_revealedAt is EqualUnmodifiableMapView) return _revealedAt;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_revealedAt);
+}
+
+ final  List<String> _revealQueue;
+@override@JsonKey() List<String> get revealQueue {
+  if (_revealQueue is EqualUnmodifiableListView) return _revealQueue;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_revealQueue);
+}
+
+@override@JsonKey() final  bool findingsEnabled;
+@override@JsonKey() final  bool seasonalEnabled;
+
+/// Create a copy of MilestoneProps
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MilestonePropsCopyWith<_MilestoneProps> get copyWith => __$MilestonePropsCopyWithImpl<_MilestoneProps>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MilestonePropsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _revealQueue)&&(identical(other.findingsEnabled, findingsEnabled) || other.findingsEnabled == findingsEnabled)&&(identical(other.seasonalEnabled, seasonalEnabled) || other.seasonalEnabled == seasonalEnabled));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_unlocked),const DeepCollectionEquality().hash(_revealedAt),const DeepCollectionEquality().hash(_revealQueue),findingsEnabled,seasonalEnabled);
+}
+
+@override
+String toString() {
+    return 'MilestoneProps(unlocked: $unlocked, revealedAt: $revealedAt, revealQueue: $revealQueue, findingsEnabled: $findingsEnabled, seasonalEnabled: $seasonalEnabled)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MilestonePropsCopyWith<$Res> implements $MilestonePropsCopyWith<$Res> {
+  factory _$MilestonePropsCopyWith(_MilestoneProps value, $Res Function(_MilestoneProps) _then) = __$MilestonePropsCopyWithImpl;
+@override @useResult
+$Res call({
+ Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled
+});
+
+
+
+
+}
+/// @nodoc
+class __$MilestonePropsCopyWithImpl<$Res>
+    implements _$MilestonePropsCopyWith<$Res> {
+  __$MilestonePropsCopyWithImpl(this._self, this._then);
+
+  final _MilestoneProps _self;
+  final $Res Function(_MilestoneProps) _then;
+
+/// Create a copy of MilestoneProps
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,}) {
+  return _then(_MilestoneProps(
+unlocked: null == unlocked ? _self._unlocked : unlocked // ignore: cast_nullable_to_non_nullable
+as Set<String>,revealedAt: null == revealedAt ? _self._revealedAt : revealedAt // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,revealQueue: null == revealQueue ? _self._revealQueue : revealQueue // ignore: cast_nullable_to_non_nullable
+as List<String>,findingsEnabled: null == findingsEnabled ? _self.findingsEnabled : findingsEnabled // ignore: cast_nullable_to_non_nullable
+as bool,seasonalEnabled: null == seasonalEnabled ? _self.seasonalEnabled : seasonalEnabled // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$Config {
 
- int? get currentProfileId; bool get overrideDns; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps;@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps get desyncProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
+ int? get currentProfileId; bool get overrideDns;@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps get milestoneProps; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps;@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps get desyncProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3705,20 +4008,20 @@ $ConfigCopyWith<Config> get copyWith => _$ConfigCopyWithImpl<Config>(this as Con
 @override
 bool operator ==(Object other) {
   final _this = this as Config;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.desyncProps, _this.desyncProps) || other.desyncProps == _this.desyncProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.milestoneProps, _this.milestoneProps) || other.milestoneProps == _this.milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.desyncProps, _this.desyncProps) || other.desyncProps == _this.desyncProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Config;
-  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.desyncProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
+  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,_this.milestoneProps,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.desyncProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
 }
 
 @override
 String toString() {
   final _this = this as Config;
-  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, desyncProps: ${_this.desyncProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
+  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, milestoneProps: ${_this.milestoneProps}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, desyncProps: ${_this.desyncProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
 }
 
 
@@ -3729,11 +4032,11 @@ abstract mixin class $ConfigCopyWith<$Res>  {
   factory $ConfigCopyWith(Config value, $Res Function(Config) _then) = _$ConfigCopyWithImpl;
 @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
-$AppSettingPropsCopyWith<$Res> get appSettingProps;$DAVPropsCopyWith<$Res>? get davProps;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;$DesyncPropsCopyWith<$Res> get desyncProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;$WindowPropsCopyWith<$Res> get windowProps;$PatchClashConfigCopyWith<$Res> get patchClashConfig;
+$MilestonePropsCopyWith<$Res> get milestoneProps;$AppSettingPropsCopyWith<$Res> get appSettingProps;$DAVPropsCopyWith<$Res>? get davProps;$NetworkPropsCopyWith<$Res> get networkProps;$VpnPropsCopyWith<$Res> get vpnProps;$SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;$DesyncPropsCopyWith<$Res> get desyncProps;$ThemePropsCopyWith<$Res> get themeProps;$ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;$WindowPropsCopyWith<$Res> get windowProps;$PatchClashConfigCopyWith<$Res> get patchClashConfig;
 
 }
 /// @nodoc
@@ -3746,11 +4049,12 @@ class _$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
-as bool,hotKeyActions: null == hotKeyActions ? _self.hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
+as bool,milestoneProps: null == milestoneProps ? _self.milestoneProps : milestoneProps // ignore: cast_nullable_to_non_nullable
+as MilestoneProps,hotKeyActions: null == hotKeyActions ? _self.hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
 as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
 as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // ignore: cast_nullable_to_non_nullable
 as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
@@ -3765,6 +4069,15 @@ as PatchClashConfig,
   ));
 }
 /// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MilestonePropsCopyWith<$Res> get milestoneProps {
+  
+  return $MilestonePropsCopyWith<$Res>(_self.milestoneProps, (value) {
+    return _then(_self.copyWith(milestoneProps: value));
+  });
+}/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -3939,10 +4252,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return orElse();
 
 }
@@ -3960,10 +4273,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
 switch (_that) {
 case _Config():
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3980,10 +4293,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return null;
 
 }
@@ -3995,11 +4308,12 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.hotKeyActions,_th
 @JsonSerializable()
 
 class _Config implements Config {
-  const _Config({this.currentProfileId, this.overrideDns = false,  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson) this.desyncProps = defaultDesyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
+  const _Config({this.currentProfileId, this.overrideDns = false, @JsonKey(fromJson: MilestoneProps.safeFromJson) this.milestoneProps = const MilestoneProps(),  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson) this.desyncProps = defaultDesyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
   factory _Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 
 @override final  int? currentProfileId;
 @override@JsonKey() final  bool overrideDns;
+@override@JsonKey(fromJson: MilestoneProps.safeFromJson) final  MilestoneProps milestoneProps;
  final  List<HotKeyAction> _hotKeyActions;
 @override@JsonKey() List<HotKeyAction> get hotKeyActions {
   if (_hotKeyActions is EqualUnmodifiableListView) return _hotKeyActions;
@@ -4031,18 +4345,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.desyncProps, desyncProps) || other.desyncProps == desyncProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.milestoneProps, milestoneProps) || other.milestoneProps == milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.desyncProps, desyncProps) || other.desyncProps == desyncProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,currentProfileId,overrideDns,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,desyncProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
+    return Object.hash(runtimeType,currentProfileId,overrideDns,milestoneProps,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,desyncProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
 }
 
 @override
 String toString() {
-    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, desyncProps: $desyncProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
+    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, milestoneProps: $milestoneProps, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, desyncProps: $desyncProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
 }
 
 
@@ -4053,11 +4367,11 @@ abstract mixin class _$ConfigCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   factory _$ConfigCopyWith(_Config value, $Res Function(_Config) _then) = __$ConfigCopyWithImpl;
 @override @useResult
 $Res call({
- int? currentProfileId, bool overrideDns, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
-@override $AppSettingPropsCopyWith<$Res> get appSettingProps;@override $DAVPropsCopyWith<$Res>? get davProps;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;@override $DesyncPropsCopyWith<$Res> get desyncProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;@override $WindowPropsCopyWith<$Res> get windowProps;@override $PatchClashConfigCopyWith<$Res> get patchClashConfig;
+@override $MilestonePropsCopyWith<$Res> get milestoneProps;@override $AppSettingPropsCopyWith<$Res> get appSettingProps;@override $DAVPropsCopyWith<$Res>? get davProps;@override $NetworkPropsCopyWith<$Res> get networkProps;@override $VpnPropsCopyWith<$Res> get vpnProps;@override $SmartRoutingPropsCopyWith<$Res> get smartRoutingProps;@override $DesyncPropsCopyWith<$Res> get desyncProps;@override $ThemePropsCopyWith<$Res> get themeProps;@override $ProxiesStylePropsCopyWith<$Res> get proxiesStyleProps;@override $WindowPropsCopyWith<$Res> get windowProps;@override $PatchClashConfigCopyWith<$Res> get patchClashConfig;
 
 }
 /// @nodoc
@@ -4070,11 +4384,12 @@ class __$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(_Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
-as bool,hotKeyActions: null == hotKeyActions ? _self._hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
+as bool,milestoneProps: null == milestoneProps ? _self.milestoneProps : milestoneProps // ignore: cast_nullable_to_non_nullable
+as MilestoneProps,hotKeyActions: null == hotKeyActions ? _self._hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
 as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
 as AppSettingProps,davProps: freezed == davProps ? _self.davProps : davProps // ignore: cast_nullable_to_non_nullable
 as DAVProps?,networkProps: null == networkProps ? _self.networkProps : networkProps // ignore: cast_nullable_to_non_nullable
@@ -4090,6 +4405,15 @@ as PatchClashConfig,
 }
 
 /// Create a copy of Config
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MilestonePropsCopyWith<$Res> get milestoneProps {
+  
+  return $MilestonePropsCopyWith<$Res>(_self.milestoneProps, (value) {
+    return _then(_self.copyWith(milestoneProps: value));
+  });
+}/// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

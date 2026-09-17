@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "VPN-ді айналып өтіп қайталау керек пе?",
+  "subscriptionDirectRetryMessage": "Ағымдағы қосылым арқылы жазылымға қол жеткізу мүмкін болмады. VPN-ді өшірмей, осы жүктеуді тікелей қайталау керек пе? Панель желіңіздің IP мекенжайын көреді. Қалған трафиктің бағыты өзгермейді.",
+  "subscriptionDirectRetryConfirm": "Тікелей қайталау",
+  "appRegion": "Қолданба өңірі",
+  "appRegionDesc": "Желі өңірін таңдаңыз. Ресей таңдалса, HWID қосылады; оны төменде өшіруге болады. Ақылды бағыттау бөлек қосылады.",
+  "appRegionOther": "Басқа",
+  "setupRegionSettings": "Өңірдің жылдам баптаулары",
+  "setupRegionSettingsDesc": "Геодеректерді, бағыттау пресеттерін және қолданбалар қатынасын тексеріңіз. Ештеңе автоматты түрде қосылмайды.",
+  "lanProfileImportPhoneHint": "Жазылымды теледидарға импорттау үшін оның сілтемесін қойыңыз.",
+  "lanProfileImportSend": "Теледидарға импорттау",
+  "lanProfileImportPhoneSuccess": "Жазылым импортталды. Теледидарға оралып, осы бетті жабуға болады.",
+  "lanProfileImportPhoneFailed": "Жазылымды импорттау мүмкін болмады. Сілтемені тексеріп, қайталап көріңіз.",
+  "lanProfileImportPhoneUnreachable": "Теледидармен байланыс жоқ. Қосылымды тексеріп, нәтижені білу үшін осы бетте сұрауды қайталаңыз.",
+  "panelHwidNotSupported": "Панель HWID шектеуі туралы хабарлады",
+  "panelHwidNotSupportedTip": "Панель x-hwid-not-supported қайтарды. Бұл клиенттің үйлесімсіздігін дәлелдемейді. HWID баптаулары мен жазылым талаптарын тексеріңіз.",
+  "panelHwidIdentityDisabled": "HWID жіберу өшірулі. Панельге сенсеңіз ғана қосыңыз.",
+  "networkDefaultLanBypass": "Арнайы маршруттар болмаса, жергілікті желі VPN-ді айналып өтеді. Оны қамту үшін маршруттарды нақты көрсетіңіз.",
+  "subscriptionClientExperimentalLabel": "Тәжірибелік",
   "rule": "Ереже",
   "rules": "Ережелер",
   "global": "Глобалды",
@@ -93,7 +111,7 @@
   "importFromURL": "URL арқылы импорттау",
   "subscriptionClientLabel": "Клиент пішімі",
   "subscriptionClientDesc": "Қолданба жазылысты осы клиенттің пішімінде сұрайды",
-  "subscriptionClientExperimentalTip": "Эмуляция — тәжірибелік мүмкіндік: провайдер басқа клиенттің пішімін қайтарады, ReClash оны түрлендіреді.",
+  "subscriptionClientExperimentalTip": "Басқа клиенттермен үйлесімділік — тәжірибелік мүмкіндік: провайдер таңдалған клиент пішімін береді, ReClash оны түрлендіреді.",
   "subscriptionClientAuto": "Авто",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -129,7 +147,7 @@
   "project": "Жоба",
   "core": "Ядро",
   "madeBy": "Жасаған",
-  "roleAuthor": "Автор және қолдаушы",
+  "roleAuthor": "Автор және мейнтейнер",
   "gratitude": "Алғыс",
   "gratitudeDesc": "ReClash олардың еңбегі арқасында өмір сүреді",
   "creditFlClash": "FlClash — осы қолданбаның негізі",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "Құрылғы идентификаторын жіберу",
   "sendDeviceIdentityDesc": "Құрылғы идентификаторын, қолданба нұсқасын және құрылғы атауын провайдер серверіне жіберу",
+  "sendDeviceIdentityDisableWarning": "HWID жіберуді өшірсеңіз, жазылымдардың көпшілігі жұмыс істемей қалады. Жалғастырасыз ба?",
   "unifiedDelay": "Бірыңғай кідіріс",
   "unifiedDelayDesc": "Қол алысу сияқты қосымша кідірістерді алып тастау",
   "tcpConcurrent": "Параллельді TCP қосылымдары",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "Ядро мәжбүрлеп қайта іске қосылсын ба?",
   "dnsHijacking": "DNS басып алу",
   "coreStatus": "Ядро күйі",
+  "coreRunning": "Жұмыс істеп тұр",
+  "coreStarting": "Іске қосылуда…",
+  "coreStopped": "Тоқтатылған",
   "dataCollectionTip": "Деректер жинау туралы хабарлама",
   "dataCollectionContent": "Бұл қолданба тұрақтылықты жақсарту үшін Firebase Crashlytics көмегімен құлау туралы ақпарат жинайды.\nЖиналатын деректер — құрылғы туралы ақпарат пен құлау егжей-тегжейлері; жеке сезімтал деректер болмайды.\nМұны баптаулардан өшіре аласыз.",
   "crashlytics": "Құлау аналитикасы",
@@ -633,6 +655,15 @@
   "expectedStatus": "Күтілетін күй",
   "selectProxies": "Проксилерді таңдаңыз",
   "inputProxyGroupName": "Прокси тобының атауын енгізіңіз",
+  "helperAuthorizationTitle": "Көмекші қызметті баптауға рұқсат бересіз бе?",
+  "helperAuthorizationMessage": "TUN режимі үшін ReClash көмекші қызметін орнату немесе жаңарту қажет. Жүйенің авторизация терезесін ашу үшін «Жалғастыру» түймесін басыңыз. Құпиясөзді тек сол терезеде енгізіңіз: ReClash құпиясөздерді жинамайды.",
+  "helperAuthorizationContinue": "Жалғастыру",
+  "helperAuthorizationLater": "Кейінірек",
+  "helperSystemdUnavailable": "TUN режиміне systemd қажет, бірақ бұл жүйеде ол қолжетімсіз.",
+  "helperPkexecUnavailable": "pkexec қолжетімсіз. Дистрибутивіңізге арналған polkit бумасын орнатып, қайталап көріңіз.",
+  "helperAgentUnavailable": "Жүйенің авторизация агенті қолжетімсіз. Жұмыс үстелі сеансында polkit аутентификация агентін іске қосып, қайталап көріңіз.",
+  "helperInstallFailed": "Көмекші қызметті орнату немесе жаңарту мүмкін болмады. Журналдарды тексеріп, қайталап көріңіз.",
+  "helperInstallNotReady": "Көмекші қызметті баптау аяқталды, бірақ қызмет әлі дайын емес. Журналдарды тексеріп, қайталап көріңіз.",
   "helperCorruptTip": "Көмекші қызмет қолжетімсіз; TUN режимін қосу мүмкін емес. Қалпына келтіру үшін ReClash-ті қайта орнатыңыз.",
   "coreBlockedByPolicyTip": "Windows ReClashCore.exe файлын іске қосудан бас тартты ({code} қатесі). Smart App Control немесе AppLocker сияқты қолданба бақылау саясаты қолтаңбасы жоқ қолданбаларды блоктайды; сол саясатта ReClash-ке рұқсат беріңіз немесе саясатты өшіріңіз де, қайталап көріңіз.",
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control ReClashCore.exe файлын қолтаңбасы жоқ болғандықтан блоктады. Windows қауіпсіздігі → «Қолданбалар мен браузерді бақылау» → Smart App Control баптауларына өтіп, «Өшірулі» опциясын таңдаңыз да, ReClash-ті қайта іске қосыңыз. Smart App Control-ті қайта қосу үшін Windows-ты қайта орнату керек.",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "Сервер жауап бермейді, басқасы ізделуде",
   "smartRoutingNoServers": "Қолжетімді серверлер жоқ",
   "smartRoutingPreset": "Дайын баптаулар",
-  "smartRoutingPresetOff": "Өшірулі",
+  "smartRoutingPresetOff": "Басқа",
   "smartRoutingPresetRussia": "Ресей",
   "smartRoutingPresetIran": "Иран",
   "smartRoutingPresetChina": "Қытай",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "Жұмыс істеп тұр, жақсырағы табылмады",
   "smartRoutingReasonIncumbentDead": "Алдыңғы сервер жауап беруді доғарды",
   "smartRoutingReasonVerdictGain": "Ашық интернетке шыға алатыны дәлелденген",
-  "smartRoutingReasonLatencyGain": "Кідірісі бір жолаққа төмен",
+  "smartRoutingReasonLatencyGain": "Қайталанған тексерулер кідірістің төмен екенін растады",
+  "smartRoutingReasonReliabilityGain": "Қайталанған тексерулер тұрақтырақ баламаны растады",
+  "smartRoutingReasonQualityConfirming": "Қайта салыстыру арқылы жақсаруды растап жатырмыз",
+  "smartRoutingReasonHandoffRecovery": "Желі ауысқаннан кейін байланыс қалпына келді",
   "smartRoutingReasonTerrainChanged": "Желі өзгерді",
   "smartRoutingReasonStranded": "Қолжетімді ештеңе жоқ, ағымдағы сервер ұсталады",
   "smartRoutingReasonNoCandidate": "Ешбір сервер тексеруден өтпеді",
@@ -985,8 +1019,8 @@
   "setupRestore": "Сақтық көшірмеден қалпына келтіру",
   "setupRestoreDesc": "ReClash, FlClashX немесе FlClash көшірмесінен баптаулар мен профильдерді қалпына келтіру",
   "setupFinishTitle": "Баптауларды тексеріңіз",
-  "setupRegionDesc": "Ақылды бағыттау осы өңірді маршрут таңдаудың бастапқы нүктесі ретінде қолданады. Тіл тек ұсыныс береді.",
-  "setupRegionNone": "Басқа өңір немесе ақылды бағыттаусыз",
+  "setupRegionDesc": "Желі өңірін таңдаңыз. Ресей таңдалса, HWID қосылады; оны төменде өшіруге болады. Ақылды бағыттау бөлек қосылады.",
+  "setupRegionNone": "Басқа",
   "setupAutoRun": "ReClash ашылғанда қосылу",
   "setupAutoRunDesc": "Жарамды профиль жүктелген соң VPN-ді автоматты іске қосады",
   "setupPermissionVpn": "VPN рұқсаты",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "Тақырып",
   "appearanceIcon": "Таңбаша",
   "appearanceLayout": "Орналасу",
-  "appearanceMotion": "Қозғалыс",
   "schedule": "Кесте бойынша",
   "scheduleDesc": "Қараңғы режим: {darkAt} — {lightAt}",
   "darkAt": "Қараңғы уақыты",
@@ -1206,7 +1239,7 @@
   "openInBrowser": "Браузерде ашу",
   "off": "Өшірулі",
   "subscriptionNoQuota": "Бұл жазылыс не трафик лимітін, не аяқталу мерзімін хабарламайды",
-  "subscriptionUndialable": "Бұл жазылыстағы түйіндердің ешбіріне қосыла алмайды — басқа клиент пішімін қолданып көріңіз",
+  "subscriptionUndialable": "Жазылымда қалыпты түйін мекенжайлары табылмады. Панель уақытша бос конфигурация қайтарған болуы мүмкін. Серверлерге қосылу тексерілмеді.",
   "subscriptionDomainMoved": "Провайдер {host} мекенжайына көшкен",
   "subscriptionUpdated": "Жаңартылды",
   "subscriptionProviderInterval": "Провайдер {value} ұсынады",
@@ -1611,10 +1644,10 @@
     }
   },
   "lanProfileImport": "Телефоннан алу",
-  "lanProfileImportDesc": "Жергілікті желі арқылы жазылым URL мекенжайын жіберу үшін бір реттік QR кодын көрсету",
+  "lanProfileImportDesc": "Жергілікті желі арқылы телефоннан жазылым жіберуге арналған бір реттік бетті көрсету",
   "lanProfileImportTitle": "Жазылымды алу",
-  "lanProfileImportScan": "Осы QR кодын сол желідегі телефонмен сканерлеңіз",
-  "lanProfileImportAddress": "Немесе JSON деректерін {address} мекенжайына жіберіңіз",
+  "lanProfileImportScan": "Осы QR кодын сол желідегі телефонмен сканерлеп, жазылым URL мекенжайын қойыңыз",
+  "lanProfileImportAddress": "Немесе телефон браузерінде {address} мекенжайын ашыңыз",
   "lanProfileImportWaiting": "Жазылым күтілуде…",
   "lanProfileImportImporting": "Жазылым импортталуда…",
   "lanProfileImportImported": "Жазылым алынды",
@@ -1809,5 +1842,133 @@
   "externalActionConfirmTitle": "Сыртқы әрекетті растау",
   "externalActionConfirmMessage": "Сыртқы сілтемеге «{action}» әрекетін орындауға рұқсат берілсін бе?",
   "panelSettingsConfirmTitle": "Провайдер баптауларын қолдану",
-  "panelSettingsConfirmMessage": "Бұл жазылым қолданбаның мына жалпы баптауларын сұрайды:\n{settings}"
+  "panelSettingsConfirmMessage": "Бұл жазылым қолданбаның мына жалпы баптауларын сұрайды:\n{settings}",
+  "milestoneDecorations": "Жасырын олжалар",
+  "milestoneDecorationsDesc": "ReClash пайдалану кезінде табылған олжаларды көрсету",
+  "seasonalDecorations": "Маусымдық безендіру",
+  "seasonalDecorationsDesc": "Басты экранда нәзік маусымдық бөлшектерді көрсету",
+  "lastUsed": "Соңғы қолданылған уақыт",
+  "neverUsed": "Әлі қолданылмаған",
+  "profileUnusedForDays": "{days} күн қолданылмады",
+  "profileUnusedForMonths": "{months} ай қолданылмады",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "Үзіліссіз тоқсан күн.",
+  "milestoneRevealAuscultation": "Жүз тексеріс. Желінің тамыры соғып тұр.",
+  "milestoneRevealFullLadder": "Барлық сатыдан өтіп, біріншісіне қайту.",
+  "milestoneRevealSilentAutopilot": "Араласусыз мың шешім.",
+  "milestoneRevealOdometer": "Бір терабайт өтіп кетті.",
+  "milestoneRevealMeridian": "Бес меридиан кесіп өтілді.",
+  "milestoneRevealPorcelain": "Жеті тыныш күн.",
+  "milestoneRevealCrown": "Қамтылған уақыттың бір жылы.",
+  "findings": "Табылғандар",
+  "findingsDesc": "ReClash қолданылғанда тыныш ашылған бөлшектер",
+  "findingsCount": "{total} ішінен {found} ашылды",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "Ашылғандар",
+  "findingDiscoveredOn": "{date} табылды",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "Табылғандарды ысыру",
+  "resetFindingsDesc": "Қолдану тарихын өшірмей, ашылу сәттерін қайта көрсету",
+  "resetFindingsTitle": "Табылғандарды ысыру керек пе?",
+  "resetFindingsConfirm": "Ашылған жазбалар жасырылып, қайта пайда бола алады. Қолдану тарихы өзгермейді.",
+  "findingVigil": "Күзет",
+  "findingAuscultation": "Тыңдау",
+  "findingFullLadder": "Толық саты",
+  "findingSilentAutopilot": "Үнсіз автопилот",
+  "findingOdometer": "Одометр",
+  "findingMeridian": "Бес меридиан",
+  "findingPorcelain": "Фарфор",
+  "findingCrown": "Тәж",
+  "findingOscilloscope": "Осциллограф",
+  "findingMarks": "Белгілер",
+  "findingPi": "Пи",
+  "findingTurn": "Айналым",
+  "findingStorm": "Дауыл",
+  "findingLoopback": "Ілмек",
+  "findingOscilloscopeDesc": "Сақина алты секунд бойы нақты трафикті тыңдады.",
+  "findingMarksDesc": "ReClash белгілер жинағы ашылды.",
+  "findingPiDesc": "Бақылау тақтасы ашық кезде сеанс 3:14:15 межесінен өтті.",
+  "findingTurnDesc": "Сеанс Жаңа жыл түн ортасынан өтті.",
+  "findingStormDesc": "Барлық диагностикалық қабат бір уақытта істен шықты.",
+  "findingLoopbackDesc": "Профиль жергілікті тыңдау портына қайта бағытталды.",
+  "appIconVigil": "Күзет",
+  "appIconTopo": "Топография",
+  "appIconFractal": "Фрактал",
+  "appIconSpark": "Ұшқын",
+  "crownHistory": "{date} бастап · {days} күн қамту",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "Саты нәтижесі: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "Салқын, монохромға жуық палитраны қолдану",
+  "developerFindings": "Табылғандарды алдын ала қарау",
+  "developerFindingsDesc": "Тек уақытша алдын ала қарау: есептегіштер, алынған табылғандар мен желі баптаулары өзгермейді. Ысыру немесе әзірлеуші режимін өшіру алдын ала қарауды тоқтатады. Әсерлер байланысы дұрыс бақылау тақтасы ашылғанда көрсетіліп, безендіру баптауларына бағынады. Безендіруде таңдалған белгіше мен тақырып сақталады.",
+  "developerAllRewards": "Барлық марапаттарды көрсету",
+  "developerPreviewReset": "Алдын ала қарауды ысыру",
+  "developerPreviewAutomatic": "Автоматты",
+  "developerSeasonNewYear": "Жаңа жыл",
+  "developerSeasonBirthday": "ReClash туған күні",
+  "developerSeasonAnniversary": "Алғашқы іске қосу мерейтойы",
+  "developerSeasonDrift": "Маусымдық реңк",
+  "developerPatina": "Профильдердегі шаң",
+  "developerPatinaDays": "{days} тәулік",
+  "developerFindingEvents": "Табылғанды қайталау",
+  "developerFindingQueued": "Байланысы дұрыс бақылау тақтасы ашылғанша кезекте. Қайта көрсетуге болады.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "Қосылымның барлық кезеңі қолжетімсіз",
+  "findingStormVerdict": "Тексеру жұмыс істейтін жолды таппады. Кейінгі ақаулар алғашқы ақаудың салдары болуы мүмкін.",
+  "findingLoopbackWarning": "Профиль мекенжайы ReClash қолданбасының өз прокси портына сілтейді. Жазылым сілтемесін тексеріңіз.",
+  "seasonBirthdayNote": "Бүгін ReClash туған күні.",
+  "seasonFirstRunNote": "Бүгін алғашқы іске қосуыңыздың жылдығы."
 }

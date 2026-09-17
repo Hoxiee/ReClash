@@ -30,6 +30,7 @@ void main() {
     rpcClient = _MockRpcClient();
     crashes = StreamController<DesktopCoreFailure>.broadcast();
     when(() => lifecycle.crashEvents).thenAnswer((_) => crashes.stream);
+    when(() => lifecycle.setRecoveryHandler(any())).thenReturn(null);
     when(() => lifecycle.start()).thenAnswer((_) async => result);
     when(() => lifecycle.restart()).thenAnswer((_) async => result);
     when(() => lifecycle.stop()).thenAnswer((_) async => result);

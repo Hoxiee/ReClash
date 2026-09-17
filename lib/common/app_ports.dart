@@ -32,6 +32,8 @@ abstract interface class NavigationPort {
   /// The rail's status mark. Injected because it speaks the dashboard's hero
   /// vocabulary, which widgets and managers must not import.
   Widget buildStatusMark();
+
+  void openAbout(BuildContext context);
 }
 
 WindowPort? windowPort;

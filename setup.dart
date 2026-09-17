@@ -2,7 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
+
+import 'tool/src/release_version.dart';
+
+const _appImageToolRelease = '12';
+const _appImageToolSha256 = <String, String>{
+  'aarch64': 'c9d058310a4e04b9fbbd81340fff2b5fb44943a630b31881e321719f271bd41a',
+  'x86_64': 'd918b4df547b388ef253f3c9e7f6529ca81a885395c31f619d9aaf7030499a13',
+};
 
 const _allTargets = <String, String>{
   'android': 'apk',
@@ -104,10 +113,15 @@ ArgParser createSetupArgParser() {
 List<String> createFlutterBuildArgs({
   required String platform,
   required bool verbose,
+  ReleaseVersion? version,
 }) {
   final flutterBuildArgs = <String>[
     if (verbose) 'verbose',
     'dart-define-from-file=env.json',
+    if (platform == 'macos' && version != null) ...[
+      'build-name=${version.base}',
+      'build-number=${version.macosBuildNumber}',
+    ],
   ];
   if (platform == 'android') {
     flutterBuildArgs.add('split-per-abi');
@@ -115,8 +129,17 @@ List<String> createFlutterBuildArgs({
   return flutterBuildArgs;
 }
 
-Map<String, String> createBuildEnvironment(String env) {
-  return {'APP_ENV': env};
+Map<String, String> createBuildEnvironment(
+  String env, {
+  ReleaseVersion? version,
+}) {
+  return {
+    'APP_ENV': env,
+    if (version != null) ...{
+      'APP_VERSION': version.name,
+      'APP_BUILD_NUMBER': version.buildNumber,
+    },
+  };
 }
 
 Map<String, String> createPackageProcessEnvironment({
@@ -172,20 +195,25 @@ Future<int> _package(
   String? androidArch,
   required bool verbose,
 }) async {
+  final version = ReleaseVersion.read(rootDir);
   final file = File(p.join(rootDir, 'env.json'));
-  await file.writeAsString(jsonEncode(createBuildEnvironment(env)));
+  await file.writeAsString(
+    jsonEncode(createBuildEnvironment(env, version: version)),
+  );
 
   final flutterBuildArgs = createFlutterBuildArgs(
     platform: platform,
     verbose: verbose,
+    version: version,
   );
   final descriptionArgs = <String>[];
   if (platform != 'android') {
     descriptionArgs.addAll(['--description', arch]);
   }
 
-  final depExit = await _ensureDependencies(platform, rootDir);
+  final depExit = await _ensureDependencies(platform, rootDir, targets);
   if (depExit != 0) return depExit;
+  if (platform == 'linux') await prepareLinuxVersionTools(rootDir, targets);
 
   final activateResult = await Process.run('dart', [
     'pub',
@@ -195,7 +223,7 @@ Future<int> _package(
     'git',
     'https://github.com/chen08209/flutter_distributor.git',
     '--git-ref',
-    'v0.6.11-flclash.2',
+    '7fea25d4c531ce6e778db14e3c47f076027a1008',
     '--git-path',
     'packages/flutter_distributor',
   ]);
@@ -239,6 +267,32 @@ Future<int> _package(
   return exitCode;
 }
 
+Future<void> prepareLinuxVersionTools(String rootDir, String targets) async {
+  final directory = Directory(
+    p.join(rootDir, '.dart_tool', 'release_tools', 'bin'),
+  );
+  await directory.create(recursive: true);
+  for (final entry in {'deb': 'dpkg-deb', 'rpm': 'rpmbuild'}.entries) {
+    if (!targets.split(',').contains(entry.key)) continue;
+    final result = await Process.run('which', [entry.value]);
+    final executable = (result.stdout as String).trim();
+    if (result.exitCode != 0 ||
+        !p.isAbsolute(executable) ||
+        p.isWithin(directory.path, executable)) {
+      throw StateError('Cannot resolve native ${entry.value}');
+    }
+    final wrapper = File(p.join(directory.path, entry.value));
+    String quote(String value) => "'${value.replaceAll("'", "'\\''")}'";
+    await wrapper.writeAsString(
+      '#!/bin/sh\nexec ${quote(Platform.resolvedExecutable)} '
+      '${quote(p.join(rootDir, 'tool', 'linux_package.dart'))} '
+      '${quote(executable)} "\$@"\n',
+    );
+    final chmod = await Process.run('chmod', ['+x', wrapper.path]);
+    if (chmod.exitCode != 0) throw StateError('Cannot enable ${wrapper.path}');
+  }
+}
+
 String _detectArch() {
   if (Platform.isWindows) {
     final pa = Platform.environment['PROCESSOR_ARCHITECTURE'] ?? 'AMD64';
@@ -251,26 +305,37 @@ String _detectArch() {
   return machine;
 }
 
-Future<bool> _hasCommand(String cmd) async {
-  final which = Platform.isWindows ? 'where' : 'command';
-  final args = Platform.isWindows ? [cmd] : ['-v', cmd];
-  final result = await Process.run(which, args);
+Future<bool> hasCommand(String cmd) async {
+  if (Platform.isWindows) {
+    final result = await Process.run('where', [cmd]);
+    return result.exitCode == 0;
+  }
+  final result = await Process.run('/bin/sh', [
+    '-c',
+    'command -v -- "\$1" >/dev/null 2>&1',
+    'sh',
+    cmd,
+  ]);
   return result.exitCode == 0;
 }
 
-Future<int> _ensureDependencies(String platform, String rootDir) async {
+Future<int> _ensureDependencies(
+  String platform,
+  String rootDir,
+  String targets,
+) async {
   switch (platform) {
     case 'macos':
       return _ensureMacosDependencies();
     case 'linux':
-      return _ensureLinuxDependencies(rootDir);
+      return _ensureLinuxDependencies(rootDir, targets);
     default:
       return 0;
   }
 }
 
 Future<int> _ensureMacosDependencies() async {
-  if (await _hasCommand('appdmg')) {
+  if (await hasCommand('appdmg')) {
     stdout.writeln('appdmg already installed, skipping.');
     return 0;
   }
@@ -282,16 +347,22 @@ Future<int> _ensureMacosDependencies() async {
   return result.exitCode;
 }
 
-Future<int> _ensureLinuxDependencies(String rootDir) async {
-  const pkgGroups = <List<String>>[
+List<List<String>> linuxDependencyPackageGroups(String targets) {
+  final selectedTargets = targets.split(',').toSet();
+  return [
     ['ninja-build', 'libgtk-3-dev'],
     ['libayatana-appindicator3-dev'],
     ['libkeybinder-3.0-dev'],
     ['libsecret-1-dev'],
     ['locate'],
-    ['rpm', 'patchelf'],
-    ['libfuse2'],
+    if (selectedTargets.contains('rpm')) ['rpm', 'patchelf'],
+    if (selectedTargets.contains('appimage')) ['libfuse2'],
   ];
+}
+
+Future<int> _ensureLinuxDependencies(String rootDir, String targets) async {
+  final selectedTargets = targets.split(',').toSet();
+  final pkgGroups = linuxDependencyPackageGroups(targets);
 
   final missingGroups = <List<String>>[];
   for (final group in pkgGroups) {
@@ -331,7 +402,9 @@ Future<int> _ensureLinuxDependencies(String rootDir) async {
     }
   }
 
-  if (await _hasCommand('appimagetool')) {
+  if (!selectedTargets.contains('appimage')) return 0;
+
+  if (await hasCommand('appimagetool')) {
     stdout.writeln('appimagetool already installed, skipping.');
     return 0;
   }
@@ -342,28 +415,61 @@ Future<int> _ensureLinuxDependencies(String rootDir) async {
     'bin',
     'appimagetool',
   );
+  final stagedAppimagetool = '$appimagetool.download';
   await File(appimagetool).parent.create(recursive: true);
+  final stagedFile = File(stagedAppimagetool);
+  if (await stagedFile.exists()) await stagedFile.delete();
   stdout.writeln('Downloading appimagetool...');
-  final downloadName =
-      'appimagetool-${appImageToolArch(_detectArch())}.AppImage';
+  final hostArch = _detectArch();
+  final downloadName = 'appimagetool-${appImageToolArch(hostArch)}.AppImage';
   final dlResult = await Process.run('wget', [
     '-O',
-    appimagetool,
-    'https://github.com/AppImage/AppImageKit/releases/download/continuous/$downloadName',
+    stagedAppimagetool,
+    appImageToolUrl(hostArch),
   ]);
   if (dlResult.exitCode != 0) {
+    if (await stagedFile.exists()) await stagedFile.delete();
     stderr.write(dlResult.stderr);
     return dlResult.exitCode;
   }
-  final chmodResult = await Process.run('chmod', ['+x', appimagetool]);
-  if (chmodResult.exitCode != 0) {
-    stderr.write(chmodResult.stderr);
+  final actualSha256 = await fileSha256(stagedFile);
+  final expectedSha256 = appImageToolSha256(hostArch);
+  if (actualSha256 != expectedSha256) {
+    await stagedFile.delete();
+    stderr.writeln(
+      '$downloadName SHA256 mismatch: expected $expectedSha256, '
+      'got $actualSha256',
+    );
+    return 1;
   }
-  return chmodResult.exitCode;
+  final chmodResult = await Process.run('chmod', ['+x', stagedAppimagetool]);
+  if (chmodResult.exitCode != 0) {
+    await stagedFile.delete();
+    stderr.write(chmodResult.stderr);
+    return chmodResult.exitCode;
+  }
+  final targetFile = File(appimagetool);
+  if (await targetFile.exists()) await targetFile.delete();
+  await stagedFile.rename(appimagetool);
+  return 0;
 }
 
 String appImageToolArch(String arch) {
   return arch == 'arm64' ? 'aarch64' : 'x86_64';
+}
+
+String appImageToolUrl(String arch) {
+  final toolArch = appImageToolArch(arch);
+  return 'https://github.com/AppImage/AppImageKit/releases/download/'
+      '$_appImageToolRelease/appimagetool-$toolArch.AppImage';
+}
+
+String appImageToolSha256(String arch) {
+  return _appImageToolSha256[appImageToolArch(arch)]!;
+}
+
+Future<String> fileSha256(File file) async {
+  return sha256.bind(file.openRead()).first.then((digest) => '$digest');
 }
 
 /// Ubuntu 24.04 ships libfuse2 under its time64 name, which `dpkg -s libfuse2` cannot see.

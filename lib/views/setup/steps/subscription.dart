@@ -9,6 +9,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../region.dart';
 import '../widgets.dart';
 
 class SetupSubscriptionStep extends ConsumerStatefulWidget {
@@ -81,6 +82,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
   }
 
   Future<void> _handleAdded(Profile profile) async {
+    if (!mounted) return;
     final replaceProfileId = _replaceProfileId;
     if (replaceProfileId != null && replaceProfileId != profile.id) {
       await ref
@@ -122,6 +124,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
+          const SetupRegionSettings(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(

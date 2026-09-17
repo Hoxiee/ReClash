@@ -248,6 +248,12 @@ func healthSelectorGroup(
 	return adapter.NewProxy(group)
 }
 
+func TestCoreMemoryLimitIsExplicitAndPositive(t *testing.T) {
+	if coreMemoryLimit <= 0 {
+		t.Fatalf("coreMemoryLimit = %d, want a positive soft limit", coreMemoryLimit)
+	}
+}
+
 func TestRunHealthCheckRefreshCoversAndDeduplicatesProviderGraph(t *testing.T) {
 	topLevel := &countingHealthProvider{
 		fakeProxyProvider: fakeProxyProvider{name: "top", vehicle: cp.HTTP},
@@ -308,6 +314,8 @@ func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
 	previousEvery := healthCheckCadenceEvery
 	previousRefresh := refreshHealthChecks
 	previousTunUp := tunUp.Load()
+	previousScreenOff := isScreenOff.Load()
+	previousSuspended := isSuspended.Load()
 	healthCheckCadenceEvery = 10 * time.Millisecond
 	var refreshes atomic.Int32
 	refreshHealthChecks = func() { refreshes.Add(1) }
@@ -317,8 +325,12 @@ func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
 		healthCheckCadenceEvery = previousEvery
 		refreshHealthChecks = previousRefresh
 		tunUp.Store(previousTunUp)
+		isScreenOff.Store(previousScreenOff)
+		isSuspended.Store(previousSuspended)
 	})
 
+	isScreenOff.Store(false)
+	isSuspended.Store(false)
 	startHealthCheckCadence()
 	startHealthCheckCadence()
 	time.Sleep(30 * time.Millisecond)
@@ -335,6 +347,20 @@ func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
 		t.Fatal("cadence did not refresh with TUN up")
 	}
 
+	isScreenOff.Store(true)
+	screenOffAt := refreshes.Load()
+	time.Sleep(30 * time.Millisecond)
+	if got := refreshes.Load(); got != screenOffAt {
+		t.Errorf("refreshes with screen off = %d, want %d", got, screenOffAt)
+	}
+	isScreenOff.Store(false)
+	isSuspended.Store(true)
+	suspendedAt := refreshes.Load()
+	time.Sleep(30 * time.Millisecond)
+	if got := refreshes.Load(); got != suspendedAt {
+		t.Errorf("refreshes while suspended = %d, want %d", got, suspendedAt)
+	}
+
 	stopHealthCheckCadence()
 	stoppedAt := refreshes.Load()
 	time.Sleep(30 * time.Millisecond)
@@ -347,6 +373,93 @@ func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
 // had no network at all left every proxy marked dead and every delay reading
 // Timeout, and a lazy provider skips its next tick because nothing touched it
 // in the meantime.
+
+func TestHandleScreenOnRefreshesHealthChecksOnce(t *testing.T) {
+	var refreshes atomic.Int32
+	previousRefresh := refreshHealthChecks
+	previousTunUp := tunUp.Load()
+	previousScreenOff := isScreenOff.Load()
+	previousSuspended := isSuspended.Load()
+	refreshHealthChecks = func() { refreshes.Add(1) }
+	t.Cleanup(func() {
+		refreshHealthChecks = previousRefresh
+		tunUp.Store(previousTunUp)
+		isScreenOff.Store(previousScreenOff)
+		isSuspended.Store(previousSuspended)
+		provider.SetScreenOff(previousScreenOff)
+	})
+
+	tunUp.Store(true)
+	isSuspended.Store(false)
+	isScreenOff.Store(false)
+	handleScreenOff(true)
+	if got := refreshes.Load(); got != 0 {
+		t.Fatalf("refreshes on screen off = %d, want 0", got)
+	}
+	handleScreenOff(false)
+	if got := refreshes.Load(); got != 1 {
+		t.Fatalf("refreshes on screen on = %d, want 1", got)
+	}
+	handleScreenOff(false)
+	if got := refreshes.Load(); got != 1 {
+		t.Errorf("refreshes after duplicate screen on = %d, want 1", got)
+	}
+}
+
+func TestHealthCheckCatchUpWaitsForScreenAndSuspendRecovery(t *testing.T) {
+	previousRefresh := refreshHealthChecks
+	previousTunUp := tunUp.Load()
+	previousRunning := isRunning.Load()
+	previousScreenOff := isScreenOff.Load()
+	previousSuspended := isSuspended.Load()
+	t.Cleanup(func() {
+		refreshHealthChecks = previousRefresh
+		tunUp.Store(previousTunUp)
+		isRunning.Store(previousRunning)
+		isScreenOff.Store(previousScreenOff)
+		isSuspended.Store(previousSuspended)
+		provider.SetScreenOff(previousScreenOff)
+		if previousSuspended {
+			tunnel.OnSuspend()
+		} else {
+			tunnel.OnRunning()
+		}
+	})
+
+	for _, resumeFirst := range []bool{false, true} {
+		name := "screen-on-first"
+		if resumeFirst {
+			name = "resume-first"
+		}
+		t.Run(name, func(t *testing.T) {
+			var refreshes atomic.Int32
+			refreshHealthChecks = func() { refreshes.Add(1) }
+			tunUp.Store(true)
+			isRunning.Store(true)
+			isScreenOff.Store(false)
+			isSuspended.Store(false)
+			handleScreenOff(true)
+			handleSuspend(true)
+
+			if resumeFirst {
+				handleSuspend(false)
+				handleScreenOff(false)
+			} else {
+				handleScreenOff(false)
+				handleSuspend(false)
+			}
+			if got := refreshes.Load(); got != 1 {
+				t.Fatalf("refreshes = %d, want one catch-up", got)
+			}
+			handleScreenOff(false)
+			handleSuspend(false)
+			if got := refreshes.Load(); got != 1 {
+				t.Errorf("refreshes after duplicate wake signals = %d, want 1", got)
+			}
+		})
+	}
+}
+
 func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	var refreshes atomic.Int32
 

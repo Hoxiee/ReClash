@@ -4,6 +4,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/state.dart';
@@ -109,6 +110,38 @@ void main() {
     registerFallbackValue(const DoctorCancelParams(examId: 'exam'));
     registerFallbackValue(const DoctorHealParams(examId: 'exam', revision: 1));
   });
+
+  for (final settings in [
+    const MilestoneProps(),
+    const MilestoneProps(unlocked: {'auscultation'}),
+    const MilestoneProps(findingsEnabled: false),
+  ]) {
+    testWidgets('evidence timings are independent of findings: $settings', (
+      tester,
+    ) async {
+      await _pumpDoctor(
+        tester,
+        _MockCoreHandler(),
+        _snapshot(
+          evidence: const [
+            DoctorEvidence(layer: DoctorLayer.dns, durationBucketMs: 75),
+            DoctorEvidence(layer: DoctorLayer.route),
+          ],
+        ),
+        overrides: [
+          milestoneSettingProvider.overrideWithBuild((_, _) => settings),
+        ],
+      );
+
+      await tester.tap(find.text('Technical details'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(find.textContaining('75 ms'), 200);
+
+      expect(find.textContaining('75 ms'), findsOneWidget);
+      expect(find.textContaining('0 ms'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('shows unsupported Core without diagnostic details', (
     tester,

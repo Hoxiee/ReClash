@@ -425,6 +425,58 @@ abstract class _$CurrentProfileId extends $Notifier<int?> {
   }
 }
 
+@ProviderFor(MilestoneSetting)
+final milestoneSettingProvider = MilestoneSettingProvider._();
+
+final class MilestoneSettingProvider
+    extends $NotifierProvider<MilestoneSetting, MilestoneProps> {
+  MilestoneSettingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'milestoneSettingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$milestoneSettingHash();
+
+  @$internal
+  @override
+  MilestoneSetting create() => MilestoneSetting();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MilestoneProps value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MilestoneProps>(value),
+    );
+  }
+}
+
+String _$milestoneSettingHash() => r'ed7f0c20809c7d7aa1d4793ed3c0104833366148';
+
+abstract class _$MilestoneSetting extends $Notifier<MilestoneProps> {
+  MilestoneProps build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<MilestoneProps, MilestoneProps>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<MilestoneProps, MilestoneProps>,
+              MilestoneProps,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(DavSetting)
 final davSettingProvider = DavSettingProvider._();
 
@@ -772,4 +824,4 @@ final class _ConfigProvider extends $FunctionalProvider<Config, Config, Config>
   }
 }
 
-String _$_configHash() => r'5819c9874ed14a5c3dd0648642b5df1c7df15eab';
+String _$_configHash() => r'830205b5bd12c80e0a93c3bed8da29465834c19e';

@@ -7,6 +7,8 @@ import 'desktop/model.dart';
 import 'method.dart';
 
 mixin CoreInterface {
+  CoreProcessOwner? get processOwner => null;
+
   Future<CoreLifecycleResult> start();
 
   Future<CoreLifecycleResult> restart();
@@ -14,6 +16,10 @@ mixin CoreInterface {
   Future<CoreLifecycleResult> stop();
 
   Future<CoreLifecycleResult> close();
+
+  void setRecoveryHandler(
+    Future<void> Function(bool Function() isCurrent)? handler,
+  ) {}
 
   Future<bool> init(InitParams params);
 
@@ -26,6 +32,12 @@ mixin CoreInterface {
   Future<String> validateConfig(String path);
 
   Future<ConfigInspection?> inspectConfig(String path);
+
+  Future<Map<String, dynamic>> fetchSubscription({
+    required String url,
+    required Map<String, String> headers,
+    required int timeoutMillis,
+  });
 
   Future<Map<String, dynamic>> getConfig(String path);
 
@@ -69,6 +81,10 @@ mixin CoreInterface {
   Future<RcxReport?> smartRoutingReport();
 
   Future<bool> smartRoutingDeepScan();
+
+  Future<OdometerSnapshot?> odometerReport();
+
+  Future<bool> signalOdometer(OdometerSignal signal);
 
   Future<DoctorSnapshot> doctorSnapshot();
 
@@ -193,6 +209,30 @@ abstract class CoreHandlerInterface with CoreInterface {
       arguments: path,
     );
     return data == null ? null : ConfigInspection.fromJson(data);
+  }
+
+  @override
+  Future<Map<String, dynamic>> fetchSubscription({
+    required String url,
+    required Map<String, String> headers,
+    required int timeoutMillis,
+  }) async {
+    final result = await invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.fetchSubscription,
+      arguments: {
+        'url': url,
+        'headers': headers,
+        'timeoutMillis': timeoutMillis,
+      },
+      timeout: Duration(milliseconds: timeoutMillis + 1000),
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'no_response',
+        message: 'Core did not answer subscription download',
+      );
+    }
+    return result;
   }
 
   @override
@@ -333,6 +373,23 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<bool> smartRoutingDeepScan() async {
     return await _invokeMethod<bool>(method: CoreMethod.rcxDeepScan) ?? false;
+  }
+
+  @override
+  Future<OdometerSnapshot?> odometerReport() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.odometerReport,
+    );
+    return data == null ? null : OdometerSnapshot.fromJson(data);
+  }
+
+  @override
+  Future<bool> signalOdometer(OdometerSignal signal) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.odometerSignal,
+          arguments: signal.toJson(),
+        ) ??
+        false;
   }
 
   @override

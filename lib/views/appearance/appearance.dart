@@ -23,7 +23,7 @@ class AppearanceView extends StatelessWidget {
               labels: [
                 appLocalizations.appearanceTheme,
                 appLocalizations.appearanceLayout,
-                appLocalizations.appearanceMotion,
+                appLocalizations.other,
               ],
             ),
             const Expanded(

@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/desktop/helper_client.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
@@ -93,6 +95,9 @@ void main() {
 
   late Directory root;
   late _FakeProcesses processes;
+  final originalHasSystemd = system.hasSystemd;
+  final originalReadiness = system.helperReadiness;
+  final originalStage = Linux().stageHelperBundle;
 
   setUpAll(() {
     root = Directory.systemTemp.createTempSync('system_test');
@@ -112,36 +117,17 @@ void main() {
     system.runProcess = processes.run;
     MacOS().runProcess = processes.run;
     Linux().runProcess = processes.run;
+    system.hasSystemd = () => false;
+    system.helperReadiness = () async => HelperReadiness.notReady;
   });
 
   tearDown(() {
     system.runProcess = Process.run;
     MacOS().runProcess = Process.run;
     Linux().runProcess = Process.run;
-  });
-
-  group('statArguments', () {
-    test('selects the BSD format on macOS and the octal one elsewhere', () {
-      expect(System.statArguments('/a/core', isMacOS: true), [
-        '-f',
-        '%Su:%Sg %Sp',
-        '/a/core',
-      ]);
-      expect(System.statArguments('/a/core', isMacOS: false), [
-        '-c',
-        '%U %a',
-        '/a/core',
-      ]);
-    });
-
-    test('passes a path containing spaces through untouched', () {
-      const path = '/Users/a b/ReClash.app/Contents/MacOS/ReClashCore';
-      for (final isMacOS in [true, false]) {
-        final arguments = System.statArguments(path, isMacOS: isMacOS);
-        expect(arguments.last, path);
-        expect(arguments.last, isNot(contains(r'\')));
-      }
-    });
+    system.hasSystemd = originalHasSystemd;
+    system.helperReadiness = originalReadiness;
+    Linux().stageHelperBundle = originalStage;
   });
 
   group('aclArguments', () {
@@ -212,72 +198,6 @@ void main() {
     });
   });
 
-  group('isPrivilegedStatOutput', () {
-    test('accepts a root-owned setuid binary', () {
-      expect(
-        System.isPrivilegedStatOutput(
-          'root:admin -rwsr-sr-x\n',
-          ownerPrefix: 'root:admin',
-        ),
-        isTrue,
-      );
-    });
-
-    test('rejects a root-owned binary without the setuid bit', () {
-      expect(
-        System.isPrivilegedStatOutput(
-          'root:admin -rwxr-xr-x',
-          ownerPrefix: 'root:admin',
-        ),
-        isFalse,
-      );
-    });
-
-    test('rejects a setuid binary owned by somebody else', () {
-      expect(
-        System.isPrivilegedStatOutput(
-          'alice:staff -rwsr-sr-x',
-          ownerPrefix: 'root:admin',
-        ),
-        isFalse,
-      );
-    });
-
-    test('rejects the empty output stat leaves for a missing file', () {
-      expect(
-        System.isPrivilegedStatOutput('', ownerPrefix: 'root:admin'),
-        isFalse,
-      );
-    });
-  });
-
-  group('isPrivilegedLinuxStatOutput', () {
-    test(
-      'accepts root-owned setuid modes, including ones without a write bit',
-      () {
-        expect(System.isPrivilegedLinuxStatOutput('root 4755'), isTrue);
-        expect(System.isPrivilegedLinuxStatOutput('root 6555\n'), isTrue);
-        expect(System.isPrivilegedLinuxStatOutput('root 4555'), isTrue);
-      },
-    );
-
-    test('rejects a root-owned binary without the setuid bit', () {
-      expect(System.isPrivilegedLinuxStatOutput('root 755'), isFalse);
-      expect(System.isPrivilegedLinuxStatOutput('root 2755'), isFalse);
-    });
-
-    test('rejects a setuid binary owned by somebody else', () {
-      expect(System.isPrivilegedLinuxStatOutput('alice 4755'), isFalse);
-    });
-
-    test('rejects malformed stat output', () {
-      expect(System.isPrivilegedLinuxStatOutput(''), isFalse);
-      expect(System.isPrivilegedLinuxStatOutput('root'), isFalse);
-      expect(System.isPrivilegedLinuxStatOutput('root 4755 extra'), isFalse);
-      expect(System.isPrivilegedLinuxStatOutput('root nosuid'), isFalse);
-    });
-  });
-
   test(
     'Windows Helper stays disabled until privileged IPC is authenticated',
     () {
@@ -285,53 +205,269 @@ void main() {
     },
   );
 
-  group(
-    'checkIsAdmin',
-    () {
-      test('stats the core path verbatim', () async {
-        processes.stub(
-          'stat',
-          system.isLinux ? 'root 4755' : 'root:admin -rwsr-sr-x',
-        );
-        expect(await system.checkIsAdmin(), isTrue);
-        expect(processes.argumentsFor('stat').last, appPath.corePath);
-      });
+  group('Unix Core authorization', () {
+    test('never recognizes a setuid binary as supported', () async {
+      expect(await system.checkIsAdmin(), isFalse);
+      expect(processes.runs, isEmpty);
+    });
 
-      test('reports a core that is not setuid root', () async {
-        processes.stub(
-          'stat',
-          system.isLinux ? 'alice 755' : 'alice:staff -rwxr-xr-x',
-        );
+    test('never invokes an elevation command', () async {
+      expect(await system.authorizeCore(), AuthorizeCode.error);
+      expect(processes.runs, isEmpty);
+    });
+  }, skip: system.isMacOS || system.isLinux ? false : 'Unix only');
 
-        expect(await system.checkIsAdmin(), isFalse);
-      });
+  group('Linux Helper availability', () {
+    test('requires systemd, including for AppImage launches', () {
+      expect(system.hasHelperService, isFalse);
+      system.hasSystemd = () => true;
+      expect(system.hasHelperService, isTrue);
+    });
 
-      test('reports a core stat could not find', () async {
-        processes.stub('stat', '');
+    test('authorization requires a verified running Helper', () async {
+      system.hasSystemd = () => true;
+      expect(await system.checkIsAdmin(), isFalse);
+      system.helperReadiness = () async => HelperReadiness.ready;
+      expect(await system.checkIsAdmin(), isTrue);
+      expect(processes.runs, isEmpty);
+    });
+  }, skip: !Platform.isLinux);
 
-        expect(await system.checkIsAdmin(), isFalse);
-      });
-    },
-    skip: system.hasHelperService
-        ? 'the Helper probe replaces stat here'
-        : false,
-  );
+  group('Linux Helper installation', () {
+    late Directory stage;
+    late bool staged;
+    late bool waited;
+    final originalWait = Linux().waitForHelperService;
 
-  group('Linux installService', () {
-    test('asks pkexec to install the bundled Helper', () async {
+    setUp(() async {
+      stage = await root.createTemp('helper-stage-');
+      staged = false;
+      waited = false;
+      system.hasSystemd = () => true;
+      Linux().stageHelperBundle = () async {
+        staged = true;
+        return stage;
+      };
+      Linux().waitForHelperService = () async {
+        waited = true;
+        return true;
+      };
+    });
+
+    tearDown(() {
+      Linux().waitForHelperService = originalWait;
+      if (staged) {
+        expect(stage.existsSync(), isFalse);
+      } else {
+        stage.deleteSync(recursive: true);
+      }
+    });
+
+    test('asks pkexec to install without its internal agent', () async {
       expect(await Linux().installService(), isTrue);
-      expect(processes.argumentsFor('pkexec'), [appPath.helperPath, 'install']);
+      final helperPath = '${stage.path}/$appHelperService';
+      expect(processes.argumentsFor('chmod'), ['700', helperPath]);
+      expect(processes.argumentsFor('pkexec'), [
+        '--disable-internal-agent',
+        helperPath,
+        'install',
+      ]);
+    });
+
+    test('does not request elevation when chmod fails', () async {
+      processes.stub('chmod', '', exitCode: 1);
+      expect(
+        await Linux().installWithResult(),
+        LinuxHelperInstallResult.failed,
+      );
+      expect(processes.ran('pkexec'), isFalse);
+    });
+
+    test('does not report a chmod launch failure as missing pkexec', () async {
+      Linux().runProcess = (executable, arguments) async {
+        throw ProcessException(executable, arguments, 'Not found', 2);
+      };
+      expect(
+        await Linux().installWithResult(),
+        LinuxHelperInstallResult.failed,
+      );
     });
 
     test('reports an installation the user dismissed', () async {
+      processes.stub('pkexec', '', exitCode: 126);
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.cancelled,
+      );
+      expect(waited, isFalse);
+    });
+
+    test('keeps cancellation false through the legacy bool seam', () async {
       processes.stub('pkexec', '', exitCode: 126);
       expect(await Linux().installService(), isFalse);
     });
 
     test('reports a host with no pkexec at all', () async {
-      processes.stubThrow('pkexec');
+      Linux().runProcess = (executable, arguments) async {
+        if (executable == 'pkexec') {
+          throw ProcessException(executable, arguments, 'Not found', 2);
+        }
+        return processes.run(executable, arguments);
+      };
+      expect(
+        await Linux().installWithResult(),
+        LinuxHelperInstallResult.pkexecUnavailable,
+      );
+    });
 
-      expect(await Linux().installService(), isFalse);
+    test('keeps other pkexec launch errors as failures', () async {
+      Linux().runProcess = (executable, arguments) async {
+        if (executable == 'pkexec') {
+          throw ProcessException(
+            executable,
+            arguments,
+            'Permission denied',
+            13,
+          );
+        }
+        return processes.run(executable, arguments);
+      };
+      expect(
+        await Linux().installWithResult(),
+        LinuxHelperInstallResult.failed,
+      );
+    });
+
+    for (final diagnostic in [
+      'No authentication agent found.',
+      'No authentication agent available',
+      'No authentication agent is available',
+    ]) {
+      test('recognizes the agent diagnostic: $diagnostic', () async {
+        Linux().runProcess = (executable, arguments) async {
+          if (executable == 'pkexec') {
+            return ProcessResult(0, 127, '', diagnostic);
+          }
+          return processes.run(executable, arguments);
+        };
+        expect(
+          await Linux().installWithResult(),
+          LinuxHelperInstallResult.agentUnavailable,
+        );
+      });
+    }
+
+    for (final diagnostic in [
+      '',
+      'Not authorized',
+      'Error executing command',
+      'No session for cookie',
+    ]) {
+      test('keeps ambiguous exit 127 as failed: $diagnostic', () async {
+        Linux().runProcess = (executable, arguments) async {
+          if (executable == 'pkexec') {
+            return ProcessResult(0, 127, '', diagnostic);
+          }
+          return processes.run(executable, arguments);
+        };
+        expect(
+          await Linux().installWithResult(),
+          LinuxHelperInstallResult.failed,
+        );
+      });
+    }
+
+    test('reports a failed installer without waiting', () async {
+      processes.stub('pkexec', '', exitCode: 1);
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.failed,
+      );
+      expect(waited, isFalse);
+    });
+
+    test('checks systemd before staging or requesting elevation', () async {
+      system.hasSystemd = () => false;
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.systemdUnavailable,
+      );
+      expect(
+        await Linux().installWithResult(),
+        LinuxHelperInstallResult.systemdUnavailable,
+      );
+      expect(processes.runs, isEmpty);
+      expect(staged, isFalse);
+      expect(waited, isFalse);
+    });
+
+    test('does not reinstall an already ready Helper', () async {
+      system.helperReadiness = () async => HelperReadiness.ready;
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.ready,
+      );
+      expect(await Linux().registerService(), AuthorizeCode.none);
+      expect(processes.runs, isEmpty);
+      expect(staged, isFalse);
+      expect(waited, isFalse);
+    });
+
+    test('rejects an invalid manifest before installation', () async {
+      system.helperReadiness = () async => HelperReadiness.manifestMissing;
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.bundleInvalid,
+      );
+      expect(processes.runs, isEmpty);
+      expect(staged, isFalse);
+      expect(waited, isFalse);
+    });
+
+    test('rejects an invalid staged bundle without elevation', () async {
+      Linux().stageHelperBundle = () async {
+        throw const FormatException('Linux Helper bundle hash mismatch');
+      };
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.bundleInvalid,
+      );
+      expect(processes.runs, isEmpty);
+      expect(waited, isFalse);
+    });
+
+    test('requires readiness after successful installation', () async {
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.installed,
+      );
+      expect(waited, isTrue);
+    });
+
+    test(
+      'keeps successful installation compatible with AuthorizeCode',
+      () async {
+        expect(await Linux().registerService(), AuthorizeCode.success);
+        expect(waited, isTrue);
+      },
+    );
+
+    test('reports a Helper that never becomes ready', () async {
+      Linux().waitForHelperService = () async => false;
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.notReady,
+      );
+    });
+
+    test('reports unexpected readiness failures without elevation', () async {
+      system.helperReadiness = () async => throw StateError('Probe failed');
+      expect(
+        await Linux().registerWithResult(),
+        LinuxHelperInstallResult.failed,
+      );
+      expect(processes.runs, isEmpty);
+      expect(staged, isFalse);
     });
   });
 

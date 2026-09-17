@@ -67,6 +67,7 @@ func (e *rcxEngine) noteMarkerFailure(markerID, node string, now time.Time) {
 		e.snapshot.Quarantines[markerID] = quarantine
 		e.snapshot.Metrics.MarkerIncidents++
 		e.snapshot.Dirty = true
+		e.ledger.RollbackMarkerFailures(markerID, now)
 		e.recomputeMarkerRole(markerID, now)
 		return
 	}
@@ -98,10 +99,8 @@ func (e *rcxEngine) recomputeMarkerRole(markerID string, now time.Time) {
 	}
 	ids := e.markerIDsForConfig(role, now, "")
 	for envKey, nodes := range e.snapshot.Envs {
-		for key, state := range nodes {
-			if _, exists := state.Markers[markerID]; exists {
-				e.ledger.RecomputeRole(key, envKey, role, ids, now)
-			}
+		for key := range nodes {
+			e.ledger.RecomputeRole(key, envKey, role, ids, now)
 		}
 	}
 }

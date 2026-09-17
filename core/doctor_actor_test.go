@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -282,6 +283,8 @@ func TestDoctorActorBoundedHistoryDoesNotReportQueueOverflow(t *testing.T) {
 
 func TestDoctorActorGenerationChangeInvalidatesTerminalVerdict(t *testing.T) {
 	actor := newDoctorActor(&fakeDoctorRuntime{}, nil)
+	actor.snapshot.ExamID = "exam"
+	actor.snapshot.FreshUntil = actor.now().Add(doctorEvidenceFreshFor).UnixMilli()
 	actor.snapshot.State = doctorComplete
 	actor.snapshot.Health = doctorBroken
 	actor.snapshot.Confidence = doctorConfirmed
@@ -299,27 +302,72 @@ func TestDoctorActorGenerationChangeInvalidatesTerminalVerdict(t *testing.T) {
 	}
 }
 
-func TestDoctorActorNeutralPassiveEvidenceClearsTerminalVerdict(t *testing.T) {
-	actor := newDoctorActor(&fakeDoctorRuntime{}, nil)
-	actor.snapshot.ExamID = "exam"
-	actor.snapshot.Mode = doctorStandard
-	actor.snapshot.State = doctorComplete
-	actor.snapshot.Health = doctorBroken
-	actor.snapshot.Confidence = doctorConfirmed
-	actor.snapshot.CauseCode = "dialTimeout"
-	actor.snapshot.Layer = doctorLayerDial
-	actor.snapshot.FreshUntil = actor.now().Add(time.Minute).UnixMilli()
-	actor.changed()
+func TestDoctorActorPassiveEvidencePreservesFreshExam(t *testing.T) {
+	for name, facts := range map[string][]doctorEvidence{
+		"healthy":      {{Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded, Confidence: doctorConfirmed}},
+		"broken":       {{Layer: doctorLayerDial, Outcome: doctorOutcomeFailed, Confidence: doctorConfirmed, Code: "dialTimeout"}},
+		"degraded":     {{Layer: doctorLayerDNS, Outcome: doctorOutcomeFailed, Confidence: doctorProbable, Code: "coreResolverStale"}},
+		"inconclusive": nil,
+	} {
+		t.Run(name, func(t *testing.T) {
+			now := time.Unix(100, 0)
+			actor := &doctorActor{
+				now:      func() time.Time { return now },
+				commands: make(chan doctorCommand, 1),
+				snapshot: doctorSnapshot{
+					ExamID: "exam", Mode: doctorStandard, State: doctorExamining,
+					PathKind: doctorPathLocalProxy, CaptureState: doctorCaptureNotApplicable,
+					StartedAt: now.Add(-time.Second).UnixMilli(),
+					Progress:  doctorProgress{Total: 2},
+					Evidence:  facts,
+				},
+			}
+			actor.applyVerdict(true)
+			t.Cleanup(actor.stopFreshnessTimer)
+			actor.snapshot.Incidents = []doctorIncident{{ExamID: "exam", State: actor.snapshot.State}}
+			actor.changed()
+			before := actor.Snapshot()
+			for _, fact := range []doctorEvidence{
+				{Kind: doctorEvidenceIngress, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen, Inbound: "tun"},
+				{Kind: doctorEvidenceOuterDial, Layer: doctorLayerDial, Outcome: doctorOutcomeFailed},
+				{Kind: doctorEvidenceMarker, Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded, Confidence: doctorConfirmed},
+			} {
+				now = now.Add(time.Second)
+				actor.handlePassive(fact)
+				actor.flushPassive()
+				if current := actor.Snapshot(); !reflect.DeepEqual(current, before) {
+					t.Fatalf("passive fact %+v replaced exam: before = %+v, current = %+v", fact, before, current)
+				}
+			}
+		})
+	}
+}
 
-	actor.handlePassive(doctorEvidence{
-		Kind: doctorEvidenceIngress, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen,
-		Confidence: doctorConfirmed, Inbound: "tun", at: actor.now(),
-	})
-	actor.flushPassive()
-	snapshot := actor.Snapshot()
-	if snapshot.State != doctorObserving || snapshot.Health != doctorUnknown || snapshot.Confidence != doctorInsufficient ||
-		snapshot.CauseCode != "" || snapshot.Layer != "" || snapshot.ExamID != "" || snapshot.FreshUntil != 0 {
-		t.Fatalf("snapshot = %+v", snapshot)
+func TestDoctorActorPassiveEvidenceResumesAfterExamExpiry(t *testing.T) {
+	for _, expireFirst := range []bool{false, true} {
+		t.Run(map[bool]string{false: "beforeTimer", true: "afterTimer"}[expireFirst], func(t *testing.T) {
+			now := time.Unix(100, 0)
+			actor := &doctorActor{
+				now:      func() time.Time { return now },
+				commands: make(chan doctorCommand, 1),
+				snapshot: doctorSnapshot{
+					ExamID: "exam", State: doctorComplete, Health: doctorBroken,
+					CauseCode: "dialTimeout", FreshUntil: now.Add(time.Second).UnixMilli(),
+				},
+			}
+			actor.changed()
+			now = now.Add(time.Second)
+			if expireFirst {
+				actor.expireFreshness(0)
+			}
+			actor.handlePassive(doctorEvidence{Kind: doctorEvidenceIngress, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen})
+			actor.flushPassive()
+			snapshot := actor.Snapshot()
+			if snapshot.State != doctorObserving || snapshot.ExamID != "" || snapshot.Health != doctorUnknown ||
+				snapshot.FreshUntil != 0 || snapshot.CauseCode != "" || len(snapshot.Evidence) != 1 {
+				t.Fatalf("snapshot = %+v", snapshot)
+			}
+		})
 	}
 }
 

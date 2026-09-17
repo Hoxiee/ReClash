@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "VPN-den daşarda gaýtadan synanyşmalymy?",
+  "subscriptionDirectRetryMessage": "Häzirki birikme arkaly abunalyga ýetip bolmady. VPN-i öçürmän, diňe şu ýüklemäni göni gaýtalamalymy? Panel toruňyzyň IP salgysyny görer. Beýleki traffigiň ugry üýtgemez.",
+  "subscriptionDirectRetryConfirm": "Göni gaýtadan synanyş",
+  "appRegion": "Programma sebiti",
+  "appRegionDesc": "Tor sebitiňizi saýlaň. Russiýa saýlananda HWID açylýar; ony aşakda öçürip bilersiňiz. Akylly ugrukdyrma aýratyn açylýar.",
+  "appRegionOther": "Başga",
+  "setupRegionSettings": "Sebitiň çalt sazlamalary",
+  "setupRegionSettingsDesc": "Geografik maglumatlary, ugrukdyrma presetlerini we programmalaryň girişini barlaň. Hiç zat awtomatik goşulmaýar.",
+  "lanProfileImportPhoneHint": "Abunalygy telewizora import etmek üçin onuň salgysyny goýuň.",
+  "lanProfileImportSend": "Telewizora import et",
+  "lanProfileImportPhoneSuccess": "Abunalyk import edildi. Telewizora gaýdyp, bu sahypany ýapyp bilersiňiz.",
+  "lanProfileImportPhoneFailed": "Abunalygy import edip bolmady. Salgyny barlap, gaýtadan synanyşyň.",
+  "lanProfileImportPhoneUnreachable": "Telewizora birigip bolmady. Baglanyşygy barlaň we netijäni bilmek üçin şu sahypada haýyşy gaýtalaň.",
+  "panelHwidNotSupported": "Panel HWID çäklendirmesini habar berdi",
+  "panelHwidNotSupportedTip": "Panel x-hwid-not-supported gaýtardy. Bu müşderiniň gabat gelmeýändigini subut etmeýär. HWID sazlamalaryny we abunalyk talaplaryny barlaň.",
+  "panelHwidIdentityDisabled": "HWID ibermek öçürilen. Diňe panele ynanýan bolsaňyz açyň.",
+  "networkDefaultLanBypass": "Ýörite ugurlar bolmasa, ýerli tor VPN-den sowlup geçýär. Ony öz içine almak üçin ugurlary anyk belläň.",
+  "subscriptionClientExperimentalLabel": "Synag",
   "rule": "Düzgün",
   "rules": "Düzgünler",
   "global": "Global",
@@ -93,7 +111,7 @@
   "importFromURL": "URL-dan importirlemek",
   "subscriptionClientLabel": "Müşderi formaty",
   "subscriptionClientDesc": "Programma abuna haýyşyny şu müşderiniň formatynda iberýär",
-  "subscriptionClientExperimentalTip": "Emulýasiýa synag mümkinçiligi: üpjün ediji başga müşderiniň formatyny iberýär, ReClash ony öwürýär.",
+  "subscriptionClientExperimentalTip": "Başga müşderiler bilen gabat gelmek synag mümkinçiligidir: üpjün ediji saýlanan müşderiniň formatyny iberýär, ReClash ony öwürýär.",
   "subscriptionClientAuto": "Awtomatiki",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -129,7 +147,7 @@
   "project": "Proýekt",
   "core": "Çekirdek",
   "madeBy": "Ýasajan",
-  "roleAuthor": "Awtor we dowamlandyryjy",
+  "roleAuthor": "Awtor we meýnteýner",
   "gratitude": "Minnetdarlyk",
   "gratitudeDesc": "ReClash olaryň zähmeti sebäpli bar",
   "creditFlClash": "FlClash — bu programmanyň binýady",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "HWID ýolla",
   "sendDeviceIdentityDesc": "Enjam belgisini, programmanyň wersiýasyny we enjamyň adyny proksi üpjün edijiniň serwerine ýolla",
+  "sendDeviceIdentityDisableWarning": "HWID ýollamagy ýapsaňyz, abunalaryň köpüsi işlemez. Dowam etmelimi?",
   "unifiedDelay": "Birleşdirilen saklanma",
   "unifiedDelayDesc": "Serleşme ýaly goşmaça saklanmalary aýyrýar",
   "tcpConcurrent": "TCP paralelligi",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "Çekirdegi zorlap täzeden işletmek isleýärsiňizmi?",
   "dnsHijacking": "DNS-i ele geçirmek",
   "coreStatus": "Çekirdegiň ýagdaýy",
+  "coreRunning": "Işleýär",
+  "coreStarting": "Işe başlaýar…",
+  "coreStopped": "Saklandy",
   "dataCollectionTip": "Maglumat ýygnamagy barada duýduryş",
   "dataCollectionContent": "Bu programma durnuklylygy ýokarlandyrmak üçin Firebase Crashlytics arkaly dargamak maglumatyny ýygnýar.\nÝygnalýan maglumatlara enjam maglumaty we dargamak ýazgylary girýär, şahsy duýgur maglumat ýok.\nBu funksiýany sazlamalarda öçürip bilersiňiz.",
   "crashlytics": "Dargamak ýazgylaryny ibermek",
@@ -633,6 +655,15 @@
   "expectedStatus": "Çaklanýan ýagdaý",
   "selectProxies": "Proksileri saýlaň",
   "inputProxyGroupName": "Proksiler toparynyň adyny giriziň",
+  "helperAuthorizationTitle": "Helper hyzmatyny sazlamaga rugsat bermelimi?",
+  "helperAuthorizationMessage": "TUN usuly üçin ReClash Helper hyzmatyny gurmak ýa-da täzelemek gerek. Ulgamyň rugsat penjiresini açmak üçin «Dowam et» düwmesine basyň. Paroly diňe şol penjirede giriziň: ReClash parollary ýygnamaýar.",
+  "helperAuthorizationContinue": "Dowam et",
+  "helperAuthorizationLater": "Soňrak",
+  "helperSystemdUnavailable": "TUN usuly üçin systemd gerek, emma bu ulgamda ol elýeterli däl.",
+  "helperPkexecUnavailable": "pkexec elýeterli däl. Distributiwiňiziň polkit paketini guruň we täzeden synanyşyň.",
+  "helperAgentUnavailable": "Ulgamyň rugsat agenti elýeterli däl. Iş stoly sessiýasynda polkit autentifikasiýa agentini işe giriziň we täzeden synanyşyň.",
+  "helperInstallFailed": "Helper hyzmatyny gurmak ýa-da täzelemek başa barmady. Žurnallary barlaň we täzeden synanyşyň.",
+  "helperInstallNotReady": "Helper hyzmatynyň sazlamasy tamamlandy, emma hyzmat entek taýýar däl. Žurnallary barlaň we täzeden synanyşyň.",
   "helperCorruptTip": "Helper hyzmaty elýeterli däl; TUN usulyny işledip bolmaýar. Ony dikeltmek üçin ReClash-y täzeden guruň.",
   "coreBlockedByPolicyTip": "Windows ReClashCore.exe-i işletmedi (ýalňyşlyk kody: {code}). Smart App Control ýa-da AppLocker ýaly programmalar gözegçiliginiň syýasaty gol çekilmedik programmalary bogýar; şol syýasatda ReClash-a rugsat beriň ýa-da ony öçüriň, soňra täzeden synanyşyň.",
   "coreBlockedBySmartAppControlTip": "Windows-yň Smart App Control-y ReClashCore.exe gol çekilmedikligi sebäpli ony bogýar. Windows Howpsuzlygy → Programmalar we brauzer gözegçiligi → Smart App Control sazlamalaryna giriň, «Öçürilen» görnüşini saýlaň, soňra ReClash-y täzeden açyň. Windows-y täzeden gurmadan Smart App Control-y gaýtadan işledip bolmaýar.",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "Serwer jogap bermeýär, başgasy gözlenýär",
   "smartRoutingNoServers": "Elýeterli serwer ýok",
   "smartRoutingPreset": "Taýynlama",
-  "smartRoutingPresetOff": "Ýapyk",
+  "smartRoutingPresetOff": "Başga",
   "smartRoutingPresetRussia": "Russiýa",
   "smartRoutingPresetIran": "Eýran",
   "smartRoutingPresetChina": "Çin",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "Işleýär, has gowusy tapylmady",
   "smartRoutingReasonIncumbentDead": "Öňki serwer jogap bermegi goýdy",
   "smartRoutingReasonVerdictGain": "Bunyň açyk internete ýetýändigi subut edildi",
-  "smartRoutingReasonLatencyGain": "Bunyň saklanma derejesi has çalt",
+  "smartRoutingReasonLatencyGain": "Gaýtalanan barlaglar gijikmäniň azalandygyny tassyklady",
+  "smartRoutingReasonReliabilityGain": "Gaýtalanan barlaglar has durnukly alternatiwany tassyklady",
+  "smartRoutingReasonQualityConfirming": "Gaýtadan deňeşdirip gowulaşmany tassyklaýarys",
+  "smartRoutingReasonHandoffRecovery": "Tor üýtgäninden soň birikme dikeldildi",
   "smartRoutingReasonTerrainChanged": "Tor üýtgedi",
   "smartRoutingReasonStranded": "Hiç zada ýetip bolmaýar, häzirki serwer galýar",
   "smartRoutingReasonNoCandidate": "Hiç bir serwer barlaglardan geçmedi",
@@ -985,8 +1019,8 @@
   "setupRestore": "Ätiýaçlyk nusgadan dikelt",
   "setupRestoreDesc": "ReClash, FlClashX ýa-da FlClash nusgasyndan sazlamalary we profilleri dikelt",
   "setupFinishTitle": "Sazlamalary barlaň",
-  "setupRegionDesc": "Akylly ugrukdyrma bu sebiti ugur saýlamagyň başlangyjy hökmünde ulanýar. Dil diňe teklip berýär.",
-  "setupRegionNone": "Başga sebit ýa-da akylly ugrukdyrmasyz",
+  "setupRegionDesc": "Tor sebitiňizi saýlaň. Russiýa saýlananda HWID açylýar; ony aşakda öçürip bilersiňiz. Akylly ugrukdyrma aýratyn açylýar.",
+  "setupRegionNone": "Başga",
   "setupAutoRun": "ReClash açylanda birik",
   "setupAutoRunDesc": "Dogry profil ýüklenenden soň VPN-i awtomatiki başlaýar",
   "setupPermissionVpn": "VPN rugsady",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "Tema",
   "appearanceIcon": "Nyşan",
   "appearanceLayout": "Ýerleşim",
-  "appearanceMotion": "Hereket",
   "schedule": "Meýilleşdirilen",
   "scheduleDesc": "Garaňky tema {darkAt}-dan {lightAt}-a çenli",
   "darkAt": "Garaňky başlan wagty",
@@ -1206,7 +1239,7 @@
   "openInBrowser": "Brauzerde aç",
   "off": "Ýapyk",
   "subscriptionNoQuota": "Bu abunalyk trafik möçberini-de, gutarýan senesini-de habar etmeýär",
-  "subscriptionUndialable": "Bu abunalykdaky düwünlere baglanyp bolmaýar — başga klient formatyny synap görüň",
+  "subscriptionUndialable": "Abunalykda adaty düwün salgylary tapylmady. Panel wagtlaýyn boş konfigurasiýa gaýtaran bolmagy mümkin. Serwerlere baglanyşyk barlanmady.",
   "subscriptionDomainMoved": "Üpjün ediji {host} salgyna geçdi",
   "subscriptionUpdated": "Täzelendi",
   "subscriptionProviderInterval": "Üpjün edijiniň teklifi: {value}",
@@ -1611,10 +1644,10 @@
     }
   },
   "lanProfileImport": "Telefondan almak",
-  "lanProfileImportDesc": "Ýerli tor arkaly abuna URL salgysyny ibermek üçin bir gezeklik QR koduny görkezmek",
+  "lanProfileImportDesc": "Ýerli tor arkaly telefondan abuna ibermek üçin bir gezeklik sahypany görkezmek",
   "lanProfileImportTitle": "Abunany almak",
-  "lanProfileImportScan": "Bu QR koduny şol bir tordaky telefon bilen skanirläň",
-  "lanProfileImportAddress": "Ýa-da JSON maglumatyny {address} salgysyna iberiň",
+  "lanProfileImportScan": "Bu QR koduny şol bir tordaky telefon bilen skanirläň, soňra abuna URL salgysyny goýuň",
+  "lanProfileImportAddress": "Ýa-da telefon brauzerinde {address} salgysyny açyň",
   "lanProfileImportWaiting": "Abuna garaşylýar…",
   "lanProfileImportImporting": "Abuna import edilýär…",
   "lanProfileImportImported": "Abuna alyndy",
@@ -1809,5 +1842,133 @@
   "externalActionConfirmTitle": "Daşarky hereketi tassykla",
   "externalActionConfirmMessage": "Daşarky baglanyşyga «{action}» hereketini ýerine ýetirmäge rugsat berilsinmi?",
   "panelSettingsConfirmTitle": "Üpjün ediji sazlamalaryny ulan",
-  "panelSettingsConfirmMessage": "Bu abuna programmadaky şu umumy sazlamalary soraýar:\n{settings}"
+  "panelSettingsConfirmMessage": "Bu abuna programmadaky şu umumy sazlamalary soraýar:\n{settings}",
+  "milestoneDecorations": "Gizlin tapyndylar",
+  "milestoneDecorationsDesc": "ReClash ulanylanda gazanylan tapyndylary görkezmek",
+  "seasonalDecorations": "Möwsümleýin bezeg",
+  "seasonalDecorationsDesc": "Baş ekranda ýuwaş möwsümleýin bezegleri görkezmek",
+  "lastUsed": "Soňky ulanylan wagty",
+  "neverUsed": "Heniz ulanylmady",
+  "profileUnusedForDays": "{days} gün bäri ulanylmady",
+  "profileUnusedForMonths": "{months} aý bäri ulanylmady",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "Üzülmän togsan gün.",
+  "milestoneRevealAuscultation": "Ýüz barlag. Toruň damary urýar.",
+  "milestoneRevealFullLadder": "Ähli basgançaklardan geçip, birinjisine dolanmak.",
+  "milestoneRevealSilentAutopilot": "Goşulmazdan müň karar.",
+  "milestoneRevealOdometer": "Bir terabaýt geçdi.",
+  "milestoneRevealMeridian": "Bäş meridian geçildi.",
+  "milestoneRevealPorcelain": "Ýedi asuda gün.",
+  "milestoneRevealCrown": "Bir ýyllyk örtülen wagt.",
+  "findings": "Tapyndylar",
+  "findingsDesc": "ReClash ulanylanda ýuwaşlyk bilen tapylan ownuk jikme-jiklikler",
+  "findingsCount": "{total} sanyndan {found} sany tapyldy",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "Tapylanlar",
+  "findingDiscoveredOn": "{date} tapyldy",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "Tapyndylary täzeden başlat",
+  "resetFindingsDesc": "Ulanyş taryhyny bozman, tapyş pursatlaryny täzeden görkezmek",
+  "resetFindingsTitle": "Tapyndylar täzeden başlasynmy?",
+  "resetFindingsConfirm": "Tapylan ýazgylar gizlener we ýene peýda bolup biler. Ulanyş taryhy üýtgemez.",
+  "findingVigil": "Gözegçilik",
+  "findingAuscultation": "Diňleme",
+  "findingFullLadder": "Doly basgançak",
+  "findingSilentAutopilot": "Ümsüm awtopilot",
+  "findingOdometer": "Odometr",
+  "findingMeridian": "Bäş meridian",
+  "findingPorcelain": "Farfor",
+  "findingCrown": "Täç",
+  "findingOscilloscope": "Ossillograf",
+  "findingMarks": "Belgiler",
+  "findingPi": "Pi",
+  "findingTurn": "Öwrüm",
+  "findingStorm": "Tupan",
+  "findingLoopback": "Halka",
+  "findingOscilloscopeDesc": "Halka alty sekunt janly traffigi diňledi.",
+  "findingMarksDesc": "ReClash belgiler toplumy tapyldy.",
+  "findingPiDesc": "Baş ekran açyk wagty sessiýa 3:14:15-den geçdi.",
+  "findingTurnDesc": "Sessiýa Täze ýyl ýary gijesinden geçdi.",
+  "findingStormDesc": "Ähli diagnostika gatlaklary bir wagtda näsaz boldy.",
+  "findingLoopbackDesc": "Profil ýerli diňleýiş portuna gaýdyp görkezdi.",
+  "appIconVigil": "Gözegçilik",
+  "appIconTopo": "Topografiýa",
+  "appIconFractal": "Fraktal",
+  "appIconSpark": "Uçgun",
+  "crownHistory": "{date} bäri · {days} gün gorag",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "Basgançak netijesi: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "Sowuk, tas monohrom palitrany ulanmak",
+  "developerFindings": "Tapyndylary öňünden görmek",
+  "developerFindingsDesc": "Diňe wagtlaýyn syn: hasaplaýjylar, gazanylan tapyndylar we tor sazlamalary üýtgemeýär. Başlangyça getirmek ýa-da dörediji usulyny öçürmek syny bes edýär. Täsirler sagdyn baglanyşykly dolandyryş paneliniň açylmagyna garaşýar we bezeg sazlamalaryna eýerýär. Bezegde saýlanan nyşan ýa-da tema saklanýar.",
+  "developerAllRewards": "Ähli sylaglary görkez",
+  "developerPreviewReset": "Öňünden görmegi arassala",
+  "developerPreviewAutomatic": "Awtomatik",
+  "developerSeasonNewYear": "Täze ýyl",
+  "developerSeasonBirthday": "ReClash doglan güni",
+  "developerSeasonAnniversary": "Ilkinji işe girizilişiň ýyl dönümi",
+  "developerSeasonDrift": "Möwsümleýin öwüşgin",
+  "developerPatina": "Profiliň tozany",
+  "developerPatinaDays": "{days} gün",
+  "developerFindingEvents": "Tapyndyny gaýtala",
+  "developerFindingQueued": "Sagdyn baglanyşykly dolandyryş paneli açylýança nobatda. Tapyndyny gaýtalap bolýar.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "Birikmäniň ähli tapgyrlary elýeterli däl",
+  "findingStormVerdict": "Barlag işleýän ýoly tapmady. Soňky näsazlyklar ilkinji näsazlygyň netijesi bolup biler.",
+  "findingLoopbackWarning": "Profil salgysy ReClash programmasynyň öz proksi portuna gönükdirilýär. Abunalyk salgysyny barlaň.",
+  "seasonBirthdayNote": "Şu gün ReClash-yň doglan güni.",
+  "seasonFirstRunNote": "Şu gün ilkinji gezek işe girizen günüňiziň ýyl dönümi."
 }

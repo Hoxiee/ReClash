@@ -7,6 +7,7 @@ import android.content.ServiceConnection
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import androidx.core.content.ContextCompat
 import com.reclash.common.GlobalState
 import com.reclash.common.intent
 import com.reclash.core.Core
@@ -274,6 +275,7 @@ private class ManagedServiceBinding(
     suspend fun bind(): Result<Unit> = runCatching {
         withContext(Dispatchers.Main.immediate) {
             serviceState.value = null
+            ContextCompat.startForegroundService(GlobalState.application, intent)
             isBound = GlobalState.application.bindService(
                 intent,
                 this@ManagedServiceBinding,

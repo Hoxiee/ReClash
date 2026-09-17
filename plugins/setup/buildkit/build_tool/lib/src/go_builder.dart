@@ -44,9 +44,33 @@ class GoBuilder {
   String get _corePath => p.join(rootDir, config.coreDir);
   String get _outputPath => p.join(rootDir, config.outputDir);
 
+  static String coreLdflags(String corePath, String configuredFlags) {
+    final mihomoPath = p.join(corePath, 'Clash.Meta');
+    if (FileSystemEntity.typeSync(p.join(mihomoPath, '.git')) ==
+        FileSystemEntityType.notFound) {
+      throw BuildException('Missing mihomo Git metadata in $mihomoPath');
+    }
+    final result = runCommand('git', [
+      'describe',
+      '--tags',
+      '--match',
+      'v[0-9]*',
+      '--always',
+      '--abbrev=8',
+      '--dirty',
+    ], workingDirectory: mihomoPath);
+    final version = (result.stdout as String).trim().replaceFirst(
+      RegExp(r'^v(?=\d)'),
+      '',
+    );
+    if (!RegExp(r'^[0-9A-Za-z][0-9A-Za-z.+-]*$').hasMatch(version)) {
+      throw BuildException('Invalid mihomo version: $version');
+    }
+    return '$configuredFlags -X github.com/metacubex/mihomo/constant.Version=$version';
+  }
+
   Future<BuildExecution> build(Target target, {bool force = false}) async {
-    // Desktop: output directly to libclash/{platform}/
-    // Android: output to libclash/android/{abi}/
+    final ldflags = coreLdflags(_corePath, config.goLdflags);
     final outDir = target.isLib
         ? p.join(_outputPath, target.platformDir, target.abi!)
         : p.join(_outputPath, target.platformDir);
@@ -59,13 +83,13 @@ class GoBuilder {
 
     return cache.run(
       key: '${target.platformDir}-${target.goarch}-core',
-      fingerprint: () => _calculateFingerprint(target),
+      fingerprint: () => _calculateFingerprint(target, ldflags),
       primaryOutput: outFile,
       force: force,
       notice: notice,
       build: () async {
         final env = _buildEnvironment(target);
-        final args = _buildArguments(target, outFile: outFile);
+        final args = _buildArguments(target, ldflags, outFile: outFile);
 
         _log.info(kDoubleSeparator);
         _log.info(
@@ -123,15 +147,19 @@ class GoBuilder {
     return env;
   }
 
-  List<String> _buildArguments(Target target, {String? outFile}) => [
+  List<String> _buildArguments(
+    Target target,
+    String ldflags, {
+    String? outFile,
+  }) => [
     'build',
-    '-ldflags=${config.goLdflags}',
+    '-ldflags=$ldflags',
     '-tags=${config.tags}',
     if (target.isLib) '-buildmode=c-shared',
     if (outFile != null) ...['-o', outFile],
   ];
 
-  Future<String> _calculateFingerprint(Target target) async {
+  Future<String> _calculateFingerprint(Target target, String ldflags) async {
     final env = _buildEnvironment(target);
     final builder = FingerprintBuilder(rootDir: rootDir)
       ..addValue('cache_schema', BuildCache.schemaVersion)
@@ -145,7 +173,7 @@ class GoBuilder {
       })
       ..addValue('config', config.toFingerprintMap())
       ..addValue('environment', env)
-      ..addValue('arguments', _buildArguments(target));
+      ..addValue('arguments', _buildArguments(target, ldflags));
 
     final goVersion = runCommand(
       'go',

@@ -12,6 +12,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/connection_doctor.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/providers/state.dart';
@@ -160,6 +161,39 @@ void main() {
     try {
       profileSwitchTempDir.deleteSync(recursive: true);
     } catch (_) {}
+  });
+
+  testWidgets('doctor status waits for Android UI before fetching a snapshot', (
+    tester,
+  ) async {
+    final coreInterface = _coreInterface();
+    when(() => coreInterface.doctorSnapshot()).thenAnswer(
+      (_) async => const DoctorSnapshot(revision: 8, supported: true),
+    );
+    final container = await _pumpCoreManager(tester, coreInterface);
+    final doctor = container.read(connectionDoctorProvider.notifier);
+    await doctor.updateActivity(
+      lifecycleState: AppLifecycleState.hidden,
+      isAndroid: true,
+    );
+    for (final revision in [4, 8, 6]) {
+      coreEventManager.sendEvent(
+        CoreEvent(
+          type: CoreEventType.doctorStatus,
+          data: {'revision': revision},
+        ),
+      );
+    }
+    await tester.pump();
+    verifyNever(() => coreInterface.doctorSnapshot());
+
+    await doctor.updateActivity(
+      lifecycleState: AppLifecycleState.resumed,
+      isAndroid: true,
+    );
+    expect(container.read(connectionDoctorProvider).revision, 8);
+    verify(() => coreInterface.doctorSnapshot()).called(1);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   testWidgets('duplicate crash events disconnect the core only once', (

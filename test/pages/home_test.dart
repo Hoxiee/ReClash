@@ -476,17 +476,14 @@ void main() {
         if (!focusInRail() || focusNode == null) {
           return null;
         }
-        return [Icons.space_dashboard, Icons.article].reduce((closest, icon) {
-          final closestDistance =
-              (tester.getCenter(find.byIcon(closest).first).dy -
-                      focusNode.rect.center.dy)
-                  .abs();
-          final distance =
-              (tester.getCenter(find.byIcon(icon).first).dy -
-                      focusNode.rect.center.dy)
-                  .abs();
-          return distance < closestDistance ? icon : closest;
-        });
+        final inkWell = focusNode.context!
+            .findAncestorWidgetOfExactType<InkWell>();
+        if (inkWell == null) return null;
+        final icon = find.descendant(
+          of: find.byWidget(inkWell),
+          matching: find.byType(Icon),
+        );
+        return tester.widget<Icon>(icon).icon;
       }
 
       for (var i = 0; i < 30 && !focusInRail(); i++) {

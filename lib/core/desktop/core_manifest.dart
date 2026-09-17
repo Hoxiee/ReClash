@@ -7,12 +7,20 @@ import 'package:path/path.dart' as p;
 final class CoreManifest {
   const CoreManifest._();
 
-  static Future<String?> readCoreSha256({String? path}) async {
+  static Future<String?> readCoreSha256({String? path}) {
+    return _readHash('coreSha256', path: path);
+  }
+
+  static Future<String?> readHelperSha256({String? path}) {
+    return _readHash('helperSha256', path: path);
+  }
+
+  static Future<String?> _readHash(String key, {String? path}) async {
     try {
       final file = File(path ?? _defaultPath());
       final value = jsonDecode(await file.readAsString());
       if (value is! Map) return null;
-      final coreSha256 = value['coreSha256'];
+      final coreSha256 = value[key];
       if (coreSha256 is! String ||
           !RegExp(r'^[0-9a-f]{64}$').hasMatch(coreSha256)) {
         return null;

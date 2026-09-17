@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "VPN을 우회하여 다시 시도할까요?",
+  "subscriptionDirectRetryMessage": "현재 연결로 구독에 접근하지 못했습니다. VPN을 끄지 않고 이 다운로드만 직접 다시 시도할까요? 패널에 현재 네트워크의 IP 주소가 표시됩니다. 다른 트래픽의 경로는 바뀌지 않습니다.",
+  "subscriptionDirectRetryConfirm": "직접 다시 시도",
+  "appRegion": "앱 지역",
+  "appRegionDesc": "네트워크 지역을 선택하세요. 러시아를 선택하면 HWID가 켜지며 아래에서 끌 수 있습니다. 스마트 라우팅은 별도로 설정합니다.",
+  "appRegionOther": "기타",
+  "setupRegionSettings": "지역 빠른 설정",
+  "setupRegionSettingsDesc": "지리 데이터, 라우팅 프리셋 및 앱 접근 설정을 확인하세요. 자동으로 추가되는 항목은 없습니다.",
+  "lanProfileImportPhoneHint": "구독 URL을 붙여넣어 TV로 가져오세요.",
+  "lanProfileImportSend": "TV로 가져오기",
+  "lanProfileImportPhoneSuccess": "구독을 가져왔습니다. TV로 돌아가 이 페이지를 닫아도 됩니다.",
+  "lanProfileImportPhoneFailed": "구독을 가져오지 못했습니다. URL을 확인하고 다시 시도하세요.",
+  "lanProfileImportPhoneUnreachable": "TV에 연결할 수 없습니다. 연결을 확인하고 이 페이지에서 다시 요청하여 결과를 확인하세요.",
+  "panelHwidNotSupported": "패널에서 HWID 제한을 보고했습니다",
+  "panelHwidNotSupportedTip": "패널이 x-hwid-not-supported를 반환했습니다. 이것만으로 클라이언트가 호환되지 않는다고 판단할 수는 없습니다. HWID 설정과 구독 요구 사항을 확인하세요.",
+  "panelHwidIdentityDisabled": "HWID 전송이 꺼져 있습니다. 패널을 신뢰하는 경우에만 켜세요.",
+  "networkDefaultLanBypass": "사용자 지정 경로가 없으면 로컬 네트워크는 VPN을 우회합니다. VPN을 거치려면 경로를 명시적으로 설정하세요.",
+  "subscriptionClientExperimentalLabel": "실험적",
   "rule": "규칙",
   "rules": "규칙",
   "global": "전역",
@@ -93,7 +111,7 @@
   "importFromURL": "URL에서 가져오기",
   "subscriptionClientLabel": "클라이언트 형식",
   "subscriptionClientDesc": "구독을 요청할 때 이 클라이언트 형식을 사용합니다",
-  "subscriptionClientExperimentalTip": "에뮬레이션은 실험적 기능입니다. 제공자가 다른 클라이언트의 형식을 보내고 ReClash가 이를 변환합니다.",
+  "subscriptionClientExperimentalTip": "다른 클라이언트와의 호환성은 실험적 기능입니다. 제공자가 선택한 클라이언트 형식을 보내고 ReClash가 변환합니다.",
   "subscriptionClientAuto": "자동",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -129,7 +147,7 @@
   "project": "프로젝트",
   "core": "코어",
   "madeBy": "만든 이",
-  "roleAuthor": "개발 및 관리",
+  "roleAuthor": "작성자 및 메인테이너",
   "gratitude": "감사한 분들",
   "gratitudeDesc": "ReClash는 이 프로젝트 덕분에 존재합니다",
   "creditFlClash": "FlClash — 이 앱의 기반이 된 클라이언트",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "HWID 전송",
   "sendDeviceIdentityDesc": "기기 식별자, 앱 버전, 기기 이름을 프로바이더 서버로 전송합니다",
+  "sendDeviceIdentityDisableWarning": "HWID를 끄면 대부분의 구독이 작동하지 않습니다. 계속할까요?",
   "unifiedDelay": "통합 지연",
   "unifiedDelayDesc": "핸드셰이크 같은 추가 지연을 제거합니다",
   "tcpConcurrent": "TCP 동시 연결",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "코어를 강제로 다시 시작하시겠습니까?",
   "dnsHijacking": "DNS 하이재킹",
   "coreStatus": "코어 상태",
+  "coreRunning": "실행 중",
+  "coreStarting": "시작 중…",
+  "coreStopped": "중지됨",
   "dataCollectionTip": "데이터 수집 안내",
   "dataCollectionContent": "이 앱은 안정성 개선을 위해 Firebase Crashlytics로 크래시 정보를 수집합니다.\n수집 항목은 기기 정보와 크래시 세부 정보이며, 민감한 개인 정보는 포함되지 않습니다.\n설정에서 언제든 끌 수 있습니다.",
   "crashlytics": "크래시 분석",
@@ -633,6 +655,15 @@
   "expectedStatus": "예상 상태",
   "selectProxies": "프록시 선택",
   "inputProxyGroupName": "프록시 그룹 이름을 입력하세요",
+  "helperAuthorizationTitle": "헬퍼 설정을 허용할까요?",
+  "helperAuthorizationMessage": "TUN 모드를 사용하려면 ReClash 헬퍼 서비스를 설치하거나 업데이트해야 합니다. '계속'을 누르면 시스템 인증 대화상자가 열립니다. 비밀번호는 해당 대화상자에만 입력하세요. ReClash는 비밀번호를 수집하지 않습니다.",
+  "helperAuthorizationContinue": "계속",
+  "helperAuthorizationLater": "나중에",
+  "helperSystemdUnavailable": "TUN 모드에는 systemd가 필요하지만 이 시스템에서는 사용할 수 없습니다.",
+  "helperPkexecUnavailable": "pkexec를 사용할 수 없습니다. 배포판의 polkit 패키지를 설치한 후 다시 시도하세요.",
+  "helperAgentUnavailable": "시스템 인증 에이전트를 사용할 수 없습니다. 데스크톱 세션에서 polkit 인증 에이전트를 실행한 후 다시 시도하세요.",
+  "helperInstallFailed": "헬퍼 서비스를 설치하거나 업데이트하지 못했습니다. 로그를 확인한 후 다시 시도하세요.",
+  "helperInstallNotReady": "헬퍼 설정이 완료되었지만 서비스가 준비되지 않았습니다. 로그를 확인한 후 다시 시도하세요.",
   "helperCorruptTip": "헬퍼 서비스를 사용할 수 없어 TUN 모드를 켤 수 없습니다. ReClash를 다시 설치하면 복구됩니다.",
   "coreBlockedByPolicyTip": "Windows가 ReClashCore.exe 실행을 거부했습니다(오류 {code}). 스마트 앱 제어나 AppLocker 같은 앱 제어 정책이 서명되지 않은 프로그램을 차단합니다. 해당 정책에서 ReClash를 허용하거나 정책을 끈 후 다시 시도하세요.",
   "coreBlockedBySmartAppControlTip": "Windows 스마트 앱 제어가 서명되지 않은 ReClashCore.exe를 차단했습니다. Windows 보안 → 앱 및 브라우저 제어 → 스마트 앱 제어 설정을 열고 '끄기'를 선택한 다음 ReClash를 다시 시작하세요. 스마트 앱 제어는 Windows를 다시 설치하지 않으면 다시 켤 수 없습니다.",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "서버가 응답하지 않아 다른 서버를 찾고 있습니다",
   "smartRoutingNoServers": "연결 가능한 서버 없음",
   "smartRoutingPreset": "프리셋",
-  "smartRoutingPresetOff": "꺼짐",
+  "smartRoutingPresetOff": "기타",
   "smartRoutingPresetRussia": "러시아",
   "smartRoutingPresetIran": "이란",
   "smartRoutingPresetChina": "중국",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "작동 중이며, 더 나은 서버를 찾지 못했습니다",
   "smartRoutingReasonIncumbentDead": "이전 서버가 응답을 멈췄습니다",
   "smartRoutingReasonVerdictGain": "개방된 인터넷 연결이 확인된 서버입니다",
-  "smartRoutingReasonLatencyGain": "지연 시간이 한 단계 더 낮은 서버입니다",
+  "smartRoutingReasonLatencyGain": "반복 점검으로 더 낮은 지연 시간을 확인했습니다",
+  "smartRoutingReasonReliabilityGain": "반복 점검으로 더 안정적인 대체 서버를 확인했습니다",
+  "smartRoutingReasonQualityConfirming": "반복 비교로 개선 여부를 확인하는 중입니다",
+  "smartRoutingReasonHandoffRecovery": "네트워크 변경 후 연결이 복구되었습니다",
   "smartRoutingReasonTerrainChanged": "네트워크가 바뀌었습니다",
   "smartRoutingReasonStranded": "접근 가능한 서버가 없어 현재 서버를 유지합니다",
   "smartRoutingReasonNoCandidate": "점검을 통과한 서버가 없습니다",
@@ -985,8 +1019,8 @@
   "setupRestore": "백업에서 복원",
   "setupRestoreDesc": "ReClash, FlClashX 또는 FlClash 백업에서 설정과 프로필 복원",
   "setupFinishTitle": "설정 검토",
-  "setupRegionDesc": "스마트 라우팅이 경로를 선택할 때 이 지역을 시작점으로 사용합니다. 언어는 추천에만 사용됩니다.",
-  "setupRegionNone": "기타 지역 또는 스마트 라우팅 사용 안 함",
+  "setupRegionDesc": "네트워크 지역을 선택하세요. 러시아를 선택하면 HWID가 켜지며 아래에서 끌 수 있습니다. 스마트 라우팅은 별도로 설정합니다.",
+  "setupRegionNone": "기타",
   "setupAutoRun": "ReClash를 열 때 연결",
   "setupAutoRunDesc": "유효한 프로필을 불러온 뒤 VPN을 자동으로 시작합니다",
   "setupPermissionVpn": "VPN 권한",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "테마",
   "appearanceIcon": "아이콘",
   "appearanceLayout": "레이아웃",
-  "appearanceMotion": "모션",
   "schedule": "일정",
   "scheduleDesc": "{darkAt}부터 {lightAt}까지 다크 모드를 사용합니다",
   "darkAt": "다크 모드 시작",
@@ -1206,7 +1239,7 @@
   "openInBrowser": "브라우저에서 열기",
   "off": "꺼짐",
   "subscriptionNoQuota": "이 구독에는 트래픽 한도나 만료일 정보가 없습니다",
-  "subscriptionUndialable": "이 구독에는 연결할 수 있는 노드가 없습니다. 다른 클라이언트 형식을 시도해 보세요.",
+  "subscriptionUndialable": "이 구독에서 일반적인 노드 주소를 찾지 못했습니다. 패널이 임시 구성을 반환했을 수 있습니다. 서버 연결은 테스트하지 않았습니다.",
   "subscriptionDomainMoved": "제공자가 {host}(으)로 이동했습니다",
   "subscriptionUpdated": "업데이트됨",
   "subscriptionProviderInterval": "제공자 권장값: {value}",
@@ -1611,10 +1644,10 @@
     }
   },
   "lanProfileImport": "휴대전화에서 받기",
-  "lanProfileImportDesc": "로컬 네트워크를 통해 구독 URL을 전송할 일회용 QR 코드를 표시합니다",
+  "lanProfileImportDesc": "로컬 네트워크에서 휴대전화로 구독을 전송할 일회용 페이지를 표시합니다",
   "lanProfileImportTitle": "구독 받기",
-  "lanProfileImportScan": "같은 네트워크의 휴대전화로 이 QR 코드를 스캔하세요",
-  "lanProfileImportAddress": "또는 {address}(으)로 JSON을 보내세요",
+  "lanProfileImportScan": "같은 네트워크의 휴대전화로 이 QR 코드를 스캔한 다음 구독 URL을 붙여 넣으세요",
+  "lanProfileImportAddress": "또는 휴대전화 브라우저에서 {address}을 여세요",
   "lanProfileImportWaiting": "구독을 기다리는 중…",
   "lanProfileImportImporting": "구독을 가져오는 중…",
   "lanProfileImportImported": "구독을 받았습니다",
@@ -1809,5 +1842,133 @@
   "externalActionConfirmTitle": "외부 작업 확인",
   "externalActionConfirmMessage": "외부 링크가 “{action}” 작업을 수행하도록 허용할까요?",
   "panelSettingsConfirmTitle": "제공자 설정 적용",
-  "panelSettingsConfirmMessage": "이 구독이 다음 앱 전체 설정을 요청합니다:\n{settings}"
+  "panelSettingsConfirmMessage": "이 구독이 다음 앱 전체 설정을 요청합니다:\n{settings}",
+  "milestoneDecorations": "숨겨진 발견",
+  "milestoneDecorationsDesc": "ReClash를 사용하며 얻은 발견을 표시합니다",
+  "seasonalDecorations": "계절 꾸미기",
+  "seasonalDecorationsDesc": "홈 화면에 은은한 계절 장식을 표시합니다",
+  "lastUsed": "마지막 사용",
+  "neverUsed": "아직 사용하지 않음",
+  "profileUnusedForDays": "{days}일 동안 사용하지 않음",
+  "profileUnusedForMonths": "{months}개월 동안 사용하지 않음",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "끊김 없이 구십 일.",
+  "milestoneRevealAuscultation": "백 번의 검사. 네트워크에는 맥박이 있습니다.",
+  "milestoneRevealFullLadder": "모든 단계를 지나 다시 첫 단계로.",
+  "milestoneRevealSilentAutopilot": "개입 없이 천 번의 결정.",
+  "milestoneRevealOdometer": "일 테라바이트가 지나갔습니다.",
+  "milestoneRevealMeridian": "다섯 자오선을 건넜습니다.",
+  "milestoneRevealPorcelain": "고요한 칠 일.",
+  "milestoneRevealCrown": "보호된 시간 일 년.",
+  "findings": "발견",
+  "findingsDesc": "ReClash를 사용하는 동안 조용히 발견한 세부 요소",
+  "findingsCount": "{total}개 중 {found}개 발견",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "발견함",
+  "findingDiscoveredOn": "{date}에 발견",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "발견 초기화",
+  "resetFindingsDesc": "사용 기록은 유지하고 발견 순간을 다시 표시합니다",
+  "resetFindingsTitle": "발견을 초기화할까요?",
+  "resetFindingsConfirm": "발견한 항목이 숨겨지고 다시 나타날 수 있습니다. 사용 기록은 변경되지 않습니다.",
+  "findingVigil": "불침번",
+  "findingAuscultation": "청진",
+  "findingFullLadder": "완전한 사다리",
+  "findingSilentAutopilot": "고요한 자동 조종",
+  "findingOdometer": "주행계",
+  "findingMeridian": "다섯 자오선",
+  "findingPorcelain": "도자기",
+  "findingCrown": "왕관",
+  "findingOscilloscope": "오실로스코프",
+  "findingMarks": "마크",
+  "findingPi": "파이",
+  "findingTurn": "해넘이",
+  "findingStorm": "폭풍",
+  "findingLoopback": "루프",
+  "findingOscilloscopeDesc": "링이 6초 동안 실시간 트래픽을 들었습니다.",
+  "findingMarksDesc": "ReClash 마크 모음을 발견했습니다.",
+  "findingPiDesc": "대시보드가 열린 동안 세션이 3:14:15를 지났습니다.",
+  "findingTurnDesc": "세션이 새해 자정을 넘겼습니다.",
+  "findingStormDesc": "모든 진단 계층이 동시에 실패했습니다.",
+  "findingLoopbackDesc": "프로필이 로컬 수신 포트를 다시 가리켰습니다.",
+  "appIconVigil": "불침번",
+  "appIconTopo": "지형",
+  "appIconFractal": "프랙탈",
+  "appIconSpark": "불꽃",
+  "crownHistory": "{date}부터 · 보호 {days}일",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "사다리 결과: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "차갑고 거의 단색인 팔레트 적용",
+  "developerFindings": "발견 미리보기",
+  "developerFindingsDesc": "임시 미리보기입니다. 카운터, 획득한 발견, 네트워크 설정은 바뀌지 않습니다. 초기화하거나 개발자 모드를 끄면 종료됩니다. 효과는 연결이 정상인 대시보드가 표시될 때 나타나며 꾸미기 설정을 따릅니다. 꾸미기에서 선택한 아이콘과 테마는 저장됩니다.",
+  "developerAllRewards": "모든 보상 미리보기",
+  "developerPreviewReset": "미리보기 초기화",
+  "developerPreviewAutomatic": "자동",
+  "developerSeasonNewYear": "새해",
+  "developerSeasonBirthday": "ReClash 생일",
+  "developerSeasonAnniversary": "첫 실행 기념일",
+  "developerSeasonDrift": "계절 색조",
+  "developerPatina": "프로필 먼지",
+  "developerPatinaDays": "{days}일",
+  "developerFindingEvents": "발견 다시 재생",
+  "developerFindingQueued": "연결이 정상인 대시보드가 표시되기를 기다립니다. 다시 재생할 수 있습니다.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "연결의 모든 단계가 사용 불가합니다",
+  "findingStormVerdict": "검사에서 작동하는 경로를 찾지 못했습니다. 이후 단계의 실패는 첫 번째 장애의 결과일 수 있습니다.",
+  "findingLoopbackWarning": "이 프로필 주소는 ReClash 자체 프록시 포트를 가리킵니다. 구독 주소를 확인하세요.",
+  "seasonBirthdayNote": "오늘은 ReClash의 생일입니다.",
+  "seasonFirstRunNote": "오늘은 첫 실행 기념일입니다."
 }

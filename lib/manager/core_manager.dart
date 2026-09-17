@@ -235,7 +235,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       unawaited(
         ref
             .read(connectionDoctorProvider.notifier)
-            .refresh(minimumRevision: status.revision)
+            .refreshFromStatus(minimumRevision: status.revision)
             .catchError((Object error) {
               commonPrint.log(
                 'Connection doctor refresh failed: $error',

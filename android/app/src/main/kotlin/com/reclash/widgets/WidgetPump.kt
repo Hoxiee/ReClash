@@ -11,20 +11,13 @@ import com.reclash.ServiceState
 import com.reclash.common.GlobalState
 import com.reclash.common.receiveBroadcastFlow
 import com.reclash.service.ServiceConfig
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 private const val tickMillis = 1_000L
@@ -38,11 +31,17 @@ internal object WidgetPump {
     private var forced = true
     private var lastPushAt = 0L
 
-    // The one entry point: a caller need not know whether it already runs.
     fun wake(context: Context) {
         val application = context.applicationContext
         installed.value = anyInstalled(application)
         forced = true
+        if (!installed.value) {
+            job?.cancel()
+            job = null
+            history.clear()
+            lastPushAt = 0L
+            return
+        }
         if (job?.isActive == true) {
             revision.value = revision.value + 1
             return
@@ -50,20 +49,25 @@ internal object WidgetPump {
         job = GlobalState.launch {
             // A cold process would otherwise draw STOPPED over a live tunnel.
             ServiceState.refresh()
-            val awake = screenFlow(application)
-                .shareIn(this, SharingStarted.Eagerly, replay = 1)
-            combine(
+            val updates = combine(
                 ServiceState.runState,
                 ServiceConfig.pauseState,
                 ServiceConfig.smartRoutingStatus,
                 ServiceConfig.doctorStatus,
                 revision,
-                ticker(awake),
-            ) { _ -> Unit }.collect { render(application) }
+            ) { _ -> Unit }
+            widgetUpdates(
+                updates = updates,
+                running = ServiceState.runState.map { it == RunState.STARTED },
+                interactive = screenFlow(application),
+                installed = installed,
+                tickMillis = tickMillis,
+            ).collect { render(application) }
         }
     }
 
     private fun render(context: Context) {
+        if (!installed.value || !interactive(context)) return
         val manager = runCatching { AppWidgetManager.getInstance(context) }.getOrNull() ?: return
         val force = forced
         forced = false
@@ -87,26 +91,6 @@ internal object WidgetPump {
         lastPushAt = now
         history.push(snapshot.upSpeed, snapshot.downSpeed)
     }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun ticker(awake: Flow<Boolean>): Flow<Unit> = combine(
-        ServiceState.runState.map { it == RunState.STARTED }.distinctUntilChanged(),
-        awake,
-        installed,
-    ) { running, interactive, present -> running && interactive && present }
-        .distinctUntilChanged()
-        .flatMapLatest { live ->
-            if (live) {
-                flow {
-                    while (true) {
-                        emit(Unit)
-                        delay(tickMillis)
-                    }
-                }
-            } else {
-                flowOf(Unit)
-            }
-        }
 
     private fun screenFlow(context: Context): Flow<Boolean> = context.receiveBroadcastFlow {
         addAction(Intent.ACTION_SCREEN_ON)

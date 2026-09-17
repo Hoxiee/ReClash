@@ -281,28 +281,36 @@ class BackupAction extends _$BackupAction {
             isOverride: isOverride,
           );
         }
-        if (config != null) {
-          try {
-            _publishConfig(config, context);
-          } catch (error, stackTrace) {
-            if (previousConfig != null) {
-              try {
-                _publishConfig(previousConfig, const RestoreApplyContext());
-              } catch (rollbackError) {
-                commonPrint.log(
-                  'Settings rollback failed: ${compactError(rollbackError)}',
-                  logLevel: LogLevel.warning,
-                );
-              }
-            }
-            Error.throwWithStackTrace(error, stackTrace);
-          }
-        }
       });
       committed = true;
+      if (config != null) {
+        try {
+          _publishConfig(config, context);
+        } catch (error, stackTrace) {
+          if (previousConfig != null) {
+            try {
+              _publishConfig(previousConfig, const RestoreApplyContext());
+            } catch (rollbackError) {
+              commonPrint.log(
+                'Settings rollback failed: ${compactError(rollbackError)}',
+                logLevel: LogLevel.warning,
+              );
+            }
+          }
+          Error.throwWithStackTrace(error, stackTrace);
+        }
+      }
       await rollback.discard();
     } catch (error, stackTrace) {
       if (committed) {
+        try {
+          await rollback.discard();
+        } catch (rollbackError) {
+          commonPrint.log(
+            'Restore cleanup failed: ${compactError(rollbackError)}',
+            logLevel: LogLevel.warning,
+          );
+        }
         Error.throwWithStackTrace(error, stackTrace);
       }
       try {
@@ -360,5 +368,8 @@ class BackupAction extends _$BackupAction {
     ref.read(overrideDnsProvider.notifier).value = config.overrideDns;
     ref.read(networkSettingProvider.notifier).value = config.networkProps;
     ref.read(hotKeyActionsProvider.notifier).value = config.hotKeyActions;
+    ref.read(smartRoutingSettingProvider.notifier).value =
+        config.smartRoutingProps;
+    ref.read(desyncSettingProvider.notifier).value = config.desyncProps;
   }
 }

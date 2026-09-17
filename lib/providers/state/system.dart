@@ -142,6 +142,9 @@ bool newDashboardEnabled(Ref ref) {
 
 @riverpod
 bool shouldPatchSystemDns(Ref ref) {
+  if (system.isMacOS || system.isLinux) {
+    return false;
+  }
   final autoSetSystemDns = ref.watch(
     networkSettingProvider.select((state) => state.autoSetSystemDns),
   );

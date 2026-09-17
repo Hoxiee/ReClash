@@ -272,6 +272,40 @@ Future<ProviderContainer> _pumpFinish(
   );
 }
 
+String? _focusedText() {
+  final context = FocusManager.instance.primaryFocus?.context;
+  if (context == null) return null;
+  final tile = context.findAncestorWidgetOfExactType<ListTile>();
+  if (tile?.title case Text(data: final data?)) return data;
+  final button = context
+      .findAncestorWidgetOfExactType<ButtonStyleButton>()
+      ?.child;
+  if (button is Text) return button.data;
+  final editable = context.findAncestorWidgetOfExactType<EditableText>();
+  if (editable != null) return editable.controller.text;
+  String? result;
+  void findText(Element candidate) {
+    if (result != null) return;
+    if (candidate.widget case Text(data: final data?)) result = data;
+    candidate.visitChildElements(findText);
+  }
+
+  findText(context as Element);
+  return result;
+}
+
+Future<void> _focusText(
+  WidgetTester tester,
+  String label, {
+  int limit = 30,
+}) async {
+  for (var index = 0; index < limit && _focusedText() != label; index++) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+  }
+  expect(_focusedText(), label);
+}
+
 void main() {
   setUp(() {
     _ExitingSystemAction.calls.clear();
@@ -402,6 +436,20 @@ void main() {
     expect(find.text('URL'), findsOne);
     expect(find.text('Raw configuration'), findsOne);
     expect(find.text('Continue without a profile'), findsNWidgets(2));
+  });
+
+  testWidgets('TV setup replaces camera import with phone transfer', (
+    tester,
+  ) async {
+    addTearDown(() => system.isTVForTesting = false);
+    system.isTVForTesting = true;
+    await _pump(tester);
+    await _toSubscription(tester);
+
+    expect(find.text('Receive from phone'), findsOneWidget);
+    expect(find.text('QR code'), findsNothing);
+    expect(find.text('URL'), findsOneWidget);
+    expect(find.text('File'), findsOneWidget);
   });
 
   testWidgets('importing a subscription keeps the wizard on screen', (
@@ -581,23 +629,26 @@ void main() {
     await tester.tap(find.text('Submit'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('None of the nodes'), findsOneWidget);
+    expect(find.textContaining('No regular node addresses'), findsOneWidget);
     expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
     expect(container.read(appSettingProvider).autoRun, isFalse);
   });
 
-  testWidgets('picking a region writes the preset and turns the engine on', (
+  testWidgets('picking a region writes the preset without enabling routing', (
     tester,
   ) async {
     final container = await _pump(tester);
     await _toFinish(tester);
 
+    await tester.tap(find.byKey(const ValueKey('setup-app-region')).last);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Iran'));
     await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.iran);
-    expect(props.enabled, isTrue);
+    expect(props.enabled, isFalse);
+    expect(container.read(appSettingProvider).region, AppRegion.iran);
   });
 
   testWidgets('leaving the region unpicked leaves the engine off', (
@@ -606,8 +657,8 @@ void main() {
     final container = await _pump(tester);
     await _toFinish(tester);
 
-    await tester.tap(find.text('Other region or do not use Smart Routing'));
-    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).region, isNull);
+    expect(find.text('Other'), findsOneWidget);
 
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
@@ -862,7 +913,7 @@ void main() {
     expect(container.read(profilesProvider), isEmpty);
   });
 
-  testWidgets('locale recommendation does not enable Smart Routing', (
+  testWidgets('language does not choose a region or enable Smart Routing', (
     tester,
   ) async {
     final container = await _pump(
@@ -871,13 +922,15 @@ void main() {
     );
     await _toFinish(tester);
 
-    expect(find.text('Recommended for your language'), findsOneWidget);
+    expect(container.read(appSettingProvider).region, isNull);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(find.text('Other'), findsOneWidget);
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
     expect(props.enabled, isFalse);
   });
 
-  testWidgets('system locale is used for the region recommendation', (
+  testWidgets('system locale does not silently select Russia or HWID', (
     tester,
   ) async {
     final container = await _pump(tester, locale: const Locale('ru'));
@@ -890,7 +943,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Рекомендуется для вашего языка'), findsOneWidget);
+    expect(container.read(appSettingProvider).region, isNull);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(find.text('Другое'), findsOneWidget);
     final props = container.read(smartRoutingSettingProvider);
     expect(props.preset, SmartRoutingPreset.off);
     expect(props.enabled, isFalse);
@@ -1066,6 +1121,56 @@ void main() {
     );
     expect(fade.opacity.value, 1);
     expect(find.text('Before you continue'), findsOneWidget);
+  });
+
+  testWidgets('TV remote completes setup without pointer input', (
+    tester,
+  ) async {
+    addTearDown(() => system.isTVForTesting = false);
+    system.isTVForTesting = true;
+    final container = await _pump(tester, disableAnimations: true);
+
+    await _focusText(tester, 'Русский');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).locale, 'ru');
+
+    await _focusText(tester, 'Next');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(find.text('Before you continue'), findsOneWidget);
+
+    await _focusText(tester, 'Agree');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(find.text('Add a connection profile'), findsOneWidget);
+
+    await _focusText(tester, 'Continue without a profile');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(find.text('Review your setup'), findsOneWidget);
+
+    await _focusText(tester, 'Done');
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pumpAndSettle();
+    expect(container.read(appSettingProvider).setupCompleted, isTrue);
+  });
+
+  testWidgets('focused TV setup controls stay visible while moving down', (
+    tester,
+  ) async {
+    addTearDown(() => system.isTVForTesting = false);
+    system.isTVForTesting = true;
+    await _pump(tester, size: const Size(960, 540), disableAnimations: true);
+
+    await _focusText(tester, '简体中文');
+    await tester.pumpAndSettle();
+
+    final focusRect = FocusManager.instance.primaryFocus!.rect;
+    final cardRect = tester.getRect(find.byType(SetupScrollCard));
+    expect(cardRect.overlaps(focusRect), isTrue);
+    expect(focusRect.top, greaterThanOrEqualTo(cardRect.top));
+    expect(focusRect.bottom, lessThanOrEqualTo(cardRect.bottom));
   });
 
   testWidgets('keyboard traversal reaches the primary action', (tester) async {

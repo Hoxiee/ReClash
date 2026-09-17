@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>ReClash Porcelain</title><desc>Светлый фарфоровый аватар для контраста среди тёмных чатов</desc>
+  <defs><linearGradient id="po-bg" x1="62" y1="48" x2="454" y2="466" gradientUnits="userSpaceOnUse"><stop stop-color="#FFF9E9"/><stop offset="1" stop-color="#E6E5FF"/></linearGradient><clipPath id="po-clip"><circle cx="256" cy="256" r="256"/></clipPath></defs>
+  <circle cx="256" cy="256" r="256" fill="url(#po-bg)"/>
+  <g clip-path="url(#po-clip)" fill="none" stroke="#6673C8" stroke-opacity=".13" stroke-width="3"><path d="M-34 150C76 70 171 84 263 142S441 210 548 126"/><path d="M-38 205C74 125 166 140 258 197S437 264 549 183"/><path d="M-35 370C77 290 169 304 261 362S440 430 550 347"/></g>
+  <circle cx="256" cy="256" r="232" fill="none" stroke="#4D58B3" stroke-opacity=".18" stroke-width="2"/>
+  <g transform="translate(256 256) rotate(-20) scale(1.12)" fill="none" stroke="#3543A6" stroke-width="54" stroke-linecap="round">
+    <path d="M-88 -60 V60"/><path d="M0 -120 V120"/><path d="M88 -40 V40"/>
+  </g>
+</svg>

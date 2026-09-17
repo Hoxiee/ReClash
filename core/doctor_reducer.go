@@ -26,8 +26,8 @@ type doctorVerdict struct {
 }
 
 func reduceDoctorEvidence(facts []doctorEvidence, terminal bool, path doctorPathContext, requireAppIngressProof bool) doctorVerdict {
-	if path.PathKind == doctorPathVPN && path.CaptureState == doctorCaptureInactive {
-		return doctorVerdict{State: doctorComplete, Health: doctorBroken, Confidence: doctorConfirmed, CauseCode: "vpnNotActive", Layer: doctorLayerCapture}
+	if (path.PathKind == doctorPathVPN || path.PathKind == doctorPathTun) && path.CaptureState == doctorCaptureInactive {
+		return doctorVerdict{State: doctorComplete, Health: doctorBroken, Confidence: doctorConfirmed, CauseCode: doctorInactiveCaptureCode(path.PathKind), Layer: doctorLayerCapture}
 	}
 	for _, layer := range doctorLayerOrder {
 		for _, fact := range facts {
@@ -61,6 +61,13 @@ func reduceDoctorEvidence(facts []doctorEvidence, terminal bool, path doctorPath
 	return doctorVerdict{State: doctorExamining, Health: doctorUnknown, Confidence: doctorInsufficient}
 }
 
+func doctorInactiveCaptureCode(path doctorPathKind) string {
+	if path == doctorPathTun {
+		return "tunNotActive"
+	}
+	return "vpnNotActive"
+}
+
 func doctorStages(facts []doctorEvidence, path doctorPathContext, terminal bool) []doctorStage {
 	stages := []doctorStage{
 		{ID: "app", State: doctorStageUnknown},
@@ -75,7 +82,7 @@ func doctorStages(facts []doctorEvidence, path doctorPathContext, terminal bool)
 		stages[1].State = doctorStageNotApplicable
 	case doctorPathVPN, doctorPathTun:
 		if path.CaptureState == doctorCaptureInactive {
-			stages[0] = doctorStage{ID: "app", State: doctorStageFailed, Layer: doctorLayerCapture, Code: "vpnNotActive"}
+			stages[0] = doctorStage{ID: "app", State: doctorStageFailed, Layer: doctorLayerCapture, Code: doctorInactiveCaptureCode(path.PathKind)}
 		} else if path.CaptureState == doctorCaptureActive {
 			stages[0] = doctorStage{ID: "app", State: doctorStagePassed, Layer: doctorLayerCapture, Code: "captureActive"}
 		}

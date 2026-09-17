@@ -107,6 +107,8 @@ const defaultBypassPrivateRouteAddress = [
   'f800::/6',
   'fe00::/9',
   'fec0::/10',
+  '172.19.0.2/32',
+  'fdfe:dcba:9876::2/128',
 ];
 
 @freezed
@@ -271,7 +273,7 @@ abstract class Tun with _$Tun {
 
 extension TunExt on Tun {
   List<String> resolveRouteAddress(RouteMode routeMode) =>
-      routeMode == RouteMode.bypassPrivate
+      routeMode == RouteMode.bypassPrivate || routeAddress.isEmpty
       ? defaultBypassPrivateRouteAddress
       : routeAddress;
 

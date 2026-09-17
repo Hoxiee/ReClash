@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
@@ -30,6 +31,153 @@ void main() {
     addTearDown(container.dispose);
     return container;
   }
+
+  for (final hidden in [
+    AppLifecycleState.hidden,
+    AppLifecycleState.paused,
+    AppLifecycleState.detached,
+  ]) {
+    test('defers Android status snapshots while $hidden', () async {
+      final core = _MockCoreHandler();
+      var revision = 9;
+      when(() => core.doctorSnapshot()).thenAnswer(
+        (_) async => DoctorSnapshot(revision: revision++, supported: true),
+      );
+      final container = buildContainer(core);
+      final notifier = container.read(connectionDoctorProvider.notifier);
+      await notifier.updateActivity(lifecycleState: hidden, isAndroid: true);
+      await notifier.refreshFromStatus(minimumRevision: 10);
+      await notifier.refreshFromStatus(minimumRevision: 4);
+      verifyNever(() => core.doctorSnapshot());
+
+      final snapshot = await notifier.updateActivity(
+        lifecycleState: AppLifecycleState.resumed,
+        isAndroid: true,
+      );
+      expect(snapshot.revision, 10);
+      verify(() => core.doctorSnapshot()).called(2);
+      await notifier.updateActivity(
+        lifecycleState: AppLifecycleState.resumed,
+        isAndroid: true,
+      );
+      verifyNever(() => core.doctorSnapshot());
+    });
+  }
+
+  for (final lifecycle in [null, AppLifecycleState.inactive]) {
+    test('keeps Android status refresh enabled for $lifecycle', () async {
+      final core = _MockCoreHandler();
+      when(() => core.doctorSnapshot()).thenAnswer(
+        (_) async => const DoctorSnapshot(revision: 4, supported: true),
+      );
+      final notifier = buildContainer(
+        core,
+      ).read(connectionDoctorProvider.notifier);
+      await notifier.updateActivity(lifecycleState: lifecycle, isAndroid: true);
+      await notifier.refreshFromStatus(minimumRevision: 4);
+      verify(() => core.doctorSnapshot()).called(1);
+    });
+  }
+
+  test('desktop status refresh continues while hidden', () async {
+    final core = _MockCoreHandler();
+    when(() => core.doctorSnapshot()).thenAnswer(
+      (_) async => const DoctorSnapshot(revision: 4, supported: true),
+    );
+    final notifier = buildContainer(
+      core,
+    ).read(connectionDoctorProvider.notifier);
+    await notifier.updateActivity(
+      lifecycleState: AppLifecycleState.hidden,
+      isAndroid: false,
+    );
+    await notifier.refreshFromStatus(minimumRevision: 4);
+    verify(() => core.doctorSnapshot()).called(1);
+  });
+
+  test('hiding during refresh stops catch-up until resume', () async {
+    final core = _MockCoreHandler();
+    final first = Completer<DoctorSnapshot>();
+    when(() => core.doctorSnapshot()).thenAnswer((_) => first.future);
+    final notifier = buildContainer(
+      core,
+    ).read(connectionDoctorProvider.notifier);
+    final request = notifier.refreshFromStatus(minimumRevision: 8);
+    await notifier.updateActivity(
+      lifecycleState: AppLifecycleState.hidden,
+      isAndroid: true,
+    );
+    first.complete(const DoctorSnapshot(revision: 2, supported: true));
+    expect((await request).revision, 2);
+    verify(() => core.doctorSnapshot()).called(1);
+    var revision = 7;
+    when(() => core.doctorSnapshot()).thenAnswer(
+      (_) async => DoctorSnapshot(revision: revision++, supported: true),
+    );
+    expect(
+      (await notifier.updateActivity(
+        lifecycleState: AppLifecycleState.resumed,
+        isAndroid: true,
+      )).revision,
+      8,
+    );
+    verify(() => core.doctorSnapshot()).called(2);
+  });
+
+  test(
+    'hidden reconnect drops old revision but preserves visibility',
+    () async {
+      final core = _MockCoreHandler();
+      when(() => core.doctorSnapshot()).thenAnswer(
+        (_) async => const DoctorSnapshot(revision: 1, supported: true),
+      );
+      final notifier = buildContainer(
+        core,
+      ).read(connectionDoctorProvider.notifier);
+      await notifier.updateActivity(
+        lifecycleState: AppLifecycleState.hidden,
+        isAndroid: true,
+      );
+      await notifier.refreshFromStatus(minimumRevision: 99);
+      notifier.resetForCoreConnection();
+      await notifier.refreshFromStatus();
+      verifyNever(() => core.doctorSnapshot());
+      final snapshot = await notifier.updateActivity(
+        lifecycleState: AppLifecycleState.resumed,
+        isAndroid: true,
+      );
+      expect(snapshot.revision, 1);
+      verify(() => core.doctorSnapshot()).called(1);
+    },
+  );
+
+  test('explicit exam and snapshot are not blocked while hidden', () async {
+    final core = _MockCoreHandler();
+    when(() => core.startDoctor(any())).thenAnswer(
+      (_) async => const DoctorSnapshot(
+        revision: 4,
+        supported: true,
+        state: DoctorExamState.examining,
+      ),
+    );
+    when(() => core.doctorSnapshot()).thenAnswer(
+      (_) async => const DoctorSnapshot(revision: 5, supported: true),
+    );
+    final notifier = buildContainer(
+      core,
+    ).read(connectionDoctorProvider.notifier);
+    await notifier.updateActivity(
+      lifecycleState: AppLifecycleState.hidden,
+      isAndroid: true,
+    );
+    expect(
+      (await notifier.start(DoctorExamMode.standard)).state,
+      DoctorExamState.examining,
+    );
+    expect((await notifier.refresh()).revision, 5);
+    verify(() => core.startDoctor(any())).called(1);
+    verify(() => core.doctorSnapshot()).called(1);
+  });
 
   test('maps an old Core to an unsupported snapshot', () async {
     final core = _MockCoreHandler();

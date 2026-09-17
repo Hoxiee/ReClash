@@ -149,6 +149,7 @@ func (rcxCoreRuntime) Members() []rcxMember {
 		return nil
 	}
 	nodes := lister.Proxies()
+	identities := rcxRouteKeys(nodes)
 	url := currentTestURL()
 	members := make([]rcxMember, 0, len(nodes))
 	for _, node := range nodes {
@@ -162,20 +163,22 @@ func (rcxCoreRuntime) Members() []rcxMember {
 			provider = "inline:" + node.Type().String()
 		}
 		members = append(members, rcxMember{
-			Name:        node.Name(),
-			ID:          rcxNodeKey(node.Type().String(), node.Addr(), ""),
-			Provider:    provider,
-			Transport:   info.DiversityFingerprint,
-			Type:        node.Type().String(),
-			Port:        rcxPortOf(node.Addr()),
-			SupportsUDP: node.SupportUDP(),
-			HostMs:      hostMs,
-			HostAt:      hostAt,
-			HostDead:    hostDead,
-			Order:       uint16(len(members)),
+			Name:             node.Name(),
+			ID:               identities[node],
+			Ingress:          rcxIngress(node.Addr()),
+			ExternalProvider: strings.TrimSpace(info.ProviderName) != "",
+			Provider:         provider,
+			Transport:        info.DiversityFingerprint,
+			Type:             node.Type().String(),
+			Port:             rcxPortOf(node.Addr()),
+			SupportsUDP:      node.SupportUDP(),
+			HostMs:           hostMs,
+			HostAt:           hostAt,
+			HostDead:         hostDead,
+			Order:            len(members),
 		})
 	}
-	return rcxSeparateCollisions(members)
+	return members
 }
 
 // The delay test the user runs by hand already covers the whole park, which no
@@ -500,7 +503,7 @@ func rcxEchoMetadata(echo string) (constant.Metadata, error) {
 // too, so a private or loopback token is dropped rather than trusted.
 func rcxParseEchoIP(body []byte) netip.Addr {
 	text := strings.TrimSpace(string(body))
-	if address, err := netip.ParseAddr(text); err == nil {
+	if address, err := netip.ParseAddr(text); err == nil && address.IsGlobalUnicast() && !address.IsPrivate() {
 		return address
 	}
 	tokens := strings.FieldsFunc(text, func(char rune) bool {

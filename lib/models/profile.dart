@@ -70,6 +70,16 @@ class ProfileImportSummary {
   final bool hasProviders;
 }
 
+class ProfilePanelException implements Exception {
+  const ProfilePanelException(this.meta);
+
+  final PanelMeta meta;
+
+  @override
+  String toString() =>
+      'The panel returned an unusable subscription with a device restriction';
+}
+
 class _IdentifiedResponse {
   const _IdentifiedResponse({
     required this.response,
@@ -160,6 +170,7 @@ abstract class Profile with _$Profile {
     String? currentGroupName,
     @Default('') String url,
     DateTime? lastUpdateDate,
+    DateTime? lastUsedAt,
     required Duration autoUpdateDuration,
     SubscriptionInfo? subscriptionInfo,
     PanelMeta? panelMeta,
@@ -269,6 +280,20 @@ extension ProfilesExt on List<Profile> {
   }
 }
 
+extension ProfilePatinaExt on Profile {
+  int patinaLevelAt(DateTime now) {
+    final usedAt = lastUsedAt ?? lastUpdateDate;
+    if (usedAt == null || usedAt.isAfter(now)) return 0;
+    final days = now.difference(usedAt).inDays;
+    if (days < 14) return 0;
+    if (days < 45) return 1;
+    if (days < 120) return 2;
+    return 3;
+  }
+
+  int get patinaLevel => patinaLevelAt(DateTime.now());
+}
+
 extension ProfileExtension on Profile {
   ProfileType get type =>
       url.isEmpty == true ? ProfileType.file : ProfileType.url;
@@ -372,6 +397,7 @@ extension ProfileExtension on Profile {
     final record = await preferences.getSubscriptionHostRecord();
     final fetchResponse = fetch ?? request.getFileResponseForUrl;
     Object? lastError;
+    ProfilePanelException? panelFailure;
     PreparedProfileImport? stubFallback;
     // The HWID gate belongs to the panel, not to the emulated client, so one
     // refusal is enough to stop paying for a second request per probe.
@@ -398,6 +424,18 @@ extension ProfileExtension on Profile {
         try {
           response = await fetchResponse(host, headers: headers);
         } catch (error) {
+          if (error is DioException &&
+              error.type == DioExceptionType.badResponse) {
+            final meta = PanelMeta.fromHeaders(
+              error.response?.headers.map ?? const {},
+            );
+            if (meta.hwidMaxDevicesReached) {
+              throw ProfilePanelException(meta);
+            }
+            if (meta.hwidNotSupported) {
+              panelFailure = ProfilePanelException(meta);
+            }
+          }
           if (shouldTryNextSubscriptionClient(error)) {
             lastError = error;
             continue;
@@ -448,6 +486,10 @@ extension ProfileExtension on Profile {
             return prepared;
           }
           stubFallback ??= prepared;
+        } on ProfilePanelException catch (error) {
+          if (error.meta.hwidMaxDevicesReached) rethrow;
+          panelFailure = error;
+          lastError = error;
         } on ProfileValidationException catch (error) {
           lastError = error;
         }
@@ -456,6 +498,7 @@ extension ProfileExtension on Profile {
     if (stubFallback != null) {
       return stubFallback.withUndialableNodes();
     }
+    if (panelFailure != null) throw panelFailure;
     if (lastError != null) _throwProfileUpdateError(lastError);
     throw const ProfileFetchException.failed();
   }
@@ -486,6 +529,9 @@ extension ProfileExtension on Profile {
     try {
       retried = await fetch(host, headers: retryHeaders);
     } catch (error) {
+      if (error is DioException && error.type == DioExceptionType.badResponse) {
+        rethrow;
+      }
       commonPrint.log(
         'subscription device-identity retry skipped: ${compactError(error)}',
         logLevel: LogLevel.warning,
@@ -629,10 +675,23 @@ extension ProfileExtension on Profile {
             getFileNameForDisposition(disposition),
             Uri.tryParse(responseUrl)?.host,
           ]);
-    final validated = await _validatedConfig(
-      utf8.decode(data, allowMalformed: true),
-      validate: validate,
-    );
+    final ({
+      String content,
+      List<SkippedNode> skipped,
+      ProfileImportFormat format,
+    })
+    validated;
+    try {
+      validated = await _validatedConfig(
+        utf8.decode(data, allowMalformed: true),
+        validate: validate,
+      );
+    } on ProfileValidationException {
+      if (panelMeta.hwidMaxDevicesReached || panelMeta.hwidNotSupported) {
+        throw ProfilePanelException(panelMeta);
+      }
+      rethrow;
+    }
     final content = validated.content;
     final skipped = validated.skipped;
     return PreparedProfileImport(
@@ -865,6 +924,11 @@ extension ProfileExtension on Profile {
       throw ProfileValidationException(diagnostic: message);
     }
 
+    if (_hasForeignOutbounds(content)) {
+      throw const ProfileValidationException(
+        diagnostic: 'unrecognized outbound config',
+      );
+    }
     final message = await validateData(content, validate);
     if (message.isEmpty) {
       return (
@@ -913,6 +977,21 @@ extension ProfileExtension on Profile {
     throw ProfileValidationException(
       diagnostic: message.isEmpty ? 'invalid config' : message,
     );
+  }
+
+  bool _hasForeignOutbounds(String content) {
+    try {
+      final decoded = jsonDecode(content);
+      return switch (decoded) {
+        Map() => decoded.containsKey('outbounds'),
+        List() => decoded.any(
+          (entry) => entry is Map && entry.containsKey('outbounds'),
+        ),
+        _ => false,
+      };
+    } on FormatException {
+      return false;
+    }
   }
 
   ProfileImportSummary _importSummary(

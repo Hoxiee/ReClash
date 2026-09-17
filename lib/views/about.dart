@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/seasonal.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -8,6 +9,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 
 @immutable
 class Credit {
@@ -170,26 +172,34 @@ class AboutView extends ConsumerWidget {
   }
 }
 
-class _IdentityCard extends ConsumerWidget {
+class _IdentityCard extends ConsumerStatefulWidget {
   const _IdentityCard();
 
-  /// Only asks the core while it is up: a stopped core would burn the 2s
-  /// timeout and leave a pending timer behind.
-  Widget _buildCoreChip(WidgetRef ref) {
-    final isConnected = ref.watch(coreStatusProvider) == CoreStatus.connected;
-    if (!isConnected) return const SizedBox.shrink();
-    return FutureBuilder<String?>(
-      future: deviceIdentity.coreVersion,
-      builder: (_, snapshot) {
-        final version = snapshot.data;
-        if (version == null) return const SizedBox.shrink();
-        return MetaChip(label: 'core $version');
-      },
-    );
+  @override
+  ConsumerState<_IdentityCard> createState() => _IdentityCardState();
+}
+
+class _IdentityCardState extends ConsumerState<_IdentityCard> {
+  int _tapCount = 0;
+  DateTime? _lastTapAt;
+
+  void _handleTap() {
+    if (!ref.read(milestoneSettingProvider).findingsEnabled) return;
+    final now = DateTime.now();
+    if (_lastTapAt == null ||
+        now.difference(_lastTapAt!) > const Duration(milliseconds: 650)) {
+      _tapCount = 0;
+    }
+    _lastTapAt = now;
+    _tapCount++;
+    if (_tapCount < 7) return;
+    _tapCount = 0;
+    ref.read(milestonesProvider.notifier).discover('marks');
+    showExtend(context, builder: (_) => const MarksView());
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final textTheme = context.textTheme;
     final version = globalState.packageInfo.version;
@@ -198,6 +208,7 @@ class _IdentityCard extends ConsumerWidget {
       type: CommonCardType.filled,
       radius: AppCorner.xl,
       padding: const EdgeInsets.all(20),
+      onPressed: _handleTap,
       onLongPress: () {
         Clipboard.setData(
           ClipboardData(
@@ -248,7 +259,6 @@ class _IdentityCard extends ConsumerWidget {
                       children: [
                         MetaChip(label: 'v$version'),
                         MetaChip(label: platform),
-                        _buildCoreChip(ref),
                       ],
                     ),
                   ],
@@ -262,6 +272,8 @@ class _IdentityCard extends ConsumerWidget {
               color: context.colorScheme.onSurfaceVariant,
             ),
           ),
+          const _SeasonAnniversary(),
+          const _CrownHistory(),
           Text(
             appLocalizations.copyDiagnostics,
             style: textTheme.labelSmall?.copyWith(
@@ -269,6 +281,106 @@ class _IdentityCard extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SeasonAnniversary extends ConsumerWidget {
+  const _SeasonAnniversary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(milestoneSettingProvider).seasonalEnabled) {
+      return const SizedBox.shrink();
+    }
+    final motif = ref.watch(visibleSeasonProvider);
+    final firstRun = motif == SeasonalMotif.firstRun
+        ? ref.watch(visibleOdometerProvider)?.firstRunMillis
+        : null;
+    final date = firstRun == null || firstRun <= 0
+        ? ''
+        : ' · ${MaterialLocalizations.of(context).formatMediumDate(DateTime.fromMillisecondsSinceEpoch(firstRun))}';
+    final text = switch (motif) {
+      SeasonalMotif.birthday => context.appLocalizations.seasonBirthdayNote,
+      SeasonalMotif.firstRun =>
+        '${context.appLocalizations.seasonFirstRunNote}$date',
+      _ => null,
+    };
+    return text == null
+        ? const SizedBox.shrink()
+        : Text(
+            text,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.primary,
+            ),
+          );
+  }
+}
+
+class _CrownHistory extends ConsumerWidget {
+  const _CrownHistory();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unlocked = ref.watch(
+      visibleMilestonesProvider.select(
+        (state) => state.unlocked.contains('crown'),
+      ),
+    );
+    final snapshot = ref.watch(visibleOdometerProvider);
+    if (!unlocked || snapshot == null || snapshot.firstRunMillis <= 0) {
+      return const SizedBox.shrink();
+    }
+    final date = MaterialLocalizations.of(context).formatMediumDate(
+      DateTime.fromMillisecondsSinceEpoch(snapshot.firstRunMillis),
+    );
+    final days =
+        snapshot.totalCoveredMillis ~/ const Duration(days: 1).inMilliseconds;
+    return Text(
+      context.appLocalizations.crownHistory(date, days),
+      style: context.textTheme.bodySmall?.copyWith(
+        color: context.colorScheme.primary,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+class MarksView extends StatelessWidget {
+  const MarksView({super.key});
+
+  static const _assets = [
+    'assets/images/marks/reclash-mark-color.svg',
+    'assets/images/marks/reclash-icon-primary.svg',
+    'assets/images/marks/reclash-avatar-aurora.svg',
+    'assets/images/marks/reclash-avatar-midnight.svg',
+    'assets/images/marks/reclash-avatar-porcelain.svg',
+    'assets/images/marks/reclash-avatar-electric.svg',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveSheetScaffold(
+      title: context.appLocalizations.findingMarks,
+      body: GridView.builder(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + BottomInsetScope.of(context),
+        ),
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 180,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+        ),
+        itemCount: _assets.length,
+        itemBuilder: (_, index) => CommonCard(
+          type: CommonCardType.filled,
+          padding: const EdgeInsets.all(18),
+          child: SvgPicture.asset(_assets[index]),
+        ),
       ),
     );
   }

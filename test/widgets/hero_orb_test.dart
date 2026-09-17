@@ -4,6 +4,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,7 @@ void main() {
     bool reducedMotion = false,
     HeroHealth health = HeroHealth.unknown,
     HeroOrbVariant variant = HeroOrbVariant.vpn,
+    bool subscriptionExpired = false,
     ValueChanged<HeroOrbPhase>? onPhaseChanged,
     GlobalKey? mediaKey,
   }) async {
@@ -42,6 +44,7 @@ void main() {
             enabled: enabled,
             health: health,
             variant: variant,
+            subscriptionExpired: subscriptionExpired,
             onPhaseChanged: onPhaseChanged,
           ),
         ),
@@ -61,6 +64,125 @@ void main() {
               as _RecordingCommonAction,
     );
   }
+
+  testWidgets('new year keeps snow without adding an orb decoration', (
+    tester,
+  ) async {
+    final result = await pumpOrb(
+      tester,
+      phase: HeroOrbPhase.on,
+      health: HeroHealth.healthy,
+      reducedMotion: true,
+    );
+    result.container
+        .read(appSettingProvider.notifier)
+        .update(
+          (state) => state.copyWith(developerMode: true, reduceMotion: true),
+        );
+    final preview = result.container.read(findingPreviewProvider.notifier);
+    preview.setSeason(SeasonalMotif.drift);
+    await tester.pumpAndSettle();
+    final paints = find.descendant(
+      of: find.byType(HeroOrb),
+      matching: find.byType(CustomPaint),
+    );
+    final count = paints.evaluate().length;
+
+    preview.setSeason(SeasonalMotif.newYear);
+    await tester.pumpAndSettle();
+    expect(paints, findsNWidgets(count));
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: result.container,
+        child: const TestApp(
+          child: SeasonalDashboardOverlay(child: SizedBox.expand()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final snow = find.descendant(
+      of: find.byType(SeasonalDashboardOverlay),
+      matching: find.byType(CustomPaint),
+    );
+    expect(snow, findsOneWidget);
+    preview.setSeason(SeasonalMotif.drift);
+    await tester.pumpAndSettle();
+    expect(snow, findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('meridian unlock and preview leave the orb unchanged', (
+    tester,
+  ) async {
+    final result = await pumpOrb(
+      tester,
+      phase: HeroOrbPhase.on,
+      health: HeroHealth.healthy,
+      reducedMotion: true,
+    );
+    List<Type?> paintLayers() => tester
+        .widgetList<CustomPaint>(
+          find.descendant(
+            of: find.byType(HeroOrb),
+            matching: find.byType(CustomPaint),
+          ),
+        )
+        .map((paint) => paint.painter?.runtimeType)
+        .toList();
+
+    await tester.pumpAndSettle();
+    final initial = paintLayers();
+    expect(initial, isNotEmpty);
+    result.container
+        .read(milestoneSettingProvider.notifier)
+        .update((state) => state.copyWith(unlocked: {'meridian'}));
+    await tester.pumpAndSettle();
+    expect(paintLayers(), initial);
+    expect(find.text('IS'), findsNothing);
+
+    result.container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(developerMode: true));
+    result.container
+        .read(findingPreviewProvider.notifier)
+        .showFinding('meridian');
+    await tester.pumpAndSettle();
+    expect(paintLayers(), initial);
+    expect(find.text('IS'), findsNothing);
+    expect(result.action.runningToggles, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('two-finger finding never toggles the connection', (
+    tester,
+  ) async {
+    final result = await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final center = tester.getCenter(find.byType(HeroOrb));
+    final first = await tester.startGesture(
+      center - const Offset(20, 0),
+      pointer: 1,
+    );
+    final second = await tester.startGesture(
+      center + const Offset(20, 0),
+      pointer: 2,
+    );
+    await tester.pump(const Duration(milliseconds: 750));
+    expect(find.byKey(const ValueKey('hero-oscilloscope')), findsOneWidget);
+    await first.up();
+    await second.up();
+    await tester.pump();
+    expect(result.action.runningToggles, 0);
+    expect(
+      result.container.read(milestoneSettingProvider).unlocked,
+      contains('oscilloscope'),
+    );
+    await tester.pump(const Duration(seconds: 7));
+    await tester.tap(find.byType(HeroOrb));
+    await tester.pump();
+    expect(result.action.runningToggles, 1);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets(
     'starts optimistically and stays pending for the real operation',
@@ -159,6 +281,11 @@ void main() {
     await tester.tap(find.byType(HeroOrb));
     expect(busy.action.runningToggles, 0);
 
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    busy.container.dispose();
+    await tester.pump();
+
     final disabled = await pumpOrb(tester, enabled: false);
     expect(
       tester.widget<FocusableTap>(find.byType(FocusableTap)).onTap,
@@ -190,6 +317,15 @@ void main() {
 
     expect(result.action.runningToggles, 1);
     expect(phases, [HeroOrbPhase.off]);
+  });
+
+  testWidgets('an expired subscription gives a live orb its own mark', (
+    tester,
+  ) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on, subscriptionExpired: true);
+
+    expect(find.byIcon(Icons.event_busy_rounded), findsOneWidget);
+    expect(find.byKey(const ValueKey('core-mark')), findsNothing);
   });
 
   testWidgets('paused orb delegates resume without changing lifecycle itself', (

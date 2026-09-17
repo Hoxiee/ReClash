@@ -2,6 +2,7 @@ package com.reclash.service.modules
 
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.PowerManager
 import androidx.core.content.getSystemService
 import com.reclash.common.GlobalState
@@ -18,13 +19,19 @@ internal class WakeLockModule(
         get() = service.getSystemService()
 
     private var lock: PowerManager.WakeLock? = null
+    @Volatile
+    private var stopped = false
 
     override fun start() {
+        stopped = false
         scope.launch {
             service.receiveBroadcastFlow {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    addAction(PowerManager.ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED)
+                }
             }.collect { apply() }
         }
         // A StateFlow replays its current value, which is also the initial evaluation.
@@ -33,10 +40,15 @@ internal class WakeLockModule(
         }
     }
 
-    override fun stop() = release()
+    @Synchronized
+    override fun stop() {
+        stopped = true
+        release()
+    }
 
     @Synchronized
     private fun apply() {
+        if (stopped) return
         val manager = power ?: return
         val hold = shouldHoldWakeLock(
             screenOn = manager.isInteractive,

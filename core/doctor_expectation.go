@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/netip"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/component/process"
@@ -44,6 +45,7 @@ type doctorProbeObservation struct {
 
 type doctorExpectationRegistry struct {
 	mu           sync.Mutex
+	active       atomic.Bool
 	expectations map[string]doctorProbeExpectation
 	confirmed    map[string]bool
 }
@@ -74,6 +76,7 @@ func (registry *doctorExpectationRegistry) register(expectation doctorProbeExpec
 	}
 	registry.expectations[expectation.ProbeID] = expectation
 	registry.confirmed[expectation.ProbeID] = false
+	registry.active.Store(true)
 	return nil
 }
 
@@ -84,6 +87,7 @@ func (registry *doctorExpectationRegistry) complete(examID, probeID string) {
 		delete(registry.expectations, probeID)
 		delete(registry.confirmed, probeID)
 	}
+	registry.active.Store(len(registry.expectations) > 0)
 }
 
 func (registry *doctorExpectationRegistry) clearExam(examID string) {
@@ -95,9 +99,13 @@ func (registry *doctorExpectationRegistry) clearExam(examID string) {
 			delete(registry.confirmed, probeID)
 		}
 	}
+	registry.active.Store(len(registry.expectations) > 0)
 }
 
 func (registry *doctorExpectationRegistry) match(observation doctorProbeObservation, tunGeneration uint64, now time.Time) (doctorProbeExpectation, bool) {
+	if !registry.active.Load() {
+		return doctorProbeExpectation{}, false
+	}
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	registry.purgeExpiredLocked(now)
@@ -115,6 +123,9 @@ func (registry *doctorExpectationRegistry) match(observation doctorProbeObservat
 }
 
 func (registry *doctorExpectationRegistry) candidate(observation doctorProbeObservation, tunGeneration uint64, now time.Time) (doctorProbeExpectation, bool) {
+	if !registry.active.Load() {
+		return doctorProbeExpectation{}, false
+	}
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	registry.purgeExpiredLocked(now)
@@ -152,6 +163,7 @@ func (registry *doctorExpectationRegistry) purgeExpiredLocked(now time.Time) {
 			delete(registry.confirmed, probeID)
 		}
 	}
+	registry.active.Store(len(registry.expectations) > 0)
 }
 
 type doctorExamSink struct {
@@ -220,6 +232,10 @@ func (actor *doctorActor) matchedProbeEvidence(expectation doctorProbeExpectatio
 }
 
 func (actor *doctorActor) ObserveFlow(event tunnel.FlowEvidence) {
+	if !actor.expectations.active.Load() {
+		actor.observePassiveFlow(event)
+		return
+	}
 	fact := doctorEvidenceFromFlow(event)
 	observation, valid := doctorObservationFromFlow(event)
 	if valid && event.InboundType == C.TUN {
@@ -250,11 +266,23 @@ func (actor *doctorActor) ObserveFlow(event tunnel.FlowEvidence) {
 			}
 		}
 	}
-	actor.Passive(fact)
+	actor.observePassiveFlow(event)
+}
+
+func (actor *doctorActor) observePassiveFlow(event tunnel.FlowEvidence) {
+	if event.Stage == tunnel.FlowEvidenceIngress && event.Network == C.UDP &&
+		!actor.ingressGate.allow(event.InboundType, actor.now()) {
+		return
+	}
+	actor.Passive(doctorEvidenceFromFlow(event))
 }
 
 func (actor *doctorActor) ObserveTracker(tracker statistic.Tracker, progress bool) {
 	fact := doctorEvidenceFromTracker(tracker, progress)
+	if !actor.expectations.active.Load() {
+		actor.Passive(fact)
+		return
+	}
 	observation, valid := doctorObservationFromTracker(tracker)
 	if valid && tracker.Info().Metadata.Type == C.TUN {
 		tunGeneration := actor.tunGeneration.Load()

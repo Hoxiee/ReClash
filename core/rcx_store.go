@@ -13,7 +13,7 @@ import (
 
 const (
 	rcxStoreKey      = "rcx.v2"
-	rcxStoreVersion  = 1
+	rcxStoreVersion  = 2
 	rcxFlushDebounce = 30 * time.Second
 )
 
@@ -28,6 +28,7 @@ type rcxSnapshot struct {
 	Pins         map[string]string                 `json:"pn"`
 	LanePicks    map[string]map[string]string      `json:"lp"`
 	LaneStandbys map[string]map[string][]string    `json:"ls"`
+	IdentitySalt []byte                            `json:"identitySalt,omitempty"`
 	Seed         uint64                            `json:"sd"`
 	Regimes      map[string]rcxRegimeMemory        `json:"r"`
 	Circuits     map[string]rcxProviderCircuit     `json:"pc"`
@@ -106,7 +107,7 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
 		return rcxEmptySnapshot()
 	}
-	if header.Version != rcxStoreVersion {
+	if header.Version != 1 && header.Version != rcxStoreVersion {
 		log.Infoln("[RCX] discarding state from schema v%d", header.Version)
 		return rcxEmptySnapshot()
 	}
@@ -115,6 +116,16 @@ func rcxDecodeSnapshot(raw []byte) *rcxSnapshot {
 		log.Warnln("[RCX] discarding unreadable state: %s", err.Error())
 		return rcxEmptySnapshot()
 	}
+	if header.Version == 1 {
+		snapshot.Global = nil
+		snapshot.Envs = nil
+		snapshot.Standbys = nil
+		snapshot.LaneStandbys = nil
+		snapshot.Circuits = nil
+		snapshot.Quarantines = nil
+		snapshot.Dirty = true
+	}
+	snapshot.Version = rcxStoreVersion
 	snapshot.Config.DefaultsVersion = rcxDefaultsVersion
 	snapshot.Config = snapshot.Config.normalized()
 	rcxFillSnapshot(snapshot)
@@ -129,6 +140,12 @@ func rcxEmptySnapshot() *rcxSnapshot {
 }
 
 func rcxFillSnapshot(snapshot *rcxSnapshot) {
+	if len(snapshot.IdentitySalt) != 32 {
+		snapshot.IdentitySalt = make([]byte, 32)
+		if _, err := rand.Read(snapshot.IdentitySalt); err != nil {
+			snapshot.IdentitySalt = nil
+		}
+	}
 	if snapshot.Global == nil {
 		snapshot.Global = map[string]*rcxNodeGlobal{}
 	}

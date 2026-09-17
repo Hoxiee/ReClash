@@ -12,6 +12,39 @@ import (
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
+func TestPersistSkipsCleanSnapshot(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	storage := newFakeStorage()
+	engine.store = testStore(storage)
+	engine.store.Load()
+	engine.snapshot.Dirty = false
+
+	engine.persist(false)
+
+	if storage.writes != 0 {
+		t.Fatalf("writes = %d, want no serialization for a clean snapshot", storage.writes)
+	}
+}
+
+func TestEngineLifecycleCallsAreSerialized(t *testing.T) {
+	e := newRcxEngine(newFakeRuntime())
+	e.Start()
+
+	var stops sync.WaitGroup
+	stops.Add(2)
+	for i := 0; i < 2; i++ {
+		go func() {
+			defer stops.Done()
+			e.Stop()
+		}()
+	}
+	stops.Wait()
+
+	e.Start()
+	e.Stop()
+}
+
 type fakeRuntime struct {
 	mu            sync.Mutex
 	members       []rcxMember
@@ -125,7 +158,11 @@ func (r *fakeRuntime) Test(ctx context.Context, node string, _ rcxMarker) (int, 
 	result, ok := r.results[node]
 	r.mu.Unlock()
 	if started != nil {
-		started <- node
+		select {
+		case started <- node:
+		case <-ctx.Done():
+			return 0, false, ctx.Err()
+		}
 	}
 	if release != nil {
 		select {
@@ -320,7 +357,7 @@ func foreignMembers(names ...string) []rcxMember {
 			Type:        "Vless",
 			Port:        443,
 			SupportsUDP: true,
-			Order:       uint16(i),
+			Order:       i,
 		})
 	}
 	return members
@@ -331,6 +368,8 @@ func providerMembers(provider string, names ...string) []rcxMember {
 	for i := range members {
 		members[i].Provider = provider
 		members[i].Transport = "transport-" + names[i]
+		members[i].Ingress = names[i] + ".example"
+		members[i].ExternalProvider = true
 	}
 	return members
 }
@@ -442,12 +481,19 @@ func TestScreenOffFailedSelectDoesNotSpendEpisode(t *testing.T) {
 
 func waitForWakeEvent(t *testing.T, engine *rcxEngine) rcxEvent {
 	t.Helper()
-	select {
-	case event := <-engine.events:
-		return event
-	case <-time.After(time.Second):
-		t.Fatal("wake probe did not finish")
-		return rcxEvent{}
+	timer := time.NewTimer(time.Second)
+	defer timer.Stop()
+	for {
+		select {
+		case event := <-engine.events:
+			if event.Kind == rcxEventWakeResults {
+				return event
+			}
+			engine.handle(event)
+		case <-timer.C:
+			t.Fatal("wake probe did not finish")
+			return rcxEvent{}
+		}
 	}
 }
 
@@ -469,12 +515,15 @@ func TestWakeProbeTestsIncumbentAndStandbyInParallel(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 	armWakeStandby(engine, runtime, "current", "standby")
 	engine.screenOff = true
+	engine.suspended = true
 	engine.screenEpisode = 1
 	previous := rcxWakeSettleDelay
 	rcxWakeSettleDelay = 0
 	defer func() { rcxWakeSettleDelay = previous }()
 
 	engine.applyScreenOff(false)
+	engine.suspended = false
+	engine.startWakeProbe()
 	started := map[string]bool{}
 	for len(started) < 2 {
 		select {
@@ -498,6 +547,29 @@ func TestWakeProbeTestsIncumbentAndStandbyInParallel(t *testing.T) {
 	}
 }
 
+func TestWakeProbeWaitsUntilResumeAfterScreenOn(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	engine := newTestEngine(runtime, "ru")
+	armWakeStandby(engine, runtime, "current", "standby")
+	engine.screenOff = true
+	engine.suspended = true
+	engine.screenEpisode = 1
+	previous := rcxWakeSettleDelay
+	rcxWakeSettleDelay = 0
+	defer func() { rcxWakeSettleDelay = previous }()
+
+	engine.applyScreenOff(false)
+	if engine.wakePending {
+		t.Fatal("wake probe started before resume")
+	}
+	engine.applySuspend(false)
+	defer engine.supersedeWake()
+	if !engine.wakePending {
+		t.Fatal("wake probe did not start after resume")
+	}
+}
+
 func TestWakeProbeSwitchesOnceOnlyAfterIncumbentFailure(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("current", "standby")
@@ -506,20 +578,22 @@ func TestWakeProbeSwitchesOnceOnlyAfterIncumbentFailure(t *testing.T) {
 	engine := newTestEngine(runtime, "ru")
 	armWakeStandby(engine, runtime, "current", "standby")
 	engine.screenOff = true
+	engine.suspended = true
 	engine.screenEpisode = 4
 	previous := rcxWakeSettleDelay
 	rcxWakeSettleDelay = 0
 	defer func() { rcxWakeSettleDelay = previous }()
 
 	engine.applyScreenOff(false)
+	engine.applySuspend(false)
 	event := waitForWakeEvent(t, engine)
 	engine.handle(event)
 	engine.handle(event)
 
 	if runtime.selected != "standby" || len(runtime.selects) != 1 {
-		t.Fatalf("selected = %q, selects = %v, want one confirmed-death wake failover", runtime.selected, runtime.selects)
+		t.Fatalf("selected = %q, selects = %v, wake=%+v, want one confirmed-death wake failover", runtime.selected, runtime.selects, event.Wake)
 	}
-	if !engine.screenFailedOver || engine.incumbent != "standby" {
+	if engine.screenFailedOver || engine.incumbent != "standby" {
 		t.Fatalf("episode state = used:%v incumbent:%q", engine.screenFailedOver, engine.incumbent)
 	}
 }
@@ -1450,14 +1524,20 @@ func TestEngineDeliversTheWaveTheNewNetworkBought(t *testing.T) {
 		t.Fatal("want the new network's own wave in flight")
 	}
 	close(runtime.testRelease)
+	gen := engine.probeGen
+	defer engine.supersedeProbe()
+	defer engine.supersedeReach()
 
 	deadline := time.After(2 * time.Second)
-	for engine.probing {
+	completed := false
+	for !completed {
 		select {
 		case event := <-engine.events:
 			engine.handle(event)
+			completed = event.Kind == rcxEventProbeResults && event.Gen == gen
+		case <-runtime.testStarted:
 		case <-deadline:
-			t.Fatal("the wave the new network bought never landed: its generation was not the live one")
+			t.Fatal("the wave the new network bought never delivered its completion")
 		}
 	}
 
@@ -2022,6 +2102,54 @@ func TestEngineRetriesABlindCanaryRoundImmediately(t *testing.T) {
 
 	if !engine.reaching || engine.reachBlind != 1 {
 		t.Fatalf("reaching=%v blind=%d, want one immediate retry", engine.reaching, engine.reachBlind)
+	}
+}
+
+func TestEngineDefersCanaryWhileScreenOffOrSuspended(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	engine.cfg.CanaryForeign = []string{"1.1.1.1:443"}
+	engine.quit = make(chan struct{})
+
+	engine.screenOff = true
+	engine.startReach()
+	if engine.reaching {
+		t.Fatal("screen-off engine started a canary round")
+	}
+	engine.screenOff = false
+	engine.suspended = true
+	engine.startReach()
+	if engine.reaching {
+		t.Fatal("suspended engine started a canary round")
+	}
+	engine.suspended = false
+	engine.startReach()
+	if !engine.reaching {
+		t.Fatal("active engine did not start its deferred canary round")
+	}
+}
+
+func TestScreenOffCancelsCanaryRound(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.hang = map[string]bool{"1.1.1.1:443": true}
+	engine := newTestEngine(runtime, "ru")
+	engine.cfg.CanaryForeign = []string{"1.1.1.1:443"}
+	engine.quit = make(chan struct{})
+	engine.startReach()
+	gen := engine.reachGen
+
+	engine.applyScreenOff(true)
+	if engine.reaching || engine.reachGen == gen {
+		t.Fatal("screen-off did not cancel and supersede the canary round")
+	}
+	select {
+	case event := <-engine.events:
+		engine.handle(event)
+		if engine.reaching {
+			t.Fatal("cancelled canary result restarted while the screen was off")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("cancelled canary round did not finish")
 	}
 }
 
@@ -2666,8 +2794,8 @@ func TestEngineKeepsTheTrickleInsideAReserveForReactiveWaves(t *testing.T) {
 	members := runtime.members
 
 	engine.budget.Take(rcxProbeBudgetCap-rcxProbeReserve-1, runtime.Now())
-	if wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain); len(wave) != 1 {
-		t.Fatalf("wave = %d nodes, want the one probe left above the reserve", len(wave))
+	if wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain); len(wave) != 0 {
+		t.Fatalf("wave = %d nodes, want discovery's protected budget preserved", len(wave))
 	}
 
 	if wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain); len(wave) != 0 {
@@ -2948,7 +3076,7 @@ func TestEngineComingBackToANetworkPrefersThePinOverTheLastAutoChoice(t *testing
 	}
 }
 
-func TestEngineSpreadsColdStartsAcrossInstalls(t *testing.T) {
+func TestEnginePreservesProviderOrderAcrossInstalls(t *testing.T) {
 	park := foreignMembers("a", "b", "c", "d", "e", "f", "g", "h")
 	pick := func(seed uint64) string {
 		runtime := newFakeRuntime()
@@ -2963,8 +3091,8 @@ func TestEngineSpreadsColdStartsAcrossInstalls(t *testing.T) {
 	if first == "" || second == "" {
 		t.Fatalf("cold start chose nothing: %q, %q", first, second)
 	}
-	if first == second {
-		t.Errorf("both installs opened on %q: the declared index is the same list for everyone", first)
+	if first != "a" || second != "a" {
+		t.Errorf("cold starts = %q, %q, want the provider's first member", first, second)
 	}
 	if again := pick(1); again != first {
 		t.Errorf("same seed chose %q then %q: the order must be stable across restarts", first, again)
@@ -3190,7 +3318,16 @@ func TestEngineKeepsLiveConnectionsThroughAComfortSwitch(t *testing.T) {
 	engine.since = runtime.Now().Add(-time.Hour)
 	engine.ledger.NoteProbe("slow", "w:Home", rcxRoleOpen, rcxProbeOK, 1800, runtime.Now())
 	engine.ledger.NoteProbe("fast", "w:Home", rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+	engine.envSince = runtime.Now().Add(-time.Hour)
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	engine.ledger.NoteQualitySample("slow", "w:Home", marker, engine.qualityEpoch(), 1800, runtime.Now())
+	engine.ledger.NoteQualitySample("fast", "w:Home", marker, engine.qualityEpoch(), 40, runtime.Now())
 
+	engine.reconsider()
+	if got := runtime.lastStatus().Reason; got != string(rcxReasonQualityConfirming) {
+		t.Fatalf("reason = %q, want quality-confirming", got)
+	}
+	engine.quality = rcxQualityCheck{From: engine.key("slow"), To: engine.key("fast"), Env: engine.envKey, Epoch: engine.envSince.UnixNano(), Config: engine.configGen, Rounds: 2, Last: runtime.Now()}
 	engine.reconsider()
 
 	if got := runtime.lastStatus().Reason; got != string(rcxReasonLatencyGain) {

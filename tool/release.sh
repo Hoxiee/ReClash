@@ -116,6 +116,10 @@ else
   tag="v$version"
 fi
 
+if [[ "${tag#v}" != "$(sed -n 's/^version: \([^+]*\)+.*/\1/p' pubspec.yaml)" ]]; then
+  bumped=1
+fi
+
 echo
 echo "mode      : $mode"
 echo "branch    : $branch"
@@ -123,13 +127,18 @@ echo "version   : $current -> $version$([[ $bumped == 1 ]] && echo ' (pubspec wi
 echo "tag       : $tag"
 if [[ "$mode" == "pre" ]]; then
   echo "changelog : rendered by CI from build --unreleased; nothing committed"
-  echo "publishes : build artifacts + Telegram only, no GitHub release"
+  echo "publishes : prerelease with artifacts + Telegram"
 else
   echo "changelog : CHANGELOG.md + changelog.json regenerated and committed"
   echo "publishes : GitHub release with artifacts, SHA256SUMS, Homebrew cask"
 fi
 echo "push      : $([[ $do_push == 1 ]] && echo yes || echo 'no (printed at the end)')"
 echo
+
+if ((dry_run)); then
+  echo "dry run: nothing was changed."
+  exit 0
+fi
 
 committed=0
 restore() {
@@ -139,7 +148,7 @@ restore() {
 trap restore EXIT
 
 if ((bumped)); then
-  sed -i.bak "s/^version: [0-9]*\.[0-9]*\.[0-9]*/version: $version/" pubspec.yaml
+  sed -i.bak "s/^version: [^+]*/version: ${tag#v}/" pubspec.yaml
   rm -f pubspec.yaml.bak
 fi
 tool/bump_version.sh minor
@@ -154,11 +163,6 @@ fi
 git checkout -- changelog.json 2>/dev/null || true
 echo "--- end of notes ---"
 echo
-
-if ((dry_run)); then
-  echo "dry run: nothing was changed."
-  exit 0
-fi
 
 if ((assume_yes == 0)); then
   if [[ ! -r /dev/tty ]]; then

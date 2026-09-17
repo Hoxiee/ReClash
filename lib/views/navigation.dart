@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status_mark.dart';
 import 'package:reclash/views/views.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 class Navigation implements NavigationPort {
@@ -76,6 +77,11 @@ class Navigation implements NavigationPort {
 
   @override
   Widget buildStatusMark() => const HeroStatusMark();
+
+  @override
+  void openAbout(BuildContext context) {
+    showExtend(context, builder: (_) => const AboutView());
+  }
 
   Navigation._internal();
 

@@ -133,7 +133,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(AppNavRail), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();

@@ -58,7 +58,7 @@ ReClash — кроссплатформенное приложение для And
 | Android | APK: `arm64-v8a`, `armeabi-v7a`, `x86_64` |
 | Windows | установщик или portable ZIP: x64, ARM64 |
 | macOS | DMG: Apple silicon, Intel |
-| Linux | AppImage, DEB, RPM: x64, ARM64 |
+| Linux | AppImage: x64; DEB и RPM: x64, ARM64 |
 
 К каждому релизу прилагается `SHA256SUMS`. В Linux или macOS положите его рядом со скачанным пакетом и выполните:
 

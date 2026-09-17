@@ -19,6 +19,7 @@ class AppearanceMotionTab extends ConsumerWidget {
         ),
       ),
     );
+    final milestones = ref.watch(milestoneSettingProvider);
     return CustomScrollView(
       primary: false,
       slivers: [
@@ -49,6 +50,29 @@ class AppearanceMotionTab extends ConsumerWidget {
               onChanged: (value) => ref
                   .read(appSettingProvider.notifier)
                   .update((state) => state.copyWith(reduceMotion: value)),
+            ),
+          ],
+        ),
+        SettingSection.sliver(
+          title: appLocalizations.appearance,
+          items: [
+            DecorationListItem.toggle(
+              leading: const Icon(Icons.ac_unit),
+              title: Text(appLocalizations.seasonalDecorations),
+              subtitle: Text(appLocalizations.seasonalDecorationsDesc),
+              value: milestones.seasonalEnabled,
+              onChanged: (value) => ref
+                  .read(milestoneSettingProvider.notifier)
+                  .update((state) => state.copyWith(seasonalEnabled: value)),
+            ),
+            DecorationListItem.toggle(
+              leading: const Icon(Icons.auto_awesome),
+              title: Text(appLocalizations.milestoneDecorations),
+              subtitle: Text(appLocalizations.milestoneDecorationsDesc),
+              value: milestones.findingsEnabled,
+              onChanged: (value) => ref
+                  .read(milestoneSettingProvider.notifier)
+                  .update((state) => state.copyWith(findingsEnabled: value)),
             ),
           ],
         ),

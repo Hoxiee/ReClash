@@ -39,6 +39,7 @@ void _dropCurrentColumns(Database raw) {
     'undialable_nodes',
     'user_label',
     'last_working_client',
+    'last_used_at',
   ]) {
     raw.execute('ALTER TABLE profiles DROP COLUMN $column');
   }
@@ -122,8 +123,20 @@ void main() {
         'undialable_nodes',
         'user_label',
         'last_working_client',
+        'last_used_at',
       ]),
     );
+    expect(_userVersion(raw), 4);
+  });
+
+  test('a current v4 database backfills the added profile column', () async {
+    raw.execute('ALTER TABLE profiles DROP COLUMN last_used_at');
+    raw.execute('PRAGMA user_version = 4');
+    expect(_columnsOf(raw, 'profiles'), isNot(contains('last_used_at')));
+
+    await openAndMigrate();
+
+    expect(_columnsOf(raw, 'profiles'), contains('last_used_at'));
     expect(_userVersion(raw), 4);
   });
 

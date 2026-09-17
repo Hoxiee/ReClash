@@ -118,8 +118,8 @@ double getWidgetHeight(num lines) {
   return max(lines * (80.ap + space) - space, 0);
 }
 
-const maxLogsLength = 5000;
-const maxRequestsLength = 2000;
+const maxLogsLength = 500;
+const maxRequestsLength = 500;
 const pausedMaxLogsLength = maxLogsLength * 2;
 const pausedMaxRequestsLength = maxRequestsLength * 2;
 

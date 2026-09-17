@@ -72,17 +72,13 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
           header,
           const SizedBox(height: 24),
         ],
-        Focus(
-          autofocus: true,
-          descendantsAreFocusable: false,
-          child: Semantics(
-            header: true,
-            child: Text(
-              widget.title,
-              textAlign: TextAlign.center,
-              style: textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+        Semantics(
+          header: true,
+          child: Text(
+            widget.title,
+            textAlign: TextAlign.center,
+            style: textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -108,13 +104,16 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
       child: NotificationListener<ScrollNotification>(
         onNotification: (notification) =>
             _onScroll(notification.depth, notification.metrics),
-        child: SingleChildScrollView(
+        child: FocusedScrollView(
           controller: _controller,
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 20,
-            children: [_head(context), ?widget.fillBody, ?widget.tail],
+          child: SingleChildScrollView(
+            controller: _controller,
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 20,
+              children: [_head(context), ?widget.fillBody, ?widget.tail],
+            ),
           ),
         ),
       ),
@@ -155,7 +154,7 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
     final colorScheme = context.colorScheme;
     final footerChildren = <Widget>[];
     for (var index = 0; index < widget.actions.length; index++) {
-      footerChildren.add(widget.actions[index]);
+      footerChildren.add(TvFocusOutline(child: widget.actions[index]));
       if (index < widget.actions.length - 1) {
         footerChildren.add(const SizedBox(height: 8));
       }
@@ -425,7 +424,10 @@ class _SetupScrollCardState extends State<SetupScrollCard> {
                 thumbVisibility: true,
                 child: ScrollConfiguration(
                   behavior: const HiddenBarScrollBehavior(),
-                  child: list,
+                  child: FocusedScrollView(
+                    controller: _controller,
+                    child: list,
+                  ),
                 ),
               )
             : list,

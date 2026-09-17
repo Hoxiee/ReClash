@@ -6,6 +6,10 @@ extern void (*release_object_func)(void *obj);
 
 extern void (*free_string_func)(char *data);
 
+extern int (*protect_subscription_func)(void *tun_interface, int fd);
+
+extern int protect_subscription(void *tun_interface, int fd);
+
 extern int (*protect_func)(void *tun_interface, int fd);
 
 extern int (*resolve_uid_func)(void *tun_interface, int protocol, const char *source, const char *target);

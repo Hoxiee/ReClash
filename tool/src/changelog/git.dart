@@ -100,9 +100,29 @@ class Git {
     return tags;
   }
 
-  List<VersionTag> stableTags({String revision = 'HEAD'}) => versionTags(
-    revision: revision,
-  ).where((tag) => !tag.isPrerelease).toList();
+  List<VersionTag> stableTags({String revision = 'HEAD', String? after}) {
+    final frozen = after == null
+        ? <String>{}
+        : versionTags(revision: after).map((tag) => tag.name).toSet();
+    final tags = versionTags(
+      revision: revision,
+    ).where((tag) => !tag.isPrerelease && !frozen.contains(tag.name)).toList();
+    final history = _run([
+      'rev-list',
+      '--topo-order',
+      revision,
+    ]).trim().split('\n');
+    final order = {for (var i = 0; i < history.length; i++) history[i]: i};
+    final positions = {
+      for (final tag in tags)
+        tag.name: order[_run(['rev-parse', '${tag.name}^{commit}']).trim()]!,
+    };
+    tags.sort((a, b) {
+      final byHistory = positions[a.name]!.compareTo(positions[b.name]!);
+      return byHistory != 0 ? byHistory : b.compareTo(a);
+    });
+    return tags;
+  }
 
   bool tagExists(String name) =>
       _run(['tag', '--list', name]).trim().isNotEmpty;

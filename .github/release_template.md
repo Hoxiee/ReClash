@@ -1,3 +1,5 @@
+<!-- reclash:release-epoch:1 -->
+
 ## Downloads
 
 Choose the package for your operating system and architecture. Every release includes `SHA256SUMS` for verification.
@@ -12,7 +14,7 @@ Choose the package for your operating system and architecture. Every release inc
 | macOS | Apple silicon | [DMG](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-arm64.dmg) |
 | macOS | Intel | [DMG](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-macos-amd64.dmg) |
 | Linux | x64 | [AppImage](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.AppImage) · [DEB](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.deb) · [RPM](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-amd64.rpm) |
-| Linux | ARM64 | [AppImage](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.AppImage) · [DEB](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.deb) · [RPM](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.rpm) |
+| Linux | ARM64 | [DEB](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.deb) · [RPM](https://github.com/Hoxiee/ReClash/releases/download/vVERSION/ReClash-VERSION-linux-arm64.rpm) |
 
 Pre-release builds are intended for testing and may be unstable. Only assets attached to releases in this repository are official ReClash builds.
 

@@ -124,6 +124,41 @@ extension ModeUiExt on Mode {
       : UiOutboundMode.values.byName(name);
 }
 
+enum AppRegion {
+  @JsonValue('ru')
+  russia,
+  @JsonValue('ir')
+  iran,
+  @JsonValue('cn')
+  china,
+  @JsonValue('other')
+  other;
+
+  static AppRegion fromPreset(SmartRoutingPreset preset) => switch (preset) {
+    SmartRoutingPreset.russia => russia,
+    SmartRoutingPreset.iran => iran,
+    SmartRoutingPreset.china => china,
+    SmartRoutingPreset.off => other,
+  };
+
+  SmartRoutingPreset get preset => switch (this) {
+    russia => SmartRoutingPreset.russia,
+    iran => SmartRoutingPreset.iran,
+    china => SmartRoutingPreset.china,
+    other => SmartRoutingPreset.off,
+  };
+
+  String label(BuildContext context) {
+    final l10n = context.appLocalizations;
+    return switch (this) {
+      russia => l10n.smartRoutingPresetRussia,
+      iran => l10n.smartRoutingPresetIran,
+      china => l10n.smartRoutingPresetChina,
+      other => l10n.appRegionOther,
+    };
+  }
+}
+
 enum SmartRoutingPreset {
   @JsonValue('off')
   off,

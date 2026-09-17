@@ -3,7 +3,7 @@ package main
 import "time"
 
 func (e *rcxEngine) applyProbeResult(event rcxEvent) {
-	if event.Gen != e.probeGen || event.Lane != e.probeLane ||
+	if event.Gen != 0 && event.Gen != e.probeGen || event.Lane != e.probeLane ||
 		(event.ConfigGen != 0 && event.ConfigGen != e.configGen) || len(event.Results) == 0 {
 		return
 	}
@@ -19,8 +19,12 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		return
 	}
 	now := e.runtime.Now()
+	e.markDiscoveryResult(result, now)
 	key := currentKey
 	negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
+	if negative && result.Role == rcxRoleOpen && e.trafficSince(key, e.probeLaunchedAt, now) {
+		return
+	}
 	charge := !negative || e.chargesNegative(now)
 	if result.ExitCountry != "" {
 		e.ledger.SetExit(key, result.ExitCountry, e.sideOf(result.ExitCountry), now)
@@ -54,9 +58,26 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 			e.ledger.RecomputeRole(key, e.envKey, result.Role, e.markerIDs(result.Role, now), now)
 		}
 	}
+	if result.Outcome == rcxProbeOK && result.Role == rcxRoleOpen && result.Fingerprint != "" {
+		e.ledger.NoteQualitySample(key, e.envKey, result.Fingerprint, e.qualityEpoch(), result.DelayMs, now)
+	}
 	if negative && charge {
-		e.escrowNegative(result.Node, 0, now)
+		weight := 0
+		if !e.markerQuarantined(result.Fingerprint, now) && e.ledger.NoteMarkerFailure(key, e.envKey, result.Fingerprint, e.terrainCurrent(), now) {
+			weight = 1
+		}
+		e.escrowNegative(result.Node, weight, now)
 		e.recordProbeDeath(result)
+	}
+	if negative && event.Lane == "" && e.recoveryWave() && !e.probeDecisionClosed {
+		for _, previous := range e.probeResults {
+			if previous.Outcome == rcxProbeOK && previous.Role == rcxRoleOpen {
+				e.tryMainProbeRecovery(previous.Node, now)
+				if e.probeDecisionClosed {
+					break
+				}
+			}
+		}
 	}
 	if result.Outcome == rcxProbeOK {
 		e.witnessWhitelist(result.Role)
@@ -74,26 +95,30 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 			}
 			return
 		}
-		recovered := e.provesOpenRecovery(result.Node, now)
-		if !e.probeDecisionClosed && e.recoveryWave() && recovered {
-			if result.Node == e.incumbent {
-				e.probeRecovered = true
-				e.resetRescue()
-				if e.probeKind == rcxWaveIncident {
-					e.closeIncident(now, true)
-				}
-				e.sealProbeDecision()
-				return
-			}
-			if e.screenOff && e.screenDead != e.incumbent {
-				return
-			}
-			if e.tryAutomaticMainSelect(result.Node, rcxReasonIncumbentDead, now) {
-				e.probeRecovered = true
-				e.resetRescue()
-				e.sealProbeDecision()
-			}
+		e.tryMainProbeRecovery(result.Node, now)
+	}
+}
+
+func (e *rcxEngine) tryMainProbeRecovery(node string, now time.Time) {
+	if e.probeDecisionClosed || !e.recoveryWave() || !e.provesOpenRecovery(node, now) {
+		return
+	}
+	if node == e.incumbent {
+		e.probeRecovered = true
+		e.resetRescue()
+		if e.probeKind == rcxWaveIncident {
+			e.closeIncident(now, true)
 		}
+		e.sealProbeDecision()
+		return
+	}
+	if e.screenOff && e.screenDead != e.incumbent {
+		return
+	}
+	if e.recoveryCanReplace(now) && e.tryAutomaticMainSelect(node, e.recoveryReason(), now) {
+		e.probeRecovered = true
+		e.resetRescue()
+		e.sealProbeDecision()
 	}
 }
 
@@ -133,16 +158,20 @@ func (e *rcxEngine) provesOpenRecovery(node string, now time.Time) bool {
 
 func (e *rcxEngine) finishProbe() {
 	now := e.runtime.Now()
+	if e.probeKind == rcxWaveQuality {
+		e.finishQuality(now)
+	}
 	measured := map[string]struct{}{}
 	for _, result := range e.probeResults {
 		if result.Outcome != rcxProbeOverloaded {
 			measured[result.Node] = struct{}{}
 		}
 	}
-	if e.paidWaveGen == e.probeGen {
-		e.budget.Refund(e.paidWave - len(measured))
+	if e.paidWaveGen == e.probeGen && e.paidWave > 0 {
+		delete(e.receipts, e.probeGen)
+		e.budget.RefundAt(max(e.paidWave-len(measured), 0), e.paidAt)
+		e.paidWave = 0
 	}
-	e.paidWave = 0
 	e.paidWaveGen = e.probeGen
 	for _, result := range e.probeResults {
 		if result.chargeNegative &&
@@ -158,6 +187,8 @@ func (e *rcxEngine) finishProbe() {
 		e.rescueAt = now
 	}
 	decisionClosed := e.probeDecisionClosed
+	recovered := e.probeRecovered
+	fellBack := recovered && e.probeIncumbent != e.incumbent
 	e.probing = false
 	e.deep = false
 	e.probeCancel = nil
@@ -181,6 +212,11 @@ func (e *rcxEngine) finishProbe() {
 	}
 	if !decisionClosed {
 		e.reconsider()
+	} else if e.canImprove() {
+		e.reconsider()
+	}
+	if !e.probing && decisionClosed && fellBack {
+		e.startImprovement(false)
 	}
 	e.persist(false)
 }
@@ -190,6 +226,9 @@ func (e *rcxEngine) watchIncumbent() {
 		return
 	}
 	e.sampleTraffic()
+	if e.suspected(e.runtime.Now()) && e.improvementWave() {
+		e.supersedeProbe()
+	}
 	if !e.suspected(e.runtime.Now()) || e.probing {
 		return
 	}

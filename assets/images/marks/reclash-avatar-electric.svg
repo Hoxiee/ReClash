@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>ReClash Electric</title><desc>Электрический синий аватар для активного чата</desc>
+  <defs><linearGradient id="el-bg" x1="54" y1="45" x2="458" y2="468" gradientUnits="userSpaceOnUse"><stop stop-color="#224FEA"/><stop offset=".56" stop-color="#087FEA"/><stop offset="1" stop-color="#06BED9"/></linearGradient><clipPath id="el-clip"><circle cx="256" cy="256" r="256"/></clipPath></defs>
+  <circle cx="256" cy="256" r="256" fill="url(#el-bg)"/>
+  <g clip-path="url(#el-clip)" fill="none" stroke="#C4FCFF" stroke-opacity=".24" stroke-width="14" stroke-linejoin="round"><path d="M-18 123H128L94 175H176"/><path d="M530 386H388L420 336H345"/><path d="M73 460 121 397 85 365"/></g>
+  <circle cx="256" cy="256" r="232" fill="none" stroke="#FFFFFF" stroke-opacity=".24" stroke-width="2" stroke-dasharray="90 12 22 12"/>
+  <g transform="translate(256 256) rotate(-20) scale(1.12)" fill="none" stroke="#FFFFFF" stroke-width="54" stroke-linecap="round">
+    <path d="M-88 -60 V60"/><path d="M0 -120 V120"/><path d="M88 -40 V40"/>
+  </g>
+</svg>

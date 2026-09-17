@@ -26,6 +26,9 @@ class SystemAction extends _$SystemAction {
   }
 
   Future<void> handleExit([bool needSave = true]) {
+    ref
+        .read(setupActionProvider.notifier)
+        .beginTunAuthorization(allowPrompt: false);
     final coordinator = _exitCoordinator ??= SystemExitCoordinator(
       watchdogDuration: exitWatchdogDuration,
       closeWindow: closeWindow,
@@ -123,9 +126,16 @@ class SystemAction extends _$SystemAction {
   }
 
   void updateTun() {
+    setTunEnabled(!ref.read(patchClashConfigProvider).tun.enable);
+  }
+
+  void setTunEnabled(bool enabled) {
+    ref
+        .read(setupActionProvider.notifier)
+        .beginTunAuthorization(allowPrompt: enabled);
     ref
         .read(patchClashConfigProvider.notifier)
-        .update((state) => state.copyWith.tun(enable: !state.tun.enable));
+        .update((state) => state.copyWith.tun(enable: enabled));
   }
 
   void updateSystemProxy() {

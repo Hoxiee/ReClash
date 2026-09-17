@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 
 import 'core_manifest.dart';
 import 'launcher.dart';
+import 'linux_helper.dart';
 import 'model.dart';
 import 'process_probe.dart';
 
@@ -52,17 +53,18 @@ final class HelperException implements Exception {
 
 final class HelperClient {
   final Dio _dio;
-  final String Function() _expectedHelperPath;
+  final FutureOr<String> Function() _expectedHelperPath;
   final Future<String> Function() _readCoreSha256;
   final String baseUrl;
   String? _coreSha256Cache;
 
   HelperClient({
     Dio? dio,
-    String Function()? expectedHelperPath,
+    FutureOr<String> Function()? expectedHelperPath,
     Future<String> Function()? readCoreSha256,
     String? baseUrl,
-  }) : _dio = dio ?? _createDio(),
+    String? unixSocketPath,
+  }) : _dio = dio ?? _createDio(unixSocketPath),
        baseUrl = baseUrl ?? _defaultBaseUrl(),
        _expectedHelperPath = expectedHelperPath ?? _defaultHelperPath,
        _readCoreSha256 = readCoreSha256 ?? _readBundledCoreSha256;
@@ -88,12 +90,21 @@ final class HelperClient {
 
   // The Helper protocol never leaves the machine; never route it through a
   // proxy.
-  static Dio _createDio() {
+  static Dio _createDio(String? unixSocketPath) {
     return Dio()
       ..httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
           final client = HttpClient();
           client.findProxy = (uri) => 'DIRECT';
+          if (Platform.isLinux) {
+            final address = InternetAddress(
+              unixSocketPath ?? LinuxHelperEnvironment().socketPath,
+              type: InternetAddressType.unix,
+            );
+            client.connectionFactory = (uri, proxyHost, proxyPort) {
+              return Socket.startConnect(address, 0);
+            };
+          }
           return client;
         },
       );
@@ -113,7 +124,10 @@ final class HelperClient {
     );
   }
 
-  static String _defaultHelperPath() {
+  static FutureOr<String> _defaultHelperPath() {
+    if (Platform.isLinux) {
+      return LinuxHelperEnvironment().installedHelperPath();
+    }
     final context = _pathContext;
     return context.join(
       context.dirname(Platform.resolvedExecutable),
@@ -148,7 +162,7 @@ final class HelperClient {
         options: _options(ResponseType.plain, acceptAnyStatus: true),
       );
       return response.statusCode == HttpStatus.ok
-          ? _readyFromOk(response, logFailure)
+          ? await _readyFromOk(response, logFailure)
           : _notReadyFromPing(response, logFailure);
     } catch (error) {
       _logPingFailure('helper ping failed: $error', logFailure);
@@ -158,7 +172,10 @@ final class HelperClient {
     }
   }
 
-  HelperReadiness _readyFromOk(Response<Object?> response, bool logFailure) {
+  Future<HelperReadiness> _readyFromOk(
+    Response<Object?> response,
+    bool logFailure,
+  ) async {
     final protocolVersion = response.headers.value(helperProtocolVersionHeader);
     final helperPath = response.data;
     if (helperPath is! String) {
@@ -171,7 +188,7 @@ final class HelperClient {
     }
     final matches = _pathContext.equals(
       helperPath.trim(),
-      _expectedHelperPath(),
+      await _expectedHelperPath(),
     );
     if (!matches) {
       _logPingFailure('helper executable path mismatch', logFailure);

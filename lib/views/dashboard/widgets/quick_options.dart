@@ -1,5 +1,5 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -89,9 +89,7 @@ class TUNButton extends StatelessWidget {
       ],
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
       onChanged: (ref, value) {
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith.tun(enable: value));
+        ref.read(systemActionProvider.notifier).setTunEnabled(value);
       },
     );
   }

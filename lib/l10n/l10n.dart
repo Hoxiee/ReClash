@@ -55,6 +55,176 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `Retry outside the VPN?`
+  String get subscriptionDirectRetryTitle {
+    return Intl.message(
+      'Retry outside the VPN?',
+      name: 'subscriptionDirectRetryTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription could not be reached through the current connection. Retry this download directly without turning off the VPN? The panel will see your network’s IP address. Other app traffic will not change.`
+  String get subscriptionDirectRetryMessage {
+    return Intl.message(
+      'The subscription could not be reached through the current connection. Retry this download directly without turning off the VPN? The panel will see your network’s IP address. Other app traffic will not change.',
+      name: 'subscriptionDirectRetryMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Retry directly`
+  String get subscriptionDirectRetryConfirm {
+    return Intl.message(
+      'Retry directly',
+      name: 'subscriptionDirectRetryConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App region`
+  String get appRegion {
+    return Intl.message('App region', name: 'appRegion', desc: '', args: []);
+  }
+
+  /// `Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.`
+  String get appRegionDesc {
+    return Intl.message(
+      'Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.',
+      name: 'appRegionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other`
+  String get appRegionOther {
+    return Intl.message('Other', name: 'appRegionOther', desc: '', args: []);
+  }
+
+  /// `Regional quick settings`
+  String get setupRegionSettings {
+    return Intl.message(
+      'Regional quick settings',
+      name: 'setupRegionSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review geo resources, routing presets and app access. Nothing is added automatically.`
+  String get setupRegionSettingsDesc {
+    return Intl.message(
+      'Review geo resources, routing presets and app access. Nothing is added automatically.',
+      name: 'setupRegionSettingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paste a subscription URL to import it on your TV.`
+  String get lanProfileImportPhoneHint {
+    return Intl.message(
+      'Paste a subscription URL to import it on your TV.',
+      name: 'lanProfileImportPhoneHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import on TV`
+  String get lanProfileImportSend {
+    return Intl.message(
+      'Import on TV',
+      name: 'lanProfileImportSend',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription imported. You can return to the TV and close this page.`
+  String get lanProfileImportPhoneSuccess {
+    return Intl.message(
+      'Subscription imported. You can return to the TV and close this page.',
+      name: 'lanProfileImportPhoneSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not import the subscription. Check the URL and try again.`
+  String get lanProfileImportPhoneFailed {
+    return Intl.message(
+      'Could not import the subscription. Check the URL and try again.',
+      name: 'lanProfileImportPhoneFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not reach the TV. Check the connection and retry on this page to confirm the result.`
+  String get lanProfileImportPhoneUnreachable {
+    return Intl.message(
+      'Could not reach the TV. Check the connection and retry on this page to confirm the result.',
+      name: 'lanProfileImportPhoneUnreachable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The panel reported an HWID restriction`
+  String get panelHwidNotSupported {
+    return Intl.message(
+      'The panel reported an HWID restriction',
+      name: 'panelHwidNotSupported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The panel returned x-hwid-not-supported. This does not prove that the client is incompatible. Check your HWID settings and subscription requirements.`
+  String get panelHwidNotSupportedTip {
+    return Intl.message(
+      'The panel returned x-hwid-not-supported. This does not prove that the client is incompatible. Check your HWID settings and subscription requirements.',
+      name: 'panelHwidNotSupportedTip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HWID sharing is off. Enable it only if you trust the panel.`
+  String get panelHwidIdentityDisabled {
+    return Intl.message(
+      'HWID sharing is off. Enable it only if you trust the panel.',
+      name: 'panelHwidIdentityDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Without custom routes, the local network bypasses the VPN. Set explicit routes to capture it.`
+  String get networkDefaultLanBypass {
+    return Intl.message(
+      'Without custom routes, the local network bypasses the VPN. Set explicit routes to capture it.',
+      name: 'networkDefaultLanBypass',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Experimental`
+  String get subscriptionClientExperimentalLabel {
+    return Intl.message(
+      'Experimental',
+      name: 'subscriptionClientExperimentalLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Rule`
   String get rule {
     return Intl.message('Rule', name: 'rule', desc: '', args: []);
@@ -725,10 +895,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Emulation is experimental: the provider serves another client's format, which ReClash converts.`
+  /// `Client compatibility is experimental: the provider serves another client's format, which ReClash converts.`
   String get subscriptionClientExperimentalTip {
     return Intl.message(
-      'Emulation is experimental: the provider serves another client\'s format, which ReClash converts.',
+      'Client compatibility is experimental: the provider serves another client\'s format, which ReClash converts.',
       name: 'subscriptionClientExperimentalTip',
       desc: '',
       args: [],
@@ -2495,6 +2665,16 @@ class AppLocalizations {
     return Intl.message(
       'Send device identifier, app version and device name to proxy provider server',
       name: 'sendDeviceIdentityDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turning off HWID will stop most subscriptions from working. Continue?`
+  String get sendDeviceIdentityDisableWarning {
+    return Intl.message(
+      'Turning off HWID will stop most subscriptions from working. Continue?',
+      name: 'sendDeviceIdentityDisableWarning',
       desc: '',
       args: [],
     );
@@ -4709,6 +4889,21 @@ class AppLocalizations {
     return Intl.message('Core status', name: 'coreStatus', desc: '', args: []);
   }
 
+  /// `Running`
+  String get coreRunning {
+    return Intl.message('Running', name: 'coreRunning', desc: '', args: []);
+  }
+
+  /// `Starting…`
+  String get coreStarting {
+    return Intl.message('Starting…', name: 'coreStarting', desc: '', args: []);
+  }
+
+  /// `Stopped`
+  String get coreStopped {
+    return Intl.message('Stopped', name: 'coreStopped', desc: '', args: []);
+  }
+
   /// `Data collection notice`
   String get dataCollectionTip {
     return Intl.message(
@@ -5304,6 +5499,96 @@ class AppLocalizations {
     return Intl.message(
       'Enter the proxy group name',
       name: 'inputProxyGroupName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow Helper setup?`
+  String get helperAuthorizationTitle {
+    return Intl.message(
+      'Allow Helper setup?',
+      name: 'helperAuthorizationTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN mode needs the ReClash Helper service to be installed or updated. Continue to open your system’s authorization dialog. Enter your password only there; ReClash does not collect it.`
+  String get helperAuthorizationMessage {
+    return Intl.message(
+      'TUN mode needs the ReClash Helper service to be installed or updated. Continue to open your system’s authorization dialog. Enter your password only there; ReClash does not collect it.',
+      name: 'helperAuthorizationMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get helperAuthorizationContinue {
+    return Intl.message(
+      'Continue',
+      name: 'helperAuthorizationContinue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Later`
+  String get helperAuthorizationLater {
+    return Intl.message(
+      'Later',
+      name: 'helperAuthorizationLater',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `TUN mode requires systemd, which is unavailable on this system.`
+  String get helperSystemdUnavailable {
+    return Intl.message(
+      'TUN mode requires systemd, which is unavailable on this system.',
+      name: 'helperSystemdUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `pkexec is unavailable. Install your distribution’s polkit package, then try again.`
+  String get helperPkexecUnavailable {
+    return Intl.message(
+      'pkexec is unavailable. Install your distribution’s polkit package, then try again.',
+      name: 'helperPkexecUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No system authorization agent is available. Start a polkit authentication agent in your desktop session, then try again.`
+  String get helperAgentUnavailable {
+    return Intl.message(
+      'No system authorization agent is available. Start a polkit authentication agent in your desktop session, then try again.',
+      name: 'helperAgentUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not install or update the Helper service. Check the logs and try again.`
+  String get helperInstallFailed {
+    return Intl.message(
+      'Could not install or update the Helper service. Check the logs and try again.',
+      name: 'helperInstallFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Helper setup finished, but the service is not ready. Check the logs and try again.`
+  String get helperInstallNotReady {
+    return Intl.message(
+      'Helper setup finished, but the service is not ready. Check the logs and try again.',
+      name: 'helperInstallNotReady',
       desc: '',
       args: [],
     );
@@ -7249,10 +7534,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Off`
+  /// `Other`
   String get smartRoutingPresetOff {
     return Intl.message(
-      'Off',
+      'Other',
       name: 'smartRoutingPresetOff',
       desc: '',
       args: [],
@@ -7674,11 +7959,41 @@ class AppLocalizations {
     );
   }
 
-  /// `This one is a latency band faster`
+  /// `Repeated checks confirmed lower latency`
   String get smartRoutingReasonLatencyGain {
     return Intl.message(
-      'This one is a latency band faster',
+      'Repeated checks confirmed lower latency',
       name: 'smartRoutingReasonLatencyGain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Repeated checks confirmed a more stable alternative`
+  String get smartRoutingReasonReliabilityGain {
+    return Intl.message(
+      'Repeated checks confirmed a more stable alternative',
+      name: 'smartRoutingReasonReliabilityGain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirming the improvement with repeated comparisons`
+  String get smartRoutingReasonQualityConfirming {
+    return Intl.message(
+      'Confirming the improvement with repeated comparisons',
+      name: 'smartRoutingReasonQualityConfirming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connection restored after the network changed`
+  String get smartRoutingReasonHandoffRecovery {
+    return Intl.message(
+      'Connection restored after the network changed',
+      name: 'smartRoutingReasonHandoffRecovery',
       desc: '',
       args: [],
     );
@@ -8454,24 +8769,19 @@ class AppLocalizations {
     );
   }
 
-  /// `Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.`
+  /// `Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.`
   String get setupRegionDesc {
     return Intl.message(
-      'Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.',
+      'Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.',
       name: 'setupRegionDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Other region or do not use Smart Routing`
+  /// `Other`
   String get setupRegionNone {
-    return Intl.message(
-      'Other region or do not use Smart Routing',
-      name: 'setupRegionNone',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Other', name: 'setupRegionNone', desc: '', args: []);
   }
 
   /// `Connect when ReClash opens`
@@ -9959,11 +10269,6 @@ class AppLocalizations {
     return Intl.message('Layout', name: 'appearanceLayout', desc: '', args: []);
   }
 
-  /// `Motion`
-  String get appearanceMotion {
-    return Intl.message('Motion', name: 'appearanceMotion', desc: '', args: []);
-  }
-
   /// `Scheduled`
   String get schedule {
     return Intl.message('Scheduled', name: 'schedule', desc: '', args: []);
@@ -10289,10 +10594,10 @@ class AppLocalizations {
     );
   }
 
-  /// `None of the nodes in this subscription can be reached — try another client format`
+  /// `No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.`
   String get subscriptionUndialable {
     return Intl.message(
-      'None of the nodes in this subscription can be reached — try another client format',
+      'No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.',
       name: 'subscriptionUndialable',
       desc: '',
       args: [],
@@ -11880,10 +12185,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Show a one-time QR code to send a subscription URL over your local network`
+  /// `Show a one-time page to send a subscription from a phone on your local network`
   String get lanProfileImportDesc {
     return Intl.message(
-      'Show a one-time QR code to send a subscription URL over your local network',
+      'Show a one-time page to send a subscription from a phone on your local network',
       name: 'lanProfileImportDesc',
       desc: '',
       args: [],
@@ -11900,20 +12205,20 @@ class AppLocalizations {
     );
   }
 
-  /// `Scan this QR code with a phone on the same network`
+  /// `Scan this QR code with a phone on the same network, then paste the subscription URL`
   String get lanProfileImportScan {
     return Intl.message(
-      'Scan this QR code with a phone on the same network',
+      'Scan this QR code with a phone on the same network, then paste the subscription URL',
       name: 'lanProfileImportScan',
       desc: '',
       args: [],
     );
   }
 
-  /// `Or send JSON to {address}`
+  /// `Or open {address} in a phone browser`
   String lanProfileImportAddress(String address) {
     return Intl.message(
-      'Or send JSON to $address',
+      'Or open $address in a phone browser',
       name: 'lanProfileImportAddress',
       desc: '',
       args: [address],
@@ -13412,6 +13717,636 @@ class AppLocalizations {
       name: 'panelSettingsConfirmMessage',
       desc: '',
       args: [settings],
+    );
+  }
+
+  /// `Hidden findings`
+  String get milestoneDecorations {
+    return Intl.message(
+      'Hidden findings',
+      name: 'milestoneDecorations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show discoveries earned while using ReClash`
+  String get milestoneDecorationsDesc {
+    return Intl.message(
+      'Show discoveries earned while using ReClash',
+      name: 'milestoneDecorationsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Seasonal appearance`
+  String get seasonalDecorations {
+    return Intl.message(
+      'Seasonal appearance',
+      name: 'seasonalDecorations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show subtle seasonal details on the dashboard`
+  String get seasonalDecorationsDesc {
+    return Intl.message(
+      'Show subtle seasonal details on the dashboard',
+      name: 'seasonalDecorationsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last used`
+  String get lastUsed {
+    return Intl.message('Last used', name: 'lastUsed', desc: '', args: []);
+  }
+
+  /// `Not used yet`
+  String get neverUsed {
+    return Intl.message('Not used yet', name: 'neverUsed', desc: '', args: []);
+  }
+
+  /// `Not used for {days} days`
+  String profileUnusedForDays(int days) {
+    return Intl.message(
+      'Not used for $days days',
+      name: 'profileUnusedForDays',
+      desc: '',
+      args: [days],
+    );
+  }
+
+  /// `Not used for {months} months`
+  String profileUnusedForMonths(int months) {
+    return Intl.message(
+      'Not used for $months months',
+      name: 'profileUnusedForMonths',
+      desc: '',
+      args: [months],
+    );
+  }
+
+  /// `Ninety days without a gap.`
+  String get milestoneRevealVigil {
+    return Intl.message(
+      'Ninety days without a gap.',
+      name: 'milestoneRevealVigil',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A hundred checks. The network has a pulse.`
+  String get milestoneRevealAuscultation {
+    return Intl.message(
+      'A hundred checks. The network has a pulse.',
+      name: 'milestoneRevealAuscultation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every rung, and back to the first.`
+  String get milestoneRevealFullLadder {
+    return Intl.message(
+      'Every rung, and back to the first.',
+      name: 'milestoneRevealFullLadder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A thousand decisions without interruption.`
+  String get milestoneRevealSilentAutopilot {
+    return Intl.message(
+      'A thousand decisions without interruption.',
+      name: 'milestoneRevealSilentAutopilot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `One terabyte has passed through.`
+  String get milestoneRevealOdometer {
+    return Intl.message(
+      'One terabyte has passed through.',
+      name: 'milestoneRevealOdometer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Five meridians crossed.`
+  String get milestoneRevealMeridian {
+    return Intl.message(
+      'Five meridians crossed.',
+      name: 'milestoneRevealMeridian',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Seven quiet days.`
+  String get milestoneRevealPorcelain {
+    return Intl.message(
+      'Seven quiet days.',
+      name: 'milestoneRevealPorcelain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A year of covered time.`
+  String get milestoneRevealCrown {
+    return Intl.message(
+      'A year of covered time.',
+      name: 'milestoneRevealCrown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Findings`
+  String get findings {
+    return Intl.message('Findings', name: 'findings', desc: '', args: []);
+  }
+
+  /// `Quiet details discovered while using ReClash`
+  String get findingsDesc {
+    return Intl.message(
+      'Quiet details discovered while using ReClash',
+      name: 'findingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discovered {found} of {total}`
+  String findingsCount(int found, int total) {
+    return Intl.message(
+      'Discovered $found of $total',
+      name: 'findingsCount',
+      desc: '',
+      args: [found, total],
+    );
+  }
+
+  /// `Discovered`
+  String get discoveredFindings {
+    return Intl.message(
+      'Discovered',
+      name: 'discoveredFindings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discovered {date}`
+  String findingDiscoveredOn(String date) {
+    return Intl.message(
+      'Discovered $date',
+      name: 'findingDiscoveredOn',
+      desc: '',
+      args: [date],
+    );
+  }
+
+  /// `Reset findings`
+  String get resetFindings {
+    return Intl.message(
+      'Reset findings',
+      name: 'resetFindings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show discovery moments again without resetting usage history`
+  String get resetFindingsDesc {
+    return Intl.message(
+      'Show discovery moments again without resetting usage history',
+      name: 'resetFindingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset findings?`
+  String get resetFindingsTitle {
+    return Intl.message(
+      'Reset findings?',
+      name: 'resetFindingsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discovered entries will be hidden and can appear again. Usage history will remain unchanged.`
+  String get resetFindingsConfirm {
+    return Intl.message(
+      'Discovered entries will be hidden and can appear again. Usage history will remain unchanged.',
+      name: 'resetFindingsConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vigil`
+  String get findingVigil {
+    return Intl.message('Vigil', name: 'findingVigil', desc: '', args: []);
+  }
+
+  /// `Auscultation`
+  String get findingAuscultation {
+    return Intl.message(
+      'Auscultation',
+      name: 'findingAuscultation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full ladder`
+  String get findingFullLadder {
+    return Intl.message(
+      'Full ladder',
+      name: 'findingFullLadder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Silent autopilot`
+  String get findingSilentAutopilot {
+    return Intl.message(
+      'Silent autopilot',
+      name: 'findingSilentAutopilot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Odometer`
+  String get findingOdometer {
+    return Intl.message(
+      'Odometer',
+      name: 'findingOdometer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Five meridians`
+  String get findingMeridian {
+    return Intl.message(
+      'Five meridians',
+      name: 'findingMeridian',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Porcelain`
+  String get findingPorcelain {
+    return Intl.message(
+      'Porcelain',
+      name: 'findingPorcelain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Crown`
+  String get findingCrown {
+    return Intl.message('Crown', name: 'findingCrown', desc: '', args: []);
+  }
+
+  /// `Oscilloscope`
+  String get findingOscilloscope {
+    return Intl.message(
+      'Oscilloscope',
+      name: 'findingOscilloscope',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Marks`
+  String get findingMarks {
+    return Intl.message('Marks', name: 'findingMarks', desc: '', args: []);
+  }
+
+  /// `Pi`
+  String get findingPi {
+    return Intl.message('Pi', name: 'findingPi', desc: '', args: []);
+  }
+
+  /// `Turn`
+  String get findingTurn {
+    return Intl.message('Turn', name: 'findingTurn', desc: '', args: []);
+  }
+
+  /// `Storm`
+  String get findingStorm {
+    return Intl.message('Storm', name: 'findingStorm', desc: '', args: []);
+  }
+
+  /// `Loop`
+  String get findingLoopback {
+    return Intl.message('Loop', name: 'findingLoopback', desc: '', args: []);
+  }
+
+  /// `The ring listened to live traffic for six seconds.`
+  String get findingOscilloscopeDesc {
+    return Intl.message(
+      'The ring listened to live traffic for six seconds.',
+      name: 'findingOscilloscopeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The ReClash mark sheet was uncovered.`
+  String get findingMarksDesc {
+    return Intl.message(
+      'The ReClash mark sheet was uncovered.',
+      name: 'findingMarksDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The session passed 3:14:15 while the dashboard was open.`
+  String get findingPiDesc {
+    return Intl.message(
+      'The session passed 3:14:15 while the dashboard was open.',
+      name: 'findingPiDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The session crossed New Year midnight.`
+  String get findingTurnDesc {
+    return Intl.message(
+      'The session crossed New Year midnight.',
+      name: 'findingTurnDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every diagnostic layer failed at once.`
+  String get findingStormDesc {
+    return Intl.message(
+      'Every diagnostic layer failed at once.',
+      name: 'findingStormDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A profile pointed back to the local listening port.`
+  String get findingLoopbackDesc {
+    return Intl.message(
+      'A profile pointed back to the local listening port.',
+      name: 'findingLoopbackDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vigil`
+  String get appIconVigil {
+    return Intl.message('Vigil', name: 'appIconVigil', desc: '', args: []);
+  }
+
+  /// `Topo`
+  String get appIconTopo {
+    return Intl.message('Topo', name: 'appIconTopo', desc: '', args: []);
+  }
+
+  /// `Fractal`
+  String get appIconFractal {
+    return Intl.message('Fractal', name: 'appIconFractal', desc: '', args: []);
+  }
+
+  /// `Spark`
+  String get appIconSpark {
+    return Intl.message('Spark', name: 'appIconSpark', desc: '', args: []);
+  }
+
+  /// `Since {date} · {days} covered days`
+  String crownHistory(String date, int days) {
+    return Intl.message(
+      'Since $date · $days covered days',
+      name: 'crownHistory',
+      desc: '',
+      args: [date, days],
+    );
+  }
+
+  /// `Ladder result: {passed}/{total}`
+  String desyncLadderResult(int passed, int total) {
+    return Intl.message(
+      'Ladder result: $passed/$total',
+      name: 'desyncLadderResult',
+      desc: '',
+      args: [passed, total],
+    );
+  }
+
+  /// `Apply the cold, nearly monochrome palette`
+  String get porcelainThemeDesc {
+    return Intl.message(
+      'Apply the cold, nearly monochrome palette',
+      name: 'porcelainThemeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finding preview`
+  String get developerFindings {
+    return Intl.message(
+      'Finding preview',
+      name: 'developerFindings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Temporary previews only: counters, earned findings and network settings stay unchanged. Reset or disable developer mode to leave. Dashboard effects wait for a visible, healthy connection and respect appearance settings. Selecting an icon or theme in Appearance still saves that choice.`
+  String get developerFindingsDesc {
+    return Intl.message(
+      'Temporary previews only: counters, earned findings and network settings stay unchanged. Reset or disable developer mode to leave. Dashboard effects wait for a visible, healthy connection and respect appearance settings. Selecting an icon or theme in Appearance still saves that choice.',
+      name: 'developerFindingsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview all rewards`
+  String get developerAllRewards {
+    return Intl.message(
+      'Preview all rewards',
+      name: 'developerAllRewards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear previews`
+  String get developerPreviewReset {
+    return Intl.message(
+      'Clear previews',
+      name: 'developerPreviewReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatic`
+  String get developerPreviewAutomatic {
+    return Intl.message(
+      'Automatic',
+      name: 'developerPreviewAutomatic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Year`
+  String get developerSeasonNewYear {
+    return Intl.message(
+      'New Year',
+      name: 'developerSeasonNewYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash birthday`
+  String get developerSeasonBirthday {
+    return Intl.message(
+      'ReClash birthday',
+      name: 'developerSeasonBirthday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `First-run anniversary`
+  String get developerSeasonAnniversary {
+    return Intl.message(
+      'First-run anniversary',
+      name: 'developerSeasonAnniversary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Seasonal hue`
+  String get developerSeasonDrift {
+    return Intl.message(
+      'Seasonal hue',
+      name: 'developerSeasonDrift',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profile patina`
+  String get developerPatina {
+    return Intl.message(
+      'Profile patina',
+      name: 'developerPatina',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{days} days`
+  String developerPatinaDays(int days) {
+    return Intl.message(
+      '$days days',
+      name: 'developerPatinaDays',
+      desc: '',
+      args: [days],
+    );
+  }
+
+  /// `Replay a finding`
+  String get developerFindingEvents {
+    return Intl.message(
+      'Replay a finding',
+      name: 'developerFindingEvents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Queued for the visible, healthy dashboard. You can replay this finding again.`
+  String get developerFindingQueued {
+    return Intl.message(
+      'Queued for the visible, healthy dashboard. You can replay this finding again.',
+      name: 'developerFindingQueued',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Every connection stage is unavailable`
+  String get findingStormTitle {
+    return Intl.message(
+      'Every connection stage is unavailable',
+      name: 'findingStormTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The check found no working path. Later failures may be consequences of the first one.`
+  String get findingStormVerdict {
+    return Intl.message(
+      'The check found no working path. Later failures may be consequences of the first one.',
+      name: 'findingStormVerdict',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This profile URL points to ReClash’s own proxy port. Check the subscription address.`
+  String get findingLoopbackWarning {
+    return Intl.message(
+      'This profile URL points to ReClash’s own proxy port. Check the subscription address.',
+      name: 'findingLoopbackWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Today is ReClash’s birthday.`
+  String get seasonBirthdayNote {
+    return Intl.message(
+      'Today is ReClash’s birthday.',
+      name: 'seasonBirthdayNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Today is the anniversary of your first launch.`
+  String get seasonFirstRunNote {
+    return Intl.message(
+      'Today is the anniversary of your first launch.',
+      name: 'seasonFirstRunNote',
+      desc: '',
+      args: [],
     );
   }
 }

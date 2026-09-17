@@ -84,6 +84,17 @@ class TestSetupAction extends SetupAction {
   int authorizeCalls = 0;
   AuthorizeCode authorizeResult = AuthorizeCode.none;
   bool adminCheckResult = true;
+  bool tunElevationSupported = true;
+  bool tunAuthorizationRechecked = true;
+
+  @override
+  bool get requiresHelperSession => false;
+
+  @override
+  bool get supportsTunElevation => tunElevationSupported;
+
+  @override
+  bool get rechecksTunAuthorization => tunAuthorizationRechecked;
 
   @override
   Future<AuthorizeCode> authorizeCore() async {
@@ -427,90 +438,109 @@ void main() {
       );
     });
 
-    test('does not ask again once the state left none', () async {
+    test('Unix continues without requesting elevated Core access', () async {
+      action.tunElevationSupported = false;
       container.read(authorizedTunEnableProvider.notifier).value =
           TunAuthorizationState.authorized;
 
       expect(await action.requestAdmin(true), isTrue);
       expect(action.authorizeCalls, 0);
-    });
-
-    test(
-      'marks the state authorized when the binary is already privileged',
-      () async {
-        action.adminCheckResult = true;
-
-        expect(await action.requestAdmin(true), isTrue);
-        expect(action.authorizeCalls, 0);
-        expect(
-          container.read(authorizedTunEnableProvider),
-          TunAuthorizationState.authorized,
-        );
-      },
-    );
-
-    test(
-      're-prompts on a privileged binary even after an authorized state',
-      () async {
-        action.adminCheckResult = false;
-        action.authorizeResult = AuthorizeCode.success;
-        container.read(authorizedTunEnableProvider.notifier).value =
-            TunAuthorizationState.authorized;
-
-        expect(await action.requestAdmin(true), isFalse);
-        expect(action.authorizeCalls, 1);
-      },
-    );
-
-    test('re-prompts after a dismissed authorization dialog', () async {
-      action.adminCheckResult = false;
-      action.authorizeResult = AuthorizeCode.error;
-      await action.requestAdmin(true);
-
-      action.authorizeResult = AuthorizeCode.none;
-      expect(await action.requestAdmin(true), isTrue);
-      expect(action.authorizeCalls, 2);
-      expect(
-        container.read(authorizedTunEnableProvider),
-        TunAuthorizationState.authorized,
-      );
-    });
-
-    test(
-      'a successful authorization hands off instead of continuing',
-      () async {
-        action.adminCheckResult = false;
-        action.authorizeResult = AuthorizeCode.success;
-
-        expect(await action.requestAdmin(true), isFalse);
-        expect(action.authorizeCalls, 1);
-        expect(
-          container.read(authorizedTunEnableProvider),
-          TunAuthorizationState.authorized,
-        );
-      },
-    );
-
-    test('a platform without an authorization step continues inline', () async {
-      action.adminCheckResult = false;
-      action.authorizeResult = AuthorizeCode.none;
-
-      expect(await action.requestAdmin(true), isTrue);
-      expect(
-        container.read(authorizedTunEnableProvider),
-        TunAuthorizationState.authorized,
-      );
-    });
-
-    test('a failed authorization continues but stays unauthorized', () async {
-      action.adminCheckResult = false;
-      action.authorizeResult = AuthorizeCode.error;
-
-      expect(await action.requestAdmin(true), isTrue);
       expect(
         container.read(authorizedTunEnableProvider),
         TunAuthorizationState.unauthorized,
       );
+    });
+
+    group('requestAdmin supported elevation', () {
+      test('does not ask again once the state left none', () async {
+        action.tunAuthorizationRechecked = false;
+        container.read(authorizedTunEnableProvider.notifier).value =
+            TunAuthorizationState.authorized;
+
+        expect(await action.requestAdmin(true), isTrue);
+        expect(action.authorizeCalls, 0);
+      });
+
+      test(
+        'marks the state authorized when the binary is already privileged',
+        () async {
+          action.adminCheckResult = true;
+
+          expect(await action.requestAdmin(true), isTrue);
+          expect(action.authorizeCalls, 0);
+          expect(
+            container.read(authorizedTunEnableProvider),
+            TunAuthorizationState.authorized,
+          );
+        },
+      );
+
+      test(
+        're-prompts on a privileged binary even after an authorized state',
+        () async {
+          action.adminCheckResult = false;
+          action.authorizeResult = AuthorizeCode.success;
+          container.read(authorizedTunEnableProvider.notifier).value =
+              TunAuthorizationState.authorized;
+
+          expect(await action.requestAdmin(true), isFalse);
+          expect(action.authorizeCalls, 1);
+        },
+      );
+
+      test('re-prompts after a dismissed authorization dialog', () async {
+        action.adminCheckResult = false;
+        action.authorizeResult = AuthorizeCode.error;
+        await action.requestAdmin(true);
+
+        action.authorizeResult = AuthorizeCode.none;
+        expect(await action.requestAdmin(true), isTrue);
+        expect(action.authorizeCalls, 2);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.authorized,
+        );
+      });
+
+      test(
+        'a successful authorization hands off instead of continuing',
+        () async {
+          action.adminCheckResult = false;
+          action.authorizeResult = AuthorizeCode.success;
+
+          expect(await action.requestAdmin(true), isFalse);
+          expect(action.authorizeCalls, 1);
+          expect(
+            container.read(authorizedTunEnableProvider),
+            TunAuthorizationState.authorized,
+          );
+        },
+      );
+
+      test(
+        'a platform without an authorization step continues inline',
+        () async {
+          action.adminCheckResult = false;
+          action.authorizeResult = AuthorizeCode.none;
+
+          expect(await action.requestAdmin(true), isTrue);
+          expect(
+            container.read(authorizedTunEnableProvider),
+            TunAuthorizationState.authorized,
+          );
+        },
+      );
+
+      test('a failed authorization continues but stays unauthorized', () async {
+        action.adminCheckResult = false;
+        action.authorizeResult = AuthorizeCode.error;
+
+        expect(await action.requestAdmin(true), isTrue);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.unauthorized,
+        );
+      });
     });
   });
 
@@ -888,7 +918,10 @@ void main() {
 
         await messageAction.setRunning(true, initialize: true);
 
-        expect(messageAction.coreRunningCalls, [true, false]);
+        expect(
+          messageAction.coreRunningCalls,
+          Platform.isLinux ? [false] : [true, false],
+        );
         expect(scoped.read(runTimeProvider), isNull);
         verify(() => core.setupConfig(any())).called(1);
       },

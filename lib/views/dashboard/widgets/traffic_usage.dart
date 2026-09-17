@@ -2,13 +2,16 @@ import 'dart:math';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/finding_preview.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TrafficUsage extends StatelessWidget {
-  const TrafficUsage({super.key});
+  const TrafficUsage({super.key, this.preview = false});
+
+  final bool preview;
 
   @override
   Widget build(BuildContext context) {
@@ -23,26 +26,80 @@ class TrafficUsage extends StatelessWidget {
             iconData: Icons.data_saver_off,
           ),
           onPressed: () {},
-          child: Consumer(
-            builder: (_, ref, _) {
-              final totalTraffic = ref.watch(totalTrafficProvider);
-              return _TrafficUsageBody(
-                up: totalTraffic.up,
-                down: totalTraffic.down,
-              );
-            },
-          ),
+          child: preview
+              ? const _PreviewTrafficUsage()
+              : Consumer(
+                  builder: (_, ref, _) {
+                    final totalTraffic = ref.watch(totalTrafficProvider);
+                    final rolling = ref.watch(
+                      visibleMilestonesProvider.select(
+                        (state) => state.unlocked.contains('odometer'),
+                      ),
+                    );
+                    return _TrafficUsageBody(
+                      up: totalTraffic.up,
+                      down: totalTraffic.down,
+                      rolling: rolling,
+                    );
+                  },
+                ),
         ),
       ),
     );
   }
 }
 
+class _PreviewTrafficUsage extends StatefulWidget {
+  const _PreviewTrafficUsage();
+
+  @override
+  State<_PreviewTrafficUsage> createState() => _PreviewTrafficUsageState();
+}
+
+class _PreviewTrafficUsageState extends State<_PreviewTrafficUsage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _clock = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 8),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (context.disableAnimations || !TickerMode.valuesOf(context).enabled) {
+      _clock.stop();
+    } else if (!_clock.isAnimating) {
+      _clock.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _clock.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _clock,
+    builder: (_, _) => _TrafficUsageBody(
+      up: 120 * 1024 * 1024 + (_clock.value * 16).floor() * 1024 * 1024,
+      down: 480 * 1024 * 1024 + (_clock.value * 16).floor() * 4 * 1024 * 1024,
+      rolling: true,
+    ),
+  );
+}
+
 class _TrafficUsageBody extends StatelessWidget {
-  const _TrafficUsageBody({required this.up, required this.down});
+  const _TrafficUsageBody({
+    required this.up,
+    required this.down,
+    required this.rolling,
+  });
 
   final num up;
   final num down;
+  final bool rolling;
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +123,13 @@ class _TrafficUsageBody extends StatelessWidget {
           _TrafficDataItem(
             icon: Icon(Icons.arrow_upward, color: upColor, size: 14),
             value: up,
+            rolling: rolling,
           ),
           const SizedBox(height: 8),
           _TrafficDataItem(
             icon: Icon(Icons.arrow_downward, color: downColor, size: 14),
             value: down,
+            rolling: rolling,
           ),
         ],
       ),
@@ -186,10 +245,15 @@ class _LegendEntry extends StatelessWidget {
 }
 
 class _TrafficDataItem extends StatelessWidget {
-  const _TrafficDataItem({required this.icon, required this.value});
+  const _TrafficDataItem({
+    required this.icon,
+    required this.value,
+    required this.rolling,
+  });
 
   final Icon icon;
   final num value;
+  final bool rolling;
 
   @override
   Widget build(BuildContext context) {
@@ -207,10 +271,9 @@ class _TrafficDataItem extends StatelessWidget {
               const SizedBox(width: 8),
               Flexible(
                 flex: 1,
-                child: Text(
-                  value.traffic.value,
-                  style: context.textTheme.bodySmall,
-                  maxLines: 1,
+                child: _RollingTrafficValue(
+                  value: value.traffic.value,
+                  rolling: rolling,
                 ),
               ),
             ],
@@ -218,6 +281,67 @@ class _TrafficDataItem extends StatelessWidget {
         ),
         Text(value.traffic.unit, style: context.textTheme.bodySmall?.toLighter),
       ],
+    );
+  }
+}
+
+class _RollingTrafficValue extends StatelessWidget {
+  const _RollingTrafficValue({required this.value, required this.rolling});
+
+  final String value;
+  final bool rolling;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      value,
+      key: ValueKey(value),
+      style: context.textTheme.bodySmall,
+      maxLines: 1,
+    );
+    if (!rolling || context.disableAnimations) return text;
+    return Semantics(
+      label: value,
+      excludeSemantics: true,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var index = 0; index < value.length; index++)
+              ClipRect(
+                key: ValueKey(value.length - index),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  transitionBuilder: (child, animation) {
+                    final offset =
+                        Tween<Offset>(
+                          begin: const Offset(0, 0.9),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOut,
+                          ),
+                        );
+                    return SlideTransition(
+                      position: offset,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  child: Text(
+                    value[index],
+                    key: ValueKey(value[index]),
+                    style: context.textTheme.bodySmall?.copyWith(
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

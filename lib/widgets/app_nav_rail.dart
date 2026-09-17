@@ -8,14 +8,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum NavRailLabelMode { none, stacked, extended }
-
-/// Desktop navigation rail. Slots are placed at measured pixel tops rather
-/// than at index multiples, because semantic groups insert hairlines and the
-/// last group is pinned to the bottom; the travelling pill reads those same
-/// tops, so it can never drift from the row it highlights.
 class AppNavRail extends ConsumerStatefulWidget {
-  const AppNavRail({super.key, this.leading, this.onToPage});
+  const AppNavRail({super.key, this.leading, this.onToPage, this.onAbout});
 
   @visibleForTesting
   static const Key highlightKey = Key('nav-rail-highlight');
@@ -25,6 +19,7 @@ class AppNavRail extends ConsumerStatefulWidget {
 
   final Widget? leading;
   final void Function(PageLabel label)? onToPage;
+  final VoidCallback? onAbout;
 
   @override
   ConsumerState<AppNavRail> createState() => _AppNavRailState();
@@ -108,19 +103,6 @@ class _AppNavRailState extends ConsumerState<AppNavRail>
   @override
   Widget build(BuildContext context) {
     final items = ref.watch(currentNavigationItemsStateProvider).value;
-    final showLabel = ref.watch(
-      appSettingProvider.select((state) => state.showLabel),
-    );
-    final wide = ref.watch(
-      viewWidthProvider.select(
-        (width) => width >= NavRailMetrics.extendedMinViewWidth,
-      ),
-    );
-    final mode = switch ((showLabel, wide)) {
-      (false, _) => NavRailLabelMode.none,
-      (true, false) => NavRailLabelMode.stacked,
-      (true, true) => NavRailLabelMode.extended,
-    };
 
     // Listeners, not build: this also covers navigation that did not come
     // from a tap here, and never marks the subtree dirty mid-build.
@@ -134,47 +116,22 @@ class _AppNavRailState extends ConsumerState<AppNavRail>
     });
 
     final leading = widget.leading;
-    return AnimatedContainer(
-      duration: context.motionDuration(NavRailMetrics.motionDuration),
-      curve: NavRailMetrics.motionCurve,
-      width: mode == NavRailLabelMode.extended
-          ? NavRailMetrics.extendedWidth
-          : NavRailMetrics.collapsedWidth,
+    return SizedBox(
+      width: NavRailMetrics.width,
       child: Column(
         children: [
           if (leading != null) ...[leading, const SizedBox(height: 12)],
           Expanded(
             child: _RailBody(
               items: items,
-              mode: mode,
               controller: _controller,
               positionOf: () => _position,
               selectedIndexOf: () => _to.round(),
               onToPage: _handleTap,
+              onAbout: widget.onAbout,
             ),
           ),
-          _RailChevron(expanded: showLabel),
         ],
-      ),
-    );
-  }
-}
-
-class _RailChevron extends ConsumerWidget {
-  const _RailChevron({required this.expanded});
-
-  final bool expanded;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: IconButton(
-        onPressed: () => ref
-            .read(appSettingProvider.notifier)
-            .update((state) => state.copyWith(showLabel: !state.showLabel)),
-        tooltip: context.appLocalizations.toggleLabel,
-        icon: Icon(expanded ? Icons.chevron_left : Icons.chevron_right),
       ),
     );
   }
@@ -183,19 +140,19 @@ class _RailChevron extends ConsumerWidget {
 class _RailBody extends StatelessWidget {
   const _RailBody({
     required this.items,
-    required this.mode,
     required this.controller,
     required this.positionOf,
     required this.selectedIndexOf,
     required this.onToPage,
+    this.onAbout,
   });
 
   final List<NavigationItem> items;
-  final NavRailLabelMode mode;
   final AnimationController controller;
   final double Function() positionOf;
   final int Function() selectedIndexOf;
   final void Function(PageLabel label) onToPage;
+  final VoidCallback? onAbout;
 
   static int _groupOf(PageLabel label) => switch (label) {
     PageLabel.dashboard => 0,
@@ -207,13 +164,10 @@ class _RailBody extends StatelessWidget {
     PageLabel.tools => 3,
   };
 
-  static const int _pinnedGroup = 3;
-
-  double get _slotHeight => switch (mode) {
-    NavRailLabelMode.none => NavRailMetrics.iconSlotHeight,
-    NavRailLabelMode.stacked => NavRailMetrics.stackedSlotHeight,
-    NavRailLabelMode.extended => NavRailMetrics.extendedSlotHeight,
-  };
+  static double _extentOf(int count, int boundaries, double slotHeight) =>
+      NavRailMetrics.padding.vertical +
+      count * slotHeight +
+      boundaries * NavRailMetrics.dividerExtent;
 
   @override
   Widget build(BuildContext context) {
@@ -221,121 +175,152 @@ class _RailBody extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final colorScheme = context.colorScheme;
-    final slotHeight = _slotHeight;
+    const slotHeight = NavRailMetrics.stackedSlotHeight;
     final boundaries = <int>[
       for (var i = 1; i < items.length; i++)
         if (_groupOf(items[i].label) != _groupOf(items[i - 1].label)) i,
     ];
-    final fixedExtent =
-        NavRailMetrics.padding.vertical +
-        items.length * slotHeight +
-        boundaries.length * NavRailMetrics.dividerExtent;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final spacer = (constraints.maxHeight - fixedExtent).clamp(
-          0.0,
-          double.infinity,
-        );
-        final tops = <double>[];
-        final dividers = <double>[];
-        var y = NavRailMetrics.padding.top;
-        for (var i = 0; i < items.length; i++) {
-          if (boundaries.contains(i)) {
-            if (_groupOf(items[i].label) == _pinnedGroup) {
-              y += spacer;
-            }
-            y += NavRailMetrics.groupGap;
-            dividers.add(y);
-            y += NavRailMetrics.hairline + NavRailMetrics.groupGap;
-          }
-          tops.add(y);
-          y += slotHeight;
-        }
-        final extent = fixedExtent + spacer;
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Column(
+        children: [
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final extent = _extentOf(
+                  items.length,
+                  boundaries.length,
+                  slotHeight,
+                );
+                final tops = <double>[];
+                final dividers = <double>[];
+                var y = NavRailMetrics.padding.top;
+                for (var i = 0; i < items.length; i++) {
+                  if (boundaries.contains(i)) {
+                    y += NavRailMetrics.groupGap;
+                    dividers.add(y);
+                    y += NavRailMetrics.hairline + NavRailMetrics.groupGap;
+                  }
+                  tops.add(y);
+                  y += slotHeight;
+                }
 
-        final body = FocusTraversalGroup(
-          policy: WidgetOrderTraversalPolicy(),
-          child: AnimatedBuilder(
-            animation: controller,
-            builder: (context, _) {
-              final position = positionOf().clamp(
-                0.0,
-                (items.length - 1).toDouble(),
-              );
-              final pillTop = _topAt(position, tops);
-              return Stack(
-                children: [
-                  for (final dividerY in dividers)
-                    Positioned(
-                      top: dividerY,
-                      left: NavRailMetrics.pillInsetX + 4,
-                      right: NavRailMetrics.pillInsetX + 4,
-                      height: NavRailMetrics.hairline,
-                      child: ColoredBox(
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: 0.6,
-                        ),
-                      ),
-                    ),
-                  Positioned(
-                    top: pillTop + NavRailMetrics.pillInsetY,
-                    left: NavRailMetrics.pillInsetX,
-                    right: NavRailMetrics.pillInsetX,
-                    height: slotHeight - NavRailMetrics.pillInsetY * 2,
-                    child: DecoratedBox(
-                      key: AppNavRail.highlightKey,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        borderRadius: AppRadius.full,
-                      ),
-                    ),
-                  ),
-                  _SlotLayer(
-                    items: items,
-                    tops: tops,
-                    slotHeight: slotHeight,
-                    mode: mode,
-                    pillTop: pillTop,
-                    selectedIndex: selectedIndexOf(),
-                    color: colorScheme.onSurfaceVariant,
-                    onToPage: onToPage,
-                  ),
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: ExcludeSemantics(
-                        child: ClipPath(
-                          clipper: _HighlightClip(
-                            top: pillTop + NavRailMetrics.pillInsetY,
-                            height: slotHeight - NavRailMetrics.pillInsetY * 2,
+                final body = AnimatedBuilder(
+                  animation: controller,
+                  builder: (context, _) {
+                    final position = positionOf().clamp(
+                      0.0,
+                      (items.length - 1).toDouble(),
+                    );
+                    final pillTop = _topAt(position, tops);
+                    return Stack(
+                      children: [
+                        for (final dividerY in dividers)
+                          Positioned(
+                            top: dividerY,
+                            left: NavRailMetrics.pillInsetX + 4,
+                            right: NavRailMetrics.pillInsetX + 4,
+                            height: NavRailMetrics.hairline,
+                            child: ColoredBox(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.6,
+                              ),
+                            ),
                           ),
-                          child: _SlotLayer(
-                            items: items,
-                            tops: tops,
-                            slotHeight: slotHeight,
-                            mode: mode,
-                            pillTop: pillTop,
-                            selectedIndex: selectedIndexOf(),
-                            color: colorScheme.onPrimary,
+                        Positioned(
+                          top: pillTop + NavRailMetrics.pillInsetY,
+                          left: NavRailMetrics.pillInsetX,
+                          right: NavRailMetrics.pillInsetX,
+                          height: slotHeight - NavRailMetrics.pillInsetY * 2,
+                          child: DecoratedBox(
+                            key: AppNavRail.highlightKey,
+                            decoration: ShapeDecoration(
+                              color: colorScheme.primary,
+                              shape: AppShape.md,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
+                        _SlotLayer(
+                          items: items,
+                          tops: tops,
+                          slotHeight: slotHeight,
+                          selectedIndex: selectedIndexOf(),
+                          color: colorScheme.onSurfaceVariant,
+                          onToPage: onToPage,
+                        ),
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: ExcludeSemantics(
+                              child: ClipPath(
+                                clipper: _HighlightClip(
+                                  shape: AppShape.md,
+                                  top: pillTop + NavRailMetrics.pillInsetY,
+                                  height:
+                                      slotHeight -
+                                      NavRailMetrics.pillInsetY * 2,
+                                ),
+                                child: _SlotLayer(
+                                  items: items,
+                                  tops: tops,
+                                  slotHeight: slotHeight,
+                                  selectedIndex: selectedIndexOf(),
+                                  color: colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (extent <= constraints.maxHeight) {
+                  return body;
+                }
+                // Directional focus traversal reveals the focused slot on its own.
+                return ScrollConfiguration(
+                  behavior: const HiddenBarScrollBehavior(),
+                  child: SingleChildScrollView(
+                    child: SizedBox(height: extent, child: body),
                   ),
-                ],
-              );
-            },
+                );
+              },
+            ),
           ),
-        );
-
-        if (spacer > 0) {
-          return body;
-        }
-        // Directional focus traversal reveals the focused slot on its own.
-        return SingleChildScrollView(
-          child: SizedBox(height: extent, child: body),
-        );
-      },
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: NavRailMetrics.pillInsetX + 4,
+            ),
+            child: ColoredBox(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+              child: const SizedBox(
+                height: NavRailMetrics.hairline,
+                width: double.infinity,
+              ),
+            ),
+          ),
+          const SizedBox(height: NavRailMetrics.groupGap),
+          Padding(
+            padding: EdgeInsets.only(bottom: NavRailMetrics.padding.bottom),
+            child: SizedBox(
+              height: slotHeight,
+              width: double.infinity,
+              child: FocusTraversalOrder(
+                order: NumericFocusOrder(items.length.toDouble()),
+                child: _RailSlot(
+                  icon: Icons.info_outline,
+                  label: context.appLocalizations.about,
+                  color: colorScheme.onSurfaceVariant,
+                  selected: false,
+                  onToPage: onAbout,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -351,8 +336,6 @@ class _SlotLayer extends StatelessWidget {
     required this.items,
     required this.tops,
     required this.slotHeight,
-    required this.mode,
-    required this.pillTop,
     required this.selectedIndex,
     required this.color,
     this.onToPage,
@@ -361,8 +344,6 @@ class _SlotLayer extends StatelessWidget {
   final List<NavigationItem> items;
   final List<double> tops;
   final double slotHeight;
-  final NavRailLabelMode mode;
-  final double pillTop;
   final int selectedIndex;
   final Color color;
   final void Function(PageLabel label)? onToPage;
@@ -376,16 +357,17 @@ class _SlotLayer extends StatelessWidget {
           left: 0,
           right: 0,
           height: slotHeight,
-          child: _RailSlot(
-            item: items[i],
-            mode: mode,
-            color: color,
-            selected: i == selectedIndex,
-            covered: (1 - (pillTop - tops[i]).abs() / slotHeight).clamp(
-              0.0,
-              1.0,
+          child: FocusTraversalOrder(
+            order: NumericFocusOrder(i.toDouble()),
+            child: _RailSlot(
+              icon: items[i].icon.icon ?? Icons.circle,
+              label: items[i].label.label,
+              color: color,
+              selected: i == selectedIndex,
+              onToPage: onToPage == null
+                  ? null
+                  : () => onToPage!(items[i].label),
             ),
-            onToPage: onToPage == null ? null : () => onToPage!(items[i].label),
           ),
         ),
     ],
@@ -394,19 +376,17 @@ class _SlotLayer extends StatelessWidget {
 
 class _RailSlot extends StatefulWidget {
   const _RailSlot({
-    required this.item,
-    required this.mode,
+    required this.icon,
+    required this.label,
     required this.color,
     required this.selected,
-    required this.covered,
     this.onToPage,
   });
 
-  final NavigationItem item;
-  final NavRailLabelMode mode;
+  final IconData icon;
+  final String label;
   final Color color;
   final bool selected;
-  final double covered;
   final VoidCallback? onToPage;
 
   @override
@@ -436,15 +416,11 @@ class _RailSlotState extends State<_RailSlot> {
 
   @override
   Widget build(BuildContext context) {
-    final label = widget.item.label.label;
-    final icon = Icon(
-      widget.item.icon.icon ?? Icons.circle,
-      size: 24,
-      color: widget.color,
-    );
-    final content = switch (widget.mode) {
-      NavRailLabelMode.none => Center(child: icon),
-      NavRailLabelMode.stacked => Column(
+    final label = widget.label;
+    final icon = Icon(widget.icon, size: 24, color: widget.color);
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -453,35 +429,17 @@ class _RailSlotState extends State<_RailSlot> {
           Text(
             label,
             maxLines: 1,
+            textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.labelSmall?.copyWith(
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: widget.color,
             ),
           ),
         ],
       ),
-      NavRailLabelMode.extended => Row(
-        children: [
-          const SizedBox(width: 8),
-          icon,
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: widget.color,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    };
+    );
     final onToPage = widget.onToPage;
     // Both layers pad identically, or the recoloured copy would sit off the
     // resting one by the pill inset.
@@ -494,40 +452,38 @@ class _RailSlotState extends State<_RailSlot> {
     }
     return Semantics(
       selected: widget.selected,
-      child: Tooltip(
-        message: label,
-        child: Padding(
-          padding: padding,
-          child: Stack(
-            children: [
-              // Keyboard and D-pad focus has to read as its own state: the
-              // pill only ever shows the selected page.
-              if (_focused && !widget.selected)
-                Positioned.fill(
-                  child: DecoratedBox(
-                    key: AppNavRail.focusRingKey,
-                    decoration: BoxDecoration(
-                      borderRadius: AppRadius.full,
-                      border: Border.all(
+      child: Padding(
+        padding: padding,
+        child: Stack(
+          children: [
+            // Keyboard and D-pad focus has to read as its own state: the
+            // pill only ever shows the selected page.
+            if (_focused && !widget.selected)
+              Positioned.fill(
+                child: DecoratedBox(
+                  key: AppNavRail.focusRingKey,
+                  decoration: ShapeDecoration(
+                    shape: AppShape.md.copyWith(
+                      side: BorderSide(
                         color: context.colorScheme.primary,
                         width: 2,
                       ),
                     ),
                   ),
                 ),
-              Positioned.fill(
-                child: InkWell(
-                  onTap: onToPage,
-                  onFocusChange: (value) => setState(() => _focused = value),
-                  focusNode: _focusNode,
-                  customBorder: AppShape.full,
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  child: content,
-                ),
               ),
-            ],
-          ),
+            Positioned.fill(
+              child: InkWell(
+                onTap: onToPage,
+                onFocusChange: (value) => setState(() => _focused = value),
+                focusNode: _focusNode,
+                customBorder: AppShape.md,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                child: content,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -535,26 +491,29 @@ class _RailSlotState extends State<_RailSlot> {
 }
 
 class _HighlightClip extends CustomClipper<Path> {
-  const _HighlightClip({required this.top, required this.height});
+  const _HighlightClip({
+    required this.shape,
+    required this.top,
+    required this.height,
+  });
 
+  final ShapeBorder shape;
   final double top;
   final double height;
 
   @override
-  Path getClip(Size size) => Path()
-    ..addRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          NavRailMetrics.pillInsetX,
-          top,
-          size.width - NavRailMetrics.pillInsetX * 2,
-          height,
-        ),
-        const Radius.circular(AppCorner.full),
-      ),
-    );
+  Path getClip(Size size) => shape.getOuterPath(
+    Rect.fromLTWH(
+      NavRailMetrics.pillInsetX,
+      top,
+      size.width - NavRailMetrics.pillInsetX * 2,
+      height,
+    ),
+  );
 
   @override
   bool shouldReclip(_HighlightClip oldClipper) =>
-      oldClipper.top != top || oldClipper.height != height;
+      oldClipper.shape != shape ||
+      oldClipper.top != top ||
+      oldClipper.height != height;
 }

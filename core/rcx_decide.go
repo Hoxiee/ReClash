@@ -83,8 +83,6 @@ func (v rcxVerdict) String() string {
 	}
 }
 
-// Real traffic outranks any probe: a censor can answer a marker, but it cannot
-// fake the user's own connection succeeding.
 type rcxEvidence uint8
 
 const (
@@ -110,19 +108,21 @@ func (e rcxEvidence) String() string {
 type rcxReason string
 
 const (
-	rcxReasonHold           rcxReason = "hold"
-	rcxReasonIncumbentDead  rcxReason = "incumbent-dead"
-	rcxReasonVerdictGain    rcxReason = "verdict-gain"
-	rcxReasonDegraded       rcxReason = "degraded"
-	rcxReasonLatencyGain    rcxReason = "latency-gain"
-	rcxReasonColdStart      rcxReason = "cold-start"
-	rcxReasonTerrainChanged rcxReason = "terrain-changed"
-	rcxReasonNoCandidate    rcxReason = "no-candidate"
-	rcxReasonStranded       rcxReason = "stranded"
-	rcxReasonDwellHold      rcxReason = "dwell-hold"
-	rcxReasonMeasuring      rcxReason = "measuring"
-	rcxReasonManualHold     rcxReason = "manual-hold"
-	rcxReasonPinReturn      rcxReason = "pin-return"
+	rcxReasonHold              rcxReason = "hold"
+	rcxReasonIncumbentDead     rcxReason = "incumbent-dead"
+	rcxReasonVerdictGain       rcxReason = "verdict-gain"
+	rcxReasonDegraded          rcxReason = "degraded"
+	rcxReasonLatencyGain       rcxReason = "latency-gain"
+	rcxReasonReliabilityGain   rcxReason = "reliability-gain"
+	rcxReasonQualityConfirming rcxReason = "quality-confirming"
+	rcxReasonColdStart         rcxReason = "cold-start"
+	rcxReasonTerrainChanged    rcxReason = "terrain-changed"
+	rcxReasonNoCandidate       rcxReason = "no-candidate"
+	rcxReasonStranded          rcxReason = "stranded"
+	rcxReasonDwellHold         rcxReason = "dwell-hold"
+	rcxReasonMeasuring         rcxReason = "measuring"
+	rcxReasonManualHold        rcxReason = "manual-hold"
+	rcxReasonPinReturn         rcxReason = "pin-return"
 )
 
 type rcxFacts struct {
@@ -234,15 +234,16 @@ func rcxAllowsLastResort(terrain rcxTerrain, presetAllows bool) bool {
 type rcxKey struct {
 	verdict    rcxVerdict
 	misfit     uint8
-	evidence   rcxEvidence
-	latBucket  uint8
+	recurrence int
+	degraded   bool
 	unproven   bool
+	evidence   rcxEvidence
+	latencyMs  int
+	latBucket  uint8
 	challenger bool
-	order      uint16
+	order      int
 }
 
-// The first component that differs is also the reason a switch happens, so this
-// order is the order of the trace vocabulary.
 func rcxCompare(a, b rcxKey) int {
 	if a.verdict != b.verdict {
 		if a.verdict > b.verdict {
@@ -256,20 +257,32 @@ func rcxCompare(a, b rcxKey) int {
 		}
 		return 1
 	}
-	if a.evidence != b.evidence {
-		if a.evidence < b.evidence {
+	if a.recurrence != b.recurrence {
+		if a.recurrence < b.recurrence {
 			return -1
 		}
 		return 1
 	}
-	if a.latBucket != b.latBucket {
-		if a.latBucket < b.latBucket {
+	if a.degraded != b.degraded {
+		if !a.degraded {
 			return -1
 		}
 		return 1
 	}
 	if a.unproven != b.unproven {
 		if !a.unproven {
+			return -1
+		}
+		return 1
+	}
+	if a.evidence != b.evidence {
+		if a.evidence < b.evidence {
+			return -1
+		}
+		return 1
+	}
+	if a.latencyMs != b.latencyMs {
+		if a.latencyMs < b.latencyMs {
 			return -1
 		}
 		return 1
@@ -289,8 +302,6 @@ func rcxCompare(a, b rcxKey) int {
 	return 0
 }
 
-// Bands, not milliseconds: noise narrower than a band cannot move a decision,
-// which is a structural flap guard and needs no debounce timer.
 func rcxLatBucket(medianMs int, bands []int) uint8 {
 	if medianMs <= 0 {
 		return uint8(len(bands) / 2)
@@ -304,18 +315,20 @@ func rcxLatBucket(medianMs int, bands []int) uint8 {
 }
 
 type rcxCandidate struct {
-	Name       string
-	Order      uint16
-	Facts      rcxFacts
-	Evidence   rcxEvidence
-	MedianMs   int
-	HostMs     int
-	HostAt     time.Time
-	HostDead   bool
-	CoolUntil  time.Time
-	InSkeleton bool
-	Degraded   bool
-	Circuit    bool
+	Name             string
+	Order            int
+	Facts            rcxFacts
+	Evidence         rcxEvidence
+	MedianMs         int
+	HostMs           int
+	HostAt           time.Time
+	HostDead         bool
+	CoolUntil        time.Time
+	InSkeleton       bool
+	Degraded         bool
+	Recurrence       int
+	QualityConfirmed bool
+	Circuit          bool
 }
 
 type rcxPolicy struct {
@@ -344,8 +357,6 @@ type rcxDecision struct {
 	Detail string
 }
 
-// A gated node is not a worse candidate, it is not a candidate: folding
-// reliability into the ranking is what makes a fast-but-flapping node oscillate.
 func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 	if !c.InSkeleton {
 		return false
@@ -374,25 +385,55 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 }
 
 func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
-	bands := uint8(len(in.Policy.LatencyBands))
-	bucket := rcxLatencyBucket(c, in.Policy.LatencyBands)
-	if c.Degraded {
-		bucket = rcxSaturatingAdd(bucket, in.Policy.DegradedBandPenalty, bands)
+	evidence := c.Evidence
+	if evidence == rcxEvidenceFreshProbe {
+		evidence = rcxEvidenceLiveTraffic
+	}
+	recurrence := c.Recurrence
+	if recurrence < 2 {
+		recurrence = 0
+	}
+	latencyMs := rcxDiscoveryLatency(c)
+	if latencyMs <= 0 {
+		latencyMs = int(^uint(0) >> 1)
 	}
 	return rcxKey{
 		verdict:    rcxAdmit(in.Terrain, c.Facts),
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
-		evidence:   c.Evidence,
-		latBucket:  bucket,
+		recurrence: recurrence,
+		degraded:   c.Degraded,
 		unproven:   c.Facts.Transit != rcxProofProven,
+		evidence:   evidence,
+		latencyMs:  latencyMs,
+		latBucket:  rcxLatencyBucket(c, in.Policy.LatencyBands),
 		challenger: c.Name != in.Incumbent,
 		order:      c.Order,
 	}
 }
 
-// Our own median wins: it is measured through the tunnel being decided about, while the
-// host's delay test only orders the crowd this engine never reached, and a park of 250 has
-// no other order but a hash.
+func rcxDiscoveryLatency(c rcxCandidate) int {
+	if c.MedianMs > 0 {
+		return c.MedianMs
+	}
+	if c.HostMs > 0 && !c.HostDead {
+		return c.HostMs
+	}
+	return 0
+}
+
+func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
+	if incumbent <= 0 || challenger <= 0 || challenger >= incumbent {
+		return false
+	}
+	absolute, percent := 30, 20
+	if strategy == rcxStrategyStable || strategy == rcxStrategySaver {
+		absolute, percent = 50, 30
+	}
+	gain := incumbent - challenger
+	required := incumbent/100*percent + (incumbent%100*percent+99)/100
+	return gain >= absolute && gain >= required
+}
+
 func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
 	if c.MedianMs > 0 {
 		return rcxLatBucket(c.MedianMs, bands)
@@ -403,20 +444,12 @@ func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
 	return rcxLatBucket(c.HostMs, bands)
 }
 
-func rcxSaturatingAdd(value, delta, max uint8) uint8 {
-	sum := int(value) + int(delta)
-	if sum > int(max) {
-		return max
-	}
-	return uint8(sum)
-}
-
 func rcxDecide(in rcxDecisionInput) rcxDecision {
 	var best *rcxCandidate
 	var bestKey rcxKey
 	var incumbentKey rcxKey
 	incumbentEligible := false
-	incumbentPenalised := false
+	var incumbent rcxCandidate
 	pinEligible := false
 	compare := rcxCompareFor(in.Policy.Strategy)
 	for i := range in.Candidates {
@@ -431,7 +464,7 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		if c.Name == in.Incumbent {
 			incumbentEligible = true
 			incumbentKey = key
-			incumbentPenalised = c.Degraded
+			incumbent = *c
 		}
 		if best == nil || compare(key, bestKey) < 0 {
 			best = c
@@ -474,12 +507,12 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		}
 	}
 
-	if best.Name == in.Incumbent {
-		return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
-	}
-
 	if in.Pin == in.Incumbent {
 		return rcxDecision{Reason: rcxReasonManualHold, Detail: in.Incumbent}
+	}
+
+	if best.Name == in.Incumbent {
+		return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
 	}
 
 	if bestKey.verdict > incumbentKey.verdict {
@@ -498,21 +531,22 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		return rcxDecision{Reason: rcxReasonDwellHold, Detail: in.Incumbent}
 	}
 
-	// The degrade penalty is measured, so a penalised incumbent loses its band.
-	if bestKey.latBucket+rcxLatencyHysteresis < incumbentKey.latBucket ||
-		incumbentKey.latBucket > bestKey.latBucket && incumbentPenalised {
-		return rcxDecision{
-			Switch: true,
-			To:     best.Name,
-			Reason: rcxReasonLatencyGain,
-			Detail: in.Incumbent,
+	reason := rcxReasonHold
+	if bestKey.recurrence < incumbentKey.recurrence ||
+		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded {
+		reason = rcxReasonReliabilityGain
+	} else if rcxLatencyImproves(in.Policy.Strategy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
+		reason = rcxReasonLatencyGain
+	}
+	if reason != rcxReasonHold {
+		if !best.QualityConfirmed {
+			return rcxDecision{Reason: rcxReasonQualityConfirming, Detail: best.Name}
 		}
+		return rcxDecision{Switch: true, To: best.Name, Reason: reason, Detail: in.Incumbent}
 	}
 
 	return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
 }
-
-const rcxLatencyHysteresis = 1
 
 func rcxOrderOf(seed uint64, key string) uint16 {
 	digest := fnv.New64a()
@@ -525,92 +559,12 @@ func rcxOrderOf(seed uint64, key string) uint16 {
 }
 
 func rcxCompareLatency(a, b rcxKey) int {
-	if a.verdict != b.verdict {
-		if a.verdict > b.verdict {
-			return -1
-		}
-		return 1
-	}
-	if a.evidence != b.evidence {
-		if a.evidence < b.evidence {
-			return -1
-		}
-		return 1
-	}
-	if a.unproven != b.unproven {
-		if !a.unproven {
-			return -1
-		}
-		return 1
-	}
-	if a.latBucket != b.latBucket {
-		if a.latBucket < b.latBucket {
-			return -1
-		}
-		return 1
-	}
-	if a.challenger != b.challenger {
-		if !a.challenger {
-			return -1
-		}
-		return 1
-	}
-	if a.order != b.order {
-		if a.order < b.order {
-			return -1
-		}
-		return 1
-	}
-	return 0
+	a.misfit, b.misfit = 0, 0
+	return rcxCompare(a, b)
 }
 
-// Holding still is worth more than a latency band here: the incumbent outranks a
-// challenger before either is read for speed, so nothing but a better verdict,
-// fit, evidence or proof can move the engine off a server that works.
 func rcxCompareStable(a, b rcxKey) int {
-	if a.verdict != b.verdict {
-		if a.verdict > b.verdict {
-			return -1
-		}
-		return 1
-	}
-	if a.misfit != b.misfit {
-		if a.misfit < b.misfit {
-			return -1
-		}
-		return 1
-	}
-	if a.evidence != b.evidence {
-		if a.evidence < b.evidence {
-			return -1
-		}
-		return 1
-	}
-	if a.unproven != b.unproven {
-		if !a.unproven {
-			return -1
-		}
-		return 1
-	}
-	if a.challenger != b.challenger {
-		if !a.challenger {
-			return -1
-		}
-		return 1
-	}
-	if a.latBucket != b.latBucket {
-		if a.latBucket < b.latBucket {
-			return -1
-		}
-		return 1
-	}
-	if a.order != b.order {
-		if a.order < b.order {
-			return -1
-		}
-		return 1
-	}
-	return 0
+	return rcxCompare(a, b)
 }
 
 func rcxCompareFor(strategy string) func(a, b rcxKey) int {

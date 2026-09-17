@@ -1,7 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,9 +82,8 @@ class TUNItem extends ConsumerWidget {
       title: (l) => l.tun,
       subtitle: (l) => l.tunDesc,
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
-      onChanged: _tunWriter(
-        (state, value) => state.copyWith.tun(enable: value),
-      ),
+      onChanged: (ref, value) =>
+          ref.read(systemActionProvider.notifier).setTunEnabled(value),
     );
   }
 }
@@ -304,7 +303,7 @@ class RouteAddressItem extends ConsumerWidget {
     }
     return ConfigListInputItem(
       title: (l) => l.routeAddress,
-      subtitle: (l) => l.routeAddressDesc,
+      subtitle: (l) => '${l.routeAddressDesc}\n${l.networkDefaultLanBypass}',
       itemMaxLength: TextInputLimits.cidr,
       maxWidth: 360,
       selector: patchClashConfigProvider.select(

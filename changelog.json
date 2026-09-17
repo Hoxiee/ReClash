@@ -2,30 +2,381 @@
   "schemaVersion": 2,
   "versions": [
     {
-      "version": "0.8.96",
-      "tag": "v0.8.96",
-      "date": "2026-08-17",
-      "prerelease": false,
+      "version": "0.1.0-pre.1",
+      "tag": "v0.1.0-pre.1",
+      "date": "2026-09-15",
+      "prerelease": true,
       "groups": [
         {
-          "type": "fix",
+          "type": "feat",
           "entries": [
             {
-              "id": "7fb4f4f",
-              "text": "Fix whole group delay test failing on Windows"
+              "id": "6bf871b",
+              "scope": "navigation",
+              "text": "Redesigned desktop navigation rail"
+            },
+            {
+              "id": "fe0778b",
+              "text": "A suspiciously large pile of reliability and UX upgrades"
+            },
+            {
+              "id": "f06c6d9",
+              "text": "Explain smart routing picks on their own tab"
+            },
+            {
+              "id": "165c77d",
+              "text": "Refine setup wizard"
+            },
+            {
+              "id": "a60a8d2",
+              "text": "Split smart routing overview into tabs"
+            },
+            {
+              "id": "a822815",
+              "text": "Rebuild launcher icons from one master set"
+            },
+            {
+              "id": "940f3a7",
+              "text": "Refine app motion"
+            },
+            {
+              "id": "5b576ce",
+              "text": "Harden subscriptions and expand app experience"
+            },
+            {
+              "id": "c6e8c55",
+              "text": "Dedicated DPI-only hero screen"
+            },
+            {
+              "id": "efd8a4d",
+              "scope": "sync",
+              "text": "Sync FlClash dev 5a524cd5: core graceful exit, rule parser rewrite, empty states"
+            },
+            {
+              "id": "50ba304",
+              "text": "Gate desync behind developer mode"
+            },
+            {
+              "id": "3b19b71",
+              "text": "Harden desync tester per byebyedpi audit"
+            },
+            {
+              "id": "34576db",
+              "text": "Desync localization for uz, kk, tk and ko"
+            },
+            {
+              "id": "7cf9213",
+              "text": "Strategy tester, engine dns and telegram routing"
+            },
+            {
+              "id": "3904def",
+              "text": "Byedpi mode picker on hero orb"
+            },
+            {
+              "id": "f13801b",
+              "text": "Desync engine settings in advanced"
+            },
+            {
+              "id": "9ffc90a",
+              "text": "Salt desync cache key with ssid"
+            },
+            {
+              "id": "5f0adc7",
+              "text": "Desync as a third rule target"
+            },
+            {
+              "id": "e9df30f",
+              "text": "Desync outbound and category rules"
+            },
+            {
+              "id": "7476439",
+              "text": "Byedpi service lifecycle and strategy argv"
+            },
+            {
+              "id": "313b1f4",
+              "text": "Byedpi protect receiver"
+            },
+            {
+              "id": "69653b9",
+              "text": "Vendored byedpi native module"
+            },
+            {
+              "id": "ebc103c",
+              "text": "Monochrome mark in the orb core"
+            },
+            {
+              "id": "d2884bd",
+              "text": "Service logo in the orb core"
+            },
+            {
+              "id": "0047e9b",
+              "text": "Panel-aware subscription naming"
+            },
+            {
+              "id": "c89aa8f",
+              "text": "Reclash:// automation commands"
+            },
+            {
+              "id": "72c6bda",
+              "text": "Bundled licenses in about"
+            },
+            {
+              "id": "4f86073",
+              "text": "Add Uzbek, Kazakh, Turkmen and Korean locales"
+            },
+            {
+              "id": "50d41ca",
+              "text": "Split advanced config into general and extra"
+            },
+            {
+              "id": "1ba5978",
+              "text": "Dialability gate and mode groups for subscriptions"
+            },
+            {
+              "id": "f7cc71e",
+              "text": "New app icon on the tray, TV banner and store listing"
+            },
+            {
+              "id": "4409e58",
+              "text": "Subscription notices, boot restore, DoH, wakelock guards, web dashboard"
+            },
+            {
+              "id": "c9ee0fd",
+              "text": "Screen-gated healthcheck and geo sha256 precheck"
+            },
+            {
+              "id": "d12bc01",
+              "text": "Appearance polish: resets, truthful previews, working app icons"
+            },
+            {
+              "id": "43a86a4",
+              "text": "Appearance tabs"
+            },
+            {
+              "id": "d8e130d",
+              "text": "Explicit material you toggle"
+            },
+            {
+              "id": "8efbdf8",
+              "text": "Theme schedule, contrast, amoled splash"
+            },
+            {
+              "id": "c379520",
+              "text": "Appearance tab skeleton"
+            },
+            {
+              "id": "ded0138",
+              "text": "Appearance model props"
+            },
+            {
+              "id": "18268da",
+              "text": "Smart routing UI polish, hero auto mode, update checker"
+            },
+            {
+              "id": "03fb529",
+              "text": "Complete redesign of the about tab"
+            },
+            {
+              "id": "56e8fcb",
+              "text": "Smart routing end to end in the app"
+            },
+            {
+              "id": "5198431",
+              "text": "Smart routing engine in core"
+            },
+            {
+              "id": "a61fc44",
+              "text": "Panel view and theme headers"
+            },
+            {
+              "id": "7c466c2",
+              "text": "Panel offers, announce rendering, subscription dialog"
+            },
+            {
+              "id": "db5a7f5",
+              "text": "Amnezia subscription import"
+            },
+            {
+              "id": "92458be",
+              "text": "Local subscription converter and UA emulation"
+            },
+            {
+              "id": "20abc43",
+              "text": "Smart pause on trusted networks"
+            },
+            {
+              "id": "059bad9",
+              "text": "Hero board as the default view"
+            },
+            {
+              "id": "6605e78",
+              "text": "Panel settings and network defaults"
+            },
+            {
+              "id": "328b975",
+              "text": "Panel-driven dashboard widgets"
+            },
+            {
+              "id": "dc1414f",
+              "text": "Panel subscription bootstrap"
+            },
+            {
+              "id": "a52b9eb",
+              "text": "Floating AppNavBar with jump-fade switching"
+            },
+            {
+              "id": "86978f0",
+              "text": "Rebrand FlClash base as ReClash"
+            },
+            {
+              "id": "c884603",
+              "scope": "ui",
+              "text": "Adjust and optimize the app UI, with refreshed ja/ru translations"
+            },
+            {
+              "id": "07d1116",
+              "scope": "android",
+              "text": "Rework the VPN service, tile, and lifecycle arbitration"
+            },
+            {
+              "id": "efa2c4e",
+              "scope": "plugins",
+              "text": "Rework the desktop tray, window, and system proxy integration"
+            },
+            {
+              "id": "c6391a2",
+              "scope": "core",
+              "text": "Rework the core IPC and process lifecycle"
             }
           ]
         },
         {
-          "type": "perf",
+          "type": "fix",
           "entries": [
             {
-              "id": "903e2b8",
-              "text": "Optimize package icon loading and connections polling"
+              "id": "24dde4d",
+              "scope": "release",
+              "text": "Fail closed on unsafe platform artifacts"
+            },
+            {
+              "id": "867fc17",
+              "text": "Bound smart routing handoffs to ten seconds"
+            },
+            {
+              "id": "c4f6fde",
+              "text": "Telegram-first open marker so routing skips home duds"
+            },
+            {
+              "id": "37146e8",
+              "text": "Keep the buildkit build flow working after the FlClash sync"
+            },
+            {
+              "id": "4b333f4",
+              "text": "Hero logos and subscription redesign"
+            },
+            {
+              "id": "60cc073",
+              "text": "Drop url scheme tab description"
+            },
+            {
+              "id": "630feae",
+              "text": "Panel theme follows the active profile"
+            },
+            {
+              "id": "1c442e7",
+              "text": "Naturalness pass on the Russian locale"
+            },
+            {
+              "id": "825565c",
+              "text": "Own fork links and grouped url scheme commands"
+            },
+            {
+              "id": "db94b03",
+              "text": "Desync entry placement after the advanced split"
+            },
+            {
+              "id": "336af1c",
+              "text": "Serialize desync engine restarts"
+            },
+            {
+              "id": "d151dd6",
+              "text": "Hero traffic card test import"
+            },
+            {
+              "id": "f262ec9",
+              "text": "Strip provider desync dialer-proxy when off"
+            },
+            {
+              "id": "4f22f3d",
+              "text": "Appearance polish"
+            },
+            {
+              "id": "c462e91",
+              "text": "V4→v5 migration crash on marker round-trip"
+            },
+            {
+              "id": "dd866c0",
+              "text": "Compile the wifi_ssid desktop plugins"
+            },
+            {
+              "id": "ed25840",
+              "text": "Hero subscription card opens the overview"
+            },
+            {
+              "id": "08b7255",
+              "text": "Fix release tooling data and Linux packaging metadata"
+            },
+            {
+              "id": "ba47ebf",
+              "text": "Wait for TUN name before recreating"
+            },
+            {
+              "id": "5972c74",
+              "text": "Reclaim keeps the core setuid bit"
+            },
+            {
+              "id": "e43f18d",
+              "text": "TUN authorization on read-only installs"
+            },
+            {
+              "id": "6d54f28",
+              "text": "Rcx sync failure no longer blocks tunnel start"
+            },
+            {
+              "id": "d2c50c6",
+              "text": "Dead wireguard conf result type"
+            },
+            {
+              "id": "3358c07",
+              "text": "Smart pause stops blocking starts and misreporting state"
+            },
+            {
+              "id": "cba638f",
+              "text": "A refused pause or resume no longer repaints the run state"
+            },
+            {
+              "id": "8e9a2da",
+              "text": "Startup guard defers the pause instead of dropping it"
+            },
+            {
+              "id": "e28741d",
+              "text": "Subscription UA gets a panel-recognized identity"
+            },
+            {
+              "id": "abd08fa",
+              "scope": "script",
+              "text": "Override scripts can declare main with const/let arrow functions"
             }
           ]
         }
       ]
+    },
+    {
+      "version": "0.8.96",
+      "tag": "v0.8.96",
+      "date": "2026-08-17",
+      "prerelease": false,
+      "groups": []
     }
   ]
 }

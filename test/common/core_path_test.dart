@@ -83,6 +83,25 @@ void main() {
     expect(appPath.corePath, join(bundle.path, 'ReClashCore'));
   });
 
+  test('a writable setuid bundle uses an unprivileged copy', () async {
+    final bundle = Directory(join(root.path, 'bundle-setuid'))..createSync();
+    final bundled = File(join(bundle.path, 'ReClashCore'))
+      ..writeAsStringSync('core-binary');
+    final data = Directory(join(root.path, 'data-setuid'))..createSync();
+    appPath.dataDir.complete(data);
+    await Process.run('chmod', ['4755', bundled.path]);
+    AppPath.executableDirectory = () => bundle.path;
+
+    await appPath.ensureWritableCore();
+    await appPath.corePathReady;
+
+    final target = File(join(data.path, 'ReClashCore'));
+    final mode = await Process.run('stat', ['-c', '%a', target.path]);
+    expect(appPath.corePath, target.path);
+    expect(mode.stdout.toString().trim(), '755');
+    expect(target.readAsStringSync(), 'core-binary');
+  });
+
   test('a read-only bundle copies the core into the data dir', () async {
     final bundle = Directory(join(root.path, 'bundle-readonly'))..createSync();
     File(join(bundle.path, 'ReClashCore')).writeAsStringSync('core-binary');
@@ -105,7 +124,7 @@ void main() {
     );
   });
 
-  test('a matching copy is kept, preserving its setuid mode', () async {
+  test('a matching copy is replaced and stripped of setuid mode', () async {
     final bundle = Directory(join(root.path, 'bundle-match'))..createSync();
     File(join(bundle.path, 'ReClashCore')).writeAsStringSync('core-binary');
     final data = Directory(join(root.path, 'data-match'))..createSync();
@@ -119,11 +138,13 @@ void main() {
     await appPath.ensureWritableCore();
     final target = File(join(data.path, 'ReClashCore'));
     await Process.run('chmod', ['4755', target.path]);
+    target.writeAsStringSync('tampered-core');
 
     await appPath.ensureWritableCore();
 
     final mode = await Process.run('stat', ['-c', '%a', target.path]);
-    expect(mode.stdout.toString().trim(), '4755');
+    expect(mode.stdout.toString().trim(), '755');
+    expect(target.readAsStringSync(), 'core-binary');
   });
 
   test('a missing data dir resolves the gate without an override', () async {

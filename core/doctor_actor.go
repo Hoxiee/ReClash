@@ -93,6 +93,7 @@ type doctorActor struct {
 	expectations  *doctorExpectationRegistry
 	identity      func(doctorProbeObservation) (doctorProbeObservation, bool)
 	tunGeneration atomic.Uint64
+	ingressGate   doctorIngressGate
 
 	snapshot               doctorSnapshot
 	cancel                 context.CancelFunc
@@ -424,6 +425,7 @@ func (actor *doctorActor) bumpGenerations(change doctorGenerationChange) {
 		actor.tunGeneration.Store(actor.snapshot.Generations.Tun)
 	}
 	if actor.snapshot.State == doctorExamining {
+		actor.ingressGate.reset()
 		actor.terminate(doctorSuperseded, "generationChanged")
 		return
 	}
@@ -448,6 +450,7 @@ func (actor *doctorActor) bumpGeneration(kind doctorGenerationKind) {
 		actor.tunGeneration.Store(actor.snapshot.Generations.Tun)
 	}
 	if actor.snapshot.State == doctorExamining {
+		actor.ingressGate.reset()
 		actor.terminate(doctorSuperseded, "generationChanged")
 		return
 	}
@@ -460,6 +463,13 @@ func (actor *doctorActor) bumpGeneration(kind doctorGenerationKind) {
 
 func (actor *doctorActor) handlePassive(evidence doctorEvidence) {
 	if actor.snapshot.State == doctorExamining {
+		return
+	}
+	listenerFailed := evidence.Code == "byeDpiListenerFailed" && evidence.Inbound == "byedpi"
+	freshExam := actor.snapshot.ExamID != "" &&
+		(actor.snapshot.State == doctorComplete || actor.snapshot.State == doctorInconclusive) &&
+		actor.snapshot.FreshUntil > actor.now().UnixMilli()
+	if freshExam && !listenerFailed {
 		return
 	}
 	if actor.snapshot.State != doctorObserving {
@@ -475,7 +485,7 @@ func (actor *doctorActor) handlePassive(evidence doctorEvidence) {
 		actor.snapshot.FreshUntil = actor.now().Add(doctorEvidenceFreshFor).UnixMilli()
 		actor.scheduleFreshnessExpiry()
 	}
-	if evidence.Code == "byeDpiListenerFailed" && evidence.Inbound == "byedpi" {
+	if listenerFailed {
 		actor.snapshot.Health = doctorBroken
 		actor.snapshot.Confidence = doctorConfirmed
 		actor.snapshot.CauseCode = evidence.Code
@@ -494,6 +504,7 @@ func doctorPassiveHealthEvidence(evidence doctorEvidence, path doctorPathContext
 }
 
 func (actor *doctorActor) resetObservation() {
+	actor.ingressGate.reset()
 	actor.snapshot.ExamID = ""
 	actor.snapshot.Mode = ""
 	actor.snapshot.State = doctorObserving
@@ -662,6 +673,14 @@ func (actor *doctorActor) applyVerdict(terminal bool) {
 func (actor *doctorActor) finishIncident() {
 	if actor.snapshot.ExamID == "" || actor.snapshot.StartedAt == 0 {
 		return
+	}
+	for _, incident := range actor.snapshot.Incidents {
+		if incident.ExamID == actor.snapshot.ExamID {
+			return
+		}
+	}
+	if actor.snapshot.State == doctorComplete {
+		odometerInstance.NoteExam(actor.snapshot.Health != doctorBroken)
 	}
 	actor.snapshot.Incidents = appendBounded(actor.snapshot.Incidents, doctorIncident{
 		ExamID:     actor.snapshot.ExamID,

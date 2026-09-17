@@ -2,17 +2,12 @@ import 'package:reclash/common/nav_bar_metrics.dart';
 import 'package:flutter/widgets.dart';
 
 abstract final class NavRailMetrics {
-  static const double collapsedWidth = 72;
-  static const double extendedWidth = 200;
-
-  static const double extendedMinViewWidth = 1000;
+  static const double width = 80;
 
   static const double iconSlotHeight = 52;
   static const double stackedSlotHeight = 64;
-  static const double extendedSlotHeight = 52;
 
-  static const double slotGap = 4;
-  static const double pillInsetX = 8;
+  static const double pillInsetX = 6;
   static const double pillInsetY = 4;
 
   static const double groupGap = 8;

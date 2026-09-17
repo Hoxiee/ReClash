@@ -97,6 +97,7 @@ Java_com_reclash_core_Core_quickSetup(JNIEnv *env, jobject thiz, jstring init_pa
 
 
 static jmethodID m_tun_interface_protect;
+static jmethodID m_tun_interface_protect_subscription;
 static jmethodID m_tun_interface_resolve_uid;
 static jmethodID m_tun_interface_resolve_package;
 static jmethodID m_tun_interface_run_doctor_probe;
@@ -111,6 +112,20 @@ static void release_jni_object_impl(void *obj) {
 
 static void free_string_impl(char *str) {
     free(str);
+}
+
+static int call_tun_interface_protect_subscription_impl(void *tun_interface, const int fd) {
+    if (tun_interface == nullptr) {
+        return 0;
+    }
+    ATTACH_JNI();
+    const auto accepted = env->CallBooleanMethod(static_cast<jobject>(tun_interface),
+                                                 m_tun_interface_protect_subscription,
+                                                 fd);
+    if (jni_clear_exception(env)) {
+        return 0;
+    }
+    return accepted == JNI_TRUE ? 1 : 0;
 }
 
 static int call_tun_interface_protect_impl(void *tun_interface, const int fd) {
@@ -242,6 +257,7 @@ JNI_OnLoad(JavaVM *vm, void *) {
     const auto c_invoke_interface = find_class("com/reclash/core/InvokeInterface");
 
     m_tun_interface_protect = find_method(c_tun_interface, "protect", "(I)Z");
+    m_tun_interface_protect_subscription = find_method(c_tun_interface, "protectSubscription", "(I)Z");
     m_tun_interface_resolve_uid = find_method(c_tun_interface, "resolveUid",
                                               "(ILjava/lang/String;Ljava/lang/String;)I");
     m_tun_interface_resolve_package = find_method(c_tun_interface, "resolvePackage",
@@ -255,6 +271,7 @@ JNI_OnLoad(JavaVM *vm, void *) {
 
 
     protect_func = &call_tun_interface_protect_impl;
+    protect_subscription_func = &call_tun_interface_protect_subscription_impl;
     resolve_uid_func = &call_tun_interface_resolve_uid_impl;
     resolve_package_func = &call_tun_interface_resolve_package_impl;
     doctor_probe_func = &call_tun_interface_doctor_probe_impl;

@@ -12,6 +12,7 @@ import 'widgets/connection_mode.dart';
 import 'widgets/core_status_button.dart';
 import 'widgets/dashboard_pager.dart';
 import 'widgets/start_button.dart';
+import 'widgets/seasonal_overlay.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
 
@@ -244,50 +245,52 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           .where((item) => item.visibleIn(mode))
           .map((item) => item.widget),
     ];
-    return _buildIsEdit(
-      (isEdit) => CommonScaffold(
-        title: context.appLocalizations.dashboard,
-        actions: _buildActions(isEdit),
-        floatingActionButton: const StartButton(),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: Builder(
-            builder: (context) => SingleChildScrollView(
-              padding: const EdgeInsets.all(
-                16,
-              ).copyWith(bottom: 16 + BottomInsetScope.of(context)),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: _maxGridWidth),
-                  child: LayoutBuilder(
-                    builder: (_, constraints) {
-                      final columns = switch (constraints.maxWidth) {
-                        < _mediumGridBreakpoint => _compactCrossAxisCount,
-                        <= _maxGridBreakpoint => _mediumCrossAxisCount,
-                        _ => _maxCrossAxisCount,
-                      };
-                      return isEdit
-                          ? BackLayerScope(
-                              onBack: _handleExitEdit,
-                              child: SuperGrid(
-                                key: key,
+    return SeasonalDashboardOverlay(
+      child: _buildIsEdit(
+        (isEdit) => CommonScaffold(
+          title: context.appLocalizations.dashboard,
+          actions: _buildActions(isEdit),
+          floatingActionButton: const StartButton(),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: Builder(
+              builder: (context) => SingleChildScrollView(
+                padding: const EdgeInsets.all(
+                  16,
+                ).copyWith(bottom: 16 + BottomInsetScope.of(context)),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: _maxGridWidth),
+                    child: LayoutBuilder(
+                      builder: (_, constraints) {
+                        final columns = switch (constraints.maxWidth) {
+                          < _mediumGridBreakpoint => _compactCrossAxisCount,
+                          <= _maxGridBreakpoint => _mediumCrossAxisCount,
+                          _ => _maxCrossAxisCount,
+                        };
+                        return isEdit
+                            ? BackLayerScope(
+                                onBack: _handleExitEdit,
+                                child: SuperGrid(
+                                  key: key,
+                                  crossAxisCount: columns,
+                                  crossAxisSpacing: spacing,
+                                  mainAxisSpacing: spacing,
+                                  children: children,
+                                  onUpdate: () {
+                                    _handleSave();
+                                  },
+                                ),
+                              )
+                            : Grid(
                                 crossAxisCount: columns,
                                 crossAxisSpacing: spacing,
                                 mainAxisSpacing: spacing,
                                 children: children,
-                                onUpdate: () {
-                                  _handleSave();
-                                },
-                              ),
-                            )
-                          : Grid(
-                              crossAxisCount: columns,
-                              crossAxisSpacing: spacing,
-                              mainAxisSpacing: spacing,
-                              children: children,
-                            );
-                    },
+                              );
+                      },
+                    ),
                   ),
                 ),
               ),

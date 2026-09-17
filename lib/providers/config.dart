@@ -1,7 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:riverpod/riverpod.dart' show Provider;
+import 'package:riverpod/riverpod.dart' show Provider, ProviderListenableSelect;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/config.g.dart';
@@ -11,6 +11,32 @@ class AppSetting extends _$AppSetting with AutoDisposeNotifierMixin {
   @override
   AppSettingProps build() {
     return const AppSettingProps();
+  }
+}
+
+final appRegionProvider = Provider<AppRegion>((ref) {
+  final region = ref.watch(appSettingProvider.select((state) => state.region));
+  return region ??
+      AppRegion.fromPreset(
+        ref.watch(smartRoutingSettingProvider.select((state) => state.preset)),
+      );
+});
+
+void selectAppRegion(ProviderReader read, AppRegion region) {
+  final settings = read(appSettingProvider);
+  if (settings.region == region) return;
+  final previous = read(appRegionProvider);
+  read(appSettingProvider.notifier).update(
+    (state) => state.copyWith(
+      region: region,
+      sendDeviceIdentity:
+          region == AppRegion.russia || state.sendDeviceIdentity,
+    ),
+  );
+  if (previous != region) {
+    read(
+      smartRoutingSettingProvider.notifier,
+    ).update((state) => state.applyPreset(region.preset));
   }
 }
 
@@ -80,6 +106,13 @@ class CurrentProfileId extends _$CurrentProfileId
 }
 
 @riverpod
+class MilestoneSetting extends _$MilestoneSetting
+    with AutoDisposeNotifierMixin {
+  @override
+  MilestoneProps build() => const MilestoneProps();
+}
+
+@riverpod
 class DavSetting extends _$DavSetting with AutoDisposeNotifierMixin {
   @override
   DAVProps? build() {
@@ -140,6 +173,7 @@ Config _config(Ref ref) {
   final desyncProps = ref.watch(desyncSettingProvider);
   final themeProps = ref.watch(themeSettingProvider);
   final currentProfileId = ref.watch(currentProfileIdProvider);
+  final milestoneProps = ref.watch(milestoneSettingProvider);
   final davProps = ref.watch(davSettingProvider);
   final overrideDns = ref.watch(overrideDnsProvider);
   final hotKeyActions = ref.watch(hotKeyActionsProvider);
@@ -154,6 +188,7 @@ Config _config(Ref ref) {
     desyncProps: desyncProps,
     themeProps: themeProps,
     currentProfileId: currentProfileId,
+    milestoneProps: milestoneProps,
     davProps: davProps,
     overrideDns: overrideDns,
     hotKeyActions: hotKeyActions,
@@ -176,6 +211,7 @@ List<Override> buildConfigOverrides(Config config) {
     currentProfileIdProvider.overrideWithBuild(
       (_, _) => config.currentProfileId,
     ),
+    milestoneSettingProvider.overrideWithBuild((_, _) => config.milestoneProps),
     davSettingProvider.overrideWithBuild((_, _) => config.davProps),
     overrideDnsProvider.overrideWithBuild((_, _) => config.overrideDns),
     hotKeyActionsProvider.overrideWithBuild((_, _) => config.hotKeyActions),

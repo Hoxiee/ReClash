@@ -421,27 +421,133 @@ void main() {
   });
 
   test(
-    'unexpected disconnect cleans one session and emits one crash',
+    'unexpected disconnect restores one session and emits one crash',
     () async {
       final transport = FakeDesktopCoreTransport();
-      final launcher = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+      final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+      final replacement = FakeLauncher(owner: CoreProcessOwner.direct, pid: 84);
+      final resolver = MutableLauncherResolver(direct);
       final lifecycle = _createLifecycle(
         transport: transport,
-        resolver: MutableLauncherResolver(launcher),
+        resolver: resolver,
+        recoveryWait: (_) async {},
       );
-      await _startConnected(lifecycle, transport, launcher, pid: 42);
-      final crash = lifecycle.crashEvents.first;
+      var restored = 0;
+      lifecycle.setRecoveryHandler((isCurrent) async {
+        expect(isCurrent(), isTrue);
+        restored++;
+      });
+      await _startConnected(lifecycle, transport, direct, pid: 42);
+      final crashes = <DesktopCoreFailure>[];
+      final subscription = lifecycle.crashEvents.listen(crashes.add);
+      resolver.launcher = replacement;
 
       transport.disconnect(1);
-
-      expect((await crash).code, 'unexpected_disconnect');
-      await launcher.lease.stopStarted;
+      await direct.lease.stopStarted;
+      await replacement.started;
+      transport.connect(pid: 84, generation: 2);
+      await lifecycle.waitUntilRunning(const Duration(seconds: 1));
       await pumpEventQueue();
-      expect(launcher.lease.stopCount, 1);
-      expect(lifecycle.state, isA<DesktopCoreFailed>());
-      await lifecycle.close();
+
+      expect(crashes, hasLength(1));
+      expect(crashes.single.code, 'unexpected_disconnect');
+      expect(direct.lease.stopCount, 1);
+      expect(replacement.startCount, 1);
+      expect(restored, 1);
+      await subscription.cancel();
+      await _closeRunning(lifecycle, transport, replacement.lease, 2);
     },
   );
+
+  test('stop during recovery backoff cancels replacement', () async {
+    final transport = FakeDesktopCoreTransport();
+    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+    final replacement = FakeLauncher(owner: CoreProcessOwner.direct, pid: 84);
+    final resolver = MutableLauncherResolver(direct);
+    final backoff = Completer<void>();
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: resolver,
+      recoveryWait: (_) => backoff.future,
+    );
+    lifecycle.setRecoveryHandler((_) async {});
+    await _startConnected(lifecycle, transport, direct, pid: 42);
+    resolver.launcher = replacement;
+
+    transport.disconnect(1);
+    await direct.lease.stopStarted;
+    final result = await lifecycle.stop();
+    backoff.complete();
+    await pumpEventQueue();
+
+    expect(result.outcome, CoreLifecycleOutcome.applied);
+    expect(replacement.startCount, 0);
+    expect(lifecycle.state, isA<DesktopCoreIdle>());
+    await lifecycle.close();
+  });
+
+  test('unconfirmed crashed lease blocks automatic replacement', () async {
+    final transport = FakeDesktopCoreTransport();
+    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+    direct.lease.stopResult = const CoreProcessStopResult(
+      stopped: false,
+      exitConfirmed: false,
+    );
+    final replacement = FakeLauncher(owner: CoreProcessOwner.direct, pid: 84);
+    final resolver = MutableLauncherResolver(direct);
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: resolver,
+      recoveryWait: (_) async {},
+    );
+    lifecycle.setRecoveryHandler((_) async {});
+    await _startConnected(lifecycle, transport, direct, pid: 42);
+    resolver.launcher = replacement;
+
+    transport.disconnect(1);
+    await direct.lease.stopStarted;
+    await pumpEventQueue();
+
+    expect(replacement.startCount, 0);
+    expect(lifecycle.state, isA<DesktopCoreFailed>());
+    direct.lease.stopResult = const CoreProcessStopResult(
+      stopped: false,
+      exitConfirmed: true,
+    );
+    await lifecycle.close();
+  });
+
+  test('recovery stops after its crash-loop budget is exhausted', () async {
+    final transport = FakeDesktopCoreTransport();
+    final direct = FakeLauncher(owner: CoreProcessOwner.direct, pid: 42);
+    final failing = FakeLauncher(owner: CoreProcessOwner.direct, pid: 84)
+      ..startError = StateError('spawn failed');
+    final resolver = MutableLauncherResolver(direct);
+    final lifecycle = _createLifecycle(
+      transport: transport,
+      resolver: resolver,
+      maxRecoveryAttempts: 3,
+      recoveryWait: (_) async {},
+    );
+    lifecycle.setRecoveryHandler((_) async {});
+    await _startConnected(lifecycle, transport, direct, pid: 42);
+    resolver.launcher = failing;
+
+    transport.disconnect(1);
+    await direct.lease.stopStarted;
+    await pumpEventQueue(times: 20);
+
+    expect(failing.startCount, 3);
+    expect(
+      lifecycle.state,
+      isA<DesktopCoreFailed>().having(
+        (state) => state.failure.code,
+        'failure code',
+        'recovery_exhausted',
+      ),
+    );
+    await lifecycle.close();
+  });
 
   test('stale disconnect generation cannot stop the current session', () async {
     final transport = FakeDesktopCoreTransport();
@@ -744,12 +850,16 @@ void _afterMicrotasks(int count, void Function() action) {
 DesktopCoreLifecycle _createLifecycle({
   required FakeDesktopCoreTransport transport,
   required MutableLauncherResolver resolver,
+  int maxRecoveryAttempts = 5,
+  Future<void> Function(int attempt)? recoveryWait,
 }) {
   return DesktopCoreLifecycle(
     transportFactory: () => transport,
     launcherResolver: resolver,
     sessionIdFactory: () => _sessionId,
     verifyPeerPid: true,
+    maxRecoveryAttempts: maxRecoveryAttempts,
+    recoveryWait: recoveryWait,
     timeouts: const DesktopCoreTimeouts(
       ready: Duration(seconds: 1),
       connection: Duration(seconds: 1),

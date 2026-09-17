@@ -144,9 +144,14 @@ class ProxiesAction extends _$ProxiesAction {
         _currentSelectedName(groupName);
     profilesAction.updateCurrentSelectedMap(groupName, proxyName);
     try {
-      await _core.changeProxy(
-        ChangeProxyParams(groupName: groupName, proxyName: proxyName),
+      final message = await _core.changeProxy(
+        ChangeProxyParams(
+          groupName: groupName,
+          proxyName: proxyName,
+          manual: true,
+        ),
       );
+      if (message.isNotEmpty) throw MessageException(message);
     } catch (error) {
       commonPrint.log(
         'changeProxy($groupName -> $proxyName) failed: $error',
@@ -192,9 +197,10 @@ class ProxiesAction extends _$ProxiesAction {
     final rollbackName = _currentSelectedName(rcxNodeGroupName);
     profilesAction.updateCurrentSelectedMap(rcxNodeGroupName, '');
     try {
-      await _core.changeProxy(
+      final message = await _core.changeProxy(
         const ChangeProxyParams(groupName: rcxNodeGroupName, proxyName: ''),
       );
+      if (message.isNotEmpty) throw MessageException(message);
     } catch (error) {
       commonPrint.log(
         'resumeSmartRouting failed: $error',

@@ -571,6 +571,12 @@ void main() {
           .read(patchClashConfigProvider.notifier)
           .update((state) => state.copyWith(mixedPort: 7899));
       source.read(overrideDnsProvider.notifier).value = true;
+      source
+          .read(smartRoutingSettingProvider.notifier)
+          .update((state) => state.copyWith(enabled: true));
+      source
+          .read(desyncSettingProvider.notifier)
+          .update((state) => state.copyWith(enabled: true));
       final configMap = configMapOf(source);
 
       final target = buildContainer();
@@ -582,6 +588,8 @@ void main() {
       expect(target.read(appSettingProvider).autoLaunch, isTrue);
       expect(target.read(patchClashConfigProvider).mixedPort, 7899);
       expect(target.read(overrideDnsProvider), isTrue);
+      expect(target.read(smartRoutingSettingProvider).enabled, isTrue);
+      expect(target.read(desyncSettingProvider).enabled, isTrue);
     });
 
     test('leaves the settings untouched for an onlyProfiles restore', () async {

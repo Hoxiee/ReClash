@@ -18,6 +18,10 @@ const launcherVariants = <String>[
   'strata',
   'shatter',
   'trace',
+  'vigil',
+  'topo',
+  'spark',
+  'fractal',
 ];
 
 const launcherDensities = <String, double>{

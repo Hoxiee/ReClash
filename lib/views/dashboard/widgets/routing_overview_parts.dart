@@ -12,6 +12,9 @@ String routingReasonLabel(AppLocalizations l10n, String reason) =>
       'incumbent-dead' => l10n.smartRoutingReasonIncumbentDead,
       'verdict-gain' => l10n.smartRoutingReasonVerdictGain,
       'latency-gain' => l10n.smartRoutingReasonLatencyGain,
+      'reliability-gain' => l10n.smartRoutingReasonReliabilityGain,
+      'quality-confirming' => l10n.smartRoutingReasonQualityConfirming,
+      'handoff-recovery' => l10n.smartRoutingReasonHandoffRecovery,
       'terrain-changed' => l10n.smartRoutingReasonTerrainChanged,
       'stranded' => l10n.smartRoutingReasonStranded,
       'no-candidate' => l10n.smartRoutingReasonNoCandidate,
@@ -67,8 +70,10 @@ String routingRungLabel(AppLocalizations l10n, RoutingRung rung) =>
       RoutingRung.admission => l10n.smartRoutingKeyAdmission,
       RoutingRung.verdict => l10n.smartRoutingKeyVerdict,
       RoutingRung.misfit => l10n.smartRoutingKeyMisfit,
+      RoutingRung.recurrence => l10n.smartRoutingDegraded,
+      RoutingRung.degraded => l10n.smartRoutingReasonDegraded,
       RoutingRung.evidence => l10n.smartRoutingKeyEvidence,
-      RoutingRung.band => l10n.smartRoutingKeyBand,
+      RoutingRung.latency => l10n.smartRoutingKeyBand,
       RoutingRung.unproven => l10n.smartRoutingKeyUnproven,
       RoutingRung.incumbent => l10n.smartRoutingKeyIncumbent,
       RoutingRung.tiebreak => l10n.smartRoutingKeyTiebreak,
@@ -92,8 +97,12 @@ String routingRungValueLabel(
     routingRungValue(rung, candidate, terrain) == 0
         ? l10n.smartRoutingFitYes
         : l10n.smartRoutingFitNo,
+  RoutingRung.recurrence => candidate.recurrence.toString(),
+  RoutingRung.degraded =>
+    candidate.degraded ? l10n.smartRoutingDegraded : l10n.smartRoutingProvenYes,
   RoutingRung.evidence => routingEvidenceLabel(l10n, candidate.evidence),
-  RoutingRung.band => l10n.smartRoutingBandLabel(candidate.band),
+  RoutingRung.latency =>
+    candidate.latencyMs > 0 ? '${candidate.latencyMs} ms' : l10n.unknown,
   RoutingRung.unproven =>
     candidate.unproven ? l10n.smartRoutingProvenNo : l10n.smartRoutingProvenYes,
   RoutingRung.incumbent =>

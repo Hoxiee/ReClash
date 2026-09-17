@@ -4,4 +4,6 @@ export 'config.dart';
 export 'connection_doctor.dart';
 export 'core.dart';
 export 'database.dart';
+export 'finding_preview.dart';
+export 'milestones.dart';
 export 'state.dart';

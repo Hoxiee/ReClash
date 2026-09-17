@@ -77,6 +77,13 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'mode': 'rule',
         'rule': ['MATCH,DIRECT'],
       },
+      CoreMethod.fetchSubscription => {
+        'status': 302,
+        'headers': {
+          'Location': ['https://other.test/sub'],
+        },
+        'body': '',
+      },
       CoreMethod.getMemory => 2048,
       CoreMethod.doctorSnapshot ||
       CoreMethod.doctorStart ||
@@ -226,6 +233,28 @@ void main() {
     expect(handler.calls[CoreMethod.clearEffect], 42);
     expect(handler.calls[CoreMethod.setUiActive], isTrue);
   });
+
+  test(
+    'subscription fetch preserves one-hop native response and headers',
+    () async {
+      final handler = _RecordingCoreHandler();
+      final response = await handler.fetchSubscription(
+        url: 'https://subscription.test/sub',
+        headers: const {'X-Hwid': 'test-device'},
+        timeoutMillis: 5000,
+      );
+      expect(handler.calls[CoreMethod.fetchSubscription], {
+        'url': 'https://subscription.test/sub',
+        'headers': {'X-Hwid': 'test-device'},
+        'timeoutMillis': 5000,
+      });
+      expect(response['status'], 302);
+      expect(response['headers'], {
+        'Location': ['https://other.test/sub'],
+      });
+      expect(response['body'], '');
+    },
+  );
 
   test('RCX lane config and status keep their additive wire contract', () {
     const config = RcxLaneConfig(

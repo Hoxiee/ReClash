@@ -11,6 +11,7 @@ enum CoreMethod {
   shutdown,
   validateConfig,
   inspectConfig,
+  fetchSubscription,
   updateConfig,
   getConfig,
   getProxies,
@@ -51,6 +52,8 @@ enum CoreMethod {
   doctorCancel,
   doctorFlushDns,
   doctorExport,
+  odometerReport,
+  odometerSignal,
 }
 
 class CoreMethodCall {

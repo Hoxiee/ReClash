@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+import 'package:reclash/common/finding_events.dart';
+import 'package:reclash/providers/milestones.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/core.dart';
@@ -21,6 +24,8 @@ class ConnectionDoctor extends _$ConnectionDoctor {
   DoctorSnapshot _freshnessSnapshot = unsupportedDoctorSnapshot;
   int _minimumRevision = 0;
   int _connectionEpoch = 0;
+  bool _updatesEnabled = true;
+  bool _statusRefreshPending = false;
 
   @override
   DoctorSnapshot build() {
@@ -31,6 +36,39 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     ref.onResume(_resumeFreshness);
     ref.onDispose(() => _freshnessTimer?.cancel());
     return unsupportedDoctorSnapshot;
+  }
+
+  Future<DoctorSnapshot> updateActivity({
+    required AppLifecycleState? lifecycleState,
+    required bool isAndroid,
+  }) {
+    final enabled =
+        !isAndroid ||
+        lifecycleState == null ||
+        lifecycleState == AppLifecycleState.resumed ||
+        lifecycleState == AppLifecycleState.inactive;
+    final resumed = !_updatesEnabled && enabled;
+    _updatesEnabled = enabled;
+    if (resumed && _statusRefreshPending) {
+      return refresh();
+    }
+    return Future.value(state);
+  }
+
+  Future<DoctorSnapshot> refreshFromStatus({int minimumRevision = 0}) {
+    if (minimumRevision > 0 &&
+        minimumRevision <= state.revision &&
+        state.supported) {
+      return Future.value(state);
+    }
+    if (minimumRevision > _minimumRevision) {
+      _minimumRevision = minimumRevision;
+    }
+    _statusRefreshPending = true;
+    if (!_updatesEnabled) {
+      return Future.value(state);
+    }
+    return refresh(minimumRevision: minimumRevision);
   }
 
   Future<DoctorSnapshot> refresh({int minimumRevision = 0}) {
@@ -68,11 +106,19 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     int? previousRevision;
     for (var attempt = 0; attempt < 3 && epoch == _connectionEpoch; attempt++) {
       final snapshot = await _refresh();
+      if (epoch != _connectionEpoch) {
+        return state;
+      }
+      if (!_updatesEnabled) {
+        _statusRefreshPending = true;
+        return snapshot;
+      }
       if (!snapshot.supported ||
           snapshot.revision >= _minimumRevision ||
           snapshot.revision == previousRevision) {
         if (epoch == _connectionEpoch) {
           _minimumRevision = 0;
+          _statusRefreshPending = false;
         }
         return snapshot;
       }
@@ -80,6 +126,7 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     }
     if (epoch == _connectionEpoch) {
       _minimumRevision = 0;
+      _statusRefreshPending = false;
     }
     return state;
   }
@@ -169,6 +216,7 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     _freshnessTimer = null;
     _freshnessSnapshot = unsupportedDoctorSnapshot;
     _minimumRevision = 0;
+    _statusRefreshPending = false;
     state = unsupportedDoctorSnapshot;
   }
 
@@ -214,6 +262,9 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     if (snapshot.revision >= state.revision || !state.supported) {
       state = snapshot;
       _scheduleFreshness(snapshot);
+      if (allDoctorLayersFailed(snapshot)) {
+        ref.read(milestonesProvider.notifier).discover('storm');
+      }
     }
     return state;
   }

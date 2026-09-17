@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "Retry outside the VPN?",
+  "subscriptionDirectRetryMessage": "The subscription could not be reached through the current connection. Retry this download directly without turning off the VPN? The panel will see your network’s IP address. Other app traffic will not change.",
+  "subscriptionDirectRetryConfirm": "Retry directly",
+  "appRegion": "App region",
+  "appRegionDesc": "Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.",
+  "appRegionOther": "Other",
+  "setupRegionSettings": "Regional quick settings",
+  "setupRegionSettingsDesc": "Review geo resources, routing presets and app access. Nothing is added automatically.",
+  "lanProfileImportPhoneHint": "Paste a subscription URL to import it on your TV.",
+  "lanProfileImportSend": "Import on TV",
+  "lanProfileImportPhoneSuccess": "Subscription imported. You can return to the TV and close this page.",
+  "lanProfileImportPhoneFailed": "Could not import the subscription. Check the URL and try again.",
+  "lanProfileImportPhoneUnreachable": "Could not reach the TV. Check the connection and retry on this page to confirm the result.",
+  "panelHwidNotSupported": "The panel reported an HWID restriction",
+  "panelHwidNotSupportedTip": "The panel returned x-hwid-not-supported. This does not prove that the client is incompatible. Check your HWID settings and subscription requirements.",
+  "panelHwidIdentityDisabled": "HWID sharing is off. Enable it only if you trust the panel.",
+  "networkDefaultLanBypass": "Without custom routes, the local network bypasses the VPN. Set explicit routes to capture it.",
+  "subscriptionClientExperimentalLabel": "Experimental",
   "rule": "Rule",
   "rules": "Rules",
   "global": "Global",
@@ -93,7 +111,7 @@
   "importFromURL": "Import from URL",
   "subscriptionClientLabel": "Client format",
   "subscriptionClientDesc": "The app requests the subscription in this client's format",
-  "subscriptionClientExperimentalTip": "Emulation is experimental: the provider serves another client's format, which ReClash converts.",
+  "subscriptionClientExperimentalTip": "Client compatibility is experimental: the provider serves another client's format, which ReClash converts.",
   "subscriptionClientAuto": "Auto",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "Send HWID",
   "sendDeviceIdentityDesc": "Send device identifier, app version and device name to proxy provider server",
+  "sendDeviceIdentityDisableWarning": "Turning off HWID will stop most subscriptions from working. Continue?",
   "unifiedDelay": "Unified delay",
   "unifiedDelayDesc": "Remove extra delays such as handshakes",
   "tcpConcurrent": "TCP concurrent",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "Are you sure you want to force restart the core?",
   "dnsHijacking": "DNS hijacking",
   "coreStatus": "Core status",
+  "coreRunning": "Running",
+  "coreStarting": "Starting…",
+  "coreStopped": "Stopped",
   "dataCollectionTip": "Data collection notice",
   "dataCollectionContent": "This app uses Firebase Crashlytics to collect crash information to improve stability.\nThe collected data includes device information and crash details, and contains no personally sensitive data.\nYou can turn this off in settings.",
   "crashlytics": "Crash analytics",
@@ -633,6 +655,15 @@
   "expectedStatus": "Expected status",
   "selectProxies": "Select proxies",
   "inputProxyGroupName": "Enter the proxy group name",
+  "helperAuthorizationTitle": "Allow Helper setup?",
+  "helperAuthorizationMessage": "TUN mode needs the ReClash Helper service to be installed or updated. Continue to open your system’s authorization dialog. Enter your password only there; ReClash does not collect it.",
+  "helperAuthorizationContinue": "Continue",
+  "helperAuthorizationLater": "Later",
+  "helperSystemdUnavailable": "TUN mode requires systemd, which is unavailable on this system.",
+  "helperPkexecUnavailable": "pkexec is unavailable. Install your distribution’s polkit package, then try again.",
+  "helperAgentUnavailable": "No system authorization agent is available. Start a polkit authentication agent in your desktop session, then try again.",
+  "helperInstallFailed": "Could not install or update the Helper service. Check the logs and try again.",
+  "helperInstallNotReady": "Helper setup finished, but the service is not ready. Check the logs and try again.",
   "helperCorruptTip": "Helper service unavailable; TUN mode cannot be enabled. Reinstall ReClash to restore it.",
   "coreBlockedByPolicyTip": "Windows refused to run ReClashCore.exe (error {code}). An app control policy such as Smart App Control or AppLocker blocks unsigned programs; allow ReClash in that policy or turn it off, then try again.",
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control blocked ReClashCore.exe because it is not signed. Open Windows Security → App & browser control → Smart App Control settings, choose Off, then start ReClash again. Smart App Control cannot be turned back on without reinstalling Windows.",
@@ -861,7 +892,7 @@
   "smartRoutingRetrying": "Server is not answering, looking for another",
   "smartRoutingNoServers": "No reachable servers",
   "smartRoutingPreset": "Preset",
-  "smartRoutingPresetOff": "Off",
+  "smartRoutingPresetOff": "Other",
   "smartRoutingPresetRussia": "Russia",
   "smartRoutingPresetIran": "Iran",
   "smartRoutingPresetChina": "China",
@@ -932,7 +963,10 @@
   "smartRoutingReasonHold": "Working, nothing better found",
   "smartRoutingReasonIncumbentDead": "Previous server stopped answering",
   "smartRoutingReasonVerdictGain": "This one is proven to reach the open internet",
-  "smartRoutingReasonLatencyGain": "This one is a latency band faster",
+  "smartRoutingReasonLatencyGain": "Repeated checks confirmed lower latency",
+  "smartRoutingReasonReliabilityGain": "Repeated checks confirmed a more stable alternative",
+  "smartRoutingReasonQualityConfirming": "Confirming the improvement with repeated comparisons",
+  "smartRoutingReasonHandoffRecovery": "Connection restored after the network changed",
   "smartRoutingReasonTerrainChanged": "The network changed",
   "smartRoutingReasonStranded": "Nothing reachable, keeping the current server",
   "smartRoutingReasonNoCandidate": "No server passed the checks",
@@ -1064,8 +1098,8 @@
   "setupRestore": "Restore from a backup",
   "setupRestoreDesc": "Restore settings and profiles from a ReClash, FlClashX, or FlClash backup",
   "setupFinishTitle": "Review your setup",
-  "setupRegionDesc": "Smart Routing uses this as a starting point when choosing a route. Your language only provides a suggestion.",
-  "setupRegionNone": "Other region or do not use Smart Routing",
+  "setupRegionDesc": "Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.",
+  "setupRegionNone": "Other",
   "setupAutoRun": "Connect when ReClash opens",
   "setupAutoRunDesc": "Starts the VPN automatically after a valid profile is loaded",
   "setupPermissionVpn": "VPN permission",
@@ -1356,7 +1390,6 @@
   "appearanceTheme": "Theme",
   "appearanceIcon": "Icon",
   "appearanceLayout": "Layout",
-  "appearanceMotion": "Motion",
   "schedule": "Scheduled",
   "scheduleDesc": "Dark from {darkAt} to {lightAt}",
   "@scheduleDesc": {
@@ -1408,7 +1441,7 @@
   "openInBrowser": "Open in browser",
   "off": "Off",
   "subscriptionNoQuota": "This subscription reports no traffic quota or end date",
-  "subscriptionUndialable": "None of the nodes in this subscription can be reached — try another client format",
+  "subscriptionUndialable": "No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.",
   "@subscriptionUndialable": {
     "type": "text"
   },
@@ -1670,10 +1703,10 @@
     }
   },
   "lanProfileImport": "Receive from phone",
-  "lanProfileImportDesc": "Show a one-time QR code to send a subscription URL over your local network",
+  "lanProfileImportDesc": "Show a one-time page to send a subscription from a phone on your local network",
   "lanProfileImportTitle": "Receive subscription",
-  "lanProfileImportScan": "Scan this QR code with a phone on the same network",
-  "lanProfileImportAddress": "Or send JSON to {address}",
+  "lanProfileImportScan": "Scan this QR code with a phone on the same network, then paste the subscription URL",
+  "lanProfileImportAddress": "Or open {address} in a phone browser",
   "lanProfileImportWaiting": "Waiting for a subscription…",
   "lanProfileImportImporting": "Importing subscription…",
   "lanProfileImportImported": "Subscription received",
@@ -1868,5 +1901,133 @@
   "externalActionConfirmTitle": "Confirm external action",
   "externalActionConfirmMessage": "Allow this external link to perform: {action}?",
   "panelSettingsConfirmTitle": "Apply provider settings",
-  "panelSettingsConfirmMessage": "This subscription requests these app-wide settings:\n{settings}"
+  "panelSettingsConfirmMessage": "This subscription requests these app-wide settings:\n{settings}",
+  "milestoneDecorations": "Hidden findings",
+  "milestoneDecorationsDesc": "Show discoveries earned while using ReClash",
+  "seasonalDecorations": "Seasonal appearance",
+  "seasonalDecorationsDesc": "Show subtle seasonal details on the dashboard",
+  "lastUsed": "Last used",
+  "neverUsed": "Not used yet",
+  "profileUnusedForDays": "Not used for {days} days",
+  "profileUnusedForMonths": "Not used for {months} months",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "Ninety days without a gap.",
+  "milestoneRevealAuscultation": "A hundred checks. The network has a pulse.",
+  "milestoneRevealFullLadder": "Every rung, and back to the first.",
+  "milestoneRevealSilentAutopilot": "A thousand decisions without interruption.",
+  "milestoneRevealOdometer": "One terabyte has passed through.",
+  "milestoneRevealMeridian": "Five meridians crossed.",
+  "milestoneRevealPorcelain": "Seven quiet days.",
+  "milestoneRevealCrown": "A year of covered time.",
+  "findings": "Findings",
+  "findingsDesc": "Quiet details discovered while using ReClash",
+  "findingsCount": "Discovered {found} of {total}",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "Discovered",
+  "findingDiscoveredOn": "Discovered {date}",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "Reset findings",
+  "resetFindingsDesc": "Show discovery moments again without resetting usage history",
+  "resetFindingsTitle": "Reset findings?",
+  "resetFindingsConfirm": "Discovered entries will be hidden and can appear again. Usage history will remain unchanged.",
+  "findingVigil": "Vigil",
+  "findingAuscultation": "Auscultation",
+  "findingFullLadder": "Full ladder",
+  "findingSilentAutopilot": "Silent autopilot",
+  "findingOdometer": "Odometer",
+  "findingMeridian": "Five meridians",
+  "findingPorcelain": "Porcelain",
+  "findingCrown": "Crown",
+  "findingOscilloscope": "Oscilloscope",
+  "findingMarks": "Marks",
+  "findingPi": "Pi",
+  "findingTurn": "Turn",
+  "findingStorm": "Storm",
+  "findingLoopback": "Loop",
+  "findingOscilloscopeDesc": "The ring listened to live traffic for six seconds.",
+  "findingMarksDesc": "The ReClash mark sheet was uncovered.",
+  "findingPiDesc": "The session passed 3:14:15 while the dashboard was open.",
+  "findingTurnDesc": "The session crossed New Year midnight.",
+  "findingStormDesc": "Every diagnostic layer failed at once.",
+  "findingLoopbackDesc": "A profile pointed back to the local listening port.",
+  "appIconVigil": "Vigil",
+  "appIconTopo": "Topo",
+  "appIconFractal": "Fractal",
+  "appIconSpark": "Spark",
+  "crownHistory": "Since {date} · {days} covered days",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "Ladder result: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "Apply the cold, nearly monochrome palette",
+  "developerFindings": "Finding preview",
+  "developerFindingsDesc": "Temporary previews only: counters, earned findings and network settings stay unchanged. Reset or disable developer mode to leave. Dashboard effects wait for a visible, healthy connection and respect appearance settings. Selecting an icon or theme in Appearance still saves that choice.",
+  "developerAllRewards": "Preview all rewards",
+  "developerPreviewReset": "Clear previews",
+  "developerPreviewAutomatic": "Automatic",
+  "developerSeasonNewYear": "New Year",
+  "developerSeasonBirthday": "ReClash birthday",
+  "developerSeasonAnniversary": "First-run anniversary",
+  "developerSeasonDrift": "Seasonal hue",
+  "developerPatina": "Profile patina",
+  "developerPatinaDays": "{days} days",
+  "developerFindingEvents": "Replay a finding",
+  "developerFindingQueued": "Queued for the visible, healthy dashboard. You can replay this finding again.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "Every connection stage is unavailable",
+  "findingStormVerdict": "The check found no working path. Later failures may be consequences of the first one.",
+  "findingLoopbackWarning": "This profile URL points to ReClash’s own proxy port. Check the subscription address.",
+  "seasonBirthdayNote": "Today is ReClash’s birthday.",
+  "seasonFirstRunNote": "Today is the anniversary of your first launch."
 }

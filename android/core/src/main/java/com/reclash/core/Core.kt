@@ -35,6 +35,7 @@ object Core {
     fun startTun(
         fd: Int,
         protect: (Int) -> Boolean,
+        protectSubscription: (Int) -> Boolean,
         resolveUid: (protocol: Int, source: InetSocketAddress, target: InetSocketAddress) -> Int,
         resolvePackage: (uid: Int) -> String,
         stack: String,
@@ -46,6 +47,8 @@ object Core {
             fd,
             object : TunInterface {
                 override fun protect(fd: Int): Boolean = protect(fd)
+
+                override fun protectSubscription(fd: Int): Boolean = protectSubscription(fd)
 
                 override fun resolveUid(
                     protocol: Int,

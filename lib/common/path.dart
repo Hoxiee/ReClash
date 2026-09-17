@@ -77,9 +77,8 @@ class AppPath {
 
   Future<void> get corePathReady => _corePathResolved.future;
 
-  /// A read-only install (AppImage squashfs, root-owned /opt) cannot hold a
-  /// setuid core, so [corePath] resolves to a writable app-support copy; a
-  /// size/mtime match keeps the existing copy and its setuid bit.
+  /// A read-only install (AppImage squashfs, root-owned /opt) resolves
+  /// [corePath] to a fresh unprivileged app-support copy.
   Future<void> ensureWritableCore() async {
     if (!Platform.isLinux) {
       return _resolveCorePath();
@@ -90,27 +89,57 @@ class AppPath {
     if (!await bundled.exists()) {
       return _resolveCorePath();
     }
+    try {
+      final bundledMode = await _unixMode(bundled.path);
+      if (bundledMode & 0xC00 != 0) {
+        final directory = await dataDir.future;
+        await _installUnprivilegedCore(bundled, directory);
+        return _resolveCorePath();
+      }
+    } catch (error) {
+      commonPrint.log('core privilege check failed: $error');
+      return _resolveCorePath();
+    }
     if (_isDirectoryWritable(executableDirPath)) {
       return _resolveCorePath();
     }
     try {
       final directory = await dataDir.future;
-      final target = File(join(directory.path, 'ReClashCore'));
-      final needsCopy =
-          !await target.exists() ||
-          await target.length() != await bundled.length() ||
-          (await target.lastModified()).isBefore(await bundled.lastModified());
-      if (needsCopy) {
-        final staged = File('${target.path}.staged');
-        await bundled.copy(staged.path);
-        await Process.run('chmod', ['755', staged.path]);
-        await staged.rename(target.path);
-      }
-      _coreOverridePath = target.path;
+      await _installUnprivilegedCore(bundled, directory);
     } catch (error) {
       commonPrint.log('writable core copy failed: $error');
     }
     _resolveCorePath();
+  }
+
+  Future<void> _installUnprivilegedCore(
+    File bundled,
+    Directory directory,
+  ) async {
+    final target = File(join(directory.path, 'ReClashCore'));
+    final staged = File('${target.path}.staged');
+    if (await staged.exists()) {
+      await staged.delete();
+    }
+    await bundled.copy(staged.path);
+    final chmodResult = await Process.run('chmod', ['755', staged.path]);
+    if (chmodResult.exitCode != 0) {
+      await staged.delete();
+      throw FileSystemException(
+        'Failed to make Core unprivileged',
+        staged.path,
+      );
+    }
+    await staged.rename(target.path);
+    _coreOverridePath = target.path;
+  }
+
+  Future<int> _unixMode(String path) async {
+    final result = await Process.run('stat', ['-c', '%f', path]);
+    if (result.exitCode != 0) {
+      throw FileSystemException('Failed to inspect Core mode', path);
+    }
+    return int.parse(result.stdout.toString().trim(), radix: 16);
   }
 
   void _resolveCorePath() {

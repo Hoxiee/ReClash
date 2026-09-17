@@ -125,10 +125,10 @@ func TestDoctorPlatformStatusDuringExamIsAppliedAfterCompletion(t *testing.T) {
 	t.Fatal("deferred platform status was not applied")
 }
 
-func TestDoctorPlatformStatusKeepsLatestUpdateDuringExam(t *testing.T) {
+func TestDoctorPlatformStatusKeepsFreshExamAfterLatestHealthyUpdate(t *testing.T) {
 	runtime := &fakeDoctorRuntime{release: make(chan struct{})}
 	actor := newDoctorActor(runtime, nil)
-	_, _ = actor.request(doctorCommand{kind: doctorStartCommand, start: doctorStartParams{Mode: doctorStandard}})
+	started, _ := actor.request(doctorCommand{kind: doctorStartCommand, start: doctorStartParams{Mode: doctorStandard}})
 	for _, status := range []doctorPlatformStatus{
 		{State: "failed", Generation: 1},
 		{State: "healthy", Generation: 2},
@@ -138,19 +138,27 @@ func TestDoctorPlatformStatusKeepsLatestUpdateDuringExam(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	close(runtime.release)
-	deadline := time.Now().Add(time.Second)
-	for time.Now().Before(deadline) {
-		current := actor.Snapshot()
-		if current.ExamID == "" && len(current.Evidence) == 1 {
-			if current.Evidence[0].Code != "byeDpiListenerHealthy" || current.Health != doctorUnknown {
-				t.Fatalf("snapshot = %+v", current)
-			}
-			return
-		}
-		time.Sleep(time.Millisecond)
+	if _, err := actor.request(doctorCommand{kind: doctorFinishCommand, examID: started.ExamID}); err != nil {
+		t.Fatal(err)
 	}
-	t.Fatal("latest platform status was not applied")
+	close(runtime.release)
+	_, _ = actor.request(doctorCommand{kind: doctorPassiveFlushCommand})
+	current := actor.Snapshot()
+	if current.ExamID != started.ExamID || current.State != doctorInconclusive ||
+		current.CauseCode != "insufficientEvidence" || len(current.Evidence) != 0 || len(current.Incidents) != 1 {
+		t.Fatalf("deferred healthy status replaced exam: %+v", current)
+	}
+	before := current.Revision
+	if _, err := actor.request(doctorCommand{
+		kind:     doctorPlatformStatusCommand,
+		platform: doctorPlatformStatus{State: "healthy", Generation: 3},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	_, _ = actor.request(doctorCommand{kind: doctorPassiveFlushCommand})
+	if current = actor.Snapshot(); current.Revision != before || current.ExamID != started.ExamID {
+		t.Fatalf("live healthy status replaced exam: %+v", current)
+	}
 }
 
 func TestDoctorFailedByeDPIListenerIsScopedConfirmedFailure(t *testing.T) {

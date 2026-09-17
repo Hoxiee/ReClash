@@ -10,31 +10,49 @@ const _rungOfField = {
   'verdict': RoutingRung.verdict,
   'misfit': RoutingRung.misfit,
   'evidence': RoutingRung.evidence,
-  'latBucket': RoutingRung.band,
+  'latencyMs': RoutingRung.latency,
+  'recurrence': RoutingRung.recurrence,
+  'degraded': RoutingRung.degraded,
   'unproven': RoutingRung.unproven,
   'challenger': RoutingRung.incumbent,
   'order': RoutingRung.tiebreak,
 };
 
-List<RoutingRung> _goLadder(String source, String function) {
-  final body = RegExp(
+List<RoutingRung> _goLadder(
+  String source,
+  String function, [
+  Set<String> visited = const {},
+]) {
+  if (visited.contains(function)) {
+    fail('Comparator delegation cycle at $function');
+  }
+  final match = RegExp(
     'func $function\\(a, b rcxKey\\) int \\{.*?\\n\\}',
     dotAll: true,
   ).firstMatch(source);
-  expect(body, isNotNull, reason: '$function is gone from $_decide');
-  return [
-    for (final match in RegExp(
-      r'a\.(\w+) != b\.\1',
-    ).allMatches(body!.group(0)!))
-      _rungOfField[match.group(1)]!,
-  ];
+  expect(match, isNotNull, reason: '$function is gone from $_decide');
+  final body = match!.group(0)!;
+  final delegate = RegExp(r'return (rcxCompare\w*)\(a, b\);?').firstMatch(body);
+  if (delegate != null) {
+    final ignored = {
+      for (final field in RegExp(r'a\.(\w+), b\.\1 = 0, 0').allMatches(body))
+        _rungOfField[field.group(1)]!,
+    };
+    return _goLadder(source, delegate.group(1)!, {
+      ...visited,
+      function,
+    }).where((rung) => !ignored.contains(rung)).toList();
+  }
+  final fields = RegExp(r'a\.(\w+) != b\.\1').allMatches(body);
+  expect(fields, isNotEmpty, reason: '$function has no recognized comparisons');
+  return [for (final field in fields) _rungOfField[field.group(1)]!];
 }
 
 const _base = RcxCandidateReport(
   node: 'base',
   verdict: 'viable',
   evidence: 'fresh',
-  band: 2,
+  latencyMs: 249,
 );
 
 void main() {
@@ -69,33 +87,27 @@ void main() {
     }
   });
 
-  test('holding still outranks a faster band, and evidence outranks both', () {
-    const ladder = 'stable';
-    final incumbent = _base.copyWith(current: true, band: 3);
-    final faster = _base.copyWith(band: 0);
-    final betterEvidence = _base.copyWith(band: 3, evidence: 'live');
-
-    expect(
-      routingDuel(faster, incumbent, terrain: 'normal', strategy: ladder).won,
-      isFalse,
-    );
-    expect(
-      routingDuel(
+  test('confirmed quality ranking can improve an active stable incumbent', () {
+    final incumbent = _base.copyWith(current: true, evidence: 'live');
+    final faster = _base.copyWith(latencyMs: 69, confirmed: true);
+    for (final strategy in ['balanced', 'lowest-latency', 'stable', 'saver']) {
+      final duel = routingDuel(
         faster,
         incumbent,
         terrain: 'normal',
-        strategy: 'balanced',
-      ).won,
-      isTrue,
-    );
+        strategy: strategy,
+      );
+      expect(duel.rung, RoutingRung.latency);
+      expect(duel.won, isTrue);
+    }
+  });
+
+  test('ranking does not claim promotion before confirmation', () {
+    final faster = _base.copyWith(latencyMs: 69);
+    expect(faster.confirmed, isFalse);
     expect(
-      routingDuel(
-        betterEvidence,
-        incumbent,
-        terrain: 'normal',
-        strategy: ladder,
-      ).won,
-      isTrue,
+      routingDuel(faster, _base, terrain: 'normal', strategy: 'stable').rung,
+      RoutingRung.latency,
     );
   });
 
@@ -129,8 +141,8 @@ void main() {
     expect(duelOn('normal').won, isFalse);
   });
 
-  test('latency reads the band before the terrain it does not rank by', () {
-    final breaker = _base.copyWith(breaker: true, band: 4);
+  test('latency ignores specialist suitability', () {
+    final breaker = _base.copyWith(breaker: true, latencyMs: 900);
     final duel = routingDuel(
       breaker,
       _base,
@@ -138,12 +150,12 @@ void main() {
       strategy: 'lowest-latency',
     );
 
-    expect(duel.rung, RoutingRung.band);
+    expect(duel.rung, RoutingRung.latency);
     expect(duel.won, isFalse);
   });
 
   test('a rung below the first difference cannot change the outcome', () {
-    final worseVerdict = _base.copyWith(verdict: 'last-resort', band: 0);
+    final worseVerdict = _base.copyWith(verdict: 'last-resort', latencyMs: 1);
     final duel = routingDuel(
       worseVerdict,
       _base,
@@ -162,18 +174,104 @@ void main() {
     );
   });
 
+  test('fresh probes and live traffic have equal evidence rank', () {
+    final live = _base.copyWith(evidence: 'live');
+    expect(live.evidence, isNot(_base.evidence));
+    expect(
+      routingDuel(live, _base, terrain: 'normal', strategy: 'balanced').rung,
+      isNull,
+    );
+  });
+
+  test('recurrence starts ranking at two episodes and precedes speed', () {
+    final oneEpisode = _base.copyWith(recurrence: 1);
+    expect(
+      routingDuel(
+        oneEpisode,
+        _base,
+        terrain: 'normal',
+        strategy: 'balanced',
+      ).rung,
+      isNull,
+    );
+    final recurrent = _base.copyWith(recurrence: 2, latencyMs: 20);
+    final duel = routingDuel(
+      recurrent,
+      _base,
+      terrain: 'normal',
+      strategy: 'lowest-latency',
+    );
+    expect(duel.rung, RoutingRung.recurrence);
+    expect(duel.won, isFalse);
+  });
+
+  test('degradation precedes speed without changing its displayed value', () {
+    final degraded = _base.copyWith(degraded: true, latencyMs: 20);
+    final duel = routingDuel(
+      degraded,
+      _base,
+      terrain: 'normal',
+      strategy: 'stable',
+    );
+    expect(degraded.latencyMs, 20);
+    expect(duel.rung, RoutingRung.degraded);
+    expect(duel.won, isFalse);
+  });
+
+  test('unknown latency sorts behind measured latency', () {
+    for (final latencyMs in [0, -1]) {
+      final unknown = _base.copyWith(latencyMs: latencyMs, order: 0);
+      final duel = routingDuel(
+        unknown,
+        _base,
+        terrain: 'normal',
+        strategy: 'balanced',
+      );
+      expect(duel.rung, RoutingRung.latency);
+      expect(duel.won, isFalse);
+    }
+  });
+
+  test('latency uses milliseconds rather than display bands', () {
+    final slow = _base.copyWith(latencyMs: 140, band: 0);
+    final fast = _base.copyWith(latencyMs: 100, band: 0);
+    final duel = routingDuel(
+      fast,
+      slow,
+      terrain: 'normal',
+      strategy: 'balanced',
+    );
+    expect(duel.rung, RoutingRung.latency);
+    expect(duel.won, isTrue);
+  });
+
+  test('incumbency wins equal quality before source order', () {
+    final current = _base.copyWith(current: true, order: 70000);
+    final earlier = _base.copyWith(order: 1);
+    final duel = routingDuel(
+      current,
+      earlier,
+      terrain: 'normal',
+      strategy: 'balanced',
+    );
+    expect(duel.rung, RoutingRung.incumbent);
+    expect(duel.won, isTrue);
+  });
+
   test('every rung reads low-is-better so one comparison covers them all', () {
     final best = _base.copyWith(
       verdict: 'preferred',
       evidence: 'live',
-      band: 0,
+      latencyMs: 69,
       current: true,
       order: 1,
     );
     final worst = _base.copyWith(
       verdict: 'reject',
       evidence: 'none',
-      band: 9,
+      latencyMs: 900,
+      recurrence: 2,
+      degraded: true,
       unproven: true,
       breaker: true,
       block: 'absent',

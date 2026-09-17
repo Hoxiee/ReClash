@@ -12,11 +12,18 @@ DateTime? subscriptionExpireDate(int expire) {
   return date.year >= perpetualExpireYear ? null : date;
 }
 
+bool subscriptionIsExpired({required int expire, required DateTime now}) {
+  final expireDate = subscriptionExpireDate(expire);
+  return expireDate != null && !expireDate.isAfter(now);
+}
+
 /// Null when the plan is too far out, perpetual, or has no end date at all.
 int? subscriptionNoticeDay({required int expire, required DateTime now}) {
   final expireDate = subscriptionExpireDate(expire);
   if (expireDate == null) return null;
-  if (!expireDate.isAfter(now)) return subscriptionExpiredDay;
+  if (subscriptionIsExpired(expire: expire, now: now)) {
+    return subscriptionExpiredDay;
+  }
   final daysLeft = expireDate.difference(now).inDays;
   return daysLeft <= subscriptionNoticeLeadDays ? daysLeft : null;
 }

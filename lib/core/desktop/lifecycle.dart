@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'launcher.dart';
 import 'model.dart';
@@ -19,12 +20,24 @@ abstract interface class DesktopCoreLifecycleController {
 
   Future<CoreLifecycleResult> close();
 
+  void setRecoveryHandler(
+    Future<void> Function(bool Function() isCurrent)? handler,
+  );
+
   Future<DesktopCoreSession> waitUntilRunning(Duration timeout);
 }
 
 enum _LifecycleTarget { running, restarted, stopped, closed }
 
 enum _LifecycleAchievement { runningExisting, runningFresh, idle, closed }
+
+final _recoveryRandom = Random();
+
+Duration _defaultRecoveryDelay(int attempt) {
+  final seconds = 1 << (attempt - 1).clamp(0, 4);
+  final jitter = 0.8 + _recoveryRandom.nextDouble() * 0.4;
+  return Duration(milliseconds: (seconds * 1000 * jitter).round());
+}
 
 final class _LifecycleIntent {
   final int revision;
@@ -129,6 +142,10 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   final DesktopCoreTimeouts timeouts;
   final String Function() sessionIdFactory;
   final bool verifyPeerPid;
+  final int maxRecoveryAttempts;
+  final Duration recoveryStablePeriod;
+  final Future<void> Function(int attempt) recoveryWait;
+  final DateTime Function() now;
   final DesktopCoreTransportBinding _transport;
 
   final StreamController<DesktopCoreState> _stateController =
@@ -143,9 +160,13 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
   _SessionDisconnect? _sessionDisconnect;
   Future<void>? _worker;
   Future<void>? _unexpectedDisconnectOperation;
+  Future<void> Function(bool Function() isCurrent)? _recoveryHandler;
   CoreProcessLease? _unconfirmedLease;
   Future<CoreLifecycleResult>? _closeResult;
   int _revision = 0;
+  int _recoveryEpoch = 0;
+  int _recoveryAttempts = 0;
+  DateTime? _runningSince;
   _LifecycleIntent _desired = const _LifecycleIntent(
     0,
     _LifecycleTarget.stopped,
@@ -159,6 +180,10 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     DesktopCoreTimeouts timeouts = const DesktopCoreTimeouts(),
     String Function()? sessionIdFactory,
     bool verifyPeerPid = false,
+    int maxRecoveryAttempts = 5,
+    Duration recoveryStablePeriod = const Duration(seconds: 60),
+    Future<void> Function(int attempt)? recoveryWait,
+    DateTime Function()? now,
   }) {
     return DesktopCoreLifecycle._(
       transportFactory: transportFactory,
@@ -166,6 +191,12 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       timeouts: timeouts,
       sessionIdFactory: sessionIdFactory ?? createCoreSessionId,
       verifyPeerPid: verifyPeerPid,
+      maxRecoveryAttempts: maxRecoveryAttempts,
+      recoveryStablePeriod: recoveryStablePeriod,
+      recoveryWait:
+          recoveryWait ??
+          (attempt) => Future<void>.delayed(_defaultRecoveryDelay(attempt)),
+      now: now ?? DateTime.now,
       transport: DesktopCoreTransportBinding(transportFactory()),
     );
   }
@@ -176,6 +207,10 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     required this.timeouts,
     required this.sessionIdFactory,
     required this.verifyPeerPid,
+    required this.maxRecoveryAttempts,
+    required this.recoveryStablePeriod,
+    required this.recoveryWait,
+    required this.now,
     required DesktopCoreTransportBinding transport,
   }) : _transport = transport {
     _transportSubscription = _transport.events.listen(_handleTransportEvent);
@@ -191,6 +226,13 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
 
   @override
   Stream<DesktopCoreFailure> get crashEvents => _crashController.stream;
+
+  @override
+  void setRecoveryHandler(
+    Future<void> Function(bool Function() isCurrent)? handler,
+  ) {
+    _recoveryHandler = handler;
+  }
 
   @override
   Future<CoreLifecycleResult> start() => _submit(_LifecycleTarget.running);
@@ -225,6 +267,9 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     if (target == _LifecycleTarget.closed) {
       _terminalRequested = true;
     }
+    _recoveryEpoch++;
+    _recoveryAttempts = 0;
+    _runningSince = null;
     final intent = _LifecycleIntent(++_revision, target);
     final command = _PendingLifecycleCommand(intent);
     _pending.add(command);
@@ -452,6 +497,7 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
       _session = session;
       _sessionDisconnect = _SessionDisconnect(session);
       leaseReleased = true;
+      _runningSince = now();
       _publish(DesktopCoreRunning(session));
       return true;
     } catch (error, stackTrace) {
@@ -738,6 +784,12 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
         !identical(_session, session)) {
       return;
     }
+    final runningSince = _runningSince;
+    if (runningSince != null &&
+        now().difference(runningSince) >= recoveryStablePeriod) {
+      _recoveryAttempts = 0;
+    }
+    _runningSince = null;
     _clearSession(session);
     final failure = _failure(
       code: code,
@@ -751,23 +803,126 @@ final class DesktopCoreLifecycle implements DesktopCoreLifecycleController {
     if (!_crashController.isClosed) {
       _crashController.add(failure);
     }
+    final epoch = ++_recoveryEpoch;
     late final Future<void> operation;
-    operation = session.lease
-        .stop(timeouts.disconnection)
-        .then<void>((result) {
-          if (!result.exitConfirmed) {
-            _unconfirmedLease = session.lease;
-          }
-        })
-        .catchError((_) {
-          _unconfirmedLease = session.lease;
-        })
+    operation = _recoverUnexpectedDisconnect(session, failure, epoch)
         .whenComplete(() {
           if (identical(_unexpectedDisconnectOperation, operation)) {
             _unexpectedDisconnectOperation = null;
           }
         });
     _unexpectedDisconnectOperation = operation;
+  }
+
+  Future<void> _recoverUnexpectedDisconnect(
+    DesktopCoreSession session,
+    DesktopCoreFailure crash,
+    int epoch,
+  ) async {
+    try {
+      final result = await session.lease.stop(timeouts.disconnection);
+      if (!result.exitConfirmed) {
+        _unconfirmedLease = session.lease;
+        return;
+      }
+    } catch (_) {
+      _unconfirmedLease = session.lease;
+      return;
+    }
+    Object? lastFailure = crash;
+    StackTrace? lastStackTrace = crash.stackTrace;
+    while (_recoveryIsCurrent(epoch)) {
+      if (_recoveryAttempts >= maxRecoveryAttempts) {
+        _publish(
+          DesktopCoreFailed(
+            _failure(
+              code: 'recovery_exhausted',
+              phase: DesktopCorePhase.failed,
+              revision: _revision,
+              cause: lastFailure,
+              stackTrace: lastStackTrace,
+            ),
+          ),
+        );
+        return;
+      }
+      final attempt = ++_recoveryAttempts;
+      if (!await _waitForRecoveryDelay(attempt, epoch)) {
+        return;
+      }
+      try {
+        if (!await _startSession(_desired.revision) ||
+            !_recoveryIsCurrent(epoch)) {
+          return;
+        }
+        if (!await _restoreRecoveredCore(epoch)) {
+          return;
+        }
+        if (_recoveryIsCurrent(epoch)) {
+          _runningSince = now();
+        }
+        return;
+      } catch (error, stackTrace) {
+        lastFailure = error;
+        lastStackTrace = stackTrace;
+        if (_unconfirmedLease != null) {
+          return;
+        }
+        final failedSession = _session;
+        if (failedSession != null) {
+          try {
+            await _stopSession(
+              failedSession,
+              _desired.revision,
+              allowUnconfirmedExit: false,
+            );
+          } catch (cleanupError, cleanupStackTrace) {
+            lastFailure = cleanupError;
+            lastStackTrace = cleanupStackTrace;
+            if (_unconfirmedLease != null) {
+              return;
+            }
+          }
+        }
+        if (_recoveryIsCurrent(epoch)) {
+          final failure = error is DesktopCoreFailure
+              ? error
+              : _failure(
+                  code: 'recovery_failed',
+                  phase: DesktopCorePhase.failed,
+                  revision: _revision,
+                  cause: error,
+                  stackTrace: stackTrace,
+                );
+          _publish(DesktopCoreFailed(failure));
+        }
+      }
+    }
+  }
+
+  bool _recoveryIsCurrent(int epoch) {
+    return epoch == _recoveryEpoch && _wantsRunning && !_terminalRequested;
+  }
+
+  Future<bool> _restoreRecoveredCore(int epoch) async {
+    final handler = _recoveryHandler;
+    if (handler == null) {
+      throw StateError('Desktop Core recovery handler is not configured');
+    }
+    final restoration = handler(() => _recoveryIsCurrent(epoch));
+    final completed = await Future.any<bool>([
+      restoration.then((_) => true),
+      _intentChanged.future.then((_) => false),
+    ]);
+    if (!completed) {
+      unawaited(restoration.catchError((_) {}));
+    }
+    return completed && _recoveryIsCurrent(epoch);
+  }
+
+  Future<bool> _waitForRecoveryDelay(int attempt, int epoch) async {
+    await Future.any<void>([recoveryWait(attempt), _intentChanged.future]);
+    return _recoveryIsCurrent(epoch);
   }
 
   DesktopCoreFailure _failure({

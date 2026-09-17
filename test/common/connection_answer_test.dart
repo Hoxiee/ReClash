@@ -25,7 +25,7 @@ const _literalCauses = {
     'captivePortal',
     'networkUnvalidated',
   },
-  _reducer: {'vpnNotActive'},
+  _reducer: {'vpnNotActive', 'tunNotActive'},
   _platform: {'byeDpiListenerFailed'},
   _actor: {'staleEvidence'},
   _evidence: {'destinationDnsFailed'},

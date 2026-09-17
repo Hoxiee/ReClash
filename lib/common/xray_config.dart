@@ -547,20 +547,34 @@ String _canon(Object? value) {
   return jsonEncode(value);
 }
 
-// Shape walking.
+bool _isXrayConfig(Map<String, Object?> config) {
+  if (config['type'] == 'amneziawg') return true;
+  final outbounds = config['outbounds'];
+  return outbounds is List &&
+      outbounds.any(
+        (outbound) => outbound is Map && outbound['protocol'] is String,
+      ) &&
+      !outbounds.any(
+        (outbound) => outbound is Map && outbound['type'] is String,
+      );
+}
 
 List<Map<String, Object?>> _configsOf(Object? decoded) {
-  if (decoded is Map<String, Object?> &&
-      (decoded['outbounds'] is List || decoded['type'] == 'amneziawg')) {
+  if (decoded is Map<String, Object?> && _isXrayConfig(decoded)) {
     return [decoded];
   }
   if (decoded is List) {
+    if (decoded.any(
+      (entry) =>
+          entry is Map<String, Object?> &&
+          entry.containsKey('outbounds') &&
+          !_isXrayConfig(entry),
+    )) {
+      return const [];
+    }
     return [
       for (final entry in decoded)
-        if (entry is Map<String, Object?> &&
-            // An amneziawg container has no outbounds — it IS the payload.
-            (entry['outbounds'] is List || entry['type'] == 'amneziawg'))
-          entry,
+        if (entry is Map<String, Object?> && _isXrayConfig(entry)) entry,
     ];
   }
   return const [];

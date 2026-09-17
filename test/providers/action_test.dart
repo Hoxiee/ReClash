@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
+import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -49,7 +50,10 @@ class _ControlledUpdateProfilesAction extends ProfilesAction {
   }
 
   @override
-  Future<PreparedProfileImport> prepareProfileUpdate(Profile profile) {
+  Future<PreparedProfileImport> prepareProfileUpdate(
+    Profile profile, {
+    bool allowDirectRetry = false,
+  }) {
     final queue = preparations[profile.id];
     if (queue == null || queue.isEmpty) {
       throw StateError('No prepared update for ${profile.id}');
@@ -282,6 +286,16 @@ void main() {
           DioException(
             requestOptions: RequestOptions(path: '/'),
             type: DioExceptionType.connectionError,
+          ),
+          request,
+        ),
+        ProfileImportFailure.fetchFailed,
+      );
+      expect(
+        action.profileImportFailure(
+          const CoreMethodException(
+            code: 'subscription_protection',
+            message: 'protected socket refused',
           ),
           request,
         ),
@@ -964,6 +978,63 @@ void main() {
       },
     );
 
+    test('recovery handler restores a running Core', () async {
+      final handler = _MockCoreHandlerInterface();
+      Future<void> Function(bool Function() isCurrent)? recovery;
+      when(() => handler.setRecoveryHandler(any())).thenAnswer((invocation) {
+        recovery =
+            invocation.positionalArguments.single
+                as Future<void> Function(bool Function() isCurrent)?;
+      });
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(handler)),
+          coreActionProvider.overrideWith(_TestCoreAction.new),
+          setupActionProvider.overrideWith(_TestSetupAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(runTimeProvider.notifier).value = 0;
+      final coreAction =
+          container.read(coreActionProvider.notifier) as _TestCoreAction;
+      final setupAction =
+          container.read(setupActionProvider.notifier) as _TestSetupAction;
+
+      await recovery!(() => true);
+
+      expect(coreAction.initCoreCount, 1);
+      expect(setupAction.setRunningCount, 1);
+      expect(container.read(coreStatusProvider), CoreStatus.connected);
+    });
+
+    test('cancelled recovery does not restore Core state', () async {
+      final handler = _MockCoreHandlerInterface();
+      Future<void> Function(bool Function() isCurrent)? recovery;
+      when(() => handler.setRecoveryHandler(any())).thenAnswer((invocation) {
+        recovery =
+            invocation.positionalArguments.single
+                as Future<void> Function(bool Function() isCurrent)?;
+      });
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(CoreController.scoped(handler)),
+          coreActionProvider.overrideWith(_TestCoreAction.new),
+          setupActionProvider.overrideWith(_TestSetupAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final coreAction =
+          container.read(coreActionProvider.notifier) as _TestCoreAction;
+      final setupAction =
+          container.read(setupActionProvider.notifier) as _TestSetupAction;
+
+      await recovery!(() => false);
+
+      expect(coreAction.initCoreCount, 0);
+      expect(setupAction.setRunningCount, 0);
+      expect(setupAction.applyProfileCount, 0);
+    });
+
     test('restartCore treats a coalesced outcome as applied', () async {
       final container = ProviderContainer(
         overrides: [
@@ -990,6 +1061,158 @@ void main() {
   });
 
   group('SetupAction', () {
+    group('runtime activity', () {
+      late ProviderContainer container;
+      late _RaceSetupAction action;
+      late _RaceCommonAction commonAction;
+
+      void createContainer() {
+        registerFallbackValue(
+          const OdometerSignal(OdometerSignalKind.prepareUp),
+        );
+        final coreInterface = _MockCoreHandlerInterface();
+        when(
+          () => coreInterface.signalOdometer(any()),
+        ).thenAnswer((_) async => true);
+        container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(
+              CoreController.scoped(coreInterface),
+            ),
+            initProvider.overrideWithBuild((_, _) => true),
+            commonActionProvider.overrideWith(_RaceCommonAction.new),
+            setupActionProvider.overrideWith(_RaceSetupAction.new),
+          ],
+        );
+        addTearDown(container.dispose);
+        action =
+            container.read(setupActionProvider.notifier) as _RaceSetupAction;
+        commonAction =
+            container.read(commonActionProvider.notifier) as _RaceCommonAction;
+      }
+
+      for (final lifecycleState in [
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+        AppLifecycleState.detached,
+      ]) {
+        testWidgets('stops Android polling while $lifecycleState', (
+          tester,
+        ) async {
+          createContainer();
+          await action.setRunning(true);
+          await tester.pump(const Duration(seconds: 2));
+          final trafficCount = commonAction.updateTrafficCount;
+          final runTime = container.read(runTimeProvider);
+          expect(trafficCount, 3);
+
+          action.updateRuntimeActivity(
+            lifecycleState: lifecycleState,
+            isAndroid: true,
+          );
+          await tester.pump(const Duration(minutes: 5));
+
+          expect(commonAction.updateTrafficCount, trafficCount);
+          expect(container.read(runTimeProvider), runTime);
+          expect(container.read(isStartProvider), isTrue);
+          expect(action.transitions, [true]);
+
+          action.updateRuntimeActivity(
+            lifecycleState: AppLifecycleState.resumed,
+            isAndroid: true,
+          );
+          expect(commonAction.updateTrafficCount, trafficCount + 1);
+          expect(
+            container.read(runTimeProvider),
+            greaterThanOrEqualTo(runTime!),
+          );
+          action.updateRuntimeActivity(
+            lifecycleState: AppLifecycleState.resumed,
+            isAndroid: true,
+          );
+          await tester.pump(const Duration(seconds: 2));
+          expect(commonAction.updateTrafficCount, trafficCount + 3);
+          expect(action.transitions, [true]);
+          await action.setRunning(false);
+        });
+
+        testWidgets('can start and stop while Android is $lifecycleState', (
+          tester,
+        ) async {
+          createContainer();
+          action.updateRuntimeActivity(
+            lifecycleState: lifecycleState,
+            isAndroid: true,
+          );
+          await action.setRunning(true);
+          await tester.pump(const Duration(seconds: 3));
+          expect(container.read(isStartProvider), isTrue);
+          expect(commonAction.updateTrafficCount, 0);
+
+          await action.setRunning(false);
+          action.updateRuntimeActivity(
+            lifecycleState: AppLifecycleState.resumed,
+            isAndroid: true,
+          );
+          await tester.pump(const Duration(seconds: 3));
+          expect(commonAction.updateTrafficCount, 0);
+          expect(container.read(runTimeProvider), isNull);
+          expect(action.transitions, [true, false]);
+        });
+      }
+
+      testWidgets('keeps polling for a visible but inactive Android UI', (
+        tester,
+      ) async {
+        createContainer();
+        await action.setRunning(true);
+        for (final lifecycleState in [null, AppLifecycleState.inactive]) {
+          action.updateRuntimeActivity(
+            lifecycleState: lifecycleState,
+            isAndroid: true,
+          );
+          final trafficCount = commonAction.updateTrafficCount;
+          await tester.pump(const Duration(seconds: 2));
+          expect(commonAction.updateTrafficCount, trafficCount + 2);
+        }
+        await action.setRunning(false);
+      });
+
+      testWidgets('keeps desktop background polling for tray consumers', (
+        tester,
+      ) async {
+        createContainer();
+        await action.setRunning(true);
+        for (final lifecycleState in AppLifecycleState.values) {
+          action.updateRuntimeActivity(
+            lifecycleState: lifecycleState,
+            isAndroid: false,
+          );
+          final trafficCount = commonAction.updateTrafficCount;
+          await tester.pump(const Duration(seconds: 2));
+          expect(commonAction.updateTrafficCount, trafficCount + 2);
+        }
+        await action.setRunning(false);
+      });
+
+      testWidgets('disposal cancels a resumed runtime timer', (tester) async {
+        createContainer();
+        await action.setRunning(true);
+        action.updateRuntimeActivity(
+          lifecycleState: AppLifecycleState.hidden,
+          isAndroid: true,
+        );
+        action.updateRuntimeActivity(
+          lifecycleState: AppLifecycleState.resumed,
+          isAndroid: true,
+        );
+        final trafficCount = commonAction.updateTrafficCount;
+        container.dispose();
+        await tester.pump(const Duration(seconds: 3));
+        expect(commonAction.updateTrafficCount, trafficCount);
+      });
+    });
+
     group('rapid status changes', () {
       test('updates runtime and traffic while core start is pending', () async {
         final startCompleter = Completer<bool>();
@@ -1267,7 +1490,7 @@ void main() {
       );
     });
 
-    test('re-prompts while the core binary stays unauthorized', () async {
+    test('retries authorization after a failed Helper installation', () async {
       late _AuthorizationSetupAction setupAction;
       final container = ProviderContainer(
         overrides: [
@@ -1283,13 +1506,22 @@ void main() {
       addTearDown(container.dispose);
       container.read(setupActionProvider);
 
-      expect(await setupAction.requestAdmin(true), isTrue);
+      await expectLater(
+        setupAction.requestAdmin(true),
+        throwsA(isA<MessageException>()),
+      );
       expect(
         container.read(authorizedTunEnableProvider),
         TunAuthorizationState.unauthorized,
       );
 
+      expect(await setupAction.requestAdmin(true), isNull);
+      expect(setupAction.confirmationRequestCount, 1);
+      expect(setupAction.authorizationRequestCount, 1);
+
+      setupAction.beginTunAuthorization();
       expect(await setupAction.requestAdmin(true), isFalse);
+      expect(setupAction.confirmationRequestCount, 2);
       expect(setupAction.authorizationRequestCount, 2);
       expect(
         container.read(authorizedTunEnableProvider),
@@ -1297,27 +1529,304 @@ void main() {
       );
     });
 
+    test('defers silent authorization until an explicit user retry', () async {
+      final action = _AuthorizationSetupAction([AuthorizeCode.success]);
+      final container = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+      action.beginTunAuthorization(allowPrompt: false);
+
+      expect(await action.requestAdmin(true), isNull);
+      expect(await action.requestAdmin(true), isNull);
+      expect(action.confirmationRequestCount, 0);
+      expect(action.authorizationRequestCount, 0);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.unauthorized,
+      );
+
+      action.beginTunAuthorization();
+      expect(await action.requestAdmin(true), isFalse);
+      expect(action.confirmationRequestCount, 1);
+      expect(action.authorizationRequestCount, 1);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.authorized,
+      );
+    });
+
+    test('cancelling confirmation requires an explicit retry', () async {
+      final action = _AuthorizationSetupAction([AuthorizeCode.success])
+        ..confirmationResult = false;
+      final container = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+
+      expect(await action.requestAdmin(true), isNull);
+      expect(action.confirmationRequestCount, 1);
+      expect(action.authorizationRequestCount, 0);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.unauthorized,
+      );
+
+      action.confirmationResult = true;
+      expect(await action.requestAdmin(true), isNull);
+      expect(action.confirmationRequestCount, 1);
+      expect(action.authorizationRequestCount, 0);
+
+      action.beginTunAuthorization();
+      expect(await action.requestAdmin(true), isFalse);
+      expect(action.confirmationRequestCount, 2);
+      expect(action.authorizationRequestCount, 1);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.authorized,
+      );
+    });
+
     test(
-      'skips the prompt when the core binary is already privileged',
+      'concurrent requests share one confirmation and installation',
       () async {
-        late _AuthorizationSetupAction setupAction;
+        final confirmation = Completer<bool>();
+        final action = _AuthorizationSetupAction([AuthorizeCode.success])
+          ..confirmationCompleter = confirmation;
         final container = ProviderContainer(
-          overrides: [
-            setupActionProvider.overrideWith(() {
-              setupAction = _AuthorizationSetupAction([AuthorizeCode.success])
-                ..adminAuthorized = true;
-              return setupAction;
-            }),
-          ],
+          overrides: [setupActionProvider.overrideWith(() => action)],
         );
         addTearDown(container.dispose);
         container.read(setupActionProvider);
 
-        expect(await setupAction.requestAdmin(true), isTrue);
-        expect(setupAction.authorizationRequestCount, 0);
+        final first = action.requestAdmin(true);
+        await action.confirmationStarted.future;
+        final second = action.requestAdmin(true);
+        final third = action.requestAdmin(true);
+        expect(action.confirmationRequestCount, 1);
+        expect(action.authorizationRequestCount, 0);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.unauthorized,
+        );
+
+        confirmation.complete(true);
+        expect(await Future.wait([first, second, third]), [
+          false,
+          false,
+          false,
+        ]);
+        expect(action.confirmationRequestCount, 1);
+        expect(action.authorizationRequestCount, 1);
         expect(
           container.read(authorizedTunEnableProvider),
           TunAuthorizationState.authorized,
+        );
+      },
+    );
+
+    test(
+      'a newer authorization intent invalidates pending confirmation',
+      () async {
+        final confirmation = Completer<bool>();
+        final action = _AuthorizationSetupAction([AuthorizeCode.success])
+          ..confirmationCompleter = confirmation;
+        final container = ProviderContainer(
+          overrides: [setupActionProvider.overrideWith(() => action)],
+        );
+        addTearDown(container.dispose);
+        container.read(setupActionProvider);
+
+        final pending = action.requestAdmin(true);
+        await action.confirmationStarted.future;
+        action.beginTunAuthorization();
+        confirmation.complete(true);
+
+        expect(await pending, isNull);
+        expect(action.confirmationRequestCount, 1);
+        expect(action.authorizationRequestCount, 0);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.unauthorized,
+        );
+
+        action.confirmationCompleter = null;
+        expect(await action.requestAdmin(true), isFalse);
+        expect(action.confirmationRequestCount, 2);
+        expect(action.authorizationRequestCount, 1);
+      },
+    );
+
+    test('Stop while confirmation is open suppresses installation', () async {
+      registerFallbackValue(
+        const OdometerSignal(OdometerSignalKind.prepareDown),
+      );
+      final coreInterface = _MockCoreHandlerInterface();
+      when(
+        () => coreInterface.signalOdometer(any()),
+      ).thenAnswer((_) async => true);
+      final confirmation = Completer<bool>();
+      final action = _AuthorizationSetupAction([AuthorizeCode.success])
+        ..confirmationCompleter = confirmation;
+      final container = ProviderContainer(
+        overrides: [
+          coreHandlerProvider.overrideWithValue(
+            CoreController.scoped(coreInterface),
+          ),
+          setupActionProvider.overrideWith(() => action),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+
+      final pending = action.requestAdmin(true);
+      await action.confirmationStarted.future;
+      expect(await action.setRunning(false), isTrue);
+      confirmation.complete(true);
+
+      expect(await pending, isNull);
+      expect(await action.requestAdmin(true), isNull);
+      expect(action.confirmationRequestCount, 1);
+      expect(action.authorizationRequestCount, 0);
+      expect(action.coreRunningCalls, [false]);
+      expect(container.read(isStartProvider), isFalse);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.unauthorized,
+      );
+    });
+
+    test('an explicit retry waits for an obsolete dialog to close', () async {
+      final confirmation = Completer<bool>();
+      final action = _AuthorizationSetupAction([AuthorizeCode.success])
+        ..confirmationCompleter = confirmation;
+      final container = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+      final first = action.requestAdmin(true);
+      await action.confirmationStarted.future;
+      action.beginTunAuthorization();
+      final retry = action.requestAdmin(true);
+      action.confirmationCompleter = null;
+      expect(action.confirmationRequestCount, 1);
+      confirmation.complete(false);
+      expect(await first, isNull);
+      expect(await retry, isFalse);
+      expect(action.confirmationRequestCount, 2);
+      expect(action.authorizationRequestCount, 1);
+    });
+
+    test('Stop during installation suppresses a stale restart', () async {
+      final installation = Completer<AuthorizeCode>();
+      final action = _AuthorizationSetupAction([])
+        ..installationCompleter = installation;
+      final container = ProviderContainer(
+        overrides: [setupActionProvider.overrideWith(() => action)],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+      final pending = action.requestAdmin(true);
+      await action.installationStarted.future;
+      await action.setRunning(false);
+      installation.complete(AuthorizeCode.success);
+      expect(await pending, isNull);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.unauthorized,
+      );
+      expect(container.read(isStartProvider), isFalse);
+      expect(action.coreRunningCalls, [false]);
+    });
+
+    test('skips the prompt for an active verified Helper session', () async {
+      late _AuthorizationSetupAction setupAction;
+      final container = ProviderContainer(
+        overrides: [
+          setupActionProvider.overrideWith(() {
+            setupAction = _AuthorizationSetupAction([AuthorizeCode.success])
+              ..adminAuthorized = true
+              ..helperActive = true;
+            return setupAction;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(setupActionProvider);
+      setupAction.beginTunAuthorization(allowPrompt: false);
+
+      expect(await setupAction.requestAdmin(true), isTrue);
+      expect(setupAction.confirmationRequestCount, 0);
+      expect(setupAction.authorizationRequestCount, 0);
+      expect(
+        container.read(authorizedTunEnableProvider),
+        TunAuthorizationState.authorized,
+      );
+    });
+
+    test(
+      'hands a direct session to lifecycle before authorizing TUN',
+      () async {
+        final action = _AuthorizationSetupAction([])..adminAuthorized = true;
+        final container = ProviderContainer(
+          overrides: [setupActionProvider.overrideWith(() => action)],
+        );
+        addTearDown(container.dispose);
+        container.read(setupActionProvider);
+
+        expect(await action.requestAdmin(true), isFalse);
+        expect(action.authorizationRequestCount, 0);
+        await expectLater(
+          action.requestAdmin(true),
+          throwsA(isA<MessageException>()),
+        );
+        action.helperActive = true;
+        expect(await action.requestAdmin(true), isTrue);
+      },
+    );
+
+    test(
+      'an already installed Helper does not authorize a direct session',
+      () async {
+        final action = _AuthorizationSetupAction([AuthorizeCode.none]);
+        final container = ProviderContainer(
+          overrides: [setupActionProvider.overrideWith(() => action)],
+        );
+        addTearDown(container.dispose);
+        container.read(setupActionProvider);
+
+        expect(await action.requestAdmin(true), isFalse);
+        expect(action.authorizationRequestCount, 1);
+      },
+    );
+
+    test(
+      'failed Helper authorization cannot start listeners or retain running state',
+      () async {
+        final action = _AuthorizationSetupAction([AuthorizeCode.error]);
+        final container = ProviderContainer(
+          overrides: [
+            initProvider.overrideWithBuild((_, _) => true),
+            currentProfileProvider.overrideWithValue(null),
+            setupActionProvider.overrideWith(() => action),
+            commonActionProvider.overrideWith(_RaceCommonAction.new),
+          ],
+        );
+        addTearDown(container.dispose);
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update((state) => state.copyWith.tun(enable: true));
+        container.read(setupActionProvider);
+
+        expect(await action.setRunning(true), isFalse);
+        expect(action.coreRunningCalls, [false]);
+        expect(container.read(isStartProvider), isFalse);
+        expect(
+          container.read(authorizedTunEnableProvider),
+          TunAuthorizationState.unauthorized,
         );
       },
     );
@@ -1338,7 +1847,10 @@ void main() {
           .update((state) => state.copyWith.tun(enable: true));
       container.read(setupActionProvider);
 
-      await setupAction.requestAdmin(true);
+      await expectLater(
+        setupAction.requestAdmin(true),
+        throwsA(isA<MessageException>()),
+      );
 
       expect(container.read(shouldPatchSystemDnsProvider), isFalse);
     });
@@ -1425,13 +1937,54 @@ final _restartFailure = Exception('restart failed');
 class _AuthorizationSetupAction extends SetupAction {
   final List<AuthorizeCode> authorizationResults;
   int authorizationRequestCount = 0;
+  int confirmationRequestCount = 0;
+  bool confirmationResult = true;
+  Completer<bool>? confirmationCompleter;
+  final confirmationStarted = Completer<void>();
+  Completer<AuthorizeCode>? installationCompleter;
+  final installationStarted = Completer<void>();
   bool adminAuthorized = false;
+  bool helperActive = false;
+  final coreRunningCalls = <bool>[];
+
+  @override
+  Future<bool> setCoreRunning(bool running) async {
+    coreRunningCalls.add(running);
+    return true;
+  }
 
   _AuthorizationSetupAction(this.authorizationResults);
 
   @override
+  void build() {
+    super.build();
+    beginTunAuthorization();
+  }
+
+  @override
+  Future<bool> confirmTunAuthorization() async {
+    confirmationRequestCount++;
+    if (!confirmationStarted.isCompleted) confirmationStarted.complete();
+    return await confirmationCompleter?.future ?? confirmationResult;
+  }
+
+  @override
+  bool get requiresHelperSession => true;
+
+  @override
+  bool get helperSessionActive => helperActive;
+
+  @override
+  bool get supportsTunElevation => true;
+
+  @override
+  bool get rechecksTunAuthorization => true;
+
+  @override
   Future<AuthorizeCode> authorizeCore() async {
-    return authorizationResults[authorizationRequestCount++];
+    final index = authorizationRequestCount++;
+    if (!installationStarted.isCompleted) installationStarted.complete();
+    return await installationCompleter?.future ?? authorizationResults[index];
   }
 
   @override

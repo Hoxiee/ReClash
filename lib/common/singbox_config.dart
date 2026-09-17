@@ -14,7 +14,18 @@ bool isSingboxConfigInput(String body) {
   final trimmed = body.trimLeft();
   if (!trimmed.startsWith('{')) return false;
   final decoded = _tryJson(trimmed);
-  return decoded is Map<String, Object?> && decoded['outbounds'] is List;
+  return decoded is Map<String, Object?> && _hasSingboxOutbounds(decoded);
+}
+
+bool _hasSingboxOutbounds(Map<String, Object?> config) {
+  final outbounds = config['outbounds'];
+  return outbounds is List &&
+      outbounds.any(
+        (outbound) => outbound is Map && outbound['type'] is String,
+      ) &&
+      !outbounds.any(
+        (outbound) => outbound is Map && outbound['protocol'] is String,
+      );
 }
 
 class SingboxConfigResult implements ConvertedSubscription {
@@ -29,7 +40,9 @@ class SingboxConfigResult implements ConvertedSubscription {
 
 SingboxConfigResult? tryConvertSingboxConfig(String body) {
   final decoded = _tryJson(body);
-  if (decoded is! Map<String, Object?>) return null;
+  if (decoded is! Map<String, Object?> || !_hasSingboxOutbounds(decoded)) {
+    return null;
+  }
   final outbounds = decoded['outbounds'];
   if (outbounds is! List) return null;
 

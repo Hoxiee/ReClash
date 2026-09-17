@@ -6,6 +6,7 @@ import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/connection_doctor.dart';
@@ -17,6 +18,38 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
+
+class _RecordingSetupAction extends SetupAction {
+  final activityUpdates = <({AppLifecycleState? state, bool isAndroid})>[];
+
+  @override
+  void updateRuntimeActivity({
+    required AppLifecycleState? lifecycleState,
+    required bool isAndroid,
+  }) {
+    activityUpdates.add((state: lifecycleState, isAndroid: isAndroid));
+    super.updateRuntimeActivity(
+      lifecycleState: lifecycleState,
+      isAndroid: isAndroid,
+    );
+  }
+}
+
+class _RecordingDoctor extends ConnectionDoctor {
+  final activityUpdates = <({AppLifecycleState? state, bool isAndroid})>[];
+
+  @override
+  Future<DoctorSnapshot> updateActivity({
+    required AppLifecycleState? lifecycleState,
+    required bool isAndroid,
+  }) {
+    activityUpdates.add((state: lifecycleState, isAndroid: isAndroid));
+    return super.updateActivity(
+      lifecycleState: lifecycleState,
+      isAndroid: isAndroid,
+    );
+  }
+}
 
 const _debounce = Duration(milliseconds: 700);
 
@@ -56,6 +89,8 @@ void main() {
   Future<ProviderContainer> pumpManager(WidgetTester tester) async {
     final container = ProviderContainer(
       overrides: [
+        setupActionProvider.overrideWith(_RecordingSetupAction.new),
+        connectionDoctorProvider.overrideWith(_RecordingDoctor.new),
         coreHandlerProvider.overrideWithValue(
           CoreController.scoped(coreInterface),
         ),
@@ -70,6 +105,35 @@ void main() {
     );
     return container;
   }
+
+  testWidgets('syncs runtime activity on mount and lifecycle changes', (
+    tester,
+  ) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    final container = await pumpManager(tester);
+    tester.binding.scheduleForcedFrame();
+    await tester.pump();
+    final action =
+        container.read(setupActionProvider.notifier) as _RecordingSetupAction;
+    expect(action.activityUpdates, [
+      (state: AppLifecycleState.hidden, isAndroid: system.isAndroid),
+    ]);
+
+    final doctor =
+        container.read(connectionDoctorProvider.notifier) as _RecordingDoctor;
+    expect(doctor.activityUpdates, action.activityUpdates);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(doctor.activityUpdates, action.activityUpdates);
+    expect(action.activityUpdates, [
+      (state: AppLifecycleState.hidden, isAndroid: system.isAndroid),
+      (state: AppLifecycleState.resumed, isAndroid: system.isAndroid),
+      (state: AppLifecycleState.paused, isAndroid: system.isAndroid),
+    ]);
+  });
 
   testWidgets('syncs UI activity idempotently and after reconnect', (
     tester,

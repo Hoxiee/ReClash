@@ -227,6 +227,14 @@ DoctorAnswer _problemAnswer(
     blame: blame,
   );
 
+  if (cause == 'tunNotActive') {
+    return answer(
+      text.captureHeadline,
+      text.captureMeaning,
+      steps: [text.stepRestartTunnel],
+      remedies: const [DoctorRemedy.openAdvanced, DoctorRemedy.recheck],
+    );
+  }
   if (cause == 'vpnNotActive') {
     return answer(
       text.vpnInactiveHeadline,

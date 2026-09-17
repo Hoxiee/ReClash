@@ -6,6 +6,8 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/access.dart';
+import 'package:reclash/views/resources.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,16 +128,6 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
     } catch (_) {}
   }
 
-  void _selectPreset(SmartRoutingPreset value) {
-    ref
-        .read(smartRoutingSettingProvider.notifier)
-        .update(
-          (state) => state
-              .applyPreset(value)
-              .copyWith(enabled: value != SmartRoutingPreset.off),
-        );
-  }
-
   Future<void> _checkNotifications() async {
     if (!widget.permissionGateway.isAndroid) {
       if (mounted) {
@@ -221,18 +213,13 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final preset = ref.watch(
-      smartRoutingSettingProvider.select((state) => state.preset),
-    );
+    final routing = ref.watch(smartRoutingSettingProvider);
     final appSetting = ref.watch(appSettingProvider);
     final profiles = ref.watch(profilesProvider);
     final profile = ref.watch(currentProfileProvider) ?? profiles.firstOrNull;
     final hasProfile = profile != null;
     final autoRun = hasProfile && appSetting.autoRun;
     final storedAutoRun = appSetting.autoRun;
-    final recommendation = smartRoutingPresetForLocale(
-      appSetting.locale ?? Localizations.localeOf(context).toLanguageTag(),
-    );
     final battery = ref.watch(batteryOptimizationDisableProvider);
     final systemProxy = ref.watch(
       networkSettingProvider.select((state) => state.systemProxy),
@@ -247,31 +234,57 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
         spacing: 20,
         children: [
           SetupSection(
-            caption: appLocalizations.setupRegionTitle,
-            description: appLocalizations.setupRegionDesc,
+            caption: appLocalizations.setupRegionSettings,
+            description: appLocalizations.setupRegionSettingsDesc,
             child: SetupCard(
-              child: RadioGroup<SmartRoutingPreset>(
-                groupValue: preset,
-                onChanged: (value) {
-                  if (value != null) _selectPreset(value);
-                },
-                child: Column(
-                  children: [
-                    for (final value in SmartRoutingPreset.values)
-                      ListItem<SmartRoutingPreset>.radio(
-                        title: Text(
-                          value == SmartRoutingPreset.off
-                              ? appLocalizations.setupRegionNone
-                              : value.label,
-                        ),
-                        subtitle: value == recommendation
-                            ? Text(appLocalizations.setupRegionRecommended)
-                            : null,
-                        value: value,
-                        onTap: () => _selectPreset(value),
-                      ),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  ListItem.toggle(
+                    key: const ValueKey('setup-smart-routing'),
+                    title: Text(appLocalizations.smartRouting),
+                    subtitle: Text(appLocalizations.smartRoutingDesc),
+                    value: routing.enabled,
+                    onChanged: (value) => ref
+                        .read(smartRoutingSettingProvider.notifier)
+                        .update((state) => state.withEnabled(value)),
+                  ),
+                  ListItem<SmartRoutingStrategy>.options(
+                    key: const ValueKey('setup-smart-routing-preset'),
+                    leading: const Icon(Icons.tune_rounded),
+                    title: Text(appLocalizations.smartRoutingPreset),
+                    subtitle: Text(
+                      routing.matchesStrategy
+                          ? routing.strategy.label
+                          : appLocalizations.smartRoutingStrategyEdited(
+                              routing.strategy.label,
+                            ),
+                    ),
+                    dialogTitle: appLocalizations.smartRoutingPreset,
+                    options: SmartRoutingStrategy.values,
+                    value: routing.strategy,
+                    textBuilder: (value) => value.label,
+                    subtitleBuilder: (value) => value.description,
+                    onChanged: (value) {
+                      if (!mounted || value == null) return;
+                      ref
+                          .read(smartRoutingSettingProvider.notifier)
+                          .update((state) => state.applyStrategy(value));
+                    },
+                  ),
+                  ListItem.next(
+                    leading: const Icon(Icons.public_outlined),
+                    title: Text(appLocalizations.geoResources),
+                    subtitle: Text(appLocalizations.resourcesDesc),
+                    widget: const ResourcesView(),
+                  ),
+                  if (system.isAndroid)
+                    ListItem.next(
+                      leading: const Icon(Icons.apps_rounded),
+                      title: Text(appLocalizations.accessControl),
+                      subtitle: Text(appLocalizations.accessControlDesc),
+                      widget: const AccessView(),
+                    ),
+                ],
               ),
             ),
           ),
@@ -384,9 +397,9 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                     ),
                     Text(
                       appLocalizations.setupSummaryRouting(
-                        preset == SmartRoutingPreset.off
-                            ? appLocalizations.setupRegionNone
-                            : preset.label,
+                        routing.enabled
+                            ? routing.preset.label
+                            : appLocalizations.off,
                       ),
                     ),
                     if (system.isDesktop) ...[

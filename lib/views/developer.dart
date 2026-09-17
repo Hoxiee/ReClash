@@ -7,6 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/views/finding_preview.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -159,6 +160,16 @@ class DeveloperView extends ConsumerWidget {
           ),
           _getSubscriptionsList(context, ref),
           _getDeveloperList(context, ref),
+          if (enable)
+            SettingSection(
+              items: [
+                DecorationListItem.open(
+                  leading: const Icon(Icons.science_outlined),
+                  title: Text(appLocalizations.developerFindings),
+                  widget: const FindingPreviewView(),
+                ),
+              ],
+            ),
           const SettingBottomInset(),
         ],
       ),

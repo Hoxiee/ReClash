@@ -20,7 +20,7 @@ if [[ "$mode" != "major" && "$mode" != "minor" && "$mode" != "all" ]]; then
   exit 64
 fi
 
-version_line="$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+\+[0-9]{10}$' "$pubspec_file" || true)"
+version_line="$(grep -E '^version: [0-9]+\.[0-9]+\.[0-9]+(-pre\.[1-9][0-9]*)?\+[0-9]{10}$' "$pubspec_file" || true)"
 if [[ -z "$version_line" ]]; then
   echo "No valid version line found in $pubspec_file" >&2
   exit 1
@@ -31,7 +31,7 @@ app_version="${version%%+*}"
 build_number="${version##*+}"
 
 if [[ "$mode" == "major" || "$mode" == "all" ]]; then
-  IFS='.' read -r major minor patch <<<"$app_version"
+  IFS='.' read -r major minor patch <<<"${app_version%%-*}"
   patch=$((patch + 1))
   app_version="$major.$minor.$patch"
 fi
@@ -40,6 +40,10 @@ if [[ "$mode" == "minor" || "$mode" == "all" ]]; then
   today="$(date +%Y%m%d)"
   build_date="${build_number:0:8}"
   build_count="${build_number:8:2}"
+  if [[ "$today" < "$build_date" ]]; then
+    echo "Clock date $today precedes build date $build_date" >&2
+    exit 1
+  fi
   if [[ "$build_date" == "$today" ]]; then
     count=$((10#$build_count + 1))
     if ((count > 99)); then
@@ -50,6 +54,11 @@ if [[ "$mode" == "minor" || "$mode" == "all" ]]; then
     count=1
   fi
   build_number="$today$(printf '%02d' "$count")"
+fi
+
+if ((10#$build_number + 4000 > 2100000000)); then
+  echo "Build number exceeds the Android split APK limit" >&2
+  exit 1
 fi
 
 new_version="$app_version+$build_number"

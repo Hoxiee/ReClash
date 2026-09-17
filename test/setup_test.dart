@@ -83,10 +83,60 @@ void main() {
       expect(setup.createPackageTargets('macos', null, arch: 'arm64'), 'dmg');
     });
 
-    test('downloads the appimagetool build matching the host', () {
+    test('installs packaging dependencies only for selected targets', () {
+      final deb = setup.linuxDependencyPackageGroups('deb').expand((e) => e);
+      final rpm = setup
+          .linuxDependencyPackageGroups('deb,rpm')
+          .expand((e) => e);
+      final appimage = setup
+          .linuxDependencyPackageGroups('appimage')
+          .expand((e) => e);
+
+      expect(deb, isNot(contains('rpm')));
+      expect(deb, isNot(contains('libfuse2')));
+      expect(rpm, containsAll(['rpm', 'patchelf']));
+      expect(appimage, contains('libfuse2'));
+    });
+
+    test('downloads a pinned verified appimagetool for the host', () async {
       expect(setup.appImageToolArch('arm64'), 'aarch64');
       expect(setup.appImageToolArch('amd64'), 'x86_64');
+      expect(
+        setup.appImageToolUrl('amd64'),
+        'https://github.com/AppImage/AppImageKit/releases/download/'
+        '12/appimagetool-x86_64.AppImage',
+      );
+      expect(
+        setup.appImageToolSha256('arm64'),
+        'c9d058310a4e04b9fbbd81340fff2b5fb44943a630b31881e321719f271bd41a',
+      );
+
+      final directory = await Directory.systemTemp.createTemp(
+        'setup_hash_test',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final file = File(p.join(directory.path, 'appimagetool'));
+      await file.writeAsString('corrupted');
+
+      expect(
+        await setup.fileSha256(file),
+        isNot(setup.appImageToolSha256('amd64')),
+      );
     });
+
+    test(
+      'probes POSIX commands without invoking a shell builtin directly',
+      () async {
+        if (Platform.isWindows) return;
+
+        expect(await setup.hasCommand('sh'), isTrue);
+        expect(
+          await setup.hasCommand('reclash-command-that-does-not-exist'),
+          isFalse,
+        );
+        expect(await setup.hasCommand(r'$(touch /tmp/reclash-probe)'), isFalse);
+      },
+    );
 
     test(
       'CMake reevaluates build_tool without bundling the Windows Helper',

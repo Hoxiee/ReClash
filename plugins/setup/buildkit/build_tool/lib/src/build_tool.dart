@@ -125,7 +125,7 @@ class BuildLinuxCommand extends BuildCommand {
   final name = 'linux';
 
   @override
-  final description = 'Build Linux Go core (executable)';
+  final description = 'Build Linux Go core + Rust helper';
 
   @override
   Future<void> runBuildCommand() async {
@@ -149,11 +149,29 @@ class BuildLinuxCommand extends BuildCommand {
       cache: cache,
       notice: notice,
     );
-    final results = await builder.buildAll(targets, force: force);
+    final coreResult = (await builder.buildAll(targets, force: force)).single;
+    final coreSha256 = await calcSha256(coreResult.primaryOutput);
+    final helperResult = await RustBuilder(
+      rootDir: _rootDir,
+      config: config,
+      cache: cache,
+      notice: notice,
+    ).build(targets.single, coreSha256, force: force);
+    writeCoreManifest(
+      path: p.join(
+        _rootDir,
+        config.outputDir,
+        targets.single.platformDir,
+        coreManifestName,
+      ),
+      coreSha256: coreSha256,
+      helperSha256: await calcSha256(helperResult.primaryOutput),
+    );
 
-    if (results.any((result) => result.rebuilt)) {
+    if (coreResult.rebuilt || helperResult.rebuilt) {
       _log.info(
-        'Build complete: ${results.map((result) => result.primaryOutput)}',
+        'Build complete: ${coreResult.primaryOutput}, '
+        '${helperResult.primaryOutput}',
       );
     }
   }

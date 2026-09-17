@@ -47,6 +47,36 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('ladder numbers and timings do not require findings', (
+    tester,
+  ) async {
+    await pumpView(tester, child: const DesyncLadderPreview());
+
+    List<String?> results() => tester
+        .widgetList<Text>(find.textContaining('Ladder result:'))
+        .map((text) => text.data)
+        .toList();
+
+    final expected = results();
+    expect(expected, isNotEmpty);
+    expect(expected.first, 'Ladder result: 2/5 · 120 ms');
+    expect(find.widgetWithText(CircleAvatar, '1'), findsOneWidget);
+    expect(find.widgetWithText(CircleAvatar, '2'), findsOneWidget);
+    expect(container.read(milestoneSettingProvider).unlocked, isEmpty);
+
+    for (final settings in [
+      const MilestoneProps(unlocked: {'fullLadder'}),
+      const MilestoneProps(findingsEnabled: false),
+    ]) {
+      container.read(milestoneSettingProvider.notifier).update((_) => settings);
+      await tester.pumpAndSettle();
+      expect(results(), expected);
+      expect(find.widgetWithText(CircleAvatar, '1'), findsOneWidget);
+      expect(find.widgetWithText(CircleAvatar, '2'), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the default ladder is marked active', (tester) async {
     await pumpView(tester);
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);

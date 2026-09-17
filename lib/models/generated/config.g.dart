@@ -80,6 +80,11 @@ const _$NotificationVisibilityEnumMap = {
 _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
     _AppSettingProps(
       locale: json['locale'] as String?,
+      region: $enumDecodeNullable(
+        _$AppRegionEnumMap,
+        json['region'],
+        unknownValue: JsonKey.nullForUndefinedEnumValue,
+      ),
       dashboardWidgets: json['dashboardWidgets'] == null
           ? defaultDashboardWidgets
           : dashboardWidgetsSafeFormJson(json['dashboardWidgets'] as List?),
@@ -124,6 +129,7 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
     <String, dynamic>{
       'locale': instance.locale,
+      'region': _$AppRegionEnumMap[instance.region],
       'dashboardWidgets': instance.dashboardWidgets
           .map((e) => _$DashboardWidgetEnumMap[e]!)
           .toList(),
@@ -155,6 +161,13 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'iconVariant': instance.iconVariant,
       'reduceMotion': instance.reduceMotion,
     };
+
+const _$AppRegionEnumMap = {
+  AppRegion.russia: 'ru',
+  AppRegion.iran: 'ir',
+  AppRegion.china: 'cn',
+  AppRegion.other: 'other',
+};
 
 const _$RestoreStrategyEnumMap = {
   RestoreStrategy.compatible: 'compatible',
@@ -554,9 +567,44 @@ const _$DynamicSchemeVariantEnumMap = {
   DynamicSchemeVariant.fruitSalad: 'fruitSalad',
 };
 
+_MilestoneProps _$MilestonePropsFromJson(Map<String, dynamic> json) =>
+    _MilestoneProps(
+      unlocked:
+          (json['unlocked'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          const <String>{},
+      revealedAt:
+          (json['revealedAt'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          const <String, int>{},
+      revealQueue:
+          (json['revealQueue'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      findingsEnabled: json['findingsEnabled'] as bool? ?? true,
+      seasonalEnabled: json['seasonalEnabled'] as bool? ?? true,
+    );
+
+Map<String, dynamic> _$MilestonePropsToJson(_MilestoneProps instance) =>
+    <String, dynamic>{
+      'unlocked': instance.unlocked.toList(),
+      'revealedAt': instance.revealedAt,
+      'revealQueue': instance.revealQueue,
+      'findingsEnabled': instance.findingsEnabled,
+      'seasonalEnabled': instance.seasonalEnabled,
+    };
+
 _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
   currentProfileId: (json['currentProfileId'] as num?)?.toInt(),
   overrideDns: json['overrideDns'] as bool? ?? false,
+  milestoneProps: json['milestoneProps'] == null
+      ? const MilestoneProps()
+      : MilestoneProps.safeFromJson(
+          json['milestoneProps'] as Map<String, Object?>?,
+        ),
   hotKeyActions:
       (json['hotKeyActions'] as List<dynamic>?)
           ?.map((e) => HotKeyAction.fromJson(e as Map<String, dynamic>))
@@ -605,6 +653,7 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'currentProfileId': instance.currentProfileId,
   'overrideDns': instance.overrideDns,
+  'milestoneProps': instance.milestoneProps,
   'hotKeyActions': instance.hotKeyActions,
   'appSettingProps': instance.appSettingProps,
   'davProps': instance.davProps,

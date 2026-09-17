@@ -58,7 +58,7 @@ Download the package for your platform from [Releases](https://github.com/Hoxiee
 | Android | APK: `arm64-v8a`, `armeabi-v7a`, `x86_64` |
 | Windows | installer or portable ZIP: x64, ARM64 |
 | macOS | DMG: Apple silicon, Intel |
-| Linux | AppImage, DEB, RPM: x64, ARM64 |
+| Linux | AppImage: x64; DEB and RPM: x64, ARM64 |
 
 Each release includes `SHA256SUMS`. On Linux or macOS, place it beside the downloaded package and run:
 

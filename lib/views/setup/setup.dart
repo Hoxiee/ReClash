@@ -184,7 +184,16 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
                             child: PageView(
                               controller: _controller,
                               physics: const NeverScrollableScrollPhysics(),
-                              children: _steps(),
+                              children: [
+                                for (final (index, step) in _steps().indexed)
+                                  ExcludeFocus(
+                                    excluding: index != _index,
+                                    child: PageFocusScope(
+                                      autofocus: index == _index,
+                                      child: step,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),

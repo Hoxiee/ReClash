@@ -50,6 +50,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate release version
+        shell: bash
+        env:
+          TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+        run: dart run tool/check_release_version.dart "$TAG"
+
       - name: Check format
         run: dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
 
@@ -141,6 +147,8 @@ jobs:
       - name: Run Android unit tests
         working-directory: android
         shell: bash
+        env:
+          ANDROID_NDK: ${{ steps.core-ndk.outputs.ndk-path }}
         run: |
           # settings.gradle.kts resolves the Flutter tooling through local.properties,
           # which only the Flutter build itself would otherwise generate.
@@ -161,6 +169,7 @@ jobs:
         run: |
           cargo fmt --manifest-path services/helper/Cargo.toml -- --check
           cargo test --manifest-path services/helper/Cargo.toml
+          cargo test --manifest-path services/helper/Cargo.toml --features linux-service
           cargo fmt --manifest-path plugins/rust_api/rust/Cargo.toml -- --check
           cargo test --manifest-path plugins/rust_api/rust/Cargo.toml
 
@@ -268,6 +277,7 @@ jobs:
 
       - name: Setup NDK
         if: startsWith(matrix.platform,'android')
+        id: release-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r28c
@@ -280,22 +290,39 @@ jobs:
           flutter pub get
 
       - name: Setup
+        env:
+          ANDROID_NDK: ${{ steps.release-ndk.outputs.ndk-path }}
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
       - name: Reject unsafe Windows Helper releases
         if: startsWith(matrix.platform, 'windows')
         shell: bash
         run: |
-          if find dist -type f -iname 'ReClashHelperService.exe' -print -quit | grep -q .; then
+          if find dist -type f \( -iname 'ReClashHelperService.exe' -o -iname 'FlClashHelperService.exe' \) -print -quit | grep -q .; then
             echo '::error::Windows Helper publishing is disabled until its privileged IPC is authenticated.'
             exit 1
           fi
+          while IFS= read -r -d '' archive; do
+            extracted="$(mktemp -d)"
+            if ! 7z x -y -o"$extracted" "$archive" > /dev/null; then
+              rm -rf "$extracted"
+              echo "::error::Could not inspect packaged Windows artifact: $archive"
+              exit 1
+            fi
+            if find "$extracted" -type f \( -iname 'ReClashHelperService.exe' -o -iname 'FlClashHelperService.exe' \) -print -quit | grep -q .; then
+              rm -rf "$extracted"
+              echo "::error::Unsafe Windows Helper found inside $archive"
+              exit 1
+            fi
+            rm -rf "$extracted"
+          done < <(find dist -maxdepth 1 -type f \( -iname '*.zip' -o -iname '*-setup.exe' \) -print0)
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
           path: ./dist
+          if-no-files-found: error
           overwrite: true
 
   upload:
@@ -327,6 +354,41 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Verify release asset manifest
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(dart run tool/check_release_version.dart "$TAG")"
+          expected=(
+            "ReClash-$version-android-arm64-v8a.apk"
+            "ReClash-$version-android-armeabi-v7a.apk"
+            "ReClash-$version-android-x86_64.apk"
+            "ReClash-$version-linux-amd64.AppImage"
+            "ReClash-$version-linux-amd64.deb"
+            "ReClash-$version-linux-amd64.rpm"
+            "ReClash-$version-linux-arm64.deb"
+            "ReClash-$version-linux-arm64.rpm"
+            "ReClash-$version-macos-amd64.dmg"
+            "ReClash-$version-macos-arm64.dmg"
+            "ReClash-$version-windows-amd64-setup.exe"
+            "ReClash-$version-windows-amd64.zip"
+            "ReClash-$version-windows-arm64-setup.exe"
+            "ReClash-$version-windows-arm64.zip"
+          )
+          printf '%s\n' "${expected[@]}" | sort > expected-assets.txt
+          find dist -maxdepth 1 -type f -printf '%f\n' | sort > actual-assets.txt
+          if ! diff -u expected-assets.txt actual-assets.txt; then
+            echo '::error::Release assets do not match the required manifest.'
+            exit 1
+          fi
+          while IFS= read -r asset; do
+            if [[ ! -s "dist/$asset" ]]; then
+              echo "::error::Release asset is empty: $asset"
+              exit 1
+            fi
+          done < expected-assets.txt
+
       - name: Generate release notes
         shell: bash
         env:
@@ -340,8 +402,9 @@ jobs:
             dart run tool/changelog.dart build --unreleased
           fi
           dart run tool/changelog.dart render release "${target[@]}" --out release.md
-          version="${TAG#v}"
-          sed "s|VERSION|$version|g" .github/release_template.md >> release.md
+          version="$(dart run tool/check_release_version.dart "$TAG")"
+          sed "s|VERSION|$version|g; s|/download/v$version/|/download/$TAG/|g" \
+            .github/release_template.md >> release.md
 
       - name: Generate checksums
         shell: bash
@@ -352,7 +415,6 @@ jobs:
             | xargs -0 sha256sum > SHA256SUMS
 
       - name: Publish GitHub release
-        if: env.IS_STABLE == 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: ./dist/*

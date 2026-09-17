@@ -161,6 +161,44 @@ void main() {
     expect(missingReleaseTags(derived, derived), isEmpty);
   });
 
+  test('orders a version reset by ancestry rather than version or date', () {
+    expect(
+      readPubspecVersion('version: 0.1.0-pre.1+2026091501\n'),
+      '0.1.0-pre.1',
+    );
+    commit('feat: start the new release series');
+    git(['tag', 'v0.1.0-pre.1']);
+    final pre = build(
+      pending: const PendingVersion(
+        version: '0.1.0-pre.1',
+        date: '2026-01-02',
+        prerelease: true,
+      ),
+    ).changelog.versions;
+    expect(pre.map((version) => version.tag), ['v0.1.0-pre.1', 'v1.1.0']);
+    expect(
+      pre.first.groups.single.entries.single.text,
+      'Start the new release series',
+    );
+    expect(pre.first.prerelease, isTrue);
+
+    commit('fix: finalize the new release');
+    git(['tag', 'v0.1.0']);
+    final stable = build().changelog.versions;
+    expect(stable.map((version) => version.tag), ['v0.1.0', 'v1.1.0']);
+    expect(stable.first.groups.expand((group) => group.entries).length, 2);
+    expect(
+      build(
+        pending: const PendingVersion(
+          version: '0.1.1-pre.1',
+          date: '2026-01-02',
+          prerelease: true,
+        ),
+      ).changelog.versions.first.isEmpty,
+      isTrue,
+    );
+  });
+
   test('is deterministic across runs', () {
     expect(
       encodeChangelog(build().changelog),

@@ -56,14 +56,16 @@ var (
 	// configMu -> selectMu.
 	selectMu sync.Mutex
 
-	isInit      atomic.Bool
-	isRunning   atomic.Bool
-	isSuspended atomic.Bool
-	uiActive    atomic.Bool
-	tunUp       atomic.Bool
-	tunPaused   atomic.Bool
-	sdkVersion  atomic.Int32
-	testURL     atomic.Pointer[string]
+	isInit       atomic.Bool
+	isRunning    atomic.Bool
+	isSuspended  atomic.Bool
+	isScreenOff  atomic.Bool
+	uiActive     atomic.Bool
+	tunUp        atomic.Bool
+	tunRequested atomic.Bool
+	tunPaused    atomic.Bool
+	sdkVersion   atomic.Int32
+	testURL      atomic.Pointer[string]
 
 	delayTestSlots = make(chan struct{}, delayTestConcurrency)
 
@@ -72,6 +74,7 @@ var (
 
 var (
 	errConfigNotApplied    = errors.New("config is not applied")
+	errTunNotActive        = errors.New("TUN was requested but its listener did not start")
 	errNotExternalProvider = errors.New("not external provider")
 )
 
@@ -140,6 +143,7 @@ func sideUpdateExternalProvider(p cp.Provider, data []byte) error {
 }
 
 func updateListeners(cfg *config.Config) {
+	tunRequested.Store(!features.Android && cfg != nil && cfg.General.Tun.Enable)
 	if cfg == nil || !isRunning.Load() {
 		return
 	}
@@ -167,13 +171,15 @@ func updateListeners(cfg *config.Config) {
 		if tunPaused.Load() {
 			tunConf.Enable = false
 		}
-		if tunConf.Enable && tunConf.Device != "" && !listener.GetTunConf().Enable {
-			recreateTunWhenNameFree(tunConf)
-		} else {
-			listener.ReCreateTun(tunConf, tunnel.Tunnel)
-		}
-		syncTunUp()
+		updateTunListener(tunConf)
 	}
+}
+
+func requestedTunError() error {
+	if !features.Android && isRunning.Load() && tunRequested.Load() && !tunPaused.Load() && !tunUp.Load() {
+		return errTunNotActive
+	}
+	return nil
 }
 
 func setTunUp(up bool) {
@@ -189,24 +195,63 @@ func syncTunUp() {
 	setTunUp(isRunning.Load() && listener.GetTunConf().Enable)
 }
 
-// A closed TUN netdevice unregisters asynchronously (~2s on Linux); creating while the dying device still holds the name attaches to it and wedges netlink — create only on a free name, and treat a free-name failure as a real error.
+var (
+	recreateTun        = func(conf LC.Tun) { listener.ReCreateTun(conf, tunnel.Tunnel) }
+	tunInterfaceByName = net.InterfaceByName
+	tunNow             = time.Now
+	tunSleep           = time.Sleep
+)
+
+func stopListeners() {
+	if !features.Android {
+		setTunUp(false)
+		// StopListener leaves LastTunConf enabled after closing its listener.
+		recreateTun(LC.Tun{})
+	}
+	listener.StopListener()
+	setTunUp(false)
+}
+
+func updateTunListener(tunConf LC.Tun) {
+	tunConf.Sort()
+	if tunConf.Enable && tunUp.Load() && tunConf.Equal(listener.LastTunConf) {
+		recreateTun(tunConf)
+		syncTunUp()
+		return
+	}
+
+	setTunUp(false)
+	disabled := tunConf
+	disabled.Enable = false
+	recreateTun(disabled)
+	if tunConf.Enable {
+		if tunConf.Device != "" {
+			recreateTunWhenNameFree(tunConf)
+		} else {
+			recreateTun(tunConf)
+		}
+	}
+	syncTunUp()
+}
+
+// A closed TUN netdevice unregisters asynchronously on Linux; never create while it still holds the name.
 func recreateTunWhenNameFree(tunConf LC.Tun) {
-	deadline := time.Now().Add(8 * time.Second)
+	deadline := tunNow().Add(8 * time.Second)
 	for {
-		if _, err := net.InterfaceByName(tunConf.Device); err != nil {
-			listener.ReCreateTun(tunConf, tunnel.Tunnel)
+		if _, err := tunInterfaceByName(tunConf.Device); err != nil {
+			recreateTun(tunConf)
 			if listener.GetTunConf().Enable {
 				return
 			}
-			if _, err := net.InterfaceByName(tunConf.Device); err != nil {
+			if _, err := tunInterfaceByName(tunConf.Device); err != nil {
 				return
 			}
 		}
-		if !time.Now().Before(deadline) {
+		if !tunNow().Before(deadline) {
 			log.Warnln("[APP] TUN %s still holds its name after 8s, giving up recreate", tunConf.Device)
 			return
 		}
-		time.Sleep(250 * time.Millisecond)
+		tunSleep(250 * time.Millisecond)
 	}
 }
 
@@ -370,7 +415,7 @@ func updateConfig(params *UpdateParams) error {
 
 	updateListeners(currentConfig)
 	syncGeoUpdater(params.GeoAutoUpdate, params.GeoUpdateInterval)
-	return nil
+	return requestedTunError()
 }
 
 func applyAuthentication(cfg *config.Config, authentication []string) {
@@ -458,7 +503,10 @@ func applyConfig(params *SetupParams) error {
 	reconcileGeoUpdater()
 	rcxEngineInstance.OnConfigApplied()
 	doctorBumpGenerations(doctorGenerationChange{Config: true, Routing: true})
-	return err
+	if err != nil {
+		return err
+	}
+	return requestedTunError()
 }
 
 func UnmarshalJson(data []byte, v any) error {

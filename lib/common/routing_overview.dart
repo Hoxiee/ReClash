@@ -96,9 +96,11 @@ enum RoutingRung {
   admission,
   verdict,
   misfit,
-  evidence,
-  band,
+  recurrence,
+  degraded,
   unproven,
+  evidence,
+  latency,
   incumbent,
   tiebreak,
 }
@@ -107,9 +109,11 @@ const _balancedLadder = [
   RoutingRung.admission,
   RoutingRung.verdict,
   RoutingRung.misfit,
-  RoutingRung.evidence,
-  RoutingRung.band,
+  RoutingRung.recurrence,
+  RoutingRung.degraded,
   RoutingRung.unproven,
+  RoutingRung.evidence,
+  RoutingRung.latency,
   RoutingRung.incumbent,
   RoutingRung.tiebreak,
 ];
@@ -117,27 +121,17 @@ const _balancedLadder = [
 const _latencyLadder = [
   RoutingRung.admission,
   RoutingRung.verdict,
-  RoutingRung.evidence,
+  RoutingRung.recurrence,
+  RoutingRung.degraded,
   RoutingRung.unproven,
-  RoutingRung.band,
-  RoutingRung.incumbent,
-  RoutingRung.tiebreak,
-];
-
-const _stableLadder = [
-  RoutingRung.admission,
-  RoutingRung.verdict,
-  RoutingRung.misfit,
   RoutingRung.evidence,
-  RoutingRung.unproven,
+  RoutingRung.latency,
   RoutingRung.incumbent,
-  RoutingRung.band,
   RoutingRung.tiebreak,
 ];
 
 List<RoutingRung> routingLadder(String strategy) => switch (strategy) {
   'lowest-latency' => _latencyLadder,
-  'stable' || 'saver' => _stableLadder,
   _ => _balancedLadder,
 };
 
@@ -153,8 +147,7 @@ int _routingVerdictRank(String verdict) => switch (verdict) {
 };
 
 int _routingEvidenceRank(String evidence) => switch (evidence) {
-  'live' => 0,
-  'fresh' => 1,
+  'live' || 'fresh' => 0,
   'stale' => 2,
   _ => 3,
 };
@@ -168,7 +161,10 @@ int routingRungValue(
   RoutingRung.verdict => _routingVerdictRank(candidate.verdict),
   RoutingRung.misfit => _routingMisfit(terrain, candidate.breaker),
   RoutingRung.evidence => _routingEvidenceRank(candidate.evidence),
-  RoutingRung.band => candidate.band,
+  RoutingRung.recurrence => candidate.recurrence < 2 ? 0 : candidate.recurrence,
+  RoutingRung.degraded => candidate.degraded ? 1 : 0,
+  RoutingRung.latency =>
+    candidate.latencyMs > 0 ? candidate.latencyMs : 0x7fffffffffffffff,
   RoutingRung.unproven => candidate.unproven ? 1 : 0,
   RoutingRung.incumbent => candidate.current ? 0 : 1,
   RoutingRung.tiebreak => candidate.order,

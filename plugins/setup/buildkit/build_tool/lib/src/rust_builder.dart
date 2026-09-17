@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 
 import 'build_cache.dart';
+import 'error.dart';
 import 'fingerprint.dart';
 import 'logging.dart';
 import 'options.dart';
@@ -28,24 +29,45 @@ class RustBuilder {
   String get _helperPath => p.join(rootDir, config.helperDir);
   String get _outputPath => p.join(rootDir, config.outputDir);
 
+  static String? cargoTarget(Target target) {
+    if (target.goos == 'windows') return null;
+    return switch ((target.goos, target.goarch)) {
+      ('linux', 'amd64') => 'x86_64-unknown-linux-gnu',
+      ('linux', 'arm64') => 'aarch64-unknown-linux-gnu',
+      _ => throw BuildException('Unsupported Helper target: $target'),
+    };
+  }
+
+  static List<String> cargoArguments(Target target) {
+    final triple = cargoTarget(target);
+    return [
+      'build',
+      '--features',
+      target.goos == 'linux' ? 'linux-service' : 'windows-service',
+      '--release',
+      if (triple != null) ...['--target', triple],
+    ];
+  }
+
   Future<BuildExecution> build(
     Target target,
     String coreSha256, {
     bool force = false,
     Future<void> Function()? beforeBuild,
   }) async {
-    final args = ['build', '--features', 'windows-service', '--release'];
+    final args = cargoArguments(target);
     final env = {
       'CORE_SHA256': coreSha256,
       'CORE_NAME': '${config.coreName}${target.executableExtension}',
     };
 
-    final srcPath = p.join(
+    final srcPath = p.joinAll([
       _helperPath,
       'target',
+      if (cargoTarget(target) case final triple?) triple,
       'release',
       'helper${target.executableExtension}',
-    );
+    ]);
     final destDir = p.join(_outputPath, target.goos);
     final destPath = p.join(
       destDir,
@@ -90,7 +112,7 @@ class RustBuilder {
   }) async {
     final builder = FingerprintBuilder(rootDir: rootDir)
       ..addValue('cache_schema', BuildCache.schemaVersion)
-      ..addValue('kind', 'windows-helper')
+      ..addValue('kind', '${target.goos}-helper')
       ..addValue('target', {'goos': target.goos, 'goarch': target.goarch})
       ..addValue('arguments', args)
       ..addValue('core_sha256', coreSha256)

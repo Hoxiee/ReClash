@@ -42,15 +42,21 @@ class StartupCoordinator {
     required Future<void> Function() initializeRuntime,
     required Future<void> Function() applyWindowVisibility,
     required void Function() startOptionalEffects,
+    bool showWindowBeforeRuntime = false,
   }) async {
     if (!await handleFailedPreference()) return StartupOutcome.exitRequested;
+    final coreStart = startCore();
     await handleSetupWizard();
-    if (!await handleDisclaimer()) return StartupOutcome.exitRequested;
+    if (!await handleDisclaimer()) {
+      await coreStart;
+      return StartupOutcome.exitRequested;
+    }
     await showCrashRecoveryTip();
     await showCrashlyticsTip();
-    await startCore();
+    await coreStart;
+    if (showWindowBeforeRuntime) await applyWindowVisibility();
     await initializeRuntime();
-    await applyWindowVisibility();
+    if (!showWindowBeforeRuntime) await applyWindowVisibility();
     startOptionalEffects();
     return StartupOutcome.completed;
   }
@@ -127,7 +133,9 @@ class Bootstrap {
     int version,
     DynamicColorSeeds dynamicColor,
   ) async {
-    globalState.packageInfo = await PackageInfo.fromPlatform();
+    globalState.packageInfo = releasePackageInfo(
+      await PackageInfo.fromPlatform(),
+    );
     var config = await migration.run();
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,
@@ -198,6 +206,7 @@ class Bootstrap {
       initializeRuntime: _initializeRuntime,
       applyWindowVisibility: _applyWindowVisibility,
       startOptionalEffects: _startOptionalEffects,
+      showWindowBeforeRuntime: system.isLinux,
     );
   }
 

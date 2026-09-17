@@ -34,6 +34,7 @@ enum HeroStatus {
   reconnecting,
   secured,
   degraded,
+  subscriptionExpired,
   broken,
   paused,
 }
@@ -47,6 +48,7 @@ extension HeroStatusExt on HeroStatus {
   bool get isAlert =>
       this == HeroStatus.paused ||
       this == HeroStatus.degraded ||
+      this == HeroStatus.subscriptionExpired ||
       this == HeroStatus.broken;
 
   bool get isSweeping =>
@@ -230,6 +232,12 @@ const List<Color> _degradedRing = [
   Color(0xFFE8590C),
 ];
 
+const List<Color> _subscriptionExpiredRing = [
+  Color(0xFFC0C8D2),
+  Color(0xFF7C8796),
+  Color(0xFF4F5968),
+];
+
 const List<Color> _brokenRing = [
   Color(0xFFFF8787),
   Color(0xFFF03E3E),
@@ -377,6 +385,8 @@ HeroPalette heroPaletteOf(
       return alert(_pausedRing);
     case HeroStatus.degraded:
       return alert(_degradedRing);
+    case HeroStatus.subscriptionExpired:
+      return alert(_subscriptionExpiredRing);
     case HeroStatus.broken:
       return alert(_brokenRing);
   }

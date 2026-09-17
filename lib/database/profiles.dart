@@ -15,6 +15,8 @@ class Profiles extends Table {
 
   DateTimeColumn get lastUpdateDate => dateTime().nullable()();
 
+  DateTimeColumn get lastUsedAt => dateTime().nullable()();
+
   TextColumn get overwriteType => textEnum<OverwriteType>()();
 
   IntColumn get scriptId => integer().nullable()();
@@ -239,6 +241,7 @@ extension RawProfilExt on RawProfile {
       currentGroupName: currentGroupName,
       url: url,
       lastUpdateDate: lastUpdateDate,
+      lastUsedAt: lastUsedAt,
       autoUpdateDuration: Duration(milliseconds: autoUpdateDurationMillis),
       subscriptionInfo: subscriptionInfo,
       panelMeta: panelMeta,
@@ -271,6 +274,7 @@ extension ProfilesCompanionExt on Profile {
       currentGroupName: Value(currentGroupName),
       url: url,
       lastUpdateDate: Value(lastUpdateDate),
+      lastUsedAt: Value(lastUsedAt),
       autoUpdateDurationMillis: autoUpdateDuration.inMilliseconds,
       subscriptionInfo: Value(subscriptionInfo),
       panelMeta: Value(panelMeta),

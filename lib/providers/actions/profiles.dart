@@ -159,6 +159,15 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
+  void markProfileUsed(int profileId, [DateTime? usedAt]) {
+    ref
+        .read(profilesProvider.notifier)
+        .updateProfile(
+          profileId,
+          (profile) => profile.copyWith(lastUsedAt: usedAt ?? DateTime.now()),
+        );
+  }
+
   void putProfile(Profile profile) {
     ref.read(profilesProvider.notifier).put(profile);
     if (ref.read(currentProfileIdProvider) != null) return;
@@ -182,7 +191,10 @@ class ProfilesAction extends _$ProfilesAction {
         : null;
     try {
       ref.read(profilesProvider.notifier).put(profile);
-      final prepared = await prepareProfileUpdate(profile);
+      final prepared = await prepareProfileUpdate(
+        profile,
+        allowDirectRetry: showLoading,
+      );
       await _runProfileOperation(profile.id, () async {
         _ensureCurrentProfileRevision(profile.id, revision);
         final current = ref.read(profilesProvider).getProfile(profile.id);
@@ -234,9 +246,13 @@ class ProfilesAction extends _$ProfilesAction {
   }
 
   @visibleForTesting
-  Future<PreparedProfileImport> prepareProfileUpdate(Profile profile) async {
+  Future<PreparedProfileImport> prepareProfileUpdate(
+    Profile profile, {
+    bool allowDirectRetry = false,
+  }) async {
     final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
     return profile.prepareUpdate(
+      fetch: _subscriptionFetch(allowDirectRetry: allowDirectRetry),
       validate: (path) => _core.validateConfig(path),
       inspect: (path) => _core.inspectConfig(path),
       requestHeaders: await deviceIdentity.subscriptionHeaders(
@@ -259,8 +275,6 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
-  /// Client support is a constant of the pairing, not news an update can
-  /// bring, so only a fresh import is allowed to report it.
   Future<void> handlePanelVerdicts(
     PanelMeta? panelMeta, {
     bool onImport = false,
@@ -283,11 +297,17 @@ class ProfilesAction extends _$ProfilesAction {
       }
     } else if (onImport && panelMeta.hwidNotSupported) {
       await dialogs.showMessage(
-        title: currentAppLocalizations.clientNotSupported,
-        message: TextSpan(text: currentAppLocalizations.clientNotSupportedTip),
+        title: currentAppLocalizations.panelHwidNotSupported,
+        message: TextSpan(text: _panelHwidMessage()),
       );
     }
   }
+
+  String _panelHwidMessage() => [
+    currentAppLocalizations.panelHwidNotSupportedTip,
+    if (!ref.read(appSettingProvider).sendDeviceIdentity)
+      currentAppLocalizations.panelHwidIdentityDisabled,
+  ].join('\n\n');
 
   Future<ProfileImportResult> importProfile(
     ProfileImportRequest request,
@@ -310,7 +330,11 @@ class ProfilesAction extends _$ProfilesAction {
       await dialogs.showMessage(
         title: currentAppLocalizations.addProfile,
         message: TextSpan(
-          text: profileImportFailureMessage(failure, currentAppLocalizations),
+          text: error is ProfilePanelException
+              ? error.meta.hwidMaxDevicesReached
+                    ? currentAppLocalizations.deviceLimitReachedTip
+                    : _panelHwidMessage()
+              : profileImportFailureMessage(failure, currentAppLocalizations),
         ),
         cancelable: false,
       );
@@ -323,9 +347,7 @@ class ProfilesAction extends _$ProfilesAction {
   void _showImportSummary(Profile profile, ProfileImportSummary summary) {
     final skipped = profile.skippedNodes.length;
     if (profile.undialableNodes) {
-      // A panel verdict names the reason the nodes are stubs; the generic
-      // notice would only repeat it in a second dialog.
-      if (profile.panelMeta?.explainsUndialableNodes == true) return;
+      if (profile.panelMeta?.hwidMaxDevicesReached == true) return;
       unawaited(
         dialogs.showMessage(
           title: currentAppLocalizations.addProfile,
@@ -429,6 +451,9 @@ class ProfilesAction extends _$ProfilesAction {
     if (error is ProfileImportUrlException) {
       return ProfileImportFailure.invalidUrl;
     }
+    if (error is ProfilePanelException) {
+      return ProfileImportFailure.fetchRejected;
+    }
     if (error is ProfileValidationException) {
       return ProfileImportFailure.invalidConfig;
     }
@@ -436,6 +461,10 @@ class ProfilesAction extends _$ProfilesAction {
       return error.failure == ProfileFetchFailure.emptyResponse
           ? ProfileImportFailure.emptyResponse
           : ProfileImportFailure.fetchFailed;
+    }
+    if (error is CoreMethodException &&
+        error.code.startsWith('subscription_')) {
+      return ProfileImportFailure.fetchFailed;
     }
     if (error is DioException) {
       return error.type == DioExceptionType.badResponse
@@ -474,6 +503,35 @@ class ProfilesAction extends _$ProfilesAction {
     );
   }
 
+  FetchProfileResponse _subscriptionFetch({bool allowDirectRetry = true}) {
+    bool allowed() =>
+        allowDirectRetry &&
+        system.isAndroid &&
+        ref.mounted &&
+        ref.read(isStartProvider) &&
+        !ref.read(pausedProvider) &&
+        ref.read(vpnSettingProvider).enable &&
+        ref.read(vpnSettingProvider).allowBypass;
+    final transport = ProtectedSubscriptionTransport(
+      hop: _core.fetchSubscription,
+      allowed: allowed,
+    );
+    return SubscriptionRetry(
+      fetchNormally: request.getFileResponseForUrl,
+      fetchProtected: transport.download,
+      allowed: allowed,
+      confirm: () async =>
+          await dialogs.showMessage(
+            title: currentAppLocalizations.subscriptionDirectRetryTitle,
+            message: TextSpan(
+              text: currentAppLocalizations.subscriptionDirectRetryMessage,
+            ),
+            confirmText: currentAppLocalizations.subscriptionDirectRetryConfirm,
+          ) ==
+          true,
+    ).fetch;
+  }
+
   Future<PreparedProfileImport> _prepareLink(
     ProfileLinkImportRequest request,
   ) async {
@@ -483,6 +541,16 @@ class ProfilesAction extends _$ProfilesAction {
         uri.host.isEmpty) {
       throw const ProfileImportUrlException();
     }
+    if (profilePointsToListener(
+      request.url,
+      ref.read(patchClashConfigProvider).mixedPort,
+    )) {
+      ref.read(milestonesProvider.notifier).discover('loopback');
+      dialogs.showNotifier(
+        currentAppLocalizations.findingLoopbackWarning,
+        level: MessageLevel.warning,
+      );
+    }
     final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
     return Profile.normal(
       url: request.url,
@@ -490,6 +558,7 @@ class ProfilesAction extends _$ProfilesAction {
       clientEmulation: request.client,
       customUserAgent: request.customUserAgent,
     ).prepareUpdate(
+      fetch: _subscriptionFetch(),
       validate: (path) => _core.validateConfig(path),
       inspect: (path) => _core.inspectConfig(path),
       requestHeaders: await deviceIdentity.subscriptionHeaders(

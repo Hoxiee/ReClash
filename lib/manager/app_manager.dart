@@ -24,6 +24,7 @@ class AppStateManager extends ConsumerStatefulWidget {
 
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
+  Timer? _milestoneTimer;
   Future<void> _uiActiveOperation = Future.value();
   bool? _pendingUiActive;
   bool? _sentUiActive;
@@ -34,6 +35,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _syncRuntimeActivity(WidgetsBinding.instance.lifecycleState);
+    _milestoneTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _refreshMilestones();
+    });
     ref.listenManual(checkIpProvider, (prev, next) {
       if (prev != next && next.isInit && next.needsIpCheck) {
         ref.read(networkDetectionProvider.notifier).startCheck();
@@ -114,10 +119,23 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
       if (prev != null) {
         doctor.resetForCoreConnection();
       }
+      if (next == CoreStatus.disconnected && prev != null) {
+        ref.read(milestonesProvider.notifier).coreDisconnected();
+      }
       if (next == CoreStatus.connected) {
         _requestUiActiveSync(force: true);
         unawaited(
-          doctor.refresh().catchError((Object error) {
+          ref.read(milestonesProvider.notifier).refresh().catchError((
+            Object error,
+          ) {
+            commonPrint.log(
+              'Milestone refresh failed: $error',
+              logLevel: coreFailureLogLevel(error),
+            );
+          }),
+        );
+        unawaited(
+          doctor.refreshFromStatus().catchError((Object error) {
             commonPrint.log(
               'Connection doctor reconnect refresh failed: $error',
               logLevel: coreFailureLogLevel(error),
@@ -133,6 +151,27 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         unawaited(systemDns.sync(next));
       }, fireImmediately: true);
     }
+  }
+
+  void _syncRuntimeActivity(AppLifecycleState? state) {
+    unawaited(
+      ref
+          .read(connectionDoctorProvider.notifier)
+          .updateActivity(lifecycleState: state, isAndroid: system.isAndroid)
+          .catchError((Object error) {
+            commonPrint.log(
+              'Connection doctor resume refresh failed: $error',
+              logLevel: coreFailureLogLevel(error),
+            );
+            return unsupportedDoctorSnapshot;
+          }),
+    );
+    ref
+        .read(setupActionProvider.notifier)
+        .updateRuntimeActivity(
+          lifecycleState: state,
+          isAndroid: system.isAndroid,
+        );
   }
 
   void _requestUiActiveSync({bool force = false}) {
@@ -174,8 +213,28 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
     });
   }
 
+  void _refreshMilestones() {
+    if (!mounted ||
+        ref.read(coreStatusProvider) != CoreStatus.connected ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.hidden) {
+      return;
+    }
+    unawaited(
+      ref.read(milestonesProvider.notifier).refresh().catchError((
+        Object error,
+      ) {
+        commonPrint.log(
+          'Milestone refresh failed: $error',
+          logLevel: coreFailureLogLevel(error),
+        );
+      }),
+    );
+  }
+
   @override
   void dispose() {
+    _milestoneTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -183,8 +242,10 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     commonPrint.log('$state');
+    _syncRuntimeActivity(state);
     _requestUiActiveSync();
     if (state == AppLifecycleState.resumed) {
+      _refreshMilestones();
       permissions.check(ref.read);
       render?.resume();
       ref.read(themeActionProvider.notifier).updateBrightness();
@@ -301,6 +362,7 @@ class AppSidebarContainer extends ConsumerWidget {
                         child: AppNavRail(
                           leading: navigationPort?.buildStatusMark(),
                           onToPage: (label) => _handleToPage(ref, label),
+                          onAbout: () => navigationPort?.openAbout(context),
                         ),
                       ),
                     ),

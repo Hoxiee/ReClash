@@ -164,12 +164,14 @@ _ChangeProxyParams _$ChangeProxyParamsFromJson(Map<String, dynamic> json) =>
     _ChangeProxyParams(
       groupName: json['group-name'] as String,
       proxyName: json['proxy-name'] as String,
+      manual: json['manual'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ChangeProxyParamsToJson(_ChangeProxyParams instance) =>
     <String, dynamic>{
       'group-name': instance.groupName,
       'proxy-name': instance.proxyName,
+      'manual': instance.manual,
     };
 
 _UpdateGeoDataParams _$UpdateGeoDataParamsFromJson(Map<String, dynamic> json) =>
@@ -498,9 +500,12 @@ _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
       delay: (json['delay'] as num?)?.toInt() ?? 0,
       hostDelay: (json['hostDelay'] as num?)?.toInt() ?? 0,
       band: (json['band'] as num?)?.toInt() ?? 0,
+      latencyMs: (json['latencyMs'] as num?)?.toInt() ?? 0,
       unproven: json['unproven'] as bool? ?? false,
       order: (json['order'] as num?)?.toInt() ?? 0,
       degraded: json['degraded'] as bool? ?? false,
+      recurrence: (json['recurrence'] as num?)?.toInt() ?? 0,
+      confirmed: json['confirmed'] as bool? ?? false,
       breaker: json['breaker'] as bool? ?? false,
       udp: json['udp'] as bool? ?? false,
       fails: (json['fails'] as num?)?.toInt() ?? 0,
@@ -520,9 +525,12 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
       'delay': instance.delay,
       'hostDelay': instance.hostDelay,
       'band': instance.band,
+      'latencyMs': instance.latencyMs,
       'unproven': instance.unproven,
       'order': instance.order,
       'degraded': instance.degraded,
+      'recurrence': instance.recurrence,
+      'confirmed': instance.confirmed,
       'breaker': instance.breaker,
       'udp': instance.udp,
       'fails': instance.fails,
@@ -626,6 +634,24 @@ Map<String, dynamic> _$RcxMetricsReportToJson(_RcxMetricsReport instance) =>
       'activeMarkers': instance.activeMarkers,
     };
 
+_RcxDiscoveryReport _$RcxDiscoveryReportFromJson(Map<String, dynamic> json) =>
+    _RcxDiscoveryReport(
+      covered: (json['covered'] as num?)?.toInt() ?? 0,
+      pending: (json['pending'] as num?)?.toInt() ?? 0,
+      attempts: (json['attempts'] as num?)?.toInt() ?? 0,
+      confirmations: (json['confirmations'] as num?)?.toInt() ?? 0,
+      state: json['state'] as String? ?? '',
+    );
+
+Map<String, dynamic> _$RcxDiscoveryReportToJson(_RcxDiscoveryReport instance) =>
+    <String, dynamic>{
+      'covered': instance.covered,
+      'pending': instance.pending,
+      'attempts': instance.attempts,
+      'confirmations': instance.confirmations,
+      'state': instance.state,
+    };
+
 _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
   status: json['status'] == null
       ? const RcxStatus()
@@ -659,6 +685,9 @@ _RcxReport _$RcxReportFromJson(Map<String, dynamic> json) => _RcxReport(
   probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
   probeCap: (json['probeCap'] as num?)?.toInt() ?? 0,
   manual: json['manual'] as bool? ?? false,
+  discovery: json['discovery'] == null
+      ? const RcxDiscoveryReport()
+      : RcxDiscoveryReport.fromJson(json['discovery'] as Map<String, dynamic>),
   at: (json['at'] as num?)?.toInt() ?? 0,
 );
 
@@ -674,5 +703,6 @@ Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
       'probesLeft': instance.probesLeft,
       'probeCap': instance.probeCap,
       'manual': instance.manual,
+      'discovery': instance.discovery,
       'at': instance.at,
     };

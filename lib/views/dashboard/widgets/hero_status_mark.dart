@@ -47,6 +47,7 @@ class _HeroStatusMarkState extends ConsumerState<HeroStatusMark>
     HeroStatus.off ||
     HeroStatus.secured ||
     HeroStatus.degraded ||
+    HeroStatus.subscriptionExpired ||
     HeroStatus.broken ||
     HeroStatus.paused => false,
   };

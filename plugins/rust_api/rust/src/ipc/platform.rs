@@ -75,13 +75,13 @@ pub fn authorize_peer(stream: &Stream) -> io::Result<()> {
     }
     Err(io::Error::new(
         io::ErrorKind::PermissionDenied,
-        format!("peer uid {peer_uid} is neither {own_uid} nor root"),
+        format!("peer uid {peer_uid} does not match socket owner {own_uid}"),
     ))
 }
 
 #[cfg(unix)]
 fn is_permitted_uid(peer_uid: libc::uid_t, own_uid: libc::uid_t) -> bool {
-    peer_uid == own_uid || peer_uid == 0
+    peer_uid == own_uid
 }
 
 #[cfg(windows)]
@@ -89,7 +89,7 @@ pub fn authorize_peer(_stream: &Stream) -> io::Result<()> {
     Ok(())
 }
 
-#[cfg(windows)]
+#[cfg(any(windows, target_os = "linux"))]
 pub fn connected_payload(stream: &Stream) -> io::Result<Vec<u8>> {
     use interprocess::local_socket::traits::StreamCommon as _;
 
@@ -100,10 +100,16 @@ pub fn connected_payload(stream: &Stream) -> io::Result<Vec<u8>> {
             "peer process ID is unavailable",
         )
     })?;
+    let process_id = u32::try_from(process_id)
+        .ok()
+        .filter(|pid| *pid != 0)
+        .ok_or_else(|| {
+            io::Error::new(io::ErrorKind::PermissionDenied, "invalid peer process ID")
+        })?;
     Ok(process_id.to_le_bytes().to_vec())
 }
 
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "linux")))]
 pub fn connected_payload(_stream: &Stream) -> io::Result<Vec<u8>> {
     Ok(Vec::new())
 }
@@ -152,14 +158,36 @@ impl Read for PipeReader<'_> {
 mod tests {
     use super::is_permitted_uid;
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn connected_payload_carries_the_kernel_peer_pid() {
+        use interprocess::local_socket::{prelude::*, GenericFilePath, ListenerOptions, Stream};
+
+        let path = std::env::temp_dir().join(format!("reclash-peer-{}.sock", std::process::id()));
+        let name = path.clone().to_fs_name::<GenericFilePath>().unwrap();
+        let listener = super::restrict_listener_mode(ListenerOptions::new().name(name))
+            .create_sync()
+            .unwrap();
+        let peer = std::thread::spawn(move || {
+            Stream::connect(path.to_fs_name::<GenericFilePath>().unwrap()).unwrap()
+        });
+        let stream = listener.accept().unwrap();
+        let _peer = peer.join().unwrap();
+        super::authorize_peer(&stream).unwrap();
+        assert_eq!(
+            super::connected_payload(&stream).unwrap(),
+            std::process::id().to_le_bytes()
+        );
+    }
+
     #[test]
     fn admits_the_socket_owner() {
         assert!(is_permitted_uid(501, 501));
     }
 
     #[test]
-    fn admits_root_because_the_core_runs_privileged_for_tun() {
-        assert!(is_permitted_uid(0, 501));
+    fn rejects_root_for_an_unprivileged_socket_owner() {
+        assert!(!is_permitted_uid(0, 501));
     }
 
     #[test]

@@ -59,6 +59,17 @@ class $ProfilesTable extends Profiles
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _lastUsedAtMeta = const VerificationMeta(
+    'lastUsedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastUsedAt = GeneratedColumn<DateTime>(
+    'last_used_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<OverwriteType, String>
   overwriteType = GeneratedColumn<String>(
@@ -297,6 +308,7 @@ class $ProfilesTable extends Profiles
     currentGroupName,
     url,
     lastUpdateDate,
+    lastUsedAt,
     overwriteType,
     scriptId,
     matchTarget,
@@ -364,6 +376,15 @@ class $ProfilesTable extends Profiles
         lastUpdateDate.isAcceptableOrUnknown(
           data['last_update_date']!,
           _lastUpdateDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_used_at')) {
+      context.handle(
+        _lastUsedAtMeta,
+        lastUsedAt.isAcceptableOrUnknown(
+          data['last_used_at']!,
+          _lastUsedAtMeta,
         ),
       );
     }
@@ -459,6 +480,10 @@ class $ProfilesTable extends Profiles
       lastUpdateDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_update_date'],
+      ),
+      lastUsedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_used_at'],
       ),
       overwriteType: $ProfilesTable.$converteroverwriteType.fromSql(
         attachedDatabase.typeMapping.read(
@@ -626,6 +651,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
   final String? currentGroupName;
   final String url;
   final DateTime? lastUpdateDate;
+  final DateTime? lastUsedAt;
   final OverwriteType overwriteType;
   final int? scriptId;
   final String? matchTarget;
@@ -652,6 +678,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     this.currentGroupName,
     required this.url,
     this.lastUpdateDate,
+    this.lastUsedAt,
     required this.overwriteType,
     this.scriptId,
     this.matchTarget,
@@ -684,6 +711,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     map['url'] = Variable<String>(url);
     if (!nullToAbsent || lastUpdateDate != null) {
       map['last_update_date'] = Variable<DateTime>(lastUpdateDate);
+    }
+    if (!nullToAbsent || lastUsedAt != null) {
+      map['last_used_at'] = Variable<DateTime>(lastUsedAt);
     }
     {
       map['overwrite_type'] = Variable<String>(
@@ -781,6 +811,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       lastUpdateDate: lastUpdateDate == null && nullToAbsent
           ? const Value.absent()
           : Value(lastUpdateDate),
+      lastUsedAt: lastUsedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastUsedAt),
       overwriteType: Value(overwriteType),
       scriptId: scriptId == null && nullToAbsent
           ? const Value.absent()
@@ -831,6 +864,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       currentGroupName: serializer.fromJson<String?>(json['currentGroupName']),
       url: serializer.fromJson<String>(json['url']),
       lastUpdateDate: serializer.fromJson<DateTime?>(json['lastUpdateDate']),
+      lastUsedAt: serializer.fromJson<DateTime?>(json['lastUsedAt']),
       overwriteType: $ProfilesTable.$converteroverwriteType.fromJson(
         serializer.fromJson<String>(json['overwriteType']),
       ),
@@ -886,6 +920,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       'currentGroupName': serializer.toJson<String?>(currentGroupName),
       'url': serializer.toJson<String>(url),
       'lastUpdateDate': serializer.toJson<DateTime?>(lastUpdateDate),
+      'lastUsedAt': serializer.toJson<DateTime?>(lastUsedAt),
       'overwriteType': serializer.toJson<String>(
         $ProfilesTable.$converteroverwriteType.toJson(overwriteType),
       ),
@@ -934,6 +969,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     Value<String?> currentGroupName = const Value.absent(),
     String? url,
     Value<DateTime?> lastUpdateDate = const Value.absent(),
+    Value<DateTime?> lastUsedAt = const Value.absent(),
     OverwriteType? overwriteType,
     Value<int?> scriptId = const Value.absent(),
     Value<String?> matchTarget = const Value.absent(),
@@ -966,6 +1002,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     lastUpdateDate: lastUpdateDate.present
         ? lastUpdateDate.value
         : this.lastUpdateDate,
+    lastUsedAt: lastUsedAt.present ? lastUsedAt.value : this.lastUsedAt,
     overwriteType: overwriteType ?? this.overwriteType,
     scriptId: scriptId.present ? scriptId.value : this.scriptId,
     matchTarget: matchTarget.present ? matchTarget.value : this.matchTarget,
@@ -1008,6 +1045,9 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
       lastUpdateDate: data.lastUpdateDate.present
           ? data.lastUpdateDate.value
           : this.lastUpdateDate,
+      lastUsedAt: data.lastUsedAt.present
+          ? data.lastUsedAt.value
+          : this.lastUsedAt,
       overwriteType: data.overwriteType.present
           ? data.overwriteType.value
           : this.overwriteType,
@@ -1069,6 +1109,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           ..write('currentGroupName: $currentGroupName, ')
           ..write('url: $url, ')
           ..write('lastUpdateDate: $lastUpdateDate, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
           ..write('overwriteType: $overwriteType, ')
           ..write('scriptId: $scriptId, ')
           ..write('matchTarget: $matchTarget, ')
@@ -1100,6 +1141,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
     currentGroupName,
     url,
     lastUpdateDate,
+    lastUsedAt,
     overwriteType,
     scriptId,
     matchTarget,
@@ -1130,6 +1172,7 @@ class RawProfile extends DataClass implements Insertable<RawProfile> {
           other.currentGroupName == this.currentGroupName &&
           other.url == this.url &&
           other.lastUpdateDate == this.lastUpdateDate &&
+          other.lastUsedAt == this.lastUsedAt &&
           other.overwriteType == this.overwriteType &&
           other.scriptId == this.scriptId &&
           other.matchTarget == this.matchTarget &&
@@ -1158,6 +1201,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
   final Value<String?> currentGroupName;
   final Value<String> url;
   final Value<DateTime?> lastUpdateDate;
+  final Value<DateTime?> lastUsedAt;
   final Value<OverwriteType> overwriteType;
   final Value<int?> scriptId;
   final Value<String?> matchTarget;
@@ -1184,6 +1228,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.currentGroupName = const Value.absent(),
     this.url = const Value.absent(),
     this.lastUpdateDate = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
     this.overwriteType = const Value.absent(),
     this.scriptId = const Value.absent(),
     this.matchTarget = const Value.absent(),
@@ -1211,6 +1256,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     this.currentGroupName = const Value.absent(),
     required String url,
     this.lastUpdateDate = const Value.absent(),
+    this.lastUsedAt = const Value.absent(),
     required OverwriteType overwriteType,
     this.scriptId = const Value.absent(),
     this.matchTarget = const Value.absent(),
@@ -1244,6 +1290,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Expression<String>? currentGroupName,
     Expression<String>? url,
     Expression<DateTime>? lastUpdateDate,
+    Expression<DateTime>? lastUsedAt,
     Expression<String>? overwriteType,
     Expression<int>? scriptId,
     Expression<String>? matchTarget,
@@ -1271,6 +1318,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       if (currentGroupName != null) 'current_group_name': currentGroupName,
       if (url != null) 'url': url,
       if (lastUpdateDate != null) 'last_update_date': lastUpdateDate,
+      if (lastUsedAt != null) 'last_used_at': lastUsedAt,
       if (overwriteType != null) 'overwrite_type': overwriteType,
       if (scriptId != null) 'script_id': scriptId,
       if (matchTarget != null) 'match_target': matchTarget,
@@ -1304,6 +1352,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     Value<String?>? currentGroupName,
     Value<String>? url,
     Value<DateTime?>? lastUpdateDate,
+    Value<DateTime?>? lastUsedAt,
     Value<OverwriteType>? overwriteType,
     Value<int?>? scriptId,
     Value<String?>? matchTarget,
@@ -1331,6 +1380,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
       currentGroupName: currentGroupName ?? this.currentGroupName,
       url: url ?? this.url,
       lastUpdateDate: lastUpdateDate ?? this.lastUpdateDate,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       overwriteType: overwriteType ?? this.overwriteType,
       scriptId: scriptId ?? this.scriptId,
       matchTarget: matchTarget ?? this.matchTarget,
@@ -1374,6 +1424,9 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
     }
     if (lastUpdateDate.present) {
       map['last_update_date'] = Variable<DateTime>(lastUpdateDate.value);
+    }
+    if (lastUsedAt.present) {
+      map['last_used_at'] = Variable<DateTime>(lastUsedAt.value);
     }
     if (overwriteType.present) {
       map['overwrite_type'] = Variable<String>(
@@ -1482,6 +1535,7 @@ class ProfilesCompanion extends UpdateCompanion<RawProfile> {
           ..write('currentGroupName: $currentGroupName, ')
           ..write('url: $url, ')
           ..write('lastUpdateDate: $lastUpdateDate, ')
+          ..write('lastUsedAt: $lastUsedAt, ')
           ..write('overwriteType: $overwriteType, ')
           ..write('scriptId: $scriptId, ')
           ..write('matchTarget: $matchTarget, ')
@@ -4182,6 +4236,7 @@ typedef $$ProfilesTableCreateCompanionBuilder =
       Value<String?> currentGroupName,
       required String url,
       Value<DateTime?> lastUpdateDate,
+      Value<DateTime?> lastUsedAt,
       required OverwriteType overwriteType,
       Value<int?> scriptId,
       Value<String?> matchTarget,
@@ -4210,6 +4265,7 @@ typedef $$ProfilesTableUpdateCompanionBuilder =
       Value<String?> currentGroupName,
       Value<String> url,
       Value<DateTime?> lastUpdateDate,
+      Value<DateTime?> lastUsedAt,
       Value<OverwriteType> overwriteType,
       Value<int?> scriptId,
       Value<String?> matchTarget,
@@ -4306,6 +4362,11 @@ class $$ProfilesTableFilterComposer
 
   ColumnFilters<DateTime> get lastUpdateDate => $composableBuilder(
     column: $table.lastUpdateDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4530,6 +4591,11 @@ class $$ProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get overwriteType => $composableBuilder(
     column: $table.overwriteType,
     builder: (column) => ColumnOrderings(column),
@@ -4656,6 +4722,11 @@ class $$ProfilesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastUpdateDate => $composableBuilder(
     column: $table.lastUpdateDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastUsedAt => $composableBuilder(
+    column: $table.lastUsedAt,
     builder: (column) => column,
   );
 
@@ -4846,6 +4917,7 @@ class $$ProfilesTableTableManager
                 Value<String?> currentGroupName = const Value.absent(),
                 Value<String> url = const Value.absent(),
                 Value<DateTime?> lastUpdateDate = const Value.absent(),
+                Value<DateTime?> lastUsedAt = const Value.absent(),
                 Value<OverwriteType> overwriteType = const Value.absent(),
                 Value<int?> scriptId = const Value.absent(),
                 Value<String?> matchTarget = const Value.absent(),
@@ -4880,6 +4952,7 @@ class $$ProfilesTableTableManager
                 currentGroupName: currentGroupName,
                 url: url,
                 lastUpdateDate: lastUpdateDate,
+                lastUsedAt: lastUsedAt,
                 overwriteType: overwriteType,
                 scriptId: scriptId,
                 matchTarget: matchTarget,
@@ -4908,6 +4981,7 @@ class $$ProfilesTableTableManager
                 Value<String?> currentGroupName = const Value.absent(),
                 required String url,
                 Value<DateTime?> lastUpdateDate = const Value.absent(),
+                Value<DateTime?> lastUsedAt = const Value.absent(),
                 required OverwriteType overwriteType,
                 Value<int?> scriptId = const Value.absent(),
                 Value<String?> matchTarget = const Value.absent(),
@@ -4942,6 +5016,7 @@ class $$ProfilesTableTableManager
                 currentGroupName: currentGroupName,
                 url: url,
                 lastUpdateDate: lastUpdateDate,
+                lastUsedAt: lastUsedAt,
                 overwriteType: overwriteType,
                 scriptId: scriptId,
                 matchTarget: matchTarget,

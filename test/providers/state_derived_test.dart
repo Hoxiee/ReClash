@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/enum/enum.dart';
@@ -232,7 +234,10 @@ void main() {
     expect(vpn.stack, container.read(patchClashConfigProvider).tun.stack);
     expect(vpn.vpnProps, container.read(vpnSettingProvider));
 
-    expect(container.read(shouldPatchSystemDnsProvider), isTrue);
+    expect(
+      container.read(shouldPatchSystemDnsProvider),
+      Platform.isMacOS || Platform.isLinux ? isFalse : isTrue,
+    );
 
     container
         .read(networkSettingProvider.notifier)

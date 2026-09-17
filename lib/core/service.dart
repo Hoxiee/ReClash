@@ -45,7 +45,7 @@ class CoreService extends CoreHandlerInterface {
         helperLauncher: HelperLauncher(helperClient),
         helperReady: () => helperClient.readiness(),
       ),
-      verifyPeerPid: system.isWindows,
+      verifyPeerPid: system.isWindows || system.isLinux,
     );
     return CoreService._(
       lifecycle: lifecycle,
@@ -64,6 +64,7 @@ class CoreService extends CoreHandlerInterface {
     required CoreRpcChannel rpcClient,
   }) : _lifecycle = lifecycle,
        _rpcClient = rpcClient {
+    _lifecycle.setRecoveryHandler(_recover);
     _crashSubscription = _lifecycle.crashEvents.listen((failure) {
       coreEventManager.sendEvent(
         CoreEvent(
@@ -73,6 +74,29 @@ class CoreService extends CoreHandlerInterface {
       );
     });
   }
+
+  Future<void> _recover(bool Function() isCurrent) async {
+    final handler = _recoveryHandler;
+    if (handler == null) {
+      throw StateError('Desktop Core recovery handler is not configured');
+    }
+    await handler(isCurrent);
+  }
+
+  Future<void> Function(bool Function() isCurrent)? _recoveryHandler;
+
+  @override
+  void setRecoveryHandler(
+    Future<void> Function(bool Function() isCurrent)? handler,
+  ) {
+    _recoveryHandler = handler;
+  }
+
+  @override
+  CoreProcessOwner? get processOwner => switch (_lifecycle.state) {
+    DesktopCoreRunning(:final session) => session.owner,
+    _ => null,
+  };
 
   @override
   Future<CoreLifecycleResult> start() => _lifecycle.start();
@@ -92,6 +116,7 @@ class CoreService extends CoreHandlerInterface {
     try {
       return await _lifecycle.close();
     } finally {
+      _lifecycle.setRecoveryHandler(null);
       await _rpcClient.close();
       await _crashSubscription.cancel();
     }

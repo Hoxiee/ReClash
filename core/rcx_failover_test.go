@@ -63,8 +63,8 @@ func TestMarkerQuarantineExpiresAndRestoresTheConfiguredOrder(t *testing.T) {
 func TestProviderIncidentCountsOnlyWhenTheCircuitOpens(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = []rcxMember{
-		{Name: "a", ID: "a-id", Provider: "provider-a", Transport: "ws", Port: 443},
-		{Name: "b", ID: "b-id", Provider: "provider-a", Transport: "grpc", Port: 443},
+		{Name: "a", ID: "a-id", Provider: "provider-a", Transport: "ws", Port: 443, Ingress: "a.example", ExternalProvider: true},
+		{Name: "b", ID: "b-id", Provider: "provider-a", Transport: "grpc", Port: 443, Ingress: "b.example", ExternalProvider: true},
 	}
 	engine := newTestEngine(runtime, "ru")
 
@@ -244,6 +244,9 @@ func TestIncidentResultSwitchesEarlyAndCompletionRefundsUnstartedTargets(t *test
 	engine.probeCancel = func() { cancelled = true }
 
 	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+		{Node: "dead", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+	}})
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
 		{Node: "warm", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40},
 	}})
 
@@ -316,6 +319,9 @@ func TestOpenProofEndsRecoveryAfterDomesticProof(t *testing.T) {
 	cancelled := false
 	engine.probeCancel = func() { cancelled = true }
 
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
+		Node: "dead", Role: rcxRoleOpen, Outcome: rcxProbeFail,
+	}}})
 	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{{
 		Node: "home", Role: rcxRoleDomestic, Outcome: rcxProbeOK, DelayMs: 20,
 	}}})

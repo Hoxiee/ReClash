@@ -16,6 +16,10 @@ internal object LauncherIconAliases {
         "strata" to ".icons.StrataAlias",
         "shatter" to ".icons.ShatterAlias",
         "trace" to ".icons.TraceAlias",
+        "vigil" to ".icons.VigilAlias",
+        "topo" to ".icons.TopoAlias",
+        "spark" to ".icons.SparkAlias",
+        "fractal" to ".icons.FractalAlias",
     )
 
     val allAliases = currentAliases.values.toSet()

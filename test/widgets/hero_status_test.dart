@@ -180,6 +180,7 @@ void main() {
     test('marks every state that must not read as calm', () {
       expect(HeroStatus.paused.isAlert, isTrue);
       expect(HeroStatus.degraded.isAlert, isTrue);
+      expect(HeroStatus.subscriptionExpired.isAlert, isTrue);
       expect(HeroStatus.broken.isAlert, isTrue);
       expect(HeroStatus.offline.isAlert, isFalse);
       expect(HeroStatus.secured.isAlert, isFalse);
@@ -452,11 +453,12 @@ void main() {
           HeroStatus.secured,
           HeroStatus.paused,
           HeroStatus.degraded,
+          HeroStatus.subscriptionExpired,
           HeroStatus.broken,
         ])
           palettes[status]!.accent,
       };
-      expect(accents, hasLength(4));
+      expect(accents, hasLength(5));
       // Recovery must not be mistaken for a fault that has settled.
       expect(
         palettes[HeroStatus.reconnecting]!.ring,

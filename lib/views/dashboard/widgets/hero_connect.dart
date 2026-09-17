@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
@@ -50,6 +51,12 @@ class HeroConnect extends ConsumerStatefulWidget {
 
 class _HeroConnectState extends ConsumerState<HeroConnect> {
   late HeroOrbPhase _phase = ref.read(heroLifecycleProvider);
+  String? _revealId;
+  Timer? _revealTimer;
+  bool _revealScheduled = false;
+  bool _piDiscovered = false;
+  String? _sessionNote;
+  Timer? _sessionNoteTimer;
 
   @override
   void initState() {
@@ -70,6 +77,80 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
         setState(() => _phase = phase);
       }
     });
+    ref.listenManual(runTimeProvider, (previous, value) {
+      const piMillis = ((3 * 60 + 14) * 60 + 15) * 1000;
+      if (value == null || value < piMillis) {
+        _piDiscovered = false;
+        return;
+      }
+      if (_piDiscovered ||
+          previous == null ||
+          previous >= piMillis ||
+          !_calm ||
+          ref.read(findingPreviewProvider).enabled) {
+        return;
+      }
+      _piDiscovered = true;
+      if (!ref.read(milestonesProvider.notifier).discover('pi')) return;
+      setState(() => _sessionNote = 'pi');
+      _sessionNoteTimer?.cancel();
+      _sessionNoteTimer = Timer(const Duration(seconds: 4), () {
+        if (mounted) setState(() => _sessionNote = null);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    _sessionNoteTimer?.cancel();
+    super.dispose();
+  }
+
+  bool get _calm {
+    final profile = ref.read(currentProfileProvider);
+    final subscription = profile?.subscriptionInfo;
+    return heroStatusOf(
+              ref.read(heroLifecycleProvider),
+              heroDoctorHealthOf(ref.read(connectionDoctorProvider)),
+            ) ==
+            HeroStatus.secured &&
+        !(subscription != null &&
+            subscriptionIsExpired(
+              expire: subscription.expire,
+              now: DateTime.now(),
+            )) &&
+        PageActivityScope.isActiveOf(context) &&
+        (ModalRoute.of(context)?.isCurrent ?? true) &&
+        ref.read(runRequestStateProvider).phase == RunRequestPhase.idle &&
+        !ref.read(loadingProvider(LoadingTag.proxies));
+  }
+
+  void _queueReveal(HeroStatus status) {
+    if (_revealScheduled ||
+        _revealId != null ||
+        status != HeroStatus.secured ||
+        !_calm) {
+      return;
+    }
+    _revealScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _revealScheduled = false;
+      if (!mounted || !_calm) return;
+      final preview = ref.read(findingPreviewProvider);
+      if (preview.pending != null) {
+        ref.read(findingPreviewProvider.notifier).activate(calm: _calm);
+        return;
+      }
+      if (preview.active != null || preview.enabled) return;
+      final id = ref.read(milestonesProvider.notifier).takeReveal(calm: _calm);
+      if (id == null) return;
+      setState(() => _revealId = id);
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 6), () {
+        if (mounted) setState(() => _revealId = null);
+      });
+    });
   }
 
   void _handleShowSubscription() {
@@ -83,6 +164,10 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(milestoneSettingProvider);
+    final preview = ref.watch(findingPreviewProvider);
+    final reveal = preview.active ?? _revealId;
+    final note = preview.active == 'pi' ? 'pi' : _sessionNote;
     final profile = ref.watch(currentProfileProvider);
     final hasSavedProfiles = ref.watch(
       profilesProvider.select((state) => state.isNotEmpty),
@@ -105,6 +190,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final health = heroDoctorHealthOf(doctor);
     if (byedpiMode) {
       final status = heroStatusOf(_phase, health);
+      _queueReveal(status);
       final palette = byedpiHeroPaletteOf(context, status);
       return _HeroBoard(
         controller: widget.scrollController,
@@ -123,6 +209,8 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             palette: palette,
             metrics: metrics,
             variant: HeroOrbVariant.byedpi,
+            revealId: reveal,
+            sessionNote: note,
           ),
           SizedBox(height: metrics.gapCard),
           if (!split) ...[
@@ -139,6 +227,9 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final announce = panelMeta?.announce?.trim();
     final sub = activeProfile.subscriptionInfo;
     final hasSub = sub != null && sub.hasFacts;
+    final subscriptionExpired =
+        sub != null &&
+        subscriptionIsExpired(expire: sub.expire, now: DateTime.now());
 
     final buyPlanUrl = panelMeta?.buyPlanUrl;
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
@@ -146,7 +237,11 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final activeServer = ref.watch(activeServerProvider);
     final displayName = activeServer.displayName;
     final isUpdating = ref.watch(isUpdatingProvider(activeProfile.updatingKey));
-    final status = heroStatusOf(_phase, health);
+    final baseStatus = heroStatusOf(_phase, health);
+    final status = subscriptionExpired && baseStatus.flows
+        ? HeroStatus.subscriptionExpired
+        : baseStatus;
+    _queueReveal(status);
     final heroRing = parsePanelHeroRing(panelMeta?.heroRing);
     final palette = heroPaletteOf(context, status, heroRing: heroRing);
     final accent = status.isAlert ? palette.accent : null;
@@ -160,6 +255,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
         health: health,
         serviceLogo: panelMeta?.serviceLogo,
         heroRing: heroRing,
+        subscriptionExpired: subscriptionExpired,
         onPhaseChanged: (phase) => setState(() => _phase = phase),
       ),
       tail: (metrics) => [
@@ -168,6 +264,8 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
           status: status,
           palette: palette,
           metrics: metrics,
+          revealId: reveal,
+          sessionNote: note,
         ),
         SizedBox(height: metrics.gapCard),
         if (!split) ...[
@@ -605,6 +703,7 @@ class _OrbSlot extends ConsumerWidget {
     required this.onPhaseChanged,
     this.serviceLogo,
     this.heroRing,
+    this.subscriptionExpired = false,
     this.variant = HeroOrbVariant.vpn,
   });
 
@@ -614,6 +713,7 @@ class _OrbSlot extends ConsumerWidget {
   final ValueChanged<HeroOrbPhase> onPhaseChanged;
   final String? serviceLogo;
   final List<Color>? heroRing;
+  final bool subscriptionExpired;
   final HeroOrbVariant variant;
 
   @override
@@ -629,12 +729,32 @@ class _OrbSlot extends ConsumerWidget {
         activity: activity,
         serviceLogo: serviceLogo,
         heroRing: heroRing,
+        subscriptionExpired: subscriptionExpired,
         variant: variant,
         onPhaseChanged: onPhaseChanged,
       ),
     );
   }
 }
+
+String _milestoneRevealText(AppLocalizations localizations, String id) =>
+    switch (id) {
+      'vigil' => localizations.milestoneRevealVigil,
+      'auscultation' => localizations.milestoneRevealAuscultation,
+      'fullLadder' => localizations.milestoneRevealFullLadder,
+      'silentAutopilot' => localizations.milestoneRevealSilentAutopilot,
+      'odometer' => localizations.milestoneRevealOdometer,
+      'meridian' => localizations.milestoneRevealMeridian,
+      'porcelain' => localizations.milestoneRevealPorcelain,
+      'crown' => localizations.milestoneRevealCrown,
+      'oscilloscope' => localizations.findingOscilloscopeDesc,
+      'marks' => localizations.findingMarksDesc,
+      'pi' => localizations.findingPiDesc,
+      'turn' => localizations.findingTurnDesc,
+      'storm' => localizations.findingStormDesc,
+      'loopback' => localizations.findingLoopbackDesc,
+      _ => '',
+    };
 
 class _OrbCaption extends ConsumerWidget {
   const _OrbCaption({
@@ -643,6 +763,8 @@ class _OrbCaption extends ConsumerWidget {
     required this.palette,
     required this.metrics,
     this.variant = HeroOrbVariant.vpn,
+    this.revealId,
+    this.sessionNote,
   });
 
   final String displayName;
@@ -650,6 +772,8 @@ class _OrbCaption extends ConsumerWidget {
   final HeroPalette palette;
   final HeroMetrics metrics;
   final HeroOrbVariant variant;
+  final String? revealId;
+  final String? sessionNote;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -673,6 +797,8 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.reconnecting => appLocalizations.byedpiReconnecting,
             HeroStatus.paused => appLocalizations.byedpiPaused,
             HeroStatus.broken => appLocalizations.heroLinkBroken,
+            HeroStatus.subscriptionExpired =>
+              appLocalizations.dashboardSubscriptionExpired,
             HeroStatus.secured ||
             HeroStatus.degraded => appLocalizations.byedpiActive,
           }
@@ -685,6 +811,8 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.reconnecting => appLocalizations.heroReconnecting,
             HeroStatus.paused => appLocalizations.heroPaused,
             HeroStatus.broken => appLocalizations.heroLinkBroken,
+            HeroStatus.subscriptionExpired =>
+              appLocalizations.dashboardSubscriptionExpired,
             HeroStatus.secured || HeroStatus.degraded => activeText,
           };
     final subtitle = variant == HeroOrbVariant.byedpi
@@ -700,6 +828,7 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.degraded => appLocalizations.byedpiActiveFor(
               heroDurationWords(runMinutes ?? 0),
             ),
+            HeroStatus.subscriptionExpired => displayName,
             HeroStatus.broken => displayName,
           }
         : switch (status) {
@@ -712,12 +841,18 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.paused => appLocalizations.heroTapToResume,
             HeroStatus.secured || HeroStatus.degraded =>
               appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
+            HeroStatus.subscriptionExpired => displayName,
             HeroStatus.broken =>
               ref.watch(isStartProvider)
                   ? appLocalizations.stop
                   : appLocalizations.heroTapToConnect,
           };
     final accent = status.isAlert ? palette.accent : null;
+    final decorationsVisible =
+        status == HeroStatus.secured &&
+        ref.watch(milestoneSettingProvider).findingsEnabled &&
+        PageActivityScope.isActiveOf(context) &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
     final lastTraffic = _heroTraffic(ref, status);
 
     return Column(
@@ -757,6 +892,38 @@ class _OrbCaption extends ConsumerWidget {
             ),
           ),
         ),
+        if (decorationsVisible)
+          AnimatedSwitcher(
+            duration: context.motionDuration(const Duration(milliseconds: 320)),
+            child: revealId == null
+                ? const SizedBox.shrink()
+                : Padding(
+                    key: ValueKey(revealId),
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      _milestoneRevealText(appLocalizations, revealId!),
+                      textAlign: TextAlign.center,
+                      style: context.textTheme.labelMedium?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+          ),
+        if (decorationsVisible)
+          AnimatedSwitcher(
+            duration: context.motionDuration(const Duration(milliseconds: 240)),
+            child: sessionNote == 'pi'
+                ? Text(
+                    '3:14:15',
+                    key: const ValueKey('pi-session-note'),
+                    style: context.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontFamily: FontFamily.jetBrainsMono.value,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         SizedBox(height: metrics.gapCard),
         RepaintBoundary(
           child: AnimatedSlide(
@@ -877,8 +1044,14 @@ class _SubscriptionStrip extends StatelessWidget {
         : colorScheme.primary;
 
     final expireDate = subscriptionExpireDate(sub.expire);
-    final expiresIn = expireDate?.difference(DateTime.now()).inDays;
-    final daysLeft = expiresIn == null || expiresIn > 0 ? expiresIn : 0;
+    final now = DateTime.now();
+    final expired = subscriptionIsExpired(expire: sub.expire, now: now);
+    final expiresIn = expireDate?.difference(now).inDays;
+    final daysLeft = expired
+        ? null
+        : expiresIn == null || expiresIn > 0
+        ? expiresIn
+        : 0;
     final daysUrgent = daysLeft != null && daysLeft <= heroRenewDaysThreshold;
     final daysColor = daysUrgent ? colorScheme.error : colorScheme.primary;
 
@@ -920,7 +1093,9 @@ class _SubscriptionStrip extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (daysLeft != null)
+                    if (expired)
+                      _SubscriptionExpiredPill(color: colorScheme.error)
+                    else if (daysLeft != null)
                       _DaysPill(days: daysLeft, color: daysColor),
                   ],
                 ),
@@ -998,6 +1173,39 @@ class _SubscriptionStrip extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SubscriptionExpiredPill extends StatelessWidget {
+  const _SubscriptionExpiredPill({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(heroPillRadius),
+      color: color.withValues(alpha: 0.14),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.event_busy_rounded, size: 14, color: color),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            context.appLocalizations.dashboardSubscriptionExpired,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _DaysPill extends StatelessWidget {
@@ -1547,7 +1755,11 @@ class _EmptyHero extends ConsumerWidget {
       context,
       builder: (context) => AdaptiveSheetScaffold(
         title: context.appLocalizations.addProfile,
-        body: const AddProfileView(),
+        body: Builder(
+          builder: (chooserContext) => AddProfileView(
+            onProfileAdded: (_) => closeProfileImportRoute(chooserContext),
+          ),
+        ),
       ),
     );
   }

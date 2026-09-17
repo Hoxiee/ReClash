@@ -34,7 +34,10 @@ void main() {
 
   setUpAll(() async {
     l10n = await AppLocalizations.load(const Locale('en'));
-    source = File(_decide).readAsStringSync();
+    source = [
+      File(_decide).readAsStringSync(),
+      File('core/rcx_selection.go').readAsStringSync(),
+    ].join('\n');
   });
 
   // A label the UI never wrote falls through to a default that reads as a

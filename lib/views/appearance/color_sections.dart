@@ -189,6 +189,16 @@ class _AppearanceColorSectionsState
     final iconVariant = ref.watch(
       appSettingProvider.select((state) => state.iconVariant),
     );
+    final rewards = ref.watch(
+      visibleMilestonesProvider.select((state) => state.unlocked),
+    );
+    final iconVariants = [
+      ..._iconVariants,
+      if (rewards.contains('vigil')) 'vigil',
+      if (rewards.contains('fullLadder')) 'topo',
+      if (rewards.contains('silentAutopilot')) 'spark',
+      if (rewards.contains('crown')) 'fractal',
+    ];
     final primaryColor = themeColors.primaryColor;
     final isDynamic = primaryColor == null;
     final removable = _removablePrimaryColor;
@@ -230,6 +240,29 @@ class _AppearanceColorSectionsState
             ),
           ],
         ),
+        if (rewards.contains('porcelain'))
+          SettingSection.sliver(
+            items: [
+              DecorationListItem(
+                leading: const Icon(Icons.tonality_outlined),
+                title: Text(appLocalizations.findingPorcelain),
+                subtitle: Text(appLocalizations.porcelainThemeDesc),
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onPressed: () {
+                  const color = 0xFFB8C8D4;
+                  _update(
+                    (state) => state.copyWith(
+                      primaryColor: color,
+                      primaryColors: state.primaryColors.contains(color)
+                          ? state.primaryColors
+                          : [...state.primaryColors, color],
+                      schemeVariant: DynamicSchemeVariant.monochrome,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         SettingSection.sliver(
           title: appLocalizations.palette,
           // One always-present action: a swap of label keeps the header height
@@ -293,7 +326,7 @@ class _AppearanceColorSectionsState
                     spacing: spacing,
                     runSpacing: spacing,
                     children: [
-                      for (final variant in _iconVariants)
+                      for (final variant in iconVariants)
                         _AppIconTile(
                           asset: 'assets/images/icon_variants/$variant.png',
                           label: _iconVariantLabel(context, variant),
@@ -326,6 +359,10 @@ String _iconVariantLabel(BuildContext context, String variant) {
     'strata' => appLocalizations.appIconStrata,
     'shatter' => appLocalizations.appIconShatter,
     'trace' => appLocalizations.appIconTrace,
+    'vigil' => appLocalizations.appIconVigil,
+    'topo' => appLocalizations.appIconTopo,
+    'spark' => appLocalizations.appIconSpark,
+    'fractal' => appLocalizations.appIconFractal,
     _ => appLocalizations.defaultText,
   };
 }

@@ -11,6 +11,21 @@ import (
 	"testing"
 )
 
+func TestElevatedIDsRejectsRootAndMismatchedIdentities(t *testing.T) {
+	if !elevatedIDs(0, 0) {
+		t.Error("a root login must be rejected")
+	}
+	if !elevatedIDs(501, 0) {
+		t.Error("a setuid-root process must be rejected")
+	}
+	if !elevatedIDs(501, 502) {
+		t.Error("mismatched real and effective users must be rejected")
+	}
+	if elevatedIDs(501, 501) {
+		t.Error("a regular unprivileged process must be admitted")
+	}
+}
+
 func TestCanReclaimRequiresADirectoryOwnedByTheCaller(t *testing.T) {
 	homeDir := t.TempDir()
 	uid := os.Getuid()

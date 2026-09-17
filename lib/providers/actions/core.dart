@@ -8,7 +8,11 @@ class CoreAction extends _$CoreAction {
   Future<bool>? _restartOperation;
 
   @override
-  void build() {}
+  void build() {
+    final core = _core;
+    core.setRecoveryHandler(_recoverCore);
+    ref.onDispose(() => core.setRecoveryHandler(null));
+  }
 
   Future<void> initCore() async {
     final isInit = await _core.isInit;
@@ -35,6 +39,34 @@ class CoreAction extends _$CoreAction {
         'smart routing sync skipped: $error',
         logLevel: LogLevel.warning,
       );
+    }
+  }
+
+  Future<void> _recoverCore(bool Function() isCurrent) async {
+    if (!isCurrent()) return;
+    await initCore();
+    if (!isCurrent()) return;
+    if (ref.read(isStartProvider)) {
+      final restored = await ref
+          .read(setupActionProvider.notifier)
+          .setRunning(true, initialize: true);
+      if (!restored) {
+        throw StateError('Unable to restore the running Core state');
+      }
+    } else {
+      final restored = await ref
+          .read(setupActionProvider.notifier)
+          .applyProfile(force: true);
+      if (!restored) {
+        throw StateError('Unable to restore the Core configuration');
+      }
+    }
+    if (!isCurrent()) return;
+    if (ref.read(pausedProvider)) {
+      await _core.pauseTun();
+    }
+    if (isCurrent()) {
+      ref.read(coreStatusProvider.notifier).value = CoreStatus.connected;
     }
   }
 

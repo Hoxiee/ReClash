@@ -1,15 +1,19 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 
-/// zashboard (MIT, (c) Zephyruso) is fetched from its own release, not bundled.
+/// zashboard (MIT, (c) Zephyruso) is fetched from a verified release asset.
 const webDashboardUrl =
-    'https://github.com/Zephyruso/zashboard/releases/latest/download/dist-no-fonts.zip';
+    'https://github.com/Zephyruso/zashboard/releases/download/'
+    'v3.26.0/dist-no-fonts.zip';
+const webDashboardSha256 =
+    '5b4cf64e6c9e36767d7245d2275d1f64c91d576a74ecf0d51cec53e9b13344c1';
 
 /// Relative on purpose: the Core resolves `external-ui` against its home dir.
 const webDashboardDirName = 'ui';
@@ -146,6 +150,9 @@ class WebDashboard {
       return error;
     }
     try {
+      if (!await hasWebDashboardDigest(File(archivePath), webDashboardSha256)) {
+        throw const FormatException('web dashboard checksum mismatch');
+      }
       await compute(unpackWebDashboard, (
         archivePath: archivePath,
         targetPath: webDashboardDirIn(homeDirPath),
@@ -168,6 +175,12 @@ class WebDashboard {
 }
 
 final webDashboard = WebDashboard();
+
+@visibleForTesting
+Future<bool> hasWebDashboardDigest(File file, String expected) async {
+  final actual = await sha256.bind(file.openRead()).first;
+  return '$actual' == expected;
+}
 
 /// A release wraps everything in `dist/`, which the Core would serve below `/ui`.
 @visibleForTesting

@@ -40,6 +40,8 @@ class CoreController {
     return _instance!;
   }
 
+  CoreProcessOwner? get processOwner => _interface.processOwner;
+
   Future<CoreLifecycleResult> start() => _interface.start();
 
   Future<CoreLifecycleResult> restart() => _interface.restart();
@@ -47,6 +49,12 @@ class CoreController {
   Future<CoreLifecycleResult> stop() => _interface.stop();
 
   Future<CoreLifecycleResult> close() => _interface.close();
+
+  void setRecoveryHandler(
+    Future<void> Function(bool Function() isCurrent)? handler,
+  ) {
+    _interface.setRecoveryHandler(handler);
+  }
 
   static Future<void> ensureHomeDir() async {
     final homePath = await appPath.homeDirPath;
@@ -103,6 +111,16 @@ class CoreController {
     return _interface.inspectConfig(path);
   }
 
+  Future<Map<String, dynamic>> fetchSubscription({
+    required String url,
+    required Map<String, String> headers,
+    required int timeoutMillis,
+  }) => _interface.fetchSubscription(
+    url: url,
+    headers: headers,
+    timeoutMillis: timeoutMillis,
+  );
+
   Future<String> validateConfigWithData(String data) async {
     final path = await appPath.tempFilePath;
     final file = File(path);
@@ -124,6 +142,11 @@ class CoreController {
   }) async {
     if (preloadInvoke == null) {
       return _interface.setupConfig(params);
+    }
+    if (Platform.isLinux) {
+      final result = await _interface.setupConfig(params);
+      if (result.isEmpty) await preloadInvoke();
+      return result;
     }
     final (result, _) = await (
       _interface.setupConfig(params),
@@ -232,6 +255,14 @@ class CoreController {
 
   Future<bool> smartRoutingDeepScan() {
     return _interface.smartRoutingDeepScan();
+  }
+
+  Future<OdometerSnapshot?> odometerReport() {
+    return _interface.odometerReport();
+  }
+
+  Future<bool> signalOdometer(OdometerSignal signal) {
+    return _interface.signalOdometer(signal);
   }
 
   Future<DoctorSnapshot> doctorSnapshot() {

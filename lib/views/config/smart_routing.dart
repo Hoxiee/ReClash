@@ -8,7 +8,6 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 const _dwellChoices = [30, 90, 180, 600];
 const _waveChoices = [4, 8, 12, 20];
@@ -24,14 +23,7 @@ class SmartRoutingView extends ConsumerWidget {
   }
 
   void _handleEnabled(WidgetRef ref, bool value) {
-    _update(ref, (state) {
-      if (!value || state.preset != SmartRoutingPreset.off) {
-        return state.copyWith(enabled: value);
-      }
-      final implied = smartRoutingPresetForLocale(Intl.defaultLocale);
-      final preset = implied == SmartRoutingPreset.off ? state.preset : implied;
-      return state.applyPreset(preset).copyWith(enabled: true);
-    });
+    _update(ref, (state) => state.withEnabled(value));
   }
 
   Future<void> _handleReset(BuildContext context, WidgetRef ref) async {
@@ -53,6 +45,7 @@ class SmartRoutingView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
+    final region = ref.watch(appRegionProvider);
     final profile = ref.watch(currentProfileProvider);
     final servicePolicies = {
       for (final policy in profile?.serviceRoutePolicies ?? const [])
@@ -84,6 +77,7 @@ class SmartRoutingView extends ConsumerWidget {
       slivers.addAll([
         SettingSection.sliver(
           title: appLocalizations.smartRoutingPreset,
+          subTitle: appLocalizations.appRegionDesc,
           actions: [
             const SizedBox(width: 8),
             CommonMinFilledButtonTheme(
@@ -99,22 +93,19 @@ class SmartRoutingView extends ConsumerWidget {
             DecorationListItem.options(
               title: Text(appLocalizations.smartRoutingRegion),
               subtitle: Text(
-                props.matchesPreset
-                    ? props.preset.label
+                props.matchesPreset && props.preset == region.preset
+                    ? region.label(context)
                     : appLocalizations.smartRoutingPresetEdited(
-                        props.preset.label,
+                        region.label(context),
                       ),
               ),
               dialogTitle: appLocalizations.smartRoutingRegion,
-              options: SmartRoutingPreset.values,
-              value: props.preset,
-              textBuilder: (value) => (value as SmartRoutingPreset).label,
+              options: AppRegion.values,
+              value: region,
+              textBuilder: (value) => (value as AppRegion).label(context),
               onChanged: (value) {
-                if (value == null) return;
-                _update(
-                  ref,
-                  (state) => state.applyPreset(value as SmartRoutingPreset),
-                );
+                if (!context.mounted || value == null) return;
+                selectAppRegion(ref.read, value as AppRegion);
               },
             ),
             DecorationListItem.options(

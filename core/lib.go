@@ -18,6 +18,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/metacubex/mihomo/component/dialer"
@@ -233,6 +234,7 @@ func (th *TunHandler) initHook() {
 // calls a nil func value.
 func (th *TunHandler) removeHook() {
 	activeTunHandler.CompareAndSwap(th, nil)
+	cancelSubscriptionFetches()
 }
 
 var (
@@ -304,6 +306,7 @@ var (
 )
 
 func handleUpdateDns(value string) {
+	updateSubscriptionDNS(value)
 	seq := dnsUpdateSeq.Add(1)
 	safeGoDetached("updateDns", func() {
 		dnsUpdateMu.Lock()
@@ -382,8 +385,14 @@ func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar
 			invokeResult(callback, err.Error())
 			return
 		}
+		odometerInstance.NoteUp(time.Now(), takeOdoStartReason())
 		isRunning.Store(true)
-		invokeResult(callback, handleSetupConfig(setupParams))
+		message := handleSetupConfig(setupParams)
+		if message != "" {
+			odometerInstance.NoteDown(time.Now(), false)
+			isRunning.Store(false)
+		}
+		invokeResult(callback, message)
 	}()
 }
 

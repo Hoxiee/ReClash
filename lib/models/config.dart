@@ -233,6 +233,8 @@ extension NotificationSettingsProjection on NotificationSettings {
 abstract class AppSettingProps with _$AppSettingProps {
   const factory AppSettingProps({
     String? locale,
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    AppRegion? region,
     @Default(defaultDashboardWidgets)
     @JsonKey(fromJson: dashboardWidgetsSafeFormJson)
     List<DashboardWidget> dashboardWidgets,
@@ -324,6 +326,10 @@ const _iconVariants = {
   'strata',
   'shatter',
   'trace',
+  'vigil',
+  'topo',
+  'spark',
+  'fractal',
 };
 
 String _normalizeIconVariant(String? value) =>
@@ -577,10 +583,36 @@ int? _parseDayMinutes(String value) {
 }
 
 @freezed
+abstract class MilestoneProps with _$MilestoneProps {
+  const factory MilestoneProps({
+    @Default(<String>{}) Set<String> unlocked,
+    @Default(<String, int>{}) Map<String, int> revealedAt,
+    @Default(<String>[]) List<String> revealQueue,
+    @Default(true) bool findingsEnabled,
+    @Default(true) bool seasonalEnabled,
+  }) = _MilestoneProps;
+
+  factory MilestoneProps.fromJson(Map<String, Object?> json) =>
+      _$MilestonePropsFromJson(json);
+
+  factory MilestoneProps.safeFromJson(Map<String, Object?>? json) {
+    if (json == null) return const MilestoneProps();
+    return decodeOrRestoreDefault(
+      'milestones',
+      () => MilestoneProps.fromJson(json),
+      () => const MilestoneProps(),
+    );
+  }
+}
+
+@freezed
 abstract class Config with _$Config {
   const factory Config({
     int? currentProfileId,
     @Default(false) bool overrideDns,
+    @JsonKey(fromJson: MilestoneProps.safeFromJson)
+    @Default(MilestoneProps())
+    MilestoneProps milestoneProps,
     @Default([]) List<HotKeyAction> hotKeyActions,
     @JsonKey(fromJson: AppSettingProps.safeFromJson)
     @Default(defaultAppSettingProps)

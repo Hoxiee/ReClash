@@ -90,7 +90,10 @@ class DesyncTestOutcome {
     required this.passedOnRetry,
     required this.total,
     required this.engineUp,
+    this.elapsed = Duration.zero,
   });
+
+  final Duration elapsed;
 
   final String text;
 
@@ -218,6 +221,7 @@ class DesyncStrategyTester {
     String line,
     List<String> sites,
   ) async {
+    final clock = Stopwatch()..start();
     final failed = <String>[];
     var passedOnRetry = 0;
     var engineUp = true;
@@ -269,6 +273,7 @@ class DesyncStrategyTester {
       passedOnRetry: passedOnRetry,
       total: sites.length,
       engineUp: engineUp,
+      elapsed: clock.elapsed,
     );
   }
 

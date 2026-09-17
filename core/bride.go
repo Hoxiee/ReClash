@@ -6,6 +6,10 @@ package main
 import "C"
 import "unsafe"
 
+func protectSubscription(callback unsafe.Pointer, fd int) bool {
+	return C.protect_subscription(callback, C.int(fd)) != 0
+}
+
 func protect(callback unsafe.Pointer, fd int) bool {
 	return C.protect(callback, C.int(fd)) != 0
 }

@@ -44,6 +44,15 @@ void main() {
     expect(subscriptionExpireDate(perpetual), isNull);
   });
 
+  test('the expiration helper separates an over plan from missing dates', () {
+    final expired = _epochSeconds(now.subtract(const Duration(seconds: 1)));
+    final active = _epochSeconds(now.add(const Duration(seconds: 1)));
+
+    expect(subscriptionIsExpired(expire: expired, now: now), isTrue);
+    expect(subscriptionIsExpired(expire: active, now: now), isFalse);
+    expect(subscriptionIsExpired(expire: 0, now: now), isFalse);
+  });
+
   test('a reminder is pending until it fires for that very expire', () {
     const record = SubscriptionNoticeRecord();
 

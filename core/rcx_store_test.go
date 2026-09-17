@@ -200,7 +200,7 @@ func TestSnapshotStaysCompact(t *testing.T) {
 
 	// One key holds everything because SetStorage cursor-scans the whole bucket
 	// on every write, so payload size costs far less than key count.
-	if len(payload) > 512 {
+	if len(payload) > 640 {
 		t.Errorf("payload = %d bytes for one pick, want the short field names to hold", len(payload))
 	}
 }

@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -31,6 +32,11 @@ void main() {
       builder: (_) => const SizedBox.shrink(),
     ),
     NavigationItem(
+      icon: const Icon(Icons.bug_report),
+      label: PageLabel.logs,
+      builder: (_) => const SizedBox.shrink(),
+    ),
+    NavigationItem(
       icon: const Icon(Icons.construction),
       label: PageLabel.tools,
       builder: (_) => const SizedBox.shrink(),
@@ -42,6 +48,8 @@ void main() {
     double viewWidth = 800,
     bool showLabel = false,
     double height = 500,
+    Locale? locale,
+    VoidCallback? onAbout,
   }) async {
     tester.view.physicalSize = Size(viewWidth, 600);
     tester.view.devicePixelRatio = 1;
@@ -68,10 +76,14 @@ void main() {
         container: container,
         child: TestApp(
           includeNavigatorKey: false,
+          locale: locale,
           child: Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
-              child: SizedBox(height: height, child: const AppNavRail()),
+              child: SizedBox(
+                height: height,
+                child: AppNavRail(onAbout: onAbout),
+              ),
             ),
           ),
         ),
@@ -104,9 +116,7 @@ void main() {
     expect(highlightY(tester), greaterThan(middle));
   });
 
-  testWidgets('semantic groups divide and pin tools to the bottom', (
-    tester,
-  ) async {
+  testWidgets('tools follow logs with a group divider', (tester) async {
     await pumpRail(tester);
 
     final dashboardY = tester
@@ -118,30 +128,160 @@ void main() {
         .dy;
     final toolsY = tester.getCenter(find.byIcon(Icons.construction).first).dy;
 
-    expect(profilesY - dashboardY, greaterThan(NavRailMetrics.iconSlotHeight));
-    expect(requestsY - profilesY, greaterThan(NavRailMetrics.iconSlotHeight));
-    final expectedToolsY =
-        500 -
-        64 -
-        NavRailMetrics.padding.bottom -
-        NavRailMetrics.iconSlotHeight / 2;
-    expect(toolsY, closeTo(expectedToolsY, 1));
-    expect(toolsY - requestsY, greaterThan(200));
+    expect(
+      profilesY - dashboardY,
+      greaterThan(NavRailMetrics.stackedSlotHeight),
+    );
+    expect(
+      requestsY - profilesY,
+      greaterThan(NavRailMetrics.stackedSlotHeight),
+    );
+    final logsY = tester.getCenter(find.byIcon(Icons.bug_report).first).dy;
+    expect(logsY - requestsY, NavRailMetrics.stackedSlotHeight);
+    expect(
+      toolsY - logsY,
+      NavRailMetrics.stackedSlotHeight + NavRailMetrics.dividerExtent,
+    );
+    final divider = find.byWidgetPredicate(
+      (widget) =>
+          widget is Positioned && widget.height == NavRailMetrics.hairline,
+    );
+    expect(divider, findsNWidgets(3));
+    final dividerY = tester.getCenter(divider.last).dy;
+    expect(dividerY, greaterThan(logsY));
+    expect(dividerY, lessThan(toolsY));
   });
 
-  testWidgets('labels stack first and extend only on wide windows', (
+  testWidgets('about sits at the bottom separate from tools', (tester) async {
+    var aboutCalls = 0;
+    await pumpRail(tester, onAbout: () => aboutCalls++);
+
+    final tools = find.byIcon(Icons.construction).first;
+    final about = find.byIcon(Icons.info_outline);
+    final toolsButton = find.ancestor(
+      of: tools,
+      matching: find.byType(InkWell),
+    );
+    final aboutButton = find.ancestor(
+      of: about,
+      matching: find.byType(InkWell),
+    );
+    expect(tester.getSize(aboutButton), tester.getSize(toolsButton));
+    expect(tester.getCenter(about).dx, tester.getCenter(tools).dx);
+    expect(
+      tester.getCenter(about).dy - tester.getCenter(tools).dy,
+      greaterThan(NavRailMetrics.stackedSlotHeight),
+    );
+    expect(
+      tester.widget<InkWell>(aboutButton).customBorder,
+      tester.widget<InkWell>(toolsButton).customBorder,
+    );
+
+    final railBottom = tester.getRect(find.byType(AppNavRail)).bottom;
+    expect(
+      railBottom - tester.getCenter(about).dy,
+      lessThan(NavRailMetrics.stackedSlotHeight),
+    );
+
+    await tester.tap(about);
+    await tester.pumpAndSettle();
+    expect(aboutCalls, 1);
+    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+  });
+
+  testWidgets('about stays fixed while the rail scrolls', (tester) async {
+    var aboutCalls = 0;
+    await pumpRail(tester, height: 180, onAbout: () => aboutCalls++);
+
+    final aboutCenter = tester.getCenter(find.byIcon(Icons.info_outline));
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byIcon(Icons.info_outline)), aboutCenter);
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+    expect(aboutCalls, 1);
+
+    final toolsButton = tester.widget<InkWell>(
+      find.ancestor(
+        of: find.byIcon(Icons.construction).first,
+        matching: find.byType(InkWell),
+      ),
+    );
+    toolsButton.focusNode!.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(aboutCalls, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('labels stack under the icons without widening the rail', (
     tester,
   ) async {
     await pumpRail(tester, showLabel: true);
 
-    expect(tester.getSize(find.byType(AppNavRail)).width, 72);
+    expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
     expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
 
-    container.read(viewSizeProvider.notifier).value = const Size(1200, 600);
+    container.read(viewSizeProvider.notifier).value = const Size(1400, 600);
     await tester.pumpAndSettle();
 
-    expect(tester.getSize(find.byType(AppNavRail)).width, 200);
+    expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
     expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
+  });
+
+  for (final locale in AppLocalizations.delegate.supportedLocales) {
+    testWidgets('the selected label stays inside the pill in $locale', (
+      tester,
+    ) async {
+      await pumpRail(tester, showLabel: true, locale: locale);
+
+      for (final item in items()) {
+        goTo(item.label);
+        await tester.pumpAndSettle();
+        final highlight = find.byKey(AppNavRail.highlightKey);
+        final pill = tester.getRect(highlight);
+        final decoration = tester.widget<DecoratedBox>(highlight).decoration;
+        final contour = decoration.getClipPath(pill, TextDirection.ltr);
+        final label = tester.getRect(find.text(item.label.label).first);
+        for (final point in [
+          label.topLeft,
+          label.topRight,
+          label.bottomLeft,
+          label.bottomRight,
+        ]) {
+          expect(
+            contour.contains(point),
+            isTrue,
+            reason: '${item.label} in $locale crosses the rounded contour',
+          );
+        }
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('short windows preserve labels and scroll to tools', (
+    tester,
+  ) async {
+    await pumpRail(tester, showLabel: true, height: 340);
+
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -200),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.construction).first);
+    await tester.pumpAndSettle();
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a short viewport falls back to scrolling', (tester) async {

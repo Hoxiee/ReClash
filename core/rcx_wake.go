@@ -9,16 +9,21 @@ var rcxWakeSettleDelay = rcxWakeSettle
 
 func (e *rcxEngine) startWakeProbe() {
 	if !e.Enabled() || e.runtime.Mode() != "rule" || e.incumbent == "" ||
-		e.screenFailedOver || e.wakePending {
+		e.screenOff || e.suspended || e.screenFailedOver || e.wakePending {
 		return
 	}
-	markers := e.activeMarkers(rcxRoleOpen, e.runtime.Now())
-	standby := e.selectWakeStandby(e.runtime.Now())
-	if len(markers) == 0 || standby == "" {
+	now := e.runtime.Now()
+	markers := e.activeMarkers(rcxRoleOpen, now)
+	standby := e.wakeProbeCandidate(now)
+	if len(markers) == 0 {
 		return
 	}
+	e.supersedeProbe()
 	e.supersedeWake()
 	e.wakePending = true
+	e.wakeStartedAt = now
+	e.wakeIncumbentKey = e.key(e.incumbent)
+	e.wakeStandbyKey = e.key(standby)
 	e.wakeEpisode = e.screenEpisode
 	e.wakeIncumbent = e.incumbent
 	e.wakeStandby = standby
@@ -27,27 +32,32 @@ func (e *rcxEngine) startWakeProbe() {
 	episode := e.screenEpisode
 	incumbent := e.incumbent
 	quit := e.quit
+	settleDelay := rcxWakeSettleDelay
 	ctx, cancel := context.WithTimeout(context.Background(), rcxWakeDeadline)
 	e.wakeCancel = cancel
 	safeGoDetached("rcx wake probe", func() {
 		defer cancel()
-		if !rcxWait(ctx, rcxWakeSettleDelay) {
+		if !rcxWait(ctx, settleDelay) {
 			return
 		}
-		results := make(chan rcxWakeResult, 2)
-		for _, node := range []string{incumbent, standby} {
+		nodes := []string{incumbent}
+		if standby != "" {
+			nodes = append(nodes, standby)
+		}
+		results := make(chan rcxWakeResult, len(nodes))
+		for _, node := range nodes {
 			node := node
 			safeGoDetached("rcx wake node", func() {
 				results <- e.testWakeNode(ctx, node, markers)
 			})
 		}
-		pair := make([]rcxWakeResult, 0, 2)
-		for len(pair) < 2 {
+		pair := make([]rcxWakeResult, 0, len(nodes))
+		for len(pair) < len(nodes) {
 			select {
 			case result := <-results:
 				pair = append(pair, result)
 			case <-ctx.Done():
-				for len(pair) < 2 {
+				for len(pair) < len(nodes) {
 					pair = append(pair, rcxWakeResult{Outcome: rcxProbeOverloaded})
 				}
 			}
@@ -100,46 +110,89 @@ func (e *rcxEngine) testWakeNode(parent context.Context, node string, markers []
 	return rcxWakeResult{Node: node, Outcome: outcome}
 }
 
+func (e *rcxEngine) wakeProbeCandidate(now time.Time) string {
+	if standby := e.selectWakeStandby(now); standby != "" {
+		return standby
+	}
+	members := e.runtime.Members()
+	eligible := make(map[string]bool, len(members))
+	first := ""
+	for _, member := range members {
+		if member.key() == e.key(e.incumbent) || (e.cfg.policy().RequireUDP && !member.SupportsUDP) {
+			continue
+		}
+		eligible[member.Name] = true
+		if first == "" {
+			first = member.Name
+		}
+	}
+	for _, name := range e.standbyNames() {
+		if eligible[name] {
+			return name
+		}
+	}
+	return first
+}
+
 func (e *rcxEngine) applyWakeResults(event rcxEvent) {
 	if !e.wakePending || event.Gen != e.wakeGen || event.ConfigGen != e.configGen ||
-		event.Episode != e.wakeEpisode || e.screenOff || e.incumbent != e.wakeIncumbent {
+		event.Episode != e.wakeEpisode || e.screenOff || e.suspended || e.incumbent != e.wakeIncumbent {
+		return
+	}
+	e.syncIdentity(e.runtime.Members())
+	if e.key(e.wakeIncumbent) != e.wakeIncumbentKey || e.key(e.wakeStandby) != e.wakeStandbyKey {
+		e.supersedeWake()
+		e.startWakeProbe()
 		return
 	}
 	if e.wakeCancel != nil {
 		e.wakeCancel()
 	}
-	incumbent := e.wakeIncumbent
-	standby := e.wakeStandby
+	incumbent, standby := e.wakeIncumbent, e.wakeStandby
+	now := e.runtime.Now()
 	e.wakePending = false
 	e.wakeCancel = nil
-	var current, alternative rcxWakeResult
+	current := rcxWakeResult{Node: incumbent, Outcome: rcxProbeOverloaded}
+	alternative := rcxWakeResult{Node: standby, Outcome: rcxProbeOverloaded}
 	for _, result := range event.Wake {
-		switch result.Node {
-		case incumbent:
+		if result.Node == "" || (result.Node != incumbent && result.Node != standby) {
+			continue
+		}
+		if result.Node == incumbent {
 			current = result
-		case standby:
+		} else {
 			alternative = result
 		}
 		if result.Outcome == rcxProbeOK {
-			e.ledger.NoteProbe(e.key(result.Node), e.envKey, rcxRoleOpen, rcxProbeOK, result.DelayMs, e.runtime.Now())
+			e.ledger.NoteProbe(e.key(result.Node), e.envKey, rcxRoleOpen, rcxProbeOK, result.DelayMs, now)
 			e.noteProviderSuccess(result.Node)
-			e.noteLinkAlive(e.runtime.Now())
+			e.noteLinkAlive(now)
 		}
 	}
-	if (current.Outcome == rcxProbeFail || current.Outcome == rcxProbeStatusMismatch) &&
+	alive := current.Outcome == rcxProbeOK || e.trafficSince(e.key(incumbent), e.wakeStartedAt, now)
+	switched := false
+	if !alive && (current.Outcome == rcxProbeFail || current.Outcome == rcxProbeStatusMismatch) &&
 		alternative.Outcome == rcxProbeOK && !e.screenFailedOver &&
-		e.screenTargetEligible(standby, incumbent, nil, e.runtime.Now()) {
+		e.screenTargetEligible(standby, incumbent, nil, now) {
 		e.screenDead = incumbent
-		if e.tryAutomaticMainSelect(standby, rcxReasonIncumbentDead, e.runtime.Now()) {
-			e.screenFailedOver = true
-		} else {
-			e.screenDead = ""
-			e.reassertIncumbent()
+		switched = e.tryAutomaticMainSelect(standby, rcxReasonIncumbentDead, now)
+		if switched {
+			e.ledger.NoteProbe(e.key(incumbent), e.envKey, rcxRoleOpen, current.Outcome, 0, now)
 		}
-	} else {
-		e.reassertIncumbent()
+		e.screenDead = ""
 	}
-	e.wakeIncumbent = ""
-	e.wakeStandby = ""
+	e.reassertIncumbent()
+	e.wakeIncumbent, e.wakeStandby = "", ""
+	if !alive && !switched {
+		e.resetRescue()
+		members := e.runtime.Members()
+		e.startProbe(e.candidates(members), members, rcxWaveIncident)
+	}
+	if switched {
+		e.reconsider()
+		if !e.probing {
+			e.startImprovement(false)
+		}
+	}
 	e.persist(false)
 }

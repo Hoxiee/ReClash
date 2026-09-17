@@ -69,9 +69,19 @@ class Database extends _$Database {
             profiles.undialableNodes,
             profiles.userLabel,
             profiles.lastWorkingClient,
+            profiles.lastUsedAt,
           ]) {
             await _addColumnIfMissing(m, profiles, column);
           }
+        }
+      },
+      beforeOpen: (details) async {
+        if (!details.wasCreated) {
+          await _addColumnIfMissing(
+            createMigrator(),
+            profiles,
+            profiles.lastUsedAt,
+          );
         }
       },
     );

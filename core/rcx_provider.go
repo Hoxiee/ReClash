@@ -30,7 +30,11 @@ func rcxCircuitKey(env, provider string) string {
 }
 
 func rcxFailureBucket(member rcxMember) string {
-	return member.Provider + "\x00" + member.key() + "|" + member.Transport + "|" + rcxPortClass(member.Port)
+	ingress := member.Ingress
+	if ingress == "" {
+		ingress = member.key()
+	}
+	return member.Provider + "\x00" + ingress
 }
 
 func (e *rcxEngine) reconcileCircuits(members []rcxMember, now time.Time) {
@@ -96,7 +100,7 @@ func sameMemberSet(left, right map[string]struct{}) bool {
 }
 
 func (e *rcxEngine) noteProviderFailure(member rcxMember, now time.Time) {
-	if e.snapshot == nil || member.Provider == "" {
+	if e.snapshot == nil || member.Provider == "" || !member.ExternalProvider {
 		return
 	}
 	key := rcxCircuitKey(e.envKey, member.Provider)
@@ -239,4 +243,20 @@ func (e *rcxEngine) circuitHalfOpenMembers(members []rcxMember, now time.Time) m
 		}
 	}
 	return chosen
+}
+
+func (e *rcxEngine) discoverySentinelDue(provider string, now time.Time) bool {
+	return e.sentinels == nil || now.Sub(e.sentinels[rcxCircuitKey(e.envKey, provider)]) >= rcxProviderFailureWindow
+}
+
+func (e *rcxEngine) noteDiscoverySentinel(provider string, now time.Time) {
+	if e.sentinels == nil {
+		e.sentinels = map[string]time.Time{}
+	}
+	for key, at := range e.sentinels {
+		if now.Sub(at) > rcxProviderCircuitTTL {
+			delete(e.sentinels, key)
+		}
+	}
+	e.sentinels[rcxCircuitKey(e.envKey, provider)] = now
 }

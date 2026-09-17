@@ -463,6 +463,187 @@ void main() {
       expect(updated.panelMeta?.hwidNotSupported, isTrue);
     });
 
+    for (final client in [SubscriptionClient.auto, SubscriptionClient.clash]) {
+      test('Profile dispatches sing-box payload with $client', () async {
+        final raw = jsonEncode({
+          'outbounds': [
+            {'type': 'direct', 'tag': 'direct'},
+            {
+              'type': 'trojan',
+              'tag': 'singbox-node',
+              'server': 'node.example',
+              'server_port': 443,
+              'password': 'secret',
+            },
+          ],
+        });
+        final profile = Profile.normal(
+          url: 'https://provider.test/sub',
+          clientEmulation: client,
+        );
+        final local = await profile.prepareContent(
+          raw,
+          validate: (_) async => '',
+        );
+        var requests = 0;
+        final remote = await profile.prepareUpdate(
+          validate: (_) async => '',
+          inspect: (_) async =>
+              const ConfigInspection(servers: ['node.example.net']),
+          fetch: (url, {headers}) async {
+            requests++;
+            return _response(
+              url,
+              raw,
+              headers: const {
+                'x-hwid-not-supported': ['true'],
+              },
+            );
+          },
+        );
+        expect(local.summary.format, ProfileImportFormat.singbox);
+        expect(remote.summary.format, ProfileImportFormat.singbox);
+        expect(remote.summary.nodeCount, 1);
+        expect(remote.profile.panelMeta?.hwidNotSupported, isTrue);
+        expect(remote.undialableNodes, isFalse);
+        expect(remote.content, contains('name: "singbox-node"'));
+        expect(requests, 1);
+        expect(isXrayConfigInput(raw), isFalse);
+        expect(isSingboxConfigInput(raw), isTrue);
+      });
+    }
+
+    test('invalid panel payload retains the HWID diagnostic', () async {
+      final profile = Profile.normal(url: 'https://provider.test/sub');
+      await expectLater(
+        profile.prepareUpdate(
+          validate: (_) async => 'invalid config',
+          inspect: (_) async => null,
+          fetch: (url, {headers}) async => _response(
+            url,
+            '<html>Device registration required</html>',
+            headers: const {
+              'x-hwid-not-supported': ['true'],
+            },
+          ),
+        ),
+        throwsA(
+          isA<ProfilePanelException>().having(
+            (error) => error.meta.hwidNotSupported,
+            'HWID signal',
+            isTrue,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'an HTTP denial on the consented identity retry is not hidden',
+      () async {
+        var requests = 0;
+        final profile = Profile.normal(url: 'https://provider.test/sub');
+        await expectLater(
+          profile.prepareUpdate(
+            validate: (_) async => '',
+            inspect: (_) async => null,
+            allowDeviceIdentityRetry: true,
+            fetch: (url, {headers}) async {
+              requests++;
+              if (requests == 1) {
+                return _response(
+                  url,
+                  'proxies: []',
+                  headers: const {
+                    'x-hwid-not-supported': ['true'],
+                  },
+                );
+              }
+              throw DioException(
+                requestOptions: RequestOptions(path: url),
+                type: DioExceptionType.badResponse,
+                response: Response(
+                  statusCode: 403,
+                  requestOptions: RequestOptions(path: url),
+                ),
+              );
+            },
+          ),
+          throwsA(
+            isA<DioException>().having(
+              (error) => error.response?.statusCode,
+              'HTTP denial',
+              403,
+            ),
+          ),
+        );
+        expect(requests, 2);
+      },
+    );
+
+    test(
+      'ambiguous outbound JSON cannot pass permissive Clash validation',
+      () async {
+        for (final raw in [
+          '{"outbounds":[]}',
+          '{"outbounds":[{}]}',
+          '{"outbounds":[{"protocol":"freedom"},{"type":"direct"}]}',
+          '[{"outbounds":[{"protocol":"freedom"}]},{"outbounds":[{"type":"direct"}]}]',
+        ]) {
+          var validated = false;
+          await expectLater(
+            Profile.normal().prepareContent(
+              raw,
+              validate: (_) async {
+                validated = true;
+                return '';
+              },
+            ),
+            throwsA(isA<ProfileValidationException>()),
+          );
+          expect(validated, isFalse);
+        }
+      },
+    );
+
+    test(
+      'HWID on HTTP denial does not preempt supported client negotiation',
+      () async {
+        var requests = 0;
+        final prepared = await Profile.normal(url: 'https://provider.test/sub')
+            .prepareUpdate(
+              validate: (_) async => '',
+              inspect: (_) async =>
+                  const ConfigInspection(servers: ['node.example.net']),
+              fetch: (url, {headers}) async {
+                requests++;
+                if (requests == 1) {
+                  throw DioException(
+                    requestOptions: RequestOptions(path: url),
+                    type: DioExceptionType.badResponse,
+                    response: Response(
+                      statusCode: 403,
+                      requestOptions: RequestOptions(path: url),
+                      headers: Headers.fromMap({
+                        'x-hwid-not-supported': ['true'],
+                      }),
+                    ),
+                  );
+                }
+                return _response(url, 'proxies: []');
+              },
+            );
+        expect(requests, 2);
+        expect(prepared.undialableNodes, isFalse);
+      },
+    );
+
+    test('outbounds alone do not identify either JSON format', () {
+      for (final raw in ['{"outbounds":[]}', '{"outbounds":[{}]}']) {
+        expect(isXrayConfigInput(raw), isFalse);
+        expect(isSingboxConfigInput(raw), isFalse);
+      }
+    });
+
     test(
       'recognized Xray JSON is converted before permissive validation',
       () async {
@@ -759,7 +940,7 @@ Profile _profileWithManifest() =>
 Future<Profile> _updateWithCapabilityHeader(Profile profile, String? header) {
   return profile.update(
     validate: (_) async => '',
-    inspect: (_) async => const ConfigInspection(servers: ['node.example']),
+    inspect: (_) async => const ConfigInspection(servers: ['node.example.net']),
     fetch: (url, {headers}) async => _response(
       url,
       'proxies: []',
@@ -798,7 +979,7 @@ Future<void> _expectOldHostFallback(
     validate: validate ?? (_) async => '',
     inspect:
         inspect ??
-        (_) async => const ConfigInspection(servers: ['node.example']),
+        (_) async => const ConfigInspection(servers: ['node.example.net']),
     fetch: fetch,
   );
 

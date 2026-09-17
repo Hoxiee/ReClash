@@ -28,13 +28,7 @@ class WakeLockPolicyTest {
     }
 
     @Test
-    fun `the grace window outlives a screen off burst without spanning the night`() {
-        assertTrue(WakeLockPolicy.GRACE_MS >= 60_000)
-        assertTrue(WakeLockPolicy.GRACE_MS <= 30 * 60_000)
-    }
-
-    @Test
-    fun `the timeout is expressed in milliseconds`() {
-        assertEquals(600_000L, WakeLockPolicy.GRACE_MS)
+    fun `the grace window covers a short transfer without spanning standby`() {
+        assertEquals(120_000L, WakeLockPolicy.GRACE_MS)
     }
 }

@@ -2,10 +2,13 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:reclash/common/finding_events.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_spark.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kTouchSlop;
@@ -56,6 +59,15 @@ const _novaLanding = 0.74;
 /// before this has seen nothing at all.
 const _chargeTell = 0.55;
 
+Color _seasonalGlow(Color color) {
+  final now = DateTime.now();
+  final day = now.difference(DateTime(now.year)).inDays;
+  final hsl = HSLColor.fromColor(color);
+  return hsl
+      .withHue((hsl.hue + 3 * math.sin(day / 365 * 2 * math.pi)) % 360)
+      .toColor();
+}
+
 class HeroOrb extends ConsumerStatefulWidget {
   @visibleForTesting
   static const Key novaKey = ValueKey('orb-nova');
@@ -70,6 +82,7 @@ class HeroOrb extends ConsumerStatefulWidget {
     this.activity = 0,
     this.serviceLogo,
     this.heroRing,
+    this.subscriptionExpired = false,
     this.variant = HeroOrbVariant.vpn,
     this.onPhaseChanged,
   });
@@ -79,6 +92,7 @@ class HeroOrb extends ConsumerStatefulWidget {
 
   final String? serviceLogo;
   final List<Color>? heroRing;
+  final bool subscriptionExpired;
   final HeroOrbVariant variant;
 
   /// Verdict on the live connection. Today it comes from the incumbent node's
@@ -124,6 +138,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   bool _swallowTap = false;
   Timer? _swallowTimer;
   Timer? _landingTimer;
+  Timer? _oscilloscopeHold;
+  Timer? _oscilloscopeTimer;
+  final Set<int> _pointers = {};
+  bool _oscilloscope = false;
+  bool _multiTouch = false;
+  Timer? _multiTouchRelease;
+  DateTime? _sessionTick;
+  int _turn = 0;
 
   /// `repeat` restarts at the lower bound, so these carry the phase across a
   /// retime rather than letting it snap.
@@ -158,7 +180,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   void initState() {
     super.initState();
     _phase = ref.read(heroLifecycleProvider);
-    _status = heroStatusOf(_phase, widget.health);
+    _status = _statusOf(_phase, widget.health);
     _draw = AnimationController(
       vsync: this,
       value: _status.isLive && !_status.isTransitioning ? 1 : 0,
@@ -209,6 +231,22 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       reverseDuration: const Duration(milliseconds: 260),
     )..addStatusListener(_handleCharge);
     _nova = AnimationController(vsync: this, duration: _novaDuration);
+    ref.listenManual(runTimeProvider, (_, runtime) {
+      final now = DateTime.now();
+      final previous = _sessionTick;
+      _sessionTick = runtime == null ? null : now;
+      if (runtime == null ||
+          previous == null ||
+          !sessionCrossedNewYear(previous, now, runtime) ||
+          _status != HeroStatus.secured ||
+          !PageActivityScope.isActiveOf(context) ||
+          !ref.read(milestoneSettingProvider).findingsEnabled ||
+          ref.read(findingPreviewProvider).enabled) {
+        return;
+      }
+      ref.read(milestonesProvider.notifier).discover('turn');
+      setState(() => _turn++);
+    });
     ref.listenManual(heroLifecycleProvider, (prev, next) {
       if (!mounted) return;
       _setPhase(next);
@@ -257,8 +295,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
         _runBreathing();
       }
     }
-    if (oldWidget.health != widget.health) {
-      _applyStatus(heroStatusOf(_phase, widget.health));
+    if (oldWidget.health != widget.health ||
+        oldWidget.subscriptionExpired != widget.subscriptionExpired) {
+      _applyStatus(_statusOf(_phase, widget.health));
     }
   }
 
@@ -267,6 +306,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _connectingHold?.cancel();
     _swallowTimer?.cancel();
     _landingTimer?.cancel();
+    _oscilloscopeHold?.cancel();
+    _oscilloscopeTimer?.cancel();
+    _multiTouchRelease?.cancel();
     _charge.dispose();
     _nova.dispose();
     _draw.dispose();
@@ -285,6 +327,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   Duration get _breatheDuration => switch (_status) {
     HeroStatus.broken => const Duration(milliseconds: 1400),
+    HeroStatus.subscriptionExpired => const Duration(milliseconds: 2800),
     HeroStatus.paused => const Duration(milliseconds: 2400),
     _ =>
       _band == HeroOrbActivity.active
@@ -387,11 +430,18 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _adoptPhase(phase);
   }
 
+  HeroStatus _statusOf(HeroOrbPhase phase, HeroHealth health) {
+    final status = heroStatusOf(phase, health);
+    return widget.subscriptionExpired && status.flows
+        ? HeroStatus.subscriptionExpired
+        : status;
+  }
+
   void _adoptPhase(HeroOrbPhase phase) {
     final changed = _phase != phase;
     _phase = phase;
     if (changed) widget.onPhaseChanged?.call(phase);
-    _applyStatus(heroStatusOf(phase, widget.health));
+    _applyStatus(_statusOf(phase, widget.health));
   }
 
   void _runBreathing() {
@@ -492,6 +542,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _handleTap() {
+    if (_multiTouch) return;
     // The pointer that armed the nova is still a tap to the recognizer, and
     // that tap would toggle the tunnel the egg promised not to touch.
     if (_swallowTap) {
@@ -522,8 +573,52 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     ref.read(commonActionProvider.notifier).toggleRunning();
   }
 
+  void _pointerDown(PointerDownEvent event) {
+    if (_pointers.isEmpty) {
+      _multiTouchRelease?.cancel();
+      _multiTouch = false;
+    }
+    _pointers.add(event.pointer);
+    if (_pointers.length != 2) return;
+    _multiTouch = true;
+    _multiTouchRelease?.cancel();
+    _cancelCharge();
+    _oscilloscopeHold?.cancel();
+    _oscilloscopeHold = Timer(const Duration(milliseconds: 700), () {
+      if (!mounted ||
+          _pointers.length < 2 ||
+          _status != HeroStatus.secured ||
+          !PageActivityScope.isActiveOf(context) ||
+          !ref.read(milestoneSettingProvider).findingsEnabled) {
+        return;
+      }
+      if (!ref.read(findingPreviewProvider).enabled) {
+        ref.read(milestonesProvider.notifier).discover('oscilloscope');
+      }
+      setState(() => _oscilloscope = true);
+      _oscilloscopeTimer?.cancel();
+      _oscilloscopeTimer = Timer(const Duration(seconds: 6), () {
+        if (mounted) setState(() => _oscilloscope = false);
+      });
+    });
+  }
+
+  void _pointerUp(PointerEvent event) {
+    _pointers.remove(event.pointer);
+    if (_pointers.isEmpty && _multiTouch) {
+      _multiTouchRelease?.cancel();
+      _multiTouchRelease = Timer(const Duration(milliseconds: 300), () {
+        _multiTouch = false;
+      });
+    }
+    if (_pointers.length < 2) {
+      _oscilloscopeHold?.cancel();
+      _oscilloscopeHold = null;
+    }
+  }
+
   void _beginCharge(Offset position) {
-    if (_still || !widget.enabled || _nova.isAnimating) return;
+    if (_still || !widget.enabled || _nova.isAnimating || _multiTouch) return;
     _chargeOrigin = position;
     _charge.forward(from: 0);
   }
@@ -673,6 +768,27 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final haloSpread = _haloSpread * scale;
     final novaSpread = _novaSpread * scale;
     final core = size - _coreInset * scale * 2;
+    final milestoneSettings = ref.watch(visibleMilestonesProvider);
+    final preview = ref.watch(findingPreviewProvider);
+    final motif = ref.watch(visibleSeasonProvider);
+    final seasonal = milestoneSettings.seasonalEnabled;
+    final calmRewards =
+        _status == HeroStatus.secured &&
+        PageActivityScope.isActiveOf(context) &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
+    final showOscilloscope =
+        calmRewards &&
+        milestoneSettings.findingsEnabled &&
+        (_oscilloscope || preview.active == 'oscilloscope');
+    final oscilloscopeSamples = !showOscilloscope
+        ? const <double>[]
+        : preview.active == 'oscilloscope'
+        ? const <double>[2, 5, 3, 9, 4, 12, 8, 3, 6, 11, 2, 7]
+        : ref
+              .watch(trafficsProvider)
+              .list
+              .map((traffic) => (traffic.up + traffic.down).toDouble())
+              .toList();
     // Retargeted here rather than on a status change alone, so a new theme or
     // seed colour travels the same way a status does.
     final target = widget.variant == HeroOrbVariant.byedpi
@@ -724,6 +840,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     return RepaintBoundary(
       child: Listener(
         onPointerDown: (event) {
+          _pointerDown(event);
           if (_canTap && !_still) _press.forward();
           _beginCharge(event.position);
         },
@@ -735,11 +852,13 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
             _cancelCharge();
           }
         },
-        onPointerUp: (_) {
+        onPointerUp: (event) {
+          _pointerUp(event);
           _press.reverse();
           _releaseCharge();
         },
-        onPointerCancel: (_) {
+        onPointerCancel: (event) {
+          _pointerUp(event);
           _press.reverse();
           _cancelCharge();
         },
@@ -789,12 +908,15 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                               switch (_status) {
                                 HeroStatus.checking ||
                                 HeroStatus.diagnosing => 0.45,
+                                HeroStatus.subscriptionExpired => 0.36,
                                 HeroStatus.paused => 0.30,
                                 _ => 1.0,
                               };
                           return CustomPaint(
                             painter: _HeroHaloPainter(
-                              glow: _currentPalette.glow,
+                              glow: seasonal && calmRewards
+                                  ? _seasonalGlow(_currentPalette.glow)
+                                  : _currentPalette.glow,
                               intensity: math.max(halo, _novaGlow),
                               ripple: _still ? 1 : _ripple.value,
                               orbRadius: size / 2,
@@ -890,6 +1012,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                       final amplitude = switch (_status) {
                         HeroStatus.secured => 0.022,
                         HeroStatus.degraded => 0.014,
+                        HeroStatus.subscriptionExpired => 0.010,
                         HeroStatus.paused => 0.008,
                         _ => 0.0,
                       };
@@ -899,6 +1022,30 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                       );
                     },
                   ),
+                  if (showOscilloscope)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          key: const ValueKey('hero-oscilloscope'),
+                          painter: _HeroOscilloscopePainter(
+                            samples: oscilloscopeSamples,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if ((seasonal &&
+                          (motif == SeasonalMotif.birthday ||
+                              motif == SeasonalMotif.firstRun)) ||
+                      (milestoneSettings.findingsEnabled &&
+                          (preview.active == 'turn' || _turn > 0)))
+                    Positioned.fill(
+                      child: SeasonalSpark(
+                        key: ValueKey((motif, preview.active == 'turn', _turn)),
+                        reduceMotion: _still,
+                        visible: calmRewards,
+                      ),
+                    ),
                   Positioned(
                     left: -novaSpread,
                     top: -novaSpread,
@@ -967,6 +1114,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.reconnecting => context.appLocalizations.heroReconnecting,
     HeroStatus.secured => context.appLocalizations.heroProtected,
     HeroStatus.degraded => context.appLocalizations.heroProtected,
+    HeroStatus.subscriptionExpired =>
+      context.appLocalizations.dashboardSubscriptionExpired,
     HeroStatus.broken => context.appLocalizations.heroLinkBroken,
     HeroStatus.paused => context.appLocalizations.heroPaused,
   };
@@ -975,6 +1124,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.paused => Icons.play_arrow_rounded,
     HeroStatus.checking ||
     HeroStatus.diagnosing => Icons.wifi_tethering_rounded,
+    HeroStatus.subscriptionExpired => Icons.event_busy_rounded,
     HeroStatus.offline => Icons.wifi_off_rounded,
     _ => Icons.power_settings_new_rounded,
   };
@@ -1043,6 +1193,48 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     colorFilter: ColorFilter.mode(accent, BlendMode.srcIn),
     child: image,
   );
+}
+
+class _HeroOscilloscopePainter extends CustomPainter {
+  const _HeroOscilloscopePainter({required this.samples, required this.color});
+
+  final List<double> samples;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide * 0.455;
+    final path = Path();
+    final peak = samples.fold<double>(1, math.max);
+    for (var index = 0; index <= 96; index++) {
+      final angle = index / 96 * math.pi * 2 - math.pi / 2;
+      final position = index / 96 * math.max(0, samples.length - 1);
+      final low = position.floor();
+      final high = math.min(low + 1, samples.length - 1);
+      final sample = samples.isEmpty
+          ? 0.0
+          : lerpDouble(samples[low], samples[high], position - low)!;
+      final r = radius + sample / peak * 9;
+      final point = center + Offset(math.cos(angle), math.sin(angle)) * r;
+      if (index == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color.withValues(alpha: 0.86)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HeroOscilloscopePainter oldDelegate) =>
+      !listEquals(oldDelegate.samples, samples) || oldDelegate.color != color;
 }
 
 class _HeroHaloPainter extends CustomPainter {
@@ -1658,6 +1850,23 @@ class _HeroOrbPainter extends CustomPainter {
               ? transitionProgress
               : 1,
         );
+      case HeroStatus.subscriptionExpired:
+        if (transitionProgress < 1) {
+          _paintPreviousRing(
+            canvas,
+            center,
+            rect,
+            radius,
+            alpha: 1 - transitionProgress,
+          );
+        }
+        _paintSubscriptionExpiredRing(
+          canvas,
+          rect,
+          radius,
+          morph,
+          alpha: transitionProgress,
+        );
       case HeroStatus.broken:
         if (transitionProgress < 1) {
           _paintPreviousRing(
@@ -1760,6 +1969,8 @@ class _HeroOrbPainter extends CustomPainter {
           bloom: false,
           alpha: alpha,
         );
+      case HeroStatus.subscriptionExpired:
+        _paintSubscriptionExpiredRing(canvas, rect, radius, 1, alpha: alpha);
       case HeroStatus.broken:
         _paintBrokenRing(canvas, rect, 1, alpha: alpha);
       case HeroStatus.paused:
@@ -1793,6 +2004,7 @@ class _HeroOrbPainter extends CustomPainter {
       HeroStatus.reconnecting => 0.65 + 0.35 * transitionProgress,
       HeroStatus.diagnosing => 0.86,
       HeroStatus.degraded => 0.72,
+      HeroStatus.subscriptionExpired => 0.48,
       HeroStatus.broken => 0.28,
       HeroStatus.paused => 0.42,
       HeroStatus.secured => 1.0,
@@ -1921,6 +2133,49 @@ class _HeroOrbPainter extends CustomPainter {
           stops: [0, span * 0.7, span],
           transform: GradientRotation(head - length),
         ).createShader(rect),
+    );
+  }
+
+  void _paintSubscriptionExpiredRing(
+    Canvas canvas,
+    Rect rect,
+    double radius,
+    double morph, {
+    double alpha = 1,
+  }) {
+    final rotation = lerpDouble(-math.pi / 2, -math.pi * 0.38, morph)!;
+    final mainSweep = lerpDouble(2 * math.pi, math.pi * 1.46, morph)!;
+    final stroke = lerpDouble(_ring, _ring * 0.68, morph)!;
+    final opacity = alpha * lerpDouble(1, 0.72 + 0.08 * pulse, morph)!;
+    final paint = _ringPaint(
+      rect,
+      rotation,
+      strokeWidth: stroke,
+      alpha: opacity,
+    );
+    canvas.drawArc(rect, rotation, mainSweep, false, paint);
+
+    if (morph <= 0.02) return;
+    final remnantStart = rotation + mainSweep + math.pi * 0.20 * morph;
+    final remnantSweep = math.pi * 0.16 * morph;
+    canvas.drawArc(
+      rect,
+      remnantStart,
+      remnantSweep,
+      false,
+      _ringPaint(
+        rect,
+        rotation,
+        strokeWidth: stroke * 0.72,
+        alpha: opacity * 0.34,
+      ),
+    );
+    final terminal =
+        rect.center + Offset.fromDirection(rotation + mainSweep, radius);
+    canvas.drawCircle(
+      terminal,
+      stroke * 0.42 * morph,
+      Paint()..color = palette.ring.first.withValues(alpha: opacity * 0.88),
     );
   }
 

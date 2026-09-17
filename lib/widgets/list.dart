@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';
+import 'focus.dart';
 import 'input.dart';
 import 'open_container.dart';
 import 'scaffold.dart';
@@ -332,23 +333,25 @@ class ListItem<T> extends StatelessWidget {
     Widget? trailing,
     Widget? leading,
   }) {
-    return ListTile(
-      key: key,
-      dense: dense,
-      visualDensity: visualDensity,
-      tileColor: color,
-      titleTextStyle: titleTextStyle,
-      subtitleTextStyle: subtitleTextStyle,
-      leading: leading ?? this.leading,
-      horizontalTitleGap: horizontalTitleGap,
-      title: title,
-      minTileHeight: minTileHeight,
-      minVerticalPadding: minVerticalPadding,
-      subtitle: subtitle,
-      titleAlignment: tileTitleAlignment,
-      onTap: onTap,
-      trailing: trailing ?? this.trailing,
-      contentPadding: padding,
+    return TvFocusOutline(
+      child: ListTile(
+        key: key,
+        dense: dense,
+        visualDensity: visualDensity,
+        tileColor: color,
+        titleTextStyle: titleTextStyle,
+        subtitleTextStyle: subtitleTextStyle,
+        leading: leading ?? this.leading,
+        horizontalTitleGap: horizontalTitleGap,
+        title: title,
+        minTileHeight: minTileHeight,
+        minVerticalPadding: minVerticalPadding,
+        subtitle: subtitle,
+        titleAlignment: tileTitleAlignment,
+        onTap: onTap,
+        trailing: trailing ?? this.trailing,
+        contentPadding: padding,
+      ),
     );
   }
 
@@ -449,9 +452,12 @@ class ListItem<T> extends StatelessWidget {
               : () {
                   checkboxDelegate.onChanged!(!checkboxDelegate.value);
                 },
-          trailing: CommonCheckBox(
-            value: checkboxDelegate.value,
-            onChanged: checkboxDelegate.onChanged,
+          trailing: ExcludeFocus(
+            excluding: system.isTV,
+            child: CommonCheckBox(
+              value: checkboxDelegate.value,
+              onChanged: checkboxDelegate.onChanged,
+            ),
           ),
         );
       case final _ToggleAction toggleAction:
@@ -461,9 +467,12 @@ class ListItem<T> extends StatelessWidget {
               : () {
                   toggleAction.onChanged!(!toggleAction.value);
                 },
-          trailing: Switch(
-            value: toggleAction.value,
-            onChanged: toggleAction.onChanged,
+          trailing: ExcludeFocus(
+            excluding: system.isTV,
+            child: Switch(
+              value: toggleAction.value,
+              onChanged: toggleAction.onChanged,
+            ),
           ),
         );
       case final _RadioAction radio:

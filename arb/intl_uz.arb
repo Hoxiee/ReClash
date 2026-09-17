@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "VPNni chetlab qayta urinish kerakmi?",
+  "subscriptionDirectRetryMessage": "Joriy ulanish orqali obunaga ulanib bo‘lmadi. VPNni o‘chirmasdan, faqat shu yuklab olishni bevosita takrorlaysizmi? Panel tarmog‘ingizning IP manzilini ko‘radi. Boshqa trafik yo‘nalishi o‘zgarmaydi.",
+  "subscriptionDirectRetryConfirm": "Bevosita qayta urinish",
+  "appRegion": "Ilova hududi",
+  "appRegionDesc": "Tarmoq hududini tanlang. Rossiya tanlansa, HWID yoqiladi; uni quyida o‘chirish mumkin. Aqlli yo‘naltirish alohida yoqiladi.",
+  "appRegionOther": "Boshqa",
+  "setupRegionSettings": "Hududning tezkor sozlamalari",
+  "setupRegionSettingsDesc": "Geoma’lumotlar, yo‘naltirish presetlari va ilovalar ruxsatini tekshiring. Hech narsa avtomatik qo‘shilmaydi.",
+  "lanProfileImportPhoneHint": "Obunani televizorga import qilish uchun havolani kiriting.",
+  "lanProfileImportSend": "Televizorga import qilish",
+  "lanProfileImportPhoneSuccess": "Obuna import qilindi. Televizorga qaytib, bu sahifani yopishingiz mumkin.",
+  "lanProfileImportPhoneFailed": "Obunani import qilib bo‘lmadi. Havolani tekshiring va qayta urinib ko‘ring.",
+  "lanProfileImportPhoneUnreachable": "Televizorga ulanib bo‘lmadi. Ulanishni tekshiring va natijani bilish uchun shu sahifada so‘rovni takrorlang.",
+  "panelHwidNotSupported": "Panel HWID cheklovi haqida xabar berdi",
+  "panelHwidNotSupportedTip": "Panel x-hwid-not-supported qaytardi. Bu klient mos kelmasligini isbotlamaydi. HWID sozlamalari va obuna talablarini tekshiring.",
+  "panelHwidIdentityDisabled": "HWID yuborish o‘chiq. Faqat panelga ishonsangiz yoqing.",
+  "networkDefaultLanBypass": "Maxsus marshrutlar bo‘lmasa, mahalliy tarmoq VPNni chetlab o‘tadi. Uni qamrab olish uchun marshrutlarni aniq belgilang.",
+  "subscriptionClientExperimentalLabel": "Tajriba",
   "rule": "Qoida",
   "rules": "Qoidalar",
   "global": "Global",
@@ -93,7 +111,7 @@
   "importFromURL": "URL orqali import qilish",
   "subscriptionClientLabel": "Mijoz formati",
   "subscriptionClientDesc": "Ilova obunani aynan shu mijoz formatida soʻraydi",
-  "subscriptionClientExperimentalTip": "Emulyatsiya — tajriba imkoniyati: provayder boshqa klient formatini yuboradi, ReClash esa uni konvertatsiya qiladi.",
+  "subscriptionClientExperimentalTip": "Boshqa klientlar bilan moslik tajriba imkoniyatidir: provayder tanlangan klient formatini yuboradi, ReClash uni o‘giradi.",
   "subscriptionClientAuto": "Avtomatik",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -129,7 +147,7 @@
   "project": "Loyiha",
   "core": "Yadro",
   "madeBy": "Muallif",
-  "roleAuthor": "Muallif va loyiha yurituvchisi",
+  "roleAuthor": "Muallif va meynteyner",
   "gratitude": "Minnatdorchilik",
   "gratitudeDesc": "ReClash ularning mehnati tufayli mavjud",
   "creditFlClash": "FlClash — ilova shu mijoz asosida qurilgan",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "HWID yuborish",
   "sendDeviceIdentityDesc": "Qurilma identifikatori, ilova versiyasi va qurilma nomini proksi provayderi serveriga yuborish",
+  "sendDeviceIdentityDisableWarning": "HWID yuborishni oʻchirsangiz, obunalarning aksariyati ishlamay qoladi. Davom etasizmi?",
   "unifiedDelay": "Yagona kechikish",
   "unifiedDelayDesc": "Handshake kabi ortiqcha kechikishlarni olib tashlaydi",
   "tcpConcurrent": "Parallel TCP ulanishlari",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "Yadro majburan qayta ishga tushirilsinmi?",
   "dnsHijacking": "DNS oʻgʻirlash",
   "coreStatus": "Yadro holati",
+  "coreRunning": "Ishlamoqda",
+  "coreStarting": "Ishga tushmoqda…",
+  "coreStopped": "Toʻxtatilgan",
   "dataCollectionTip": "Ma’lumot yigʻish haqida eslatma",
   "dataCollectionContent": "Bu ilova barqarorlikni oshirish uchun qulash ma’lumotlarini yigʻishda Firebase Crashlytics xizmatidan foydalanadi.\nYigʻilgan ma’lumotlar qurilma ma’lumotlari va qulash tafsilotlaridan iborat, shaxsiy maxfiy ma’lumot yoʻq.\nBuni sozlamalarda oʻchirib qoʻyishingiz mumkin.",
   "crashlytics": "Qulash tahlili",
@@ -633,6 +655,15 @@
   "expectedStatus": "Kutilgan status",
   "selectProxies": "Proksilarni tanlash",
   "inputProxyGroupName": "Proksi guruh nomini kiriting",
+  "helperAuthorizationTitle": "Yordamchi xizmatni sozlashga ruxsat berilsinmi?",
+  "helperAuthorizationMessage": "TUN rejimi uchun ReClash yordamchi xizmatini oʻrnatish yoki yangilash kerak. Tizimning ruxsat oynasini ochish uchun «Davom etish» tugmasini bosing. Parolni faqat shu oynada kiriting: ReClash parollarni yigʻmaydi.",
+  "helperAuthorizationContinue": "Davom etish",
+  "helperAuthorizationLater": "Keyinroq",
+  "helperSystemdUnavailable": "TUN rejimi uchun systemd kerak, lekin bu tizimda u mavjud emas.",
+  "helperPkexecUnavailable": "pkexec mavjud emas. Distributivingiz uchun polkit paketini oʻrnating va qayta urinib koʻring.",
+  "helperAgentUnavailable": "Tizimning ruxsat agenti mavjud emas. Ish stoli seansida polkit autentifikatsiya agentini ishga tushiring va qayta urinib koʻring.",
+  "helperInstallFailed": "Yordamchi xizmatni oʻrnatib yoki yangilab boʻlmadi. Jurnallarni tekshiring va qayta urinib koʻring.",
+  "helperInstallNotReady": "Yordamchi xizmatni sozlash tugadi, lekin xizmat hali tayyor emas. Jurnallarni tekshiring va qayta urinib koʻring.",
   "helperCorruptTip": "Yordamchi xizmat mavjud emas, TUN rejimini yoqib boʻlmaydi. Tiklash uchun ReClashni qayta oʻrnating.",
   "coreBlockedByPolicyTip": "Windows ReClashCore.exe dasturini ishga tushirishni rad etdi (xato kodi {code}). Smart App Control yoki AppLocker kabi dasturlarni boshqarish siyosati imzosiz dasturlarni bloklaydi. ReClashga oʻsha siyosatda ruxsat bering yoki siyosatni oʻchirib qoʻying, soʻng qayta urinib koʻring.",
   "coreBlockedBySmartAppControlTip": "Windows Smart App Control ReClashCore.exe dasturini imzo yoʻqligi sababli blokladi. Windows Security → App & browser control → Smart App Control sozlamalariga oʻting, Off ni tanlang va ReClashni qayta ishga tushiring. Smart App Controlni Windowsni qayta oʻrnatmasdan qayta yoqib boʻlmaydi.",
@@ -847,7 +878,7 @@
   "smartRoutingRetrying": "Server javob bermayapti, boshqasi qidirilmoqda",
   "smartRoutingNoServers": "Ulanib boʻladigan serverlar yoʻq",
   "smartRoutingPreset": "Tayyor sozlama",
-  "smartRoutingPresetOff": "Oʻchiq",
+  "smartRoutingPresetOff": "Boshqa",
   "smartRoutingPresetRussia": "Rossiya",
   "smartRoutingPresetIran": "Eron",
   "smartRoutingPresetChina": "Xitoy",
@@ -897,7 +928,10 @@
   "smartRoutingReasonHold": "Ishlayapti, yaxshirogʻi topilmadi",
   "smartRoutingReasonIncumbentDead": "Oldingi server javob bermay qoʻydi",
   "smartRoutingReasonVerdictGain": "Bu server ochiq internetga yetib borishi isbotlangan",
-  "smartRoutingReasonLatencyGain": "Kechikish boʻyicha bir pogʻona tezroq",
+  "smartRoutingReasonLatencyGain": "Takroriy tekshiruvlar pastroq kechikishni tasdiqladi",
+  "smartRoutingReasonReliabilityGain": "Takroriy tekshiruvlar barqarorroq muqobilni tasdiqladi",
+  "smartRoutingReasonQualityConfirming": "Takroriy taqqoslashlar bilan yaxshilanishni tasdiqlayapmiz",
+  "smartRoutingReasonHandoffRecovery": "Tarmoq almashganidan keyin ulanish tiklandi",
   "smartRoutingReasonTerrainChanged": "Tarmoq oʻzgardi",
   "smartRoutingReasonStranded": "Hech narsaga ulanib boʻlmadi, joriy server saqlanmoqda",
   "smartRoutingReasonNoCandidate": "Hech bir server tekshiruvlardan oʻtmadi",
@@ -985,8 +1019,8 @@
   "setupRestore": "Zaxira nusxadan tiklash",
   "setupRestoreDesc": "ReClash, FlClashX yoki FlClash nusxasidan sozlamalar va profillarni tiklash",
   "setupFinishTitle": "Sozlamalarni tekshiring",
-  "setupRegionDesc": "Aqlli yo‘naltirish bu hududdan marshrut tanlashning boshlang‘ich nuqtasi sifatida foydalanadi. Til faqat tavsiya beradi.",
-  "setupRegionNone": "Boshqa hudud yoki aqlli yo‘naltirishsiz",
+  "setupRegionDesc": "Tarmoq hududini tanlang. Rossiya tanlansa, HWID yoqiladi; uni quyida o‘chirish mumkin. Aqlli yo‘naltirish alohida yoqiladi.",
+  "setupRegionNone": "Boshqa",
   "setupAutoRun": "ReClash ochilganda ulanish",
   "setupAutoRunDesc": "Yaroqli profil yuklangach VPNni avtomatik ishga tushiradi",
   "setupPermissionVpn": "VPN ruxsati",
@@ -1164,7 +1198,6 @@
   "appearanceTheme": "Mavzu",
   "appearanceIcon": "Belgi",
   "appearanceLayout": "Joylashuv",
-  "appearanceMotion": "Harakat",
   "schedule": "Jadval boʻyicha",
   "scheduleDesc": "Qorongʻi mavzu {darkAt} dan {lightAt} gacha",
   "darkAt": "Qorongʻi boshlanish vaqti",
@@ -1206,7 +1239,7 @@
   "openInBrowser": "Brauzerda ochish",
   "off": "Oʻchiq",
   "subscriptionNoQuota": "Bu obuna trafik kvotasi yoki tugash sanasini koʻrsatmaydi",
-  "subscriptionUndialable": "Bu obunadagi hech bir tugunga ulanib boʻlmaydi — boshqa formatni sinab koʻring",
+  "subscriptionUndialable": "Obunada odatiy tugun manzillari topilmadi. Panel vaqtinchalik bo‘sh konfiguratsiya qaytargan bo‘lishi mumkin. Serverlarga ulanish tekshirilmadi.",
   "subscriptionDomainMoved": "Provayder {host} manziliga koʻchdi",
   "subscriptionUpdated": "Yangilandi",
   "subscriptionProviderInterval": "Provayder tavsiya qiladi: {value}",
@@ -1611,10 +1644,10 @@
     }
   },
   "lanProfileImport": "Telefondan olish",
-  "lanProfileImportDesc": "Mahalliy tarmoq orqali obuna URL manzilini yuborish uchun bir martalik QR kodni ko‘rsatish",
+  "lanProfileImportDesc": "Mahalliy tarmoq orqali telefondan obuna yuborish uchun bir martalik sahifani ko‘rsatish",
   "lanProfileImportTitle": "Obunani olish",
-  "lanProfileImportScan": "Bu QR kodni shu tarmoqdagi telefon orqali skanerlang",
-  "lanProfileImportAddress": "Yoki JSON ma’lumotini {address} manziliga yuboring",
+  "lanProfileImportScan": "Bu QR kodni shu tarmoqdagi telefon orqali skanerlang, so‘ng obuna URL manzilini kiriting",
+  "lanProfileImportAddress": "Yoki telefon brauzerida {address} manzilini oching",
   "lanProfileImportWaiting": "Obuna kutilmoqda…",
   "lanProfileImportImporting": "Obuna import qilinmoqda…",
   "lanProfileImportImported": "Obuna olindi",
@@ -1809,5 +1842,133 @@
   "externalActionConfirmTitle": "Tashqi amalni tasdiqlash",
   "externalActionConfirmMessage": "Tashqi havolaga “{action}” amalini bajarishga ruxsat berilsinmi?",
   "panelSettingsConfirmTitle": "Provayder sozlamalarini qo‘llash",
-  "panelSettingsConfirmMessage": "Bu obuna ilovaning quyidagi umumiy sozlamalarini so‘ramoqda:\n{settings}"
+  "panelSettingsConfirmMessage": "Bu obuna ilovaning quyidagi umumiy sozlamalarini so‘ramoqda:\n{settings}",
+  "milestoneDecorations": "Yashirin topilmalar",
+  "milestoneDecorationsDesc": "ReClash ishlatilganda qo‘lga kiritilgan topilmalarni ko‘rsatish",
+  "seasonalDecorations": "Mavsumiy ko‘rinish",
+  "seasonalDecorationsDesc": "Bosh ekranda nozik mavsumiy bezaklarni ko‘rsatish",
+  "lastUsed": "Oxirgi foydalanish",
+  "neverUsed": "Hali foydalanilmagan",
+  "profileUnusedForDays": "{days} kundan beri foydalanilmagan",
+  "profileUnusedForMonths": "{months} oydan beri foydalanilmagan",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "Uzilishsiz to‘qson kun.",
+  "milestoneRevealAuscultation": "Yuzta tekshiruv. Tarmoqning tomiri urmoqda.",
+  "milestoneRevealFullLadder": "Barcha pog‘onalar va yana birinchisiga.",
+  "milestoneRevealSilentAutopilot": "Aralashuvsiz mingta qaror.",
+  "milestoneRevealOdometer": "Bir terabayt o‘tdi.",
+  "milestoneRevealMeridian": "Beshta meridian kesib o‘tildi.",
+  "milestoneRevealPorcelain": "Yetti sokin kun.",
+  "milestoneRevealCrown": "Bir yillik qamrov vaqti.",
+  "findings": "Topilmalar",
+  "findingsDesc": "ReClash ishlatilganda sokin topilgan tafsilotlar",
+  "findingsCount": "{total} tadan {found} tasi topildi",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "Topilganlar",
+  "findingDiscoveredOn": "{date} kuni topildi",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "Topilmalarni tiklash",
+  "resetFindingsDesc": "Foydalanish tarixini o‘chirmay, topilish lahzalarini qayta ko‘rsatish",
+  "resetFindingsTitle": "Topilmalar tiklansinmi?",
+  "resetFindingsConfirm": "Topilgan yozuvlar yashiriladi va yana paydo bo‘lishi mumkin. Foydalanish tarixi o‘zgarmaydi.",
+  "findingVigil": "Qo‘riq",
+  "findingAuscultation": "Tinglash",
+  "findingFullLadder": "To‘liq zina",
+  "findingSilentAutopilot": "Jim avtopilot",
+  "findingOdometer": "Odometr",
+  "findingMeridian": "Beshta meridian",
+  "findingPorcelain": "Chinni",
+  "findingCrown": "Toj",
+  "findingOscilloscope": "Ossillograf",
+  "findingMarks": "Belgilar",
+  "findingPi": "Pi",
+  "findingTurn": "Aylanish",
+  "findingStorm": "Bo‘ron",
+  "findingLoopback": "Halqa",
+  "findingOscilloscopeDesc": "Halqa olti soniya davomida jonli trafikni tingladi.",
+  "findingMarksDesc": "ReClash belgilar to‘plami topildi.",
+  "findingPiDesc": "Boshqaruv paneli ochiq paytda seans 3:14:15 dan o‘tdi.",
+  "findingTurnDesc": "Seans Yangi yil yarim tundan o‘tdi.",
+  "findingStormDesc": "Barcha diagnostika qatlamlari bir vaqtda ishlamay qoldi.",
+  "findingLoopbackDesc": "Profil mahalliy tinglash portiga qayta yo‘naltirildi.",
+  "appIconVigil": "Qo‘riq",
+  "appIconTopo": "Topografiya",
+  "appIconFractal": "Fraktal",
+  "appIconSpark": "Uchqun",
+  "crownHistory": "{date} dan beri · {days} kun qamrov",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "Pog‘ona natijasi: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "Sovuq, deyarli monoxrom palitrani qo‘llash",
+  "developerFindings": "Topilmalarni oldindan ko‘rish",
+  "developerFindingsDesc": "Faqat vaqtinchalik ko‘rinish: hisoblagichlar, olingan topilmalar va tarmoq sozlamalari o‘zgarmaydi. Qayta tiklash yoki dasturchi rejimini o‘chirish ko‘rinishni to‘xtatadi. Effektlar ulanishi sog‘lom boshqaruv paneli ochilishini kutadi va bezak sozlamalariga amal qiladi. Bezakda tanlangan belgi yoki mavzu saqlanadi.",
+  "developerAllRewards": "Barcha mukofotlarni ko‘rsatish",
+  "developerPreviewReset": "Oldindan ko‘rishni tozalash",
+  "developerPreviewAutomatic": "Avtomatik",
+  "developerSeasonNewYear": "Yangi yil",
+  "developerSeasonBirthday": "ReClash tug‘ilgan kuni",
+  "developerSeasonAnniversary": "Birinchi ishga tushirish yilligi",
+  "developerSeasonDrift": "Mavsumiy rang",
+  "developerPatina": "Profil changi",
+  "developerPatinaDays": "{days} kun",
+  "developerFindingEvents": "Topilmani takrorlash",
+  "developerFindingQueued": "Ulanishi sog‘lom boshqaruv paneli ochilguncha navbatda. Topilmani takrorlash mumkin.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "Ulanishning barcha bosqichlari ishlamayapti",
+  "findingStormVerdict": "Tekshiruv ishlaydigan yo‘lni topmadi. Keyingi nosozliklar birinchi nosozlikning oqibati bo‘lishi mumkin.",
+  "findingLoopbackWarning": "Profil manzili ReClash ilovasining o‘z proksi portiga yo‘naltirilgan. Obuna havolasini tekshiring.",
+  "seasonBirthdayNote": "Bugun ReClash tug‘ilgan kun.",
+  "seasonFirstRunNote": "Bugun ilk ishga tushirgan kuningizning yilligi."
 }

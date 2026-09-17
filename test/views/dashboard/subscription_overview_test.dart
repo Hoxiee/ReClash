@@ -197,8 +197,8 @@ void main() {
 
     expect(
       find.text(
-        'None of the nodes in this subscription can be reached — '
-        'try another client format',
+        'No regular node addresses were found in this subscription. '
+        'The panel may have returned a placeholder. Server connectivity was not tested.',
       ),
       findsOne,
     );
@@ -208,7 +208,7 @@ void main() {
     await _pump(tester, _profile());
 
     expect(
-      find.textContaining('None of the nodes in this subscription'),
+      find.textContaining('No regular node addresses were found'),
       findsNothing,
     );
   });

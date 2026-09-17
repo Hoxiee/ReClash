@@ -21,6 +21,10 @@ class LauncherIconAliasesTest {
             "strata",
             "shatter",
             "trace",
+            "vigil",
+            "topo",
+            "spark",
+            "fractal",
         )
 
         assertEquals(variants, LauncherIconAliases.currentAliases.keys)

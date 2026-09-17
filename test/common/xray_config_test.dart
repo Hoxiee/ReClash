@@ -95,7 +95,9 @@ void main() {
       expect(
         isXrayConfigInput(
           _json({
-            'outbounds': [{}],
+            'outbounds': [
+              {'protocol': 'freedom'},
+            ],
           }),
         ),
         isTrue,
@@ -107,7 +109,9 @@ void main() {
         isXrayConfigInput(
           _json([
             {
-              'outbounds': [{}],
+              'outbounds': [
+                {'protocol': 'freedom'},
+              ],
             },
           ]),
         ),

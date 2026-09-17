@@ -1,4 +1,22 @@
 {
+  "subscriptionDirectRetryTitle": "Повторить вне VPN?",
+  "subscriptionDirectRetryMessage": "Не удалось связаться с подпиской через текущее подключение. Повторить эту загрузку напрямую, не выключая VPN? Панель увидит IP-адрес вашей сети. Маршрут остального трафика не изменится.",
+  "subscriptionDirectRetryConfirm": "Повторить напрямую",
+  "appRegion": "Регион приложения",
+  "appRegionDesc": "Выберите регион сети. При выборе России включается HWID — его можно выключить ниже. Умная маршрутизация включается отдельно.",
+  "appRegionOther": "Другое",
+  "setupRegionSettings": "Быстрые настройки региона",
+  "setupRegionSettingsDesc": "Проверьте георесурсы, пресеты маршрутизации и доступ приложений. Ничего не добавляется автоматически.",
+  "lanProfileImportPhoneHint": "Вставьте ссылку на подписку, чтобы импортировать её на телевизоре.",
+  "lanProfileImportSend": "Импортировать на ТВ",
+  "lanProfileImportPhoneSuccess": "Подписка импортирована. Можно вернуться к телевизору и закрыть эту страницу.",
+  "lanProfileImportPhoneFailed": "Не удалось импортировать подписку. Проверьте ссылку и повторите попытку.",
+  "lanProfileImportPhoneUnreachable": "Нет связи с телевизором. Проверьте подключение и повторите запрос на этой странице, чтобы узнать результат.",
+  "panelHwidNotSupported": "Панель сообщила об ограничении HWID",
+  "panelHwidNotSupportedTip": "Панель вернула x-hwid-not-supported. Это не доказывает несовместимость клиента. Проверьте настройки HWID и условия подписки.",
+  "panelHwidIdentityDisabled": "Передача HWID выключена. Включайте её только если доверяете панели.",
+  "networkDefaultLanBypass": "Без собственных маршрутов локальная сеть обходит VPN. Для её захвата задайте маршруты явно.",
+  "subscriptionClientExperimentalLabel": "Экспериментально",
   "rule": "Правило",
   "rules": "Правила",
   "global": "Глобальный",
@@ -93,7 +111,7 @@
   "importFromURL": "Импорт из URL",
   "subscriptionClientLabel": "Формат подписки",
   "subscriptionClientDesc": "Приложение запросит подписку в формате этого клиента",
-  "subscriptionClientExperimentalTip": "Эмуляция экспериментальна: провайдер отдаёт формат другого клиента, и ReClash его преобразует.",
+  "subscriptionClientExperimentalTip": "Совместимость с другими клиентами экспериментальна: провайдер отдаёт формат выбранного клиента, и ReClash его преобразует.",
   "subscriptionClientAuto": "Авто",
   "subscriptionClientClash": "Clash",
   "subscriptionClientClashMeta": "Clash Meta",
@@ -129,7 +147,7 @@
   "project": "Проект",
   "core": "Ядро",
   "madeBy": "Автор",
-  "roleAuthor": "Автор и сопровождающий",
+  "roleAuthor": "Автор и мейнтейнер",
   "gratitude": "Благодарности",
   "gratitudeDesc": "ReClash существует благодаря их работе",
   "creditFlClash": "FlClash — клиент, на котором всё построено",
@@ -289,6 +307,7 @@
   "userAgent": "User-Agent",
   "sendDeviceIdentity": "Отправлять HWID",
   "sendDeviceIdentityDesc": "Отправлять идентификатор и название устройства, а также версию приложения на сервер провайдера",
+  "sendDeviceIdentityDisableWarning": "При отключении HWID большинство подписок перестанет работать. Продолжить?",
   "unifiedDelay": "Единая задержка",
   "unifiedDelayDesc": "Убирает лишние задержки, например рукопожатие",
   "tcpConcurrent": "Параллельный TCP",
@@ -568,6 +587,9 @@
   "forceRestartCoreTip": "Принудительно перезапустить ядро?",
   "dnsHijacking": "Перехват DNS",
   "coreStatus": "Статус ядра",
+  "coreRunning": "Работает",
+  "coreStarting": "Запускается…",
+  "coreStopped": "Остановлено",
   "dataCollectionTip": "Сбор данных",
   "dataCollectionContent": "Приложение использует Firebase Crashlytics для сбора сведений о сбоях — это помогает повышать стабильность.\nСобираются данные об устройстве и подробности сбоев. Личные данные не собираются.\nЭту функцию можно отключить в настройках.",
   "crashlytics": "Аналитика сбоев",
@@ -633,6 +655,15 @@
   "expectedStatus": "Ожидаемый статус",
   "selectProxies": "Выбрать прокси",
   "inputProxyGroupName": "Введите название группы прокси",
+  "helperAuthorizationTitle": "Разрешить настройку Helper?",
+  "helperAuthorizationMessage": "Для TUN-режима нужно установить или обновить службу ReClash Helper. Нажмите «Продолжить», чтобы открыть системный запрос авторизации. Вводите пароль только в нём: ReClash не собирает пароли.",
+  "helperAuthorizationContinue": "Продолжить",
+  "helperAuthorizationLater": "Позже",
+  "helperSystemdUnavailable": "Для TUN-режима нужен systemd, но в этой системе он недоступен.",
+  "helperPkexecUnavailable": "pkexec недоступен. Установите пакет polkit для вашего дистрибутива и повторите попытку.",
+  "helperAgentUnavailable": "Системный агент авторизации недоступен. Запустите агент аутентификации polkit в сеансе рабочего стола и повторите попытку.",
+  "helperInstallFailed": "Не удалось установить или обновить службу Helper. Проверьте журналы и повторите попытку.",
+  "helperInstallNotReady": "Настройка Helper завершена, но служба не готова к работе. Проверьте журналы и повторите попытку.",
   "helperCorruptTip": "Служба Helper недоступна, поэтому TUN-режим включить нельзя. Переустановите ReClash.",
   "coreBlockedByPolicyTip": "Windows отказалась запускать ReClashCore.exe (ошибка {code}). Политики контроля приложений, такие как Smart App Control или AppLocker, блокируют неподписанные программы; разрешите ReClash в этой политике или отключите её и повторите попытку.",
   "coreBlockedBySmartAppControlTip": "Smart App Control в Windows заблокировал неподписанный ReClashCore.exe. Откройте Безопасность Windows → Управление приложениями и браузером → Параметры Smart App Control, выберите «Выкл.» и снова запустите ReClash. Повторно включить Smart App Control без переустановки Windows нельзя.",
@@ -861,7 +892,7 @@
   "smartRoutingRetrying": "Сервер не отвечает, ищем замену",
   "smartRoutingNoServers": "Нет доступных серверов",
   "smartRoutingPreset": "Пресет",
-  "smartRoutingPresetOff": "Отключено",
+  "smartRoutingPresetOff": "Другое",
   "smartRoutingPresetRussia": "Россия",
   "smartRoutingPresetIran": "Иран",
   "smartRoutingPresetChina": "Китай",
@@ -911,7 +942,10 @@
   "smartRoutingReasonHold": "Работает, ничего лучше не нашлось",
   "smartRoutingReasonIncumbentDead": "Прежний сервер перестал отвечать",
   "smartRoutingReasonVerdictGain": "У этого подтверждён выход в открытый интернет",
-  "smartRoutingReasonLatencyGain": "Этот на целую полосу быстрее",
+  "smartRoutingReasonLatencyGain": "Повторные проверки подтвердили меньшую задержку",
+  "smartRoutingReasonReliabilityGain": "Повторные проверки подтвердили более стабильную альтернативу",
+  "smartRoutingReasonQualityConfirming": "Подтверждаем улучшение повторными сравнениями",
+  "smartRoutingReasonHandoffRecovery": "Связь восстановлена после смены сети",
   "smartRoutingReasonTerrainChanged": "Сеть изменилась",
   "smartRoutingReasonStranded": "Ни один сервер недоступен, остаёмся на текущем",
   "smartRoutingReasonNoCandidate": "Ни один сервер не прошёл проверки",
@@ -989,8 +1023,8 @@
   "setupRestore": "Восстановить из копии",
   "setupRestoreDesc": "Восстановить настройки и профили из копии ReClash, FlClashX или FlClash",
   "setupFinishTitle": "Проверьте настройки",
-  "setupRegionDesc": "Умная маршрутизация использует этот регион как отправную точку. Язык служит только подсказкой.",
-  "setupRegionNone": "Другой регион или без умной маршрутизации",
+  "setupRegionDesc": "Выберите регион сети. При выборе России включается HWID — его можно выключить ниже. Умная маршрутизация включается отдельно.",
+  "setupRegionNone": "Другое",
   "setupAutoRun": "Подключаться при открытии ReClash",
   "setupAutoRunDesc": "Автоматически запускает VPN после загрузки исправного профиля",
   "setupPermissionVpn": "Разрешение на VPN",
@@ -1168,7 +1202,6 @@
   "appearanceTheme": "Тема",
   "appearanceIcon": "Иконка",
   "appearanceLayout": "Макет",
-  "appearanceMotion": "Движение",
   "schedule": "По расписанию",
   "scheduleDesc": "Тёмная с {darkAt} до {lightAt}",
   "@scheduleDesc": {
@@ -1220,7 +1253,7 @@
   "openInBrowser": "Открыть в браузере",
   "off": "Выключено",
   "subscriptionNoQuota": "Подписка не сообщает ни лимит трафика, ни срок действия",
-  "subscriptionUndialable": "Ни один узел подписки не дозванивается — попробуйте другой формат клиента",
+  "subscriptionUndialable": "В подписке не найдено обычных адресов узлов. Возможно, панель вернула заглушку. Подключение к серверам не проверялось.",
   "@subscriptionUndialable": {
     "type": "text"
   },
@@ -1482,10 +1515,10 @@
     }
   },
   "lanProfileImport": "Получить с телефона",
-  "lanProfileImportDesc": "Показать одноразовый QR-код для передачи URL подписки по локальной сети",
+  "lanProfileImportDesc": "Показать одноразовую страницу для передачи подписки с телефона по локальной сети",
   "lanProfileImportTitle": "Получение подписки",
-  "lanProfileImportScan": "Отсканируйте QR-код телефоном в той же сети",
-  "lanProfileImportAddress": "Или отправьте JSON на {address}",
+  "lanProfileImportScan": "Отсканируйте QR-код телефоном в той же сети, затем вставьте URL подписки",
+  "lanProfileImportAddress": "Или откройте {address} в браузере телефона",
   "lanProfileImportWaiting": "Ожидание подписки…",
   "lanProfileImportImporting": "Импорт подписки…",
   "lanProfileImportImported": "Подписка получена",
@@ -1680,5 +1713,133 @@
   "externalActionConfirmTitle": "Подтверждение внешнего действия",
   "externalActionConfirmMessage": "Разрешить внешней ссылке выполнить действие «{action}»?",
   "panelSettingsConfirmTitle": "Применить настройки провайдера",
-  "panelSettingsConfirmMessage": "Подписка запрашивает следующие общие настройки приложения:\n{settings}"
+  "panelSettingsConfirmMessage": "Подписка запрашивает следующие общие настройки приложения:\n{settings}",
+  "milestoneDecorations": "Скрытые находки",
+  "milestoneDecorationsDesc": "Показывать находки, заслуженные при использовании ReClash",
+  "seasonalDecorations": "Сезонное оформление",
+  "seasonalDecorationsDesc": "Показывать ненавязчивые сезонные детали на главном экране",
+  "lastUsed": "Последнее использование",
+  "neverUsed": "Ещё не использовался",
+  "profileUnusedForDays": "Не использовался {days} дн.",
+  "profileUnusedForMonths": "Не использовался {months} мес.",
+  "@profileUnusedForDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "@profileUnusedForMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneRevealVigil": "Девяносто суток без разрыва.",
+  "milestoneRevealAuscultation": "Сто проверок. У сети есть пульс.",
+  "milestoneRevealFullLadder": "Все ступени — и обратно на первую.",
+  "milestoneRevealSilentAutopilot": "Тысяча решений без вмешательства.",
+  "milestoneRevealOdometer": "Через приложение прошёл один терабайт.",
+  "milestoneRevealMeridian": "Пересечены пять меридианов.",
+  "milestoneRevealPorcelain": "Семь спокойных суток.",
+  "milestoneRevealCrown": "Год покрытого времени.",
+  "findings": "Находки",
+  "findingsDesc": "Тихие детали, найденные во время использования ReClash",
+  "findingsCount": "Открыто {found} из {total}",
+  "@findingsCount": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoveredFindings": "Открытое",
+  "findingDiscoveredOn": "Найдено {date}",
+  "@findingDiscoveredOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFindings": "Сбросить находки",
+  "resetFindingsDesc": "Повторить моменты раскрытия, не сбрасывая историю использования",
+  "resetFindingsTitle": "Сбросить находки?",
+  "resetFindingsConfirm": "Открытые записи скроются и смогут появиться снова. История использования не изменится.",
+  "findingVigil": "Дозор",
+  "findingAuscultation": "Аускультация",
+  "findingFullLadder": "Полная лестница",
+  "findingSilentAutopilot": "Молчаливый автопилот",
+  "findingOdometer": "Одометр",
+  "findingMeridian": "Пять меридианов",
+  "findingPorcelain": "Фарфор",
+  "findingCrown": "Венец",
+  "findingOscilloscope": "Осциллограф",
+  "findingMarks": "Марки",
+  "findingPi": "Пи",
+  "findingTurn": "Оборот",
+  "findingStorm": "Шторм",
+  "findingLoopback": "Петля",
+  "findingOscilloscopeDesc": "Кольцо шесть секунд слушало живой трафик.",
+  "findingMarksDesc": "Открылся лист марок ReClash.",
+  "findingPiDesc": "Сессия прошла отметку 3:14:15 при открытом дашборде.",
+  "findingTurnDesc": "Сессия пережила новогоднюю полночь.",
+  "findingStormDesc": "Все диагностические слои отказали одновременно.",
+  "findingLoopbackDesc": "Профиль указал обратно на локальный порт прослушивания.",
+  "appIconVigil": "Дозор",
+  "appIconTopo": "Топография",
+  "appIconFractal": "Фрактал",
+  "appIconSpark": "Искра",
+  "crownHistory": "С {date} · {days} суток покрытия",
+  "@crownHistory": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "desyncLadderResult": "Результат ступени: {passed}/{total}",
+  "@desyncLadderResult": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "porcelainThemeDesc": "Применить холодную почти монохромную палитру",
+  "developerFindings": "Предпросмотр находок",
+  "developerFindingsDesc": "Только временный предпросмотр: счётчики, полученные находки и сетевые настройки не меняются. Сброс или выключение режима разработчика убирает предпросмотр. Эффекты ждут видимого дашборда с исправным соединением и учитывают настройки оформления. Выбор иконки или темы в оформлении по-прежнему сохраняется.",
+  "developerAllRewards": "Показать все награды",
+  "developerPreviewReset": "Сбросить предпросмотр",
+  "developerPreviewAutomatic": "Автоматически",
+  "developerSeasonNewYear": "Новый год",
+  "developerSeasonBirthday": "День рождения ReClash",
+  "developerSeasonAnniversary": "Годовщина первого запуска",
+  "developerSeasonDrift": "Сезонный оттенок",
+  "developerPatina": "Патина профилей",
+  "developerPatinaDays": "{days} суток",
+  "developerFindingEvents": "Повторить находку",
+  "developerFindingQueued": "В очереди до открытия дашборда с исправным соединением. Находку можно повторить.",
+  "@developerPatinaDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingStormTitle": "Все этапы соединения недоступны",
+  "findingStormVerdict": "Проверка не нашла рабочего пути. Отказы следующих этапов могут быть следствием первого.",
+  "findingLoopbackWarning": "Адрес профиля указывает на прокси-порт самого ReClash. Проверьте ссылку подписки.",
+  "seasonBirthdayNote": "Сегодня день рождения ReClash.",
+  "seasonFirstRunNote": "Сегодня годовщина вашего первого запуска."
 }

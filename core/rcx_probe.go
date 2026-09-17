@@ -22,6 +22,7 @@ type rcxMarkerAttempt struct {
 }
 
 type rcxProbeResult struct {
+	Dispatched     bool
 	Node           string
 	Key            string
 	Role           rcxRole
@@ -170,6 +171,7 @@ func (p *rcxProber) probe(parent context.Context, target rcxProbeTarget) rcxProb
 		return result
 	}
 	for _, marker := range markers {
+		result.Dispatched = true
 		attempt := p.probeMarker(parent, target.Node, target.Role, marker)
 		result.Attempts = append(result.Attempts, attempt)
 		result.Outcome = attempt.Outcome
@@ -361,6 +363,18 @@ func (b *rcxProbeBudget) prune(now time.Time) {
 		if now.Sub(stamp) < b.window {
 			kept = append(kept, stamp)
 		}
+	}
+	b.stamps = kept
+}
+
+func (b *rcxProbeBudget) RefundAt(count int, at time.Time) {
+	kept := b.stamps[:0]
+	for _, stamp := range b.stamps {
+		if count > 0 && stamp.Equal(at) {
+			count--
+			continue
+		}
+		kept = append(kept, stamp)
 	}
 	b.stamps = kept
 }

@@ -7,6 +7,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/profile_patina.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -38,7 +39,11 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
       context,
       builder: (context) => AdaptiveSheetScaffold(
         title: context.appLocalizations.addProfile,
-        body: const AddProfileView(),
+        body: Builder(
+          builder: (chooserContext) => AddProfileView(
+            onProfileAdded: (_) => closeProfileImportRoute(chooserContext),
+          ),
+        ),
       ),
     );
   }
@@ -178,6 +183,11 @@ class _ProfilesGrid extends ConsumerWidget {
               groupValue: currentProfileId,
               onChanged: (profileId) {
                 ref.read(currentProfileIdProvider.notifier).value = profileId;
+                if (profileId != null) {
+                  ref
+                      .read(profilesActionProvider.notifier)
+                      .markProfileUsed(profileId);
+                }
               },
             );
           },
@@ -254,6 +264,11 @@ class ProfileItem extends ConsumerWidget {
         lastUpdateDate: profile.lastUpdateDate,
         style: context.textTheme.bodySmall?.toLighter,
       ),
+      const SizedBox(height: 2),
+      LastUsedTimeText(
+        lastUsedAt: profile.lastUsedAt,
+        style: context.textTheme.bodySmall?.toLighter,
+      ),
     ];
   }
 
@@ -261,6 +276,11 @@ class ProfileItem extends ConsumerWidget {
     return [
       LastUpdateTimeText(
         lastUpdateDate: profile.lastUpdateDate,
+        style: context.textTheme.bodySmall?.toLighter,
+      ),
+      const SizedBox(height: 2),
+      LastUsedTimeText(
+        lastUsedAt: profile.lastUsedAt,
         style: context.textTheme.bodySmall?.toLighter,
       ),
     ];
@@ -386,6 +406,30 @@ class ProfileItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final profiles = ref.watch(profilesProvider);
+    final seasonalEnabled = ref.watch(
+      milestoneSettingProvider.select((state) => state.seasonalEnabled),
+    );
+    final dustyCount = profiles.where((item) => item.patinaLevel > 0).length;
+    final soften = profiles.isNotEmpty && dustyCount * 3 > profiles.length * 2;
+    final previewDays = ref.watch(
+      findingPreviewProvider.select((state) => state.patinaDays),
+    );
+    final previewLevel = previewDays == null
+        ? null
+        : switch (previewDays) {
+            >= 120 => 3,
+            >= 45 => 2,
+            >= 14 => 1,
+            _ => 0,
+          };
+    final updating = ref.watch(isUpdatingProvider(profile.updatingKey));
+    final patina = !seasonalEnabled || profile.id == groupValue || updating
+        ? 0
+        : previewLevel ??
+              (soften ? profile.patinaLevel.clamp(0, 1) : profile.patinaLevel);
+    final reduceMotion =
+        context.disableAnimations || ref.watch(appSettingProvider).reduceMotion;
     return CommonCard(
       enterActionsOnRight: true,
       radius: AppCorner.xl,
@@ -393,64 +437,82 @@ class ProfileItem extends ConsumerWidget {
       onPressed: () {
         onChanged(profile.id);
       },
-      child: ListItem(
-        key: Key(profile.id.toString()),
-        horizontalTitleGap: 8,
-        minVerticalPadding: 12,
-        padding: const EdgeInsets.only(left: 16, right: 6),
-        trailing: SizedBox(
-          height: 40,
-          width: 40,
-          child: Consumer(
-            builder: (context, ref, _) {
-              final isUpdating = ref.watch(
-                isUpdatingProvider(profile.updatingKey),
-              );
-              return FadeThroughBox(
-                alignment: Alignment.center,
-                child: isUpdating
-                    ? const Padding(
-                        key: ValueKey('loading'),
-                        padding: EdgeInsets.all(8),
-                        child: CommonCircleLoading(),
-                      )
-                    : CommonPopupBox(
-                        key: const ValueKey('menu'),
-                        popupBuilder: (_) =>
-                            CommonPopupMenu(items: _menuItems(context, ref)),
-                        targetBuilder: (open) {
-                          return IconButton(
-                            style: IconButton.styleFrom(
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.standard,
-                            ),
-                            tooltip: context.appLocalizations.more,
-                            onPressed: () {
-                              open();
-                            },
-                            icon: const Icon(Icons.more_vert),
-                          );
-                        },
-                      ),
-              );
+      child: ProfilePatina(
+        level: patina,
+        reduceMotion: reduceMotion,
+        child: ListItem(
+          key: Key(profile.id.toString()),
+          horizontalTitleGap: 8,
+          minVerticalPadding: 12,
+          padding: const EdgeInsets.only(left: 16, right: 6),
+          trailing: SizedBox(
+            height: 40,
+            width: 40,
+            child: Consumer(
+              builder: (context, ref, _) {
+                final isUpdating = ref.watch(
+                  isUpdatingProvider(profile.updatingKey),
+                );
+                return FadeThroughBox(
+                  alignment: Alignment.center,
+                  child: isUpdating
+                      ? const Padding(
+                          key: ValueKey('loading'),
+                          padding: EdgeInsets.all(8),
+                          child: CommonCircleLoading(),
+                        )
+                      : CommonPopupBox(
+                          key: const ValueKey('menu'),
+                          popupBuilder: (_) =>
+                              CommonPopupMenu(items: _menuItems(context, ref)),
+                          targetBuilder: (open) {
+                            return IconButton(
+                              style: IconButton.styleFrom(
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.standard,
+                              ),
+                              tooltip: context.appLocalizations.more,
+                              onPressed: () {
+                                open();
+                              },
+                              icon: const Icon(Icons.more_vert),
+                            );
+                          },
+                        ),
+                );
+              },
+            ),
+          ),
+          title: _ProfileCardTitle(
+            profile: profile,
+            desaturation: patina == 0
+                ? 0
+                : patina == 1
+                ? 0.2
+                : 0.45,
+            reduceMotion: reduceMotion,
+            info: switch (profile.type) {
+              ProfileType.file => _buildFileProfileInfo(context),
+              ProfileType.url => _buildUrlProfileInfo(context),
             },
           ),
+          tileTitleAlignment: ListTileTitleAlignment.top,
         ),
-        title: _ProfileCardTitle(
-          profile: profile,
-          info: switch (profile.type) {
-            ProfileType.file => _buildFileProfileInfo(context),
-            ProfileType.url => _buildUrlProfileInfo(context),
-          },
-        ),
-        tileTitleAlignment: ListTileTitleAlignment.top,
       ),
     );
   }
 }
 
 class _ProfileCardTitle extends StatelessWidget {
-  const _ProfileCardTitle({required this.profile, required this.info});
+  const _ProfileCardTitle({
+    required this.profile,
+    required this.info,
+    required this.desaturation,
+    required this.reduceMotion,
+  });
+
+  final double desaturation;
+  final bool reduceMotion;
 
   final Profile profile;
   final List<Widget> info;
@@ -468,6 +530,52 @@ class _ProfileCardTitle extends StatelessWidget {
         Row(
           spacing: 6,
           children: [
+            if (profile.panelMeta?.serviceLogo case final logo?
+                when logo.isNotEmpty)
+              TweenAnimationBuilder<double>(
+                tween: Tween(end: desaturation),
+                duration: reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 600),
+                builder: (_, amount, child) {
+                  final r = 0.2126 * amount;
+                  final g = 0.7152 * amount;
+                  final b = 0.0722 * amount;
+                  final keep = 1 - amount;
+                  return ColorFiltered(
+                    colorFilter: ColorFilter.matrix([
+                      keep + r,
+                      g,
+                      b,
+                      0,
+                      0,
+                      r,
+                      keep + g,
+                      b,
+                      0,
+                      0,
+                      r,
+                      g,
+                      keep + b,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                    ]),
+                    child: child,
+                  );
+                },
+                child: SizedBox.square(
+                  dimension: 24,
+                  child: ImageCacheWidget(
+                    src: logo,
+                    defaultWidget: const Icon(Icons.cloud_outlined, size: 20),
+                  ),
+                ),
+              ),
             Flexible(
               child: Text(
                 profile.realLabel,
@@ -488,6 +596,43 @@ class _ProfileCardTitle extends StatelessWidget {
         const SizedBox(height: 6),
         ...info,
       ],
+    );
+  }
+}
+
+class LastUsedTimeText extends ConsumerWidget {
+  const LastUsedTimeText({
+    super.key,
+    required this.lastUsedAt,
+    this.style,
+    this.now,
+  });
+
+  final DateTime? lastUsedAt;
+  final TextStyle? style;
+  final DateTime? now;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final previewDays = ref.watch(
+      findingPreviewProvider.select((state) => state.patinaDays),
+    );
+    final value = previewDays == null
+        ? lastUsedAt
+        : (now ?? DateTime.now()).subtract(Duration(days: previewDays));
+    if (value == null) {
+      return Text(context.appLocalizations.neverUsed, style: style);
+    }
+    final age = (now ?? DateTime.now()).difference(value);
+    final showInactiveAge = ref.watch(
+      milestoneSettingProvider.select((state) => state.seasonalEnabled),
+    );
+    final description = showInactiveAge && age.inDays >= 120
+        ? context.appLocalizations.profileUnusedForMonths(age.inDays ~/ 30)
+        : value.getLastUpdateTimeDesc(context);
+    return Text(
+      '${context.appLocalizations.lastUsed}: $description',
+      style: style,
     );
   }
 }

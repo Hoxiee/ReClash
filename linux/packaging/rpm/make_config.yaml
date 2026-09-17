@@ -13,12 +13,6 @@ icon: ./assets/images/icon.png
 requires:
   - libsecret
 
-# rpmbuild's find-debuginfo and brp-strip rewrite the Core and drop the setuid
-# bit the Linux TUN path relies on.
-spec_macros:
-  - '%global debug_package %{nil}'
-  - '%global __os_install_post %{nil}'
-
 postinstall_scripts:
   - 'update-desktop-database %{_datadir}/applications &> /dev/null || :'
 

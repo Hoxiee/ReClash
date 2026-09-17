@@ -1,38 +1,52 @@
 import 'dart:io';
 
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 extension PackageInfoExtension on PackageInfo {
   String get ua =>
       ['$appName/v$version', 'Platform/${Platform.operatingSystem}'].join(' ');
 }
 
+PackageInfo releasePackageInfo(
+  PackageInfo native, {
+  String version = const String.fromEnvironment('APP_VERSION'),
+  String buildNumber = const String.fromEnvironment('APP_BUILD_NUMBER'),
+}) => PackageInfo(
+  appName: native.appName,
+  packageName: native.packageName,
+  version: version.isEmpty ? native.version : version,
+  buildNumber: buildNumber.isEmpty ? native.buildNumber : buildNumber,
+  buildSignature: native.buildSignature,
+  installerStore: native.installerStore,
+  installTime: native.installTime,
+  updateTime: native.updateTime,
+);
+
 int compareVersions(String version1, String version2) {
-  final List<String> v1 = version1.split('+')[0].split('.');
-  final List<String> v2 = version2.split('+')[0].split('.');
-  final int major1 = int.parse(v1[0]);
-  final int major2 = int.parse(v2[0]);
-  if (major1 != major2) {
-    return major1.compareTo(major2);
+  Version parse(String value) {
+    final match = RegExp(r'^\d+(?:\.\d+){0,2}').firstMatch(value)!;
+    final base = match.group(0)!;
+    final padding = List.filled(3 - base.split('.').length, '.0').join();
+    return Version.parse('$base$padding${value.substring(base.length)}');
   }
-  final int minor1 = v1.length > 1 ? int.parse(v1[1]) : 0;
-  final int minor2 = v2.length > 1 ? int.parse(v2[1]) : 0;
-  if (minor1 != minor2) {
-    return minor1.compareTo(minor2);
-  }
-  final int patch1 = v1.length > 2 ? int.parse(v1[2]) : 0;
-  final int patch2 = v2.length > 2 ? int.parse(v2[2]) : 0;
-  if (patch1 != patch2) {
-    return patch1.compareTo(patch2);
-  }
-  final int build1 = version1.contains('+')
-      ? int.parse(version1.split('+')[1])
-      : 0;
-  final int build2 = version2.contains('+')
-      ? int.parse(version2.split('+')[1])
-      : 0;
-  return build1.compareTo(build2);
+
+  return parse(version1).compareTo(parse(version2));
 }
+
+const releaseEpochMarker = '<!-- reclash:release-epoch:1 -->';
+
+bool isNewerAppRelease({
+  required String remoteVersion,
+  required String installedVersion,
+  required String? body,
+}) =>
+    (body?.contains(releaseEpochMarker) ?? false) &&
+    compareVersions(
+          remoteVersion.replaceFirst(RegExp(r'^v'), ''),
+          installedVersion,
+        ) >
+        0;
 
 const releaseNotesBeginMarker = '<!-- reclash:changelog:begin -->';
 const releaseNotesEndMarker = '<!-- reclash:changelog:end -->';

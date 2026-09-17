@@ -24,16 +24,18 @@ class ClientPresetSelector extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     final chips = [
       for (final client in SubscriptionClient.values)
-        ChoiceChip(
-          label: Text(subscriptionClientLabel(client, appLocalizations)),
-          selected: selected == client,
-          onSelected: (_) => onChanged(client),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          side: BorderSide(color: Theme.of(context).dividerColor.opacity15),
-          labelStyle: Theme.of(context).textTheme.bodyMedium,
+        TvFocusOutline(
+          child: ChoiceChip(
+            label: Text(subscriptionClientLabel(client, appLocalizations)),
+            selected: selected == client,
+            onSelected: (_) => onChanged(client),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            side: BorderSide(color: Theme.of(context).dividerColor.opacity15),
+            labelStyle: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
     ];
-    final emulated = !isNativeSubscriptionClient(selected);
+    final compatibilityProfile = !isNativeSubscriptionClient(selected);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -41,16 +43,16 @@ class ClientPresetSelector extends StatelessWidget {
           spacing: 8,
           children: [
             Flexible(child: Text(appLocalizations.subscriptionClientLabel)),
-            if (emulated)
-              const CommonChip(
-                label: 'Experimental',
+            if (compatibilityProfile)
+              CommonChip(
+                label: appLocalizations.subscriptionClientExperimentalLabel,
                 icon: Icons.science_outlined,
               ),
           ],
         ),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: chips),
-        if (emulated) ...[
+        if (compatibilityProfile) ...[
           const SizedBox(height: 8),
           Text(
             appLocalizations.subscriptionClientExperimentalTip,

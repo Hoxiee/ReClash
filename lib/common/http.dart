@@ -7,6 +7,12 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+String redactUrlForLog(Uri url) => Uri(
+  scheme: url.scheme,
+  host: url.host,
+  port: url.hasPort ? url.port : null,
+).toString();
+
 class ReClashHttpOverrides extends HttpOverrides {
   final ProviderContainer _container;
 
@@ -22,17 +28,46 @@ class ReClashHttpOverrides extends HttpOverrides {
     }
     final isStart = read(isStartProvider);
     final paused = read(pausedProvider);
-    commonPrint.log('find $url proxy: $isStart');
+    commonPrint.log('find ${redactUrlForLog(url)} proxy: $isStart');
     if (!isStart || paused) return 'DIRECT';
     final mixedPort = read(
       patchClashConfigProvider.select((state) => state.mixedPort),
     );
-    final authentication = read(
-      networkSettingProvider.select((state) => state.authentication),
-    );
-    final credentials = authentication.credentials;
-    final userInfo = credentials.isNotEmpty ? '${credentials.first}@' : '';
-    return 'PROXY ${userInfo}localhost:$mixedPort';
+    return 'PROXY $localhost:$mixedPort';
+  }
+
+  // Credentials never ride in the proxy string: a password containing '@' or
+  // ':' would be mis-split by the parser.
+  static void applyProxyAuthentication(HttpClient client, ProviderReader read) {
+    final attempted = <(String, int, String?, String, String)>{};
+    client.authenticateProxy = (host, port, scheme, realm) async {
+      final authentication = read(networkSettingProvider).authentication;
+      if (host != localhost ||
+          port != read(patchClashConfigProvider).mixedPort ||
+          !read(isStartProvider) ||
+          read(pausedProvider) ||
+          scheme.toLowerCase() != 'basic' ||
+          authentication.credentials.isEmpty ||
+          !attempted.add((
+            host,
+            port,
+            realm,
+            authentication.username,
+            authentication.password,
+          ))) {
+        return false;
+      }
+      client.addProxyCredentials(
+        host,
+        port,
+        realm ?? '',
+        HttpClientBasicCredentials(
+          authentication.username,
+          authentication.password,
+        ),
+      );
+      return true;
+    };
   }
 
   static bool allowBadCertificate(
@@ -72,6 +107,7 @@ class ReClashHttpOverrides extends HttpOverrides {
     client.badCertificateCallback = (certificate, host, port) =>
         allowBadCertificate(_container, certificate, host, port);
     client.findProxy = (url) => findProxyFor(_container, url);
+    applyProxyAuthentication(client, _container.read);
     return client;
   }
 }

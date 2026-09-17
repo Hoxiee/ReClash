@@ -22,6 +22,7 @@ const dohMaxTtl = Duration(minutes: 30);
 const dohFailureLimit = 2;
 const dohFailureSleep = Duration(minutes: 10);
 const dialTimeout = Duration(seconds: 10);
+const dohCacheCapacity = 256;
 
 Uri dohQueryUrl(String endpoint, String host) =>
     Uri.parse(endpoint).replace(queryParameters: {'name': host, 'type': 'A'});
@@ -80,8 +81,11 @@ class DohResolver {
   Future<InternetAddress?> lookup(String host) async {
     if (host.isEmpty || InternetAddress.tryParse(host) != null) return null;
     final now = _now();
-    final cached = _cache[host];
-    if (cached != null && cached.expiresAt.isAfter(now)) return cached.address;
+    final cached = _cache.remove(host);
+    if (cached != null && cached.expiresAt.isAfter(now)) {
+      _cache[host] = cached;
+      return cached.address;
+    }
     final sleepUntil = _sleepUntil;
     if (sleepUntil != null && sleepUntil.isAfter(now)) return null;
     for (final endpoint in _endpoints) {
@@ -91,6 +95,9 @@ class DohResolver {
       _failures = 0;
       _sleepUntil = null;
       _cache[host] = _DohEntry(answer.address, now.add(answer.ttl));
+      if (_cache.length > dohCacheCapacity) {
+        _cache.remove(_cache.keys.first);
+      }
       return answer.address;
     }
     _failures++;

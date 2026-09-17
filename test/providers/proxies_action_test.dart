@@ -204,7 +204,11 @@ void main() {
 
       verify(
         () => core.changeProxy(
-          const ChangeProxyParams(groupName: 'Proxy', proxyName: 'HK-01'),
+          const ChangeProxyParams(
+            groupName: 'Proxy',
+            proxyName: 'HK-01',
+            manual: true,
+          ),
         ),
       ).called(1);
       verify(core.closeConnections).called(1);
@@ -259,6 +263,46 @@ void main() {
       verifyNever(core.resetConnections);
       expect(container.read(checkIpNumProvider), before);
     });
+
+    for (final closeConnections in [true, false]) {
+      test('rejects a returned error without switch side effects '
+          '(closeConnections: $closeConnections)', () async {
+        when(
+          () => core.changeProxy(any()),
+        ).thenAnswer((_) async => 'Not found group');
+        when(
+          () => core.asyncTestDelay(any(), any()),
+        ).thenAnswer((_) async => null);
+        final container = buildContainer(profile: _selectedProfile('HK-00'));
+        container.read(appSettingProvider.notifier).value = AppSettingProps(
+          testUrl: _testUrl,
+          closeConnections: closeConnections,
+        );
+        container.read(runTimeProvider.notifier).value = 1;
+        container.read(groupsProvider.notifier).value = [
+          const Group(
+            name: 'Proxy',
+            type: GroupType.Selector,
+            testUrl: _testUrl,
+            all: [_proxy],
+          ),
+        ];
+        final before = container.read(checkIpNumProvider);
+
+        await actionOf(
+          container,
+        ).changeProxy(groupName: 'Proxy', proxyName: 'HK-01');
+
+        expect(container.read(currentProfileProvider)?.selectedMap, {
+          'Proxy': 'HK-00',
+        });
+        verifyNever(core.closeConnections);
+        verifyNever(core.resetConnections);
+        expect(container.read(checkIpNumProvider), before);
+        verifyNever(() => core.asyncTestDelay(any(), any()));
+        expect(container.read(pendingDelayTestsProvider), isEmpty);
+      });
+    }
 
     test('probes the selected node after a live switch', () async {
       final probe = Completer<Delay?>();
@@ -363,6 +407,42 @@ void main() {
         debouncer.cancel((FunctionTag.changeProxy, 'Proxy'));
       },
     );
+  });
+
+  group('resumeSmartRouting', () {
+    for (final message in ['', 'Not found group']) {
+      test(
+        message.isEmpty
+            ? 'clears the manual selection after Core accepts the release'
+            : 'restores the manual selection on a returned error',
+        () async {
+          when(() => core.changeProxy(any())).thenAnswer((_) async => message);
+          final container = buildContainer(
+            profile: _selectedProfile(
+              'HK-00',
+            ).copyWith(selectedMap: {rcxNodeGroupName: 'HK-00'}),
+          );
+          final before = container.read(checkIpNumProvider);
+
+          await actionOf(container).resumeSmartRouting();
+
+          verify(
+            () => core.changeProxy(
+              const ChangeProxyParams(
+                groupName: rcxNodeGroupName,
+                proxyName: '',
+              ),
+            ),
+          ).called(1);
+          expect(container.read(currentProfileProvider)?.selectedMap, {
+            rcxNodeGroupName: message.isEmpty ? '' : 'HK-00',
+          });
+          verifyNever(core.closeConnections);
+          verifyNever(core.resetConnections);
+          expect(container.read(checkIpNumProvider), before);
+        },
+      );
+    }
   });
 
   group('proxyDelayTest', () {
