@@ -1,9 +1,12 @@
 # Changelog
 
-## v0.1.0-pre.1 (2026-09-17)
+## v0.1.0-pre.1 (2026-09-18)
 
 **Features**
 
+- **appearance** Custom background image with focus and dashboard polish (3692383)
+- Panel background fixes and addition of Ember Line test subscription (932888b)
+- **tun** Support mips stack from upgraded core (5a97e88)
 - Cosmetic findings, regional setup, resilient routing and Linux Helper support (dd1afa7)
 - **navigation** Redesigned desktop navigation rail (6bf871b)
 - A suspiciously large pile of reliability and UX upgrades (fe0778b)
@@ -66,6 +69,7 @@
 
 **Bug Fixes**
 
+- **setup** Confirm HWID disable only for the Russia region (7895580)
 - **release** Fail closed on unsafe platform artifacts (24dde4d)
 - Bound smart routing handoffs to ten seconds (867fc17)
 - Telegram-first open marker so routing skips home duds (c4f6fde)

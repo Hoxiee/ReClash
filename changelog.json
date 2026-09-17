@@ -4,12 +4,26 @@
     {
       "version": "0.1.0-pre.1",
       "tag": "v0.1.0-pre.1",
-      "date": "2026-09-17",
+      "date": "2026-09-18",
       "prerelease": true,
       "groups": [
         {
           "type": "feat",
           "entries": [
+            {
+              "id": "3692383",
+              "scope": "appearance",
+              "text": "Custom background image with focus and dashboard polish"
+            },
+            {
+              "id": "932888b",
+              "text": "Panel background fixes and addition of Ember Line test subscription"
+            },
+            {
+              "id": "5a97e88",
+              "scope": "tun",
+              "text": "Support mips stack from upgraded core"
+            },
             {
               "id": "dd1afa7",
               "text": "Cosmetic findings, regional setup, resilient routing and Linux Helper support"
@@ -257,6 +271,11 @@
         {
           "type": "fix",
           "entries": [
+            {
+              "id": "7895580",
+              "scope": "setup",
+              "text": "Confirm HWID disable only for the Russia region"
+            },
             {
               "id": "24dde4d",
               "scope": "release",
