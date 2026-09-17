@@ -322,6 +322,12 @@ class ListEditingController extends ChangeNotifier {
           },
           leading: leadingBuilder != null ? leadingBuilder(value) : null,
           subtitle: subtitleBuilder != null ? subtitleBuilder(value) : null,
+          trailing: ReorderMenuButton(
+            onMoveUp: index > 0 ? () => reorder(index, index - 1) : null,
+            onMoveDown: index < length - 1
+                ? () => reorder(index, index + 1)
+                : null,
+          ),
         ),
       ),
     );
@@ -545,6 +551,12 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
           onPressed: () {
             _handleAddOrEdit(value);
           },
+          trailing: ReorderMenuButton(
+            onMoveUp: index > 0 ? () => _handleReorder(index, index - 1) : null,
+            onMoveDown: index < length - 1
+                ? () => _handleReorder(index, index + 1)
+                : null,
+          ),
         ),
       ),
     );

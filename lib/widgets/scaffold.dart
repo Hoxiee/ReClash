@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'chip.dart';
 import 'inherited.dart';
 import 'panel_background.dart';
+import 'wallpaper.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -272,7 +273,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     return appBar;
   }
 
-  PreferredSizeWidget _buildAppBar(VoidCallback? backAction) {
+  PreferredSizeWidget _buildAppBar(
+    VoidCallback? backAction, {
+    bool wallpaper = false,
+  }) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: Stack(
@@ -288,6 +292,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                           ? false
                           : true,
                       animateColor: true,
+                      backgroundColor: wallpaper ? Colors.transparent : null,
+                      surfaceTintColor: wallpaper ? Colors.transparent : null,
+                      scrolledUnderElevation: wallpaper ? 0 : null,
                       centerTitle: widget.centerTitle ?? false,
                       leading: _buildLeading(backAction),
                       title: _buildTitle(state.searchState),
@@ -395,19 +402,21 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         return true;
       },
     );
-    return Scaffold(
-      appBar: _buildAppBar(backActionProvider?.backAction),
-      body: PanelProfileBackground(child: foreground),
-      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-      backgroundColor: widget.backgroundColor,
-      floatingActionButton: hasFab
-          ? bottomInset > 0
-                ? Padding(
-                    padding: EdgeInsets.only(bottom: bottomInset),
-                    child: fabChild,
-                  )
-                : fabChild
-          : null,
+    return AppWallpaper(
+      builder: (context, active) => Scaffold(
+        appBar: _buildAppBar(backActionProvider?.backAction, wallpaper: active),
+        body: PanelProfileBackground(enabled: !active, child: foreground),
+        resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+        backgroundColor: active ? Colors.transparent : widget.backgroundColor,
+        floatingActionButton: hasFab
+            ? bottomInset > 0
+                  ? Padding(
+                      padding: EdgeInsets.only(bottom: bottomInset),
+                      child: fabChild,
+                    )
+                  : fabChild
+            : null,
+      ),
     );
   }
 }

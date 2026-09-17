@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/views/setup/widgets.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -196,4 +197,75 @@ void main() {
       expect(value, isNot(initial));
     });
   }
+
+  testWidgets('non-TV slider lets vertical focus escape too', (tester) async {
+    system.isTVForTesting = false;
+    var value = 0.5;
+    final after = FocusNode();
+    addTearDown(after.dispose);
+    await tester.pumpWidget(
+      TestApp(
+        child: Scaffold(
+          body: FocusTraversalGroup(
+            child: StatefulBuilder(
+              builder: (context, setState) => Column(
+                children: [
+                  SettingSliderItem(
+                    title: 'Value',
+                    valueLabel: '$value',
+                    min: 0,
+                    max: 1,
+                    value: value,
+                    onChanged: (next) => setState(() => value = next),
+                  ),
+                  TextButton(
+                    focusNode: after,
+                    onPressed: () {},
+                    child: const Text('After'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(
+      FocusManager.instance.primaryFocus!.context!
+          .findAncestorWidgetOfExactType<Slider>(),
+      isNotNull,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(after.hasPrimaryFocus, isTrue);
+    expect(value, 0.5);
+  });
+
+  testWidgets('filled settings cards outline keyboard focus', (tester) async {
+    await tester.pumpWidget(
+      TestApp(
+        child: Scaffold(
+          body: FocusTraversalGroup(
+            child: PageFocusScope(
+              autofocus: true,
+              child: CommonCard(
+                type: CommonCardType.filled,
+                onPressed: () {},
+                child: const Text('Row'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    final focused = button.style?.side?.resolve({WidgetState.focused});
+    expect(focused?.color, isNot(Colors.transparent));
+    expect(focused?.width, 2);
+    expect(button.style?.side?.resolve({}), BorderSide.none);
+  });
 }

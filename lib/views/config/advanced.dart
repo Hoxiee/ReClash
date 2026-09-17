@@ -106,7 +106,7 @@ class AdvancedConfigView extends ConsumerWidget {
     ];
     return BaseScaffold(
       title: appLocalizations.advancedConfig,
-      body: ListView(
+      body: SettingsListView(
         children: [
           SettingSection(top: 16, items: generalItems),
           SettingSection(

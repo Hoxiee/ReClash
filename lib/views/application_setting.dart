@@ -131,8 +131,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
         update: (state, value) => state.copyWith(checkCertificate: value),
       ),
     ];
-    return CustomScrollView(
-      primary: false,
+    return SettingsScrollView(
       slivers: [
         SettingSection.sliver(top: 12, items: behaviorItems),
         SettingSection.sliver(title: appLocalizations.other, items: otherItems),

@@ -16,3 +16,4 @@ export 'panel_widgets.dart';
 export 'odometer.dart';
 export 'profile.dart';
 export 'state.dart';
+export 'wallpaper.dart';

@@ -379,11 +379,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Boshqa"),
     "appearance": MessageLookupByLibrary.simpleMessage("Koʻrinish"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Fon"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Mavzu, ranglar, belgilar va panel koʻrinishi",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Belgi"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Joylashuv"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Mavzu"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Tizim DNSini qoʻshish",
@@ -1545,10 +1545,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -3671,6 +3670,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik sarfi"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
+      "Tarjima tuzatishni taklif qilish",
+    ),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage(
       "Ishonchli tarmoqlar",
     ),
@@ -3780,6 +3785,69 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Oʻzgarishlar VPN qayta ishga tushirilgach kuchga kiradi",
+    ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Xiralashtirish"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Kartochkalarning noshaffofligi",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Rasm tanlash"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Tanlagan rasmingiz obuna foni oʻrniga ishlatiladi. Maxsus fonni oʻchirsangiz, obuna foni tiklanadi.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Qoraytirish"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Rasm sozlamalari",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Maxsus fondan foydalanish",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage(
+      "Rasmni joylashtirish",
+    ),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Sigʻdirish"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Toʻldirish"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Choʻzish"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Gorizontal joylashuv",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "Fon rasmini ochib boʻlmayapti. Uni qayta tanlang.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
+      "Rasm tanlanmagan",
+    ),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Rasmning noshaffofligi",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage(
+      "Oʻqish qulayligi",
+    ),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
+      "Rasmni olib tashlash",
+    ),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
+      "Rasmni almashtirish",
+    ),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Sozlamalarni asliga qaytarish",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Fonni saqlab boʻlmadi. Oldingi fon saqlab qolindi.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Masshtab"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG yoki WebP · 20 MB gacha",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Maxsus fon"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Hajmi 20 MB dan, aniqligi 50 megapikseldan oshmaydigan rasmni tanlang.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Vertikal joylashuv",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV sozlamalari",

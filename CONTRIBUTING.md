@@ -9,6 +9,7 @@ Thank you for taking the time to improve ReClash. Small, focused changes are eas
 - Discuss large UI changes, new platform integrations, dependency replacements, and public API changes before investing in an implementation.
 - Report security problems privately as described in [SECURITY.md](SECURITY.md).
 - ReClash does not maintain or recommend proxy providers. Provider-specific account and subscription problems are outside the project scope.
+- To propose a translation fix, open a translation issue with the language, the screen where the phrase appears, the current text, and your suggested wording; a screenshot helps. One phrase per issue keeps the review fast.
 
 ## Development setup
 

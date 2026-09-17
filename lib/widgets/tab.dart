@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:reclash/common/shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -61,6 +62,12 @@ const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
 bool _reducedMotionOf(BuildContext context) =>
     MediaQuery.disableAnimationsOf(context);
+
+class _MoveTabIntent extends Intent {
+  const _MoveTabIntent(this.delta);
+
+  final int delta;
+}
 
 class CommonTabBar<T extends Object> extends StatefulWidget {
   CommonTabBar({
@@ -322,6 +329,30 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
 
   T? pressed;
 
+  bool _focused = false;
+
+  void _moveByKeyboard(int delta) {
+    final keys = widget.children.keys.toList(growable: false);
+    if (keys.isEmpty) {
+      return;
+    }
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final step = rtl ? -delta : delta;
+    var index = keys.indexOf(widget.groupValue as T);
+    if (index < 0) {
+      index = step > 0 ? -1 : keys.length;
+    }
+    var next = index + step;
+    while (next >= 0 && next < keys.length) {
+      final candidate = keys[next];
+      if (!widget.disabledChildren.contains(candidate)) {
+        widget.onValueChanged(candidate);
+        return;
+      }
+      next += step;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(widget.children.length >= 2);
@@ -397,30 +428,61 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
         }
     }
 
-    return UnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.all(_kCornerRadius),
-          ),
-          color: widget.backgroundColor,
-        ),
-        child: AnimatedBuilder(
-          animation: thumbScaleAnimation,
-          builder: (BuildContext context, Widget? child) {
-            return _CommonTabBarRenderWidget<T>(
-              proportionalWidth: widget.proportionalWidth,
-              key: segmentedControlRenderWidgetKey,
-              highlightedIndex: highlightedIndex,
-              thumbColor: widget.thumbColor,
-              thumbScale: thumbScaleAnimation.value,
-              state: this,
-              children: children,
-            );
+    return FocusableActionDetector(
+      shortcuts: const {
+        SingleActivator(LogicalKeyboardKey.arrowLeft): _MoveTabIntent(-1),
+        SingleActivator(LogicalKeyboardKey.arrowRight): _MoveTabIntent(1),
+      },
+      actions: {
+        _MoveTabIntent: CallbackAction<_MoveTabIntent>(
+          onInvoke: (intent) {
+            _moveByKeyboard(intent.delta);
+            return null;
           },
+        ),
+      },
+      onShowFocusHighlight: (value) {
+        if (!mounted || value == _focused) {
+          return;
+        }
+        setState(() => _focused = value);
+      },
+      child: UnconstrainedBox(
+        constrainedAxis: Axis.horizontal,
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          padding: widget.padding.resolve(Directionality.of(context)),
+          foregroundDecoration: ShapeDecoration(
+            shape: RoundedSuperellipseBorder(
+              borderRadius: const BorderRadius.all(_kCornerRadius),
+              side: BorderSide(
+                color: _focused
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
+          decoration: ShapeDecoration(
+            shape: const RoundedSuperellipseBorder(
+              borderRadius: BorderRadius.all(_kCornerRadius),
+            ),
+            color: widget.backgroundColor,
+          ),
+          child: AnimatedBuilder(
+            animation: thumbScaleAnimation,
+            builder: (BuildContext context, Widget? child) {
+              return _CommonTabBarRenderWidget<T>(
+                proportionalWidth: widget.proportionalWidth,
+                key: segmentedControlRenderWidgetKey,
+                highlightedIndex: highlightedIndex,
+                thumbColor: widget.thumbColor,
+                thumbScale: thumbScaleAnimation.value,
+                state: this,
+                children: children,
+              );
+            },
+          ),
         ),
       ),
     );

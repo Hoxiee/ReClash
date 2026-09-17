@@ -1,0 +1,57 @@
+name: Translation fix / 翻译修改
+description: Suggest a better wording for a ReClash translation / 为 ReClash 翻译提出更好的措辞
+title: '[Translation] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping ReClash speak your language. One phrase per issue keeps the review fast. Search existing issues first to avoid duplicates.
+
+        感谢你帮助 ReClash 讲好你的语言。一个 issue 只提一处措辞，处理会更快。提交前请先搜索现有 issue，避免重复。
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language / 语言
+      options:
+        - English
+        - 简体中文
+        - 日本語
+        - Русский
+        - Oʻzbekcha
+        - Қазақша
+        - Türkmençe
+        - 한국어
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Where does it appear? / 出现在哪里？
+      description: Name the screen or setting where you saw the phrase. / 请写出看到该措辞的页面或设置项。
+      placeholder: Tools → Language; profile list empty state
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text / 当前文本
+      description: Copy the phrase exactly as shown in the app. / 请原样复制应用中显示的文本。
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested wording / 建议措辞
+      description: Write how a native speaker would say it. / 请写出符合母语习惯的说法。
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshot or context / 截图或补充说明
+      description: A screenshot helps a lot; paste it here. / 截图非常有帮助，可直接粘贴在这里。

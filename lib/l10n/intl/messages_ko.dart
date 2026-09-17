@@ -335,11 +335,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("기타"),
     "appearance": MessageLookupByLibrary.simpleMessage("외관"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("배경"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "테마, 색상, 아이콘, 대시보드 모양",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("아이콘"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("레이아웃"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("테마"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("시스템 DNS 추가"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
@@ -2891,6 +2891,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage("번역 수정 제안하기"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("신뢰할 수 있는 네트워크"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "여기에 등록한 네트워크에 연결되어 있으면 VPN이 일시 중지됩니다",
@@ -2979,6 +2983,47 @@ class MessageLookup extends MessageLookupByLibrary {
       "시스템의 모든 트래픽을 VpnService를 통해 자동으로 라우팅합니다",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("변경 사항은 VPN을 다시 시작해야 적용됩니다"),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("흐림 효과"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("카드 불투명도"),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("이미지 선택"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "선택한 이미지가 구독 배경보다 우선 적용됩니다. 사용자 지정 배경을 끄면 구독 배경으로 돌아갑니다.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("어둡게"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("이미지 조정"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("사용자 지정 배경 사용"),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("이미지 맞춤"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("맞추기"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("채우기"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("늘이기"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "가로 위치",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "배경 이미지를 사용할 수 없습니다. 다시 선택하세요.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage("선택한 이미지 없음"),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("이미지 교체"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("조정값 초기화"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "배경을 저장하지 못했습니다. 이전 배경은 유지됩니다.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("배율"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG 또는 WebP · 최대 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("사용자 지정 배경"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "20 MB 이하, 5,000만 화소 이하의 이미지를 선택하세요.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage("세로 위치"),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV 설정"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("웹 대시보드"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(

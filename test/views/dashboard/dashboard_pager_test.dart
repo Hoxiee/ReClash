@@ -4,6 +4,8 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
+import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:flutter/gestures.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';
@@ -63,6 +66,7 @@ void main() {
     Size size = const Size(900, 1200),
     double textScaleFactor = 1,
     DesyncProps desync = const DesyncProps(),
+    List<Override> overrides = const [],
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -81,6 +85,7 @@ void main() {
         groupsProvider.overrideWithValue(const [group]),
         tunEnabledProvider.overrideWith((ref) => true),
         initProvider.overrideWithBuild((_, _) => true),
+        ...overrides,
       ],
     );
     addTearDown(container.dispose);
@@ -142,6 +147,50 @@ void main() {
     );
   });
 
+  testWidgets('new year snow never blocks the provider page', (tester) async {
+    final container = await pumpPager(
+      tester,
+      profile: _profile(),
+      overrides: [heroLifecycleProvider.overrideWithValue(HeroOrbPhase.on)],
+    );
+    container
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(developerMode: true));
+    container
+        .read(findingPreviewProvider.notifier)
+        .setSeason(SeasonalMotif.newYear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      find.descendant(
+        of: find.byType(SeasonalDashboardOverlay),
+        matching: find.byType(CustomPaint),
+      ),
+      findsWidgets,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
+    await _pumpPageChange(tester);
+    expect(find.byType(ProviderSummaryPage).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('dashboard-show-connection')));
+    await _pumpPageChange(tester);
+    expect(
+      find.byKey(const ValueKey('dashboard-hero-page')).hitTestable(),
+      findsOneWidget,
+    );
+
+    await tester.fling(
+      find.byKey(const ValueKey('dashboard-hero-page')),
+      const Offset(0, -300),
+      1200,
+    );
+    await _pumpPageChange(tester);
+    expect(find.byType(ProviderSummaryPage).hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the system back leaves the provider page', (tester) async {
     await pumpPager(tester, profile: _profile());
 
@@ -200,6 +249,52 @@ void main() {
       find.byKey(const ValueKey('dashboard-hero-page')).hitTestable(),
       findsOneWidget,
     );
+  });
+
+  testWidgets('arrow keys walk the hero into the provider page', (
+    tester,
+  ) async {
+    await pumpPager(tester, profile: _profile());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    bool focusedOn(Key key) {
+      final focus = FocusManager.instance.primaryFocus?.context;
+      if (focus == null || !focus.mounted) return false;
+      return find
+          .ancestor(of: find.byWidget(focus.widget), matching: find.byKey(key))
+          .evaluate()
+          .isNotEmpty;
+    }
+
+    for (
+      var i = 0;
+      i < 12 && !focusedOn(const ValueKey('dashboard-show-provider'));
+      i++
+    ) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(
+      focusedOn(const ValueKey('dashboard-show-provider')),
+      isTrue,
+      reason:
+          'arrow down from the hero must reach its affordance, not the rail',
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await _pumpPageChange(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(ProviderSummaryPage).hitTestable(), findsOneWidget);
+    expect(focusedOn(const ValueKey('dashboard-show-connection')), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await _pumpPageChange(tester);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      find.byKey(const ValueKey('dashboard-hero-page')).hitTestable(),
+      findsOneWidget,
+    );
+    expect(focusedOn(const ValueKey('dashboard-show-provider')), isTrue);
   });
 
   testWidgets('provider summary scrolls before returning at its boundary', (

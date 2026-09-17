@@ -929,7 +929,7 @@ class _DesyncTestSitesPage extends ConsumerWidget {
     );
     return CommonScaffold(
       title: appLocalizations.desyncTestDomains,
-      body: CustomScrollView(
+      body: SettingsScrollView(
         slivers: [
           SettingSection.sliver(
             bottom: 24,
@@ -972,7 +972,7 @@ class _DesyncTestDomainListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: list.name,
-    body: CustomScrollView(
+    body: SettingsScrollView(
       slivers: [
         SettingSection.sliver(
           title: context.appLocalizations.desyncTestDomains,

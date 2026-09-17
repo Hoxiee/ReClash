@@ -363,11 +363,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Other"),
     "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Background"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Theme, colors, icons and dashboard look",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Icon"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Layout"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Theme"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Append system DNS",
@@ -1447,10 +1447,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -3471,6 +3470,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
+      "Suggest a translation fix",
+    ),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Trusted networks"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "The VPN pauses while connected to any of these networks",
@@ -3570,6 +3575,57 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Changes take effect after restarting the VPN",
+    ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Blur"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Card opacity",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Choose image"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Your image takes priority over subscription backgrounds. Turn it off to restore them.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Dimming"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Image adjustments",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Use custom background",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Image fit"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Fit"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Fill"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Stretch"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Horizontal position",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "Choose a valid PNG, JPEG or WebP image.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "The background image is unavailable. Choose it again.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
+      "No image selected",
+    ),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("Replace image"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("Reset adjustments"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Could not save the background. Your previous background has been kept.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Scale"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG or WebP · up to 20 MB",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Custom background"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Choose an image up to 20 MB and 50 megapixels.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Vertical position",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV configuration",

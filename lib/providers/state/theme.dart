@@ -81,8 +81,8 @@ class EffectiveThemeMode extends _$EffectiveThemeMode {
     final now = DateTime.now();
     final flip = themeSetting.nextScheduleFlip(now);
     if (flip != null) {
-      // Одноразовый таймер на границу окна: секунда запаса, чтобы пересчёт
-      // случился уже за ней, а не ровно на ней.
+      // One-shot timer past the window edge: the extra second makes the
+      // recompute land after the boundary, not exactly on it.
       final timer = Timer(
         flip + const Duration(seconds: 1),
         ref.invalidateSelf,

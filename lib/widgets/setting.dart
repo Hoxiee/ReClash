@@ -161,6 +161,64 @@ class SettingBottomInset extends StatelessWidget {
   }
 }
 
+class SettingsScrollView extends StatefulWidget {
+  const SettingsScrollView({super.key, required this.slivers});
+
+  final List<Widget> slivers;
+
+  @override
+  State<SettingsScrollView> createState() => _SettingsScrollViewState();
+}
+
+class _SettingsScrollViewState extends State<SettingsScrollView> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusedScrollView(
+      controller: _controller,
+      child: CustomScrollView(
+        controller: _controller,
+        primary: false,
+        slivers: widget.slivers,
+      ),
+    );
+  }
+}
+
+class SettingsListView extends StatefulWidget {
+  const SettingsListView({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  State<SettingsListView> createState() => _SettingsListViewState();
+}
+
+class _SettingsListViewState extends State<SettingsListView> {
+  final _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusedScrollView(
+      controller: _controller,
+      child: ListView(controller: _controller, children: widget.children),
+    );
+  }
+}
+
 /// Slider row: title above, value on the trailing edge; without a title the
 /// slider spans the whole row. With [resetValue] the trailing slot keeps room
 /// for a reset button, so showing it never reflows the row.
@@ -188,27 +246,21 @@ class SettingSliderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final slider = TvFocusOutline(
-      child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          navigationMode: system.isTV
-              ? NavigationMode.directional
-              : MediaQuery.navigationModeOf(context),
-        ),
-        child: SliderTheme(
-          data: SliderDefaultsM3(context),
-          child: Slider(
-            padding: EdgeInsets.zero,
-            min: min,
-            max: max,
-            value: value.clamp(min, max),
-            onChanged: onChanged,
-          ),
+    final slider = DirectionalSlider(
+      child: SliderTheme(
+        data: SliderDefaultsM3(context),
+        child: Slider(
+          padding: EdgeInsets.zero,
+          min: min,
+          max: max,
+          value: value.clamp(min, max),
+          onChanged: onChanged,
         ),
       ),
     );
     final title = this.title;
     final resetValue = this.resetValue;
+    final showReset = resetValue != null && (value - resetValue).abs() >= 0.001;
     return DecorationListItem(
       minVerticalPadding: 8,
       contentPadding: EdgeInsets.only(
@@ -232,15 +284,22 @@ class SettingSliderItem extends StatelessWidget {
           if (resetValue != null)
             SizedBox.square(
               dimension: 36,
-              child: (value - resetValue).abs() < 0.001
-                  ? null
-                  : IconButton(
-                      tooltip: context.appLocalizations.reset,
-                      onPressed: () => onChanged(resetValue),
-                      padding: EdgeInsets.zero,
-                      iconSize: 18,
-                      icon: const Icon(Icons.replay),
-                    ),
+              child: Visibility(
+                visible: showReset,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: ExcludeFocus(
+                  excluding: !showReset,
+                  child: IconButton(
+                    tooltip: context.appLocalizations.reset,
+                    onPressed: () => onChanged(resetValue),
+                    padding: EdgeInsets.zero,
+                    iconSize: 18,
+                    icon: const Icon(Icons.replay),
+                  ),
+                ),
+              ),
             ),
         ],
       ),

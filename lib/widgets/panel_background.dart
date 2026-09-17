@@ -7,36 +7,43 @@ import 'icon.dart';
 
 class PanelProfileBackground extends ConsumerWidget {
   final Widget child;
+  final bool enabled;
 
-  const PanelProfileBackground({super.key, required this.child});
+  const PanelProfileBackground({
+    super.key,
+    this.enabled = true,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final background = ref.watch(panelBackgroundProvider);
-    if (background == null) return child;
+    final background = enabled ? ref.watch(panelBackgroundProvider) : null;
     return Stack(
+      fit: StackFit.passthrough,
       children: [
-        Positioned.fill(
-          key: const ValueKey('panel-profile-background'),
-          child: ExcludeSemantics(
+        if (background != null) ...[
+          Positioned.fill(
+            key: const ValueKey('panel-profile-background'),
+            child: ExcludeSemantics(
+              child: IgnorePointer(
+                child: ImageCacheWidget(
+                  src: background.url,
+                  fit: BoxFit.cover,
+                  defaultWidget: ColoredBox(color: context.colorScheme.surface),
+                ),
+              ),
+            ),
+          ),
+          Positioned.fill(
             child: IgnorePointer(
-              child: ImageCacheWidget(
-                src: background.url,
-                fit: BoxFit.cover,
-                defaultWidget: ColoredBox(color: context.colorScheme.surface),
+              child: ColoredBox(
+                color: context.colorScheme.surface.withValues(
+                  alpha: 1 - background.opacity,
+                ),
               ),
             ),
           ),
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: ColoredBox(
-              color: context.colorScheme.surface.withValues(
-                alpha: 1 - background.opacity,
-              ),
-            ),
-          ),
-        ),
+        ],
         child,
       ],
     );

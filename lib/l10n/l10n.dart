@@ -10274,9 +10274,254 @@ class AppLocalizations {
     return Intl.message('Icon', name: 'appearanceIcon', desc: '', args: []);
   }
 
-  /// `Layout`
-  String get appearanceLayout {
-    return Intl.message('Layout', name: 'appearanceLayout', desc: '', args: []);
+  /// `Background`
+  String get appearanceBackground {
+    return Intl.message(
+      'Background',
+      name: 'appearanceBackground',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom background`
+  String get wallpaperTitle {
+    return Intl.message(
+      'Custom background',
+      name: 'wallpaperTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your image takes priority over subscription backgrounds. Turn it off to restore them.`
+  String get wallpaperDescription {
+    return Intl.message(
+      'Your image takes priority over subscription backgrounds. Turn it off to restore them.',
+      name: 'wallpaperDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose image`
+  String get wallpaperChoose {
+    return Intl.message(
+      'Choose image',
+      name: 'wallpaperChoose',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace image`
+  String get wallpaperReplace {
+    return Intl.message(
+      'Replace image',
+      name: 'wallpaperReplace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove image`
+  String get wallpaperRemove {
+    return Intl.message(
+      'Remove image',
+      name: 'wallpaperRemove',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No image selected`
+  String get wallpaperNoImage {
+    return Intl.message(
+      'No image selected',
+      name: 'wallpaperNoImage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use custom background`
+  String get wallpaperEnabled {
+    return Intl.message(
+      'Use custom background',
+      name: 'wallpaperEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image fit`
+  String get wallpaperFit {
+    return Intl.message('Image fit', name: 'wallpaperFit', desc: '', args: []);
+  }
+
+  /// `Fill`
+  String get wallpaperFitCover {
+    return Intl.message('Fill', name: 'wallpaperFitCover', desc: '', args: []);
+  }
+
+  /// `Fit`
+  String get wallpaperFitContain {
+    return Intl.message('Fit', name: 'wallpaperFitContain', desc: '', args: []);
+  }
+
+  /// `Stretch`
+  String get wallpaperFitFill {
+    return Intl.message(
+      'Stretch',
+      name: 'wallpaperFitFill',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scale`
+  String get wallpaperScale {
+    return Intl.message('Scale', name: 'wallpaperScale', desc: '', args: []);
+  }
+
+  /// `Horizontal position`
+  String get wallpaperHorizontalPosition {
+    return Intl.message(
+      'Horizontal position',
+      name: 'wallpaperHorizontalPosition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vertical position`
+  String get wallpaperVerticalPosition {
+    return Intl.message(
+      'Vertical position',
+      name: 'wallpaperVerticalPosition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image opacity`
+  String get wallpaperOpacity {
+    return Intl.message(
+      'Image opacity',
+      name: 'wallpaperOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dimming`
+  String get wallpaperDimming {
+    return Intl.message(
+      'Dimming',
+      name: 'wallpaperDimming',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blur`
+  String get wallpaperBlur {
+    return Intl.message('Blur', name: 'wallpaperBlur', desc: '', args: []);
+  }
+
+  /// `Card opacity`
+  String get wallpaperCardOpacity {
+    return Intl.message(
+      'Card opacity',
+      name: 'wallpaperCardOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset adjustments`
+  String get wallpaperReset {
+    return Intl.message(
+      'Reset adjustments',
+      name: 'wallpaperReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a valid PNG, JPEG or WebP image.`
+  String get wallpaperImageError {
+    return Intl.message(
+      'Choose a valid PNG, JPEG or WebP image.',
+      name: 'wallpaperImageError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose an image up to 20 MB and 50 megapixels.`
+  String get wallpaperTooLarge {
+    return Intl.message(
+      'Choose an image up to 20 MB and 50 megapixels.',
+      name: 'wallpaperTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not save the background. Your previous background has been kept.`
+  String get wallpaperSaveError {
+    return Intl.message(
+      'Could not save the background. Your previous background has been kept.',
+      name: 'wallpaperSaveError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The background image is unavailable. Choose it again.`
+  String get wallpaperMissing {
+    return Intl.message(
+      'The background image is unavailable. Choose it again.',
+      name: 'wallpaperMissing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `PNG, JPEG or WebP · up to 20 MB`
+  String get wallpaperSelectHint {
+    return Intl.message(
+      'PNG, JPEG or WebP · up to 20 MB',
+      name: 'wallpaperSelectHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Framing`
+  String get wallpaperLayout {
+    return Intl.message('Framing', name: 'wallpaperLayout', desc: '', args: []);
+  }
+
+  /// `Image adjustments`
+  String get wallpaperEffects {
+    return Intl.message(
+      'Image adjustments',
+      name: 'wallpaperEffects',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Readability`
+  String get wallpaperReadability {
+    return Intl.message(
+      'Readability',
+      name: 'wallpaperReadability',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Scheduled`
@@ -14355,6 +14600,26 @@ class AppLocalizations {
     return Intl.message(
       'Today is the anniversary of your first launch.',
       name: 'seasonFirstRunNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.`
+  String get translationNotice {
+    return Intl.message(
+      'ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.',
+      name: 'translationNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest a translation fix`
+  String get translationSuggestFix {
+    return Intl.message(
+      'Suggest a translation fix',
+      name: 'translationSuggestFix',
       desc: '',
       args: [],
     );

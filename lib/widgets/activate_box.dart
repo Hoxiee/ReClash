@@ -8,6 +8,9 @@ class ActivateBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(ignoring: !active, child: child);
+    return ExcludeFocus(
+      excluding: !active,
+      child: IgnorePointer(ignoring: !active, child: child),
+    );
   }
 }

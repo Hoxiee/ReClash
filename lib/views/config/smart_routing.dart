@@ -297,7 +297,7 @@ class SmartRoutingView extends ConsumerWidget {
 
     return CommonScaffold(
       title: appLocalizations.smartRouting,
-      body: CustomScrollView(
+      body: SettingsScrollView(
         slivers: [...slivers, const SettingBottomInset.sliver()],
       ),
     );
@@ -558,7 +558,7 @@ class _ServiceRoutePage extends ConsumerWidget {
         ),
         const SizedBox(width: 8),
       ],
-      body: ListView(
+      body: SettingsListView(
         children: [
           if (policy.enabled)
             SettingSection(

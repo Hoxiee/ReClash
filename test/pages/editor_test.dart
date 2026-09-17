@@ -2,6 +2,7 @@ import 'package:reclash/pages/editor.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:re_editor/re_editor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -53,6 +54,42 @@ void main() {
       find.text('Network error, please check your connection and try again'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('system back first leaves the editor, then pops', (tester) async {
+    var pops = 0;
+    await tester.pumpWidget(
+      TestApp(
+        overrides: [
+          _viewSizeOverride,
+          profilesProvider.overrideWith(TestProfiles.new),
+        ],
+        child: EditorPage(
+          title: 'Editor',
+          content: 'hello',
+          onSave: _noopSave,
+          onPop: (context, title, content) async {
+            pops++;
+            return true;
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(CodeEditor));
+    await tester.pump();
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(pops, 0);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(pops, 1);
+
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
   });
 }
 

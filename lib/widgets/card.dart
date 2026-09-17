@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'fade_box.dart';
 import 'text.dart';
+import 'wallpaper_scope.dart';
 
 class Info {
   final String label;
@@ -127,8 +128,12 @@ class CommonCard extends StatelessWidget {
 
   BorderSide _buildBorderSide(BuildContext context, Set<WidgetState> states) {
     final colorScheme = context.colorScheme;
+    final focused = states.contains(WidgetState.focused);
     if (isError) {
       if (type == CommonCardType.filled) {
+        if (focused) {
+          return BorderSide(color: colorScheme.error, width: 2);
+        }
         return BorderSide(color: colorScheme.error);
       }
       final hoverColor = isSelected
@@ -146,6 +151,9 @@ class CommonCard extends StatelessWidget {
       );
     }
     if (type == CommonCardType.filled) {
+      if (focused) {
+        return BorderSide(color: colorScheme.primary, width: 2);
+      }
       return BorderSide.none;
     }
     final hoverColor = isSelected
@@ -165,16 +173,17 @@ class CommonCard extends StatelessWidget {
 
   Color? _buildBackgroundColor(BuildContext context) {
     final colorScheme = context.colorScheme;
-    if (type == CommonCardType.filled) {
-      if (isSelected) {
-        return colorScheme.secondaryContainer.opacity80;
-      }
-      return colorScheme.surfaceContainerHigh;
-    }
-    if (isSelected) {
-      return colorScheme.secondaryContainer;
-    }
-    return colorScheme.surfaceContainerLow;
+    final color = switch (type) {
+      CommonCardType.filled =>
+        isSelected
+            ? colorScheme.secondaryContainer.opacity80
+            : colorScheme.surfaceContainerHigh,
+      _ =>
+        isSelected
+            ? colorScheme.secondaryContainer
+            : colorScheme.surfaceContainerLow,
+    };
+    return WallpaperSurfaceScope.colorOf(context, color);
   }
 
   Color? _buildForegroundColor(BuildContext context) {

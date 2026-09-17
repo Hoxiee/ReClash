@@ -64,6 +64,12 @@ class _EditorPageState extends ConsumerState<EditorPage> {
       return;
     }
     _focusNode.onKeyEvent = ((_, event) {
+      if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+        return KeyEventResult.ignored;
+      }
+      if (readOnly) {
+        return KeyEventResult.ignored;
+      }
       final keys = HardwareKeyboard.instance.logicalKeysPressed;
       final key = event.logicalKey;
       if (!keys.contains(key)) {
@@ -76,7 +82,6 @@ class _EditorPageState extends ConsumerState<EditorPage> {
         _controller.moveCursor(AxisDirection.down);
         return KeyEventResult.handled;
       } else if (key == LogicalKeyboardKey.arrowLeft) {
-        _controller.selection.endIndex;
         _controller.moveCursor(AxisDirection.left);
         return KeyEventResult.handled;
       } else if (key == LogicalKeyboardKey.arrowRight) {
@@ -166,6 +171,10 @@ class _EditorPageState extends ConsumerState<EditorPage> {
   }
 
   Future<bool> _handlePop(BuildContext context) async {
+    if (_focusNode.hasPrimaryFocus) {
+      _focusNode.unfocus();
+      return false;
+    }
     final onPop = widget.onPop;
     if (onPop == null) {
       return true;

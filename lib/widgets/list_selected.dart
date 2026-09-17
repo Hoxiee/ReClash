@@ -330,7 +330,9 @@ class DecorationListItem extends StatelessWidget {
   }
 
   Widget _tappableTrailing(BuildContext context, Widget trailing) {
-    return ExcludeSemantics(child: IgnorePointer(child: trailing));
+    return ExcludeFocus(
+      child: ExcludeSemantics(child: IgnorePointer(child: trailing)),
+    );
   }
 
   Widget _buildActionCard({
@@ -392,6 +394,7 @@ class SelectedDecorationListItem extends StatelessWidget {
   final Widget? leading;
   final bool invalid;
   final double? minVerticalPadding;
+  final Widget? trailing;
 
   const SelectedDecorationListItem({
     super.key,
@@ -405,6 +408,7 @@ class SelectedDecorationListItem extends StatelessWidget {
     this.minVerticalPadding,
     this.subtitle,
     this.leading,
+    this.trailing,
   });
 
   @override
@@ -425,12 +429,19 @@ class SelectedDecorationListItem extends StatelessWidget {
         onPressed();
       },
       subtitle: subtitle,
-      trailing: CommonCheckBox(
-        value: isSelected,
-        isCircle: true,
-        onChanged: (_) {
-          onSelected();
-        },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ignore: use_null_aware_elements
+          if (trailing != null) trailing!,
+          CommonCheckBox(
+            value: isSelected,
+            isCircle: true,
+            onChanged: (_) {
+              onSelected();
+            },
+          ),
+        ],
       ),
     );
   }

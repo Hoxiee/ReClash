@@ -368,11 +368,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Другое"),
     "appearance": MessageLookupByLibrary.simpleMessage("Оформление"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Фон"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Тема, цвета, иконки и вид панели",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Иконка"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Макет"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Тема"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Добавлять системный DNS",
@@ -1490,10 +1490,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -3580,6 +3579,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
+      "Предложить правку перевода",
+    ),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Доверенные сети"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "В этих сетях VPN ставится на паузу",
@@ -3679,6 +3684,71 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Изменения вступят в силу после перезапуска VPN",
+    ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Размытие"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность карточек",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage(
+      "Выбрать изображение",
+    ),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Ваше изображение заменяет фон подписки. Отключите его, чтобы вернуть прежнее оформление.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Затемнение"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Настройки изображения",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Использовать свой фон",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage(
+      "Размещение изображения",
+    ),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Вписать"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Заполнить"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Растянуть"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Положение по горизонтали",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "Выберите корректное изображение PNG, JPEG или WebP.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "Изображение фона недоступно. Выберите его заново.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
+      "Изображение не выбрано",
+    ),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность изображения",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Читаемость"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
+      "Удалить изображение",
+    ),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
+      "Заменить изображение",
+    ),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Сбросить параметры",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Не удалось сохранить фон. Прежний фон сохранён.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Масштаб"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG или WebP · до 20 МБ",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage(
+      "Пользовательский фон",
+    ),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Выберите изображение размером до 20 МБ и 50 мегапикселей.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Положение по вертикали",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "Настройки WebDAV",

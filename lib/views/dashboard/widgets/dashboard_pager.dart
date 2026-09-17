@@ -32,6 +32,8 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
   final _pageController = PageController();
   final _heroScrollController = ScrollController();
   final _providerScrollController = ScrollController();
+  final _heroAffordanceNode = FocusNode();
+  final _providerAffordanceNode = FocusNode();
 
   var _page = 0;
   var _animating = false;
@@ -63,6 +65,8 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
     _pageController.dispose();
     _heroScrollController.dispose();
     _providerScrollController.dispose();
+    _heroAffordanceNode.dispose();
+    _providerAffordanceNode.dispose();
     super.dispose();
   }
 
@@ -227,7 +231,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
     if (page != null) _goToPage(page);
   }
 
-  Future<void> _goToPage(int page) async {
+  Future<void> _goToPage(int page, {FocusNode? focusAfter}) async {
     if (_animating || page == _page || !_pageController.hasClients) return;
     setState(() => _animating = true);
     try {
@@ -238,6 +242,11 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
       );
     } finally {
       if (mounted) setState(() => _animating = false);
+    }
+    if (focusAfter != null && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) focusAfter.requestFocus();
+      });
     }
   }
 
@@ -319,6 +328,13 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                                   .appLocalizations
                                   .dashboardShowProvider,
                               badge: hasAnnounce,
+                              focusNode: _heroAffordanceNode,
+                              onArrowDown: hasProviderPage
+                                  ? () => _goToPage(
+                                      1,
+                                      focusAfter: _providerAffordanceNode,
+                                    )
+                                  : null,
                               onPressed: () => _goToPage(1),
                             ),
                       child: PageActivityScope(
@@ -328,6 +344,9 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                           onShowProvider: byedpiMode
                               ? null
                               : () => _goToPage(1),
+                          onRequestAfterTailFocus: hasProviderPage
+                              ? () => _heroAffordanceNode.requestFocus()
+                              : null,
                         ),
                       ),
                     ),
@@ -338,6 +357,11 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                         key: const ValueKey('dashboard-show-connection'),
                         icon: Icons.keyboard_arrow_up_rounded,
                         label: context.appLocalizations.dashboardShowConnection,
+                        focusNode: _providerAffordanceNode,
+                        onArrowUp: hasProviderPage
+                            ? () =>
+                                  _goToPage(0, focusAfter: _heroAffordanceNode)
+                            : null,
                         onPressed: () => _goToPage(0),
                       ),
                       child: ProviderSummaryPage(
@@ -451,32 +475,55 @@ class _PageAffordance extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.badge = false,
+    this.focusNode,
+    this.onArrowDown,
+    this.onArrowUp,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
   final bool badge;
+  final FocusNode? focusNode;
+  final VoidCallback? onArrowDown;
+  final VoidCallback? onArrowUp;
 
   @override
   Widget build(BuildContext context) {
     final icon = Icon(this.icon, size: 22);
+    final button = TextButton.icon(
+      focusNode: focusNode,
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        visualDensity: VisualDensity.compact,
+      ),
+      onPressed: onPressed,
+      icon: badge ? Badge(child: icon) : icon,
+      label: Text(label),
+    );
+    final withArrows = onArrowDown != null || onArrowUp != null
+        ? Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onKeyEvent: (_, event) {
+              if (event is! KeyDownEvent) return KeyEventResult.ignored;
+              final callback = switch (event.logicalKey) {
+                LogicalKeyboardKey.arrowDown => onArrowDown,
+                LogicalKeyboardKey.arrowUp => onArrowUp,
+                _ => null,
+              };
+              if (callback == null) return KeyEventResult.ignored;
+              callback();
+              return KeyEventResult.handled;
+            },
+            child: button,
+          )
+        : button;
     return Semantics(
       button: true,
       label: label,
       excludeSemantics: true,
-      child: Tooltip(
-        message: label,
-        child: TextButton.icon(
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            visualDensity: VisualDensity.compact,
-          ),
-          onPressed: onPressed,
-          icon: badge ? Badge(child: icon) : icon,
-          label: Text(label),
-        ),
-      ),
+      child: Tooltip(message: label, child: withArrows),
     );
   }
 }

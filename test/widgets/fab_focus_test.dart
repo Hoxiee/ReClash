@@ -26,7 +26,7 @@ Widget _buildPage({bool wrapNavigator = false}) {
     policy: PageTraversalPolicy(),
     child: wrapNavigator
         ? Navigator(
-            pages: [MaterialPage(child: scopedPage)],
+            pages: [FocusTraversalPage<void>(child: scopedPage)],
             onDidRemovePage: (_) {},
           )
         : scopedPage,
@@ -169,5 +169,45 @@ void main() {
     await tester.pump();
 
     expect(FocusManager.instance.primaryFocus, sidebarFocus);
+  });
+
+  testWidgets('toggling a fab icon keeps keyboard focus', (tester) async {
+    var paused = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: const SizedBox.expand(),
+          floatingActionButton: StatefulBuilder(
+            builder: (context, setState) => FloatingActionButton(
+              tooltip: paused ? 'resume' : 'pause',
+              onPressed: () => setState(() => paused = !paused),
+              child: FadeRotationScaleBox(
+                child: paused
+                    ? const Icon(Icons.block, key: ValueKey('pause'))
+                    : const Icon(
+                        Icons.vertical_align_top,
+                        key: ValueKey('resume'),
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(_isFabFocused(), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(paused, isTrue);
+    expect(_isFabFocused(), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(paused, isFalse);
+    expect(_isFabFocused(), isTrue);
   });
 }

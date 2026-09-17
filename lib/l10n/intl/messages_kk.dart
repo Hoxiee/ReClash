@@ -369,11 +369,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Басқа"),
     "appearance": MessageLookupByLibrary.simpleMessage("Сыртқы түр"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Фон"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Тақырып, түстер, таңбашалар және бақылау тақтасы көрінісі",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Таңбаша"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Орналасу"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Тақырып"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Жүйелік DNS-ті қосу",
@@ -1503,10 +1503,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -3595,6 +3594,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy порты"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Трафик шығыны"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash әртүрлі елдердің адамдары пайдалана алатындай сіздің тіліңізде сөйлейді. Қандай да бір сөз тіркесі көзге оғаш көрінсе — жазыңыз, түзетеміз.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
+      "Аударма түзетуін ұсыну",
+    ),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Сенімді желілер"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "Осы желілердің кез келгеніне қосылғанда VPN кідіртіледі",
@@ -3698,6 +3703,63 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "Өзгерістер VPN қайта іске қосылғаннан кейін күшіне енеді",
+    ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Бұлыңғырлау"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Карточкалардың мөлдір еместігі",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Суретті таңдау"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Таңдалған сурет жазылым фонының орнына қолданылады. Жазылым фонын қайтару үшін жеке фонды өшіріңіз.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Қараңғылату"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("Суретті реттеу"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Жеке фонды пайдалану",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Суретті орналастыру"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Сыйдыру"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Толтыру"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Созу"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Көлденең орналасуы",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "Фон суреті қолжетімсіз. Оны қайта таңдаңыз.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
+      "Сурет таңдалмаған",
+    ),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Суреттің мөлдір еместігі",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage(
+      "Оқуға ыңғайлылық",
+    ),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Суретті жою"),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
+      "Суретті ауыстыру",
+    ),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Баптауларды қалпына келтіру",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Фонды сақтау мүмкін болмады. Алдыңғы фон сақталды.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Масштаб"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG немесе WebP · 20 МБ-қа дейін",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Жеке фон"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Көлемі 20 МБ-тан, ал ажыратымдылығы 50 мегапиксельден аспайтын суретті таңдаңыз.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Тік орналасуы",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV баптаулары",

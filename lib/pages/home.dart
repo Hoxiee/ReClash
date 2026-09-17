@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,27 +22,30 @@ class HomePage extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return HomeBackScopeContainer(
-      child: AppSidebarContainer(
-        child: _HomeShell(
-          child: Consumer(
-            builder: (_, ref, _) {
-              final navigationItems = ref
-                  .watch(currentNavigationItemsStateProvider)
-                  .value;
-              final isMobile = ref.watch(isMobileViewProvider);
-              return _HomePageView(
-                navigationItems: navigationItems,
-                pageBuilder: (_, index) {
-                  final navigationItem = navigationItems[index];
-                  return _NavigationPage(
-                    key: ValueKey(navigationItem.label),
-                    item: navigationItem,
-                    isMobile: isMobile,
-                    view: navigationItem.builder(context),
-                  );
-                },
-              );
-            },
+      child: PageFocusScope(
+        directionalTraversalEdgeBehavior: TraversalEdgeBehavior.stop,
+        child: AppSidebarContainer(
+          child: _HomeShell(
+            child: Consumer(
+              builder: (_, ref, _) {
+                final navigationItems = ref
+                    .watch(currentNavigationItemsStateProvider)
+                    .value;
+                final isMobile = ref.watch(isMobileViewProvider);
+                return _HomePageView(
+                  navigationItems: navigationItems,
+                  pageBuilder: (_, index) {
+                    final navigationItem = navigationItems[index];
+                    return _NavigationPage(
+                      key: ValueKey(navigationItem.label),
+                      item: navigationItem,
+                      isMobile: isMobile,
+                      view: navigationItem.builder(context),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -130,7 +134,7 @@ class _NavigationPage extends StatelessWidget {
           ? scopedView
           : Navigator(
               key: ValueKey('${item.label.name}_navigator'),
-              pages: [MaterialPage(child: scopedView)],
+              pages: [FocusTraversalPage<void>(child: scopedView)],
               onDidRemovePage: (_) {},
             ),
     );
@@ -319,7 +323,11 @@ class HomeBackScopeContainer extends ConsumerWidget {
           notifier.toPage(returnPage);
           return false;
         }
-        await ref.read(systemActionProvider.notifier).handleClose();
+        // Escape walks back through the app but never closes it: with nothing
+        // left to go back to it simply stops, unlike the system back button.
+        if (globalState.escapeBackDepth == 0) {
+          await ref.read(systemActionProvider.notifier).handleClose();
+        }
         return false;
       },
       child: child,

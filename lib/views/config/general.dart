@@ -301,7 +301,7 @@ class GeneralListView extends ConsumerWidget {
     final authentication = ref.watch(
       networkSettingProvider.select((state) => state.authentication.enable),
     );
-    return ListView(
+    return SettingsListView(
       children: [
         SettingSection(
           top: 16,

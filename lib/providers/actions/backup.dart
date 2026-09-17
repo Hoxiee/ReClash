@@ -135,6 +135,10 @@ class RestoreApplyContext {
   final AppSettingProps Function(AppSettingProps restored)? mergeAppSettings;
 }
 
+@visibleForTesting
+String? restoreWallpaperFileName(Map? configMap) =>
+    wallpaperFileNameOf(configMap);
+
 @Riverpod(keepAlive: true)
 class BackupAction extends _$BackupAction {
   @override
@@ -301,6 +305,7 @@ class BackupAction extends _$BackupAction {
         }
       }
       await rollback.discard();
+      await _pruneReplacedWallpaper(previousConfig, config, profilesOnly);
     } catch (error, stackTrace) {
       if (committed) {
         try {
@@ -349,7 +354,45 @@ class BackupAction extends _$BackupAction {
         throw FileSystemException('Backup content is missing', copy.from);
       }
     }
+    if (!profilesOnly) {
+      final fileName = restoreWallpaperFileName(data.configMap);
+      if (fileName != null) {
+        final staged = File(join(stagingPath, 'wallpapers', fileName));
+        if (!await staged.exists()) return copies;
+        try {
+          await WallpaperStore.readStoredImage(staged);
+          copies.add((
+            from: staged.path,
+            to: join(homePath, 'wallpapers', fileName),
+          ));
+        } catch (error) {
+          commonPrint.log(
+            'Invalid wallpaper in backup, skipping: ${compactError(error)}',
+            logLevel: LogLevel.warning,
+          );
+        }
+      }
+    }
     return copies;
+  }
+
+  Future<void> _pruneReplacedWallpaper(
+    Config? previous,
+    Config? next,
+    bool profilesOnly,
+  ) async {
+    if (profilesOnly) return;
+    final oldName = previous?.themeProps.wallpaper.fileName;
+    final newName = next?.themeProps.wallpaper.fileName;
+    if (oldName == null || oldName == newName) return;
+    if (!isWallpaperFileName(oldName)) return;
+    try {
+      final file = File(join(await appPath.wallpapersDirPath, oldName));
+      if (await FileSystemEntity.type(file.path, followLinks: false) ==
+          FileSystemEntityType.file) {
+        await file.delete();
+      }
+    } catch (_) {}
   }
 
   void _publishConfig(Config config, RestoreApplyContext context) {

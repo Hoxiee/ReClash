@@ -58,14 +58,17 @@ class ProxyCard extends ConsumerWidget {
                             onPressed: () => _handleTestCurrentDelay(ref),
                           ),
                   )
-                : GestureDetector(
-                    onTap: () => _handleTestCurrentDelay(ref),
-                    child: Text(
-                      delay > 0 ? '$delay ms' : 'Timeout',
-                      maxLines: 1,
-                      style: context.textTheme.labelSmall?.copyWith(
-                        overflow: TextOverflow.ellipsis,
-                        color: getDelayColor(delay),
+                : Tooltip(
+                    message: context.appLocalizations.delayTest,
+                    child: InkWell(
+                      onTap: () => _handleTestCurrentDelay(ref),
+                      child: Text(
+                        delay > 0 ? '$delay ms' : 'Timeout',
+                        maxLines: 1,
+                        style: context.textTheme.labelSmall?.copyWith(
+                          overflow: TextOverflow.ellipsis,
+                          color: getDelayColor(delay),
+                        ),
                       ),
                     ),
                   ),

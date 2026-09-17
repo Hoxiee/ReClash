@@ -321,11 +321,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("その他"),
     "appearance": MessageLookupByLibrary.simpleMessage("外観"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("背景"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "テーマ・色・アイコンとダッシュボードの見た目",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("アイコン"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("レイアウト"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage("システムDNSを追加"),
     "appendSystemDnsTip": MessageLookupByLibrary.simpleMessage(
@@ -2925,6 +2925,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxyポート"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("トラフィック統計"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage("翻訳の修正を提案する"),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("信頼できるネットワーク"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "これらのネットワークに接続中はVPNを一時停止します",
@@ -3011,6 +3015,49 @@ class MessageLookup extends MessageLookupByLibrary {
       "VpnServiceでシステムの全トラフィックを自動的にルーティングします",
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage("変更はVPNの再起動後に有効になります"),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("ぼかし"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage("カードの不透明度"),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("画像を選択"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "選択した画像はサブスクリプションの背景より優先されます。カスタム背景をオフにすると元の背景に戻ります。",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("暗さ"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage("画像の調整"),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage("カスタム背景を使用"),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("画像の配置"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("全体を表示"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("画面いっぱいに表示"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("引き伸ばし"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "水平方向の位置",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "背景画像を利用できません。もう一度選択してください。",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage("画像が選択されていません"),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("画像を置き換え"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage("調整をリセット"),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "背景を保存できませんでした。元の背景はそのままです。",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("拡大率"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG、JPEG、WebP · 20 MB 以下",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("カスタム背景"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "20 MB 以下、5,000 万画素以下の画像を選択してください。",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "垂直方向の位置",
+    ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "webDashboard": MessageLookupByLibrary.simpleMessage("Web ダッシュボード"),
     "webDashboardDesc": MessageLookupByLibrary.simpleMessage(

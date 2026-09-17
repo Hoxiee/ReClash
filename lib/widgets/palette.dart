@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 
 import 'color_scheme_box.dart';
+import 'focus.dart';
 import 'theme.dart';
 
 @immutable
@@ -101,19 +102,21 @@ class _HueSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliderTheme(
-      data: SliderDefaultsM3(context).copyWith(
-        trackShape: _HueTrackShape(),
-        trackHeight: 24,
-        thumbSize: const WidgetStatePropertyAll(Size(6.0, 48.0)),
-        thumbColor: Color(Hct.from(hue, 100, 80).toInt()),
-      ),
-      child: Slider(
-        padding: EdgeInsets.zero,
-        value: hue,
-        min: 0,
-        max: 360,
-        onChanged: onChanged,
+    return DirectionalSlider(
+      child: SliderTheme(
+        data: SliderDefaultsM3(context).copyWith(
+          trackShape: _HueTrackShape(),
+          trackHeight: 24,
+          thumbSize: const WidgetStatePropertyAll(Size(6.0, 48.0)),
+          thumbColor: Color(Hct.from(hue, 100, 80).toInt()),
+        ),
+        child: Slider(
+          padding: EdgeInsets.zero,
+          value: hue,
+          min: 0,
+          max: 360,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -132,19 +135,21 @@ class _ChromaSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliderTheme(
-      data: SliderDefaultsM3(context).copyWith(
-        trackShape: _ChromaTrackShape(hue: hue),
-        trackHeight: 24,
-        thumbSize: const WidgetStatePropertyAll(Size(6.0, 48.0)),
-        thumbColor: Color(Hct.from(hue, chroma, 80).toInt()),
-      ),
-      child: Slider(
-        padding: EdgeInsets.zero,
-        value: chroma.clamp(0, 10),
-        min: 0,
-        max: 10,
-        onChanged: onChanged,
+    return DirectionalSlider(
+      child: SliderTheme(
+        data: SliderDefaultsM3(context).copyWith(
+          trackShape: _ChromaTrackShape(hue: hue),
+          trackHeight: 24,
+          thumbSize: const WidgetStatePropertyAll(Size(6.0, 48.0)),
+          thumbColor: Color(Hct.from(hue, chroma, 80).toInt()),
+        ),
+        child: Slider(
+          padding: EdgeInsets.zero,
+          value: chroma.clamp(0, 10),
+          min: 0,
+          max: 10,
+          onChanged: onChanged,
+        ),
       ),
     );
   }
@@ -315,60 +320,138 @@ class _ToneGrid extends StatelessWidget {
             final color = Color(Hct.from(hue, chroma, tone.toDouble()).toInt());
             final isSelected = tone == selectedTone.round();
             final textColor = tone <= 50 ? Colors.white : Colors.black;
-            return GestureDetector(
+            return _ToneCell(
+              color: color,
+              label: '$tone',
+              textColor: textColor,
+              isSelected: isSelected,
+              selectedBorderColor: selectedBorderColor,
+              width: itemWidth,
               onTap: () => onToneSelected(tone.toDouble()),
-              child: SizedBox(
-                width: itemWidth,
-                height: itemWidth,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned.fill(
-                      child: Container(
-                        decoration: ShapeDecoration(
-                          color: color,
-                          shape: AppShape.sm,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '$tone',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (isSelected)
-                      Positioned.fill(
-                        top: -_selectionRingInset,
-                        right: -_selectionRingInset,
-                        bottom: -_selectionRingInset,
-                        left: -_selectionRingInset,
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: ShapeDecoration(
-                              shape: RoundedSuperellipseBorder(
-                                borderRadius: AppRadius.all(
-                                  AppCorner.sm + _selectionRingInset,
-                                ),
-                                side: BorderSide(
-                                  color: selectedBorderColor,
-                                  width: _selectionRingInset,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+              child: Text(
+                '$tone',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             );
           }).toList(),
         );
       },
+    );
+  }
+}
+
+class _ToneCell extends StatefulWidget {
+  const _ToneCell({
+    required this.color,
+    required this.label,
+    required this.textColor,
+    required this.isSelected,
+    required this.selectedBorderColor,
+    required this.width,
+    required this.onTap,
+    required this.child,
+  });
+
+  final Color color;
+  final String label;
+  final Color textColor;
+  final bool isSelected;
+  final Color selectedBorderColor;
+  final double width;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_ToneCell> createState() => _ToneCellState();
+}
+
+class _ToneCellState extends State<_ToneCell> {
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onShowFocusHighlight: (value) {
+        if (mounted && value != _focused) setState(() => _focused = value);
+      },
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onTap();
+            return null;
+          },
+        ),
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: SizedBox(
+          width: widget.width,
+          height: widget.width,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: Container(
+                  decoration: ShapeDecoration(
+                    color: widget.color,
+                    shape: AppShape.sm,
+                  ),
+                  alignment: Alignment.center,
+                  child: widget.child,
+                ),
+              ),
+              if (widget.isSelected)
+                Positioned.fill(
+                  top: -_selectionRingInset,
+                  right: -_selectionRingInset,
+                  bottom: -_selectionRingInset,
+                  left: -_selectionRingInset,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: AppRadius.all(
+                            AppCorner.sm + _selectionRingInset,
+                          ),
+                          side: BorderSide(
+                            color: widget.selectedBorderColor,
+                            width: _selectionRingInset,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_focused && !widget.isSelected)
+                Positioned.fill(
+                  top: -_selectionRingInset,
+                  right: -_selectionRingInset,
+                  bottom: -_selectionRingInset,
+                  left: -_selectionRingInset,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: ShapeDecoration(
+                        shape: RoundedSuperellipseBorder(
+                          borderRadius: AppRadius.all(
+                            AppCorner.sm + _selectionRingInset,
+                          ),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

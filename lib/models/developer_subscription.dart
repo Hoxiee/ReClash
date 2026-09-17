@@ -132,3 +132,9 @@ const developerSubscriptions = <DeveloperSubscription>[
     ),
   ),
 ];
+
+bool isDeveloperSubscriptionProfile(Profile profile) {
+  final logo = profile.panelMeta?.serviceLogo;
+  if (logo == null || logo.isEmpty) return false;
+  return developerSubscriptions.any((fixture) => fixture.logo == logo);
+}

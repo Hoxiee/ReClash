@@ -4,6 +4,7 @@ import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/widgets/wallpaper.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -235,8 +236,16 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   Widget build(BuildContext context) {
     final newDashboard = ref.watch(newDashboardEnabledProvider);
     if (newDashboard) {
-      return const Scaffold(
-        body: SafeArea(child: PanelProfileBackground(child: DashboardPager())),
+      return AppWallpaper(
+        builder: (context, active) => Scaffold(
+          backgroundColor: active ? Colors.transparent : null,
+          body: SafeArea(
+            child: PanelProfileBackground(
+              enabled: !active,
+              child: const DashboardPager(),
+            ),
+          ),
+        ),
       );
     }
     final dashboardState = ref.watch(dashboardStateProvider);

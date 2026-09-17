@@ -357,7 +357,7 @@ class NetworkListView extends ConsumerWidget {
         (state) => state.routeMode != RouteMode.bypassPrivate,
       ),
     );
-    return ListView(
+    return SettingsListView(
       children: [
         if (system.isAndroid) ...[
           const SettingSection(top: 16, items: [VPNItem()]),

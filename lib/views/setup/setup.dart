@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -108,7 +109,7 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     }
     if (widget.revisit) {
       Navigator.of(context).pop();
-    } else {
+    } else if (globalState.escapeBackDepth == 0) {
       await ref.read(systemActionProvider.notifier).handleClose();
     }
     return false;

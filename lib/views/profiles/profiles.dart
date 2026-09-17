@@ -591,6 +591,8 @@ class _ProfileCardTitle extends StatelessWidget {
                     '${native ? '' : ' · Experimental'}',
                 icon: native ? null : Icons.science_outlined,
               ),
+            if (isDeveloperSubscriptionProfile(profile))
+              const CommonChip(label: 'Dev'),
           ],
         ),
         const SizedBox(height: 6),

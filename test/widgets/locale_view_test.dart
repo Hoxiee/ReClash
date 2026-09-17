@@ -41,6 +41,16 @@ void main() {
     expect(tester.takeException(), null);
   });
 
+  testWidgets('shows a translation notice with a fix suggestion', (
+    tester,
+  ) async {
+    await pumpView(tester, const []);
+
+    expect(find.textContaining('nobody is left out'), findsOneWidget);
+    expect(find.text('Suggest a translation fix'), findsOneWidget);
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('marks the active locale and writes the choice on tap', (
     tester,
   ) async {

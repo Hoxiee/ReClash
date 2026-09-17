@@ -11,6 +11,14 @@ class Picker {
     return FilePicker.pickFile(initialDirectory: await appPath.downloadDirPath);
   }
 
+  Future<PlatformFile?> pickerImage() async {
+    return FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp'],
+      initialDirectory: await appPath.downloadDirPath,
+    );
+  }
+
   Future<Uri?> saveFile(String fileName, Uint8List bytes) async {
     final uri = await FilePicker.saveFile(
       fileName: fileName,

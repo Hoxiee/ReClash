@@ -86,8 +86,7 @@ class AppearanceThemeTab extends ConsumerWidget {
       ),
     );
     final contrast = theme.contrastLevel.clamp(-1.0, 1.0);
-    return CustomScrollView(
-      primary: false,
+    return SettingsScrollView(
       slivers: [
         SettingSection.sliver(
           title: appLocalizations.themeMode,

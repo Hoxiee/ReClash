@@ -3,6 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 
 typedef PopupAnchorResolver = Rect? Function();
 
@@ -391,6 +392,9 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
   );
 
   final List<_MenuStep> _path = [];
+  final List<int?> _focusTrail = [];
+  final FocusNode _headerFocusNode = FocusNode();
+  final List<FocusNode> _rowNodes = [];
   bool _closing = false;
 
   @override
@@ -407,7 +411,18 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     _recedeScale.dispose();
     _recedeScrim.dispose();
     _controller.dispose();
+    _headerFocusNode.dispose();
+    for (final node in _rowNodes) {
+      node.dispose();
+    }
     super.dispose();
+  }
+
+  FocusNode _rowNode(int index) {
+    while (_rowNodes.length <= index) {
+      _rowNodes.add(FocusNode());
+    }
+    return _rowNodes[index];
   }
 
   void _handleStatusChanged(AnimationStatus status) {
@@ -418,6 +433,11 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     setState(() {
       _path.removeLast();
       _controller.value = 1;
+    });
+    final restore = _focusTrail.isNotEmpty ? _focusTrail.removeLast() : null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || restore == null || restore >= _rowNodes.length) return;
+      _rowNodes[restore].requestFocus();
     });
   }
 
@@ -483,7 +503,17 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
         itemBox.hasSize &&
         stackBox.hasSize;
     _closing = false;
+    final opener = FocusManager.instance.primaryFocus;
+    var openerInRow = false;
+    opener?.context?.visitAncestorElements((element) {
+      if (element == itemContext) {
+        openerInRow = true;
+        return false;
+      }
+      return true;
+    });
     setState(() {
+      _focusTrail.add(openerInRow ? index : null);
       _path.add(
         _MenuStep(
           index: index,
@@ -497,6 +527,9 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
       );
     });
     _controller.forward(from: 0);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _headerFocusNode.requestFocus();
+    });
   }
 
   void _pop() {
@@ -517,6 +550,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     required CommonPopupMenuItem item,
     required VoidCallback? onTap,
     Animation<double>? arrowTurns,
+    FocusNode? focusNode,
   }) {
     final colorScheme = context.colorScheme;
     final enabled = onTap != null;
@@ -534,6 +568,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
       }
     }
     final child = InkWell(
+      focusNode: focusNode,
       customBorder: const RoundedSuperellipseBorder(
         borderRadius: BorderRadius.all(Radius.circular(_itemRadius)),
       ),
@@ -566,13 +601,32 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     return Semantics(button: true, enabled: enabled, child: child);
   }
 
-  Widget _buildItem(BuildContext context, CommonPopupMenuItem item, int index) {
+  Widget _buildItem(
+    BuildContext context,
+    CommonPopupMenuItem item,
+    int index, {
+    FocusNode? focusNode,
+  }) {
     if (item.subItems.isNotEmpty) {
       return Builder(
-        builder: (itemContext) => _buildRow(
-          itemContext,
-          item: item,
-          onTap: () => _push(itemContext, index),
+        builder: (itemContext) => Focus(
+          canRequestFocus: false,
+          onKeyEvent: (_, event) {
+            if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+              return KeyEventResult.ignored;
+            }
+            if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+              _push(itemContext, index);
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+          child: _buildRow(
+            itemContext,
+            item: item,
+            onTap: () => _push(itemContext, index),
+            focusNode: focusNode,
+          ),
         ),
       );
     }
@@ -581,6 +635,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
       context,
       item: item,
       onTap: onPressed == null ? null : () => _select(onPressed),
+      focusNode: focusNode,
     );
   }
 
@@ -615,10 +670,16 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     BuildContext context,
     _MenuLevel level, {
     required bool expanding,
+    FocusNode? Function(int index)? rowNode,
   }) {
     final items = [
       for (var index = 0; index < level.items.length; index++)
-        _buildItem(context, level.items[index], index),
+        _buildItem(
+          context,
+          level.items[index],
+          index,
+          focusNode: rowNode?.call(index),
+        ),
     ];
     final owner = level.owner;
     if (owner == null) {
@@ -638,6 +699,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
           item: owner,
           onTap: _pop,
           arrowTurns: progress.drive(_arrowTween),
+          focusNode: _headerFocusNode,
         ),
         SizeTransition(
           sizeFactor: progress,
@@ -670,7 +732,12 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
           child: child!,
         );
       },
-      child: _buildContent(context, level, expanding: level.owner != null),
+      child: _buildContent(
+        context,
+        level,
+        expanding: level.owner != null,
+        rowNode: _rowNode,
+      ),
     );
   }
 
@@ -681,42 +748,44 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     required double origin,
   }) {
     final scrim = context.colorScheme.scrim;
-    return IgnorePointer(
-      child: ExcludeSemantics(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            final scaleDistance = depth - (1 - _recedeScale.value);
-            final scrimDistance = depth - (1 - _recedeScrim.value);
-            final scale = math.max(0.0, 1 - _levelScaleStep * scaleDistance);
-            return Transform(
-              transform: Matrix4.diagonal3Values(scale, scale, 1),
-              alignment: Alignment.topRight,
-              origin: Offset(0, origin),
-              child: DecoratedBox(
-                position: DecorationPosition.foreground,
-                decoration: ShapeDecoration(
-                  color: scrim.withValues(
-                    alpha: math.min(1.0, _levelScrimStep * scrimDistance),
-                  ),
-                  shape: const RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(_cardRadius),
+    return ExcludeFocus(
+      child: IgnorePointer(
+        child: ExcludeSemantics(
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final scaleDistance = depth - (1 - _recedeScale.value);
+              final scrimDistance = depth - (1 - _recedeScrim.value);
+              final scale = math.max(0.0, 1 - _levelScaleStep * scaleDistance);
+              return Transform(
+                transform: Matrix4.diagonal3Values(scale, scale, 1),
+                alignment: Alignment.topRight,
+                origin: Offset(0, origin),
+                child: DecoratedBox(
+                  position: DecorationPosition.foreground,
+                  decoration: ShapeDecoration(
+                    color: scrim.withValues(
+                      alpha: math.min(1.0, _levelScrimStep * scrimDistance),
+                    ),
+                    shape: const RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(_cardRadius),
+                      ),
                     ),
                   ),
+                  child: child,
                 ),
-                child: child,
+              );
+            },
+            child: RepaintBoundary(
+              child: _buildCard(
+                context,
+                minWidth: level.minWidth,
+                maxWidth: level.maxWidth,
+                elevation: _elevationOf(depth),
+                radius: _cardRadius,
+                child: _buildContent(context, level, expanding: false),
               ),
-            );
-          },
-          child: RepaintBoundary(
-            child: _buildCard(
-              context,
-              minWidth: level.minWidth,
-              maxWidth: level.maxWidth,
-              elevation: _elevationOf(depth),
-              radius: _cardRadius,
-              child: _buildContent(context, level, expanding: false),
             ),
           ),
         ),
@@ -735,26 +804,40 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
           _pop();
         }
       },
-      child: Stack(
-        alignment: Alignment.topRight,
-        children: [
-          for (var index = 0; index <= topIndex; index++)
-            Padding(
-              key: ValueKey(index),
-              padding: EdgeInsets.only(top: levels[index].top),
-              child: index == topIndex
-                  ? _buildActiveLevel(context, levels[index])
-                  : _buildRecedingLevel(
-                      context,
-                      levels[index],
-                      depth: topIndex - index,
-                      origin:
-                          levels[index + 1].top +
-                          _cardInset -
-                          levels[index].top,
-                    ),
-            ),
-        ],
+      child: Focus(
+        canRequestFocus: false,
+        onKeyEvent: (_, event) {
+          if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+            return KeyEventResult.ignored;
+          }
+          if (event.logicalKey == LogicalKeyboardKey.arrowLeft &&
+              _path.isNotEmpty) {
+            _pop();
+            return KeyEventResult.handled;
+          }
+          return KeyEventResult.ignored;
+        },
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            for (var index = 0; index <= topIndex; index++)
+              Padding(
+                key: ValueKey(index),
+                padding: EdgeInsets.only(top: levels[index].top),
+                child: index == topIndex
+                    ? _buildActiveLevel(context, levels[index])
+                    : _buildRecedingLevel(
+                        context,
+                        levels[index],
+                        depth: topIndex - index,
+                        origin:
+                            levels[index + 1].top +
+                            _cardInset -
+                            levels[index].top,
+                      ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -27,6 +27,7 @@ import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
 import 'package:reclash/views/profiles/add.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// `splitLeft` is the left half of the two-column board: the orb keeps its
@@ -39,11 +40,13 @@ class HeroConnect extends ConsumerStatefulWidget {
     this.scrollController,
     this.onShowProvider,
     this.mode = HeroLayoutMode.column,
+    this.onRequestAfterTailFocus,
   });
 
   final ScrollController? scrollController;
   final VoidCallback? onShowProvider;
   final HeroLayoutMode mode;
+  final VoidCallback? onRequestAfterTailFocus;
 
   @override
   ConsumerState<HeroConnect> createState() => _HeroConnectState();
@@ -181,6 +184,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       return _EmptyHero(
         hasSavedProfiles: hasSavedProfiles,
         scrollController: widget.scrollController,
+        onRequestAfterTailFocus: widget.onRequestAfterTailFocus,
       );
     }
 
@@ -217,7 +221,10 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
             const _ByeDpiDashboard(),
             SizedBox(height: metrics.gapCard),
           ],
-          const _HeroActionRow(showUpdate: false),
+          _TailEdgeFocus(
+            onDown: widget.onRequestAfterTailFocus,
+            child: const _HeroActionRow(showUpdate: false),
+          ),
         ],
       );
     }
@@ -302,14 +309,17 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
           ),
           SizedBox(height: metrics.gapCard),
         ],
-        _HeroActionRow(
-          isUpdating: isUpdating,
-          onUpdate: () => unawaited(
-            ref
-                .read(profilesActionProvider.notifier)
-                .updateProfile(activeProfile, showLoading: true),
+        _TailEdgeFocus(
+          onDown: widget.onRequestAfterTailFocus,
+          child: _HeroActionRow(
+            isUpdating: isUpdating,
+            onUpdate: () => unawaited(
+              ref
+                  .read(profilesActionProvider.notifier)
+                  .updateProfile(activeProfile, showLoading: true),
+            ),
+            supportUrl: panelMeta?.supportUrl,
           ),
-          supportUrl: panelMeta?.supportUrl,
         ),
       ],
     );
@@ -421,6 +431,32 @@ class _DetailsScroll extends StatelessWidget {
   }
 }
 
+class _TailEdgeFocus extends StatelessWidget {
+  const _TailEdgeFocus({required this.child, this.onDown});
+
+  final Widget child;
+  final VoidCallback? onDown;
+
+  @override
+  Widget build(BuildContext context) {
+    final onDown = this.onDown;
+    if (onDown == null) return child;
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onKeyEvent: (_, event) {
+        if (event is! KeyDownEvent ||
+            event.logicalKey != LogicalKeyboardKey.arrowDown) {
+          return KeyEventResult.ignored;
+        }
+        onDown();
+        return KeyEventResult.handled;
+      },
+      child: child,
+    );
+  }
+}
+
 /// Scroll plus elastic flow: the orb takes the height the rest leaves over, and
 /// when the rest alone outgrows the viewport the scroll takes over instead of
 /// the board overflowing.
@@ -454,7 +490,7 @@ class _HeroBoard extends StatelessWidget {
         final top = metrics.gapEdge;
         final bottom = metrics.gapCard + bottomInset;
         final height = box.hasBoundedHeight ? box.maxHeight : 0.0;
-        return SingleChildScrollView(
+        final scroll = SingleChildScrollView(
           controller: controller,
           primary: false,
           padding: EdgeInsets.only(top: top, bottom: bottom),
@@ -466,6 +502,9 @@ class _HeroBoard extends StatelessWidget {
             tail: tail(metrics),
           ),
         );
+        final scrollController = controller;
+        if (scrollController == null) return scroll;
+        return FocusedScrollView(controller: scrollController, child: scroll);
       },
     );
   }
@@ -1745,10 +1784,12 @@ class _EmptyHero extends ConsumerWidget {
   const _EmptyHero({
     required this.hasSavedProfiles,
     required this.scrollController,
+    this.onRequestAfterTailFocus,
   });
 
   final bool hasSavedProfiles;
   final ScrollController? scrollController;
+  final VoidCallback? onRequestAfterTailFocus;
 
   void _showAddProfile(BuildContext context) {
     showExtend(
@@ -1773,6 +1814,7 @@ class _EmptyHero extends ConsumerWidget {
     final description = hasSavedProfiles
         ? appLocalizations.dashboardNoActiveProfileDesc
         : appLocalizations.dashboardNoProfileDesc;
+    final hasByeDpiCard = ref.watch(byeDpiSupportedProvider);
     return DashboardCenteredScrollView(
       controller: scrollController,
       child: Column(
@@ -1787,94 +1829,103 @@ class _EmptyHero extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          HeroSurface(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    title,
-                    style: context.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                FilledButton.icon(
-                  autofocus: true,
-                  onPressed: hasSavedProfiles
-                      ? () => ref
-                            .read(currentPageLabelProvider.notifier)
-                            .toProfiles()
-                      : () => _showAddProfile(context),
-                  icon: Icon(
-                    hasSavedProfiles
-                        ? Icons.folder_open_rounded
-                        : Icons.add_rounded,
-                  ),
-                  label: Text(
-                    hasSavedProfiles
-                        ? appLocalizations.dashboardSelectProfile
-                        : appLocalizations.addProfile,
-                  ),
-                ),
-                if (hasSavedProfiles) ...[
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => _showAddProfile(context),
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(appLocalizations.addProfile),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          if (ref.watch(byeDpiSupportedProvider)) ...[
-            const SizedBox(height: 12),
-            FocusableTap(
-              borderRadius: heroCardRadius,
-              onTap: () => changeDashboardMode(ref, DashboardMode.byedpi),
-              child: HeroSurface(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 44),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appLocalizations.dashboardByedpiTitle,
-                            style: context.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            appLocalizations.dashboardByedpiDesc,
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+          _TailEdgeFocus(
+            onDown: hasByeDpiCard ? null : onRequestAfterTailFocus,
+            child: HeroSurface(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      title,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.chevron_right_rounded,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    description,
+                    style: context.textTheme.bodyMedium?.copyWith(
                       color: context.colorScheme.onSurfaceVariant,
                     ),
+                  ),
+                  const SizedBox(height: 18),
+                  FilledButton.icon(
+                    autofocus: true,
+                    onPressed: hasSavedProfiles
+                        ? () => ref
+                              .read(currentPageLabelProvider.notifier)
+                              .toProfiles()
+                        : () => _showAddProfile(context),
+                    icon: Icon(
+                      hasSavedProfiles
+                          ? Icons.folder_open_rounded
+                          : Icons.add_rounded,
+                    ),
+                    label: Text(
+                      hasSavedProfiles
+                          ? appLocalizations.dashboardSelectProfile
+                          : appLocalizations.addProfile,
+                    ),
+                  ),
+                  if (hasSavedProfiles) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => _showAddProfile(context),
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(appLocalizations.addProfile),
+                    ),
                   ],
+                ],
+              ),
+            ),
+          ),
+          if (hasByeDpiCard) ...[
+            const SizedBox(height: 12),
+            _TailEdgeFocus(
+              onDown: onRequestAfterTailFocus,
+              child: FocusableTap(
+                borderRadius: heroCardRadius,
+                onTap: () => changeDashboardMode(ref, DashboardMode.byedpi),
+                child: HeroSurface(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      const _ByeDpiCardIcon(
+                        icon: Icons.shield_rounded,
+                        size: 44,
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              appLocalizations.dashboardByedpiTitle,
+                              style: context.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              appLocalizations.dashboardByedpiDesc,
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

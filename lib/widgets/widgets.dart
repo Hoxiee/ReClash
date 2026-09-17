@@ -34,6 +34,7 @@ export 'palette.dart';
 export 'panel_background.dart';
 export 'pop_scope.dart';
 export 'popup.dart';
+export 'reorder_menu.dart';
 export 'scaffold.dart';
 export 'scroll.dart';
 export 'setting.dart';

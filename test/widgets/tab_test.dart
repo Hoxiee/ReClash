@@ -1,5 +1,6 @@
 import 'package:reclash/widgets/tab.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -169,5 +170,140 @@ void main() {
     });
     await tester.pump();
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('CommonTabBar moves with arrows without wrapping', (
+    tester,
+  ) async {
+    var selected = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return CommonTabBar<int>(
+                  groupValue: selected,
+                  thumbColor: Colors.blue,
+                  children: const {
+                    0: Text('One'),
+                    1: Text('Two'),
+                    2: Text('Three'),
+                  },
+                  onValueChanged: (value) {
+                    setState(() => selected = value!);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<CommonTabBar<int>>(),
+      isNotNull,
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(selected, 0);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(selected, 1);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(selected, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(selected, 2);
+  });
+
+  testWidgets('CommonTabBar arrows skip disabled segments', (tester) async {
+    var selected = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return CommonTabBar<int>(
+                  groupValue: selected,
+                  disabledChildren: const {1},
+                  thumbColor: Colors.blue,
+                  children: const {
+                    0: Text('One'),
+                    1: Text('Two'),
+                    2: Text('Three'),
+                  },
+                  onValueChanged: (value) {
+                    setState(() => selected = value!);
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(selected, 2);
+  });
+
+  testWidgets('CommonTabBar mirrors arrows in RTL', (tester) async {
+    var selected = 1;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: Center(
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  return CommonTabBar<int>(
+                    groupValue: selected,
+                    thumbColor: Colors.blue,
+                    children: const {
+                      0: Text('One'),
+                      1: Text('Two'),
+                      2: Text('Three'),
+                    },
+                    onValueChanged: (value) {
+                      setState(() => selected = value!);
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(selected, 2);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(selected, 1);
   });
 }

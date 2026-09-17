@@ -2,6 +2,7 @@ import 'package:reclash/common/app_ports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/app_manager.dart';
+import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/theme_manager.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -1212,6 +1213,120 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(closeCount, 1, reason: 'the marker is spent, back leaves the app');
+  });
+
+  testWidgets('escape on the main screen never closes the app', (tester) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var closeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.equalizer),
+                label: PageLabel.proxies,
+                builder: (_) => const Text('page:proxies'),
+              ),
+            ],
+          ),
+        ),
+        systemActionProvider.overrideWith(
+          () => _TestSystemAction(() => closeCount++),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: const HomePage(),
+          homeBuilder: (child) =>
+              HotKeyManager(child: Focus(autofocus: true, child: child)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(closeCount, 0, reason: 'escape must stop instead of closing');
+    expect(globalState.escapeBackDepth, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('escape walks back through a returnable page', (tester) async {
+    tester.view.physicalSize = const Size(500, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var closeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                icon: const Icon(Icons.space_dashboard),
+                label: PageLabel.dashboard,
+                builder: (_) => const Text('page:dashboard'),
+              ),
+              NavigationItem(
+                icon: const Icon(Icons.equalizer),
+                label: PageLabel.proxies,
+                builder: (_) => const Text('page:proxies'),
+              ),
+            ],
+          ),
+        ),
+        systemActionProvider.overrideWith(
+          () => _TestSystemAction(() => closeCount++),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    globalState.container = container;
+    container.read(viewSizeProvider.notifier).value = const Size(500, 800);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: const HomePage(),
+          homeBuilder: (child) =>
+              HotKeyManager(child: Focus(autofocus: true, child: child)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    container
+        .read(currentPageLabelProvider.notifier)
+        .toPage(PageLabel.proxies, returnable: true);
+    await tester.pumpAndSettle();
+    expect(container.read(currentPageLabelProvider), PageLabel.proxies);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    expect(closeCount, 0);
+    expect(tester.takeException(), isNull);
   });
 }
 

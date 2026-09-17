@@ -7,6 +7,7 @@ import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 
@@ -482,10 +483,24 @@ class _PrimaryColorTile extends StatelessWidget {
         children: [
           EffectGestureDetector(
             onLongPress: onRequestRemove,
-            child: ColorSchemeBox(
-              isSelected: isSelected,
-              primaryColor: color != null ? Color(color!) : null,
-              onPressed: onSelect,
+            child: Focus(
+              canRequestFocus: false,
+              onKeyEvent: (_, event) {
+                if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+                  return KeyEventResult.ignored;
+                }
+                if (event.logicalKey == LogicalKeyboardKey.delete ||
+                    event.logicalKey == LogicalKeyboardKey.backspace) {
+                  onRequestRemove();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: ColorSchemeBox(
+                isSelected: isSelected,
+                primaryColor: color != null ? Color(color!) : null,
+                onPressed: onSelect,
+              ),
             ),
           ),
           if (isRemovable)

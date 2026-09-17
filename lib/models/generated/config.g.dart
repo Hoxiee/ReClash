@@ -533,6 +533,9 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
   textScale: json['textScale'] == null
       ? const TextScale()
       : TextScale.fromJson(json['textScale'] as Map<String, dynamic>),
+  wallpaper: json['wallpaper'] == null
+      ? const WallpaperProps()
+      : WallpaperProps.safeFromJson(json['wallpaper']),
 );
 
 Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
@@ -547,6 +550,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'pureBlack': instance.pureBlack,
       'contrastLevel': instance.contrastLevel,
       'textScale': instance.textScale,
+      'wallpaper': instance.wallpaper,
     };
 
 const _$ThemeModeEnumMap = {

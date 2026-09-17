@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'effect.dart';
 import 'list.dart';
+import 'reorder_menu.dart';
 import 'theme.dart';
 part 'input_pages.dart';
 
@@ -201,6 +202,7 @@ class _InputDialogState extends State<InputDialog> {
               keyboardType: widget.keyboardType ?? TextInputType.url,
               maxLines: widget.obscureText == true ? 1 : 5,
               minLines: 1,
+              autofocus: true,
               controller: _textController,
               onFieldSubmitted: (_) {
                 _handleUpdate();
@@ -295,6 +297,7 @@ class _AddDialogState extends State<AddDialog> {
               TextFormField(
                 maxLines: 3,
                 minLines: 1,
+                autofocus: true,
                 inputFormatters: widget.keyMaxLength == null
                     ? null
                     : TextInputLimits.limit(widget.keyMaxLength!),
@@ -318,6 +321,7 @@ class _AddDialogState extends State<AddDialog> {
             TextFormField(
               maxLines: 3,
               minLines: 1,
+              autofocus: keyField == null,
               inputFormatters: widget.valueMaxLength == null
                   ? null
                   : TextInputLimits.limit(widget.valueMaxLength!),

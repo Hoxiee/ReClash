@@ -506,6 +506,9 @@ abstract class ThemeProps with _$ThemeProps {
     @Default(false) bool pureBlack,
     @Default(0) double contrastLevel,
     @Default(TextScale()) TextScale textScale,
+    @JsonKey(fromJson: WallpaperProps.safeFromJson)
+    @Default(WallpaperProps())
+    WallpaperProps wallpaper,
   }) = _ThemeProps;
 
   factory ThemeProps.fromJson(Map<String, Object?> json) =>

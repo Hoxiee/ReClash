@@ -239,31 +239,21 @@ class ProviderItem extends ConsumerWidget {
       subtitle: _buildProviderMetadata(context),
       trailing: SizedBox.square(
         dimension: kMinInteractiveDimension,
-        child: FadeThroughBox(
-          alignment: Alignment.center,
-          child: isUpdating
-              ? const SizedBox.square(
-                  key: ValueKey('loading'),
-                  dimension: kMinInteractiveDimension,
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CommonCircleLoading(),
-                  ),
-                )
-              : CommonPopupBox(
-                  key: const ValueKey('menu'),
-                  popupBuilder: (_) =>
-                      CommonPopupMenu(items: _menuItems(context, ref)),
-                  targetBuilder: (open) {
-                    return IconButton(
-                      tooltip: context.appLocalizations.more,
-                      onPressed: () {
-                        open();
-                      },
-                      icon: const Icon(Icons.more_vert),
-                    );
-                  },
-                ),
+        child: CommonPopupBox(
+          key: const ValueKey('menu'),
+          popupBuilder: (_) => CommonPopupMenu(items: _menuItems(context, ref)),
+          targetBuilder: (open) {
+            return IconButton(
+              tooltip: context.appLocalizations.more,
+              onPressed: isUpdating ? () {} : open,
+              icon: isUpdating
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: CommonCircleLoading(),
+                    )
+                  : const Icon(Icons.more_vert),
+            );
+          },
         ),
       ),
     );

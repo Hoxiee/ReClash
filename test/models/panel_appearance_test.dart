@@ -39,7 +39,10 @@ void main() {
         'asset:assets/images/developer/developer_ember_bg.svg,22',
       );
 
-      expect(background?.url, 'asset:assets/images/developer/developer_ember_bg.svg');
+      expect(
+        background?.url,
+        'asset:assets/images/developer/developer_ember_bg.svg',
+      );
       expect(background?.opacity, 0.22);
       expect(
         parsePanelBackground('asset:assets/images/logo.svg')?.opacity,

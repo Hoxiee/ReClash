@@ -77,6 +77,10 @@ class HotKeyRecorder extends ConsumerStatefulWidget {
 
 class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
   late final ValueNotifier<HotKeyAction> hotKeyActionNotifier;
+  late final FocusScopeNode _scopeNode = FocusScopeNode(
+    traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+    directionalTraversalEdgeBehavior: TraversalEdgeBehavior.stop,
+  );
 
   @override
   void initState() {
@@ -92,6 +96,31 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
     final keys = HardwareKeyboard.instance.physicalKeysPressed;
 
     final key = keyEvent.physicalKey;
+    if (KeyboardModifier.values.any((e) => e.physicalKeys.contains(key))) {
+      return false;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    final hasModifier =
+        keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed ||
+        keyboard.isShiftPressed;
+    if (!hasModifier) {
+      switch (keyEvent.logicalKey) {
+        case LogicalKeyboardKey.tab ||
+            LogicalKeyboardKey.escape ||
+            LogicalKeyboardKey.enter ||
+            LogicalKeyboardKey.numpadEnter ||
+            LogicalKeyboardKey.space ||
+            LogicalKeyboardKey.select ||
+            LogicalKeyboardKey.gameButtonA ||
+            LogicalKeyboardKey.arrowUp ||
+            LogicalKeyboardKey.arrowDown ||
+            LogicalKeyboardKey.arrowLeft ||
+            LogicalKeyboardKey.arrowRight:
+          return false;
+      }
+    }
 
     final modifiers = KeyboardModifier.values
         .where(
@@ -111,6 +140,7 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
   void dispose() {
     HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     hotKeyActionNotifier.dispose();
+    _scopeNode.dispose();
     super.dispose();
   }
 
@@ -165,55 +195,73 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    return Focus(
-      onKeyEvent: (_, _) {
-        return KeyEventResult.handled;
-      },
-      autofocus: true,
-      child: CommonDialog(
-        title: widget.hotKeyAction.action.label,
-        actions: [
-          TextButton(
-            onPressed: () {
-              _handleRemove();
+    return FocusScope.withExternalFocusNode(
+      focusScopeNode: _scopeNode,
+      child: Focus(
+        autofocus: true,
+        skipTraversal: true,
+        onKeyEvent: (_, event) {
+          if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+            return KeyEventResult.ignored;
+          }
+          final keyboard = HardwareKeyboard.instance;
+          final hasModifier =
+              keyboard.isControlPressed ||
+              keyboard.isAltPressed ||
+              keyboard.isMetaPressed ||
+              keyboard.isShiftPressed;
+          if (!hasModifier &&
+              (event.logicalKey == LogicalKeyboardKey.tab ||
+                  event.logicalKey == LogicalKeyboardKey.escape)) {
+            return KeyEventResult.ignored;
+          }
+          return KeyEventResult.handled;
+        },
+        child: CommonDialog(
+          title: widget.hotKeyAction.action.label,
+          actions: [
+            TextButton(
+              onPressed: () {
+                _handleRemove();
+              },
+              child: Text(appLocalizations.remove),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () {
+                _handleConfirm();
+              },
+              child: Text(appLocalizations.confirm),
+            ),
+          ],
+          child: ValueListenableBuilder(
+            valueListenable: hotKeyActionNotifier,
+            builder: (_, hotKeyAction, _) {
+              final key = hotKeyAction.key;
+              final modifiers = hotKeyAction.modifiers;
+              return SizedBox(
+                width: dialogCommonWidth,
+                child: key != null
+                    ? Wrap(
+                        spacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (final modifier in modifiers)
+                            KeyboardKeyBox(
+                              keyboardKey: modifier.physicalKeys.first,
+                            ),
+                          if (modifiers.isNotEmpty)
+                            Text('+', style: context.textTheme.titleMedium),
+                          KeyboardKeyBox(keyboardKey: PhysicalKeyboardKey(key)),
+                        ],
+                      )
+                    : Text(
+                        appLocalizations.pressKeyboard,
+                        style: context.textTheme.titleMedium,
+                      ),
+              );
             },
-            child: Text(appLocalizations.remove),
           ),
-          const SizedBox(width: 8),
-          TextButton(
-            onPressed: () {
-              _handleConfirm();
-            },
-            child: Text(appLocalizations.confirm),
-          ),
-        ],
-        child: ValueListenableBuilder(
-          valueListenable: hotKeyActionNotifier,
-          builder: (_, hotKeyAction, _) {
-            final key = hotKeyAction.key;
-            final modifiers = hotKeyAction.modifiers;
-            return SizedBox(
-              width: dialogCommonWidth,
-              child: key != null
-                  ? Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        for (final modifier in modifiers)
-                          KeyboardKeyBox(
-                            keyboardKey: modifier.physicalKeys.first,
-                          ),
-                        if (modifiers.isNotEmpty)
-                          Text('+', style: context.textTheme.titleMedium),
-                        KeyboardKeyBox(keyboardKey: PhysicalKeyboardKey(key)),
-                      ],
-                    )
-                  : Text(
-                      appLocalizations.pressKeyboard,
-                      style: context.textTheme.titleMedium,
-                    ),
-            );
-          },
         ),
       ),
     );

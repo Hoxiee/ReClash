@@ -311,11 +311,11 @@ class DnsListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return ListView(
+    return const SettingsListView(
       children: [
-        const Padding(padding: EdgeInsets.only(top: 16)),
+        Padding(padding: EdgeInsets.only(top: 16)),
         ...dnsItems,
-        const SettingBottomInset(),
+        SettingBottomInset(),
       ],
     );
   }

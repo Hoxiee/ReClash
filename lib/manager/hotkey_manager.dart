@@ -131,7 +131,19 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
                 ref.read(systemActionProvider.notifier).handleClose(false),
           ),
           EscapeBackIntent: CallbackAction<EscapeBackIntent>(
-            onInvoke: (_) => globalState.navigatorKey.currentState?.maybePop(),
+            onInvoke: (_) {
+              final navigator = globalState.navigatorKey.currentState;
+              if (navigator == null) {
+                return null;
+              }
+              globalState.escapeBackDepth++;
+              unawaited(
+                navigator.maybePop().whenComplete(
+                  () => globalState.escapeBackDepth--,
+                ),
+              );
+              return null;
+            },
           ),
           ToPageIntent: CallbackAction<ToPageIntent>(
             onInvoke: (intent) {

@@ -80,6 +80,9 @@ class StoreAction extends _$StoreAction {
     await database.close();
     await File(await appPath.databasePath).safeDelete(recursive: true);
     await Directory(await appPath.profilesPath).safeDelete(recursive: true);
+    await Directory(
+      await appPath.wallpapersDirPath,
+    ).safeDelete(recursive: true);
     unawaited(ref.read(systemActionProvider.notifier).handleExit(false));
   }
 }

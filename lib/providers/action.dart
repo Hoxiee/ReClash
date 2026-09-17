@@ -5,6 +5,7 @@ import 'package:reclash/common/finding_events.dart';
 import 'package:reclash/common/boot_guard.dart';
 import 'package:reclash/common/boot_record.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/wallpaper_store.dart';
 import 'package:reclash/common/subscription_reminder.dart';
 import 'package:reclash/common/subscription_retry.dart';
 import 'package:reclash/common/system_dns.dart';

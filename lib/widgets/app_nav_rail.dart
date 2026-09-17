@@ -398,20 +398,66 @@ class _RailSlotState extends State<_RailSlot> {
   bool _focused = false;
 
   @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addHighlightModeListener(_handleHighlightMode);
+  }
+
+  void _handleHighlightMode(FocusHighlightMode _) {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_handleHighlightMode);
     _focusNode.dispose();
     super.dispose();
   }
 
   KeyEventResult _handleKey(FocusNode _, KeyEvent event) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    final focusedNode = FocusManager.instance.primaryFocus;
-    final moved = switch (event.logicalKey) {
-      LogicalKeyboardKey.arrowDown => focusedNode?.nextFocus() ?? false,
-      LogicalKeyboardKey.arrowUp => focusedNode?.previousFocus() ?? false,
-      _ => false,
-    };
-    return moved ? KeyEventResult.handled : KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowUp ||
+        key == LogicalKeyboardKey.arrowDown) {
+      final rail = context.findAncestorWidgetOfExactType<AppNavRail>();
+      final nodes =
+          _focusNode.nearestScope!.traversalDescendants
+              .where(
+                (node) =>
+                    node.context?.findAncestorWidgetOfExactType<AppNavRail>() ==
+                    rail,
+              )
+              .toList()
+            ..sort((a, b) => a.rect.top.compareTo(b.rect.top));
+      final index = nodes.indexOf(_focusNode);
+      final next = index + (key == LogicalKeyboardKey.arrowDown ? 1 : -1);
+      if (index >= 0 && next >= 0 && next < nodes.length) {
+        FocusTraversalPolicy.defaultTraversalRequestFocusCallback(nodes[next]);
+      }
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.arrowLeft) {
+      final rtl = Directionality.of(context) == TextDirection.rtl;
+      final inward = rtl
+          ? key == LogicalKeyboardKey.arrowLeft
+          : key == LogicalKeyboardKey.arrowRight;
+      if (inward) {
+        _focusNode.focusInDirection(
+          rtl ? TraversalDirection.left : TraversalDirection.right,
+        );
+      }
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
   }
 
   @override

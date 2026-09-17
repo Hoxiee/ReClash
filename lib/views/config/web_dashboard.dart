@@ -241,7 +241,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
     final cancelToken = _cancelToken;
     return BaseScaffold(
       title: appLocalizations.webDashboard,
-      body: ListView(
+      body: SettingsListView(
         children: [
           SettingSection(
             top: 16,

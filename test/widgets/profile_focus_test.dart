@@ -112,6 +112,42 @@ void main() {
     }
   });
 
+  testWidgets('developer fixture profiles carry a Dev badge', (tester) async {
+    final fixture = developerSubscriptions[1];
+    final devProfile = Profile.normal(
+      label: 'dev',
+    ).copyWith(panelMeta: PanelMeta(serviceLogo: fixture.logo));
+    await pumpProfiles(
+      tester,
+      profiles: [
+        devProfile,
+        Profile.normal(label: 'plain'),
+      ],
+    );
+
+    final devCard = find.ancestor(
+      of: find.text('dev'),
+      matching: find.byType(ListItem),
+    );
+    expect(
+      tester
+          .widgetList<CommonChip>(
+            find.descendant(of: devCard, matching: find.byType(CommonChip)),
+          )
+          .map((chip) => chip.label),
+      contains('Dev'),
+    );
+    final plainCard = find.ancestor(
+      of: find.text('plain'),
+      matching: find.byType(ListItem),
+    );
+    expect(
+      find.descendant(of: plainCard, matching: find.byType(CommonChip)),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('subscription menu item opens the usage dialog', (tester) async {
     await pumpProfiles(tester, profiles: [urlProfile('url')]);
 

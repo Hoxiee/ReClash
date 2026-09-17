@@ -116,21 +116,26 @@ class _LogsViewState extends ConsumerState<LogsView> {
         valueListenable: _listController,
         builder: (_, state, _) {
           final autoScrollToEnd = state.autoScrollToEnd;
-          return FadeRotationScaleBox(
-            child: FloatingActionButton(
-              key: ValueKey(autoScrollToEnd),
-              onPressed: () {
-                if (autoScrollToEnd) {
-                  _listController.setAutoScrollToEnd(false);
-                } else {
-                  _listController.resumeAutoScrollToEnd(
-                    ref.read(logsProvider).list,
-                  );
-                }
-              },
+          return FloatingActionButton(
+            tooltip: autoScrollToEnd
+                ? appLocalizations.pause
+                : appLocalizations.resume,
+            onPressed: () {
+              if (autoScrollToEnd) {
+                _listController.setAutoScrollToEnd(false);
+              } else {
+                _listController.resumeAutoScrollToEnd(
+                  ref.read(logsProvider).list,
+                );
+              }
+            },
+            child: FadeRotationScaleBox(
               child: autoScrollToEnd
-                  ? const Icon(Icons.block)
-                  : const Icon(Icons.vertical_align_top),
+                  ? const Icon(Icons.block, key: ValueKey('pause'))
+                  : const Icon(
+                      Icons.vertical_align_top,
+                      key: ValueKey('resume'),
+                    ),
             ),
           );
         },

@@ -333,8 +333,12 @@ class ListItem<T> extends StatelessWidget {
     Widget? trailing,
     Widget? leading,
   }) {
-    return TvFocusOutline(
-      child: ListTile(
+    return TvFocusOutline.builder(
+      shape: AppShape.xl,
+      enabled: onTap != null,
+      builder: (focusNode) => ListTile(
+        focusNode: focusNode,
+        shape: AppShape.xl,
         key: key,
         dense: dense,
         visualDensity: visualDensity,
@@ -453,7 +457,6 @@ class ListItem<T> extends StatelessWidget {
                   checkboxDelegate.onChanged!(!checkboxDelegate.value);
                 },
           trailing: ExcludeFocus(
-            excluding: system.isTV,
             child: CommonCheckBox(
               value: checkboxDelegate.value,
               onChanged: checkboxDelegate.onChanged,
@@ -468,7 +471,6 @@ class ListItem<T> extends StatelessWidget {
                   toggleAction.onChanged!(!toggleAction.value);
                 },
           trailing: ExcludeFocus(
-            excluding: system.isTV,
             child: Switch(
               value: toggleAction.value,
               onChanged: toggleAction.onChanged,

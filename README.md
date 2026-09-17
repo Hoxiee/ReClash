@@ -125,6 +125,19 @@ Providers can attach usage, expiration, update policy, support links, branding, 
 
 The `reclash-*` namespace takes priority over compatibility headers. These values are suggestions around the subscription body: user-owned settings stay under user control, and initial application defaults are applied only when a profile is added.
 
+## Localization
+
+ReClash speaks eight languages so people from different countries can use it. Uzbek, Kazakh, Turkmen, and Korean were added; Russian was re-proofread.
+
+| Stage | What was done |
+|---|---|
+| Dictionary | Terms like "proxy", "subscription", "traffic" collected before translation from real localizations native speakers use: Android settings, Firefox, Windows, Wikipedia in that language. Uzbek — 40 terms from 35 sources, Kazakh — 43 from 40, Turkmen — 43 from 43, Korean — 38 from 38 |
+| Honesty | 33 spots where sources diverged are marked as unconfirmed, not masked |
+| Review | Chunked translation, each chunk blind-checked by a second pass: `{name}` placeholders, plurals, spelling, consistent voice. Each chunk had 5–20 defects |
+| Natural phrasing | Edits against live corpora plus correct native orthography: `oʻ/gʻ`, Kazakh Cyrillic `ә ғ қ ң ө ұ ү һ і`, Turkmen Latin `ý ň ä ş ç ž` |
+
+Localizations are alive. If a phrase sounds off to a native ear, please [open a translation issue](https://github.com/Hoxiee/ReClash/issues/new) and it will be fixed.
+
 ## Support and contributing
 
 Read [SUPPORT.md](SUPPORT.md) before reporting a problem, especially before sharing logs or profiles. Security issues must be reported privately according to [SECURITY.md](SECURITY.md). Contributions are welcome under [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).

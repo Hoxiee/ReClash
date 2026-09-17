@@ -56,13 +56,40 @@ void main() {
   Finder tabBar() => find.byType(CommonTabBar<int>);
 
   Finder focusRing() => find
-      .ancestor(of: tabBar(), matching: find.byType(AnimatedContainer))
+      .descendant(
+        of: find.descendant(
+          of: tabBar(),
+          matching: find.byType(FocusableActionDetector),
+        ),
+        matching: find.byType(Container),
+      )
       .first;
 
-  BoxBorder focusRingBorder(WidgetTester tester) =>
-      (tester.widget<AnimatedContainer>(focusRing()).decoration
-              as BoxDecoration)
-          .border!;
+  BorderSide focusRingBorder(WidgetTester tester) =>
+      ((tester.widget<Container>(focusRing()).foregroundDecoration
+                      as ShapeDecoration)
+                  .shape
+              as RoundedSuperellipseBorder)
+          .side;
+
+  Future<void> focusTabBar(WidgetTester tester) async {
+    for (
+      var i = 0;
+      i < 10 &&
+          FocusManager.instance.primaryFocus?.context
+                  ?.findAncestorWidgetOfExactType<CommonTabBar<int>>() ==
+              null;
+      i++
+    ) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<CommonTabBar<int>>(),
+      isNotNull,
+    );
+  }
 
   Future<void> openTab(WidgetTester tester, String label) async {
     // Every segment renders its label twice, once per selection style.
@@ -97,7 +124,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (final label in ['Layout', 'Other', 'Theme']) {
+    for (final label in ['Background', 'Other', 'Theme']) {
       await openTab(tester, label);
       expect(tester.takeException(), isNull, reason: label);
     }
@@ -106,8 +133,12 @@ void main() {
 
   testWidgets('arrow keys move between tabs', (tester) async {
     await pumpAppearanceView(tester);
-    Focus.of(tester.element(tabBar())).requestFocus();
+    await focusTabBar(tester);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
+    expect(find.text('Dashboard style'), findsNothing);
+    expect(find.text('Choose image'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
@@ -115,7 +146,8 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(find.text('Contrast'), findsOneWidget);
+    expect(find.text('Dashboard style'), findsNothing);
+    expect(find.text('Choose image'), findsOneWidget);
   });
 
   testWidgets('the focus ring color snaps under reduced motion', (
@@ -123,18 +155,17 @@ void main() {
   ) async {
     await pumpAppearanceView(tester, disableAnimations: true);
     expect(
-      focusRingBorder(tester).top.color,
+      focusRingBorder(tester).color,
       Colors.transparent,
       reason: 'transparent while unfocused',
     );
 
     // Key events flip the highlight mode to traditional, so the ring only
     // becomes primary once a keyboard interaction has happened.
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
+    await focusTabBar(tester);
 
     expect(
-      focusRingBorder(tester).top.color,
+      focusRingBorder(tester).color,
       Theme.of(tester.element(focusRing())).colorScheme.primary,
     );
     expect(tester.hasRunningAnimations, isFalse);
@@ -286,22 +317,34 @@ void main() {
   });
 
   group('contrast', () {
+    bool resetVisible(WidgetTester tester) {
+      final visibility = tester.widget<Visibility>(
+        find.ancestor(
+          of: find.byIcon(Icons.replay),
+          matching: find.byType(Visibility),
+        ),
+      );
+      return visibility.visible;
+    }
+
     testWidgets('resets back to the neutral level', (tester) async {
       await pumpAppearanceView(tester);
 
-      expect(find.byIcon(Icons.replay), findsNothing);
+      expect(find.byIcon(Icons.replay), findsOneWidget);
+      expect(resetVisible(tester), isFalse);
 
       container
           .read(themeSettingProvider.notifier)
           .update((state) => state.copyWith(contrastLevel: 0.5));
       await tester.pumpAndSettle();
       expect(find.text('+50%'), findsOneWidget);
+      expect(resetVisible(tester), isTrue);
 
       await tester.tap(find.byIcon(Icons.replay));
       await tester.pumpAndSettle();
 
       expect(readTheme().contrastLevel, 0);
-      expect(find.byIcon(Icons.replay), findsNothing);
+      expect(resetVisible(tester), isFalse);
     });
   });
 
@@ -327,7 +370,7 @@ void main() {
       tester,
     ) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Layout');
+      await openTab(tester, 'Other');
 
       expect(container.read(appSettingProvider).newDashboard, isTrue);
 
@@ -344,7 +387,7 @@ void main() {
   group('text scale', () {
     testWidgets('hides the slider until its toggle is enabled', (tester) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Layout');
+      await openTab(tester, 'Other');
 
       expect(readTheme().textScale.enable, isFalse);
       expect(find.byType(Slider), findsNothing);
@@ -358,7 +401,7 @@ void main() {
 
     testWidgets('the slider writes a new scale once enabled', (tester) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Layout');
+      await openTab(tester, 'Other');
       await tester.tap(switchOf('Text scaling'));
       await tester.pumpAndSettle();
       final before = readTheme().textScale.scale;
@@ -379,7 +422,7 @@ void main() {
           );
 
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Layout');
+      await openTab(tester, 'Other');
 
       expect(find.text('120%'), findsOneWidget);
     });
@@ -392,7 +435,7 @@ void main() {
           );
 
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Layout');
+      await openTab(tester, 'Other');
       await tester.tap(find.byIcon(Icons.replay));
       await tester.pumpAndSettle();
 

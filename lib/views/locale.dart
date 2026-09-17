@@ -59,7 +59,41 @@ class LocaleView extends ConsumerWidget {
                 ),
             ],
           ),
+          const _TranslationNotice(),
           const SettingBottomInset(),
+        ],
+      ),
+    );
+  }
+}
+
+class _TranslationNotice extends StatelessWidget {
+  const _TranslationNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
+        children: [
+          Text(
+            appLocalizations.translationNotice,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              dialogs.openUrl(
+                'https://github.com/$repository/issues/new?template=translation.yml',
+              );
+            },
+            icon: const Icon(Icons.translate_outlined, size: 18),
+            label: Text(appLocalizations.translationSuggestFix),
+          ),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:reclash/widgets/popup.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
@@ -643,5 +644,82 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(Card).last), card);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('arrow keys open and fold a sub menu', (tester) async {
+    final open = await pumpMenu(tester, [
+      CommonPopupMenuItem(label: 'first', onPressed: () {}),
+      CommonPopupMenuItem(
+        label: 'parent',
+        subItems: [CommonPopupMenuItem(label: 'child', onPressed: () {})],
+      ),
+    ]);
+    open();
+    await tester.pumpAndSettle();
+
+    bool focusesRow(String label) {
+      final context = FocusManager.instance.primaryFocus?.context;
+      if (context == null) return false;
+      final row = context.findAncestorWidgetOfExactType<InkWell>();
+      if (row == null) return false;
+      final texts = find.descendant(
+        of: find.byWidget(row),
+        matching: find.byType(Text),
+      );
+      return texts.evaluate().any(
+        (element) => (element.widget as Text).data == label,
+      );
+    }
+
+    for (var i = 0; i < 10 && !focusesRow('parent'); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+    expect(focusesRow('parent'), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text('child'), findsOneWidget);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text('child'), findsNothing);
+    expect(find.text('parent'), findsOneWidget);
+  });
+
+  testWidgets('hidden menu levels leave the focus traversal', (tester) async {
+    final open = await pumpMenu(tester, [
+      CommonPopupMenuItem(label: 'first', onPressed: () {}),
+      CommonPopupMenuItem(
+        label: 'parent',
+        subItems: [CommonPopupMenuItem(label: 'child', onPressed: () {})],
+      ),
+    ]);
+    open();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('parent'));
+    await tester.pumpAndSettle();
+    expect(find.text('child'), findsOneWidget);
+
+    String? focusedRowLabel() {
+      final context = FocusManager.instance.primaryFocus?.context;
+      final row = context?.findAncestorWidgetOfExactType<InkWell>();
+      if (row == null) return null;
+      final texts = find
+          .descendant(of: find.byWidget(row), matching: find.byType(Text))
+          .evaluate();
+      if (texts.isEmpty) return null;
+      return (texts.first.widget as Text).data;
+    }
+
+    final seen = <String>{};
+    for (var i = 0; i < 12; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      final label = focusedRowLabel();
+      if (label != null) seen.add(label);
+    }
+    expect(seen, contains('child'));
+    expect(seen, isNot(contains('first')));
   });
 }

@@ -1,52 +1,147 @@
 import 'dart:async';
 
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 
 class TvFocusOutline extends StatefulWidget {
-  const TvFocusOutline({super.key, required this.child});
+  const TvFocusOutline({
+    super.key,
+    this.shape = AppShape.md,
+    this.color,
+    this.enabled = true,
+    required this.child,
+  }) : builder = null;
 
-  final Widget child;
+  const TvFocusOutline.builder({
+    super.key,
+    this.shape = AppShape.md,
+    this.color,
+    this.enabled = true,
+    required this.builder,
+  }) : child = null;
+
+  final Widget? child;
+  final Widget Function(FocusNode focusNode)? builder;
+  final OutlinedBorder shape;
+  final Color? color;
+  final bool enabled;
 
   @override
   State<TvFocusOutline> createState() => _TvFocusOutlineState();
 }
 
 class _TvFocusOutlineState extends State<TvFocusOutline> {
-  bool _focused = false;
+  late final FocusNode _node = FocusNode(
+    canRequestFocus: widget.builder != null,
+    skipTraversal: widget.builder == null,
+  );
+  bool _highlighted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _node.addListener(_updateHighlight);
+    FocusManager.instance.addHighlightModeListener(_handleHighlightMode);
+  }
+
+  void _handleHighlightMode(FocusHighlightMode _) => _updateHighlight();
+
+  void _updateHighlight() {
+    final focused = widget.builder == null
+        ? _node.hasFocus
+        : _node.hasPrimaryFocus;
+    final highlighted =
+        focused &&
+        (system.isTV ||
+            FocusManager.instance.highlightMode ==
+                FocusHighlightMode.traditional);
+    if (mounted && highlighted != _highlighted) {
+      setState(() => _highlighted = highlighted);
+    }
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_handleHighlightMode);
+    _node.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (!system.isTV) return widget.child;
-    return Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
-      onFocusChange: (value) => setState(() => _focused = value),
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: ShapeDecoration(
-          shape: AppShape.md.copyWith(
-            side: BorderSide(
-              color: _focused
-                  ? context.colorScheme.onSurface
-                  : Colors.transparent,
-              width: 2,
-            ),
+    final child =
+        widget.builder?.call(_node) ??
+        Focus.withExternalFocusNode(focusNode: _node, child: widget.child!);
+    return DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: ShapeDecoration(
+        shape: widget.shape.copyWith(
+          side: BorderSide(
+            color: widget.enabled && _highlighted
+                ? widget.color ?? context.colorScheme.primary
+                : Colors.transparent,
+            width: 2,
           ),
         ),
-        child: widget.child,
+      ),
+      child: child,
+    );
+  }
+}
+
+class DirectionalSlider extends StatelessWidget {
+  const DirectionalSlider({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return TvFocusOutline(
+      child: MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(navigationMode: NavigationMode.directional),
+        child: child,
       ),
     );
   }
 }
 
+class FocusTraversalPage<T> extends Page<T> {
+  const FocusTraversalPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) => _FocusTraversalRoute<T>(this);
+}
+
+class _FocusTraversalRoute<T> extends PageRoute<T>
+    with MaterialRouteTransitionMixin<T> {
+  _FocusTraversalRoute(FocusTraversalPage<T> page)
+    : super(
+        settings: page,
+        directionalTraversalEdgeBehavior: TraversalEdgeBehavior.parentScope,
+      );
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Widget buildContent(BuildContext context) =>
+      (settings as FocusTraversalPage<T>).child;
+}
+
 class PageFocusScope extends StatefulWidget {
   final Widget child;
   final bool autofocus;
+  final TraversalEdgeBehavior directionalTraversalEdgeBehavior;
 
   const PageFocusScope({
     super.key,
     this.autofocus = false,
+    this.directionalTraversalEdgeBehavior = TraversalEdgeBehavior.parentScope,
     required this.child,
   });
 
@@ -55,9 +150,10 @@ class PageFocusScope extends StatefulWidget {
 }
 
 class _PageFocusScopeState extends State<PageFocusScope> {
-  final FocusScopeNode _node = FocusScopeNode()
-    ..traversalEdgeBehavior = TraversalEdgeBehavior.parentScope
-    ..directionalTraversalEdgeBehavior = TraversalEdgeBehavior.parentScope;
+  late final FocusScopeNode _node = FocusScopeNode(
+    traversalEdgeBehavior: TraversalEdgeBehavior.parentScope,
+    directionalTraversalEdgeBehavior: widget.directionalTraversalEdgeBehavior,
+  );
 
   @override
   void initState() {
@@ -68,6 +164,8 @@ class _PageFocusScopeState extends State<PageFocusScope> {
   @override
   void didUpdateWidget(covariant PageFocusScope oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _node.directionalTraversalEdgeBehavior =
+        widget.directionalTraversalEdgeBehavior;
     if (!oldWidget.autofocus && widget.autofocus) _autofocus();
   }
 
@@ -75,9 +173,10 @@ class _PageFocusScopeState extends State<PageFocusScope> {
     if (!widget.autofocus) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !widget.autofocus) return;
-      FocusTraversalGroup.of(
-        context,
-      ).findFirstFocus(_node, ignoreCurrentFocus: true)?.requestFocus();
+      final target = FocusTraversalGroup.of(context).findFirstFocus(_node);
+      if (target != null) {
+        FocusTraversalPolicy.defaultTraversalRequestFocusCallback(target);
+      }
     });
   }
 
@@ -101,7 +200,7 @@ class FocusedScrollView extends StatefulWidget {
     super.key,
     required this.controller,
     required this.child,
-    this.alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    this.alignmentPolicy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
     this.alignment = 0.5,
   });
 
@@ -130,31 +229,45 @@ class _FocusedScrollViewState extends State<FocusedScrollView> {
   void _revealPrimaryFocus() {
     final focusContext = FocusManager.instance.primaryFocus?.context;
     if (focusContext == null || !focusContext.mounted) return;
-    final scrollContext = context;
     var isInside = false;
     focusContext.visitAncestorElements((element) {
-      if (element == scrollContext) {
+      if (element == context) {
         isInside = true;
         return false;
       }
       return true;
     });
     if (!isInside) return;
-    final focusRenderObject = focusContext.findRenderObject();
-    if (focusRenderObject == null) return;
+    final target = focusContext.findRenderObject();
+    if (target == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted ||
           !widget.controller.hasClients ||
-          !focusRenderObject.attached ||
+          !target.attached ||
           FocusManager.instance.primaryFocus?.context != focusContext) {
         return;
       }
+      final position = widget.controller.position;
+      var policy = widget.alignmentPolicy;
+      if (policy != ScrollPositionAlignmentPolicy.explicit) {
+        final viewport = RenderAbstractViewport.maybeOf(target);
+        if (viewport == null) return;
+        final start = viewport.getOffsetToReveal(target, 0).offset;
+        final end = viewport.getOffsetToReveal(target, 1).offset;
+        if (start < position.pixels) {
+          policy = ScrollPositionAlignmentPolicy.keepVisibleAtStart;
+        } else if (end > position.pixels) {
+          policy = ScrollPositionAlignmentPolicy.keepVisibleAtEnd;
+        } else {
+          return;
+        }
+      }
       unawaited(
-        widget.controller.position.ensureVisible(
-          focusRenderObject,
+        position.ensureVisible(
+          target,
           alignment: widget.alignment,
-          alignmentPolicy: widget.alignmentPolicy,
-          duration: const Duration(milliseconds: 140),
+          alignmentPolicy: policy,
+          duration: context.motionDuration(const Duration(milliseconds: 140)),
           curve: Easing.standardDecelerate,
         ),
       );
@@ -165,22 +278,4 @@ class _FocusedScrollViewState extends State<FocusedScrollView> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class PageTraversalPolicy extends ReadingOrderTraversalPolicy {
-  @override
-  bool inDirection(FocusNode currentNode, TraversalDirection direction) {
-    final scope = currentNode.nearestScope;
-    if (super.inDirection(currentNode, direction)) {
-      return true;
-    }
-
-    final parent = scope?.enclosingScope;
-    if (parent == null || parent == FocusManager.instance.rootScope) {
-      return false;
-    }
-    return switch (direction) {
-      TraversalDirection.down || TraversalDirection.right => parent.nextFocus(),
-      TraversalDirection.up ||
-      TraversalDirection.left => parent.previousFocus(),
-    };
-  }
-}
+class PageTraversalPolicy extends ReadingOrderTraversalPolicy {}

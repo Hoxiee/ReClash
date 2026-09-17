@@ -941,11 +941,15 @@ Future<String> _backupTask<T>(
     databasePath: args.databasePath ?? await appPath.databasePath,
     profilesDirPath: await appPath.profilesPath,
     scriptsDirPath: await appPath.scriptsDirPath,
+    wallpapersDirPath: await appPath.wallpapersDirPath,
     zipFilePath: join(tempPath, '$prefix.zip'),
     tempDatabasePath: join(tempPath, '$prefix.db'),
     tempConfigPath: join(tempPath, '$prefix.json'),
   );
 }
+
+// Duplicated from the store limit to keep the backup isolate free of dart:ui.
+const maxBackupWallpaperBytes = 32 * 1024 * 1024;
 
 @visibleForTesting
 Future<String> writeBackupArchive({
@@ -954,6 +958,7 @@ Future<String> writeBackupArchive({
   required String databasePath,
   required String profilesDirPath,
   required String scriptsDirPath,
+  String? wallpapersDirPath,
   required String zipFilePath,
   required String tempDatabasePath,
   required String tempConfigPath,
@@ -984,6 +989,18 @@ Future<String> writeBackupArchive({
   }
   if (await scriptsDir.exists()) {
     await encoder.addDirectory(scriptsDir, filter: keepListed);
+  }
+  final wallpaperFileName = wallpaperFileNameOf(configMap);
+  if (wallpaperFileName != null) {
+    final dirPath =
+        wallpapersDirPath ?? join(dirname(profilesDirPath), 'wallpapers');
+    final file = File(join(dirPath, wallpaperFileName));
+    try {
+      if (await file.exists() &&
+          await file.length() <= maxBackupWallpaperBytes) {
+        await encoder.addFile(file, 'wallpapers/$wallpaperFileName');
+      }
+    } catch (_) {}
   }
   await encoder.close();
   await tempConfigFile.safeDelete();

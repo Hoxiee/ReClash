@@ -42,9 +42,16 @@ class CommonChip extends StatelessWidget {
             ),
           ),
           if (onDeleted != null)
-            GestureDetector(
-              onTap: onDeleted,
-              child: Icon(Icons.close, size: 14, color: foregroundColor),
+            Tooltip(
+              message: context.appLocalizations.delete,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onDeleted,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(Icons.close, size: 14, color: foregroundColor),
+                ),
+              ),
             ),
         ],
       ),

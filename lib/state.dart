@@ -23,6 +23,12 @@ class GlobalState {
   late ProviderContainer container;
   bool needInitStatus = true;
 
+  /// Escape mirrors the system back button for in-app navigation, but unlike
+  /// the system back it must never close the app. A pop cannot carry its
+  /// origin, so every Escape-initiated pop holds this counter while it
+  /// resolves and the terminal back scopes skip their close when held.
+  var escapeBackDepth = 0;
+
   bool get isPre => appEnv != 'stable';
 
   bool get canCrashCore => canCrashCoreFor(isDebug: kDebugMode, appEnv: appEnv);

@@ -372,11 +372,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appRegionOther": MessageLookupByLibrary.simpleMessage("Başga"),
     "appearance": MessageLookupByLibrary.simpleMessage("Görnüş"),
+    "appearanceBackground": MessageLookupByLibrary.simpleMessage("Fon"),
     "appearanceDesc": MessageLookupByLibrary.simpleMessage(
       "Tema, reňkler, nyşanlar we panel stili",
     ),
     "appearanceIcon": MessageLookupByLibrary.simpleMessage("Nyşan"),
-    "appearanceLayout": MessageLookupByLibrary.simpleMessage("Ýerleşim"),
     "appearanceTheme": MessageLookupByLibrary.simpleMessage("Tema"),
     "appendSystemDns": MessageLookupByLibrary.simpleMessage(
       "Ulgam DNS-ini goşmak",
@@ -1508,10 +1508,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -3580,6 +3579,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy porty"),
     "trafficFreeOfTotal": m102,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
+    "translationNotice": MessageLookupByLibrary.simpleMessage(
+      "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
+    ),
+    "translationSuggestFix": MessageLookupByLibrary.simpleMessage(
+      "Terjime düzedişini teklip et",
+    ),
     "trustedNetworks": MessageLookupByLibrary.simpleMessage("Ynamly torlar"),
     "trustedNetworksDesc": MessageLookupByLibrary.simpleMessage(
       "Bu torlaryň birine baglanylanda VPN awtomatiki bes edilýär",
@@ -3685,6 +3690,63 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "vpnTip": MessageLookupByLibrary.simpleMessage(
       "VPN täzeden işledilenden soň üýtgeşmeler güýje girer",
+    ),
+    "wallpaperBlur": MessageLookupByLibrary.simpleMessage("Bulaňňylaşdyrmak"),
+    "wallpaperCardOpacity": MessageLookupByLibrary.simpleMessage(
+      "Kartoçkalaryň dury dälligi",
+    ),
+    "wallpaperChoose": MessageLookupByLibrary.simpleMessage("Surat saýla"),
+    "wallpaperDescription": MessageLookupByLibrary.simpleMessage(
+      "Saýlan suratyňyz abunalygyň fonunyň ýerine ulanylýar. Öňki fony dikeltmek üçin ýörite fony öçüriň.",
+    ),
+    "wallpaperDimming": MessageLookupByLibrary.simpleMessage("Garaňkylatmak"),
+    "wallpaperEffects": MessageLookupByLibrary.simpleMessage(
+      "Surat sazlamalary",
+    ),
+    "wallpaperEnabled": MessageLookupByLibrary.simpleMessage(
+      "Ýörite fony ulan",
+    ),
+    "wallpaperFit": MessageLookupByLibrary.simpleMessage("Suraty ýerleşdirmek"),
+    "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Sygdyr"),
+    "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Doldur"),
+    "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Süýndür"),
+    "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
+      "Keseligine ýerleşiş",
+    ),
+    "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
+    ),
+    "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
+    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
+      "Fon suraty elýeterli däl. Ony täzeden saýlaň.",
+    ),
+    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
+      "Surat saýlanmady",
+    ),
+    "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
+      "Suratyň dury dälligi",
+    ),
+    "wallpaperReadability": MessageLookupByLibrary.simpleMessage(
+      "Okamak aňsatlygy",
+    ),
+    "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Suraty aýyr"),
+    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("Suraty çalyş"),
+    "wallpaperReset": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalary başlangyja getir",
+    ),
+    "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
+      "Fony ýatda saklap bolmady. Öňki fon saklandy.",
+    ),
+    "wallpaperScale": MessageLookupByLibrary.simpleMessage("Masştab"),
+    "wallpaperSelectHint": MessageLookupByLibrary.simpleMessage(
+      "PNG, JPEG ýa-da WebP · 20 MB-a çenli",
+    ),
+    "wallpaperTitle": MessageLookupByLibrary.simpleMessage("Ýörite fon"),
+    "wallpaperTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Ölçegi 20 MB-dan we piksel sany 50 milliondan geçmeýän suraty saýlaň.",
+    ),
+    "wallpaperVerticalPosition": MessageLookupByLibrary.simpleMessage(
+      "Dikligine ýerleşiş",
     ),
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage(
       "WebDAV sazlamalary",

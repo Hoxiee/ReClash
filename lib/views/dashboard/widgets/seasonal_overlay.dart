@@ -77,24 +77,27 @@ class _SeasonalDashboardOverlayState
     } else if ((!visible || reduceMotion) && _ticker.isAnimating) {
       _ticker.stop();
     }
-    if (!visible) return widget.child;
+    // The stack itself never leaves the tree: rebuilding the page behind the
+    // snow (the pager hides it while animating) must not remount that page,
+    // or every transition would abort itself mid-flight.
     return Stack(
       fit: StackFit.expand,
       children: [
         widget.child,
-        IgnorePointer(
-          child: RepaintBoundary(
-            child: AnimatedBuilder(
-              animation: _ticker,
-              builder: (_, _) => CustomPaint(
-                painter: _SnowPainter(
-                  progress: reduceMotion ? 0.32 : _ticker.value,
-                  color: context.colorScheme.onSurfaceVariant,
+        if (visible)
+          IgnorePointer(
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _ticker,
+                builder: (_, _) => CustomPaint(
+                  painter: _SnowPainter(
+                    progress: reduceMotion ? 0.32 : _ticker.value,
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

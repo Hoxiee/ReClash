@@ -314,4 +314,71 @@ void main() {
     expect(find.byKey(AppNavRail.focusRingKey), findsOneWidget);
     expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
   });
+
+  testWidgets('rail arrows stop at the edges instead of wrapping', (
+    tester,
+  ) async {
+    await pumpRail(tester);
+
+    bool focusInRail() {
+      final context = FocusManager.instance.primaryFocus?.context;
+      return context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
+    }
+
+    for (var i = 0; i < 10 && !focusInRail(); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+    expect(focusInRail(), isTrue);
+
+    String focusedLabel() {
+      final context = FocusManager.instance.primaryFocus?.context;
+      final slot = context?.findAncestorWidgetOfExactType<InkWell>();
+      return tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byWidget(slot!),
+              matching: find.byType(Text),
+            ),
+          )
+          .data!;
+    }
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    final top = focusedLabel();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(focusedLabel(), top);
+    expect(focusInRail(), isTrue);
+
+    for (var i = 0; i < 10; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+    }
+    final bottom = focusedLabel();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(focusedLabel(), bottom);
+    expect(focusInRail(), isTrue);
+  });
+
+  testWidgets('rail left arrow keeps focus inside the rail', (tester) async {
+    await pumpRail(tester);
+
+    bool focusInRail() {
+      final context = FocusManager.instance.primaryFocus?.context;
+      return context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
+    }
+
+    for (var i = 0; i < 10 && !focusInRail(); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+    }
+    expect(focusInRail(), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(focusInRail(), isTrue);
+  });
 }
