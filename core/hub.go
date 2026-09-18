@@ -754,6 +754,15 @@ func defaultRefreshHealthChecks() {
 
 var refreshHealthChecks = defaultRefreshHealthChecks
 
+// A wake on the same physical network fires no connectivity callback, so the
+// stale-socket drop NetworkObserveModule does on handover has to be reissued here.
+func defaultDropStaleConnections() {
+	handleResetConnections()
+	handleCloseConnections()
+}
+
+var dropStaleConnections = defaultDropStaleConnections
+
 func startHealthCheckCadence() {
 	healthCheckCadenceMu.Lock()
 	defer healthCheckCadenceMu.Unlock()
@@ -809,6 +818,13 @@ func handleSuspend(suspended bool) bool {
 	}
 
 	tunnel.OnRunning()
+	// A real wake (screen back, listeners up), not a Doze maintenance window.
+	// Sockets from before the sleep point at a gateway the far end has dropped;
+	// the routing engine reselects nodes but never touches those app sessions.
+	woke := wasSuspended && !isScreenOff.Load() && isRunning.Load()
+	if woke {
+		dropStaleConnections()
+	}
 	// Provider health checks keep ticking through Doze, where the app has no
 	// network at all, so coming back means every proxy is marked dead and every
 	// delay reads Timeout. A lazy provider then skips its next tick because
@@ -817,7 +833,7 @@ func handleSuspend(suspended bool) bool {
 	// listeners are stopped, since the service also resumes the core on its way
 	// down, and not when the routing engine is on: it buys one probe for the
 	// node in use instead of one per provider.
-	if wasSuspended && !isScreenOff.Load() && isRunning.Load() && !rcxEngineInstance.Enabled() {
+	if woke && !rcxEngineInstance.Enabled() {
 		refreshHealthChecks()
 	}
 	rcxEngineInstance.OnSuspend(false)

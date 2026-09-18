@@ -408,12 +408,15 @@ func TestHandleScreenOnRefreshesHealthChecksOnce(t *testing.T) {
 
 func TestHealthCheckCatchUpWaitsForScreenAndSuspendRecovery(t *testing.T) {
 	previousRefresh := refreshHealthChecks
+	previousDrop := dropStaleConnections
 	previousTunUp := tunUp.Load()
 	previousRunning := isRunning.Load()
 	previousScreenOff := isScreenOff.Load()
 	previousSuspended := isSuspended.Load()
+	dropStaleConnections = func() {}
 	t.Cleanup(func() {
 		refreshHealthChecks = previousRefresh
+		dropStaleConnections = previousDrop
 		tunUp.Store(previousTunUp)
 		isRunning.Store(previousRunning)
 		isScreenOff.Store(previousScreenOff)
@@ -462,23 +465,33 @@ func TestHealthCheckCatchUpWaitsForScreenAndSuspendRecovery(t *testing.T) {
 
 func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	var refreshes atomic.Int32
+	var drops atomic.Int32
 
 	previous := refreshHealthChecks
+	previousDrop := dropStaleConnections
 	previousRunning := isRunning.Load()
+	previousScreenOff := isScreenOff.Load()
 	refreshHealthChecks = func() { refreshes.Add(1) }
+	dropStaleConnections = func() { drops.Add(1) }
 	t.Cleanup(func() {
 		refreshHealthChecks = previous
+		dropStaleConnections = previousDrop
 		isRunning.Store(previousRunning)
+		isScreenOff.Store(previousScreenOff)
 		isSuspended.Store(false)
 		tunnel.OnRunning()
 	})
 
 	isSuspended.Store(false)
+	isScreenOff.Store(false)
 	isRunning.Store(true)
 
 	handleSuspend(false)
 	if got := refreshes.Load(); got != 0 {
 		t.Errorf("refreshes = %d, want none: the device was never suspended", got)
+	}
+	if got := drops.Load(); got != 0 {
+		t.Errorf("drops = %d, want none: the device was never suspended", got)
 	}
 
 	handleSuspend(true)
@@ -488,6 +501,9 @@ func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	if got := refreshes.Load(); got != 0 {
 		t.Errorf("refreshes = %d, want none while the device is still suspended", got)
 	}
+	if got := drops.Load(); got != 0 {
+		t.Errorf("drops = %d, want none while the device is still suspended", got)
+	}
 
 	handleSuspend(false)
 	if isSuspended.Load() {
@@ -496,10 +512,16 @@ func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	if got := refreshes.Load(); got != 1 {
 		t.Errorf("refreshes = %d, want exactly one on resume", got)
 	}
+	if got := drops.Load(); got != 1 {
+		t.Errorf("drops = %d, want exactly one stale-socket drop on resume", got)
+	}
 
 	handleSuspend(false)
 	if got := refreshes.Load(); got != 1 {
 		t.Errorf("refreshes = %d, want a redundant resume to change nothing", got)
+	}
+	if got := drops.Load(); got != 1 {
+		t.Errorf("drops = %d, want a redundant resume to change nothing", got)
 	}
 
 	// The service resumes the core on its way down, and probing every node
@@ -509,6 +531,49 @@ func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
 	handleSuspend(false)
 	if got := refreshes.Load(); got != 1 {
 		t.Errorf("refreshes = %d, want no probe while the listeners are stopped", got)
+	}
+	if got := drops.Load(); got != 1 {
+		t.Errorf("drops = %d, want no drop while the listeners are stopped", got)
+	}
+}
+
+// The routing engine reselects nodes but never closes the app sockets that hold
+// the dead sessions, so a wake still has to drop them even with the engine on.
+func TestHandleSuspendDropsStaleConnectionsIndependentlyOfEngine(t *testing.T) {
+	var refreshes atomic.Int32
+	var drops atomic.Int32
+
+	previousRefresh := refreshHealthChecks
+	previousDrop := dropStaleConnections
+	previousRunning := isRunning.Load()
+	previousScreenOff := isScreenOff.Load()
+	previousEngine := rcxEngineInstance
+	refreshHealthChecks = func() { refreshes.Add(1) }
+	dropStaleConnections = func() { drops.Add(1) }
+	engine := newRcxEngine(newFakeRuntime())
+	engine.enabled = true
+	rcxEngineInstance = engine
+	t.Cleanup(func() {
+		refreshHealthChecks = previousRefresh
+		dropStaleConnections = previousDrop
+		isRunning.Store(previousRunning)
+		isScreenOff.Store(previousScreenOff)
+		isSuspended.Store(false)
+		rcxEngineInstance = previousEngine
+		tunnel.OnRunning()
+	})
+
+	isSuspended.Store(false)
+	isScreenOff.Store(false)
+	isRunning.Store(true)
+
+	handleSuspend(true)
+	handleSuspend(false)
+	if got := drops.Load(); got != 1 {
+		t.Errorf("drops = %d, want one wake drop even with the engine on", got)
+	}
+	if got := refreshes.Load(); got != 0 {
+		t.Errorf("refreshes = %d, want the engine to own probing while enabled", got)
 	}
 }
 
