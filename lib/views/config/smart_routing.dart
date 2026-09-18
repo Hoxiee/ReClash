@@ -45,7 +45,6 @@ class SmartRoutingView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
-    final region = ref.watch(appRegionProvider);
     final profile = ref.watch(currentProfileProvider);
     final servicePolicies = {
       for (final policy in profile?.serviceRoutePolicies ?? const [])
@@ -77,7 +76,6 @@ class SmartRoutingView extends ConsumerWidget {
       slivers.addAll([
         SettingSection.sliver(
           title: appLocalizations.smartRoutingPreset,
-          subTitle: appLocalizations.appRegionDesc,
           actions: [
             const SizedBox(width: 8),
             CommonMinFilledButtonTheme(
@@ -90,24 +88,6 @@ class SmartRoutingView extends ConsumerWidget {
             ),
           ],
           items: [
-            DecorationListItem.options(
-              title: Text(appLocalizations.smartRoutingRegion),
-              subtitle: Text(
-                props.matchesPreset && props.preset == region.preset
-                    ? region.label(context)
-                    : appLocalizations.smartRoutingPresetEdited(
-                        region.label(context),
-                      ),
-              ),
-              dialogTitle: appLocalizations.smartRoutingRegion,
-              options: AppRegion.values,
-              value: region,
-              textBuilder: (value) => (value as AppRegion).label(context),
-              onChanged: (value) {
-                if (!context.mounted || value == null) return;
-                selectAppRegion(ref.read, value as AppRegion);
-              },
-            ),
             DecorationListItem.options(
               title: Text(appLocalizations.smartRoutingStrategy),
               subtitle: Text(

@@ -156,16 +156,16 @@ class AddProfileView extends ConsumerWidget {
           onTap: () => _toScan(ref, context),
         ),
       ListItem(
-        leading: const Icon(Icons.cloud_download_sharp),
-        title: Text(appLocalizations.url),
-        subtitle: Text(appLocalizations.urlDesc),
-        onTap: () => _toAdd(ref, context),
-      ),
-      ListItem(
         leading: const Icon(Icons.upload_file_sharp),
         title: Text(appLocalizations.file),
         subtitle: Text(appLocalizations.fileDesc),
         onTap: () => _handleAddProfileFormFile(ref, context),
+      ),
+      ListItem(
+        leading: const Icon(Icons.cloud_download_sharp),
+        title: Text(appLocalizations.url),
+        subtitle: Text(appLocalizations.urlDesc),
+        onTap: () => _toAdd(ref, context),
       ),
       ListItem(
         leading: const Icon(Icons.data_object_rounded),

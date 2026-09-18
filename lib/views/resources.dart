@@ -81,7 +81,6 @@ class ResourcesView extends ConsumerWidget {
         children: [
           SettingSection(
             top: 16,
-            title: appLocalizations.geoOptions,
             items: [
               DecorationListItem.toggle(
                 title: Text(appLocalizations.geoAutoUpdate),
