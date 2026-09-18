@@ -15,7 +15,7 @@
   <a href="https://github.com/Hoxiee/ReClash/actions/workflows/build.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Hoxiee/ReClash/build.yaml?branch=main&style=flat-square&label=CI"></a>
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="GPL-3.0 license" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
-  <a href="https://t.me/ReClashNews"><img alt="Telegram news" src="https://img.shields.io/badge/Telegram-ReClashNews-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://t.me/ReClashApp"><img alt="Telegram news" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
 </p>
 
 ReClash is a cross-platform application for Android, Windows, macOS, and Linux. Add and update subscriptions, switch proxies, monitor connections and traffic, and connect through system proxy or TUN/VPN. Settings, backups, and diagnostic tools are available in one interface.
@@ -142,7 +142,7 @@ Localizations are alive. If a phrase sounds off to a native ear, please [open a 
 
 Read [SUPPORT.md](SUPPORT.md) before reporting a problem, especially before sharing logs or profiles. Security issues must be reported privately according to [SECURITY.md](SECURITY.md). Contributions are welcome under [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Project announcements are published in the [ReClash Telegram channel](https://t.me/ReClashNews). It is a news channel, not a private provider-support service.
+Project announcements are published in the [ReClash Telegram channel](https://t.me/ReClashApp). It is a news channel, not a private provider-support service.
 
 ## Acknowledgements
 

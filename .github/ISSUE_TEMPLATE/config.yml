@@ -4,7 +4,7 @@ contact_links:
     url: https://github.com/Hoxiee/ReClash/blob/main/SUPPORT.md
     about: Check troubleshooting steps and learn how to share logs safely. / 查看排障步骤以及安全分享日志的方法。
   - name: Release news / 发布动态
-    url: https://t.me/ReClashNews
+    url: https://t.me/ReClashApp
     about: Follow ReClash release announcements on Telegram. / 在 Telegram 关注 ReClash 发布动态。
   - name: Security report / 安全报告
     url: https://github.com/Hoxiee/ReClash/blob/main/SECURITY.md

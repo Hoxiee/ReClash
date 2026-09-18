@@ -15,7 +15,7 @@
   <a href="https://github.com/Hoxiee/ReClash/actions/workflows/build.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Hoxiee/ReClash/build.yaml?branch=main&style=flat-square&label=CI"></a>
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="最新版本" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="GPL-3.0 许可证" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
-  <a href="https://t.me/ReClashNews"><img alt="Telegram 频道" src="https://img.shields.io/badge/Telegram-ReClashNews-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://t.me/ReClashApp"><img alt="Telegram 频道" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
 </p>
 
 ReClash 是面向 Android、Windows、macOS 和 Linux 的跨平台应用。添加和更新订阅、快速切换代理、监控连接与流量，并通过系统代理或 TUN/VPN 连接。设置、备份和诊断工具集中在同一个界面中。
@@ -129,7 +129,7 @@ dart setup.dart linux
 
 提交问题前请阅读 [SUPPORT.md](SUPPORT.md)，尤其是安全分享日志与配置的说明。安全漏洞应按照 [SECURITY.md](SECURITY.md) 私下报告。贡献规则见 [CONTRIBUTING.md](CONTRIBUTING.md)，社区行为规范见 [Code of Conduct](CODE_OF_CONDUCT.md)。
 
-项目动态发布在 [ReClash Telegram 频道](https://t.me/ReClashNews)。该频道用于发布新闻，不是服务商的私人客服渠道。
+项目动态发布在 [ReClash Telegram 频道](https://t.me/ReClashApp)。该频道用于发布新闻，不是服务商的私人客服渠道。
 
 ## 致谢
 

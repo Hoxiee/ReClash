@@ -128,7 +128,7 @@ class AboutView extends ConsumerWidget {
                 leading: const Icon(Icons.telegram),
                 trailing: const Icon(Icons.launch, size: 20),
                 onPressed: () {
-                  dialogs.openUrl('https://t.me/ReClashNews');
+                  dialogs.openUrl('https://t.me/ReClashApp');
                 },
               ),
               DecorationListItem(

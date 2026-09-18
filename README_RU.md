@@ -15,7 +15,7 @@
   <a href="https://github.com/Hoxiee/ReClash/actions/workflows/build.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Hoxiee/ReClash/build.yaml?branch=main&style=flat-square&label=CI"></a>
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Последний релиз" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="Лицензия GPL-3.0" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
-  <a href="https://t.me/ReClashNews"><img alt="Новости в Telegram" src="https://img.shields.io/badge/Telegram-ReClashNews-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://t.me/ReClashApp"><img alt="Новости в Telegram" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
 </p>
 
 ReClash — кроссплатформенное приложение для Android, Windows, macOS и Linux. Добавляйте и обновляйте подписки, быстро переключайте узлы, контролируйте соединения и трафик, используйте системный прокси или TUN/VPN. Настройки, резервные копии и инструменты диагностики доступны в одном интерфейсе.
@@ -142,7 +142,7 @@ ReClash говорит на восьми языках, чтобы им могл�
 
 Перед сообщением о проблеме прочитайте [SUPPORT.md](SUPPORT.md), особенно правила безопасной публикации логов и профилей. Уязвимости нужно отправлять приватно по инструкции из [SECURITY.md](SECURITY.md). Правила участия находятся в [CONTRIBUTING.md](CONTRIBUTING.md), нормы общения — в [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Новости проекта публикуются в [Telegram-канале ReClash](https://t.me/ReClashNews). Это канал новостей, а не приватная поддержка провайдеров.
+Новости проекта публикуются в [Telegram-канале ReClash](https://t.me/ReClashApp). Это канал новостей, а не приватная поддержка провайдеров.
 
 ## Благодарности
 

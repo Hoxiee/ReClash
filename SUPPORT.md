@@ -10,7 +10,7 @@ ReClash is maintained as an open-source application. Support is best effort, and
 4. Search existing issues and pull requests when repository Issues are enabled.
 5. Collect the ReClash version, operating system, architecture, exact steps, and relevant debug log lines.
 
-Use the bug report form for reproducible application problems and the feature request form for a concrete user need. The [Telegram channel](https://t.me/ReClashNews) publishes project news; it is not a private support desk.
+Use the bug report form for reproducible application problems and the feature request form for a concrete user need. The [Telegram channel](https://t.me/ReClashApp) publishes project news; it is not a private support desk.
 
 ## Share logs safely
 
