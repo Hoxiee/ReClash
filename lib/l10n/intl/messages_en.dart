@@ -3569,6 +3569,42 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Your subscription expires today",
     ),
+    "subscriptionFaultClient": MessageLookupByLibrary.simpleMessage(
+      "The problem is on this device",
+    ),
+    "subscriptionFaultClientDesc": MessageLookupByLibrary.simpleMessage(
+      "The VPN or tunnel is not fully active. Reconnect, then build the report again.",
+    ),
+    "subscriptionFaultInconclusive": MessageLookupByLibrary.simpleMessage(
+      "No single cause stands out",
+    ),
+    "subscriptionFaultInconclusiveDesc": MessageLookupByLibrary.simpleMessage(
+      "The evidence does not point clearly at one side. Save the report anyway — the aggregates still help your provider.",
+    ),
+    "subscriptionFaultServer": MessageLookupByLibrary.simpleMessage(
+      "The problem looks like the provider",
+    ),
+    "subscriptionFaultServerDesc": MessageLookupByLibrary.simpleMessage(
+      "Nodes fail heavily on specific exits while your network is fine. Send this report to your provider.",
+    ),
+    "subscriptionFaultSubscription": MessageLookupByLibrary.simpleMessage(
+      "The subscription failed to update",
+    ),
+    "subscriptionFaultSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
+      "The config could not be fetched or parsed. Send this report to your provider — it points at the fetch or panel side.",
+    ),
+    "subscriptionFaultUnknown": MessageLookupByLibrary.simpleMessage(
+      "Not enough data yet",
+    ),
+    "subscriptionFaultUnknownDesc": MessageLookupByLibrary.simpleMessage(
+      "Use the connection for a while, then build the report again for a clearer verdict.",
+    ),
+    "subscriptionFaultYourNetwork": MessageLookupByLibrary.simpleMessage(
+      "The problem is your network",
+    ),
+    "subscriptionFaultYourNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Traffic is being blocked or the network is offline before it reaches the provider. Check Wi-Fi, mobile data or a captive portal.",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage(
       "Subscription info",
     ),
@@ -3582,6 +3618,25 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription reminders",
     ),
     "subscriptionProviderInterval": m106,
+    "subscriptionReport": MessageLookupByLibrary.simpleMessage(
+      "Subscription report",
+    ),
+    "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
+      "The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?",
+    ),
+    "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
+      "Flagged nodes",
+    ),
+    "subscriptionReportGenerating": MessageLookupByLibrary.simpleMessage(
+      "Building report…",
+    ),
+    "subscriptionReportRuntimeDials": MessageLookupByLibrary.simpleMessage(
+      "Runtime dials",
+    ),
+    "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("Save JSON"),
+    "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
+      "Update failures",
+    ),
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "No regular node addresses were found in this subscription. The panel may have returned a placeholder. Server connectivity was not tested.",
     ),

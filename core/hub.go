@@ -56,6 +56,7 @@ func handleInitClash(params *InitParams) bool {
 		isInit.Store(true)
 	}()
 	rcxEngineInstance.Start()
+	subscriptionReporterInstance.Start()
 	return true
 }
 
@@ -139,6 +140,7 @@ func handleShutdown() bool {
 	handleStopLog()
 	rcxEngineInstance.Stop()
 	provider.SetAutoHealthCheckSuppressed(false)
+	subscriptionReporterInstance.Stop()
 
 	configMu.Lock()
 	isRunning.Store(false)
@@ -1003,7 +1005,10 @@ func init() {
 			},
 		})
 	}
-	tunnel.DefaultFlowEvidenceNotify = connectionDoctor.ObserveFlow
+	tunnel.DefaultFlowEvidenceNotify = func(event tunnel.FlowEvidence) {
+		connectionDoctor.ObserveFlow(event)
+		subscriptionReporterInstance.ObserveFlow(event)
+	}
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
 		connectionDoctor.ObserveTracker(c, false)
 		rcxEngineInstance.NoteTracker(c)

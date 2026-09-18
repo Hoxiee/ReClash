@@ -2629,6 +2629,36 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("订阅已过期"),
     "subscriptionExpiresInDays": m105,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage("订阅今天到期"),
+    "subscriptionFaultClient": MessageLookupByLibrary.simpleMessage("问题出在本设备"),
+    "subscriptionFaultClientDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN 或隧道未完全启用。请重新连接后再次生成报告。",
+    ),
+    "subscriptionFaultInconclusive": MessageLookupByLibrary.simpleMessage(
+      "没有明确的单一原因",
+    ),
+    "subscriptionFaultInconclusiveDesc": MessageLookupByLibrary.simpleMessage(
+      "证据未明确指向某一方。仍可保存报告——汇总数据对提供商仍有帮助。",
+    ),
+    "subscriptionFaultServer": MessageLookupByLibrary.simpleMessage("问题似乎在提供商"),
+    "subscriptionFaultServerDesc": MessageLookupByLibrary.simpleMessage(
+      "在你的网络正常时，节点在特定出口大量失败。请将此报告发送给提供商。",
+    ),
+    "subscriptionFaultSubscription": MessageLookupByLibrary.simpleMessage(
+      "订阅更新失败",
+    ),
+    "subscriptionFaultSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
+      "无法获取或解析配置。请将此报告发送给提供商——它指向获取或面板一侧。",
+    ),
+    "subscriptionFaultUnknown": MessageLookupByLibrary.simpleMessage("数据尚不足"),
+    "subscriptionFaultUnknownDesc": MessageLookupByLibrary.simpleMessage(
+      "先使用一段时间连接，再重新生成报告以获得更清晰的判定。",
+    ),
+    "subscriptionFaultYourNetwork": MessageLookupByLibrary.simpleMessage(
+      "问题出在你的网络",
+    ),
+    "subscriptionFaultYourNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "流量在到达提供商之前就被拦截，或网络已离线。请检查 Wi-Fi、移动数据或强制门户。",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "subscriptionLoopbackWarning": MessageLookupByLibrary.simpleMessage(
       "此配置地址指向 ReClash 自身的代理端口。请检查订阅链接。",
@@ -2638,6 +2668,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("订阅提醒"),
     "subscriptionProviderInterval": m106,
+    "subscriptionReport": MessageLookupByLibrary.simpleMessage("订阅报告"),
+    "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
+      "报告仅包含匿名化的诊断信息：带有协议、传输和出口国家标签的节点代号、错误类别、延迟区间以及你的路由和 desync 预设。绝不包含订阅 URL、真实节点名称、主机名、地址或端口。是否保存为 JSON 以发送给你的提供商?",
+    ),
+    "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
+      "标记的节点",
+    ),
+    "subscriptionReportGenerating": MessageLookupByLibrary.simpleMessage(
+      "正在生成报告…",
+    ),
+    "subscriptionReportRuntimeDials": MessageLookupByLibrary.simpleMessage(
+      "运行时连接",
+    ),
+    "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("保存 JSON"),
+    "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
+      "更新失败",
+    ),
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "订阅中未找到常规节点地址。面板可能返回了占位配置。尚未测试服务器连接。",
     ),

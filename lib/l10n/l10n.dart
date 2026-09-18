@@ -3185,6 +3185,196 @@ class AppLocalizations {
     );
   }
 
+  /// `Subscription report`
+  String get subscriptionReport {
+    return Intl.message(
+      'Subscription report',
+      name: 'subscriptionReport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?`
+  String get subscriptionReportConfirm {
+    return Intl.message(
+      'The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?',
+      name: 'subscriptionReportConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Building report…`
+  String get subscriptionReportGenerating {
+    return Intl.message(
+      'Building report…',
+      name: 'subscriptionReportGenerating',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save JSON`
+  String get subscriptionReportSave {
+    return Intl.message(
+      'Save JSON',
+      name: 'subscriptionReportSave',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Runtime dials`
+  String get subscriptionReportRuntimeDials {
+    return Intl.message(
+      'Runtime dials',
+      name: 'subscriptionReportRuntimeDials',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flagged nodes`
+  String get subscriptionReportFlaggedNodes {
+    return Intl.message(
+      'Flagged nodes',
+      name: 'subscriptionReportFlaggedNodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update failures`
+  String get subscriptionReportUpdateFailures {
+    return Intl.message(
+      'Update failures',
+      name: 'subscriptionReportUpdateFailures',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The problem is your network`
+  String get subscriptionFaultYourNetwork {
+    return Intl.message(
+      'The problem is your network',
+      name: 'subscriptionFaultYourNetwork',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Traffic is being blocked or the network is offline before it reaches the provider. Check Wi-Fi, mobile data or a captive portal.`
+  String get subscriptionFaultYourNetworkDesc {
+    return Intl.message(
+      'Traffic is being blocked or the network is offline before it reaches the provider. Check Wi-Fi, mobile data or a captive portal.',
+      name: 'subscriptionFaultYourNetworkDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The problem is on this device`
+  String get subscriptionFaultClient {
+    return Intl.message(
+      'The problem is on this device',
+      name: 'subscriptionFaultClient',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The VPN or tunnel is not fully active. Reconnect, then build the report again.`
+  String get subscriptionFaultClientDesc {
+    return Intl.message(
+      'The VPN or tunnel is not fully active. Reconnect, then build the report again.',
+      name: 'subscriptionFaultClientDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The subscription failed to update`
+  String get subscriptionFaultSubscription {
+    return Intl.message(
+      'The subscription failed to update',
+      name: 'subscriptionFaultSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The config could not be fetched or parsed. Send this report to your provider — it points at the fetch or panel side.`
+  String get subscriptionFaultSubscriptionDesc {
+    return Intl.message(
+      'The config could not be fetched or parsed. Send this report to your provider — it points at the fetch or panel side.',
+      name: 'subscriptionFaultSubscriptionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The problem looks like the provider`
+  String get subscriptionFaultServer {
+    return Intl.message(
+      'The problem looks like the provider',
+      name: 'subscriptionFaultServer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Nodes fail heavily on specific exits while your network is fine. Send this report to your provider.`
+  String get subscriptionFaultServerDesc {
+    return Intl.message(
+      'Nodes fail heavily on specific exits while your network is fine. Send this report to your provider.',
+      name: 'subscriptionFaultServerDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No single cause stands out`
+  String get subscriptionFaultInconclusive {
+    return Intl.message(
+      'No single cause stands out',
+      name: 'subscriptionFaultInconclusive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The evidence does not point clearly at one side. Save the report anyway — the aggregates still help your provider.`
+  String get subscriptionFaultInconclusiveDesc {
+    return Intl.message(
+      'The evidence does not point clearly at one side. Save the report anyway — the aggregates still help your provider.',
+      name: 'subscriptionFaultInconclusiveDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not enough data yet`
+  String get subscriptionFaultUnknown {
+    return Intl.message(
+      'Not enough data yet',
+      name: 'subscriptionFaultUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use the connection for a while, then build the report again for a clearer verdict.`
+  String get subscriptionFaultUnknownDesc {
+    return Intl.message(
+      'Use the connection for a while, then build the report again for a clearer verdict.',
+      name: 'subscriptionFaultUnknownDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Override DNS`
   String get overrideDns {
     return Intl.message(

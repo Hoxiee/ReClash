@@ -150,6 +150,7 @@ extension ProfileExtension on Profile {
     bool allowDeviceIdentityRetry = false,
     bool guardEmptyPlummet = false,
     FetchProfileResponse? fetch,
+    SubscriptionUpdateProbe? updateProbe,
   }) async {
     final target = normalizeSubscriptionUrl(url);
     final record = await preferences.getSubscriptionHostRecord();
@@ -178,6 +179,7 @@ extension ProfileExtension on Profile {
           customUserAgent: customUserAgent,
           sendDeviceHeaders: hasDeviceIdentityHeaders(requestHeaders),
         );
+        updateProbe?.recordAttempt(host);
         final Response<Uint8List> response;
         try {
           response = await fetchResponse(host, headers: headers);
@@ -188,12 +190,19 @@ extension ProfileExtension on Profile {
               error.response?.headers.map ?? const {},
             );
             if (meta.hwidMaxDevicesReached) {
+              updateProbe?.recordHwidRejected(host);
               throw ProfilePanelException(meta);
             }
             if (meta.hwidNotSupported) {
+              updateProbe?.recordHwidRejected(host);
               panelFailure = ProfilePanelException(meta);
             }
           }
+          updateProbe?.recordFailure(
+            host,
+            SubscriptionUpdateProbe.stageFetch,
+            compactError(error),
+          );
           if (shouldTryNextSubscriptionClient(error)) {
             lastError = error;
             continue;
@@ -216,6 +225,7 @@ extension ProfileExtension on Profile {
         identityRejected |= identified.identityRejected;
         final data = identified.response.data;
         if (data == null) {
+          updateProbe?.recordEmptyResponse(host);
           lastError = const ProfileFetchException.emptyResponse();
           continue;
         }
@@ -238,17 +248,29 @@ extension ProfileExtension on Profile {
             workingClient: client,
           );
           if (migrated != null) {
+            updateProbe?.recordSuccess(host);
             return migrated;
           }
           if (await _isPreparedDialable(prepared, inspect)) {
+            updateProbe?.recordSuccess(host);
             return prepared;
           }
+          updateProbe?.recordUndialable(host);
           stubFallback ??= prepared;
         } on ProfilePanelException catch (error) {
-          if (error.meta.hwidMaxDevicesReached) rethrow;
+          if (error.meta.hwidMaxDevicesReached) {
+            updateProbe?.recordHwidRejected(host);
+            rethrow;
+          }
+          updateProbe?.recordHwidRejected(host);
           panelFailure = error;
           lastError = error;
         } on ProfileValidationException catch (error) {
+          updateProbe?.recordFailure(
+            host,
+            SubscriptionUpdateProbe.stageParse,
+            error.diagnostic,
+          );
           lastError = error;
         }
       }

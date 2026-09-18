@@ -261,6 +261,12 @@ func (e *rcxEngine) Status() rcxStatus {
 	return e.status
 }
 
+// ExitCountryFor returns a node's last measured exit country, or "" when the
+// ledger never proved one. It reads stored state only and issues no geo query.
+func (e *rcxEngine) ExitCountryFor(node string) string {
+	return e.ledger.ExitCountry(e.key(node))
+}
+
 func (e *rcxEngine) Report() rcxReport {
 	for {
 		e.mu.RLock()

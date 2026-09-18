@@ -261,16 +261,63 @@ class ProfilesAction extends _$ProfilesAction {
     bool isAutoUpdate = false,
   }) async {
     final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
-    return profile.prepareUpdate(
-      fetch: _subscriptionFetch(allowDirectRetry: allowDirectRetry),
-      validate: (path) => _core.validateConfig(path),
-      inspect: (path) => _core.inspectConfig(path),
-      requestHeaders: await deviceIdentity.subscriptionHeaders(
-        includeDeviceIdentity: allowDeviceIdentity,
-      ),
-      allowDeviceIdentityRetry: allowDeviceIdentity,
-      guardEmptyPlummet: isAutoUpdate,
+    final probe = SubscriptionUpdateProbe();
+    try {
+      return await profile.prepareUpdate(
+        fetch: _subscriptionFetch(allowDirectRetry: allowDirectRetry),
+        validate: (path) => _core.validateConfig(path),
+        inspect: (path) => _core.inspectConfig(path),
+        requestHeaders: await deviceIdentity.subscriptionHeaders(
+          includeDeviceIdentity: allowDeviceIdentity,
+        ),
+        allowDeviceIdentityRetry: allowDeviceIdentity,
+        guardEmptyPlummet: isAutoUpdate,
+        updateProbe: probe,
+      );
+    } finally {
+      unawaited(preferences.saveSubscriptionUpdateReport(probe.build()));
+    }
+  }
+
+  Future<SubscriptionReport> buildSubscriptionReport() async {
+    final proxies = await _core.getProxies();
+    final labels = subscriptionNodeLabelsOf(proxies.proxies);
+    final metadata = SubscriptionMetadata(
+      nodes: labels,
+      presets: _activeSubscriptionPresets(),
     );
+    await _core.setSubscriptionMetadata(metadata);
+    final report = await _core.exportSubscriptionReport();
+    final update = await preferences.getSubscriptionUpdateReport();
+    final doctor = ref.read(connectionDoctorProvider);
+    final fault = subscriptionFaultOf(
+      terrain: report.terrain,
+      doctorCauseCode: doctor.causeCode,
+      doctorLayer: doctor.layer,
+      update: update,
+      dial: report.runtimeDial,
+    );
+    return report.copyWith(
+      appVersion: globalState.packageInfo.version,
+      subscriptionUpdate: update,
+      verdict: SubscriptionVerdict(
+        fault: fault,
+        health: doctor.health.name,
+        causeCode: doctor.causeCode,
+        layer: doctor.layer.name,
+        terrain: report.terrain,
+        env: report.env,
+      ),
+    );
+  }
+
+  List<String> _activeSubscriptionPresets() {
+    final routing = ref.read(smartRoutingSettingProvider);
+    final desync = ref.read(desyncSettingProvider);
+    return [
+      'route=${routing.preset.name}',
+      if (desync.enabled) 'desync=on' else 'desync=off',
+    ];
   }
 
   Profile _mergePreparedProfile(Profile current, Profile prepared) {

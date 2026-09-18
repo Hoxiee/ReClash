@@ -84,6 +84,7 @@ const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const subscriptionNoticeKey = 'subscription_notice';
 const subscriptionHostsKey = 'subscription_hosts';
+const subscriptionUpdateReportKey = 'subscription_update_report';
 const defaultSystemDnsFallback = '223.5.5.5';
 const double dialogCommonWidth = 300;
 const repository = 'Hoxiee/ReClash';

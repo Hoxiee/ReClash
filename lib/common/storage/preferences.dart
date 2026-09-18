@@ -210,6 +210,31 @@ class Preferences {
     await saveSubscriptionHostRecord(remaining);
   }
 
+  Future<SubscriptionUpdateReport?> getSubscriptionUpdateReport() async {
+    try {
+      final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+      final raw = sharedPreferencesIns?.getString(subscriptionUpdateReportKey);
+      if (raw == null) return null;
+      return SubscriptionUpdateReport.fromJson(json.decode(raw));
+    } catch (e) {
+      commonPrint.log(
+        'getSubscriptionUpdateReport error ${e.toString()}',
+        logLevel: LogLevel.warning,
+      );
+      return null;
+    }
+  }
+
+  Future<void> saveSubscriptionUpdateReport(
+    SubscriptionUpdateReport report,
+  ) async {
+    final sharedPreferencesIns = await sharedPreferencesCompleter.future;
+    await sharedPreferencesIns?.setString(
+      subscriptionUpdateReportKey,
+      json.encode(report),
+    );
+  }
+
   Future<void> clearPreferences() async {
     final sharedPreferencesIns = await sharedPreferencesCompleter.future;
     await sharedPreferencesIns?.clear();

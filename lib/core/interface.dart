@@ -96,6 +96,10 @@ mixin CoreInterface {
 
   Future<DoctorReport> exportDoctorReport();
 
+  Future<SubscriptionReport> exportSubscriptionReport();
+
+  Future<bool> setSubscriptionMetadata(SubscriptionMetadata metadata);
+
   FutureOr<Traffic> getTraffic(bool onlyStatisticsProxy);
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
@@ -461,6 +465,29 @@ abstract class CoreHandlerInterface with CoreInterface {
       );
     }
     return DoctorReport.fromJson(data);
+  }
+
+  @override
+  Future<SubscriptionReport> exportSubscriptionReport() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.subscriptionReportExport,
+    );
+    if (data == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty subscription report',
+      );
+    }
+    return SubscriptionReport.fromJson(data);
+  }
+
+  @override
+  Future<bool> setSubscriptionMetadata(SubscriptionMetadata metadata) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.subscriptionReportMetadata,
+          arguments: metadata.toJson(),
+        ) ??
+        false;
   }
 
   @override

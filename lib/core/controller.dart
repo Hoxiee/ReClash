@@ -155,6 +155,8 @@ class CoreController {
     return result;
   }
 
+  Future<ProxiesData> getProxies() => _interface.getProxies();
+
   Future<List<Group>> getProxiesGroups({
     required ProxiesSortType sortType,
     required DelayMap delayMap,
@@ -283,6 +285,14 @@ class CoreController {
 
   Future<DoctorReport> exportDoctorReport() {
     return _interface.exportDoctorReport();
+  }
+
+  Future<SubscriptionReport> exportSubscriptionReport() {
+    return _interface.exportSubscriptionReport();
+  }
+
+  Future<bool> setSubscriptionMetadata(SubscriptionMetadata metadata) {
+    return _interface.setSubscriptionMetadata(metadata);
   }
 
   Future<Delay?> getDelay(String url, String proxyName) async {

@@ -3692,6 +3692,42 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Подписка истекает сегодня",
     ),
+    "subscriptionFaultClient": MessageLookupByLibrary.simpleMessage(
+      "Проблема на этом устройстве",
+    ),
+    "subscriptionFaultClientDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN или туннель не полностью активен. Переподключитесь и сформируйте отчёт заново.",
+    ),
+    "subscriptionFaultInconclusive": MessageLookupByLibrary.simpleMessage(
+      "Однозначной причины нет",
+    ),
+    "subscriptionFaultInconclusiveDesc": MessageLookupByLibrary.simpleMessage(
+      "Данные не указывают явно на одну сторону. Всё равно сохраните отчёт — агрегаты помогут провайдеру.",
+    ),
+    "subscriptionFaultServer": MessageLookupByLibrary.simpleMessage(
+      "Похоже, проблема у провайдера",
+    ),
+    "subscriptionFaultServerDesc": MessageLookupByLibrary.simpleMessage(
+      "Ноды массово падают на отдельных выходах, а ваша сеть в порядке. Отправьте отчёт провайдеру.",
+    ),
+    "subscriptionFaultSubscription": MessageLookupByLibrary.simpleMessage(
+      "Подписка не обновляется",
+    ),
+    "subscriptionFaultSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
+      "Не удалось загрузить или разобрать конфиг. Отправьте отчёт провайдеру — он указывает на загрузку или панель.",
+    ),
+    "subscriptionFaultUnknown": MessageLookupByLibrary.simpleMessage(
+      "Пока недостаточно данных",
+    ),
+    "subscriptionFaultUnknownDesc": MessageLookupByLibrary.simpleMessage(
+      "Попользуйтесь соединением, затем сформируйте отчёт заново для более чёткого вывода.",
+    ),
+    "subscriptionFaultYourNetwork": MessageLookupByLibrary.simpleMessage(
+      "Проблема в вашей сети",
+    ),
+    "subscriptionFaultYourNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "Трафик блокируется или сеть недоступна ещё до провайдера. Проверьте Wi-Fi, мобильный интернет или captive-портал.",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("О подписке"),
     "subscriptionLoopbackWarning": MessageLookupByLibrary.simpleMessage(
       "Адрес профиля указывает на прокси-порт самого ReClash. Проверьте ссылку подписки.",
@@ -3703,6 +3739,27 @@ class MessageLookup extends MessageLookupByLibrary {
       "Напоминания о подписке",
     ),
     "subscriptionProviderInterval": m106,
+    "subscriptionReport": MessageLookupByLibrary.simpleMessage(
+      "Отчёт по подписке",
+    ),
+    "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
+      "Отчёт содержит только обезличенную диагностику: псевдонимы нод с метками протокола, транспорта и страны выхода, классы ошибок, интервалы задержек и ваши пресеты маршрутизации и desync. В него никогда не попадают URL подписки, реальные имена нод, хосты, адреса и порты. Сохранить как JSON, чтобы отправить провайдеру?",
+    ),
+    "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
+      "Проблемные ноды",
+    ),
+    "subscriptionReportGenerating": MessageLookupByLibrary.simpleMessage(
+      "Формируем отчёт…",
+    ),
+    "subscriptionReportRuntimeDials": MessageLookupByLibrary.simpleMessage(
+      "Соединения",
+    ),
+    "subscriptionReportSave": MessageLookupByLibrary.simpleMessage(
+      "Сохранить JSON",
+    ),
+    "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
+      "Сбои обновления",
+    ),
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "В подписке не найдено обычных адресов узлов. Возможно, панель вернула заглушку. Подключение к серверам не проверялось.",
     ),

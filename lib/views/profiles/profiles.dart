@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'add.dart';
 import 'edit.dart';
 import 'preview.dart';
+import 'subscription_report.dart';
 
 class ProfilesView extends ConsumerStatefulWidget {
   const ProfilesView({super.key});
@@ -320,6 +321,18 @@ class ProfileItem extends ConsumerWidget {
     BaseNavigator.push(context, OverwriteView(profileId: id));
   }
 
+  Future<void> _handleShowSubscriptionReport(BuildContext context) async {
+    final appLocalizations = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      context: context,
+      title: appLocalizations.subscriptionReport,
+      confirmText: appLocalizations.subscriptionReport,
+      message: TextSpan(text: appLocalizations.subscriptionReportConfirm),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await showSubscriptionReportSheet(context);
+  }
+
   List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isUrl = profile.type == ProfileType.url;
@@ -392,6 +405,14 @@ class ProfileItem extends ConsumerWidget {
               _handleExportFile(context);
             },
           ),
+          if (isUrl)
+            CommonPopupMenuItem(
+              icon: Icons.assignment_outlined,
+              label: appLocalizations.subscriptionReport,
+              onPressed: () {
+                unawaited(_handleShowSubscriptionReport(context));
+              },
+            ),
         ],
       ),
       CommonPopupMenuItem(

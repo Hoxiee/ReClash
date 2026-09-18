@@ -53,6 +53,8 @@ enum CoreMethod {
   doctorCancel,
   doctorFlushDns,
   doctorExport,
+  subscriptionReportMetadata,
+  subscriptionReportExport,
   odometerReport,
   odometerSignal,
 }

@@ -2988,6 +2988,42 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションは本日期限切れになります",
     ),
+    "subscriptionFaultClient": MessageLookupByLibrary.simpleMessage(
+      "問題はこの端末にあります",
+    ),
+    "subscriptionFaultClientDesc": MessageLookupByLibrary.simpleMessage(
+      "VPN またはトンネルが完全に有効になっていません。再接続してからレポートを作り直してください。",
+    ),
+    "subscriptionFaultInconclusive": MessageLookupByLibrary.simpleMessage(
+      "単一の原因は特定できません",
+    ),
+    "subscriptionFaultInconclusiveDesc": MessageLookupByLibrary.simpleMessage(
+      "証拠はどちらか一方を明確に示していません。それでもレポートを保存してください。集計はプロバイダーの役に立ちます。",
+    ),
+    "subscriptionFaultServer": MessageLookupByLibrary.simpleMessage(
+      "問題はプロバイダー側のようです",
+    ),
+    "subscriptionFaultServerDesc": MessageLookupByLibrary.simpleMessage(
+      "ネットワークは正常なのに、特定の出口でノードが大量に失敗しています。このレポートをプロバイダーに送ってください。",
+    ),
+    "subscriptionFaultSubscription": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションを更新できませんでした",
+    ),
+    "subscriptionFaultSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
+      "設定を取得または解析できませんでした。このレポートをプロバイダーに送ってください。取得側またはパネル側を示しています。",
+    ),
+    "subscriptionFaultUnknown": MessageLookupByLibrary.simpleMessage(
+      "データがまだ足りません",
+    ),
+    "subscriptionFaultUnknownDesc": MessageLookupByLibrary.simpleMessage(
+      "しばらく接続を使ってから、より明確な判定のためにレポートを作り直してください。",
+    ),
+    "subscriptionFaultYourNetwork": MessageLookupByLibrary.simpleMessage(
+      "問題はあなたのネットワークです",
+    ),
+    "subscriptionFaultYourNetworkDesc": MessageLookupByLibrary.simpleMessage(
+      "プロバイダーに届く前に通信が遮断されているか、ネットワークがオフラインです。Wi-Fi、モバイル通信、キャプティブポータルを確認してください。",
+    ),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("サブスクリプション情報"),
     "subscriptionLoopbackWarning": MessageLookupByLibrary.simpleMessage(
       "このプロファイルの URL は ReClash 自身のプロキシポートを指しています。サブスクリプションの URL を確認してください。",
@@ -2999,6 +3035,23 @@ class MessageLookup extends MessageLookupByLibrary {
       "サブスクリプションのリマインダー",
     ),
     "subscriptionProviderInterval": m106,
+    "subscriptionReport": MessageLookupByLibrary.simpleMessage("サブスクリプションレポート"),
+    "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
+      "レポートには匿名化された診断情報のみが含まれます。プロトコル・トランスポート・出口国のラベル付きノード仮名、エラークラス、遅延の区分、ルートと desync のプリセットです。サブスクリプションの URL、実際のノード名、ホスト名、アドレス、ポートは一切含まれません。プロバイダーに送るために JSON として保存しますか?",
+    ),
+    "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
+      "該当ノード",
+    ),
+    "subscriptionReportGenerating": MessageLookupByLibrary.simpleMessage(
+      "レポートを作成中…",
+    ),
+    "subscriptionReportRuntimeDials": MessageLookupByLibrary.simpleMessage(
+      "ランタイム接続",
+    ),
+    "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("JSON を保存"),
+    "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
+      "更新の失敗",
+    ),
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "このサブスクリプションに通常のノードアドレスが見つかりません。パネルが仮の設定を返した可能性があります。サーバーへの接続はテストしていません。",
     ),
