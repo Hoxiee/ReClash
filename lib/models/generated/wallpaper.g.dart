@@ -10,6 +10,11 @@ _WallpaperProps _$WallpaperPropsFromJson(Map<String, dynamic> json) =>
     _WallpaperProps(
       enabled: json['enabled'] as bool? ?? false,
       fileName: json['fileName'] as String?,
+      library:
+          (json['library'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
       fit:
           $enumDecodeNullable(_$WallpaperFitEnumMap, json['fit']) ??
           WallpaperFit.cover,
@@ -26,6 +31,7 @@ Map<String, dynamic> _$WallpaperPropsToJson(_WallpaperProps instance) =>
     <String, dynamic>{
       'enabled': instance.enabled,
       'fileName': instance.fileName,
+      'library': instance.library,
       'fit': _$WallpaperFitEnumMap[instance.fit]!,
       'scale': instance.scale,
       'positionX': instance.positionX,

@@ -238,6 +238,10 @@
   "notificationMoveUp": "Ýokary süýşür",
   "notificationMoveDown": "Aşak süýşür",
   "notificationReorder": "Tertibini üýtget",
+  "moveUp": "Ýokary süýşür",
+  "moveDown": "Aşak süýşür",
+  "moveToTop": "Başyna süýşür",
+  "moveToBottom": "Ahyryna süýşür",
   "notificationPreviewNetwork": "Tor · Kadaly",
   "notificationPreviewServer": "Serwer · Tokio 01",
   "notificationSmartRoutingDesc": "Häzirki akylly marşrut kararyny görkezmek",
@@ -1201,10 +1205,17 @@
   "appearanceBackground": "Fon",
   "wallpaperTitle": "Ýörite fon",
   "wallpaperDescription": "Saýlan suratyňyz abunalygyň fonunyň ýerine ulanylýar. Öňki fony dikeltmek üçin ýörite fony öçüriň.",
+  "wallpaperGalleryHint": "Ulanmak üçin ýatda saklanan fona basyň ýa-da täzesini goşuň.",
+  "wallpaperLibraryFull": "Iň köp {count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "Surat saýla",
-  "wallpaperReplace": "Suraty çalyş",
   "wallpaperRemove": "Suraty aýyr",
-  "wallpaperNoImage": "Surat saýlanmady",
   "wallpaperEnabled": "Ýörite fony ulan",
   "wallpaperFit": "Suraty ýerleşdirmek",
   "wallpaperFitCover": "Doldur",
@@ -1221,7 +1232,6 @@
   "wallpaperImageError": "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
   "wallpaperTooLarge": "Ölçegi 20 MB-dan we piksel sany 50 milliondan geçmeýän suraty saýlaň.",
   "wallpaperSaveError": "Fony ýatda saklap bolmady. Öňki fon saklandy.",
-  "wallpaperMissing": "Fon suraty elýeterli däl. Ony täzeden saýlaň.",
   "wallpaperSelectHint": "PNG, JPEG ýa-da WebP · 20 MB-a çenli",
   "wallpaperLayout": "Kadr sazlamalary",
   "wallpaperEffects": "Surat sazlamalary",

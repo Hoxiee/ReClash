@@ -234,7 +234,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m103(label) => "${label}必须为URL";
 
-  static String m104(count) => "${count} 年前";
+  static String m104(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+
+  static String m105(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1223,6 +1225,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("单色"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("更多"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("下移"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("移到底部"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("移到顶部"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("上移"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage("多个值使用逗号分隔"),
     "name": MessageLookupByLibrary.simpleMessage("名称"),
     "nameserver": MessageLookupByLibrary.simpleMessage("域名服务器"),
@@ -2663,17 +2669,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("适应"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("填充"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("拉伸"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "点按已保存的背景即可应用，或添加新背景。",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage("水平位置"),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "请选择有效的 PNG、JPEG 或 WebP 图片。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage("背景图片不可用，请重新选择。"),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage("尚未选择图片"),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("移除图片"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("更换图片"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("重置调整"),
     "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
       "无法保存背景。已保留原有背景。",
@@ -2701,7 +2708,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage("内核尚未提供面板"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

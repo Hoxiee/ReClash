@@ -2000,6 +2000,31 @@ class AppLocalizations {
     );
   }
 
+  /// `Move up`
+  String get moveUp {
+    return Intl.message('Move up', name: 'moveUp', desc: '', args: []);
+  }
+
+  /// `Move down`
+  String get moveDown {
+    return Intl.message('Move down', name: 'moveDown', desc: '', args: []);
+  }
+
+  /// `Move to top`
+  String get moveToTop {
+    return Intl.message('Move to top', name: 'moveToTop', desc: '', args: []);
+  }
+
+  /// `Move to bottom`
+  String get moveToBottom {
+    return Intl.message(
+      'Move to bottom',
+      name: 'moveToBottom',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Network · Normal`
   String get notificationPreviewNetwork {
     return Intl.message(
@@ -10304,6 +10329,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Tap a saved background to use it, or add a new one.`
+  String get wallpaperGalleryHint {
+    return Intl.message(
+      'Tap a saved background to use it, or add a new one.',
+      name: 'wallpaperGalleryHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can keep up to {count} backgrounds. Remove one to add another.`
+  String wallpaperLibraryFull(int count) {
+    return Intl.message(
+      'You can keep up to $count backgrounds. Remove one to add another.',
+      name: 'wallpaperLibraryFull',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Choose image`
   String get wallpaperChoose {
     return Intl.message(
@@ -10314,31 +10359,11 @@ class AppLocalizations {
     );
   }
 
-  /// `Replace image`
-  String get wallpaperReplace {
-    return Intl.message(
-      'Replace image',
-      name: 'wallpaperReplace',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Remove image`
   String get wallpaperRemove {
     return Intl.message(
       'Remove image',
       name: 'wallpaperRemove',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No image selected`
-  String get wallpaperNoImage {
-    return Intl.message(
-      'No image selected',
-      name: 'wallpaperNoImage',
       desc: '',
       args: [],
     );
@@ -10474,16 +10499,6 @@ class AppLocalizations {
     return Intl.message(
       'Could not save the background. Your previous background has been kept.',
       name: 'wallpaperSaveError',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The background image is unavailable. Choose it again.`
-  String get wallpaperMissing {
-    return Intl.message(
-      'The background image is unavailable. Choose it again.',
-      name: 'wallpaperMissing',
       desc: '',
       args: [],
     );

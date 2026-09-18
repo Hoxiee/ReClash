@@ -261,6 +261,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "${label} URL болуы керек";
 
   static String m104(count) =>
+      "Ең көбі ${count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '1 жыл бұрын', other: '${count} жыл бұрын')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1503,9 +1506,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -1715,6 +1719,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("Тағы"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("Төмен жылжыту"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("Соңына жылжыту"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("Басына жылжыту"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("Жоғары жылжыту"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Бірнеше мәнді үтірмен ажыратыңыз",
     ),
@@ -3721,6 +3729,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Сыйдыру"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Толтыру"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Созу"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Қолдану үшін сақталған фонды түртіңіз немесе жаңасын қосыңыз.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Көлденең орналасуы",
     ),
@@ -3728,12 +3739,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрлау"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "Фон суреті қолжетімсіз. Оны қайта таңдаңыз.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
-      "Сурет таңдалмаған",
-    ),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Суреттің мөлдір еместігі",
     ),
@@ -3741,9 +3747,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Оқуға ыңғайлылық",
     ),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Суретті жою"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
-      "Суретті ауыстыру",
-    ),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage(
       "Баптауларды қалпына келтіру",
     ),
@@ -3781,7 +3784,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ядро әлі бақылау тақтасын қызмет етпей тұр",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ақ тізім режимі"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("Қытайша (жеңілдетілген)"),
   };
 }

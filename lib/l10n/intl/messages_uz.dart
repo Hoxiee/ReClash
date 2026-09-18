@@ -269,6 +269,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "${label} URL boʻlishi kerak";
 
   static String m104(count) =>
+      "Koʻpi bilan ${count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '1 yil oldin', other: '${count} yil oldin')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1545,9 +1548,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -1755,6 +1759,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monoxrom"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("Yana"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("Pastga ko‘chirish"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("Oxiriga ko‘chirish"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("Boshiga ko‘chirish"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("Yuqoriga ko‘chirish"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Bir nechta qiymatni vergul bilan ajratib kiriting",
     ),
@@ -3807,6 +3815,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Sigʻdirish"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Toʻldirish"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Choʻzish"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Qoʻllash uchun saqlangan fonni bosing yoki yangisini qoʻshing.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Gorizontal joylashuv",
     ),
@@ -3814,12 +3825,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadrlash"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "Fon rasmini ochib boʻlmayapti. Uni qayta tanlang.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
-      "Rasm tanlanmagan",
-    ),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Rasmning noshaffofligi",
     ),
@@ -3828,9 +3834,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
       "Rasmni olib tashlash",
-    ),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
-      "Rasmni almashtirish",
     ),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage(
       "Sozlamalarni asliga qaytarish",
@@ -3869,7 +3872,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Yadro hali paneldan javob bermayapti",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Oq roʻyxat rejimi"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage(
       "Soddalashtirilgan xitoy tili",
     ),

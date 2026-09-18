@@ -238,6 +238,10 @@
   "notificationMoveUp": "Yuqoriga ko‘chirish",
   "notificationMoveDown": "Pastga ko‘chirish",
   "notificationReorder": "Tartiblash",
+  "moveUp": "Yuqoriga ko‘chirish",
+  "moveDown": "Pastga ko‘chirish",
+  "moveToTop": "Boshiga ko‘chirish",
+  "moveToBottom": "Oxiriga ko‘chirish",
   "notificationPreviewNetwork": "Tarmoq · Me’yorda",
   "notificationPreviewServer": "Server · Tokio 01",
   "notificationSmartRoutingDesc": "Joriy aqlli marshrutlash qarorini ko‘rsatish",
@@ -1201,10 +1205,17 @@
   "appearanceBackground": "Fon",
   "wallpaperTitle": "Maxsus fon",
   "wallpaperDescription": "Tanlagan rasmingiz obuna foni oʻrniga ishlatiladi. Maxsus fonni oʻchirsangiz, obuna foni tiklanadi.",
+  "wallpaperGalleryHint": "Qoʻllash uchun saqlangan fonni bosing yoki yangisini qoʻshing.",
+  "wallpaperLibraryFull": "Koʻpi bilan {count} ta fon saqlash mumkin. Yangisini qoʻshish uchun bittasini oʻchiring.",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "Rasm tanlash",
-  "wallpaperReplace": "Rasmni almashtirish",
   "wallpaperRemove": "Rasmni olib tashlash",
-  "wallpaperNoImage": "Rasm tanlanmagan",
   "wallpaperEnabled": "Maxsus fondan foydalanish",
   "wallpaperFit": "Rasmni joylashtirish",
   "wallpaperFitCover": "Toʻldirish",
@@ -1221,7 +1232,6 @@
   "wallpaperImageError": "PNG, JPEG yoki WebP formatidagi yaroqli rasmni tanlang.",
   "wallpaperTooLarge": "Hajmi 20 MB dan, aniqligi 50 megapikseldan oshmaydigan rasmni tanlang.",
   "wallpaperSaveError": "Fonni saqlab boʻlmadi. Oldingi fon saqlab qolindi.",
-  "wallpaperMissing": "Fon rasmini ochib boʻlmayapti. Uni qayta tanlang.",
   "wallpaperSelectHint": "PNG, JPEG yoki WebP · 20 MB gacha",
   "wallpaperLayout": "Kadrlash",
   "wallpaperEffects": "Rasm sozlamalari",

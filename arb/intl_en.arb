@@ -238,6 +238,10 @@
   "notificationMoveUp": "Move up",
   "notificationMoveDown": "Move down",
   "notificationReorder": "Reorder",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "moveToTop": "Move to top",
+  "moveToBottom": "Move to bottom",
   "notificationPreviewNetwork": "Network · Normal",
   "notificationPreviewServer": "Server · Tokyo 01",
   "notificationSmartRoutingDesc": "Show the active Smart Routing decision",
@@ -1393,10 +1397,17 @@
   "appearanceBackground": "Background",
   "wallpaperTitle": "Custom background",
   "wallpaperDescription": "Your image takes priority over subscription backgrounds. Turn it off to restore them.",
+  "wallpaperGalleryHint": "Tap a saved background to use it, or add a new one.",
+  "wallpaperLibraryFull": "You can keep up to {count} backgrounds. Remove one to add another.",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "Choose image",
-  "wallpaperReplace": "Replace image",
   "wallpaperRemove": "Remove image",
-  "wallpaperNoImage": "No image selected",
   "wallpaperEnabled": "Use custom background",
   "wallpaperFit": "Image fit",
   "wallpaperFitCover": "Fill",
@@ -1413,7 +1424,6 @@
   "wallpaperImageError": "Choose a valid PNG, JPEG or WebP image.",
   "wallpaperTooLarge": "Choose an image up to 20 MB and 50 megapixels.",
   "wallpaperSaveError": "Could not save the background. Your previous background has been kept.",
-  "wallpaperMissing": "The background image is unavailable. Choose it again.",
   "wallpaperSelectHint": "PNG, JPEG or WebP · up to 20 MB",
   "wallpaperLayout": "Framing",
   "wallpaperEffects": "Image adjustments",

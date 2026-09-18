@@ -10,6 +10,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/widgets/animated_visibility.dart';
 import 'package:reclash/widgets/app_nav_rail.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -340,6 +341,65 @@ class AppSidebarContainer extends ConsumerWidget {
     });
   }
 
+  KeyEventResult _handleContentKey(WidgetRef ref, FocusNode node, KeyEvent e) {
+    if (e is! KeyDownEvent && e is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isControlPressed ||
+        keyboard.isAltPressed ||
+        keyboard.isMetaPressed) {
+      return KeyEventResult.ignored;
+    }
+    final rtl = Directionality.of(node.context!) == TextDirection.rtl;
+    final toRail = e.logicalKey ==
+        (rtl ? LogicalKeyboardKey.arrowRight : LogicalKeyboardKey.arrowLeft);
+    if (!toRail) {
+      return KeyEventResult.ignored;
+    }
+    final focus = FocusManager.instance.primaryFocus;
+    final focusRect = focus?.rect;
+    if (focus == null ||
+        focusRect == null ||
+        focus.context?.findAncestorWidgetOfExactType<AppNavRail>() != null) {
+      return KeyEventResult.ignored;
+    }
+    // Directional traversal inside the page runs first; only the page's own
+    // left edge falls through to here, where it should land on the rail.
+    final hasInnerTarget = focus.nearestScope!.traversalDescendants.any((n) {
+      if (n == focus || n.rect.overlaps(focusRect)) {
+        return false;
+      }
+      final beyond = rtl ? n.rect.left > focusRect.left : n.rect.right < focusRect.right;
+      final overlapsRow =
+          n.rect.top < focusRect.bottom && n.rect.bottom > focusRect.top;
+      return beyond && overlapsRow;
+    });
+    if (hasInnerTarget) {
+      return KeyEventResult.ignored;
+    }
+    final railNodes =
+        FocusManager.instance.rootScope.traversalDescendants
+            .where(
+              (n) =>
+                  n.context?.findAncestorWidgetOfExactType<AppNavRail>() != null,
+            )
+            .toList()
+          ..sort((a, b) => a.rect.top.compareTo(b.rect.top));
+    if (railNodes.isEmpty) {
+      return KeyEventResult.ignored;
+    }
+    final items = ref.read(currentNavigationItemsStateProvider).value;
+    final selected = items.indexWhere(
+      (item) => item.label == ref.read(currentPageLabelProvider),
+    );
+    final target = (selected >= 0 && selected < railNodes.length)
+        ? railNodes[selected]
+        : railNodes.first;
+    FocusTraversalPolicy.defaultTraversalRequestFocusCallback(target);
+    return KeyEventResult.handled;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMobileView = ref.watch(isMobileViewProvider);
@@ -371,7 +431,14 @@ class AppSidebarContainer extends ConsumerWidget {
               ),
             ),
           ),
-          Expanded(flex: 1, child: ClipRect(child: child)),
+          Expanded(
+            flex: 1,
+            child: Focus(
+              canRequestFocus: false,
+              onKeyEvent: (node, event) => _handleContentKey(ref, node, event),
+              child: ClipRect(child: child),
+            ),
+          ),
         ],
       ),
     );

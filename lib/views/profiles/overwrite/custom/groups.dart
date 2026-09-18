@@ -78,6 +78,13 @@ class _CustomProxyGroupsViewState extends ConsumerState<CustomProxyGroupsView> {
               profileId: widget.profileId,
               proxyGroup: proxyGroup,
               index: index,
+              count:
+                  ref
+                      .watch(proxyGroupsProvider(widget.profileId))
+                      .value
+                      ?.length ??
+                  0,
+              onReorder: _handleReorder,
               onPressed: () {
                 _handleAddOrUpdate(proxyGroup: proxyGroup);
               },
@@ -98,6 +105,8 @@ class _ProxyGroupItem extends ConsumerWidget {
   final int profileId;
   final ProxyGroup proxyGroup;
   final int index;
+  final int count;
+  final void Function(int oldIndex, int newIndex) onReorder;
   final VoidCallback onPressed;
 
   const _ProxyGroupItem({
@@ -105,6 +114,8 @@ class _ProxyGroupItem extends ConsumerWidget {
     required this.profileId,
     required this.proxyGroup,
     required this.index,
+    required this.count,
+    required this.onReorder,
     required this.onPressed,
   });
 
@@ -144,13 +155,12 @@ class _ProxyGroupItem extends ConsumerWidget {
             InfoMessageButton(
               message: appLocalizations.proxyGroupDetectedAbnormal,
             ),
-          ReorderableDelayedDragStartListener(
+          ReorderMenuHandle(
             index: index,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              color: Colors.transparent,
-              child: const Icon(Icons.drag_handle),
-            ),
+            count: count,
+            delayedDrag: true,
+            icon: Icons.drag_handle,
+            onReorder: onReorder,
           ),
         ],
       ),

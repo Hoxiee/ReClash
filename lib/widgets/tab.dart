@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:reclash/common/focus_visibility.dart';
 import 'package:reclash/common/shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -140,6 +141,11 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
     longPress.onLongPress = () {};
 
     highlighted = widget.groupValue;
+    FocusHighlightVisibility.visible.addListener(_handleFocusVisibility);
+  }
+
+  void _handleFocusVisibility() {
+    if (mounted) setState(() {});
   }
 
   void _animateThumb() {
@@ -165,6 +171,7 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
 
   @override
   void dispose() {
+    FocusHighlightVisibility.visible.removeListener(_handleFocusVisibility);
     thumbScaleController.dispose();
     thumbController.dispose();
 
@@ -331,6 +338,8 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
 
   bool _focused = false;
 
+  bool get _focusVisible => _focused && FocusHighlightVisibility.visible.value;
+
   void _moveByKeyboard(int delta) {
     final keys = widget.children.keys.toList(growable: false);
     if (keys.isEmpty) {
@@ -456,7 +465,7 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
             shape: RoundedSuperellipseBorder(
               borderRadius: const BorderRadius.all(_kCornerRadius),
               side: BorderSide(
-                color: _focused
+                color: _focusVisible
                     ? Theme.of(context).colorScheme.primary
                     : Colors.transparent,
                 width: 2,

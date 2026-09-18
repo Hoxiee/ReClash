@@ -19,6 +19,8 @@ class OverwriteDismissItem extends ConsumerWidget {
   final VoidCallback onRemove;
   final VoidCallback onDismissed;
   final int index;
+  final int count;
+  final void Function(int oldIndex, int newIndex) onReorder;
   final double dragIconPadding;
 
   const OverwriteDismissItem({
@@ -32,6 +34,8 @@ class OverwriteDismissItem extends ConsumerWidget {
     required this.onRemove,
     required this.onDismissed,
     required this.index,
+    required this.count,
+    required this.onReorder,
     this.dragIconPadding = 12,
   });
 
@@ -68,13 +72,12 @@ class OverwriteDismissItem extends ConsumerWidget {
               children: [
                 if (!isValid)
                   InfoMessageButton(message: invalidMessageOf(context, title)),
-                ReorderableDelayedDragStartListener(
+                ReorderMenuHandle(
                   index: index,
-                  child: Container(
-                    color: Colors.transparent,
-                    padding: EdgeInsets.all(dragIconPadding),
-                    child: const Icon(Icons.drag_handle),
-                  ),
+                  count: count,
+                  delayedDrag: true,
+                  icon: Icons.drag_handle,
+                  onReorder: onReorder,
                 ),
               ],
             ),

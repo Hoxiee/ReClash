@@ -238,6 +238,10 @@
   "notificationMoveUp": "上移",
   "notificationMoveDown": "下移",
   "notificationReorder": "重新排序",
+  "moveUp": "上移",
+  "moveDown": "下移",
+  "moveToTop": "移到顶部",
+  "moveToBottom": "移到底部",
   "notificationPreviewNetwork": "网络 · 正常",
   "notificationPreviewServer": "服务器 · 东京 01",
   "notificationSmartRoutingDesc": "显示当前的智能路由决策",
@@ -1201,10 +1205,17 @@
   "appearanceBackground": "背景",
   "wallpaperTitle": "自定义背景",
   "wallpaperDescription": "您选择的图片会优先于订阅背景显示。关闭自定义背景即可恢复订阅背景。",
+  "wallpaperGalleryHint": "点按已保存的背景即可应用，或添加新背景。",
+  "wallpaperLibraryFull": "最多可保存 {count} 张背景。删除一张后才能添加新背景。",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "选择图片",
-  "wallpaperReplace": "更换图片",
   "wallpaperRemove": "移除图片",
-  "wallpaperNoImage": "尚未选择图片",
   "wallpaperEnabled": "使用自定义背景",
   "wallpaperFit": "图片适配方式",
   "wallpaperFitCover": "填充",
@@ -1221,7 +1232,6 @@
   "wallpaperImageError": "请选择有效的 PNG、JPEG 或 WebP 图片。",
   "wallpaperTooLarge": "请选择大小不超过 20 MB、像素总数不超过 5000 万的图片。",
   "wallpaperSaveError": "无法保存背景。已保留原有背景。",
-  "wallpaperMissing": "背景图片不可用，请重新选择。",
   "wallpaperSelectHint": "PNG、JPEG 或 WebP · 不超过 20 MB",
   "wallpaperLayout": "构图",
   "wallpaperEffects": "图片调整",

@@ -990,10 +990,9 @@ Future<String> writeBackupArchive({
   if (await scriptsDir.exists()) {
     await encoder.addDirectory(scriptsDir, filter: keepListed);
   }
-  final wallpaperFileName = wallpaperFileNameOf(configMap);
-  if (wallpaperFileName != null) {
-    final dirPath =
-        wallpapersDirPath ?? join(dirname(profilesDirPath), 'wallpapers');
+  final dirPath =
+      wallpapersDirPath ?? join(dirname(profilesDirPath), 'wallpapers');
+  for (final wallpaperFileName in wallpaperLibraryOf(configMap)) {
     final file = File(join(dirPath, wallpaperFileName));
     try {
       if (await file.exists() &&

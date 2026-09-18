@@ -262,6 +262,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "${label} URL bolmaly";
 
   static String m104(count) =>
+      "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1508,9 +1511,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -1714,6 +1718,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Birreňk"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("Giňişleýin"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("Aşak süýşür"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("Ahyryna süýşür"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("Başyna süýşür"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("Ýokary süýşür"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Birnäçe bahany otur bilen aýryň",
     ),
@@ -3710,6 +3718,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Sygdyr"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Doldur"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Süýndür"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Ulanmak üçin ýatda saklanan fona basyň ýa-da täzesini goşuň.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Keseligine ýerleşiş",
     ),
@@ -3717,12 +3728,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "Fon suraty elýeterli däl. Ony täzeden saýlaň.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
-      "Surat saýlanmady",
-    ),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Suratyň dury dälligi",
     ),
@@ -3730,7 +3736,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Okamak aňsatlygy",
     ),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Suraty aýyr"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("Suraty çalyş"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage(
       "Sazlamalary başlangyja getir",
     ),
@@ -3766,7 +3771,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Panel heniz elýeterli däl",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };
 }

@@ -136,8 +136,8 @@ class RestoreApplyContext {
 }
 
 @visibleForTesting
-String? restoreWallpaperFileName(Map? configMap) =>
-    wallpaperFileNameOf(configMap);
+List<String> restoreWallpaperFileNames(Map? configMap) =>
+    wallpaperLibraryOf(configMap);
 
 @Riverpod(keepAlive: true)
 class BackupAction extends _$BackupAction {
@@ -355,10 +355,9 @@ class BackupAction extends _$BackupAction {
       }
     }
     if (!profilesOnly) {
-      final fileName = restoreWallpaperFileName(data.configMap);
-      if (fileName != null) {
+      for (final fileName in restoreWallpaperFileNames(data.configMap)) {
         final staged = File(join(stagingPath, 'wallpapers', fileName));
-        if (!await staged.exists()) return copies;
+        if (!await staged.exists()) continue;
         try {
           await WallpaperStore.readStoredImage(staged);
           copies.add((
@@ -382,17 +381,20 @@ class BackupAction extends _$BackupAction {
     bool profilesOnly,
   ) async {
     if (profilesOnly) return;
-    final oldName = previous?.themeProps.wallpaper.fileName;
-    final newName = next?.themeProps.wallpaper.fileName;
-    if (oldName == null || oldName == newName) return;
-    if (!isWallpaperFileName(oldName)) return;
-    try {
-      final file = File(join(await appPath.wallpapersDirPath, oldName));
-      if (await FileSystemEntity.type(file.path, followLinks: false) ==
-          FileSystemEntityType.file) {
-        await file.delete();
-      }
-    } catch (_) {}
+    final oldNames = previous?.themeProps.wallpaper.library ?? const [];
+    final newNames = next?.themeProps.wallpaper.library ?? const [];
+    final dropped = oldNames.where(
+      (name) => isWallpaperFileName(name) && !newNames.contains(name),
+    );
+    for (final name in dropped) {
+      try {
+        final file = File(join(await appPath.wallpapersDirPath, name));
+        if (await FileSystemEntity.type(file.path, followLinks: false) ==
+            FileSystemEntityType.file) {
+          await file.delete();
+        }
+      } catch (_) {}
+    }
   }
 
   void _publishConfig(Config config, RestoreApplyContext context) {

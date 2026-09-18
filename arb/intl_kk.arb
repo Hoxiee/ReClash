@@ -238,6 +238,10 @@
   "notificationMoveUp": "Жоғары жылжыту",
   "notificationMoveDown": "Төмен жылжыту",
   "notificationReorder": "Ретін өзгерту",
+  "moveUp": "Жоғары жылжыту",
+  "moveDown": "Төмен жылжыту",
+  "moveToTop": "Басына жылжыту",
+  "moveToBottom": "Соңына жылжыту",
   "notificationPreviewNetwork": "Желі · Қалыпты",
   "notificationPreviewServer": "Сервер · Токио 01",
   "notificationSmartRoutingDesc": "Белсенді смарт бағыттау шешімін көрсету",
@@ -1201,10 +1205,17 @@
   "appearanceBackground": "Фон",
   "wallpaperTitle": "Жеке фон",
   "wallpaperDescription": "Таңдалған сурет жазылым фонының орнына қолданылады. Жазылым фонын қайтару үшін жеке фонды өшіріңіз.",
+  "wallpaperGalleryHint": "Қолдану үшін сақталған фонды түртіңіз немесе жаңасын қосыңыз.",
+  "wallpaperLibraryFull": "Ең көбі {count} фон сақтауға болады. Жаңасын қосу үшін біреуін жойыңыз.",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "Суретті таңдау",
-  "wallpaperReplace": "Суретті ауыстыру",
   "wallpaperRemove": "Суретті жою",
-  "wallpaperNoImage": "Сурет таңдалмаған",
   "wallpaperEnabled": "Жеке фонды пайдалану",
   "wallpaperFit": "Суретті орналастыру",
   "wallpaperFitCover": "Толтыру",
@@ -1221,7 +1232,6 @@
   "wallpaperImageError": "PNG, JPEG немесе WebP пішіміндегі жарамды суретті таңдаңыз.",
   "wallpaperTooLarge": "Көлемі 20 МБ-тан, ал ажыратымдылығы 50 мегапиксельден аспайтын суретті таңдаңыз.",
   "wallpaperSaveError": "Фонды сақтау мүмкін болмады. Алдыңғы фон сақталды.",
-  "wallpaperMissing": "Фон суреті қолжетімсіз. Оны қайта таңдаңыз.",
   "wallpaperSelectHint": "PNG, JPEG немесе WebP · 20 МБ-қа дейін",
   "wallpaperLayout": "Кадрлау",
   "wallpaperEffects": "Суретті реттеу",

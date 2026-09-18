@@ -32,6 +32,13 @@ final wallpaperImageProvider = FutureProvider<MemoryImage?>((ref) async {
     themeSettingProvider.select((value) => value.wallpaper.fileName),
   );
   if (fileName == null) return null;
+  return ref.watch(wallpaperThumbnailProvider(fileName).future);
+});
+
+final wallpaperThumbnailProvider = FutureProvider.family<MemoryImage?, String>((
+  ref,
+  fileName,
+) async {
   try {
     final bytes = await ref.watch(wallpaperStoreProvider).readImage(fileName);
     if (bytes == null || !ref.mounted) return null;
@@ -58,16 +65,24 @@ class WallpaperAction extends Notifier<bool> {
     final previous = ref.read(themeSettingProvider).wallpaper;
     String? imported;
     try {
+      if (previous.library.length >= maxWallpaperLibrary) {
+        throw MessageException(
+          currentAppLocalizations.wallpaperLibraryFull(maxWallpaperLibrary),
+        );
+      }
       final source = await ref.read(wallpaperPickerProvider)();
       if (source == null || !ref.mounted) return;
       imported = await store.importImage(source);
       if (!ref.mounted) return;
       final current = ref.read(themeSettingProvider).wallpaper;
-      if (current.fileName != previous.fileName ||
-          current.enabled != previous.enabled) {
-        return;
-      }
-      await _replace(current.copyWith(enabled: true, fileName: imported));
+      if (current != previous) return;
+      await _commit(
+        current.copyWith(
+          enabled: true,
+          fileName: imported,
+          library: [imported, ...current.library],
+        ),
+      );
       imported = null;
     } on WallpaperImportException catch (error) {
       throw MessageException(switch (error.failure) {
@@ -86,22 +101,43 @@ class WallpaperAction extends Notifier<bool> {
     }
   }
 
-  Future<void> removeImage() async {
+  Future<void> selectImage(String fileName) async {
     if (state) return;
+    final current = ref.read(themeSettingProvider).wallpaper;
+    if (!current.library.contains(fileName)) return;
+    if (current.fileName == fileName && current.enabled) return;
     state = true;
     try {
-      await _replace(
-        ref
-            .read(themeSettingProvider)
-            .wallpaper
-            .copyWith(enabled: false, fileName: null),
+      await _commit(current.copyWith(enabled: true, fileName: fileName));
+    } finally {
+      if (ref.mounted) state = false;
+    }
+  }
+
+  Future<void> removeImage(String fileName) async {
+    if (state) return;
+    final current = ref.read(themeSettingProvider).wallpaper;
+    if (!current.library.contains(fileName)) return;
+    state = true;
+    try {
+      final removingActive = current.fileName == fileName;
+      await _commit(
+        current.copyWith(
+          library: current.library.where((name) => name != fileName).toList(),
+          fileName: removingActive ? null : current.fileName,
+          enabled: removingActive ? false : current.enabled,
+        ),
+        prune: [fileName],
       );
     } finally {
       if (ref.mounted) state = false;
     }
   }
 
-  Future<void> _replace(WallpaperProps next) async {
+  Future<void> _commit(
+    WallpaperProps next, {
+    List<String> prune = const [],
+  }) async {
     final previous = ref.read(themeSettingProvider).wallpaper;
     final save = ref.read(wallpaperSaveProvider);
     final store = ref.read(wallpaperStoreProvider);
@@ -116,15 +152,17 @@ class WallpaperAction extends Notifier<bool> {
     }
     if (!saved) {
       if (ref.mounted &&
-          ref.read(themeSettingProvider).wallpaper.fileName == next.fileName) {
+          ref.read(themeSettingProvider).wallpaper == next) {
         ref
             .read(themeSettingProvider.notifier)
             .update((value) => value.copyWith(wallpaper: previous));
       }
       throw MessageException(currentAppLocalizations.wallpaperSaveError);
     }
-    if (previous.fileName != next.fileName) {
-      await _removeQuietly(store, previous.fileName);
+    for (final fileName in prune) {
+      if (!next.library.contains(fileName)) {
+        await _removeQuietly(store, fileName);
+      }
     }
   }
 

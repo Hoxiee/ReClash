@@ -235,7 +235,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m103(label) => "${label}はURLである必要があります";
 
-  static String m104(count) => "${count} 年前";
+  static String m104(count) => "背景は最大 ${count} 件まで保存できます。追加するには 1 件削除してください。";
+
+  static String m105(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1392,6 +1394,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("モノクローム"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("その他"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("下へ移動"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("末尾へ移動"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("先頭へ移動"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("上へ移動"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "複数の値はカンマで区切ってください",
     ),
@@ -3028,6 +3034,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("全体を表示"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("画面いっぱいに表示"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("引き伸ばし"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "保存済みの背景をタップして適用するか、新しい背景を追加します。",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "水平方向の位置",
     ),
@@ -3035,14 +3044,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "背景画像を利用できません。もう一度選択してください。",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage("画像が選択されていません"),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("画像を置き換え"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("調整をリセット"),
     "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
       "背景を保存できませんでした。元の背景はそのままです。",
@@ -3074,7 +3079,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "コアがまだダッシュボードを配信していません",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

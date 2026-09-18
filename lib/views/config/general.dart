@@ -306,6 +306,19 @@ class GeneralListView extends ConsumerWidget {
         SettingSection(
           top: 16,
           items: [
+            ConfigOptionsItem<AppRegion>(
+              leading: const Icon(Icons.public_outlined),
+              title: (l) => l.appRegion,
+              options: AppRegion.values,
+              textBuilder: (region) => region.label(context),
+              selector: appRegionProvider,
+              onChanged: (ref, value) => selectAppRegion(ref.read, value),
+            ),
+          ],
+        ),
+        SettingSection(
+          title: appLocalizations.network,
+          items: [
             const PortItem(),
             _clashToggle(
               icon: Icons.device_hub,
@@ -341,16 +354,7 @@ class GeneralListView extends ConsumerWidget {
           ),
         SettingSection(
           title: appLocalizations.identity,
-          subTitle: appLocalizations.appRegionDesc,
           items: [
-            ConfigOptionsItem<AppRegion>(
-              leading: const Icon(Icons.public_outlined),
-              title: (l) => l.appRegion,
-              options: AppRegion.values,
-              textBuilder: (region) => region.label(context),
-              selector: appRegionProvider,
-              onChanged: (ref, value) => selectAppRegion(ref.read, value),
-            ),
             const UaItem(),
             ConfigToggleItem(
               leading: const Icon(Icons.perm_device_information_outlined),

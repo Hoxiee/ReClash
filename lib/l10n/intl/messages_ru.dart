@@ -260,6 +260,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "Значение «${label}» должно быть URL";
 
   static String m104(count) =>
+      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1490,9 +1493,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1698,6 +1702,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("Ещё"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("Ниже"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("В конец"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("В начало"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("Выше"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Разделяйте несколько значений запятыми",
     ),
@@ -3708,6 +3716,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Вписать"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Заполнить"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Растянуть"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Положение по горизонтали",
     ),
@@ -3715,21 +3726,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "Изображение фона недоступно. Выберите его заново.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
-      "Изображение не выбрано",
-    ),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Читаемость"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
       "Удалить изображение",
-    ),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage(
-      "Заменить изображение",
     ),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage(
       "Сбросить параметры",
@@ -3770,7 +3773,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };
 }

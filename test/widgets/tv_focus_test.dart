@@ -10,8 +10,14 @@ import 'package:reclash/widgets/widgets.dart';
 import '../helpers/test_app.dart';
 
 void main() {
-  setUp(() => system.isTVForTesting = true);
-  tearDown(() => system.isTVForTesting = false);
+  setUp(() {
+    system.isTVForTesting = true;
+    FocusHighlightVisibility.visibleForTesting = true;
+  });
+  tearDown(() {
+    system.isTVForTesting = false;
+    FocusHighlightVisibility.visibleForTesting = false;
+  });
 
   BorderSide outline(WidgetTester tester, Finder parent) {
     final box = tester.widget<DecoratedBox>(
@@ -244,7 +250,9 @@ void main() {
     expect(value, 0.5);
   });
 
-  testWidgets('filled settings cards outline keyboard focus', (tester) async {
+  testWidgets('filled settings cards lift the background on keyboard focus', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       TestApp(
         child: Scaffold(
@@ -263,9 +271,13 @@ void main() {
     );
     await tester.pumpAndSettle();
     final button = tester.widget<FilledButton>(find.byType(FilledButton));
-    final focused = button.style?.side?.resolve({WidgetState.focused});
-    expect(focused?.color, isNot(Colors.transparent));
-    expect(focused?.width, 2);
-    expect(button.style?.side?.resolve({}), BorderSide.none);
+    final resting = button.style?.backgroundColor?.resolve({});
+    final focused = button.style?.backgroundColor?.resolve({
+      WidgetState.focused,
+    });
+    expect(focused, isNotNull);
+    expect(focused, isNot(resting));
+    // The lift replaces the old thick ring: focus draws no border.
+    expect(button.style?.side?.resolve({WidgetState.focused}), BorderSide.none);
   });
 }

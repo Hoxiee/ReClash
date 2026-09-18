@@ -695,7 +695,17 @@ class _ReorderableProfilesSheetState
       child: ReorderableDelayedDragStartListener(
         index: index,
         child: DecorationListItem(
-          trailing: const Icon(Icons.drag_handle),
+          trailing: ReorderMenuHandle(
+            index: index,
+            count: profiles.length,
+            delayedDrag: true,
+            icon: Icons.drag_handle,
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                profiles = profiles.copyAndReorder(oldIndex, newIndex);
+              });
+            },
+          ),
           title: Text(profile.realLabel),
         ),
       ),

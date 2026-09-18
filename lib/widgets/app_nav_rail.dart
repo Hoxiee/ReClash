@@ -400,16 +400,16 @@ class _RailSlotState extends State<_RailSlot> {
   @override
   void initState() {
     super.initState();
-    FocusManager.instance.addHighlightModeListener(_handleHighlightMode);
+    FocusHighlightVisibility.visible.addListener(_handleFocusVisibility);
   }
 
-  void _handleHighlightMode(FocusHighlightMode _) {
+  void _handleFocusVisibility() {
     if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    FocusManager.instance.removeHighlightModeListener(_handleHighlightMode);
+    FocusHighlightVisibility.visible.removeListener(_handleFocusVisibility);
     _focusNode.dispose();
     super.dispose();
   }
@@ -504,7 +504,9 @@ class _RailSlotState extends State<_RailSlot> {
           children: [
             // Keyboard and D-pad focus has to read as its own state: the
             // pill only ever shows the selected page.
-            if (_focused && !widget.selected)
+            if (_focused &&
+                !widget.selected &&
+                FocusHighlightVisibility.visible.value)
               Positioned.fill(
                 child: DecoratedBox(
                   key: AppNavRail.focusRingKey,

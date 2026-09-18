@@ -181,10 +181,13 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       ),
     );
     if (profile == null && !byedpiMode) {
-      return _EmptyHero(
-        hasSavedProfiles: hasSavedProfiles,
-        scrollController: widget.scrollController,
-        onRequestAfterTailFocus: widget.onRequestAfterTailFocus,
+      return _HeroCrossFade(
+        slot: 'hero-empty',
+        child: _EmptyHero(
+          hasSavedProfiles: hasSavedProfiles,
+          scrollController: widget.scrollController,
+          onRequestAfterTailFocus: widget.onRequestAfterTailFocus,
+        ),
       );
     }
 
@@ -196,36 +199,39 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       final status = heroStatusOf(_phase, health);
       _queueReveal(status);
       final palette = byedpiHeroPaletteOf(context, status);
-      return _HeroBoard(
-        controller: widget.scrollController,
-        split: split,
-        head: _OrbSlot(
-          isReady: isReady,
-          status: status,
-          health: health,
-          variant: HeroOrbVariant.byedpi,
-          onPhaseChanged: (phase) => setState(() => _phase = phase),
-        ),
-        tail: (metrics) => [
-          _OrbCaption(
-            displayName: context.appLocalizations.desyncModeByedpi,
+      return _HeroCrossFade(
+        slot: 'hero-board',
+        child: _HeroBoard(
+          controller: widget.scrollController,
+          split: split,
+          head: _OrbSlot(
+            isReady: isReady,
             status: status,
-            palette: palette,
-            metrics: metrics,
+            health: health,
             variant: HeroOrbVariant.byedpi,
-            revealId: reveal,
-            sessionNote: note,
+            onPhaseChanged: (phase) => setState(() => _phase = phase),
           ),
-          SizedBox(height: metrics.gapCard),
-          if (!split) ...[
-            const _ByeDpiDashboard(),
+          tail: (metrics) => [
+            _OrbCaption(
+              displayName: context.appLocalizations.desyncModeByedpi,
+              status: status,
+              palette: palette,
+              metrics: metrics,
+              variant: HeroOrbVariant.byedpi,
+              revealId: reveal,
+              sessionNote: note,
+            ),
             SizedBox(height: metrics.gapCard),
+            if (!split) ...[
+              const _ByeDpiDashboard(),
+              SizedBox(height: metrics.gapCard),
+            ],
+            _TailEdgeFocus(
+              onDown: widget.onRequestAfterTailFocus,
+              child: const _HeroActionRow(showUpdate: false),
+            ),
           ],
-          _TailEdgeFocus(
-            onDown: widget.onRequestAfterTailFocus,
-            child: const _HeroActionRow(showUpdate: false),
-          ),
-        ],
+        ),
       );
     }
 
@@ -233,7 +239,6 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final panelMeta = activeProfile.panelMeta;
     final announce = panelMeta?.announce?.trim();
     final sub = activeProfile.subscriptionInfo;
-    final hasSub = sub != null && sub.hasFacts;
     final subscriptionExpired =
         sub != null &&
         subscriptionIsExpired(expire: sub.expire, now: DateTime.now());
@@ -253,75 +258,88 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final palette = heroPaletteOf(context, status, heroRing: heroRing);
     final accent = status.isAlert ? palette.accent : null;
 
-    return _HeroBoard(
-      controller: widget.scrollController,
-      split: split,
-      head: _OrbSlot(
-        isReady: isReady,
-        status: status,
-        health: health,
-        serviceLogo: panelMeta?.serviceLogo,
-        heroRing: heroRing,
-        subscriptionExpired: subscriptionExpired,
-        onPhaseChanged: (phase) => setState(() => _phase = phase),
-      ),
-      tail: (metrics) => [
-        _OrbCaption(
-          displayName: displayName,
+    return _HeroCrossFade(
+      slot: 'hero-board',
+      child: _HeroBoard(
+        controller: widget.scrollController,
+        split: split,
+        head: _OrbSlot(
+          isReady: isReady,
           status: status,
-          palette: palette,
-          metrics: metrics,
-          revealId: reveal,
-          sessionNote: note,
+          health: health,
+          serviceLogo: panelMeta?.serviceLogo,
+          heroRing: heroRing,
+          subscriptionExpired: subscriptionExpired,
+          onPhaseChanged: (phase) => setState(() => _phase = phase),
         ),
-        SizedBox(height: metrics.gapCard),
-        if (!split) ...[
-          _ServerPanel(
+        tail: (metrics) => [
+          _OrbCaption(
             displayName: displayName,
-            nameCountryCode: activeServer.countryCode,
-            delay: activeServer.delay,
             status: status,
-            accent: accent,
-            otherCodes: activeServer.otherCodes,
-            otherLocations: activeServer.otherLocations,
-            smartRouting: activeServer.smartRouting,
+            palette: palette,
+            metrics: metrics,
+            revealId: reveal,
+            sessionNote: note,
           ),
           SizedBox(height: metrics.gapCard),
-        ],
-        if (hasSub) ...[
-          FocusableTap(
-            borderRadius: heroCardRadius,
-            onTap: _handleShowSubscription,
-            child: _SubscriptionStrip(
-              key: const ValueKey('hero-subscription-strip'),
-              sub: sub,
-              buyPlanUrl: buyPlanUrl,
-              buyTrafficUrl: buyTrafficUrl,
-              hasAnnounce: !split && announce != null && announce.isNotEmpty,
+          if (!split)
+            _ServerSlot(
+              server: activeServer,
+              status: status,
+              accent: accent,
+              profileUpdatingKey: activeProfile.updatingKey,
+              gap: metrics.gapCard,
+            ),
+          _HeroReveal(
+            child: sub != null && sub.hasFacts
+                ? Column(
+                    key: const ValueKey('hero-sub'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FocusableTap(
+                        borderRadius: heroCardRadius,
+                        onTap: _handleShowSubscription,
+                        child: _SubscriptionStrip(
+                          key: const ValueKey('hero-subscription-strip'),
+                          sub: sub,
+                          buyPlanUrl: buyPlanUrl,
+                          buyTrafficUrl: buyTrafficUrl,
+                          hasAnnounce:
+                              !split && announce != null && announce.isNotEmpty,
+                        ),
+                      ),
+                      SizedBox(height: metrics.gapCard),
+                    ],
+                  )
+                : !split && announce != null && announce.isNotEmpty
+                ? Column(
+                    key: const ValueKey('hero-notice'),
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FocusableTap(
+                        borderRadius: heroCardRadius,
+                        onTap: _handleShowSubscription,
+                        child: _NoticeOpenCard(text: announce),
+                      ),
+                      SizedBox(height: metrics.gapCard),
+                    ],
+                  )
+                : const SizedBox.shrink(key: ValueKey('hero-tail-empty')),
+          ),
+          _TailEdgeFocus(
+            onDown: widget.onRequestAfterTailFocus,
+            child: _HeroActionRow(
+              isUpdating: isUpdating,
+              onUpdate: () => unawaited(
+                ref
+                    .read(profilesActionProvider.notifier)
+                    .updateProfile(activeProfile, showLoading: true),
+              ),
+              supportUrl: panelMeta?.supportUrl,
             ),
           ),
-          SizedBox(height: metrics.gapCard),
-        ] else if (!split && announce != null && announce.isNotEmpty) ...[
-          FocusableTap(
-            borderRadius: heroCardRadius,
-            onTap: _handleShowSubscription,
-            child: _NoticeOpenCard(text: announce),
-          ),
-          SizedBox(height: metrics.gapCard),
         ],
-        _TailEdgeFocus(
-          onDown: widget.onRequestAfterTailFocus,
-          child: _HeroActionRow(
-            isUpdating: isUpdating,
-            onUpdate: () => unawaited(
-              ref
-                  .read(profilesActionProvider.notifier)
-                  .updateProfile(activeProfile, showLoading: true),
-            ),
-            supportUrl: panelMeta?.supportUrl,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -1366,6 +1384,220 @@ class _BuyChip extends StatelessWidget {
       label: view.label,
       compact: true,
       onTap: () => unawaited(dialogs.openUrl(url)),
+    );
+  }
+}
+
+/// Cross-fades the whole board when it swaps between the empty state and a
+/// live profile, so a profile blinking away during a switch reads as a fade
+/// rather than the entire layout snapping to a different tree.
+class _HeroCrossFade extends StatelessWidget {
+  const _HeroCrossFade({required this.slot, required this.child});
+
+  final String slot;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: context.motionDuration(commonDuration),
+      switchInCurve: Easing.emphasizedDecelerate,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
+        children: <Widget>[...previousChildren, ?currentChild],
+      ),
+      child: KeyedSubtree(key: ValueKey(slot), child: child),
+    );
+  }
+}
+
+/// A tail card that fades and collapses instead of popping. The child carries
+/// its own trailing gap so an absent slot leaves no double spacing behind, and
+/// the size animation follows the fade so the board settles in one motion.
+class _HeroReveal extends StatelessWidget {
+  const _HeroReveal({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = context.motionDuration(commonDuration);
+    return AnimatedSize(
+      duration: duration,
+      curve: Easing.standard,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: duration,
+        switchInCurve: Easing.emphasizedDecelerate,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) =>
+            FadeTransition(opacity: animation, child: child),
+        layoutBuilder: (currentChild, previousChildren) => Stack(
+          alignment: Alignment.topCenter,
+          children: <Widget>[...previousChildren, ?currentChild],
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+enum _ServerCardPhase { server, loading, none }
+
+/// The change-server card as a three-phase slot. It shows the picked server,
+/// a loading shell while the subscription is refreshing without one yet, or
+/// nothing at all. A short hold guards the collapse so a proxy list that
+/// blinks empty during a reload — a common thing when the tab is shown again —
+/// does not fold the card away and immediately reopen it.
+class _ServerSlot extends ConsumerStatefulWidget {
+  const _ServerSlot({
+    required this.server,
+    required this.status,
+    required this.accent,
+    required this.profileUpdatingKey,
+    required this.gap,
+  });
+
+  final ActiveServerInfo server;
+  final HeroStatus status;
+  final Color? accent;
+  final String profileUpdatingKey;
+  final double gap;
+
+  @override
+  ConsumerState<_ServerSlot> createState() => _ServerSlotState();
+}
+
+class _ServerSlotState extends ConsumerState<_ServerSlot> {
+  static const _collapseHold = Duration(milliseconds: 600);
+
+  late _ServerCardPhase _shown = _targetPhase();
+  Timer? _collapseTimer;
+
+  _ServerCardPhase _targetPhase() {
+    if (widget.server.displayName.isNotEmpty) {
+      return _ServerCardPhase.server;
+    }
+    final busy =
+        ref.read(loadingProvider(LoadingTag.proxies)) ||
+        ref.read(isUpdatingProvider(widget.profileUpdatingKey)) ||
+        ref.read(groupsProvider).isNotEmpty;
+    return busy ? _ServerCardPhase.loading : _ServerCardPhase.none;
+  }
+
+  @override
+  void dispose() {
+    _collapseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasServer = widget.server.displayName.isNotEmpty;
+    final busy =
+        !hasServer &&
+        (ref.watch(loadingProvider(LoadingTag.proxies)) ||
+            ref.watch(isUpdatingProvider(widget.profileUpdatingKey)) ||
+            ref.watch(groupsProvider.select((state) => state.isNotEmpty)));
+    final target = hasServer
+        ? _ServerCardPhase.server
+        : busy
+        ? _ServerCardPhase.loading
+        : _ServerCardPhase.none;
+
+    if (target != _ServerCardPhase.none) {
+      _collapseTimer?.cancel();
+      _collapseTimer = null;
+      _shown = target;
+    } else if (_shown != _ServerCardPhase.none && _collapseTimer == null) {
+      _collapseTimer = Timer(_collapseHold, () {
+        _collapseTimer = null;
+        if (mounted) setState(() => _shown = _ServerCardPhase.none);
+      });
+    }
+
+    return _HeroReveal(child: _content(_shown));
+  }
+
+  Widget _content(_ServerCardPhase phase) {
+    switch (phase) {
+      case _ServerCardPhase.none:
+        return const SizedBox.shrink(key: ValueKey('server-none'));
+      case _ServerCardPhase.loading:
+        return Column(
+          key: const ValueKey('server-loading'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _ServerLoadingCard(),
+            SizedBox(height: widget.gap),
+          ],
+        );
+      case _ServerCardPhase.server:
+        final server = widget.server;
+        return Column(
+          key: const ValueKey('server-ready'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ServerPanel(
+              displayName: server.displayName,
+              nameCountryCode: server.countryCode,
+              delay: server.delay,
+              status: widget.status,
+              accent: widget.accent,
+              otherCodes: server.otherCodes,
+              otherLocations: server.otherLocations,
+              smartRouting: server.smartRouting,
+            ),
+            SizedBox(height: widget.gap),
+          ],
+        );
+    }
+  }
+}
+
+/// The change-server card while servers are still loading: same surface as the
+/// real card so the swap grows into place instead of appearing from nowhere.
+class _ServerLoadingCard extends StatelessWidget {
+  const _ServerLoadingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return HeroSurface(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CommonCircleLoading(color: colorScheme.primary),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.appLocalizations.loading,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.titleSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

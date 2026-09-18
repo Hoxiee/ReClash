@@ -5,8 +5,30 @@ part 'generated/wallpaper.g.dart';
 
 enum WallpaperFit { cover, contain, fill }
 
+const maxWallpaperLibrary = 3;
+
 bool isWallpaperFileName(Object? value) =>
     value is String && RegExp(r'^[a-f0-9]{32}\.png$').hasMatch(value);
+
+// [active] is pinned first so a migrated single-image config stays in-library.
+List<String> sanitizeWallpaperLibrary(Object? value, {Object? active}) {
+  final result = <String>[];
+  void add(Object? candidate) {
+    if (isWallpaperFileName(candidate) &&
+        !result.contains(candidate) &&
+        result.length < maxWallpaperLibrary) {
+      result.add(candidate! as String);
+    }
+  }
+
+  add(active);
+  if (value is Iterable) {
+    for (final item in value) {
+      add(item);
+    }
+  }
+  return result;
+}
 
 String? wallpaperFileNameOf(Map? configMap) {
   final theme = configMap?['themeProps'];
@@ -17,11 +39,23 @@ String? wallpaperFileNameOf(Map? configMap) {
   return isWallpaperFileName(fileName) ? fileName as String : null;
 }
 
+List<String> wallpaperLibraryOf(Map? configMap) {
+  final theme = configMap?['themeProps'];
+  if (theme is! Map) return const [];
+  final wallpaper = theme['wallpaper'];
+  if (wallpaper is! Map) return const [];
+  return sanitizeWallpaperLibrary(
+    wallpaper['library'],
+    active: wallpaper['fileName'],
+  );
+}
+
 @freezed
 abstract class WallpaperProps with _$WallpaperProps {
   const factory WallpaperProps({
     @Default(false) bool enabled,
     String? fileName,
+    @Default(<String>[]) List<String> library,
     @Default(WallpaperFit.cover) WallpaperFit fit,
     @Default(1.0) double scale,
     @Default(0.0) double positionX,
@@ -46,9 +80,14 @@ abstract class WallpaperProps with _$WallpaperProps {
 
     final fileName = json['fileName'];
     final validFile = isWallpaperFileName(fileName);
+    final library = sanitizeWallpaperLibrary(
+      json['library'],
+      active: validFile ? fileName : null,
+    );
     return WallpaperProps(
       enabled: validFile && json['enabled'] == true,
       fileName: validFile ? fileName as String : null,
+      library: library,
       fit: WallpaperFit.values.firstWhere(
         (value) => value.name == json['fit'],
         orElse: () => WallpaperFit.cover,

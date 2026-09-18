@@ -126,6 +126,15 @@ class CommonCard extends StatelessWidget {
   final double? radius;
   final OutlinedBorder? shape;
 
+  // Flutter keeps `focused` set after a mouse click; honor `:focus-visible`.
+  Set<WidgetState> _effectiveStates(Set<WidgetState> states) {
+    if (FocusHighlightVisibility.visible.value ||
+        !states.contains(WidgetState.focused)) {
+      return states;
+    }
+    return states.difference({WidgetState.focused});
+  }
+
   BorderSide _buildBorderSide(BuildContext context, Set<WidgetState> states) {
     final colorScheme = context.colorScheme;
     final focused = states.contains(WidgetState.focused);
@@ -151,8 +160,8 @@ class CommonCard extends StatelessWidget {
       );
     }
     if (type == CommonCardType.filled) {
-      if (focused) {
-        return BorderSide(color: colorScheme.primary, width: 2);
+      if (focused && isSelected) {
+        return BorderSide(color: colorScheme.primary);
       }
       return BorderSide.none;
     }
@@ -171,9 +180,9 @@ class CommonCard extends StatelessWidget {
     );
   }
 
-  Color? _buildBackgroundColor(BuildContext context) {
+  Color? _buildBackgroundColor(BuildContext context, Set<WidgetState> states) {
     final colorScheme = context.colorScheme;
-    final color = switch (type) {
+    var color = switch (type) {
       CommonCardType.filled =>
         isSelected
             ? colorScheme.secondaryContainer.opacity80
@@ -183,7 +192,29 @@ class CommonCard extends StatelessWidget {
             ? colorScheme.secondaryContainer
             : colorScheme.surfaceContainerLow,
     };
+    if (states.contains(WidgetState.focused)) {
+      color = Color.alphaBlend(
+        colorScheme.primary.withValues(alpha: system.isTV ? 0.22 : 0.12),
+        color,
+      );
+    }
     return WallpaperSurfaceScope.colorOf(context, color);
+  }
+
+  // The button paints its own focus overlay while it holds focus, so a mouse
+  // click elsewhere leaves it stuck; resolve it through the focus-visible gate.
+  Color? _buildOverlayColor(BuildContext context, Set<WidgetState> states) {
+    final base = _buildForegroundColor(context) ?? context.colorScheme.onSurface;
+    if (states.contains(WidgetState.pressed)) {
+      return base.withValues(alpha: 0.1);
+    }
+    if (states.contains(WidgetState.hovered)) {
+      return base.withValues(alpha: 0.08);
+    }
+    if (states.contains(WidgetState.focused)) {
+      return base.withValues(alpha: 0.1);
+    }
+    return null;
   }
 
   Color? _buildForegroundColor(BuildContext context) {
@@ -231,11 +262,14 @@ class CommonCard extends StatelessWidget {
               side: BorderSide.none,
               elevation: 0,
             ).copyWith(
-              backgroundColor: WidgetStatePropertyAll(
-                _buildBackgroundColor(context),
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => _buildBackgroundColor(context, _effectiveStates(states)),
+              ),
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => _buildOverlayColor(context, _effectiveStates(states)),
               ),
               side: WidgetStateProperty.resolveWith(
-                (states) => _buildBorderSide(context, states),
+                (states) => _buildBorderSide(context, _effectiveStates(states)),
               ),
             ),
         onPressed: onPressed,
@@ -251,12 +285,17 @@ class CommonCard extends StatelessWidget {
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
               iconSize: 20,
               iconColor: _buildIconColor(context),
-              backgroundColor: _buildBackgroundColor(context),
               foregroundColor: _buildForegroundColor(context),
               elevation: 0,
             ).copyWith(
+              backgroundColor: WidgetStateProperty.resolveWith(
+                (states) => _buildBackgroundColor(context, _effectiveStates(states)),
+              ),
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => _buildOverlayColor(context, _effectiveStates(states)),
+              ),
               side: WidgetStateProperty.resolveWith(
-                (states) => _buildBorderSide(context, states),
+                (states) => _buildBorderSide(context, _effectiveStates(states)),
               ),
             ),
         onPressed: onPressed,
@@ -290,34 +329,40 @@ class CommonCard extends StatelessWidget {
       childWidget = Stack(children: children);
     }
 
-    final button = skipTraversal
-        ? _SkipTraversalScope(
-            builder: (focusNode) =>
-                _buildButton(context, childWidget, focusNode),
-          )
-        : _buildButton(context, childWidget, null);
-    final card = !enterActionsOnRight
-        ? button
-        : Focus(
-            canRequestFocus: false,
-            onKeyEvent: (_, event) {
-              if (event is! KeyDownEvent ||
-                  event.logicalKey != LogicalKeyboardKey.arrowRight) {
-                return KeyEventResult.ignored;
-              }
-              final focusNode = FocusManager.instance.primaryFocus;
-              final context = focusNode?.context;
-              if (focusNode == null ||
-                  context == null ||
-                  context.findAncestorWidgetOfExactType<IconButton>() != null) {
-                return KeyEventResult.ignored;
-              }
-              return focusNode.nextFocus()
-                  ? KeyEventResult.handled
-                  : KeyEventResult.ignored;
-            },
-            child: button,
-          );
+    final card = ValueListenableBuilder(
+      valueListenable: FocusHighlightVisibility.visible,
+      builder: (context, _, _) {
+        final button = skipTraversal
+            ? _SkipTraversalScope(
+                builder: (focusNode) =>
+                    _buildButton(context, childWidget, focusNode),
+              )
+            : _buildButton(context, childWidget, null);
+        if (!enterActionsOnRight) {
+          return button;
+        }
+        return Focus(
+          canRequestFocus: false,
+          onKeyEvent: (_, event) {
+            if (event is! KeyDownEvent ||
+                event.logicalKey != LogicalKeyboardKey.arrowRight) {
+              return KeyEventResult.ignored;
+            }
+            final focusNode = FocusManager.instance.primaryFocus;
+            final context = focusNode?.context;
+            if (focusNode == null ||
+                context == null ||
+                context.findAncestorWidgetOfExactType<IconButton>() != null) {
+              return KeyEventResult.ignored;
+            }
+            return focusNode.nextFocus()
+                ? KeyEventResult.handled
+                : KeyEventResult.ignored;
+          },
+          child: button,
+        );
+      },
+    );
 
     return switch (enterAnimated) {
       true => FadeScaleEnterBox(child: card),

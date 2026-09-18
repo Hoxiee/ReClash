@@ -5,60 +5,77 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 
 void main() {
-  Future<void> pumpMenu(
+  Future<List<(int, int)>> pumpList(
     WidgetTester tester, {
-    VoidCallback? onMoveUp,
-    VoidCallback? onMoveDown,
+    int count = 3,
   }) async {
+    final moves = <(int, int)>[];
     await tester.pumpWidget(
       TestApp(
+        locale: const Locale('en'),
         child: Scaffold(
-          body: Center(
-            child: ReorderMenuButton(
-              onMoveUp: onMoveUp,
-              onMoveDown: onMoveDown,
+          body: ReorderableListView.builder(
+            buildDefaultDragHandles: false,
+            itemCount: count,
+            itemBuilder: (_, index) => ListTile(
+              key: ValueKey(index),
+              title: Text('item $index'),
+              trailing: ReorderMenuHandle(
+                index: index,
+                count: count,
+                onReorder: (oldIndex, newIndex) =>
+                    moves.add((oldIndex, newIndex)),
+              ),
             ),
+            onReorder: (_, _) {},
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    return moves;
   }
 
-  testWidgets('reorder menu moves through its items', (tester) async {
-    var up = 0;
-    var down = 0;
-    await pumpMenu(tester, onMoveUp: () => up++, onMoveDown: () => down++);
-
-    await tester.tap(find.byType(ReorderMenuButton));
+  Future<void> openMenuAt(WidgetTester tester, int index) async {
+    await tester.tap(find.byType(ReorderMenuHandle).at(index));
     await tester.pumpAndSettle();
+  }
 
-    await tester.tap(find.byType(MenuItemButton).first);
-    await tester.pumpAndSettle();
-    expect(up, 1);
-    expect(down, 0);
-
-    await tester.tap(find.byType(ReorderMenuButton));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(MenuItemButton).last);
-    await tester.pumpAndSettle();
-    expect(up, 1);
-    expect(down, 1);
+  testWidgets('a middle item exposes every move', (tester) async {
+    await pumpList(tester);
+    await openMenuAt(tester, 1);
+    expect(find.text('Move up'), findsOneWidget);
+    expect(find.text('Move down'), findsOneWidget);
+    expect(find.text('Move to top'), findsOneWidget);
+    expect(find.text('Move to bottom'), findsOneWidget);
   });
 
-  testWidgets('unavailable directions stay out of the menu', (tester) async {
-    await pumpMenu(tester, onMoveDown: () {});
-
-    await tester.tap(find.byType(ReorderMenuButton));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(MenuItemButton), findsOneWidget);
+  testWidgets('the first item cannot move up', (tester) async {
+    await pumpList(tester);
+    await openMenuAt(tester, 0);
+    expect(find.text('Move up'), findsNothing);
+    expect(find.text('Move to top'), findsNothing);
+    expect(find.text('Move down'), findsOneWidget);
+    expect(find.text('Move to bottom'), findsOneWidget);
   });
 
-  testWidgets('a fully pinned item renders no button', (tester) async {
-    await pumpMenu(tester);
+  testWidgets('moves report the destination index', (tester) async {
+    final moves = await pumpList(tester);
 
+    await openMenuAt(tester, 1);
+    await tester.tap(find.text('Move up'));
+    await tester.pumpAndSettle();
+    expect(moves.last, (1, 0));
+
+    await openMenuAt(tester, 1);
+    await tester.tap(find.text('Move to bottom'));
+    await tester.pumpAndSettle();
+    expect(moves.last, (1, 2));
+  });
+
+  testWidgets('a lone item renders no interactive handle', (tester) async {
+    await pumpList(tester, count: 1);
+    expect(find.byType(ReorderMenuHandle), findsOneWidget);
     expect(find.byType(IconButton), findsNothing);
   });
 }

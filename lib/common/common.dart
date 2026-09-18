@@ -21,6 +21,7 @@ export 'exception.dart';
 export 'file.dart';
 export 'fixed.dart';
 export 'function.dart';
+export 'focus_visibility.dart';
 export 'future.dart';
 export 'http.dart';
 export 'icons.dart';

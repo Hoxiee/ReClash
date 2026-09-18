@@ -56,18 +56,11 @@ class NotificationComponentsEditor extends ConsumerWidget {
                 ? Text(_componentStatus(l, component))
                 : _NoticeText(notice: notice),
             invalid: notice?.severe ?? false,
-            trailing: Tooltip(
-              message: l.notificationReorder,
-              child: ReorderableDragStartListener(
-                index: index,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(
-                    Icons.drag_indicator_rounded,
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
+            trailing: ReorderMenuHandle(
+              index: index,
+              count: components.length,
+              onReorder: (oldIndex, newIndex) =>
+                  _move(ref, components, oldIndex, newIndex),
             ),
             onPressed: () => _open(context, component.type),
           ),

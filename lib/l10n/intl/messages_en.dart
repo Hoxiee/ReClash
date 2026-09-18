@@ -259,6 +259,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "${label} must be a URL";
 
   static String m104(count) =>
+      "You can keep up to ${count} backgrounds. Remove one to add another.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1447,9 +1450,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1653,6 +1657,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("More"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("Move down"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("Move to bottom"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("Move to top"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("Move up"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "Separate multiple values with commas",
     ),
@@ -3595,6 +3603,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("Fit"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("Fill"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Stretch"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "Tap a saved background to use it, or add a new one.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Horizontal position",
     ),
@@ -3602,16 +3613,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose a valid PNG, JPEG or WebP image.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "The background image is unavailable. Choose it again.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage(
-      "No image selected",
-    ),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("Replace image"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("Reset adjustments"),
     "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
       "Could not save the background. Your previous background has been kept.",
@@ -3645,7 +3650,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The core is not serving the dashboard yet",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

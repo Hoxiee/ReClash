@@ -119,6 +119,8 @@ class _NameListEditorState extends ConsumerState<NameListEditor>
       position: position,
       dismiss: dismiss,
       index: index,
+      count: length,
+      onReorder: _handleReorder,
       dragIconPadding: widget.dragIconPadding,
       isValidOf: widget.isValidOf,
       invalidMessageOf: widget.invalidMessageOf,

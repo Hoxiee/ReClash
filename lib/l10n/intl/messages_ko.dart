@@ -247,6 +247,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m103(label) => "${label}은(는) URL이어야 합니다";
 
   static String m104(count) =>
+      "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
+
+  static String m105(count) =>
       "${Intl.plural(count, one: '1년 전', other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1380,6 +1383,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("모노크롬"),
     "monthsAgo": m49,
     "more": MessageLookupByLibrary.simpleMessage("더 보기"),
+    "moveDown": MessageLookupByLibrary.simpleMessage("아래로 이동"),
+    "moveToBottom": MessageLookupByLibrary.simpleMessage("맨 아래로 이동"),
+    "moveToTop": MessageLookupByLibrary.simpleMessage("맨 위로 이동"),
+    "moveUp": MessageLookupByLibrary.simpleMessage("위로 이동"),
     "multipleValuesTip": MessageLookupByLibrary.simpleMessage(
       "여러 값을 쉼표로 구분하세요",
     ),
@@ -2996,6 +3003,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitContain": MessageLookupByLibrary.simpleMessage("맞추기"),
     "wallpaperFitCover": MessageLookupByLibrary.simpleMessage("채우기"),
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("늘이기"),
+    "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
+      "저장된 배경을 탭하여 적용하거나 새 배경을 추가하세요.",
+    ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "가로 위치",
     ),
@@ -3003,14 +3013,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperMissing": MessageLookupByLibrary.simpleMessage(
-      "배경 이미지를 사용할 수 없습니다. 다시 선택하세요.",
-    ),
-    "wallpaperNoImage": MessageLookupByLibrary.simpleMessage("선택한 이미지 없음"),
+    "wallpaperLibraryFull": m104,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
-    "wallpaperReplace": MessageLookupByLibrary.simpleMessage("이미지 교체"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("조정값 초기화"),
     "wallpaperSaveError": MessageLookupByLibrary.simpleMessage(
       "배경을 저장하지 못했습니다. 이전 배경은 유지됩니다.",
@@ -3040,7 +3046,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "코어가 아직 대시보드를 제공하고 있지 않습니다",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("화이트리스트 모드"),
-    "yearsAgo": m104,
+    "yearsAgo": m105,
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어(간체)"),
   };
 }

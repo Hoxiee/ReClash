@@ -42,20 +42,14 @@ class _TvFocusOutlineState extends State<TvFocusOutline> {
   void initState() {
     super.initState();
     _node.addListener(_updateHighlight);
-    FocusManager.instance.addHighlightModeListener(_handleHighlightMode);
+    FocusHighlightVisibility.visible.addListener(_updateHighlight);
   }
-
-  void _handleHighlightMode(FocusHighlightMode _) => _updateHighlight();
 
   void _updateHighlight() {
     final focused = widget.builder == null
         ? _node.hasFocus
         : _node.hasPrimaryFocus;
-    final highlighted =
-        focused &&
-        (system.isTV ||
-            FocusManager.instance.highlightMode ==
-                FocusHighlightMode.traditional);
+    final highlighted = focused && FocusHighlightVisibility.visible.value;
     if (mounted && highlighted != _highlighted) {
       setState(() => _highlighted = highlighted);
     }
@@ -63,7 +57,7 @@ class _TvFocusOutlineState extends State<TvFocusOutline> {
 
   @override
   void dispose() {
-    FocusManager.instance.removeHighlightModeListener(_handleHighlightMode);
+    FocusHighlightVisibility.visible.removeListener(_updateHighlight);
     _node.dispose();
     super.dispose();
   }

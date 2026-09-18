@@ -238,6 +238,10 @@
   "notificationMoveUp": "上へ移動",
   "notificationMoveDown": "下へ移動",
   "notificationReorder": "並べ替え",
+  "moveUp": "上へ移動",
+  "moveDown": "下へ移動",
+  "moveToTop": "先頭へ移動",
+  "moveToBottom": "末尾へ移動",
   "notificationPreviewNetwork": "ネットワーク · 正常",
   "notificationPreviewServer": "サーバー · 東京 01",
   "notificationSmartRoutingDesc": "現在のスマートルーティングの判断を表示します",
@@ -1201,10 +1205,17 @@
   "appearanceBackground": "背景",
   "wallpaperTitle": "カスタム背景",
   "wallpaperDescription": "選択した画像はサブスクリプションの背景より優先されます。カスタム背景をオフにすると元の背景に戻ります。",
+  "wallpaperGalleryHint": "保存済みの背景をタップして適用するか、新しい背景を追加します。",
+  "wallpaperLibraryFull": "背景は最大 {count} 件まで保存できます。追加するには 1 件削除してください。",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "画像を選択",
-  "wallpaperReplace": "画像を置き換え",
   "wallpaperRemove": "画像を削除",
-  "wallpaperNoImage": "画像が選択されていません",
   "wallpaperEnabled": "カスタム背景を使用",
   "wallpaperFit": "画像の配置",
   "wallpaperFitCover": "画面いっぱいに表示",
@@ -1221,7 +1232,6 @@
   "wallpaperImageError": "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
   "wallpaperTooLarge": "20 MB 以下、5,000 万画素以下の画像を選択してください。",
   "wallpaperSaveError": "背景を保存できませんでした。元の背景はそのままです。",
-  "wallpaperMissing": "背景画像を利用できません。もう一度選択してください。",
   "wallpaperSelectHint": "PNG、JPEG、WebP · 20 MB 以下",
   "wallpaperLayout": "構図",
   "wallpaperEffects": "画像の調整",

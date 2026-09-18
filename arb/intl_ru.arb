@@ -238,6 +238,10 @@
   "notificationMoveUp": "Выше",
   "notificationMoveDown": "Ниже",
   "notificationReorder": "Изменить порядок",
+  "moveUp": "Выше",
+  "moveDown": "Ниже",
+  "moveToTop": "В начало",
+  "moveToBottom": "В конец",
   "notificationPreviewNetwork": "Сеть · Норма",
   "notificationPreviewServer": "Сервер · Токио 01",
   "notificationSmartRoutingDesc": "Показывать активное решение Умной маршрутизации",
@@ -1205,10 +1209,17 @@
   "appearanceBackground": "Фон",
   "wallpaperTitle": "Пользовательский фон",
   "wallpaperDescription": "Ваше изображение заменяет фон подписки. Отключите его, чтобы вернуть прежнее оформление.",
+  "wallpaperGalleryHint": "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
+  "wallpaperLibraryFull": "Можно хранить до {count} фонов. Удалите один, чтобы добавить новый.",
+  "@wallpaperLibraryFull": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "wallpaperChoose": "Выбрать изображение",
-  "wallpaperReplace": "Заменить изображение",
   "wallpaperRemove": "Удалить изображение",
-  "wallpaperNoImage": "Изображение не выбрано",
   "wallpaperEnabled": "Использовать свой фон",
   "wallpaperFit": "Размещение изображения",
   "wallpaperFitCover": "Заполнить",
@@ -1225,7 +1236,6 @@
   "wallpaperImageError": "Выберите корректное изображение PNG, JPEG или WebP.",
   "wallpaperTooLarge": "Выберите изображение размером до 20 МБ и 50 мегапикселей.",
   "wallpaperSaveError": "Не удалось сохранить фон. Прежний фон сохранён.",
-  "wallpaperMissing": "Изображение фона недоступно. Выберите его заново.",
   "wallpaperSelectHint": "PNG, JPEG или WebP · до 20 МБ",
   "wallpaperLayout": "Кадрирование",
   "wallpaperEffects": "Настройки изображения",

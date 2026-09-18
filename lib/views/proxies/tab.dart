@@ -29,9 +29,32 @@ class ProxiesTabView extends ConsumerStatefulWidget {
 
 class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     with TickerProviderStateMixin {
+  static const _emptyHold = Duration(milliseconds: 600);
+
   TabController? _tabController;
   final _hasMoreButtonNotifier = ValueNotifier<bool>(false);
   ProxyGroupViewKeyMap _keyMap = {};
+
+  // Held groups keep the live TabController's length matched to the tabs when a reload blinks the list empty.
+  List<Group> _heldGroups = const [];
+  Timer? _emptyTimer;
+
+  List<Group> _displayGroups(List<Group> live) {
+    if (live.isNotEmpty) {
+      _emptyTimer?.cancel();
+      _emptyTimer = null;
+      _heldGroups = live;
+      return live;
+    }
+    if (_heldGroups.isNotEmpty && _tabController != null) {
+      _emptyTimer ??= Timer(_emptyHold, () {
+        _emptyTimer = null;
+        if (mounted) setState(() => _heldGroups = const []);
+      });
+      return _heldGroups;
+    }
+    return const [];
+  }
 
   @override
   void initState() {
@@ -51,6 +74,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
 
   @override
   void dispose() {
+    _emptyTimer?.cancel();
     _destroyTabController();
     _hasMoreButtonNotifier.dispose();
     super.dispose();
@@ -201,7 +225,7 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
     final proxiesLayout = ref.watch(
       effectiveProxiesStyleProvider.select((state) => state.layout),
     );
-    final groups = state.groups;
+    final groups = _displayGroups(state.groups);
     _keyMap = {};
     return NullStatusSwitcher(
       isEmpty: groups.isEmpty || _tabController == null,
