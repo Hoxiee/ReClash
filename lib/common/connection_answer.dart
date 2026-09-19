@@ -1,3 +1,4 @@
+import 'package:reclash/common/finding_events.dart';
 import 'package:reclash/models/models.dart';
 
 /// A remedy the Doctor screen can actually carry out or navigate to. Advice the
@@ -25,6 +26,9 @@ class DoctorAnswer {
     this.steps = const [],
     this.remedies = const [],
     this.blame,
+    this.confidence = DoctorConfidence.unknown,
+    this.scope = DoctorScope.unknown,
+    this.storm = false,
   });
 
   final DoctorAnswerTone tone;
@@ -41,6 +45,12 @@ class DoctorAnswer {
 
   /// Path stage id the fault sits on, for captioning the path map.
   final String? blame;
+
+  final DoctorConfidence confidence;
+  final DoctorScope scope;
+
+  /// Every path stage failed at once; the screen gates its start button on this.
+  final bool storm;
 
   bool get isProblem =>
       tone == DoctorAnswerTone.bad || tone == DoctorAnswerTone.warning;
@@ -148,6 +158,17 @@ DoctorAnswer doctorAnswerOf(DoctorSnapshot snapshot, DoctorAnswerText text) {
       remedies: const [DoctorRemedy.recheck],
     );
   }
+  if (allDoctorLayersFailed(snapshot)) {
+    return DoctorAnswer(
+      tone: DoctorAnswerTone.bad,
+      headline: text.stormHeadline,
+      meaning: text.stormMeaning,
+      steps: [text.stepSwitchNetwork],
+      confidence: snapshot.confidence,
+      scope: snapshot.scope,
+      storm: true,
+    );
+  }
   if (snapshot.health == DoctorHealth.broken ||
       snapshot.health == DoctorHealth.degraded) {
     return _problemAnswer(snapshot, text, cause);
@@ -194,23 +215,36 @@ DoctorAnswer _healthyAnswer(DoctorSnapshot snapshot, DoctorAnswerText text) {
       tone: DoctorAnswerTone.good,
       headline: text.reachableHeadline,
       meaning: text.reachableMeaning,
+      confidence: snapshot.confidence,
+      scope: snapshot.scope,
     );
   }
   return DoctorAnswer(
     tone: DoctorAnswerTone.good,
     headline: text.healthyHeadline,
     meaning: text.healthyMeaning,
+    confidence: snapshot.confidence,
+    scope: snapshot.scope,
   );
 }
+
+/// Severity leads; health is the fallback while it is `unknown` (identical today).
+DoctorAnswerTone _problemTone(DoctorSnapshot snapshot) => switch (snapshot.severity) {
+  DoctorSeverity.critical => DoctorAnswerTone.bad,
+  DoctorSeverity.warning => DoctorAnswerTone.warning,
+  DoctorSeverity.info => DoctorAnswerTone.warning,
+  DoctorSeverity.unknown =>
+    snapshot.health == DoctorHealth.broken
+        ? DoctorAnswerTone.bad
+        : DoctorAnswerTone.warning,
+};
 
 DoctorAnswer _problemAnswer(
   DoctorSnapshot snapshot,
   DoctorAnswerText text,
   String cause,
 ) {
-  final tone = snapshot.health == DoctorHealth.broken
-      ? DoctorAnswerTone.bad
-      : DoctorAnswerTone.warning;
+  final tone = _problemTone(snapshot);
   final blame = _stageForLayer(snapshot.layer);
 
   DoctorAnswer answer(
@@ -225,6 +259,8 @@ DoctorAnswer _problemAnswer(
     steps: steps,
     remedies: remedies,
     blame: blame,
+    confidence: snapshot.confidence,
+    scope: snapshot.scope,
   );
 
   if (cause == 'tunNotActive') {
@@ -440,6 +476,8 @@ class DoctorAnswerText {
     required this.captureMeaning,
     required this.genericHeadline,
     required this.genericMeaning,
+    required this.stormHeadline,
+    required this.stormMeaning,
     required this.stepStartVpn,
     required this.stepCheckWifi,
     required this.stepSignInPortal,
@@ -504,6 +542,8 @@ class DoctorAnswerText {
   final String captureMeaning;
   final String genericHeadline;
   final String genericMeaning;
+  final String stormHeadline;
+  final String stormMeaning;
   final String stepStartVpn;
   final String stepCheckWifi;
   final String stepSignInPortal;

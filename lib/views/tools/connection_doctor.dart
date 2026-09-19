@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/finding_events.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -20,40 +19,12 @@ import 'connection_doctor_path.dart';
 DoctorAnswer connectionDoctorAnswer(
   AppLocalizations localizations,
   DoctorSnapshot snapshot,
-) => allDoctorLayersFailed(snapshot)
-    ? DoctorAnswer(
-        tone: DoctorAnswerTone.bad,
-        headline: localizations.findingStormTitle,
-        meaning: localizations.findingStormVerdict,
-        steps: [localizations.doctorStepSwitchNetwork],
-      )
-    : doctorAnswerOf(snapshot, doctorAnswerText(localizations));
+) => doctorAnswerOf(snapshot, doctorAnswerText(localizations));
 
 String connectionDoctorTitle(
   AppLocalizations appLocalizations,
   DoctorSnapshot snapshot,
-) {
-  if (!snapshot.supported) return appLocalizations.doctorUnsupportedTitle;
-  if (!snapshot.isFresh) return appLocalizations.doctorObservingTitle;
-  if (_expectedCaptureInactive(snapshot)) {
-    return appLocalizations.doctorVpnInactiveTitle;
-  }
-  if (_markerOnlyReachable(snapshot)) {
-    return appLocalizations.doctorEndpointReachableTitle;
-  }
-  return switch (snapshot.state) {
-    DoctorExamState.examining => appLocalizations.doctorExaminingTitle,
-    DoctorExamState.inconclusive => appLocalizations.doctorInconclusiveTitle,
-    DoctorExamState.superseded => appLocalizations.doctorSupersededTitle,
-    DoctorExamState.cancelled => appLocalizations.doctorCancelledTitle,
-    _ => switch (snapshot.health) {
-      DoctorHealth.healthy => appLocalizations.doctorHealthyTitle,
-      DoctorHealth.degraded => appLocalizations.doctorDegradedTitle,
-      DoctorHealth.broken => appLocalizations.doctorBrokenTitle,
-      _ => appLocalizations.doctorObservingTitle,
-    },
-  };
-}
+) => connectionDoctorAnswer(appLocalizations, snapshot).headline;
 
 String connectionDoctorDescription(
   AppLocalizations appLocalizations,
@@ -432,7 +403,7 @@ class _DoctorAnswerCard extends StatelessWidget {
         : null;
     final remedies = answer.remedies.where(_remedyActive).toList();
     final showStart =
-        !allDoctorLayersFailed(snapshot) &&
+        !answer.storm &&
         snapshot.supported &&
         canStart &&
         !examining &&
@@ -468,6 +439,17 @@ class _DoctorAnswerCard extends StatelessWidget {
                           color: colors.onSurfaceVariant,
                         ),
                       ),
+                      if (answer.isProblem &&
+                          answer.confidence == DoctorConfidence.probable) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          _confidenceLabel(appLocalizations, answer.confidence),
+                          style: context.textTheme.labelMedium?.copyWith(
+                            color: colors.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

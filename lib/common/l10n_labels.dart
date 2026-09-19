@@ -299,6 +299,8 @@ DoctorAnswerText doctorAnswerText(AppLocalizations appLocalizations) =>
       captureMeaning: appLocalizations.doctorVpnInactiveDesc,
       genericHeadline: appLocalizations.doctorBrokenTitle,
       genericMeaning: appLocalizations.doctorGenericDesc,
+      stormHeadline: appLocalizations.findingStormTitle,
+      stormMeaning: appLocalizations.findingStormVerdict,
       stepStartVpn: appLocalizations.doctorStepStartVpn,
       stepCheckWifi: appLocalizations.doctorStepCheckWifi,
       stepSignInPortal: appLocalizations.doctorStepSignInPortal,

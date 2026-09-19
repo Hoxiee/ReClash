@@ -139,6 +139,8 @@ const _text = DoctorAnswerText(
   captureMeaning: 'captureMeaning',
   genericHeadline: 'genericHeadline',
   genericMeaning: 'genericMeaning',
+  stormHeadline: 'stormHeadline',
+  stormMeaning: 'stormMeaning',
   stepStartVpn: 'stepStartVpn',
   stepCheckWifi: 'stepCheckWifi',
   stepSignInPortal: 'stepSignInPortal',
@@ -275,6 +277,62 @@ void main() {
       ).tone,
       DoctorAnswerTone.warning,
     );
+  });
+
+  test('severity leads the tone when the core reports one', () {
+    // A degraded verdict the core still calls critical must read as critical,
+    // and health drives the tone only while severity is unknown.
+    final degraded = _failed(
+      'coreResolverFailed',
+      DoctorLayer.dns,
+    ).copyWith(health: DoctorHealth.degraded);
+    expect(
+      doctorAnswerOf(
+        degraded.copyWith(severity: DoctorSeverity.critical),
+        _text,
+      ).tone,
+      DoctorAnswerTone.bad,
+    );
+    expect(
+      doctorAnswerOf(
+        _failed('coreResolverFailed', DoctorLayer.dns)
+            .copyWith(severity: DoctorSeverity.warning),
+        _text,
+      ).tone,
+      DoctorAnswerTone.warning,
+    );
+  });
+
+  test('confidence is carried through to the answer', () {
+    final probable = _failed(
+      'coreResolverFailed',
+      DoctorLayer.dns,
+    ).copyWith(confidence: DoctorConfidence.probable);
+    expect(
+      doctorAnswerOf(probable, _text).confidence,
+      DoctorConfidence.probable,
+    );
+  });
+
+  test('a wholly failed path reads as one storm, not a first fault', () {
+    const storm = DoctorSnapshot(
+      supported: true,
+      state: DoctorExamState.complete,
+      health: DoctorHealth.broken,
+      causeCode: 'coreResolverFailed',
+      layer: DoctorLayer.dns,
+      stages: [
+        DoctorStage(id: 'app', state: DoctorStageState.failed),
+        DoctorStage(id: 'ingress', state: DoctorStageState.consequence),
+        DoctorStage(id: 'route', state: DoctorStageState.consequence),
+        DoctorStage(id: 'internet', state: DoctorStageState.consequence),
+        DoctorStage(id: 'response', state: DoctorStageState.consequence),
+      ],
+    );
+    final answer = doctorAnswerOf(storm, _text);
+    expect(answer.storm, isTrue);
+    expect(answer.headline, _text.stormHeadline);
+    expect(answer.tone, DoctorAnswerTone.bad);
   });
 
   test('a healthy run without ingress proof only claims reachability', () {

@@ -240,8 +240,16 @@ class _LogFilterButton extends StatelessWidget {
     required this.onClear,
   });
 
-  String _label(Enum value, bool selected) {
-    return '${selected ? '✓ ' : ''}${value.name.toUpperCase()}';
+  CommonPopupMenuItem _optionItem(
+    Enum value,
+    bool selected,
+    VoidCallback onPressed,
+  ) {
+    return CommonPopupMenuItem(
+      icon: selected ? Icons.check : Icons.check_box_outline_blank,
+      label: value.name.toUpperCase(),
+      onPressed: onPressed,
+    );
   }
 
   List<CommonPopupMenuItem> _buildItems(BuildContext context) {
@@ -252,9 +260,10 @@ class _LogFilterButton extends StatelessWidget {
         label: appLocalizations.source,
         subItems: [
           for (final source in LogSource.values)
-            CommonPopupMenuItem(
-              label: _label(source, logsState.sources.contains(source)),
-              onPressed: () => onToggleSource(source),
+            _optionItem(
+              source,
+              logsState.sources.contains(source),
+              () => onToggleSource(source),
             ),
         ],
       ),
@@ -264,9 +273,10 @@ class _LogFilterButton extends StatelessWidget {
         subItems: [
           for (final level in LogLevel.values)
             if (level != LogLevel.silent)
-              CommonPopupMenuItem(
-                label: _label(level, logsState.levels.contains(level)),
-                onPressed: () => onToggleLevel(level),
+              _optionItem(
+                level,
+                logsState.levels.contains(level),
+                () => onToggleLevel(level),
               ),
         ],
       ),
@@ -303,45 +313,152 @@ class LogItem extends StatelessWidget {
 
   const LogItem({super.key, required this.log, this.onClick});
 
+  (String date, String time) _splitDateTime() {
+    final parts = log.dateTime.split(' ');
+    if (parts.length >= 2) {
+      return (parts.first, parts.sublist(1).join(' '));
+    }
+    return ('', log.dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListItem(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ).copyWith(bottom: 12),
-      onTap: () {},
-      minVerticalPadding: 0,
-      title: SelectableText(
-        log.payload,
-        style: context.textTheme.bodyLarge?.copyWith(
-          color: log.logLevel.color(context),
-        ),
+    final colorScheme = context.colorScheme;
+    final level = log.logLevel;
+    final accent = level.accentColor(context);
+    final emphasized = level == LogLevel.error || level == LogLevel.warning;
+    final (date, time) = _splitDateTime();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: emphasized ? accent.opacity3 : null,
+        border: Border(left: BorderSide(color: accent, width: 3)),
       ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Row(
-          spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(13, 10, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CommonChip(
-              label: log.logLevel.name,
-              onPressed: () => onClick?.call(log.logLevel.name),
-            ),
-            Flexible(
-              child: Text(
-                log.dateTime,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
+            Row(
+              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _LevelBadge(
+                  level: level,
+                  onPressed: () => onClick?.call(level.name),
                 ),
-              ),
+                _SourceBadge(source: log.source),
+                const Spacer(),
+                _TimeLabel(date: date, time: time),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SelectableText(
+              log.payload,
+              style: context.textTheme.bodyMedium
+                  ?.copyWith(
+                    color: level == LogLevel.silent
+                        ? colorScheme.outline
+                        : colorScheme.onSurface,
+                    height: 1.35,
+                  )
+                  .toJetBrainsMono,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LevelBadge extends StatelessWidget {
+  final LogLevel level;
+  final VoidCallback? onPressed;
+
+  const _LevelBadge({required this.level, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(
+      level.name.toUpperCase(),
+      style: context.textTheme.labelSmall?.copyWith(
+        color: level.onBadgeColor(context),
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.4,
+      ),
+    );
+    return Material(
+      color: level.badgeColor(context),
+      shape: AppShape.xs,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: label,
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceBadge extends StatelessWidget {
+  final LogSource source;
+
+  const _SourceBadge({required this.source});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: AppShape.xs.copyWith(
+          side: BorderSide(color: colorScheme.outlineVariant),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        child: Text(
+          source.name.toUpperCase(),
+          style: context.textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            letterSpacing: 0.4,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TimeLabel extends StatelessWidget {
+  final String date;
+  final String time;
+
+  const _TimeLabel({required this.date, required this.time});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          time,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: context.textTheme.labelMedium
+              ?.copyWith(color: colorScheme.onSurfaceVariant)
+              .toJetBrainsMono,
+        ),
+        if (date.isNotEmpty)
+          Text(
+            date,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.labelSmall
+                ?.copyWith(color: colorScheme.outline)
+                .toJetBrainsMono,
+          ),
+      ],
     );
   }
 }

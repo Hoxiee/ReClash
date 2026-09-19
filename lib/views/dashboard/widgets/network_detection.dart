@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
@@ -46,7 +47,7 @@ class NetworkDetection extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: _statusColor(context, snapshot),
+                    color: _statusColor(context, appLocalizations, snapshot),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -83,13 +84,17 @@ class NetworkDetection extends ConsumerWidget {
   }
 }
 
-Color _statusColor(BuildContext context, DoctorSnapshot snapshot) {
+Color _statusColor(
+  BuildContext context,
+  AppLocalizations appLocalizations,
+  DoctorSnapshot snapshot,
+) {
   if (!snapshot.supported || !snapshot.isFresh) {
     return context.colorScheme.onSurfaceVariant;
   }
-  return switch (snapshot.health) {
-    DoctorHealth.broken => context.colorScheme.error,
-    DoctorHealth.degraded => Colors.orange,
+  return switch (connectionDoctorAnswer(appLocalizations, snapshot).tone) {
+    DoctorAnswerTone.bad => context.colorScheme.error,
+    DoctorAnswerTone.warning => Colors.orange,
     _ => context.colorScheme.onSurface,
   };
 }

@@ -198,6 +198,37 @@ extension LogLevelExt on LogLevel {
       LogLevel.error => colorScheme.error,
     };
   }
+
+  Color accentColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (this) {
+      LogLevel.error => colorScheme.error,
+      LogLevel.warning => colorScheme.tertiary,
+      LogLevel.info => colorScheme.primary,
+      LogLevel.debug => colorScheme.outlineVariant,
+      LogLevel.silent => colorScheme.outlineVariant,
+    };
+  }
+
+  Color badgeColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (this) {
+      LogLevel.error => colorScheme.errorContainer,
+      LogLevel.warning => colorScheme.tertiaryContainer,
+      _ => colorScheme.surfaceContainerHighest,
+    };
+  }
+
+  Color onBadgeColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (this) {
+      LogLevel.error => colorScheme.onErrorContainer,
+      LogLevel.warning => colorScheme.onTertiaryContainer,
+      LogLevel.info => colorScheme.onSurface,
+      LogLevel.debug => colorScheme.onSurfaceVariant,
+      LogLevel.silent => colorScheme.outline,
+    };
+  }
 }
 
 enum MessageLevel { info, success, warning, error }
