@@ -74,8 +74,6 @@ class System {
     return app?.getLastExitInfo();
   }
 
-  bool supportsPredictiveBack(int version) => isAndroid && version >= 33;
-
   bool Function() hasSystemd = () =>
       Directory('/run/systemd/system').existsSync();
 
