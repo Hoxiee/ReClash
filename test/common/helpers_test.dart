@@ -57,12 +57,22 @@ void main() {
       expect(getTimeText(3661000), '01:01:01');
     });
 
-    test('formats three digit hours', () {
-      expect(getTimeText(100 * 3600 * 1000), '100:00:00');
+    test('zero-pads hours up to 23', () {
+      expect(getTimeText(23 * 3600 * 1000), '23:00:00');
     });
 
-    test('caps at 999:59:59', () {
-      expect(getTimeText(1000 * 3600 * 1000), '999:59:59');
+    test('switches to day format at exactly 24 hours', () {
+      expect(getTimeText(24 * 3600 * 1000), '1d 00:00:00');
+    });
+
+    test('formats multiple days with remaining time', () {
+      const timeStamp = ((5 * 24 + 3) * 3600 + 12 * 60 + 45) * 1000;
+      expect(getTimeText(timeStamp), '5d 03:12:45');
+    });
+
+    test('does not cap large day counts', () {
+      expect(getTimeText(100 * 24 * 3600 * 1000), '100d 00:00:00');
+      expect(getTimeText(1000 * 3600 * 1000), '41d 16:00:00');
     });
   });
 

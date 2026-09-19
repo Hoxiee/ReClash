@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/test_app.dart';
 
 void main() {
-  testWidgets('RunTimeText emphasizes the hundreds hour digit', (tester) async {
+  testWidgets('RunTimeText emphasizes the day prefix', (tester) async {
     const colorScheme = ColorScheme.light(
       primary: Color(0xFF6750A4),
       onPrimaryContainer: Color(0xFF21005D),
@@ -17,7 +17,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(colorScheme: colorScheme),
-        home: const RunTimeText(timeStamp: 100 * 60 * 60 * 1000),
+        home: const RunTimeText(timeStamp: 24 * 60 * 60 * 1000),
       ),
     );
 
@@ -29,18 +29,19 @@ void main() {
     );
     final span = text.textSpan! as TextSpan;
 
-    expect(span.toPlainText(), '100:00:00');
-    expect(span.text, '1');
+    expect(span.toPlainText(), '1d 00:00:00');
+    expect(span.text, '1d');
     expect(span.style?.color, colorScheme.primary);
     expect(span.style?.fontWeight, FontWeight.w600);
     expect(span.children, hasLength(1));
+    expect((span.children!.single as TextSpan).text, ' 00:00:00');
     expect(
       (span.children!.single as TextSpan).style?.color,
       colorScheme.onPrimaryContainer,
     );
   });
 
-  testWidgets('RunTimeText uses one color below 100 hours', (tester) async {
+  testWidgets('RunTimeText uses one color below one day', (tester) async {
     const colorScheme = ColorScheme.light(
       primary: Color(0xFF6750A4),
       onPrimaryContainer: Color(0xFF21005D),
@@ -48,7 +49,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(colorScheme: colorScheme),
-        home: const RunTimeText(timeStamp: 99 * 60 * 60 * 1000),
+        home: const RunTimeText(timeStamp: 23 * 60 * 60 * 1000),
       ),
     );
 
@@ -59,11 +60,11 @@ void main() {
       ),
     );
 
-    expect(text.data, '99:00:00');
+    expect(text.data, '23:00:00');
     expect(text.style?.color, colorScheme.onPrimaryContainer);
   });
 
-  testWidgets('StartButton animates its width when hours reach three digits', (
+  testWidgets('StartButton animates its width when uptime reaches a day', (
     tester,
   ) async {
     final container = ProviderContainer(
@@ -75,7 +76,7 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
-    container.read(runTimeProvider.notifier).value = 99 * 60 * 60 * 1000;
+    container.read(runTimeProvider.notifier).value = 23 * 60 * 60 * 1000;
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -92,15 +93,15 @@ void main() {
 
     final button = find.byType(FloatingActionButton);
     expect(tester.getSize(button).height, 56);
-    final twoDigitWidth = tester.getSize(button).width;
+    final hoursWidth = tester.getSize(button).width;
 
-    container.read(runTimeProvider.notifier).value = 100 * 60 * 60 * 1000;
+    container.read(runTimeProvider.notifier).value = 24 * 60 * 60 * 1000;
     await tester.pump();
-    expect(tester.getSize(button).width, twoDigitWidth);
+    expect(tester.getSize(button).width, hoursWidth);
 
     await tester.pump(const Duration(milliseconds: 100));
     final animatedWidth = tester.getSize(button).width;
-    expect(animatedWidth, greaterThan(twoDigitWidth));
+    expect(animatedWidth, greaterThan(hoursWidth));
 
     await tester.pumpAndSettle();
     expect(tester.getSize(button).width, greaterThan(animatedWidth));
@@ -152,7 +153,7 @@ void main() {
         .widget<AnimatedContainer>(find.byType(AnimatedContainer))
         .constraints
         ?.maxWidth;
-    expect(runTimeText(), '100:02:03');
+    expect(runTimeText(), '4d 04:02:03');
 
     container.read(runTimeProvider.notifier).value = null;
     await tester.pump();
@@ -169,12 +170,12 @@ void main() {
           ?.maxWidth,
       expandedTextWidth,
     );
-    expect(runTimeText(), '100:02:03');
+    expect(runTimeText(), '4d 04:02:03');
 
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(tester.getSize(button).width, 56);
-    expect(runTimeText(), '100:02:03');
+    expect(runTimeText(), '4d 04:02:03');
 
     await tester.pumpAndSettle();
 

@@ -5,7 +5,6 @@ import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const _threeDigitHourThreshold = 100 * 60 * 60 * 1000;
 const _widthAnimationDuration = Duration(milliseconds: 200);
 const _buttonHeight = 56.0;
 
@@ -22,20 +21,15 @@ TextStyle? _hundredsTextStyle(BuildContext context) {
   );
 }
 
-double _computeRunTimeTextWidth(
-  BuildContext context, {
-  required bool hasThreeDigitHours,
-}) {
-  final regularWidth = globalState.measure
-      .computeTextSize(Text('99:99:99', style: _runTimeTextStyle(context)))
-      .width;
-  if (!hasThreeDigitHours) {
-    return regularWidth + 16;
-  }
-  final hundredsWidth = globalState.measure
-      .computeTextSize(Text('9', style: _hundredsTextStyle(context)))
-      .width;
-  return hundredsWidth + regularWidth + 16;
+double _computeRunTimeTextWidth(BuildContext context, String text) {
+  final daySeparator = text.indexOf('d ');
+  final placeholder = daySeparator == -1
+      ? '99:99:99'
+      : '${'9' * daySeparator}d 99:99:99';
+  return globalState.measure
+          .computeTextSize(Text(placeholder, style: _runTimeTextStyle(context)))
+          .width +
+      16;
 }
 
 class RunTimeText extends StatelessWidget {
@@ -47,13 +41,16 @@ class RunTimeText extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = getTimeText(timeStamp);
     final style = _runTimeTextStyle(context);
-    final textWidget = text.length < 9
+    final daySeparator = text.indexOf('d ');
+    final textWidget = daySeparator == -1
         ? Text(text, maxLines: 1, overflow: TextOverflow.visible, style: style)
         : Text.rich(
             TextSpan(
-              text: text.substring(0, 1),
+              text: text.substring(0, daySeparator + 1),
               style: _hundredsTextStyle(context),
-              children: [TextSpan(text: text.substring(1), style: style)],
+              children: [
+                TextSpan(text: text.substring(daySeparator + 1), style: style),
+              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.visible,
@@ -74,8 +71,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
   late Animation<double> _animation;
-  double? _twoDigitTextWidth;
-  double? _threeDigitTextWidth;
+  final _runTimeTextWidths = <int, double>{};
   double? _pausedTextWidth;
   int? _displayRunTime;
 
@@ -104,8 +100,7 @@ class _StartButtonState extends ConsumerState<StartButton>
     _controller!.duration = context.disableAnimations
         ? Duration.zero
         : const Duration(milliseconds: 200);
-    _twoDigitTextWidth = null;
-    _threeDigitTextWidth = null;
+    _runTimeTextWidths.clear();
     _pausedTextWidth = null;
   }
 
@@ -152,19 +147,10 @@ class _StartButtonState extends ConsumerState<StartButton>
     });
   }
 
-  double _getRunTimeTextWidth(
-    BuildContext context, {
-    required bool hasThreeDigitHours,
-  }) {
-    if (hasThreeDigitHours) {
-      return _threeDigitTextWidth ??= _computeRunTimeTextWidth(
-        context,
-        hasThreeDigitHours: true,
-      );
-    }
-    return _twoDigitTextWidth ??= _computeRunTimeTextWidth(
-      context,
-      hasThreeDigitHours: false,
+  double _getRunTimeTextWidth(BuildContext context, String text) {
+    return _runTimeTextWidths.putIfAbsent(
+      text.length,
+      () => _computeRunTimeTextWidth(context, text),
     );
   }
 
@@ -195,13 +181,11 @@ class _StartButtonState extends ConsumerState<StartButton>
     final isStart = ref.watch(isStartProvider);
     final showPauseButton =
         isStart && (ref.watch(tunEnabledProvider) || paused);
-    final hasThreeDigitHours =
-        (_displayRunTime ?? 0) >= _threeDigitHourThreshold;
     final theme = Theme.of(context);
     final appLocalizations = context.appLocalizations;
     final textWidth = paused
         ? _getPausedTextWidth(context, appLocalizations.paused)
-        : _getRunTimeTextWidth(context, hasThreeDigitHours: hasThreeDigitHours);
+        : _getRunTimeTextWidth(context, getTimeText(_displayRunTime));
     final widthDuration = context.motionDuration(_widthAnimationDuration);
     return RepaintBoundary(
       child: Row(
@@ -223,7 +207,6 @@ class _StartButtonState extends ConsumerState<StartButton>
                   .copyWith(
                     sizeConstraints: const BoxConstraints(
                       minWidth: 56,
-                      maxWidth: 220,
                       minHeight: _buttonHeight,
                       maxHeight: _buttonHeight,
                     ),
