@@ -116,22 +116,41 @@ class ProtectedSubscriptionTransport implements HttpClientAdapter {
       ),
       timeoutMillis: remaining,
     );
-    final status = result['status'] as int;
-    final headers = (result['headers'] as Map<String, dynamic>).map(
-      (key, value) => MapEntry(key, (value as List).cast<String>()),
+    final status = result['status'];
+    final rawHeaders = result['headers'];
+    final encoded = result['body'];
+    if (status is! int || rawHeaders is! Map || encoded is! String) {
+      throw const CoreMethodException(
+        code: 'subscription_protection',
+        message: 'Malformed protected subscription response',
+      );
+    }
+    final headers = rawHeaders.map(
+      (key, value) => MapEntry(
+        key.toString(),
+        value is List
+            ? value.map((item) => item.toString()).toList()
+            : <String>[],
+      ),
     );
-    final encoded = result['body'] as String;
     if (encoded.length > ((maxSubscriptionResponseBytes + 2) ~/ 3) * 4) {
       throw const CoreMethodException(
         code: 'subscription_too_large',
         message: 'Subscription response is too large',
       );
     }
-    return ResponseBody.fromBytes(
-      base64Decode(encoded),
-      status,
-      headers: headers,
-    );
+    try {
+      return ResponseBody.fromBytes(
+        base64Decode(encoded),
+        status,
+        headers: headers,
+      );
+    } on FormatException {
+      throw const CoreMethodException(
+        code: 'subscription_protection',
+        message: 'Malformed protected subscription response',
+      );
+    }
   }
 
   @override

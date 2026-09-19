@@ -73,7 +73,7 @@ class _HeroStatusMarkState extends ConsumerState<HeroStatusMark>
   Widget build(BuildContext context) {
     final status = heroStatusOf(
       ref.watch(heroLifecycleProvider),
-      heroDoctorHealthOf(ref.watch(connectionDoctorProvider)),
+      ref.watch(connectionDoctorProvider.select(heroDoctorHealthOf)),
     );
     _syncMotion(_moving(status));
     return SizedBox.square(

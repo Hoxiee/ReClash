@@ -63,6 +63,7 @@ class DAVConnectionController extends ValueNotifier<bool?> {
   DAVClient? client;
 
   Future<void> update(DAVProps? props) async {
+    if (_disposed) return;
     final nextClient = props == null ? null : _createClient(props);
     client = nextClient;
 

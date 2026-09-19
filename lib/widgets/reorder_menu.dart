@@ -14,6 +14,7 @@ class ReorderMenuHandle extends StatelessWidget {
     this.delayedDrag = false,
     this.icon = Icons.drag_indicator_rounded,
     this.color,
+    this.compact = false,
   });
 
   final int index;
@@ -25,6 +26,9 @@ class ReorderMenuHandle extends StatelessWidget {
   final bool delayedDrag;
   final IconData icon;
   final Color? color;
+
+  /// Shrinks the tap target to fit a dense fixed-height row without overflow.
+  final bool compact;
 
   bool get _canMoveUp => index > 0;
   bool get _canMoveDown => index < count - 1;
@@ -65,7 +69,7 @@ class ReorderMenuHandle extends StatelessWidget {
     final handleColor = color ?? context.colorScheme.onSurfaceVariant;
     if (count <= 1) {
       return Padding(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(compact ? 4 : 8),
         child: Icon(icon, color: handleColor),
       );
     }
@@ -75,6 +79,16 @@ class ReorderMenuHandle extends StatelessWidget {
         final handle = IconButton(
           tooltip: l.notificationReorder,
           onPressed: () => open(),
+          visualDensity: compact ? VisualDensity.compact : null,
+          padding: compact ? EdgeInsets.zero : null,
+          constraints: compact
+              ? const BoxConstraints(minWidth: 32, minHeight: 32)
+              : null,
+          style: compact
+              ? IconButton.styleFrom(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                )
+              : null,
           icon: Icon(icon, color: handleColor),
         );
         return delayedDrag

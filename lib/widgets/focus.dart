@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 
@@ -185,6 +186,52 @@ class _PageFocusScopeState extends State<PageFocusScope> {
     return FocusScope.withExternalFocusNode(
       focusScopeNode: _node,
       child: widget.child,
+    );
+  }
+}
+
+/// Page-style initial focus for a modal: the deferred frame lets an inner
+/// autofocus win, and requestFocus (no ensureVisible) keeps a picker's scroll.
+class ModalFocusScope extends StatefulWidget {
+  const ModalFocusScope({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<ModalFocusScope> createState() => _ModalFocusScopeState();
+}
+
+class _ModalFocusScopeState extends State<ModalFocusScope> {
+  late final FocusScopeNode _node = FocusScopeNode(
+    traversalEdgeBehavior: TraversalEdgeBehavior.parentScope,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(_settleFocus);
+  }
+
+  Future<void> _settleFocus(Duration _) async {
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted || _node.focusedChild != null) return;
+    FocusTraversalGroup.of(context).findFirstFocus(_node)?.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusTraversalGroup(
+      policy: PageTraversalPolicy(),
+      child: FocusScope.withExternalFocusNode(
+        focusScopeNode: _node,
+        child: widget.child,
+      ),
     );
   }
 }

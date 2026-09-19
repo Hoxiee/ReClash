@@ -71,7 +71,10 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
     final tip = coreStatus == CoreStatus.connected
         ? context.appLocalizations.forceRestartCoreTip
         : context.appLocalizations.restartCoreTip;
-    final res = await dialogs.showMessage(message: TextSpan(text: tip));
+    final res = await dialogs.showMessage(
+      dangerous: true,
+      message: TextSpan(text: tip),
+    );
     if (res != true) {
       return;
     }

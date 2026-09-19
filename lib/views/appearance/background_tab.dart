@@ -194,8 +194,7 @@ class _WallpaperGallery extends ConsumerWidget {
     );
     final canAdd = library.length < maxWallpaperLibrary;
     final action = ref.read(wallpaperActionProvider.notifier);
-    Future<void> run(Future<void> Function() task) =>
-        globalState.safeRun(task);
+    Future<void> run(Future<void> Function() task) => globalState.safeRun(task);
 
     final hint = library.isEmpty
         ? l10n.wallpaperSelectHint
@@ -212,13 +211,19 @@ class _WallpaperGallery extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (library.isEmpty)
-          SizedBox(height: _tileMaxWidth, width: double.infinity, child: addTile)
+          SizedBox(
+            height: _tileMaxWidth,
+            width: double.infinity,
+            child: addTile,
+          )
         else
           LayoutBuilder(
             builder: (context, constraints) {
-              final width = (((constraints.maxWidth - _tileSpacing * 2) / 3)
-                      .clamp(0.0, _tileMaxWidth))
-                  .floorToDouble();
+              final width =
+                  (((constraints.maxWidth - _tileSpacing * 2) / 3).clamp(
+                    0.0,
+                    _tileMaxWidth,
+                  )).floorToDouble();
               final height = (width * _tileAspect).floorToDouble();
               final tiles = <Widget>[
                 for (final fileName in library)

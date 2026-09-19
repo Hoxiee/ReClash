@@ -54,7 +54,7 @@ class _SeasonalDashboardOverlayState
     );
     final status = heroStatusOf(
       ref.watch(heroLifecycleProvider),
-      heroDoctorHealthOf(ref.watch(connectionDoctorProvider)),
+      ref.watch(connectionDoctorProvider.select(heroDoctorHealthOf)),
     );
     final motif = ref.watch(visibleSeasonProvider);
     final subscription = ref.watch(currentProfileProvider)?.subscriptionInfo;

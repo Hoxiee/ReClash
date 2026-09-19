@@ -72,35 +72,53 @@ class AppPath {
   }
 
   Future<void> _initDataDir() async {
-    if (isPortable) {
-      dataDir.complete(_portableBase());
-      return;
+    try {
+      if (isPortable) {
+        dataDir.complete(_portableBase());
+        return;
+      }
+      dataDir.complete(await supportDirectory());
+    } catch (error, stackTrace) {
+      if (!dataDir.isCompleted) {
+        dataDir.completeError(error, stackTrace);
+      }
     }
-    dataDir.complete(await supportDirectory());
   }
 
   Future<void> _initTempDir() async {
-    if (isPortable) {
-      final directory = Directory(join(_portableBase().path, 'tmp'));
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true);
+    try {
+      if (isPortable) {
+        final directory = Directory(join(_portableBase().path, 'tmp'));
+        if (!directory.existsSync()) {
+          directory.createSync(recursive: true);
+        }
+        tempDir.complete(directory);
+        return;
       }
-      tempDir.complete(directory);
-      return;
+      tempDir.complete(await temporaryDirectory());
+    } catch (error, stackTrace) {
+      if (!tempDir.isCompleted) {
+        tempDir.completeError(error, stackTrace);
+      }
     }
-    tempDir.complete(await temporaryDirectory());
   }
 
   Future<void> _initCacheDir() async {
-    if (isPortable) {
-      final directory = Directory(join(_portableBase().path, '.cache'));
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true);
+    try {
+      if (isPortable) {
+        final directory = Directory(join(_portableBase().path, '.cache'));
+        if (!directory.existsSync()) {
+          directory.createSync(recursive: true);
+        }
+        cacheDir.complete(directory);
+        return;
       }
-      cacheDir.complete(directory);
-      return;
+      cacheDir.complete(await cacheDirectory());
+    } catch (error, stackTrace) {
+      if (!cacheDir.isCompleted) {
+        cacheDir.completeError(error, stackTrace);
+      }
     }
-    cacheDir.complete(await cacheDirectory());
   }
 
   @visibleForTesting

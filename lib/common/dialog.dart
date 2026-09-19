@@ -32,7 +32,7 @@ class Dialogs {
         transitionDuration: callerContext.motionDuration(_enterDuration),
         reverseTransitionDuration: callerContext.motionDuration(_exitDuration),
       ),
-      builder: (_) => child,
+      builder: (_) => ModalFocusScope(child: child),
       filter: filter ? commonFilter : null,
     );
   }
@@ -45,7 +45,11 @@ class Dialogs {
     String? cancelText,
     bool cancelable = true,
     bool? dismissible,
+    bool dangerous = false,
   }) async {
+    // A destructive default should rest on Cancel, so one stray center-press on
+    // a remote does not delete or reset.
+    final focusCancel = dangerous && cancelable;
     return showCommonDialog<bool>(
       context: context,
       dismissible: dismissible,
@@ -57,12 +61,14 @@ class Dialogs {
             actions: [
               if (cancelable)
                 TextButton(
+                  autofocus: focusCancel,
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
                   child: Text(cancelText ?? appLocalizations.cancel),
                 ),
               TextButton(
+                autofocus: !focusCancel,
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
@@ -101,6 +107,7 @@ class Dialogs {
             title: appLocalizations.tip,
             actions: [
               TextButton(
+                autofocus: true,
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
@@ -131,6 +138,7 @@ class Dialogs {
                 child: Text(currentAppLocalizations.exit),
               ),
               TextButton(
+                autofocus: true,
                 onPressed: () {
                   Navigator.of(_context).pop<bool>(true);
                 },

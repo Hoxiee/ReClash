@@ -204,7 +204,8 @@ class CommonCard extends StatelessWidget {
   // The button paints its own focus overlay while it holds focus, so a mouse
   // click elsewhere leaves it stuck; resolve it through the focus-visible gate.
   Color? _buildOverlayColor(BuildContext context, Set<WidgetState> states) {
-    final base = _buildForegroundColor(context) ?? context.colorScheme.onSurface;
+    final base =
+        _buildForegroundColor(context) ?? context.colorScheme.onSurface;
     if (states.contains(WidgetState.pressed)) {
       return base.withValues(alpha: 0.1);
     }
@@ -263,10 +264,12 @@ class CommonCard extends StatelessWidget {
               elevation: 0,
             ).copyWith(
               backgroundColor: WidgetStateProperty.resolveWith(
-                (states) => _buildBackgroundColor(context, _effectiveStates(states)),
+                (states) =>
+                    _buildBackgroundColor(context, _effectiveStates(states)),
               ),
               overlayColor: WidgetStateProperty.resolveWith(
-                (states) => _buildOverlayColor(context, _effectiveStates(states)),
+                (states) =>
+                    _buildOverlayColor(context, _effectiveStates(states)),
               ),
               side: WidgetStateProperty.resolveWith(
                 (states) => _buildBorderSide(context, _effectiveStates(states)),
@@ -289,10 +292,12 @@ class CommonCard extends StatelessWidget {
               elevation: 0,
             ).copyWith(
               backgroundColor: WidgetStateProperty.resolveWith(
-                (states) => _buildBackgroundColor(context, _effectiveStates(states)),
+                (states) =>
+                    _buildBackgroundColor(context, _effectiveStates(states)),
               ),
               overlayColor: WidgetStateProperty.resolveWith(
-                (states) => _buildOverlayColor(context, _effectiveStates(states)),
+                (states) =>
+                    _buildOverlayColor(context, _effectiveStates(states)),
               ),
               side: WidgetStateProperty.resolveWith(
                 (states) => _buildBorderSide(context, _effectiveStates(states)),

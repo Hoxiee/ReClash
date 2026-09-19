@@ -63,6 +63,7 @@ class _AppearanceColorSectionsState
 
   Future<void> _handleReset() async {
     final res = await dialogs.showMessage(
+      dangerous: true,
       message: TextSpan(text: context.appLocalizations.resetTip),
     );
     if (res != true) {
@@ -84,6 +85,7 @@ class _AppearanceColorSectionsState
       return;
     }
     final res = await dialogs.showMessage(
+      dangerous: true,
       message: TextSpan(
         text: appLocalizations.deleteTip(appLocalizations.colorSchemes),
       ),

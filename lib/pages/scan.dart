@@ -157,8 +157,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                       icon = const Icon(Icons.flash_auto);
                       backgroundColor = Colors.orange;
                   }
-                  final available =
-                      state.torchState != TorchState.unavailable;
+                  final available = state.torchState != TorchState.unavailable;
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     child: ActivateBox(
@@ -171,8 +170,9 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                           foregroundColor: Colors.white,
                           backgroundColor: backgroundColor,
                         ),
-                        onPressed:
-                            available ? () => controller.toggleTorch() : null,
+                        onPressed: available
+                            ? () => controller.toggleTorch()
+                            : null,
                       ),
                     ),
                   );

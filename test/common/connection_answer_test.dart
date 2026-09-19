@@ -295,8 +295,10 @@ void main() {
     );
     expect(
       doctorAnswerOf(
-        _failed('coreResolverFailed', DoctorLayer.dns)
-            .copyWith(severity: DoctorSeverity.warning),
+        _failed(
+          'coreResolverFailed',
+          DoctorLayer.dns,
+        ).copyWith(severity: DoctorSeverity.warning),
         _text,
       ).tone,
       DoctorAnswerTone.warning,

@@ -21,7 +21,7 @@ class SmartRoutingCard extends ConsumerWidget {
     );
     final status = heroStatusOf(
       ref.watch(heroLifecycleProvider),
-      heroDoctorHealthOf(ref.watch(connectionDoctorProvider)),
+      ref.watch(connectionDoctorProvider.select(heroDoctorHealthOf)),
     );
     final view = enabled
         ? heroServiceLineViewOf(

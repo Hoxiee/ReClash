@@ -26,6 +26,9 @@ class RuleItem extends StatelessWidget {
   final void Function() onSelected;
   final void Function(Rule rule) onEdit;
   final bool Function(Rule rule)? checkInvalidHandler;
+  final int? reorderIndex;
+  final int? reorderCount;
+  final void Function(int oldIndex, int newIndex)? onReorder;
 
   const RuleItem({
     super.key,
@@ -36,6 +39,9 @@ class RuleItem extends StatelessWidget {
     this.checkInvalidHandler,
     this.isEditing = false,
     this.hasMatch = false,
+    this.reorderIndex,
+    this.reorderCount,
+    this.onReorder,
   });
 
   ({bool invalid, Color? color}) _checkInvalid(BuildContext context) {
@@ -88,12 +94,26 @@ class RuleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final checkResult = _checkInvalid(context);
     final invalid = checkResult.invalid;
+    final onReorder = this.onReorder;
+    final reorderIndex = this.reorderIndex;
+    final reorderCount = this.reorderCount;
     return SelectedDecorationListItem(
       minVerticalPadding: 0,
       isSelected: isSelected,
       isEditing: isEditing,
       horizontalTitleGap: 0,
       invalid: invalid,
+      trailing:
+          onReorder != null && reorderIndex != null && reorderCount != null
+          ? ReorderMenuHandle(
+              index: reorderIndex,
+              count: reorderCount,
+              delayedDrag: true,
+              compact: true,
+              icon: Icons.drag_handle,
+              onReorder: onReorder,
+            )
+          : null,
       onSelected: () {
         onSelected();
       },

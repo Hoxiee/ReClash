@@ -64,6 +64,7 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
       ref.read(nativePauseProvider.notifier).value = cached;
     }
     final paused = await service?.getPauseState();
+    if (!mounted) return;
     if (paused != null) {
       ref.read(nativePauseProvider.notifier).value = paused;
     }

@@ -86,7 +86,6 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
     return OverwriteEditorPage<Rule>(
       title: appLocalizations.rule,
       selectionEnabled: true,
-      dragFromRow: true,
       idOf: (rule) => rule.id,
       itemsOf: (ref) {
         return ref.watch(profileCustomRulesProvider(_profileId)).value ?? [];
@@ -100,6 +99,14 @@ class _CustomRulesViewState extends ConsumerState<CustomRulesView> {
               isEditing: isEditing,
               isSelected: isSelected,
               rule: rule,
+              reorderIndex: index,
+              reorderCount:
+                  ref
+                      .watch(profileCustomRulesProvider(_profileId))
+                      .value
+                      ?.length ??
+                  0,
+              onReorder: _handleReorder,
               onSelected: onToggleSelected,
               onEdit: (rule) {
                 _handleAddOrUpdate(rule: rule);
@@ -481,6 +488,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
   Future<void> _handleDelete(int profileId) async {
     final appLocalizations = context.appLocalizations;
     final res = await dialogs.showMessage(
+      dangerous: true,
       message: TextSpan(
         text: appLocalizations.deleteTip(appLocalizations.rule),
       ),

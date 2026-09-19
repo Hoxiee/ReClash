@@ -29,6 +29,7 @@ class SmartRoutingView extends ConsumerWidget {
   Future<void> _handleReset(BuildContext context, WidgetRef ref) async {
     final appLocalizations = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
+      dangerous: true,
       title: appLocalizations.reset,
       message: TextSpan(text: appLocalizations.resetTip),
     );

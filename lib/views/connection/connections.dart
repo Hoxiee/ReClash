@@ -25,9 +25,48 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
 
   final _listController = TrackerInfoListController();
   final ScrollController _scrollController = ScrollController();
+  final Map<String, ({int up, int down, DateTime at})> _samples = {};
 
   @override
   Duration get pollInterval => const Duration(seconds: 1);
+
+  List<TrackerInfo> _withSpeeds(List<TrackerInfo> trackerInfos) {
+    final now = DateTime.now();
+    final withSpeeds = [
+      for (final info in trackerInfos)
+        () {
+          final prev = _samples[info.id];
+          if (prev == null) {
+            return info;
+          }
+          final seconds = now.difference(prev.at).inMilliseconds / 1000;
+          if (seconds <= 0) {
+            return info;
+          }
+          return info.copyWith(
+            downloadSpeed: ((info.download - prev.down) / seconds)
+                .round()
+                .clamp(0, 1 << 62),
+            uploadSpeed: ((info.upload - prev.up) / seconds).round().clamp(
+              0,
+              1 << 62,
+            ),
+          );
+        }(),
+    ];
+    _samples
+      ..clear()
+      ..addEntries(
+        trackerInfos.map(
+          (info) => MapEntry(info.id, (
+            up: info.upload,
+            down: info.download,
+            at: now,
+          )),
+        ),
+      );
+    return withSpeeds;
+  }
 
   List<Widget> _buildActions() {
     return [
@@ -77,7 +116,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   void _applyConnections(List<TrackerInfo> trackerInfos) {
     // The core snapshot iterates a Go map, so its order is random per poll;
     // sort by total traffic to keep the list stable between refreshes.
-    final sorted = List.of(trackerInfos)
+    final sorted = _withSpeeds(trackerInfos)
       ..sort((a, b) {
         final traffic = (b.upload + b.download).compareTo(
           a.upload + a.download,

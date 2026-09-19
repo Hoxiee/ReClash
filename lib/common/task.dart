@@ -439,7 +439,7 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['authentication'] = data.authentication;
   rawConfig['skip-auth-prefixes'] = [];
   rawConfig['mode'] = realPatchConfig.mode.name;
-  if (rawConfig['tun'] == null) {
+  if (rawConfig['tun'] is! Map) {
     rawConfig['tun'] = {};
   }
   rawConfig['tun']['enable'] = realPatchConfig.tun.enable;
@@ -453,15 +453,18 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['geodata-loader'] = realPatchConfig.geodataLoader.name;
   rawConfig['geo-auto-update'] = realPatchConfig.geoAutoUpdate;
   rawConfig['geo-update-interval'] = realPatchConfig.geoUpdateInterval;
-  if (rawConfig['sniffer']?['sniff'] != null) {
-    for (final value in (rawConfig['sniffer']?['sniff'] as Map).values) {
-      if (value['ports'] != null && value['ports'] is List) {
-        value['ports'] =
-            value['ports']?.map((item) => item.toString()).toList() ?? [];
+  final sniffer = rawConfig['sniffer'];
+  final sniff = sniffer is Map ? sniffer['sniff'] : null;
+  if (sniff is Map) {
+    for (final value in sniff.values) {
+      if (value is Map && value['ports'] is List) {
+        value['ports'] = (value['ports'] as List)
+            .map((item) => item.toString())
+            .toList();
       }
     }
   }
-  if (rawConfig['profile'] == null) {
+  if (rawConfig['profile'] is! Map) {
     rawConfig['profile'] = {};
   }
   confineProviders('proxy-providers', proxiesProviderDirectoryName);
@@ -469,7 +472,7 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   rawConfig['profile']['store-selected'] = false;
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.raw;
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
-  if (rawConfig['hosts'] == null) {
+  if (rawConfig['hosts'] is! Map) {
     rawConfig['hosts'] = {};
   }
   for (final host in realPatchConfig.hosts.entries) {
@@ -510,8 +513,9 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   List<String> rules = [];
   var userRuleCount = 0;
   if (data.rules.isEmpty) {
-    if (rawConfig['rules'] != null) {
-      rules = List<String>.from(rawConfig['rules']);
+    final rawRules = rawConfig['rules'];
+    if (rawRules is List) {
+      rules = rawRules.map((rule) => '$rule').toList();
     }
     if (addedRules.isNotEmpty) {
       final hasMatchPlaceholder = addedRules.any(
@@ -1106,17 +1110,23 @@ Future<MigrationData> readBackupArchive({
   await dir.create(recursive: true);
   final zipDecoder = ZipDecoder();
   final input = InputFileStream(backupFilePath);
-  final archive = zipDecoder.decodeStream(input);
-  for (final file in archive.files) {
-    final outPath = _restoreEntryPath(restoreDirPath, file.name);
-    if (outPath == null) {
-      continue;
+  try {
+    final archive = zipDecoder.decodeStream(input);
+    for (final file in archive.files) {
+      final outPath = _restoreEntryPath(restoreDirPath, file.name);
+      if (outPath == null) {
+        continue;
+      }
+      final outputStream = OutputFileStream(outPath);
+      try {
+        file.writeContent(outputStream);
+      } finally {
+        await outputStream.close();
+      }
     }
-    final outputStream = OutputFileStream(outPath);
-    file.writeContent(outputStream);
-    await outputStream.close();
+  } finally {
+    await input.close();
   }
-  await input.close();
   final restoreConfigFile = File(join(restoreDirPath, configJsonName));
   if (!await restoreConfigFile.exists()) {
     throw MessageException(currentAppLocalizations.invalidBackupFile);

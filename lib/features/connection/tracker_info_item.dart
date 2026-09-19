@@ -94,7 +94,10 @@ class TrackerInfoItem extends ConsumerWidget {
       final payload = trackerInfo.rulePayload;
       parts.add(payload.isEmpty ? rule : '$rule($payload)');
     }
-    parts.add(trackerInfo.start.getLastUpdateTimeDesc(context));
+    final asn = trackerInfo.metadata.destinationIPASN.trim();
+    if (asn.isNotEmpty) {
+      parts.add(asn);
+    }
     return parts.join('  ·  ');
   }
 
@@ -128,6 +131,16 @@ class TrackerInfoItem extends ConsumerWidget {
     return '';
   }
 
+  Widget _routingAvatar(_RoutingStyle style) {
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(color: style.background, shape: AppShape.md),
+      child: Icon(style.icon, size: 22, color: style.foreground),
+    );
+  }
+
   Widget _buildLeading(
     BuildContext context,
     bool showAppIcon,
@@ -141,16 +154,25 @@ class TrackerInfoItem extends ConsumerWidget {
           if (process.isEmpty) return;
           onClickKeyword?.call(process);
         },
-        child: PackageIcon(packageName: process, size: 44),
+        child: Container(
+          width: 44,
+          height: 44,
+          clipBehavior: Clip.antiAlias,
+          decoration: ShapeDecoration(
+            color: context.colorScheme.surfaceContainerHighest,
+            shape: AppShape.md.copyWith(
+              side: BorderSide(color: style.background, width: 2),
+            ),
+          ),
+          child: PackageIcon(
+            packageName: process,
+            size: 44,
+            placeholder: _routingAvatar(style),
+          ),
+        ),
       );
     } else {
-      avatar = Container(
-        width: 44,
-        height: 44,
-        alignment: Alignment.center,
-        decoration: ShapeDecoration(color: style.background, shape: AppShape.md),
-        child: Icon(style.icon, size: 22, color: style.foreground),
-      );
+      avatar = _routingAvatar(style);
     }
     final code = _countryCode;
     if (code.isEmpty) {
@@ -167,27 +189,52 @@ class TrackerInfoItem extends ConsumerWidget {
 
   Widget _buildTraffic(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final style = context.textTheme.labelSmall
-        ?.copyWith(color: colorScheme.onSurfaceVariant)
-        .toJetBrainsMono;
-    Widget line(IconData icon, String value) {
+    final downSpeed = trackerInfo.downloadSpeed ?? 0;
+    final upSpeed = trackerInfo.uploadSpeed ?? 0;
+    final live = downSpeed > 0 || upSpeed > 0;
+    final baseStyle = context.textTheme.labelSmall?.toJetBrainsMono;
+
+    Widget line(IconData icon, Color iconColor, String value, Color textColor) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         spacing: 3,
         children: [
-          Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
-          Text(value, style: style),
+          Icon(icon, size: 12, color: iconColor),
+          Text(value, style: baseStyle?.copyWith(color: textColor)),
         ],
       );
     }
 
+    final downValue = live
+        ? '${downSpeed.traffic.show}/s'
+        : trackerInfo.download.traffic.show;
+    final upValue = live
+        ? '${upSpeed.traffic.show}/s'
+        : trackerInfo.upload.traffic.show;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       spacing: 4,
       children: [
-        line(Icons.south, trackerInfo.download.traffic.show),
-        line(Icons.north, trackerInfo.upload.traffic.show),
+        Text(
+          trackerInfo.start.getLastUpdateTimeDesc(context),
+          style: context.textTheme.labelSmall?.copyWith(
+            color: colorScheme.outline,
+          ),
+        ),
+        line(
+          Icons.south,
+          live ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          downValue,
+          live ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
+        line(
+          Icons.north,
+          live ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
+          upValue,
+          live ? colorScheme.tertiary : colorScheme.onSurfaceVariant,
+        ),
+        _TrafficBar(down: trackerInfo.download, up: trackerInfo.upload),
       ],
     );
   }
@@ -258,6 +305,40 @@ class TrackerInfoItem extends ConsumerWidget {
   }
 }
 
+class _TrafficBar extends StatelessWidget {
+  final num down;
+  final num up;
+
+  const _TrafficBar({required this.down, required this.up});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final total = down + up;
+    return SizedBox(
+      width: 72,
+      height: 3,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(2),
+        child: total <= 0
+            ? ColoredBox(color: colorScheme.surfaceContainerHighest)
+            : Row(
+                children: [
+                  Expanded(
+                    flex: (down / total * 1000).round().clamp(1, 1000),
+                    child: ColoredBox(color: colorScheme.primary),
+                  ),
+                  Expanded(
+                    flex: (up / total * 1000).round().clamp(1, 1000),
+                    child: ColoredBox(color: colorScheme.tertiary),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
 class _CountryBadge extends StatelessWidget {
   final String code;
 
@@ -295,7 +376,11 @@ class _RoutingPill extends StatelessWidget {
   final _RoutingStyle style;
   final VoidCallback? onPressed;
 
-  const _RoutingPill({required this.label, required this.style, this.onPressed});
+  const _RoutingPill({
+    required this.label,
+    required this.style,
+    this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -328,7 +413,6 @@ class _RoutingPill extends StatelessWidget {
     );
   }
 }
-
 
 class TrackerInfoDetailView extends StatelessWidget {
   final TrackerInfo trackerInfo;

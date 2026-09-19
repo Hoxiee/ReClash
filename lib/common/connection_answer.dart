@@ -229,15 +229,16 @@ DoctorAnswer _healthyAnswer(DoctorSnapshot snapshot, DoctorAnswerText text) {
 }
 
 /// Severity leads; health is the fallback while it is `unknown` (identical today).
-DoctorAnswerTone _problemTone(DoctorSnapshot snapshot) => switch (snapshot.severity) {
-  DoctorSeverity.critical => DoctorAnswerTone.bad,
-  DoctorSeverity.warning => DoctorAnswerTone.warning,
-  DoctorSeverity.info => DoctorAnswerTone.warning,
-  DoctorSeverity.unknown =>
-    snapshot.health == DoctorHealth.broken
-        ? DoctorAnswerTone.bad
-        : DoctorAnswerTone.warning,
-};
+DoctorAnswerTone _problemTone(DoctorSnapshot snapshot) =>
+    switch (snapshot.severity) {
+      DoctorSeverity.critical => DoctorAnswerTone.bad,
+      DoctorSeverity.warning => DoctorAnswerTone.warning,
+      DoctorSeverity.info => DoctorAnswerTone.warning,
+      DoctorSeverity.unknown =>
+        snapshot.health == DoctorHealth.broken
+            ? DoctorAnswerTone.bad
+            : DoctorAnswerTone.warning,
+    };
 
 DoctorAnswer _problemAnswer(
   DoctorSnapshot snapshot,

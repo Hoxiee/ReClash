@@ -352,7 +352,8 @@ class AppSidebarContainer extends ConsumerWidget {
       return KeyEventResult.ignored;
     }
     final rtl = Directionality.of(node.context!) == TextDirection.rtl;
-    final toRail = e.logicalKey ==
+    final toRail =
+        e.logicalKey ==
         (rtl ? LogicalKeyboardKey.arrowRight : LogicalKeyboardKey.arrowLeft);
     if (!toRail) {
       return KeyEventResult.ignored;
@@ -370,7 +371,9 @@ class AppSidebarContainer extends ConsumerWidget {
       if (n == focus || n.rect.overlaps(focusRect)) {
         return false;
       }
-      final beyond = rtl ? n.rect.left > focusRect.left : n.rect.right < focusRect.right;
+      final beyond = rtl
+          ? n.rect.left > focusRect.left
+          : n.rect.right < focusRect.right;
       final overlapsRow =
           n.rect.top < focusRect.bottom && n.rect.bottom > focusRect.top;
       return beyond && overlapsRow;
@@ -382,7 +385,8 @@ class AppSidebarContainer extends ConsumerWidget {
         FocusManager.instance.rootScope.traversalDescendants
             .where(
               (n) =>
-                  n.context?.findAncestorWidgetOfExactType<AppNavRail>() != null,
+                  n.context?.findAncestorWidgetOfExactType<AppNavRail>() !=
+                  null,
             )
             .toList()
           ..sort((a, b) => a.rect.top.compareTo(b.rect.top));

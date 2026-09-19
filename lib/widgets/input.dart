@@ -56,6 +56,7 @@ class OptionsDialog<T> extends StatelessWidget {
                   final subtitle = subtitleBuilder?.call(option);
                   return ListItem.radio(
                     value: option,
+                    autofocus: value == option,
                     onTap: () {
                       Navigator.of(context).pop(option);
                     },

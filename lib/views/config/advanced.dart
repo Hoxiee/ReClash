@@ -42,6 +42,7 @@ class AdvancedConfigView extends ConsumerWidget {
                 return IconButton(
                   onPressed: () async {
                     final res = await dialogs.showMessage(
+                      dangerous: true,
                       title: appLocalizations.reset,
                       message: TextSpan(text: appLocalizations.resetTip),
                     );

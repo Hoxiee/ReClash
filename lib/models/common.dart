@@ -194,7 +194,7 @@ extension LogsStateExt on LogsState {
     final matcher = SearchMatcher(query, useRegex: useRegex);
     return logs.where((log) {
       final logLevelName = log.logLevel.name;
-      return {logLevelName}.containsAll(keywords) &&
+      return keywords.every((keyword) => keyword == logLevelName) &&
           (sources.isEmpty || sources.contains(log.source)) &&
           (levels.isEmpty || levels.contains(log.logLevel)) &&
           matcher.hasAnyMatch([log.payload, logLevelName]);
@@ -226,7 +226,9 @@ extension TrackerInfosStateExt on TrackerInfosState {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
       final metadata = trackerInfo.metadata;
-      return {...chains, process}.containsAll(keywords) &&
+      return keywords.every(
+            (keyword) => keyword == process || chains.contains(keyword),
+          ) &&
           matcher.hasAnyMatch([
             metadata.network,
             metadata.host,

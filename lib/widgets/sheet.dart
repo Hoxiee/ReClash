@@ -4,6 +4,7 @@ import 'package:reclash/widgets/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'focus.dart';
 import 'scaffold.dart';
 import 'side_sheet.dart';
 
@@ -181,6 +182,9 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
     final type = sheetProvider?.type ?? SheetType.page;
     final isBottomSheet = type == SheetType.bottomSheet;
     final centerTitle = widget.centerTitle ?? isBottomSheet;
+    // Lands initial focus on the first body control so a remote/keyboard opens
+    // the sheet with a visible ring instead of the toolbar close button.
+    final body = ModalFocusScope(child: widget.body);
 
     if (type == SheetType.page) {
       return CommonScaffold(
@@ -190,7 +194,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
           for (final data in widget.actions)
             _buildIconButton(data, filled: false),
         ],
-        body: widget.body,
+        body: body,
       );
     }
 
@@ -224,7 +228,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
       actions: genActions(popAsSuffix ? [popButton] : actions),
     );
     if (!isBottomSheet) {
-      return CommonScaffold(appBar: appBar, body: widget.body);
+      return CommonScaffold(appBar: appBar, body: body);
     }
     final sheetAppBar = _SheetToolBar(appBar: appBar);
     return ClipRSuperellipse(
@@ -237,7 +241,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
             Flexible(
               child: ScrollConfiguration(
                 behavior: const ShowBarScrollBehavior(),
-                child: widget.body,
+                child: body,
               ),
             ),
           ] else
@@ -245,7 +249,7 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
               child: _TransparentToolBarBody(
                 backgroundColor: backgroundColor,
                 toolBar: sheetAppBar,
-                body: widget.body,
+                body: body,
               ),
             ),
           SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),

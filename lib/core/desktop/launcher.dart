@@ -36,13 +36,13 @@ final class DirectCoreLauncher implements CoreProcessLauncher {
   }) async {
     final corePath = await _resolveCorePath();
     final process = await _startProcess(corePath, [address]);
-    process.stdout.listen((_) {});
+    process.stdout.listen((_) {}, onError: (_) {});
     process.stderr.listen((data) {
       final error = utf8.decode(data);
       if (error.isNotEmpty) {
         commonPrint.log(error, logLevel: LogLevel.warning);
       }
-    });
+    }, onError: (_) {});
     return DirectCoreLease(sessionId: sessionId, process: process);
   }
 

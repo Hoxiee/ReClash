@@ -524,17 +524,17 @@ abstract class CoreHandlerInterface with CoreInterface {
 
   @override
   FutureOr<void> resetTraffic() {
-    _invokeMethod(method: CoreMethod.resetTraffic);
+    _invokeMethod(method: CoreMethod.resetTraffic).ignore();
   }
 
   @override
   FutureOr<void> startLog() {
-    _invokeMethod(method: CoreMethod.startLog);
+    _invokeMethod(method: CoreMethod.startLog).ignore();
   }
 
   @override
   FutureOr<void> stopLog() {
-    _invokeMethod<bool>(method: CoreMethod.stopLog);
+    _invokeMethod<bool>(method: CoreMethod.stopLog).ignore();
   }
 
   @override

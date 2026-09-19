@@ -257,6 +257,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
   ) async {
     final appLocalizations = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
+      dangerous: true,
       title: appLocalizations.delete,
       message: TextSpan(text: appLocalizations.deleteTip(strategy.name)),
     );

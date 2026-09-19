@@ -213,6 +213,7 @@ class ProfileItem extends ConsumerWidget {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     final appLocalizations = context.appLocalizations;
     final res = await dialogs.showMessage(
+      dangerous: true,
       title: appLocalizations.tip,
       message: TextSpan(
         text: appLocalizations.deleteTip(appLocalizations.profile),

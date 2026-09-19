@@ -401,6 +401,17 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
   void initState() {
     super.initState();
     _controller.addStatusListener(_handleStatusChanged);
+    // A menu opened by keyboard/remote must land the ring on a real row, or it
+    // opens invisible until the first arrow press moves into the list.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final index = widget.items.indexWhere(
+        (item) => item.onPressed != null || item.subItems.isNotEmpty,
+      );
+      if (index >= 0 && index < _rowNodes.length) {
+        _rowNodes[index].requestFocus();
+      }
+    });
   }
 
   @override

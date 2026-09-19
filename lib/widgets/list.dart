@@ -26,8 +26,9 @@ final class _DefaultAction extends _ListItemAction {
 final class _RadioAction<T> extends _ListItemAction {
   final T value;
   final VoidCallback? onTap;
+  final bool autofocus;
 
-  const _RadioAction({required this.value, this.onTap});
+  const _RadioAction({required this.value, this.onTap, this.autofocus = false});
 }
 
 final class _ToggleAction extends _ListItemAction {
@@ -315,6 +316,7 @@ class ListItem<T> extends StatelessWidget {
     this.padding = const EdgeInsets.only(left: 12, right: 16),
     required T value,
     VoidCallback? onTap,
+    bool autofocus = false,
     this.horizontalTitleGap = 8,
     this.dense,
     this.titleTextStyle,
@@ -324,7 +326,11 @@ class ListItem<T> extends StatelessWidget {
     this.visualDensity,
     this.minVerticalPadding = 12,
     this.tileTitleAlignment = ListTileTitleAlignment.center,
-  }) : _action = _RadioAction<T>(value: value, onTap: onTap),
+  }) : _action = _RadioAction<T>(
+         value: value,
+         onTap: onTap,
+         autofocus: autofocus,
+       ),
        leading = null,
        onTap = null;
 
@@ -332,12 +338,14 @@ class ListItem<T> extends StatelessWidget {
     void Function()? onTap,
     Widget? trailing,
     Widget? leading,
+    bool autofocus = false,
   }) {
     return TvFocusOutline.builder(
       shape: AppShape.xl,
       enabled: onTap != null,
       builder: (focusNode) => ListTile(
         focusNode: focusNode,
+        autofocus: autofocus,
         shape: AppShape.xl,
         key: key,
         dense: dense,
@@ -481,6 +489,7 @@ class ListItem<T> extends StatelessWidget {
         final radioDelegate = radio as _RadioAction<T>;
         return _buildListTile(
           onTap: radioDelegate.onTap,
+          autofocus: radioDelegate.autofocus,
           leading: ExcludeFocus(
             child: Radio<T>(
               visualDensity: VisualDensity.compact,

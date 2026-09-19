@@ -73,6 +73,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
   Future<void> _delete(Profile profile) async {
     final appLocalizations = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
+      dangerous: true,
       title: appLocalizations.setupDeleteProfile,
       message: TextSpan(text: appLocalizations.deleteTip(profile.label)),
       confirmText: appLocalizations.delete,

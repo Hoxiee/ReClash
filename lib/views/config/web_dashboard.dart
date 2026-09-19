@@ -132,6 +132,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
   Future<void> _handleRemove() async {
     final appLocalizations = context.appLocalizations;
     final res = await dialogs.showMessage(
+      dangerous: true,
       title: appLocalizations.tip,
       message: TextSpan(
         text: appLocalizations.deleteTip(appLocalizations.webDashboard),

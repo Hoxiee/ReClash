@@ -1523,10 +1523,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),

@@ -151,8 +151,7 @@ class WallpaperAction extends Notifier<bool> {
       saved = false;
     }
     if (!saved) {
-      if (ref.mounted &&
-          ref.read(themeSettingProvider).wallpaper == next) {
+      if (ref.mounted && ref.read(themeSettingProvider).wallpaper == next) {
         ref
             .read(themeSettingProvider.notifier)
             .update((value) => value.copyWith(wallpaper: previous));

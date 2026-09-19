@@ -30,6 +30,8 @@ class SingleInstanceLock {
       await _accessFile?.lock();
       return true;
     } catch (e) {
+      await _accessFile?.close();
+      _accessFile = null;
       commonPrint.log(
         'single instance lock acquire failed ${e.toString()}',
         logLevel: LogLevel.warning,

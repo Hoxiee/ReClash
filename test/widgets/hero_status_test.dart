@@ -375,8 +375,10 @@ void main() {
       notifier.markFault(RunRequestFault.ingressBlocked);
       notifier.finish(revision);
       expect(container.read(heroLifecycleProvider), HeroOrbPhase.blocked);
-      expect(heroStatusOf(HeroOrbPhase.blocked, HeroHealth.unknown),
-          HeroStatus.blocked);
+      expect(
+        heroStatusOf(HeroOrbPhase.blocked, HeroHealth.unknown),
+        HeroStatus.blocked,
+      );
 
       notifier.begin(true);
       expect(container.read(heroLifecycleProvider), HeroOrbPhase.connecting);

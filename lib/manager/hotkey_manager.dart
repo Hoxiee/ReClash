@@ -63,7 +63,17 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     }
   }
 
-  Future<void> _updateHotKeys({
+  Future<void>? _updating;
+
+  Future<void> _updateHotKeys({required List<HotKeyAction> hotKeyActions}) {
+    final run = (_updating ?? Future<void>.value()).then(
+      (_) => _applyHotKeys(hotKeyActions: hotKeyActions),
+    );
+    _updating = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<void> _applyHotKeys({
     required List<HotKeyAction> hotKeyActions,
   }) async {
     await hotKeyManager.unregisterAll();
