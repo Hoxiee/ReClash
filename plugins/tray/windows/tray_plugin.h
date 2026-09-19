@@ -36,6 +36,7 @@ class TrayPlugin : public flutter::Plugin {
   bool Show(const flutter::EncodableMap& arguments);
   void Hide();
   bool OpenMenu();
+  void SetMenuBrightness(const flutter::EncodableMap& arguments);
   bool ApplyIcon(bool add);
   void RebuildMenu(HMENU menu, const flutter::EncodableList& items);
   void SendEvent(const char* name, const flutter::EncodableValue& arguments);
@@ -53,6 +54,7 @@ class TrayPlugin : public flutter::Plugin {
   HMENU menu_ = nullptr;
   std::wstring tool_tip_;
   bool visible_ = false;
+  bool menu_is_dark_ = false;
 
   UINT taskbar_created_message_ = 0;
   int window_proc_id_ = -1;

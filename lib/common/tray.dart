@@ -19,15 +19,19 @@ class AppTray implements TrayPort {
   final bool isMacOS;
   final bool isWindows;
   final Future<void> Function(String title) _setTitle;
+  final Future<void> Function(Brightness brightness) _setMenuBrightness;
 
   bool _isShutDown = false;
   String? _lastTrayTitle;
+  Brightness? _lastMenuBrightness;
 
   AppTray._internal({
     required this.isMacOS,
     required this.isWindows,
     required Future<void> Function(String title) setTitle,
-  }) : _setTitle = setTitle;
+    required Future<void> Function(Brightness brightness) setMenuBrightness,
+  }) : _setTitle = setTitle,
+       _setMenuBrightness = setMenuBrightness;
 
   factory AppTray() {
     _instance ??= AppTray._internal(
@@ -36,6 +40,7 @@ class AppTray implements TrayPort {
       setTitle: (title) async {
         await Tray.instance.setTitle(title);
       },
+      setMenuBrightness: _defaultSetMenuBrightness,
     );
     return _instance!;
   }
@@ -45,6 +50,7 @@ class AppTray implements TrayPort {
     required bool isMacOS,
     required bool isWindows,
     Future<void> Function(String title)? setTitle,
+    Future<void> Function(Brightness brightness)? setMenuBrightness,
   }) {
     return AppTray._internal(
       isMacOS: isMacOS,
@@ -54,7 +60,16 @@ class AppTray implements TrayPort {
           (title) async {
             await Tray.instance.setTitle(title);
           },
+      setMenuBrightness: setMenuBrightness ?? _defaultSetMenuBrightness,
     );
+  }
+
+  static const MethodChannel _trayChannel = MethodChannel('tray');
+
+  static Future<void> _defaultSetMenuBrightness(Brightness brightness) async {
+    await _trayChannel.invokeMethod('setMenuBrightness', <String, Object?>{
+      'brightness': brightness.name,
+    });
   }
 
   String get _trayIconSuffix {
@@ -83,6 +98,7 @@ class AppTray implements TrayPort {
   Future<void> shutdown() async {
     _isShutDown = true;
     _lastTrayTitle = null;
+    _lastMenuBrightness = null;
     await Tray.instance.hide();
   }
 
@@ -94,6 +110,13 @@ class AppTray implements TrayPort {
   }) async {
     if (_isShutDown) {
       return;
+    }
+    if (isWindows) {
+      final brightness = read(currentBrightnessProvider);
+      if (_lastMenuBrightness != brightness) {
+        await _setMenuBrightness(brightness);
+        _lastMenuBrightness = brightness;
+      }
     }
     await Tray.instance.show(
       TraySpec(

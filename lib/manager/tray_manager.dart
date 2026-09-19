@@ -37,6 +37,13 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
         _reportFailure(ref.read(systemActionProvider.notifier).updateTray());
       }
     });
+    if (system.isWindows) {
+      ref.listenManual(currentBrightnessProvider, (prev, next) {
+        if (prev != next) {
+          _reportFailure(ref.read(systemActionProvider.notifier).updateTray());
+        }
+      });
+    }
     if (system.isMacOS) {
       ref.listenManual(trayTitleStateProvider, (prev, next) {
         if (prev != next) {

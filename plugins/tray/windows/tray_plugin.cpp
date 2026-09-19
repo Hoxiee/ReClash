@@ -11,6 +11,54 @@ namespace {
 constexpr UINT kTrayCallbackMessage = WM_USER + 1;
 constexpr UINT kTrayIconId = 1;
 
+// Undocumented uxtheme.dll ordinals (135/133/136), unnamed and absent before
+// Windows 10 1809; missing lookups leave the popup menu light, never crash.
+using SetPreferredAppModeFunc = int(WINAPI*)(int mode);
+using AllowDarkModeForWindowFunc = BOOL(WINAPI*)(HWND hwnd, BOOL allow);
+using FlushMenuThemesFunc = void(WINAPI*)();
+
+enum PreferredAppMode {
+  kDefaultAppMode = 0,
+  kAllowDarkAppMode = 1,
+};
+
+SetPreferredAppModeFunc set_preferred_app_mode = nullptr;
+AllowDarkModeForWindowFunc allow_dark_mode_for_window = nullptr;
+FlushMenuThemesFunc flush_menu_themes = nullptr;
+bool dark_mode_apis_initialized = false;
+bool last_menu_is_dark = false;
+bool has_menu_brightness = false;
+
+void ApplyMenuBrightness(HWND window, bool is_dark) {
+  if (!dark_mode_apis_initialized) {
+    const HMODULE ux_theme = ::LoadLibraryW(L"uxtheme.dll");
+    if (ux_theme != nullptr) {
+      set_preferred_app_mode = reinterpret_cast<SetPreferredAppModeFunc>(
+          ::GetProcAddress(ux_theme, MAKEINTRESOURCEA(135)));
+      allow_dark_mode_for_window =
+          reinterpret_cast<AllowDarkModeForWindowFunc>(
+              ::GetProcAddress(ux_theme, MAKEINTRESOURCEA(133)));
+      flush_menu_themes = reinterpret_cast<FlushMenuThemesFunc>(
+          ::GetProcAddress(ux_theme, MAKEINTRESOURCEA(136)));
+    }
+    dark_mode_apis_initialized = true;
+  }
+
+  const bool changed = !has_menu_brightness || last_menu_is_dark != is_dark;
+  if (changed && set_preferred_app_mode != nullptr) {
+    set_preferred_app_mode(is_dark ? kAllowDarkAppMode : kDefaultAppMode);
+  }
+  if (allow_dark_mode_for_window != nullptr && window != nullptr) {
+    allow_dark_mode_for_window(window, is_dark ? TRUE : FALSE);
+  }
+  if (changed && flush_menu_themes != nullptr) {
+    flush_menu_themes();
+  }
+
+  last_menu_is_dark = is_dark;
+  has_menu_brightness = true;
+}
+
 const flutter::EncodableValue* ValueAt(const flutter::EncodableMap& map,
                                        const char* key) {
   const auto it = map.find(flutter::EncodableValue(key));
@@ -183,6 +231,11 @@ bool TrayPlugin::Show(const flutter::EncodableMap& arguments) {
     tool_tip_ = Utf16FromUtf8(*tool_tip);
   }
 
+  const std::string* brightness = StringAt(arguments, "brightness");
+  if (brightness != nullptr) {
+    menu_is_dark_ = *brightness == "dark";
+  }
+
   bool applied = ApplyIcon(!visible_);
   if (!applied && visible_) {
     applied = ApplyIcon(true);
@@ -230,6 +283,7 @@ bool TrayPlugin::OpenMenu() {
   POINT cursor;
   ::GetCursorPos(&cursor);
 
+  ApplyMenuBrightness(window, menu_is_dark_);
   ::SetForegroundWindow(window);
   const int command = ::TrackPopupMenu(
       menu_, TPM_BOTTOMALIGN | TPM_LEFTALIGN | TPM_RETURNCMD | TPM_RIGHTBUTTON,
@@ -242,6 +296,11 @@ bool TrayPlugin::OpenMenu() {
     SendEvent("onMenuItemSelected", flutter::EncodableValue(arguments));
   }
   return true;
+}
+
+void TrayPlugin::SetMenuBrightness(const flutter::EncodableMap& arguments) {
+  const std::string* brightness = StringAt(arguments, "brightness");
+  menu_is_dark_ = brightness != nullptr && *brightness == "dark";
 }
 
 std::optional<LRESULT> TrayPlugin::HandleWindowProc(HWND window,
@@ -294,6 +353,16 @@ void TrayPlugin::HandleMethodCall(
 
   if (method == "openMenu") {
     result->Success(flutter::EncodableValue(OpenMenu()));
+    return;
+  }
+
+  if (method == "setMenuBrightness") {
+    const auto* arguments =
+        std::get_if<flutter::EncodableMap>(method_call.arguments());
+    if (arguments != nullptr) {
+      SetMenuBrightness(*arguments);
+    }
+    result->Success(flutter::EncodableValue(arguments != nullptr));
     return;
   }
 
