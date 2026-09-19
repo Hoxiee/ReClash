@@ -154,7 +154,55 @@ void main() {
     );
   });
 
-  test('an untrusted certificate is rejected by default', () {
+  test('an untrusted loopback certificate is rejected by default', () {
+    final container = buildContainer();
+
+    expect(
+      ReClashHttpOverrides.allowBadCertificate(
+        container,
+        _FakeCertificate(),
+        localhost,
+        443,
+      ),
+      isFalse,
+    );
+  });
+
+  test('turning the check off accepts an untrusted loopback certificate', () {
+    final container = buildContainer(checkCertificate: false);
+
+    for (final host in [localhost, 'localhost', '::1']) {
+      expect(
+        ReClashHttpOverrides.allowBadCertificate(
+          container,
+          _FakeCertificate(),
+          host,
+          443,
+        ),
+        isTrue,
+        reason: '$host should be treated as loopback',
+      );
+    }
+  });
+
+  test('an untrusted certificate is rejected for non-loopback hosts', () {
+    final container = buildContainer(checkCertificate: false);
+
+    for (final host in ['example.com', '1.1.1.1']) {
+      expect(
+        ReClashHttpOverrides.allowBadCertificate(
+          container,
+          _FakeCertificate(),
+          host,
+          443,
+        ),
+        isFalse,
+        reason: '$host must never bypass certificate validation',
+      );
+    }
+  });
+
+  test('non-loopback certificates stay rejected with the check enabled', () {
     final container = buildContainer();
 
     expect(
@@ -165,20 +213,6 @@ void main() {
         443,
       ),
       isFalse,
-    );
-  });
-
-  test('turning the check off accepts an untrusted certificate', () {
-    final container = buildContainer(checkCertificate: false);
-
-    expect(
-      ReClashHttpOverrides.allowBadCertificate(
-        container,
-        _FakeCertificate(),
-        'example.com',
-        443,
-      ),
-      isTrue,
     );
   });
 }

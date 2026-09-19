@@ -84,6 +84,14 @@ class ReClashHttpOverrides extends HttpOverrides {
     );
   }
 
+  // The bad-certificate bypass is meant for local, self-signed dashboards, so
+  // restrict it to loopback targets. localhost never parses as an
+  // InternetAddress, so it is matched separately without a DNS lookup.
+  static bool isLoopbackHost(String host) {
+    if (host == 'localhost') return true;
+    return InternetAddress.tryParse(host)?.isLoopback ?? false;
+  }
+
   static bool allowBadCertificateForReader(
     ProviderReader read,
     X509Certificate certificate,
@@ -93,12 +101,13 @@ class ReClashHttpOverrides extends HttpOverrides {
     final checkCertificate = read(
       appSettingProvider.select((state) => state.checkCertificate),
     );
+    final loopback = isLoopbackHost(host);
     commonPrint.log(
       'untrusted certificate for $host:$port issued by ${certificate.issuer}, '
-      'check: $checkCertificate',
+      'check: $checkCertificate, loopback: $loopback',
       logLevel: LogLevel.warning,
     );
-    return !checkCertificate;
+    return loopback && !checkCertificate;
   }
 
   @override
