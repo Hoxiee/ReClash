@@ -243,6 +243,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     NotificationSettings notificationSettings,
     @Default(false) bool autoLaunch,
     @Default(false) bool silentLaunch,
+    @Default(false) bool highPriorityAutoLaunch,
     @Default(false) bool autoRun,
     @Default(false) bool openLogs,
     @Default(true) bool closeConnections,

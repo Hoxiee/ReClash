@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/launch.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/application_notification.dart';
@@ -77,6 +80,26 @@ class _ApplicationGeneralTab extends StatelessWidget {
           select: (state) => state.silentLaunch,
           update: (state, value) => state.copyWith(silentLaunch: value),
         ),
+        if (system.isWindows)
+          ConfigToggleItem(
+            title: (l) => l.highPriorityAutoLaunch,
+            subtitle: (l) => l.highPriorityAutoLaunchDesc,
+            selector: appSettingProvider.select(
+              (state) => state.highPriorityAutoLaunch,
+            ),
+            onChanged: (ref, value) {
+              ref
+                  .read(appSettingProvider.notifier)
+                  .update(
+                    (state) => state.copyWith(highPriorityAutoLaunch: value),
+                  );
+              unawaited(
+                autoLaunch?.updateStatus(
+                  ref.read(appSettingProvider).autoLaunch,
+                ),
+              );
+            },
+          ),
       ],
       _appSettingToggle(
         title: (l) => l.autoRun,
