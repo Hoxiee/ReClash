@@ -326,7 +326,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   Duration get _breatheDuration => switch (_status) {
-    HeroStatus.broken => const Duration(milliseconds: 1400),
+    HeroStatus.broken ||
+    HeroStatus.blocked => const Duration(milliseconds: 1400),
     HeroStatus.subscriptionExpired => const Duration(milliseconds: 2800),
     HeroStatus.paused => const Duration(milliseconds: 2400),
     _ =>
@@ -1117,6 +1118,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.subscriptionExpired =>
       context.appLocalizations.dashboardSubscriptionExpired,
     HeroStatus.broken => context.appLocalizations.heroLinkBroken,
+    HeroStatus.blocked => context.appLocalizations.heroBlockedTitle,
     HeroStatus.paused => context.appLocalizations.heroPaused,
   };
 
@@ -1867,6 +1869,7 @@ class _HeroOrbPainter extends CustomPainter {
           morph,
           alpha: transitionProgress,
         );
+      case HeroStatus.blocked:
       case HeroStatus.broken:
         if (transitionProgress < 1) {
           _paintPreviousRing(
@@ -1971,6 +1974,7 @@ class _HeroOrbPainter extends CustomPainter {
         );
       case HeroStatus.subscriptionExpired:
         _paintSubscriptionExpiredRing(canvas, rect, radius, 1, alpha: alpha);
+      case HeroStatus.blocked:
       case HeroStatus.broken:
         _paintBrokenRing(canvas, rect, 1, alpha: alpha);
       case HeroStatus.paused:

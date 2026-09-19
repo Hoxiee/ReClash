@@ -49,6 +49,7 @@ class _HeroStatusMarkState extends ConsumerState<HeroStatusMark>
     HeroStatus.degraded ||
     HeroStatus.subscriptionExpired ||
     HeroStatus.broken ||
+    HeroStatus.blocked ||
     HeroStatus.paused => false,
   };
 

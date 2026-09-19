@@ -490,6 +490,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Кэш зақымдалды. Тазалансын ба?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Камераға рұқсат өшірулі. QR-кодты сканерлеу үшін оны параметрлерде қосыңыз.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Бас тарту"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Таңдауды алып тастау",
@@ -1405,6 +1408,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN режиміне systemd қажет, бірақ бұл жүйеде ол қолжетімсіз.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "Басқа VPN трафикті ұстап тұр — қайталау үшін түртіңіз",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage(
+      "Туннель бұғатталды",
+    ),
     "heroChecking": MessageLookupByLibrary.simpleMessage("Желі тексерілуде…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage(
       "Таңдалған сервер өлшенуде",
@@ -2295,6 +2304,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("Прокси түрі"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Кэшті тазарту"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Таза қара режим"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Бұл құрылғыда QR-кодтарды сканерлеуге қолдау көрсетілмейді.",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR коды"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "QR кодын сканерлеу арқылы профиль алу",

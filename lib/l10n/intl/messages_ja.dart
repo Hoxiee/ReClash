@@ -405,6 +405,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "キャッシュが破損しています。クリアしますか？",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "カメラへのアクセスがオフです。QRコードをスキャンするには設定でオンにしてください。",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("すべて選択解除"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1146,6 +1149,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN モードには systemd が必要ですが、このシステムでは利用できません。",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "別の VPN がトラフィックを捕捉しています — タップで再試行",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage("トンネルがブロックされています"),
     "heroChecking": MessageLookupByLibrary.simpleMessage("ネットワークを確認中…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage("選択したノードを計測中"),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("接続中…"),
@@ -1886,6 +1893,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("プロキシタイプ"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュを整理"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("ピュアブラックモード"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "このデバイスではQRコードのスキャンに対応していません。",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QRコード"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "QRコードをスキャンしてプロファイルを取得します",

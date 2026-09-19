@@ -380,6 +380,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomain": MessageLookupByLibrary.simpleMessage("排除域名"),
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage("仅在系统代理启用时生效"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage("缓存已损坏，是否清空？"),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "相机权限已关闭。请在设置中开启后再扫描二维码。",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("取消"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1017,6 +1020,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN 模式需要 systemd，但当前系统无法使用 systemd。",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "另一个 VPN 正在拦截流量 — 点按重试",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage("隧道被拦截"),
     "heroChecking": MessageLookupByLibrary.simpleMessage("正在检查网络…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage("正在测量所选节点"),
     "heroConnecting": MessageLookupByLibrary.simpleMessage("连接中…"),
@@ -1651,6 +1658,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("代理类型"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("修剪缓存"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("纯黑模式"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage("此设备不支持扫描二维码。"),
     "qrcode": MessageLookupByLibrary.simpleMessage("二维码"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("扫描二维码获取配置文件"),
     "quickFill": MessageLookupByLibrary.simpleMessage("一键填入"),

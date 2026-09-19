@@ -17,6 +17,7 @@ enum HeroOrbPhase {
   on,
   paused,
   failed,
+  blocked,
 }
 
 /// `unknown` is not a middle ground: it withholds the verdict, so a missing or
@@ -36,6 +37,7 @@ enum HeroStatus {
   degraded,
   subscriptionExpired,
   broken,
+  blocked,
   paused,
 }
 
@@ -49,7 +51,8 @@ extension HeroStatusExt on HeroStatus {
       this == HeroStatus.paused ||
       this == HeroStatus.degraded ||
       this == HeroStatus.subscriptionExpired ||
-      this == HeroStatus.broken;
+      this == HeroStatus.broken ||
+      this == HeroStatus.blocked;
 
   bool get isSweeping =>
       this == HeroStatus.checking ||
@@ -88,9 +91,13 @@ HeroOrbTransition heroOrbTransitionOf(HeroStatus from, HeroStatus to) {
   if (from == to) return HeroOrbTransition.steady;
   if (to == HeroStatus.offline) return HeroOrbTransition.networkLoss;
   if (to == HeroStatus.off) return HeroOrbTransition.shutdown;
-  if (to == HeroStatus.broken) return HeroOrbTransition.fault;
+  if (to == HeroStatus.broken || to == HeroStatus.blocked) {
+    return HeroOrbTransition.fault;
+  }
   if (from == HeroStatus.offline) return HeroOrbTransition.networkReturn;
-  if (from == HeroStatus.broken || to == HeroStatus.reconnecting) {
+  if (from == HeroStatus.broken ||
+      from == HeroStatus.blocked ||
+      to == HeroStatus.reconnecting) {
     return HeroOrbTransition.recovery;
   }
   if (to == HeroStatus.paused) return HeroOrbTransition.pause;
@@ -147,6 +154,10 @@ final heroLifecycleProvider = Provider<HeroOrbPhase>((ref) {
               coreStatus == CoreStatus.connecting && ref.watch(initProvider),
           coreDisconnected: coreStatus == CoreStatus.disconnected,
         );
+  if (phase == HeroOrbPhase.off &&
+      request.fault == RunRequestFault.ingressBlocked) {
+    return HeroOrbPhase.blocked;
+  }
   final probing = ref.watch(
     pendingDelayTestsProvider.select((state) => state.isNotEmpty),
   );
@@ -190,6 +201,7 @@ HeroStatus heroStatusOf(HeroOrbPhase phase, HeroHealth health) =>
       HeroOrbPhase.reconnecting => HeroStatus.reconnecting,
       HeroOrbPhase.paused => HeroStatus.paused,
       HeroOrbPhase.failed => HeroStatus.broken,
+      HeroOrbPhase.blocked => HeroStatus.blocked,
       HeroOrbPhase.on => switch (health) {
         HeroHealth.checking => HeroStatus.diagnosing,
         HeroHealth.broken => HeroStatus.broken,
@@ -242,6 +254,12 @@ const List<Color> _brokenRing = [
   Color(0xFFFF8787),
   Color(0xFFF03E3E),
   Color(0xFFC92A2A),
+];
+
+const List<Color> _blockedRing = [
+  Color(0xFFFFA8CC),
+  Color(0xFFE64980),
+  Color(0xFFA61E4D),
 ];
 
 const List<Color> _reconnectingRing = [
@@ -389,5 +407,7 @@ HeroPalette heroPaletteOf(
       return alert(_subscriptionExpiredRing);
     case HeroStatus.broken:
       return alert(_brokenRing);
+    case HeroStatus.blocked:
+      return alert(_blockedRing);
   }
 }

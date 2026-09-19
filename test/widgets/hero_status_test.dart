@@ -182,6 +182,7 @@ void main() {
       expect(HeroStatus.degraded.isAlert, isTrue);
       expect(HeroStatus.subscriptionExpired.isAlert, isTrue);
       expect(HeroStatus.broken.isAlert, isTrue);
+      expect(HeroStatus.blocked.isAlert, isTrue);
       expect(HeroStatus.offline.isAlert, isFalse);
       expect(HeroStatus.secured.isAlert, isFalse);
       expect(HeroStatus.off.isLive, isFalse);
@@ -356,6 +357,53 @@ void main() {
       expect(container.read(heroLifecycleProvider), HeroOrbPhase.connecting);
       container.read(runRequestStateProvider.notifier).finish(revision);
       expect(container.read(heroLifecycleProvider), HeroOrbPhase.off);
+    });
+
+    test('an ingress block settles into a visible blocked phase', () {
+      final container = ProviderContainer(
+        overrides: [
+          isStartProvider.overrideWithValue(false),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          initProvider.overrideWithBuild((_, _) => true),
+          networkReachableProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(runRequestStateProvider.notifier);
+      final revision = notifier.begin(true);
+      notifier.markFault(RunRequestFault.ingressBlocked);
+      notifier.finish(revision);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.blocked);
+      expect(heroStatusOf(HeroOrbPhase.blocked, HeroHealth.unknown),
+          HeroStatus.blocked);
+
+      notifier.begin(true);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.connecting);
+      expect(
+        container.read(runRequestStateProvider).fault,
+        RunRequestFault.none,
+      );
+    });
+
+    test('a cleanup stop keeps the ingress block until a retry', () {
+      final container = ProviderContainer(
+        overrides: [
+          isStartProvider.overrideWithValue(false),
+          coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+          initProvider.overrideWithBuild((_, _) => true),
+          networkReachableProvider.overrideWithBuild((_, _) => true),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(runRequestStateProvider.notifier);
+      final startRevision = notifier.begin(true);
+      notifier.markFault(RunRequestFault.ingressBlocked);
+      final stopRevision = notifier.begin(false);
+      notifier.finish(stopRevision);
+      expect(container.read(heroLifecycleProvider), HeroOrbPhase.blocked);
+      expect(startRevision, isNot(stopRevision));
     });
 
     test('a disconnected core outranks a pending start request', () {

@@ -476,6 +476,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "The cache is corrupted. Clear it?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Camera access is off. Turn it on in settings to scan a QR code.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("Deselect all"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1353,6 +1356,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN mode requires systemd, which is unavailable on this system.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "Another VPN is capturing traffic — tap to retry",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage(
+      "Tunnel is blocked",
+    ),
     "heroChecking": MessageLookupByLibrary.simpleMessage(
       "Checking the network…",
     ),
@@ -2215,6 +2224,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Scanning QR codes isn\'t supported on this device.",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR code"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan a QR code to obtain a profile",

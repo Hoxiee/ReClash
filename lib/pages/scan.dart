@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
@@ -22,28 +23,61 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   );
 
   StreamSubscription<Object?>? _subscription;
+  bool _handled = false;
+  double _zoomOnScaleStart = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _listenBarcodes();
-    unawaited(controller.start());
+    unawaited(_startScanner());
   }
 
   void _handleBarcode(BarcodeCapture barcodeCapture) {
-    if (!mounted) {
+    if (!mounted || _handled) {
       return;
     }
-    final value = barcodeCapture.barcodes.first.rawValue;
+    final value = barcodeCapture.barcodes.firstOrNull?.rawValue;
     if (value?.isProfileImportLink ?? false) {
+      _handled = true;
+      unawaited(_subscription?.cancel());
+      _subscription = null;
       Navigator.pop<String>(context, value);
+    }
+  }
+
+  // start() reports a busy camera through controller.value instead of throwing, so poll isRunning and retry: a fresh controller usually loses the first race with the previous session's background camera teardown and comes back not running.
+  Future<void> _startScanner() async {
+    for (var attempt = 0; attempt < 5; attempt++) {
+      if (!mounted || controller.value.isRunning) {
+        return;
+      }
+      await controller.start();
+      if (!mounted || controller.value.isRunning) {
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 300));
     }
   }
 
   void _listenBarcodes() {
     unawaited(_subscription?.cancel());
     _subscription = controller.barcodes.listen(_handleBarcode);
+  }
+
+  void _onScaleStart(ScaleStartDetails details) {
+    _zoomOnScaleStart = controller.value.zoomScale;
+  }
+
+  // Pinch maps the gesture ratio straight onto the 0..1 zoom range so a QR on a
+  // distant TV can be framed from the couch without leaving the scanner.
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    if (!controller.value.isRunning || details.scale == 1.0) {
+      return;
+    }
+    final zoom = (_zoomOnScaleStart + details.scale - 1.0).clamp(0.0, 1.0);
+    unawaited(controller.setZoomScale(zoom));
   }
 
   @override
@@ -56,7 +90,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
         return;
       case AppLifecycleState.resumed:
         _listenBarcodes();
-        unawaited(controller.start());
+        unawaited(_startScanner());
       case AppLifecycleState.inactive:
         unawaited(_subscription?.cancel());
         _subscription = null;
@@ -75,10 +109,15 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
     return Scaffold(
       body: Stack(
         children: [
-          Center(
-            child: MobileScanner(
-              controller: controller,
-              scanWindow: scanWindow,
+          Positioned.fill(
+            child: GestureDetector(
+              onScaleStart: _onScaleStart,
+              onScaleUpdate: _onScaleUpdate,
+              child: MobileScanner(
+                controller: controller,
+                scanWindow: scanWindow,
+                errorBuilder: _buildError,
+              ),
             ),
           ),
           CustomPaint(painter: ScannerOverlay(scanWindow: scanWindow)),
@@ -116,10 +155,12 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                       icon = const Icon(Icons.flash_auto);
                       backgroundColor = Colors.orange;
                   }
+                  final available =
+                      state.torchState != TorchState.unavailable;
                   return Container(
                     margin: const EdgeInsets.symmetric(horizontal: 8),
                     child: ActivateBox(
-                      active: state.torchState != TorchState.unavailable,
+                      active: available,
                       child: IconButton(
                         tooltip: context.appLocalizations.torch,
                         color: Colors.white,
@@ -128,7 +169,8 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                           foregroundColor: Colors.white,
                           backgroundColor: backgroundColor,
                         ),
-                        onPressed: () => controller.toggleTorch(),
+                        onPressed:
+                            available ? () => controller.toggleTorch() : null,
                       ),
                     ),
                   );
@@ -160,6 +202,53 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context, MobileScannerException error) {
+    final l10n = context.appLocalizations;
+    final String message;
+    switch (error.errorCode) {
+      case MobileScannerErrorCode.permissionDenied:
+        message = l10n.cameraPermissionRequired;
+      case MobileScannerErrorCode.unsupported:
+        message = l10n.qrScanUnsupported;
+      default:
+        message = error.errorDetails?.message ?? error.errorCode.message;
+    }
+    final canOpenSettings =
+        error.errorCode == MobileScannerErrorCode.permissionDenied &&
+        app != null;
+    return ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.no_photography_outlined,
+                color: Colors.white,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white),
+              ),
+              if (canOpenSettings) ...[
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: () => unawaited(app!.openAppSettings()),
+                  child: Text(l10n.setupPermissionOpenSettings),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

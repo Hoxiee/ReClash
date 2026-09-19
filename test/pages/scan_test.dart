@@ -199,6 +199,26 @@ void main() {
       expect(find.byType(ScanPage), findsOneWidget);
     });
 
+    testWidgets('a second valid barcode does not pop a dead route', (
+      tester,
+    ) async {
+      var popCount = 0;
+      await pumpScanPage(tester, onPopped: (_) => popCount++);
+
+      // Once the first valid code pops, the subscription is cancelled and a
+      // `_handled` guard blocks anything already dispatched, so a second code
+      // in the same frame can never pop a second route.
+      platform.emit(
+        _capture(type: BarcodeType.url, rawValue: 'https://first.example'),
+      );
+      platform.emit(
+        _capture(type: BarcodeType.url, rawValue: 'https://second.example'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(popCount, 1);
+    });
+
     testWidgets('a supported custom scheme pops its raw value', (tester) async {
       String? result;
       await pumpScanPage(tester, onPopped: (value) => result = value);

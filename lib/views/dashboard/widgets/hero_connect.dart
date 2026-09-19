@@ -853,6 +853,7 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.connecting => appLocalizations.byedpiStarting,
             HeroStatus.reconnecting => appLocalizations.byedpiReconnecting,
             HeroStatus.paused => appLocalizations.byedpiPaused,
+            HeroStatus.blocked => appLocalizations.heroBlockedTitle,
             HeroStatus.broken => appLocalizations.heroLinkBroken,
             HeroStatus.subscriptionExpired =>
               appLocalizations.dashboardSubscriptionExpired,
@@ -867,6 +868,7 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.connecting => appLocalizations.heroConnecting,
             HeroStatus.reconnecting => appLocalizations.heroReconnecting,
             HeroStatus.paused => appLocalizations.heroPaused,
+            HeroStatus.blocked => appLocalizations.heroBlockedTitle,
             HeroStatus.broken => appLocalizations.heroLinkBroken,
             HeroStatus.subscriptionExpired =>
               appLocalizations.dashboardSubscriptionExpired,
@@ -881,6 +883,7 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.connecting => displayName,
             HeroStatus.reconnecting => displayName,
             HeroStatus.paused => appLocalizations.byedpiTapToResume,
+            HeroStatus.blocked => appLocalizations.heroBlockedHint,
             HeroStatus.secured ||
             HeroStatus.degraded => appLocalizations.byedpiActiveFor(
               heroDurationWords(runMinutes ?? 0),
@@ -896,6 +899,7 @@ class _OrbCaption extends ConsumerWidget {
             HeroStatus.connecting => displayName,
             HeroStatus.reconnecting => appLocalizations.heroReconnectingHint,
             HeroStatus.paused => appLocalizations.heroTapToResume,
+            HeroStatus.blocked => appLocalizations.heroBlockedHint,
             HeroStatus.secured || HeroStatus.degraded =>
               appLocalizations.connectedFor(heroDurationWords(runMinutes ?? 0)),
             HeroStatus.subscriptionExpired => displayName,

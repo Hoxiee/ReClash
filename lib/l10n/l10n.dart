@@ -1045,6 +1045,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Camera access is off. Turn it on in settings to scan a QR code.`
+  String get cameraPermissionRequired {
+    return Intl.message(
+      'Camera access is off. Turn it on in settings to scan a QR code.',
+      name: 'cameraPermissionRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scanning QR codes isn't supported on this device.`
+  String get qrScanUnsupported {
+    return Intl.message(
+      'Scanning QR codes isn\'t supported on this device.',
+      name: 'qrScanUnsupported',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Blacklist mode`
   String get blacklistMode {
     return Intl.message(
@@ -7374,6 +7394,26 @@ class AppLocalizations {
     return Intl.message(
       'Waiting for a connection',
       name: 'heroNoNetworkHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tunnel is blocked`
+  String get heroBlockedTitle {
+    return Intl.message(
+      'Tunnel is blocked',
+      name: 'heroBlockedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Another VPN is capturing traffic — tap to retry`
+  String get heroBlockedHint {
+    return Intl.message(
+      'Another VPN is capturing traffic — tap to retry',
+      name: 'heroBlockedHint',
       desc: '',
       args: [],
     );

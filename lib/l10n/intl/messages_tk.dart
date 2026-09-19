@@ -493,6 +493,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Keş bozuldy. Arassalamak isleýärsiňizmi?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Kamera rugsady öçürilen. QR kody skanirlemek üçin ony sazlamalarda açyň.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Ýatyr"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("Ählisini aýyr"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1412,6 +1415,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN usuly üçin systemd gerek, emma bu ulgamda ol elýeterli däl.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "Başga VPN traffigi tutýar — gaýtalamak üçin basyň",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage(
+      "Tunnel petiklendi",
+    ),
     "heroChecking": MessageLookupByLibrary.simpleMessage("Tor barlanýar…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage(
       "Saýlanan düwüni barlaýarys",
@@ -2296,6 +2305,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("Proksiniň görnüşi"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Keşi arassala"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Doly gara usuly"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Bu enjamda QR kodlary skanirlemek goldanylmaýar.",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR kod"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Profil almak üçin QR kody skanerläň",

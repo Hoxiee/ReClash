@@ -7,6 +7,59 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+enum _Routing { direct, proxy, reject, unknown }
+
+class _RoutingStyle {
+  final Color background;
+  final Color foreground;
+  final IconData icon;
+
+  const _RoutingStyle(this.background, this.foreground, this.icon);
+}
+
+_Routing _routingOf(List<String> chains) {
+  if (chains.isEmpty) {
+    return _Routing.unknown;
+  }
+  final upper = chains.map((chain) => chain.toUpperCase());
+  if (upper.any(
+    (chain) =>
+        chain.startsWith('REJECT') || chain == 'BLACKHOLE' || chain == 'PASS',
+  )) {
+    return _Routing.reject;
+  }
+  if (upper.contains('DIRECT')) {
+    return _Routing.direct;
+  }
+  return _Routing.proxy;
+}
+
+_RoutingStyle _routingStyle(BuildContext context, _Routing routing) {
+  final colorScheme = context.colorScheme;
+  return switch (routing) {
+    _Routing.proxy => _RoutingStyle(
+      colorScheme.primaryContainer,
+      colorScheme.onPrimaryContainer,
+      Icons.vpn_lock_outlined,
+    ),
+    _Routing.direct => _RoutingStyle(
+      colorScheme.tertiaryContainer,
+      colorScheme.onTertiaryContainer,
+      Icons.arrow_outward,
+    ),
+    _Routing.reject => _RoutingStyle(
+      colorScheme.errorContainer,
+      colorScheme.onErrorContainer,
+      Icons.block,
+    ),
+    _Routing.unknown => _RoutingStyle(
+      colorScheme.surfaceContainerHighest,
+      colorScheme.onSurfaceVariant,
+      Icons.help_outline,
+    ),
+  };
+}
+
 class TrackerInfoItem extends ConsumerWidget {
   final TrackerInfo trackerInfo;
   final Function(String)? onClickKeyword;
@@ -21,97 +74,261 @@ class TrackerInfoItem extends ConsumerWidget {
     required this.detailTitle,
   });
 
-  Widget _buildMeta(BuildContext context) {
-    final traffic = Traffic(up: trackerInfo.upload, down: trackerInfo.download);
+  String get _host {
+    final host = trackerInfo.title;
+    return host.isEmpty ? trackerInfo.desc : host;
+  }
+
+  String _subtitle(BuildContext context) {
+    final parts = <String>[];
+    final network = trackerInfo.metadata.network.toUpperCase();
+    if (network.isNotEmpty) {
+      parts.add(network);
+    }
+    final port = trackerInfo.metadata.destinationPort;
+    if (port.isNotEmpty) {
+      parts.add(':$port');
+    }
+    final rule = trackerInfo.rule;
+    if (rule.isNotEmpty) {
+      final payload = trackerInfo.rulePayload;
+      parts.add(payload.isEmpty ? rule : '$rule($payload)');
+    }
+    parts.add(trackerInfo.start.getLastUpdateTimeDesc(context));
+    return parts.join('  ·  ');
+  }
+
+  String get _outboundLabel {
     final chains = trackerInfo.chains;
-    final metaText =
-        '${trackerInfo.start.getLastUpdateTimeDesc(context)} · ${traffic.desc}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return chains.isEmpty ? '' : chains.first;
+  }
+
+  void _openDetail(BuildContext context) {
+    showExtend(
+      context,
+      builder: (_) {
+        return AdaptiveSheetScaffold(
+          sheetTransparentToolBar: true,
+          body: TrackerInfoDetailView(trackerInfo: trackerInfo),
+          title: detailTitle,
+        );
+      },
+    );
+  }
+
+  String get _countryCode {
+    for (final code in trackerInfo.metadata.destinationGeoIP) {
+      final trimmed = code.trim();
+      final upper = trimmed.toUpperCase();
+      if (trimmed.isEmpty || upper == 'PRIVATE' || upper == 'LAN') {
+        continue;
+      }
+      return upper.length > 3 ? upper.substring(0, 3) : upper;
+    }
+    return '';
+  }
+
+  Widget _buildLeading(
+    BuildContext context,
+    bool showAppIcon,
+    _RoutingStyle style,
+  ) {
+    final Widget avatar;
+    if (showAppIcon) {
+      final process = trackerInfo.metadata.process;
+      avatar = GestureDetector(
+        onTap: () {
+          if (process.isEmpty) return;
+          onClickKeyword?.call(process);
+        },
+        child: PackageIcon(packageName: process, size: 44),
+      );
+    } else {
+      avatar = Container(
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        decoration: ShapeDecoration(color: style.background, shape: AppShape.md),
+        child: Icon(style.icon, size: 22, color: style.foreground),
+      );
+    }
+    final code = _countryCode;
+    if (code.isEmpty) {
+      return avatar;
+    }
+    return Stack(
+      clipBehavior: Clip.none,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(
-            metaText,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
-        if (chains.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, bottom: 0),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: [
-                for (final chain in chains)
-                  CommonChip(
-                    label: chain,
-                    onPressed: () => onClickKeyword?.call(chain),
-                  ),
-              ],
-            ),
-          ),
+        avatar,
+        Positioned(right: -4, bottom: -4, child: _CountryBadge(code: code)),
+      ],
+    );
+  }
+
+  Widget _buildTraffic(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final style = context.textTheme.labelSmall
+        ?.copyWith(color: colorScheme.onSurfaceVariant)
+        .toJetBrainsMono;
+    Widget line(IconData icon, String value) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 3,
+        children: [
+          Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
+          Text(value, style: style),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      spacing: 4,
+      children: [
+        line(Icons.south, trackerInfo.download.traffic.show),
+        line(Icons.north, trackerInfo.upload.traffic.show),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context, ref) {
-    final showIcon = ref.watch(
+    final colorScheme = context.colorScheme;
+    final showAppIcon = ref.watch(
       patchClashConfigProvider.select(
         (state) =>
             state.findProcessMode == FindProcessMode.always && system.isAndroid,
       ),
     );
-    final process = trackerInfo.metadata.process;
-    final icon = showIcon
-        ? GestureDetector(
-            onTap: () {
-              if (process.isEmpty) return;
-              onClickKeyword?.call(process);
-            },
-            child: Padding(
-              padding: const EdgeInsetsGeometry.only(top: 6),
-              child: PackageIcon(packageName: process, size: 44),
-            ),
-          )
-        : null;
-    return ListItem(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ).copyWith(bottom: 12),
-      minVerticalPadding: 0,
-      horizontalTitleGap: 12,
-      tileTitleAlignment: ListTileTitleAlignment.top,
-      onTap: () {
-        showExtend(
-          context,
-          builder: (_) {
-            return AdaptiveSheetScaffold(
-              sheetTransparentToolBar: true,
-              body: TrackerInfoDetailView(trackerInfo: trackerInfo),
-              title: detailTitle,
-            );
-          },
-        );
-      },
-      leading: icon,
-      title: Text(
-        trackerInfo.desc,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textTheme.bodyLarge,
+    final style = _routingStyle(context, _routingOf(trackerInfo.chains));
+    final outbound = _outboundLabel;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () => _openDetail(context),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 14,
+            children: [
+              _buildLeading(context, showAppIcon, style),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 3,
+                  children: [
+                    Text(
+                      _host,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      _subtitle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (outbound.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: _RoutingPill(
+                          label: outbound,
+                          style: style,
+                          onPressed: () => onClickKeyword?.call(outbound),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              _buildTraffic(context),
+              ?trailing,
+            ],
+          ),
+        ),
       ),
-      subtitle: _buildMeta(context),
-      trailing: trailing,
     );
   }
 }
+
+class _CountryBadge extends StatelessWidget {
+  final String code;
+
+  const _CountryBadge({required this.code});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        shape: AppShape.full.copyWith(
+          side: BorderSide(color: colorScheme.surface, width: 2),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+        child: Text(
+          code,
+          style: context.textTheme.labelSmall
+              ?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              )
+              .toJetBrainsMono,
+        ),
+      ),
+    );
+  }
+}
+
+class _RoutingPill extends StatelessWidget {
+  final String label;
+  final _RoutingStyle style;
+  final VoidCallback? onPressed;
+
+  const _RoutingPill({required this.label, required this.style, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: style.background,
+      shape: AppShape.full,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 3, 10, 3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              Icon(style.icon, size: 13, color: style.foreground),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.labelMedium?.copyWith(
+                  color: style.foreground,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class TrackerInfoDetailView extends StatelessWidget {
   final TrackerInfo trackerInfo;

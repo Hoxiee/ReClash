@@ -19,12 +19,12 @@ class ServiceNotificationLevelsTest {
     }
 
     @Test
-    fun `importance falls to none on the hidden channel`() {
+    fun `the hidden channel stays postable at the minimum importance`() {
         assertEquals(
             listOf(
                 NotificationManager.IMPORTANCE_LOW,
                 NotificationManager.IMPORTANCE_MIN,
-                NotificationManager.IMPORTANCE_NONE,
+                NotificationManager.IMPORTANCE_MIN,
             ),
             channels.map(::serviceChannelImportance),
         )

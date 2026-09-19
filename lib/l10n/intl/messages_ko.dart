@@ -418,6 +418,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "캐시가 손상됐습니다. 지우시겠습니까?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "카메라 접근이 꺼져 있습니다. QR 코드를 스캔하려면 설정에서 켜세요.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("취소"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("선택 해제"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1139,6 +1142,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN 모드에는 systemd가 필요하지만 이 시스템에서는 사용할 수 없습니다.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "다른 VPN이 트래픽을 가로채고 있습니다 — 다시 시도하려면 누르세요",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage("터널이 차단됨"),
     "heroChecking": MessageLookupByLibrary.simpleMessage("네트워크 확인 중…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage(
       "선택한 노드를 측정하고 있습니다",
@@ -1867,6 +1874,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("프록시 유형"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("캐시 정리"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("퓨어 블랙 모드"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "이 기기에서는 QR 코드 스캔을 지원하지 않습니다.",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR 코드"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QR 코드를 스캔해 프로필을 추가합니다"),
     "quickFill": MessageLookupByLibrary.simpleMessage("빠른 입력"),

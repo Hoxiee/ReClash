@@ -53,15 +53,21 @@ class Picker {
       return null;
     }
     final controller = MobileScannerController();
-    final capture = await controller.analyzeImage(
-      xFile.path,
-      formats: [BarcodeFormat.qrCode],
-    );
-    final result = capture?.barcodes.first.rawValue;
-    if (result == null || !result.isProfileImportLink) {
-      throw MessageException(currentAppLocalizations.pleaseUploadValidQrcode);
+    try {
+      final capture = await controller.analyzeImage(
+        xFile.path,
+        formats: [BarcodeFormat.qrCode],
+      );
+      final result = capture?.barcodes.firstOrNull?.rawValue;
+      if (result == null || !result.isProfileImportLink) {
+        throw MessageException(currentAppLocalizations.pleaseUploadValidQrcode);
+      }
+      return result;
+    } on UnsupportedError {
+      throw MessageException(currentAppLocalizations.qrScanUnsupported);
+    } finally {
+      await controller.dispose();
     }
-    return result;
   }
 }
 

@@ -57,7 +57,7 @@ HeroServiceLine heroServiceLineOf({
     return HeroServiceLine.doctor;
   }
   final link = switch (status) {
-    HeroStatus.broken => HeroServiceLine.linkBroken,
+    HeroStatus.broken || HeroStatus.blocked => HeroServiceLine.linkBroken,
     HeroStatus.degraded => HeroServiceLine.linkSlow,
     _ => null,
   };

@@ -30,6 +30,7 @@ class SetupAction extends _$SetupAction {
   int _authorizationRevision = 0;
   bool _authorizationPromptAllowed = false;
   bool _disposed = false;
+  bool _notificationPermissionRequested = false;
   LinuxHelperInstallResult? _linuxInstallResult;
   String? _authorizationProblem;
 
@@ -187,7 +188,18 @@ class SetupAction extends _$SetupAction {
     );
   }
 
+  // Android 14+ crashes the core service if its foreground notification cannot be
+  // posted, so grant POST_NOTIFICATIONS a chance before the service starts. Asked
+  // once per session and never blocking: a deliberate refusal still starts the tunnel.
+  Future<void> _ensureNotificationPermission() async {
+    if (!system.isAndroid || _notificationPermissionRequested) return;
+    _notificationPermissionRequested = true;
+    if (await app?.isNotificationsPermissionGranted() ?? true) return;
+    await app?.requestNotificationsPermission();
+  }
+
   Future<bool> _start(_RunRequest request) async {
+    await _ensureNotificationPermission();
     if (request.initialize ||
         (requiresHelperSession &&
             ref.read(patchClashConfigProvider).tun.enable)) {
@@ -248,6 +260,11 @@ class SetupAction extends _$SetupAction {
       _signalOdometerIntent(request.running);
       final applied = await setCoreRunning(request.running);
       if (!applied && _isCurrent(request)) {
+        if (request.running) {
+          ref
+              .read(runRequestStateProvider.notifier)
+              .markFault(RunRequestFault.ingressBlocked);
+        }
         throw MessageException(currentAppLocalizations.doctorIngressTitle);
       }
       if (request.running && _isCurrent(request)) {

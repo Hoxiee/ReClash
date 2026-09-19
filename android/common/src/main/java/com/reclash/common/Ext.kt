@@ -60,9 +60,12 @@ val Intent.toPendingIntent: PendingIntent
     )
 
 // Channel importance is immutable and AMS drops the old post only when the id changes.
+// A foreground service must post, and Android 14+ crashes the process with
+// CannotPostForegroundServiceNotificationException if the target channel is blocked,
+// so the quietest level stays at IMPORTANCE_MIN rather than IMPORTANCE_NONE.
 fun serviceChannelImportance(channelId: String): Int = when (channelId) {
     GlobalState.NOTIFICATION_CHANNEL_QUIET -> NotificationManager.IMPORTANCE_MIN
-    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> NotificationManager.IMPORTANCE_NONE
+    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> NotificationManager.IMPORTANCE_MIN
     else -> NotificationManager.IMPORTANCE_LOW
 }
 

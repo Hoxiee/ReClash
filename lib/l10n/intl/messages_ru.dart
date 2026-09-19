@@ -483,6 +483,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Кэш повреждён. Очистить его?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Доступ к камере выключен. Включите его в настройках, чтобы отсканировать QR-код.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Отмена"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage("Снять выделение"),
     "changeProxyFailedTip": MessageLookupByLibrary.simpleMessage(
@@ -1394,6 +1397,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "Для TUN-режима нужен systemd, но в этой системе он недоступен.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "Другой VPN перехватывает трафик — нажмите, чтобы повторить",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage(
+      "Туннель заблокирован",
+    ),
     "heroChecking": MessageLookupByLibrary.simpleMessage("Проверка сети…"),
     "heroCheckingHint": MessageLookupByLibrary.simpleMessage(
       "Измеряем выбранный узел",
@@ -2285,6 +2294,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage(
       "Истинно чёрный режим",
+    ),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Сканирование QR-кодов не поддерживается на этом устройстве.",
     ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR-код"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(

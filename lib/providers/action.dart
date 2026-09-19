@@ -45,12 +45,19 @@ part 'generated/action.g.dart';
 
 enum RunRequestPhase { idle, starting, stopping }
 
+enum RunRequestFault { none, ingressBlocked }
+
 @immutable
 class RunRequestState {
-  const RunRequestState({this.phase = RunRequestPhase.idle, this.revision = 0});
+  const RunRequestState({
+    this.phase = RunRequestPhase.idle,
+    this.revision = 0,
+    this.fault = RunRequestFault.none,
+  });
 
   final RunRequestPhase phase;
   final int revision;
+  final RunRequestFault fault;
 
   bool get isStarting => phase == RunRequestPhase.starting;
 }
@@ -66,13 +73,23 @@ class RunRequestStateNotifier extends Notifier<RunRequestState> {
     state = RunRequestState(
       phase: running ? RunRequestPhase.starting : RunRequestPhase.stopping,
       revision: revision,
+      // A stop keeps the fault so a failed start's cleanup stop cannot erase it.
+      fault: running ? RunRequestFault.none : state.fault,
     );
     return revision;
   }
 
+  void markFault(RunRequestFault fault) {
+    state = RunRequestState(
+      phase: state.phase,
+      revision: state.revision,
+      fault: fault,
+    );
+  }
+
   void finish(int revision) {
     if (state.revision != revision) return;
-    state = RunRequestState(revision: revision);
+    state = RunRequestState(revision: revision, fault: state.fault);
   }
 }
 

@@ -508,6 +508,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Kesh buzilgan. Tozalansinmi?",
     ),
+    "cameraPermissionRequired": MessageLookupByLibrary.simpleMessage(
+      "Kameraga ruxsat o\'chirilgan. QR kodni skanerlash uchun uni sozlamalarda yoqing.",
+    ),
     "cancel": MessageLookupByLibrary.simpleMessage("Bekor qilish"),
     "cancelSelectAll": MessageLookupByLibrary.simpleMessage(
       "Tanlovni bekor qilish",
@@ -1437,6 +1440,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "helperSystemdUnavailable": MessageLookupByLibrary.simpleMessage(
       "TUN rejimi uchun systemd kerak, lekin bu tizimda u mavjud emas.",
     ),
+    "heroBlockedHint": MessageLookupByLibrary.simpleMessage(
+      "Boshqa VPN trafikni ushlamoqda — qayta urinish uchun bosing",
+    ),
+    "heroBlockedTitle": MessageLookupByLibrary.simpleMessage(
+      "Tunnel bloklandi",
+    ),
     "heroChecking": MessageLookupByLibrary.simpleMessage(
       "Tarmoq tekshirilmoqda…",
     ),
@@ -2349,6 +2358,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "proxyType": MessageLookupByLibrary.simpleMessage("Proksi turi"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Keshni tozalash"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Toʻliq qora rejim"),
+    "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
+      "Bu qurilmada QR kodlarni skanerlash qo\'llab-quvvatlanmaydi.",
+    ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR kod"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Profil olish uchun QR kodni skanerlang",
