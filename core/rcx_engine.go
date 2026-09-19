@@ -2905,10 +2905,10 @@ func (e *rcxEngine) probeTargets(
 				secondary.Echoes = e.cfg.EgressEchoes
 			}
 		}
-		if len(primary.Markers) > 0 {
+		if len(primary.Markers) > 0 || len(primary.Echoes) > 0 {
 			primaries = append(primaries, primary)
 		}
-		if !both || len(secondary.Markers) == 0 {
+		if !both || len(secondary.Markers) == 0 && len(secondary.Echoes) == 0 {
 			continue
 		}
 		if paired {

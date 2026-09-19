@@ -163,7 +163,7 @@ func (e *rcxEngine) startImprovement(periodic bool) bool {
 }
 
 func (e *rcxEngine) markDiscoveryResult(result rcxProbeResult, now time.Time) {
-	if result.Outcome == rcxProbeOverloaded {
+	if result.Outcome == rcxProbeOverloaded && result.ExitCountry == "" {
 		return
 	}
 	d := e.discoveryState()

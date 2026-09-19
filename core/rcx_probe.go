@@ -166,31 +166,31 @@ func rcxTargetMarkers(target rcxProbeTarget) []rcxMarker {
 
 func (p *rcxProber) probe(parent context.Context, target rcxProbeTarget) rcxProbeResult {
 	result := rcxUnmeasuredProbe(target)
-	markers := rcxTargetMarkers(target)
-	if len(markers) == 0 {
-		return result
-	}
-	for _, marker := range markers {
-		result.Dispatched = true
-		attempt := p.probeMarker(parent, target.Node, target.Role, marker)
-		result.Attempts = append(result.Attempts, attempt)
-		result.Outcome = attempt.Outcome
-		result.DelayMs = attempt.DelayMs
-		result.Fingerprint = attempt.ID
-		if attempt.Outcome == rcxProbeOK || attempt.Outcome == rcxProbeOverloaded {
-			break
+	egressOnly := len(target.Markers) == 0 && target.Marker.URL == "" && len(target.Echoes) > 0
+	if !egressOnly {
+		for _, marker := range rcxTargetMarkers(target) {
+			result.Dispatched = true
+			attempt := p.probeMarker(parent, target.Node, target.Role, marker)
+			result.Attempts = append(result.Attempts, attempt)
+			result.Outcome = attempt.Outcome
+			result.DelayMs = attempt.DelayMs
+			result.Fingerprint = attempt.ID
+			if attempt.Outcome == rcxProbeOK || attempt.Outcome == rcxProbeOverloaded {
+				break
+			}
 		}
 	}
-	if result.Outcome == rcxProbeOK {
-		result.ExitCountry = p.echo(parent, target)
+	// Egress rides any live tunnel, not the open proof, so a quarantined or failed marker cannot hide a domestic exit.
+	if len(target.Echoes) > 0 && parent.Err() == nil {
+		if country := p.echo(parent, target); country != "" {
+			result.ExitCountry = country
+		}
 	}
 	return result
 }
 
-// Ridden on the open probe on purpose: the event that grants the open proof
-// carries the egress with it, so no tick ranks a fronted node while unmeasured.
 func (p *rcxProber) echo(parent context.Context, target rcxProbeTarget) string {
-	if p.locate == nil || target.Role != rcxRoleOpen {
+	if p.locate == nil || len(target.Echoes) == 0 {
 		return ""
 	}
 	for _, echo := range target.Echoes {

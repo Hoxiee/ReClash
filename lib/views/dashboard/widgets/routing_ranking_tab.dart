@@ -187,7 +187,7 @@ class RoutingDuelRow extends StatelessWidget {
     final rung = duel.rung;
     final ahead = rung != null && duel.won;
     final tone = ahead ? colorScheme.tertiary : colorScheme.onSurfaceVariant;
-    final standing = rung == null
+    final phrase = rung == null
         ? appLocalizations.smartRoutingTiedAll
         : ahead
         ? appLocalizations.smartRoutingWinsAt(
@@ -196,73 +196,82 @@ class RoutingDuelRow extends StatelessWidget {
         : appLocalizations.smartRoutingLostAt(
             routingRungLabel(appLocalizations, rung),
           );
+    final standing = [
+      if (candidate.region.isNotEmpty) candidate.region,
+      phrase,
+    ].join(' · ');
+    // The two readings ride the name line so the standing below keeps the full
+    // width and never truncates to a headless "Ranks higher at…".
+    final versus = rung == null
+        ? ''
+        : appLocalizations.smartRoutingRungVersus(
+            routingRungValueLabel(appLocalizations, rung, candidate, terrain),
+            routingRungValueLabel(appLocalizations, rung, chosen, terrain),
+          );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            rung == null
-                ? Icons.drag_handle_rounded
-                : ahead
-                ? Icons.trending_up_rounded
-                : Icons.trending_down_rounded,
-            size: 15,
-            color: tone,
+          Padding(
+            padding: const EdgeInsets.only(top: 1),
+            child: Icon(
+              rung == null
+                  ? Icons.drag_handle_rounded
+                  : ahead
+                  ? Icons.trending_up_rounded
+                  : Icons.trending_down_rounded,
+              size: 15,
+              color: tone,
+            ),
           ),
           const SizedBox(width: 9),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TooltipText(
-                  text: Text(
-                    candidate.node,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TooltipText(
+                        text: Text(
+                          candidate.node,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.textTheme.bodySmall,
+                        ),
+                      ),
+                    ),
+                    if (versus.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 156),
+                        child: TooltipText(
+                          text: Text(
+                            versus,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                            style: context.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
+                const SizedBox(height: 1),
                 Text(
-                  [
-                    if (candidate.region.isNotEmpty) candidate.region,
-                    standing,
-                  ].join(' · '),
-                  maxLines: 1,
+                  standing,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.labelSmall?.copyWith(color: tone),
                 ),
               ],
             ),
           ),
-          if (rung != null) ...[
-            const SizedBox(width: 8),
-            Flexible(
-              child: TooltipText(
-                text: Text(
-                  appLocalizations.smartRoutingRungVersus(
-                    routingRungValueLabel(
-                      appLocalizations,
-                      rung,
-                      candidate,
-                      terrain,
-                    ),
-                    routingRungValueLabel(
-                      appLocalizations,
-                      rung,
-                      chosen,
-                      terrain,
-                    ),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: context.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

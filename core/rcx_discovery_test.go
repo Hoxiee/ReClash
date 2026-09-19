@@ -34,6 +34,31 @@ func TestDiscoveryPreservesProviderOrderAcrossBatches(t *testing.T) {
 	}
 }
 
+func TestEgressOnlyMeasurementCountsAsDiscovered(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("a", "b")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "a"
+	keys := map[string]string{}
+	for _, node := range engine.discoveryNodes(runtime.members, 8) {
+		keys[node.Name] = node.Key
+	}
+
+	engine.markDiscoveryResult(rcxProbeResult{Node: "a", Key: keys["a"], Outcome: rcxProbeOverloaded}, runtime.Now())
+	engine.markDiscoveryResult(rcxProbeResult{Node: "b", Key: keys["b"], Outcome: rcxProbeOverloaded, ExitCountry: "RU"}, runtime.Now())
+
+	pending := map[string]bool{}
+	for _, node := range engine.discoveryNodes(runtime.members, 8) {
+		pending[node.Name] = true
+	}
+	if !pending["a"] {
+		t.Fatal("a cancelled probe that measured nothing must stay pending")
+	}
+	if pending["b"] {
+		t.Fatal("an egress-only measurement must count as covered")
+	}
+}
+
 func TestDiscoveryCapDoesNotDependOnWaveWidth(t *testing.T) {
 	runtime := newFakeRuntime()
 	names := make([]string, 80)

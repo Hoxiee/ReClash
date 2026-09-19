@@ -53,12 +53,14 @@ const _russia = SmartRoutingBundle(
     '94.140.14.14:443',
   ],
   canaryDomestic: ['77.88.8.8:443', '213.180.204.242:443'],
-  // The probe tests only the first marker: api.telegram.org is unreachable from
-  // every Russian egress while Telegram works, so reaching it proves a node is
-  // abroad — a home-country dud cannot. 404 counts because the root path 404s
-  // while the host answers, so demanding 200 would disqualify usable nodes.
+  // Both hosts are unreachable from every Russian egress while working abroad,
+  // so reaching either proves a node is abroad and a home-country dud cannot.
+  // Two of them means one host going dark does not blind the engine. Telegram
+  // stays first (404 counts: its root 404s while the host answers); Instagram is
+  // the fallback the probe tries only when Telegram fails.
   openMarkers: [
     RcxMarker(url: 'https://api.telegram.org/', statuses: [200, 404]),
+    RcxMarker(url: 'https://www.instagram.com/', statuses: [200]),
   ],
   domesticMarkers: [
     RcxMarker(url: 'https://ya.ru/', statuses: [200, 301, 302]),

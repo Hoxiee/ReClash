@@ -188,6 +188,13 @@ func (l *rcxLedger) ExitAt(node string) time.Time {
 	return l.globalState(node).ExitAt
 }
 
+func (l *rcxLedger) Exit(node string, now time.Time) rcxOrigin {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	return rcxExitAged(state.Exit, state.ExitAt, now)
+}
+
 const rcxDegradedWindow = 10 * time.Minute
 
 const rcxExitTTL = 6 * time.Hour

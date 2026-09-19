@@ -15,8 +15,10 @@ func TestMarkerQuarantineNeedsIndependentPreviouslyWorkingNodes(t *testing.T) {
 	}
 	engine := newTestEngine(runtime, "ru")
 	markerID := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	// Only a proven-foreign node can testify the foreign marker is down.
 	for _, node := range []string{"a", "b", "c"} {
 		engine.ledger.NoteProbe(node, engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+		engine.ledger.SetExit(node, "US", rcxOriginForeign, runtime.Now())
 	}
 
 	for _, node := range []string{"a", "a", "new", "b"} {
@@ -32,6 +34,28 @@ func TestMarkerQuarantineNeedsIndependentPreviouslyWorkingNodes(t *testing.T) {
 	}
 	if engine.snapshot.Metrics.MarkerIncidents != 1 {
 		t.Fatalf("marker incidents = %d, want one quarantine transition", engine.snapshot.Metrics.MarkerIncidents)
+	}
+}
+
+func TestDomesticEgressNodesNeverQuarantineTheOpenMarker(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "a", Provider: "one", Transport: "ws", Type: "Vless", Port: 443},
+		{Name: "b", Provider: "one", Transport: "grpc", Type: "Vless", Port: 443},
+		{Name: "c", Provider: "two", Transport: "tcp", Type: "Shadowsocks", Port: 8388},
+	}
+	engine := newTestEngine(runtime, "ru")
+	markerID := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	for _, node := range []string{"a", "b", "c"} {
+		engine.ledger.NoteProbe(node, engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+		engine.ledger.SetExit(node, "RU", rcxOriginDomestic, runtime.Now())
+	}
+
+	for _, node := range []string{"a", "b", "c"} {
+		engine.noteMarkerFailure(markerID, node, runtime.Now())
+	}
+	if engine.markerQuarantined(markerID, runtime.Now()) {
+		t.Fatal("home-country nodes failing the foreign marker quarantined it")
 	}
 }
 

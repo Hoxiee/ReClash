@@ -46,6 +46,14 @@ func (e *rcxEngine) noteMarkerFailure(markerID, node string, now time.Time) {
 		!e.ledger.PreviouslyGood(member.key(), e.envKey) {
 		return
 	}
+	// A node that does not measurably egress abroad cannot testify that the
+	// foreign open marker is down: its failure is the expected domestic signal,
+	// not marker breakage. Only a proven-foreign node quarantines the open marker,
+	// so a park of home-country nodes can never blind the engine to itself.
+	if role, known := e.markerRole(markerID); known && role == rcxRoleOpen &&
+		e.ledger.Exit(member.key(), now) != rcxOriginForeign {
+		return
+	}
 	bucket := rcxFailureBucket(member)
 	quarantine := e.snapshot.Quarantines[markerID]
 	failures := quarantine.Failures[:0]

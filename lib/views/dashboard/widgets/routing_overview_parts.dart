@@ -271,11 +271,12 @@ class RoutingStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
+        Flexible(
           child: Text(
             label,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
@@ -287,7 +288,7 @@ class RoutingStat extends StatelessWidget {
           child: TooltipText(
             text: Text(
               value,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
               style: context.textTheme.bodySmall?.copyWith(

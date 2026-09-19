@@ -376,42 +376,50 @@ func TestProbeStopsTheMarkerChainAtTheFirstSuccess(t *testing.T) {
 	}
 }
 
-func TestProbeEchoesOnlyThroughAnAnsweredOpenMarker(t *testing.T) {
-	asked := 0
+func TestProbeMeasuresEgressIndependentOfTheOpenMarker(t *testing.T) {
 	prober := testProber(func(_ context.Context, node string, _ rcxMarker) (int, bool, error) {
-		if node == "mute" {
-			return 0, false, errors.New("no answer")
+		if node == "domestic" {
+			return 0, false, nil
 		}
 		return 59, true, nil
 	})
 	prober.echoTimeout = time.Second
-	prober.locate = func(_ context.Context, _, _ string) string {
-		asked++
-		return "RU"
+	prober.locate = func(_ context.Context, node, _ string) string {
+		if node == "domestic" {
+			return "RU"
+		}
+		return "US"
 	}
-	target := rcxProbeTarget{
-		Node:   "spb",
+	base := rcxProbeTarget{
 		Role:   rcxRoleOpen,
 		Marker: rcxMarker{URL: "https://open.example/"},
 		Echoes: []string{"https://echo.example/"},
 	}
 
-	if got := prober.probe(context.Background(), target).ExitCountry; got != "RU" {
-		t.Errorf("exit = %q, want the measured egress on an answered open marker", got)
+	answered := base
+	answered.Node = "spb"
+	if got := prober.probe(context.Background(), answered).ExitCountry; got != "US" {
+		t.Errorf("exit = %q, want the egress measured on an answered open marker", got)
 	}
 
-	domestic := target
-	domestic.Role = rcxRoleDomestic
-	if got := prober.probe(context.Background(), domestic).ExitCountry; got != "" {
-		t.Errorf("exit = %q, want none: a domestic marker measures nothing about the egress", got)
+	failed := base
+	failed.Node = "domestic"
+	if got := prober.probe(context.Background(), failed).ExitCountry; got != "RU" {
+		t.Errorf("exit = %q, want the egress measured despite a failed marker", got)
 	}
 
-	mute := target
-	mute.Node = "mute"
-	if got := prober.probe(context.Background(), mute).ExitCountry; got != "" {
-		t.Errorf("exit = %q, want none: a node that answered nothing costs no echo", got)
+	bare := rcxProbeTarget{Node: "spb", Role: rcxRoleOpen, Marker: rcxMarker{URL: "https://open.example/"}}
+	if got := prober.probe(context.Background(), bare).ExitCountry; got != "" {
+		t.Errorf("exit = %q, want none without echoes", got)
 	}
-	if asked != 1 {
-		t.Errorf("echoes asked = %d, want one", asked)
+
+	// Egress-only: no marker probe, so it records no verdict but still measures.
+	egress := rcxProbeTarget{Node: "spb", Role: rcxRoleOpen, Echoes: []string{"https://echo.example/"}}
+	result := prober.probe(context.Background(), egress)
+	if result.ExitCountry != "US" {
+		t.Errorf("exit = %q, want the exit measured by an egress-only probe", result.ExitCountry)
+	}
+	if result.Outcome != rcxProbeOverloaded || len(result.Attempts) != 0 {
+		t.Errorf("result = %+v, want no marker verdict from an egress-only probe", result)
 	}
 }
