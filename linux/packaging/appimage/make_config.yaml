@@ -31,5 +31,8 @@ categories:
   - Network
 
 startup_notify: true
+# Should equal the app id (com.reclash). NOTE: the current flutter_distributor
+# appimage maker does not emit StartupWMClass; kept for parity/forward-compat.
+startup_wm_class: com.reclash
 
 include: []

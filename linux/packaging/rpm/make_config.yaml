@@ -11,6 +11,8 @@ essential: false
 icon: ./assets/images/icon.png
 
 requires:
+  - libayatana-appindicator-gtk3
+  - keybinder3
   - libsecret
 
 postinstall_scripts:
@@ -44,3 +46,6 @@ generic_name: ReClash
 group: Applications/Internet
 
 startup_notify: true
+# Should equal the app id (com.reclash). NOTE: the current flutter_distributor
+# rpm maker does not emit StartupWMClass; kept for parity and forward-compat.
+startup_wm_class: com.reclash

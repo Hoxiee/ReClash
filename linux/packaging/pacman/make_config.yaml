@@ -4,16 +4,17 @@ maintainer:
   name: Hoxiee
   email: hoxiee.dev@gmail.com
 
-priority: optional
-section: x11
+licenses:
+  - Other
+
 installed_size: 6604
-essential: false
 icon: ./assets/images/icon.png
 
 dependencies:
-  - libayatana-appindicator3-dev
-  - libkeybinder-3.0-dev
-  - libsecret-1-0
+  - gtk3
+  - libayatana-appindicator
+  - libkeybinder3
+  - libsecret
 
 supported_mime_type:
   - x-scheme-handler/clash
@@ -44,6 +45,6 @@ categories:
   - Network
 
 startup_notify: true
-# Matches g_set_prgname/application-id (com.reclash) so the running window
-# maps to this .desktop entry and the taskbar shows the correct icon.
+# Should equal the app id (com.reclash). NOTE: the current flutter_distributor
+# pacman maker does not emit StartupWMClass; kept for parity/forward-compat.
 startup_wm_class: com.reclash
