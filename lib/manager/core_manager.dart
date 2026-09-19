@@ -173,6 +173,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
 
   @override
   void onLog(Log log) {
+    fileLogger.log('[CORE ${log.logLevel.name.toUpperCase()}] ${log.payload}');
     ref.read(logsProvider.notifier).add(log);
     if (log.logLevel == LogLevel.error) {
       throttler.call(

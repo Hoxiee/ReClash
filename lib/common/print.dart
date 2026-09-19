@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:reclash/common/file_logger.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
@@ -28,6 +29,7 @@ class CommonPrint {
   void log(String? text, {LogLevel logLevel = LogLevel.info}) {
     final payload = '[APP] $text';
     debugPrint(payload);
+    fileLogger.log('[${logLevel.name.toUpperCase()}] $payload');
     if (!globalState.isAttach) {
       return;
     }

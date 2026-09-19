@@ -6,6 +6,7 @@ const _appLicenses = {
   'mihomo (ReClash core)': 'assets/data/licenses/mihomo-GPL3.txt',
   'JetBrains Mono': 'assets/data/licenses/JetBrainsMono-OFL.txt',
   'Twemoji Mozilla': 'assets/data/licenses/Twemoji.Mozilla-LICENSE.txt',
+  '@incy/link-encoder': 'assets/data/licenses/incy-link-encoder-MIT.txt',
 };
 
 /// Hand-bundled licenses appear on the license page only via this registration.

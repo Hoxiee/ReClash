@@ -238,6 +238,75 @@ class _PackageIconState extends State<PackageIcon> {
   }
 }
 
+class ProcessIcon extends StatefulWidget {
+  final String processPath;
+  final String process;
+  final double size;
+  final Widget placeholder;
+
+  const ProcessIcon({
+    super.key,
+    required this.processPath,
+    required this.process,
+    required this.size,
+    required this.placeholder,
+  });
+
+  @override
+  State<ProcessIcon> createState() => _ProcessIconState();
+}
+
+class _ProcessIconState extends State<ProcessIcon> {
+  ImageProvider? _icon;
+  int _generation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadIcon();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProcessIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.processPath != widget.processPath ||
+        oldWidget.process != widget.process) {
+      _loadIcon();
+    }
+  }
+
+  void _loadIcon() {
+    final generation = ++_generation;
+    _icon = null;
+    final future = processIcon(widget.processPath, widget.process);
+    if (future == null) {
+      return;
+    }
+    future.then((icon) {
+      if (!mounted || generation != _generation || icon == null) {
+        return;
+      }
+      setState(() {
+        _icon = icon;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = _icon;
+    if (icon == null) {
+      return widget.placeholder;
+    }
+    return Image(
+      image: icon,
+      gaplessPlayback: true,
+      width: widget.size,
+      height: widget.size,
+    );
+  }
+}
+
 class CommonImage extends StatelessWidget {
   final File data;
   final bool isSvg;

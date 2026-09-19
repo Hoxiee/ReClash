@@ -15,5 +15,6 @@ void main() {
 
     expect(packages, containsAll(['ReClash', 'mihomo (ReClash core)']));
     expect(packages, containsAll(['JetBrains Mono', 'Twemoji Mozilla']));
+    expect(packages, contains('@incy/link-encoder'));
   });
 }

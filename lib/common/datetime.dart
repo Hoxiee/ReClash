@@ -55,6 +55,10 @@ extension DateTimeExtension on DateTime {
   String get showTime {
     return toString().substring(10, 19);
   }
+
+  String get showLog {
+    return toString().substring(0, 23);
+  }
 }
 
 String getDateStringLast2(int value) {
