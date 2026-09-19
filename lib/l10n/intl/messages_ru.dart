@@ -1271,6 +1271,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл изменён. Сохранить изменения?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Фильтр"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Поиск процесса"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Может немного снизить производительность",
@@ -1438,6 +1439,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Скрыть из списка"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("Скрыть пароль"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "Автозапуск с высоким приоритетом",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Использовать задачу планировщика Windows для более раннего запуска",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Хост"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage(
       "Добавить записи в файл hosts",
@@ -1597,6 +1604,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "В прошлый раз приложение неожиданно завершилось во время запуска. Автоматическая настройка для этого запуска пропущена — при необходимости запустите её вручную.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Макет"),
+    "level": MessageLookupByLibrary.simpleMessage("Уровень"),
     "license": MessageLookupByLibrary.simpleMessage("Лицензия"),
     "licenses": MessageLookupByLibrary.simpleMessage("Лицензии"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage(
@@ -1748,6 +1756,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("Следующее совпадение"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("Нет анонсов"),
     "noData": MessageLookupByLibrary.simpleMessage("Нет данных"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage(
+      "Нет условий фильтра",
+    ),
     "noHotKey": MessageLookupByLibrary.simpleMessage("Горячих клавиш пока нет"),
     "noInfo": MessageLookupByLibrary.simpleMessage("Нет информации"),
     "noLongerRemind": MessageLookupByLibrary.simpleMessage(
@@ -2160,6 +2171,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Введите другой порт",
     ),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage(
+      "Предиктивный жест «Назад»",
+    ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Предпочитать HTTP/3 для DoH",
     ),
@@ -2286,6 +2300,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Уже включено в настройках системы",
+    ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage(
+      "Поиск по регулярному выражению",
     ),
     "reload": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
     "remaining": MessageLookupByLibrary.simpleMessage("Осталось"),

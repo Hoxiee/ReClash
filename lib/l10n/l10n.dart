@@ -3080,6 +3080,66 @@ class AppLocalizations {
     return Intl.message('Source', name: 'source', desc: '', args: []);
   }
 
+  /// `Filter`
+  String get filter {
+    return Intl.message('Filter', name: 'filter', desc: '', args: []);
+  }
+
+  /// `No filter conditions`
+  String get noFilterCondition {
+    return Intl.message(
+      'No filter conditions',
+      name: 'noFilterCondition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Regex search`
+  String get regexSearch {
+    return Intl.message(
+      'Regex search',
+      name: 'regexSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Level`
+  String get level {
+    return Intl.message('Level', name: 'level', desc: '', args: []);
+  }
+
+  /// `Predictive back`
+  String get predictiveBack {
+    return Intl.message(
+      'Predictive back',
+      name: 'predictiveBack',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `High priority auto launch`
+  String get highPriorityAutoLaunch {
+    return Intl.message(
+      'High priority auto launch',
+      name: 'highPriorityAutoLaunch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use a Windows scheduled task to start earlier`
+  String get highPriorityAutoLaunchDesc {
+    return Intl.message(
+      'Use a Windows scheduled task to start earlier',
+      name: 'highPriorityAutoLaunchDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Action`
   String get action {
     return Intl.message('Action', name: 'action', desc: '', args: []);

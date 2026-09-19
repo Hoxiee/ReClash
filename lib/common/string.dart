@@ -7,6 +7,39 @@ import 'package:reclash/enum/enum.dart';
 
 import 'dart:math';
 
+class SearchMatcher {
+  final String query;
+  final bool useRegex;
+  final String _lowerQuery;
+  final RegExp? _regExp;
+
+  SearchMatcher(this.query, {this.useRegex = false})
+    : _lowerQuery = query.toLowerCase(),
+      _regExp = useRegex ? _tryBuildRegExp(query) : null;
+
+  static bool isValidRegex(String query) => _tryBuildRegExp(query) != null;
+
+  static RegExp? _tryBuildRegExp(String query) {
+    try {
+      return RegExp(query, caseSensitive: false);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  bool hasMatch(String value) {
+    if (query.isEmpty) {
+      return true;
+    }
+    if (!useRegex) {
+      return value.toLowerCase().contains(_lowerQuery);
+    }
+    return _regExp?.hasMatch(value) ?? false;
+  }
+
+  bool hasAnyMatch(Iterable<String> values) => values.any(hasMatch);
+}
+
 extension StringExtension on String {
   bool get isUrl {
     final uri = Uri.tryParse(this);
@@ -109,6 +142,16 @@ extension StringExtension on String {
       return null;
     }
     return this;
+  }
+
+  bool matchesQuery(String query, {bool useRegex = false}) {
+    return SearchMatcher(query, useRegex: useRegex).hasMatch(this);
+  }
+}
+
+extension SearchableStringsExtension on Iterable<String> {
+  bool matchesQuery(String query, {bool useRegex = false}) {
+    return SearchMatcher(query, useRegex: useRegex).hasAnyMatch(this);
   }
 }
 

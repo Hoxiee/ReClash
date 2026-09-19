@@ -1232,6 +1232,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "The file has been modified. Save the changes?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Filter"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Enabling causes some performance loss",
@@ -1399,6 +1400,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Hide from list"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("Hide password"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "High priority auto launch",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Use a Windows scheduled task to start earlier",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Append hosts"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("Hotkey conflict"),
@@ -1556,6 +1563,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The app exited unexpectedly while it was starting up last time. Automatic setup was skipped for this launch; you can start it manually to retry.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Layout"),
+    "level": MessageLookupByLibrary.simpleMessage("Level"),
     "license": MessageLookupByLibrary.simpleMessage("License"),
     "licenses": MessageLookupByLibrary.simpleMessage("Licenses"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage(
@@ -1707,6 +1715,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("Next match"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("No announcements"),
     "noData": MessageLookupByLibrary.simpleMessage("No data"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage(
+      "No filter conditions",
+    ),
     "noHotKey": MessageLookupByLibrary.simpleMessage("No hotkeys yet"),
     "noInfo": MessageLookupByLibrary.simpleMessage("No info"),
     "noLongerRemind": MessageLookupByLibrary.simpleMessage(
@@ -2097,6 +2108,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please enter a different port",
     ),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage("Predictive back"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prefer HTTP/3 for DoH",
     ),
@@ -2218,6 +2230,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Already enabled in system settings",
     ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage("Regex search"),
     "reload": MessageLookupByLibrary.simpleMessage("Reload"),
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Remaining"),

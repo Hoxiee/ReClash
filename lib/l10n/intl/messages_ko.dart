@@ -1030,6 +1030,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "파일이 수정됐습니다. 변경 사항을 저장하시겠습니까?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("필터"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("프로세스 찾기"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "사용하면 성능이 다소 저하됩니다",
@@ -1169,6 +1170,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "heroTapToResume": MessageLookupByLibrary.simpleMessage("탭해서 보호를 재개하세요"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("목록에서 숨기기"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("비밀번호 숨기기"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "높은 우선순위 자동 실행",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Windows 예약 작업을 사용해 더 일찍 시작합니다",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("호스트"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("호스트 추가"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("단축키 충돌"),
@@ -1300,6 +1307,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "지난번에 앱이 시작 중에 예기치 않게 종료되었습니다. 이번에는 자동 설정을 건너뛰었으니 앱을 직접 시작해 다시 시도해 보세요.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("레이아웃"),
+    "level": MessageLookupByLibrary.simpleMessage("레벨"),
     "license": MessageLookupByLibrary.simpleMessage("라이선스"),
     "licenses": MessageLookupByLibrary.simpleMessage("라이선스"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage("앱에 포함된 패키지"),
@@ -1423,6 +1431,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("다음 일치 항목"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("공지사항 없음"),
     "noData": MessageLookupByLibrary.simpleMessage("데이터 없음"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage("필터 조건 없음"),
     "noHotKey": MessageLookupByLibrary.simpleMessage("아직 단축키가 없습니다"),
     "noInfo": MessageLookupByLibrary.simpleMessage("정보 없음"),
     "noLongerRemind": MessageLookupByLibrary.simpleMessage("다시 알리지 않기"),
@@ -1759,6 +1768,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "port": MessageLookupByLibrary.simpleMessage("포트"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("다른 포트를 입력하세요"),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage("예측형 뒤로 가기"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH에 HTTP/3를 우선 사용합니다",
     ),
@@ -1868,6 +1878,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "시스템 설정에서 이미 켜져 있습니다",
     ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage("정규식 검색"),
     "reload": MessageLookupByLibrary.simpleMessage("다시 불러오기"),
     "remaining": MessageLookupByLibrary.simpleMessage("남음"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("남은 트래픽"),

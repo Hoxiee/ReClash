@@ -152,6 +152,7 @@ String _logDateTime(dynamic _) {
 abstract class Log with _$Log {
   const factory Log({
     @JsonKey(name: 'LogLevel') @Default(LogLevel.info) LogLevel logLevel,
+    @Default(LogSource.app) LogSource source,
     @JsonKey(name: 'Payload') @Default('') String payload,
     @JsonKey(fromJson: _logDateTime) required String dateTime,
   }) = _Log;
@@ -168,20 +169,42 @@ abstract class LogsState with _$LogsState {
   const factory LogsState({
     @Default([]) List<Log> logs,
     @Default([]) List<String> keywords,
+    @Default({}) Set<LogSource> sources,
+    @Default({}) Set<LogLevel> levels,
     @Default('') String query,
+    @Default(false) bool useRegex,
     @Default(true) bool autoScrollToEnd,
   }) = _LogsState;
 }
 
 extension LogsStateExt on LogsState {
+  bool get hasFilters => sources.isNotEmpty || levels.isNotEmpty;
+
+  LogsState toggleSource(LogSource source) {
+    return copyWith(sources: _toggleSet(sources, source));
+  }
+
+  LogsState toggleLevel(LogLevel level) {
+    return copyWith(levels: _toggleSet(levels, level));
+  }
+
+  LogsState clearFilters() => copyWith(sources: {}, levels: {});
+
   List<Log> get list {
-    final lowQuery = query.toLowerCase();
+    final matcher = SearchMatcher(query, useRegex: useRegex);
     return logs.where((log) {
       final logLevelName = log.logLevel.name;
       return {logLevelName}.containsAll(keywords) &&
-          ((log.payload.toLowerCase().contains(lowQuery)) ||
-              logLevelName.contains(lowQuery));
+          (sources.isEmpty || sources.contains(log.source)) &&
+          (levels.isEmpty || levels.contains(log.logLevel)) &&
+          matcher.hasAnyMatch([log.payload, logLevelName]);
     }).toList();
+  }
+
+  Set<T> _toggleSet<T>(Set<T> values, T value) {
+    final next = Set<T>.from(values);
+    next.contains(value) ? next.remove(value) : next.add(value);
+    return next;
   }
 }
 
@@ -191,29 +214,26 @@ abstract class TrackerInfosState with _$TrackerInfosState {
     @Default([]) List<TrackerInfo> trackerInfos,
     @Default([]) List<String> keywords,
     @Default('') String query,
+    @Default(false) bool useRegex,
     @Default(true) bool autoScrollToEnd,
   }) = _TrackerInfosState;
 }
 
 extension TrackerInfosStateExt on TrackerInfosState {
   List<TrackerInfo> get list {
-    final lowerQuery = query.toLowerCase().trim();
-    final lowQuery = query.toLowerCase();
+    final matcher = SearchMatcher(query.trim(), useRegex: useRegex);
     return trackerInfos.where((trackerInfo) {
       final chains = trackerInfo.chains;
       final process = trackerInfo.metadata.process;
-      final networkText = trackerInfo.metadata.network.toLowerCase();
-      final hostText = trackerInfo.metadata.host.toLowerCase();
-      final destinationIPText = trackerInfo.metadata.destinationIP
-          .toLowerCase();
-      final processText = trackerInfo.metadata.process.toLowerCase();
-      final chainsText = chains.join('').toLowerCase();
+      final metadata = trackerInfo.metadata;
       return {...chains, process}.containsAll(keywords) &&
-          (networkText.contains(lowerQuery) ||
-              hostText.contains(lowerQuery) ||
-              destinationIPText.contains(lowQuery) ||
-              processText.contains(lowerQuery) ||
-              chainsText.contains(lowerQuery));
+          matcher.hasAnyMatch([
+            metadata.network,
+            metadata.host,
+            metadata.destinationIP,
+            metadata.process,
+            chains.join(' '),
+          ]);
     }).toList();
   }
 }

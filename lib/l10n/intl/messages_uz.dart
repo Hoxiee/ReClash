@@ -1312,6 +1312,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Fayl oʻzgartirildi. Oʻzgarishlar saqlansinmi?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Filtr"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Jarayonni topish"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Yoqilganda unumdorlik biroz pasayishi mumkin",
@@ -1489,6 +1490,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Roʻyxatdan yashirish",
     ),
     "hidePassword": MessageLookupByLibrary.simpleMessage("Parolni yashirish"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "Yuqori ustuvorlikdagi avto-ishga tushirish",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Ertaroq ishga tushirish uchun Windows rejalashtirilgan vazifasidan foydalaning",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Hostlarni qoʻshish"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
@@ -1652,6 +1659,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Oʻtgan safar ilova ishga tushayotganda kutilmaganda yopildi. Avtomatik sozlash oʻtkazib yuborildi; ilovani qoʻlda ishga tushirib koʻrishingiz mumkin.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Joylashuv"),
+    "level": MessageLookupByLibrary.simpleMessage("Daraja"),
     "license": MessageLookupByLibrary.simpleMessage("Litsenziya"),
     "licenses": MessageLookupByLibrary.simpleMessage("Litsenziyalar"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage(
@@ -1809,6 +1817,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("Keyingi moslik"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("E’lonlar yoʻq"),
     "noData": MessageLookupByLibrary.simpleMessage("Ma’lumot yoʻq"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage(
+      "Filtr shartlari yo‘q",
+    ),
     "noHotKey": MessageLookupByLibrary.simpleMessage(
       "Hozircha tezkor tugmalar yoʻq",
     ),
@@ -2217,6 +2228,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Boshqa port kiriting",
     ),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage(
+      "Bashoratli orqaga qaytish",
+    ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH’da HTTP/3 afzal koʻriladi",
     ),
@@ -2352,6 +2366,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Tizim sozlamalarida allaqachon yoqilgan",
     ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage("Regex qidiruv"),
     "reload": MessageLookupByLibrary.simpleMessage("Qayta yuklash"),
     "remaining": MessageLookupByLibrary.simpleMessage("Qolgan"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Qolgan"),

@@ -1289,6 +1289,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Faýl üýtgedildi. Üýtgeşmeleri ýatda saklamak isleýärsiňizmi?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Süzgüç"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Prosesi tap"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Açanda biraz tizlik peselýär",
@@ -1458,6 +1459,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Sanawdan gizle"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("Paroly gizle"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "Ýokary ileri tutulýan awtomatik başlatma",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Irrak başlatmak üçin Windows meýilnama meselesini ulanyň",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Host"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Hostlara goşmak"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
@@ -1617,6 +1624,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Programma geçen gezek açylanda garaşylmadyk halatda ýapyldy. Şu açylyşda awtomatiki düzüm ýerine ýetirilmedi; gaýtadan synamak üçin ony el bilen başlap bilersiňiz.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Dizilim"),
+    "level": MessageLookupByLibrary.simpleMessage("Dereje"),
     "license": MessageLookupByLibrary.simpleMessage("Ygtyýarnama"),
     "licenses": MessageLookupByLibrary.simpleMessage("Ygtyýarnamalar"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage(
@@ -1768,6 +1776,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("Indiki gabat gelme"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("Bildirişler ýok"),
     "noData": MessageLookupByLibrary.simpleMessage("Maglumat ýok"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage(
+      "Süzgüç şerti ýok",
+    ),
     "noHotKey": MessageLookupByLibrary.simpleMessage(
       "Häzirlikde çalt klawişalar ýok",
     ),
@@ -2170,6 +2181,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Başga port giriziň",
     ),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage("Çaklaýjy yza"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH üçin HTTP/3-i ileri tutmak",
     ),
@@ -2299,6 +2311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň sazlamalarynda eýýäm açyk",
     ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage("Regex gözleg"),
     "reload": MessageLookupByLibrary.simpleMessage("Täzeden ýükle"),
     "remaining": MessageLookupByLibrary.simpleMessage("Galan"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Galan"),

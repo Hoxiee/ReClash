@@ -1284,6 +1284,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл өзгертілді. Өзгерістер сақталсын ба?",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("Сүзгі"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("Процесті табу"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "Қосқанда өнімділік сәл төмендеуі мүмкін",
@@ -1449,6 +1450,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "hideFromList": MessageLookupByLibrary.simpleMessage("Тізімнен жасыру"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("Құпия сөзді жасыру"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage(
+      "Жоғары басымдықпен автоқосу",
+    ),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Ертерек іске қосу үшін Windows жоспарлағыш тапсырмасын пайдалану",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("Хост"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Хост жазбаларын қосу"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage(
@@ -1610,6 +1617,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Соңғы рет қолданба іске қоса бастағанда күтпеген жағдайда жабылып қалды, сондықтан автоматты баптау жасалмады. Оны қолмен бастап, қайталап көре аласыз.",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("Орналасу"),
+    "level": MessageLookupByLibrary.simpleMessage("Деңгей"),
     "license": MessageLookupByLibrary.simpleMessage("Лицензия"),
     "licenses": MessageLookupByLibrary.simpleMessage("Лицензиялар"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage(
@@ -1769,6 +1777,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Хабарландырулар жоқ",
     ),
     "noData": MessageLookupByLibrary.simpleMessage("Деректер жоқ"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage(
+      "Сүзгі шарттары жоқ",
+    ),
     "noHotKey": MessageLookupByLibrary.simpleMessage("Перне тіркесімі әлі жоқ"),
     "noInfo": MessageLookupByLibrary.simpleMessage("Ақпарат жоқ"),
     "noLongerRemind": MessageLookupByLibrary.simpleMessage("Енді еске салмау"),
@@ -2173,6 +2184,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Басқа порт енгізіңіз",
     ),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage(
+      "Болжамды «Артқа» қимылы",
+    ),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "DoH үшін HTTP/3-ті артық көру",
     ),
@@ -2295,6 +2309,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "Жүйе баптауларында қосылып қойған",
+    ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage(
+      "Тұрақты өрнек арқылы іздеу",
     ),
     "reload": MessageLookupByLibrary.simpleMessage("Қайта жүктеу"),
     "remaining": MessageLookupByLibrary.simpleMessage("Қалған"),

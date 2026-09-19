@@ -1037,6 +1037,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "ファイルが変更されています。変更を保存しますか？",
     ),
+    "filter": MessageLookupByLibrary.simpleMessage("フィルター"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("プロセス検出"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
       "有効にすると、パフォーマンスが多少低下します",
@@ -1172,6 +1173,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "heroTapToResume": MessageLookupByLibrary.simpleMessage("タップして保護を再開"),
     "hideFromList": MessageLookupByLibrary.simpleMessage("リストから隠す"),
     "hidePassword": MessageLookupByLibrary.simpleMessage("パスワードを隠す"),
+    "highPriorityAutoLaunch": MessageLookupByLibrary.simpleMessage("高優先度の自動起動"),
+    "highPriorityAutoLaunchDesc": MessageLookupByLibrary.simpleMessage(
+      "Windows のタスク スケジューラを使って早く起動します",
+    ),
     "host": MessageLookupByLibrary.simpleMessage("ホスト"),
     "hostsDesc": MessageLookupByLibrary.simpleMessage("Hostsを追加します"),
     "hotkeyConflict": MessageLookupByLibrary.simpleMessage("ホットキーが競合しています"),
@@ -1309,6 +1314,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "前回、アプリは起動中に予期せず終了しました。今回の自動セットアップはスキップしました。手動で起動して再試行できます。",
     ),
     "layout": MessageLookupByLibrary.simpleMessage("レイアウト"),
+    "level": MessageLookupByLibrary.simpleMessage("レベル"),
     "license": MessageLookupByLibrary.simpleMessage("ライセンス"),
     "licenses": MessageLookupByLibrary.simpleMessage("ライセンス一覧"),
     "licensesDesc": MessageLookupByLibrary.simpleMessage("アプリに同梱されているパッケージ"),
@@ -1432,6 +1438,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nextMatch": MessageLookupByLibrary.simpleMessage("次の一致"),
     "noAnnouncements": MessageLookupByLibrary.simpleMessage("お知らせはありません"),
     "noData": MessageLookupByLibrary.simpleMessage("データがありません"),
+    "noFilterCondition": MessageLookupByLibrary.simpleMessage("フィルター条件なし"),
     "noHotKey": MessageLookupByLibrary.simpleMessage("ホットキーはまだありません"),
     "noInfo": MessageLookupByLibrary.simpleMessage("情報がありません"),
     "noLongerRemind": MessageLookupByLibrary.simpleMessage("今後表示しない"),
@@ -1780,6 +1787,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "port": MessageLookupByLibrary.simpleMessage("ポート"),
     "portConflictTip": MessageLookupByLibrary.simpleMessage("別のポートを入力してください"),
     "portTip": m53,
+    "predictiveBack": MessageLookupByLibrary.simpleMessage("予測型戻る"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage("DoHでHTTP/3を優先します"),
     "prerequisites": MessageLookupByLibrary.simpleMessage("前提条件"),
     "pressKeyboard": MessageLookupByLibrary.simpleMessage("キーを押してください"),
@@ -1891,6 +1899,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "reduceMotionSystemHint": MessageLookupByLibrary.simpleMessage(
       "システム設定で既に有効です",
     ),
+    "regexSearch": MessageLookupByLibrary.simpleMessage("正規表現検索"),
     "reload": MessageLookupByLibrary.simpleMessage("再読み込み"),
     "remaining": MessageLookupByLibrary.simpleMessage("残り"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("残り"),
