@@ -6,6 +6,20 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+const portableDirectoryName = 'config';
+
+/// Portable install: a `config/` dir next to the executable holds all data,
+/// so nothing touches the OS user profile. Desktop only, never Android/iOS.
+bool isPortableModeFor(String executableDir) {
+  if (!system.isDesktop) {
+    return false;
+  }
+  return Directory(join(executableDir, portableDirectoryName)).existsSync();
+}
+
+bool get isPortableMode =>
+    isPortableModeFor(dirname(Platform.resolvedExecutable));
+
 class AppPath {
   static AppPath? _instance;
   Completer<Directory> dataDir = Completer();
@@ -37,20 +51,61 @@ class AppPath {
     if (!Platform.isLinux) {
       _corePathResolved.complete();
     }
-    supportDirectory().then((value) {
-      dataDir.complete(value);
-    });
-    temporaryDirectory().then((value) {
-      tempDir.complete(value);
-    });
-    cacheDirectory().then((value) {
-      cacheDir.complete(value);
-    });
+    unawaited(_initDataDir());
+    unawaited(_initTempDir());
+    unawaited(_initCacheDir());
   }
 
   factory AppPath() {
     _instance ??= AppPath._internal();
     return _instance!;
+  }
+
+  bool get isPortable => isPortableModeFor(executableDirPath);
+
+  Directory _portableBase() {
+    final directory = Directory(join(executableDirPath, portableDirectoryName));
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+    return directory;
+  }
+
+  Future<void> _initDataDir() async {
+    if (isPortable) {
+      dataDir.complete(_portableBase());
+      return;
+    }
+    dataDir.complete(await supportDirectory());
+  }
+
+  Future<void> _initTempDir() async {
+    if (isPortable) {
+      final directory = Directory(join(_portableBase().path, 'tmp'));
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+      tempDir.complete(directory);
+      return;
+    }
+    tempDir.complete(await temporaryDirectory());
+  }
+
+  Future<void> _initCacheDir() async {
+    if (isPortable) {
+      final directory = Directory(join(_portableBase().path, '.cache'));
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+      cacheDir.complete(directory);
+      return;
+    }
+    cacheDir.complete(await cacheDirectory());
+  }
+
+  @visibleForTesting
+  Future<void> reinitDirsForTesting() async {
+    await Future.wait([_initDataDir(), _initTempDir(), _initCacheDir()]);
   }
 
   String get executableExtension {
