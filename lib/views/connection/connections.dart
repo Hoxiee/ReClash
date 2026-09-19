@@ -109,7 +109,14 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     return CommonScaffold(
       title: appLocalizations.connections,
       onKeywordsUpdate: _listController.updateKeywords,
-      searchState: AppBarSearchState(onSearch: _listController.search),
+      searchState: AppBarSearchState(
+        onSearch: _listController.search,
+        onRegexChange: (value) {
+          _listController.setUseRegex(value);
+          setState(() {});
+        },
+        useRegex: _listController.value.useRegex,
+      ),
       actions: _buildActions(),
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,

@@ -1,3 +1,4 @@
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -114,6 +115,19 @@ void main() {
     expect(hintFinder(), findsNothing);
   });
 
+  testWidgets('filter button opens the source/level menu', (tester) async {
+    await pumpLogsView(tester);
+
+    expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.filter_alt_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Level'), findsOneWidget);
+    expect(find.text('Reset'), findsOneWidget);
+  });
+
   group('LogListController', () {
     final logs = seedLogs();
 
@@ -142,6 +156,66 @@ void main() {
       expect(controller.value.logs, latest);
       controller.setLogs(logs.sublist(30, 130));
       expect(controller.value.logs, logs.sublist(30, 130));
+    });
+
+    test('toggling a source narrows the list to that source', () {
+      final controller = LogListController();
+      addTearDown(controller.dispose);
+      controller.setLogs(const [
+        Log(payload: 'app line', dateTime: 't', source: LogSource.app),
+        Log(payload: 'core line', dateTime: 't', source: LogSource.core),
+      ]);
+
+      controller.toggleSource(LogSource.core);
+
+      expect(controller.value.hasFilters, isTrue);
+      expect(controller.value.list.map((log) => log.payload), ['core line']);
+
+      controller.toggleSource(LogSource.core);
+      expect(controller.value.hasFilters, isFalse);
+      expect(controller.value.list.length, 2);
+    });
+
+    test('toggling a level narrows the list to that level', () {
+      final controller = LogListController();
+      addTearDown(controller.dispose);
+      controller.setLogs(const [
+        Log(payload: 'info line', dateTime: 't', logLevel: LogLevel.info),
+        Log(payload: 'error line', dateTime: 't', logLevel: LogLevel.error),
+      ]);
+
+      controller.toggleLevel(LogLevel.error);
+
+      expect(controller.value.list.map((log) => log.payload), ['error line']);
+    });
+
+    test('clearFilters drops both source and level filters', () {
+      final controller = LogListController();
+      addTearDown(controller.dispose);
+      controller.toggleSource(LogSource.core);
+      controller.toggleLevel(LogLevel.error);
+      expect(controller.value.hasFilters, isTrue);
+
+      controller.clearFilters();
+
+      expect(controller.value.hasFilters, isFalse);
+      expect(controller.value.sources, isEmpty);
+      expect(controller.value.levels, isEmpty);
+    });
+
+    test('setUseRegex switches search to regex matching', () {
+      final controller = LogListController();
+      addTearDown(controller.dispose);
+      controller.setLogs(const [
+        Log(payload: 'abc123', dateTime: 't'),
+        Log(payload: 'plain text', dateTime: 't'),
+      ]);
+
+      controller.setUseRegex(true);
+      controller.search(r'\d+');
+
+      expect(controller.value.useRegex, isTrue);
+      expect(controller.value.list.map((log) => log.payload), ['abc123']);
     });
   });
 }

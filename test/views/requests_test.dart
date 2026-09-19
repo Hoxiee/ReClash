@@ -198,4 +198,17 @@ void main() {
 
     await teardownView(tester);
   });
+
+  testWidgets('renders the regex toggle in the search bar', (tester) async {
+    seedRequests([_tracker(id: 'a', host: 'alpha.test')]);
+
+    await pumpRequests(tester);
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.code), findsOneWidget);
+
+    await teardownView(tester);
+  });
 }

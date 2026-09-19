@@ -13,6 +13,10 @@ class TrackerInfoListController extends ValueNotifier<TrackerInfosState> {
     value = value.copyWith(query: query);
   }
 
+  void setUseRegex(bool useRegex) {
+    value = value.copyWith(useRegex: useRegex);
+  }
+
   void updateKeywords(List<String> keywords) {
     value = value.copyWith(keywords: keywords);
   }

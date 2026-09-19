@@ -17,6 +17,22 @@ class LogListController extends ValueNotifier<LogsState> {
     value = value.copyWith(query: query);
   }
 
+  void setUseRegex(bool useRegex) {
+    value = value.copyWith(useRegex: useRegex);
+  }
+
+  void toggleSource(LogSource source) {
+    value = value.toggleSource(source);
+  }
+
+  void toggleLevel(LogLevel level) {
+    value = value.toggleLevel(level);
+  }
+
+  void clearFilters() {
+    value = value.clearFilters();
+  }
+
   void updateKeywords(List<String> keywords) {
     value = value.copyWith(keywords: keywords);
   }
@@ -64,6 +80,15 @@ class _LogsViewState extends ConsumerState<LogsView> {
 
   List<Widget> _buildActions() {
     return [
+      ValueListenableBuilder<LogsState>(
+        valueListenable: _listController,
+        builder: (_, state, _) => _LogFilterButton(
+          logsState: state,
+          onToggleSource: _listController.toggleSource,
+          onToggleLevel: _listController.toggleLevel,
+          onClear: _listController.clearFilters,
+        ),
+      ),
       IconButton(
         tooltip: context.appLocalizations.exportLogs,
         onPressed: () {
@@ -110,7 +135,14 @@ class _LogsViewState extends ConsumerState<LogsView> {
     return CommonScaffold(
       actions: _buildActions(),
       onKeywordsUpdate: _listController.updateKeywords,
-      searchState: AppBarSearchState(onSearch: _listController.search),
+      searchState: AppBarSearchState(
+        onSearch: _listController.search,
+        onRegexChange: (value) {
+          _listController.setUseRegex(value);
+          setState(() {});
+        },
+        useRegex: _listController.value.useRegex,
+      ),
       title: appLocalizations.logs,
       floatingActionButton: ValueListenableBuilder(
         valueListenable: _listController,
@@ -191,6 +223,76 @@ class _LogsViewState extends ConsumerState<LogsView> {
           );
         },
       ),
+    );
+  }
+}
+
+class _LogFilterButton extends StatelessWidget {
+  final LogsState logsState;
+  final ValueChanged<LogSource> onToggleSource;
+  final ValueChanged<LogLevel> onToggleLevel;
+  final VoidCallback onClear;
+
+  const _LogFilterButton({
+    required this.logsState,
+    required this.onToggleSource,
+    required this.onToggleLevel,
+    required this.onClear,
+  });
+
+  String _label(Enum value, bool selected) {
+    return '${selected ? '✓ ' : ''}${value.name.toUpperCase()}';
+  }
+
+  List<CommonPopupMenuItem> _buildItems(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return [
+      CommonPopupMenuItem(
+        icon: Icons.source_outlined,
+        label: appLocalizations.source,
+        subItems: [
+          for (final source in LogSource.values)
+            CommonPopupMenuItem(
+              label: _label(source, logsState.sources.contains(source)),
+              onPressed: () => onToggleSource(source),
+            ),
+        ],
+      ),
+      CommonPopupMenuItem(
+        icon: Icons.flag_outlined,
+        label: appLocalizations.level,
+        subItems: [
+          for (final level in LogLevel.values)
+            if (level != LogLevel.silent)
+              CommonPopupMenuItem(
+                label: _label(level, logsState.levels.contains(level)),
+                onPressed: () => onToggleLevel(level),
+              ),
+        ],
+      ),
+      CommonPopupMenuItem(
+        icon: Icons.filter_alt_off_outlined,
+        label: appLocalizations.reset,
+        onPressed: onClear,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tooltip = context.appLocalizations.filter;
+    return CommonPopupBox(
+      popupBuilder: (_) => CommonPopupMenu(items: _buildItems(context)),
+      targetBuilder: (open) {
+        const icon = Icon(Icons.filter_alt_outlined);
+        return logsState.hasFilters
+            ? IconButton.filledTonal(
+                tooltip: tooltip,
+                onPressed: () => open(),
+                icon: icon,
+              )
+            : IconButton(tooltip: tooltip, onPressed: () => open(), icon: icon);
+      },
     );
   }
 }

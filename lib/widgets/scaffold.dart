@@ -231,7 +231,21 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                 startState.onSearch(value);
               }
             },
-            decoration: InputDecoration(hintText: appLocalizations.search),
+            decoration: InputDecoration(
+              hintText: appLocalizations.search,
+              suffixIcon: startState?.onRegexChange != null
+                  ? IconButton(
+                      tooltip: appLocalizations.regexSearch,
+                      isSelected: startState!.useRegex,
+                      color: startState.useRegex
+                          ? context.colorScheme.primary
+                          : null,
+                      onPressed: () =>
+                          startState.onRegexChange!(!startState.useRegex),
+                      icon: const Icon(Icons.code),
+                    )
+                  : null,
+            ),
           )
         : Text(
             !_isEdit

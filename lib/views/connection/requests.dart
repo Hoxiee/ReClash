@@ -52,7 +52,14 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       title: appLocalizations.requests,
-      searchState: AppBarSearchState(onSearch: _listController.search),
+      searchState: AppBarSearchState(
+        onSearch: _listController.search,
+        onRegexChange: (value) {
+          _listController.setUseRegex(value);
+          setState(() {});
+        },
+        useRegex: _listController.value.useRegex,
+      ),
       onKeywordsUpdate: _listController.updateKeywords,
       floatingActionButton: ValueListenableBuilder(
         valueListenable: _listController,

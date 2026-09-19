@@ -171,4 +171,17 @@ void main() {
 
     verifyNever(core.getConnections);
   });
+
+  testWidgets('renders the regex toggle in the search bar', (tester) async {
+    when(core.getConnections).thenAnswer((_) async => const <TrackerInfo>[]);
+
+    await pumpConnections(tester);
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.code), findsOneWidget);
+
+    await teardownView(tester);
+  });
 }
