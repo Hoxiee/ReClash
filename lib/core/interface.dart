@@ -102,6 +102,8 @@ mixin CoreInterface {
 
   FutureOr<int> getMemory();
 
+  FutureOr<int> getGoroutineCount();
+
   FutureOr<void> resetTraffic();
 
   FutureOr<void> startLog();
@@ -582,5 +584,10 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<int> getMemory() async {
     return await _invokeMethod<int>(method: CoreMethod.getMemory) ?? 0;
+  }
+
+  @override
+  Future<int> getGoroutineCount() async {
+    return await _invokeMethod<int>(method: CoreMethod.getGoroutineCount) ?? 0;
   }
 }

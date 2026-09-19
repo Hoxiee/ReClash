@@ -180,7 +180,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('the default reader adds Core memory while connected', (
+  testWidgets('the default reader reports Core memory while connected', (
     tester,
   ) async {
     final coreInterface = _MockCoreHandlerInterface();

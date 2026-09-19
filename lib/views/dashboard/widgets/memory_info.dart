@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
@@ -47,7 +45,9 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   Future<num?> _readMemory() async {
     try {
       final memoryReader = widget.memoryReader;
-      return memoryReader != null ? await memoryReader() : await _readTotal();
+      return memoryReader != null
+          ? await memoryReader()
+          : await _readCoreMemory();
     } catch (error) {
       commonPrint.log(
         'updateMemory error: $error',
@@ -57,13 +57,9 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
     }
   }
 
-  Future<num> _readTotal() async {
-    final rss = ProcessInfo.currentRss;
+  Future<num> _readCoreMemory() async {
     final coreConnected = ref.read(coreStatusProvider) == CoreStatus.connected;
-    if (system.isDesktop && coreConnected) {
-      return await _core.getMemory() + rss;
-    }
-    return rss;
+    return coreConnected ? await _core.getMemory() : 0;
   }
 
   @override

@@ -185,6 +185,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.systemProxyButton: 'systemProxyButton',
   DashboardWidget.intranetIp: 'intranetIp',
   DashboardWidget.memoryInfo: 'memoryInfo',
+  DashboardWidget.goroutineInfo: 'goroutineInfo',
   DashboardWidget.metaInfo: 'metaInfo',
   DashboardWidget.announce: 'announce',
   DashboardWidget.serviceInfo: 'serviceInfo',

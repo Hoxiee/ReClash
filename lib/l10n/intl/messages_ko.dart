@@ -1106,6 +1106,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("이동"),
     "goDownload": MessageLookupByLibrary.simpleMessage("다운로드"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("스크립트 구성으로 이동"),
+    "goroutineInfo": MessageLookupByLibrary.simpleMessage("고루틴"),
     "gratitude": MessageLookupByLibrary.simpleMessage("감사한 분들"),
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash는 이 프로젝트 덕분에 존재합니다",

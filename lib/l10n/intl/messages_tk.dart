@@ -1375,6 +1375,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage(
       "Skript sazlamanyna geç",
     ),
+    "goroutineInfo": MessageLookupByLibrary.simpleMessage("Gorutinler"),
     "gratitude": MessageLookupByLibrary.simpleMessage("Minnetdarlyk"),
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash olaryň zähmeti sebäpli bar",

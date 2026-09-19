@@ -478,6 +478,7 @@
   "interfaceNameDesc": "Chiquvchi ulanishlar uchun ishlatiladigan tarmoq interfeysi",
   "copyEnvVar": "Muhit oʻzgaruvchilarini nusxalash",
   "memoryInfo": "Xotira ma’lumotlari",
+  "goroutineInfo": "Gorutinlar",
   "cancel": "Bekor qilish",
   "fileIsUpdate": "Fayl oʻzgartirildi. Oʻzgarishlar saqlansinmi?",
   "profileHasUpdate": "Profil oʻzgartirildi. Avtomatik yangilash oʻchirilsinmi?",

@@ -478,6 +478,7 @@
   "interfaceNameDesc": "アウトバウンド接続に使用するネットワークインターフェース名",
   "copyEnvVar": "環境変数をコピー",
   "memoryInfo": "メモリ情報",
+  "goroutineInfo": "ゴルーチン",
   "cancel": "キャンセル",
   "fileIsUpdate": "ファイルが変更されています。変更を保存しますか？",
   "profileHasUpdate": "プロファイルが変更されています。自動更新を無効にしますか？",

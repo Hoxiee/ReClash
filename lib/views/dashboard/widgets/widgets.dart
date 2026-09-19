@@ -5,6 +5,7 @@ export 'connection_mode.dart';
 export 'dashboard_info_card.dart';
 export 'desync_cards.dart';
 export 'focusable_tap.dart';
+export 'goroutine_info.dart';
 export 'hero_connect.dart';
 export 'hero_offers.dart';
 export 'hero_orb.dart';

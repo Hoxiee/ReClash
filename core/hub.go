@@ -911,6 +911,10 @@ func handleGetMemory() uint64 {
 	return statistic.DefaultManager.Memory()
 }
 
+func handleGetGoroutineCount() int {
+	return runtime.NumGoroutine()
+}
+
 func handleGetConfig(path string) (*config.RawConfig, error) {
 	buf, err := os.ReadFile(path)
 	if err != nil {

@@ -478,6 +478,7 @@
   "interfaceNameDesc": "Network interface used for outbound connections",
   "copyEnvVar": "Copy environment variables",
   "memoryInfo": "Memory info",
+  "goroutineInfo": "Goroutines",
   "cancel": "Cancel",
   "fileIsUpdate": "The file has been modified. Save the changes?",
   "profileHasUpdate": "The profile has been modified. Turn off auto update?",

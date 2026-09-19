@@ -1113,6 +1113,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("開く"),
     "goDownload": MessageLookupByLibrary.simpleMessage("ダウンロードへ"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("スクリプト設定へ移動"),
+    "goroutineInfo": MessageLookupByLibrary.simpleMessage("ゴルーチン"),
     "gratitude": MessageLookupByLibrary.simpleMessage("感謝"),
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "彼らの成果の上に ReClash があります",

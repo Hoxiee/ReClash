@@ -478,6 +478,7 @@
   "interfaceNameDesc": "Çykýan baglanyşyklar üçin ulanylýan tor interfeýsi",
   "copyEnvVar": "Gurşaw üýtgeýjilerini göçürip al",
   "memoryInfo": "Ýat maglumaty",
+  "goroutineInfo": "Gorutinler",
   "cancel": "Ýatyr",
   "fileIsUpdate": "Faýl üýtgedildi. Üýtgeşmeleri ýatda saklamak isleýärsiňizmi?",
   "profileHasUpdate": "Profil üýtgedildi. Awtomatiki täzelenmäni öçürmek isleýärsiňizmi?",

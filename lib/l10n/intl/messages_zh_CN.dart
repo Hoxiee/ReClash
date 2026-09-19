@@ -986,6 +986,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "go": MessageLookupByLibrary.simpleMessage("前往"),
     "goDownload": MessageLookupByLibrary.simpleMessage("前往下载"),
     "goToConfigureScript": MessageLookupByLibrary.simpleMessage("前往配置脚本"),
+    "goroutineInfo": MessageLookupByLibrary.simpleMessage("协程"),
     "gratitude": MessageLookupByLibrary.simpleMessage("致谢"),
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage("ReClash 建立在他们的工作之上"),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),

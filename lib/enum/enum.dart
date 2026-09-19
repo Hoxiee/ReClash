@@ -407,6 +407,7 @@ enum DashboardWidget {
   systemProxyButton(platforms: desktopPlatforms),
   intranetIp,
   memoryInfo,
+  goroutineInfo,
   metaInfo(modes: _vpnOnly),
   announce(modes: _vpnOnly),
   serviceInfo(modes: _vpnOnly),
