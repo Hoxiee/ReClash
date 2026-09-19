@@ -137,7 +137,7 @@ ReClash 的开发离不开以下项目及其维护者：
 
 - [FlClash](https://github.com/chen08209/FlClash)，由 [chen08209](https://github.com/chen08209) 维护，是 ReClash 的项目基础。
 - [FlClashX](https://github.com/pluralplay/FlClashX)，由 [pluralplay](https://github.com/pluralplay) 维护，其面向服务商的功能和设计思路为 ReClash 的部分实现提供了参考。
-- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用使用的代理核心。
+- [mihomo](https://github.com/MetaCubeX/mihomo)，由 [MetaCubeX](https://github.com/MetaCubeX) 维护，是本应用使用的代理核心。ReClash 使用经过少量修改的[分支](https://github.com/Hoxiee/mihomo/tree/ReClash)；改动说明见 [README.ReClash](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.md)。
 
 ReClash 由独立维护者维护。文中提及其他项目仅用于说明技术来源、兼容性和依赖关系，并不表示这些项目或其维护者认可 ReClash。
 

@@ -151,7 +151,7 @@ ReClash существует благодаря работе этих проек
 - [FlClash](https://github.com/chen08209/FlClash) от [chen08209](https://github.com/chen08209) — приложение, на котором основан ReClash.
 - [FlClashX](https://github.com/pluralplay/FlClashX) от [pluralplay](https://github.com/pluralplay) — часть функций и идей для интеграции с провайдерами опирается на его работу.
   > «Да не сплю я» — pluralplay
-- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения.
+- [mihomo](https://github.com/MetaCubeX/mihomo) от [MetaCubeX](https://github.com/MetaCubeX) — прокси-ядро приложения. ReClash использует слегка доработанный [форк](https://github.com/Hoxiee/mihomo/tree/ReClash); подробнее — [что изменено](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.ru.md).
 
 ReClash поддерживается независимо. Названия других проектов используются только для описания происхождения, совместимости и зависимостей и не означают одобрения ReClash их авторами.
 

@@ -150,7 +150,7 @@ ReClash exists because of the work of these projects and maintainers:
 
 - [FlClash](https://github.com/chen08209/FlClash) by [chen08209](https://github.com/chen08209), the application ReClash is based on.
 - [FlClashX](https://github.com/pluralplay/FlClashX) by [pluralplay](https://github.com/pluralplay), whose provider-oriented work and ideas informed parts of ReClash.
-- [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application.
+- [mihomo](https://github.com/MetaCubeX/mihomo) by [MetaCubeX](https://github.com/MetaCubeX), the proxy core used by the application. ReClash ships a lightly patched [fork](https://github.com/Hoxiee/mihomo/tree/ReClash); see [what's changed](https://github.com/Hoxiee/mihomo/blob/ReClash/README.ReClash.md).
 
 ReClash is maintained independently. References to other projects describe technical lineage, compatibility, and dependencies; they do not imply endorsement.
 
