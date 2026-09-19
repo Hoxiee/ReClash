@@ -100,7 +100,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('TrackerInfoItem shows all chains and forwards their clicks', (
+  testWidgets('TrackerInfoItem shows the outbound and forwards its click', (
     tester,
   ) async {
     final clicked = <String>[];
@@ -118,14 +118,30 @@ void main() {
     await tester.pump();
 
     expect(find.text('Proxy A'), findsOneWidget);
-    expect(find.text('Proxy B'), findsOneWidget);
+    expect(find.text('Proxy B'), findsNothing);
 
     await tester.tap(find.text('Proxy A'));
     await tester.pump();
-    await tester.tap(find.text('Proxy B'));
+
+    expect(clicked, ['Proxy A']);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('TrackerInfoDetailView lists every chain hop', (tester) async {
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        homeBuilder: (child) => Scaffold(body: child),
+        child: TrackerInfoDetailView(
+          trackerInfo: _tracker(chains: const ['Proxy A', 'Proxy B']),
+        ),
+      ),
+    );
     await tester.pump();
 
-    expect(clicked, ['Proxy A', 'Proxy B']);
+    expect(find.text('Proxy A'), findsOneWidget);
+    expect(find.text('Proxy B'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

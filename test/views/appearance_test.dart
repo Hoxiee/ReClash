@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -20,6 +21,10 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
+    // The key-driven visibility handler does not survive the test framework's
+    // between-test teardown, so drive the seam directly: a keyboard highlight
+    // is what makes the ring eligible to show.
+    FocusHighlightVisibility.visibleForTesting = true;
     container = ProviderContainer(
       overrides: [profilesProvider.overrideWith(TestProfiles.new)],
     );

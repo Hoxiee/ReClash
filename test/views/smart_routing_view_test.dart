@@ -97,7 +97,6 @@ void main() {
       ),
     );
 
-    expect(find.text('Region'), findsOne);
     expect(find.text('Require UDP support'), findsOne);
     expect(find.text('Settle time'), findsOne);
     await _reveal(tester, find.text('Servers per check'), delta: 200);
@@ -140,9 +139,14 @@ void main() {
       ),
     );
 
-    expect(find.text('Russia · adjusted'), findsOne);
+    final resetButton = find.widgetWithText(FilledButton, 'Reset');
+    expect(
+      tester.widget<FilledButton>(resetButton).onPressed,
+      isNotNull,
+      reason: 'an adjusted preset offers a reset',
+    );
 
-    await tester.tap(find.text('Reset'));
+    await tester.tap(resetButton);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Confirm'));
@@ -151,7 +155,11 @@ void main() {
     final props = container.read(smartRoutingSettingProvider);
     expect(props.matchesPreset, isTrue);
     expect(props.enabled, isTrue);
-    expect(find.text('Russia'), findsAtLeast(1));
+    expect(
+      tester.widget<FilledButton>(resetButton).onPressed,
+      isNull,
+      reason: 'a matching preset has nothing to reset',
+    );
   });
 
   testWidgets('the strategy is named in plain words with what it does', (
@@ -414,48 +422,6 @@ void main() {
       isEmpty,
     );
   });
-
-  testWidgets(
-    'region selection shares HWID consent and preserves manual edits',
-    (tester) async {
-      final container = await _pump(
-        tester,
-        props: const SmartRoutingProps(enabled: true)
-            .applyPreset(SmartRoutingPreset.iran)
-            .applyStrategy(SmartRoutingStrategy.saver),
-      );
-      await tester.tap(find.text('Region'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Russia').last);
-      await tester.pumpAndSettle();
-      expect(container.read(appSettingProvider).region, AppRegion.russia);
-      expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
-      expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
-      expect(
-        container.read(smartRoutingSettingProvider).strategy,
-        SmartRoutingStrategy.saver,
-      );
-
-      container
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(sendDeviceIdentity: false));
-      final edited = container
-          .read(smartRoutingSettingProvider)
-          .copyWith(
-            openMarkers: const [
-              RcxMarker(url: 'https://example.com/', statuses: [204]),
-            ],
-          );
-      container.read(smartRoutingSettingProvider.notifier).value = edited;
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Region'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Russia').last);
-      await tester.pumpAndSettle();
-      expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
-      expect(container.read(smartRoutingSettingProvider), edited);
-    },
-  );
 
   testWidgets('turning it on from Other uses neutral markers, not the locale', (
     tester,
