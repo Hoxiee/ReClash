@@ -3376,7 +3376,7 @@ as double,
 /// @nodoc
 mixin _$ThemeProps {
 
- int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; bool get scheduledTheme; String? get darkAt; String? get lightAt; DynamicSchemeVariant get schemeVariant; bool get pureBlack; double get contrastLevel; TextScale get textScale;@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps get wallpaper;
+ int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; bool get scheduledTheme; String? get darkAt; String? get lightAt; DynamicSchemeVariant get schemeVariant; bool get pureBlack; bool get predictiveBack; double get contrastLevel; TextScale get textScale;@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps get wallpaper;
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3390,20 +3390,20 @@ $ThemePropsCopyWith<ThemeProps> get copyWith => _$ThemePropsCopyWithImpl<ThemePr
 @override
 bool operator ==(Object other) {
   final _this = this as ThemeProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, _this.primaryColor) || other.primaryColor == _this.primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _this.primaryColors)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.scheduledTheme, _this.scheduledTheme) || other.scheduledTheme == _this.scheduledTheme)&&(identical(other.darkAt, _this.darkAt) || other.darkAt == _this.darkAt)&&(identical(other.lightAt, _this.lightAt) || other.lightAt == _this.lightAt)&&(identical(other.schemeVariant, _this.schemeVariant) || other.schemeVariant == _this.schemeVariant)&&(identical(other.pureBlack, _this.pureBlack) || other.pureBlack == _this.pureBlack)&&(identical(other.contrastLevel, _this.contrastLevel) || other.contrastLevel == _this.contrastLevel)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.wallpaper, _this.wallpaper) || other.wallpaper == _this.wallpaper));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, _this.primaryColor) || other.primaryColor == _this.primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _this.primaryColors)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.scheduledTheme, _this.scheduledTheme) || other.scheduledTheme == _this.scheduledTheme)&&(identical(other.darkAt, _this.darkAt) || other.darkAt == _this.darkAt)&&(identical(other.lightAt, _this.lightAt) || other.lightAt == _this.lightAt)&&(identical(other.schemeVariant, _this.schemeVariant) || other.schemeVariant == _this.schemeVariant)&&(identical(other.pureBlack, _this.pureBlack) || other.pureBlack == _this.pureBlack)&&(identical(other.predictiveBack, _this.predictiveBack) || other.predictiveBack == _this.predictiveBack)&&(identical(other.contrastLevel, _this.contrastLevel) || other.contrastLevel == _this.contrastLevel)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.wallpaper, _this.wallpaper) || other.wallpaper == _this.wallpaper));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ThemeProps;
-  return Object.hash(runtimeType,_this.primaryColor,const DeepCollectionEquality().hash(_this.primaryColors),_this.themeMode,_this.scheduledTheme,_this.darkAt,_this.lightAt,_this.schemeVariant,_this.pureBlack,_this.contrastLevel,_this.textScale,_this.wallpaper);
+  return Object.hash(runtimeType,_this.primaryColor,const DeepCollectionEquality().hash(_this.primaryColors),_this.themeMode,_this.scheduledTheme,_this.darkAt,_this.lightAt,_this.schemeVariant,_this.pureBlack,_this.predictiveBack,_this.contrastLevel,_this.textScale,_this.wallpaper);
 }
 
 @override
 String toString() {
   final _this = this as ThemeProps;
-  return 'ThemeProps(primaryColor: ${_this.primaryColor}, primaryColors: ${_this.primaryColors}, themeMode: ${_this.themeMode}, scheduledTheme: ${_this.scheduledTheme}, darkAt: ${_this.darkAt}, lightAt: ${_this.lightAt}, schemeVariant: ${_this.schemeVariant}, pureBlack: ${_this.pureBlack}, contrastLevel: ${_this.contrastLevel}, textScale: ${_this.textScale}, wallpaper: ${_this.wallpaper})';
+  return 'ThemeProps(primaryColor: ${_this.primaryColor}, primaryColors: ${_this.primaryColors}, themeMode: ${_this.themeMode}, scheduledTheme: ${_this.scheduledTheme}, darkAt: ${_this.darkAt}, lightAt: ${_this.lightAt}, schemeVariant: ${_this.schemeVariant}, pureBlack: ${_this.pureBlack}, predictiveBack: ${_this.predictiveBack}, contrastLevel: ${_this.contrastLevel}, textScale: ${_this.textScale}, wallpaper: ${_this.wallpaper})';
 }
 
 
@@ -3414,7 +3414,7 @@ abstract mixin class $ThemePropsCopyWith<$Res>  {
   factory $ThemePropsCopyWith(ThemeProps value, $Res Function(ThemeProps) _then) = _$ThemePropsCopyWithImpl;
 @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, bool predictiveBack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
 });
 
 
@@ -3431,7 +3431,7 @@ class _$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? predictiveBack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
   return _then(ThemeProps(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self.primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -3441,6 +3441,7 @@ as bool,darkAt: freezed == darkAt ? _self.darkAt : darkAt // ignore: cast_nullab
 as String?,lightAt: freezed == lightAt ? _self.lightAt : lightAt // ignore: cast_nullable_to_non_nullable
 as String?,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
+as bool,predictiveBack: null == predictiveBack ? _self.predictiveBack : predictiveBack // ignore: cast_nullable_to_non_nullable
 as bool,contrastLevel: null == contrastLevel ? _self.contrastLevel : contrastLevel // ignore: cast_nullable_to_non_nullable
 as double,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
 as TextScale,wallpaper: null == wallpaper ? _self.wallpaper : wallpaper // ignore: cast_nullable_to_non_nullable
@@ -3547,10 +3548,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   return orElse();
 
 }
@@ -3568,10 +3569,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps():
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3588,10 +3589,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   return null;
 
 }
@@ -3603,7 +3604,7 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 @JsonSerializable()
 
 class _ThemeProps implements ThemeProps {
-  const _ThemeProps({this.primaryColor,  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.dark, this.scheduledTheme = false, this.darkAt, this.lightAt, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.contrastLevel = 0, this.textScale = const TextScale(), @JsonKey(fromJson: WallpaperProps.safeFromJson) this.wallpaper = const WallpaperProps()}): _primaryColors = primaryColors;
+  const _ThemeProps({this.primaryColor,  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.dark, this.scheduledTheme = false, this.darkAt, this.lightAt, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.predictiveBack = true, this.contrastLevel = 0, this.textScale = const TextScale(), @JsonKey(fromJson: WallpaperProps.safeFromJson) this.wallpaper = const WallpaperProps()}): _primaryColors = primaryColors;
   factory _ThemeProps.fromJson(Map<String, dynamic> json) => _$ThemePropsFromJson(json);
 
 @override final  int? primaryColor;
@@ -3620,6 +3621,7 @@ class _ThemeProps implements ThemeProps {
 @override final  String? lightAt;
 @override@JsonKey() final  DynamicSchemeVariant schemeVariant;
 @override@JsonKey() final  bool pureBlack;
+@override@JsonKey() final  bool predictiveBack;
 @override@JsonKey() final  double contrastLevel;
 @override@JsonKey() final  TextScale textScale;
 @override@JsonKey(fromJson: WallpaperProps.safeFromJson) final  WallpaperProps wallpaper;
@@ -3637,18 +3639,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.scheduledTheme, scheduledTheme) || other.scheduledTheme == scheduledTheme)&&(identical(other.darkAt, darkAt) || other.darkAt == darkAt)&&(identical(other.lightAt, lightAt) || other.lightAt == lightAt)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.contrastLevel, contrastLevel) || other.contrastLevel == contrastLevel)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.wallpaper, wallpaper) || other.wallpaper == wallpaper));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.scheduledTheme, scheduledTheme) || other.scheduledTheme == scheduledTheme)&&(identical(other.darkAt, darkAt) || other.darkAt == darkAt)&&(identical(other.lightAt, lightAt) || other.lightAt == lightAt)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.predictiveBack, predictiveBack) || other.predictiveBack == predictiveBack)&&(identical(other.contrastLevel, contrastLevel) || other.contrastLevel == contrastLevel)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.wallpaper, wallpaper) || other.wallpaper == wallpaper));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,scheduledTheme,darkAt,lightAt,schemeVariant,pureBlack,contrastLevel,textScale,wallpaper);
+    return Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,scheduledTheme,darkAt,lightAt,schemeVariant,pureBlack,predictiveBack,contrastLevel,textScale,wallpaper);
 }
 
 @override
 String toString() {
-    return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, scheduledTheme: $scheduledTheme, darkAt: $darkAt, lightAt: $lightAt, schemeVariant: $schemeVariant, pureBlack: $pureBlack, contrastLevel: $contrastLevel, textScale: $textScale, wallpaper: $wallpaper)';
+    return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, scheduledTheme: $scheduledTheme, darkAt: $darkAt, lightAt: $lightAt, schemeVariant: $schemeVariant, pureBlack: $pureBlack, predictiveBack: $predictiveBack, contrastLevel: $contrastLevel, textScale: $textScale, wallpaper: $wallpaper)';
 }
 
 
@@ -3659,7 +3661,7 @@ abstract mixin class _$ThemePropsCopyWith<$Res> implements $ThemePropsCopyWith<$
   factory _$ThemePropsCopyWith(_ThemeProps value, $Res Function(_ThemeProps) _then) = __$ThemePropsCopyWithImpl;
 @override @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, bool predictiveBack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
 });
 
 
@@ -3676,7 +3678,7 @@ class __$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? predictiveBack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
   return _then(_ThemeProps(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self._primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -3686,6 +3688,7 @@ as bool,darkAt: freezed == darkAt ? _self.darkAt : darkAt // ignore: cast_nullab
 as String?,lightAt: freezed == lightAt ? _self.lightAt : lightAt // ignore: cast_nullable_to_non_nullable
 as String?,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
+as bool,predictiveBack: null == predictiveBack ? _self.predictiveBack : predictiveBack // ignore: cast_nullable_to_non_nullable
 as bool,contrastLevel: null == contrastLevel ? _self.contrastLevel : contrastLevel // ignore: cast_nullable_to_non_nullable
 as double,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
 as TextScale,wallpaper: null == wallpaper ? _self.wallpaper : wallpaper // ignore: cast_nullable_to_non_nullable

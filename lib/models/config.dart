@@ -505,6 +505,7 @@ abstract class ThemeProps with _$ThemeProps {
     String? lightAt,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
+    @Default(true) bool predictiveBack,
     @Default(0) double contrastLevel,
     @Default(TextScale()) TextScale textScale,
     @JsonKey(fromJson: WallpaperProps.safeFromJson)

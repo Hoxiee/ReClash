@@ -51,6 +51,19 @@ Widget buildManagerStack({
   );
 }
 
+PageTransitionsTheme buildPageTransitionsTheme({required bool predictiveBack}) {
+  return PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: predictiveBack
+          ? const PredictiveBackPageTransitionsBuilder()
+          : commonSharedXPageTransitions,
+      TargetPlatform.windows: commonSharedXPageTransitions,
+      TargetPlatform.linux: commonSharedXPageTransitions,
+      TargetPlatform.macOS: commonSharedXPageTransitions,
+    },
+  );
+}
+
 class Application extends ConsumerStatefulWidget {
   const Application({super.key});
 
@@ -61,15 +74,6 @@ class Application extends ConsumerStatefulWidget {
 class ApplicationState extends ConsumerState<Application> {
   Timer? _autoUpdateProfilesTaskTimer;
   bool _preHasVpn = false;
-
-  final _pageTransitionsTheme = const PageTransitionsTheme(
-    builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: commonSharedXPageTransitions,
-      TargetPlatform.windows: commonSharedXPageTransitions,
-      TargetPlatform.linux: commonSharedXPageTransitions,
-      TargetPlatform.macOS: commonSharedXPageTransitions,
-    },
-  );
 
   ColorScheme _getAppColorScheme({required Brightness brightness}) {
     return ref.read(genColorSchemeProvider(brightness));
@@ -280,6 +284,11 @@ class ApplicationState extends ConsumerState<Application> {
           appSettingProvider.select((state) => state.locale),
         );
         final themeProps = ref.watch(effectiveThemePropsProvider);
+        final pageTransitionsTheme = buildPageTransitionsTheme(
+          predictiveBack:
+              system.supportsPredictiveBack(ref.watch(versionProvider)) &&
+              themeProps.predictiveBack,
+        );
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
@@ -311,12 +320,12 @@ class ApplicationState extends ConsumerState<Application> {
           themeMode: ref.watch(effectiveThemeModeProvider),
           theme: ThemeData(
             useMaterial3: true,
-            pageTransitionsTheme: _pageTransitionsTheme,
+            pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(brightness: Brightness.light),
           ).withAppShapes,
           darkTheme: ThemeData(
             useMaterial3: true,
-            pageTransitionsTheme: _pageTransitionsTheme,
+            pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(
               brightness: Brightness.dark,
             ).toPureBlack(themeProps.pureBlack),

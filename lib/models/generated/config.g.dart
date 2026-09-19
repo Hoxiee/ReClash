@@ -532,6 +532,7 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
       ) ??
       DynamicSchemeVariant.content,
   pureBlack: json['pureBlack'] as bool? ?? false,
+  predictiveBack: json['predictiveBack'] as bool? ?? true,
   contrastLevel: (json['contrastLevel'] as num?)?.toDouble() ?? 0,
   textScale: json['textScale'] == null
       ? const TextScale()
@@ -551,6 +552,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'lightAt': instance.lightAt,
       'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
       'pureBlack': instance.pureBlack,
+      'predictiveBack': instance.predictiveBack,
       'contrastLevel': instance.contrastLevel,
       'textScale': instance.textScale,
       'wallpaper': instance.wallpaper,

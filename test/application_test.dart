@@ -1,4 +1,5 @@
 import 'package:reclash/application.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
 import 'package:material_ui/material_ui.dart';
@@ -60,6 +61,32 @@ void main() {
     final state = const Application().createState();
 
     expect(state, isA<ApplicationState>());
+  });
+
+  test('predictive back only swaps the Android transition builder', () {
+    final off = buildPageTransitionsTheme(predictiveBack: false);
+    final on = buildPageTransitionsTheme(predictiveBack: true);
+
+    expect(
+      off.builders[TargetPlatform.android],
+      same(commonSharedXPageTransitions),
+    );
+    expect(
+      on.builders[TargetPlatform.android],
+      isA<PredictiveBackPageTransitionsBuilder>(),
+    );
+    for (final platform in [
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+    ]) {
+      expect(on.builders[platform], same(commonSharedXPageTransitions));
+      expect(off.builders[platform], same(commonSharedXPageTransitions));
+    }
+  });
+
+  test('supportsPredictiveBack is false off Android', () {
+    expect(system.supportsPredictiveBack(34), isFalse);
   });
 
   test('the desktop manager stack nests in ownership order', () {
