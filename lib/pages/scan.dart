@@ -111,6 +111,8 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
         children: [
           Positioned.fill(
             child: GestureDetector(
+              // The camera Texture leaf never hit-tests, so a deferToChild detector gets no pointers; claim them here or pinch never fires.
+              behavior: HitTestBehavior.opaque,
               onScaleStart: _onScaleStart,
               onScaleUpdate: _onScaleUpdate,
               child: MobileScanner(
