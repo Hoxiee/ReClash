@@ -11,12 +11,14 @@ private fun snapshot(
     searching: Boolean = false,
     doctorState: String = "",
     doctorHealth: String = "",
+    byedpiOnly: Boolean = false,
     startedAtMillis: Long = 0L,
 ) = WidgetSnapshot(
     runState = runState,
     searching = searching,
     doctorState = doctorState,
     doctorHealth = doctorHealth,
+    byedpiOnly = byedpiOnly,
     startedAtMillis = startedAtMillis,
 )
 
@@ -63,6 +65,12 @@ class WidgetSnapshotTest {
         assertEquals(0L, snapshot(RunState.STOPPED, startedAtMillis = started).uptimeMillis)
         assertTrue(snapshot(startedAtMillis = started).uptimeMillis >= 5_000L)
         assertTrue(snapshot(startedAtMillis = started).uptimeMillis < 60_000L)
+    }
+
+    @Test
+    fun `the mode follows the byedpi-only flag`() {
+        assertEquals(WidgetMode.VPN, snapshot().mode)
+        assertEquals(WidgetMode.BYEDPI, snapshot(byedpiOnly = true).mode)
     }
 
     @Test

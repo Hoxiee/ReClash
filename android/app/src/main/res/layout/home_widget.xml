@@ -15,8 +15,8 @@
     android:paddingBottom="7dp">
 
     <FrameLayout
-        android:layout_width="30dp"
-        android:layout_height="30dp">
+        android:layout_width="34dp"
+        android:layout_height="34dp">
 
         <ImageView
             android:id="@+id/widget_orb"
@@ -27,8 +27,8 @@
 
         <ImageView
             android:id="@+id/widget_mark"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_gravity="center"
             android:contentDescription="@null"
             android:src="@drawable/widget_ic_mark" />
@@ -57,7 +57,7 @@
                 android:maxLines="1"
                 android:text="@string/widget_disconnected"
                 android:textColor="@color/widget_on_surface"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <Chronometer

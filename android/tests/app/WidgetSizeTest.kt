@@ -28,13 +28,9 @@ class WidgetSizeTest {
 
         assertFalse(short.metricsFit)
         assertFalse(short.chipsFit)
-        assertTrue(short.chartHeadFit)
-        assertFalse(short.chartTotalsFit)
 
         assertTrue(tall.metricsFit)
         assertTrue(tall.chipsFit)
-        assertTrue(tall.chartHeadFit)
-        assertTrue(tall.chartTotalsFit)
     }
 
     @Test

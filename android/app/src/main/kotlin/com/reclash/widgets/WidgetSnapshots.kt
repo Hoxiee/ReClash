@@ -20,6 +20,7 @@ internal object WidgetSnapshots {
         val shared = runCatching { GlobalState.application.sharedState }.getOrNull()
         val routing = ServiceConfig.smartRoutingStatus.value
         val doctor = ServiceConfig.doctorStatus.value
+        val vpn = ServiceConfig.vpnOptions
         val runState = ServiceState.runState.value
         val running = runState == RunState.STARTED || runState == RunState.PAUSED
         val onlyStatisticsProxy = shared?.onlyStatisticsProxy ?: false
@@ -42,6 +43,7 @@ internal object WidgetSnapshots {
             delay = if (routing.delay > 0) routing.delay else stored.delay,
             terrain = routing.terrain.takeIf { it.isNotBlank() } ?: stored.terrain,
             routingEnabled = routing.enabled,
+            byedpiOnly = vpn?.let { it.desyncEnabled && it.desyncOnly } ?: false,
             searching = routing.searching,
             doctorState = doctor.state,
             doctorHealth = doctor.health,

@@ -4,6 +4,10 @@ import com.reclash.RunState
 
 internal enum class WidgetTone { IDLE, PENDING, ACTIVE, DEGRADED, BROKEN, PAUSED }
 
+// ByeDPI-only carries traffic direct with just the DPI bypass, so every surface
+// that says "connected" has to know it is not describing a tunnel.
+internal enum class WidgetMode { VPN, BYEDPI }
+
 internal data class WidgetSnapshot(
     val runState: RunState = RunState.STOPPED,
     val profile: String = "",
@@ -12,6 +16,7 @@ internal data class WidgetSnapshot(
     val delay: Int = 0,
     val terrain: String = "",
     val routingEnabled: Boolean = false,
+    val byedpiOnly: Boolean = false,
     val searching: Boolean = false,
     val doctorState: String = "",
     val doctorHealth: String = "",
@@ -21,6 +26,9 @@ internal data class WidgetSnapshot(
     val sessionDown: Long = 0L,
     val startedAtMillis: Long = 0L,
 )
+
+internal val WidgetSnapshot.mode: WidgetMode
+    get() = if (byedpiOnly) WidgetMode.BYEDPI else WidgetMode.VPN
 
 internal val WidgetSnapshot.live: Boolean
     get() = runState == RunState.STARTED || runState == RunState.PAUSED

@@ -19,19 +19,15 @@
     <string name="widget_label_switch">ReClash スイッチ</string>
     <string name="widget_label_control">ReClash コントロール</string>
     <string name="widget_label_nodes">ReClash ノード</string>
-    <string name="widget_label_traffic">ReClash トラフィック</string>
     <string name="widget_description_switch">ワンタップで接続。稼働時間と現在の速度を表示します。</string>
     <string name="widget_description_control">接続状態、速度、稼働時間と4つのクイック操作。</string>
     <string name="widget_description_nodes">現在のグループからプロキシを選択し、遅延を再測定します。</string>
-    <string name="widget_description_traffic">速度グラフ、セッション合計と稼働時間。</string>
 
     <string name="widget_placeholder_speed">0 B/s</string>
-    <string name="widget_placeholder_total">0 B</string>
 
     <string name="widget_metric_down">ダウンロード</string>
     <string name="widget_metric_up">アップロード</string>
     <string name="widget_metric_uptime">稼働時間</string>
-    <string name="widget_metric_session">セッション</string>
 
     <string name="widget_no_nodes">利用可能なノードがありません</string>
     <string name="widget_service_off">サービスが起動していません</string>

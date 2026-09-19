@@ -19,19 +19,15 @@
     <string name="widget_label_switch">ReClash Ауыстырғыш</string>
     <string name="widget_label_control">ReClash Басқару</string>
     <string name="widget_label_nodes">ReClash Түйіндер</string>
-    <string name="widget_label_traffic">ReClash Трафик</string>
     <string name="widget_description_switch">Бір түртумен қосылу, жұмыс уақыты және ағымдағы жылдамдық.</string>
     <string name="widget_description_control">Қосылым күйі, жылдамдық, жұмыс уақыты және төрт жылдам әрекет.</string>
     <string name="widget_description_nodes">Ағымдағы топтан прокси таңдау және кідірістерді қайта тексеру.</string>
-    <string name="widget_description_traffic">Жылдамдық графигі, сеанс қорытындысы және жұмыс уақыты.</string>
 
     <string name="widget_placeholder_speed">0 B/s</string>
-    <string name="widget_placeholder_total">0 B</string>
 
     <string name="widget_metric_down">Қабылдау</string>
     <string name="widget_metric_up">Жіберу</string>
     <string name="widget_metric_uptime">Жұмыс уақыты</string>
-    <string name="widget_metric_session">Сеанс</string>
 
     <string name="widget_no_nodes">Қолжетімді түйіндер жоқ</string>
     <string name="widget_service_off">Қызмет іске қосылмаған</string>

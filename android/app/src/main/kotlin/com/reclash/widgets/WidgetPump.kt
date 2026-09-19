@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
-import android.os.SystemClock
 import com.reclash.HomeWidgetProvider
 import com.reclash.RunState
 import com.reclash.ServiceState
@@ -26,10 +25,8 @@ private const val tickMillis = 1_000L
 internal object WidgetPump {
     private val revision = MutableStateFlow(0)
     private val installed = MutableStateFlow(false)
-    private val history = WidgetTrafficHistory()
     private var job: Job? = null
     private var forced = true
-    private var lastPushAt = 0L
 
     fun wake(context: Context) {
         val application = context.applicationContext
@@ -38,8 +35,6 @@ internal object WidgetPump {
         if (!installed.value) {
             job?.cancel()
             job = null
-            history.clear()
-            lastPushAt = 0L
             return
         }
         if (job?.isActive == true) {
@@ -72,24 +67,9 @@ internal object WidgetPump {
         val force = forced
         forced = false
         val snapshot = WidgetSnapshots.current(context)
-        pushHistory(snapshot)
         HomeWidgetProvider.updateAll(context, manager, snapshot)
         ControlWidgetProvider.updateAll(context, manager, snapshot)
         NodesWidgetProvider.updateAll(context, manager, snapshot, force)
-        TrafficWidgetProvider.updateAll(context, manager, snapshot, history)
-    }
-
-    // The x axis is wall clock, so a state-driven redraw must not shift it.
-    private fun pushHistory(snapshot: WidgetSnapshot) {
-        if (!snapshot.live) {
-            history.clear()
-            lastPushAt = 0L
-            return
-        }
-        val now = SystemClock.elapsedRealtime()
-        if (lastPushAt != 0L && now - lastPushAt < tickMillis - 100L) return
-        lastPushAt = now
-        history.push(snapshot.upSpeed, snapshot.downSpeed)
     }
 
     private fun screenFlow(context: Context): Flow<Boolean> = context.receiveBroadcastFlow {
@@ -111,7 +91,6 @@ internal object WidgetPump {
             HomeWidgetProvider::class.java,
             ControlWidgetProvider::class.java,
             NodesWidgetProvider::class.java,
-            TrafficWidgetProvider::class.java,
         ).any { manager.widgetIds(context, it).isNotEmpty() }
     }
 }

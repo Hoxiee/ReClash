@@ -3,6 +3,7 @@ package com.reclash.widgets
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import com.reclash.ServiceController
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.async
@@ -121,6 +122,11 @@ internal object ProxyCatalog {
         val arguments = JsonObject().apply { addProperty("mode", "standard") }
         return invoke("doctorStart", arguments) != null
     }
+
+    // rcxSetEnabled takes the bare bool the core registered it with, not an
+    // object, so the argument is a primitive rather than a wrapper.
+    suspend fun setAutopilot(enabled: Boolean): Boolean =
+        invoke("rcxSetEnabled", JsonPrimitive(enabled)) != null
 
     private suspend fun measureOne(node: String, testUrl: String) {
         val arguments = JsonObject().apply {

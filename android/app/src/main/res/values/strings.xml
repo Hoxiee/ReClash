@@ -17,21 +17,22 @@
     <string name="widget_app_name">@string/app_name</string>
 
     <string name="widget_label_switch">ReClash Switch</string>
-    <string name="widget_label_control">ReClash Control</string>
-    <string name="widget_label_nodes">ReClash Nodes</string>
-    <string name="widget_label_traffic">ReClash Traffic</string>
-    <string name="widget_description_switch">One tap to connect, with uptime and live speed.</string>
-    <string name="widget_description_control">Connection state, speed, uptime and four quick actions.</string>
-    <string name="widget_description_nodes">Pick a proxy from the current group and re-test delays.</string>
-    <string name="widget_description_traffic">Speed graph with session totals and uptime.</string>
+    <string name="widget_label_control">ReClash Status</string>
+    <string name="widget_label_nodes">ReClash Route</string>
+    <string name="widget_description_switch">One tap to connect, showing the active mode and uptime.</string>
+    <string name="widget_description_control">Connection at a glance: mode, node, speed and health.</string>
+    <string name="widget_description_nodes">Smart Route autopilot and the current group\'s nodes.</string>
 
     <string name="widget_placeholder_speed">0 B/s</string>
-    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_mode_vpn">VPN</string>
+    <string name="widget_mode_byedpi">DPI bypass</string>
+
+    <string name="widget_autopilot">Auto</string>
 
     <string name="widget_metric_down">Down</string>
     <string name="widget_metric_up">Up</string>
     <string name="widget_metric_uptime">Uptime</string>
-    <string name="widget_metric_session">Session</string>
 
     <string name="widget_no_nodes">No nodes available</string>
     <string name="widget_service_off">Service is not running</string>

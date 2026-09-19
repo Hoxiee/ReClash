@@ -12,8 +12,6 @@ private const val controlWidthDp = 250
 private const val controlHeightDp = 110
 private const val nodesWidthDp = 180
 private const val nodesHeightDp = 180
-private const val trafficWidthDp = 250
-private const val trafficHeightDp = 110
 
 // A provider only reports that its placements changed; one pump decides what
 // every widget draws, so two of them can never disagree about the same second.
@@ -72,7 +70,8 @@ class NodesWidgetProvider : PumpWidgetProvider() {
             }
             // Re-attaching the adapter restarts the list and drops the scroll
             // position, so the rows only move when their own facts do.
-            val next = "${snapshot.group}|${snapshot.node}|${snapshot.tone}|${snapshot.live}"
+            val next = "${snapshot.group}|${snapshot.node}|${snapshot.tone}|" +
+                "${snapshot.live}|${snapshot.routingEnabled}"
             if (!force && next == chrome) return
             chrome = next
             ids.forEach { id ->
@@ -87,33 +86,6 @@ class NodesWidgetProvider : PumpWidgetProvider() {
             val ids = manager.widgetIds(context, NodesWidgetProvider::class.java)
             if (ids.isEmpty()) return
             manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list)
-        }
-    }
-}
-
-class TrafficWidgetProvider : PumpWidgetProvider() {
-    companion object {
-        internal fun updateAll(
-            context: Context,
-            manager: AppWidgetManager,
-            snapshot: WidgetSnapshot,
-            history: WidgetTrafficHistory,
-        ) {
-            val ids = manager.widgetIds(context, TrafficWidgetProvider::class.java)
-            if (ids.isEmpty()) return
-            val chart = SparklineRenderer.render(
-                down = history.downSeries(),
-                up = history.upSeries(),
-                downColor = context.getColor(R.color.widget_chart_down),
-                upColor = context.getColor(R.color.widget_chart_up),
-                gridColor = context.getColor(R.color.widget_chart_grid),
-            )
-            ids.forEach { id ->
-                val views = manager.orientationViews(id, trafficWidthDp, trafficHeightDp) { box ->
-                    WidgetRenderer.traffic(context, snapshot, chart, box)
-                }
-                manager.updateAppWidget(id, views)
-            }
         }
     }
 }

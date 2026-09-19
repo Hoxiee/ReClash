@@ -26,6 +26,12 @@ internal val DelayGrade.colorRes: Int
 internal val WidgetSnapshot.statusRes: Int
     get() = runState.toHomeWidgetPresentation().statusRes
 
+internal val WidgetSnapshot.modeRes: Int
+    get() = when (mode) {
+        WidgetMode.VPN -> R.string.widget_mode_vpn
+        WidgetMode.BYEDPI -> R.string.widget_mode_byedpi
+    }
+
 internal val WidgetSnapshot.powerLabelRes: Int
     get() = runState.toHomeWidgetPresentation().actionLabelRes
 

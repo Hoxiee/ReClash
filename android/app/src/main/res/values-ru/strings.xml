@@ -17,21 +17,22 @@
     <string name="widget_app_name">@string/app_name</string>
 
     <string name="widget_label_switch">ReClash Переключатель</string>
-    <string name="widget_label_control">ReClash Управление</string>
-    <string name="widget_label_nodes">ReClash Узлы</string>
-    <string name="widget_label_traffic">ReClash Трафик</string>
-    <string name="widget_description_switch">Одно касание для подключения, время работы и текущая скорость.</string>
-    <string name="widget_description_control">Состояние соединения, скорость, время работы и четыре быстрых действия.</string>
-    <string name="widget_description_nodes">Выбор прокси из текущей группы и повторный тест задержек.</string>
-    <string name="widget_description_traffic">График скорости, итоги сеанса и время работы.</string>
+    <string name="widget_label_control">ReClash Статус</string>
+    <string name="widget_label_nodes">ReClash Маршрут</string>
+    <string name="widget_description_switch">Одно касание для подключения, показывает режим и время работы.</string>
+    <string name="widget_description_control">Соединение с одного взгляда: режим, узел, скорость и здоровье.</string>
+    <string name="widget_description_nodes">Автопилот Smart Route и узлы текущей группы.</string>
 
     <string name="widget_placeholder_speed">0 B/s</string>
-    <string name="widget_placeholder_total">0 B</string>
+
+    <string name="widget_mode_vpn">VPN</string>
+    <string name="widget_mode_byedpi">Обход DPI</string>
+
+    <string name="widget_autopilot">Авто</string>
 
     <string name="widget_metric_down">Приём</string>
     <string name="widget_metric_up">Отдача</string>
     <string name="widget_metric_uptime">В работе</string>
-    <string name="widget_metric_session">Сеанс</string>
 
     <string name="widget_no_nodes">Нет доступных узлов</string>
     <string name="widget_service_off">Служба не запущена</string>

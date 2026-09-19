@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
@@ -49,7 +48,7 @@ internal object WidgetRenderer {
         val views = RemoteViews(context.packageName, R.layout.widget_control)
         tint(context, views, snapshot)
         views.setTextViewText(R.id.widget_title, title(context, snapshot))
-        views.setTextViewText(R.id.widget_subtitle, controlSubtitle(context, snapshot, box))
+        views.setTextViewText(R.id.widget_subtitle, statusSubtitle(context, snapshot))
         views.setTextViewText(R.id.widget_pill, context.getText(snapshot.statusRes))
         views.setTextColor(R.id.widget_pill, context.getColor(snapshot.tone.colorRes))
 
@@ -69,19 +68,6 @@ internal object WidgetRenderer {
         views.setTextViewText(R.id.widget_power_label, context.getText(snapshot.powerLabelRes))
         views.setImageViewResource(R.id.widget_power_icon, snapshot.powerIconRes)
         views.setOnClickPendingIntent(R.id.widget_power, WidgetActions.power(snapshot.runState))
-
-        val hold = WidgetActions.hold(snapshot.runState)
-        views.setImageViewResource(
-            R.id.widget_pause,
-            if (snapshot.runState == RunState.PAUSED) {
-                R.drawable.widget_ic_start
-            } else {
-                R.drawable.widget_ic_pause
-            },
-        )
-        enable(views, R.id.widget_pause, hold)
-        enable(views, R.id.widget_examine, WidgetActions.examine(context).takeIf { snapshot.live })
-        views.setOnClickPendingIntent(R.id.widget_open, WidgetActions.open(context))
         views.setOnClickPendingIntent(R.id.widget_root, WidgetActions.open(context))
         return views
     }
@@ -90,6 +76,20 @@ internal object WidgetRenderer {
         val views = RemoteViews(context.packageName, R.layout.widget_nodes)
         views.setInt(R.id.widget_mark, colorFilter, context.getColor(snapshot.tone.colorRes))
         views.setTextViewText(R.id.widget_group, nodesTitle(context, snapshot))
+
+        // Autopilot is the whole point of the group, so the toggle reads its own
+        // state rather than borrowing the connection tone.
+        val autoColor = if (snapshot.routingEnabled) {
+            R.color.widget_tone_active
+        } else {
+            R.color.widget_on_surface_variant
+        }
+        views.setTextColor(R.id.widget_auto, context.getColor(autoColor))
+        val autopilot = WidgetActions.autopilot(context, !snapshot.routingEnabled)
+            .takeIf { snapshot.live }
+        views.setOnClickPendingIntent(R.id.widget_auto, autopilot)
+        views.setBoolean(R.id.widget_auto, "setEnabled", autopilot != null)
+
         views.setTextViewText(
             R.id.widget_empty,
             context.getText(
@@ -139,36 +139,6 @@ internal object WidgetRenderer {
         return views
     }
 
-    // The chart arrives already drawn: RemoteViews caches a bitmap by identity,
-    // so one instance shared by both orientations crosses the binder once.
-    fun traffic(
-        context: Context,
-        snapshot: WidgetSnapshot,
-        chart: Bitmap,
-        box: WidgetBox,
-    ): RemoteViews {
-        val views = RemoteViews(context.packageName, R.layout.widget_traffic)
-        views.setInt(R.id.widget_mark, colorFilter, context.getColor(snapshot.tone.colorRes))
-        views.setTextViewText(R.id.widget_title, trafficTitle(context, snapshot))
-        uptime(views, R.id.widget_uptime, snapshot)
-
-        views.setInt(R.id.widget_down_dot, colorFilter, context.getColor(R.color.widget_chart_down))
-        views.setInt(R.id.widget_up_dot, colorFilter, context.getColor(R.color.widget_chart_up))
-        views.setTextViewText(R.id.widget_down_value, formatSpeed(snapshot.downSpeed))
-        views.setTextViewText(R.id.widget_up_value, formatSpeed(snapshot.upSpeed))
-        val session = context.getString(R.string.widget_metric_session)
-        views.setTextViewText(R.id.widget_down_total, "$session ${formatBytes(snapshot.sessionDown)}")
-        views.setTextViewText(R.id.widget_up_total, "$session ${formatBytes(snapshot.sessionUp)}")
-
-        views.setViewVisibility(R.id.widget_head, visibility(box.chartHeadFit))
-        views.setViewVisibility(R.id.widget_down_total, visibility(box.chartTotalsFit))
-        views.setViewVisibility(R.id.widget_up_total, visibility(box.chartTotalsFit))
-
-        views.setImageViewBitmap(R.id.widget_chart, chart)
-        views.setOnClickPendingIntent(R.id.widget_root, WidgetActions.open(context))
-        return views
-    }
-
     private fun tint(context: Context, views: RemoteViews, snapshot: WidgetSnapshot) {
         val tone = context.getColor(snapshot.tone.colorRes)
         views.setInt(R.id.widget_orb, colorFilter, tone)
@@ -203,35 +173,24 @@ internal object WidgetRenderer {
             ?: context.getText(R.string.widget_app_name)
 
     private fun switchDetail(context: Context, snapshot: WidgetSnapshot): CharSequence {
-        if (!snapshot.live) return title(context, snapshot)
-        val node = snapshot.node.takeIf { it.isNotBlank() }?.let { shorten(it, 18) }
-        return listOfNotNull(node, formatSpeed(snapshot.downSpeed)).joinToString(separator)
+        if (!snapshot.live) return context.getText(snapshot.modeRes)
+        val mode = context.getString(snapshot.modeRes)
+        val node = snapshot.node.takeIf { it.isNotBlank() }?.let { shorten(it, 16) }
+        return listOfNotNull(mode, node).joinToString(separator)
     }
 
-    // The metrics row is the first thing a two-row placement loses, so at that
-    // size the subtitle has to carry the speeds instead of the node.
-    private fun controlSubtitle(
-        context: Context,
-        snapshot: WidgetSnapshot,
-        box: WidgetBox,
-    ): CharSequence {
+    // The header already names the run state, so the subtitle carries what it
+    // cannot: which engine is up and where it is pointed.
+    private fun statusSubtitle(context: Context, snapshot: WidgetSnapshot): CharSequence {
         if (!snapshot.live) return context.getText(R.string.widget_service_off)
-        if (!box.metricsFit) {
-            return formatSpeed(snapshot.downSpeed) + separator + formatSpeed(snapshot.upSpeed)
-        }
-        val node = snapshot.node.takeIf { it.isNotBlank() }?.let { shorten(it, 20) }
+        val mode = context.getString(snapshot.modeRes)
+        val node = snapshot.node.takeIf { it.isNotBlank() }?.let { shorten(it, 18) }
         val delay = formatDelay(snapshot.delay).takeIf { it.isNotBlank() }
-        return listOfNotNull(node, delay).joinToString(separator)
+        return listOfNotNull(mode, node, delay).joinToString(separator)
             .ifBlank { context.getString(R.string.widget_state) }
     }
 
     private fun nodesTitle(context: Context, snapshot: WidgetSnapshot): CharSequence =
         snapshot.group.takeIf { it.isNotBlank() }?.let { shorten(it, 22) }
             ?: context.getText(R.string.widget_label_nodes)
-
-    private fun trafficTitle(context: Context, snapshot: WidgetSnapshot): CharSequence {
-        val name = snapshot.node.takeIf { it.isNotBlank() && snapshot.live }
-            ?: snapshot.profile.takeIf { it.isNotBlank() }
-        return name?.let { shorten(it, 20) } ?: context.getText(R.string.widget_metric_session)
-    }
 }

@@ -14,13 +14,14 @@ class WidgetActionReceiver : BroadcastReceiver() {
         val name = intent.action?.substringAfterLast('.') ?: return
         val group = intent.getStringExtra(WidgetActions.EXTRA_GROUP).orEmpty()
         val node = intent.getStringExtra(WidgetActions.EXTRA_NODE).orEmpty()
+        val enabled = intent.getBooleanExtra(WidgetActions.EXTRA_ENABLED, false)
         val application = context.applicationContext
         // The broadcast returns long before the core answers, and a widget tap
         // is the only thing holding this process up.
         val pending = goAsync()
         GlobalState.launch {
             try {
-                dispatch(application, name, group, node)
+                dispatch(application, name, group, node, enabled)
             } finally {
                 pending.finish()
             }
@@ -32,6 +33,7 @@ class WidgetActionReceiver : BroadcastReceiver() {
         name: String,
         group: String,
         node: String,
+        enabled: Boolean,
     ) {
         if (ServiceState.refresh() == 0L) {
             WidgetPump.wake(context)
@@ -41,6 +43,7 @@ class WidgetActionReceiver : BroadcastReceiver() {
             WidgetActions.EXAMINE -> ProxyCatalog.examine()
             WidgetActions.MEASURE -> measure(context, group)
             WidgetActions.SELECT -> select(context, group, node)
+            WidgetActions.AUTOPILOT -> ProxyCatalog.setAutopilot(enabled)
             else -> return
         }
         WidgetPump.wake(context)

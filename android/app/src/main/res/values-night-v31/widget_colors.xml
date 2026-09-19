@@ -8,6 +8,7 @@
     <color name="widget_accent">@android:color/system_accent1_200</color>
     <color name="widget_accent_press">@android:color/system_accent1_100</color>
     <color name="widget_on_accent">@android:color/system_accent1_900</color>
+    <color name="widget_tone_idle">@android:color/system_neutral2_400</color>
     <color name="widget_tone_active">@android:color/system_accent1_200</color>
     <color name="widget_chart_down">@android:color/system_accent1_200</color>
     <color name="widget_chart_grid">@android:color/system_neutral2_700</color>

@@ -16,13 +16,16 @@ internal object WidgetActions {
     const val EXAMINE = "WIDGET_EXAMINE"
     const val MEASURE = "WIDGET_MEASURE"
     const val SELECT = "WIDGET_SELECT"
+    const val AUTOPILOT = "WIDGET_AUTOPILOT"
     const val EXTRA_GROUP = "group"
     const val EXTRA_NODE = "node"
+    const val EXTRA_ENABLED = "enabled"
 
     private const val requestExamine = 0x5701
     private const val requestMeasure = 0x5702
     private const val requestSelect = 0x5703
     private const val requestOpen = 0x5704
+    private const val requestAutopilot = 0x5705
 
     fun action(context: Context, name: String): String = "${context.packageName}.$name"
 
@@ -50,6 +53,22 @@ internal object WidgetActions {
 
     fun examine(context: Context): PendingIntent =
         broadcast(context, requestExamine, EXAMINE, mutable = false)
+
+    // The two request codes keep the enable and disable intents from colliding
+    // under FLAG_UPDATE_CURRENT, so each carries the value it was drawn with.
+    fun autopilot(context: Context, enable: Boolean): PendingIntent {
+        val intent = Intent(action(context, AUTOPILOT)).apply {
+            setPackage(context.packageName)
+            setClass(context, WidgetActionReceiver::class.java)
+            putExtra(EXTRA_ENABLED, enable)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            requestAutopilot + if (enable) 1 else 0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
 
     fun measure(context: Context): PendingIntent =
         broadcast(context, requestMeasure, MEASURE, mutable = false)

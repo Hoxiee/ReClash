@@ -8,7 +8,6 @@ private val widgets = listOf(
     Triple(".HomeWidgetProvider", "home_widget", "home_widget_info"),
     Triple(".widgets.ControlWidgetProvider", "widget_control", "widget_control_info"),
     Triple(".widgets.NodesWidgetProvider", "widget_nodes", "widget_nodes_info"),
-    Triple(".widgets.TrafficWidgetProvider", "widget_traffic", "widget_traffic_info"),
 )
 
 class HomeWidgetContractTest {

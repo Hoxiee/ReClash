@@ -20,13 +20,9 @@ internal data class WidgetBox(val widthDp: Int, val heightDp: Int) {
             else -> WidgetHeight.TALL
         }
 
-    val metricsFit: Boolean get() = heightDp >= 140
+    val metricsFit: Boolean get() = heightDp >= 132
 
-    val chipsFit: Boolean get() = heightDp >= 170
-
-    val chartHeadFit: Boolean get() = heightDp >= 96
-
-    val chartTotalsFit: Boolean get() = heightDp >= 124
+    val chipsFit: Boolean get() = heightDp >= 168
 
     val nodeRows: Int get() = ((heightDp - 50) / 34).coerceIn(1, 16)
 }

@@ -19,19 +19,15 @@
     <string name="widget_label_switch">ReClash 开关</string>
     <string name="widget_label_control">ReClash 控制</string>
     <string name="widget_label_nodes">ReClash 节点</string>
-    <string name="widget_label_traffic">ReClash 流量</string>
     <string name="widget_description_switch">一键连接，并显示运行时长与实时速度。</string>
     <string name="widget_description_control">连接状态、速度、运行时长与四个快捷操作。</string>
     <string name="widget_description_nodes">从当前分组选择代理并重新测试延迟。</string>
-    <string name="widget_description_traffic">速度曲线、本次会话流量与运行时长。</string>
 
     <string name="widget_placeholder_speed">0 B/s</string>
-    <string name="widget_placeholder_total">0 B</string>
 
     <string name="widget_metric_down">下载</string>
     <string name="widget_metric_up">上传</string>
     <string name="widget_metric_uptime">运行时长</string>
-    <string name="widget_metric_session">会话</string>
 
     <string name="widget_no_nodes">没有可用节点</string>
     <string name="widget_service_off">服务未运行</string>
