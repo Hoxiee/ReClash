@@ -1375,6 +1375,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash олардың еңбегі арқасында өмір сүреді",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage(
+      "Қалыпты импорт",
+    ),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash жазылымды өз атынан сұрайды және пішімді автоматты түрде анықтайды.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage(
+      "Happ үйлесімділік режимі",
+    ),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash өзін Happ қосымшасы ретінде таныстырып, оның пішімін оқиды. Провайдер түйіндерді Happ-қа бейімдеп бергенде қажет.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "Жазылымды импорттау",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "Бұл сілтеме Happ арқылы ашылды. Жазылымды Happ үйлесімділік режимінде сұрау керек пе, әлде ReClash-тың қалыпты тәсілімен бе?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Өзгерістер кэшке сақталсын ба?",
     ),
@@ -1523,9 +1541,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),

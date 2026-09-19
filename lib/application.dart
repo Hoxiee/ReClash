@@ -219,33 +219,47 @@ class ApplicationState extends ConsumerState<Application> {
     required SubscriptionClient preset,
     required Color color,
   }) async {
-    final trimmed =
-        subscriptionDisplaySource(source) ??
-        currentAppLocalizations.subscriptionConfigurationSource;
-    final message = currentAppLocalizations.createProfileFromUrlTip(trimmed);
-    final parts = message.split(trimmed);
-    final res = await dialogs.showMessage(
-      title: currentAppLocalizations.addProfile,
-      message: TextSpan(
-        children: [
-          TextSpan(text: parts.first),
-          TextSpan(
-            text: trimmed,
-            style: TextStyle(
-              color: color,
-              decoration: TextDecoration.underline,
-              decorationColor: color,
+    var effectivePreset = preset;
+    if (preset == SubscriptionClient.happ && content == null) {
+      final chosen = await dialogs.showHappImportChoice(
+        source: target.isNotEmpty ? target : source,
+        name: name,
+      );
+      if (chosen == null) return;
+      effectivePreset = chosen;
+    } else {
+      final trimmed =
+          subscriptionDisplaySource(source) ??
+          currentAppLocalizations.subscriptionConfigurationSource;
+      final message = currentAppLocalizations.createProfileFromUrlTip(trimmed);
+      final parts = message.split(trimmed);
+      final res = await dialogs.showMessage(
+        title: currentAppLocalizations.addProfile,
+        message: TextSpan(
+          children: [
+            TextSpan(text: parts.first),
+            TextSpan(
+              text: trimmed,
+              style: TextStyle(
+                color: color,
+                decoration: TextDecoration.underline,
+                decorationColor: color,
+              ),
             ),
-          ),
-          if (parts.length > 1) TextSpan(text: parts.last),
-        ],
-      ),
-    );
-    if (res != true) return;
+            if (parts.length > 1) TextSpan(text: parts.last),
+          ],
+        ),
+      );
+      if (res != true) return;
+    }
     final action = ref.read(profilesActionProvider.notifier);
     final request = content != null
         ? ProfileImportRequest.raw(content)
-        : ProfileImportRequest.link(target, client: preset, name: name);
+        : ProfileImportRequest.link(
+            target,
+            client: effectivePreset,
+            name: name,
+          );
     unawaited(action.importProfile(request));
   }
 
@@ -332,6 +346,7 @@ class ApplicationState extends ConsumerState<Application> {
   void dispose() {
     linkManager.destroy();
     _autoUpdateProfilesTaskTimer?.cancel();
+    unawaited(fileLogger.dispose());
     super.dispose();
   }
 }

@@ -1122,6 +1122,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "彼らの成果の上に ReClash があります",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("通常のインポート"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash 自身として購読を要求し、形式を自動的に判別します。",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage("Happ 互換モード"),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash を Happ アプリとして識別させ、その形式を読み込みます。プロバイダーが Happ 向けにノードを提供する場合に必要です。",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "サブスクリプションをインポート",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "このリンクは Happ 経由で開かれました。Happ 互換モードで購読を取得しますか、それとも ReClash の通常の方法にしますか？",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("変更をキャッシュしますか？"),
     "helperAgentUnavailable": MessageLookupByLibrary.simpleMessage(
       "システムの認証エージェントが利用できません。デスクトップセッションで polkit 認証エージェントを起動してから、再試行してください。",

@@ -1407,6 +1407,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash ularning mehnati tufayli mavjud",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("Oddiy import"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash obunani o\'z nomidan so\'raydi va formatni avtomatik aniqlaydi.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage(
+      "Happ moslik rejimi",
+    ),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash o\'zini Happ ilovasi sifatida taqdim etadi va uning formatini o\'qiydi. Provayder tugunlarni Happ uchun moslashtirib berganda kerak.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "Obunani import qilish",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "Bu havola Happ orqali ochildi. Obunani Happ moslik rejimida so\'raymizmi yoki ReClash\'ning oddiy usulida?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Oʻzgarishlar keshga saqlansinmi?",
     ),
@@ -1565,9 +1581,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),

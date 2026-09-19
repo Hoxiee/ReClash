@@ -63,11 +63,20 @@ class AddProfileView extends ConsumerWidget {
     }
     if (!context.mounted) return const ProfileImportResult.cancelled();
     final target = resolved?.url ?? url;
+    var effectiveClient = resolved?.preset ?? client;
+    if (resolved?.preset == SubscriptionClient.happ && target.isNotEmpty) {
+      final chosen = await dialogs.showHappImportChoice(
+        source: target,
+        name: resolved?.name,
+      );
+      if (chosen == null) return const ProfileImportResult.cancelled();
+      effectiveClient = chosen;
+    }
     final request = target.isEmpty
         ? ProfileImportRequest.raw(resolved!.data!)
         : ProfileImportRequest.link(
             target,
-            client: resolved?.preset ?? client,
+            client: effectiveClient,
             name: resolved?.name,
             customUserAgent: customUserAgent,
           );

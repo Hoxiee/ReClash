@@ -94,6 +94,20 @@ class Dialogs {
     );
   }
 
+  /// A Happ deep link forces the Happ preset, but the user may prefer ReClash
+  /// to fetch the subscription as itself. Returns the chosen client, or null
+  /// when cancelled.
+  Future<SubscriptionClient?> showHappImportChoice({
+    required String source,
+    String? name,
+    BuildContext? context,
+  }) {
+    return showCommonDialog<SubscriptionClient>(
+      context: context,
+      child: HappImportChoiceDialog(source: source, name: name),
+    );
+  }
+
   Future<bool?> showAllUpdatingMessagesDialog(
     List<UpdatingMessage> messages,
   ) async {
@@ -200,3 +214,108 @@ class _UpdatingMessageItem extends StatelessWidget {
 }
 
 final dialogs = Dialogs._();
+
+class HappImportChoiceDialog extends StatefulWidget {
+  const HappImportChoiceDialog({super.key, required this.source, this.name});
+
+  final String source;
+  final String? name;
+
+  @override
+  State<HappImportChoiceDialog> createState() => _HappImportChoiceDialogState();
+}
+
+class _HappImportChoiceDialogState extends State<HappImportChoiceDialog> {
+  SubscriptionClient _client = SubscriptionClient.happ;
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final displaySource =
+        subscriptionDisplaySource(widget.source) ?? widget.source.trim();
+    final name = widget.name?.trim();
+    return CommonDialog(
+      title: appLocalizations.happImportChoiceTitle,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(appLocalizations.cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_client),
+          child: Text(appLocalizations.import),
+        ),
+      ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              appLocalizations.happImportPrompt,
+              style: context.textTheme.bodyMedium?.toLighter,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (displaySource.isNotEmpty)
+            _HappImportDetailRow(
+              label: appLocalizations.source,
+              value: displaySource,
+            ),
+          if (name != null && name.isNotEmpty)
+            _HappImportDetailRow(label: appLocalizations.name, value: name),
+          const SizedBox(height: 8),
+          RadioGroup<SubscriptionClient>(
+            groupValue: _client,
+            onChanged: (value) {
+              if (value != null) setState(() => _client = value);
+            },
+            child: Column(
+              children: [
+                ListItem.radio(
+                  value: SubscriptionClient.happ,
+                  onTap: () =>
+                      setState(() => _client = SubscriptionClient.happ),
+                  title: Text(appLocalizations.happImportAsHapp),
+                  subtitle: Text(appLocalizations.happImportAsHappDesc),
+                ),
+                ListItem.radio(
+                  value: SubscriptionClient.auto,
+                  onTap: () =>
+                      setState(() => _client = SubscriptionClient.auto),
+                  title: Text(appLocalizations.happImportAsClient),
+                  subtitle: Text(appLocalizations.happImportAsClientDesc),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HappImportDetailRow extends StatelessWidget {
+  const _HappImportDetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Text(label, style: context.textTheme.bodySmall?.toLighter),
+          Expanded(
+            child: Text(value, style: context.textTheme.bodyMedium),
+          ),
+        ],
+      ),
+    );
+  }
+}

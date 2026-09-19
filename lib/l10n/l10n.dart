@@ -985,6 +985,66 @@ class AppLocalizations {
     );
   }
 
+  /// `Import subscription`
+  String get happImportChoiceTitle {
+    return Intl.message(
+      'Import subscription',
+      name: 'happImportChoiceTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?`
+  String get happImportPrompt {
+    return Intl.message(
+      'This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?',
+      name: 'happImportPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happ compatibility mode`
+  String get happImportAsHapp {
+    return Intl.message(
+      'Happ compatibility mode',
+      name: 'happImportAsHapp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash presents itself as the Happ app and reads its format. Needed when the provider serves nodes tailored to Happ.`
+  String get happImportAsHappDesc {
+    return Intl.message(
+      'ReClash presents itself as the Happ app and reads its format. Needed when the provider serves nodes tailored to Happ.',
+      name: 'happImportAsHappDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Normal import`
+  String get happImportAsClient {
+    return Intl.message(
+      'Normal import',
+      name: 'happImportAsClient',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ReClash requests the subscription as itself and detects the format automatically.`
+  String get happImportAsClientDesc {
+    return Intl.message(
+      'ReClash requests the subscription as itself and detects the format automatically.',
+      name: 'happImportAsClientDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `User-Agent`
   String get customUserAgentLabel {
     return Intl.message(

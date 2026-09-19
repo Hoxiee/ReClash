@@ -1325,6 +1325,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash exists because of their work",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("Normal import"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash requests the subscription as itself and detects the format automatically.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage(
+      "Happ compatibility mode",
+    ),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash presents itself as the Happ app and reads its format. Needed when the provider serves nodes tailored to Happ.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "Import subscription",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Cache the changes?",
     ),
@@ -1467,9 +1483,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),

@@ -1366,6 +1366,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash существует благодаря их работе",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage(
+      "Обычный импорт",
+    ),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash запрашивает подписку от своего имени и определяет формат автоматически.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage(
+      "Режим совместимости с Happ",
+    ),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash представляется приложением Happ и читает его формат. Нужно, если провайдер отдаёт узлы под Happ.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "Импорт подписки",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "Ссылка открыта через Happ. Запросить подписку в режиме совместимости с Happ или обычным способом ReClash?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Кэшировать изменения?",
     ),
@@ -1510,9 +1528,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),

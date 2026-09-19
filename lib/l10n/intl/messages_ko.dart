@@ -1115,6 +1115,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash는 이 프로젝트 덕분에 존재합니다",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("일반 가져오기"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 자체적으로 구독을 요청하고 형식을 자동으로 감지합니다.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage("Happ 호환 모드"),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash가 Happ 앱으로 식별되어 해당 형식을 읽습니다. 공급자가 Happ에 맞춰 노드를 제공할 때 필요합니다.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage("구독 가져오기"),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "이 링크는 Happ를 통해 열렸습니다. Happ 호환 모드로 구독을 요청할까요, 아니면 ReClash의 일반 방식으로 할까요?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("변경 사항을 캐시하시겠습니까?"),
     "helperAgentUnavailable": MessageLookupByLibrary.simpleMessage(
       "시스템 인증 에이전트를 사용할 수 없습니다. 데스크톱 세션에서 polkit 인증 에이전트를 실행한 후 다시 시도하세요.",

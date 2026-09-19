@@ -1384,6 +1384,22 @@ class MessageLookup extends MessageLookupByLibrary {
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage(
       "ReClash olaryň zähmeti sebäpli bar",
     ),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("Adaty import"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash abunany öz adyndan soraýar we formaty awtomatiki kesgitleýär.",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage(
+      "Happ gabat gelşik režimi",
+    ),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash özüni Happ programmasy hökmünde tanadyp, onuň formatyny okaýar. Üpjün ediji düwünleri Happ üçin uýgunlaşdyryp berende gerek.",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage(
+      "Abunany import et",
+    ),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "Bu salgy Happ arkaly açyldy. Abunany Happ gabat gelşik režiminde sorajakmy ýa-da ReClash-yň adaty usulynda?",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage(
       "Üýtgeşmeleri keşde saklamak isleýärsiňizmi?",
     ),
@@ -1528,9 +1544,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),

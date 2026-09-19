@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/theme.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -302,5 +305,72 @@ void main() {
     expect(find.text('reduced body'), findsNothing);
     expect(await result, isTrue);
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('showHappImportChoice shows the source, name and both modes', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+
+    unawaited(
+      dialogs.showHappImportChoice(
+        source: 'https://panel.example.com/sub',
+        name: 'My subscription',
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('https://panel.example.com/sub'), findsOneWidget);
+    expect(find.text('My subscription'), findsOneWidget);
+    expect(find.text('Happ compatibility mode'), findsOneWidget);
+    expect(find.text('Normal import'), findsOneWidget);
+  });
+
+  testWidgets('showHappImportChoice defaults to Happ on Import', (tester) async {
+    await _pumpHost(tester);
+
+    final result = dialogs.showHappImportChoice(
+      source: 'https://panel.example.com/sub',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Import'));
+    await tester.pumpAndSettle();
+
+    expect(await result, SubscriptionClient.happ);
+  });
+
+  testWidgets('showHappImportChoice returns auto when ReClash is picked', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+
+    final result = dialogs.showHappImportChoice(
+      source: 'https://panel.example.com/sub',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Normal import'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Import'));
+    await tester.pumpAndSettle();
+
+    expect(await result, SubscriptionClient.auto);
+  });
+
+  testWidgets('showHappImportChoice returns null when cancelled', (
+    tester,
+  ) async {
+    await _pumpHost(tester);
+
+    final result = dialogs.showHappImportChoice(
+      source: 'https://panel.example.com/sub',
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(await result, isNull);
   });
 }

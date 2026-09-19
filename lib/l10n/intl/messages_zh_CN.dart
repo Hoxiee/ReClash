@@ -993,6 +993,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "goroutineInfo": MessageLookupByLibrary.simpleMessage("协程"),
     "gratitude": MessageLookupByLibrary.simpleMessage("致谢"),
     "gratitudeDesc": MessageLookupByLibrary.simpleMessage("ReClash 建立在他们的工作之上"),
+    "happImportAsClient": MessageLookupByLibrary.simpleMessage("常规导入"),
+    "happImportAsClientDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash 以自身身份请求订阅并自动识别格式。",
+    ),
+    "happImportAsHapp": MessageLookupByLibrary.simpleMessage("Happ 兼容模式"),
+    "happImportAsHappDesc": MessageLookupByLibrary.simpleMessage(
+      "ReClash 将自身标识为 Happ 应用并读取其格式。当服务商为 Happ 定制节点时需要。",
+    ),
+    "happImportChoiceTitle": MessageLookupByLibrary.simpleMessage("导入订阅"),
+    "happImportPrompt": MessageLookupByLibrary.simpleMessage(
+      "此链接通过 Happ 打开。以 Happ 兼容模式请求订阅，还是使用 ReClash 的常规方式？",
+    ),
     "hasCacheChange": MessageLookupByLibrary.simpleMessage("是否缓存修改"),
     "helperAgentUnavailable": MessageLookupByLibrary.simpleMessage(
       "系统授权代理不可用。请在桌面会话中启动 polkit 身份验证代理，然后重试。",
