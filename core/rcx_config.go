@@ -138,6 +138,7 @@ const (
 	rcxWaveWidth          = 12
 	rcxProofTTLMinutes    = 30
 	rcxDegradeConfirmSec  = 60
+	rcxColdConfirmSec     = 15
 	rcxProbeConcurrency   = 2
 	rcxProbeStaggerMs     = 250
 	rcxLiveWindowSeconds  = 60
@@ -274,6 +275,7 @@ func (c rcxConfig) policy() rcxPolicy {
 		Strategy:            c.Strategy,
 		RequireUDP:          c.RequireUDP,
 		AllowDomesticLast:   c.AllowDomesticLastResort,
+		Censoring:           len(c.CensorCountries) > 0,
 		DwellSeconds:        c.DwellSeconds,
 		DegradedBandPenalty: rcxDegradedPenalty,
 	}

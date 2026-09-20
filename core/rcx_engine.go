@@ -370,6 +370,7 @@ type rcxEngine struct {
 	screenDead       string
 	screenFailedOver bool
 	conns            map[string]int64
+	upConns          map[string]int64
 	keys             map[string]string
 	names            map[string]string
 	direct           string
@@ -1360,7 +1361,9 @@ func (e *rcxEngine) sampleTraffic() {
 	now := e.runtime.Now()
 	conns := e.runtime.Connections()
 	previous := e.conns
+	previousUp := e.upConns
 	e.conns = make(map[string]int64, len(conns))
+	e.upConns = make(map[string]int64, len(conns))
 	e.mu.RLock()
 	markers := e.openHosts
 	e.mu.RUnlock()
@@ -1368,8 +1371,11 @@ func (e *rcxEngine) sampleTraffic() {
 	alive := false
 	for _, conn := range conns {
 		answered := conn.Down > previous[conn.Key]
+		_, seen := previous[conn.Key]
+		uploading := seen && conn.Up > previousUp[conn.Key]
 		alive = alive || answered
 		e.conns[conn.Key] = conn.Down
+		e.upConns[conn.Key] = conn.Up
 		if conn.Node == "" || conn.Node == "DIRECT" {
 			continue
 		}
@@ -1383,8 +1389,8 @@ func (e *rcxEngine) sampleTraffic() {
 		case answered:
 			flow.progress = true
 			flow.open = flow.open || rcxMarkerRelated(markers, conn.Host)
-		// Answered once means idle, not starved: only payload never answered accuses.
-		case conn.Down == 0 && conn.Up > 0 && now.Sub(conn.Start) >= rcxConnStallAge:
+		// Growing Up is a live link (§1.9); only payload never answered nor still uploading accuses.
+		case conn.Down == 0 && conn.Up > 0 && !uploading && now.Sub(conn.Start) >= rcxConnStallAge:
 			flow.stalled++
 			if conn.Node == e.incumbent {
 				e.incidentConns[conn.Key] = struct{}{}
@@ -1493,6 +1499,21 @@ func (e *rcxEngine) notePayload(node string, openWorld bool, now time.Time) {
 	e.noteProviderSuccess(node)
 }
 
+func (e *rcxEngine) confirmWindow(key, node string) time.Duration {
+	full := time.Duration(e.cfg.DegradeConfirmSeconds) * time.Second
+	if node != e.incumbent {
+		return full
+	}
+	if !e.ledger.ProgressAt(key, e.envKey).IsZero() || !e.ledger.OpenAt(key, e.envKey).IsZero() {
+		return full
+	}
+	cold := rcxColdConfirmSec * time.Second
+	if cold < full {
+		return cold
+	}
+	return full
+}
+
 func (e *rcxEngine) trackFrozenPayload(node string, now time.Time) {
 	if !e.chargesNegative(now) {
 		return
@@ -1512,7 +1533,7 @@ func (e *rcxEngine) trackFrozenPayload(node string, now time.Time) {
 		e.downFrozen[key] = now
 		return
 	}
-	if now.Sub(frozen) < time.Duration(e.cfg.DegradeConfirmSeconds)*time.Second {
+	if now.Sub(frozen) < e.confirmWindow(key, node) {
 		return
 	}
 	e.ledger.NoteDegraded(key, e.envKey, now)

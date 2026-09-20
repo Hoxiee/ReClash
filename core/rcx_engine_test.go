@@ -1700,12 +1700,12 @@ func TestEngineKeepsTheVerdictsOfAWaveThatGotAnAnswer(t *testing.T) {
 // A request that asked and was never answered, held open across a confirmation
 // window.
 func freezePayload(engine *rcxEngine, runtime *fakeRuntime, node string) {
+	// A stuck ClientHello bursts Up once then goes silent; the second sample only crosses the confirm window.
 	runtime.openConn("starved", node, "example.org")
 	runtime.bumpConn("starved", 1000, 0)
 	runtime.advance(rcxConnStallAge)
 	engine.sampleTraffic()
 	runtime.advance(time.Duration(engine.cfg.DegradeConfirmSeconds+1) * time.Second)
-	runtime.bumpConn("starved", 3000, 0)
 	engine.sampleTraffic()
 }
 
@@ -1732,7 +1732,6 @@ func TestEngineConfirmsAFreezeBeforeBlamingTheNode(t *testing.T) {
 	}
 
 	runtime.advance(time.Duration(engine.cfg.DegradeConfirmSeconds+1) * time.Second)
-	runtime.bumpConn("req", 3000, 0)
 	engine.sampleTraffic()
 
 	if !engine.ledger.Degraded("node", "w:Home", runtime.Now()) {
@@ -1750,6 +1749,41 @@ func TestEngineConfirmsAFreezeBeforeBlamingTheNode(t *testing.T) {
 	}
 	if engine.ledger.Stalled("node", "w:Home") {
 		t.Error("payload is the answer the suspicion was waiting for")
+	}
+}
+
+func TestEngineConfirmsAColdIncumbentFasterThanASettledOne(t *testing.T) {
+	shortWindow := time.Duration(rcxColdConfirmSec)*time.Second + time.Second
+
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("node")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "node"
+	runtime.openConn("req", "node", "example.org")
+	runtime.bumpConn("req", 1000, 0)
+	runtime.advance(rcxConnStallAge)
+	engine.sampleTraffic()
+	runtime.advance(shortWindow)
+	engine.sampleTraffic()
+
+	if !engine.ledger.Degraded("node", "w:Home", runtime.Now()) {
+		t.Fatal("a cold incumbent that never moved a byte owes no benefit of the doubt")
+	}
+
+	proven := newFakeRuntime()
+	proven.members = foreignMembers("node")
+	engine2 := newTestEngine(proven, "ru")
+	engine2.incumbent = "node"
+	engine2.ledger.NoteTrafficProgress("node", "w:Home", false, proven.Now())
+	proven.openConn("req", "node", "example.org")
+	proven.bumpConn("req", 1000, 0)
+	proven.advance(rcxConnStallAge)
+	engine2.sampleTraffic()
+	proven.advance(shortWindow)
+	engine2.sampleTraffic()
+
+	if engine2.ledger.Degraded("node", "w:Home", proven.Now()) {
+		t.Error("a node that proved passage keeps the full window against noise")
 	}
 }
 
@@ -1827,6 +1861,34 @@ func TestEngineRefusesUploadAsProofOfTransit(t *testing.T) {
 	}
 	if len(engine.downFrozen) == 0 {
 		t.Error("payload that left and was never answered is the freeze signal itself")
+	}
+}
+
+// Growing Up is proof the link is alive (§1.9), so a minutes-long upload with
+// nothing coming back must never freeze, even past a stuck ClientHello's window.
+func TestEngineKeepsAGrowingUploadAlive(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("node")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "node"
+
+	runtime.openConn("upload", "node", "example.org")
+	runtime.bumpConn("upload", 1<<20, 0)
+	runtime.advance(rcxConnStallAge)
+	engine.sampleTraffic()
+
+	ticks := engine.cfg.DegradeConfirmSeconds/int(rcxWatchInterval/time.Second) + 2
+	for i := 0; i < ticks; i++ {
+		runtime.advance(rcxWatchInterval)
+		runtime.bumpConn("upload", 1<<20, 0)
+		engine.sampleTraffic()
+	}
+
+	if len(engine.downFrozen) != 0 {
+		t.Error("a still-growing upload is a live link, not a stuck handshake")
+	}
+	if engine.ledger.Stalled(engine.key("node"), engine.envKey) {
+		t.Error("a node moving upload bytes must not be marked stalled")
 	}
 }
 

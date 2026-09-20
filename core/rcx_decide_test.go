@@ -471,6 +471,25 @@ func TestDecidePicksFromThePriorWithoutProbesOnColdStart(t *testing.T) {
 	}
 }
 
+func TestDecideDoesNotLatchAFasterDomesticNodeOnACensoredColdStart(t *testing.T) {
+	home := rcxNode("moscow", domesticUntested())
+	home.Evidence, home.MedianMs, home.HostMs = rcxEvidenceNone, 0, 38
+	abroad := rcxNode("nl-1", foreignUntested())
+	abroad.Evidence, abroad.MedianMs, abroad.HostMs = rcxEvidenceNone, 0, 120
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{home, abroad},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want the foreign node, not the closer home ping", got)
+	}
+}
+
 func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	throttled := rcxNode("nl-1", foreignProven())

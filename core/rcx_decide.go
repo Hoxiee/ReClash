@@ -238,6 +238,7 @@ type rcxKey struct {
 	degraded   bool
 	unproven   bool
 	evidence   rcxEvidence
+	homeRisk   uint8
 	latencyMs  int
 	latBucket  uint8
 	challenger bool
@@ -277,6 +278,12 @@ func rcxCompare(a, b rcxKey) int {
 	}
 	if a.evidence != b.evidence {
 		if a.evidence < b.evidence {
+			return -1
+		}
+		return 1
+	}
+	if a.homeRisk != b.homeRisk {
+		if a.homeRisk < b.homeRisk {
 			return -1
 		}
 		return 1
@@ -336,6 +343,7 @@ type rcxPolicy struct {
 	Strategy            string
 	RequireUDP          bool
 	AllowDomesticLast   bool
+	Censoring           bool
 	DwellSeconds        int
 	DegradedBandPenalty uint8
 }
@@ -404,6 +412,7 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		degraded:   c.Degraded,
 		unproven:   c.Facts.Transit != rcxProofProven,
 		evidence:   evidence,
+		homeRisk:   rcxHomeRisk(in.Policy, c.Facts),
 		latencyMs:  latencyMs,
 		latBucket:  rcxLatencyBucket(c, in.Policy.LatencyBands),
 		challenger: c.Name != in.Incumbent,
@@ -419,6 +428,23 @@ func rcxDiscoveryLatency(c rcxCandidate) int {
 		return c.HostMs
 	}
 	return 0
+}
+
+// Host-ping favours home, so an unmeasured domestic node would latch on latency before a probe exposes it; rank by egress-in-country instead.
+func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
+	if !policy.Censoring {
+		return 0
+	}
+	if f.Transit == rcxProofProven || f.OpenWorld == rcxProofProven {
+		return 0
+	}
+	if f.Exit == rcxOriginForeign {
+		return 0
+	}
+	if f.Exit == rcxOriginDomestic || f.Origin == rcxOriginDomestic {
+		return 2
+	}
+	return 1
 }
 
 func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
