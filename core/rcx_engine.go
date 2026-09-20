@@ -2521,6 +2521,12 @@ func (e *rcxEngine) needsProbe(decision rcxDecision, candidates []rcxCandidate) 
 	return e.incumbent == ""
 }
 
+// Domestic bytes are not open-world proof, so under censorship a live-but-unproven
+// node keeps earning routine probes instead of latching as dead weight.
+func (e *rcxEngine) openUnverified(c rcxCandidate) bool {
+	return len(e.cfg.CensorCountries) > 0 && c.Facts.OpenWorld != rcxProofProven
+}
+
 // A rescue and a hand-asked sweep answer what the user sees, outside the cap.
 type rcxWaveKind uint8
 
@@ -2618,7 +2624,7 @@ func (e *rcxEngine) planWave(
 				continue
 			}
 		} else if !reactive && kind != rcxWaveDeep && member.Name != suspect &&
-			candidate.Evidence == rcxEvidenceLiveTraffic {
+			candidate.Evidence == rcxEvidenceLiveTraffic && !e.openUnverified(candidate) {
 			continue
 		}
 		if kind == rcxWaveRoutine || kind == rcxWaveMaintain {

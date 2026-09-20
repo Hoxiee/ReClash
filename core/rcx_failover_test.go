@@ -483,3 +483,29 @@ func TestQuarantineSweepSparesTheProvenIncumbent(t *testing.T) {
 		t.Fatal("a non-incumbent with no marker evidence should be recomputed to unknown")
 	}
 }
+
+func TestLiveTrafficWithoutOpenProofStillProbesUnderCensorship(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("carrier", "proven")
+	engine := newTestEngine(runtime, "ru")
+	now := runtime.Now()
+	// Both carry live traffic; only "proven" has demonstrated it opens the marker.
+	engine.ledger.NoteTrafficProgress("carrier", engine.envKey, false, now)
+	engine.ledger.NoteTrafficProgress("proven", engine.envKey, true, now)
+
+	inPool := func(wave []rcxProbeNode, name string) bool {
+		for _, node := range wave {
+			if node.Name == name {
+				return true
+			}
+		}
+		return false
+	}
+	wave := engine.planWave(engine.candidates(runtime.members), runtime.members, rcxWaveRoutine)
+	if !inPool(wave, "carrier") {
+		t.Fatal("a live node that never opened the censored world skipped its probe")
+	}
+	if inPool(wave, "proven") {
+		t.Fatal("a proven-open live node still paid for a routine probe")
+	}
+}
