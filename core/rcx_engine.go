@@ -738,8 +738,8 @@ func (e *rcxEngine) handle(event rcxEvent) {
 			break
 		}
 		if negative {
-			// One health-check miss leaves a proven incumbent's proof standing; escrow still accrues.
-			if !e.incumbentHoldsFreshOpen(e.key(event.Node), now) {
+			// One health-check miss leaves any freshly proven node's proof standing; escrow still accrues.
+			if !e.freshlyOpenProven(e.key(event.Node), now) {
 				e.ledger.NoteHarvestedProbe(e.key(event.Node), e.envKey, event.DelayMs, now)
 			}
 			e.escrowNegative(event.Node, 0, now)

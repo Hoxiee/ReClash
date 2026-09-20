@@ -677,14 +677,25 @@ func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
 }
 
 func TestCompareLatencyKeepsReliabilityAboveLatency(t *testing.T) {
-	fastAndNew := rcxKey{latencyMs: 0, evidence: rcxEvidenceNone, unproven: true}
-	slowAndKnown := rcxKey{latencyMs: 1, evidence: rcxEvidenceFreshProbe}
+	// An unmeasured stranger carries the maxint sentinel rcxKeyOf stamps on it, so
+	// it still loses to any measured node without evidence needing to outrank speed.
+	stranger := rcxKey{latencyMs: int(^uint(0) >> 1), evidence: rcxEvidenceNone, unproven: true}
+	measured := rcxKey{latencyMs: 90, evidence: rcxEvidenceFreshProbe}
 
-	if rcxCompare(fastAndNew, slowAndKnown) <= 0 {
-		t.Error("a measured working node must beat a faster stranger")
+	if rcxCompare(stranger, measured) <= 0 {
+		t.Error("a measured working node must beat an unmeasured stranger")
 	}
-	if rcxCompareLatency(fastAndNew, slowAndKnown) <= 0 {
-		t.Error("lowest-latency must not trade reachability evidence for milliseconds")
+	if rcxCompareLatency(stranger, measured) <= 0 {
+		t.Error("lowest-latency must not pick an unmeasured stranger over a measured node")
+	}
+}
+
+func TestCompareFastIdleBeatsSlowBusyInTier(t *testing.T) {
+	fastIdle := rcxKey{latencyMs: 50, evidence: rcxEvidenceNone}
+	slowBusy := rcxKey{latencyMs: 200, evidence: rcxEvidenceLiveTraffic}
+
+	if rcxCompare(fastIdle, slowBusy) >= 0 {
+		t.Error("inside one tier the faster node must beat a slower one merely carrying bytes")
 	}
 }
 

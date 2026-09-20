@@ -24,7 +24,7 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 	negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
 	if negative && result.Role == rcxRoleOpen &&
 		(e.trafficSince(key, e.probeLaunchedAt, now) ||
-			!rcxReactiveWave(e.probeKind) && e.incumbentHoldsFreshOpen(key, now)) {
+			!rcxReactiveWave(e.probeKind) && e.freshlyOpenProven(key, now)) {
 		return
 	}
 	charge := !negative || e.chargesNegative(now)
@@ -107,12 +107,22 @@ func rcxReactiveWave(kind rcxWaveKind) bool {
 	return kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveHandoff || kind == rcxWaveGrant
 }
 
-func (e *rcxEngine) incumbentHoldsFreshOpen(key string, now time.Time) bool {
-	if key == "" || key != e.key(e.incumbent) {
+// A single missed marker is a 12s freeze, not a refutation: any node that lately
+// proved it opens the censored world keeps that proof through one non-reactive
+// miss, so a slow probe cannot evict a working challenger like it did the latch.
+func (e *rcxEngine) freshlyOpenProven(key string, now time.Time) bool {
+	if key == "" {
 		return false
 	}
 	ttl := rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))
 	return e.ledger.OpenProven(key, e.envKey, now, ttl)
+}
+
+func (e *rcxEngine) incumbentHoldsFreshOpen(key string, now time.Time) bool {
+	if key == "" || key != e.key(e.incumbent) {
+		return false
+	}
+	return e.freshlyOpenProven(key, now)
 }
 
 func (e *rcxEngine) tryMainProbeRecovery(node string, now time.Time) {

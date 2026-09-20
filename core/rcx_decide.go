@@ -270,8 +270,16 @@ func rcxCompare(a, b rcxKey) int {
 		}
 		return 1
 	}
-	if a.unproven != b.unproven {
-		if !a.unproven {
+	if a.homeRisk != b.homeRisk {
+		if a.homeRisk < b.homeRisk {
+			return -1
+		}
+		return 1
+	}
+	// Latency outranks "who is carrying bytes right now": inside one verdict tier
+	// the faster node wins, so a busy 200ms node no longer beats an idle 50ms one.
+	if a.latencyMs != b.latencyMs {
+		if a.latencyMs < b.latencyMs {
 			return -1
 		}
 		return 1
@@ -282,14 +290,8 @@ func rcxCompare(a, b rcxKey) int {
 		}
 		return 1
 	}
-	if a.homeRisk != b.homeRisk {
-		if a.homeRisk < b.homeRisk {
-			return -1
-		}
-		return 1
-	}
-	if a.latencyMs != b.latencyMs {
-		if a.latencyMs < b.latencyMs {
+	if a.unproven != b.unproven {
+		if !a.unproven {
 			return -1
 		}
 		return 1

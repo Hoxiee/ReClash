@@ -140,6 +140,20 @@ func (l *rcxLedger) ProofTTL() time.Duration {
 	return l.policy.ProofTTL
 }
 
+// A marker one node still passes is not down: the failures elsewhere are node
+// deaths, so they must not quarantine it and blind every other node with it.
+func (l *rcxLedger) MarkerFreshlyPassing(envKey, markerID string, now time.Time) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	for _, state := range l.envs[envKey] {
+		evidence, ok := state.Markers[markerID]
+		if ok && evidence.Outcome == rcxProbeOK && rcxFreshAt(evidence.At, now, l.policy.ProofTTL) {
+			return true
+		}
+	}
+	return false
+}
+
 func (l *rcxLedger) SetFingerprints(open, domestic string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()

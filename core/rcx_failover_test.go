@@ -433,7 +433,7 @@ func TestOpenMissKeepsProvenIncumbentUnlessReactive(t *testing.T) {
 	}
 }
 
-func TestHarvestMissKeepsProvenIncumbent(t *testing.T) {
+func TestHarvestMissKeepsAnyFreshlyProvenNode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("current", "rival")
 	engine := newTestEngine(runtime, "ru")
@@ -449,13 +449,13 @@ func TestHarvestMissKeepsProvenIncumbent(t *testing.T) {
 		t.Fatal("a lone health-check miss disproved the working incumbent")
 	}
 
-	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "rival", DelayMs: 0})
+	// A freshly proven non-incumbent (yesterday's abandoned Sweden) must survive a
+	// lone health-check miss too: only a reactive wave or the traffic detector kills.
 	engine.ledger.NoteProbe("rival", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
-	engine.incumbent = "rival"
-	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
-	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "current", DelayMs: 0})
-	if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
-		t.Fatal("a non-incumbent must still lose its proof on a health-check miss")
+	engine.incumbent = "current"
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "rival", DelayMs: 0})
+	if !engine.ledger.OpenProven("rival", engine.envKey, now, ttl) {
+		t.Fatal("a lone health-check miss disproved a freshly proven challenger")
 	}
 }
 

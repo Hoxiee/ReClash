@@ -54,6 +54,9 @@ func (e *rcxEngine) noteMarkerFailure(markerID, node string, now time.Time) {
 		e.ledger.Exit(member.key(), now) != rcxOriginForeign {
 		return
 	}
+	if e.ledger.MarkerFreshlyPassing(e.envKey, markerID, now) {
+		return
+	}
 	bucket := rcxFailureBucket(member)
 	quarantine := e.snapshot.Quarantines[markerID]
 	failures := quarantine.Failures[:0]
@@ -155,7 +158,29 @@ func (e *rcxEngine) activeMarkers(role rcxRole, now time.Time) []rcxMarker {
 			active = append(active, marker)
 		}
 	}
+	// Quarantining every open marker blinds the engine into one collapsed tier; keep the nearest-to-expiry one live rather than go dark.
+	if len(active) == 0 && len(markers) > 0 && role == rcxRoleOpen {
+		if fallback, ok := e.soonestMarker(role); ok {
+			active = append(active, fallback)
+		}
+	}
 	return active
+}
+
+func (e *rcxEngine) soonestMarker(role rcxRole) (rcxMarker, bool) {
+	var best rcxMarker
+	var bestUntil time.Time
+	found := false
+	for _, marker := range e.configMarkers(role) {
+		quarantine, ok := e.snapshot.Quarantines[rcxMarkerID(role, marker)]
+		if !ok {
+			return marker, true
+		}
+		if !found || quarantine.Until.Before(bestUntil) {
+			best, bestUntil, found = marker, quarantine.Until, true
+		}
+	}
+	return best, found
 }
 
 func (e *rcxEngine) markerIDs(role rcxRole, now time.Time) []string {
