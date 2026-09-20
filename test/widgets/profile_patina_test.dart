@@ -11,7 +11,7 @@ void main() {
   testWidgets('dust leaves from the touch and disappears after 600 ms', (
     tester,
   ) async {
-    final level = ValueNotifier(3);
+    final level = ValueNotifier<double>(3);
     addTearDown(level.dispose);
     const key = ValueKey('patina-raster');
     await tester.pumpWidget(
@@ -19,7 +19,7 @@ void main() {
         child: Center(
           child: RepaintBoundary(
             key: key,
-            child: ValueListenableBuilder<int>(
+            child: ValueListenableBuilder<double>(
               valueListenable: level,
               builder: (_, value, _) => ProfilePatina(
                 level: value,
@@ -69,7 +69,7 @@ void main() {
   });
 
   testWidgets('reduced motion removes dust without a ticker', (tester) async {
-    Future<void> show(int level) => tester.pumpWidget(
+    Future<void> show(double level) => tester.pumpWidget(
       TestApp(
         child: ProfilePatina(
           level: level,

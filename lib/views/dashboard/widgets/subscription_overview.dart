@@ -1,14 +1,39 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/core/controller.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/hero_words.dart';
-import 'package:reclash/views/profiles/edit.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// Wraps one detail block in the surface its host uses: the sheet paints a
+/// solid card, the dashboard board a translucent one over the wallpaper.
+typedef SubscriptionCardWrap = Widget Function(Widget child, {Color? tone});
+
+/// The single source for the subscription facts. Every surface that shows them
+/// -- the sheet, the pager's second page, the split board's right column --
+/// builds from this list so a fact lives in one place, not three.
+List<Widget> subscriptionDetailCards(
+  BuildContext context,
+  Profile profile, {
+  required SubscriptionCardWrap wrap,
+}) {
+  final panelMeta = profile.panelMeta;
+  final announce = panelMeta?.announce?.trim();
+  return [
+    for (final notice in _notices(context, profile))
+      wrap(_NoticeBody(notice: notice), tone: notice.tone),
+    _ProviderCard(profile: profile, wrap: wrap),
+    if (announce != null && announce.isNotEmpty)
+      wrap(_AnnounceBody(text: announce)),
+    wrap(const _SystemBody()),
+  ];
+}
 
 class SubscriptionOverviewView extends ConsumerWidget {
   const SubscriptionOverviewView({super.key});
@@ -23,9 +48,14 @@ class SubscriptionOverviewView extends ConsumerWidget {
         body: CustomScrollView(
           slivers: [
             _sliver(
-              _NoticeCard(
-                icon: Icons.folder_off_rounded,
-                text: appLocalizations.nullProfileDesc,
+              _sheetCard(
+                _NoticeBody(
+                  notice: (
+                    icon: Icons.folder_off_rounded,
+                    text: appLocalizations.nullProfileDesc,
+                    tone: null,
+                  ),
+                ),
               ),
             ),
             const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
@@ -34,36 +64,16 @@ class SubscriptionOverviewView extends ConsumerWidget {
       );
     }
 
-    final panelMeta = profile.panelMeta;
-    final subscriptionInfo = profile.subscriptionInfo;
-    final hasDetails = subscriptionInfo != null && subscriptionInfo.hasFacts;
-    final offers = _offersOf(context, panelMeta);
     return CommonScaffold(
       title: appLocalizations.metaInfo,
       body: CustomScrollView(
         slivers: [
-          if (profile.undialableNodes)
-            _sliver(
-              _NoticeCard(
-                icon: Icons.wifi_off_rounded,
-                text: appLocalizations.subscriptionUndialable,
-                tone: context.colorScheme.error,
-                onTap: () => _handleShowEditExtendPage(context, profile),
-              ),
-            ),
-          for (final notice in _notices(context, panelMeta)) _sliver(notice),
-          if (hasDetails)
-            _sliver(_UsageDetailsCard(subscriptionInfo: subscriptionInfo))
-          else
-            _sliver(
-              _NoticeCard(
-                icon: Icons.data_usage_rounded,
-                text: appLocalizations.subscriptionNoQuota,
-              ),
-            ),
-          _sliver(_AccountDetailsCard(profile: profile)),
-          _sliver(_RefreshCard(profile: profile)),
-          if (offers.isNotEmpty) _sliver(_OffersCard(offers: offers)),
+          for (final card in subscriptionDetailCards(
+            context,
+            profile,
+            wrap: (child, {tone}) => _sheetCard(child, tone: tone),
+          ))
+            _sliver(card),
           const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
         ],
       ),
@@ -71,74 +81,46 @@ class SubscriptionOverviewView extends ConsumerWidget {
   }
 }
 
-void _handleShowEditExtendPage(BuildContext context, Profile profile) {
-  showExtend(
-    context,
-    builder: (context) => AdaptiveSheetScaffold(
-      title: context.appLocalizations.edit,
-      body: EditProfileView(profile: profile, context: context),
-    ),
-  );
-}
-
 Widget _sliver(Widget child) => SliverPadding(
   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
   sliver: SliverToBoxAdapter(child: child),
 );
 
-List<Widget> _notices(BuildContext context, PanelMeta? panelMeta) {
-  if (panelMeta == null) return const [];
+/// The sheet's own surface: solid card, tinted when a notice carries a tone.
+Widget _sheetCard(Widget child, {Color? tone}) => _Card(tone: tone, child: child);
+
+typedef _Notice = ({IconData icon, String text, Color? tone});
+
+List<_Notice> _notices(BuildContext context, Profile profile) {
   final appLocalizations = context.appLocalizations;
   final colorScheme = context.colorScheme;
-  final announce = panelMeta.announce?.trim();
-  final newDomain = panelMeta.newDomain?.trim();
+  final panelMeta = profile.panelMeta;
+  final newDomain = panelMeta?.newDomain?.trim();
   return [
-    if (panelMeta.hwidMaxDevicesReached)
-      _NoticeCard(
+    if (profile.undialableNodes)
+      (
+        icon: Icons.wifi_off_rounded,
+        text: appLocalizations.subscriptionUndialable,
+        tone: colorScheme.error,
+      ),
+    if (panelMeta?.hwidMaxDevicesReached ?? false)
+      (
         icon: Icons.devices_other_rounded,
         text: appLocalizations.deviceLimitReached,
         tone: colorScheme.error,
       ),
-    if (panelMeta.hwidNotSupported)
-      _NoticeCard(
+    if (panelMeta?.hwidNotSupported ?? false)
+      (
         icon: Icons.report_gmailerrorred_rounded,
         text: appLocalizations.panelHwidNotSupported,
         tone: colorScheme.tertiary,
       ),
-    if (announce != null && announce.isNotEmpty)
-      _NoticeCard(
-        icon: Icons.campaign_rounded,
-        text: announce,
-        tone: colorScheme.primary,
-      ),
     if (newDomain != null && newDomain.isNotEmpty)
-      _NoticeCard(
+      (
         icon: Icons.swap_horiz_rounded,
         text: appLocalizations.subscriptionDomainMoved(newDomain),
+        tone: null,
       ),
-  ];
-}
-
-List<(IconData, String, String)> _offersOf(
-  BuildContext context,
-  PanelMeta? panelMeta,
-) {
-  if (panelMeta == null) return const [];
-  final appLocalizations = context.appLocalizations;
-  final buyPlanUrl = panelMeta.buyPlanUrl;
-  final buyTrafficUrl = panelMeta.buyTrafficUrl;
-  final supportUrl = panelMeta.supportUrl;
-  return [
-    if (buyPlanUrl != null && buyPlanUrl.isNotEmpty)
-      (Icons.autorenew_rounded, appLocalizations.renewSubscription, buyPlanUrl),
-    if (buyTrafficUrl != null && buyTrafficUrl.isNotEmpty)
-      (
-        Icons.add_shopping_cart_rounded,
-        appLocalizations.topUpTraffic,
-        buyTrafficUrl,
-      ),
-    if (supportUrl != null && supportUrl.isNotEmpty)
-      (Icons.support_agent_rounded, appLocalizations.support, supportUrl),
   ];
 }
 
@@ -166,40 +148,24 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _NoticeCard extends StatelessWidget {
-  const _NoticeCard({
-    required this.icon,
-    required this.text,
-    this.tone,
-    this.onTap,
-  });
+class _NoticeBody extends StatelessWidget {
+  const _NoticeBody({required this.notice});
 
-  final IconData icon;
-  final String text;
-  final Color? tone;
-  final VoidCallback? onTap;
+  final _Notice notice;
 
   @override
   Widget build(BuildContext context) {
-    final onTap = this.onTap;
-    final tone = this.tone ?? context.colorScheme.onSurfaceVariant;
-    final card = _Card(
-      tone: this.tone,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: tone),
-          const SizedBox(width: 12),
-          Expanded(child: Text(text, style: context.textTheme.bodyMedium)),
-          if (onTap != null) ...[
-            const SizedBox(width: 8),
-            Icon(Icons.chevron_right_rounded, size: 20, color: tone),
-          ],
-        ],
-      ),
+    final tone = notice.tone ?? context.colorScheme.onSurfaceVariant;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(notice.icon, size: 20, color: tone),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(notice.text, style: context.textTheme.bodyMedium),
+        ),
+      ],
     );
-    if (onTap == null) return card;
-    return InkWell(customBorder: AppShape.xl, onTap: onTap, child: card);
   }
 }
 
@@ -263,211 +229,13 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 1,
-    color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-  );
-}
-
-class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.tone,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color tone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: ShapeDecoration(
-        shape: AppShape.md,
-        color: tone.withValues(alpha: 0.08),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: tone),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              fontFamily: FontFamily.jetBrainsMono.value,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UsageDetailsCard extends StatelessWidget {
-  const _UsageDetailsCard({required this.subscriptionInfo});
-
-  final SubscriptionInfo subscriptionInfo;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    final used = subscriptionInfo.upload + subscriptionInfo.download;
-    final total = subscriptionInfo.total;
-    final remaining = total > 0 ? (total - used).clamp(0, total) : null;
-    final expireDate = subscriptionExpireDate(subscriptionInfo.expire);
-    final perpetual = subscriptionInfo.expire > 0 && expireDate == null;
-    return _Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.data_usage_rounded,
-            label: appLocalizations.trafficUsage,
-          ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _Metric(
-                  icon: Icons.north_rounded,
-                  label: appLocalizations.upload,
-                  value: subscriptionInfo.upload.traffic.show,
-                  tone: colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _Metric(
-                  icon: Icons.south_rounded,
-                  label: appLocalizations.download,
-                  value: subscriptionInfo.download.traffic.show,
-                  tone: colorScheme.tertiary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          const _Divider(),
-          const SizedBox(height: 12),
-          _DetailRow(
-            label: appLocalizations.usedTraffic,
-            value: used.traffic.show,
-          ),
-          if (remaining != null) ...[
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: appLocalizations.remainingTraffic,
-              value: remaining.traffic.show,
-            ),
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: appLocalizations.totalTraffic,
-              value: total.traffic.show,
-            ),
-          ],
-          if (subscriptionInfo.expire > 0) ...[
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: appLocalizations.expireTime,
-              value: perpetual
-                  ? appLocalizations.perpetualSubscription
-                  : expireDate!.showFull,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _AccountDetailsCard extends StatelessWidget {
-  const _AccountDetailsCard({required this.profile});
+/// The provider card at a glance: identity, when it ends, when it last
+/// refreshed and on what cadence, with a manual refresh in its header.
+class _ProviderCard extends ConsumerWidget {
+  const _ProviderCard({required this.profile, required this.wrap});
 
   final Profile profile;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final panelMeta = profile.panelMeta;
-    final username = panelMeta?.accountUsername?.trim();
-    final host = Uri.tryParse(profile.url)?.host ?? '';
-    final client = profile.effectiveClient ?? SubscriptionClient.auto;
-    return _Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionTitle(
-            icon: Icons.badge_outlined,
-            label: appLocalizations.account,
-          ),
-          const SizedBox(height: 14),
-          if (panelMeta?.serviceName?.trim().isNotEmpty ?? false) ...[
-            _DetailRow(
-              label: appLocalizations.serviceInfo,
-              value: panelMeta!.serviceName!.trim(),
-            ),
-            const SizedBox(height: 10),
-          ],
-          _DetailRow(label: appLocalizations.profile, value: profile.realLabel),
-          if (username != null && username.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            _DetailRow(label: appLocalizations.account, value: username),
-          ],
-          if (host.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            _DetailRow(label: appLocalizations.domain, value: host),
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: appLocalizations.subscriptionClientLabel,
-              value: subscriptionClientLabel(client, context.appLocalizations),
-            ),
-          ],
-          if (client == SubscriptionClient.custom &&
-              profile.customUserAgent.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: appLocalizations.customUserAgentLabel,
-              value: profile.customUserAgent,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _RefreshCard extends ConsumerWidget {
-  const _RefreshCard({required this.profile});
-
-  final Profile profile;
+  final SubscriptionCardWrap wrap;
 
   Future<void> _handleUpdate(WidgetRef ref) async {
     try {
@@ -486,60 +254,119 @@ class _RefreshCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
+    final panelMeta = profile.panelMeta;
+    final serviceName = panelMeta?.serviceName?.trim();
+    final displayName = serviceName == null || serviceName.isEmpty
+        ? profile.realLabel
+        : serviceName;
+    final info = profile.subscriptionInfo;
+    final hasFacts = info != null && info.hasFacts;
+    final expire = info?.expire ?? 0;
+    final expireDate = subscriptionExpireDate(expire);
+    final perpetual = expire > 0 && expireDate == null;
+
+    final ownMinutes = profile.autoUpdateDuration.inMinutes;
+    final panelMinutes = panelMeta?.updateIntervalMinutes;
+    final suggestedMinutes = panelMinutes != null && panelMinutes > 0
+        ? panelMinutes
+        : ownMinutes;
+    final autoUpdateValue = profile.realAutoUpdate
+        ? heroDurationWords(ownMinutes)
+        : (suggestedMinutes > 0
+              ? appLocalizations.autoUpdateOffSuggested(
+                  heroDurationWords(suggestedMinutes),
+                )
+              : appLocalizations.off);
+
     final isUpdating = ref.watch(isUpdatingProvider(profile.updatingKey));
     final lastUpdateDate = profile.lastUpdateDate;
-    final ownMinutes = profile.autoUpdateDuration.inMinutes;
-    final panelMinutes = profile.panelMeta?.updateIntervalMinutes;
-    final showPanelInterval =
-        panelMinutes != null && panelMinutes > 0 && panelMinutes != ownMinutes;
-    return _Card(
-      child: Column(
+
+    return wrap(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionTitle(
-            icon: Icons.sync_rounded,
-            label: appLocalizations.autoUpdate,
-          ),
-          const SizedBox(height: 14),
-          _DetailRow(
-            label: appLocalizations.subscriptionUpdated,
-            value: lastUpdateDate?.showFull ?? appLocalizations.noData,
-          ),
-          const SizedBox(height: 10),
-          _DetailRow(
-            label: appLocalizations.autoUpdate,
-            value: profile.realAutoUpdate
-                ? heroDurationWords(ownMinutes)
-                : appLocalizations.off,
-          ),
-          if (showPanelInterval) ...[
-            const SizedBox(height: 8),
-            Text(
-              appLocalizations.subscriptionProviderInterval(
-                heroDurationWords(panelMinutes),
+          Row(
+            children: [
+              SizedBox.square(
+                dimension: 44,
+                child: panelMeta?.serviceLogo?.isNotEmpty ?? false
+                    ? ImageCacheWidget(
+                        src: panelMeta!.serviceLogo!,
+                        defaultWidget: const Icon(
+                          Icons.cloud_outlined,
+                          size: 28,
+                        ),
+                      )
+                    : const Icon(Icons.cloud_outlined, size: 28),
               ),
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        displayName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (displayName != profile.realLabel) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        profile.realLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          ],
-          if (profile.type == ProfileType.url) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: CommonMinFilledButtonTheme(
-                child: FilledButton.tonalIcon(
+              if (profile.type == ProfileType.url)
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  tooltip: appLocalizations.update,
                   onPressed: isUpdating
                       ? null
                       : () => unawaited(_handleUpdate(ref)),
                   icon: isUpdating
                       ? const SizedBox.square(
-                          dimension: 16,
+                          dimension: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.refresh_rounded),
-                  label: Text(appLocalizations.update),
                 ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (expire > 0) ...[
+            _DetailRow(
+              label: appLocalizations.expireTime,
+              value: perpetual
+                  ? appLocalizations.perpetualSubscription
+                  : expireDate!.show,
+            ),
+            const SizedBox(height: 10),
+          ],
+          _DetailRow(
+            label: appLocalizations.subscriptionUpdated,
+            value: lastUpdateDate?.show ?? appLocalizations.noData,
+          ),
+          const SizedBox(height: 10),
+          _DetailRow(label: appLocalizations.autoUpdate, value: autoUpdateValue),
+          if (!hasFacts && expire <= 0) ...[
+            const SizedBox(height: 12),
+            Text(
+              appLocalizations.subscriptionNoQuota,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -549,37 +376,119 @@ class _RefreshCard extends ConsumerWidget {
   }
 }
 
-class _OffersCard extends StatelessWidget {
-  const _OffersCard({required this.offers});
+class _AnnounceBody extends StatelessWidget {
+  const _AnnounceBody({required this.text});
 
-  final List<(IconData, String, String)> offers;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return _Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final (index, offer) in offers.indexed) ...[
-            if (index > 0) const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: CommonMinFilledButtonTheme(
-                child: index == 0
-                    ? FilledButton.icon(
-                        onPressed: () => unawaited(dialogs.openUrl(offer.$3)),
-                        icon: Icon(offer.$1),
-                        label: Text(offer.$2),
-                      )
-                    : FilledButton.tonalIcon(
-                        onPressed: () => unawaited(dialogs.openUrl(offer.$3)),
-                        icon: Icon(offer.$1),
-                        label: Text(offer.$2),
-                      ),
+    final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.campaign_rounded, size: 20, color: colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                appLocalizations.announce,
+                style: context.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
+        ),
+        const SizedBox(height: 12),
+        SelectionArea(
+          child: AnnounceText(
+            text: text,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Runtime facts about the app itself: how much memory the core holds and,
+/// on desktop, whether traffic leaves through the tunnel or the proxy.
+class _SystemBody extends ConsumerWidget {
+  const _SystemBody();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(
+          icon: Icons.memory_rounded,
+          label: appLocalizations.system,
+        ),
+        const SizedBox(height: 14),
+        const _MemoryRow(),
+        if (!context.isMobileView) ...[
+          const SizedBox(height: 10),
+          _DetailRow(
+            label: appLocalizations.connectionType,
+            value: ref.watch(tunEnabledProvider)
+                ? appLocalizations.tun
+                : appLocalizations.connectionProxy,
+          ),
         ],
+      ],
+    );
+  }
+}
+
+class _MemoryRow extends ConsumerStatefulWidget {
+  const _MemoryRow();
+
+  @override
+  ConsumerState<_MemoryRow> createState() => _MemoryRowState();
+}
+
+class _MemoryRowState extends ConsumerState<_MemoryRow>
+    with WidgetsBindingObserver, ActivePollingMixin<_MemoryRow> {
+  final _memory = ValueNotifier<num>(0);
+
+  CoreController get _core => ref.read(coreHandlerProvider);
+
+  @override
+  Duration get pollInterval => const Duration(seconds: 2);
+
+  @override
+  void dispose() {
+    _memory.dispose();
+    super.dispose();
+  }
+
+  @override
+  Future<void> poll(PollGuard isCurrent) async {
+    final connected =
+        ref.read(coreStatusProvider) == CoreStatus.connected;
+    final value = connected ? await _core.getMemory() : 0;
+    if (!isCurrent()) return;
+    _memory.value = value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _memory,
+      builder: (context, memory, _) => _DetailRow(
+        label: context.appLocalizations.memory,
+        value: memory > 0
+            ? memory.traffic.show
+            : context.appLocalizations.noData,
       ),
     );
   }

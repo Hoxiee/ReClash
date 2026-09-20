@@ -152,7 +152,14 @@ class ProfilesAction extends _$ProfilesAction {
         continue;
       }
       try {
-        await updateProfile(profile);
+        await updateProfile(profile, isAutoUpdate: true);
+      } on ProfileEmptyAfterUpdateException {
+        final name = profile.label.isEmpty ? '${profile.id}' : profile.label;
+        commonPrint.log(
+          'Auto-update for $name kept the previous config: refresh produced no '
+          'dialable nodes',
+          logLevel: LogLevel.info,
+        );
       } catch (e) {
         commonPrint.log(compactError(e), logLevel: LogLevel.warning);
       }
@@ -184,6 +191,7 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> updateProfile(
     Profile profile, {
     bool showLoading = false,
+    bool isAutoUpdate = false,
   }) async {
     final revision = _nextProfileRevision(profile.id);
     final operation = showLoading
@@ -194,6 +202,7 @@ class ProfilesAction extends _$ProfilesAction {
       final prepared = await prepareProfileUpdate(
         profile,
         allowDirectRetry: showLoading,
+        isAutoUpdate: isAutoUpdate,
       );
       await _runProfileOperation(profile.id, () async {
         _ensureCurrentProfileRevision(profile.id, revision);
@@ -249,6 +258,7 @@ class ProfilesAction extends _$ProfilesAction {
   Future<PreparedProfileImport> prepareProfileUpdate(
     Profile profile, {
     bool allowDirectRetry = false,
+    bool isAutoUpdate = false,
   }) async {
     final allowDeviceIdentity = ref.read(appSettingProvider).sendDeviceIdentity;
     return profile.prepareUpdate(
@@ -259,6 +269,7 @@ class ProfilesAction extends _$ProfilesAction {
         includeDeviceIdentity: allowDeviceIdentity,
       ),
       allowDeviceIdentityRetry: allowDeviceIdentity,
+      guardEmptyPlummet: isAutoUpdate,
     );
   }
 
@@ -545,9 +556,8 @@ class ProfilesAction extends _$ProfilesAction {
       request.url,
       ref.read(patchClashConfigProvider).mixedPort,
     )) {
-      ref.read(milestonesProvider.notifier).discover('loopback');
       dialogs.showNotifier(
-        currentAppLocalizations.findingLoopbackWarning,
+        currentAppLocalizations.subscriptionLoopbackWarning,
         level: MessageLevel.warning,
       );
     }

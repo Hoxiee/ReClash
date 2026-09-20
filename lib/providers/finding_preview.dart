@@ -22,8 +22,6 @@ const findingIds = [
   'marks',
   'pi',
   'turn',
-  'storm',
-  'loopback',
 ];
 
 class FindingPreviewState {
@@ -92,7 +90,7 @@ class FindingPreview extends _$FindingPreview {
   }
 
   void setPatinaDays(int? days) {
-    if (!_allowed || (days != null && ![0, 14, 45, 120].contains(days))) return;
+    if (!_allowed || (days != null && (days < 0 || days > 365))) return;
     state = FindingPreviewState(
       unlocked: state.unlocked,
       season: state.season,

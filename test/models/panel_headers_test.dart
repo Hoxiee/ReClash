@@ -246,6 +246,16 @@ void main() {
       expect(restored.hasContent, isTrue);
     });
 
+    test('keeps the hero effect through headers and JSON serialization', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-heroeffect': ['aurora'],
+      });
+      expect(meta.heroEffect, 'aurora');
+      final restored = PanelMeta.fromJson(meta.toJson());
+      expect(restored.heroEffect, 'aurora');
+      expect(restored.hasContent, isTrue);
+    });
+
     test('keeps active text through headers and JSON serialization', () {
       final meta = PanelMeta.fromHeaders({
         'reclash-activetext': ['Protected by provider'],

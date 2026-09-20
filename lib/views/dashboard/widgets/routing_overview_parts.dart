@@ -190,7 +190,7 @@ ShapeDecoration routingCardDecoration(BuildContext context, {Color? accent}) =>
           : accent.withValues(alpha: 0.10),
     );
 
-const routingCardPadding = EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+const routingCardPadding = EdgeInsets.symmetric(horizontal: 16, vertical: 14);
 
 class RoutingCard extends StatelessWidget {
   const RoutingCard({super.key, required this.child, this.accent});
@@ -261,46 +261,225 @@ class RoutingBadge extends StatelessWidget {
   }
 }
 
+/// A short reading rides the label's line; a sentence-long one drops under it,
+/// so a ledger of mixed counts and phrases never wraps to a ragged right edge.
 class RoutingStat extends StatelessWidget {
-  const RoutingStat({super.key, required this.label, required this.value});
+  const RoutingStat({
+    super.key,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   final String label;
   final String value;
+  final Color? valueColor;
+
+  static double _measure(String text, TextStyle? style, TextScaler scaler) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: scaler,
+      maxLines: 1,
+    )..layout();
+    return painter.width;
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return Row(
+    final labelStyle = context.textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+    );
+    final valueStyle = context.textTheme.bodySmall?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: valueColor ?? colorScheme.onSurface,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final scaler = MediaQuery.textScalerOf(context);
+        const gap = 16.0;
+        final fits =
+            _measure(label, labelStyle, scaler) +
+                gap +
+                _measure(value, valueStyle, scaler) <=
+            constraints.maxWidth;
+        if (fits) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: labelStyle,
+                ),
+              ),
+              const SizedBox(width: gap),
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: valueStyle,
+                ),
+              ),
+            ],
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: labelStyle),
+            const SizedBox(height: 2),
+            Text(value, style: valueStyle),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// A single big number over its caption, so one count reads the same wherever
+/// it sits.
+class RoutingTile extends StatelessWidget {
+  const RoutingTile({
+    super.key,
+    required this.value,
+    required this.label,
+    this.valueColor,
+  });
+
+  final String value;
+  final String label;
+  final Color? valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Flexible(
-          child: Text(
-            label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+        Text(
+          value,
+          style: context.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: valueColor ?? context.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(width: 12),
-        Flexible(
-          child: TooltipText(
-            text: Text(
-              value,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: context.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
+        const SizedBox(height: 2),
+        Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: Text(
+            label,
+            style: context.textTheme.labelSmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+              height: 1.3,
             ),
           ),
         ),
       ],
     );
   }
+}
+
+/// Number tiles laid two to a row, reading as a small board of counts.
+class RoutingTileGrid extends StatelessWidget {
+  const RoutingTileGrid({super.key, required this.tiles});
+
+  final List<({String value, String label, Color? color})> tiles;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <Widget>[];
+    for (var index = 0; index < tiles.length; index += 2) {
+      final left = tiles[index];
+      final right = index + 1 < tiles.length ? tiles[index + 1] : null;
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: RoutingTile(
+                value: left.value,
+                label: left.label,
+                valueColor: left.color,
+              ),
+            ),
+            Expanded(
+              child: right == null
+                  ? const SizedBox.shrink()
+                  : RoutingTile(
+                      value: right.value,
+                      label: right.label,
+                      valueColor: right.color,
+                    ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var index = 0; index < rows.length; index++) ...[
+          if (index > 0) const SizedBox(height: 16),
+          rows[index],
+        ],
+      ],
+    );
+  }
+}
+
+/// The latency reading as a pill tinted in the server's own delay colour.
+class RoutingDelayPill extends StatelessWidget {
+  const RoutingDelayPill({
+    super.key,
+    required this.delay,
+    this.approx = false,
+  });
+
+  final int delay;
+  final bool approx;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = getDelayColor(delay) ?? context.colorScheme.onSurfaceVariant;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: color.withValues(alpha: 0.14),
+        shape: AppShape.full,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          approx ? '≈$delay ms' : '$delay ms',
+          style: context.textTheme.labelMedium?.copyWith(
+            fontWeight: approx ? FontWeight.w500 : FontWeight.w700,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A muted caption inside a card, above a run of chips or rows.
+class RoutingCaption extends StatelessWidget {
+  const RoutingCaption({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text,
+    style: context.textTheme.labelSmall?.copyWith(
+      color: context.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.3,
+    ),
+  );
 }
 
 class RoutingHairline extends StatelessWidget {

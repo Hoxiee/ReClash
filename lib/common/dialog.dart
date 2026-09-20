@@ -251,21 +251,31 @@ class _HappImportChoiceDialogState extends State<HappImportChoiceDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              appLocalizations.happImportPrompt,
-              style: context.textTheme.bodyMedium?.toLighter,
+            padding: const EdgeInsets.only(left: 12, right: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  appLocalizations.happImportPrompt,
+                  style: context.textTheme.bodyMedium?.toLighter,
+                ),
+                if (displaySource.isNotEmpty ||
+                    (name != null && name.isNotEmpty)) ...[
+                  const SizedBox(height: 10),
+                  if (name != null && name.isNotEmpty)
+                    Text(name, style: context.textTheme.bodyMedium),
+                  if (displaySource.isNotEmpty)
+                    Text(
+                      displaySource,
+                      style: context.textTheme.bodySmall?.toLighter,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ],
             ),
           ),
           const SizedBox(height: 12),
-          if (displaySource.isNotEmpty)
-            _HappImportDetailRow(
-              label: appLocalizations.source,
-              value: displaySource,
-            ),
-          if (name != null && name.isNotEmpty)
-            _HappImportDetailRow(label: appLocalizations.name, value: name),
-          const SizedBox(height: 8),
           RadioGroup<SubscriptionClient>(
             groupValue: _client,
             onChanged: (value) {
@@ -296,26 +306,3 @@ class _HappImportChoiceDialogState extends State<HappImportChoiceDialog> {
   }
 }
 
-class _HappImportDetailRow extends StatelessWidget {
-  const _HappImportDetailRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8,
-        children: [
-          Text(label, style: context.textTheme.bodySmall?.toLighter),
-          Expanded(
-            child: Text(value, style: context.textTheme.bodyMedium),
-          ),
-        ],
-      ),
-    );
-  }
-}

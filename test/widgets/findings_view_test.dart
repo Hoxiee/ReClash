@@ -75,9 +75,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(FindingsView), findsOneWidget);
+    // vigil is revealed (relic tile shows its name); fullLadder is unlocked
+    // but not revealed, so it stays a blank silhouette.
     expect(find.text('Vigil'), findsOneWidget);
     expect(find.text('Full ladder'), findsNothing);
-    expect(find.text('Discovered 1 of 14'), findsOneWidget);
+    expect(find.text('Relics'), findsOneWidget);
+    expect(find.text('Moments'), findsOneWidget);
   });
 
   testWidgets('reset confirms and removes the Tools entry', (tester) async {

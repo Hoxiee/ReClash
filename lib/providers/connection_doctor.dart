@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:reclash/common/finding_events.dart';
-import 'package:reclash/providers/milestones.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/core.dart';
@@ -262,9 +260,6 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     if (snapshot.revision >= state.revision || !state.supported) {
       state = snapshot;
       _scheduleFreshness(snapshot);
-      if (allDoctorLayersFailed(snapshot)) {
-        ref.read(milestonesProvider.notifier).discover('storm');
-      }
     }
     return state;
   }

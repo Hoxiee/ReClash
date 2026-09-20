@@ -303,8 +303,10 @@ void main() {
     }
   });
 
-  testWidgets('both columns centre the board they hold', (tester) async {
-    await pumpBoard(tester, size: const Size(1280, 800), profile: _profile());
+  testWidgets('the detail column centres content that fits its height', (
+    tester,
+  ) async {
+    await pumpBoard(tester, size: const Size(1280, 1400), profile: _profile());
 
     final column = tester.getRect(find.byType(HeroSplitDetails));
     final cards = find.descendant(
@@ -319,6 +321,21 @@ void main() {
       closeTo(0, 24),
       reason: 'the cards must not hug the top of their column',
     );
+  });
+
+  testWidgets('the detail column scrolls instead of overflowing when tall', (
+    tester,
+  ) async {
+    await pumpBoard(tester, size: const Size(1280, 800), profile: _profile());
+
+    final column = tester.getRect(find.byType(HeroSplitDetails));
+    final cards = find.descendant(
+      of: find.byType(HeroSplitDetails),
+      matching: find.byType(HeroSurface),
+    );
+    // Overflowing content pins to the top and scrolls rather than clipping.
+    expect(tester.getRect(cards.first).top, greaterThanOrEqualTo(column.top));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a narrow viewport keeps the pager', (tester) async {

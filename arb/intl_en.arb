@@ -121,7 +121,7 @@
   "subscriptionClientV2rayNG": "v2rayNG",
   "subscriptionClientCustom": "Custom",
   "happImportChoiceTitle": "Import subscription",
-  "happImportPrompt": "This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?",
+  "happImportPrompt": "This link was opened via Happ. Choose how to request the subscription.",
   "happImportAsHapp": "Happ compatibility mode",
   "happImportAsHappDesc": "ReClash presents itself as the Happ app and reads its format. Needed when the provider serves nodes tailored to Happ.",
   "happImportAsClient": "Normal import",
@@ -1962,6 +1962,8 @@
   "milestoneDecorationsDesc": "Show discoveries earned while using ReClash",
   "seasonalDecorations": "Seasonal appearance",
   "seasonalDecorationsDesc": "Show subtle seasonal details on the dashboard",
+  "providerEffects": "Provider effects",
+  "providerEffectsDesc": "Let your subscription add a decorative effect to the dashboard",
   "lastUsed": "Last used",
   "neverUsed": "Not used yet",
   "profileUnusedForDays": "Not used for {days} days",
@@ -2001,6 +2003,24 @@
       }
     }
   },
+  "findingsRelics": "Relics",
+  "findingsMoments": "Moments",
+  "findingsNextMilestone": "{days} days to the next mark",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "{count} not found yet",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "Discovered",
   "findingDiscoveredOn": "Discovered {date}",
   "@findingDiscoveredOn": {
@@ -2026,14 +2046,10 @@
   "findingMarks": "Marks",
   "findingPi": "Pi",
   "findingTurn": "Turn",
-  "findingStorm": "Storm",
-  "findingLoopback": "Loop",
   "findingOscilloscopeDesc": "The ring listened to live traffic for six seconds.",
   "findingMarksDesc": "The ReClash mark sheet was uncovered.",
   "findingPiDesc": "The session passed 3:14:15 while the dashboard was open.",
   "findingTurnDesc": "The session crossed New Year midnight.",
-  "findingStormDesc": "Every diagnostic layer failed at once.",
-  "findingLoopbackDesc": "A profile pointed back to the local listening port.",
   "appIconVigil": "Vigil",
   "appIconTopo": "Topo",
   "appIconFractal": "Fractal",
@@ -2072,6 +2088,10 @@
   "developerSeasonDrift": "Seasonal hue",
   "developerPatina": "Profile patina",
   "developerPatinaDays": "{days} days",
+  "developerPatinaLab": "Patina lab",
+  "developerPatinaApply": "Apply to the profile list",
+  "developerPatinaApplyDesc": "Force every profile to this age. Off leaves each one on its real last-used date.",
+  "developerPatinaSample": "Neglected subscription",
   "developerFindingEvents": "Replay a finding",
   "developerFindingQueued": "Queued for the visible, healthy dashboard. You can replay this finding again.",
   "@developerPatinaDays": {
@@ -2081,11 +2101,22 @@
       }
     }
   },
-  "findingStormTitle": "Every connection stage is unavailable",
-  "findingStormVerdict": "The check found no working path. Later failures may be consequences of the first one.",
-  "findingLoopbackWarning": "This profile URL points to ReClash’s own proxy port. Check the subscription address.",
+  "doctorStormTitle": "Every connection stage is unavailable",
+  "doctorStormVerdict": "The check found no working path. Later failures may be consequences of the first one.",
+  "subscriptionLoopbackWarning": "This profile URL points to ReClash’s own proxy port. Check the subscription address.",
   "seasonBirthdayNote": "Today is ReClash’s birthday.",
   "seasonFirstRunNote": "Today is the anniversary of your first launch.",
   "translationNotice": "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
-  "translationSuggestFix": "Suggest a translation fix"
+  "translationSuggestFix": "Suggest a translation fix",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -217,8 +217,7 @@ void main() {
       await tester.tap(find.byType(MetaInfo));
       await tester.pumpAndSettle();
 
-      expect(find.text('Traffic usage'), findsOneWidget);
-      expect(find.text('example.com'), findsOneWidget);
+      expect(find.text('System'), findsOneWidget);
     });
 
     testWidgets('opens even when the panel sent no subscription data', (

@@ -117,7 +117,7 @@ abstract class ProxyGroup with _$ProxyGroup {
     int? profileId,
     @JsonKey(fromJson: Snowflake.buildId) required int id,
     required String name,
-    required GroupType type,
+    @JsonKey(unknownEnumValue: GroupType.unknown) required GroupType type,
     List<String>? proxies,
     List<String>? use,
     int? interval,

@@ -891,6 +891,13 @@ func (l *rcxLedger) OpenAt(node, envKey string) time.Time {
 	return l.envState(envKey, node).OpenAt
 }
 
+func (l *rcxLedger) OpenProven(node, envKey string, now time.Time, ttl time.Duration) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.envState(envKey, node)
+	return rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, ttl) == rcxProofProven
+}
+
 func (l *rcxLedger) ProgressAt(node, envKey string) time.Time {
 	l.mu.Lock()
 	defer l.mu.Unlock()

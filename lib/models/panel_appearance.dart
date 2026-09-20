@@ -63,6 +63,16 @@ List<Color>? parsePanelHeroRing(String? value) {
   return [for (final color in colors) Color(color!)];
 }
 
+/// A panel names one of a fixed set of overlay presets; anything else, or an
+/// absent value, resolves to `none`. This map is the whole whitelist — a panel
+/// cannot reach any effect the client did not ship.
+const _heroEffects = <String, ProviderHeroEffect>{
+  'aurora': ProviderHeroEffect.aurora,
+};
+
+ProviderHeroEffect parsePanelHeroEffect(String? value) =>
+    _heroEffects[value?.trim().toLowerCase()] ?? ProviderHeroEffect.none;
+
 /// `FF5733[:variant][:pureblack]`, tokens after the colour accepted in any
 /// order so a panel that emits only `pureblack` still works.
 PanelTheme? parsePanelTheme(String? value) {

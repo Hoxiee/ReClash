@@ -1903,6 +1903,8 @@
   "milestoneDecorationsDesc": "ReClash ulanylanda gazanylan tapyndylary görkezmek",
   "seasonalDecorations": "Möwsümleýin bezeg",
   "seasonalDecorationsDesc": "Baş ekranda ýuwaş möwsümleýin bezegleri görkezmek",
+  "providerEffects": "Üpjün ediji effektleri",
+  "providerEffectsDesc": "Abunаňyzyň baş ekrana bezeg effektini goşmagyna rugsat bermek",
   "lastUsed": "Soňky ulanylan wagty",
   "neverUsed": "Heniz ulanylmady",
   "profileUnusedForDays": "{days} gün bäri ulanylmady",
@@ -1942,6 +1944,24 @@
       }
     }
   },
+  "findingsRelics": "Ýadygärlikler",
+  "findingsMoments": "Pursatlar",
+  "findingsNextMilestone": "Indiki belgä çenli {days} gün",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "Ýene {count} tapylmady",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "Tapylanlar",
   "findingDiscoveredOn": "{date} tapyldy",
   "@findingDiscoveredOn": {
@@ -1967,14 +1987,10 @@
   "findingMarks": "Belgiler",
   "findingPi": "Pi",
   "findingTurn": "Öwrüm",
-  "findingStorm": "Tupan",
-  "findingLoopback": "Halka",
   "findingOscilloscopeDesc": "Halka alty sekunt janly traffigi diňledi.",
   "findingMarksDesc": "ReClash belgiler toplumy tapyldy.",
   "findingPiDesc": "Baş ekran açyk wagty sessiýa 3:14:15-den geçdi.",
   "findingTurnDesc": "Sessiýa Täze ýyl ýary gijesinden geçdi.",
-  "findingStormDesc": "Ähli diagnostika gatlaklary bir wagtda näsaz boldy.",
-  "findingLoopbackDesc": "Profil ýerli diňleýiş portuna gaýdyp görkezdi.",
   "appIconVigil": "Gözegçilik",
   "appIconTopo": "Topografiýa",
   "appIconFractal": "Fraktal",
@@ -2022,11 +2038,22 @@
       }
     }
   },
-  "findingStormTitle": "Birikmäniň ähli tapgyrlary elýeterli däl",
-  "findingStormVerdict": "Barlag işleýän ýoly tapmady. Soňky näsazlyklar ilkinji näsazlygyň netijesi bolup biler.",
-  "findingLoopbackWarning": "Profil salgysy ReClash programmasynyň öz proksi portuna gönükdirilýär. Abunalyk salgysyny barlaň.",
+  "doctorStormTitle": "Birikmäniň ähli tapgyrlary elýeterli däl",
+  "doctorStormVerdict": "Barlag işleýän ýoly tapmady. Soňky näsazlyklar ilkinji näsazlygyň netijesi bolup biler.",
+  "subscriptionLoopbackWarning": "Profil salgysy ReClash programmasynyň öz proksi portuna gönükdirilýär. Abunalyk salgysyny barlaň.",
   "seasonBirthdayNote": "Şu gün ReClash-yň doglan güni.",
   "seasonFirstRunNote": "Şu gün ilkinji gezek işe girizen günüňiziň ýyl dönümi.",
   "translationNotice": "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
-  "translationSuggestFix": "Terjime düzedişini teklip et"
+  "translationSuggestFix": "Terjime düzedişini teklip et",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

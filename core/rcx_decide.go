@@ -541,7 +541,10 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
 	}
 
-	if bestKey.verdict > incumbentKey.verdict {
+	// A verdict gain escapes at once only when the incumbent cannot itself reach
+	// the open world; one that still can but merely lost tier (a terrain or
+	// breaker rerank) is a comfort move and waits out the dwell like any other.
+	if bestKey.verdict > incumbentKey.verdict && incumbent.Facts.OpenWorld != rcxProofProven {
 		return rcxDecision{
 			Switch: true,
 			To:     best.Name,

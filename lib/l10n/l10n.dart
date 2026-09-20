@@ -995,10 +995,10 @@ class AppLocalizations {
     );
   }
 
-  /// `This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?`
+  /// `This link was opened via Happ. Choose how to request the subscription.`
   String get happImportPrompt {
     return Intl.message(
-      'This link was opened via Happ. Request the subscription in Happ compatibility mode, or the normal ReClash way?',
+      'This link was opened via Happ. Choose how to request the subscription.',
       name: 'happImportPrompt',
       desc: '',
       args: [],
@@ -14200,6 +14200,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Provider effects`
+  String get providerEffects {
+    return Intl.message(
+      'Provider effects',
+      name: 'providerEffects',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Let your subscription add a decorative effect to the dashboard`
+  String get providerEffectsDesc {
+    return Intl.message(
+      'Let your subscription add a decorative effect to the dashboard',
+      name: 'providerEffectsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Last used`
   String get lastUsed {
     return Intl.message('Last used', name: 'lastUsed', desc: '', args: []);
@@ -14332,6 +14352,36 @@ class AppLocalizations {
       name: 'findingsCount',
       desc: '',
       args: [found, total],
+    );
+  }
+
+  /// `Relics`
+  String get findingsRelics {
+    return Intl.message('Relics', name: 'findingsRelics', desc: '', args: []);
+  }
+
+  /// `Moments`
+  String get findingsMoments {
+    return Intl.message('Moments', name: 'findingsMoments', desc: '', args: []);
+  }
+
+  /// `{days} days to the next mark`
+  String findingsNextMilestone(int days) {
+    return Intl.message(
+      '$days days to the next mark',
+      name: 'findingsNextMilestone',
+      desc: '',
+      args: [days],
+    );
+  }
+
+  /// `{count} not found yet`
+  String findingsLocked(int count) {
+    return Intl.message(
+      '$count not found yet',
+      name: 'findingsLocked',
+      desc: '',
+      args: [count],
     );
   }
 
@@ -14490,16 +14540,6 @@ class AppLocalizations {
     return Intl.message('Turn', name: 'findingTurn', desc: '', args: []);
   }
 
-  /// `Storm`
-  String get findingStorm {
-    return Intl.message('Storm', name: 'findingStorm', desc: '', args: []);
-  }
-
-  /// `Loop`
-  String get findingLoopback {
-    return Intl.message('Loop', name: 'findingLoopback', desc: '', args: []);
-  }
-
   /// `The ring listened to live traffic for six seconds.`
   String get findingOscilloscopeDesc {
     return Intl.message(
@@ -14535,26 +14575,6 @@ class AppLocalizations {
     return Intl.message(
       'The session crossed New Year midnight.',
       name: 'findingTurnDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Every diagnostic layer failed at once.`
-  String get findingStormDesc {
-    return Intl.message(
-      'Every diagnostic layer failed at once.',
-      name: 'findingStormDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `A profile pointed back to the local listening port.`
-  String get findingLoopbackDesc {
-    return Intl.message(
-      'A profile pointed back to the local listening port.',
-      name: 'findingLoopbackDesc',
       desc: '',
       args: [],
     );
@@ -14720,6 +14740,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Patina lab`
+  String get developerPatinaLab {
+    return Intl.message(
+      'Patina lab',
+      name: 'developerPatinaLab',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply to the profile list`
+  String get developerPatinaApply {
+    return Intl.message(
+      'Apply to the profile list',
+      name: 'developerPatinaApply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Force every profile to this age. Off leaves each one on its real last-used date.`
+  String get developerPatinaApplyDesc {
+    return Intl.message(
+      'Force every profile to this age. Off leaves each one on its real last-used date.',
+      name: 'developerPatinaApplyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Neglected subscription`
+  String get developerPatinaSample {
+    return Intl.message(
+      'Neglected subscription',
+      name: 'developerPatinaSample',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Replay a finding`
   String get developerFindingEvents {
     return Intl.message(
@@ -14741,30 +14801,30 @@ class AppLocalizations {
   }
 
   /// `Every connection stage is unavailable`
-  String get findingStormTitle {
+  String get doctorStormTitle {
     return Intl.message(
       'Every connection stage is unavailable',
-      name: 'findingStormTitle',
+      name: 'doctorStormTitle',
       desc: '',
       args: [],
     );
   }
 
   /// `The check found no working path. Later failures may be consequences of the first one.`
-  String get findingStormVerdict {
+  String get doctorStormVerdict {
     return Intl.message(
       'The check found no working path. Later failures may be consequences of the first one.',
-      name: 'findingStormVerdict',
+      name: 'doctorStormVerdict',
       desc: '',
       args: [],
     );
   }
 
   /// `This profile URL points to ReClash’s own proxy port. Check the subscription address.`
-  String get findingLoopbackWarning {
+  String get subscriptionLoopbackWarning {
     return Intl.message(
       'This profile URL points to ReClash’s own proxy port. Check the subscription address.',
-      name: 'findingLoopbackWarning',
+      name: 'subscriptionLoopbackWarning',
       desc: '',
       args: [],
     );
@@ -14807,6 +14867,36 @@ class AppLocalizations {
       name: 'translationSuggestFix',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Connection`
+  String get connectionType {
+    return Intl.message(
+      'Connection',
+      name: 'connectionType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy`
+  String get connectionProxy {
+    return Intl.message('Proxy', name: 'connectionProxy', desc: '', args: []);
+  }
+
+  /// `Memory`
+  String get memory {
+    return Intl.message('Memory', name: 'memory', desc: '', args: []);
+  }
+
+  /// `Off (suggested {value})`
+  String autoUpdateOffSuggested(String value) {
+    return Intl.message(
+      'Off (suggested $value)',
+      name: 'autoUpdateOffSuggested',
+      desc: '',
+      args: [value],
     );
   }
 }

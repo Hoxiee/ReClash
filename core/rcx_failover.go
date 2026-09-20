@@ -22,7 +22,9 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 	e.markDiscoveryResult(result, now)
 	key := currentKey
 	negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
-	if negative && result.Role == rcxRoleOpen && e.trafficSince(key, e.probeLaunchedAt, now) {
+	if negative && result.Role == rcxRoleOpen &&
+		(e.trafficSince(key, e.probeLaunchedAt, now) ||
+			!rcxReactiveWave(e.probeKind) && e.incumbentHoldsFreshOpen(key, now)) {
 		return
 	}
 	charge := !negative || e.chargesNegative(now)
@@ -97,6 +99,20 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		}
 		e.tryMainProbeRecovery(result.Node, now)
 	}
+}
+
+// Only a wave the incumbent's own trouble provoked may refute it (§1.9); a
+// periodic probe or the core's health check leaves a fresh proof standing.
+func rcxReactiveWave(kind rcxWaveKind) bool {
+	return kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveHandoff || kind == rcxWaveGrant
+}
+
+func (e *rcxEngine) incumbentHoldsFreshOpen(key string, now time.Time) bool {
+	if key == "" || key != e.key(e.incumbent) {
+		return false
+	}
+	ttl := rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))
+	return e.ledger.OpenProven(key, e.envKey, now, ttl)
 }
 
 func (e *rcxEngine) tryMainProbeRecovery(node string, now time.Time) {

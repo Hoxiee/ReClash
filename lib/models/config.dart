@@ -594,6 +594,7 @@ abstract class MilestoneProps with _$MilestoneProps {
     @Default(<String>[]) List<String> revealQueue,
     @Default(true) bool findingsEnabled,
     @Default(true) bool seasonalEnabled,
+    @Default(true) bool providerEffectsEnabled,
   }) = _MilestoneProps;
 
   factory MilestoneProps.fromJson(Map<String, Object?> json) =>

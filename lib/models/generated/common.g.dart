@@ -195,6 +195,8 @@ const _$GroupTypeEnumMap = {
   GroupType.Fallback: 'fallback',
   GroupType.LoadBalance: 'load-balance',
   GroupType.Relay: 'relay',
+  GroupType.Smart: 'smart',
+  GroupType.unknown: 'unknown',
 };
 
 _HotKeyAction _$HotKeyActionFromJson(Map<String, dynamic> json) =>

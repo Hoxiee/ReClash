@@ -781,3 +781,23 @@ func TestNormalizedKeepsEveryShippedStrategy(t *testing.T) {
 		t.Errorf("an unknown strategy degraded to %q", got)
 	}
 }
+
+func TestDecideDoesNotRushAVerdictGainForAStillOpenIncumbent(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	// A proven-open specialist ranks Viable in Normal while a proven-open sibling
+	// ranks Preferred; the tier gap must not evict a node that still reaches out.
+	breaker := rcxNode("br-1", foreignProven())
+	breaker.Facts.Breaker = true
+	rival := rcxNode("de-1", foreignProven())
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "br-1",
+		IncumbentSince: now,
+		Candidates:     []rcxCandidate{breaker, rival},
+		Now:            now.Add(time.Second),
+	})
+	if got.Switch {
+		t.Fatalf("decision = %+v, want no rush: a still-open incumbent that only lost tier waits out dwell", got)
+	}
+}

@@ -1903,6 +1903,8 @@
   "milestoneDecorationsDesc": "ReClash ishlatilganda qo‘lga kiritilgan topilmalarni ko‘rsatish",
   "seasonalDecorations": "Mavsumiy ko‘rinish",
   "seasonalDecorationsDesc": "Bosh ekranda nozik mavsumiy bezaklarni ko‘rsatish",
+  "providerEffects": "Provayder effektlari",
+  "providerEffectsDesc": "Obunangizga bosh ekranga bezak effektini qo‘shishga ruxsat berish",
   "lastUsed": "Oxirgi foydalanish",
   "neverUsed": "Hali foydalanilmagan",
   "profileUnusedForDays": "{days} kundan beri foydalanilmagan",
@@ -1942,6 +1944,24 @@
       }
     }
   },
+  "findingsRelics": "Yodgorliklar",
+  "findingsMoments": "Lahzalar",
+  "findingsNextMilestone": "Keyingi belgigacha {days} kun",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "Yana {count} tasi topilmagan",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "Topilganlar",
   "findingDiscoveredOn": "{date} kuni topildi",
   "@findingDiscoveredOn": {
@@ -1967,14 +1987,10 @@
   "findingMarks": "Belgilar",
   "findingPi": "Pi",
   "findingTurn": "Aylanish",
-  "findingStorm": "Bo‘ron",
-  "findingLoopback": "Halqa",
   "findingOscilloscopeDesc": "Halqa olti soniya davomida jonli trafikni tingladi.",
   "findingMarksDesc": "ReClash belgilar to‘plami topildi.",
   "findingPiDesc": "Boshqaruv paneli ochiq paytda seans 3:14:15 dan o‘tdi.",
   "findingTurnDesc": "Seans Yangi yil yarim tundan o‘tdi.",
-  "findingStormDesc": "Barcha diagnostika qatlamlari bir vaqtda ishlamay qoldi.",
-  "findingLoopbackDesc": "Profil mahalliy tinglash portiga qayta yo‘naltirildi.",
   "appIconVigil": "Qo‘riq",
   "appIconTopo": "Topografiya",
   "appIconFractal": "Fraktal",
@@ -2022,11 +2038,22 @@
       }
     }
   },
-  "findingStormTitle": "Ulanishning barcha bosqichlari ishlamayapti",
-  "findingStormVerdict": "Tekshiruv ishlaydigan yo‘lni topmadi. Keyingi nosozliklar birinchi nosozlikning oqibati bo‘lishi mumkin.",
-  "findingLoopbackWarning": "Profil manzili ReClash ilovasining o‘z proksi portiga yo‘naltirilgan. Obuna havolasini tekshiring.",
+  "doctorStormTitle": "Ulanishning barcha bosqichlari ishlamayapti",
+  "doctorStormVerdict": "Tekshiruv ishlaydigan yo‘lni topmadi. Keyingi nosozliklar birinchi nosozlikning oqibati bo‘lishi mumkin.",
+  "subscriptionLoopbackWarning": "Profil manzili ReClash ilovasining o‘z proksi portiga yo‘naltirilgan. Obuna havolasini tekshiring.",
   "seasonBirthdayNote": "Bugun ReClash tug‘ilgan kun.",
   "seasonFirstRunNote": "Bugun ilk ishga tushirgan kuningizning yilligi.",
   "translationNotice": "ReClash turli mamlakatlardagi odamlar foydalana olishi uchun sizning tilingizda gaplashadi. Biror ibora g‘aliz ko‘rinsa — yozing, tuzatamiz.",
-  "translationSuggestFix": "Tarjima tuzatishni taklif qilish"
+  "translationSuggestFix": "Tarjima tuzatishni taklif qilish",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

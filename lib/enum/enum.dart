@@ -8,6 +8,10 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+/// Whitelisted decorative overlay a subscription panel may request on the
+/// dashboard. The panel only ever names one of these; it can never ship code.
+enum ProviderHeroEffect { none, aurora }
+
 enum SupportPlatform {
   Windows,
   MacOS,
@@ -46,7 +50,11 @@ enum GroupType {
   @JsonValue('load-balance')
   LoadBalance('load-balance'),
   @JsonValue('relay')
-  Relay('relay');
+  Relay('relay'),
+  @JsonValue('smart')
+  Smart('smart'),
+  @JsonValue('unknown')
+  unknown('unknown');
 
   final String value;
 
@@ -59,7 +67,8 @@ enum GroupType {
       'fallback' => Fallback,
       'load-balance' || 'loadbalance' => LoadBalance,
       'relay' => Relay,
-      String() => throw UnimplementedError(),
+      'smart' => Smart,
+      String() => unknown,
     };
   }
 }

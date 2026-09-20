@@ -108,6 +108,11 @@ func (e *rcxEngine) recomputeMarkerRole(markerID string, now time.Time) {
 	ids := e.markerIDsForConfig(role, now, "")
 	for envKey, nodes := range e.snapshot.Envs {
 		for key := range nodes {
+			// A quarantine sweep off other nodes' failures must not strip the
+			// proven incumbent's open proof; the traffic detector owns its death.
+			if envKey == e.envKey && role == rcxRoleOpen && e.incumbentHoldsFreshOpen(key, now) {
+				continue
+			}
 			e.ledger.RecomputeRole(key, envKey, role, ids, now)
 		}
 	}

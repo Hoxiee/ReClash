@@ -382,3 +382,104 @@ func TestHandoffResultSwitchesEarly(t *testing.T) {
 		t.Fatalf("selected = %q, cancelled = %v, want an early handoff", runtime.selected, cancelled)
 	}
 }
+
+func TestOpenMissKeepsProvenIncumbentUnlessReactive(t *testing.T) {
+	setup := func(kind rcxWaveKind) *rcxEngine {
+		runtime := newFakeRuntime()
+		runtime.members = foreignMembers("current", "rival")
+		engine := newTestEngine(runtime, "ru")
+		engine.incumbent = "current"
+		engine.since = runtime.Now().Add(-time.Hour)
+		runtime.selected = "current"
+		engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+		engine.probing = true
+		engine.probeKind = kind
+		engine.probeResults = nil
+		engine.probeStarted = map[string]struct{}{}
+		return engine
+	}
+
+	now := newFakeRuntime().Now()
+	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+
+	spared := map[string]rcxWaveKind{
+		"routine": rcxWaveRoutine, "maintain": rcxWaveMaintain,
+		"discover": rcxWaveDiscover, "quality": rcxWaveQuality, "deep": rcxWaveDeep,
+	}
+	for name, kind := range spared {
+		engine := setup(kind)
+		if !engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+			t.Fatalf("%s: incumbent should start proven", name)
+		}
+		engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+			{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+		}})
+		if !engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+			t.Fatalf("%s: a lone open miss disproved the working incumbent", name)
+		}
+	}
+
+	reactive := map[string]rcxWaveKind{
+		"incident": rcxWaveIncident, "rescue": rcxWaveRescue, "handoff": rcxWaveHandoff,
+	}
+	for name, kind := range reactive {
+		engine := setup(kind)
+		engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+			{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+		}})
+		if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+			t.Fatalf("%s: a reactive wave must still be able to refute the incumbent", name)
+		}
+	}
+}
+
+func TestHarvestMissKeepsProvenIncumbent(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "rival")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.since = runtime.Now().Add(-time.Hour)
+	runtime.selected = "current"
+	now := runtime.Now()
+	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "current", DelayMs: 0})
+	if !engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+		t.Fatal("a lone health-check miss disproved the working incumbent")
+	}
+
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "rival", DelayMs: 0})
+	engine.ledger.NoteProbe("rival", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+	engine.incumbent = "rival"
+	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "current", DelayMs: 0})
+	if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+		t.Fatal("a non-incumbent must still lose its proof on a health-check miss")
+	}
+}
+
+func TestQuarantineSweepSparesTheProvenIncumbent(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "rival")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	runtime.selected = "current"
+	now := runtime.Now()
+	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+
+	// Both are open only by live traffic, so a marker sweep finds no evidence.
+	engine.ledger.NoteTrafficProgress("current", engine.envKey, true, now)
+	engine.ledger.NoteTrafficProgress("rival", engine.envKey, true, now)
+	engine.snapshot.Global, engine.snapshot.Envs = engine.ledger.Export()
+
+	markerID := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	engine.recomputeMarkerRole(markerID, now)
+
+	if !engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+		t.Fatal("a quarantine sweep stripped the proven incumbent's open proof")
+	}
+	if engine.ledger.OpenProven("rival", engine.envKey, now, ttl) {
+		t.Fatal("a non-incumbent with no marker evidence should be recomputed to unknown")
+	}
+}

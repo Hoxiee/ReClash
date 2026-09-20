@@ -1903,6 +1903,8 @@
   "milestoneDecorationsDesc": "ReClash를 사용하며 얻은 발견을 표시합니다",
   "seasonalDecorations": "계절 꾸미기",
   "seasonalDecorationsDesc": "홈 화면에 은은한 계절 장식을 표시합니다",
+  "providerEffects": "제공자 효과",
+  "providerEffectsDesc": "구독이 홈 화면에 장식 효과를 추가하도록 허용합니다",
   "lastUsed": "마지막 사용",
   "neverUsed": "아직 사용하지 않음",
   "profileUnusedForDays": "{days}일 동안 사용하지 않음",
@@ -1942,6 +1944,24 @@
       }
     }
   },
+  "findingsRelics": "유물",
+  "findingsMoments": "순간",
+  "findingsNextMilestone": "다음 표식까지 {days}일",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "아직 {count}개 미발견",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "발견함",
   "findingDiscoveredOn": "{date}에 발견",
   "@findingDiscoveredOn": {
@@ -1967,14 +1987,10 @@
   "findingMarks": "마크",
   "findingPi": "파이",
   "findingTurn": "해넘이",
-  "findingStorm": "폭풍",
-  "findingLoopback": "루프",
   "findingOscilloscopeDesc": "링이 6초 동안 실시간 트래픽을 들었습니다.",
   "findingMarksDesc": "ReClash 마크 모음을 발견했습니다.",
   "findingPiDesc": "대시보드가 열린 동안 세션이 3:14:15를 지났습니다.",
   "findingTurnDesc": "세션이 새해 자정을 넘겼습니다.",
-  "findingStormDesc": "모든 진단 계층이 동시에 실패했습니다.",
-  "findingLoopbackDesc": "프로필이 로컬 수신 포트를 다시 가리켰습니다.",
   "appIconVigil": "불침번",
   "appIconTopo": "지형",
   "appIconFractal": "프랙탈",
@@ -2022,11 +2038,22 @@
       }
     }
   },
-  "findingStormTitle": "연결의 모든 단계가 사용 불가합니다",
-  "findingStormVerdict": "검사에서 작동하는 경로를 찾지 못했습니다. 이후 단계의 실패는 첫 번째 장애의 결과일 수 있습니다.",
-  "findingLoopbackWarning": "이 프로필 주소는 ReClash 자체 프록시 포트를 가리킵니다. 구독 주소를 확인하세요.",
+  "doctorStormTitle": "연결의 모든 단계가 사용 불가합니다",
+  "doctorStormVerdict": "검사에서 작동하는 경로를 찾지 못했습니다. 이후 단계의 실패는 첫 번째 장애의 결과일 수 있습니다.",
+  "subscriptionLoopbackWarning": "이 프로필 주소는 ReClash 자체 프록시 포트를 가리킵니다. 구독 주소를 확인하세요.",
   "seasonBirthdayNote": "오늘은 ReClash의 생일입니다.",
   "seasonFirstRunNote": "오늘은 첫 실행 기념일입니다.",
   "translationNotice": "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
-  "translationSuggestFix": "번역 수정 제안하기"
+  "translationSuggestFix": "번역 수정 제안하기",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

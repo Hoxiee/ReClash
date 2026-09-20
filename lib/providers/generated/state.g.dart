@@ -472,7 +472,7 @@ final class SharedStateProvider
   }
 }
 
-String _$sharedStateHash() => r'206815a92bc032575380aa3db55c596d7936a8cc';
+String _$sharedStateHash() => r'7f74280fbbcb5e65efd379feac44bf2c6e91e966';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -3393,6 +3393,54 @@ final class PanelBackgroundProvider
 
 String _$panelBackgroundHash() => r'10c627c60ceec69248479fef1d971195f47fe08b';
 
+@ProviderFor(providerHeroEffect)
+final providerHeroEffectProvider = ProviderHeroEffectProvider._();
+
+final class ProviderHeroEffectProvider
+    extends
+        $FunctionalProvider<
+          ProviderHeroEffect,
+          ProviderHeroEffect,
+          ProviderHeroEffect
+        >
+    with $Provider<ProviderHeroEffect> {
+  ProviderHeroEffectProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'providerHeroEffectProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$providerHeroEffectHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProviderHeroEffect> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ProviderHeroEffect create(Ref ref) {
+    return providerHeroEffect(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProviderHeroEffect value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProviderHeroEffect>(value),
+    );
+  }
+}
+
+String _$providerHeroEffectHash() =>
+    r'ad26a3044c0e0ff8ed5f014dc8d6073c3f9e4ba1';
+
 @ProviderFor(profile)
 final profileProvider = ProfileFamily._();
 
@@ -3676,7 +3724,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'41f7d4efc2351fc781029cbf424b158c96ececd3';
+String _$setupStateHash() => r'f6eb48cbc04e8c1a4c6bc08748f90bf3190e61c4';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

@@ -139,6 +139,17 @@ class AppearanceMotionTab extends ConsumerWidget {
                   .update((state) => state.copyWith(seasonalEnabled: value)),
             ),
             DecorationListItem.toggle(
+              leading: const Icon(Icons.gradient_outlined),
+              title: Text(appLocalizations.providerEffects),
+              subtitle: Text(appLocalizations.providerEffectsDesc),
+              value: milestones.providerEffectsEnabled,
+              onChanged: (value) => ref
+                  .read(milestoneSettingProvider.notifier)
+                  .update(
+                    (state) => state.copyWith(providerEffectsEnabled: value),
+                  ),
+            ),
+            DecorationListItem.toggle(
               leading: const Icon(Icons.auto_awesome),
               title: Text(appLocalizations.milestoneDecorations),
               subtitle: Text(appLocalizations.milestoneDecorationsDesc),

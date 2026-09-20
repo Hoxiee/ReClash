@@ -91,6 +91,19 @@ void main() {
     });
   });
 
+  group('parsePanelHeroEffect', () {
+    test('maps a whitelisted preset name case-insensitively', () {
+      expect(parsePanelHeroEffect('aurora'), ProviderHeroEffect.aurora);
+      expect(parsePanelHeroEffect('  AURORA '), ProviderHeroEffect.aurora);
+    });
+
+    test('resolves anything unknown or absent to none', () {
+      expect(parsePanelHeroEffect(null), ProviderHeroEffect.none);
+      expect(parsePanelHeroEffect(''), ProviderHeroEffect.none);
+      expect(parsePanelHeroEffect('boom'), ProviderHeroEffect.none);
+    });
+  });
+
   group('parsePanelTheme', () {
     test('reads colour, variant and pure black in any order', () {
       final theme = parsePanelTheme('FF5733:vibrant:pureblack')!;
@@ -184,10 +197,12 @@ void main() {
       'reclash-view': ['type:list; card:min'],
       'reclash-hex': ['FF5733:pureblack'],
       'reclash-heroring': ['35B5FF,3657FF,A638F4'],
+      'reclash-heroeffect': ['aurora'],
     });
     expect(meta.proxiesView, 'type:list; card:min');
     expect(meta.themeHex, 'FF5733:pureblack');
     expect(meta.heroRing, '35B5FF,3657FF,A638F4');
+    expect(meta.heroEffect, 'aurora');
     expect(meta.hasContent, true);
   });
 }

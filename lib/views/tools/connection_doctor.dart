@@ -718,50 +718,6 @@ class _DoctorDetails extends StatelessWidget {
   }
 }
 
-class DoctorStormPreview extends StatelessWidget {
-  const DoctorStormPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final snapshot = DoctorSnapshot(
-      supported: true,
-      state: DoctorExamState.complete,
-      health: DoctorHealth.broken,
-      stages: [
-        const DoctorStage(id: 'app', state: DoctorStageState.failed),
-        for (final id in ['ingress', 'route', 'internet', 'response'])
-          DoctorStage(id: id, state: DoctorStageState.consequence),
-      ],
-    );
-    return CommonScaffold(
-      title: context.appLocalizations.developerFindings,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(context.appLocalizations.developerFindingsDesc),
-            const SizedBox(height: 16),
-            _DoctorAnswerCard(
-              snapshot: snapshot,
-              answer: connectionDoctorAnswer(
-                context.appLocalizations,
-                snapshot,
-              ),
-              busy: false,
-              canStart: false,
-              canFlushDns: false,
-              canCancel: false,
-              onRemedy: (_) {},
-              onStart: () {},
-              onCancel: () {},
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class DoctorTimingPreview extends StatelessWidget {
   const DoctorTimingPreview({super.key});
 

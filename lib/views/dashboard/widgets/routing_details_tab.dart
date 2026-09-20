@@ -362,39 +362,60 @@ class RoutingReliabilityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final colorScheme = context.colorScheme;
     final metrics = report.metrics;
-    final active = <Widget>[
-      if (metrics.activeCircuits.isNotEmpty)
-        RoutingStat(
-          label: appLocalizations.smartRoutingActiveCircuits,
-          value: metrics.activeCircuits.join(', '),
-        ),
-      if (metrics.activeMarkers.isNotEmpty)
-        RoutingStat(
-          label: appLocalizations.smartRoutingActiveMarkers,
-          value: metrics.activeMarkers.join(', '),
-        ),
-    ];
+    final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.65);
+    Color toneOf(int count) => count > 0 ? colorScheme.onSurface : muted;
     return RoutingCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 10,
+        spacing: 16,
         children: [
-          RoutingStat(
-            label: appLocalizations.smartRoutingAvailability,
-            value: appLocalizations.smartRoutingAvailabilityValue(
-              metrics.availability,
-              routingMetricPeriod(context, metrics.enabledMillis),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RoutingCaption(text: appLocalizations.smartRoutingAvailability),
+              const SizedBox(height: 4),
+              Text(
+                appLocalizations.smartRoutingAvailabilityValue(
+                  metrics.availability,
+                  routingMetricPeriod(context, metrics.enabledMillis),
+                ),
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: metrics.availability >= 99
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-          RoutingStat(
-            label: appLocalizations.smartRoutingIncidents,
-            value: '${metrics.incidents}',
+          const RoutingHairline(),
+          RoutingTileGrid(
+            tiles: [
+              (
+                value: '${metrics.incidents}',
+                label: appLocalizations.smartRoutingIncidents,
+                color: toneOf(metrics.incidents),
+              ),
+              (
+                value: '${metrics.standbyHits}',
+                label: appLocalizations.smartRoutingStandbyHits,
+                color: metrics.standbyHits > 0 ? colorScheme.primary : muted,
+              ),
+              (
+                value: '${metrics.providerIncidents}',
+                label: appLocalizations.smartRoutingProviderIncidents,
+                color: toneOf(metrics.providerIncidents),
+              ),
+              (
+                value: '${metrics.markerIncidents}',
+                label: appLocalizations.smartRoutingMarkerIncidents,
+                color: toneOf(metrics.markerIncidents),
+              ),
+            ],
           ),
-          RoutingStat(
-            label: appLocalizations.smartRoutingStandbyHits,
-            value: '${metrics.standbyHits}',
-          ),
+          const RoutingHairline(),
           RoutingStat(
             label: appLocalizations.smartRoutingLastRecovery,
             value: routingMetricDuration(context, metrics.lastOutage),
@@ -417,18 +438,76 @@ class RoutingReliabilityCard extends StatelessWidget {
               value: routingMetricPeriod(context, metrics.availableMillis),
             ),
           ],
-          RoutingStat(
-            label: appLocalizations.smartRoutingProviderIncidents,
-            value: '${metrics.providerIncidents}',
-          ),
-          RoutingStat(
-            label: appLocalizations.smartRoutingMarkerIncidents,
-            value: '${metrics.markerIncidents}',
-          ),
-          if (active.isNotEmpty) const RoutingHairline(),
-          ...active,
+          if (metrics.activeCircuits.isNotEmpty) ...[
+            const RoutingHairline(),
+            RoutingSafeguardList(
+              label: appLocalizations.smartRoutingActiveCircuits,
+              items: metrics.activeCircuits,
+            ),
+          ],
+          if (metrics.activeMarkers.isNotEmpty) ...[
+            if (metrics.activeCircuits.isEmpty) const RoutingHairline(),
+            RoutingSafeguardList(
+              label: appLocalizations.smartRoutingActiveMarkers,
+              items: metrics.activeMarkers,
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// The held-back providers and quarantined checks as a captioned run of rows,
+/// so a URL keeps a full line instead of colliding with a right-aligned value.
+class RoutingSafeguardList extends StatelessWidget {
+  const RoutingSafeguardList({
+    super.key,
+    required this.label,
+    required this.items,
+  });
+
+  final String label;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RoutingCaption(text: label),
+        const SizedBox(height: 8),
+        ...items.map(
+          (item) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Icon(
+                    Icons.circle,
+                    size: 5,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

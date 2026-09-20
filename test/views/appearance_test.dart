@@ -207,24 +207,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('shows reward icons only after their findings unlock', (
-      tester,
-    ) async {
+    testWidgets('all app icons are always available', (tester) async {
       await pumpIconSections(tester);
-
-      expect(find.text('Vigil'), findsNothing);
-      expect(find.text('Topo'), findsNothing);
-      expect(find.text('Spark'), findsNothing);
-      expect(find.text('Fractal'), findsNothing);
-
-      container
-          .read(milestoneSettingProvider.notifier)
-          .update(
-            (state) => state.copyWith(
-              unlocked: {'vigil', 'fullLadder', 'silentAutopilot', 'crown'},
-            ),
-          );
-      await tester.pumpAndSettle();
 
       expect(find.text('Vigil'), findsOneWidget);
       expect(find.text('Topo'), findsOneWidget);

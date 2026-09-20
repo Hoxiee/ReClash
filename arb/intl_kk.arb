@@ -1903,6 +1903,8 @@
   "milestoneDecorationsDesc": "ReClash пайдалану кезінде табылған олжаларды көрсету",
   "seasonalDecorations": "Маусымдық безендіру",
   "seasonalDecorationsDesc": "Басты экранда нәзік маусымдық бөлшектерді көрсету",
+  "providerEffects": "Провайдер әсерлері",
+  "providerEffectsDesc": "Жазылымға басты экранға декоративті әсер қосуға рұқсат ету",
   "lastUsed": "Соңғы қолданылған уақыт",
   "neverUsed": "Әлі қолданылмаған",
   "profileUnusedForDays": "{days} күн қолданылмады",
@@ -1942,6 +1944,24 @@
       }
     }
   },
+  "findingsRelics": "Жәдігерлер",
+  "findingsMoments": "Сәттер",
+  "findingsNextMilestone": "Келесі белгіге дейін {days} күн",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "Тағы {count} табылмады",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "Ашылғандар",
   "findingDiscoveredOn": "{date} табылды",
   "@findingDiscoveredOn": {
@@ -1967,14 +1987,10 @@
   "findingMarks": "Белгілер",
   "findingPi": "Пи",
   "findingTurn": "Айналым",
-  "findingStorm": "Дауыл",
-  "findingLoopback": "Ілмек",
   "findingOscilloscopeDesc": "Сақина алты секунд бойы нақты трафикті тыңдады.",
   "findingMarksDesc": "ReClash белгілер жинағы ашылды.",
   "findingPiDesc": "Бақылау тақтасы ашық кезде сеанс 3:14:15 межесінен өтті.",
   "findingTurnDesc": "Сеанс Жаңа жыл түн ортасынан өтті.",
-  "findingStormDesc": "Барлық диагностикалық қабат бір уақытта істен шықты.",
-  "findingLoopbackDesc": "Профиль жергілікті тыңдау портына қайта бағытталды.",
   "appIconVigil": "Күзет",
   "appIconTopo": "Топография",
   "appIconFractal": "Фрактал",
@@ -2022,11 +2038,22 @@
       }
     }
   },
-  "findingStormTitle": "Қосылымның барлық кезеңі қолжетімсіз",
-  "findingStormVerdict": "Тексеру жұмыс істейтін жолды таппады. Кейінгі ақаулар алғашқы ақаудың салдары болуы мүмкін.",
-  "findingLoopbackWarning": "Профиль мекенжайы ReClash қолданбасының өз прокси портына сілтейді. Жазылым сілтемесін тексеріңіз.",
+  "doctorStormTitle": "Қосылымның барлық кезеңі қолжетімсіз",
+  "doctorStormVerdict": "Тексеру жұмыс істейтін жолды таппады. Кейінгі ақаулар алғашқы ақаудың салдары болуы мүмкін.",
+  "subscriptionLoopbackWarning": "Профиль мекенжайы ReClash қолданбасының өз прокси портына сілтейді. Жазылым сілтемесін тексеріңіз.",
   "seasonBirthdayNote": "Бүгін ReClash туған күні.",
   "seasonFirstRunNote": "Бүгін алғашқы іске қосуыңыздың жылдығы.",
   "translationNotice": "ReClash әртүрлі елдердің адамдары пайдалана алатындай сіздің тіліңізде сөйлейді. Қандай да бір сөз тіркесі көзге оғаш көрінсе — жазыңыз, түзетеміз.",
-  "translationSuggestFix": "Аударма түзетуін ұсыну"
+  "translationSuggestFix": "Аударма түзетуін ұсыну",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -49,4 +49,20 @@ void main() {
       0,
     );
   });
+
+  test('patina amount grows continuously between the discrete steps', () {
+    double amountAfter(int days) => base
+        .copyWith(lastUsedAt: now.subtract(Duration(days: days)))
+        .patinaAmountAt(now);
+
+    expect(amountAfter(10), 0);
+    expect(amountAfter(14), 0);
+    expect(amountAfter(45), closeTo(1, 1e-9));
+    expect(amountAfter(120), closeTo(2, 1e-9));
+    expect(amountAfter(300), closeTo(3, 1e-9));
+    expect(amountAfter(500), 3);
+    // Strictly monotonic across a threshold, no snap at the old boundaries.
+    expect(amountAfter(30), greaterThan(amountAfter(20)));
+    expect(amountAfter(80), greaterThan(amountAfter(46)));
+  });
 }

@@ -1770,6 +1770,8 @@
   "milestoneDecorationsDesc": "显示使用 ReClash 时获得的发现",
   "seasonalDecorations": "季节外观",
   "seasonalDecorationsDesc": "在主界面显示轻微的季节装饰",
+  "providerEffects": "提供商特效",
+  "providerEffectsDesc": "允许订阅在主界面添加装饰特效",
   "lastUsed": "上次使用",
   "neverUsed": "尚未使用",
   "profileUnusedForDays": "已有 {days} 天未使用",
@@ -1809,6 +1811,24 @@
       }
     }
   },
+  "findingsRelics": "遗珍",
+  "findingsMoments": "瞬间",
+  "findingsNextMilestone": "距下一道刻痕还有 {days} 天",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "还有 {count} 项未发现",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "已发现",
   "findingDiscoveredOn": "发现于 {date}",
   "@findingDiscoveredOn": {
@@ -1834,14 +1854,10 @@
   "findingMarks": "标记",
   "findingPi": "圆周率",
   "findingTurn": "跨年",
-  "findingStorm": "风暴",
-  "findingLoopback": "回环",
   "findingOscilloscopeDesc": "圆环聆听了六秒实时流量。",
   "findingMarksDesc": "发现了 ReClash 标记集。",
   "findingPiDesc": "仪表板打开时，会话越过了 3:14:15。",
   "findingTurnDesc": "会话跨过了新年午夜。",
-  "findingStormDesc": "所有诊断层同时失效。",
-  "findingLoopbackDesc": "配置文件指回了本地监听端口。",
   "appIconVigil": "守望",
   "appIconTopo": "地形",
   "appIconFractal": "分形",
@@ -1880,6 +1896,10 @@
   "developerSeasonDrift": "季节色调",
   "developerPatina": "配置积尘",
   "developerPatinaDays": "{days} 天",
+  "developerPatinaLab": "积尘实验室",
+  "developerPatinaApply": "应用到配置列表",
+  "developerPatinaApplyDesc": "将所有配置强制设为该时长。关闭后各配置沿用真实的最近使用日期。",
+  "developerPatinaSample": "被冷落的订阅",
   "developerFindingEvents": "重放发现",
   "developerFindingQueued": "已排队，等待主页可见且连接正常。可再次重放此发现。",
   "@developerPatinaDays": {
@@ -1889,11 +1909,22 @@
       }
     }
   },
-  "findingStormTitle": "连接的所有阶段均不可用",
-  "findingStormVerdict": "检查未找到可用路径。后续阶段的失败可能由最初的故障引起。",
-  "findingLoopbackWarning": "此配置地址指向 ReClash 自身的代理端口。请检查订阅链接。",
+  "doctorStormTitle": "连接的所有阶段均不可用",
+  "doctorStormVerdict": "检查未找到可用路径。后续阶段的失败可能由最初的故障引起。",
+  "subscriptionLoopbackWarning": "此配置地址指向 ReClash 自身的代理端口。请检查订阅链接。",
   "seasonBirthdayNote": "今天是 ReClash 的生日。",
   "seasonFirstRunNote": "今天是您首次启动的周年纪念日。",
   "translationNotice": "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
-  "translationSuggestFix": "提交翻译修改建议"
+  "translationSuggestFix": "提交翻译修改建议",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -24,6 +24,10 @@ const _iconVariants = [
   'strata',
   'shatter',
   'trace',
+  'vigil',
+  'topo',
+  'spark',
+  'fractal',
 ];
 
 class AppearanceColorSections extends ConsumerStatefulWidget {
@@ -195,13 +199,7 @@ class _AppearanceColorSectionsState
     final rewards = ref.watch(
       visibleMilestonesProvider.select((state) => state.unlocked),
     );
-    final iconVariants = [
-      ..._iconVariants,
-      if (rewards.contains('vigil')) 'vigil',
-      if (rewards.contains('fullLadder')) 'topo',
-      if (rewards.contains('silentAutopilot')) 'spark',
-      if (rewards.contains('crown')) 'fractal',
-    ];
+    const iconVariants = _iconVariants;
     final primaryColor = themeColors.primaryColor;
     final isDynamic = primaryColor == null;
     final removable = _removablePrimaryColor;

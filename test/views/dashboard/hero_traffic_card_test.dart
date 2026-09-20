@@ -95,10 +95,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Traffic usage'), findsOneWidget);
-    expect(find.text('example.com'), findsOneWidget);
+    expect(find.text('System'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump(const Duration(seconds: 2));
+    // The memory row's in-flight getMemory arms a 10s connect timeout; let it
+    // drain before teardown checks for pending timers.
+    await tester.pump(const Duration(seconds: 11));
   });
 }

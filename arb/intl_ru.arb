@@ -121,7 +121,7 @@
   "subscriptionClientV2rayNG": "v2rayNG",
   "subscriptionClientCustom": "Свой",
   "happImportChoiceTitle": "Импорт подписки",
-  "happImportPrompt": "Ссылка открыта через Happ. Запросить подписку в режиме совместимости с Happ или обычным способом ReClash?",
+  "happImportPrompt": "Ссылка открыта через Happ. Выберите, как запросить подписку.",
   "happImportAsHapp": "Режим совместимости с Happ",
   "happImportAsHappDesc": "ReClash представляется приложением Happ и читает его формат. Нужно, если провайдер отдаёт узлы под Happ.",
   "happImportAsClient": "Обычный импорт",
@@ -1774,6 +1774,8 @@
   "milestoneDecorationsDesc": "Показывать находки, заслуженные при использовании ReClash",
   "seasonalDecorations": "Сезонное оформление",
   "seasonalDecorationsDesc": "Показывать ненавязчивые сезонные детали на главном экране",
+  "providerEffects": "Эффекты провайдера",
+  "providerEffectsDesc": "Разрешить подписке добавлять декоративный эффект на главный экран",
   "lastUsed": "Последнее использование",
   "neverUsed": "Ещё не использовался",
   "profileUnusedForDays": "Не использовался {days} дн.",
@@ -1813,6 +1815,24 @@
       }
     }
   },
+  "findingsRelics": "Реликвии",
+  "findingsMoments": "Моменты",
+  "findingsNextMilestone": "До следующей насечки — {days} суток",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "Ещё {count} не найдены",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "Открытое",
   "findingDiscoveredOn": "Найдено {date}",
   "@findingDiscoveredOn": {
@@ -1838,14 +1858,10 @@
   "findingMarks": "Марки",
   "findingPi": "Пи",
   "findingTurn": "Оборот",
-  "findingStorm": "Шторм",
-  "findingLoopback": "Петля",
   "findingOscilloscopeDesc": "Кольцо шесть секунд слушало живой трафик.",
   "findingMarksDesc": "Открылся лист марок ReClash.",
   "findingPiDesc": "Сессия прошла отметку 3:14:15 при открытом дашборде.",
   "findingTurnDesc": "Сессия пережила новогоднюю полночь.",
-  "findingStormDesc": "Все диагностические слои отказали одновременно.",
-  "findingLoopbackDesc": "Профиль указал обратно на локальный порт прослушивания.",
   "appIconVigil": "Дозор",
   "appIconTopo": "Топография",
   "appIconFractal": "Фрактал",
@@ -1884,6 +1900,10 @@
   "developerSeasonDrift": "Сезонный оттенок",
   "developerPatina": "Патина профилей",
   "developerPatinaDays": "{days} суток",
+  "developerPatinaLab": "Лаборатория патины",
+  "developerPatinaApply": "Применить ко всему списку",
+  "developerPatinaApplyDesc": "Состарить все профили до этого возраста. Выключено — каждый остаётся на своей реальной дате последнего использования.",
+  "developerPatinaSample": "Заброшенная подписка",
   "developerFindingEvents": "Повторить находку",
   "developerFindingQueued": "В очереди до открытия дашборда с исправным соединением. Находку можно повторить.",
   "@developerPatinaDays": {
@@ -1893,11 +1913,22 @@
       }
     }
   },
-  "findingStormTitle": "Все этапы соединения недоступны",
-  "findingStormVerdict": "Проверка не нашла рабочего пути. Отказы следующих этапов могут быть следствием первого.",
-  "findingLoopbackWarning": "Адрес профиля указывает на прокси-порт самого ReClash. Проверьте ссылку подписки.",
+  "doctorStormTitle": "Все этапы соединения недоступны",
+  "doctorStormVerdict": "Проверка не нашла рабочего пути. Отказы следующих этапов могут быть следствием первого.",
+  "subscriptionLoopbackWarning": "Адрес профиля указывает на прокси-порт самого ReClash. Проверьте ссылку подписки.",
   "seasonBirthdayNote": "Сегодня день рождения ReClash.",
   "seasonFirstRunNote": "Сегодня годовщина вашего первого запуска.",
   "translationNotice": "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
-  "translationSuggestFix": "Предложить правку перевода"
+  "translationSuggestFix": "Предложить правку перевода",
+  "connectionType": "Подключение",
+  "connectionProxy": "Прокси",
+  "memory": "Память",
+  "autoUpdateOffSuggested": "Выключено (рекомендуется {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

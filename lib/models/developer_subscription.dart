@@ -33,6 +33,7 @@ const developerSubscriptions = <DeveloperSubscription>[
       accountUsername: 'brand.tester',
       themeHex: '6E55F5:tonalspot',
       heroRing: '2E5BFF;7A36F0;FF5A8A',
+      heroEffect: 'aurora',
     ),
   ),
   DeveloperSubscription(

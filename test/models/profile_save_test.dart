@@ -907,6 +907,73 @@ AllowedIPs = 0.0.0.0/0, ::/0
       );
     });
   });
+
+  group('Profile.update empty-plummet guard', () {
+    Future<Profile> seedWorkingProfile() async {
+      final profile = Profile.normal(
+        label: 'working',
+        url: 'https://provider.test/sub',
+      );
+      final committed = await profile.update(
+        validate: (_) async => '',
+        inspect: (_) async =>
+            const ConfigInspection(servers: ['node.example.net']),
+        fetch: (url, {headers}) async => _response(
+          url,
+          'proxies:\n'
+              '  - {name: node, type: socks5, server: node.example, port: 1}',
+        ),
+      );
+      expect(committed.undialableNodes, isFalse);
+      return committed;
+    }
+
+    Future<PreparedProfileImport> refreshToEmpty(
+      Profile profile, {
+      required bool guardEmptyPlummet,
+    }) {
+      return profile.prepareUpdate(
+        guardEmptyPlummet: guardEmptyPlummet,
+        validate: (_) async => '',
+        inspect: (path) async {
+          final content = await File(path).readAsString();
+          return ConfigInspection(
+            servers: content.contains('node.example')
+                ? const ['node.example.net']
+                : const [],
+          );
+        },
+        fetch: (url, {headers}) async => _response(url, 'proxies: []'),
+      );
+    }
+
+    test('auto-update refuses to collapse a working config to empty', () async {
+      final profile = await seedWorkingProfile();
+      await expectLater(
+        refreshToEmpty(profile, guardEmptyPlummet: true),
+        throwsA(isA<ProfileEmptyAfterUpdateException>()),
+      );
+      expect(
+        await (await profile.file).readAsString(),
+        contains('node.example'),
+      );
+    });
+
+    test('a manual refresh still accepts the empty result', () async {
+      final profile = await seedWorkingProfile();
+      final prepared = await refreshToEmpty(profile, guardEmptyPlummet: false);
+      expect(prepared.undialableNodes, isTrue);
+    });
+
+    test('guard lets the empty result through when nothing is saved', () async {
+      final profile = Profile.normal(
+        label: 'fresh',
+        url: 'https://provider.test/sub',
+      );
+      final prepared = await refreshToEmpty(profile, guardEmptyPlummet: true);
+      expect(prepared.undialableNodes, isTrue);
+    });
+  });
 }
 
 const _happUserAgent = 'Happ/3.26.1';

@@ -30,6 +30,7 @@ abstract class PanelMeta with _$PanelMeta {
     String? themeHex,
     String? background,
     String? heroRing,
+    String? heroEffect,
     String? activeText,
   }) = _PanelMeta;
 
@@ -74,6 +75,7 @@ abstract class PanelMeta with _$PanelMeta {
       themeHex: map['themeHex'],
       background: map['background'],
       heroRing: map['heroRing'],
+      heroEffect: map['heroEffect'],
       activeText: map['activeText'],
     );
   }
@@ -101,6 +103,7 @@ extension PanelMetaExt on PanelMeta {
       themeHex != null ||
       background != null ||
       heroRing != null ||
+      heroEffect != null ||
       activeText != null ||
       settings != null;
 }

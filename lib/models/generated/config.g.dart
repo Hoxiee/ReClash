@@ -593,6 +593,7 @@ _MilestoneProps _$MilestonePropsFromJson(Map<String, dynamic> json) =>
           const <String>[],
       findingsEnabled: json['findingsEnabled'] as bool? ?? true,
       seasonalEnabled: json['seasonalEnabled'] as bool? ?? true,
+      providerEffectsEnabled: json['providerEffectsEnabled'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$MilestonePropsToJson(_MilestoneProps instance) =>
@@ -602,6 +603,7 @@ Map<String, dynamic> _$MilestonePropsToJson(_MilestoneProps instance) =>
       'revealQueue': instance.revealQueue,
       'findingsEnabled': instance.findingsEnabled,
       'seasonalEnabled': instance.seasonalEnabled,
+      'providerEffectsEnabled': instance.providerEffectsEnabled,
     };
 
 _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(

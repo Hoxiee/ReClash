@@ -1770,6 +1770,8 @@
   "milestoneDecorationsDesc": "ReClash の使用中に獲得した発見を表示します",
   "seasonalDecorations": "季節の外観",
   "seasonalDecorationsDesc": "ホーム画面にさりげない季節の装飾を表示します",
+  "providerEffects": "プロバイダー効果",
+  "providerEffectsDesc": "サブスクリプションがホーム画面に装飾効果を追加できるようにします",
   "lastUsed": "最終使用",
   "neverUsed": "まだ使用されていません",
   "profileUnusedForDays": "{days} 日間使用されていません",
@@ -1809,6 +1811,24 @@
       }
     }
   },
+  "findingsRelics": "遺物",
+  "findingsMoments": "瞬間",
+  "findingsNextMilestone": "次の刻みまであと {days} 日",
+  "@findingsNextMilestone": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "findingsLocked": "未発見が {count} 件",
+  "@findingsLocked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "discoveredFindings": "発見済み",
   "findingDiscoveredOn": "{date} に発見",
   "@findingDiscoveredOn": {
@@ -1834,14 +1854,10 @@
   "findingMarks": "マーク",
   "findingPi": "円周率",
   "findingTurn": "年越し",
-  "findingStorm": "嵐",
-  "findingLoopback": "ループ",
   "findingOscilloscopeDesc": "リングが六秒間、実際の通信を聴きました。",
   "findingMarksDesc": "ReClash のマークシートが見つかりました。",
   "findingPiDesc": "ダッシュボードを開いたまま、セッションが 3:14:15 を越えました。",
   "findingTurnDesc": "セッションが新年の午前零時を越えました。",
-  "findingStormDesc": "すべての診断レイヤーが同時に停止しました。",
-  "findingLoopbackDesc": "プロファイルがローカル待受ポートを指していました。",
   "appIconVigil": "見張り",
   "appIconTopo": "地形",
   "appIconFractal": "フラクタル",
@@ -1880,6 +1896,10 @@
   "developerSeasonDrift": "季節の色合い",
   "developerPatina": "プロファイルのほこり",
   "developerPatinaDays": "{days} 日",
+  "developerPatinaLab": "ほこりラボ",
+  "developerPatinaApply": "プロファイル一覧に適用",
+  "developerPatinaApplyDesc": "すべてのプロファイルをこの経過日数に固定します。オフの場合は各プロファイルの実際の最終使用日を使います。",
+  "developerPatinaSample": "放置されたサブスクリプション",
   "developerFindingEvents": "発見を再生",
   "developerFindingQueued": "正常な接続のダッシュボード表示を待っています。何度でも再生できます。",
   "@developerPatinaDays": {
@@ -1889,11 +1909,22 @@
       }
     }
   },
-  "findingStormTitle": "接続のすべての段階が利用できません",
-  "findingStormVerdict": "利用可能な経路が見つかりませんでした。後続の失敗は最初の障害に起因している可能性があります。",
-  "findingLoopbackWarning": "このプロファイルの URL は ReClash 自身のプロキシポートを指しています。サブスクリプションの URL を確認してください。",
+  "doctorStormTitle": "接続のすべての段階が利用できません",
+  "doctorStormVerdict": "利用可能な経路が見つかりませんでした。後続の失敗は最初の障害に起因している可能性があります。",
+  "subscriptionLoopbackWarning": "このプロファイルの URL は ReClash 自身のプロキシポートを指しています。サブスクリプションの URL を確認してください。",
   "seasonBirthdayNote": "今日は ReClash の誕生日です。",
   "seasonFirstRunNote": "今日は初回起動の周年記念日です。",
   "translationNotice": "ReClashはさまざまな国の人に使ってもらえるよう、あなたの言語に対応しています。不自然な表現があれば教えてください。修正します。",
-  "translationSuggestFix": "翻訳の修正を提案する"
+  "translationSuggestFix": "翻訳の修正を提案する",
+  "connectionType": "Connection",
+  "connectionProxy": "Proxy",
+  "memory": "Memory",
+  "autoUpdateOffSuggested": "Off (suggested {value})",
+  "@autoUpdateOffSuggested": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

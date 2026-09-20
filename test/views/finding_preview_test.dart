@@ -57,16 +57,6 @@ void main() {
     await show(const DoctorTimingPreview());
     expect(find.textContaining('25 ms'), findsWidgets);
     expect(container.read(connectionDoctorProvider), doctor);
-    await show(const DoctorStormPreview());
-    expect(
-      find.text(currentAppLocalizations.findingStormTitle),
-      findsOneWidget,
-    );
-    expect(
-      find.text(currentAppLocalizations.doctorStepSwitchNetwork),
-      findsOneWidget,
-    );
-    expect(container.read(connectionDoctorProvider), doctor);
     await show(const Scaffold(body: TrafficUsage(preview: true)));
     await tester.pump(const Duration(seconds: 2));
     expect(container.read(totalTrafficProvider), traffic);
@@ -138,7 +128,9 @@ void main() {
     await tester.tap(find.text(localizations.developerSeasonNewYear));
     await tester.pumpAndSettle();
     expect(container.read(visibleSeasonProvider), SeasonalMotif.newYear);
-    await tester.tap(find.text(localizations.developerPatinaDays(120)));
+    final apply = find.text(localizations.developerPatinaApply);
+    await tester.scrollUntilVisible(apply, 300);
+    await tester.tap(apply);
     await tester.pumpAndSettle();
     expect(container.read(findingPreviewProvider).patinaDays, 120);
 

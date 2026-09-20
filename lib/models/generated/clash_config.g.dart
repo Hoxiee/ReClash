@@ -10,7 +10,11 @@ _ProxyGroup _$ProxyGroupFromJson(Map<String, dynamic> json) => _ProxyGroup(
   profileId: (json['profileId'] as num?)?.toInt(),
   id: Snowflake.buildId((json['id'] as num?)?.toInt()),
   name: json['name'] as String,
-  type: $enumDecode(_$GroupTypeEnumMap, json['type']),
+  type: $enumDecode(
+    _$GroupTypeEnumMap,
+    json['type'],
+    unknownValue: GroupType.unknown,
+  ),
   proxies: (json['proxies'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -65,6 +69,8 @@ const _$GroupTypeEnumMap = {
   GroupType.Fallback: 'fallback',
   GroupType.LoadBalance: 'load-balance',
   GroupType.Relay: 'relay',
+  GroupType.Smart: 'smart',
+  GroupType.unknown: 'unknown',
 };
 
 _Proxy _$ProxyFromJson(Map<String, dynamic> json) => _Proxy(

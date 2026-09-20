@@ -8,6 +8,7 @@ import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero_layout.dart';
 import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
+import 'package:reclash/views/dashboard/widgets/provider_effect_overlay.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -264,116 +265,126 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
     );
     return SeasonalDashboardOverlay(
       visible: _page == 0 && !_animating,
-      child: LayoutBuilder(
-        builder: (context, box) {
-          final split = heroSplitFor(box);
-          final hasProviderPage = !byedpiMode && !split;
-          if (!hasProviderPage && _page != 0) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) return;
-              if (_pageController.hasClients) _pageController.jumpToPage(0);
-              if (_page != 0) _setPage(0);
-            });
-          }
-          if (split) {
-            return _SplitBoard(
-              heroScrollController: _heroScrollController,
-              detailsScrollController: _providerScrollController,
-            );
-          }
-          return CallbackShortcuts(
-            bindings: hasProviderPage
-                ? {
-                    const SingleActivator(LogicalKeyboardKey.pageDown): () =>
-                        unawaited(_goToPage(1)),
-                    const SingleActivator(LogicalKeyboardKey.pageUp): () =>
-                        unawaited(_goToPage(0)),
-                  }
-                : const {},
-            // Key events only reach the bindings above through the focus chain,
-            // and the hero page takes its autofocus with it when the pager leaves
-            // it. This scope stays behind to catch the focus the page dropped.
-            child: FocusScope(
-              child: Listener(
-                behavior: HitTestBehavior.translucent,
-                onPointerDown: hasProviderPage ? _handlePointerDown : null,
-                onPointerMove: hasProviderPage ? _handlePointerMove : null,
-                onPointerUp: hasProviderPage ? _handlePointerUp : null,
-                onPointerCancel: hasProviderPage
-                    ? (_) => _resetPointer()
-                    : null,
-                onPointerSignal: hasProviderPage ? _handlePointerSignal : null,
-                onPointerPanZoomStart: hasProviderPage
-                    ? _handlePanZoomStart
-                    : null,
-                onPointerPanZoomUpdate: hasProviderPage
-                    ? _handlePanZoomUpdate
-                    : null,
-                onPointerPanZoomEnd: hasProviderPage ? _handlePanZoomEnd : null,
-                child: PageView(
-                  key: const ValueKey('dashboard-pager'),
-                  controller: _pageController,
-                  scrollDirection: Axis.vertical,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: _setPage,
-                  children: [
-                    _DashboardPage(
-                      key: const ValueKey('dashboard-hero-page'),
-                      affordance: byedpiMode
-                          ? null
-                          : _PageAffordance(
-                              key: const ValueKey('dashboard-show-provider'),
-                              icon: Icons.keyboard_arrow_down_rounded,
-                              label: context
-                                  .appLocalizations
-                                  .dashboardShowProvider,
-                              badge: hasAnnounce,
-                              focusNode: _heroAffordanceNode,
-                              onArrowDown: hasProviderPage
-                                  ? () => _goToPage(
-                                      1,
-                                      focusAfter: _providerAffordanceNode,
-                                    )
-                                  : null,
-                              onPressed: () => _goToPage(1),
-                            ),
-                      child: PageActivityScope(
-                        isActive: _pageActive && _page == 0 && !_animating,
-                        child: HeroConnect(
-                          scrollController: _heroScrollController,
-                          onShowProvider: byedpiMode
-                              ? null
-                              : () => _goToPage(1),
-                          onRequestAfterTailFocus: hasProviderPage
-                              ? () => _heroAffordanceNode.requestFocus()
-                              : null,
+      child: ProviderEffectOverlay(
+        visible: _page == 0 && !_animating,
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final split = heroSplitFor(box);
+            final hasProviderPage = !byedpiMode && !split;
+            if (!hasProviderPage && _page != 0) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                if (_pageController.hasClients) _pageController.jumpToPage(0);
+                if (_page != 0) _setPage(0);
+              });
+            }
+            if (split) {
+              return _SplitBoard(
+                heroScrollController: _heroScrollController,
+                detailsScrollController: _providerScrollController,
+              );
+            }
+            return CallbackShortcuts(
+              bindings: hasProviderPage
+                  ? {
+                      const SingleActivator(LogicalKeyboardKey.pageDown): () =>
+                          unawaited(_goToPage(1)),
+                      const SingleActivator(LogicalKeyboardKey.pageUp): () =>
+                          unawaited(_goToPage(0)),
+                    }
+                  : const {},
+              // Key events only reach the bindings above through the focus chain,
+              // and the hero page takes its autofocus with it when the pager leaves
+              // it. This scope stays behind to catch the focus the page dropped.
+              child: FocusScope(
+                child: Listener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: hasProviderPage ? _handlePointerDown : null,
+                  onPointerMove: hasProviderPage ? _handlePointerMove : null,
+                  onPointerUp: hasProviderPage ? _handlePointerUp : null,
+                  onPointerCancel: hasProviderPage
+                      ? (_) => _resetPointer()
+                      : null,
+                  onPointerSignal: hasProviderPage
+                      ? _handlePointerSignal
+                      : null,
+                  onPointerPanZoomStart: hasProviderPage
+                      ? _handlePanZoomStart
+                      : null,
+                  onPointerPanZoomUpdate: hasProviderPage
+                      ? _handlePanZoomUpdate
+                      : null,
+                  onPointerPanZoomEnd: hasProviderPage
+                      ? _handlePanZoomEnd
+                      : null,
+                  child: PageView(
+                    key: const ValueKey('dashboard-pager'),
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: _setPage,
+                    children: [
+                      _DashboardPage(
+                        key: const ValueKey('dashboard-hero-page'),
+                        affordance: byedpiMode
+                            ? null
+                            : _PageAffordance(
+                                key: const ValueKey('dashboard-show-provider'),
+                                icon: Icons.keyboard_arrow_down_rounded,
+                                label: context
+                                    .appLocalizations
+                                    .dashboardShowProvider,
+                                badge: hasAnnounce,
+                                focusNode: _heroAffordanceNode,
+                                onArrowDown: hasProviderPage
+                                    ? () => _goToPage(
+                                        1,
+                                        focusAfter: _providerAffordanceNode,
+                                      )
+                                    : null,
+                                onPressed: () => _goToPage(1),
+                              ),
+                        child: PageActivityScope(
+                          isActive: _pageActive && _page == 0 && !_animating,
+                          child: HeroConnect(
+                            scrollController: _heroScrollController,
+                            onShowProvider: byedpiMode
+                                ? null
+                                : () => _goToPage(1),
+                            onRequestAfterTailFocus: hasProviderPage
+                                ? () => _heroAffordanceNode.requestFocus()
+                                : null,
+                          ),
                         ),
                       ),
-                    ),
-                    _DashboardPage(
-                      key: const ValueKey('dashboard-provider-page'),
-                      affordanceAtTop: true,
-                      affordance: _PageAffordance(
-                        key: const ValueKey('dashboard-show-connection'),
-                        icon: Icons.keyboard_arrow_up_rounded,
-                        label: context.appLocalizations.dashboardShowConnection,
-                        focusNode: _providerAffordanceNode,
-                        onArrowUp: hasProviderPage
-                            ? () =>
-                                  _goToPage(0, focusAfter: _heroAffordanceNode)
-                            : null,
-                        onPressed: () => _goToPage(0),
+                      _DashboardPage(
+                        key: const ValueKey('dashboard-provider-page'),
+                        affordanceAtTop: true,
+                        affordance: _PageAffordance(
+                          key: const ValueKey('dashboard-show-connection'),
+                          icon: Icons.keyboard_arrow_up_rounded,
+                          label:
+                              context.appLocalizations.dashboardShowConnection,
+                          focusNode: _providerAffordanceNode,
+                          onArrowUp: hasProviderPage
+                              ? () => _goToPage(
+                                  0,
+                                  focusAfter: _heroAffordanceNode,
+                                )
+                              : null,
+                          onPressed: () => _goToPage(0),
+                        ),
+                        child: ProviderSummaryPage(
+                          scrollController: _providerScrollController,
+                        ),
                       ),
-                      child: ProviderSummaryPage(
-                        scrollController: _providerScrollController,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

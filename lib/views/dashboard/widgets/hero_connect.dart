@@ -392,12 +392,7 @@ class HeroSplitDetails extends ConsumerWidget {
         ),
         if (profile != null) ...[
           SizedBox(height: metrics.gapCard),
-          ...providerSummaryCards(
-            context,
-            profile,
-            gap: metrics.gapCard,
-            showQuota: false,
-          ),
+          ...providerSummaryCards(context, profile, gap: metrics.gapCard),
         ],
       ],
     );
@@ -808,8 +803,6 @@ String _milestoneRevealText(AppLocalizations localizations, String id) =>
       'marks' => localizations.findingMarksDesc,
       'pi' => localizations.findingPiDesc,
       'turn' => localizations.findingTurnDesc,
-      'storm' => localizations.findingStormDesc,
-      'loopback' => localizations.findingLoopbackDesc,
       _ => '',
     };
 

@@ -7,7 +7,6 @@ import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
 import 'package:reclash/views/dashboard/widgets/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
-import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -475,11 +474,8 @@ void main() {
 
     expect(find.text('Example VPN'), findsOneWidget);
     expect(find.text('Local profile'), findsOneWidget);
-    expect(find.textContaining('free of 100B'), findsOneWidget);
-    expect(find.text('Upload'), findsNothing);
-    expect(find.text('Download'), findsNothing);
-    expect(find.text('2026-09-08 12:00:00'), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text('Traffic usage'), findsNothing);
+    expect(find.text('2026-09-08'), findsOneWidget);
   });
 
   testWidgets('summary shows expired, attention, and perpetual states', (
@@ -492,7 +488,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
-    expect(find.text('2025-01-01 00:00:00'), findsOneWidget);
+    expect(find.text('2025-01-01'), findsOneWidget);
 
     container.dispose();
     await tester.pumpWidget(const SizedBox.shrink());
@@ -513,19 +509,6 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Perpetual subscription'), findsOneWidget);
-  });
-
-  testWidgets('the subscription card opens the subscription overview', (
-    tester,
-  ) async {
-    await pumpPager(tester, profile: _profile());
-    await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const ValueKey('provider-plan-card')));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SubscriptionOverviewView), findsOneWidget);
   });
 
   testWidgets('provider summary shows full announcement text', (tester) async {
@@ -571,7 +554,7 @@ void main() {
       find.text('This subscription reports no traffic quota or end date'),
       findsOneWidget,
     );
-    expect(find.text('2026-09-08 12:00:00'), findsOneWidget);
+    expect(find.text('2026-09-08'), findsOneWidget);
     expect(find.byKey(const ValueKey('provider-plan-card')), findsOneWidget);
     expect(
       find.descendant(
@@ -580,12 +563,13 @@ void main() {
       ),
       findsNothing,
     );
+    // The refresh control now lives on the provider card as an icon button.
     expect(
       find.descendant(
         of: find.byType(ProviderSummaryPage),
-        matching: find.text('Update'),
+        matching: find.byTooltip('Update'),
       ),
-      findsNothing,
+      findsOneWidget,
     );
     expect(tester.takeException(), isNull);
   });

@@ -18,7 +18,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Last used: Not used for 4 months'), findsOneWidget);
+    expect(find.text('Not used for 4 months'), findsOneWidget);
+    expect(find.textContaining('Last used:'), findsNothing);
   });
 
   testWidgets('seasonal toggle restores normal relative time', (tester) async {

@@ -280,6 +280,16 @@ extension ProfilesExt on List<Profile> {
   }
 }
 
+// Continuous dust curve shared by the model and the developer preview: amount N
+// lands on the discrete level-N step, then creeps to 3.0 near a year of neglect.
+double patinaAmountForDays(double days) {
+  if (days <= 14) return 0;
+  if (days <= 45) return (days - 14) / 31;
+  if (days <= 120) return 1 + (days - 45) / 75;
+  if (days <= 300) return 2 + (days - 120) / 180;
+  return 3;
+}
+
 extension ProfilePatinaExt on Profile {
   int patinaLevelAt(DateTime now) {
     final usedAt = lastUsedAt ?? lastUpdateDate;
@@ -292,6 +302,14 @@ extension ProfilePatinaExt on Profile {
   }
 
   int get patinaLevel => patinaLevelAt(DateTime.now());
+
+  double patinaAmountAt(DateTime now) {
+    final usedAt = lastUsedAt ?? lastUpdateDate;
+    if (usedAt == null || usedAt.isAfter(now)) return 0;
+    return patinaAmountForDays(now.difference(usedAt).inHours / 24);
+  }
+
+  double get patinaAmount => patinaAmountAt(DateTime.now());
 }
 
 extension ProfileExtension on Profile {
@@ -391,6 +409,7 @@ extension ProfileExtension on Profile {
     required InspectConfig inspect,
     Map<String, String>? requestHeaders,
     bool allowDeviceIdentityRetry = false,
+    bool guardEmptyPlummet = false,
     FetchProfileResponse? fetch,
   }) async {
     final target = normalizeSubscriptionUrl(url);
@@ -496,6 +515,13 @@ extension ProfileExtension on Profile {
       }
     }
     if (stubFallback != null) {
+      // A background refresh that collapses a working config to zero dialable
+      // nodes is almost always a broken update (provider mistake, whitelist
+      // rotation), not a deliberately empty subscription. Refuse it so the
+      // previous config keeps serving instead of stranding the user (#13109).
+      if (guardEmptyPlummet && await _currentConfigDialable(inspect)) {
+        throw const ProfileEmptyAfterUpdateException();
+      }
       return stubFallback.withUndialableNodes();
     }
     if (panelFailure != null) throw panelFailure;
@@ -607,6 +633,16 @@ extension ProfileExtension on Profile {
     } finally {
       await file.safeDelete();
     }
+  }
+
+  // The config already committed on disk. Only reports true when it is present
+  // and inspects to at least one dialable node: an absent or unparseable file
+  // is nothing worth protecting, so the guard lets such an update through.
+  Future<bool> _currentConfigDialable(InspectConfig inspect) async {
+    final file = await _getFile(false);
+    if (!await file.exists()) return false;
+    final inspection = await inspect(file.path);
+    return inspection != null && hasDialableNode(inspection);
   }
 
   Future<void> rememberPreparedHosts(PreparedProfileImport prepared) async {

@@ -1,5 +1,4 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
@@ -16,8 +15,6 @@ Profile _profile({
   PanelMeta? panelMeta,
   bool autoUpdate = true,
   bool undialableNodes = false,
-  SubscriptionClient clientEmulation = SubscriptionClient.auto,
-  SubscriptionClient? lastWorkingClient,
 }) {
   return Profile(
     id: 7,
@@ -28,8 +25,6 @@ Profile _profile({
     autoUpdate: autoUpdate,
     subscriptionInfo: subscriptionInfo,
     panelMeta: panelMeta,
-    clientEmulation: clientEmulation,
-    lastWorkingClient: lastWorkingClient,
     undialableNodes: undialableNodes,
   );
 }
@@ -67,7 +62,7 @@ void main() {
     expect(find.text('Traffic usage'), findsNothing);
   });
 
-  testWidgets('a quota is read as what is left, not as what was spent', (
+  testWidgets('the end date reads short, and the quota is gone', (
     tester,
   ) async {
     await _pump(
@@ -82,13 +77,10 @@ void main() {
       ),
     );
 
-    expect(find.text('3GB'), findsOne);
-    expect(find.text('7GB'), findsOne);
-    expect(find.text('10GB'), findsOne);
-    expect(find.text('90GB'), findsOne);
-    expect(find.text('100GB'), findsOne);
-    expect(find.text('Remaining 11 days'), findsNothing);
-    expect(find.text(_expire.showFull), findsOne);
+    expect(find.text('Traffic usage'), findsNothing);
+    expect(find.textContaining('100GB'), findsNothing);
+    expect(find.text(_expire.show), findsOne);
+    expect(find.text(_expire.showFull), findsNothing);
   });
 
   testWidgets('a plan without quota or end date explains the blank', (
@@ -103,7 +95,7 @@ void main() {
     expect(find.text('Traffic usage'), findsNothing);
   });
 
-  testWidgets('account details expose service, profile, and domain', (
+  testWidgets('the provider card names the service and its local label', (
     tester,
   ) async {
     await _pump(
@@ -113,62 +105,32 @@ void main() {
 
     expect(find.text('Nebula VPN'), findsOne);
     expect(find.text('Local label'), findsOne);
-    expect(find.text('panel.example.com'), findsOne);
   });
 
-  testWidgets('account details use the client that actually worked', (
+  testWidgets('auto update on shows its own interval, not the suggestion', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _profile(panelMeta: const PanelMeta(updateIntervalMinutes: 720)),
+    );
+
+    expect(find.text('2 hours'), findsOne);
+    expect(find.textContaining('suggested'), findsNothing);
+  });
+
+  testWidgets('auto update that is off names the suggested interval', (
     tester,
   ) async {
     await _pump(
       tester,
       _profile(
-        panelMeta: const PanelMeta(accountUsername: 'user@example.com'),
-        lastWorkingClient: SubscriptionClient.happ,
+        autoUpdate: false,
+        panelMeta: const PanelMeta(updateIntervalMinutes: 720),
       ),
     );
 
-    expect(find.text('user@example.com'), findsOne);
-    expect(find.text('Happ'), findsOne);
-    expect(find.text('Auto'), findsNothing);
-  });
-
-  testWidgets(
-    'an interval of its own does not hide the one the panel asks for',
-    (tester) async {
-      await _pump(
-        tester,
-        _profile(panelMeta: const PanelMeta(updateIntervalMinutes: 720)),
-      );
-
-      expect(find.text('2 hours'), findsOne);
-      expect(find.text('The provider suggests 12 hours'), findsOne);
-    },
-  );
-
-  testWidgets('auto update that is off reads as off', (tester) async {
-    await _pump(tester, _profile(autoUpdate: false));
-
-    expect(find.text('Off'), findsOne);
-    expect(find.text('Update'), findsOne);
-  });
-
-  testWidgets('every panel link is offered, not only the urgent one', (
-    tester,
-  ) async {
-    await _pump(
-      tester,
-      _profile(
-        panelMeta: const PanelMeta(
-          buyPlanUrl: 'https://panel.example.com/plans',
-          buyTrafficUrl: 'https://panel.example.com/traffic',
-          supportUrl: 'https://panel.example.com/support',
-        ),
-      ),
-    );
-
-    expect(find.text('Renew subscription'), findsOne);
-    expect(find.text('Top up traffic'), findsOne);
-    expect(find.text('Support'), findsOne);
+    expect(find.text('Off (suggested 12 hours)'), findsOne);
   });
 
   testWidgets('a panel that moved or blocked the device says it up front', (

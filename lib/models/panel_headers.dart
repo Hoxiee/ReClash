@@ -126,6 +126,10 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'heroRing',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-heroeffect'],
+    canonicalKey: 'heroEffect',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-widgets'],
     canonicalKey: 'panelWidgets',
   ),

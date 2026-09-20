@@ -115,13 +115,7 @@ class RoutingVerdictCard extends StatelessWidget {
               ),
               if (delay > 0) ...[
                 const SizedBox(width: 10),
-                Text(
-                  ours > 0 ? '$delay ms' : '≈$delay ms',
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: ours > 0 ? FontWeight.w600 : FontWeight.w400,
-                    color: getDelayColor(delay) ?? colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                RoutingDelayPill(delay: delay, approx: ours <= 0),
               ],
             ],
           ),
@@ -649,6 +643,9 @@ class RoutingStabilityCard extends StatelessWidget {
                 child: RoutingTile(
                   value: '${metrics.availability}%',
                   label: appLocalizations.smartRoutingAvailability,
+                  valueColor: metrics.availability >= 99
+                      ? context.colorScheme.primary
+                      : null,
                 ),
               ),
               Expanded(
@@ -680,36 +677,3 @@ class RoutingStabilityCard extends StatelessWidget {
   }
 }
 
-class RoutingTile extends StatelessWidget {
-  const RoutingTile({super.key, required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: context.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: context.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: Text(
-            label,
-            style: context.textTheme.labelSmall?.copyWith(
-              color: context.colorScheme.onSurfaceVariant,
-              height: 1.3,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

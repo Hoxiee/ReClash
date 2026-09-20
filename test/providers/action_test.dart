@@ -53,6 +53,7 @@ class _ControlledUpdateProfilesAction extends ProfilesAction {
   Future<PreparedProfileImport> prepareProfileUpdate(
     Profile profile, {
     bool allowDirectRetry = false,
+    bool isAutoUpdate = false,
   }) {
     final queue = preparations[profile.id];
     if (queue == null || queue.isEmpty) {

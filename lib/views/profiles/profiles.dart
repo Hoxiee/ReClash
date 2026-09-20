@@ -416,19 +416,16 @@ class ProfileItem extends ConsumerWidget {
     final previewDays = ref.watch(
       findingPreviewProvider.select((state) => state.patinaDays),
     );
-    final previewLevel = previewDays == null
+    final previewAmount = previewDays == null
         ? null
-        : switch (previewDays) {
-            >= 120 => 3,
-            >= 45 => 2,
-            >= 14 => 1,
-            _ => 0,
-          };
+        : patinaAmountForDays(previewDays.toDouble());
     final updating = ref.watch(isUpdatingProvider(profile.updatingKey));
     final patina = !seasonalEnabled || profile.id == groupValue || updating
-        ? 0
-        : previewLevel ??
-              (soften ? profile.patinaLevel.clamp(0, 1) : profile.patinaLevel);
+        ? 0.0
+        : previewAmount ??
+              (soften
+                  ? profile.patinaAmount.clamp(0.0, 1.0)
+                  : profile.patinaAmount);
     final reduceMotion =
         context.disableAnimations || ref.watch(appSettingProvider).reduceMotion;
     return CommonCard(
@@ -440,6 +437,7 @@ class ProfileItem extends ConsumerWidget {
       },
       child: ProfilePatina(
         level: patina,
+        seed: profile.id,
         reduceMotion: reduceMotion,
         child: ListItem(
           key: Key(profile.id.toString()),
@@ -486,11 +484,7 @@ class ProfileItem extends ConsumerWidget {
           ),
           title: _ProfileCardTitle(
             profile: profile,
-            desaturation: patina == 0
-                ? 0
-                : patina == 1
-                ? 0.2
-                : 0.45,
+            desaturation: (patina * 0.16).clamp(0.0, 0.48),
             reduceMotion: reduceMotion,
             info: switch (profile.type) {
               ProfileType.file => _buildFileProfileInfo(context),
@@ -630,11 +624,15 @@ class LastUsedTimeText extends ConsumerWidget {
     final showInactiveAge = ref.watch(
       milestoneSettingProvider.select((state) => state.seasonalEnabled),
     );
-    final description = showInactiveAge && age.inDays >= 120
-        ? context.appLocalizations.profileUnusedForMonths(age.inDays ~/ 30)
-        : value.getLastUpdateTimeDesc(context);
+    if (showInactiveAge && age.inDays >= 120) {
+      return Text(
+        context.appLocalizations.profileUnusedForMonths(age.inDays ~/ 30),
+        style: style,
+      );
+    }
     return Text(
-      '${context.appLocalizations.lastUsed}: $description',
+      '${context.appLocalizations.lastUsed}: '
+      '${value.getLastUpdateTimeDesc(context)}',
       style: style,
     );
   }

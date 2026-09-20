@@ -3718,7 +3718,7 @@ $WallpaperPropsCopyWith<$Res> get wallpaper {
 /// @nodoc
 mixin _$MilestoneProps {
 
- Set<String> get unlocked; Map<String, int> get revealedAt; List<String> get revealQueue; bool get findingsEnabled; bool get seasonalEnabled;
+ Set<String> get unlocked; Map<String, int> get revealedAt; List<String> get revealQueue; bool get findingsEnabled; bool get seasonalEnabled; bool get providerEffectsEnabled;
 /// Create a copy of MilestoneProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3732,20 +3732,20 @@ $MilestonePropsCopyWith<MilestoneProps> get copyWith => _$MilestonePropsCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as MilestoneProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _this.unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _this.revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _this.revealQueue)&&(identical(other.findingsEnabled, _this.findingsEnabled) || other.findingsEnabled == _this.findingsEnabled)&&(identical(other.seasonalEnabled, _this.seasonalEnabled) || other.seasonalEnabled == _this.seasonalEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _this.unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _this.revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _this.revealQueue)&&(identical(other.findingsEnabled, _this.findingsEnabled) || other.findingsEnabled == _this.findingsEnabled)&&(identical(other.seasonalEnabled, _this.seasonalEnabled) || other.seasonalEnabled == _this.seasonalEnabled)&&(identical(other.providerEffectsEnabled, _this.providerEffectsEnabled) || other.providerEffectsEnabled == _this.providerEffectsEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MilestoneProps;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.unlocked),const DeepCollectionEquality().hash(_this.revealedAt),const DeepCollectionEquality().hash(_this.revealQueue),_this.findingsEnabled,_this.seasonalEnabled);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.unlocked),const DeepCollectionEquality().hash(_this.revealedAt),const DeepCollectionEquality().hash(_this.revealQueue),_this.findingsEnabled,_this.seasonalEnabled,_this.providerEffectsEnabled);
 }
 
 @override
 String toString() {
   final _this = this as MilestoneProps;
-  return 'MilestoneProps(unlocked: ${_this.unlocked}, revealedAt: ${_this.revealedAt}, revealQueue: ${_this.revealQueue}, findingsEnabled: ${_this.findingsEnabled}, seasonalEnabled: ${_this.seasonalEnabled})';
+  return 'MilestoneProps(unlocked: ${_this.unlocked}, revealedAt: ${_this.revealedAt}, revealQueue: ${_this.revealQueue}, findingsEnabled: ${_this.findingsEnabled}, seasonalEnabled: ${_this.seasonalEnabled}, providerEffectsEnabled: ${_this.providerEffectsEnabled})';
 }
 
 
@@ -3756,7 +3756,7 @@ abstract mixin class $MilestonePropsCopyWith<$Res>  {
   factory $MilestonePropsCopyWith(MilestoneProps value, $Res Function(MilestoneProps) _then) = _$MilestonePropsCopyWithImpl;
 @useResult
 $Res call({
- Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled
+ Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled, bool providerEffectsEnabled
 });
 
 
@@ -3773,13 +3773,14 @@ class _$MilestonePropsCopyWithImpl<$Res>
 
 /// Create a copy of MilestoneProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,Object? providerEffectsEnabled = null,}) {
   return _then(MilestoneProps(
 unlocked: null == unlocked ? _self.unlocked : unlocked // ignore: cast_nullable_to_non_nullable
 as Set<String>,revealedAt: null == revealedAt ? _self.revealedAt : revealedAt // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,revealQueue: null == revealQueue ? _self.revealQueue : revealQueue // ignore: cast_nullable_to_non_nullable
 as List<String>,findingsEnabled: null == findingsEnabled ? _self.findingsEnabled : findingsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,seasonalEnabled: null == seasonalEnabled ? _self.seasonalEnabled : seasonalEnabled // ignore: cast_nullable_to_non_nullable
+as bool,providerEffectsEnabled: null == providerEffectsEnabled ? _self.providerEffectsEnabled : providerEffectsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -3865,10 +3866,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled,  bool providerEffectsEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MilestoneProps() when $default != null:
-return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled,_that.providerEffectsEnabled);case _:
   return orElse();
 
 }
@@ -3886,10 +3887,10 @@ return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findings
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled,  bool providerEffectsEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _MilestoneProps():
-return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled,_that.providerEffectsEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3906,10 +3907,10 @@ return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findings
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Set<String> unlocked,  Map<String, int> revealedAt,  List<String> revealQueue,  bool findingsEnabled,  bool seasonalEnabled,  bool providerEffectsEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _MilestoneProps() when $default != null:
-return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled);case _:
+return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findingsEnabled,_that.seasonalEnabled,_that.providerEffectsEnabled);case _:
   return null;
 
 }
@@ -3921,7 +3922,7 @@ return $default(_that.unlocked,_that.revealedAt,_that.revealQueue,_that.findings
 @JsonSerializable()
 
 class _MilestoneProps implements MilestoneProps {
-  const _MilestoneProps({ Set<String> unlocked = const <String>{},  Map<String, int> revealedAt = const <String, int>{},  List<String> revealQueue = const <String>[], this.findingsEnabled = true, this.seasonalEnabled = true}): _unlocked = unlocked,_revealedAt = revealedAt,_revealQueue = revealQueue;
+  const _MilestoneProps({ Set<String> unlocked = const <String>{},  Map<String, int> revealedAt = const <String, int>{},  List<String> revealQueue = const <String>[], this.findingsEnabled = true, this.seasonalEnabled = true, this.providerEffectsEnabled = true}): _unlocked = unlocked,_revealedAt = revealedAt,_revealQueue = revealQueue;
   factory _MilestoneProps.fromJson(Map<String, dynamic> json) => _$MilestonePropsFromJson(json);
 
  final  Set<String> _unlocked;
@@ -3947,6 +3948,7 @@ class _MilestoneProps implements MilestoneProps {
 
 @override@JsonKey() final  bool findingsEnabled;
 @override@JsonKey() final  bool seasonalEnabled;
+@override@JsonKey() final  bool providerEffectsEnabled;
 
 /// Create a copy of MilestoneProps
 /// with the given fields replaced by the non-null parameter values.
@@ -3961,18 +3963,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _revealQueue)&&(identical(other.findingsEnabled, findingsEnabled) || other.findingsEnabled == findingsEnabled)&&(identical(other.seasonalEnabled, seasonalEnabled) || other.seasonalEnabled == seasonalEnabled));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MilestoneProps&&const DeepCollectionEquality().equals(other.unlocked, _unlocked)&&const DeepCollectionEquality().equals(other.revealedAt, _revealedAt)&&const DeepCollectionEquality().equals(other.revealQueue, _revealQueue)&&(identical(other.findingsEnabled, findingsEnabled) || other.findingsEnabled == findingsEnabled)&&(identical(other.seasonalEnabled, seasonalEnabled) || other.seasonalEnabled == seasonalEnabled)&&(identical(other.providerEffectsEnabled, providerEffectsEnabled) || other.providerEffectsEnabled == providerEffectsEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_unlocked),const DeepCollectionEquality().hash(_revealedAt),const DeepCollectionEquality().hash(_revealQueue),findingsEnabled,seasonalEnabled);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_unlocked),const DeepCollectionEquality().hash(_revealedAt),const DeepCollectionEquality().hash(_revealQueue),findingsEnabled,seasonalEnabled,providerEffectsEnabled);
 }
 
 @override
 String toString() {
-    return 'MilestoneProps(unlocked: $unlocked, revealedAt: $revealedAt, revealQueue: $revealQueue, findingsEnabled: $findingsEnabled, seasonalEnabled: $seasonalEnabled)';
+    return 'MilestoneProps(unlocked: $unlocked, revealedAt: $revealedAt, revealQueue: $revealQueue, findingsEnabled: $findingsEnabled, seasonalEnabled: $seasonalEnabled, providerEffectsEnabled: $providerEffectsEnabled)';
 }
 
 
@@ -3983,7 +3985,7 @@ abstract mixin class _$MilestonePropsCopyWith<$Res> implements $MilestonePropsCo
   factory _$MilestonePropsCopyWith(_MilestoneProps value, $Res Function(_MilestoneProps) _then) = __$MilestonePropsCopyWithImpl;
 @override @useResult
 $Res call({
- Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled
+ Set<String> unlocked, Map<String, int> revealedAt, List<String> revealQueue, bool findingsEnabled, bool seasonalEnabled, bool providerEffectsEnabled
 });
 
 
@@ -4000,13 +4002,14 @@ class __$MilestonePropsCopyWithImpl<$Res>
 
 /// Create a copy of MilestoneProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? unlocked = null,Object? revealedAt = null,Object? revealQueue = null,Object? findingsEnabled = null,Object? seasonalEnabled = null,Object? providerEffectsEnabled = null,}) {
   return _then(_MilestoneProps(
 unlocked: null == unlocked ? _self._unlocked : unlocked // ignore: cast_nullable_to_non_nullable
 as Set<String>,revealedAt: null == revealedAt ? _self._revealedAt : revealedAt // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,revealQueue: null == revealQueue ? _self._revealQueue : revealQueue // ignore: cast_nullable_to_non_nullable
 as List<String>,findingsEnabled: null == findingsEnabled ? _self.findingsEnabled : findingsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,seasonalEnabled: null == seasonalEnabled ? _self.seasonalEnabled : seasonalEnabled // ignore: cast_nullable_to_non_nullable
+as bool,providerEffectsEnabled: null == providerEffectsEnabled ? _self.providerEffectsEnabled : providerEffectsEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
