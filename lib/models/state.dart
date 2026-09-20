@@ -388,6 +388,7 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     required String defaultUA,
     @Default(false) bool smartRouting,
     @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
+    @Default({}) Map<String, List<String>> serviceRules,
     @Default([]) List<String> authentication,
     String? matchTarget,
     @Default(false) bool desync,
@@ -423,6 +424,7 @@ abstract class SetupState with _$SetupState {
     required bool overrideDns,
     required Dns dns,
     @Default([]) List<ServiceRoutePolicy> serviceRoutePolicies,
+    @Default({}) Map<String, List<String>> serviceRules,
     String? matchTarget,
   }) = _SetupState;
 }

@@ -330,16 +330,23 @@ _RcxLaneSelector _$RcxLaneSelectorFromJson(Map<String, dynamic> json) =>
     _RcxLaneSelector(
       provider: json['p'] as String?,
       nameContains: json['has'] as String?,
+      group: json['grp'] as String?,
     );
 
 Map<String, dynamic> _$RcxLaneSelectorToJson(_RcxLaneSelector instance) =>
-    <String, dynamic>{'p': instance.provider, 'has': instance.nameContains};
+    <String, dynamic>{
+      'p': instance.provider,
+      'has': instance.nameContains,
+      'grp': ?instance.group,
+    };
 
 _RcxLaneConfig _$RcxLaneConfigFromJson(Map<String, dynamic> json) =>
     _RcxLaneConfig(
       capabilityId: json['id'] as String,
       group: json['g'] as String,
       fallback: json['fb'] as String,
+      role: json['role'] as String?,
+      strategy: json['st'] as String?,
       selectors:
           (json['sel'] as List<dynamic>?)
               ?.map((e) => RcxLaneSelector.fromJson(e as Map<String, dynamic>))
@@ -352,6 +359,8 @@ Map<String, dynamic> _$RcxLaneConfigToJson(_RcxLaneConfig instance) =>
       'id': instance.capabilityId,
       'g': instance.group,
       'fb': instance.fallback,
+      'role': ?instance.role,
+      'st': ?instance.strategy,
       'sel': instance.selectors,
     };
 

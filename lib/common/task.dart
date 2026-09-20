@@ -116,6 +116,7 @@ List<String> injectRcxSkeleton({
   required Map<dynamic, dynamic> rawConfig,
   required List<String> rules,
   List<ServiceRoutePolicy> serviceRoutes = const [],
+  Map<String, List<String>> serviceRules = const {},
   int userRuleCount = 0,
 }) {
   final groups = rawConfig['proxy-groups'];
@@ -125,7 +126,7 @@ List<String> injectRcxSkeleton({
       .where(
         (route) =>
             route.enabled &&
-            supportedCapabilityIds.contains(route.capabilityId),
+            (serviceRules[route.capabilityId]?.isNotEmpty ?? false),
       )
       .toList();
   final reservedNames = {
@@ -194,12 +195,13 @@ List<String> injectRcxSkeleton({
     },
   ];
 
-  return _patchRcxRules(rules, enabledRoutes, userRuleCount);
+  return _patchRcxRules(rules, enabledRoutes, serviceRules, userRuleCount);
 }
 
 List<String> _patchRcxRules(
   List<String> rules,
   List<ServiceRoutePolicy> serviceRoutes,
+  Map<String, List<String>> serviceRules,
   int userRuleCount,
 ) {
   final patched = List<String>.from(rules);
@@ -217,7 +219,7 @@ List<String> _patchRcxRules(
   }
   final capabilityRules = [
     for (final route in serviceRoutes)
-      for (final rule in capabilityServiceRules[route.capabilityId] ?? const [])
+      for (final rule in serviceRules[route.capabilityId] ?? const [])
         '$rule,${capabilityGroupName(route.capabilityId)}',
   ];
   final protected = userRuleCount.clamp(0, patched.length);
@@ -572,6 +574,7 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
       rawConfig: rawConfig,
       rules: rules,
       serviceRoutes: data.serviceRoutePolicies,
+      serviceRules: data.serviceRules,
       userRuleCount: userRuleCount,
     );
   }

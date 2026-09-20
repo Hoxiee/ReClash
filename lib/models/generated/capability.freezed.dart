@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CapabilitySelector {
 
- String? get provider;@JsonKey(name: 'name_contains') String? get nameContains;
+ String? get provider;@JsonKey(name: 'name_contains') String? get nameContains; String? get group;
 /// Create a copy of CapabilitySelector
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $CapabilitySelectorCopyWith<CapabilitySelector> get copyWith => _$CapabilitySele
 @override
 bool operator ==(Object other) {
   final _this = this as CapabilitySelector;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CapabilitySelector&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.nameContains, _this.nameContains) || other.nameContains == _this.nameContains));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CapabilitySelector&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.nameContains, _this.nameContains) || other.nameContains == _this.nameContains)&&(identical(other.group, _this.group) || other.group == _this.group));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CapabilitySelector;
-  return Object.hash(runtimeType,_this.provider,_this.nameContains);
+  return Object.hash(runtimeType,_this.provider,_this.nameContains,_this.group);
 }
 
 @override
 String toString() {
   final _this = this as CapabilitySelector;
-  return 'CapabilitySelector(provider: ${_this.provider}, nameContains: ${_this.nameContains})';
+  return 'CapabilitySelector(provider: ${_this.provider}, nameContains: ${_this.nameContains}, group: ${_this.group})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $CapabilitySelectorCopyWith<$Res>  {
   factory $CapabilitySelectorCopyWith(CapabilitySelector value, $Res Function(CapabilitySelector) _then) = _$CapabilitySelectorCopyWithImpl;
 @useResult
 $Res call({
- String? provider,@JsonKey(name: 'name_contains') String? nameContains
+ String? provider,@JsonKey(name: 'name_contains') String? nameContains, String? group
 });
 
 
@@ -71,10 +71,11 @@ class _$CapabilitySelectorCopyWithImpl<$Res>
 
 /// Create a copy of CapabilitySelector
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? provider = freezed,Object? nameContains = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? provider = freezed,Object? nameContains = freezed,Object? group = freezed,}) {
   return _then(CapabilitySelector(
 provider: freezed == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as String?,nameContains: freezed == nameContains ? _self.nameContains : nameContains // ignore: cast_nullable_to_non_nullable
+as String?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -160,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains,  String? group)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CapabilitySelector() when $default != null:
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   return orElse();
 
 }
@@ -181,10 +182,10 @@ return $default(_that.provider,_that.nameContains);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains,  String? group)  $default,) {final _that = this;
 switch (_that) {
 case _CapabilitySelector():
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +202,10 @@ return $default(_that.provider,_that.nameContains);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? provider, @JsonKey(name: 'name_contains')  String? nameContains,  String? group)?  $default,) {final _that = this;
 switch (_that) {
 case _CapabilitySelector() when $default != null:
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   return null;
 
 }
@@ -216,11 +217,12 @@ return $default(_that.provider,_that.nameContains);case _:
 @JsonSerializable()
 
 class _CapabilitySelector implements CapabilitySelector {
-  const _CapabilitySelector({this.provider, @JsonKey(name: 'name_contains') this.nameContains});
+  const _CapabilitySelector({this.provider, @JsonKey(name: 'name_contains') this.nameContains, this.group});
   factory _CapabilitySelector.fromJson(Map<String, dynamic> json) => _$CapabilitySelectorFromJson(json);
 
 @override final  String? provider;
 @override@JsonKey(name: 'name_contains') final  String? nameContains;
+@override final  String? group;
 
 /// Create a copy of CapabilitySelector
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CapabilitySelector&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.nameContains, nameContains) || other.nameContains == nameContains));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CapabilitySelector&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.nameContains, nameContains) || other.nameContains == nameContains)&&(identical(other.group, group) || other.group == group));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,provider,nameContains);
+    return Object.hash(runtimeType,provider,nameContains,group);
 }
 
 @override
 String toString() {
-    return 'CapabilitySelector(provider: $provider, nameContains: $nameContains)';
+    return 'CapabilitySelector(provider: $provider, nameContains: $nameContains, group: $group)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$CapabilitySelectorCopyWith<$Res> implements $CapabilitySe
   factory _$CapabilitySelectorCopyWith(_CapabilitySelector value, $Res Function(_CapabilitySelector) _then) = __$CapabilitySelectorCopyWithImpl;
 @override @useResult
 $Res call({
- String? provider,@JsonKey(name: 'name_contains') String? nameContains
+ String? provider,@JsonKey(name: 'name_contains') String? nameContains, String? group
 });
 
 
@@ -274,10 +276,11 @@ class __$CapabilitySelectorCopyWithImpl<$Res>
 
 /// Create a copy of CapabilitySelector
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? provider = freezed,Object? nameContains = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? provider = freezed,Object? nameContains = freezed,Object? group = freezed,}) {
   return _then(_CapabilitySelector(
 provider: freezed == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as String?,nameContains: freezed == nameContains ? _self.nameContains : nameContains // ignore: cast_nullable_to_non_nullable
+as String?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -289,7 +292,7 @@ as String?,
 /// @nodoc
 mixin _$CapabilityClaim {
 
-@JsonKey(name: 'cap') String get capabilityId; List<CapabilitySelector> get selectors;
+@JsonKey(name: 'cap') String get capabilityId; List<CapabilitySelector> get selectors; List<String> get rules; String get role; String get strategy; String? get title;
 /// Create a copy of CapabilityClaim
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -303,20 +306,20 @@ $CapabilityClaimCopyWith<CapabilityClaim> get copyWith => _$CapabilityClaimCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as CapabilityClaim;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CapabilityClaim&&(identical(other.capabilityId, _this.capabilityId) || other.capabilityId == _this.capabilityId)&&const DeepCollectionEquality().equals(other.selectors, _this.selectors));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CapabilityClaim&&(identical(other.capabilityId, _this.capabilityId) || other.capabilityId == _this.capabilityId)&&const DeepCollectionEquality().equals(other.selectors, _this.selectors)&&const DeepCollectionEquality().equals(other.rules, _this.rules)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.title, _this.title) || other.title == _this.title));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CapabilityClaim;
-  return Object.hash(runtimeType,_this.capabilityId,const DeepCollectionEquality().hash(_this.selectors));
+  return Object.hash(runtimeType,_this.capabilityId,const DeepCollectionEquality().hash(_this.selectors),const DeepCollectionEquality().hash(_this.rules),_this.role,_this.strategy,_this.title);
 }
 
 @override
 String toString() {
   final _this = this as CapabilityClaim;
-  return 'CapabilityClaim(capabilityId: ${_this.capabilityId}, selectors: ${_this.selectors})';
+  return 'CapabilityClaim(capabilityId: ${_this.capabilityId}, selectors: ${_this.selectors}, rules: ${_this.rules}, role: ${_this.role}, strategy: ${_this.strategy}, title: ${_this.title})';
 }
 
 
@@ -327,7 +330,7 @@ abstract mixin class $CapabilityClaimCopyWith<$Res>  {
   factory $CapabilityClaimCopyWith(CapabilityClaim value, $Res Function(CapabilityClaim) _then) = _$CapabilityClaimCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'cap') String capabilityId, List<CapabilitySelector> selectors
+@JsonKey(name: 'cap') String capabilityId, List<CapabilitySelector> selectors, List<String> rules, String role, String strategy, String? title
 });
 
 
@@ -344,11 +347,15 @@ class _$CapabilityClaimCopyWithImpl<$Res>
 
 /// Create a copy of CapabilityClaim
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? capabilityId = null,Object? selectors = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? capabilityId = null,Object? selectors = null,Object? rules = null,Object? role = null,Object? strategy = null,Object? title = freezed,}) {
   return _then(CapabilityClaim(
 capabilityId: null == capabilityId ? _self.capabilityId : capabilityId // ignore: cast_nullable_to_non_nullable
 as String,selectors: null == selectors ? _self.selectors : selectors // ignore: cast_nullable_to_non_nullable
-as List<CapabilitySelector>,
+as List<CapabilitySelector>,rules: null == rules ? _self.rules : rules // ignore: cast_nullable_to_non_nullable
+as List<String>,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -433,10 +440,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors,  List<String> rules,  String role,  String strategy,  String? title)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CapabilityClaim() when $default != null:
-return $default(_that.capabilityId,_that.selectors);case _:
+return $default(_that.capabilityId,_that.selectors,_that.rules,_that.role,_that.strategy,_that.title);case _:
   return orElse();
 
 }
@@ -454,10 +461,10 @@ return $default(_that.capabilityId,_that.selectors);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors,  List<String> rules,  String role,  String strategy,  String? title)  $default,) {final _that = this;
 switch (_that) {
 case _CapabilityClaim():
-return $default(_that.capabilityId,_that.selectors);case _:
+return $default(_that.capabilityId,_that.selectors,_that.rules,_that.role,_that.strategy,_that.title);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -474,10 +481,10 @@ return $default(_that.capabilityId,_that.selectors);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'cap')  String capabilityId,  List<CapabilitySelector> selectors,  List<String> rules,  String role,  String strategy,  String? title)?  $default,) {final _that = this;
 switch (_that) {
 case _CapabilityClaim() when $default != null:
-return $default(_that.capabilityId,_that.selectors);case _:
+return $default(_that.capabilityId,_that.selectors,_that.rules,_that.role,_that.strategy,_that.title);case _:
   return null;
 
 }
@@ -489,7 +496,7 @@ return $default(_that.capabilityId,_that.selectors);case _:
 @JsonSerializable()
 
 class _CapabilityClaim implements CapabilityClaim {
-  const _CapabilityClaim({@JsonKey(name: 'cap') required this.capabilityId, required  List<CapabilitySelector> selectors}): _selectors = selectors;
+  const _CapabilityClaim({@JsonKey(name: 'cap') required this.capabilityId, required  List<CapabilitySelector> selectors,  List<String> rules = const [], this.role = capabilityRoleAny, this.strategy = '', this.title}): _selectors = selectors,_rules = rules;
   factory _CapabilityClaim.fromJson(Map<String, dynamic> json) => _$CapabilityClaimFromJson(json);
 
 @override@JsonKey(name: 'cap') final  String capabilityId;
@@ -500,6 +507,16 @@ class _CapabilityClaim implements CapabilityClaim {
   return EqualUnmodifiableListView(_selectors);
 }
 
+ final  List<String> _rules;
+@override@JsonKey() List<String> get rules {
+  if (_rules is EqualUnmodifiableListView) return _rules;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_rules);
+}
+
+@override@JsonKey() final  String role;
+@override@JsonKey() final  String strategy;
+@override final  String? title;
 
 /// Create a copy of CapabilityClaim
 /// with the given fields replaced by the non-null parameter values.
@@ -514,18 +531,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CapabilityClaim&&(identical(other.capabilityId, capabilityId) || other.capabilityId == capabilityId)&&const DeepCollectionEquality().equals(other.selectors, _selectors));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CapabilityClaim&&(identical(other.capabilityId, capabilityId) || other.capabilityId == capabilityId)&&const DeepCollectionEquality().equals(other.selectors, _selectors)&&const DeepCollectionEquality().equals(other.rules, _rules)&&(identical(other.role, role) || other.role == role)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.title, title) || other.title == title));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,capabilityId,const DeepCollectionEquality().hash(_selectors));
+    return Object.hash(runtimeType,capabilityId,const DeepCollectionEquality().hash(_selectors),const DeepCollectionEquality().hash(_rules),role,strategy,title);
 }
 
 @override
 String toString() {
-    return 'CapabilityClaim(capabilityId: $capabilityId, selectors: $selectors)';
+    return 'CapabilityClaim(capabilityId: $capabilityId, selectors: $selectors, rules: $rules, role: $role, strategy: $strategy, title: $title)';
 }
 
 
@@ -536,7 +553,7 @@ abstract mixin class _$CapabilityClaimCopyWith<$Res> implements $CapabilityClaim
   factory _$CapabilityClaimCopyWith(_CapabilityClaim value, $Res Function(_CapabilityClaim) _then) = __$CapabilityClaimCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'cap') String capabilityId, List<CapabilitySelector> selectors
+@JsonKey(name: 'cap') String capabilityId, List<CapabilitySelector> selectors, List<String> rules, String role, String strategy, String? title
 });
 
 
@@ -553,11 +570,15 @@ class __$CapabilityClaimCopyWithImpl<$Res>
 
 /// Create a copy of CapabilityClaim
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? capabilityId = null,Object? selectors = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? capabilityId = null,Object? selectors = null,Object? rules = null,Object? role = null,Object? strategy = null,Object? title = freezed,}) {
   return _then(_CapabilityClaim(
 capabilityId: null == capabilityId ? _self.capabilityId : capabilityId // ignore: cast_nullable_to_non_nullable
 as String,selectors: null == selectors ? _self._selectors : selectors // ignore: cast_nullable_to_non_nullable
-as List<CapabilitySelector>,
+as List<CapabilitySelector>,rules: null == rules ? _self._rules : rules // ignore: cast_nullable_to_non_nullable
+as List<String>,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

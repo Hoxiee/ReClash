@@ -235,6 +235,7 @@ void main() {
           'id': 'gemini-access',
           'g': 'RCX-CAP-GEMINI_ACCESS',
           'fb': 'reject',
+          'role': 'foreign',
           'sel': [
             {'p': 'premium', 'has': '⭐'},
             {'p': null, 'has': 'manual'},
@@ -287,6 +288,7 @@ void main() {
           capabilityId: 'youtube-adfree',
           group: 'RCX-CAP-YOUTUBE_ADFREE',
           fallback: 'main',
+          role: 'foreign',
         ),
       );
     });

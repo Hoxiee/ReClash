@@ -221,6 +221,7 @@ abstract class RcxLaneSelector with _$RcxLaneSelector {
   const factory RcxLaneSelector({
     @JsonKey(name: 'p') String? provider,
     @JsonKey(name: 'has') String? nameContains,
+    @JsonKey(name: 'grp', includeIfNull: false) String? group,
   }) = _RcxLaneSelector;
 
   factory RcxLaneSelector.fromJson(Map<String, Object?> json) =>
@@ -233,6 +234,8 @@ abstract class RcxLaneConfig with _$RcxLaneConfig {
     @JsonKey(name: 'id') required String capabilityId,
     @JsonKey(name: 'g') required String group,
     @JsonKey(name: 'fb') required String fallback,
+    @JsonKey(name: 'role', includeIfNull: false) String? role,
+    @JsonKey(name: 'st', includeIfNull: false) String? strategy,
     @JsonKey(name: 'sel') @Default([]) List<RcxLaneSelector> selectors,
   }) = _RcxLaneConfig;
 

@@ -161,12 +161,17 @@ class SmartRoutingView extends ConsumerWidget {
         SettingSection.sliver(
           title: appLocalizations.smartRoutingServiceRoutes,
           items: [
-            for (final capabilityId in supportedCapabilityIds)
+            for (final capabilityId in effectiveCapabilityIds(
+              profile?.capabilityManifest,
+            ))
               _ServiceRouteItem(
                 capabilityId: capabilityId,
                 policy:
                     servicePolicies[capabilityId] ??
-                    ServiceRoutePolicy(capabilityId: capabilityId),
+                    ServiceRoutePolicy(
+                      capabilityId: capabilityId,
+                      fallback: defaultFallbackFor(capabilityId),
+                    ),
                 laneStatus: laneStatusById[capabilityId],
                 manifest: profile?.capabilityManifest,
                 manualSelectors: profile?.manualCapabilitySelectors ?? const [],
@@ -357,12 +362,24 @@ int _providerSelectorCount(
         .fold<int>(0, (total, claim) => total + claim.selectors.length) ??
     0;
 
-String capabilityTitle(BuildContext context, String capabilityId) =>
-    switch (capabilityId) {
-      'youtube-adfree' => context.appLocalizations.smartRoutingServiceYouTube,
-      'gemini-access' => context.appLocalizations.smartRoutingServiceGemini,
-      _ => capabilityId,
-    };
+String capabilityTitle(
+  BuildContext context,
+  String capabilityId, {
+  ProviderCapabilityManifest? manifest,
+}) {
+  switch (capabilityId) {
+    case 'youtube-adfree':
+      return context.appLocalizations.smartRoutingServiceYouTube;
+    case 'gemini-access':
+      return context.appLocalizations.smartRoutingServiceGemini;
+  }
+  final title = manifest?.claims
+      .firstWhereOrNull(
+        (claim) => claim.capabilityId == capabilityId && claim.title != null,
+      )
+      ?.title;
+  return title ?? capabilityId;
+}
 
 String _fallbackText(BuildContext context, ServiceRouteFallback fallback) =>
     switch (fallback) {
@@ -401,15 +418,13 @@ class _ServiceRouteItem extends StatelessWidget {
       status: laneStatus,
       selectorCount: selectorCount,
     );
+    final title = capabilityTitle(context, capabilityId, manifest: manifest);
     return DecorationListItem.open(
       leading: Icon(view.icon, color: view.color),
-      title: Text(capabilityTitle(context, capabilityId)),
+      title: Text(title),
       subtitle: Text(view.text),
       blur: false,
-      widget: _ServiceRoutePage(
-        title: capabilityTitle(context, capabilityId),
-        capabilityId: capabilityId,
-      ),
+      widget: _ServiceRoutePage(title: title, capabilityId: capabilityId),
     );
   }
 }

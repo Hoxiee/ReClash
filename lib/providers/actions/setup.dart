@@ -521,6 +521,7 @@ class SetupAction extends _$SetupAction {
         defaultUA: defaultUA,
         smartRouting: smartRouting,
         serviceRoutePolicies: setupState.serviceRoutePolicies,
+        serviceRules: setupState.serviceRules,
         authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
         desync: desync.enabled,

@@ -24,6 +24,14 @@ PanelBackground? panelBackground(Ref ref) {
 }
 
 @riverpod
+ProviderHeroEffect providerHeroEffect(Ref ref) {
+  final value = ref.watch(
+    currentProfileProvider.select((state) => state?.panelMeta?.heroEffect),
+  );
+  return parsePanelHeroEffect(value);
+}
+
+@riverpod
 Profile? profile(Ref ref, int? profileId) {
   return ref.watch(
     profilesProvider.select((state) => state.getProfile(profileId)),
@@ -80,6 +88,14 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     overrideDns: overrideDns,
     dns: dns,
     serviceRoutePolicies: profile?.serviceRoutePolicies ?? const [],
+    serviceRules: {
+      for (final policy in profile?.serviceRoutePolicies ?? const [])
+        if (policy.enabled)
+          policy.capabilityId: resolvedClassRules(
+            profile?.capabilityManifest,
+            policy.capabilityId,
+          ),
+    },
     matchTarget: overwriteType == OverwriteType.standard
         ? profile?.matchTarget
         : null,

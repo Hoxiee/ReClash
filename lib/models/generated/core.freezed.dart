@@ -4348,7 +4348,7 @@ as List<int>,
 /// @nodoc
 mixin _$RcxLaneSelector {
 
-@JsonKey(name: 'p') String? get provider;@JsonKey(name: 'has') String? get nameContains;
+@JsonKey(name: 'p') String? get provider;@JsonKey(name: 'has') String? get nameContains;@JsonKey(name: 'grp', includeIfNull: false) String? get group;
 /// Create a copy of RcxLaneSelector
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4362,20 +4362,20 @@ $RcxLaneSelectorCopyWith<RcxLaneSelector> get copyWith => _$RcxLaneSelectorCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as RcxLaneSelector;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxLaneSelector&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.nameContains, _this.nameContains) || other.nameContains == _this.nameContains));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxLaneSelector&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.nameContains, _this.nameContains) || other.nameContains == _this.nameContains)&&(identical(other.group, _this.group) || other.group == _this.group));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxLaneSelector;
-  return Object.hash(runtimeType,_this.provider,_this.nameContains);
+  return Object.hash(runtimeType,_this.provider,_this.nameContains,_this.group);
 }
 
 @override
 String toString() {
   final _this = this as RcxLaneSelector;
-  return 'RcxLaneSelector(provider: ${_this.provider}, nameContains: ${_this.nameContains})';
+  return 'RcxLaneSelector(provider: ${_this.provider}, nameContains: ${_this.nameContains}, group: ${_this.group})';
 }
 
 
@@ -4386,7 +4386,7 @@ abstract mixin class $RcxLaneSelectorCopyWith<$Res>  {
   factory $RcxLaneSelectorCopyWith(RcxLaneSelector value, $Res Function(RcxLaneSelector) _then) = _$RcxLaneSelectorCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'p') String? provider,@JsonKey(name: 'has') String? nameContains
+@JsonKey(name: 'p') String? provider,@JsonKey(name: 'has') String? nameContains,@JsonKey(name: 'grp', includeIfNull: false) String? group
 });
 
 
@@ -4403,10 +4403,11 @@ class _$RcxLaneSelectorCopyWithImpl<$Res>
 
 /// Create a copy of RcxLaneSelector
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? provider = freezed,Object? nameContains = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? provider = freezed,Object? nameContains = freezed,Object? group = freezed,}) {
   return _then(RcxLaneSelector(
 provider: freezed == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as String?,nameContains: freezed == nameContains ? _self.nameContains : nameContains // ignore: cast_nullable_to_non_nullable
+as String?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -4492,10 +4493,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains, @JsonKey(name: 'grp', includeIfNull: false)  String? group)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxLaneSelector() when $default != null:
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   return orElse();
 
 }
@@ -4513,10 +4514,10 @@ return $default(_that.provider,_that.nameContains);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains, @JsonKey(name: 'grp', includeIfNull: false)  String? group)  $default,) {final _that = this;
 switch (_that) {
 case _RcxLaneSelector():
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4533,10 +4534,10 @@ return $default(_that.provider,_that.nameContains);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'p')  String? provider, @JsonKey(name: 'has')  String? nameContains, @JsonKey(name: 'grp', includeIfNull: false)  String? group)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxLaneSelector() when $default != null:
-return $default(_that.provider,_that.nameContains);case _:
+return $default(_that.provider,_that.nameContains,_that.group);case _:
   return null;
 
 }
@@ -4548,11 +4549,12 @@ return $default(_that.provider,_that.nameContains);case _:
 @JsonSerializable()
 
 class _RcxLaneSelector implements RcxLaneSelector {
-  const _RcxLaneSelector({@JsonKey(name: 'p') this.provider, @JsonKey(name: 'has') this.nameContains});
+  const _RcxLaneSelector({@JsonKey(name: 'p') this.provider, @JsonKey(name: 'has') this.nameContains, @JsonKey(name: 'grp', includeIfNull: false) this.group});
   factory _RcxLaneSelector.fromJson(Map<String, dynamic> json) => _$RcxLaneSelectorFromJson(json);
 
 @override@JsonKey(name: 'p') final  String? provider;
 @override@JsonKey(name: 'has') final  String? nameContains;
+@override@JsonKey(name: 'grp', includeIfNull: false) final  String? group;
 
 /// Create a copy of RcxLaneSelector
 /// with the given fields replaced by the non-null parameter values.
@@ -4567,18 +4569,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxLaneSelector&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.nameContains, nameContains) || other.nameContains == nameContains));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxLaneSelector&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.nameContains, nameContains) || other.nameContains == nameContains)&&(identical(other.group, group) || other.group == group));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,provider,nameContains);
+    return Object.hash(runtimeType,provider,nameContains,group);
 }
 
 @override
 String toString() {
-    return 'RcxLaneSelector(provider: $provider, nameContains: $nameContains)';
+    return 'RcxLaneSelector(provider: $provider, nameContains: $nameContains, group: $group)';
 }
 
 
@@ -4589,7 +4591,7 @@ abstract mixin class _$RcxLaneSelectorCopyWith<$Res> implements $RcxLaneSelector
   factory _$RcxLaneSelectorCopyWith(_RcxLaneSelector value, $Res Function(_RcxLaneSelector) _then) = __$RcxLaneSelectorCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'p') String? provider,@JsonKey(name: 'has') String? nameContains
+@JsonKey(name: 'p') String? provider,@JsonKey(name: 'has') String? nameContains,@JsonKey(name: 'grp', includeIfNull: false) String? group
 });
 
 
@@ -4606,10 +4608,11 @@ class __$RcxLaneSelectorCopyWithImpl<$Res>
 
 /// Create a copy of RcxLaneSelector
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? provider = freezed,Object? nameContains = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? provider = freezed,Object? nameContains = freezed,Object? group = freezed,}) {
   return _then(_RcxLaneSelector(
 provider: freezed == provider ? _self.provider : provider // ignore: cast_nullable_to_non_nullable
 as String?,nameContains: freezed == nameContains ? _self.nameContains : nameContains // ignore: cast_nullable_to_non_nullable
+as String?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -4621,7 +4624,7 @@ as String?,
 /// @nodoc
 mixin _$RcxLaneConfig {
 
-@JsonKey(name: 'id') String get capabilityId;@JsonKey(name: 'g') String get group;@JsonKey(name: 'fb') String get fallback;@JsonKey(name: 'sel') List<RcxLaneSelector> get selectors;
+@JsonKey(name: 'id') String get capabilityId;@JsonKey(name: 'g') String get group;@JsonKey(name: 'fb') String get fallback;@JsonKey(name: 'role', includeIfNull: false) String? get role;@JsonKey(name: 'st', includeIfNull: false) String? get strategy;@JsonKey(name: 'sel') List<RcxLaneSelector> get selectors;
 /// Create a copy of RcxLaneConfig
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4635,20 +4638,20 @@ $RcxLaneConfigCopyWith<RcxLaneConfig> get copyWith => _$RcxLaneConfigCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as RcxLaneConfig;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxLaneConfig&&(identical(other.capabilityId, _this.capabilityId) || other.capabilityId == _this.capabilityId)&&(identical(other.group, _this.group) || other.group == _this.group)&&(identical(other.fallback, _this.fallback) || other.fallback == _this.fallback)&&const DeepCollectionEquality().equals(other.selectors, _this.selectors));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxLaneConfig&&(identical(other.capabilityId, _this.capabilityId) || other.capabilityId == _this.capabilityId)&&(identical(other.group, _this.group) || other.group == _this.group)&&(identical(other.fallback, _this.fallback) || other.fallback == _this.fallback)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&const DeepCollectionEquality().equals(other.selectors, _this.selectors));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxLaneConfig;
-  return Object.hash(runtimeType,_this.capabilityId,_this.group,_this.fallback,const DeepCollectionEquality().hash(_this.selectors));
+  return Object.hash(runtimeType,_this.capabilityId,_this.group,_this.fallback,_this.role,_this.strategy,const DeepCollectionEquality().hash(_this.selectors));
 }
 
 @override
 String toString() {
   final _this = this as RcxLaneConfig;
-  return 'RcxLaneConfig(capabilityId: ${_this.capabilityId}, group: ${_this.group}, fallback: ${_this.fallback}, selectors: ${_this.selectors})';
+  return 'RcxLaneConfig(capabilityId: ${_this.capabilityId}, group: ${_this.group}, fallback: ${_this.fallback}, role: ${_this.role}, strategy: ${_this.strategy}, selectors: ${_this.selectors})';
 }
 
 
@@ -4659,7 +4662,7 @@ abstract mixin class $RcxLaneConfigCopyWith<$Res>  {
   factory $RcxLaneConfigCopyWith(RcxLaneConfig value, $Res Function(RcxLaneConfig) _then) = _$RcxLaneConfigCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'id') String capabilityId,@JsonKey(name: 'g') String group,@JsonKey(name: 'fb') String fallback,@JsonKey(name: 'sel') List<RcxLaneSelector> selectors
+@JsonKey(name: 'id') String capabilityId,@JsonKey(name: 'g') String group,@JsonKey(name: 'fb') String fallback,@JsonKey(name: 'role', includeIfNull: false) String? role,@JsonKey(name: 'st', includeIfNull: false) String? strategy,@JsonKey(name: 'sel') List<RcxLaneSelector> selectors
 });
 
 
@@ -4676,12 +4679,14 @@ class _$RcxLaneConfigCopyWithImpl<$Res>
 
 /// Create a copy of RcxLaneConfig
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? capabilityId = null,Object? group = null,Object? fallback = null,Object? selectors = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? capabilityId = null,Object? group = null,Object? fallback = null,Object? role = freezed,Object? strategy = freezed,Object? selectors = null,}) {
   return _then(RcxLaneConfig(
 capabilityId: null == capabilityId ? _self.capabilityId : capabilityId // ignore: cast_nullable_to_non_nullable
 as String,group: null == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String,fallback: null == fallback ? _self.fallback : fallback // ignore: cast_nullable_to_non_nullable
-as String,selectors: null == selectors ? _self.selectors : selectors // ignore: cast_nullable_to_non_nullable
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String?,strategy: freezed == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String?,selectors: null == selectors ? _self.selectors : selectors // ignore: cast_nullable_to_non_nullable
 as List<RcxLaneSelector>,
   ));
 }
@@ -4767,10 +4772,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'role', includeIfNull: false)  String? role, @JsonKey(name: 'st', includeIfNull: false)  String? strategy, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxLaneConfig() when $default != null:
-return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);case _:
+return $default(_that.capabilityId,_that.group,_that.fallback,_that.role,_that.strategy,_that.selectors);case _:
   return orElse();
 
 }
@@ -4788,10 +4793,10 @@ return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'role', includeIfNull: false)  String? role, @JsonKey(name: 'st', includeIfNull: false)  String? strategy, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)  $default,) {final _that = this;
 switch (_that) {
 case _RcxLaneConfig():
-return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);case _:
+return $default(_that.capabilityId,_that.group,_that.fallback,_that.role,_that.strategy,_that.selectors);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4808,10 +4813,10 @@ return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id')  String capabilityId, @JsonKey(name: 'g')  String group, @JsonKey(name: 'fb')  String fallback, @JsonKey(name: 'role', includeIfNull: false)  String? role, @JsonKey(name: 'st', includeIfNull: false)  String? strategy, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxLaneConfig() when $default != null:
-return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);case _:
+return $default(_that.capabilityId,_that.group,_that.fallback,_that.role,_that.strategy,_that.selectors);case _:
   return null;
 
 }
@@ -4823,12 +4828,14 @@ return $default(_that.capabilityId,_that.group,_that.fallback,_that.selectors);c
 @JsonSerializable()
 
 class _RcxLaneConfig implements RcxLaneConfig {
-  const _RcxLaneConfig({@JsonKey(name: 'id') required this.capabilityId, @JsonKey(name: 'g') required this.group, @JsonKey(name: 'fb') required this.fallback, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors = const []}): _selectors = selectors;
+  const _RcxLaneConfig({@JsonKey(name: 'id') required this.capabilityId, @JsonKey(name: 'g') required this.group, @JsonKey(name: 'fb') required this.fallback, @JsonKey(name: 'role', includeIfNull: false) this.role, @JsonKey(name: 'st', includeIfNull: false) this.strategy, @JsonKey(name: 'sel')  List<RcxLaneSelector> selectors = const []}): _selectors = selectors;
   factory _RcxLaneConfig.fromJson(Map<String, dynamic> json) => _$RcxLaneConfigFromJson(json);
 
 @override@JsonKey(name: 'id') final  String capabilityId;
 @override@JsonKey(name: 'g') final  String group;
 @override@JsonKey(name: 'fb') final  String fallback;
+@override@JsonKey(name: 'role', includeIfNull: false) final  String? role;
+@override@JsonKey(name: 'st', includeIfNull: false) final  String? strategy;
  final  List<RcxLaneSelector> _selectors;
 @override@JsonKey(name: 'sel') List<RcxLaneSelector> get selectors {
   if (_selectors is EqualUnmodifiableListView) return _selectors;
@@ -4850,18 +4857,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxLaneConfig&&(identical(other.capabilityId, capabilityId) || other.capabilityId == capabilityId)&&(identical(other.group, group) || other.group == group)&&(identical(other.fallback, fallback) || other.fallback == fallback)&&const DeepCollectionEquality().equals(other.selectors, _selectors));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxLaneConfig&&(identical(other.capabilityId, capabilityId) || other.capabilityId == capabilityId)&&(identical(other.group, group) || other.group == group)&&(identical(other.fallback, fallback) || other.fallback == fallback)&&(identical(other.role, role) || other.role == role)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&const DeepCollectionEquality().equals(other.selectors, _selectors));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,capabilityId,group,fallback,const DeepCollectionEquality().hash(_selectors));
+    return Object.hash(runtimeType,capabilityId,group,fallback,role,strategy,const DeepCollectionEquality().hash(_selectors));
 }
 
 @override
 String toString() {
-    return 'RcxLaneConfig(capabilityId: $capabilityId, group: $group, fallback: $fallback, selectors: $selectors)';
+    return 'RcxLaneConfig(capabilityId: $capabilityId, group: $group, fallback: $fallback, role: $role, strategy: $strategy, selectors: $selectors)';
 }
 
 
@@ -4872,7 +4879,7 @@ abstract mixin class _$RcxLaneConfigCopyWith<$Res> implements $RcxLaneConfigCopy
   factory _$RcxLaneConfigCopyWith(_RcxLaneConfig value, $Res Function(_RcxLaneConfig) _then) = __$RcxLaneConfigCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'id') String capabilityId,@JsonKey(name: 'g') String group,@JsonKey(name: 'fb') String fallback,@JsonKey(name: 'sel') List<RcxLaneSelector> selectors
+@JsonKey(name: 'id') String capabilityId,@JsonKey(name: 'g') String group,@JsonKey(name: 'fb') String fallback,@JsonKey(name: 'role', includeIfNull: false) String? role,@JsonKey(name: 'st', includeIfNull: false) String? strategy,@JsonKey(name: 'sel') List<RcxLaneSelector> selectors
 });
 
 
@@ -4889,12 +4896,14 @@ class __$RcxLaneConfigCopyWithImpl<$Res>
 
 /// Create a copy of RcxLaneConfig
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? capabilityId = null,Object? group = null,Object? fallback = null,Object? selectors = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? capabilityId = null,Object? group = null,Object? fallback = null,Object? role = freezed,Object? strategy = freezed,Object? selectors = null,}) {
   return _then(_RcxLaneConfig(
 capabilityId: null == capabilityId ? _self.capabilityId : capabilityId // ignore: cast_nullable_to_non_nullable
 as String,group: null == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as String,fallback: null == fallback ? _self.fallback : fallback // ignore: cast_nullable_to_non_nullable
-as String,selectors: null == selectors ? _self._selectors : selectors // ignore: cast_nullable_to_non_nullable
+as String,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
+as String?,strategy: freezed == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String?,selectors: null == selectors ? _self._selectors : selectors // ignore: cast_nullable_to_non_nullable
 as List<RcxLaneSelector>,
   ));
 }

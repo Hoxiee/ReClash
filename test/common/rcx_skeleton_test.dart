@@ -216,6 +216,9 @@ void main() {
           fallback: ServiceRouteFallback.main,
         ),
       ],
+      serviceRules: {
+        'gemini-access': routingClassTemplates['gemini-access']!.rules,
+      },
     );
 
     final lane = _groupNamed(rawConfig, 'RCX-CAP-GEMINI_ACCESS');
@@ -253,6 +256,9 @@ void main() {
       serviceRoutes: const [
         ServiceRoutePolicy(capabilityId: 'gemini-access', enabled: true),
       ],
+      serviceRules: {
+        'gemini-access': routingClassTemplates['gemini-access']!.rules,
+      },
     );
 
     expect(rules.first, 'DOMAIN,override.test,RCX-DIRECT');
@@ -278,6 +284,9 @@ void main() {
       serviceRoutes: const [
         ServiceRoutePolicy(capabilityId: 'gemini-access', enabled: true),
       ],
+      serviceRules: {
+        'gemini-access': routingClassTemplates['gemini-access']!.rules,
+      },
     );
 
     expect(rules.first, 'DOMAIN-SUFFIX,gemini.google.com,PROXY');
@@ -305,6 +314,9 @@ void main() {
           fallback: ServiceRouteFallback.reject,
         ),
       ],
+      serviceRules: {
+        'youtube-adfree': routingClassTemplates['youtube-adfree']!.rules,
+      },
     );
 
     final lane = _groupNamed(rawConfig, 'RCX-CAP-YOUTUBE_ADFREE');
@@ -355,6 +367,9 @@ void main() {
       serviceRoutes: const [
         ServiceRoutePolicy(capabilityId: 'gemini-access', enabled: true),
       ],
+      serviceRules: {
+        'gemini-access': routingClassTemplates['gemini-access']!.rules,
+      },
     );
 
     expect(rules, originalRules);

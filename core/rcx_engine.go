@@ -177,6 +177,7 @@ type rcxRuntime interface {
 	Select(node string) error
 	SelectedIn(group string) string
 	SelectIn(group, node string) error
+	GroupMembers(group string) []string
 	Mode() string
 	Country(node string) string
 	Locate(ctx context.Context, node, echo string) string
@@ -736,11 +737,15 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		if !e.isMember(event.Node) || (negative && !e.chargesNegative(now)) {
 			break
 		}
-		e.ledger.NoteHarvestedProbe(e.key(event.Node), e.envKey, event.DelayMs, now)
 		if negative {
+			// One health-check miss leaves a proven incumbent's proof standing; escrow still accrues.
+			if !e.incumbentHoldsFreshOpen(e.key(event.Node), now) {
+				e.ledger.NoteHarvestedProbe(e.key(event.Node), e.envKey, event.DelayMs, now)
+			}
 			e.escrowNegative(event.Node, 0, now)
 			break
 		}
+		e.ledger.NoteHarvestedProbe(e.key(event.Node), e.envKey, event.DelayMs, now)
 		if !rcxImplausibleDelay(event.DelayMs) {
 			e.noteProviderSuccess(event.Node)
 			e.noteLinkAlive(now)
@@ -1767,7 +1772,7 @@ func rcxScaledProofTTL(base time.Duration, park int) time.Duration {
 	return scaled
 }
 
-func rcxLaneMatches(config rcxLaneConfig, member rcxMember) bool {
+func rcxLaneMatches(config rcxLaneConfig, member rcxMember, groups map[string]map[string]struct{}) bool {
 	for _, selector := range config.Selectors {
 		if selector.Provider != "" && selector.Provider != member.Provider {
 			continue
@@ -1775,9 +1780,51 @@ func rcxLaneMatches(config rcxLaneConfig, member rcxMember) bool {
 		if selector.NameContains != "" && !strings.Contains(member.Name, selector.NameContains) {
 			continue
 		}
+		if selector.Group != "" {
+			set, ok := groups[selector.Group]
+			if !ok {
+				continue
+			}
+			if _, in := set[member.Name]; !in {
+				continue
+			}
+		}
 		return true
 	}
 	return false
+}
+
+func (e *rcxEngine) laneGroupSets(config rcxLaneConfig) map[string]map[string]struct{} {
+	var sets map[string]map[string]struct{}
+	for _, selector := range config.Selectors {
+		if selector.Group == "" {
+			continue
+		}
+		if sets == nil {
+			sets = map[string]map[string]struct{}{}
+		}
+		if _, done := sets[selector.Group]; done {
+			continue
+		}
+		set := map[string]struct{}{}
+		for _, name := range e.runtime.GroupMembers(selector.Group) {
+			set[name] = struct{}{}
+		}
+		sets[selector.Group] = set
+	}
+	return sets
+}
+
+// Gates on the measured egress, never a proof, so an unmeasured node stays probeable.
+func rcxLaneRoleAdmits(role string, f rcxFacts) bool {
+	switch role {
+	case rcxLaneRoleForeign:
+		return f.Exit != rcxOriginDomestic
+	case rcxLaneRoleDomestic:
+		return f.Exit != rcxOriginForeign
+	default:
+		return true
+	}
 }
 
 func (e *rcxEngine) laneCandidates(lane *rcxLaneState, members []rcxMember) []rcxCandidate {
@@ -1786,11 +1833,22 @@ func (e *rcxEngine) laneCandidates(lane *rcxLaneState, members []rcxMember) []rc
 	for _, member := range members {
 		byName[member.Name] = member
 	}
+	groups := e.laneGroupSets(lane.config)
 	for i := range candidates {
 		member, ok := byName[candidates[i].Name]
-		candidates[i].InSkeleton = ok && rcxLaneMatches(lane.config, member)
+		candidates[i].InSkeleton = ok && rcxLaneMatches(lane.config, member, groups) &&
+			rcxLaneRoleAdmits(lane.config.Role, candidates[i].Facts)
 	}
 	return candidates
+}
+
+// Only the strategy is per-lane; the rest of the policy stays the park's.
+func (e *rcxEngine) lanePolicy(config rcxLaneConfig) rcxPolicy {
+	policy := e.cfg.policy()
+	if config.Strategy != "" {
+		policy.Strategy = config.Strategy
+	}
+	return policy
 }
 
 func (e *rcxEngine) reconsiderLanes(members []rcxMember, now time.Time) {
@@ -1811,7 +1869,7 @@ func (e *rcxEngine) reconsiderLanes(members []rcxMember, now time.Time) {
 			Incumbent:      lane.incumbent,
 			IncumbentSince: lane.since,
 			Candidates:     candidates,
-			Policy:         e.cfg.policy(),
+			Policy:         e.lanePolicy(config),
 			Now:            now,
 		}
 		decision := rcxDecide(input)
@@ -1912,7 +1970,7 @@ func (e *rcxEngine) laneProbeReplacement(lane *rcxLaneState, node string, now ti
 		Incumbent:      lane.incumbent,
 		IncumbentSince: lane.since,
 		Candidates:     candidates,
-		Policy:         e.cfg.policy(),
+		Policy:         e.lanePolicy(lane.config),
 		Now:            now,
 	}
 	for _, candidate := range candidates {
@@ -2029,14 +2087,20 @@ func (e *rcxEngine) screenTargetEligible(node, incumbent string, lane *rcxLaneSt
 		for _, member := range members {
 			byName[member.Name] = member
 		}
+		groups := e.laneGroupSets(lane.config)
 		for i := range candidates {
 			member, ok := byName[candidates[i].Name]
-			candidates[i].InSkeleton = ok && rcxLaneMatches(lane.config, member)
+			candidates[i].InSkeleton = ok && rcxLaneMatches(lane.config, member, groups) &&
+				rcxLaneRoleAdmits(lane.config.Role, candidates[i].Facts)
 		}
+	}
+	policy := e.cfg.policy()
+	if lane != nil {
+		policy = e.lanePolicy(lane.config)
 	}
 	input := rcxDecisionInput{
 		Terrain: e.terrainCurrent(), Incumbent: incumbent, Candidates: candidates,
-		Policy: e.cfg.policy(), Now: now,
+		Policy: policy, Now: now,
 	}
 	for _, candidate := range candidates {
 		if candidate.Name == node {

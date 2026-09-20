@@ -246,27 +246,37 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
   RcxConfigParams get rcxParams => rcxParamsFor(null);
 }
 
+String? _nullIfEmpty(String value) => value.isEmpty ? null : value;
+
 List<RcxLaneConfig> _effectiveRcxLanes(Profile? profile) {
   if (profile == null) return const [];
+  final manifest = profile.capabilityManifest;
+  final supported = effectiveCapabilityIds(manifest);
   final selectorsByCapability = <String, List<RcxLaneSelector>>{};
-  final selectorKeys = <String, Set<(String?, String?)>>{};
+  final selectorKeys = <String, Set<(String?, String?, String?)>>{};
 
   void addSelector(
     String capabilityId, {
     String? provider,
     String? nameContains,
+    String? group,
   }) {
-    if (!supportedCapabilityIds.contains(capabilityId)) return;
-    final normalizedProvider = provider?.trim();
-    final normalizedName = nameContains?.trim();
-    final effectiveProvider = normalizedProvider?.isNotEmpty == true
-        ? normalizedProvider
+    if (!supported.contains(capabilityId)) return;
+    final effectiveProvider = provider?.trim().isNotEmpty == true
+        ? provider!.trim()
         : null;
-    final effectiveName = normalizedName?.isNotEmpty == true
-        ? normalizedName
+    final effectiveName = nameContains?.trim().isNotEmpty == true
+        ? nameContains!.trim()
         : null;
-    if (effectiveProvider == null && effectiveName == null) return;
-    final key = (effectiveProvider, effectiveName);
+    final effectiveGroup = group?.trim().isNotEmpty == true
+        ? group!.trim()
+        : null;
+    if (effectiveProvider == null &&
+        effectiveName == null &&
+        effectiveGroup == null) {
+      return;
+    }
+    final key = (effectiveProvider, effectiveName, effectiveGroup);
     if (!selectorKeys.putIfAbsent(capabilityId, () => {}).add(key)) return;
     selectorsByCapability
         .putIfAbsent(capabilityId, () => [])
@@ -274,11 +284,11 @@ List<RcxLaneConfig> _effectiveRcxLanes(Profile? profile) {
           RcxLaneSelector(
             provider: effectiveProvider,
             nameContains: effectiveName,
+            group: effectiveGroup,
           ),
         );
   }
 
-  final manifest = profile.capabilityManifest;
   if (manifest != null && !manifest.stale) {
     for (final claim in manifest.claims) {
       for (final selector in claim.selectors) {
@@ -286,6 +296,7 @@ List<RcxLaneConfig> _effectiveRcxLanes(Profile? profile) {
           claim.capabilityId,
           provider: selector.provider,
           nameContains: selector.nameContains,
+          group: selector.group,
         );
       }
     }
@@ -299,12 +310,15 @@ List<RcxLaneConfig> _effectiveRcxLanes(Profile? profile) {
   }
   return [
     for (final policy in profile.serviceRoutePolicies)
-      if (policy.enabled &&
-          supportedCapabilityIds.contains(policy.capabilityId))
+      if (policy.enabled && supported.contains(policy.capabilityId))
         RcxLaneConfig(
           capabilityId: policy.capabilityId,
           group: capabilityGroupName(policy.capabilityId),
           fallback: policy.fallback.name,
+          role: _nullIfEmpty(resolvedClassRole(manifest, policy.capabilityId)),
+          strategy: _nullIfEmpty(
+            resolvedClassStrategy(manifest, policy.capabilityId),
+          ),
           selectors: selectorsByCapability[policy.capabilityId] ?? const [],
         ),
   ];

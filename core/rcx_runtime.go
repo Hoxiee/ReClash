@@ -290,6 +290,24 @@ func (rcxCoreRuntime) SelectIn(group, node string) error {
 	return selectGroupMember(group, node)
 }
 
+// Immediate members only: a nested group resolves to its own name, not its leaves.
+func (rcxCoreRuntime) GroupMembers(group string) []string {
+	proxy, ok := rcxGroupAdapter(group)
+	if !ok {
+		return nil
+	}
+	lister, ok := proxy.ProxyAdapter.(rcxNodeLister)
+	if !ok {
+		return nil
+	}
+	proxies := lister.Proxies()
+	names := make([]string, 0, len(proxies))
+	for _, p := range proxies {
+		names = append(names, p.Name())
+	}
+	return names
+}
+
 func selectGroupMember(group, node string) error {
 	selectMu.Lock()
 	defer selectMu.Unlock()

@@ -74,6 +74,7 @@ type fakeRuntime struct {
 	sweepRelease  chan struct{}
 
 	groupSelected map[string]string
+	groupMembers  map[string][]string
 }
 
 func newFakeRuntime() *fakeRuntime {
@@ -138,6 +139,12 @@ func (r *fakeRuntime) SelectIn(group, node string) error {
 	}
 	r.groupSelected[group] = node
 	return nil
+}
+
+func (r *fakeRuntime) GroupMembers(group string) []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]string(nil), r.groupMembers[group]...)
 }
 
 func (r *fakeRuntime) Mode() string { return r.mode }
@@ -874,6 +881,118 @@ func TestCapabilityLaneProbeResultSwitchesOnlyItsSelector(t *testing.T) {
 	}
 	if runtime.selected != "plain" {
 		t.Fatalf("base selected = %q, lane recovery changed it", runtime.selected)
+	}
+}
+
+func TestLaneSelectorMatchesBySubscriptionGroup(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "us-01", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "de-01", Provider: "main", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "us-01"
+	runtime.groupMembers = map[string][]string{"🇺🇸 US": {"us-01"}}
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Selectors: []rcxLaneSelector{{Group: "🇺🇸 US"}},
+	}}
+	engine.applyConfigLocked(config)
+	now := runtime.Now()
+	for _, member := range runtime.members {
+		engine.ledger.NoteProbe(member.key(), engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+	}
+
+	engine.reconsider()
+
+	if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != "us-01" {
+		t.Fatalf("lane selected = %q, want the sole member of the named subscription group", got)
+	}
+}
+
+func TestForeignLaneBarsANodeProvenToEgressDomestic(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "abroad", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "home", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Role: rcxLaneRoleForeign, Selectors: []rcxLaneSelector{{Provider: "premium"}},
+	}}
+	engine.applyConfigLocked(config)
+	now := runtime.Now()
+	engine.ledger.SetExit("abroad", "US", rcxOriginForeign, now)
+	engine.ledger.SetExit("home", "RU", rcxOriginDomestic, now)
+	for _, member := range runtime.members {
+		engine.ledger.NoteProbe(member.key(), engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+	}
+
+	engine.reconsider()
+
+	if got := runtime.SelectedIn("RCX-CAP-GEMINI_ACCESS"); got != "abroad" {
+		t.Fatalf("lane selected = %q, want the foreign-egress node, never the home-egress one", got)
+	}
+}
+
+func TestForeignLaneStillProbesAnUnmeasuredMatch(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{{Name: "premium ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true}}
+	runtime.selected = "plain"
+	engine := newTestEngine(runtime, "ru")
+	config := engine.cfg
+	config.Lanes = []rcxLaneConfig{{
+		ID: "gemini-access", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: "reject",
+		Role: rcxLaneRoleForeign, Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+	}}
+	engine.applyConfigLocked(config)
+
+	engine.reconsider()
+
+	status := engine.Status()
+	if len(status.Lanes) != 1 || status.Lanes[0].State != "searching" {
+		t.Fatalf("lanes = %+v, want an unmeasured foreign match to stay searchable, not barred by role", status.Lanes)
+	}
+}
+
+func TestLaneStrategyOverridesTheParkStrategy(t *testing.T) {
+	// On a whitelist a breaker outranks a plain node under balanced/stable
+	// ordering, but the lowest-latency comparator drops that misfit axis, so a
+	// faster plain node wins instead. That divergence is the per-lane strategy.
+	newLane := func(strategy string) string {
+		runtime := newFakeRuntime()
+		now := runtime.Now()
+		runtime.members = []rcxMember{
+			{Name: "breaker ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true, HostMs: 300, HostAt: now},
+			{Name: "plain ⭐", Provider: "premium", Type: "Vless", Port: 443, SupportsUDP: true, HostMs: 40, HostAt: now},
+		}
+		runtime.selected = "base"
+		engine := newTestEngine(runtime, "ru")
+		config := engine.cfg
+		config.Strategy = rcxStrategyStable
+		config.BreakerPatterns = []string{"breaker"}
+		config.Lanes = []rcxLaneConfig{{
+			ID: "youtube-adfree", Group: "RCX-CAP-YOUTUBE_ADFREE", Fallback: "main",
+			Strategy: strategy, Selectors: []rcxLaneSelector{{NameContains: "⭐"}},
+		}}
+		engine.applyConfigLocked(config)
+		engine.terrain.observe(rcxTerrainWhitelist, now)
+		for _, member := range runtime.members {
+			engine.ledger.NoteProbe(member.key(), engine.envKey, rcxRoleOpen, rcxProbeOK, member.HostMs, now)
+		}
+		engine.reconsider()
+		return runtime.SelectedIn("RCX-CAP-YOUTUBE_ADFREE")
+	}
+
+	if got := newLane(""); got != "breaker ⭐" {
+		t.Fatalf("inherited strategy selected %q, want the breaker the park's stable order prefers", got)
+	}
+	if got := newLane(rcxStrategyLatency); got != "plain ⭐" {
+		t.Fatalf("lane strategy selected %q, want the faster node its lowest-latency order prefers", got)
 	}
 }
 

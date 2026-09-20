@@ -80,9 +80,12 @@ List<CapabilityClaim>? _parseManifest(Object? value) {
   return List.unmodifiable(claims);
 }
 
+const _claimKeys = {'cap', 'selectors', 'rules', 'role', 'strategy', 'title'};
+final _capabilityTitlePattern = RegExp(r'^.{1,48}$');
+
 CapabilityClaim? _parseClaim(Object? value) {
   if (value is! Map<String, Object?> ||
-      value.keys.any((key) => key != 'cap' && key != 'selectors')) {
+      value.keys.any((key) => !_claimKeys.contains(key))) {
     return null;
   }
   final capabilityId = value['cap'];
@@ -97,38 +100,83 @@ CapabilityClaim? _parseClaim(Object? value) {
     final selector = _parseSelector(rawSelector);
     if (selector != null) selectors.add(selector);
   }
-  return CapabilityClaim(capabilityId: capabilityId, selectors: selectors);
+  final rules = _parseRules(value['rules']);
+  if (rules == null) return null;
+  final role = value['role'];
+  if (role != null && (role is! String || !capabilityRoles.contains(role))) {
+    return null;
+  }
+  final strategy = value['strategy'];
+  if (strategy != null &&
+      (strategy is! String || !_allowedStrategies.contains(strategy))) {
+    return null;
+  }
+  final title = value['title'];
+  if (title != null &&
+      (title is! String || !_capabilityTitlePattern.hasMatch(title.trim()))) {
+    return null;
+  }
+  return CapabilityClaim(
+    capabilityId: capabilityId,
+    selectors: selectors,
+    rules: rules,
+    role: role as String? ?? capabilityRoleAny,
+    strategy: strategy as String? ?? '',
+    title: (title as String?)?.trim(),
+  );
 }
+
+const _allowedStrategies = {'stable', 'balanced', 'lowest-latency', 'saver'};
+
+List<String>? _parseRules(Object? value) {
+  if (value == null) return const [];
+  if (value is! List) return null;
+  final raw = <String>[];
+  for (final item in value) {
+    if (item is! String) return null;
+    raw.add(item);
+  }
+  return sanitizeCapabilityRules(raw);
+}
+
+const _selectorKeys = {'provider', 'name_contains', 'group'};
 
 CapabilitySelector? _parseSelector(Object? value) {
   if (value is! Map<String, Object?> ||
       value.isEmpty ||
-      value.keys.any((key) => key != 'provider' && key != 'name_contains')) {
-    return null;
-  }
-  if (!value.containsKey('provider') && !value.containsKey('name_contains')) {
+      value.keys.any((key) => !_selectorKeys.contains(key))) {
     return null;
   }
   final provider = value['provider'];
   final nameContains = value['name_contains'];
+  final group = value['group'];
   if ((value.containsKey('provider') && provider is! String) ||
-      (value.containsKey('name_contains') && nameContains is! String)) {
+      (value.containsKey('name_contains') && nameContains is! String) ||
+      (value.containsKey('group') && group is! String)) {
     return null;
   }
   final normalizedProvider = (provider as String?)?.trim();
   final normalizedName = (nameContains as String?)?.trim();
+  final normalizedGroup = (group as String?)?.trim();
+  if (normalizedProvider == null &&
+      normalizedName == null &&
+      normalizedGroup == null) {
+    return null;
+  }
+  bool tooLong(String? token) =>
+      token != null &&
+      utf8.encode(token).length > capabilitySelectorMaxTokenBytes;
   if ((provider != null && normalizedProvider!.isEmpty) ||
       (nameContains != null && normalizedName!.isEmpty) ||
-      (normalizedProvider != null &&
-          utf8.encode(normalizedProvider).length >
-              capabilitySelectorMaxTokenBytes) ||
-      (normalizedName != null &&
-          utf8.encode(normalizedName).length >
-              capabilitySelectorMaxTokenBytes)) {
+      (group != null && normalizedGroup!.isEmpty) ||
+      tooLong(normalizedProvider) ||
+      tooLong(normalizedName) ||
+      tooLong(normalizedGroup)) {
     return null;
   }
   return CapabilitySelector(
     provider: normalizedProvider,
     nameContains: normalizedName,
+    group: normalizedGroup,
   );
 }

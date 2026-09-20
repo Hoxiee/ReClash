@@ -149,6 +149,97 @@ void main() {
     });
   });
 
+  group('a provider defines classes, the client gates their shape', () {
+    test('accepts rules, role, strategy, group and a title', () {
+      final result = parseCapabilityManifestHeader({
+        capabilityManifestHeader: [
+          _header({
+            'v': 1,
+            'claims': [
+              {
+                'cap': 'ai',
+                'title': 'AI services',
+                'role': 'foreign',
+                'strategy': 'lowest-latency',
+                'rules': ['DOMAIN-SUFFIX,openai.com', 'GEOSITE,openai'],
+                'selectors': [
+                  {'group': '🇺🇸 US'},
+                ],
+              },
+            ],
+          }),
+        ],
+      });
+
+      final claim = (result as CapabilityManifestHeaderValid).claims.single;
+      expect(claim.capabilityId, 'ai');
+      expect(claim.title, 'AI services');
+      expect(claim.role, capabilityRoleForeign);
+      expect(claim.strategy, 'lowest-latency');
+      expect(claim.rules, ['DOMAIN-SUFFIX,openai.com', 'GEOSITE,openai']);
+      expect(claim.selectors.single.group, '🇺🇸 US');
+    });
+
+    test('drops a claim whose rule uses a forbidden verb', () {
+      for (final rule in ['SCRIPT,foo', 'RULE-SET,remote', 'DOMAIN-REGEX,.*']) {
+        final result = parseCapabilityManifestHeader({
+          capabilityManifestHeader: [
+            _header({
+              'v': 1,
+              'claims': [
+                {
+                  'cap': 'ai',
+                  'rules': [rule],
+                  'selectors': [
+                    {'group': 'US'},
+                  ],
+                },
+              ],
+            }),
+          ],
+        });
+        expect(
+          (result as CapabilityManifestHeaderValid).claims,
+          isEmpty,
+          reason: 'verb in "$rule" must be refused',
+        );
+      }
+    });
+
+    test('drops a claim with an unknown role rather than accepting it', () {
+      final badRole = parseCapabilityManifestHeader({
+        capabilityManifestHeader: [
+          _header({
+            'v': 1,
+            'claims': [
+              {
+                'cap': 'ai',
+                'role': 'sideways',
+                'selectors': [
+                  {'group': 'US'},
+                ],
+              },
+            ],
+          }),
+        ],
+      });
+      expect((badRole as CapabilityManifestHeaderValid).claims, isEmpty);
+    });
+
+    test('sanitizeCapabilityRules canonicalizes verbs and rejects targets', () {
+      expect(sanitizeCapabilityRules(['domain-suffix,openai.com']), [
+        'DOMAIN-SUFFIX,openai.com',
+      ]);
+      expect(
+        sanitizeCapabilityRules(['IP-CIDR,10.0.0.0/8,no-resolve']),
+        ['IP-CIDR,10.0.0.0/8,no-resolve'],
+      );
+      expect(sanitizeCapabilityRules(['GEOSITE']), isNull);
+      expect(sanitizeCapabilityRules(['SCRIPT,x']), isNull);
+      expect(sanitizeCapabilityRules(['GEOSITE,a,b,c']), isNull);
+    });
+  });
+
   test('capability profile models round-trip through JSON', () {
     final manifest = ProviderCapabilityManifest(
       version: 1,

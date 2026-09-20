@@ -18,12 +18,15 @@ type rcxMarker struct {
 type rcxLaneSelector struct {
 	Provider     string `json:"p"`
 	NameContains string `json:"has"`
+	Group        string `json:"grp,omitempty"`
 }
 
 type rcxLaneConfig struct {
 	ID        string            `json:"id"`
 	Group     string            `json:"g"`
 	Fallback  string            `json:"fb"`
+	Role      string            `json:"role,omitempty"`
+	Strategy  string            `json:"st,omitempty"`
 	Selectors []rcxLaneSelector `json:"sel"`
 }
 
@@ -89,9 +92,9 @@ func rcxStringsFingerprint(groups ...[]string) string {
 func rcxLanesFingerprint(lanes []rcxLaneConfig) string {
 	values := make([]string, 0, len(lanes))
 	for _, lane := range lanes {
-		parts := []string{lane.ID, lane.Group, lane.Fallback}
+		parts := []string{lane.ID, lane.Group, lane.Fallback, lane.Role, lane.Strategy}
 		for _, selector := range lane.Selectors {
-			parts = append(parts, selector.Provider, selector.NameContains)
+			parts = append(parts, selector.Provider, selector.NameContains, selector.Group)
 		}
 		values = append(values, strings.Join(parts, "\x00"))
 	}
@@ -133,6 +136,9 @@ const (
 	rcxLaneFallbackMain = "main"
 	rcxLaneReject       = "reject"
 	rcxLaneGroupPrefix  = "RCX-CAP-"
+	rcxLaneRoleAny      = ""
+	rcxLaneRoleForeign  = "foreign"
+	rcxLaneRoleDomestic = "domestic"
 
 	rcxDwellSeconds       = 90
 	rcxWaveWidth          = 12
@@ -220,12 +226,26 @@ func rcxNormalizeLanes(lanes []rcxLaneConfig) []rcxLaneConfig {
 		} else {
 			lane.Fallback = rcxLaneFallbackMain
 		}
+		switch strings.TrimSpace(lane.Role) {
+		case rcxLaneRoleForeign:
+			lane.Role = rcxLaneRoleForeign
+		case rcxLaneRoleDomestic:
+			lane.Role = rcxLaneRoleDomestic
+		default:
+			lane.Role = rcxLaneRoleAny
+		}
+		if !rcxKnownStrategy(strings.TrimSpace(lane.Strategy)) {
+			lane.Strategy = ""
+		} else {
+			lane.Strategy = strings.TrimSpace(lane.Strategy)
+		}
 		selectors := make([]rcxLaneSelector, 0, len(lane.Selectors))
 		seenSelectors := make(map[rcxLaneSelector]struct{}, len(lane.Selectors))
 		for _, selector := range lane.Selectors {
 			selector.Provider = norm.NFC.String(strings.TrimSpace(selector.Provider))
 			selector.NameContains = norm.NFC.String(strings.TrimSpace(selector.NameContains))
-			if selector.Provider == "" && selector.NameContains == "" {
+			selector.Group = norm.NFC.String(strings.TrimSpace(selector.Group))
+			if selector.Provider == "" && selector.NameContains == "" && selector.Group == "" {
 				continue
 			}
 			if _, exists := seenSelectors[selector]; exists {

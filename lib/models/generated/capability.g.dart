@@ -10,12 +10,14 @@ _CapabilitySelector _$CapabilitySelectorFromJson(Map<String, dynamic> json) =>
     _CapabilitySelector(
       provider: json['provider'] as String?,
       nameContains: json['name_contains'] as String?,
+      group: json['group'] as String?,
     );
 
 Map<String, dynamic> _$CapabilitySelectorToJson(_CapabilitySelector instance) =>
     <String, dynamic>{
       'provider': instance.provider,
       'name_contains': instance.nameContains,
+      'group': instance.group,
     };
 
 _CapabilityClaim _$CapabilityClaimFromJson(Map<String, dynamic> json) =>
@@ -24,12 +26,22 @@ _CapabilityClaim _$CapabilityClaimFromJson(Map<String, dynamic> json) =>
       selectors: (json['selectors'] as List<dynamic>)
           .map((e) => CapabilitySelector.fromJson(e as Map<String, dynamic>))
           .toList(),
+      rules:
+          (json['rules'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
+      role: json['role'] as String? ?? capabilityRoleAny,
+      strategy: json['strategy'] as String? ?? '',
+      title: json['title'] as String?,
     );
 
 Map<String, dynamic> _$CapabilityClaimToJson(_CapabilityClaim instance) =>
     <String, dynamic>{
       'cap': instance.capabilityId,
       'selectors': instance.selectors,
+      'rules': instance.rules,
+      'role': instance.role,
+      'strategy': instance.strategy,
+      'title': instance.title,
     };
 
 _ProviderCapabilityManifest _$ProviderCapabilityManifestFromJson(
