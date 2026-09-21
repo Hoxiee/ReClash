@@ -3009,15 +3009,16 @@ func (e *rcxEngine) probeTargets(
 	}
 	if kind == rcxWaveLocate {
 		open := e.activeMarkers(rcxRoleOpen, e.runtime.Now())
-		local := e.cfg.LocalMarkers
-		if len(open) == 0 || len(local) == 0 {
+		if len(open) == 0 {
 			return nil
 		}
+		local := e.cfg.LocalMarkers
 		targets := make([]rcxProbeTarget, 0, 2*len(wave))
 		for _, node := range wave {
-			targets = append(targets,
-				rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: open},
-				rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleLocal, Markers: local})
+			targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: open})
+			if len(local) > 0 {
+				targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleLocal, Markers: local})
+			}
 		}
 		return targets
 	}

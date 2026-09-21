@@ -104,6 +104,43 @@ func TestFinishLocateReadsBothLegs(t *testing.T) {
 	}
 }
 
+func TestSuspectNamedNodeBrandsOnOpenFailWithoutLocalMarker(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("named-ru", "clean")
+	engine := newTestEngine(runtime, "ru")
+	now := runtime.Now()
+	// No local markers configured: the open marker alone must brand a suspect node.
+	engine.ledger.SetTrust(engine.key("named-ru"), rcxTrustSuspect, rcxConfPrior, now)
+	engine.probeResults = []rcxProbeResult{
+		{Node: "named-ru", Key: engine.key("named-ru"), Role: rcxRoleOpen, Outcome: rcxProbeFail},
+		{Node: "clean", Key: engine.key("clean"), Role: rcxRoleOpen, Outcome: rcxProbeFail},
+	}
+	engine.finishLocate(now)
+
+	if trust, _ := engine.ledger.Trust(engine.key("named-ru")); trust != rcxTrustBranded {
+		t.Fatalf("named-ru trust = %v, want branded: a suspect that cannot open is confirmed useless", trust)
+	}
+	if trust, _ := engine.ledger.Trust(engine.key("clean")); trust != rcxTrustUnknown {
+		t.Fatalf("clean trust = %v, want unknown: a non-suspect open fail alone must not brand", trust)
+	}
+}
+
+func TestSuspectOpeningTheWorldIsClearedNotBranded(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("mislabelled")
+	engine := newTestEngine(runtime, "ru")
+	now := runtime.Now()
+	engine.ledger.SetTrust(engine.key("mislabelled"), rcxTrustSuspect, rcxConfPrior, now)
+	engine.probeResults = []rcxProbeResult{
+		{Node: "mislabelled", Key: engine.key("mislabelled"), Role: rcxRoleOpen, Outcome: rcxProbeOK},
+	}
+	engine.finishLocate(now)
+
+	if trust, _ := engine.ledger.Trust(engine.key("mislabelled")); trust != rcxTrusted {
+		t.Fatalf("trust = %v, want trusted: opening the world clears the RU-name suspicion", trust)
+	}
+}
+
 func TestMeasuredForeignExitClearsABrand(t *testing.T) {
 	ledger := newRcxLedger(rcxDefaultLedgerPolicy())
 	now := time.Now()

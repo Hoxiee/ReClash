@@ -131,6 +131,9 @@ func (e *rcxEngine) startImprovement(periodic bool) bool {
 	if e.startQualityProbe() {
 		return true
 	}
+	if e.startSuspectCheck() {
+		return true
+	}
 	warm := e.discoveryWarm(d, now)
 	if !warm && (!periodic || !d.LastPeriodic.IsZero() && now.Sub(d.LastPeriodic) < rcxDiscoveryInterval) {
 		return false

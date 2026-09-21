@@ -116,21 +116,22 @@ func (e *rcxEngine) finishLocate(now time.Time) {
 		}
 	}
 	for key, leg := range byNode {
+		suspect := false
+		if trust, _ := e.ledger.Trust(key); trust == rcxTrustSuspect {
+			suspect = true
+		}
 		switch {
 		case leg.openOK:
 			e.ledger.SetTrust(key, rcxTrusted, rcxConfBehavioral, now)
-		case leg.openFailed && leg.localOK:
-			// Only a definite open FAIL brands (not an overloaded/rate-limited leg);
-			// a censored-side node cannot reach the blocked world but reaches a home-only one.
+		case leg.openFailed && (suspect || leg.localOK):
+			// A definite open FAIL brands a suspect node (or one a home-only marker answered); overloaded never brands.
 			e.ledger.SetTrust(key, rcxTrustBranded, rcxConfBehavioral, now)
 		}
 	}
 }
 
-// wantsLocate holds a switch to a still-suspect challenger for one behavioural
-// check, at most once per interval so an inconclusive result never loops.
 func (e *rcxEngine) wantsLocate(name string, now time.Time) bool {
-	if name == "" || len(e.cfg.LocalMarkers) == 0 || len(e.cfg.OpenMarkers) == 0 {
+	if name == "" || len(e.cfg.OpenMarkers) == 0 {
 		return false
 	}
 	key := e.key(name)
@@ -139,6 +140,19 @@ func (e *rcxEngine) wantsLocate(name string, now time.Time) bool {
 	}
 	last := e.locateAt[key]
 	return last.IsZero() || now.Sub(last) >= rcxDiscoveryInterval
+}
+
+func (e *rcxEngine) startSuspectCheck() bool {
+	if e.probing || len(e.cfg.OpenMarkers) == 0 {
+		return false
+	}
+	now := e.runtime.Now()
+	for _, member := range e.runtime.Members() {
+		if member.Name != e.incumbent && e.wantsLocate(member.Name, now) {
+			return e.startLocate(member.Name, now)
+		}
+	}
+	return false
 }
 
 func (e *rcxEngine) startLocate(name string, now time.Time) bool {
