@@ -3647,6 +3647,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Bellikleri çalyş"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Ton nokady"),
     "tools": MessageLookupByLibrary.simpleMessage("Gurallar"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "Şu ýerde görmek üçin sazlamany saýlaň.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Trafigi doldur"),
     "torch": MessageLookupByLibrary.simpleMessage("Fonar"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jemi trafik"),

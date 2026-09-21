@@ -2622,6 +2622,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("切换标签"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("调性点缀"),
     "tools": MessageLookupByLibrary.simpleMessage("工具"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "选择一项设置以在此查看。",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("购买流量"),
     "torch": MessageLookupByLibrary.simpleMessage("手电筒"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("总流量"),

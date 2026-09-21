@@ -11,7 +11,10 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/network_detection.dart' as view;
 import 'package:reclash/views/tools.dart';
 import 'package:reclash/views/tools/connection_doctor.dart';
+import 'package:reclash/views/url_scheme.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -773,13 +776,144 @@ void main() {
 
   testWidgets('Tools entry opens the shared Doctor screen', (tester) async {
     final core = _MockCoreHandler();
-    await _pumpDoctor(tester, core, _snapshot(), child: const ToolsView());
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(360, 760),
+    );
 
     await tester.tap(find.text('Connection Doctor'));
     await tester.pumpAndSettle();
 
     expect(find.byType(ConnectionDoctorView), findsOneWidget);
     expect(find.text('Watching real traffic'), findsOneWidget);
+  });
+
+  testWidgets('Tools desktop shows a placeholder before any selection', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    expect(find.text('Select a setting to view it here.'), findsOneWidget);
+    expect(find.byType(ConnectionDoctorView), findsNothing);
+    expect(find.text('Connection Doctor'), findsWidgets);
+  });
+
+  testWidgets('Tools desktop opens the Doctor pane when picked', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.tap(find.text('Connection Doctor'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ConnectionDoctorView), findsOneWidget);
+    expect(find.text('Watching real traffic'), findsWidgets);
+  });
+
+  testWidgets('Tools desktop selects a pane inline instead of a sheet', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('URL Scheme'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('URL Scheme'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UrlSchemeView), findsOneWidget);
+    expect(find.byType(ConnectionDoctorView), findsNothing);
+  });
+
+  testWidgets('Tools desktop drives pane selection from the keyboard', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(),
+      child: const ToolsView(),
+      size: const Size(1200, 900),
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('URL Scheme'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text('URL Scheme'));
+    await tester.pumpAndSettle();
+
+    bool focusedOn(Finder ancestor) {
+      final context = FocusManager.instance.primaryFocus?.context;
+      if (context == null || ancestor.evaluate().isEmpty) {
+        return false;
+      }
+      final target = tester.widget(ancestor.first);
+      var inside = false;
+      context.visitAncestorElements((element) {
+        if (element.widget == target) {
+          inside = true;
+          return false;
+        }
+        return true;
+      });
+      return inside;
+    }
+
+    final urlSchemeCard = find.ancestor(
+      of: find.text('URL Scheme'),
+      matching: find.byType(CommonCard),
+    );
+    for (var i = 0; i < 60 && !focusedOn(urlSchemeCard); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+    }
+    expect(focusedOn(urlSchemeCard), isTrue);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(find.byType(UrlSchemeView), findsOneWidget);
+
+    // Tab traversal reaches the detail pane, so its content is operable.
+    for (var i = 0; i < 60 && !focusedOn(find.byType(UrlSchemeView)); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+    }
+    expect(focusedOn(find.byType(UrlSchemeView)), isTrue);
+
+    // Escape at the pane root neither closes the app nor drops the pane.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byType(UrlSchemeView), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('dashboard card opens the shared Doctor screen', (tester) async {

@@ -26,6 +26,7 @@
   "profile": "プロファイル",
   "profiles": "プロファイル",
   "tools": "ツール",
+  "toolsSelectPanePlaceholder": "設定を選択すると、ここに表示されます。",
   "logs": "ログ",
   "logsDesc": "キャプチャしたログの記録",
   "resources": "リソース",

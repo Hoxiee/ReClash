@@ -3653,6 +3653,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Переключить подписи"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тональный акцент"),
     "tools": MessageLookupByLibrary.simpleMessage("Инструменты"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "Выберите настройку, чтобы посмотреть её здесь.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Докупить трафик"),
     "torch": MessageLookupByLibrary.simpleMessage("Фонарик"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Всего"),

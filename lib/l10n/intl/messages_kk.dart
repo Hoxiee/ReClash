@@ -3668,6 +3668,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Жазуларды ауыстыру"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Тоналды"),
     "tools": MessageLookupByLibrary.simpleMessage("Құралдар"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "Оны осы жерде көру үшін параметрді таңдаңыз.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Трафикті толтыру"),
     "torch": MessageLookupByLibrary.simpleMessage("Қолшам"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Жалпы трафик"),

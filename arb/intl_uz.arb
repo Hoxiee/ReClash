@@ -26,6 +26,7 @@
   "profile": "Profil",
   "profiles": "Profillar",
   "tools": "Vositalar",
+  "toolsSelectPanePlaceholder": "Bu yerda ko‘rish uchun sozlamani tanlang.",
   "logs": "Loglar",
   "logsDesc": "Log yozuvlari",
   "resources": "Resurslar",

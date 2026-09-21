@@ -26,6 +26,7 @@
   "profile": "Профиль",
   "profiles": "Профили",
   "tools": "Инструменты",
+  "toolsSelectPanePlaceholder": "Выберите настройку, чтобы посмотреть её здесь.",
   "logs": "Логи",
   "logsDesc": "Собранные логи",
   "resources": "Ресурсы",

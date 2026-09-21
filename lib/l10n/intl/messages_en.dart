@@ -3536,6 +3536,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("Toggle labels"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Tonal spot"),
     "tools": MessageLookupByLibrary.simpleMessage("Tools"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "Select a setting to view it here.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Top up traffic"),
     "torch": MessageLookupByLibrary.simpleMessage("Flashlight"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),

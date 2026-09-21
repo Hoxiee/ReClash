@@ -2940,6 +2940,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("레이블 전환"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("톤 스팟"),
     "tools": MessageLookupByLibrary.simpleMessage("도구"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "여기에서 보려면 설정을 선택하세요.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("트래픽 충전"),
     "torch": MessageLookupByLibrary.simpleMessage("손전등"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("전체 트래픽"),

@@ -68,6 +68,7 @@ class DecorationListItem extends StatelessWidget {
   final VoidCallback? onPressed;
   final double? minVerticalPadding;
   final bool invalid;
+  final String? paneId;
   final _ListItemAction? _action;
 
   const DecorationListItem({
@@ -82,7 +83,8 @@ class DecorationListItem extends StatelessWidget {
     this.horizontalTitleGap,
     this.minVerticalPadding,
     this.invalid = false,
-  }) : _action = null;
+  }) : paneId = null,
+       _action = null;
 
   DecorationListItem.toggle({
     super.key,
@@ -98,6 +100,7 @@ class DecorationListItem extends StatelessWidget {
     this.invalid = false,
   }) : trailing = null,
        onPressed = null,
+       paneId = null,
        _action = _ToggleAction(value: value, onChanged: onChanged);
 
   DecorationListItem.options({
@@ -118,6 +121,7 @@ class DecorationListItem extends StatelessWidget {
     this.minVerticalPadding = 8,
     this.invalid = false,
   }) : onPressed = null,
+       paneId = null,
        _action = _OptionsAction<Object?>(
          title: dialogTitle,
          options: options,
@@ -147,6 +151,7 @@ class DecorationListItem extends StatelessWidget {
     this.minVerticalPadding = 8,
     this.invalid = false,
   }) : onPressed = null,
+       paneId = null,
        _action = _InputAction(
          title: dialogTitle,
          value: value,
@@ -170,6 +175,7 @@ class DecorationListItem extends StatelessWidget {
     bool blur = true,
     bool forceFull = true,
     ValueChanged<dynamic>? onChanged,
+    this.paneId,
     this.isSelected,
     this.horizontalTitleGap,
     this.minVerticalPadding = 8,
@@ -197,6 +203,7 @@ class DecorationListItem extends StatelessWidget {
     this.invalid = false,
   }) : trailing = null,
        onPressed = null,
+       paneId = null,
        _action = _CheckboxAction(value: value, onChanged: onChanged);
 
   @override
@@ -264,6 +271,20 @@ class DecorationListItem extends StatelessWidget {
       case final _OpenAction openDelegate:
         final child = openDelegate.widget;
         final onChanged = openDelegate.onChanged;
+        final paneScope = SettingsPaneScope.of(context);
+        final paneId = this.paneId;
+        if (paneId != null && paneScope != null && paneScope.active) {
+          return _buildActionCard(
+            proxyDecorator: proxyDecorator,
+            borderRadius: borderRadius,
+            isEnd: isEnd,
+            trailing: effectiveTrailing,
+            selected: paneScope.selectedId == paneId,
+            onTap: () => paneScope.onSelect(
+              SettingsPaneSelection(id: paneId, detail: child),
+            ),
+          );
+        }
         return OpenContainer<dynamic>(
           transitionDuration: context.motionDuration(commonDuration),
           closedBuilder: (context, action) {
@@ -341,13 +362,14 @@ class DecorationListItem extends StatelessWidget {
     required bool isEnd,
     Widget? trailing,
     VoidCallback? onTap,
+    bool? selected,
   }) {
     return CommonCard(
       shape: proxyDecorator == true
           ? LinearBorder.none
           : AppShape.of(borderRadius),
       isError: invalid,
-      isSelected: isSelected,
+      isSelected: selected ?? isSelected,
       padding: EdgeInsets.zero,
       type: CommonCardType.filled,
       onPressed: proxyDecorator ? null : onTap,

@@ -162,6 +162,39 @@ class SheetProvider<T> extends InheritedWidget {
       nestedNavigatorPop != oldWidget.nestedNavigatorPop;
 }
 
+/// When [active], an `open` list item selects into the detail pane instead of
+/// pushing; the detail pane nests an inactive scope so its own items push.
+class SettingsPaneScope extends InheritedWidget {
+  final bool active;
+  final String? selectedId;
+  final void Function(SettingsPaneSelection selection) onSelect;
+
+  const SettingsPaneScope({
+    super.key,
+    required this.active,
+    required this.selectedId,
+    required this.onSelect,
+    required super.child,
+  });
+
+  static SettingsPaneScope? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SettingsPaneScope>();
+  }
+
+  @override
+  bool updateShouldNotify(SettingsPaneScope oldWidget) =>
+      active != oldWidget.active ||
+      selectedId != oldWidget.selectedId ||
+      onSelect != oldWidget.onSelect;
+}
+
+class SettingsPaneSelection {
+  final String id;
+  final Widget detail;
+
+  const SettingsPaneSelection({required this.id, required this.detail});
+}
+
 extension SheetHeightExt on WidgetRef {
   double sheetHeight(BuildContext context, double factor) {
     final viewHeight = watch(viewHeightProvider);

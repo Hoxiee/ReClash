@@ -2975,6 +2975,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "toggleLabel": MessageLookupByLibrary.simpleMessage("ラベルを切り替え"),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("トーナルスポット"),
     "tools": MessageLookupByLibrary.simpleMessage("ツール"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "設定を選択すると、ここに表示されます。",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("データ量を追加"),
     "torch": MessageLookupByLibrary.simpleMessage("ライト"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("合計トラフィック"),

@@ -26,6 +26,7 @@
   "profile": "Profile",
   "profiles": "Profiles",
   "tools": "Tools",
+  "toolsSelectPanePlaceholder": "Select a setting to view it here.",
   "logs": "Logs",
   "logsDesc": "Captured log records",
   "resources": "Resources",

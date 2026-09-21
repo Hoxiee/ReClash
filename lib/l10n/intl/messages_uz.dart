@@ -3740,6 +3740,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "tonalSpotScheme": MessageLookupByLibrary.simpleMessage("Ohangdor"),
     "tools": MessageLookupByLibrary.simpleMessage("Vositalar"),
+    "toolsSelectPanePlaceholder": MessageLookupByLibrary.simpleMessage(
+      "Bu yerda ko‘rish uchun sozlamani tanlang.",
+    ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Trafikni toʻldirish"),
     "torch": MessageLookupByLibrary.simpleMessage("Fonar"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jami trafik"),

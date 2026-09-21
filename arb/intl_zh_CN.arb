@@ -26,6 +26,7 @@
   "profile": "配置",
   "profiles": "配置",
   "tools": "工具",
+  "toolsSelectPanePlaceholder": "选择一项设置以在此查看。",
   "logs": "日志",
   "logsDesc": "日志捕获记录",
   "resources": "资源",

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/about.dart';
@@ -23,6 +24,10 @@ import 'tools/core.dart';
 import 'tools/findings.dart';
 import 'url_scheme.dart';
 
+const toolsDoctorPaneId = 'doctor';
+
+const _toolsListPaneWidth = 360.0;
+
 class ToolsView extends ConsumerStatefulWidget {
   const ToolsView({super.key});
 
@@ -31,6 +36,19 @@ class ToolsView extends ConsumerStatefulWidget {
 }
 
 class _ToolViewState extends ConsumerState<ToolsView> {
+  String? _selectedPaneId;
+  Widget? _selectedDetail;
+
+  void _selectPane(SettingsPaneSelection selection) {
+    if (selection.id == _selectedPaneId) {
+      return;
+    }
+    setState(() {
+      _selectedPaneId = selection.id;
+      _selectedDetail = selection.detail;
+    });
+  }
+
   Widget _buildNavigationMenu(List<NavigationItem> navigationItems) {
     return SettingSection(
       top: 16,
@@ -47,6 +65,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
             widget: navigationItem.builder(context),
             maxWidth: 400,
             forceFull: false,
+            paneId: 'nav_${navigationItem.label.name}',
           ),
       ],
     );
@@ -120,12 +139,75 @@ class _ToolViewState extends ConsumerState<ToolsView> {
       const CoreSection(),
       const SettingBottomInset(),
     ];
+    final viewMode = ref.watch(viewModeProvider);
+    final list = ListView.builder(
+      key: toolsStoreKey,
+      itemCount: items.length,
+      itemBuilder: (_, index) => items[index],
+    );
+    if (viewMode != ViewMode.desktop) {
+      return CommonScaffold(
+        title: context.appLocalizations.tools,
+        body: SettingsPaneScope(
+          active: false,
+          selectedId: null,
+          onSelect: _selectPane,
+          child: list,
+        ),
+      );
+    }
     return CommonScaffold(
       title: context.appLocalizations.tools,
-      body: ListView.builder(
-        key: toolsStoreKey,
-        itemCount: items.length,
-        itemBuilder: (_, index) => items[index],
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: _toolsListPaneWidth,
+            child: SettingsPaneScope(
+              active: true,
+              selectedId: _selectedPaneId,
+              onSelect: _selectPane,
+              child: list,
+            ),
+          ),
+          VerticalDivider(
+            width: 1,
+            thickness: 1,
+            color: context.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          ),
+          Expanded(child: _buildDetailPane()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailPane() {
+    final detail = _selectedDetail;
+    if (detail == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            context.appLocalizations.toolsSelectPanePlaceholder,
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyLarge?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+    return SettingsPaneScope(
+      active: false,
+      selectedId: null,
+      onSelect: _selectPane,
+      child: SheetProvider(
+        type: SheetType.page,
+        child: Navigator(
+          key: ValueKey(_selectedPaneId),
+          onDidRemovePage: (_) {},
+          pages: [MaterialPage<void>(child: detail)],
+        ),
       ),
     );
   }
@@ -143,6 +225,7 @@ class _ConnectionDoctorItem extends ConsumerWidget {
       title: Text(appLocalizations.connectionDoctor),
       subtitle: Text(connectionDoctorTitle(appLocalizations, snapshot)),
       widget: const ConnectionDoctorView(),
+      paneId: toolsDoctorPaneId,
     );
   }
 }
@@ -156,6 +239,7 @@ class _FindingsItem extends StatelessWidget {
       leading: const Icon(Icons.auto_awesome_outlined),
       title: Text(context.appLocalizations.findings),
       widget: const FindingsView(),
+      paneId: 'findings',
     );
   }
 }
@@ -176,6 +260,7 @@ class _LocaleItem extends ConsumerWidget {
         currentLocale?.nativeLabel ?? appLocalizations.defaultText,
       ),
       widget: const LocaleView(),
+      paneId: 'locale',
     );
   }
 }
@@ -190,6 +275,7 @@ class _ThemeItem extends StatelessWidget {
       title: Text(context.appLocalizations.appearance),
       subtitle: Text(context.appLocalizations.appearanceDesc),
       widget: const AppearanceView(),
+      paneId: 'appearance',
     );
   }
 }
@@ -204,6 +290,7 @@ class _BackupItem extends StatelessWidget {
       title: Text(context.appLocalizations.backupAndRestore),
       subtitle: Text(context.appLocalizations.backupAndRestoreDesc),
       widget: const BackupAndRestore(),
+      paneId: 'backup',
     );
   }
 }
@@ -218,6 +305,7 @@ class _HotkeyItem extends StatelessWidget {
       title: Text(context.appLocalizations.hotkeyManagement),
       subtitle: Text(context.appLocalizations.hotkeyManagementDesc),
       widget: const HotKeyView(),
+      paneId: 'hotkey',
     );
   }
 }
@@ -251,6 +339,7 @@ class _AccessItem extends StatelessWidget {
       title: Text(context.appLocalizations.accessControl),
       subtitle: Text(context.appLocalizations.accessControlDesc),
       widget: const AccessView(),
+      paneId: 'access',
     );
   }
 }
@@ -265,6 +354,7 @@ class _ConfigItem extends StatelessWidget {
       title: Text(context.appLocalizations.basicConfig),
       subtitle: Text(context.appLocalizations.basicConfigDesc),
       widget: const ConfigView(),
+      paneId: 'config',
     );
   }
 }
@@ -279,6 +369,7 @@ class _AdvancedConfigItem extends StatelessWidget {
       title: Text(context.appLocalizations.advancedConfig),
       subtitle: Text(context.appLocalizations.advancedConfigDesc),
       widget: const AdvancedConfigView(),
+      paneId: 'advanced',
     );
   }
 }
@@ -293,6 +384,7 @@ class _SettingItem extends StatelessWidget {
       title: Text(context.appLocalizations.application),
       subtitle: Text(context.appLocalizations.applicationDesc),
       widget: const ApplicationSettingView(),
+      paneId: 'application',
     );
   }
 }
@@ -324,6 +416,7 @@ class _UrlSchemeItem extends StatelessWidget {
       leading: const Icon(Icons.link),
       title: Text(context.appLocalizations.urlScheme),
       widget: const UrlSchemeView(),
+      paneId: 'urlScheme',
     );
   }
 }
@@ -337,6 +430,7 @@ class _InfoItem extends StatelessWidget {
       leading: const Icon(Icons.info),
       title: Text(context.appLocalizations.about),
       widget: const AboutView(),
+      paneId: 'about',
     );
   }
 }
@@ -350,6 +444,7 @@ class _DeveloperItem extends StatelessWidget {
       leading: const Icon(Icons.developer_board),
       title: Text(context.appLocalizations.developerMode),
       widget: const DeveloperView(),
+      paneId: 'developer',
     );
   }
 }
