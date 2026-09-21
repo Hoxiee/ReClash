@@ -124,16 +124,11 @@ class _NotificationSettingsTabState
           text: l.notificationDeliveryPermissionDisabled,
           fix: () => unawaited(_requestPermission()),
         ),
-        // The hidden channel is disabled on purpose, so its state is the answer
-        // rather than a problem.
-        _ when settings.visibility == NotificationVisibility.off => (
+        // A disabled service channel is how the user turns the ongoing
+        // notification off, so it is the answer rather than a problem to fix.
+        AndroidNotificationStatus(serviceChannelEnabled: false) => (
           text: l.notificationDeliveryOff,
           fix: null,
-        ),
-        AndroidNotificationStatus(serviceChannelEnabled: false) => (
-          text: l.notificationDeliveryServiceDisabled,
-          fix: () =>
-              unawaited(_openSettings(_serviceChannelFor(settings.visibility))),
         ),
         AndroidNotificationStatus(subscriptionChannelEnabled: false)
             when settings.subscriptionReminders =>
@@ -156,20 +151,33 @@ class _NotificationSettingsTabState
     return CustomScrollView(
       primary: false,
       slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-          sliver: SliverToBoxAdapter(
-            child: _NotificationMasterCard(
+        SettingSection.sliver(
+          top: 12,
+          items: [
+            DecorationListItem.options(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: Text(l.notificationVisibility),
+              subtitle: Text(_visibilityDesc(l, settings.visibility)),
+              dialogTitle: l.notificationVisibility,
+              options: NotificationVisibility.values,
               value: settings.visibility,
+              textBuilder: (value) =>
+                  _visibilityLabel(l, value as NotificationVisibility),
+              subtitleBuilder: (value) =>
+                  _visibilityDesc(l, value as NotificationVisibility),
               onChanged: (value) {
-                _update((state) => state.copyWith(visibility: value));
+                if (value == null) return;
+                _update(
+                  (state) =>
+                      state.copyWith(visibility: value as NotificationVisibility),
+                );
                 unawaited(_loadStatus());
               },
             ),
-          ),
+          ],
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
           sliver: SliverToBoxAdapter(
             child: NotificationPreview(settings: settings.projected),
           ),
@@ -180,9 +188,9 @@ class _NotificationSettingsTabState
           items: [
             _DeliverySummary(delivery: _delivery(l, settings)),
             _settingsLink(
-              icon: Icons.notifications_active_outlined,
-              title: l.notificationServiceChannel,
-              subtitle: _serviceChannelFor(settings.visibility),
+              icon: Icons.notifications_off_outlined,
+              title: l.notificationTurnOff,
+              subtitle: l.notificationTurnOffDesc,
               onPressed: () =>
                   _openSettings(_serviceChannelFor(settings.visibility)),
             ),
@@ -240,22 +248,19 @@ class _NotificationSettingsTabState
             ],
           ),
         ),
-        _dependent(
-          settings.visibility != NotificationVisibility.off,
-          SettingSection.sliver(
-            title: l.notificationPrivacy,
-            items: [
-              _toggle(
-                icon: Icons.lock_outline_rounded,
-                title: l.notificationHideSensitive,
-                subtitle: l.notificationHideSensitiveDesc,
-                value: settings.hideSensitiveOnLockScreen,
-                onChanged: (value) => _update(
-                  (state) => state.copyWith(hideSensitiveOnLockScreen: value),
-                ),
+        SettingSection.sliver(
+          title: l.notificationPrivacy,
+          items: [
+            _toggle(
+              icon: Icons.lock_outline_rounded,
+              title: l.notificationHideSensitive,
+              subtitle: l.notificationHideSensitiveDesc,
+              value: settings.hideSensitiveOnLockScreen,
+              onChanged: (value) => _update(
+                (state) => state.copyWith(hideSensitiveOnLockScreen: value),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         SettingSection.sliver(
           title: l.notificationReminders,

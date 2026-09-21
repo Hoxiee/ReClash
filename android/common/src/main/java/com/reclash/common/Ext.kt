@@ -59,53 +59,36 @@ val Intent.toPendingIntent: PendingIntent
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
-// Channel importance is immutable and AMS drops the old post only when the id changes.
-// A foreground service must post, and Android 14+ crashes the process with
-// CannotPostForegroundServiceNotificationException if the target channel is blocked,
-// so the quietest level stays at IMPORTANCE_MIN rather than IMPORTANCE_NONE.
-fun serviceChannelImportance(channelId: String): Int = when (channelId) {
-    GlobalState.NOTIFICATION_CHANNEL_QUIET -> NotificationManager.IMPORTANCE_MIN
-    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> NotificationManager.IMPORTANCE_MIN
-    else -> NotificationManager.IMPORTANCE_LOW
-}
-
-fun serviceChannelName(channelId: String): Int = when (channelId) {
-    GlobalState.NOTIFICATION_CHANNEL_QUIET -> R.string.service_channel_quiet_name
-    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> R.string.service_channel_hidden_name
-    else -> R.string.service_channel_name
-}
-
-fun serviceNotificationId(channelId: String): Int = when (channelId) {
-    GlobalState.NOTIFICATION_CHANNEL_QUIET -> GlobalState.NOTIFICATION_ID_QUIET
-    GlobalState.NOTIFICATION_CHANNEL_HIDDEN -> GlobalState.NOTIFICATION_ID_HIDDEN
-    else -> GlobalState.NOTIFICATION_ID
-}
-
-fun Service.startForeground(
-    notification: Notification,
-    channelId: String = GlobalState.NOTIFICATION_CHANNEL,
-) {
+// A foreground service must post a notification and Android will not let the app
+// hide it, so the level lives in the content, not in separate channels. One LOW
+// channel serves every level; the user silences it by demoting it in system
+// settings. IMPORTANCE_MIN is not used because the level is a content choice now.
+fun Service.startForeground(notification: Notification) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         val manager = getSystemService(NotificationManager::class.java)
-        if (manager?.getNotificationChannel(channelId) == null) {
+        GlobalState.STALE_NOTIFICATION_CHANNELS.forEach { stale ->
+            if (manager?.getNotificationChannel(stale) != null) {
+                manager.deleteNotificationChannel(stale)
+            }
+        }
+        if (manager?.getNotificationChannel(GlobalState.NOTIFICATION_CHANNEL) == null) {
             manager?.createNotificationChannel(
                 NotificationChannel(
-                    channelId,
-                    getString(serviceChannelName(channelId)),
-                    serviceChannelImportance(channelId),
+                    GlobalState.NOTIFICATION_CHANNEL,
+                    getString(R.string.service_channel_name),
+                    NotificationManager.IMPORTANCE_LOW,
                 ),
             )
         }
     }
-    val notificationId = serviceNotificationId(channelId)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         startForeground(
-            notificationId,
+            GlobalState.NOTIFICATION_ID,
             notification,
             FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
     } else {
-        startForeground(notificationId, notification)
+        startForeground(GlobalState.NOTIFICATION_ID, notification)
     }
 }
 

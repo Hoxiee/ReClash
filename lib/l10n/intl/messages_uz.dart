@@ -1595,9 +1595,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -1948,7 +1949,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("Tuzatish"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "Xizmat bildirishnomasi ReClash’da o‘chirilgan",
+      "Bildirishnoma tizim sozlamalarida o\'chirilgan",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage(
@@ -1989,7 +1990,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Qurilma qulflanganda profil, marshrutlash va diagnostika tafsilotlarini yashirish",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "Pardaning pastida bitta jim qator qoladi, holat panelida belgi bo‘lmaydi",
+      "Faqat himoya holati, jonli tafsilotlar va tezkor amallarsiz",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage(
       "Pastga ko‘chirish",
@@ -2024,9 +2025,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Ruxsat ro‘yxati",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "Pardada hech narsa yo‘q. Himoya ishlashda davom etadi, eslatmalar keladi",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "To‘xtatib turish yoki davom ettirish",
     ),
@@ -2035,9 +2033,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "Ulanish diagnostikasi: muammo yo‘q",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "Parda bo‘sh qoladi",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · Himoyalangan ma’lumotlar yashirilgan",
@@ -2128,6 +2123,12 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Obunaga e’tibor kerak bo‘lganda xabar berish",
         ),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Bildirishnomani o\'chirish",
+    ),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "Himoya ishlayotganda Android bildirishnomani talab qiladi. Ushbu kanalni o\'chirish uchun tizim sozlamalarini oching.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage(
       "Bildirishnoma darajasi",
     ),
@@ -2146,9 +2147,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
       "Minimal",
-    ),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage(
-      "O‘chirilgan",
     ),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage(

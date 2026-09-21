@@ -1365,7 +1365,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("修复"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "服务通知已在 ReClash 中关闭",
+      "通知已在系统设置中关闭",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage("ReClash 的通知已被阻止"),
@@ -1400,7 +1400,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "设备锁定时隐藏配置、路由和诊断详情",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "仅在通知栏底部保留一行安静通知，不显示状态栏图标",
+      "仅显示保护状态，没有实时详情或快捷操作",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("下移"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("上移"),
@@ -1417,18 +1417,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationNetworkUnknown": MessageLookupByLibrary.simpleMessage("未知"),
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage("白名单"),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "通知栏中什么都不显示。保护继续运行，提醒照常送达",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage("暂停或继续"),
     "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
       "显示暂停或继续 VPN 的操作",
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "连接诊断：未发现问题",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "通知栏中不会出现任何内容",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · 已隐藏受保护详情",
@@ -1503,6 +1497,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationSubscriptionRemindersDesc":
         MessageLookupByLibrary.simpleMessage("订阅需要处理时发送通知"),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage("关闭通知"),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "保护运行时 Android 要求显示通知。打开系统设置以停用此渠道。",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage("通知级别"),
     "notificationVisibilityAlways": MessageLookupByLibrary.simpleMessage(
       "始终显示",
@@ -1516,7 +1514,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilityDoctorProblems":
         MessageLookupByLibrary.simpleMessage("检测到问题时显示"),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage("精简"),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage("本次会话有流量时显示"),
     "notificationVisibilitySmartRoutingOn":

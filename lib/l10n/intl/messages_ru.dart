@@ -1542,9 +1542,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1889,7 +1890,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Исправить",
     ),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "Уведомление сервиса выключено в ReClash",
+      "Уведомление отключено в настройках системы",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage(
@@ -1930,7 +1931,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Скрывать профиль, маршрутизацию и диагностику, пока устройство заблокировано",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "Одна тихая строка внизу шторки, без значка в статус-баре",
+      "Только статус защиты, без живых деталей и быстрых действий",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("Ниже"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("Выше"),
@@ -1959,9 +1960,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Белый список",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "В шторке ничего нет. Защита продолжает работать, напоминания приходят",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "Пауза и продолжение",
     ),
@@ -1970,9 +1968,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "Доктор соединения: проблем нет",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "Шторка остаётся пустой",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · Защищённые данные скрыты",
@@ -2071,6 +2066,12 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Уведомлять, когда подписке требуется внимание",
         ),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Отключить уведомление",
+    ),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "Android требует уведомление, пока работает защита. Открой настройки системы, чтобы отключить этот канал.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage(
       "Уровень уведомления",
     ),
@@ -2089,9 +2090,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
       "Минимум",
-    ),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage(
-      "Выключено",
     ),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage(

@@ -1537,7 +1537,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("해결"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "서비스 알림이 ReClash에서 꺼져 있습니다",
+      "시스템 설정에서 알림이 꺼져 있습니다",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage("ReClash 알림이 차단되어 있습니다"),
@@ -1574,7 +1574,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "기기가 잠겨 있을 때 프로필, 라우팅 및 진단 세부 정보를 숨깁니다",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "알림 창 아래쪽에 조용한 한 줄만 남고 상태 표시줄 아이콘은 없습니다",
+      "실시간 정보나 빠른 작업 없이 보호 상태만 표시합니다",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("아래로 이동"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("위로 이동"),
@@ -1595,9 +1595,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "허용 목록",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "알림 창에 아무것도 표시되지 않습니다. 보호는 계속 작동하고 구독 알림도 도착합니다",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "일시 중지 또는 재개",
     ),
@@ -1606,9 +1603,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "연결 진단: 문제 없음",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "알림 창에는 아무것도 남지 않습니다",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · 보호된 세부 정보 숨김",
@@ -1691,6 +1685,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationSubscriptionRemindersDesc":
         MessageLookupByLibrary.simpleMessage("구독에 확인이 필요할 때 알립니다"),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage("알림 끄기"),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "보호가 실행되는 동안 Android는 알림을 요구합니다. 시스템 설정을 열어 이 채널을 끌 수 있습니다.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage("알림 수준"),
     "notificationVisibilityAlways": MessageLookupByLibrary.simpleMessage(
       "항상 표시",
@@ -1704,7 +1702,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilityDoctorProblems":
         MessageLookupByLibrary.simpleMessage("문제가 감지되면 표시"),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage("최소"),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage("끄기"),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage("세션에 트래픽이 있을 때 표시"),
     "notificationVisibilitySmartRoutingOn":

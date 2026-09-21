@@ -1,12 +1,10 @@
 package com.reclash.service
 
 import com.reclash.common.AccessControlMode
-import com.reclash.common.GlobalState
 import com.reclash.service.models.AccessControlProps
 import com.reclash.service.models.NotificationComponent
 import com.reclash.service.models.NotificationParams
 import com.reclash.service.models.parseActiveServer
-import com.reclash.service.modules.channelId
 import com.reclash.service.modules.extended
 import com.reclash.service.modules.needsTicker
 import com.reclash.service.modules.projectContent
@@ -206,24 +204,25 @@ class ServiceConfigTest {
     }
 
     @Test
-    fun `notification projection redacts content and actions behind the keyguard`() {
+    fun `notification carries real content and a sanitized public version for lock-screen redaction`() {
         val params = NotificationParams(
             title = "Private profile",
             showPauseAction = true,
             showStopAction = true,
+            components = listOf(NotificationComponent(type = "smartRouting")),
         )
 
         val projected = params.extended(
             paused = false,
             routing = SmartRoutingStatus(enabled = true, node = "edge"),
             doctor = DoctorStatus(health = "broken"),
-            locked = true,
         )
 
-        assertEquals("ReClash", projected.title)
-        assertEquals("Protection active", projected.contentText)
-        assertEquals(false, projected.showPauseAction)
-        assertEquals(false, projected.showStopAction)
+        assertEquals("Private profile", projected.title)
+        assertEquals("Smart Routing · edge", projected.contentText)
+        assertEquals("Protection active", projected.publicContentText)
+        assertEquals(true, projected.showPauseAction)
+        assertEquals(true, projected.showStopAction)
     }
 
     @Test
@@ -238,13 +237,6 @@ class ServiceConfigTest {
         }
 
         params.extended(
-            paused = false,
-            routing = SmartRoutingStatus(),
-            doctor = DoctorStatus(),
-            activeServerResolver = resolver,
-            locked = true,
-        )
-        params.extended(
             paused = true,
             routing = SmartRoutingStatus(),
             doctor = DoctorStatus(),
@@ -255,10 +247,9 @@ class ServiceConfigTest {
     }
 
     @Test
-    fun `notification projection keeps configured content while privacy is disabled`() {
+    fun `notification projection shows the paused text and keeps actions while paused`() {
         val params = NotificationParams(
             title = "Visible profile",
-            hideSensitiveOnLockScreen = false,
             showPauseAction = true,
             showStopAction = true,
         )
@@ -267,42 +258,12 @@ class ServiceConfigTest {
             paused = true,
             routing = SmartRoutingStatus(),
             doctor = DoctorStatus(),
-            locked = true,
         )
 
         assertEquals("Visible profile", projected.title)
         assertEquals("Paused", projected.contentText)
         assertEquals(true, projected.showPauseAction)
         assertEquals(true, projected.showStopAction)
-    }
-
-    @Test
-    fun `each visibility posts to a channel of its own`() {
-        assertEquals(
-            listOf("ReClash", "ReClash.quiet", "ReClash.off"),
-            listOf("detailed", "minimal", "off")
-                .map { NotificationParams(visibility = it).channelId },
-        )
-    }
-
-    @Test
-    fun `an unknown visibility stays on the audible channel`() {
-        assertEquals(
-            GlobalState.NOTIFICATION_CHANNEL,
-            NotificationParams(visibility = "quiet").channelId,
-        )
-    }
-
-    @Test
-    fun `the keyguard projection keeps the channel of its level`() {
-        val projected = NotificationParams(visibility = "off").extended(
-            paused = false,
-            routing = SmartRoutingStatus(),
-            doctor = DoctorStatus(),
-            locked = true,
-        )
-
-        assertEquals(GlobalState.NOTIFICATION_CHANNEL_HIDDEN, projected.channelId)
     }
 
     @Test

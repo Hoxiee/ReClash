@@ -12,11 +12,11 @@ import kotlinx.coroutines.SupervisorJob
 
 object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatchers.Default) {
     const val NOTIFICATION_CHANNEL = "ReClash"
-    const val NOTIFICATION_CHANNEL_QUIET = "ReClash.quiet"
-    const val NOTIFICATION_CHANNEL_HIDDEN = "ReClash.off"
     const val NOTIFICATION_ID = 1
-    const val NOTIFICATION_ID_QUIET = 2
-    const val NOTIFICATION_ID_HIDDEN = 3
+
+    // Retired per-level channels; deleted on startup so they stop cluttering
+    // the system notification settings.
+    val STALE_NOTIFICATION_CHANNELS = listOf("ReClash.quiet", "ReClash.off")
     private const val ANY_PID = 0
     private const val EVERY_EXIT_RECORD = 0
 

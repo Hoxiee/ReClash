@@ -1495,9 +1495,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1842,7 +1843,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("Fix"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "The service notification is turned off in ReClash",
+      "The notification is turned off in system settings",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage(
@@ -1883,7 +1884,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hide profile, routing and diagnostic details while the device is locked",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "One quiet line at the bottom of the shade, without a status bar icon",
+      "Just your protection status, without live details or quick actions",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("Move down"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("Move up"),
@@ -1912,9 +1913,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Whitelist",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "Nothing in the shade. Protection keeps running and reminders still arrive",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "Pause or resume",
     ),
@@ -1923,9 +1921,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "Connection Doctor: no problems",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "The notification shade stays empty",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · Protected details hidden",
@@ -2018,6 +2013,12 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Notify when a subscription needs attention",
         ),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Turn off notification",
+    ),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "Android requires a notification while protection runs. Open system settings to disable this channel.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage(
       "Notification level",
     ),
@@ -2037,7 +2038,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
       "Minimal",
     ),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage("Off"),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage(
           "Shown while the session has traffic",

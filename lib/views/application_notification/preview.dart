@@ -43,7 +43,6 @@ class _NotificationPreviewState extends State<NotificationPreview> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    final hidden = widget.settings.visibility == NotificationVisibility.off;
     return CommonCard(
       radius: AppCorner.xl,
       child: Padding(
@@ -51,43 +50,11 @@ class _NotificationPreviewState extends State<NotificationPreview> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16,
-          children: hidden
-              ? [_buildEmptyShade(context, l)]
-              : [
-                  _buildNotification(context, l),
-                  _buildScenarioSelector(context, l),
-                ],
+          children: [
+            _buildNotification(context, l),
+            _buildScenarioSelector(context, l),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyShade(BuildContext context, AppLocalizations l) {
-    final colorScheme = context.colorScheme;
-    return Container(
-      width: double.infinity,
-      decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: AppShape.lg.copyWith(
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 28),
-      child: Column(
-        spacing: 10,
-        children: [
-          Icon(
-            Icons.notifications_off_rounded,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          Text(
-            l.notificationPreviewHidden,
-            textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,6 +1,5 @@
 package com.reclash.service.modules
 
-import android.app.KeyguardManager
 import android.app.Notification.FOREGROUND_SERVICE_IMMEDIATE
 import android.app.Service
 import android.app.Service.STOP_FOREGROUND_REMOVE
@@ -33,7 +32,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -41,7 +39,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 internal data class ExtendedNotificationParams(
@@ -55,34 +52,16 @@ internal data class ExtendedNotificationParams(
     val hideSensitiveOnLockScreen: Boolean,
     val publicContentText: String,
     val contentText: String,
-    val channelId: String,
 )
 
-// A keyguard in front of the shade is the only moment the privacy setting is
-// about; a dark screen hides the notification from nobody.
+// The public version handles lock-screen redaction; swapping content on a keyguard broadcast flashes the real title.
 internal fun NotificationParams.extended(
     paused: Boolean,
     routing: SmartRoutingStatus,
     doctor: DoctorStatus,
     activeServer: String? = null,
     activeServerResolver: (() -> String?)? = null,
-    locked: Boolean = false,
 ): ExtendedNotificationParams {
-    if (locked && hideSensitiveOnLockScreen) {
-        return ExtendedNotificationParams(
-            title = "ReClash",
-            stopText = stopText,
-            pauseText = pauseText,
-            resumeText = resumeText,
-            paused = paused,
-            showPauseAction = false,
-            showStopAction = false,
-            hideSensitiveOnLockScreen = hideSensitiveOnLockScreen,
-            publicContentText = activeText,
-            contentText = activeText,
-            channelId = channelId,
-        )
-    }
     return ExtendedNotificationParams(
         title = title,
         stopText = stopText,
@@ -98,18 +77,8 @@ internal fun NotificationParams.extended(
         } else {
             content(routing, doctor, activeServer ?: activeServerResolver?.invoke())
         },
-        channelId = channelId,
     )
 }
-
-// A foreground service has to post, so the quieter levels post to a channel the
-// app itself created at a lower importance instead of skipping the post.
-internal val NotificationParams.channelId: String
-    get() = when (visibility) {
-        "minimal" -> GlobalState.NOTIFICATION_CHANNEL_QUIET
-        "off" -> GlobalState.NOTIFICATION_CHANNEL_HIDDEN
-        else -> GlobalState.NOTIFICATION_CHANNEL
-    }
 
 // Every other component is redrawn by its own event; only live counters need a
 // clock, and only while somebody can read them.
@@ -231,43 +200,36 @@ internal class NotificationModule(
     override fun start() {
         update(currentParams())
         scope.launch {
-            val screen = screenFlow().shareIn(this, SharingStarted.Eagerly, replay = 1)
-
             combine(
-                ticker(screen),
+                ticker(),
                 ServiceConfig.notificationParams,
-                screen,
                 ServiceConfig.pauseState,
                 ServiceConfig.smartRoutingStatus,
                 ServiceConfig.doctorStatus,
             ) { values ->
                 val params = values[1] as NotificationParams
                 params.extended(
-                    paused = (values[3] as PauseState).paused,
-                    routing = values[4] as SmartRoutingStatus,
-                    doctor = values[5] as DoctorStatus,
+                    paused = (values[2] as PauseState).paused,
+                    routing = values[3] as SmartRoutingStatus,
+                    doctor = values[4] as DoctorStatus,
                     activeServerResolver = { params.resolveActiveServer() },
-                    locked = (values[2] as ScreenState).locked,
                 )
             }.distinctUntilChanged()
                 .collect(::update)
         }
     }
 
-    private data class ScreenState(val interactive: Boolean, val locked: Boolean)
-
-    private fun screenFlow(): Flow<ScreenState> = service.receiveBroadcastFlow {
+    private fun interactiveFlow(): Flow<Boolean> = service.receiveBroadcastFlow {
         addAction(Intent.ACTION_SCREEN_ON)
         addAction(Intent.ACTION_SCREEN_OFF)
-        addAction(Intent.ACTION_USER_PRESENT)
-    }.map { screenState() }
-        .onStart { emit(screenState()) }
+    }.map { screenInteractive() }
+        .onStart { emit(screenInteractive()) }
         .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun ticker(screen: Flow<ScreenState>): Flow<Unit> = combine(
+    private fun ticker(): Flow<Unit> = combine(
         ServiceConfig.notificationParams.map { it.needsTicker }.distinctUntilChanged(),
-        screen.map { it.interactive }.distinctUntilChanged(),
+        interactiveFlow(),
     ) { needed, interactive -> needed && interactive }
         .distinctUntilChanged()
         .flatMapLatest { live ->
@@ -290,7 +252,6 @@ internal class NotificationModule(
             routing = ServiceConfig.smartRoutingStatus.value,
             doctor = ServiceConfig.doctorStatus.value,
             activeServerResolver = { params.resolveActiveServer() },
-            locked = screenState().locked,
         )
     }
 
@@ -300,38 +261,25 @@ internal class NotificationModule(
         return runCatching { Core.getActiveServerState(group) }.getOrNull()
     }
 
-    private fun screenState() = ScreenState(
-        interactive = service.getSystemService<PowerManager>()?.isInteractive != false,
-        locked = service.getSystemService<KeyguardManager>()?.isKeyguardLocked == true,
-    )
+    private fun screenInteractive(): Boolean =
+        service.getSystemService<PowerManager>()?.isInteractive != false
 
-    private val builders = mutableMapOf<String, NotificationCompat.Builder>()
-
-    // Pre-O has no channels, so the priority is the only lever a quieter level
-    // has there.
-    private fun builderFor(channelId: String): NotificationCompat.Builder =
-        builders.getOrPut(channelId) {
-            val intent = Intent().setComponent(Components.mainActivity)
-            val priority = if (channelId == GlobalState.NOTIFICATION_CHANNEL) {
-                NotificationCompat.PRIORITY_LOW
-            } else {
-                NotificationCompat.PRIORITY_MIN
+    private val builder: NotificationCompat.Builder by lazy {
+        val intent = Intent().setComponent(Components.mainActivity)
+        NotificationCompat.Builder(service, GlobalState.NOTIFICATION_CHANNEL).apply {
+            setSmallIcon(R.drawable.ic_service)
+            setContentTitle("ReClash")
+            setContentIntent(intent.toPendingIntent)
+            setPriority(NotificationCompat.PRIORITY_LOW)
+            setCategory(NotificationCompat.CATEGORY_SERVICE)
+            setOngoing(true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                foregroundServiceBehavior = FOREGROUND_SERVICE_IMMEDIATE
             }
-
-            NotificationCompat.Builder(service, channelId).apply {
-                setSmallIcon(R.drawable.ic_service)
-                setContentTitle("ReClash")
-                setContentIntent(intent.toPendingIntent)
-                setPriority(priority)
-                setCategory(NotificationCompat.CATEGORY_SERVICE)
-                setOngoing(true)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    foregroundServiceBehavior = FOREGROUND_SERVICE_IMMEDIATE
-                }
-                setShowWhen(true)
-                setOnlyAlertOnce(true)
-            }
+            setShowWhen(true)
+            setOnlyAlertOnce(true)
         }
+    }
 
     private fun update(params: ExtendedNotificationParams) {
         val toggleAction = if (params.paused) QuickAction.RESUME else QuickAction.PAUSE
@@ -342,7 +290,7 @@ internal class NotificationModule(
             R.drawable.ic_action_pause
         }
         service.startForeground(
-            with(builderFor(params.channelId)) {
+            with(builder) {
                 setContentTitle(params.title)
                 setContentText(params.contentText.lineSequence().firstOrNull())
                 setStyle(
@@ -353,7 +301,7 @@ internal class NotificationModule(
                 setVisibility(
                     if (params.hideSensitiveOnLockScreen) {
                         setPublicVersion(
-                            NotificationCompat.Builder(service, params.channelId)
+                            NotificationCompat.Builder(service, GlobalState.NOTIFICATION_CHANNEL)
                                 .setSmallIcon(R.drawable.ic_service)
                                 .setContentTitle("ReClash")
                                 .setContentText(params.publicContentText)
@@ -384,7 +332,6 @@ internal class NotificationModule(
                 }
                 build()
             },
-            params.channelId,
         )
     }
 

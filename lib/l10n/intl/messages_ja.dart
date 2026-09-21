@@ -1552,7 +1552,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("修正"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "サービス通知は ReClash でオフになっています",
+      "システム設定で通知がオフになっています",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage("ReClash の通知はブロックされています"),
@@ -1589,7 +1589,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "端末のロック中はプロファイル、ルーティング、診断の詳細を隠します",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "通知シェードの下部に静かな 1 行だけを残し、ステータスバーのアイコンは出しません",
+      "保護状態のみを表示し、詳細情報やクイック操作は表示しません",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("下へ移動"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("上へ移動"),
@@ -1614,9 +1614,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "許可リスト",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "通知シェードには何も出ません。保護は動き続け、リマインダーも届きます",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "一時停止または再開",
     ),
@@ -1625,9 +1622,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "接続ドクター：問題なし",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "通知シェードには何も表示されません",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · 保護された詳細を非表示",
@@ -1712,6 +1706,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationSubscriptionRemindersDesc":
         MessageLookupByLibrary.simpleMessage("サブスクリプションへの対応が必要なときに通知します"),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage("通知をオフにする"),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "保護の実行中、Android は通知を必要とします。システム設定を開いてこのチャンネルを無効にできます。",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage("通知レベル"),
     "notificationVisibilityAlways": MessageLookupByLibrary.simpleMessage(
       "常に表示",
@@ -1725,7 +1723,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilityDoctorProblems":
         MessageLookupByLibrary.simpleMessage("問題が検出されたときに表示"),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage("最小"),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage("オフ"),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage("セッションに通信があるときに表示"),
     "notificationVisibilitySmartRoutingOn":

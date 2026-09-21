@@ -2,6 +2,4 @@
 <resources>
     <string name="app_name">ReClash</string>
     <string name="service_channel_name">ReClash Service</string>
-    <string name="service_channel_quiet_name">ReClash Service (minimal)</string>
-    <string name="service_channel_hidden_name">ReClash Service (hidden)</string>
 </resources>

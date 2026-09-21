@@ -1558,9 +1558,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -1907,7 +1908,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("Düzet"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "Hyzmat duýduryşy ReClash-da öçürilen",
+      "Bildiriş ulgam sazlamalarynda öçürilen",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage(
@@ -1948,7 +1949,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enjam gulply wagty profil, marşrut we diagnostika maglumatlaryny gizlemek",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "Perdäniň aşagynda bir ümsüm setir galýar, ýagdaý zolagynda nyşan bolmaýar",
+      "Diňe goragyň ýagdaýy, janly maglumatlarsyz we çalt hereketlersiz",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage("Aşak süýşür"),
     "notificationMoveUp": MessageLookupByLibrary.simpleMessage("Ýokary süýşür"),
@@ -1977,9 +1978,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Rugsat sanawy",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "Perdede hiç zat ýok. Gorag işlemegini dowam etdirýär, ýatlatmalar gelýär",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "Wagtlaýyn duruzmak ýa-da dowam etdirmek",
     ),
@@ -1988,9 +1986,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "Birikme diagnostikasy: mesele ýok",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "Perde boş galýar",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · Goralýan maglumatlar gizlenen",
@@ -2085,6 +2080,12 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Ýazylma üns talap edende habar bermek",
         ),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Bildirişi öçürmek",
+    ),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "Gorag işläp durka Android bildiriş talap edýär. Bu kanaly öçürmek üçin ulgam sazlamalaryny açyň.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage(
       "Duýduryş derejesi",
     ),
@@ -2101,9 +2102,6 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage("Mesele ýüze çykanda görkezilýär"),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
       "Minimal",
-    ),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage(
-      "Öçürilen",
     ),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage(

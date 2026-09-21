@@ -209,7 +209,7 @@ void main() {
     );
   });
 
-  testWidgets('level chip strips the notification down to the status', (
+  testWidgets('level option strips the notification down to the status', (
     tester,
   ) async {
     await pumpTab(tester);
@@ -218,7 +218,9 @@ void main() {
       NotificationVisibility.detailed,
     );
 
-    await tester.tap(find.text('Minimal'));
+    await tester.tap(find.text('Notification level'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Minimal').last);
     await tester.pumpAndSettle();
     final settings = container.read(appSettingProvider).notificationSettings;
     expect(settings.visibility, NotificationVisibility.minimal);
@@ -229,38 +231,9 @@ void main() {
     expect(inert(find.text('Pause or resume')), findsOneWidget);
   });
 
-  testWidgets('off level empties the shade and keeps reminders', (
+  testWidgets('a disabled service channel reads as the off state', (
     tester,
   ) async {
-    await pumpTab(tester);
-
-    await tester.tap(find.text('Off'));
-    await tester.pumpAndSettle();
-    expect(
-      container.read(appSettingProvider).notificationSettings.visibility,
-      NotificationVisibility.off,
-    );
-    expect(find.text('The notification shade stays empty'), findsOneWidget);
-    expect(
-      find.text('The service notification is turned off in ReClash'),
-      findsOneWidget,
-    );
-    await tester.scrollUntilVisible(
-      find.text('Hide sensitive details on lock screen'),
-      500,
-    );
-    expect(
-      inert(find.text('Hide sensitive details on lock screen')),
-      findsOneWidget,
-    );
-    await tester.scrollUntilVisible(find.text('Subscription reminders'), 500);
-    expect(inert(find.text('Subscription reminders')), findsNothing);
-  });
-
-  testWidgets('delivery row follows the channel of the chosen level', (
-    tester,
-  ) async {
-    final opened = <String?>[];
     await pumpTab(
       tester,
       loadStatus: () async => const AndroidNotificationStatus(
@@ -268,18 +241,31 @@ void main() {
         serviceChannelEnabled: false,
         subscriptionChannelEnabled: true,
       ),
+    );
+
+    expect(
+      find.text('The notification is turned off in system settings'),
+      findsOneWidget,
+    );
+    expect(find.text('Off'), findsNothing);
+  });
+
+  testWidgets('turn-off row deep-links to the single service channel', (
+    tester,
+  ) async {
+    final opened = <String?>[];
+    await pumpTab(
+      tester,
       openSettings: ({String? channelId}) async {
         opened.add(channelId);
         return true;
       },
     );
 
-    await tester.tap(find.text('Minimal'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('The ReClash service channel is disabled'));
+    await tester.tap(find.text('Turn off notification'));
     await tester.pumpAndSettle();
 
-    expect(opened, ['ReClash.quiet']);
+    expect(opened, ['ReClash']);
   });
 
   List<NotificationComponentType> readTypes() => container
@@ -557,13 +543,6 @@ void main() {
 
     await pumpPreview(tester, const NotificationSettings(components: []));
     expect(find.text('You are protected'), findsOneWidget);
-
-    await pumpPreview(
-      tester,
-      const NotificationSettings(visibility: NotificationVisibility.off),
-    );
-    expect(find.text('The notification shade stays empty'), findsOneWidget);
-    expect(find.text('You are protected'), findsNothing);
   });
 
   testWidgets('preview applies active, paused and privacy availability', (
@@ -617,45 +596,6 @@ void main() {
       expect(find.text('Only count proxy traffic'), findsNothing);
     },
   );
-
-  testWidgets('reports disabled Android service channel', (tester) async {
-    await pumpTab(
-      tester,
-      loadStatus: () async => const AndroidNotificationStatus(
-        permissionGranted: true,
-        serviceChannelEnabled: false,
-        subscriptionChannelEnabled: true,
-      ),
-    );
-
-    expect(
-      find.text('The ReClash service channel is disabled'),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('blocked delivery row deep-links to the service channel', (
-    tester,
-  ) async {
-    final opened = <String?>[];
-    await pumpTab(
-      tester,
-      loadStatus: () async => const AndroidNotificationStatus(
-        permissionGranted: true,
-        serviceChannelEnabled: false,
-        subscriptionChannelEnabled: true,
-      ),
-      openSettings: ({String? channelId}) async {
-        opened.add(channelId);
-        return true;
-      },
-    );
-
-    await tester.tap(find.text('The ReClash service channel is disabled'));
-    await tester.pumpAndSettle();
-
-    expect(opened, ['ReClash']);
-  });
 
   testWidgets('blocked permission asks the system, then the settings screen', (
     tester,

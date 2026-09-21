@@ -6,18 +6,11 @@ typedef NotificationSettingsOpener =
 typedef NotificationPermissionRequester = Future<bool?> Function();
 
 const _serviceChannelId = 'ReClash';
-const _quietChannelId = 'ReClash.quiet';
-const _hiddenChannelId = 'ReClash.off';
 const _subscriptionChannelId = 'reclash_subscription_reminders';
 
-/// A channel keeps the importance it was created with, so every level needs a
-/// channel of its own.
-String _serviceChannelFor(NotificationVisibility visibility) =>
-    switch (visibility) {
-      NotificationVisibility.detailed => _serviceChannelId,
-      NotificationVisibility.minimal => _quietChannelId,
-      NotificationVisibility.off => _hiddenChannelId,
-    };
+/// One channel carries every level; detailed and minimal differ only in the
+/// content posted to it, and turning it off is a system-settings toggle.
+String _serviceChannelFor(NotificationVisibility visibility) => _serviceChannelId;
 
 /// What stands between the settings and the shade, and the way to clear it.
 typedef _Delivery = ({String text, VoidCallback? fix});
@@ -69,111 +62,18 @@ class _AndroidOnly extends StatelessWidget {
   );
 }
 
-class _NotificationMasterCard extends StatelessWidget {
-  const _NotificationMasterCard({required this.value, required this.onChanged});
-
-  final NotificationVisibility value;
-  final ValueChanged<NotificationVisibility> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    final active = value != NotificationVisibility.off;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.lg,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: ShapeDecoration(
-                    color: active
-                        ? colorScheme.primaryContainer
-                        : colorScheme.surfaceContainerHighest,
-                    shape: AppShape.all(AppCorner.md),
-                  ),
-                  child: Icon(
-                    _visibilityIcon(value),
-                    color: active
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.notificationVisibility,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        _visibilityDesc(l, value),
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final level in NotificationVisibility.values)
-                  ChoiceChip(
-                    label: Text(_visibilityLabel(l, level)),
-                    selected: value == level,
-                    onSelected: (_) => onChanged(level),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    side: BorderSide(color: colorScheme.outlineVariant),
-                    labelStyle: context.textTheme.bodyMedium,
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-IconData _visibilityIcon(NotificationVisibility visibility) =>
-    switch (visibility) {
-      NotificationVisibility.detailed => Icons.notifications_active_rounded,
-      NotificationVisibility.minimal => Icons.notifications_none_rounded,
-      NotificationVisibility.off => Icons.notifications_off_rounded,
-    };
-
 String _visibilityLabel(
   AppLocalizations l,
   NotificationVisibility visibility,
 ) => switch (visibility) {
   NotificationVisibility.detailed => l.notificationVisibilityDetailed,
   NotificationVisibility.minimal => l.notificationVisibilityMinimal,
-  NotificationVisibility.off => l.notificationVisibilityOff,
 };
 
 String _visibilityDesc(AppLocalizations l, NotificationVisibility visibility) =>
     switch (visibility) {
       NotificationVisibility.detailed => l.notificationDetailedDesc,
       NotificationVisibility.minimal => l.notificationMinimalDesc,
-      NotificationVisibility.off => l.notificationOffDesc,
     };
 
 class _DeliverySummary extends StatelessWidget {

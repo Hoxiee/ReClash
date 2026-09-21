@@ -114,7 +114,7 @@ enum NotificationComponentType {
 
 enum DoctorNotificationPriority { problems, always }
 
-enum NotificationVisibility { detailed, minimal, off }
+enum NotificationVisibility { detailed, minimal }
 
 extension UiOutboundModeExt on UiOutboundMode {
   Mode get coreMode => switch (this) {

@@ -1810,21 +1810,11 @@ class AppLocalizations {
     );
   }
 
-  /// `One quiet line at the bottom of the shade, without a status bar icon`
+  /// `Just your protection status, without live details or quick actions`
   String get notificationMinimalDesc {
     return Intl.message(
-      'One quiet line at the bottom of the shade, without a status bar icon',
+      'Just your protection status, without live details or quick actions',
       name: 'notificationMinimalDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Nothing in the shade. Protection keeps running and reminders still arrive`
-  String get notificationOffDesc {
-    return Intl.message(
-      'Nothing in the shade. Protection keeps running and reminders still arrive',
-      name: 'notificationOffDesc',
       desc: '',
       args: [],
     );
@@ -1845,16 +1835,6 @@ class AppLocalizations {
     return Intl.message(
       'Minimal',
       name: 'notificationVisibilityMinimal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Off`
-  String get notificationVisibilityOff {
-    return Intl.message(
-      'Off',
-      name: 'notificationVisibilityOff',
       desc: '',
       args: [],
     );
@@ -2445,11 +2425,31 @@ class AppLocalizations {
     );
   }
 
-  /// `The service notification is turned off in ReClash`
+  /// `The notification is turned off in system settings`
   String get notificationDeliveryOff {
     return Intl.message(
-      'The service notification is turned off in ReClash',
+      'The notification is turned off in system settings',
       name: 'notificationDeliveryOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn off notification`
+  String get notificationTurnOff {
+    return Intl.message(
+      'Turn off notification',
+      name: 'notificationTurnOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Android requires a notification while protection runs. Open system settings to disable this channel.`
+  String get notificationTurnOffDesc {
+    return Intl.message(
+      'Android requires a notification while protection runs. Open system settings to disable this channel.',
+      name: 'notificationTurnOffDesc',
       desc: '',
       args: [],
     );
@@ -2470,16 +2470,6 @@ class AppLocalizations {
     return Intl.message(
       'Preview scenario',
       name: 'notificationPreviewScenario',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `The notification shade stays empty`
-  String get notificationPreviewHidden {
-    return Intl.message(
-      'The notification shade stays empty',
-      name: 'notificationPreviewHidden',
       desc: '',
       args: [],
     );

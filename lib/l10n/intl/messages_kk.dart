@@ -1555,9 +1555,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -1906,7 +1907,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationDeliveryFix": MessageLookupByLibrary.simpleMessage("Түзету"),
     "notificationDeliveryOff": MessageLookupByLibrary.simpleMessage(
-      "Қызмет хабарламасы ReClash ішінде өшірілген",
+      "Хабарлама жүйе параметрлерінде өшірілген",
     ),
     "notificationDeliveryPermissionDisabled":
         MessageLookupByLibrary.simpleMessage(
@@ -1947,7 +1948,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Құрылғы құлыптаулы кезде профиль, бағыттау және диагностика мәліметтерін жасыру",
     ),
     "notificationMinimalDesc": MessageLookupByLibrary.simpleMessage(
-      "Шымылдықтың төменінде бір тыныш жол қалады, күй жолағында белгіше болмайды",
+      "Тек қорғаныс күйі, жедел мәліметтер мен жылдам әрекеттерсіз",
     ),
     "notificationMoveDown": MessageLookupByLibrary.simpleMessage(
       "Төмен жылжыту",
@@ -1982,9 +1983,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Рұқсат тізімі",
     ),
-    "notificationOffDesc": MessageLookupByLibrary.simpleMessage(
-      "Шымылдықта ештеңе жоқ. Қорғаныс жұмысын жалғастырады, еске салғыштар келеді",
-    ),
     "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
       "Кідірту немесе жалғастыру",
     ),
@@ -1993,9 +1991,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
       "Қосылым диагностикасы: мәселе жоқ",
-    ),
-    "notificationPreviewHidden": MessageLookupByLibrary.simpleMessage(
-      "Шымылдық бос қалады",
     ),
     "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
       "ReClash · Қорғалған мәліметтер жасырылған",
@@ -2092,6 +2087,12 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Жазылымға назар қажет болғанда хабарлау",
         ),
+    "notificationTurnOff": MessageLookupByLibrary.simpleMessage(
+      "Хабарламаны өшіру",
+    ),
+    "notificationTurnOffDesc": MessageLookupByLibrary.simpleMessage(
+      "Қорғаныс жұмыс істеп тұрғанда Android хабарламаны талап етеді. Осы арнаны өшіру үшін жүйе параметрлерін ашыңыз.",
+    ),
     "notificationVisibility": MessageLookupByLibrary.simpleMessage(
       "Хабарлама деңгейі",
     ),
@@ -2110,9 +2111,6 @@ class MessageLookup extends MessageLookupByLibrary {
         ),
     "notificationVisibilityMinimal": MessageLookupByLibrary.simpleMessage(
       "Ең аз",
-    ),
-    "notificationVisibilityOff": MessageLookupByLibrary.simpleMessage(
-      "Өшірулі",
     ),
     "notificationVisibilitySessionTraffic":
         MessageLookupByLibrary.simpleMessage(
