@@ -19,6 +19,7 @@ internal class WakeLockModule(
         get() = service.getSystemService()
 
     private var lock: PowerManager.WakeLock? = null
+    private var graceConsumed = false
     @Volatile
     private var stopped = false
 
@@ -50,12 +51,23 @@ internal class WakeLockModule(
     private fun apply() {
         if (stopped) return
         val manager = power ?: return
-        val hold = shouldHoldWakeLock(
-            screenOn = manager.isInteractive,
-            deviceIdle = manager.isDeviceIdleMode,
-            paused = ServiceConfig.pauseState.value.paused,
-        )
-        if (hold) acquire(manager) else release()
+        val screenOn = manager.isInteractive
+        if (screenOn) graceConsumed = false
+        when (
+            wakeLockAction(
+                screenOn = screenOn,
+                deviceIdle = manager.isDeviceIdleMode,
+                paused = ServiceConfig.pauseState.value.paused,
+                graceConsumed = graceConsumed,
+            )
+        ) {
+            WakeLockAction.Acquire -> {
+                graceConsumed = true
+                acquire(manager)
+            }
+            WakeLockAction.Release -> release()
+            WakeLockAction.Leave -> Unit
+        }
     }
 
     private fun acquire(manager: PowerManager) {

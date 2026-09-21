@@ -136,6 +136,7 @@ func handleShutdown() bool {
 	stopHealthCheckCadence()
 	handleStopLog()
 	rcxEngineInstance.Stop()
+	provider.SetAutoHealthCheckSuppressed(false)
 
 	configMu.Lock()
 	isRunning.Store(false)
@@ -780,7 +781,7 @@ func startHealthCheckCadence() {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				if tunUp.Load() && !isScreenOff.Load() && !isSuspended.Load() {
+				if tunUp.Load() && !isScreenOff.Load() && !isSuspended.Load() && !rcxEngineInstance.Enabled() {
 					refreshHealthChecks()
 				}
 			}
@@ -804,6 +805,12 @@ func handleScreenOff(off bool) {
 	wasOff := isScreenOff.Swap(off)
 	provider.SetScreenOff(off)
 	rcxEngineInstance.OnScreenOff(off)
+	if wasOff != off {
+		odometerInstance.Tick(time.Now())
+		if !off {
+			signalOdometerWake()
+		}
+	}
 	if wasOff && !off && tunUp.Load() && !isSuspended.Load() && !rcxEngineInstance.Enabled() {
 		refreshHealthChecks()
 	}

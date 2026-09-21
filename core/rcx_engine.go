@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -874,6 +875,11 @@ func (e *rcxEngine) refreshEffectiveEnabled() {
 	was := e.enabled
 	e.enabled = want
 	e.mu.Unlock()
+	if was != want {
+		// The engine becomes the single prover: pause mihomo's per-provider auto
+		// health check so nodes are not probed twice; resume it when RCX steps down.
+		provider.SetAutoHealthCheckSuppressed(want)
+	}
 	if was && !want {
 		e.supersedeProbe()
 		e.supersedeWake()
