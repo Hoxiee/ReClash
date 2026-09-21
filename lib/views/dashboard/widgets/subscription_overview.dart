@@ -87,7 +87,8 @@ Widget _sliver(Widget child) => SliverPadding(
 );
 
 /// The sheet's own surface: solid card, tinted when a notice carries a tone.
-Widget _sheetCard(Widget child, {Color? tone}) => _Card(tone: tone, child: child);
+Widget _sheetCard(Widget child, {Color? tone}) =>
+    _Card(tone: tone, child: child);
 
 typedef _Notice = ({IconData icon, String text, Color? tone});
 
@@ -161,9 +162,7 @@ class _NoticeBody extends StatelessWidget {
       children: [
         Icon(notice.icon, size: 20, color: tone),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(notice.text, style: context.textTheme.bodyMedium),
-        ),
+        Expanded(child: Text(notice.text, style: context.textTheme.bodyMedium)),
       ],
     );
   }
@@ -360,7 +359,10 @@ class _ProviderCard extends ConsumerWidget {
             value: lastUpdateDate?.show ?? appLocalizations.noData,
           ),
           const SizedBox(height: 10),
-          _DetailRow(label: appLocalizations.autoUpdate, value: autoUpdateValue),
+          _DetailRow(
+            label: appLocalizations.autoUpdate,
+            value: autoUpdateValue,
+          ),
           if (!hasFacts && expire <= 0) ...[
             const SizedBox(height: 12),
             Text(
@@ -473,8 +475,7 @@ class _MemoryRowState extends ConsumerState<_MemoryRow>
 
   @override
   Future<void> poll(PollGuard isCurrent) async {
-    final connected =
-        ref.read(coreStatusProvider) == CoreStatus.connected;
+    final connected = ref.read(coreStatusProvider) == CoreStatus.connected;
     final value = connected ? await _core.getMemory() : 0;
     if (!isCurrent()) return;
     _memory.value = value;

@@ -1145,6 +1145,7 @@
   "smartRoutingIncumbentNo": "Da’vogar",
   "smartRoutingKeyVerdict": "Hukm",
   "smartRoutingKeyMisfit": "Bu tarmoqqa mosligi",
+  "smartRoutingKeyHomeRisk": "Chet elga chiqadi",
   "smartRoutingKeyEvidence": "Dalil",
   "smartRoutingKeyBand": "Kechikish oraligʻi",
   "smartRoutingBands": "Oraliqlar: {bands}",
@@ -2029,6 +2030,10 @@
   "developerSeasonDrift": "Mavsumiy rang",
   "developerPatina": "Profil changi",
   "developerPatinaDays": "{days} kun",
+  "developerPatinaLab": "Chang laboratoriyasi",
+  "developerPatinaApply": "Butun ro‘yxatga qo‘llash",
+  "developerPatinaApplyDesc": "Barcha profilni shu yoshgacha eskirtirish. O‘chirilgan bo‘lsa — har biri o‘zining haqiqiy oxirgi ishlatilgan sanasida qoladi.",
+  "developerPatinaSample": "Tashlab qo‘yilgan obuna",
   "developerFindingEvents": "Topilmani takrorlash",
   "developerFindingQueued": "Ulanishi sog‘lom boshqaruv paneli ochilguncha navbatda. Topilmani takrorlash mumkin.",
   "@developerPatinaDays": {

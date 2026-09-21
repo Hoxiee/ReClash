@@ -18,12 +18,7 @@ const _relicIds = <String>[
   'meridian',
   'porcelain',
 ];
-const _momentIds = <String>[
-  'oscilloscope',
-  'marks',
-  'pi',
-  'turn',
-];
+const _momentIds = <String>['oscilloscope', 'marks', 'pi', 'turn'];
 
 const _dayMillis = 24 * 60 * 60 * 1000;
 
@@ -181,10 +176,7 @@ class _RelicsSection extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               const spacing = 12.0;
-              final columns = math.max(
-                (constraints.maxWidth / 108).floor(),
-                3,
-              );
+              final columns = math.max((constraints.maxWidth / 108).floor(), 3);
               final tileWidth =
                   (constraints.maxWidth - spacing * (columns - 1)) / columns;
               return Wrap(
@@ -245,9 +237,7 @@ class _RelicTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 style: context.textTheme.labelSmall?.copyWith(
-                  color: revealed
-                      ? scheme.onSurface
-                      : scheme.onSurfaceVariant,
+                  color: revealed ? scheme.onSurface : scheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -268,14 +258,12 @@ class _MomentsSection extends StatelessWidget {
     final localizations = context.appLocalizations;
     final materialLocalizations = MaterialLocalizations.of(context);
     final found =
-        _momentIds
-            .where((id) => settings.revealedAt.containsKey(id))
-            .toList()
+        _momentIds.where((id) => settings.revealedAt.containsKey(id)).toList()
           ..sort((a, b) {
-        final da = settings.revealedAt[a] ?? 0;
-        final db = settings.revealedAt[b] ?? 0;
-        return db.compareTo(da);
-      });
+            final da = settings.revealedAt[a] ?? 0;
+            final db = settings.revealedAt[b] ?? 0;
+            return db.compareTo(da);
+          });
     final lockedCount = _momentIds.length - found.length;
     return SettingSection.sliver(
       title: localizations.findingsMoments,
@@ -284,7 +272,10 @@ class _MomentsSection extends StatelessWidget {
           DecorationListItem(
             leading: CustomPaint(
               size: const Size.square(24),
-              painter: _FindingGlyph(id: id, color: context.colorScheme.primary),
+              painter: _FindingGlyph(
+                id: id,
+                color: context.colorScheme.primary,
+              ),
             ),
             title: Text(findingName(context, id)),
             subtitle: Text(findingDescription(context, id)),
@@ -392,11 +383,7 @@ class _FindingGlyph extends CustomPainter {
         for (var i = 0; i < 3; i++) {
           final y = c.dy + r - i * r * 0.7;
           final w = r * (0.5 + i * 0.25);
-          canvas.drawLine(
-            Offset(c.dx - w, y),
-            Offset(c.dx + w, y),
-            stroke,
-          );
+          canvas.drawLine(Offset(c.dx - w, y), Offset(c.dx + w, y), stroke);
         }
       case 'silentAutopilot':
         canvas.drawCircle(c, r * 0.2, fill);
@@ -450,7 +437,10 @@ class _FindingGlyph extends CustomPainter {
         canvas.drawPath(path, stroke);
       case 'marks':
         for (var i = 0; i < 3; i++) {
-          final o = Offset(c.dx - r * 0.4 + i * r * 0.4, c.dy - r * 0.3 + i * r * 0.3);
+          final o = Offset(
+            c.dx - r * 0.4 + i * r * 0.4,
+            c.dy - r * 0.3 + i * r * 0.3,
+          );
           canvas.drawRRect(
             RRect.fromRectAndRadius(
               Rect.fromCenter(center: o, width: r, height: r),

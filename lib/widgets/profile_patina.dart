@@ -120,18 +120,19 @@ class _PatinaPainter extends CustomPainter {
     if (!removing) {
       final hazeTop = size.height * (0.66 - level * 0.06).clamp(0.4, 0.66);
       final haze = Paint()
-        ..shader =
-            ui.Gradient.linear(Offset(0, hazeTop), Offset(0, size.height), [
-              color.withValues(alpha: 0),
-              color.withValues(alpha: strength * 0.5),
-            ]);
+        ..shader = ui.Gradient.linear(
+          Offset(0, hazeTop),
+          Offset(0, size.height),
+          [color.withValues(alpha: 0), color.withValues(alpha: strength * 0.5)],
+        );
       canvas.drawRect(
         Rect.fromLTWH(0, hazeTop, size.width, size.height - hazeTop),
         haze,
       );
       if (level >= 1.6) {
-        final warm = const Color(0xFF8A6A45)
-            .withValues(alpha: (0.014 * (level - 1.6)).clamp(0.0, 0.03));
+        final warm = const Color(
+          0xFF8A6A45,
+        ).withValues(alpha: (0.014 * (level - 1.6)).clamp(0.0, 0.03));
         canvas.drawRect(Offset.zero & size, Paint()..color = warm);
       }
     } else {

@@ -39,6 +39,7 @@ void main() {
   late File oldest;
 
   setUpAll(() {
+    FileLogger.enabledInTests = true;
     root = Directory.systemTemp.createTempSync('file_logger_test');
     PathProviderPlatform.instance = _FakePathProvider(root.path);
     logsDir = Directory(join(root.path, 'logs'))..createSync(recursive: true);
@@ -53,6 +54,7 @@ void main() {
   });
 
   tearDownAll(() {
+    FileLogger.enabledInTests = false;
     try {
       root.deleteSync(recursive: true);
     } catch (_) {}

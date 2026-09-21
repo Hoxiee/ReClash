@@ -2211,6 +2211,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage("允许参与比较"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("延迟档"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("证据"),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage("出境"),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage("正在使用"),
     "smartRoutingKeyMisfit": MessageLookupByLibrary.simpleMessage("对本网络的适配"),
     "smartRoutingKeyTiebreak": MessageLookupByLibrary.simpleMessage("稳定的平局处理"),

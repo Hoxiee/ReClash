@@ -256,8 +256,8 @@ void main() {
       final cards = find.byWidgetPredicate(
         (widget) => widget is SizedBox && widget.height == 112,
       );
-      expect(cards, findsNWidgets(12));
-      for (var index = 0; index < 12; index++) {
+      expect(cards, findsNWidgets(16));
+      for (var index = 0; index < 16; index++) {
         expect(tester.getSize(cards.at(index)).height, 112);
       }
     });

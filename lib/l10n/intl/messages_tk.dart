@@ -860,7 +860,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "Dörediji usuly açyk.",
     ),
     "developerPatina": MessageLookupByLibrary.simpleMessage("Profiliň tozany"),
+    "developerPatinaApply": MessageLookupByLibrary.simpleMessage(
+      "Ähli sanawa ulgaýt",
+    ),
+    "developerPatinaApplyDesc": MessageLookupByLibrary.simpleMessage(
+      "Ähli profili şu ýaşa çenli garratmak. Öçürilen bolsa — her biri öz hakyky iň soňky ulanylan senesinde galýar.",
+    ),
     "developerPatinaDays": m25,
+    "developerPatinaLab": MessageLookupByLibrary.simpleMessage(
+      "Tozan barlaghanasy",
+    ),
+    "developerPatinaSample": MessageLookupByLibrary.simpleMessage(
+      "Unudylan abunalyk",
+    ),
     "developerPreviewAutomatic": MessageLookupByLibrary.simpleMessage(
       "Awtomatik",
     ),
@@ -1546,10 +1558,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -3089,6 +3100,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage(
       "Subutnama",
+    ),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage(
+      "Ýurtdan çykýar",
     ),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage(
       "Eýýäm ulanylýar",

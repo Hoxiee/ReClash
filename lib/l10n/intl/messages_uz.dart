@@ -875,7 +875,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "Dasturchi rejimi yoqilgan.",
     ),
     "developerPatina": MessageLookupByLibrary.simpleMessage("Profil changi"),
+    "developerPatinaApply": MessageLookupByLibrary.simpleMessage(
+      "Butun ro‘yxatga qo‘llash",
+    ),
+    "developerPatinaApplyDesc": MessageLookupByLibrary.simpleMessage(
+      "Barcha profilni shu yoshgacha eskirtirish. O‘chirilgan bo‘lsa — har biri o‘zining haqiqiy oxirgi ishlatilgan sanasida qoladi.",
+    ),
     "developerPatinaDays": m25,
+    "developerPatinaLab": MessageLookupByLibrary.simpleMessage(
+      "Chang laboratoriyasi",
+    ),
+    "developerPatinaSample": MessageLookupByLibrary.simpleMessage(
+      "Tashlab qo‘yilgan obuna",
+    ),
     "developerPreviewAutomatic": MessageLookupByLibrary.simpleMessage(
       "Avtomatik",
     ),
@@ -1583,10 +1595,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -3163,6 +3174,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kechikish oraligʻi",
     ),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("Dalil"),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage(
+      "Chet elga chiqadi",
+    ),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage(
       "Allaqachon ishlatilmoqda",
     ),

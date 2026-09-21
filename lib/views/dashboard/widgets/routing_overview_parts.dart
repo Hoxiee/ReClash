@@ -72,6 +72,7 @@ String routingRungLabel(AppLocalizations l10n, RoutingRung rung) =>
       RoutingRung.misfit => l10n.smartRoutingKeyMisfit,
       RoutingRung.recurrence => l10n.smartRoutingDegraded,
       RoutingRung.degraded => l10n.smartRoutingReasonDegraded,
+      RoutingRung.homeRisk => l10n.smartRoutingKeyHomeRisk,
       RoutingRung.evidence => l10n.smartRoutingKeyEvidence,
       RoutingRung.latency => l10n.smartRoutingKeyBand,
       RoutingRung.unproven => l10n.smartRoutingKeyUnproven,
@@ -100,6 +101,11 @@ String routingRungValueLabel(
   RoutingRung.recurrence => candidate.recurrence.toString(),
   RoutingRung.degraded =>
     candidate.degraded ? l10n.smartRoutingDegraded : l10n.smartRoutingProvenYes,
+  RoutingRung.homeRisk => switch (candidate.homeRisk) {
+    0 => l10n.smartRoutingProvenYes,
+    1 => l10n.unknown,
+    _ => l10n.smartRoutingProvenNo,
+  },
   RoutingRung.evidence => routingEvidenceLabel(l10n, candidate.evidence),
   RoutingRung.latency =>
     candidate.latencyMs > 0 ? '${candidate.latencyMs} ms' : l10n.unknown,
@@ -434,11 +440,7 @@ class RoutingTileGrid extends StatelessWidget {
 
 /// The latency reading as a pill tinted in the server's own delay colour.
 class RoutingDelayPill extends StatelessWidget {
-  const RoutingDelayPill({
-    super.key,
-    required this.delay,
-    this.approx = false,
-  });
+  const RoutingDelayPill({super.key, required this.delay, this.approx = false});
 
   final int delay;
   final bool approx;

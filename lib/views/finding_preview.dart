@@ -182,7 +182,9 @@ class _PatinaLabState extends ConsumerState<PatinaLab> {
               child: ListItem(
                 leading: const Icon(Icons.cloud_outlined),
                 title: Text(localizations.developerPatinaSample),
-                subtitle: Text(localizations.developerPatinaDays(_days.round())),
+                subtitle: Text(
+                  localizations.developerPatinaDays(_days.round()),
+                ),
               ),
             ),
           ),

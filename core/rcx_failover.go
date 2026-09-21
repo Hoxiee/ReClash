@@ -22,10 +22,17 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 	e.markDiscoveryResult(result, now)
 	key := currentKey
 	negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
-	if negative && result.Role == rcxRoleOpen &&
-		(e.trafficSince(key, e.probeLaunchedAt, now) ||
-			!rcxReactiveWave(e.probeKind) && e.freshlyOpenProven(key, now)) {
+	if negative && result.Role == rcxRoleOpen && e.trafficSince(key, e.probeLaunchedAt, now) {
+		delete(e.openMiss, result.Node)
 		return
+	}
+	if negative && result.Role == rcxRoleOpen {
+		if !rcxReactiveWave(e.probeKind) && e.freshlyOpenProven(key, now) {
+			return
+		}
+		if rcxReactiveWave(e.probeKind) && e.pardonsOpenMiss(key, result.Node, now) {
+			return
+		}
 	}
 	charge := !negative || e.chargesNegative(now)
 	if result.ExitCountry != "" {
@@ -82,6 +89,7 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		}
 	}
 	if result.Outcome == rcxProbeOK {
+		delete(e.openMiss, result.Node)
 		e.witnessWhitelist(result.Role)
 		e.noteProviderSuccess(result.Node)
 		e.noteLinkAlive(now)
@@ -116,6 +124,19 @@ func (e *rcxEngine) freshlyOpenProven(key string, now time.Time) bool {
 	}
 	ttl := rcxScaledProofTTL(e.ledger.ProofTTL(), len(e.runtime.Members()))
 	return e.ledger.OpenProven(key, e.envKey, now, ttl)
+}
+
+// A frozen server survives the open miss its own 12s freeze provoked; death waits for a second consecutive one.
+func (e *rcxEngine) pardonsOpenMiss(key, node string, now time.Time) bool {
+	if !e.ledger.Stalled(key, e.envKey) {
+		return false
+	}
+	window := time.Duration(rcxLiveWindowSeconds) * time.Second
+	if prior, ok := e.openMiss[node]; ok && now.Sub(prior) <= window {
+		return false
+	}
+	e.openMiss[node] = now
+	return true
 }
 
 func (e *rcxEngine) incumbentHoldsFreshOpen(key string, now time.Time) bool {

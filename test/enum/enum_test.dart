@@ -11,8 +11,9 @@ void main() {
       expect(GroupType.parse('loadbalance'), GroupType.LoadBalance);
     });
 
-    test('throws for unsupported group type', () {
-      expect(() => GroupType.parse('unknown'), throwsUnimplementedError);
+    test('maps an unsupported group type to unknown', () {
+      expect(GroupType.parse('nonsense'), GroupType.unknown);
+      expect(GroupType.parse('unknown'), GroupType.unknown);
     });
   });
 

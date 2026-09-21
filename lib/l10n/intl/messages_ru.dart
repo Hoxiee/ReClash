@@ -1542,10 +1542,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -3103,6 +3102,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage(
       "Доказательства",
+    ),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage(
+      "Выходит за рубеж",
     ),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage(
       "Уже используется",

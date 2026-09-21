@@ -334,6 +334,7 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default(false) bool unproven,
     @Default(0) int order,
     @Default(false) bool degraded,
+    @Default(0) int homeRisk,
     @Default(0) int recurrence,
     @Default(false) bool confirmed,
     @Default(false) bool breaker,

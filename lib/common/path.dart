@@ -54,6 +54,12 @@ class AppPath {
     unawaited(_initDataDir());
     unawaited(_initTempDir());
     unawaited(_initCacheDir());
+    // A resolver failure (no path_provider binding, e.g. under a bare unit
+    // test) reaches whoever awaits the completer; these keep the error from
+    // also surfacing as an unhandled zone error when nobody has awaited yet.
+    dataDir.future.ignore();
+    tempDir.future.ignore();
+    cacheDir.future.ignore();
   }
 
   factory AppPath() {

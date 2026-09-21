@@ -48,7 +48,10 @@ Widget _heroCard(Widget child, {Color? tone}) {
     padding: const EdgeInsets.all(20),
     child: tone == null
         ? child
-        : IconTheme.merge(data: IconThemeData(color: tone), child: child),
+        : IconTheme.merge(
+            data: IconThemeData(color: tone),
+            child: child,
+          ),
   );
 }
 

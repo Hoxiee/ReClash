@@ -1231,6 +1231,7 @@
   "smartRoutingIncumbentNo": "Challenger",
   "smartRoutingKeyVerdict": "Verdict",
   "smartRoutingKeyMisfit": "Fit for this network",
+  "smartRoutingKeyHomeRisk": "Escapes the country",
   "smartRoutingKeyEvidence": "Evidence",
   "smartRoutingKeyBand": "Latency band",
   "smartRoutingBands": "Bands: {bands}",

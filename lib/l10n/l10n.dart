@@ -9744,6 +9744,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Escapes the country`
+  String get smartRoutingKeyHomeRisk {
+    return Intl.message(
+      'Escapes the country',
+      name: 'smartRoutingKeyHomeRisk',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Evidence`
   String get smartRoutingKeyEvidence {
     return Intl.message(

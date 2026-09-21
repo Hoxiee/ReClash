@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:reclash/common/constant.dart';
 import 'package:reclash/common/datetime.dart';
 import 'package:reclash/common/path.dart';
@@ -19,6 +20,17 @@ class FileLogger {
 
   static FileLogger? _instance;
 
+  static final bool _isFlutterTest = Platform.environment.containsKey(
+    'FLUTTER_TEST',
+  );
+
+  // Under `flutter test` the disk path relies on a mocked path_provider that
+  // only the logger's own suite installs; elsewhere its fire-and-forget I/O
+  // would fault after the unrelated test that logged has already completed.
+  // That suite flips this on to exercise the real sink.
+  @visibleForTesting
+  static bool enabledInTests = false;
+
   static const int _maxFileSizeBytes = 10 * 1024 * 1024;
   static const int _maxLogFiles = 7;
 
@@ -32,6 +44,9 @@ class FileLogger {
   Future<void> _running = Future<void>.value();
 
   void log(String message) {
+    if (_isFlutterTest && !enabledInTests) {
+      return;
+    }
     _queue.add('[${DateTime.now().showLog}] $message');
     if (!_draining) {
       _draining = true;

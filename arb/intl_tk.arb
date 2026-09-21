@@ -1145,6 +1145,7 @@
   "smartRoutingIncumbentNo": "Dalaşgär",
   "smartRoutingKeyVerdict": "Hökm",
   "smartRoutingKeyMisfit": "Bu tor üçin laýyklyk",
+  "smartRoutingKeyHomeRisk": "Ýurtdan çykýar",
   "smartRoutingKeyEvidence": "Subutnama",
   "smartRoutingKeyBand": "Gijäşme derejesi",
   "smartRoutingBands": "Derejeler: {bands}",
@@ -2029,6 +2030,10 @@
   "developerSeasonDrift": "Möwsümleýin öwüşgin",
   "developerPatina": "Profiliň tozany",
   "developerPatinaDays": "{days} gün",
+  "developerPatinaLab": "Tozan barlaghanasy",
+  "developerPatinaApply": "Ähli sanawa ulgaýt",
+  "developerPatinaApplyDesc": "Ähli profili şu ýaşa çenli garratmak. Öçürilen bolsa — her biri öz hakyky iň soňky ulanylan senesinde galýar.",
+  "developerPatinaSample": "Unudylan abunalyk",
   "developerFindingEvents": "Tapyndyny gaýtala",
   "developerFindingQueued": "Sagdyn baglanyşykly dolandyryş paneli açylýança nobatda. Tapyndyny gaýtalap bolýar.",
   "@developerPatinaDays": {

@@ -853,7 +853,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "developerPatina": MessageLookupByLibrary.simpleMessage(
       "Профильдердегі шаң",
     ),
+    "developerPatinaApply": MessageLookupByLibrary.simpleMessage(
+      "Бүкіл тізімге қолдану",
+    ),
+    "developerPatinaApplyDesc": MessageLookupByLibrary.simpleMessage(
+      "Барлық профильді осы жасқа дейін ескірту. Өшірулі болса — әрқайсысы өзінің нақты соңғы қолданылу күнінде қалады.",
+    ),
     "developerPatinaDays": m25,
+    "developerPatinaLab": MessageLookupByLibrary.simpleMessage(
+      "Шаң зертханасы",
+    ),
+    "developerPatinaSample": MessageLookupByLibrary.simpleMessage(
+      "Ұмытылған жазылым",
+    ),
     "developerPreviewAutomatic": MessageLookupByLibrary.simpleMessage(
       "Автоматты",
     ),
@@ -1543,10 +1555,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -3105,6 +3116,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Кідіріс жолағы",
     ),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("Дәлелдер"),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage(
+      "Шетелге шығады",
+    ),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage(
       "Қазір қолданылуда",
     ),

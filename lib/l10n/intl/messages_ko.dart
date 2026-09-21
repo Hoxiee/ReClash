@@ -703,7 +703,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "개발자 모드가 켜져 있습니다",
     ),
     "developerPatina": MessageLookupByLibrary.simpleMessage("프로필 먼지"),
+    "developerPatinaApply": MessageLookupByLibrary.simpleMessage("전체 목록에 적용"),
+    "developerPatinaApplyDesc": MessageLookupByLibrary.simpleMessage(
+      "모든 프로필을 이 기간만큼 오래된 것으로 강제합니다. 끄면 각 프로필은 실제 마지막 사용 날짜를 유지합니다.",
+    ),
     "developerPatinaDays": m25,
+    "developerPatinaLab": MessageLookupByLibrary.simpleMessage("먼지 실험실"),
+    "developerPatinaSample": MessageLookupByLibrary.simpleMessage("방치된 구독"),
     "developerPreviewAutomatic": MessageLookupByLibrary.simpleMessage("자동"),
     "developerPreviewReset": MessageLookupByLibrary.simpleMessage("미리보기 초기화"),
     "developerSeasonAnniversary": MessageLookupByLibrary.simpleMessage(
@@ -2485,6 +2491,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage("비교 대상"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("지연 시간 대역"),
     "smartRoutingKeyEvidence": MessageLookupByLibrary.simpleMessage("증거"),
+    "smartRoutingKeyHomeRisk": MessageLookupByLibrary.simpleMessage("국외로 나감"),
     "smartRoutingKeyIncumbent": MessageLookupByLibrary.simpleMessage("이미 사용 중"),
     "smartRoutingKeyMisfit": MessageLookupByLibrary.simpleMessage(
       "현재 네트워크 적합성",

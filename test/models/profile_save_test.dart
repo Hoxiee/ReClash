@@ -921,7 +921,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
         fetch: (url, {headers}) async => _response(
           url,
           'proxies:\n'
-              '  - {name: node, type: socks5, server: node.example, port: 1}',
+          '  - {name: node, type: socks5, server: node.example, port: 1}',
         ),
       );
       expect(committed.undialableNodes, isFalse);

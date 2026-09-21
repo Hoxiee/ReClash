@@ -226,7 +226,8 @@ class TrackerInfoItem extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         spacing: 8,
                         children: [
-                          if (networkTag.isNotEmpty) _MetaTag(label: networkTag),
+                          if (networkTag.isNotEmpty)
+                            _MetaTag(label: networkTag),
                           if (rule.isNotEmpty)
                             Flexible(
                               child: Text(

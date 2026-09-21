@@ -326,7 +326,9 @@ void main() {
     expect(find.text('Normal import'), findsOneWidget);
   });
 
-  testWidgets('showHappImportChoice defaults to Happ on Import', (tester) async {
+  testWidgets('showHappImportChoice defaults to Happ on Import', (
+    tester,
+  ) async {
     await _pumpHost(tester);
 
     final result = dialogs.showHappImportChoice(

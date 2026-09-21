@@ -65,7 +65,12 @@ Future<List<Group>> buildGroups(ComputeGroupsState state) async {
   for (final groupName in all) {
     final raw = proxies[groupName];
     if (raw is! Map) continue;
-    if (raw['type'] is! String) continue;
+    final rawType = raw['type'];
+    // Built-in outbounds (Direct, Reject, ...) ride in the same map but are not
+    // selectable groups; parse maps every non-group type to unknown.
+    if (rawType is! String || GroupType.parse(rawType) == GroupType.unknown) {
+      continue;
+    }
     final memberNames = raw['all'];
     final group = Map<String, dynamic>.from(raw);
     group['all'] = memberNames is List

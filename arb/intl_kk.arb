@@ -1145,6 +1145,7 @@
   "smartRoutingIncumbentNo": "Үміткер",
   "smartRoutingKeyVerdict": "Вердикт",
   "smartRoutingKeyMisfit": "Осы желіге сәйкестігі",
+  "smartRoutingKeyHomeRisk": "Шетелге шығады",
   "smartRoutingKeyEvidence": "Дәлелдер",
   "smartRoutingKeyBand": "Кідіріс жолағы",
   "smartRoutingBands": "Жолақтар: {bands}",
@@ -2029,6 +2030,10 @@
   "developerSeasonDrift": "Маусымдық реңк",
   "developerPatina": "Профильдердегі шаң",
   "developerPatinaDays": "{days} тәулік",
+  "developerPatinaLab": "Шаң зертханасы",
+  "developerPatinaApply": "Бүкіл тізімге қолдану",
+  "developerPatinaApplyDesc": "Барлық профильді осы жасқа дейін ескірту. Өшірулі болса — әрқайсысы өзінің нақты соңғы қолданылу күнінде қалады.",
+  "developerPatinaSample": "Ұмытылған жазылым",
   "developerFindingEvents": "Табылғанды қайталау",
   "developerFindingQueued": "Байланысы дұрыс бақылау тақтасы ашылғанша кезекте. Қайта көрсетуге болады.",
   "@developerPatinaDays": {

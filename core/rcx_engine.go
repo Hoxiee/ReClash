@@ -102,6 +102,7 @@ type rcxCandidateReport struct {
 	Unproven   bool   `json:"unproven"`
 	Order      int    `json:"order"`
 	Degraded   bool   `json:"degraded"`
+	HomeRisk   int    `json:"homeRisk"`
 	Recurrence int    `json:"recurrence"`
 	Confirmed  bool   `json:"confirmed"`
 	Breaker    bool   `json:"breaker"`
@@ -433,6 +434,7 @@ type rcxEngine struct {
 	wakeStandbyKey      string
 	wakeCancel          context.CancelFunc
 	incidentConns       map[string]struct{}
+	openMiss            map[string]time.Time
 	accountedAt         time.Time
 	incidentAt          time.Time
 }
@@ -456,6 +458,7 @@ func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 		providerFails: map[string]time.Time{},
 		probeStarted:  map[string]struct{}{},
 		incidentConns: map[string]struct{}{},
+		openMiss:      map[string]time.Time{},
 		rescueSeen:    map[string]struct{}{},
 		lanes:         map[string]*rcxLaneState{},
 		laneProbeSeen: map[string]map[string]struct{}{},
@@ -3250,6 +3253,7 @@ func (e *rcxEngine) candidateReports(
 			Order:      row.Key.order,
 			Breaker:    candidate.Facts.Breaker,
 			Degraded:   candidate.Degraded,
+			HomeRisk:   int(row.Key.homeRisk),
 			Recurrence: candidate.Recurrence,
 			Confirmed:  candidate.QualityConfirmed,
 			UDP:        candidate.Facts.SupportsUDP,

@@ -1145,6 +1145,7 @@
   "smartRoutingIncumbentNo": "挑战者",
   "smartRoutingKeyVerdict": "结论",
   "smartRoutingKeyMisfit": "对本网络的适配",
+  "smartRoutingKeyHomeRisk": "出境",
   "smartRoutingKeyEvidence": "证据",
   "smartRoutingKeyBand": "延迟档",
   "smartRoutingBands": "延迟档：{bands}",

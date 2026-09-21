@@ -1149,6 +1149,7 @@
   "smartRoutingIncumbentNo": "Претендент",
   "smartRoutingKeyVerdict": "Вердикт",
   "smartRoutingKeyMisfit": "Пригодность для сети",
+  "smartRoutingKeyHomeRisk": "Выходит за рубеж",
   "smartRoutingKeyEvidence": "Доказательства",
   "smartRoutingKeyBand": "Полоса задержки",
   "smartRoutingBands": "Полосы: {bands}",

@@ -2108,8 +2108,16 @@ func TestEngineHoldsAFrozenIncumbentUntilAProbeAnswers(t *testing.T) {
 		{Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeFail},
 	}})
 
+	if got := runtime.selected; got != "node" {
+		t.Errorf("selected = %q: a frozen server survives the miss its own freeze provoked", got)
+	}
+
+	engine.handle(rcxEvent{Kind: rcxEventProbeResults, Results: []rcxProbeResult{
+		{Node: "node", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+	}})
+
 	if got := runtime.selected; got != "spare" {
-		t.Errorf("selected = %q, want the measurement to evict the node it disproved", got)
+		t.Errorf("selected = %q, want a second consecutive miss to evict the node it disproved", got)
 	}
 }
 

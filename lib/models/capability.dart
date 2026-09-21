@@ -75,10 +75,12 @@ List<String>? sanitizeCapabilityRules(List<String> rules) {
     if (parts.length < 2 || parts.length > 3) return null;
     if (!_allowedRuleVerbs.contains(parts[0].toUpperCase())) return null;
     if (parts[1].isEmpty) return null;
-    if (parts.length == 3 && !_allowedRuleFlags.contains(parts[2].toLowerCase())) {
+    if (parts.length == 3 &&
+        !_allowedRuleFlags.contains(parts[2].toLowerCase())) {
       return null;
     }
-    final normalized = '${parts[0].toUpperCase()},${parts.sublist(1).join(',')}';
+    final normalized =
+        '${parts[0].toUpperCase()},${parts.sublist(1).join(',')}';
     if (seen.add(normalized)) sanitized.add(normalized);
   }
   return sanitized;

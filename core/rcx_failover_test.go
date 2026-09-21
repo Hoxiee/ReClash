@@ -428,8 +428,39 @@ func TestOpenMissKeepsProvenIncumbentUnlessReactive(t *testing.T) {
 			{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail},
 		}})
 		if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
-			t.Fatalf("%s: a reactive wave must still be able to refute the incumbent", name)
+			t.Fatalf("%s: a reactive wave must still refute a proof no freeze protects", name)
 		}
+	}
+}
+
+func TestStalledIncumbentSurvivesOneIncidentMissThenDies(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "rival")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent, runtime.selected = "current", "current"
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.probing, engine.probeKind = true, rcxWaveIncident
+	engine.probeStarted = map[string]struct{}{}
+	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+	engine.ledger.NoteIncumbentStalled("current", engine.envKey, runtime.Now())
+
+	now := runtime.Now()
+	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	if engine.ledger.OpenProven("current", engine.envKey, now, ttl) {
+		t.Fatal("a stall should already have cleared the open proof")
+	}
+	miss := func() {
+		engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+			{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+		}})
+	}
+	miss()
+	if engine.ledger.Facts("current", engine.envKey, false, now, ttl).OpenWorld == rcxProofDisproven {
+		t.Fatal("a stalled server was refuted on its very first incident miss")
+	}
+	miss()
+	if engine.ledger.Facts("current", engine.envKey, false, now, ttl).OpenWorld != rcxProofDisproven {
+		t.Fatal("a second consecutive incident miss must refute the stalled server")
 	}
 }
 

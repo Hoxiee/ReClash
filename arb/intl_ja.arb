@@ -1145,6 +1145,7 @@
   "smartRoutingIncumbentNo": "挑戦側",
   "smartRoutingKeyVerdict": "判定",
   "smartRoutingKeyMisfit": "ネットワーク適合",
+  "smartRoutingKeyHomeRisk": "国外に出る",
   "smartRoutingKeyEvidence": "証拠",
   "smartRoutingKeyBand": "遅延帯",
   "smartRoutingBands": "遅延帯: {bands}",

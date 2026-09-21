@@ -230,10 +230,9 @@ void main() {
       expect(sanitizeCapabilityRules(['domain-suffix,openai.com']), [
         'DOMAIN-SUFFIX,openai.com',
       ]);
-      expect(
-        sanitizeCapabilityRules(['IP-CIDR,10.0.0.0/8,no-resolve']),
-        ['IP-CIDR,10.0.0.0/8,no-resolve'],
-      );
+      expect(sanitizeCapabilityRules(['IP-CIDR,10.0.0.0/8,no-resolve']), [
+        'IP-CIDR,10.0.0.0/8,no-resolve',
+      ]);
       expect(sanitizeCapabilityRules(['GEOSITE']), isNull);
       expect(sanitizeCapabilityRules(['SCRIPT,x']), isNull);
       expect(sanitizeCapabilityRules(['GEOSITE,a,b,c']), isNull);

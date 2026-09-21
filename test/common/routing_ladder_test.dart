@@ -14,6 +14,7 @@ const _rungOfField = {
   'recurrence': RoutingRung.recurrence,
   'degraded': RoutingRung.degraded,
   'unproven': RoutingRung.unproven,
+  'homeRisk': RoutingRung.homeRisk,
   'challenger': RoutingRung.incumbent,
   'order': RoutingRung.tiebreak,
 };
@@ -272,6 +273,7 @@ void main() {
       latencyMs: 900,
       recurrence: 2,
       degraded: true,
+      homeRisk: 2,
       unproven: true,
       breaker: true,
       block: 'absent',

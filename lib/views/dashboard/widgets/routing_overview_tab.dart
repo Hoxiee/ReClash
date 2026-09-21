@@ -676,4 +676,3 @@ class RoutingStabilityCard extends StatelessWidget {
     );
   }
 }
-
