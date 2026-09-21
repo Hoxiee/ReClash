@@ -319,8 +319,11 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
               child: CommonCard(
                 radius: AppCorner.xl,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ConnectionDoctorPathMap(snapshot: snapshot),
+                  padding: const EdgeInsets.all(20),
+                  child: ConnectionDoctorPathMap(
+                    snapshot: snapshot,
+                    blame: answer.blame,
+                  ),
                 ),
               ),
             ),

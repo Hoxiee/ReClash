@@ -302,6 +302,39 @@ void main() {
     }
   });
 
+  testWidgets('blames the verdict stage when no stage was marked failed', (
+    tester,
+  ) async {
+    final core = _MockCoreHandler();
+    await _pumpDoctor(
+      tester,
+      core,
+      _snapshot(
+        state: DoctorExamState.complete,
+        health: DoctorHealth.broken,
+        confidence: DoctorConfidence.confirmed,
+        layer: DoctorLayer.route,
+        causeCode: 'routeOther',
+      ),
+    );
+
+    // The core reported the fault only through the verdict layer, not a failed
+    // stage, yet the map still marks the blamed stage and dims what follows.
+    expect(
+      tester
+          .getSemantics(find.byKey(const ValueKey('doctor_path_route')))
+          .label,
+      contains('Problem here'),
+    );
+    for (final id in ['app', 'ingress']) {
+      expect(
+        tester.getSemantics(find.byKey(ValueKey('doctor_path_$id'))).label,
+        contains('Not checked'),
+      );
+    }
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('shows current examined stage without guessing later stages', (
     tester,
   ) async {
