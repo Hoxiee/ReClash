@@ -990,8 +990,11 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 		e.migrateEnvironment(aliases, primary)
 		e.supersedeProbe()
 		e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
-		e.incumbent = ""
-		e.since = time.Time{}
+		// Carry the working node across the handoff instead of dropping it: a foreign
+		// node that opened the world (OpenedOnce is per-marker, not per-env) stays
+		// admissible on the new link, so wifi<->cellular verifies rather than re-picks.
+		e.incumbent = e.runtime.Selected()
+		e.since = e.runtime.Now()
 		e.wantPick = e.snapshot.Picks[primary]
 		if pin, ok := e.snapshot.Pins[primary]; ok {
 			e.wantPick = pin

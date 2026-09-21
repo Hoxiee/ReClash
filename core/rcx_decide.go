@@ -465,6 +465,19 @@ func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
 	return 1
 }
 
+// A latency ceiling like a URLTest's: an incumbent past the slowest band yields
+// to any node inside the bands without the comfort dwell. The switch still needs
+// QualityConfirmed downstream, so it stays fast-and-stable, not slow-and-"stable".
+func rcxEscapesSlowIncumbent(policy rcxPolicy, incumbent, best rcxCandidate) bool {
+	if len(policy.LatencyBands) == 0 {
+		return false
+	}
+	ceiling := policy.LatencyBands[len(policy.LatencyBands)-1]
+	inc := rcxDiscoveryLatency(incumbent)
+	fast := rcxDiscoveryLatency(best)
+	return ceiling > 0 && inc > ceiling && fast > 0 && fast <= ceiling
+}
+
 func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
 	if incumbent <= 0 || challenger <= 0 || challenger >= incumbent {
 		return false
@@ -572,9 +585,11 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	// A verdict gain is a correctness change and never waits; a latency gain is
-	// a comfort change, so it waits out the dwell window.
+	// a comfort change, so it waits out the dwell window — unless the incumbent is
+	// slow past the top band, where a node inside the bands escapes it at once.
 	dwell := time.Duration(in.Policy.DwellSeconds) * time.Second
-	if !in.IncumbentSince.IsZero() && in.Now.Sub(in.IncumbentSince) < dwell {
+	if !rcxEscapesSlowIncumbent(in.Policy, incumbent, *best) &&
+		!in.IncumbentSince.IsZero() && in.Now.Sub(in.IncumbentSince) < dwell {
 		return rcxDecision{Reason: rcxReasonDwellHold, Detail: in.Incumbent}
 	}
 

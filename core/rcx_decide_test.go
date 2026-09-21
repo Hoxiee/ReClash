@@ -679,6 +679,47 @@ func TestAgedForeignProofStillBeatsAFreshSlowRival(t *testing.T) {
 	}
 }
 
+func TestSlowIncumbentYieldsWithinDwellToAFastNode(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	slow := rcxNode("slow", foreignProven())
+	slow.MedianMs = 1800 // past the top band (1200)
+	fast := rcxNode("fast", foreignProven())
+	fast.MedianMs, fast.QualityConfirmed = 50, true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain: rcxTerrainNormal, Incumbent: "slow",
+		IncumbentSince: now.Add(-10 * time.Second), // still inside dwell
+		Candidates:     []rcxCandidate{slow, fast}, Now: now,
+	})
+	if !got.Switch || got.To != "fast" {
+		t.Fatalf("decision = %+v, want an eager escape from a slow incumbent", got)
+	}
+
+	// A challenger also past the ceiling does not trigger the eager escape.
+	other := rcxNode("other", foreignProven())
+	other.MedianMs, other.QualityConfirmed = 1300, true
+	held := rcxDecideAt(rcxDecisionInput{
+		Terrain: rcxTerrainNormal, Incumbent: "slow",
+		IncumbentSince: now.Add(-10 * time.Second),
+		Candidates:     []rcxCandidate{slow, other}, Now: now,
+	})
+	if held.Switch {
+		t.Fatalf("decision = %+v, want dwell-hold when no rival is inside the bands", held)
+	}
+}
+
+func TestBreakerNodeStaysSecondTierBehindAWorkingNormalNode(t *testing.T) {
+	normal := rcxNode("normal", rcxFacts{Origin: rcxOriginForeign, OpenedOnce: true, Transit: rcxProofProven, SupportsUDP: true})
+	normal.MedianMs = 200
+	lte := rcxNode("lte", foreignProven())
+	lte.Facts.Breaker = true
+	lte.MedianMs = 40
+	got := rcxDecideAt(rcxDecisionInput{Terrain: rcxTerrainNormal, Candidates: []rcxCandidate{lte, normal}})
+	if got.To != "normal" {
+		t.Fatalf("cold pick = %q, want the normal node over a faster breaker: LTE is the second step", got.To)
+	}
+}
+
 func TestUpgradeReturnsFromASlowProvenIncumbentToAFastRival(t *testing.T) {
 	peru := rcxNode("peru", foreignProven())
 	peru.MedianMs = 435
