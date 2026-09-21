@@ -13,6 +13,8 @@ class SmartRoutingBundle {
     this.canaryDomestic = const [],
     this.openMarkers = const [],
     this.domesticMarkers = const [],
+    this.localMarkers = const [],
+    this.nameHints = const [],
     this.egressEchoes = const [],
     this.breakerPatterns = const [],
     this.allowDomesticLastResort = true,
@@ -25,6 +27,8 @@ class SmartRoutingBundle {
   final List<String> canaryDomestic;
   final List<RcxMarker> openMarkers;
   final List<RcxMarker> domesticMarkers;
+  final List<RcxMarker> localMarkers;
+  final List<String> nameHints;
   final List<String> egressEchoes;
   final List<String> breakerPatterns;
   final bool allowDomesticLastResort;
@@ -65,6 +69,14 @@ const _russia = SmartRoutingBundle(
   domesticMarkers: [
     RcxMarker(url: 'https://ya.ru/', statuses: [200, 301, 302]),
   ],
+  // Reachable from a Russian egress, refused from abroad: a blocked open marker
+  // that fails while one of these answers marks a node stuck on the home side.
+  // TODO: confirm the geo-fence on device (opens via RU node, fails via foreign).
+  localMarkers: [
+    RcxMarker(url: 'https://www.wildberries.ru/', statuses: [200]),
+    RcxMarker(url: 'https://www.tinkoff.ru/', statuses: [200]),
+  ],
+  nameHints: ['росси', 'russia', 'москва', 'moscow', 'санкт', 'петербург', 'спб'],
   egressEchoes: _egressEchoes,
   breakerPatterns: ['lte', 'обход', 'глушил', 'bypass', 'breaker', 'unblock'],
 );
@@ -193,6 +205,8 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       canaryDomestic: bundle.canaryDomestic,
       openMarkers: bundle.openMarkers,
       domesticMarkers: bundle.domesticMarkers,
+      localMarkers: bundle.localMarkers,
+      nameHints: bundle.nameHints,
       egressEchoes: bundle.egressEchoes,
       breakerPatterns: bundle.breakerPatterns,
       allowDomesticLastResort: bundle.allowDomesticLastResort,
@@ -233,6 +247,8 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     canaryDomestic: canaryDomestic,
     openMarkers: openMarkers,
     domesticMarkers: domesticMarkers,
+    localMarkers: localMarkers,
+    nameHints: nameHints,
     egressEchoes: egressEchoes,
     breakerPatterns: breakerPatterns,
     allowDomesticLastResort: allowDomesticLastResort,

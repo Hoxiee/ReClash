@@ -74,7 +74,6 @@ Map<String, dynamic> _$NotificationSettingsToJson(
 const _$NotificationVisibilityEnumMap = {
   NotificationVisibility.detailed: 'detailed',
   NotificationVisibility.minimal: 'minimal',
-  NotificationVisibility.off: 'off',
 };
 
 _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
@@ -291,59 +290,65 @@ Map<String, dynamic> _$VpnPropsToJson(_VpnProps instance) => <String, dynamic>{
   'accessControlProps': instance.accessControlProps,
 };
 
-_SmartRoutingProps _$SmartRoutingPropsFromJson(Map<String, dynamic> json) =>
-    _SmartRoutingProps(
-      enabled: json['enabled'] as bool? ?? false,
-      preset:
-          $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
-          SmartRoutingPreset.off,
-      strategy:
-          $enumDecodeNullable(
-            _$SmartRoutingStrategyEnumMap,
-            json['strategy'],
-          ) ??
-          SmartRoutingStrategy.balanced,
-      censorCountries:
-          (json['censorCountries'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      canaryForeign:
-          (json['canaryForeign'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      canaryDomestic:
-          (json['canaryDomestic'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      openMarkers:
-          (json['openMarkers'] as List<dynamic>?)
-              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      domesticMarkers:
-          (json['domesticMarkers'] as List<dynamic>?)
-              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      egressEchoes:
-          (json['egressEchoes'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      breakerPatterns:
-          (json['breakerPatterns'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
-      requireUdp: json['requireUdp'] as bool? ?? false,
-      respectPick: json['respectPick'] as bool? ?? true,
-      dwellSeconds: (json['dwellSeconds'] as num?)?.toInt() ?? 90,
-      waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
-    );
+_SmartRoutingProps _$SmartRoutingPropsFromJson(
+  Map<String, dynamic> json,
+) => _SmartRoutingProps(
+  enabled: json['enabled'] as bool? ?? false,
+  preset:
+      $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
+      SmartRoutingPreset.off,
+  strategy:
+      $enumDecodeNullable(_$SmartRoutingStrategyEnumMap, json['strategy']) ??
+      SmartRoutingStrategy.balanced,
+  censorCountries:
+      (json['censorCountries'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  canaryForeign:
+      (json['canaryForeign'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  canaryDomestic:
+      (json['canaryDomestic'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  openMarkers:
+      (json['openMarkers'] as List<dynamic>?)
+          ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  domesticMarkers:
+      (json['domesticMarkers'] as List<dynamic>?)
+          ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  localMarkers:
+      (json['localMarkers'] as List<dynamic>?)
+          ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  nameHints:
+      (json['nameHints'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  egressEchoes:
+      (json['egressEchoes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  breakerPatterns:
+      (json['breakerPatterns'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
+  requireUdp: json['requireUdp'] as bool? ?? false,
+  respectPick: json['respectPick'] as bool? ?? true,
+  dwellSeconds: (json['dwellSeconds'] as num?)?.toInt() ?? 90,
+  waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
+);
 
 Map<String, dynamic> _$SmartRoutingPropsToJson(
   _SmartRoutingProps instance,
@@ -356,6 +361,8 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'canaryDomestic': instance.canaryDomestic,
   'openMarkers': instance.openMarkers.map((e) => e.toJson()).toList(),
   'domesticMarkers': instance.domesticMarkers.map((e) => e.toJson()).toList(),
+  'localMarkers': instance.localMarkers.map((e) => e.toJson()).toList(),
+  'nameHints': instance.nameHints,
   'egressEchoes': instance.egressEchoes,
   'breakerPatterns': instance.breakerPatterns,
   'allowDomesticLastResort': instance.allowDomesticLastResort,

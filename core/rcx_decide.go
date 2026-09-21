@@ -134,6 +134,7 @@ type rcxFacts struct {
 	Transit     rcxProof
 	SupportsUDP bool
 	Breaker     bool
+	Trust       rcxTrust
 }
 
 // Ranking, never filtering: an open network spends a specialist for nothing, but
@@ -197,6 +198,11 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 		return rcxVerdictReject
 	}
 	if f.Transit == rcxProofDisproven {
+		return rcxVerdictReject
+	}
+	// A measured censored-side exit is a durable fact about the node, not a stale
+	// probe, so a branded node is dropped outright however fast it pings.
+	if f.Trust == rcxTrustBranded {
 		return rcxVerdictReject
 	}
 	if f.OpenWorld == rcxProofDisproven && f.Domestic != rcxProofProven {

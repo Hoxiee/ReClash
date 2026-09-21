@@ -110,6 +110,8 @@ type rcxCandidateReport struct {
 	Fails      int    `json:"fails"`
 	CoolFor    int    `json:"coolFor"`
 	Current    bool   `json:"current"`
+	Trust      string `json:"trust"`
+	Confidence string `json:"confidence"`
 }
 
 type rcxSwitchReport struct {
@@ -435,6 +437,7 @@ type rcxEngine struct {
 	wakeCancel          context.CancelFunc
 	incidentConns       map[string]struct{}
 	openMiss            map[string]time.Time
+	locateAt            map[string]time.Time
 	accountedAt         time.Time
 	incidentAt          time.Time
 }
@@ -459,6 +462,7 @@ func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 		probeStarted:  map[string]struct{}{},
 		incidentConns: map[string]struct{}{},
 		openMiss:      map[string]time.Time{},
+		locateAt:      map[string]time.Time{},
 		rescueSeen:    map[string]struct{}{},
 		lanes:         map[string]*rcxLaneState{},
 		laneProbeSeen: map[string]map[string]struct{}{},
@@ -1607,6 +1611,20 @@ func (e *rcxEngine) terrainCurrent() rcxTerrain {
 
 // Geography is a prior and nothing else: a node whose address resolves inside the
 // censoring country still earns its verdict from behaviour.
+// The cheap pass only raises Suspect; a later measurement overrides it and never regresses.
+func (e *rcxEngine) assessTrust(name, key string, now time.Time) {
+	if trust, _ := e.ledger.Trust(key); trust != rcxTrustUnknown {
+		return
+	}
+	verdict := rcxCheapAssess(
+		e.ledger.Origin(key), e.ledger.Country(key), name,
+		e.cfg.NameHints, len(e.cfg.CensorCountries) > 0, e.cfg.censors,
+	)
+	if verdict.Trust == rcxTrustSuspect {
+		e.ledger.SetTrust(key, rcxTrustSuspect, rcxConfPrior, now)
+	}
+}
+
 func (e *rcxEngine) originOf(node string) (string, rcxOrigin) {
 	code := e.runtime.Country(node)
 	if code == "" {
@@ -1717,6 +1735,7 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 			country, origin := e.originOf(member.Name)
 			e.ledger.SetOrigin(key, country, origin)
 		}
+		e.assessTrust(member.Name, key, now)
 		facts := e.ledger.Facts(key, e.envKey, member.SupportsUDP, now, proofTTL)
 		facts.Breaker = e.cfg.breaker(member.Name)
 		member = e.freshHost(member)
@@ -2253,9 +2272,21 @@ func (e *rcxEngine) reconsider() {
 		}
 	}
 
+	if decision.Reason == rcxReasonQualityConfirming {
+		e.queueQuality(decision.Detail)
+	}
+
 	if decision.Switch && e.holdsForLink(decision.Reason, now) {
 		decision.Switch = false
 		decision.Reason = rcxReasonMeasuring
+	}
+
+	// Verify a suspect winner before moving traffic onto it; cold start launches at once.
+	if decision.Switch && e.incumbent != "" && decision.To != e.incumbent && e.wantsLocate(decision.To, now) {
+		if e.startLocate(decision.To, now) {
+			decision.Switch = false
+			decision.Reason = rcxReasonMeasuring
+		}
 	}
 
 	if decision.Switch && decision.To != e.incumbent {
@@ -2543,6 +2574,7 @@ const (
 	rcxWaveDeep
 	rcxWaveDiscover
 	rcxWaveQuality
+	rcxWaveLocate
 )
 
 // A trickle is a rate, so it hangs off the tick: one tick reconsiders often.
@@ -2972,6 +3004,20 @@ func (e *rcxEngine) probeTargets(
 		}
 		return nil
 	}
+	if kind == rcxWaveLocate {
+		open := e.activeMarkers(rcxRoleOpen, e.runtime.Now())
+		local := e.cfg.LocalMarkers
+		if len(open) == 0 || len(local) == 0 {
+			return nil
+		}
+		targets := make([]rcxProbeTarget, 0, 2*len(wave))
+		for _, node := range wave {
+			targets = append(targets,
+				rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: open},
+				rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleLocal, Markers: local})
+		}
+		return targets
+	}
 	paired := kind == rcxWaveRescue || kind == rcxWaveIncident || kind == rcxWaveHandoff || kind == rcxWaveDeep
 	now := e.runtime.Now()
 	open := rcxProbeTarget{Role: rcxRoleOpen, Markers: e.activeMarkers(rcxRoleOpen, now)}
@@ -3237,6 +3283,7 @@ func (e *rcxEngine) candidateReports(
 		if !candidate.CoolUntil.IsZero() && now.Before(candidate.CoolUntil) {
 			cool = int(candidate.CoolUntil.Sub(now) / time.Second)
 		}
+		trust, conf := e.ledger.Trust(e.key(candidate.Name))
 		rows = append(rows, rcxCandidateReport{
 			Node:       candidate.Name,
 			Country:    e.ledger.Country(e.key(candidate.Name)),
@@ -3260,6 +3307,8 @@ func (e *rcxEngine) candidateReports(
 			Fails:      e.ledger.FailStreak(e.key(candidate.Name), e.envKey),
 			CoolFor:    cool,
 			Current:    candidate.Name == e.incumbent,
+			Trust:      trust.String(),
+			Confidence: conf.String(),
 		})
 	}
 	return rows

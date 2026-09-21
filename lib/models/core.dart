@@ -255,6 +255,8 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'cd') required List<String> canaryDomestic,
     @JsonKey(name: 'om') required List<RcxMarker> openMarkers,
     @JsonKey(name: 'dm') required List<RcxMarker> domesticMarkers,
+    @JsonKey(name: 'lm') @Default([]) List<RcxMarker> localMarkers,
+    @JsonKey(name: 'nh') @Default([]) List<String> nameHints,
     @JsonKey(name: 'ee') @Default([]) List<String> egressEchoes,
     @JsonKey(name: 'bp') required List<String> breakerPatterns,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
@@ -342,6 +344,8 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default(0) int fails,
     @Default(0) int coolFor,
     @Default(false) bool current,
+    @Default('unknown') String trust,
+    @Default('none') String confidence,
   }) = _RcxCandidateReport;
 
   factory RcxCandidateReport.fromJson(Map<String, Object?> json) =>

@@ -21,6 +21,15 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 	now := e.runtime.Now()
 	e.markDiscoveryResult(result, now)
 	key := currentKey
+	// The local leg of a locate wave is a trust signal, not open-world proof:
+	// keep it out of the openness ledger and quarantine; finishLocate reads it.
+	if result.Role == rcxRoleLocal {
+		e.probeResults = append(e.probeResults, rcxProbeResult{
+			Node: result.Node, Key: result.Key, Role: rcxRoleLocal, Outcome: result.Outcome,
+		})
+		e.probeStarted[result.Node] = struct{}{}
+		return
+	}
 	negative := result.Outcome == rcxProbeFail || result.Outcome == rcxProbeStatusMismatch
 	if negative && result.Role == rcxRoleOpen && e.trafficSince(key, e.probeLaunchedAt, now) {
 		delete(e.openMiss, result.Node)
@@ -207,6 +216,9 @@ func (e *rcxEngine) finishProbe() {
 	now := e.runtime.Now()
 	if e.probeKind == rcxWaveQuality {
 		e.finishQuality(now)
+	}
+	if e.probeKind == rcxWaveLocate {
+		e.finishLocate(now)
 	}
 	measured := map[string]struct{}{}
 	for _, result := range e.probeResults {

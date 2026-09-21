@@ -385,6 +385,14 @@ _RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
       domesticMarkers: (json['dm'] as List<dynamic>)
           .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
           .toList(),
+      localMarkers:
+          (json['lm'] as List<dynamic>?)
+              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      nameHints:
+          (json['nh'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
       egressEchoes:
           (json['ee'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const [],
@@ -414,6 +422,8 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'cd': instance.canaryDomestic,
       'om': instance.openMarkers,
       'dm': instance.domesticMarkers,
+      'lm': instance.localMarkers,
+      'nh': instance.nameHints,
       'ee': instance.egressEchoes,
       'bp': instance.breakerPatterns,
       'dlr': instance.allowDomesticLastResort,
@@ -523,6 +533,8 @@ _RcxCandidateReport _$RcxCandidateReportFromJson(Map<String, dynamic> json) =>
       fails: (json['fails'] as num?)?.toInt() ?? 0,
       coolFor: (json['coolFor'] as num?)?.toInt() ?? 0,
       current: json['current'] as bool? ?? false,
+      trust: json['trust'] as String? ?? 'unknown',
+      confidence: json['confidence'] as String? ?? 'none',
     );
 
 Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
@@ -549,6 +561,8 @@ Map<String, dynamic> _$RcxCandidateReportToJson(_RcxCandidateReport instance) =>
       'fails': instance.fails,
       'coolFor': instance.coolFor,
       'current': instance.current,
+      'trust': instance.trust,
+      'confidence': instance.confidence,
     };
 
 _RcxSwitchReport _$RcxSwitchReportFromJson(Map<String, dynamic> json) =>

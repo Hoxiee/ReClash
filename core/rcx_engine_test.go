@@ -3527,6 +3527,30 @@ func TestEngineKeepsLiveConnectionsThroughAComfortSwitch(t *testing.T) {
 	}
 }
 
+// The main loop must queue the confirming duel, or a slow incumbent latches forever against a faster proven rival.
+func TestReconsiderQueuesTheQualityDuelForAFasterRival(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("slow", "fast")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "slow"
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.envSince = runtime.Now().Add(-time.Hour)
+	engine.ledger.NoteProbe("slow", "w:Home", rcxRoleOpen, rcxProbeOK, 1800, runtime.Now())
+	engine.ledger.NoteProbe("fast", "w:Home", rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+	marker := rcxMarkerID(rcxRoleOpen, engine.cfg.OpenMarkers[0])
+	engine.ledger.NoteQualitySample("slow", "w:Home", marker, engine.qualityEpoch(), 1800, runtime.Now())
+	engine.ledger.NoteQualitySample("fast", "w:Home", marker, engine.qualityEpoch(), 40, runtime.Now())
+
+	engine.reconsider()
+
+	if got := runtime.lastStatus().Reason; got != string(rcxReasonQualityConfirming) {
+		t.Fatalf("reason = %q, want quality-confirming", got)
+	}
+	if engine.quality.To != engine.key("fast") || engine.quality.From != engine.key("slow") {
+		t.Fatalf("duel = %q->%q, want the faster rival queued so the upgrade can confirm", engine.quality.From, engine.quality.To)
+	}
+}
+
 // A panicking dial took the process with it, and never freed its seat.
 func TestCanaryRoundOutlivesAPanickingDial(t *testing.T) {
 	runtime := newFakeRuntime()

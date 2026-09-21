@@ -12,13 +12,16 @@ type rcxSample struct {
 }
 
 type rcxNodeGlobal struct {
-	Origin      rcxOrigin `json:"o"`
-	Country     string    `json:"c"`
-	EverGood    bool      `json:"g"`
-	OpenedUnder string    `json:"of,omitempty"`
-	Exit        rcxOrigin `json:"x,omitempty"`
-	ExitCountry string    `json:"xc,omitempty"`
-	ExitAt      time.Time `json:"xa,omitempty"`
+	Origin      rcxOrigin     `json:"o"`
+	Country     string        `json:"c"`
+	EverGood    bool          `json:"g"`
+	OpenedUnder string        `json:"of,omitempty"`
+	Exit        rcxOrigin     `json:"x,omitempty"`
+	ExitCountry string        `json:"xc,omitempty"`
+	ExitAt      time.Time     `json:"xa,omitempty"`
+	Trust       rcxTrust      `json:"tr,omitempty"`
+	TrustConf   rcxConfidence `json:"tk,omitempty"`
+	TrustAt     time.Time     `json:"ta,omitempty"`
 }
 
 // Per (node x environment) on purpose: the dominant cause of a dial failure here
@@ -188,6 +191,37 @@ func (l *rcxLedger) SetExit(node, country string, exit rcxOrigin, now time.Time)
 	state.Exit = exit
 	state.ExitCountry = country
 	state.ExitAt = now
+	// A home exit only bars to last resort (Exit already ranks it down); the hard brand is the behavioural check's alone.
+	if exit == rcxOriginForeign {
+		l.setTrustLocked(state, rcxTrusted, rcxConfMeasured, now)
+	}
+}
+
+func (l *rcxLedger) setTrustLocked(state *rcxNodeGlobal, trust rcxTrust, conf rcxConfidence, now time.Time) {
+	if conf < state.TrustConf {
+		return
+	}
+	state.Trust = trust
+	state.TrustConf = conf
+	state.TrustAt = now
+}
+
+// A Suspect prior never overwrites a measured verdict, so a flag cannot un-brand a node.
+func (l *rcxLedger) SetTrust(node string, trust rcxTrust, conf rcxConfidence, now time.Time) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	if trust == rcxTrustSuspect && state.Trust != rcxTrustUnknown {
+		return
+	}
+	l.setTrustLocked(state, trust, conf, now)
+}
+
+func (l *rcxLedger) Trust(node string) (rcxTrust, rcxConfidence) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	state := l.globalState(node)
+	return state.Trust, state.TrustConf
 }
 
 func (l *rcxLedger) ExitCountry(node string) string {
@@ -552,6 +586,7 @@ type rcxRole uint8
 const (
 	rcxRoleOpen rcxRole = iota
 	rcxRoleDomestic
+	rcxRoleLocal
 )
 
 func (l *rcxLedger) NoteProbe(
@@ -762,6 +797,7 @@ func (l *rcxLedger) Facts(
 		OpenWorld:   rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, proofTTL),
 		Domestic:    rcxProofForFingerprint(state.Domestic, state.DomesticAt, state.HomeUnder, l.homeFingerprint, now, proofTTL),
 		SupportsUDP: supportsUDP,
+		Trust:       global.Trust,
 	}
 	switch {
 	case !state.CoolUntil.IsZero() && now.Before(state.CoolUntil):
@@ -955,6 +991,9 @@ func (l *rcxLedger) Invalidate(openChanged, domesticChanged, countriesChanged, e
 			global.Exit = rcxOriginUnknown
 			global.ExitCountry = ""
 			global.ExitAt = time.Time{}
+			global.Trust = rcxTrustUnknown
+			global.TrustConf = rcxConfNone
+			global.TrustAt = time.Time{}
 		}
 	}
 	if !openChanged && !domesticChanged {

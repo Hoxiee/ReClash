@@ -660,6 +660,8 @@ class RoutingCandidateRow extends StatelessWidget {
       if (technical && candidate.region.isNotEmpty) candidate.region,
       if (technical && candidate.origin != 'unknown')
         routingOriginLabel(appLocalizations, candidate.origin),
+      if (technical && (candidate.trust == 'branded' || candidate.trust == 'suspect'))
+        candidate.trust,
       if (technical && candidate.coolFor > 0)
         appLocalizations.smartRoutingCoolFor(candidate.coolFor),
       if (technical && hosted) appLocalizations.smartRoutingHostDelay,

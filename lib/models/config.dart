@@ -66,13 +66,17 @@ Map<String, Object?> migrateNotificationSettingsJson(
     ..remove('hideIdleSpeed');
   final legacyEnabled = migrated.remove('enabled');
   final legacyDetailed = migrated.remove('detailed');
-  // The old switch promised an off state it never delivered; honour that intent
-  // now that a level exists for it.
+  // Android forces a notification while the service runs, so a true "off" level
+  // was a promise the platform never kept; the retired level folds into minimal,
+  // and turning it off entirely now lives behind a system-settings deep link.
+  if (migrated['visibility'] == 'off') {
+    migrated['visibility'] = NotificationVisibility.minimal.name;
+  }
   if (!NotificationVisibility.values.any(
     (item) => item.name == migrated['visibility'],
   )) {
     migrated['visibility'] = switch ((legacyEnabled, legacyDetailed)) {
-      (false, _) => NotificationVisibility.off.name,
+      (false, _) => NotificationVisibility.minimal.name,
       (_, false) => NotificationVisibility.minimal.name,
       _ => NotificationVisibility.detailed.name,
     };
@@ -417,6 +421,8 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default([]) List<String> canaryDomestic,
     @Default([]) List<RcxMarker> openMarkers,
     @Default([]) List<RcxMarker> domesticMarkers,
+    @Default([]) List<RcxMarker> localMarkers,
+    @Default([]) List<String> nameHints,
     @Default([]) List<String> egressEchoes,
     @Default([]) List<String> breakerPatterns,
     @Default(true) bool allowDomesticLastResort,

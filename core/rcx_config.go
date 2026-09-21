@@ -51,7 +51,7 @@ func (c rcxConfig) fingerprints() rcxConfigFingerprints {
 		Canaries:  rcxStringsFingerprint(c.CanaryForeign, c.CanaryDomestic),
 		Countries: rcxStringsFingerprint(c.CensorCountries),
 		Lanes:     rcxLanesFingerprint(c.Lanes),
-		Egress:    rcxStringsFingerprint(c.EgressEchoes),
+		Egress:    rcxStringsFingerprint(c.EgressEchoes) + "|" + rcxMarkersFingerprint(c.LocalMarkers),
 	}
 }
 
@@ -116,6 +116,8 @@ type rcxConfig struct {
 	CanaryDomestic          []string        `json:"cd"`
 	OpenMarkers             []rcxMarker     `json:"om"`
 	DomesticMarkers         []rcxMarker     `json:"dm"`
+	LocalMarkers            []rcxMarker     `json:"lm"`
+	NameHints               []string        `json:"nh"`
 	EgressEchoes            []string        `json:"ee"`
 	BreakerPatterns         []string        `json:"bp"`
 	Lanes                   []rcxLaneConfig `json:"ln"`

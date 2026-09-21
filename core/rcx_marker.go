@@ -133,8 +133,11 @@ func (e *rcxEngine) markerRole(markerID string) (rcxRole, bool) {
 }
 
 func (e *rcxEngine) configMarkers(role rcxRole) []rcxMarker {
-	if role == rcxRoleDomestic {
+	switch role {
+	case rcxRoleDomestic:
 		return e.cfg.DomesticMarkers
+	case rcxRoleLocal:
+		return e.cfg.LocalMarkers
 	}
 	return e.cfg.OpenMarkers
 }

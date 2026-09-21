@@ -4915,7 +4915,7 @@ as List<RcxLaneSelector>,
 /// @nodoc
 mixin _$RcxConfigParams {
 
-@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'st') String get strategy;@JsonKey(name: 'dv') int get defaultsVersion;@JsonKey(name: 'cc') List<String> get censorCountries;@JsonKey(name: 'cf') List<String> get canaryForeign;@JsonKey(name: 'cd') List<String> get canaryDomestic;@JsonKey(name: 'om') List<RcxMarker> get openMarkers;@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers;@JsonKey(name: 'ee') List<String> get egressEchoes;@JsonKey(name: 'bp') List<String> get breakerPatterns;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'udp') bool get requireUdp;@JsonKey(name: 'rpk') bool get respectPick;@JsonKey(name: 'dwl') int get dwellSeconds;@JsonKey(name: 'ww') int get waveWidth;@JsonKey(name: 'ln') List<RcxLaneConfig> get lanes;
+@JsonKey(name: 'on') bool get enabled;@JsonKey(name: 'preset') String get preset;@JsonKey(name: 'st') String get strategy;@JsonKey(name: 'dv') int get defaultsVersion;@JsonKey(name: 'cc') List<String> get censorCountries;@JsonKey(name: 'cf') List<String> get canaryForeign;@JsonKey(name: 'cd') List<String> get canaryDomestic;@JsonKey(name: 'om') List<RcxMarker> get openMarkers;@JsonKey(name: 'dm') List<RcxMarker> get domesticMarkers;@JsonKey(name: 'lm') List<RcxMarker> get localMarkers;@JsonKey(name: 'nh') List<String> get nameHints;@JsonKey(name: 'ee') List<String> get egressEchoes;@JsonKey(name: 'bp') List<String> get breakerPatterns;@JsonKey(name: 'dlr') bool get allowDomesticLastResort;@JsonKey(name: 'udp') bool get requireUdp;@JsonKey(name: 'rpk') bool get respectPick;@JsonKey(name: 'dwl') int get dwellSeconds;@JsonKey(name: 'ww') int get waveWidth;@JsonKey(name: 'ln') List<RcxLaneConfig> get lanes;
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4929,20 +4929,20 @@ $RcxConfigParamsCopyWith<RcxConfigParams> get copyWith => _$RcxConfigParamsCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as RcxConfigParams;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.defaultsVersion, _this.defaultsVersion) || other.defaultsVersion == _this.defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth)&&const DeepCollectionEquality().equals(other.lanes, _this.lanes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxConfigParams&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.defaultsVersion, _this.defaultsVersion) || other.defaultsVersion == _this.defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _this.localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _this.nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth)&&const DeepCollectionEquality().equals(other.lanes, _this.lanes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxConfigParams;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.strategy,_this.defaultsVersion,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth,const DeepCollectionEquality().hash(_this.lanes));
+  return Object.hashAll([runtimeType,_this.enabled,_this.preset,_this.strategy,_this.defaultsVersion,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.localMarkers),const DeepCollectionEquality().hash(_this.nameHints),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth,const DeepCollectionEquality().hash(_this.lanes)]);
 }
 
 @override
 String toString() {
   final _this = this as RcxConfigParams;
-  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, defaultsVersion: ${_this.defaultsVersion}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, egressEchoes: ${_this.egressEchoes}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth}, lanes: ${_this.lanes})';
+  return 'RcxConfigParams(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, defaultsVersion: ${_this.defaultsVersion}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, localMarkers: ${_this.localMarkers}, nameHints: ${_this.nameHints}, egressEchoes: ${_this.egressEchoes}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth}, lanes: ${_this.lanes})';
 }
 
 
@@ -4953,7 +4953,7 @@ abstract mixin class $RcxConfigParamsCopyWith<$Res>  {
   factory $RcxConfigParamsCopyWith(RcxConfigParams value, $Res Function(RcxConfigParams) _then) = _$RcxConfigParamsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
 });
 
 
@@ -4970,7 +4970,7 @@ class _$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? lanes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? lanes = null,}) {
   return _then(RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -4981,7 +4981,9 @@ as List<String>,canaryForeign: null == canaryForeign ? _self.canaryForeign : can
 as List<String>,canaryDomestic: null == canaryDomestic ? _self.canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
 as List<String>,openMarkers: null == openMarkers ? _self.openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self.domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
-as List<RcxMarker>,egressEchoes: null == egressEchoes ? _self.egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,localMarkers: null == localMarkers ? _self.localMarkers : localMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,nameHints: null == nameHints ? _self.nameHints : nameHints // ignore: cast_nullable_to_non_nullable
+as List<String>,egressEchoes: null == egressEchoes ? _self.egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
 as List<String>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
 as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
@@ -5074,10 +5076,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
   return orElse();
 
 }
@@ -5095,10 +5097,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams():
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5115,10 +5117,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'on')  bool enabled, @JsonKey(name: 'preset')  String preset, @JsonKey(name: 'st')  String strategy, @JsonKey(name: 'dv')  int defaultsVersion, @JsonKey(name: 'cc')  List<String> censorCountries, @JsonKey(name: 'cf')  List<String> canaryForeign, @JsonKey(name: 'cd')  List<String> canaryDomestic, @JsonKey(name: 'om')  List<RcxMarker> openMarkers, @JsonKey(name: 'dm')  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers, @JsonKey(name: 'nh')  List<String> nameHints, @JsonKey(name: 'ee')  List<String> egressEchoes, @JsonKey(name: 'bp')  List<String> breakerPatterns, @JsonKey(name: 'dlr')  bool allowDomesticLastResort, @JsonKey(name: 'udp')  bool requireUdp, @JsonKey(name: 'rpk')  bool respectPick, @JsonKey(name: 'dwl')  int dwellSeconds, @JsonKey(name: 'ww')  int waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxConfigParams() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth,_that.lanes);case _:
   return null;
 
 }
@@ -5130,7 +5132,7 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.defaultsVersion,
 @JsonSerializable()
 
 class _RcxConfigParams implements RcxConfigParams {
-  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'st') required this.strategy, @JsonKey(name: 'dv') required this.defaultsVersion, @JsonKey(name: 'cc') required  List<String> censorCountries, @JsonKey(name: 'cf') required  List<String> canaryForeign, @JsonKey(name: 'cd') required  List<String> canaryDomestic, @JsonKey(name: 'om') required  List<RcxMarker> openMarkers, @JsonKey(name: 'dm') required  List<RcxMarker> domesticMarkers, @JsonKey(name: 'ee')  List<String> egressEchoes = const [], @JsonKey(name: 'bp') required  List<String> breakerPatterns, @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'udp') required this.requireUdp, @JsonKey(name: 'rpk') required this.respectPick, @JsonKey(name: 'dwl') required this.dwellSeconds, @JsonKey(name: 'ww') required this.waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes = const []}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_egressEchoes = egressEchoes,_breakerPatterns = breakerPatterns,_lanes = lanes;
+  const _RcxConfigParams({@JsonKey(name: 'on') required this.enabled, @JsonKey(name: 'preset') required this.preset, @JsonKey(name: 'st') required this.strategy, @JsonKey(name: 'dv') required this.defaultsVersion, @JsonKey(name: 'cc') required  List<String> censorCountries, @JsonKey(name: 'cf') required  List<String> canaryForeign, @JsonKey(name: 'cd') required  List<String> canaryDomestic, @JsonKey(name: 'om') required  List<RcxMarker> openMarkers, @JsonKey(name: 'dm') required  List<RcxMarker> domesticMarkers, @JsonKey(name: 'lm')  List<RcxMarker> localMarkers = const [], @JsonKey(name: 'nh')  List<String> nameHints = const [], @JsonKey(name: 'ee')  List<String> egressEchoes = const [], @JsonKey(name: 'bp') required  List<String> breakerPatterns, @JsonKey(name: 'dlr') required this.allowDomesticLastResort, @JsonKey(name: 'udp') required this.requireUdp, @JsonKey(name: 'rpk') required this.respectPick, @JsonKey(name: 'dwl') required this.dwellSeconds, @JsonKey(name: 'ww') required this.waveWidth, @JsonKey(name: 'ln')  List<RcxLaneConfig> lanes = const []}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_localMarkers = localMarkers,_nameHints = nameHints,_egressEchoes = egressEchoes,_breakerPatterns = breakerPatterns,_lanes = lanes;
   factory _RcxConfigParams.fromJson(Map<String, dynamic> json) => _$RcxConfigParamsFromJson(json);
 
 @override@JsonKey(name: 'on') final  bool enabled;
@@ -5170,6 +5172,20 @@ class _RcxConfigParams implements RcxConfigParams {
   if (_domesticMarkers is EqualUnmodifiableListView) return _domesticMarkers;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_domesticMarkers);
+}
+
+ final  List<RcxMarker> _localMarkers;
+@override@JsonKey(name: 'lm') List<RcxMarker> get localMarkers {
+  if (_localMarkers is EqualUnmodifiableListView) return _localMarkers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_localMarkers);
+}
+
+ final  List<String> _nameHints;
+@override@JsonKey(name: 'nh') List<String> get nameHints {
+  if (_nameHints is EqualUnmodifiableListView) return _nameHints;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_nameHints);
 }
 
  final  List<String> _egressEchoes;
@@ -5212,18 +5228,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.defaultsVersion, defaultsVersion) || other.defaultsVersion == defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth)&&const DeepCollectionEquality().equals(other.lanes, _lanes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxConfigParams&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.defaultsVersion, defaultsVersion) || other.defaultsVersion == defaultsVersion)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth)&&const DeepCollectionEquality().equals(other.lanes, _lanes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,strategy,defaultsVersion,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth,const DeepCollectionEquality().hash(_lanes));
+    return Object.hashAll([runtimeType,enabled,preset,strategy,defaultsVersion,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_localMarkers),const DeepCollectionEquality().hash(_nameHints),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth,const DeepCollectionEquality().hash(_lanes)]);
 }
 
 @override
 String toString() {
-    return 'RcxConfigParams(enabled: $enabled, preset: $preset, strategy: $strategy, defaultsVersion: $defaultsVersion, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, egressEchoes: $egressEchoes, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth, lanes: $lanes)';
+    return 'RcxConfigParams(enabled: $enabled, preset: $preset, strategy: $strategy, defaultsVersion: $defaultsVersion, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, localMarkers: $localMarkers, nameHints: $nameHints, egressEchoes: $egressEchoes, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth, lanes: $lanes)';
 }
 
 
@@ -5234,7 +5250,7 @@ abstract mixin class _$RcxConfigParamsCopyWith<$Res> implements $RcxConfigParams
   factory _$RcxConfigParamsCopyWith(_RcxConfigParams value, $Res Function(_RcxConfigParams) _then) = __$RcxConfigParamsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
+@JsonKey(name: 'on') bool enabled,@JsonKey(name: 'preset') String preset,@JsonKey(name: 'st') String strategy,@JsonKey(name: 'dv') int defaultsVersion,@JsonKey(name: 'cc') List<String> censorCountries,@JsonKey(name: 'cf') List<String> canaryForeign,@JsonKey(name: 'cd') List<String> canaryDomestic,@JsonKey(name: 'om') List<RcxMarker> openMarkers,@JsonKey(name: 'dm') List<RcxMarker> domesticMarkers,@JsonKey(name: 'lm') List<RcxMarker> localMarkers,@JsonKey(name: 'nh') List<String> nameHints,@JsonKey(name: 'ee') List<String> egressEchoes,@JsonKey(name: 'bp') List<String> breakerPatterns,@JsonKey(name: 'dlr') bool allowDomesticLastResort,@JsonKey(name: 'udp') bool requireUdp,@JsonKey(name: 'rpk') bool respectPick,@JsonKey(name: 'dwl') int dwellSeconds,@JsonKey(name: 'ww') int waveWidth,@JsonKey(name: 'ln') List<RcxLaneConfig> lanes
 });
 
 
@@ -5251,7 +5267,7 @@ class __$RcxConfigParamsCopyWithImpl<$Res>
 
 /// Create a copy of RcxConfigParams
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? lanes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? defaultsVersion = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,Object? lanes = null,}) {
   return _then(_RcxConfigParams(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -5262,7 +5278,9 @@ as List<String>,canaryForeign: null == canaryForeign ? _self._canaryForeign : ca
 as List<String>,canaryDomestic: null == canaryDomestic ? _self._canaryDomestic : canaryDomestic // ignore: cast_nullable_to_non_nullable
 as List<String>,openMarkers: null == openMarkers ? _self._openMarkers : openMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self._domesticMarkers : domesticMarkers // ignore: cast_nullable_to_non_nullable
-as List<RcxMarker>,egressEchoes: null == egressEchoes ? _self._egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,localMarkers: null == localMarkers ? _self._localMarkers : localMarkers // ignore: cast_nullable_to_non_nullable
+as List<RcxMarker>,nameHints: null == nameHints ? _self._nameHints : nameHints // ignore: cast_nullable_to_non_nullable
+as List<String>,egressEchoes: null == egressEchoes ? _self._egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
 as List<String>,breakerPatterns: null == breakerPatterns ? _self._breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
 as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
@@ -5905,7 +5923,7 @@ as List<RcxLaneStatus>,
 /// @nodoc
 mixin _$RcxCandidateReport {
 
- String get node; String get country; String get exit; String get origin; String get verdict; String get evidence; String get block; int get delay; int get hostDelay; int get band; int get latencyMs; bool get unproven; int get order; bool get degraded; int get homeRisk; int get recurrence; bool get confirmed; bool get breaker; bool get udp; int get fails; int get coolFor; bool get current;
+ String get node; String get country; String get exit; String get origin; String get verdict; String get evidence; String get block; int get delay; int get hostDelay; int get band; int get latencyMs; bool get unproven; int get order; bool get degraded; int get homeRisk; int get recurrence; bool get confirmed; bool get breaker; bool get udp; int get fails; int get coolFor; bool get current; String get trust; String get confidence;
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5919,20 +5937,20 @@ $RcxCandidateReportCopyWith<RcxCandidateReport> get copyWith => _$RcxCandidateRe
 @override
 bool operator ==(Object other) {
   final _this = this as RcxCandidateReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCandidateReport&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.country, _this.country) || other.country == _this.country)&&(identical(other.exit, _this.exit) || other.exit == _this.exit)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.evidence, _this.evidence) || other.evidence == _this.evidence)&&(identical(other.block, _this.block) || other.block == _this.block)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.hostDelay, _this.hostDelay) || other.hostDelay == _this.hostDelay)&&(identical(other.band, _this.band) || other.band == _this.band)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.unproven, _this.unproven) || other.unproven == _this.unproven)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.degraded, _this.degraded) || other.degraded == _this.degraded)&&(identical(other.homeRisk, _this.homeRisk) || other.homeRisk == _this.homeRisk)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&(identical(other.confirmed, _this.confirmed) || other.confirmed == _this.confirmed)&&(identical(other.breaker, _this.breaker) || other.breaker == _this.breaker)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.fails, _this.fails) || other.fails == _this.fails)&&(identical(other.coolFor, _this.coolFor) || other.coolFor == _this.coolFor)&&(identical(other.current, _this.current) || other.current == _this.current));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCandidateReport&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.country, _this.country) || other.country == _this.country)&&(identical(other.exit, _this.exit) || other.exit == _this.exit)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.evidence, _this.evidence) || other.evidence == _this.evidence)&&(identical(other.block, _this.block) || other.block == _this.block)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.hostDelay, _this.hostDelay) || other.hostDelay == _this.hostDelay)&&(identical(other.band, _this.band) || other.band == _this.band)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.unproven, _this.unproven) || other.unproven == _this.unproven)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.degraded, _this.degraded) || other.degraded == _this.degraded)&&(identical(other.homeRisk, _this.homeRisk) || other.homeRisk == _this.homeRisk)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&(identical(other.confirmed, _this.confirmed) || other.confirmed == _this.confirmed)&&(identical(other.breaker, _this.breaker) || other.breaker == _this.breaker)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.fails, _this.fails) || other.fails == _this.fails)&&(identical(other.coolFor, _this.coolFor) || other.coolFor == _this.coolFor)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.trust, _this.trust) || other.trust == _this.trust)&&(identical(other.confidence, _this.confidence) || other.confidence == _this.confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxCandidateReport;
-  return Object.hashAll([runtimeType,_this.node,_this.country,_this.exit,_this.origin,_this.verdict,_this.evidence,_this.block,_this.delay,_this.hostDelay,_this.band,_this.latencyMs,_this.unproven,_this.order,_this.degraded,_this.homeRisk,_this.recurrence,_this.confirmed,_this.breaker,_this.udp,_this.fails,_this.coolFor,_this.current]);
+  return Object.hashAll([runtimeType,_this.node,_this.country,_this.exit,_this.origin,_this.verdict,_this.evidence,_this.block,_this.delay,_this.hostDelay,_this.band,_this.latencyMs,_this.unproven,_this.order,_this.degraded,_this.homeRisk,_this.recurrence,_this.confirmed,_this.breaker,_this.udp,_this.fails,_this.coolFor,_this.current,_this.trust,_this.confidence]);
 }
 
 @override
 String toString() {
   final _this = this as RcxCandidateReport;
-  return 'RcxCandidateReport(node: ${_this.node}, country: ${_this.country}, exit: ${_this.exit}, origin: ${_this.origin}, verdict: ${_this.verdict}, evidence: ${_this.evidence}, block: ${_this.block}, delay: ${_this.delay}, hostDelay: ${_this.hostDelay}, band: ${_this.band}, latencyMs: ${_this.latencyMs}, unproven: ${_this.unproven}, order: ${_this.order}, degraded: ${_this.degraded}, homeRisk: ${_this.homeRisk}, recurrence: ${_this.recurrence}, confirmed: ${_this.confirmed}, breaker: ${_this.breaker}, udp: ${_this.udp}, fails: ${_this.fails}, coolFor: ${_this.coolFor}, current: ${_this.current})';
+  return 'RcxCandidateReport(node: ${_this.node}, country: ${_this.country}, exit: ${_this.exit}, origin: ${_this.origin}, verdict: ${_this.verdict}, evidence: ${_this.evidence}, block: ${_this.block}, delay: ${_this.delay}, hostDelay: ${_this.hostDelay}, band: ${_this.band}, latencyMs: ${_this.latencyMs}, unproven: ${_this.unproven}, order: ${_this.order}, degraded: ${_this.degraded}, homeRisk: ${_this.homeRisk}, recurrence: ${_this.recurrence}, confirmed: ${_this.confirmed}, breaker: ${_this.breaker}, udp: ${_this.udp}, fails: ${_this.fails}, coolFor: ${_this.coolFor}, current: ${_this.current}, trust: ${_this.trust}, confidence: ${_this.confidence})';
 }
 
 
@@ -5943,7 +5961,7 @@ abstract mixin class $RcxCandidateReportCopyWith<$Res>  {
   factory $RcxCandidateReportCopyWith(RcxCandidateReport value, $Res Function(RcxCandidateReport) _then) = _$RcxCandidateReportCopyWithImpl;
 @useResult
 $Res call({
- String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current
+ String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
 });
 
 
@@ -5960,7 +5978,7 @@ class _$RcxCandidateReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
   return _then(RcxCandidateReport(
 node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -5984,7 +6002,9 @@ as bool,udp: null == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nulla
 as bool,fails: null == fails ? _self.fails : fails // ignore: cast_nullable_to_non_nullable
 as int,coolFor: null == coolFor ? _self.coolFor : coolFor // ignore: cast_nullable_to_non_nullable
 as int,current: null == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trust: null == trust ? _self.trust : trust // ignore: cast_nullable_to_non_nullable
+as String,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -6069,10 +6089,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport() when $default != null:
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   return orElse();
 
 }
@@ -6090,10 +6110,10 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)  $default,) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport():
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6110,10 +6130,10 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport() when $default != null:
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   return null;
 
 }
@@ -6125,7 +6145,7 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 @JsonSerializable()
 
 class _RcxCandidateReport implements RcxCandidateReport {
-  const _RcxCandidateReport({this.node = '', this.country = '', this.exit = '', this.origin = 'unknown', this.verdict = 'reject', this.evidence = 'none', this.block = '', this.delay = 0, this.hostDelay = 0, this.band = 0, this.latencyMs = 0, this.unproven = false, this.order = 0, this.degraded = false, this.homeRisk = 0, this.recurrence = 0, this.confirmed = false, this.breaker = false, this.udp = false, this.fails = 0, this.coolFor = 0, this.current = false});
+  const _RcxCandidateReport({this.node = '', this.country = '', this.exit = '', this.origin = 'unknown', this.verdict = 'reject', this.evidence = 'none', this.block = '', this.delay = 0, this.hostDelay = 0, this.band = 0, this.latencyMs = 0, this.unproven = false, this.order = 0, this.degraded = false, this.homeRisk = 0, this.recurrence = 0, this.confirmed = false, this.breaker = false, this.udp = false, this.fails = 0, this.coolFor = 0, this.current = false, this.trust = 'unknown', this.confidence = 'none'});
   factory _RcxCandidateReport.fromJson(Map<String, dynamic> json) => _$RcxCandidateReportFromJson(json);
 
 @override@JsonKey() final  String node;
@@ -6150,6 +6170,8 @@ class _RcxCandidateReport implements RcxCandidateReport {
 @override@JsonKey() final  int fails;
 @override@JsonKey() final  int coolFor;
 @override@JsonKey() final  bool current;
+@override@JsonKey() final  String trust;
+@override@JsonKey() final  String confidence;
 
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
@@ -6164,18 +6186,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCandidateReport&&(identical(other.node, node) || other.node == node)&&(identical(other.country, country) || other.country == country)&&(identical(other.exit, exit) || other.exit == exit)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.evidence, evidence) || other.evidence == evidence)&&(identical(other.block, block) || other.block == block)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.hostDelay, hostDelay) || other.hostDelay == hostDelay)&&(identical(other.band, band) || other.band == band)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.unproven, unproven) || other.unproven == unproven)&&(identical(other.order, order) || other.order == order)&&(identical(other.degraded, degraded) || other.degraded == degraded)&&(identical(other.homeRisk, homeRisk) || other.homeRisk == homeRisk)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed)&&(identical(other.breaker, breaker) || other.breaker == breaker)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.fails, fails) || other.fails == fails)&&(identical(other.coolFor, coolFor) || other.coolFor == coolFor)&&(identical(other.current, current) || other.current == current));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCandidateReport&&(identical(other.node, node) || other.node == node)&&(identical(other.country, country) || other.country == country)&&(identical(other.exit, exit) || other.exit == exit)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.evidence, evidence) || other.evidence == evidence)&&(identical(other.block, block) || other.block == block)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.hostDelay, hostDelay) || other.hostDelay == hostDelay)&&(identical(other.band, band) || other.band == band)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.unproven, unproven) || other.unproven == unproven)&&(identical(other.order, order) || other.order == order)&&(identical(other.degraded, degraded) || other.degraded == degraded)&&(identical(other.homeRisk, homeRisk) || other.homeRisk == homeRisk)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed)&&(identical(other.breaker, breaker) || other.breaker == breaker)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.fails, fails) || other.fails == fails)&&(identical(other.coolFor, coolFor) || other.coolFor == coolFor)&&(identical(other.current, current) || other.current == current)&&(identical(other.trust, trust) || other.trust == trust)&&(identical(other.confidence, confidence) || other.confidence == confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,node,country,exit,origin,verdict,evidence,block,delay,hostDelay,band,latencyMs,unproven,order,degraded,homeRisk,recurrence,confirmed,breaker,udp,fails,coolFor,current]);
+    return Object.hashAll([runtimeType,node,country,exit,origin,verdict,evidence,block,delay,hostDelay,band,latencyMs,unproven,order,degraded,homeRisk,recurrence,confirmed,breaker,udp,fails,coolFor,current,trust,confidence]);
 }
 
 @override
 String toString() {
-    return 'RcxCandidateReport(node: $node, country: $country, exit: $exit, origin: $origin, verdict: $verdict, evidence: $evidence, block: $block, delay: $delay, hostDelay: $hostDelay, band: $band, latencyMs: $latencyMs, unproven: $unproven, order: $order, degraded: $degraded, homeRisk: $homeRisk, recurrence: $recurrence, confirmed: $confirmed, breaker: $breaker, udp: $udp, fails: $fails, coolFor: $coolFor, current: $current)';
+    return 'RcxCandidateReport(node: $node, country: $country, exit: $exit, origin: $origin, verdict: $verdict, evidence: $evidence, block: $block, delay: $delay, hostDelay: $hostDelay, band: $band, latencyMs: $latencyMs, unproven: $unproven, order: $order, degraded: $degraded, homeRisk: $homeRisk, recurrence: $recurrence, confirmed: $confirmed, breaker: $breaker, udp: $udp, fails: $fails, coolFor: $coolFor, current: $current, trust: $trust, confidence: $confidence)';
 }
 
 
@@ -6186,7 +6208,7 @@ abstract mixin class _$RcxCandidateReportCopyWith<$Res> implements $RcxCandidate
   factory _$RcxCandidateReportCopyWith(_RcxCandidateReport value, $Res Function(_RcxCandidateReport) _then) = __$RcxCandidateReportCopyWithImpl;
 @override @useResult
 $Res call({
- String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current
+ String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
 });
 
 
@@ -6203,7 +6225,7 @@ class __$RcxCandidateReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
   return _then(_RcxCandidateReport(
 node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -6227,7 +6249,9 @@ as bool,udp: null == udp ? _self.udp : udp // ignore: cast_nullable_to_non_nulla
 as bool,fails: null == fails ? _self.fails : fails // ignore: cast_nullable_to_non_nullable
 as int,coolFor: null == coolFor ? _self.coolFor : coolFor // ignore: cast_nullable_to_non_nullable
 as int,current: null == current ? _self.current : current // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,trust: null == trust ? _self.trust : trust // ignore: cast_nullable_to_non_nullable
+as String,confidence: null == confidence ? _self.confidence : confidence // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
