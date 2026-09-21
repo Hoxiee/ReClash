@@ -198,7 +198,10 @@ func (l *rcxLedger) SetExit(node, country string, exit rcxOrigin, now time.Time)
 }
 
 func (l *rcxLedger) setTrustLocked(state *rcxNodeGlobal, trust rcxTrust, conf rcxConfidence, now time.Time) {
-	if conf < state.TrustConf {
+	// A measured foreign exit contradicts a brand outright, so it clears one even
+	// though the brand was recorded at higher confidence: no node stays branded forever.
+	unbrands := trust == rcxTrusted && conf >= rcxConfMeasured
+	if conf < state.TrustConf && !unbrands {
 		return
 	}
 	state.Trust = trust

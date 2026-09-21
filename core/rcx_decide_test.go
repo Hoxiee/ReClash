@@ -656,6 +656,46 @@ func TestAdmitLetsAMeasurementOutliveTheGeographyItContradicted(t *testing.T) {
 	}
 }
 
+func TestAgedForeignProofStillBeatsAFreshSlowRival(t *testing.T) {
+	// Aged-to-Unknown proof (OpenedOnce) must tie a fresh proof at Preferred so latency decides.
+	sweden := rcxFacts{Origin: rcxOriginForeign, OpenedOnce: true, Transit: rcxProofProven, SupportsUDP: true}
+	if got := rcxAdmit(rcxTerrainNormal, sweden); got != rcxVerdictPreferred {
+		t.Fatalf("aged-but-opened foreign verdict = %v, want preferred", got)
+	}
+	if got := rcxAdmit(rcxTerrainNormal, foreignProven()); got != rcxVerdictPreferred {
+		t.Fatalf("freshly proven verdict = %v, want preferred", got)
+	}
+
+	fast := rcxNode("sweden", sweden)
+	fast.MedianMs = 50
+	slow := rcxNode("peru", foreignProven())
+	slow.MedianMs = 435
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{slow, fast},
+	})
+	if got.To != "sweden" {
+		t.Fatalf("cold pick = %q, want sweden(50ms) over peru(435ms) once verdict ties", got.To)
+	}
+}
+
+func TestUpgradeReturnsFromASlowProvenIncumbentToAFastRival(t *testing.T) {
+	peru := rcxNode("peru", foreignProven())
+	peru.MedianMs = 435
+	sweden := rcxNode("sweden", rcxFacts{Origin: rcxOriginForeign, OpenedOnce: true, Transit: rcxProofProven, SupportsUDP: true})
+	sweden.MedianMs = 50
+	sweden.QualityConfirmed = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "peru",
+		IncumbentSince: time.Unix(1_700_000_000, 0).Add(-time.Hour),
+		Candidates:     []rcxCandidate{peru, sweden},
+	})
+	if !got.Switch || got.To != "sweden" {
+		t.Fatalf("decision = %+v, want an upgrade back to the fast sweden node", got)
+	}
+}
+
 func TestLatencyBucketOrdersTheUnmeasuredCrowdByTheHostDelayTest(t *testing.T) {
 	tests := []struct {
 		name string

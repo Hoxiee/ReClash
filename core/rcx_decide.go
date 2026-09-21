@@ -220,6 +220,16 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 		}
 		return row.openWorldProven
 	}
+	// An aged proof is not a dead one: a foreign node that already opened the
+	// censored world on this network keeps its tier until a probe disproves it, so
+	// latency decides between working foreign nodes, not proof-freshness roulette.
+	// Restricted to foreign origin so a fronted domestic node stays a mere prior.
+	if f.OpenedOnce && f.OpenWorld != rcxProofDisproven && f.Origin != rcxOriginDomestic {
+		if f.Breaker {
+			return row.breakerProven
+		}
+		return row.openWorldProven
+	}
 	if f.Domestic == rcxProofProven {
 		return row.domesticProven
 	}

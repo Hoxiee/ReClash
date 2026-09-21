@@ -98,7 +98,7 @@ func rcxNameSide(name string, hints []string, censors func(string) bool) (string
 // answered proves escape (Trusted); a blocked open with a reachable local-only
 // service is a node stuck on the censored side (Branded). Both failing says nothing.
 func (e *rcxEngine) finishLocate(now time.Time) {
-	type legs struct{ openOK, localOK, sawOpen, sawLocal bool }
+	type legs struct{ openOK, openFailed, localOK bool }
 	byNode := map[string]*legs{}
 	for _, r := range e.probeResults {
 		leg := byNode[r.Key]
@@ -108,10 +108,10 @@ func (e *rcxEngine) finishLocate(now time.Time) {
 		}
 		switch r.Role {
 		case rcxRoleOpen:
-			leg.sawOpen = true
 			leg.openOK = leg.openOK || r.Outcome == rcxProbeOK
+			leg.openFailed = leg.openFailed ||
+				r.Outcome == rcxProbeFail || r.Outcome == rcxProbeStatusMismatch
 		case rcxRoleLocal:
-			leg.sawLocal = true
 			leg.localOK = leg.localOK || r.Outcome == rcxProbeOK
 		}
 	}
@@ -119,7 +119,9 @@ func (e *rcxEngine) finishLocate(now time.Time) {
 		switch {
 		case leg.openOK:
 			e.ledger.SetTrust(key, rcxTrusted, rcxConfBehavioral, now)
-		case leg.sawOpen && leg.sawLocal && leg.localOK:
+		case leg.openFailed && leg.localOK:
+			// Only a definite open FAIL brands (not an overloaded/rate-limited leg);
+			// a censored-side node cannot reach the blocked world but reaches a home-only one.
 			e.ledger.SetTrust(key, rcxTrustBranded, rcxConfBehavioral, now)
 		}
 	}

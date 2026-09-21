@@ -74,7 +74,7 @@ func TestSetTrustKeepsMeasuredOverPrior(t *testing.T) {
 
 func TestFinishLocateReadsBothLegs(t *testing.T) {
 	runtime := newFakeRuntime()
-	runtime.members = foreignMembers("escapes", "stuck", "dead")
+	runtime.members = foreignMembers("escapes", "stuck", "dead", "throttled")
 	engine := newTestEngine(runtime, "ru")
 	engine.cfg.LocalMarkers = []rcxMarker{{URL: "https://local.example/", Statuses: []int{200}}}
 	now := runtime.Now()
@@ -85,6 +85,8 @@ func TestFinishLocateReadsBothLegs(t *testing.T) {
 		{Node: "stuck", Key: engine.key("stuck"), Role: rcxRoleLocal, Outcome: rcxProbeOK},
 		{Node: "dead", Key: engine.key("dead"), Role: rcxRoleOpen, Outcome: rcxProbeFail},
 		{Node: "dead", Key: engine.key("dead"), Role: rcxRoleLocal, Outcome: rcxProbeFail},
+		{Node: "throttled", Key: engine.key("throttled"), Role: rcxRoleOpen, Outcome: rcxProbeOverloaded},
+		{Node: "throttled", Key: engine.key("throttled"), Role: rcxRoleLocal, Outcome: rcxProbeOK},
 	}
 	engine.finishLocate(now)
 
@@ -96,5 +98,18 @@ func TestFinishLocateReadsBothLegs(t *testing.T) {
 	}
 	if trust, _ := engine.ledger.Trust(engine.key("dead")); trust != rcxTrustUnknown {
 		t.Fatalf("dead trust = %v, want unknown (both legs failed proves nothing)", trust)
+	}
+	if trust, _ := engine.ledger.Trust(engine.key("throttled")); trust != rcxTrustUnknown {
+		t.Fatalf("throttled trust = %v, want unknown (an overloaded open leg is not a fail)", trust)
+	}
+}
+
+func TestMeasuredForeignExitClearsABrand(t *testing.T) {
+	ledger := newRcxLedger(rcxDefaultLedgerPolicy())
+	now := time.Now()
+	ledger.SetTrust("node", rcxTrustBranded, rcxConfBehavioral, now)
+	ledger.SetExit("node", "SE", rcxOriginForeign, now)
+	if trust, _ := ledger.Trust("node"); trust != rcxTrusted {
+		t.Fatalf("trust = %v, want a measured foreign exit to clear the brand (no permanent trap)", trust)
 	}
 }

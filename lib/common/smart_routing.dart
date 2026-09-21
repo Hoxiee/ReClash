@@ -69,13 +69,8 @@ const _russia = SmartRoutingBundle(
   domesticMarkers: [
     RcxMarker(url: 'https://ya.ru/', statuses: [200, 301, 302]),
   ],
-  // Reachable from a Russian egress, refused from abroad: a blocked open marker
-  // that fails while one of these answers marks a node stuck on the home side.
-  // TODO: confirm the geo-fence on device (opens via RU node, fails via foreign).
-  localMarkers: [
-    RcxMarker(url: 'https://www.wildberries.ru/', statuses: [200]),
-    RcxMarker(url: 'https://www.tinkoff.ru/', statuses: [200]),
-  ],
+  // localMarkers stay empty until a candidate is device-confirmed to answer only
+  // from a Russian egress; an unverified one brands working foreign nodes.
   nameHints: ['росси', 'russia', 'москва', 'moscow', 'санкт', 'петербург', 'спб'],
   egressEchoes: _egressEchoes,
   breakerPatterns: ['lte', 'обход', 'глушил', 'bypass', 'breaker', 'unblock'],
