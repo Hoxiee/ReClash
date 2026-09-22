@@ -2,7 +2,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_centered_scroll_view.dart';
-import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

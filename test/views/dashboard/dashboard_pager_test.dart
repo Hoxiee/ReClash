@@ -4,7 +4,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/dashboard.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
-import 'package:reclash/views/dashboard/widgets/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:flutter/gestures.dart';

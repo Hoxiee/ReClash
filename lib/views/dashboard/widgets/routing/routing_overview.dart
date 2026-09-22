@@ -4,15 +4,15 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/smart_routing.dart';
-import 'package:reclash/views/dashboard/widgets/routing_details_tab.dart';
-import 'package:reclash/views/dashboard/widgets/routing_overview_parts.dart';
-import 'package:reclash/views/dashboard/widgets/routing_overview_tab.dart';
-import 'package:reclash/views/dashboard/widgets/routing_ranking_tab.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_overview_tab.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-export 'package:reclash/views/dashboard/widgets/routing_overview_parts.dart'
+export 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart'
     show
         routingBlockLabel,
         routingEvidenceLabel,

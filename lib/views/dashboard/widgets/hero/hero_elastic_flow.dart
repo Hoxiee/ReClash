@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/views/dashboard/widgets/hero_layout.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_layout.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 

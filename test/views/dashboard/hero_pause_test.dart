@@ -2,7 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/dashboard/widgets/hero_connect.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_connect.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';

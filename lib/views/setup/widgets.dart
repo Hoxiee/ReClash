@@ -1,5 +1,5 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/views/dashboard/widgets/hero_surface.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 

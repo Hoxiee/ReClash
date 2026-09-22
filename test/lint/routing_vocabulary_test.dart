@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

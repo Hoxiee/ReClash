@@ -6,7 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/announce.dart';
-import 'package:reclash/views/dashboard/widgets/hero_words.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,4 +1,4 @@
-import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
 import 'package:test/test.dart';
 
 const _gb = 1024 * 1024 * 1024;

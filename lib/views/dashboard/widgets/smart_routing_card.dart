@@ -1,9 +1,9 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
-import 'package:reclash/views/dashboard/widgets/hero_routing.dart';
-import 'package:reclash/views/dashboard/widgets/hero_status.dart';
-import 'package:reclash/views/dashboard/widgets/routing_overview.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_routing.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

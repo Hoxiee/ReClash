@@ -3,7 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
-import 'package:reclash/views/dashboard/widgets/hero_offers.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
