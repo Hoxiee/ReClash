@@ -5,6 +5,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"core/rcx"
 )
 
 type odoMemStorage struct {
@@ -32,7 +34,7 @@ type odoClock struct{ at time.Time }
 
 func (c *odoClock) now() time.Time { return c.at }
 
-func newTestOdometer(storage rcxStorage) (*odometer, *odoClock) {
+func newTestOdometer(storage rcx.Storage) (*odometer, *odoClock) {
 	clock := &odoClock{at: time.Date(2026, 3, 1, 10, 0, 0, 0, time.UTC)}
 	return &odometer{storage: storage, traffic: &odoFakeTraffic{}, now: clock.now}, clock
 }

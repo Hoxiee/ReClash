@@ -8,6 +8,8 @@ import (
 
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel/statistic"
+
+	"core/rcx"
 )
 
 const (
@@ -103,7 +105,7 @@ func (odoManagerTraffic) TotalTraffic(onlyStatisticsProxy bool) (int64, int64) {
 
 type odometer struct {
 	mu      sync.Mutex
-	storage rcxStorage
+	storage rcx.Storage
 	traffic odoTrafficSource
 
 	state         *odoState
@@ -123,7 +125,7 @@ type odometer struct {
 }
 
 var odometerInstance = &odometer{
-	storage:   rcxCacheStorage{},
+	storage:   rcx.CacheStorage{},
 	traffic:   odoManagerTraffic{},
 	now:       time.Now,
 	monotonic: odoElapsedRealtime,

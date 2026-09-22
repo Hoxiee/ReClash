@@ -26,13 +26,14 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 	mihomoTLS "github.com/metacubex/tls"
+
+	"core/rcx"
 )
 
 const (
 	rcxResolveTimeout = 3 * time.Second
 	rcxResolveRetry   = 10 * time.Minute
 	rcxMmdbRecheck    = time.Minute
-	rcxLocateTimeout  = 6 * time.Second
 	rcxLocateBodyCap  = 256
 	rcxHostProbeDial  = 3 * time.Second
 )
@@ -40,13 +41,6 @@ const (
 var errEchoScheme = errors.New("rcx: echo url needs http or https")
 
 const rcxHostDelayUnknown = 0xffff
-
-const (
-	rcxGroupPrefix = "RCX-"
-	rcxGroupNode   = "RCX-NODE"
-	rcxGroupFinal  = "RCX-FINAL"
-	rcxGroupDirect = "RCX-DIRECT"
-)
 
 type rcxCoreRuntime struct{}
 
@@ -68,7 +62,7 @@ func rcxGroupAdapter(name string) (*adapter.Proxy, bool) {
 }
 
 func rcxNodeGroupAdapter() (*adapter.Proxy, bool) {
-	return rcxGroupAdapter(rcxGroupNode)
+	return rcxGroupAdapter(rcx.GroupNode)
 }
 
 func rcxSelectorMembers(name string) ([]string, bool) {
@@ -100,16 +94,16 @@ func rcxMembersEqual(got []string, want ...string) bool {
 	return true
 }
 
-func (rcxCoreRuntime) TopologyValid(config rcxConfig) bool {
-	if _, ok := rcxSelectorMembers(rcxGroupNode); !ok {
+func (rcxCoreRuntime) TopologyValid(config rcx.Config) bool {
+	if _, ok := rcxSelectorMembers(rcx.GroupNode); !ok {
 		return false
 	}
-	direct, ok := rcxSelectorMembers(rcxGroupDirect)
-	if !ok || !rcxMembersEqual(direct, "DIRECT", rcxGroupNode) {
+	direct, ok := rcxSelectorMembers(rcx.GroupDirect)
+	if !ok || !rcxMembersEqual(direct, "DIRECT", rcx.GroupNode) {
 		return false
 	}
-	final, ok := rcxSelectorMembers(rcxGroupFinal)
-	if !ok || !rcxMembersEqual(final, rcxGroupNode, "DIRECT") {
+	final, ok := rcxSelectorMembers(rcx.GroupFinal)
+	if !ok || !rcxMembersEqual(final, rcx.GroupNode, "DIRECT") {
 		return false
 	}
 	for _, lane := range config.Lanes {
@@ -117,12 +111,12 @@ func (rcxCoreRuntime) TopologyValid(config rcxConfig) bool {
 		if !ok || members[0] != "REJECT" {
 			return false
 		}
-		hasMain := len(members) > 1 && members[1] == rcxGroupNode
-		if hasMain != (lane.Fallback == rcxLaneFallbackMain) {
+		hasMain := len(members) > 1 && members[1] == rcx.GroupNode
+		if hasMain != (lane.Fallback == rcx.LaneFallbackMain) {
 			return false
 		}
 		for _, member := range members[1:] {
-			if lane.Fallback == rcxLaneReject && member == rcxGroupNode {
+			if lane.Fallback == rcx.LaneReject && member == rcx.GroupNode {
 				return false
 			}
 		}
@@ -145,7 +139,7 @@ func rcxRoutableNode(proxy constant.Proxy) bool {
 	}
 }
 
-func (rcxCoreRuntime) Members() []rcxMember {
+func (rcxCoreRuntime) Members() []rcx.Member {
 	proxy, ok := rcxNodeGroupAdapter()
 	if !ok {
 		return nil
@@ -157,7 +151,7 @@ func (rcxCoreRuntime) Members() []rcxMember {
 	nodes := lister.Proxies()
 	identities := rcxRouteKeys(nodes)
 	url := currentTestURL()
-	members := make([]rcxMember, 0, len(nodes))
+	members := make([]rcx.Member, 0, len(nodes))
 	for _, node := range nodes {
 		if !rcxRoutableNode(node) {
 			continue
@@ -168,7 +162,7 @@ func (rcxCoreRuntime) Members() []rcxMember {
 		if provider == "" {
 			provider = "inline:" + node.Type().String()
 		}
-		members = append(members, rcxMember{
+		members = append(members, rcx.Member{
 			Name:             node.Name(),
 			ID:               identities[node],
 			Ingress:          rcxIngress(node.Addr()),
@@ -212,7 +206,7 @@ func rcxLastDelayAt(history []constant.DelayHistory) time.Time {
 }
 
 func rcxHostDelayValue(delay uint16) (int, bool) {
-	if delay == rcxHostDelayUnknown || delay < rcxHarvestFloorMs {
+	if delay == rcxHostDelayUnknown || delay < rcx.HarvestFloorMs {
 		return 0, false
 	}
 	return int(delay), false
@@ -220,7 +214,7 @@ func rcxHostDelayValue(delay uint16) (int, bool) {
 
 // A refresh renames the whole park, and a name-keyed identity loses every proof.
 func rcxNodeKey(kind, address, salt string) string {
-	host := rcxHostOf(address)
+	host := rcx.HostOf(address)
 	if host == "" {
 		return ""
 	}
@@ -229,7 +223,7 @@ func rcxNodeKey(kind, address, salt string) string {
 }
 
 // Two accounts on one endpoint are one key, which would pool their measurements.
-func rcxSeparateCollisions(members []rcxMember) []rcxMember {
+func rcxSeparateCollisions(members []rcx.Member) []rcx.Member {
 	seen := make(map[string]int, len(members))
 	for _, member := range members {
 		if member.ID != "" {
@@ -256,12 +250,8 @@ func rcxPortOf(address string) int {
 	return value
 }
 
-func rcxHostOf(address string) string {
-	host, _, err := net.SplitHostPort(address)
-	if err != nil {
-		return strings.TrimSpace(address)
-	}
-	return host
+func (rcxCoreRuntime) TestURL() string {
+	return currentTestURL()
 }
 
 func (rcxCoreRuntime) Selected() string {
@@ -277,7 +267,7 @@ func (rcxCoreRuntime) Selected() string {
 }
 
 func (rcxCoreRuntime) Select(node string) error {
-	return selectGroupMember(rcxGroupNode, node)
+	return selectGroupMember(rcx.GroupNode, node)
 }
 
 func (rcxCoreRuntime) SelectedIn(group string) string {
@@ -329,7 +319,7 @@ func selectGroupMember(group, node string) error {
 	return selector.Set(node)
 }
 
-func (rcxCoreRuntime) SampleLink() (rcxNetworkPayload, bool) {
+func (rcxCoreRuntime) SampleLink() (rcx.NetworkPayload, bool) {
 	return rcxSampleLink()
 }
 
@@ -409,7 +399,7 @@ func (rcxCoreRuntime) Country(node string) string {
 	if proxy == nil {
 		return ""
 	}
-	address := rcxResolveHost(rcxHostOf(proxy.Addr()))
+	address := rcxResolveHost(rcx.HostOf(proxy.Addr()))
 	if !address.IsValid() {
 		return ""
 	}
@@ -593,7 +583,7 @@ func rcxParseEchoIP(body []byte) netip.Addr {
 func (rcxCoreRuntime) Test(
 	ctx context.Context,
 	node string,
-	marker rcxMarker,
+	marker rcx.Marker,
 ) (int, bool, error) {
 	proxy, ok := lookupProxy(node).(*adapter.Proxy)
 	if !ok {
@@ -622,14 +612,14 @@ func rcxExpectedStatuses(statuses []int) (utils.IntRanges[uint16], error) {
 // outbound rather than a raw dial so the socket is still protected from the tun.
 // A whitelist accepts the TCP handshake on any address and cuts the data, so a
 // foreign canary is judged by the TLS handshake, which a gate cannot forge.
-func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) rcxProbeOutcome {
+func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) rcx.ProbeOutcome {
 	direct := lookupProxy("DIRECT")
 	if direct == nil {
-		return rcxProbeOverloaded
+		return rcx.ProbeOverloaded
 	}
 	target, err := netip.ParseAddrPort(address)
 	if err != nil {
-		return rcxProbeOverloaded
+		return rcx.ProbeOverloaded
 	}
 	metadata := &constant.Metadata{
 		NetWork: constant.TCP,
@@ -640,13 +630,13 @@ func (rcxCoreRuntime) Reach(ctx context.Context, address string, domestic bool) 
 	conn, err := direct.DialContext(ctx, metadata)
 	if err != nil {
 		if ctx.Err() != nil {
-			return rcxProbeOverloaded
+			return rcx.ProbeOverloaded
 		}
-		return rcxProbeFail
+		return rcx.ProbeFail
 	}
 	if domestic {
 		_ = conn.Close()
-		return rcxProbeOK
+		return rcx.ProbeOK
 	}
 	defer conn.Close()
 	return rcxVerifyTLS(ctx, conn, address)
@@ -691,22 +681,22 @@ func (rcxCoreRuntime) Sweep(ctx context.Context, nodes []string) {
 
 // Only the foreign canaries verify: their hosts carry public-root IP-SAN
 // certificates, which the domestic ones do not.
-func rcxVerifyTLS(ctx context.Context, conn net.Conn, address string) rcxProbeOutcome {
+func rcxVerifyTLS(ctx context.Context, conn net.Conn, address string) rcx.ProbeOutcome {
 	tlsConfig, err := ca.GetTLSConfig(ca.Option{})
 	if err != nil {
-		return rcxProbeOverloaded
+		return rcx.ProbeOverloaded
 	}
-	tlsConfig.ServerName = rcxHostOf(address)
+	tlsConfig.ServerName = rcx.HostOf(address)
 	tlsConn := mihomoTLS.Client(conn, tlsConfig)
 	if err := tlsConn.HandshakeContext(ctx); err != nil {
 		if ctx.Err() != nil {
-			return rcxProbeOverloaded
+			return rcx.ProbeOverloaded
 		}
-		return rcxProbeStatusMismatch
+		return rcx.ProbeStatusMismatch
 	}
 	req, err := http.NewRequest(http.MethodHead, "https://"+address+"/", nil)
 	if err != nil {
-		return rcxProbeOverloaded
+		return rcx.ProbeOverloaded
 	}
 	req = req.WithContext(ctx)
 	client := http.Client{
@@ -724,16 +714,16 @@ func rcxVerifyTLS(ctx context.Context, conn net.Conn, address string) rcxProbeOu
 	resp, err := client.Do(req)
 	if err != nil {
 		if ctx.Err() != nil {
-			return rcxProbeOverloaded
+			return rcx.ProbeOverloaded
 		}
-		return rcxProbeStatusMismatch
+		return rcx.ProbeStatusMismatch
 	}
 	_ = resp.Body.Close()
-	return rcxProbeOK
+	return rcx.ProbeOK
 }
 
-func (rcxCoreRuntime) Connections() []rcxConnSample {
-	samples := make([]rcxConnSample, 0, 64)
+func (rcxCoreRuntime) Connections() []rcx.ConnSample {
+	samples := make([]rcx.ConnSample, 0, 64)
 	statistic.DefaultManager.Range(func(tracker statistic.Tracker) bool {
 		info := tracker.Info()
 		if info == nil {
@@ -743,7 +733,7 @@ func (rcxCoreRuntime) Connections() []rcxConnSample {
 		if node == "" {
 			return true
 		}
-		sample := rcxConnSample{
+		sample := rcx.ConnSample{
 			Key:   tracker.ID(),
 			Node:  node,
 			Up:    info.UploadTotal.Load(),
@@ -775,7 +765,7 @@ func (rcxCoreRuntime) CloseConnections(ids []string) {
 	})
 }
 
-func (rcxCoreRuntime) Publish(status rcxStatus) {
+func (rcxCoreRuntime) Publish(status rcx.Status) {
 	sendMessage(Message{Type: RcxStatusMessage, Data: status})
 }
 

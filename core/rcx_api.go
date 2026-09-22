@@ -5,20 +5,23 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/adapter"
+
+	"core/rcx"
 )
 
-var rcxEngineInstance = newRcxEngine(rcxCoreRuntime{})
+var rcxEngineInstance = rcx.NewEngine(rcxCoreRuntime{})
 
 // Every RCX group is engine-owned: the host's persisted selection map must
 // never ForceSet one, or a stale manual pick clobbers the engine's node on
 // every config re-apply. A user's RCX-NODE pick is not a ForceSet: it arrives
 // through handleChangeProxy, which sets and pins in one path.
 func rcxIsServiceGroup(name string) bool {
-	return strings.HasPrefix(name, rcxGroupPrefix)
+	return strings.HasPrefix(name, rcx.GroupPrefix)
 }
 
 func init() {
-	registerMethod(rcxConfigureMethod, withArguments(func(config *rcxConfig, response MethodResponse) {
+	rcxEngineInstance.SetOdometer(odometerInstance)
+	registerMethod(rcxConfigureMethod, withArguments(func(config *rcx.Config, response MethodResponse) {
 		rcxEngineInstance.Configure(*config)
 		response.success(true)
 	}))

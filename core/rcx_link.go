@@ -9,12 +9,12 @@ import (
 )
 
 // Without a link there is one bucket per machine, and a cafe's cooling follows the user home.
-func rcxSampleLink() (rcxNetworkPayload, bool) {
+func rcxSampleLink() (networkFactsPayload, bool) {
 	devices, addresses := rcxPhysicalLinks()
 	if len(devices) == 0 {
-		return rcxNetworkPayload{}, false
+		return networkFactsPayload{}, false
 	}
-	return rcxNetworkPayload{
+	return networkFactsPayload{
 		Transport:  rcxLinkTransport(devices[0]),
 		Gateways:   rcxLinkGateways(devices),
 		DNSServers: rcxLinkResolvers(),

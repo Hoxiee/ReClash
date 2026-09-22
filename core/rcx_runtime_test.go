@@ -12,6 +12,8 @@ import (
 
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
+
+	"core/rcx"
 )
 
 func rcxForgetHost(t *testing.T, host string) {
@@ -123,7 +125,7 @@ func TestNodeKeyIgnoresTheNameAndSeparatesSharedEndpoints(t *testing.T) {
 		t.Errorf("key = %q for a node with no endpoint, want the name to take over", nested)
 	}
 
-	members := rcxSeparateCollisions([]rcxMember{
+	members := rcxSeparateCollisions([]rcx.Member{
 		{Name: "account-a", ID: stable},
 		{Name: "account-b", ID: stable},
 		{Name: "alone", ID: rcxNodeKey("Vless", "de-1.example:443", "")},
@@ -231,8 +233,8 @@ func TestVerifyTLSRejectsAForgedChain(t *testing.T) {
 	t.Cleanup(func() { _ = conn.Close() })
 
 	got := rcxVerifyTLS(context.Background(), conn, address)
-	if got != rcxProbeStatusMismatch {
-		t.Errorf("outcome = %s, want mismatch: a self-signed answer is not an open network", rcxOutcomeName(got))
+	if got != rcx.ProbeStatusMismatch {
+		t.Errorf("outcome = %s, want mismatch: a self-signed answer is not an open network", rcx.OutcomeName(got))
 	}
 }
 
@@ -248,12 +250,12 @@ func installRcxTopology(t *testing.T, groups map[string][]string) {
 
 func TestCoreRuntimeAcceptsOnlyTheGeneratedRcxTopology(t *testing.T) {
 	installRcxTopology(t, map[string][]string{
-		rcxGroupNode:   {"node"},
-		rcxGroupDirect: {"DIRECT", rcxGroupNode},
-		rcxGroupFinal:  {rcxGroupNode, "DIRECT"},
+		rcx.GroupNode:   {"node"},
+		rcx.GroupDirect: {"DIRECT", rcx.GroupNode},
+		rcx.GroupFinal:  {rcx.GroupNode, "DIRECT"},
 	})
 
-	if !(rcxCoreRuntime{}).TopologyValid(testConfig("ru")) {
+	if !(rcxCoreRuntime{}).TopologyValid(rcx.DefaultConfig()) {
 		t.Fatal("the generated selector skeleton was rejected")
 	}
 }
@@ -266,23 +268,23 @@ func TestCoreRuntimeRejectsIncompleteOrReorderedRcxTopology(t *testing.T) {
 		{
 			name: "missing final",
 			groups: map[string][]string{
-				rcxGroupNode:   {"node"},
-				rcxGroupDirect: {"DIRECT", rcxGroupNode},
+				rcx.GroupNode:   {"node"},
+				rcx.GroupDirect: {"DIRECT", rcx.GroupNode},
 			},
 		},
 		{
 			name: "reordered direct",
 			groups: map[string][]string{
-				rcxGroupNode:   {"node"},
-				rcxGroupDirect: {rcxGroupNode, "DIRECT"},
-				rcxGroupFinal:  {rcxGroupNode, "DIRECT"},
+				rcx.GroupNode:   {"node"},
+				rcx.GroupDirect: {rcx.GroupNode, "DIRECT"},
+				rcx.GroupFinal:  {rcx.GroupNode, "DIRECT"},
 			},
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			installRcxTopology(t, tc.groups)
-			if (rcxCoreRuntime{}).TopologyValid(testConfig("ru")) {
+			if (rcxCoreRuntime{}).TopologyValid(rcx.DefaultConfig()) {
 				t.Fatal("a user-owned or malformed reserved topology activated RCX")
 			}
 		})
@@ -290,14 +292,14 @@ func TestCoreRuntimeRejectsIncompleteOrReorderedRcxTopology(t *testing.T) {
 }
 
 func TestCoreRuntimeRequiresConfiguredLaneShape(t *testing.T) {
-	config := testConfig("ru")
-	config.Lanes = []rcxLaneConfig{{
-		ID: "gemini", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: rcxLaneFallbackMain,
+	config := rcx.DefaultConfig()
+	config.Lanes = []rcx.LaneConfig{{
+		ID: "gemini", Group: "RCX-CAP-GEMINI_ACCESS", Fallback: rcx.LaneFallbackMain,
 	}}
 	installRcxTopology(t, map[string][]string{
-		rcxGroupNode:            {"node"},
-		rcxGroupDirect:          {"DIRECT", rcxGroupNode},
-		rcxGroupFinal:           {rcxGroupNode, "DIRECT"},
+		rcx.GroupNode:           {"node"},
+		rcx.GroupDirect:         {"DIRECT", rcx.GroupNode},
+		rcx.GroupFinal:          {rcx.GroupNode, "DIRECT"},
 		"RCX-CAP-GEMINI_ACCESS": {"REJECT", "node"},
 	})
 

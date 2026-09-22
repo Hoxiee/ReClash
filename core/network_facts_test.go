@@ -7,7 +7,7 @@ func TestNetworkFactsFanoutBumpsEnvironmentOnlyForSemanticChanges(t *testing.T) 
 	networks := 0
 	fanout := networkFactsFanout{
 		bump: func() { bumps++ },
-		network: func(rcxNetworkPayload) {
+		network: func(networkFactsPayload) {
 			networks++
 		},
 	}
@@ -43,7 +43,7 @@ func TestNetworkFactsFanoutDoesNotDependOnRcxState(t *testing.T) {
 	bumps := 0
 	fanout := networkFactsFanout{
 		bump:    func() { bumps++ },
-		network: func(rcxNetworkPayload) {},
+		network: func(networkFactsPayload) {},
 	}
 
 	fanout.Update(networkFactsPayload{Transport: "cellular", Carrier: "25001"})

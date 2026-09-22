@@ -26,7 +26,8 @@ import (
 	LC "github.com/metacubex/mihomo/listener/config"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
-	"github.com/metacubex/mihomo/tunnel/statistic"
+
+	"core/rcx"
 )
 
 func namedProxy(name string) constant.Proxy {
@@ -550,8 +551,8 @@ func TestHandleSuspendDropsStaleConnectionsIndependentlyOfEngine(t *testing.T) {
 	previousEngine := rcxEngineInstance
 	refreshHealthChecks = func() { refreshes.Add(1) }
 	dropStaleConnections = func() { drops.Add(1) }
-	engine := newRcxEngine(newFakeRuntime())
-	engine.enabled = true
+	engine := rcx.NewEngine(rcxCoreRuntime{})
+	engine.SetEnabledForTest(true)
 	rcxEngineInstance = engine
 	t.Cleanup(func() {
 		refreshHealthChecks = previousRefresh
@@ -1055,16 +1056,16 @@ func TestPatchSelectGroupSerialisesWithProxyChanges(t *testing.T) {
 
 // RCX-NODE must stay hand-selectable: the manual pick is what arms the hold.
 func TestHandleChangeProxyAdmitsNodeGroupOnly(t *testing.T) {
-	node := selectorGroup(t, rcxGroupNode, "node-a", "node-b")
-	final := selectorGroup(t, rcxGroupFinal, "node-a")
+	node := selectorGroup(t, rcx.GroupNode, "node-a", "node-b")
+	final := selectorGroup(t, rcx.GroupFinal, "node-a")
 	tunnel.UpdateProxies(
-		map[string]constant.Proxy{rcxGroupNode: node, rcxGroupFinal: final},
+		map[string]constant.Proxy{rcx.GroupNode: node, rcx.GroupFinal: final},
 		nil,
 	)
 	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
 
 	if message := handleChangeProxy(&ChangeProxyParams{
-		GroupName: rcxGroupNode,
+		GroupName: rcx.GroupNode,
 		ProxyName: "node-b",
 	}); message != "" {
 		t.Fatalf("RCX-NODE change failed: %q", message)
@@ -1074,7 +1075,7 @@ func TestHandleChangeProxyAdmitsNodeGroupOnly(t *testing.T) {
 	}
 
 	if message := handleChangeProxy(&ChangeProxyParams{
-		GroupName: rcxGroupFinal,
+		GroupName: rcx.GroupFinal,
 		ProxyName: "node-a",
 	}); message != errGroupNotFound.Error() {
 		t.Errorf("RCX-FINAL message = %q, want the group not found rejection", message)
@@ -1446,27 +1447,29 @@ func TestHandleGetProxiesSeesAProviderUpdate(t *testing.T) {
 	}
 }
 
-// The engine and the Requests page share one notify hook: whichever assignment loses goes dark.
-func TestRequestNotifyReachesTheEngine(t *testing.T) {
-	engine := rcxEngineInstance
-	engine.mu.Lock()
-	enabled, hosts := engine.enabled, engine.openHosts
-	engine.enabled = true
-	engine.openHosts = map[string]struct{}{"marker.example": {}}
-	engine.mu.Unlock()
-	t.Cleanup(func() {
-		engine.mu.Lock()
-		engine.enabled, engine.openHosts = enabled, hosts
-		delete(engine.openSeen, "marker-1")
-		engine.mu.Unlock()
-	})
+// match() calls the hook holding configMux, and takes selectMu under configMu, so it must drop rather than reach for a lock.
+func TestNoteDialNeitherBlocksNorTakesCoreLocks(t *testing.T) {
+	engine := rcx.NewEngine(rcxCoreRuntime{})
+	engine.SetEnabledForTest(true)
 
-	statistic.DefaultRequestNotify(newFakeTracker("marker-1", "node-a", "marker.example"))
+	configMu.Lock()
+	selectMu.Lock()
+	defer func() {
+		selectMu.Unlock()
+		configMu.Unlock()
+	}()
 
-	engine.mu.RLock()
-	sighting, seen := engine.openSeen["marker-1"]
-	engine.mu.RUnlock()
-	if !seen || sighting.node != "node-a" {
-		t.Error("the engine never saw the connection: its side of the hook is gone")
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < 4096; i++ {
+			engine.NoteDial("node", true, time.Millisecond, time.Now())
+		}
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("the dial hook blocked: it must drop events, never wait")
 	}
 }

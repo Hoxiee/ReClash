@@ -31,6 +31,8 @@ import (
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
+
+	"core/rcx"
 )
 
 var (
@@ -349,7 +351,7 @@ func selectableGroup(groupName string) (outboundgroup.SelectAble, error) {
 // RCX-NODE is engine-owned but hand-selectable, which is what arms
 // manual-hold; the other RCX groups are invisible plumbing.
 func rcxIsSelectableServiceGroup(name string) bool {
-	return rcxIsServiceGroup(name) && name != rcxGroupNode
+	return rcxIsServiceGroup(name) && name != rcx.GroupNode
 }
 
 func handleChangeProxy(params *ChangeProxyParams) string {
@@ -378,7 +380,7 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 	}
 
 	// The host already wrote the selector: the engine only learns the pick.
-	if params.GroupName == rcxGroupNode {
+	if params.GroupName == rcx.GroupNode {
 		rcxEngineInstance.OnManualAsserted(params.ProxyName)
 	}
 	if params.Manual && params.ProxyName != "" {
