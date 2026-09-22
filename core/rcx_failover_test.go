@@ -540,3 +540,25 @@ func TestLiveTrafficWithoutOpenProofStillProbesUnderCensorship(t *testing.T) {
 		t.Fatal("a proven-open live node still paid for a routine probe")
 	}
 }
+
+func TestStallHoldsAnIncumbentThatStillAnswers(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "rival")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent, runtime.selected = "current", "current"
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.candidates(runtime.members)
+	engine.ledger.NoteProbe("rival", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+	engine.ledger.NoteIncumbentStalled("current", engine.envKey, runtime.Now())
+	engine.probing, engine.probeKind = true, rcxWaveIncident
+	engine.probeStarted = map[string]struct{}{}
+	engine.probeResults = nil
+
+	engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+		{Node: "rival", Role: rcxRoleOpen, Outcome: rcxProbeOK, DelayMs: 40},
+	}})
+
+	if runtime.selected != "current" {
+		t.Fatalf("selected = %q, want a stalled-but-unrefuted incumbent held, not walked off on an idle pause", runtime.selected)
+	}
+}

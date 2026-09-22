@@ -229,6 +229,20 @@ abstract class RcxLaneSelector with _$RcxLaneSelector {
 }
 
 @freezed
+abstract class RcxNodeRule with _$RcxNodeRule {
+  const factory RcxNodeRule({
+    @JsonKey(name: 'a') required String action,
+    @JsonKey(name: 'p', includeIfNull: false) String? provider,
+    @JsonKey(name: 'n', includeIfNull: false) String? nameContains,
+    @JsonKey(name: 'g', includeIfNull: false) String? group,
+    @JsonKey(name: 'c', includeIfNull: false) String? country,
+  }) = _RcxNodeRule;
+
+  factory RcxNodeRule.fromJson(Map<String, Object?> json) =>
+      _$RcxNodeRuleFromJson(json);
+}
+
+@freezed
 abstract class RcxLaneConfig with _$RcxLaneConfig {
   const factory RcxLaneConfig({
     @JsonKey(name: 'id') required String capabilityId,
@@ -258,7 +272,11 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'lm') @Default([]) List<RcxMarker> localMarkers,
     @JsonKey(name: 'nh') @Default([]) List<String> nameHints,
     @JsonKey(name: 'ee') @Default([]) List<String> egressEchoes,
+    @JsonKey(name: 'ce') @Default([]) List<String> countryEchoes,
     @JsonKey(name: 'bp') required List<String> breakerPatterns,
+    @JsonKey(name: 'nr') @Default([]) List<RcxNodeRule> nodeRules,
+    @JsonKey(name: 'ac') @Default([]) List<String> avoidCountries,
+    @JsonKey(name: 'lb') @Default([]) List<int> latencyBands,
     @JsonKey(name: 'dlr') required bool allowDomesticLastResort,
     @JsonKey(name: 'udp') required bool requireUdp,
     @JsonKey(name: 'rpk') required bool respectPick,

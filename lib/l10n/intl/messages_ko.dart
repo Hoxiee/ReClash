@@ -1079,6 +1079,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "findingPorcelain": MessageLookupByLibrary.simpleMessage("도자기"),
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage("고요한 자동 조종"),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("특이점"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "링을 한 점으로 붕괴할 때까지 쥐고 있자 다시 터졌습니다.",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("해넘이"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "세션이 새해 자정을 넘겼습니다.",

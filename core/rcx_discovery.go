@@ -205,15 +205,65 @@ func (e *rcxEngine) discoveryReport() rcxDiscoveryReport {
 	return rcxDiscoveryReport{Covered: covered, Pending: len(keys) - covered, Attempts: d.Attempts, Confirmations: d.Confirmations, State: reason}
 }
 
+// The tick re-proves only this handful; the slow, far, or dead tail is covered
+// once by discovery and thereafter reached solely by the reactive waves.
+func (e *rcxEngine) warmPool(candidates []rcxCandidate, now time.Time) map[string]struct{} {
+	input := rcxDecisionInput{
+		Terrain: e.terrainCurrent(), Incumbent: e.incumbent, Pin: e.pin(),
+		Policy: e.cfg.policy(), Now: now,
+	}
+	compare := rcxCompareFor(input.Policy.Strategy)
+	type rankedNode struct {
+		name string
+		key  rcxKey
+	}
+	proven := make([]rankedNode, 0, len(candidates))
+	for _, c := range candidates {
+		if !rcxEligible(c, input) ||
+			(c.Facts.OpenWorld != rcxProofProven && c.Facts.Transit != rcxProofProven) {
+			continue
+		}
+		key := rcxKeyOf(c, input)
+		if key.verdict == rcxVerdictLastResort {
+			continue
+		}
+		proven = append(proven, rankedNode{c.Name, key})
+	}
+	sort.SliceStable(proven, func(i, j int) bool {
+		return compare(proven[i].key, proven[j].key) < 0
+	})
+	warm := make(map[string]struct{}, rcxWarmPoolCap+rcxStandbyCount+2)
+	for i, r := range proven {
+		if i >= rcxWarmPoolCap {
+			break
+		}
+		warm[r.name] = struct{}{}
+	}
+	for _, name := range e.standbyNames() {
+		warm[name] = struct{}{}
+	}
+	if e.incumbent != "" {
+		warm[e.incumbent] = struct{}{}
+	}
+	if pin := e.pin(); pin != "" {
+		warm[pin] = struct{}{}
+	}
+	return warm
+}
+
 func (e *rcxEngine) planMaintenance(candidates []rcxCandidate, members []rcxMember) []rcxProbeNode {
 	now := e.runtime.Now()
 	byName := map[string]rcxCandidate{}
 	for _, c := range candidates {
 		byName[c.Name] = c
 	}
+	warm := e.warmPool(candidates, now)
 	pool := []rcxProbeNode{}
 	for _, m := range members {
 		c := byName[m.Name]
+		if _, ok := warm[m.Name]; !ok {
+			continue
+		}
 		if !e.proofDue(m.Name, now) || c.Circuit || now.Before(c.CoolUntil) {
 			continue
 		}

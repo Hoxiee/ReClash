@@ -305,3 +305,21 @@ func TestCoreRuntimeRequiresConfiguredLaneShape(t *testing.T) {
 		t.Fatal("a lane missing RCX-NODE fallback activated RCX")
 	}
 }
+
+func TestParseEchoCountry(t *testing.T) {
+	cases := map[string]string{
+		"RU":                              "RU",
+		" ru\n":                           "RU",
+		`{"ip":"1.2.3.4","country":"RU"}`: "RU",
+		`{"country_code":"ir"}`:           "IR",
+		`{"countryCode":"CN"}`:            "CN",
+		"1.2.3.4":                         "",
+		"Russia":                          "",
+		`{"ip":"1.2.3.4"}`:                "",
+	}
+	for body, want := range cases {
+		if got := rcxParseEchoCountry([]byte(body)); got != want {
+			t.Errorf("rcxParseEchoCountry(%q) = %q, want %q", body, got, want)
+		}
+	}
+}

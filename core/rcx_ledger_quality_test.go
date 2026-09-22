@@ -198,11 +198,11 @@ func TestLedgerQualityRejectsMixedRoleMarkerEpochAndOldSamples(t *testing.T) {
 	ledger, now := rcxTestLedger()
 	ledger.NoteProbe("node", "env", rcxRoleOpen, rcxProbeOK, 5, now)
 	ledger.NoteHarvestedProbe("node", "env", 6, now)
-	ledger.NoteQualitySample("node", "env", "marker", 7, 80, now.Add(-rcxQualityTTL-time.Second))
+	ledger.NoteQualitySample("node", "env", "marker", 7, 80, now.Add(-rcxRankingMedianTTL-time.Second))
 	ledger.NoteQualitySample("node", "env", "other", 7, 8, now)
 	ledger.NoteQualitySample("node", "env", "marker", 6, 9, now)
 	ledger.NoteRoleQualitySample("node", "env", "marker", rcxRoleDomestic, 7, 10, now)
-	ledger.NoteQualitySample("node", "env", "marker", 7, 90, now.Add(-10*time.Second))
+	ledger.NoteQualitySample("node", "env", "marker", 7, 90, now.Add(-rcxRankingMedianTTL+time.Minute))
 	ledger.NoteQualitySample("node", "env", "marker", 7, 100, now)
 	if ms, count := ledger.QualityMedian("node", "env", "marker", 7, now); ms != 100 || count != 2 {
 		t.Fatalf("quality median/count = %d/%d, want 100/2", ms, count)

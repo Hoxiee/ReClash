@@ -1088,6 +1088,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "findingPorcelain": MessageLookupByLibrary.simpleMessage("磁器"),
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage("静かな自動操縦"),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("特異点"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "リングは一点に崩壊するまで握られ、再び弾けました。",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("年越し"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "セッションが新年の午前零時を越えました。",

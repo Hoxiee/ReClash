@@ -172,12 +172,14 @@ func TestQualityDiscoveryUsesHostFallbackAndUnknownIsNotFastest(t *testing.T) {
 	own.MedianMs, own.HostMs, own.Order = 249, 20, 1
 	input := rcxDecisionInput{Terrain: rcxTerrainNormal, Candidates: []rcxCandidate{unknown, own, host}}
 	ranked := rcxRank(input)
-	if ranked[0].Candidate.Name != host.Name || ranked[2].Candidate.Name != unknown.Name {
+	// A measured median outranks a lower unmeasured entry-ping; among the unmeasured
+	// host-ping is only a fallback, and a signal-less node is never fastest.
+	if ranked[0].Candidate.Name != own.Name || ranked[1].Candidate.Name != host.Name || ranked[2].Candidate.Name != unknown.Name {
 		t.Fatalf("unexpected shortlist: %+v", ranked)
 	}
-	input.Incumbent = own.Name
-	if got := rcxDecideAt(input); got.Switch || got.Reason != rcxReasonQualityConfirming {
-		t.Fatalf("host-only shortlist must require paired confirmation: %+v", got)
+	input.Incumbent = unknown.Name
+	if got := rcxDecideAt(input); got.Switch {
+		t.Fatalf("an unmeasured host-ping edge must not move traffic without a measured median: %+v", got)
 	}
 }
 

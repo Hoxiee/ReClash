@@ -21,13 +21,20 @@ Future<void> _reveal(
   WidgetTester tester,
   Finder finder, {
   double delta = 250,
+  Finder? scrollable,
 }) async {
   await tester.scrollUntilVisible(
     finder,
     delta,
-    scrollable: find.byType(Scrollable).first,
+    scrollable: scrollable ?? find.byType(Scrollable).first,
   );
   await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _openAdvanced(WidgetTester tester) async {
+  await _reveal(tester, find.text('Advanced configuration'), delta: 200);
+  await tester.tap(find.text('Advanced configuration'), warnIfMissed: false);
   await tester.pumpAndSettle();
 }
 
@@ -99,7 +106,8 @@ void main() {
 
     expect(find.text('Require UDP support'), findsOne);
     expect(find.text('Settle time'), findsOne);
-    await _reveal(tester, find.text('Servers per check'), delta: 200);
+
+    await _openAdvanced(tester);
 
     expect(find.text('Servers per check'), findsOne);
   });
@@ -120,7 +128,13 @@ void main() {
         ),
       );
 
-      await _reveal(tester, find.text(title), delta: 300);
+      await _openAdvanced(tester);
+      await _reveal(
+        tester,
+        find.text(title),
+        delta: 300,
+        scrollable: find.byType(Scrollable).last,
+      );
       await tester.tap(find.text(title), warnIfMissed: false);
       await tester.pumpAndSettle();
 
@@ -174,8 +188,6 @@ void main() {
     );
 
     await _reveal(tester, find.text('Strategy'));
-    await tester.tap(find.text('Strategy'), warnIfMissed: false);
-    await tester.pumpAndSettle();
 
     expect(
       find.text('Keeps a working server and changes it less often'),
@@ -193,10 +205,8 @@ void main() {
   ) async {
     final container = await _pump(tester, props: _russia);
 
-    await _reveal(tester, find.text('Strategy'));
-    await tester.tap(find.text('Strategy'), warnIfMissed: false);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Saver').last);
+    await _reveal(tester, find.text('Saver'));
+    await tester.tap(find.text('Saver'));
     await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
@@ -207,7 +217,7 @@ void main() {
     expect(find.text('Russia · adjusted'), findsNothing);
   });
 
-  testWidgets('a hand-moved pace marks the strategy and resets back', (
+  testWidgets('a hand-moved pace enables reset, which restores the pace', (
     tester,
   ) async {
     final container = await _pump(
@@ -217,12 +227,13 @@ void main() {
           .copyWith(dwellSeconds: 30),
     );
 
-    await _reveal(tester, find.text('Strategy'));
+    final reset = find.widgetWithText(FilledButton, 'Reset');
+    expect(
+      tester.widget<FilledButton>(reset).onPressed,
+      isNotNull,
+      reason: 'an off-preset pace offers a reset',
+    );
 
-    expect(find.text('Reliable · adjusted'), findsOne);
-    final reset = find.text('Reset');
-    await tester.ensureVisible(reset);
-    await tester.pumpAndSettle();
     await tester.tap(reset);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Confirm'));

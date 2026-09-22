@@ -650,6 +650,105 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
   });
+
+  testWidgets('holding on past the nova collapses into a singularity', (
+    tester,
+  ) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2400));
+
+    // The finger never leaves, so the spent nova caves into the collapse and
+    // the collapse into the big bang.
+    await _pumpUntil(tester, find.byKey(HeroOrb.collapseKey));
+    expect(find.byKey(HeroOrb.collapseKey), findsOneWidget);
+    expect(find.byKey(HeroOrb.novaKey), findsNothing);
+
+    await _pumpUntil(tester, find.byKey(HeroOrb.singularityKey));
+    expect(find.byKey(HeroOrb.singularityKey), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pump();
+    expect(find.byKey(HeroOrb.singularityKey), findsNothing);
+    expect(find.byKey(HeroOrb.collapseKey), findsNothing);
+  });
+
+  testWidgets('a release during the collapse never reaches the big bang', (
+    tester,
+  ) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2400));
+
+    await _pumpUntil(tester, find.byKey(HeroOrb.collapseKey));
+    expect(find.byKey(HeroOrb.collapseKey), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.byKey(HeroOrb.singularityKey), findsNothing);
+    expect(find.byKey(HeroOrb.collapseKey), findsNothing);
+  });
+
+  testWidgets('reduced motion never collapses', (tester) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on, reducedMotion: true);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+
+    await tester.pump(const Duration(milliseconds: 2400));
+    await tester.pump(const Duration(milliseconds: 2800));
+    await tester.pump(const Duration(milliseconds: 2000));
+    expect(find.byKey(HeroOrb.collapseKey), findsNothing);
+    expect(find.byKey(HeroOrb.singularityKey), findsNothing);
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('no wind-up shards linger once the blast has fired', (
+    tester,
+  ) async {
+    await pumpOrb(tester, phase: HeroOrbPhase.on);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(HeroOrb)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2400));
+    await _pumpUntil(tester, find.byKey(HeroOrb.novaKey));
+
+    // Once the blast has fired the completed charge must never redraw its
+    // shards behind the nova, in the gap before the collapse, or through it.
+    for (var i = 0; i < 90; i++) {
+      expect(find.byKey(HeroOrb.chargeKey), findsNothing);
+      if (find.byKey(HeroOrb.singularityKey).evaluate().isNotEmpty) break;
+      await tester.pump(const Duration(milliseconds: 80));
+    }
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 5));
+  });
+}
+
+Future<void> _pumpUntil(
+  WidgetTester tester,
+  Finder finder, {
+  Duration step = const Duration(milliseconds: 80),
+  int maxSteps = 120,
+}) async {
+  for (var i = 0; i < maxSteps; i++) {
+    if (finder.evaluate().isNotEmpty) return;
+    await tester.pump(step);
+  }
 }
 
 class _RecordingCommonAction extends CommonAction {

@@ -10064,6 +10064,196 @@ class AppLocalizations {
     );
   }
 
+  /// `Avoid exit countries`
+  String get smartRoutingAvoidCountries {
+    return Intl.message(
+      'Avoid exit countries',
+      name: 'smartRoutingAvoidCountries',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never route through a server measured egressing in these countries, even as a last resort`
+  String get smartRoutingAvoidCountriesDesc {
+    return Intl.message(
+      'Never route through a server measured egressing in these countries, even as a last resort',
+      name: 'smartRoutingAvoidCountriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Country lookup services`
+  String get smartRoutingCountryEchoes {
+    return Intl.message(
+      'Country lookup services',
+      name: 'smartRoutingCountryEchoes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Endpoints that report a server's real exit country when verifying a suspicious node`
+  String get smartRoutingCountryEchoesDesc {
+    return Intl.message(
+      'Endpoints that report a server\'s real exit country when verifying a suspicious node',
+      name: 'smartRoutingCountryEchoesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Latency ladder`
+  String get smartRoutingLatencyBands {
+    return Intl.message(
+      'Latency ladder',
+      name: 'smartRoutingLatencyBands',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Millisecond edges that group servers into speed tiers; empty uses the strategy default`
+  String get smartRoutingLatencyBandsDesc {
+    return Intl.message(
+      'Millisecond edges that group servers into speed tiers; empty uses the strategy default',
+      name: 'smartRoutingLatencyBandsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server rules`
+  String get smartRoutingRules {
+    return Intl.message(
+      'Server rules',
+      name: 'smartRoutingRules',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore, hold back, or prefer servers by name, provider, or measured country`
+  String get smartRoutingRulesDesc {
+    return Intl.message(
+      'Ignore, hold back, or prefer servers by name, provider, or measured country',
+      name: 'smartRoutingRulesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore`
+  String get smartRoutingRuleIgnore {
+    return Intl.message(
+      'Ignore',
+      name: 'smartRoutingRuleIgnore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last resort`
+  String get smartRoutingRuleLastResort {
+    return Intl.message(
+      'Last resort',
+      name: 'smartRoutingRuleLastResort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Prefer`
+  String get smartRoutingRulePrefer {
+    return Intl.message(
+      'Prefer',
+      name: 'smartRoutingRulePrefer',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Matches any server`
+  String get smartRoutingRuleMatchAny {
+    return Intl.message(
+      'Matches any server',
+      name: 'smartRoutingRuleMatchAny',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add rule`
+  String get smartRoutingRuleAdd {
+    return Intl.message(
+      'Add rule',
+      name: 'smartRoutingRuleAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Provider`
+  String get smartRoutingRuleProvider {
+    return Intl.message(
+      'Provider',
+      name: 'smartRoutingRuleProvider',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name contains`
+  String get smartRoutingRuleName {
+    return Intl.message(
+      'Name contains',
+      name: 'smartRoutingRuleName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group`
+  String get smartRoutingRuleGroup {
+    return Intl.message(
+      'Group',
+      name: 'smartRoutingRuleGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit country`
+  String get smartRoutingRuleCountry {
+    return Intl.message(
+      'Exit country',
+      name: 'smartRoutingRuleCountry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignored by a rule`
+  String get smartRoutingBlockIgnored {
+    return Intl.message(
+      'Ignored by a rule',
+      name: 'smartRoutingBlockIgnored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exits through an avoided country`
+  String get smartRoutingBlockAvoidExit {
+    return Intl.message(
+      'Exits through an avoided country',
+      name: 'smartRoutingBlockAvoidExit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Detection`
   String get smartRoutingDetection {
     return Intl.message(
@@ -10084,10 +10274,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Latency bands are fixed: a knob here would let milliseconds outrank whether a server works`
+  /// `The latency ladder groups servers into speed tiers; a measured server always outranks an unmeasured one`
   String get smartRoutingRankingDesc {
     return Intl.message(
-      'Latency bands are fixed: a knob here would let milliseconds outrank whether a server works',
+      'The latency ladder groups servers into speed tiers; a measured server always outranks an unmeasured one',
       name: 'smartRoutingRankingDesc',
       desc: '',
       args: [],
@@ -14535,6 +14725,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Singularity`
+  String get findingSingularity {
+    return Intl.message(
+      'Singularity',
+      name: 'findingSingularity',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Marks`
   String get findingMarks {
     return Intl.message('Marks', name: 'findingMarks', desc: '', args: []);
@@ -14555,6 +14755,16 @@ class AppLocalizations {
     return Intl.message(
       'The ring listened to live traffic for six seconds.',
       name: 'findingOscilloscopeDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The orb was held until it collapsed to a point and burst anew.`
+  String get findingSingularityDesc {
+    return Intl.message(
+      'The orb was held until it collapsed to a point and burst anew.',
+      name: 'findingSingularityDesc',
       desc: '',
       args: [],
     );

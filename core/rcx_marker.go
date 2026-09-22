@@ -57,6 +57,13 @@ func (e *rcxEngine) noteMarkerFailure(markerID, node string, now time.Time) {
 	if e.ledger.MarkerFreshlyPassing(e.envKey, markerID, now) {
 		return
 	}
+	// Already quarantined: let this window expire and re-evaluate on a clean one.
+	// Re-arming Until on every renewed failure (and on the fallback re-probe of the
+	// quarantined marker) kept a dead marker quarantined forever, so the check stayed
+	// "temporarily held back" and never completed.
+	if e.markerQuarantined(markerID, now) {
+		return
+	}
 	bucket := rcxFailureBucket(member)
 	quarantine := e.snapshot.Quarantines[markerID]
 	failures := quarantine.Failures[:0]

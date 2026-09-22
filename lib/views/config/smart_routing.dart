@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -76,7 +77,7 @@ class SmartRoutingView extends ConsumerWidget {
     if (props.enabled) {
       slivers.addAll([
         SettingSection.sliver(
-          title: appLocalizations.smartRoutingPreset,
+          title: appLocalizations.smartRoutingStrategy,
           actions: [
             const SizedBox(width: 8),
             CommonMinFilledButtonTheme(
@@ -89,29 +90,23 @@ class SmartRoutingView extends ConsumerWidget {
             ),
           ],
           items: [
-            DecorationListItem.options(
-              title: Text(appLocalizations.smartRoutingStrategy),
-              subtitle: Text(
-                props.matchesStrategy
-                    ? props.strategy.description
-                    : appLocalizations.smartRoutingStrategyEdited(
-                        props.strategy.label,
-                      ),
+            for (final strategy in SmartRoutingStrategy.values)
+              DecorationListItem(
+                minVerticalPadding: 8,
+                isSelected: props.strategy == strategy,
+                leading: Icon(
+                  props.strategy == strategy
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_unchecked_rounded,
+                  color: props.strategy == strategy
+                      ? context.colorScheme.primary
+                      : context.colorScheme.onSurfaceVariant,
+                ),
+                title: Text(strategy.label),
+                subtitle: Text(strategy.description),
+                onPressed: () =>
+                    _update(ref, (state) => state.applyStrategy(strategy)),
               ),
-              dialogTitle: appLocalizations.smartRoutingStrategy,
-              options: SmartRoutingStrategy.values,
-              value: props.strategy,
-              textBuilder: (value) => (value as SmartRoutingStrategy).label,
-              subtitleBuilder: (value) =>
-                  (value as SmartRoutingStrategy).description,
-              onChanged: (value) {
-                if (value == null) return;
-                _update(
-                  ref,
-                  (state) => state.applyStrategy(value as SmartRoutingStrategy),
-                );
-              },
-            ),
           ],
         ),
         SettingSection.sliver(
@@ -179,92 +174,14 @@ class SmartRoutingView extends ConsumerWidget {
           ],
         ),
         SettingSection.sliver(
-          title: appLocalizations.smartRoutingProbing,
-          items: [
-            DecorationListItem.options(
-              title: Text(appLocalizations.smartRoutingWave),
-              subtitle: Text(appLocalizations.smartRoutingWaveDesc),
-              dialogTitle: appLocalizations.smartRoutingWave,
-              options: _waveChoices,
-              value: props.waveWidth,
-              textBuilder: (value) =>
-                  appLocalizations.smartRoutingWaveNodes(value as int),
-              onChanged: (value) {
-                if (value == null) return;
-                _update(
-                  ref,
-                  (state) => state.copyWith(waveWidth: value as int),
-                );
-              },
-            ),
-          ],
-        ),
-        SettingSection.sliver(
-          title: appLocalizations.smartRoutingDetection,
-          items: [
-            _StringListItem(
-              title: appLocalizations.smartRoutingCanariesForeign,
-              desc: appLocalizations.smartRoutingCanariesForeignDesc,
-              value: props.canaryForeign,
-              write: (state, value) => state.copyWith(canaryForeign: value),
-            ),
-            _StringListItem(
-              title: appLocalizations.smartRoutingCanariesDomestic,
-              desc: appLocalizations.smartRoutingCanariesDomesticDesc,
-              value: props.canaryDomestic,
-              write: (state, value) => state.copyWith(canaryDomestic: value),
-            ),
-            _StringListItem(
-              title: appLocalizations.smartRoutingCensor,
-              desc: appLocalizations.smartRoutingCensorDesc,
-              value: props.censorCountries,
-              write: (state, value) => state.copyWith(censorCountries: value),
-            ),
-            _StringListItem(
-              title: appLocalizations.smartRoutingBreakerPatterns,
-              desc: appLocalizations.smartRoutingBreakerPatternsDesc,
-              value: props.breakerPatterns,
-              write: (state, value) => state.copyWith(breakerPatterns: value),
-            ),
-          ],
-        ),
-        SettingSection.sliver(
-          title: appLocalizations.smartRoutingMarkers,
-          items: [
-            _MarkersItem(
-              title: appLocalizations.smartRoutingMarkersOpen,
-              desc: appLocalizations.smartRoutingMarkersOpenDesc,
-              markers: props.openMarkers,
-              domestic: false,
-            ),
-            _MarkersItem(
-              title: appLocalizations.smartRoutingMarkersDomestic,
-              desc: appLocalizations.smartRoutingMarkersDomesticDesc,
-              markers: props.domesticMarkers,
-              domestic: true,
-            ),
-          ],
-        ),
-        SettingSection.sliver(
-          title: appLocalizations.smartRoutingRanking,
           bottom: 24,
           items: [
-            DecorationListItem(
-              minVerticalPadding: 8,
-              title: Text(appLocalizations.smartRoutingRankOrder),
-              subtitle: Text(
-                [
-                  appLocalizations.smartRoutingKeyVerdict,
-                  appLocalizations.smartRoutingKeyMisfit,
-                  appLocalizations.smartRoutingKeyEvidence,
-                  appLocalizations.smartRoutingKeyBand,
-                ].join(' → '),
-              ),
-            ),
-            DecorationListItem(
-              minVerticalPadding: 8,
-              title: Text(appLocalizations.smartRoutingKeyBand),
-              subtitle: Text(appLocalizations.smartRoutingRankingDesc),
+            DecorationListItem.open(
+              leading: const Icon(Icons.tune_rounded),
+              title: Text(appLocalizations.advancedConfig),
+              subtitle: Text(appLocalizations.advancedConfigDesc),
+              blur: false,
+              widget: const _AdvancedRoutingPage(),
             ),
           ],
         ),
@@ -285,6 +202,149 @@ class SmartRoutingView extends ConsumerWidget {
       title: appLocalizations.smartRouting,
       body: SettingsScrollView(
         slivers: [...slivers, const SettingBottomInset.sliver()],
+      ),
+    );
+  }
+}
+
+/// The expert knobs live one level down so the main screen stays a short list
+/// of the choices most users make. Everything here is still preset-seeded and
+/// editable; the engine reads the same provider whether the page is open or not.
+class _AdvancedRoutingPage extends ConsumerWidget {
+  const _AdvancedRoutingPage();
+
+  void _update(WidgetRef ref, SmartRoutingProps Function(SmartRoutingProps) f) {
+    ref.read(smartRoutingSettingProvider.notifier).update(f);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(smartRoutingSettingProvider);
+    return CommonScaffold(
+      title: appLocalizations.advancedConfig,
+      body: SettingsListView(
+        children: [
+          SettingSection(
+            top: 16,
+            title: appLocalizations.smartRoutingProbing,
+            items: [
+              DecorationListItem.options(
+                title: Text(appLocalizations.smartRoutingWave),
+                subtitle: Text(appLocalizations.smartRoutingWaveDesc),
+                dialogTitle: appLocalizations.smartRoutingWave,
+                options: _waveChoices,
+                value: props.waveWidth,
+                textBuilder: (value) =>
+                    appLocalizations.smartRoutingWaveNodes(value as int),
+                onChanged: (value) {
+                  if (value == null) return;
+                  _update(
+                    ref,
+                    (state) => state.copyWith(waveWidth: value as int),
+                  );
+                },
+              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingDetection,
+            items: [
+              _StringListItem(
+                title: appLocalizations.smartRoutingCanariesForeign,
+                desc: appLocalizations.smartRoutingCanariesForeignDesc,
+                value: props.canaryForeign,
+                write: (state, value) => state.copyWith(canaryForeign: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingCanariesDomestic,
+                desc: appLocalizations.smartRoutingCanariesDomesticDesc,
+                value: props.canaryDomestic,
+                write: (state, value) => state.copyWith(canaryDomestic: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingCensor,
+                desc: appLocalizations.smartRoutingCensorDesc,
+                value: props.censorCountries,
+                write: (state, value) => state.copyWith(censorCountries: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingBreakerPatterns,
+                desc: appLocalizations.smartRoutingBreakerPatternsDesc,
+                value: props.breakerPatterns,
+                write: (state, value) => state.copyWith(breakerPatterns: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingAvoidCountries,
+                desc: appLocalizations.smartRoutingAvoidCountriesDesc,
+                value: props.avoidCountries,
+                write: (state, value) => state.copyWith(avoidCountries: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingCountryEchoes,
+                desc: appLocalizations.smartRoutingCountryEchoesDesc,
+                value: props.countryEchoes,
+                write: (state, value) => state.copyWith(countryEchoes: value),
+              ),
+              _RulesItem(rules: props.nodeRules),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingMarkers,
+            items: [
+              _MarkersItem(
+                title: appLocalizations.smartRoutingMarkersOpen,
+                desc: appLocalizations.smartRoutingMarkersOpenDesc,
+                markers: props.openMarkers,
+                domestic: false,
+              ),
+              _MarkersItem(
+                title: appLocalizations.smartRoutingMarkersDomestic,
+                desc: appLocalizations.smartRoutingMarkersDomesticDesc,
+                markers: props.domesticMarkers,
+                domestic: true,
+              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingRanking,
+            bottom: 24,
+            items: [
+              DecorationListItem(
+                minVerticalPadding: 8,
+                title: Text(appLocalizations.smartRoutingRankOrder),
+                subtitle: Text(
+                  [
+                    appLocalizations.smartRoutingKeyVerdict,
+                    appLocalizations.smartRoutingKeyMisfit,
+                    appLocalizations.smartRoutingKeyEvidence,
+                    appLocalizations.smartRoutingKeyBand,
+                  ].join(' → '),
+                ),
+              ),
+              DecorationListItem(
+                minVerticalPadding: 8,
+                title: Text(appLocalizations.smartRoutingKeyBand),
+                subtitle: Text(appLocalizations.smartRoutingRankingDesc),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingLatencyBands,
+                desc: appLocalizations.smartRoutingLatencyBandsDesc,
+                value: props.latencyBands
+                    .map((edge) => edge.toString())
+                    .toList(),
+                write: (state, value) => state.copyWith(
+                  latencyBands: value
+                      .map(int.tryParse)
+                      .whereType<int>()
+                      .where((edge) => edge > 0)
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
+          const SettingBottomInset(),
+        ],
       ),
     );
   }
@@ -1145,14 +1205,212 @@ class _StringListItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return DecorationListItem.open(
       title: Text(title),
-      subtitle: Text(
-        value.isEmpty ? desc : '${value.length} · ${value.join(', ')}',
-      ),
+      subtitle: Text(value.isEmpty ? desc : value.join(', ')),
       blur: false,
       widget: ListInputPage(title: title, items: value, titleBuilder: Text.new),
       onChanged: (items) => ref
           .read(smartRoutingSettingProvider.notifier)
           .update((state) => write(state, List<String>.from(items as List))),
+    );
+  }
+}
+
+String _ruleActionLabel(AppLocalizations l10n, String action) =>
+    switch (action) {
+      'ignore' => l10n.smartRoutingRuleIgnore,
+      'last-resort' => l10n.smartRoutingRuleLastResort,
+      'prefer' => l10n.smartRoutingRulePrefer,
+      _ => action,
+    };
+
+String _ruleMatch(AppLocalizations l10n, RcxNodeRule rule) {
+  final parts = [
+    if (rule.provider?.isNotEmpty ?? false) rule.provider!,
+    if (rule.nameContains?.isNotEmpty ?? false) '"${rule.nameContains!}"',
+    if (rule.group?.isNotEmpty ?? false) rule.group!,
+    if (rule.country?.isNotEmpty ?? false) rule.country!,
+  ];
+  return parts.isEmpty ? l10n.smartRoutingRuleMatchAny : parts.join(' · ');
+}
+
+class _RulesItem extends StatelessWidget {
+  const _RulesItem({required this.rules});
+
+  final List<RcxNodeRule> rules;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    return DecorationListItem.open(
+      title: Text(l10n.smartRoutingRules),
+      subtitle: Text(
+        rules.isEmpty
+            ? l10n.smartRoutingRulesDesc
+            : rules
+                  .map(
+                    (rule) =>
+                        '${_ruleActionLabel(l10n, rule.action)}: ${_ruleMatch(l10n, rule)}',
+                  )
+                  .join('\n'),
+      ),
+      blur: false,
+      widget: const _RulesPage(),
+    );
+  }
+}
+
+class _RulesPage extends ConsumerWidget {
+  const _RulesPage();
+
+  void _remove(WidgetRef ref, int index) {
+    ref.read(smartRoutingSettingProvider.notifier).update((state) {
+      final next = [...state.nodeRules]..removeAt(index);
+      return state.copyWith(nodeRules: next);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.appLocalizations;
+    final rules = ref.watch(
+      smartRoutingSettingProvider.select((props) => props.nodeRules),
+    );
+    return CommonScaffold(
+      title: l10n.smartRoutingRules,
+      actions: [
+        CommonMinFilledButtonTheme(
+          child: FilledButton.tonal(
+            onPressed: () => showRuleDialog(context, ref),
+            child: Text(l10n.add),
+          ),
+        ),
+        const SizedBox(width: 8),
+      ],
+      body: rules.isEmpty
+          ? NullStatus(label: l10n.smartRoutingRulesDesc)
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: rules.length,
+              itemBuilder: (context, index) {
+                final rule = rules[index];
+                return DecorationListItem(
+                  title: Text(_ruleActionLabel(l10n, rule.action)),
+                  subtitle: Text(_ruleMatch(l10n, rule)),
+                  trailing: IconButton(
+                    tooltip: l10n.delete,
+                    onPressed: () => _remove(ref, index),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+Future<void> showRuleDialog(BuildContext context, WidgetRef ref) async {
+  final result = await dialogs.showCommonDialog<RcxNodeRule>(
+    child: const _RuleDialog(),
+  );
+  if (result == null) {
+    return;
+  }
+  ref
+      .read(smartRoutingSettingProvider.notifier)
+      .update(
+        (state) => state.copyWith(nodeRules: [...state.nodeRules, result]),
+      );
+}
+
+class _RuleDialog extends StatefulWidget {
+  const _RuleDialog();
+
+  @override
+  State<_RuleDialog> createState() => _RuleDialogState();
+}
+
+class _RuleDialogState extends State<_RuleDialog> {
+  final _provider = TextEditingController();
+  final _name = TextEditingController();
+  final _group = TextEditingController();
+  final _country = TextEditingController();
+  String _action = 'ignore';
+
+  @override
+  void dispose() {
+    _provider.dispose();
+    _name.dispose();
+    _group.dispose();
+    _country.dispose();
+    super.dispose();
+  }
+
+  String? _clean(TextEditingController controller) {
+    final text = controller.text.trim();
+    return text.isEmpty ? null : text;
+  }
+
+  void _submit() {
+    Navigator.of(context).pop(
+      RcxNodeRule(
+        action: _action,
+        provider: _clean(_provider),
+        nameContains: _clean(_name),
+        group: _clean(_group),
+        country: _clean(_country),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.appLocalizations;
+    return CommonDialog(
+      title: l10n.smartRoutingRuleAdd,
+      actions: [TextButton(onPressed: _submit, child: Text(l10n.confirm))],
+      child: Column(
+        spacing: 16,
+        children: [
+          DropdownButtonFormField<String>(
+            initialValue: _action,
+            items: [
+              DropdownMenuItem(
+                value: 'ignore',
+                child: Text(l10n.smartRoutingRuleIgnore),
+              ),
+              DropdownMenuItem(
+                value: 'last-resort',
+                child: Text(l10n.smartRoutingRuleLastResort),
+              ),
+              DropdownMenuItem(
+                value: 'prefer',
+                child: Text(l10n.smartRoutingRulePrefer),
+              ),
+            ],
+            onChanged: (value) => setState(() => _action = value ?? 'ignore'),
+          ),
+          TextFormField(
+            controller: _provider,
+            decoration: InputDecoration(
+              labelText: l10n.smartRoutingRuleProvider,
+            ),
+          ),
+          TextFormField(
+            controller: _name,
+            decoration: InputDecoration(labelText: l10n.smartRoutingRuleName),
+          ),
+          TextFormField(
+            controller: _group,
+            decoration: InputDecoration(labelText: l10n.smartRoutingRuleGroup),
+          ),
+          TextFormField(
+            controller: _country,
+            decoration: InputDecoration(
+              labelText: l10n.smartRoutingRuleCountry,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

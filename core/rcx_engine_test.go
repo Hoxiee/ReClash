@@ -2139,7 +2139,7 @@ func TestEngineMeasuresASuspicionBeforeItMovesTraffic(t *testing.T) {
 	if got := runtime.selected; got != "node" {
 		t.Fatalf("selected = %q: the gain over a suspicion is still unmeasured", got)
 	}
-	if got := runtime.lastStatus().Reason; got != string(rcxReasonMeasuring) {
+	if got := runtime.lastStatus().Reason; got != string(rcxReasonQualityConfirming) {
 		t.Errorf("reason = %q, want the trace to name what the hold waits for", got)
 	}
 
@@ -3032,6 +3032,53 @@ func TestEngineBuysTheMaintenanceProbeOnAnIdleTick(t *testing.T) {
 
 	if !engine.probing {
 		t.Error("nothing measured the park: bytes moving prove transit, not that the proof still holds")
+	}
+}
+
+func TestMaintenanceLeavesTheUnprovenTailCold(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("inc", "tail1", "tail2", "tail3")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "inc"
+	engine.ledger.NoteProbe("inc", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, runtime.Now())
+
+	runtime.advance(engine.ledger.ProofTTL()/2 + time.Minute)
+	members := runtime.members
+	wave := engine.planWave(engine.candidates(members), members, rcxWaveMaintain)
+
+	if len(wave) != 1 || wave[0].Name != "inc" {
+		t.Fatalf("wave = %v, want only the warm incumbent: the unproven tail is discovery's job, not the tick", wave)
+	}
+}
+
+func TestWarmPoolDropsAFarProvenNodeBelowTheFastHandful(t *testing.T) {
+	runtime := newFakeRuntime()
+	names := make([]string, 0, rcxWarmPoolCap+1)
+	for i := 0; i < rcxWarmPoolCap; i++ {
+		names = append(names, "fast"+string(rune('a'+i)))
+	}
+	names = append(names, "far")
+	runtime.members = foreignMembers(names...)
+	for i := range runtime.members {
+		runtime.members[i].HostAt = runtime.Now()
+		if runtime.members[i].Name == "far" {
+			runtime.members[i].HostMs = 900
+		} else {
+			runtime.members[i].HostMs = 40
+		}
+	}
+	engine := newTestEngine(runtime, "ru")
+	now := runtime.Now()
+	for _, m := range runtime.members {
+		engine.ledger.NoteProbe(m.Name, engine.envKey, rcxRoleOpen, rcxProbeOK, m.HostMs, now)
+	}
+
+	warm := engine.warmPool(engine.candidates(runtime.members), now)
+	if _, ok := warm["far"]; ok {
+		t.Fatalf("far proven node is warm; the tick would keep re-proving a 900ms node the fast pool makes redundant")
+	}
+	if _, ok := warm["fasta"]; !ok {
+		t.Fatal("a fast proven node fell out of the warm pool")
 	}
 }
 
@@ -4001,5 +4048,30 @@ func TestEngineRidesTheEchoOnWhicheverProbeCarriesTheOpenRole(t *testing.T) {
 		if (len(target.Echoes) > 0) != (target.Role == rcxRoleOpen) {
 			t.Errorf("target %v carries the wrong echo set: %v", target.Role, target.Echoes)
 		}
+	}
+}
+
+func TestFastForeignWinnerIsNotSunkButVerifiedOnWin(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("Швеция")
+	engine := newTestEngine(runtime, "ru")
+	engine.cfg.CountryEchoes = []string{"https://api.country.is/"}
+	now := runtime.Now()
+	key := engine.key("Швеция")
+	engine.ledger.SetOrigin(key, "US", rcxOriginForeign)
+
+	// A fast foreign node is never pre-sunk on ping alone: it keeps competing.
+	engine.assessTrust("Швеция", key, now)
+	if trust, _ := engine.ledger.Trust(key); trust != rcxTrustUnknown {
+		t.Fatalf("trust = %v, want unknown: a fast foreign node must not be sunk before it is measured", trust)
+	}
+
+	// But an unmeasured winner earns one quick country-service check before traffic.
+	if !engine.wantsLocate("Швеция", now) {
+		t.Fatal("an unverified winner should be verified on win, not trusted blind")
+	}
+	engine.ledger.SetExit(key, "SE", rcxOriginForeign, now)
+	if engine.wantsLocate("Швеция", now) {
+		t.Fatal("a node with a measured foreign egress needs no further check")
 	}
 }

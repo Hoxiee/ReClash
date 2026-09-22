@@ -169,3 +169,32 @@ func cloneLaneConfig(config rcxConfig) rcxConfig {
 	}
 	return config
 }
+
+func TestNodeRulesAndAvoidCountries(t *testing.T) {
+	cfg := rcxConfig{
+		NodeRules: []rcxNodeRule{
+			{Provider: "cheapo", Action: rcxRuleIgnore},
+			{NameContains: "lte", Action: rcxRuleLastResort},
+			{Country: "RU", Action: rcxRulePrefer},
+		},
+		AvoidCountries: []string{"UA"},
+	}
+	if got := cfg.ruleFor("cheapo", "Node 1", "", ""); got != rcxRuleIgnore {
+		t.Errorf("provider rule = %q, want ignore", got)
+	}
+	if got := cfg.ruleFor("x", "Fast LTE Berlin", "", ""); got != rcxRuleLastResort {
+		t.Errorf("name rule = %q, want last-resort", got)
+	}
+	if got := cfg.ruleFor("x", "berlin", "", "ru"); got != rcxRulePrefer {
+		t.Errorf("country rule = %q, want prefer (case-insensitive)", got)
+	}
+	if got := cfg.ruleFor("x", "berlin", "", ""); got != "" {
+		t.Errorf("unmeasured country must not fire a country rule, got %q", got)
+	}
+	if !cfg.avoidsCountry("ua") || cfg.avoidsCountry("") || cfg.avoidsCountry("DE") {
+		t.Error("avoidsCountry mismatch")
+	}
+	if (rcxNodeRule{Action: rcxRuleIgnore}).matches("p", "n", "g", "c") {
+		t.Error("an all-empty rule must match nothing")
+	}
+}

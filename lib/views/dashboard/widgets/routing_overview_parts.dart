@@ -53,6 +53,8 @@ String routingBlockLabel(AppLocalizations l10n, RcxCandidateReport candidate) =>
       'last-resort-barred' => l10n.smartRoutingBlockLastResort,
       'terrain-unfit' => l10n.smartRoutingBlockTerrainUnfit,
       'provider-circuit' => l10n.smartRoutingBlockProviderCircuit,
+      'ignored' => l10n.smartRoutingBlockIgnored,
+      'avoid-exit' => l10n.smartRoutingBlockAvoidExit,
       _ => routingVerdictLabel(l10n, candidate.verdict),
     };
 
@@ -660,7 +662,8 @@ class RoutingCandidateRow extends StatelessWidget {
       if (technical && candidate.region.isNotEmpty) candidate.region,
       if (technical && candidate.origin != 'unknown')
         routingOriginLabel(appLocalizations, candidate.origin),
-      if (technical && (candidate.trust == 'branded' || candidate.trust == 'suspect'))
+      if (technical &&
+          (candidate.trust == 'branded' || candidate.trust == 'suspect'))
         candidate.trust,
       if (technical && candidate.coolFor > 0)
         appLocalizations.smartRoutingCoolFor(candidate.coolFor),

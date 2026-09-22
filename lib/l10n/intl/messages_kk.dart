@@ -1341,6 +1341,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage(
       "Үнсіз автопилот",
     ),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("Сингулярлық"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "Сақина бір нүктеге сығылғанша ұсталып, қайта жарылды.",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("Айналым"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "Сеанс Жаңа жыл түн ортасынан өтті.",

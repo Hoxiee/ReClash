@@ -46,7 +46,10 @@ func (e *rcxEngine) recoveryCanReplace(now time.Time) bool {
 	if e.probeKind == rcxWaveHandoff {
 		return true
 	}
-	return e.suspected(now) || e.ledger.Facts(key, e.envKey, false, now, e.ledger.ProofTTL()).Transit == rcxProofDisproven
+	// A stall alone (suspected) is not a death: confirm it with the incumbent's own
+	// probe before yanking traffic, or an idle pause walks the park and returns.
+	return e.probeRefutesIncumbent(now) ||
+		e.ledger.Facts(key, e.envKey, false, now, e.ledger.ProofTTL()).Transit == rcxProofDisproven
 }
 
 func (e *rcxEngine) automaticMainAllowed(to string, reason rcxReason, now time.Time) bool {

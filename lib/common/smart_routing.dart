@@ -16,6 +16,7 @@ class SmartRoutingBundle {
     this.localMarkers = const [],
     this.nameHints = const [],
     this.egressEchoes = const [],
+    this.countryEchoes = const [],
     this.breakerPatterns = const [],
     this.allowDomesticLastResort = true,
     this.requireUdp = false,
@@ -30,6 +31,7 @@ class SmartRoutingBundle {
   final List<RcxMarker> localMarkers;
   final List<String> nameHints;
   final List<String> egressEchoes;
+  final List<String> countryEchoes;
   final List<String> breakerPatterns;
   final bool allowDomesticLastResort;
   final bool requireUdp;
@@ -43,6 +45,15 @@ class SmartRoutingBundle {
 const _egressEchoes = [
   'https://checkip.amazonaws.com/',
   'https://api.ipify.org/',
+];
+
+// These answer with the exit's country directly, so they place a fronted node
+// more accurately than an mmdb lookup of the echoed IP. They carry request
+// limits, so the engine spends them only on verification probes, not the park.
+const _countryEchoes = [
+  'https://api.country.is/',
+  'https://api.ipgeo.ru/json/',
+  'https://countries.dev/ip',
 ];
 
 // Canaries are IP literals: DNS often answers while transit is dead, so a
@@ -71,8 +82,17 @@ const _russia = SmartRoutingBundle(
   ],
   // localMarkers stay empty until a candidate is device-confirmed to answer only
   // from a Russian egress; an unverified one brands working foreign nodes.
-  nameHints: ['росси', 'russia', 'москва', 'moscow', 'санкт', 'петербург', 'спб'],
+  nameHints: [
+    'росси',
+    'russia',
+    'москва',
+    'moscow',
+    'санкт',
+    'петербург',
+    'спб',
+  ],
   egressEchoes: _egressEchoes,
+  countryEchoes: _countryEchoes,
   breakerPatterns: ['lte', 'обход', 'глушил', 'bypass', 'breaker', 'unblock'],
 );
 
@@ -87,6 +107,7 @@ const _neutral = SmartRoutingBundle(
     RcxMarker(url: 'https://www.gstatic.com/generate_204', statuses: [204]),
   ],
   egressEchoes: _egressEchoes,
+  countryEchoes: _countryEchoes,
 );
 
 const _smartRoutingBundles = {
@@ -108,6 +129,7 @@ const _smartRoutingBundles = {
       RcxMarker(url: 'https://www.aparat.com/', statuses: [200, 301, 302]),
     ],
     egressEchoes: _egressEchoes,
+    countryEchoes: _countryEchoes,
   ),
   SmartRoutingPreset.china: SmartRoutingBundle(
     censorCountries: ['CN'],
@@ -125,6 +147,7 @@ const _smartRoutingBundles = {
       RcxMarker(url: 'https://www.baidu.com/', statuses: [200, 301, 302]),
     ],
     egressEchoes: _egressEchoes,
+    countryEchoes: _countryEchoes,
   ),
 };
 
@@ -141,10 +164,12 @@ class SmartRoutingPacing {
   const SmartRoutingPacing({
     required this.dwellSeconds,
     required this.waveWidth,
+    required this.latencyBands,
   });
 
   final int dwellSeconds;
   final int waveWidth;
+  final List<int> latencyBands;
 }
 
 extension SmartRoutingStrategyWire on SmartRoutingStrategy {
@@ -159,18 +184,22 @@ extension SmartRoutingStrategyWire on SmartRoutingStrategy {
     SmartRoutingStrategy.stable => const SmartRoutingPacing(
       dwellSeconds: 180,
       waveWidth: 8,
+      latencyBands: [200, 400, 800, 1500],
     ),
     SmartRoutingStrategy.balanced => const SmartRoutingPacing(
       dwellSeconds: 90,
       waveWidth: 12,
+      latencyBands: [150, 300, 600, 1200],
     ),
     SmartRoutingStrategy.lowestLatency => const SmartRoutingPacing(
       dwellSeconds: 30,
       waveWidth: 20,
+      latencyBands: [80, 150, 300, 600],
     ),
     SmartRoutingStrategy.saver => const SmartRoutingPacing(
       dwellSeconds: 600,
       waveWidth: 4,
+      latencyBands: [250, 500, 1000, 2000],
     ),
   };
 }
@@ -203,6 +232,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       localMarkers: bundle.localMarkers,
       nameHints: bundle.nameHints,
       egressEchoes: bundle.egressEchoes,
+      countryEchoes: bundle.countryEchoes,
       breakerPatterns: bundle.breakerPatterns,
       allowDomesticLastResort: bundle.allowDomesticLastResort,
       requireUdp: bundle.requireUdp,
@@ -228,6 +258,7 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     strategy: value,
     dwellSeconds: value.pacing.dwellSeconds,
     waveWidth: value.pacing.waveWidth,
+    latencyBands: value.pacing.latencyBands,
   );
 
   bool get matchesStrategy => this == applyStrategy(strategy);
@@ -245,7 +276,11 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     localMarkers: localMarkers,
     nameHints: nameHints,
     egressEchoes: egressEchoes,
+    countryEchoes: countryEchoes,
     breakerPatterns: breakerPatterns,
+    nodeRules: nodeRules,
+    avoidCountries: avoidCountries,
+    latencyBands: latencyBands,
     allowDomesticLastResort: allowDomesticLastResort,
     requireUdp: requireUdp,
     respectPick: respectPick,

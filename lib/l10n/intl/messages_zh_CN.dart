@@ -969,6 +969,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "findingPorcelain": MessageLookupByLibrary.simpleMessage("瓷白"),
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage("静默自动驾驶"),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("奇点"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "圆环被握到坍缩成一点，又重新迸发。",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("跨年"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage("会话跨过了新年午夜。"),
     "findingVigil": MessageLookupByLibrary.simpleMessage("守望"),

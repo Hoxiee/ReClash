@@ -6,10 +6,14 @@ import (
 )
 
 const (
-	rcxRecurrenceLimit    = 6
-	rcxRecurrenceDecay    = time.Hour
-	rcxQualityDepth       = 16
-	rcxQualityTTL         = 2 * time.Minute
+	rcxRecurrenceLimit = 6
+	rcxRecurrenceDecay = time.Hour
+	rcxQualityDepth    = 16
+	rcxQualityTTL      = 2 * time.Minute
+	// Ranking keeps a median as long as the open proof it rode in on: the tick
+	// re-proves the warm pool far slower than the 2-min confirm window, so a
+	// tighter TTL would blank MedianMs between probes and drop ranking to host-ping.
+	rcxRankingMedianTTL   = time.Duration(rcxProofTTLMinutes) * time.Minute
 	rcxQualityOriginProbe = "probe"
 )
 
@@ -73,7 +77,7 @@ func (l *rcxLedger) NoteRoleQualitySample(node, envKey, marker string, role rcxR
 func (l *rcxLedger) QualityMedian(node, envKey, marker string, epoch uint64, now time.Time) (ms, count int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now)
+	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, rcxRankingMedianTTL)
 	if len(fresh) == 0 {
 		return 0, 0
 	}
@@ -84,7 +88,7 @@ func (l *rcxLedger) QualityMedian(node, envKey, marker string, epoch uint64, now
 func (l *rcxLedger) LatestQualitySample(node, envKey, marker string, epoch uint64, now time.Time) (rcxQualitySample, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now)
+	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, rcxQualityTTL)
 	if len(fresh) == 0 {
 		return rcxQualitySample{}, false
 	}
@@ -97,11 +101,11 @@ func (l *rcxLedger) LatestQualitySample(node, envKey, marker string, epoch uint6
 	return latest, true
 }
 
-func (l *rcxLedger) qualitySamplesLocked(node, envKey, marker string, epoch uint64, now time.Time) []rcxQualitySample {
+func (l *rcxLedger) qualitySamplesLocked(node, envKey, marker string, epoch uint64, now time.Time, ttl time.Duration) []rcxQualitySample {
 	var fresh []rcxQualitySample
 	for _, sample := range l.envState(envKey, node).QualitySamples {
 		if sample.Origin == rcxQualityOriginProbe && sample.Marker == marker && sample.Role == rcxRoleOpen && sample.Epoch == epoch &&
-			sample.Under == l.openFingerprint && sample.DelayMs >= rcxHarvestFloorMs && rcxFreshAt(sample.At, now, rcxQualityTTL) {
+			sample.Under == l.openFingerprint && sample.DelayMs >= rcxHarvestFloorMs && rcxFreshAt(sample.At, now, ttl) {
 			fresh = append(fresh, sample)
 		}
 	}

@@ -1867,7 +1867,7 @@ $AccessControlPropsCopyWith<$Res> get accessControlProps {
 /// @nodoc
 mixin _$SmartRoutingProps {
 
- bool get enabled; SmartRoutingPreset get preset; SmartRoutingStrategy get strategy; List<String> get censorCountries; List<String> get canaryForeign; List<String> get canaryDomestic; List<RcxMarker> get openMarkers; List<RcxMarker> get domesticMarkers; List<RcxMarker> get localMarkers; List<String> get nameHints; List<String> get egressEchoes; List<String> get breakerPatterns; bool get allowDomesticLastResort; bool get requireUdp; bool get respectPick; int get dwellSeconds; int get waveWidth;
+ bool get enabled; SmartRoutingPreset get preset; SmartRoutingStrategy get strategy; List<String> get censorCountries; List<String> get canaryForeign; List<String> get canaryDomestic; List<RcxMarker> get openMarkers; List<RcxMarker> get domesticMarkers; List<RcxMarker> get localMarkers; List<String> get nameHints; List<String> get egressEchoes; List<String> get countryEchoes; List<String> get breakerPatterns; List<RcxNodeRule> get nodeRules; List<String> get avoidCountries; List<int> get latencyBands; bool get allowDomesticLastResort; bool get requireUdp; bool get respectPick; int get dwellSeconds; int get waveWidth;
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1881,20 +1881,20 @@ $SmartRoutingPropsCopyWith<SmartRoutingProps> get copyWith => _$SmartRoutingProp
 @override
 bool operator ==(Object other) {
   final _this = this as SmartRoutingProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _this.localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _this.nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SmartRoutingProps&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _this.censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _this.canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _this.canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _this.openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _this.domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _this.localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _this.nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _this.egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _this.countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _this.breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _this.nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _this.avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _this.latencyBands)&&(identical(other.allowDomesticLastResort, _this.allowDomesticLastResort) || other.allowDomesticLastResort == _this.allowDomesticLastResort)&&(identical(other.requireUdp, _this.requireUdp) || other.requireUdp == _this.requireUdp)&&(identical(other.respectPick, _this.respectPick) || other.respectPick == _this.respectPick)&&(identical(other.dwellSeconds, _this.dwellSeconds) || other.dwellSeconds == _this.dwellSeconds)&&(identical(other.waveWidth, _this.waveWidth) || other.waveWidth == _this.waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SmartRoutingProps;
-  return Object.hash(runtimeType,_this.enabled,_this.preset,_this.strategy,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.localMarkers),const DeepCollectionEquality().hash(_this.nameHints),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth);
+  return Object.hashAll([runtimeType,_this.enabled,_this.preset,_this.strategy,const DeepCollectionEquality().hash(_this.censorCountries),const DeepCollectionEquality().hash(_this.canaryForeign),const DeepCollectionEquality().hash(_this.canaryDomestic),const DeepCollectionEquality().hash(_this.openMarkers),const DeepCollectionEquality().hash(_this.domesticMarkers),const DeepCollectionEquality().hash(_this.localMarkers),const DeepCollectionEquality().hash(_this.nameHints),const DeepCollectionEquality().hash(_this.egressEchoes),const DeepCollectionEquality().hash(_this.countryEchoes),const DeepCollectionEquality().hash(_this.breakerPatterns),const DeepCollectionEquality().hash(_this.nodeRules),const DeepCollectionEquality().hash(_this.avoidCountries),const DeepCollectionEquality().hash(_this.latencyBands),_this.allowDomesticLastResort,_this.requireUdp,_this.respectPick,_this.dwellSeconds,_this.waveWidth]);
 }
 
 @override
 String toString() {
   final _this = this as SmartRoutingProps;
-  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, localMarkers: ${_this.localMarkers}, nameHints: ${_this.nameHints}, egressEchoes: ${_this.egressEchoes}, breakerPatterns: ${_this.breakerPatterns}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
+  return 'SmartRoutingProps(enabled: ${_this.enabled}, preset: ${_this.preset}, strategy: ${_this.strategy}, censorCountries: ${_this.censorCountries}, canaryForeign: ${_this.canaryForeign}, canaryDomestic: ${_this.canaryDomestic}, openMarkers: ${_this.openMarkers}, domesticMarkers: ${_this.domesticMarkers}, localMarkers: ${_this.localMarkers}, nameHints: ${_this.nameHints}, egressEchoes: ${_this.egressEchoes}, countryEchoes: ${_this.countryEchoes}, breakerPatterns: ${_this.breakerPatterns}, nodeRules: ${_this.nodeRules}, avoidCountries: ${_this.avoidCountries}, latencyBands: ${_this.latencyBands}, allowDomesticLastResort: ${_this.allowDomesticLastResort}, requireUdp: ${_this.requireUdp}, respectPick: ${_this.respectPick}, dwellSeconds: ${_this.dwellSeconds}, waveWidth: ${_this.waveWidth})';
 }
 
 
@@ -1905,7 +1905,7 @@ abstract mixin class $SmartRoutingPropsCopyWith<$Res>  {
   factory $SmartRoutingPropsCopyWith(SmartRoutingProps value, $Res Function(SmartRoutingProps) _then) = _$SmartRoutingPropsCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<RcxMarker> localMarkers, List<String> nameHints, List<String> egressEchoes, List<String> breakerPatterns, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
+ bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<RcxMarker> localMarkers, List<String> nameHints, List<String> egressEchoes, List<String> countryEchoes, List<String> breakerPatterns, List<RcxNodeRule> nodeRules, List<String> avoidCountries, List<int> latencyBands, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
 });
 
 
@@ -1922,7 +1922,7 @@ class _$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -1935,8 +1935,12 @@ as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self.domesticMark
 as List<RcxMarker>,localMarkers: null == localMarkers ? _self.localMarkers : localMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,nameHints: null == nameHints ? _self.nameHints : nameHints // ignore: cast_nullable_to_non_nullable
 as List<String>,egressEchoes: null == egressEchoes ? _self.egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
+as List<String>,countryEchoes: null == countryEchoes ? _self.countryEchoes : countryEchoes // ignore: cast_nullable_to_non_nullable
 as List<String>,breakerPatterns: null == breakerPatterns ? _self.breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
-as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as List<String>,nodeRules: null == nodeRules ? _self.nodeRules : nodeRules // ignore: cast_nullable_to_non_nullable
+as List<RcxNodeRule>,avoidCountries: null == avoidCountries ? _self.avoidCountries : avoidCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,latencyBands: null == latencyBands ? _self.latencyBands : latencyBands // ignore: cast_nullable_to_non_nullable
+as List<int>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
 as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable
@@ -2026,10 +2030,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> countryEchoes,  List<String> breakerPatterns,  List<RcxNodeRule> nodeRules,  List<String> avoidCountries,  List<int> latencyBands,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   return orElse();
 
 }
@@ -2047,10 +2051,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> countryEchoes,  List<String> breakerPatterns,  List<RcxNodeRule> nodeRules,  List<String> avoidCountries,  List<int> latencyBands,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps():
-return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2067,10 +2071,10 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> breakerPatterns,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  SmartRoutingPreset preset,  SmartRoutingStrategy strategy,  List<String> censorCountries,  List<String> canaryForeign,  List<String> canaryDomestic,  List<RcxMarker> openMarkers,  List<RcxMarker> domesticMarkers,  List<RcxMarker> localMarkers,  List<String> nameHints,  List<String> egressEchoes,  List<String> countryEchoes,  List<String> breakerPatterns,  List<RcxNodeRule> nodeRules,  List<String> avoidCountries,  List<int> latencyBands,  bool allowDomesticLastResort,  bool requireUdp,  bool respectPick,  int dwellSeconds,  int waveWidth)?  $default,) {final _that = this;
 switch (_that) {
 case _SmartRoutingProps() when $default != null:
-return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.breakerPatterns,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
+return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,_that.canaryForeign,_that.canaryDomestic,_that.openMarkers,_that.domesticMarkers,_that.localMarkers,_that.nameHints,_that.egressEchoes,_that.countryEchoes,_that.breakerPatterns,_that.nodeRules,_that.avoidCountries,_that.latencyBands,_that.allowDomesticLastResort,_that.requireUdp,_that.respectPick,_that.dwellSeconds,_that.waveWidth);case _:
   return null;
 
 }
@@ -2082,7 +2086,7 @@ return $default(_that.enabled,_that.preset,_that.strategy,_that.censorCountries,
 
 @JsonSerializable(explicitToJson: true)
 class _SmartRoutingProps implements SmartRoutingProps {
-  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off, this.strategy = SmartRoutingStrategy.balanced,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<RcxMarker> localMarkers = const [],  List<String> nameHints = const [],  List<String> egressEchoes = const [],  List<String> breakerPatterns = const [], this.allowDomesticLastResort = true, this.requireUdp = false, this.respectPick = true, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_localMarkers = localMarkers,_nameHints = nameHints,_egressEchoes = egressEchoes,_breakerPatterns = breakerPatterns;
+  const _SmartRoutingProps({this.enabled = false, this.preset = SmartRoutingPreset.off, this.strategy = SmartRoutingStrategy.balanced,  List<String> censorCountries = const [],  List<String> canaryForeign = const [],  List<String> canaryDomestic = const [],  List<RcxMarker> openMarkers = const [],  List<RcxMarker> domesticMarkers = const [],  List<RcxMarker> localMarkers = const [],  List<String> nameHints = const [],  List<String> egressEchoes = const [],  List<String> countryEchoes = const [],  List<String> breakerPatterns = const [],  List<RcxNodeRule> nodeRules = const [],  List<String> avoidCountries = const [],  List<int> latencyBands = const [], this.allowDomesticLastResort = true, this.requireUdp = false, this.respectPick = true, this.dwellSeconds = 90, this.waveWidth = 12}): _censorCountries = censorCountries,_canaryForeign = canaryForeign,_canaryDomestic = canaryDomestic,_openMarkers = openMarkers,_domesticMarkers = domesticMarkers,_localMarkers = localMarkers,_nameHints = nameHints,_egressEchoes = egressEchoes,_countryEchoes = countryEchoes,_breakerPatterns = breakerPatterns,_nodeRules = nodeRules,_avoidCountries = avoidCountries,_latencyBands = latencyBands;
   factory _SmartRoutingProps.fromJson(Map<String, dynamic> json) => _$SmartRoutingPropsFromJson(json);
 
 @override@JsonKey() final  bool enabled;
@@ -2144,11 +2148,39 @@ class _SmartRoutingProps implements SmartRoutingProps {
   return EqualUnmodifiableListView(_egressEchoes);
 }
 
+ final  List<String> _countryEchoes;
+@override@JsonKey() List<String> get countryEchoes {
+  if (_countryEchoes is EqualUnmodifiableListView) return _countryEchoes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_countryEchoes);
+}
+
  final  List<String> _breakerPatterns;
 @override@JsonKey() List<String> get breakerPatterns {
   if (_breakerPatterns is EqualUnmodifiableListView) return _breakerPatterns;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_breakerPatterns);
+}
+
+ final  List<RcxNodeRule> _nodeRules;
+@override@JsonKey() List<RcxNodeRule> get nodeRules {
+  if (_nodeRules is EqualUnmodifiableListView) return _nodeRules;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_nodeRules);
+}
+
+ final  List<String> _avoidCountries;
+@override@JsonKey() List<String> get avoidCountries {
+  if (_avoidCountries is EqualUnmodifiableListView) return _avoidCountries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_avoidCountries);
+}
+
+ final  List<int> _latencyBands;
+@override@JsonKey() List<int> get latencyBands {
+  if (_latencyBands is EqualUnmodifiableListView) return _latencyBands;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_latencyBands);
 }
 
 @override@JsonKey() final  bool allowDomesticLastResort;
@@ -2170,18 +2202,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SmartRoutingProps&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&const DeepCollectionEquality().equals(other.censorCountries, _censorCountries)&&const DeepCollectionEquality().equals(other.canaryForeign, _canaryForeign)&&const DeepCollectionEquality().equals(other.canaryDomestic, _canaryDomestic)&&const DeepCollectionEquality().equals(other.openMarkers, _openMarkers)&&const DeepCollectionEquality().equals(other.domesticMarkers, _domesticMarkers)&&const DeepCollectionEquality().equals(other.localMarkers, _localMarkers)&&const DeepCollectionEquality().equals(other.nameHints, _nameHints)&&const DeepCollectionEquality().equals(other.egressEchoes, _egressEchoes)&&const DeepCollectionEquality().equals(other.countryEchoes, _countryEchoes)&&const DeepCollectionEquality().equals(other.breakerPatterns, _breakerPatterns)&&const DeepCollectionEquality().equals(other.nodeRules, _nodeRules)&&const DeepCollectionEquality().equals(other.avoidCountries, _avoidCountries)&&const DeepCollectionEquality().equals(other.latencyBands, _latencyBands)&&(identical(other.allowDomesticLastResort, allowDomesticLastResort) || other.allowDomesticLastResort == allowDomesticLastResort)&&(identical(other.requireUdp, requireUdp) || other.requireUdp == requireUdp)&&(identical(other.respectPick, respectPick) || other.respectPick == respectPick)&&(identical(other.dwellSeconds, dwellSeconds) || other.dwellSeconds == dwellSeconds)&&(identical(other.waveWidth, waveWidth) || other.waveWidth == waveWidth));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,preset,strategy,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_localMarkers),const DeepCollectionEquality().hash(_nameHints),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_breakerPatterns),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth);
+    return Object.hashAll([runtimeType,enabled,preset,strategy,const DeepCollectionEquality().hash(_censorCountries),const DeepCollectionEquality().hash(_canaryForeign),const DeepCollectionEquality().hash(_canaryDomestic),const DeepCollectionEquality().hash(_openMarkers),const DeepCollectionEquality().hash(_domesticMarkers),const DeepCollectionEquality().hash(_localMarkers),const DeepCollectionEquality().hash(_nameHints),const DeepCollectionEquality().hash(_egressEchoes),const DeepCollectionEquality().hash(_countryEchoes),const DeepCollectionEquality().hash(_breakerPatterns),const DeepCollectionEquality().hash(_nodeRules),const DeepCollectionEquality().hash(_avoidCountries),const DeepCollectionEquality().hash(_latencyBands),allowDomesticLastResort,requireUdp,respectPick,dwellSeconds,waveWidth]);
 }
 
 @override
 String toString() {
-    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, strategy: $strategy, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, localMarkers: $localMarkers, nameHints: $nameHints, egressEchoes: $egressEchoes, breakerPatterns: $breakerPatterns, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
+    return 'SmartRoutingProps(enabled: $enabled, preset: $preset, strategy: $strategy, censorCountries: $censorCountries, canaryForeign: $canaryForeign, canaryDomestic: $canaryDomestic, openMarkers: $openMarkers, domesticMarkers: $domesticMarkers, localMarkers: $localMarkers, nameHints: $nameHints, egressEchoes: $egressEchoes, countryEchoes: $countryEchoes, breakerPatterns: $breakerPatterns, nodeRules: $nodeRules, avoidCountries: $avoidCountries, latencyBands: $latencyBands, allowDomesticLastResort: $allowDomesticLastResort, requireUdp: $requireUdp, respectPick: $respectPick, dwellSeconds: $dwellSeconds, waveWidth: $waveWidth)';
 }
 
 
@@ -2192,7 +2224,7 @@ abstract mixin class _$SmartRoutingPropsCopyWith<$Res> implements $SmartRoutingP
   factory _$SmartRoutingPropsCopyWith(_SmartRoutingProps value, $Res Function(_SmartRoutingProps) _then) = __$SmartRoutingPropsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<RcxMarker> localMarkers, List<String> nameHints, List<String> egressEchoes, List<String> breakerPatterns, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
+ bool enabled, SmartRoutingPreset preset, SmartRoutingStrategy strategy, List<String> censorCountries, List<String> canaryForeign, List<String> canaryDomestic, List<RcxMarker> openMarkers, List<RcxMarker> domesticMarkers, List<RcxMarker> localMarkers, List<String> nameHints, List<String> egressEchoes, List<String> countryEchoes, List<String> breakerPatterns, List<RcxNodeRule> nodeRules, List<String> avoidCountries, List<int> latencyBands, bool allowDomesticLastResort, bool requireUdp, bool respectPick, int dwellSeconds, int waveWidth
 });
 
 
@@ -2209,7 +2241,7 @@ class __$SmartRoutingPropsCopyWithImpl<$Res>
 
 /// Create a copy of SmartRoutingProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? breakerPatterns = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? preset = null,Object? strategy = null,Object? censorCountries = null,Object? canaryForeign = null,Object? canaryDomestic = null,Object? openMarkers = null,Object? domesticMarkers = null,Object? localMarkers = null,Object? nameHints = null,Object? egressEchoes = null,Object? countryEchoes = null,Object? breakerPatterns = null,Object? nodeRules = null,Object? avoidCountries = null,Object? latencyBands = null,Object? allowDomesticLastResort = null,Object? requireUdp = null,Object? respectPick = null,Object? dwellSeconds = null,Object? waveWidth = null,}) {
   return _then(_SmartRoutingProps(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
@@ -2222,8 +2254,12 @@ as List<RcxMarker>,domesticMarkers: null == domesticMarkers ? _self._domesticMar
 as List<RcxMarker>,localMarkers: null == localMarkers ? _self._localMarkers : localMarkers // ignore: cast_nullable_to_non_nullable
 as List<RcxMarker>,nameHints: null == nameHints ? _self._nameHints : nameHints // ignore: cast_nullable_to_non_nullable
 as List<String>,egressEchoes: null == egressEchoes ? _self._egressEchoes : egressEchoes // ignore: cast_nullable_to_non_nullable
+as List<String>,countryEchoes: null == countryEchoes ? _self._countryEchoes : countryEchoes // ignore: cast_nullable_to_non_nullable
 as List<String>,breakerPatterns: null == breakerPatterns ? _self._breakerPatterns : breakerPatterns // ignore: cast_nullable_to_non_nullable
-as List<String>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
+as List<String>,nodeRules: null == nodeRules ? _self._nodeRules : nodeRules // ignore: cast_nullable_to_non_nullable
+as List<RcxNodeRule>,avoidCountries: null == avoidCountries ? _self._avoidCountries : avoidCountries // ignore: cast_nullable_to_non_nullable
+as List<String>,latencyBands: null == latencyBands ? _self._latencyBands : latencyBands // ignore: cast_nullable_to_non_nullable
+as List<int>,allowDomesticLastResort: null == allowDomesticLastResort ? _self.allowDomesticLastResort : allowDomesticLastResort // ignore: cast_nullable_to_non_nullable
 as bool,requireUdp: null == requireUdp ? _self.requireUdp : requireUdp // ignore: cast_nullable_to_non_nullable
 as bool,respectPick: null == respectPick ? _self.respectPick : respectPick // ignore: cast_nullable_to_non_nullable
 as bool,dwellSeconds: null == dwellSeconds ? _self.dwellSeconds : dwellSeconds // ignore: cast_nullable_to_non_nullable

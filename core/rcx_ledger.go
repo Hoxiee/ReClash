@@ -19,6 +19,7 @@ type rcxNodeGlobal struct {
 	Exit        rcxOrigin     `json:"x,omitempty"`
 	ExitCountry string        `json:"xc,omitempty"`
 	ExitAt      time.Time     `json:"xa,omitempty"`
+	HomeEgress  bool          `json:"he,omitempty"` // measured home egress; outlives the Exit TTL and any open proof
 	Trust       rcxTrust      `json:"tr,omitempty"`
 	TrustConf   rcxConfidence `json:"tk,omitempty"`
 	TrustAt     time.Time     `json:"ta,omitempty"`
@@ -193,7 +194,11 @@ func (l *rcxLedger) SetExit(node, country string, exit rcxOrigin, now time.Time)
 	state.ExitAt = now
 	// A home exit only bars to last resort (Exit already ranks it down); the hard brand is the behavioural check's alone.
 	if exit == rcxOriginForeign {
+		state.HomeEgress = false
 		l.setTrustLocked(state, rcxTrusted, rcxConfMeasured, now)
+	}
+	if exit == rcxOriginDomestic {
+		state.HomeEgress = true
 	}
 }
 
@@ -793,14 +798,17 @@ func (l *rcxLedger) Facts(
 	state := l.envState(envKey, node)
 	l.decayLocked(state, now)
 	global := l.globalState(node)
+	openWorld := rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, proofTTL)
 	facts := rcxFacts{
 		Origin:      global.Origin,
 		Exit:        rcxExitAged(global.Exit, global.ExitAt, now),
 		OpenedOnce:  global.OpenedUnder != "" && global.OpenedUnder == l.openFingerprint,
-		OpenWorld:   rcxProofForFingerprint(state.OpenWorld, state.OpenAt, state.OpenUnder, l.openFingerprint, now, proofTTL),
+		OpenWorld:   openWorld,
+		OpenLapsed:  state.OpenUnder == l.openFingerprint && state.OpenWorld == rcxProofDisproven && openWorld == rcxProofUnknown,
 		Domestic:    rcxProofForFingerprint(state.Domestic, state.DomesticAt, state.HomeUnder, l.homeFingerprint, now, proofTTL),
 		SupportsUDP: supportsUDP,
 		Trust:       global.Trust,
+		HomeEgress:  global.HomeEgress,
 	}
 	switch {
 	case !state.CoolUntil.IsZero() && now.Before(state.CoolUntil):
@@ -994,6 +1002,7 @@ func (l *rcxLedger) Invalidate(openChanged, domesticChanged, countriesChanged, e
 			global.Exit = rcxOriginUnknown
 			global.ExitCountry = ""
 			global.ExitAt = time.Time{}
+			global.HomeEgress = false
 			global.Trust = rcxTrustUnknown
 			global.TrustConf = rcxConfNone
 			global.TrustAt = time.Time{}

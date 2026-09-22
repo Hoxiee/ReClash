@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"io"
 	"net"
@@ -133,6 +134,11 @@ func (rcxCoreRuntime) TopologyValid(config rcxConfig) bool {
 func rcxRoutableNode(proxy constant.Proxy) bool {
 	switch proxy.Type() {
 	case constant.Direct, constant.Reject, constant.RejectDrop, constant.Pass, constant.Compatible:
+		return false
+	case constant.Selector, constant.URLTest, constant.Fallback, constant.LoadBalance:
+		// A nested auto-group re-picks its own node behind RCX's back, so it can be
+		// neither measured nor held; routing one bounces the pick. Route only the
+		// concrete leaves such a group chooses among.
 		return false
 	default:
 		return true
@@ -425,7 +431,17 @@ func (rcxCoreRuntime) Locate(ctx context.Context, node, echo string) string {
 	if !ok {
 		return ""
 	}
-	address := rcxEchoAddress(ctx, proxy, echo)
+	body := rcxEchoBody(ctx, proxy, echo)
+	if len(body) == 0 {
+		return ""
+	}
+	// A country-lookup service names the exit outright; an IP echo needs the local
+	// mmdb. Read the named country first so its verdict is not overruled by an mmdb
+	// lookup of the same response's echoed IP.
+	if country := rcxParseEchoCountry(body); country != "" {
+		return country
+	}
+	address := rcxParseEchoIP(body)
 	if !address.IsValid() || !rcxMmdbUsable(time.Now()) {
 		return ""
 	}
@@ -436,21 +452,57 @@ func (rcxCoreRuntime) Locate(ctx context.Context, node, echo string) string {
 	return strings.ToUpper(codes[0])
 }
 
+func rcxParseEchoCountry(body []byte) string {
+	if code := rcxCountryCode(string(body)); code != "" {
+		return code
+	}
+	var fields map[string]any
+	if err := json.Unmarshal(body, &fields); err != nil {
+		return ""
+	}
+	for _, key := range []string{"country", "country_code", "countryCode", "cc"} {
+		if value, ok := fields[key].(string); ok {
+			if code := rcxCountryCode(value); code != "" {
+				return code
+			}
+		}
+	}
+	return ""
+}
+
+// A bare ISO-3166 alpha-2 code, upper-cased; an IP, a name, or JSON is not one.
+func rcxCountryCode(text string) string {
+	text = strings.TrimSpace(text)
+	if len(text) != 2 {
+		return ""
+	}
+	for _, char := range text {
+		if (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') {
+			return ""
+		}
+	}
+	return strings.ToUpper(text)
+}
+
 // The handshake is driven here rather than left to the transport: mihomo builds
 // against its own TLS fork, whose config the standard transport will not take.
 func rcxEchoAddress(ctx context.Context, proxy *adapter.Proxy, echo string) netip.Addr {
+	return rcxParseEchoIP(rcxEchoBody(ctx, proxy, echo))
+}
+
+func rcxEchoBody(ctx context.Context, proxy *adapter.Proxy, echo string) []byte {
 	metadata, err := rcxEchoMetadata(echo)
 	if err != nil {
-		return netip.Addr{}
+		return nil
 	}
 	conn, err := proxy.DialContext(ctx, &metadata)
 	if err != nil {
-		return netip.Addr{}
+		return nil
 	}
 	defer conn.Close()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, echo, nil)
 	if err != nil {
-		return netip.Addr{}
+		return nil
 	}
 	transport := &http.Transport{
 		DialContext: func(context.Context, string, string) (net.Conn, error) {
@@ -461,12 +513,12 @@ func rcxEchoAddress(ctx context.Context, proxy *adapter.Proxy, echo string) neti
 	if req.URL.Scheme == "https" {
 		tlsConfig, err := ca.GetTLSConfig(ca.Option{})
 		if err != nil {
-			return netip.Addr{}
+			return nil
 		}
 		tlsConfig.ServerName = req.URL.Hostname()
 		tlsConn := mihomoTLS.Client(conn, tlsConfig)
 		if err := tlsConn.HandshakeContext(ctx); err != nil {
-			return netip.Addr{}
+			return nil
 		}
 		transport.DialTLSContext = func(context.Context, string, string) (net.Conn, error) {
 			return tlsConn, nil
@@ -481,17 +533,17 @@ func rcxEchoAddress(ctx context.Context, proxy *adapter.Proxy, echo string) neti
 	defer client.CloseIdleConnections()
 	resp, err := client.Do(req)
 	if err != nil {
-		return netip.Addr{}
+		return nil
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return netip.Addr{}
+		return nil
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, rcxLocateBodyCap))
 	if err != nil {
-		return netip.Addr{}
+		return nil
 	}
-	return rcxParseEchoIP(body)
+	return body
 }
 
 func rcxEchoMetadata(echo string) (constant.Metadata, error) {

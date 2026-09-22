@@ -278,6 +278,7 @@ const (
 	rcxProbeBudgetWin = time.Hour
 	rcxProbeReserve   = 40
 	rcxMaintainWidth  = 3
+	rcxWarmPoolCap    = 16
 	rcxHistoryDepth   = 12
 
 	rcxReachRefresh  = 5 * time.Minute
@@ -1748,6 +1749,7 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 		facts := e.ledger.Facts(key, e.envKey, member.SupportsUDP, now, proofTTL)
 		facts.Breaker = e.cfg.breaker(member.Name)
 		member = e.freshHost(member)
+		rule := e.cfg.ruleFor(member.Provider, member.Name, "", e.freshExitCountry(key, now))
 		candidates = append(candidates, rcxCandidate{
 			Name:             member.Name,
 			Order:            e.orderOf(key, member.Order),
@@ -1763,6 +1765,10 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 			InSkeleton:       true,
 			Degraded:         e.ledger.Degraded(key, e.envKey, now),
 			Circuit:          e.providerCircuitOpenFor(member.Provider, member.Name, incumbent, now),
+			Ignore:           rule == rcxRuleIgnore,
+			AvoidExit:        e.cfg.avoidsCountry(e.ledger.ExitCountry(key)),
+			RuleLastResort:   rule == rcxRuleLastResort,
+			Prefer:           rule == rcxRulePrefer,
 		})
 	}
 	return candidates
@@ -3019,9 +3025,12 @@ func (e *rcxEngine) probeTargets(
 			return nil
 		}
 		local := e.cfg.LocalMarkers
+		// The rate-limited country services are worth their cost only here, verifying
+		// one suspect; the unlimited IP echo trails them as the fallback.
+		verify := append(append([]string{}, e.cfg.CountryEchoes...), e.cfg.EgressEchoes...)
 		targets := make([]rcxProbeTarget, 0, 2*len(wave))
 		for _, node := range wave {
-			targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: open})
+			targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleOpen, Markers: open, Echoes: verify})
 			if len(local) > 0 {
 				targets = append(targets, rcxProbeTarget{Node: node.Name, Key: node.Key, Role: rcxRoleLocal, Markers: local})
 			}
@@ -3260,7 +3269,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 		Canaries:   append([]rcxCanaryReport(nil), e.canaries...),
 		History:    append([]rcxSwitchReport(nil), e.history...),
 		Metrics:    e.metricsReport(now),
-		Bands:      rcxLatencyBands(),
+		Bands:      e.cfg.latencyBands(),
 		ProbesLeft: e.budget.Remaining(now),
 		ProbeCap:   rcxProbeBudgetCap,
 		Manual:     input.Pin != "",

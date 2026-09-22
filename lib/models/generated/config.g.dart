@@ -338,9 +338,29 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  countryEchoes:
+      (json['countryEchoes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   breakerPatterns:
       (json['breakerPatterns'] as List<dynamic>?)
           ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  nodeRules:
+      (json['nodeRules'] as List<dynamic>?)
+          ?.map((e) => RcxNodeRule.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  avoidCountries:
+      (json['avoidCountries'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  latencyBands:
+      (json['latencyBands'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
           .toList() ??
       const [],
   allowDomesticLastResort: json['allowDomesticLastResort'] as bool? ?? true,
@@ -364,7 +384,11 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'localMarkers': instance.localMarkers.map((e) => e.toJson()).toList(),
   'nameHints': instance.nameHints,
   'egressEchoes': instance.egressEchoes,
+  'countryEchoes': instance.countryEchoes,
   'breakerPatterns': instance.breakerPatterns,
+  'nodeRules': instance.nodeRules.map((e) => e.toJson()).toList(),
+  'avoidCountries': instance.avoidCountries,
+  'latencyBands': instance.latencyBands,
   'allowDomesticLastResort': instance.allowDomesticLastResort,
   'requireUdp': instance.requireUdp,
   'respectPick': instance.respectPick,

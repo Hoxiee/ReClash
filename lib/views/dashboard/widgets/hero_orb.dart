@@ -59,6 +59,16 @@ const _novaLanding = 0.74;
 /// before this has seen nothing at all.
 const _chargeTell = 0.55;
 
+const _collapseCharge = Duration(milliseconds: 2400);
+
+const _singularityDuration = Duration(milliseconds: 2600);
+const _singularitySparkCount = 66;
+
+const _evaporatePeak = 0.52;
+const _regrowDuration = Duration(milliseconds: 1180);
+
+const _collapseTell = 0.34;
+
 Color _seasonalGlow(Color color) {
   final now = DateTime.now();
   final day = now.difference(DateTime(now.year)).inDays;
@@ -73,6 +83,10 @@ class HeroOrb extends ConsumerStatefulWidget {
   static const Key novaKey = ValueKey('orb-nova');
   @visibleForTesting
   static const Key chargeKey = ValueKey('orb-charge');
+  @visibleForTesting
+  static const Key collapseKey = ValueKey('orb-collapse');
+  @visibleForTesting
+  static const Key singularityKey = ValueKey('orb-singularity');
 
   const HeroOrb({
     super.key,
@@ -129,10 +143,23 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   late final AnimationController _charge;
   late final AnimationController _nova;
+  late final AnimationController _collapse;
+  late final AnimationController _singularity;
+
+  late final AnimationController _regrow;
 
   /// Drawn once per detonation so the spray is stable across its frames and
   /// different every time.
   List<_NovaSpark> _sparks = const [];
+  List<_NovaSpark> _singularitySparks = const [];
+
+  /// Set once the big bang has fired so a finger still down after it never
+  /// re-arms the charge or the collapse.
+  bool _spent = false;
+  final List<Timer> _pulseTimers = [];
+
+  OverlayEntry? _cinematicEntry;
+  Rect _cinematicOrbRect = Rect.zero;
 
   Offset? _chargeOrigin;
   bool _swallowTap = false;
@@ -231,6 +258,24 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       reverseDuration: const Duration(milliseconds: 260),
     )..addStatusListener(_handleCharge);
     _nova = AnimationController(vsync: this, duration: _novaDuration);
+    _collapse = AnimationController(
+      vsync: this,
+      duration: _collapseCharge,
+      reverseDuration: const Duration(milliseconds: 620),
+    )
+      ..addStatusListener(_handleCollapse)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed && !_spent) _hideCinematic();
+      });
+    _singularity = AnimationController(
+      vsync: this,
+      duration: _singularityDuration,
+    );
+    _regrow = AnimationController(
+      vsync: this,
+      value: 1,
+      duration: _regrowDuration,
+    );
     ref.listenManual(runTimeProvider, (_, runtime) {
       final now = DateTime.now();
       final previous = _sessionTick;
@@ -303,14 +348,21 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   @override
   void dispose() {
+    _hideCinematic();
     _connectingHold?.cancel();
     _swallowTimer?.cancel();
     _landingTimer?.cancel();
     _oscilloscopeHold?.cancel();
     _oscilloscopeTimer?.cancel();
     _multiTouchRelease?.cancel();
+    for (final timer in _pulseTimers) {
+      timer.cancel();
+    }
     _charge.dispose();
     _nova.dispose();
+    _collapse.dispose();
+    _singularity.dispose();
+    _regrow.dispose();
     _draw.dispose();
     _breathe.dispose();
     _press.dispose();
@@ -401,6 +453,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _cancelCharge();
     _landingTimer?.cancel();
     _landingTimer = null;
+    for (final timer in _pulseTimers) {
+      timer.cancel();
+    }
+    _pulseTimers.clear();
+    _spent = false;
+    _collapse.value = 0;
+    _singularity.value = 0;
+    _regrow.value = 1;
     _nova.value = 0;
     _press.value = 0;
     _ripple.value = 1;
@@ -619,13 +679,34 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   }
 
   void _beginCharge(Offset position) {
-    if (_still || !widget.enabled || _nova.isAnimating || _multiTouch) return;
+    if (_still ||
+        !widget.enabled ||
+        _nova.isAnimating ||
+        _collapse.isAnimating ||
+        _singularity.isAnimating ||
+        _spent ||
+        _multiTouch) {
+      return;
+    }
     _chargeOrigin = position;
     _charge.forward(from: 0);
   }
 
+  void _clearPulses() {
+    for (final timer in _pulseTimers) {
+      timer.cancel();
+    }
+    _pulseTimers.clear();
+  }
+
   void _cancelCharge() {
     _chargeOrigin = null;
+    _spent = false;
+    _clearPulses();
+    if (_collapse.value > 0 && !_singularity.isAnimating) {
+      _collapse.reverse();
+      if (!_still) _ripple.forward(from: 0);
+    }
     if (_charge.isDismissed) return;
     if (_charge.isCompleted) {
       _charge.value = 0;
@@ -653,8 +734,332 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
           })
         : null;
     _nova.forward(from: 0).whenComplete(() {
-      if (mounted) _nova.value = 0;
+      if (!mounted) return;
+      _nova.value = 0;
+      _maybeCollapse();
     });
+  }
+
+  // The nova is done and the finger never left: the orb caves into the collapse
+  // that arms the big bang.
+  void _maybeCollapse() {
+    if (_still ||
+        _spent ||
+        _multiTouch ||
+        _chargeOrigin == null ||
+        _pointers.isEmpty ||
+        !_charge.isCompleted) {
+      return;
+    }
+    _collapse.forward(from: 0);
+    _showCinematic();
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    for (final at in const [0.45, 0.7, 0.88]) {
+      _pulseTimers.add(
+        Timer(_collapseCharge * at, () {
+          if (mounted && _collapse.isAnimating) HapticFeedback.lightImpact();
+        }),
+      );
+    }
+  }
+
+  void _handleCollapse(AnimationStatus status) {
+    if (status != AnimationStatus.completed || !mounted) return;
+    _evaporate();
+  }
+
+  void _evaporate() {
+    _spent = true;
+    _clearPulses();
+    _singularitySparks = _novaSparks(
+      math.Random(DateTime.now().microsecondsSinceEpoch),
+      count: _singularitySparkCount,
+    );
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      HapticFeedback.mediumImpact();
+      for (final at in const [0.16, 0.28]) {
+        _pulseTimers.add(
+          Timer(_singularityDuration * at, () {
+            if (mounted) HapticFeedback.lightImpact();
+          }),
+        );
+      }
+      // A salvo of heavy hits at the detonation, tapering off, so the blast is
+      // a felt rumble on the fingertips rather than a single knock.
+      final peak = _singularityDuration * _evaporatePeak;
+      for (final ms in const [0, 45, 95, 155]) {
+        _pulseTimers.add(
+          Timer(peak + Duration(milliseconds: ms), () {
+            if (mounted) HapticFeedback.heavyImpact();
+          }),
+        );
+      }
+      for (final ms in const [235, 340]) {
+        _pulseTimers.add(
+          Timer(peak + Duration(milliseconds: ms), () {
+            if (mounted) HapticFeedback.mediumImpact();
+          }),
+        );
+      }
+    }
+    _maybeDiscoverSingularity();
+    _singularity.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      _singularity.value = 0;
+      _collapse.value = 0;
+      _charge.value = 0;
+      _hideCinematic();
+      _regrowOrb();
+    });
+  }
+
+  void _regrowOrb() {
+    _spent = true;
+    if (_still) {
+      _regrow.value = 1;
+      return;
+    }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      _pulseTimers.add(
+        Timer(_regrowDuration ~/ 2, () {
+          if (mounted) HapticFeedback.selectionClick();
+        }),
+      );
+    }
+    _ripple.forward(from: 0);
+    _regrow.forward(from: 0);
+  }
+
+  void _maybeDiscoverSingularity() {
+    if (_status != HeroStatus.secured ||
+        !PageActivityScope.isActiveOf(context) ||
+        !ref.read(milestoneSettingProvider).findingsEnabled ||
+        ref.read(findingPreviewProvider).enabled) {
+      return;
+    }
+    ref.read(milestonesProvider.notifier).discover('singularity');
+  }
+
+  void _showCinematic() {
+    if (_cinematicEntry != null) return;
+    final box = context.findRenderObject() as RenderBox?;
+    final overlay = Overlay.maybeOf(context);
+    if (box == null || !box.hasSize || overlay == null) return;
+    _cinematicOrbRect = box.localToGlobal(Offset.zero) & box.size;
+    _cinematicEntry = OverlayEntry(builder: _buildCinematic);
+    overlay.insert(_cinematicEntry!);
+  }
+
+  void _hideCinematic() {
+    _cinematicEntry?.remove();
+    _cinematicEntry = null;
+  }
+
+  Offset _cinematicShake() {
+    final s = _singularity.value;
+    if (s > 0) {
+      if (s < 0.42) {
+        final b = s / 0.42;
+        final amp = b * b * 3.0;
+        return Offset(math.sin(s * 23) * amp * 0.4, math.sin(s * 19) * amp);
+      }
+      if (s < _evaporatePeak) {
+        final b = (s - 0.42) / (_evaporatePeak - 0.42);
+        final amp = 4 + b * b * 22;
+        return Offset(math.sin(s * 57) * amp * 0.7, math.sin(s * 63) * amp);
+      }
+      // The screen carries the slam now; the field only keeps a fine judder
+      // on top so the collapsing point trembles inside the moving frame.
+      final k = ((s - _evaporatePeak) / (1 - _evaporatePeak)).clamp(0.0, 1.0);
+      final decay = math.pow(1 - k, 1.8).toDouble();
+      final tremble = math.sin(s * 96) * 9 * decay;
+      return Offset(tremble * 0.6, tremble);
+    }
+    final c = _collapse.value;
+    if (c <= _collapseTell) return Offset.zero;
+    final local = (c - _collapseTell) / (1 - _collapseTell);
+    final tremor = local * local * 1.6;
+    return Offset(math.sin(c * 15) * tremor * 0.4, math.sin(c * 12) * tremor);
+  }
+
+  /// The big-bang kick, thrown at the whole overlay so the screen itself
+  /// recoils. A hard low-frequency lurch that is already at full throw on the
+  /// first frame, stacked with a high-frequency buzz, both ringing down fast
+  /// under a steep decay so it hits like an impact rather than a wobble.
+  Offset _screenShake(double s, double screenShort) {
+    if (s < _evaporatePeak) return Offset.zero;
+    final k = ((s - _evaporatePeak) / (1 - _evaporatePeak)).clamp(0.0, 1.0);
+    final decay = math.pow(1 - k, 2.3).toDouble();
+    final gain = (screenShort / 720).clamp(0.8, 1.7);
+    final lurch = math.cos(k * 8 * math.pi) * 60 * decay;
+    final swing = math.sin(k * 6 * math.pi + 0.7) * 52 * decay;
+    final buzz = math.sin(s * 124) * 26 * decay;
+    return Offset((swing + buzz) * gain, (lurch + buzz * 0.7) * gain);
+  }
+
+  Widget _buildCinematic(BuildContext overlayContext) {
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_collapse, _singularity, _tint]),
+        builder: (context, _) {
+          final s = _singularity.value;
+          final sWarp = s < _evaporatePeak
+              ? _evaporatePeak * Curves.easeInOutCubic.transform(s / _evaporatePeak)
+              : _evaporatePeak +
+                    (1 - _evaporatePeak) *
+                        Curves.easeOutQuart.transform(
+                          (s - _evaporatePeak) / (1 - _evaporatePeak),
+                        );
+          final collapseLocal =
+              ((_collapse.value - _collapseTell) / (1 - _collapseTell)).clamp(
+                0.0,
+                1.0,
+              );
+          final showSingularity = s > 0 && s < 1;
+          final showCollapse = !showSingularity && collapseLocal > 0;
+          if (!showSingularity && !showCollapse) {
+            return const SizedBox.shrink();
+          }
+
+          final screen = MediaQuery.sizeOf(context);
+          final screenShort = math.min(screen.width, screen.height);
+          final screenCenter = Offset(screen.width / 2, screen.height / 2);
+          final grow = Curves.easeInOutCubic.transform(
+            ((collapseLocal - 0.12) / 0.78).clamp(0.0, 1.0),
+          );
+          final risePos = showSingularity ? 1.0 : grow;
+          final riseScale = showSingularity ? 1.0 : grow;
+          final focal = Offset.lerp(
+            _cinematicOrbRect.center,
+            screenCenter,
+            risePos,
+          )!;
+          final bodyDia = lerpDouble(
+            _cinematicOrbRect.shortestSide * 0.92,
+            screenShort * 0.5,
+            riseScale,
+          )!;
+          final cine = bodyDia / heroOrbBaseSize;
+          final coreRadius = bodyDia / 2 - _coreInset * cine;
+          final ringRadius = bodyDia / 2 - (_ringStroke / 2 + 1.5) * cine;
+          final field =
+              math.sqrt(
+                screen.width * screen.width + screen.height * screen.height,
+              ) *
+              1.3;
+          final shake = _cinematicShake();
+          final screenShake = _screenShake(s, screenShort);
+          // Overhang so the recoiling scrim and flash never uncover a bright
+          // strip of the app at the edge as the whole overlay is translated.
+          const shakePad = 96.0;
+          final scrimEnvelope = showSingularity
+              ? (1 -
+                    Curves.easeInCubic.transform(
+                      ((s - _evaporatePeak) / (1 - _evaporatePeak)).clamp(
+                        0.0,
+                        1.0,
+                      ),
+                    ))
+              : Curves.easeInCubic.transform(collapseLocal);
+          final scrim = 0.8 * scrimEnvelope;
+
+          return Transform.translate(
+            offset: screenShake,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+              Positioned(
+                left: -shakePad,
+                top: -shakePad,
+                right: -shakePad,
+                bottom: -shakePad,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(
+                        (focal.dx / screen.width) * 2 - 1,
+                        (focal.dy / screen.height) * 2 - 1,
+                      ),
+                      radius: 0.95,
+                      colors: [
+                        Colors.black.withValues(alpha: scrim * 0.4),
+                        Colors.black.withValues(alpha: scrim),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: focal.dx - field / 2 + shake.dx,
+                top: focal.dy - field / 2 + shake.dy,
+                width: field,
+                height: field,
+                child: showSingularity
+                    ? Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (sWarp < 0.22)
+                            CustomPaint(
+                              key: HeroOrb.collapseKey,
+                              painter: _HeroCollapsePainter(
+                                progress: 1,
+                                palette: _currentPalette,
+                                scale: cine,
+                                coreRadius: coreRadius,
+                                fade: 1 - (sWarp / 0.22),
+                              ),
+                            ),
+                          CustomPaint(
+                            key: HeroOrb.singularityKey,
+                            painter: _HeroSingularityPainter(
+                              progress: sWarp,
+                              palette: _currentPalette,
+                              scale: cine,
+                              ringRadius: ringRadius,
+                              coreRadius: coreRadius,
+                              sparks: _singularitySparks,
+                              spinPhase: 1.8 + 5.0,
+                            ),
+                          ),
+                        ],
+                      )
+                    : CustomPaint(
+                        key: HeroOrb.collapseKey,
+                        painter: _HeroCollapsePainter(
+                          progress: _collapse.value,
+                          palette: _currentPalette,
+                          scale: cine,
+                          coreRadius: coreRadius,
+                        ),
+                      ),
+              ),
+              if (showSingularity && s >= _evaporatePeak)
+                Positioned(
+                  left: -shakePad,
+                  top: -shakePad,
+                  right: -shakePad,
+                  bottom: -shakePad,
+                  child: ColoredBox(
+                    color: Colors.white.withValues(
+                      alpha:
+                          0.32 *
+                          math
+                              .pow(
+                                1 -
+                                    ((s - _evaporatePeak) / (1 - _evaporatePeak))
+                                        .clamp(0.0, 1.0),
+                                5,
+                              )
+                              .toDouble(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _releaseCharge() {
@@ -702,6 +1107,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       final settle = ((landing - 0.24) / 0.76).clamp(0.0, 1.0);
       return lerpDouble(0.90, 1, Curves.elasticOut.transform(settle))!;
     }
+    if (_charge.isCompleted) return 1;
     return 1 - 0.06 * Curves.easeInCubic.transform(_charge.value);
   }
 
@@ -743,6 +1149,72 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final local = (_nova.value - 0.04) / 0.36;
     final decay = math.pow(1 - local, 2.0).toDouble();
     return math.sin(local * 4 * 2 * math.pi) * 0.085 * decay;
+  }
+
+  double get _orbScale {
+    if (_regrow.value < 1) return _regrowScale;
+    if (_singularity.value > 0) return _drainScale;
+    if (_collapse.value > 0) return _collapseScale;
+    return _novaScale;
+  }
+
+  Offset get _orbKick {
+    if (_regrow.value < 1 || _singularity.value > 0) return Offset.zero;
+    if (_collapse.value > 0) return _collapseKick;
+    return _novaKick;
+  }
+
+  double get _orbTilt =>
+      (_regrow.value < 1 || _singularity.value > 0) ? 0 : _novaTilt;
+
+  double get _orbGlow {
+    final r = _regrow.value;
+    if (r < 1) {
+      final local = ((r - 0.14) / 0.5).clamp(0.0, 1.0);
+      return local <= 0 || local >= 1 ? 0 : math.sin(math.pi * local);
+    }
+    if (_singularity.value > 0 || _collapse.value > 0) return 0;
+    return _novaGlow;
+  }
+
+  double get _orbBodyOpacity {
+    final r = _regrow.value;
+    if (r < 1) {
+      return Curves.easeOutCubic.transform(
+        ((r - 0.14) / 0.34).clamp(0.0, 1.0),
+      );
+    }
+    if (_singularity.value > 0) return 0;
+    final c = _collapse.value;
+    if (c <= 0) return 1;
+    final local = ((c - _collapseTell) / (1 - _collapseTell)).clamp(0.0, 1.0);
+    return 1 - Curves.easeInCubic.transform((local / 0.18).clamp(0.0, 1.0));
+  }
+
+  double get _collapseScale {
+    final c = _collapse.value;
+    if (c <= 0) return _novaScale;
+    final gather = Curves.easeInCubic.transform(c);
+    final tremor = math.sin(c * 30) * 0.016 * c;
+    return lerpDouble(1, 0.5, gather)! + tremor;
+  }
+
+  Offset get _collapseKick {
+    final c = _collapse.value;
+    if (c <= _collapseTell) return Offset.zero;
+    final local = (c - _collapseTell) / (1 - _collapseTell);
+    final amp = local * local * 5.5;
+    final phase = c * 40;
+    return Offset(math.sin(phase) * amp, math.cos(phase * 1.3) * amp);
+  }
+
+  double get _drainScale => 0.05;
+
+  double get _regrowScale {
+    final r = _regrow.value;
+    if (r >= 1) return 1;
+    if (r < 0.14) return 0;
+    return Curves.elasticOut.transform(((r - 0.14) / 0.86).clamp(0.0, 1.0));
   }
 
   void _beginConnecting() {
@@ -864,7 +1336,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
           _cancelCharge();
         },
         child: AnimatedBuilder(
-          animation: Listenable.merge([_press, _charge, _nova]),
+          animation: Listenable.merge([
+            _press,
+            _charge,
+            _nova,
+            _collapse,
+            _singularity,
+            _regrow,
+          ]),
           child: Opacity(
             opacity: widget.enabled ? 1 : 0.72,
             child: SizedBox(
@@ -889,6 +1368,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                           _settle,
                           _tint,
                           _nova,
+                          _collapse,
+                          _singularity,
+                          _regrow,
                         ]),
                         builder: (context, _) {
                           // A cosine: a period change alters speed, never
@@ -918,7 +1400,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                               glow: seasonal && calmRewards
                                   ? _seasonalGlow(_currentPalette.glow)
                                   : _currentPalette.glow,
-                              intensity: math.max(halo, _novaGlow),
+                              intensity: math.max(halo, _orbGlow),
                               ripple: _still ? 1 : _ripple.value,
                               orbRadius: size / 2,
                             ),
@@ -1071,7 +1553,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                               ),
                             );
                           }
-                          if (_charge.value > _chargeTell) {
+                          if (_charge.value > _chargeTell &&
+                              !_charge.isCompleted) {
                             return CustomPaint(
                               key: HeroOrb.chargeKey,
                               painter: _HeroChargePainter(
@@ -1091,16 +1574,20 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
               ),
             ),
           ),
-          builder: (context, child) => Transform.translate(
-            offset: _novaKick * scale,
-            child: Transform.rotate(
-              angle: _novaTilt,
-              child: Transform.scale(
-                scale: (1.0 - 0.035 * _press.value) * _novaScale,
-                child: child,
+          builder: (context, child) {
+            final body = _orbBodyOpacity;
+            final scaled = Transform.translate(
+              offset: _orbKick * scale,
+              child: Transform.rotate(
+                angle: _orbTilt,
+                child: Transform.scale(
+                  scale: (1.0 - 0.035 * _press.value) * _orbScale,
+                  child: child,
+                ),
               ),
-            ),
-          ),
+            );
+            return body >= 1 ? scaled : Opacity(opacity: body, child: scaled);
+          },
         ),
       ),
     );
@@ -1309,16 +1796,17 @@ class _NovaSpark {
   final int tint;
 }
 
-List<_NovaSpark> _novaSparks(math.Random random) => [
-  for (var i = 0; i < _novaSparkCount; i++)
-    _NovaSpark(
-      angle: (i + random.nextDouble() * 0.8) / _novaSparkCount * 2 * math.pi,
-      reach: 0.62 + random.nextDouble() * 0.46,
-      delay: random.nextDouble() * 0.14,
-      width: 1.2 + random.nextDouble() * 2.4,
-      tint: random.nextInt(3),
-    ),
-];
+List<_NovaSpark> _novaSparks(math.Random random, {int count = _novaSparkCount}) =>
+    [
+      for (var i = 0; i < count; i++)
+        _NovaSpark(
+          angle: (i + random.nextDouble() * 0.8) / count * 2 * math.pi,
+          reach: 0.62 + random.nextDouble() * 0.46,
+          delay: random.nextDouble() * 0.14,
+          width: 1.2 + random.nextDouble() * 2.4,
+          tint: random.nextInt(3),
+        ),
+    ];
 
 /// The wind-up: shards falling inwards while the hold is still being made.
 /// It starts only past `_chargeTell`, so a finger that leaves early never
@@ -1703,6 +2191,1129 @@ class _HeroNovaPainter extends CustomPainter {
       old.scale != scale ||
       old.ringRadius != ringRadius ||
       old.coreRadius != coreRadius ||
+      !identical(old.sparks, sparks);
+}
+
+/// The second wind-up made literal: the light the nova threw is dragged back
+/// into a well. A near-edge-on accretion disk lights around a growing shadow;
+/// its far side is lensed up and over the top while its near side sweeps
+/// across the front, a razor photon ring traces the event horizon, the flank
+/// turning toward the eye is beamed to white and the receding one reddens, and
+/// twin jets fire from the poles — all of it winding faster into the big bang.
+/// Owns no state.
+class _HeroCollapsePainter extends CustomPainter {
+  _HeroCollapsePainter({
+    required this.progress,
+    required this.palette,
+    required this.scale,
+    required this.coreRadius,
+    this.fade = 1,
+  });
+
+  final double progress;
+  final HeroPalette palette;
+  final double scale;
+  final double coreRadius;
+  final double fade;
+
+  static const _armCount = 26;
+  static const _starCount = 44;
+  static const _diskBands = 7;
+  static const _hotSpots = 22;
+
+  /// The disk is a plate seen from a shallow angle: squashing its height is
+  /// what gives it a near and a far edge. The lensed halo stays near-circular
+  /// instead, and that mismatch — flat bar through a round ring — is the read.
+  static const _squash = 0.34;
+
+  /// Shared by the plane, the ansae and the lensed halo so all three agree on
+  /// where the disk ends.
+  double _diskOuter(double pull) => coreRadius * lerpDouble(2.3, 1.5, pull)!;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final local = ((progress - _collapseTell) / (1 - _collapseTell)).clamp(
+      0.0,
+      1.0,
+    );
+    if (local <= 0) return;
+    final center = size.center(Offset.zero);
+    final reach = size.shortestSide / 2;
+    final faded = fade < 1;
+    if (faded) {
+      canvas.saveLayer(
+        Offset.zero & size,
+        Paint()..color = Color.fromRGBO(255, 255, 255, fade.clamp(0.0, 1.0)),
+      );
+    }
+    final pull = Curves.easeInCubic.transform(local);
+    final spin = local * 2.2 + local * local * 6.0;
+    final open = Curves.easeOutBack.transform(
+      ((local - 0.12) / 0.4).clamp(0.0, 1.0),
+    );
+    final breathe = 1 + 0.03 * math.sin(local * 4 * 2 * math.pi);
+    final horizon = coreRadius * lerpDouble(0.05, 0.52, open)! * breathe;
+    final split = 0.5 * scale;
+
+    _paintDeepSpace(canvas, center, reach, pull);
+    _paintOrbBody(canvas, center, local, pull);
+    _paintStars(canvas, center, reach, horizon, pull, spin);
+    _paintInfall(canvas, center, reach, horizon, local, pull, spin);
+
+    // Far half of the plate (behind the hole): the opaque shadow drawn next
+    // cuts its inner edge, so what survives reads as diving in behind.
+    canvas.save();
+    canvas.clipRect(
+      Rect.fromLTRB(
+        center.dx - reach,
+        center.dy - reach,
+        center.dx + reach,
+        center.dy + split,
+      ),
+    );
+    _paintDiskPlane(canvas, center, horizon, pull, spin);
+    canvas.restore();
+
+    _paintShadow(canvas, center, horizon, pull);
+    _paintLensHalo(canvas, center, horizon, pull, spin);
+    _paintPhotonRing(canvas, center, horizon, pull, local, spin);
+
+    // Near half, drawn last: additive gas over the black shadow lights its
+    // lower rim, which is exactly how the front of the plate should occlude it.
+    canvas.save();
+    canvas.clipRect(
+      Rect.fromLTRB(
+        center.dx - reach,
+        center.dy - split,
+        center.dx + reach,
+        center.dy + reach,
+      ),
+    );
+    _paintDiskPlane(canvas, center, horizon, pull, spin);
+    canvas.restore();
+
+    _paintDoppler(canvas, center, pull, spin);
+    _paintJets(canvas, center, horizon, reach, pull, spin);
+    _paintShimmer(canvas, center, horizon, pull, spin);
+    if (faded) canvas.restore();
+  }
+
+  void _paintOrbBody(Canvas canvas, Offset center, double local, double pull) {
+    final fadeIn = (local / 0.18).clamp(0.0, 1.0);
+    final fade = fadeIn * (1 - pull / 0.86).clamp(0.0, 1.0);
+    if (fade <= 0) return;
+    final r =
+        coreRadius * lerpDouble(1.0, 0.3, Curves.easeInCubic.transform(pull))!;
+    final rect = Rect.fromCircle(center: center, radius: r);
+    canvas.drawCircle(
+      center,
+      r,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            palette.accent.withValues(alpha: 0.95 * fade),
+            palette.ring.first.withValues(alpha: 0.6 * fade),
+            _shift(
+              palette.ring.last,
+              hue: 12,
+              light: -0.1,
+            ).withValues(alpha: 0.3 * fade),
+          ],
+          stops: const [0, 0.6, 1],
+        ).createShader(rect),
+    );
+    canvas.drawCircle(
+      center,
+      r * 1.02,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _ringStroke * scale * (0.4 + 0.6 * fade)
+        ..color = palette.ring.first.lighten(8).withValues(alpha: 0.85 * fade),
+    );
+  }
+
+  /// A blurred additive glow; the blooms carry most of the collapse's light.
+  void _bloom(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Color color,
+    double sigma,
+  ) {
+    if (radius <= 0) return;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, sigma)
+        ..shader = RadialGradient(
+          colors: [color, color.withValues(alpha: 0)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  void _paintDeepSpace(Canvas canvas, Offset center, double reach, double pull) {
+    final rect = Rect.fromCenter(
+      center: center,
+      width: reach * 2,
+      height: reach * 2,
+    );
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.black.withValues(alpha: 0),
+            Colors.black.withValues(alpha: 0),
+            Colors.black.withValues(alpha: 0.5 * pull),
+          ],
+          stops: [0, lerpDouble(0.62, 0.34, pull)!, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: reach)),
+    );
+  }
+
+  /// The field being pulled in: points wind around the well and smear into
+  /// short tangential streaks, brightest as they cross the lensing radius
+  /// where a real photon would be swung the furthest.
+  void _paintStars(
+    Canvas canvas,
+    Offset center,
+    double reach,
+    double horizon,
+    double pull,
+    double spin,
+  ) {
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..blendMode = BlendMode.plus;
+    final lensR = horizon * 2.6;
+    for (var i = 0; i < _starCount; i++) {
+      final seed = 0.28 + (i % 7) / 7 * 0.72;
+      final r = reach * seed * (1 - 0.58 * pull);
+      final angle = i * 2.39996 + spin * (0.35 + seed * 0.6);
+      final head = center + Offset.fromDirection(angle, r);
+      final lens = 1 + 1.6 * math.exp(-math.pow((r - lensR) / (lensR * 0.5), 2));
+      final stretch = (5 + 30 * pull) * scale * (1 - seed * 0.5) * lens;
+      final tail = center + Offset.fromDirection(angle + 0.16, r + stretch);
+      final twinkle = 0.5 + 0.5 * (0.5 + 0.5 * math.sin(spin * 1.1 + i));
+      paint
+        ..strokeWidth = (0.6 + 0.8 * (1 - seed)) * scale
+        ..color = Colors.white.withValues(
+          alpha: (0.42 * pull * twinkle * seed * lens).clamp(0.0, 0.9),
+        );
+      canvas.drawLine(tail, head, paint);
+    }
+  }
+
+  /// The accretion disk as a plane, painted once per depth half. A radial
+  /// temperature ramp runs white-hot at the inner rim out to a cool ember
+  /// edge; concentric bands churn on their own phases so the gas turns rather
+  /// than spinning rigidly; a left-to-right beam brightens the approaching
+  /// flank and reddens the receding one.
+  void _paintDiskPlane(
+    Canvas canvas,
+    Offset center,
+    double horizon,
+    double pull,
+    double spin,
+  ) {
+    final inner = horizon * 1.02;
+    final outer = _diskOuter(pull);
+    final outerRect = Rect.fromCenter(
+      center: center,
+      width: outer * 2,
+      height: outer * 2 * _squash,
+    );
+    final innerRect = Rect.fromCenter(
+      center: center,
+      width: inner * 2,
+      height: inner * 2 * _squash,
+    );
+    final annulus = Path()
+      ..addOval(outerRect)
+      ..addOval(innerRect)
+      ..fillType = PathFillType.evenOdd;
+    final hIn = (inner / outer).clamp(0.02, 0.6);
+    final mid = palette.ring[palette.ring.length ~/ 2];
+
+    canvas.drawPath(
+      annulus,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.85 * pull),
+            palette.ring.first.lighten(14).withValues(alpha: 0.7 * pull),
+            mid.withValues(alpha: 0.42 * pull),
+            _shift(
+              palette.ring.last,
+              hue: 20,
+              light: -0.04,
+            ).withValues(alpha: 0.22 * pull),
+            palette.ring.last.withValues(alpha: 0),
+          ],
+          stops: [
+            hIn * 0.96,
+            hIn,
+            lerpDouble(hIn, 1, 0.2)!,
+            lerpDouble(hIn, 1, 0.52)!,
+            0.84,
+            1,
+          ],
+        ).createShader(outerRect),
+    );
+
+    // Differential-rotation banding.
+    for (var b = 0; b < _diskBands; b++) {
+      final t = b / (_diskBands - 1);
+      final wobble = 1 + 0.05 * math.sin(spin * 1.3 + b * 1.7);
+      final radius = lerpDouble(outer * 0.97, inner * 1.06, t)! * wobble;
+      final rect = Rect.fromCenter(
+        center: center,
+        width: radius * 2,
+        height: radius * 2 * _squash,
+      );
+      canvas.drawOval(
+        rect,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = lerpDouble(5, 12, t)! * scale
+          ..blendMode = BlendMode.plus
+          ..shader = SweepGradient(
+            colors: _diskSweep((0.1 + 0.18 * t) * pull),
+            transform: GradientRotation(spin + b),
+          ).createShader(rect),
+      );
+    }
+
+    // Doppler beaming across the whole plate.
+    canvas.drawPath(
+      annulus,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.95 * pull),
+            _shift(
+              palette.ring.first,
+              hue: -20,
+              light: 0.22,
+            ).withValues(alpha: 0.6 * pull),
+            _shift(
+              palette.ring.first,
+              hue: -20,
+              light: 0.22,
+            ).withValues(alpha: 0),
+            _shift(
+              palette.ring.last,
+              hue: 16,
+              light: -0.08,
+            ).withValues(alpha: 0.32 * pull),
+          ],
+          stops: const [0, 0.24, 0.6, 1],
+        ).createShader(outerRect),
+    );
+
+    canvas.drawOval(
+      innerRect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4 * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 1.5 * scale)
+        ..color = Colors.white.withValues(alpha: 0.7 * pull),
+    );
+
+    _paintHotSpots(canvas, center, inner, outer, pull, spin);
+  }
+
+  void _paintHotSpots(
+    Canvas canvas,
+    Offset center,
+    double inner,
+    double outer,
+    double pull,
+    double spin,
+  ) {
+    for (var i = 0; i < _hotSpots; i++) {
+      final a = i * 2.39996 + spin * (0.8 + (i % 3) * 0.2);
+      final rr = lerpDouble(inner, outer, (i % 5) / 4)!;
+      final p = center + Offset(math.cos(a) * rr, math.sin(a) * rr * _squash);
+      // Beamed brighter on the approaching (left) flank, dim on the right.
+      final beam = 0.45 + 0.55 * (0.5 - 0.5 * math.cos(a));
+      final flick = 0.6 + 0.4 * (0.5 + 0.5 * math.sin(spin * 1.4 + i * 1.7));
+      final radius = (2.5 + (i % 3) * 2.2) * scale;
+      final tint = palette.ring[i % palette.ring.length].lighten(20);
+      canvas.drawCircle(
+        p,
+        radius,
+        Paint()
+          ..blendMode = BlendMode.plus
+          ..shader = RadialGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.85 * pull * flick * beam),
+              tint.withValues(alpha: 0.5 * pull * flick * beam),
+              tint.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromCircle(center: p, radius: radius)),
+      );
+    }
+  }
+
+  /// Matter spiralling down the well and stretching thin as it goes — more
+  /// turns the closer it falls — each stream ending in a hot head right where
+  /// it is about to cross the horizon and be swallowed.
+  void _paintInfall(
+    Canvas canvas,
+    Offset center,
+    double reach,
+    double horizon,
+    double local,
+    double pull,
+    double spin,
+  ) {
+    const steps = 12;
+    for (var i = 0; i < _armCount; i++) {
+      final base = i * 2.39996 + spin;
+      final outer = lerpDouble(reach * 0.92, coreRadius * 1.6, pull)!;
+      final side = math.cos(base);
+      final tint = _shift(
+        palette.ring[i % palette.ring.length],
+        hue: side * -18,
+        light: side * 0.12,
+      ).lighten(8);
+      final swirl = 1.4 + 2.2 * pull;
+      final path = Path();
+      for (var s = 0; s <= steps; s++) {
+        final t = s / steps;
+        final r = lerpDouble(outer, horizon * 0.98, t)!;
+        final angle = base + t * t * swirl;
+        final point = center + Offset.fromDirection(angle, r);
+        s == 0
+            ? path.moveTo(point.dx, point.dy)
+            : path.lineTo(point.dx, point.dy);
+      }
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = (0.6 + 1.5 * pull) * scale
+          ..strokeCap = StrokeCap.round
+          ..blendMode = BlendMode.plus
+          ..color = tint.withValues(alpha: (0.28 + 0.26 * pull) * local),
+      );
+      final head = center + Offset.fromDirection(base + swirl, horizon * 1.02);
+      final hr = (2.0 + 2.2 * pull) * scale;
+      canvas.drawCircle(
+        head,
+        hr,
+        Paint()
+          ..blendMode = BlendMode.plus
+          ..shader = RadialGradient(
+            colors: [
+              Colors.white.withValues(alpha: 0.8 * pull),
+              tint.withValues(alpha: 0),
+            ],
+          ).createShader(Rect.fromCircle(center: head, radius: hr)),
+      );
+    }
+  }
+
+  /// Twin relativistic jets fired along the poles: a blurred sheath round a
+  /// white spine with knots riding out, igniting once the fall is underway.
+  void _paintJets(
+    Canvas canvas,
+    Offset center,
+    double horizon,
+    double reach,
+    double pull,
+    double spin,
+  ) {
+    final ignite = ((pull - 0.18) / 0.82).clamp(0.0, 1.0);
+    if (ignite <= 0) return;
+    final length = reach * lerpDouble(0.35, 1.3, ignite)!;
+    final tint = _shift(palette.ring.first, hue: -14, light: 0.2).lighten(6);
+    const steps = 14;
+    for (final axis in [-math.pi / 2, math.pi / 2]) {
+      for (var s = 0; s < steps; s++) {
+        final t = s / steps;
+        final r0 = horizon * 0.5 + length * t;
+        final r1 = horizon * 0.5 + length * (s + 1) / steps;
+        final p0 = center + Offset.fromDirection(axis, r0);
+        final p1 = center + Offset.fromDirection(axis, r1);
+        final taper = 1 - t;
+        final width = (3 + 13 * taper) * scale;
+        final fade = math.pow(1 - t, 1.4).toDouble() * ignite;
+        canvas.drawLine(
+          p0,
+          p1,
+          Paint()
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = width * 2.6
+            ..blendMode = BlendMode.plus
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, width)
+            ..color = tint.withValues(alpha: 0.24 * fade),
+        );
+        canvas.drawLine(
+          p0,
+          p1,
+          Paint()
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = width * 0.5
+            ..blendMode = BlendMode.plus
+            ..color = Colors.white.withValues(alpha: 0.5 * fade),
+        );
+      }
+      for (var k = 0; k < 4; k++) {
+        final kt = (spin * 0.12 + k / 4) % 1.0;
+        final rr = horizon * 0.5 + length * kt;
+        final wob = math.sin(spin * 2 + k * 2) * 6 * scale * (1 - kt);
+        final p = center + Offset.fromDirection(axis, rr) + Offset(wob, 0);
+        _bloom(
+          canvas,
+          p,
+          (5 + 7 * (1 - kt)) * scale,
+          Colors.white.withValues(alpha: 0.7 * ignite * (1 - kt)),
+          3 * scale,
+        );
+      }
+    }
+  }
+
+  /// The event horizon: a true black disk that grows as the fall deepens, with
+  /// a short falloff so its rim reads sharp against the light sitting on it.
+  void _paintShadow(Canvas canvas, Offset center, double horizon, double pull) {
+    final r = horizon * (1 + 0.012 * math.sin(pull * 30));
+    final edge = r * 1.1;
+    canvas.drawCircle(
+      center,
+      edge,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.black,
+            Colors.black,
+            Colors.black.withValues(alpha: 0),
+          ],
+          stops: [0, r / edge, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: edge)),
+    );
+  }
+
+  /// The lensed emission wrapping the shadow: the disk's light bent into a
+  /// near-circular ring that closes the top and bottom the flat plate cannot,
+  /// beamed the same way — blinding on the left, an ember on the right.
+  void _paintLensHalo(
+    Canvas canvas,
+    Offset center,
+    double horizon,
+    double pull,
+    double spin,
+  ) {
+    final radius = horizon * 1.14;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (10 + 12 * pull) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 7 * scale)
+        ..shader = SweepGradient(
+          colors: _diskSweep(0.5 * pull),
+          transform: GradientRotation(spin * 0.3),
+        ).createShader(rect),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (5 + 6 * pull) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2 * scale)
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.85 * pull),
+            _shift(
+              palette.ring.first,
+              hue: -18,
+              light: 0.2,
+            ).withValues(alpha: 0.42 * pull),
+            _shift(
+              palette.ring.first,
+              hue: -18,
+              light: 0.2,
+            ).withValues(alpha: 0),
+            _shift(
+              palette.ring.last,
+              hue: 14,
+              light: -0.06,
+            ).withValues(alpha: 0.24 * pull),
+          ],
+          stops: const [0, 0.28, 0.62, 1],
+        ).createShader(rect),
+    );
+  }
+
+  /// The photon ring: a razor-thin, near-perfect circle of light grazing the
+  /// horizon, with a fainter second image stacked just inside the way the
+  /// higher-order rings pile up against the shadow's edge.
+  void _paintPhotonRing(
+    Canvas canvas,
+    Offset center,
+    double horizon,
+    double pull,
+    double local,
+    double spin,
+  ) {
+    final radius = horizon * 1.02;
+    final glow = 0.82 + 0.18 * math.sin(local * 2 * 2 * math.pi);
+    final fx = ((local - 0.5) / 0.22).clamp(0.0, 1.0);
+    final form =
+        1 +
+        2.8 * math.pow(fx, 0.3).toDouble() * math.pow(1 - fx, 1.7).toDouble();
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (10 + 10 * pull) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 7 * scale)
+        ..color = palette.ring.first.lighten(18).withValues(
+          alpha: (0.36 * pull * form).clamp(0.0, 1.0),
+        ),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (2.4 + 2.4 * pull) * scale
+        ..blendMode = BlendMode.plus
+        ..shader = SweepGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.95 * pull),
+            palette.ring.first.lighten(16).withValues(alpha: 0.5 * pull),
+            _shift(
+              palette.ring.last,
+              hue: 12,
+              light: -0.04,
+            ).withValues(alpha: 0.3 * pull),
+            Colors.white.withValues(alpha: 0.95 * pull),
+          ],
+          stops: const [0, 0.5, 0.75, 1],
+          transform: const GradientRotation(math.pi),
+        ).createShader(rect),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (1.1 + 1.0 * pull) * scale
+        ..blendMode = BlendMode.plus
+        ..color = Colors.white.withValues(
+          alpha: ((0.8 + 0.2 * glow) * pull * form).clamp(0.0, 1.0),
+        ),
+    );
+    canvas.drawCircle(
+      center,
+      radius * 0.965,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.9 * scale
+        ..blendMode = BlendMode.plus
+        ..color = Colors.white.withValues(
+          alpha: (0.4 * pull * form).clamp(0.0, 1.0),
+        ),
+    );
+  }
+
+  /// The two ansae where the disk turns edge-on: the approaching flank beamed
+  /// to a blinding point with an anamorphic streak, the receding one a dim
+  /// ember. This is the brightest thing on the board.
+  void _paintDoppler(Canvas canvas, Offset center, double pull, double spin) {
+    final ansa = _diskOuter(pull) * 0.96;
+    final flick = 0.9 + 0.1 * math.sin(spin * 1.4);
+    final near = center + Offset(-ansa, 0);
+    final far = center + Offset(ansa, 0);
+    _bloom(
+      canvas,
+      near,
+      (18 + 16 * pull) * scale,
+      _shift(
+        palette.ring.first,
+        hue: -22,
+        light: 0.24,
+      ).withValues(alpha: 0.55 * pull),
+      5 * scale,
+    );
+    _bloom(
+      canvas,
+      near,
+      (9 + 8 * pull) * scale,
+      Colors.white.withValues(alpha: 0.95 * pull * flick),
+      2 * scale,
+    );
+    final streak = Rect.fromCenter(
+      center: near,
+      width: ansa * 2.4,
+      height: 4 * scale,
+    );
+    canvas.drawRect(
+      streak,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 2 * scale)
+        ..shader = LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0),
+            Colors.white.withValues(alpha: 0.72 * pull * flick),
+            Colors.white.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.5, 1],
+        ).createShader(streak),
+    );
+    _bloom(
+      canvas,
+      far,
+      (8 + 7 * pull) * scale,
+      _shift(
+        palette.ring.last,
+        hue: 14,
+        light: -0.05,
+      ).withValues(alpha: 0.5 * pull),
+      3 * scale,
+    );
+  }
+
+  /// Space refusing to hold its shape at the rim: the red and blue channels
+  /// split and wobble, the tell that light here is being bent, not lit.
+  void _paintShimmer(
+    Canvas canvas,
+    Offset center,
+    double horizon,
+    double pull,
+    double spin,
+  ) {
+    final radius = horizon * 1.08;
+    final wob = math.sin(spin * 2) * 1.4 * scale * pull;
+    final alpha = 0.24 * pull;
+    canvas.drawCircle(
+      center + Offset(wob, 0),
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2 * scale
+        ..blendMode = BlendMode.plus
+        ..color = const Color(0xFF4488FF).withValues(alpha: alpha),
+    );
+    canvas.drawCircle(
+      center - Offset(wob, 0),
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2 * scale
+        ..blendMode = BlendMode.plus
+        ..color = const Color(0xFFFF3355).withValues(alpha: alpha),
+    );
+  }
+
+  List<Color> _diskSweep(double alpha) => [
+    for (final color in [...palette.ring, palette.ring.first])
+      color.lighten(6).withValues(alpha: alpha),
+  ];
+
+  Color _shift(Color c, {double hue = 0, double light = 0, double sat = 0}) {
+    final hsl = HSLColor.fromColor(c);
+    final h = (hsl.hue + hue) % 360;
+    return HSLColor.fromAHSL(
+      hsl.alpha,
+      h < 0 ? h + 360 : h,
+      (hsl.saturation + sat).clamp(0.0, 1.0),
+      (hsl.lightness + light).clamp(0.0, 1.0),
+    ).toColor();
+  }
+
+  @override
+  bool shouldRepaint(_HeroCollapsePainter old) =>
+      old.progress != progress ||
+      old.palette != palette ||
+      old.scale != scale ||
+      old.coreRadius != coreRadius ||
+      old.fade != fade;
+}
+
+class _HeroSingularityPainter extends CustomPainter {
+  _HeroSingularityPainter({
+    required this.progress,
+    required this.palette,
+    required this.scale,
+    required this.ringRadius,
+    required this.coreRadius,
+    required this.sparks,
+    required this.spinPhase,
+  });
+
+  final double progress;
+  final HeroPalette palette;
+  final double scale;
+  final double ringRadius;
+  final double coreRadius;
+  final List<_NovaSpark> sparks;
+
+  final double spinPhase;
+
+  double _span(double start, double length) =>
+      ((progress - start) / length).clamp(0.0, 1.0);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final reach = size.shortestSide / 2;
+    _paintPinch(canvas, center);
+    _paintDevour(canvas, center, reach);
+    _paintBlast(canvas, center, reach);
+    _paintPoint(canvas, center);
+    _paintFlash(canvas, center, reach);
+    _paintShock(canvas, center, reach);
+    _paintQuanta(canvas, center, reach);
+    _paintShells(canvas, center, reach);
+  }
+
+  void _paintPinch(Canvas canvas, Offset center) {
+    final crush = _span(0, 0.28);
+    if (crush >= 1) return;
+    final eased = Curves.easeInCubic.transform(
+      ((crush - 0.12) / 0.88).clamp(0.0, 1.0),
+    );
+    final horizon = coreRadius * 0.5 * (1 - eased);
+    final spin = spinPhase + crush * 4 + crush * crush * 8;
+    final glowUp = 0.5 + 1.1 * eased;
+
+    final diskR = horizon * 1.7;
+    if (diskR > 1) {
+      final bed = Rect.fromCenter(
+        center: center,
+        width: diskR * 2,
+        height: diskR * 2 * 0.55,
+      );
+      canvas.drawOval(
+        bed,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = (6 + 6 * (1 - crush)) * scale
+          ..blendMode = BlendMode.plus
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5 * scale)
+          ..shader = SweepGradient(
+            colors: [
+              for (final color in [...palette.ring, palette.ring.first])
+                color.lighten(8).withValues(alpha: 0.45 * (1 - crush)),
+            ],
+            transform: GradientRotation(spin),
+          ).createShader(bed),
+      );
+    }
+
+    if (horizon > 0.6) {
+      final edge = horizon * 1.12;
+      canvas.drawCircle(
+        center,
+        edge,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              Colors.black,
+              Colors.black,
+              Colors.black.withValues(alpha: 0),
+            ],
+            stops: [0, horizon / edge, 1],
+          ).createShader(Rect.fromCircle(center: center, radius: edge)),
+      );
+    }
+
+    final ringR = math.max(horizon * 1.06, 1.0);
+    canvas.drawCircle(
+      center,
+      ringR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (7 + 9 * eased) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * scale)
+        ..color = palette.ring.first
+            .lighten(16)
+            .withValues(alpha: (0.4 * glowUp).clamp(0.0, 1.0)),
+    );
+    canvas.drawCircle(
+      center,
+      ringR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (1.4 + 1.4 * eased) * scale
+        ..blendMode = BlendMode.plus
+        ..color = Colors.white.withValues(alpha: (0.7 * glowUp).clamp(0.0, 1.0)),
+    );
+  }
+
+  void _paintPoint(Canvas canvas, Offset center) {
+    final live = _span(0.2, 0.65);
+    if (live <= 0 || live >= 1) return;
+    final double strength;
+    final double r;
+    if (progress < _evaporatePeak) {
+      final b = ((progress - 0.2) / (_evaporatePeak - 0.2)).clamp(0.0, 1.0);
+      final throb = 0.5 + 0.5 * math.sin(b * 2.5 * 2 * math.pi);
+      strength =
+          (0.6 + 0.4 * throb) *
+          (0.5 + 0.5 * Curves.easeInCubic.transform(b));
+      r = coreRadius * (0.05 + 0.015 * throb);
+    } else {
+      final d = ((progress - _evaporatePeak) / 0.33).clamp(0.0, 1.0);
+      strength = 1.4 * math.pow(1 - d, 2.2).toDouble();
+      r = coreRadius * (0.06 + 0.14 * d);
+    }
+    _bloom(
+      canvas,
+      center,
+      r * 4.5,
+      palette.glow.lighten(16).withValues(alpha: (0.7 * strength).clamp(0.0, 1.0)),
+      12 * scale,
+    );
+    canvas.drawCircle(
+      center,
+      r,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: strength.clamp(0.0, 1.0)),
+            palette.glow
+                .lighten(10)
+                .withValues(alpha: (0.5 * strength).clamp(0.0, 1.0)),
+            palette.glow.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.5, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: r)),
+    );
+  }
+
+  void _paintDevour(Canvas canvas, Offset center, double reach) {
+    final inhale = _span(0.42, 0.1);
+    final purge = _span(_evaporatePeak, 0.34);
+    final cover = inhale * math.pow(1 - purge, 1.6).toDouble();
+    if (cover <= 0.01) return;
+    final radius = lerpDouble(
+      coreRadius * 0.3,
+      reach * 1.6,
+      Curves.easeIn.transform(inhale),
+    )!;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..shader = RadialGradient(
+          colors: [
+            Colors.black.withValues(alpha: 0.97 * cover),
+            Colors.black.withValues(alpha: 0.97 * cover),
+            Colors.black.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.72, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  void _paintBlast(Canvas canvas, Offset center, double reach) {
+    final b = _span(_evaporatePeak, 0.55);
+    if (b <= 0 || b >= 1) return;
+    final e = Curves.easeOutCubic.transform(b);
+    final radius = lerpDouble(coreRadius * 0.12, reach * 1.45, e)!;
+    final fade = math.pow(1 - b, 2.0).toDouble();
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..shader = RadialGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.55 * fade),
+            palette.glow.lighten(12).withValues(alpha: 0.42 * fade),
+            palette.ring.first.withValues(alpha: 0.16 * fade),
+            palette.glow.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.22, 0.6, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  void _paintFlash(Canvas canvas, Offset center, double reach) {
+    final boil = _span(_evaporatePeak, 1 - _evaporatePeak);
+    if (boil <= 0 || boil >= 1) return;
+    final swell = Curves.easeOutCubic.transform(boil);
+    final fade = math.pow(1 - boil, 1.8).toDouble();
+    final radius = lerpDouble(coreRadius * 0.2, reach * 1.25, swell)!;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 30 * scale)
+        ..shader = RadialGradient(
+          colors: [
+            palette.glow.lighten(18).withValues(alpha: 0.6 * fade),
+            palette.glow.lighten(6).withValues(alpha: 0.32 * fade),
+            palette.glow.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.45, 1],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  void _paintShock(Canvas canvas, Offset center, double reach) {
+    final local = _span(_evaporatePeak, 0.42);
+    if (local <= 0 || local >= 1) return;
+    final eased = Curves.easeOutQuart.transform(local);
+    final radius = lerpDouble(coreRadius * 0.4, reach * 1.35, eased)!;
+    final fade = math.pow(1 - local, 1.5).toDouble();
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (2 + 22 * (1 - eased)) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * scale)
+        ..shader = SweepGradient(
+          colors: [
+            for (final color in [...palette.ring, palette.ring.first])
+              color.lighten(14).withValues(alpha: 0.55 * fade),
+          ],
+        ).createShader(rect),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (1 + 3 * (1 - eased)) * scale
+        ..blendMode = BlendMode.plus
+        ..color = Colors.white.withValues(alpha: 0.9 * fade),
+    );
+    final lead = _span(_evaporatePeak, 0.28);
+    if (lead > 0 && lead < 1) {
+      final le = Curves.easeOutQuart.transform(lead);
+      final lr = lerpDouble(coreRadius * 0.4, reach * 1.5, le)!;
+      canvas.drawCircle(
+        center,
+        lr,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = (0.8 + 2 * (1 - le)) * scale
+          ..blendMode = BlendMode.plus
+          ..color = Colors.white.withValues(
+            alpha: 0.8 * math.pow(1 - lead, 1.6).toDouble(),
+          ),
+      );
+    }
+  }
+
+  void _paintQuanta(Canvas canvas, Offset center, double reach) {
+    for (final spark in sparks) {
+      final local = _span(_evaporatePeak - 0.04 + spark.delay * 0.4, 0.7);
+      if (local <= 0 || local >= 1) continue;
+      final eased = Curves.easeOutCubic.transform(local);
+      final distance =
+          lerpDouble(coreRadius * 0.1, reach * spark.reach * 1.25, eased)!;
+      final tail = (12 + 56 * (1 - eased)) * scale;
+      final fade = math.pow(1 - local, 1.7).toDouble();
+      final drift = spark.angle + math.sin(local * math.pi) * 0.2;
+      final head = center + Offset.fromDirection(drift, distance);
+      final back =
+          center + Offset.fromDirection(drift, math.max(0, distance - tail));
+      final tint = palette.ring[spark.tint % palette.ring.length];
+      canvas.drawLine(
+        back,
+        head,
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = spark.width * 0.8 * scale
+          ..blendMode = BlendMode.plus
+          ..shader = LinearGradient(
+            colors: [
+              tint.withValues(alpha: 0),
+              tint.lighten(16).withValues(alpha: 0.8 * fade),
+            ],
+          ).createShader(Rect.fromPoints(back, head).inflate(1)),
+      );
+    }
+  }
+
+  void _paintShells(Canvas canvas, Offset center, double reach) {
+    for (var i = 0; i < 3; i++) {
+      final local = _span(_evaporatePeak + i * 0.07, 0.62);
+      if (local <= 0 || local >= 1) continue;
+      final eased = Curves.easeOutQuart.transform(local);
+      final radius =
+          lerpDouble(ringRadius * 0.5, reach * (1.2 - i * 0.16), eased)!;
+      final fade = math.pow(1 - local, 2).toDouble();
+      final rect = Rect.fromCircle(center: center, radius: radius);
+      canvas.drawCircle(
+        center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = (2 + 5 * (1 - eased)) * scale
+          ..blendMode = BlendMode.plus
+          ..shader = SweepGradient(
+            colors: [
+              for (final color in [...palette.ring, palette.ring.first])
+                color.lighten(12).withValues(alpha: (0.46 - i * 0.12) * fade),
+            ],
+            transform: GradientRotation(-math.pi / 2 + eased * math.pi),
+          ).createShader(rect),
+      );
+    }
+  }
+
+  void _bloom(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Color color,
+    double sigma,
+  ) {
+    if (radius <= 0) return;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, sigma)
+        ..shader = RadialGradient(
+          colors: [color, color.withValues(alpha: 0)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HeroSingularityPainter old) =>
+      old.progress != progress ||
+      old.palette != palette ||
+      old.scale != scale ||
+      old.ringRadius != ringRadius ||
+      old.coreRadius != coreRadius ||
+      old.spinPhase != spinPhase ||
       !identical(old.sparks, sparks);
 }
 

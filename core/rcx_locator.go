@@ -135,11 +135,16 @@ func (e *rcxEngine) wantsLocate(name string, now time.Time) bool {
 		return false
 	}
 	key := e.key(name)
-	if trust, _ := e.ledger.Trust(key); trust != rcxTrustSuspect {
+	if last := e.locateAt[key]; !last.IsZero() && now.Sub(last) < rcxDiscoveryInterval {
 		return false
 	}
-	last := e.locateAt[key]
-	return last.IsZero() || now.Sub(last) >= rcxDiscoveryInterval
+	if trust, _ := e.ledger.Trust(key); trust == rcxTrustSuspect {
+		return true
+	}
+	// A winner the mmdb only guessed gets one quick country-service check before it
+	// carries traffic; once its egress is measured it rides its speed uncontested.
+	return len(e.cfg.CensorCountries) > 0 && len(e.cfg.CountryEchoes) > 0 &&
+		e.freshExitCountry(key, now) == ""
 }
 
 func (e *rcxEngine) startSuspectCheck() bool {

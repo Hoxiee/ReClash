@@ -800,6 +800,7 @@ String _milestoneRevealText(AppLocalizations localizations, String id) =>
       'porcelain' => localizations.milestoneRevealPorcelain,
       'crown' => localizations.milestoneRevealCrown,
       'oscilloscope' => localizations.findingOscilloscopeDesc,
+      'singularity' => localizations.findingSingularityDesc,
       'marks' => localizations.findingMarksDesc,
       'pi' => localizations.findingPiDesc,
       'turn' => localizations.findingTurnDesc,

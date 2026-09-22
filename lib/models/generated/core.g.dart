@@ -340,6 +340,23 @@ Map<String, dynamic> _$RcxLaneSelectorToJson(_RcxLaneSelector instance) =>
       'grp': ?instance.group,
     };
 
+_RcxNodeRule _$RcxNodeRuleFromJson(Map<String, dynamic> json) => _RcxNodeRule(
+  action: json['a'] as String,
+  provider: json['p'] as String?,
+  nameContains: json['n'] as String?,
+  group: json['g'] as String?,
+  country: json['c'] as String?,
+);
+
+Map<String, dynamic> _$RcxNodeRuleToJson(_RcxNodeRule instance) =>
+    <String, dynamic>{
+      'a': instance.action,
+      'p': ?instance.provider,
+      'n': ?instance.nameContains,
+      'g': ?instance.group,
+      'c': ?instance.country,
+    };
+
 _RcxLaneConfig _$RcxLaneConfigFromJson(Map<String, dynamic> json) =>
     _RcxLaneConfig(
       capabilityId: json['id'] as String,
@@ -364,52 +381,65 @@ Map<String, dynamic> _$RcxLaneConfigToJson(_RcxLaneConfig instance) =>
       'sel': instance.selectors,
     };
 
-_RcxConfigParams _$RcxConfigParamsFromJson(Map<String, dynamic> json) =>
-    _RcxConfigParams(
-      enabled: json['on'] as bool,
-      preset: json['preset'] as String,
-      strategy: json['st'] as String,
-      defaultsVersion: (json['dv'] as num).toInt(),
-      censorCountries: (json['cc'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      canaryForeign: (json['cf'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      canaryDomestic: (json['cd'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      openMarkers: (json['om'] as List<dynamic>)
-          .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      domesticMarkers: (json['dm'] as List<dynamic>)
-          .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      localMarkers:
-          (json['lm'] as List<dynamic>?)
-              ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      nameHints:
-          (json['nh'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-      egressEchoes:
-          (json['ee'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-      breakerPatterns: (json['bp'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      allowDomesticLastResort: json['dlr'] as bool,
-      requireUdp: json['udp'] as bool,
-      respectPick: json['rpk'] as bool,
-      dwellSeconds: (json['dwl'] as num).toInt(),
-      waveWidth: (json['ww'] as num).toInt(),
-      lanes:
-          (json['ln'] as List<dynamic>?)
-              ?.map((e) => RcxLaneConfig.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-    );
+_RcxConfigParams _$RcxConfigParamsFromJson(
+  Map<String, dynamic> json,
+) => _RcxConfigParams(
+  enabled: json['on'] as bool,
+  preset: json['preset'] as String,
+  strategy: json['st'] as String,
+  defaultsVersion: (json['dv'] as num).toInt(),
+  censorCountries: (json['cc'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  canaryForeign: (json['cf'] as List<dynamic>).map((e) => e as String).toList(),
+  canaryDomestic: (json['cd'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  openMarkers: (json['om'] as List<dynamic>)
+      .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  domesticMarkers: (json['dm'] as List<dynamic>)
+      .map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  localMarkers:
+      (json['lm'] as List<dynamic>?)
+          ?.map((e) => RcxMarker.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  nameHints:
+      (json['nh'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  egressEchoes:
+      (json['ee'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  countryEchoes:
+      (json['ce'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  breakerPatterns: (json['bp'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  nodeRules:
+      (json['nr'] as List<dynamic>?)
+          ?.map((e) => RcxNodeRule.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  avoidCountries:
+      (json['ac'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  latencyBands:
+      (json['lb'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
+      const [],
+  allowDomesticLastResort: json['dlr'] as bool,
+  requireUdp: json['udp'] as bool,
+  respectPick: json['rpk'] as bool,
+  dwellSeconds: (json['dwl'] as num).toInt(),
+  waveWidth: (json['ww'] as num).toInt(),
+  lanes:
+      (json['ln'] as List<dynamic>?)
+          ?.map((e) => RcxLaneConfig.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
 
 Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
     <String, dynamic>{
@@ -425,7 +455,11 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'lm': instance.localMarkers,
       'nh': instance.nameHints,
       'ee': instance.egressEchoes,
+      'ce': instance.countryEchoes,
       'bp': instance.breakerPatterns,
+      'nr': instance.nodeRules,
+      'ac': instance.avoidCountries,
+      'lb': instance.latencyBands,
       'dlr': instance.allowDomesticLastResort,
       'udp': instance.requireUdp,
       'rpk': instance.respectPick,

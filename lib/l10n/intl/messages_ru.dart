@@ -1330,6 +1330,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage(
       "Молчаливый автопилот",
     ),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("Сингулярность"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "Орб держали, пока он не схлопнулся в точку и не вспыхнул заново.",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("Оборот"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "Сессия пережила новогоднюю полночь.",
@@ -2854,6 +2858,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Среднее восстановление",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "Избегать стран выхода",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Никогда не выпускать трафик через сервер, чей выход измерен в этих странах — даже в крайнем случае",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Вернуть автовыбор",
     ),
@@ -2863,9 +2873,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Нет в текущем списке серверов",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "Выходит через избегаемую страну",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Не прошёл проверки в этой сети",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "Игнорируется правилом",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "Местный сервер, в этой сети под запретом",
@@ -2924,6 +2940,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сервер ещё не выбран",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "Сервисы определения страны",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Эндпоинты, сообщающие реальную страну выхода сервера при проверке подозрительного узла",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Проверить все серверы",
     ),
@@ -3126,6 +3148,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Последнее восстановление",
     ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "Лестница задержек",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Границы в миллисекундах, делящие серверы на тиры скорости; пусто — значение стратегии",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Учитывать ручной выбор",
@@ -3224,7 +3252,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Порядок выбора",
     ),
     "smartRoutingRankingDesc": MessageLookupByLibrary.simpleMessage(
-      "Полосы задержки не настраиваются: иначе миллисекунды могли бы перевесить работоспособность сервера",
+      "Лестница задержек делит серверы на тиры скорости; измеренный сервер всегда выше неизмеренного",
     ),
     "smartRoutingReasonColdStart": MessageLookupByLibrary.simpleMessage(
       "Первый выбор в этой сети",
@@ -3296,8 +3324,39 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Сервер не отвечает, ищем замену",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage(
+      "Добавить правило",
+    ),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
+      "Страна выхода",
+    ),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Группа"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage(
+      "Игнорировать",
+    ),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "Крайний случай",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "Совпадает с любым сервером",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
+      "Имя содержит",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Доступна только в режиме «Правила»",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
+      "Предпочитать",
+    ),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
+      "Провайдер",
+    ),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
+      "Правила серверов",
+    ),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "Игнорировать, придерживать или предпочитать серверы по имени, провайдеру или измеренной стране",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(

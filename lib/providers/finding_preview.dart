@@ -19,6 +19,7 @@ const findingIds = [
   'porcelain',
   'crown',
   'oscilloscope',
+  'singularity',
   'marks',
   'pi',
   'turn',

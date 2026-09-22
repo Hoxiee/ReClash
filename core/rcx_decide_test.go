@@ -490,6 +490,152 @@ func TestDecideDoesNotLatchAFasterDomesticNodeOnACensoredColdStart(t *testing.T)
 	}
 }
 
+// A CDN-fronted home node reads foreign in the mmdb (Origin=foreign) yet its
+// name tripped the cheap check to Suspect. Without the trust penalty its foreign
+// origin would leave homeRisk at 1, tying a real foreign node, and its nearer
+// host-ping would then latch it on a censored cold start.
+func TestDecideSinksASuspectFrontedNodeUnderARealForeignNode(t *testing.T) {
+	suspect := rcxNode("ru-fronted", foreignUntested())
+	suspect.Facts.Trust = rcxTrustSuspect
+	suspect.Evidence, suspect.MedianMs, suspect.HostMs = rcxEvidenceNone, 0, 30
+	abroad := rcxNode("nl-1", foreignUntested())
+	abroad.Evidence, abroad.MedianMs, abroad.HostMs = rcxEvidenceNone, 0, 140
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{suspect, abroad},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want the foreign node over a nearer suspect", got)
+	}
+}
+
+func TestDecideSinksAHomeEgressNodeThatOpenedTheWorld(t *testing.T) {
+	// mmdb-foreign and it proved it reaches the open world, yet the egress echo
+	// placed it in-country: the open proof must not buy it foreign parity.
+	home := rcxNode("ru-fronted", foreignProven())
+	home.Facts.HomeEgress = true
+	home.MedianMs, home.HostMs = 0, 30
+	abroad := rcxNode("nl-1", foreignProven())
+	abroad.MedianMs, abroad.HostMs = 0, 140
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{home, abroad},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want the real foreign exit over a home-egress node that merely opened", got)
+	}
+}
+
+func TestDecideIgnoreAndAvoidBarANode(t *testing.T) {
+	ignored := rcxNode("ignored", foreignProven())
+	ignored.Ignore = true
+	avoided := rcxNode("avoided", foreignProven())
+	avoided.AvoidExit = true
+	ok := rcxNode("ok", foreignProven())
+	input := rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{ignored, avoided, ok},
+		Policy:     rcxTestPolicy(),
+	}
+	if got := rcxDecideAt(input); got.To != "ok" {
+		t.Fatalf("picked %q, want the only un-barred node", got.To)
+	}
+	if rcxEligible(ignored, input) || rcxEligible(avoided, input) {
+		t.Fatal("a barred node stayed eligible")
+	}
+	if b := rcxBlockOf(ignored, input); b != rcxBlockIgnored {
+		t.Fatalf("ignored block = %q", b)
+	}
+	if b := rcxBlockOf(avoided, input); b != rcxBlockAvoidExit {
+		t.Fatalf("avoided block = %q", b)
+	}
+}
+
+func TestDecideLastResortRuleCapsAPreferredNode(t *testing.T) {
+	capped := rcxNode("capped", foreignProven())
+	capped.RuleLastResort = true
+	input := rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{capped},
+		Policy:     rcxTestPolicy(),
+	}
+	if got := rcxDecideAt(input); got.Switch {
+		t.Fatalf("decision = %+v, want no pick: normal terrain bars a last-resort-capped node", got)
+	}
+}
+
+func TestDecidePreferBreaksATie(t *testing.T) {
+	plain := rcxNode("plain", foreignProven())
+	plain.Order = 1
+	favoured := rcxNode("favoured", foreignProven())
+	favoured.Order = 2
+	favoured.Prefer = true
+	input := rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{plain, favoured},
+		Policy:     rcxTestPolicy(),
+	}
+	if got := rcxDecideAt(input); got.To != "favoured" {
+		t.Fatalf("picked %q, want the preferred node to take the tie despite a higher order", got.To)
+	}
+}
+
+// Two unmeasured foreign-origin nodes tie on homeRisk, so before the fix the
+// nearer host-ping decided and a fronted home node (small ping) beat a real
+// exit. On a censored network an unmeasured node must not rank by host-ping;
+// the deterministic order breaks the tie until a probe measures either.
+func TestDecideDoesNotRankUnmeasuredForeignNodesByHostPingWhenCensored(t *testing.T) {
+	near := rcxNode("near", foreignUntested())
+	near.Evidence, near.MedianMs, near.HostMs = rcxEvidenceNone, 0, 25
+	near.Order = 5
+	far := rcxNode("far", foreignUntested())
+	far.Evidence, far.MedianMs, far.HostMs = rcxEvidenceNone, 0, 300
+	far.Order = 1
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{near, far},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "far" {
+		t.Fatalf("decision = %+v, want the lower hash order, not the nearer host-ping", got)
+	}
+}
+
+// The host-ping order still applies off a censored network, where a small ping
+// is a genuine proximity signal and no censor sits between the node and a site.
+func TestDecideStillOrdersUnmeasuredNodesByHostPingWhenNotCensored(t *testing.T) {
+	near := rcxNode("near", foreignUntested())
+	near.Evidence, near.MedianMs, near.HostMs = rcxEvidenceNone, 0, 25
+	near.Order = 5
+	far := rcxNode("far", foreignUntested())
+	far.Evidence, far.MedianMs, far.HostMs = rcxEvidenceNone, 0, 300
+	far.Order = 1
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Candidates: []rcxCandidate{near, far},
+		Policy:     rcxTestPolicy(),
+	})
+
+	if !got.Switch || got.To != "near" {
+		t.Fatalf("decision = %+v, want the nearer host-ping when no censor is present", got)
+	}
+}
+
 func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	throttled := rcxNode("nl-1", foreignProven())
@@ -891,5 +1037,60 @@ func TestDecideDoesNotRushAVerdictGainForAStillOpenIncumbent(t *testing.T) {
 	})
 	if got.Switch {
 		t.Fatalf("decision = %+v, want no rush: a still-open incumbent that only lost tier waits out dwell", got)
+	}
+}
+
+func TestLapsedDisproofDoesNotLatchBackToPreferred(t *testing.T) {
+	// A foreign node opens once, then fails; when the disproof ages to Unknown it
+	// must not ride the OpenedOnce latch back to Preferred without a fresh probe.
+	ledger, now := rcxTestLedger()
+	ledger.NoteProbe("node", "env", rcxRoleOpen, rcxProbeOK, 50, now)
+	ledger.NoteProbe("node", "env", rcxRoleOpen, rcxProbeFail, 0, now.Add(time.Minute))
+
+	fresh := ledger.Facts("node", "env", true, now.Add(time.Minute), rcxLedgerProofTTL)
+	if fresh.OpenWorld != rcxProofDisproven {
+		t.Fatalf("fresh disproof = %v, want disproven", fresh.OpenWorld)
+	}
+
+	lapsed := ledger.Facts("node", "env", true, now.Add(rcxLedgerProofTTL*4), rcxLedgerProofTTL)
+	if lapsed.OpenWorld != rcxProofUnknown {
+		t.Fatalf("aged disproof OpenWorld = %v, want unknown", lapsed.OpenWorld)
+	}
+	if !lapsed.OpenLapsed {
+		t.Fatalf("aged disproof should set OpenLapsed")
+	}
+	if !lapsed.OpenedOnce {
+		t.Fatalf("OpenedOnce latch should survive the disproof")
+	}
+	lapsed.Origin = rcxOriginForeign
+	if got := rcxAdmit(rcxTerrainNormal, lapsed); got == rcxVerdictPreferred {
+		t.Fatalf("lapsed-disproof node latched back to Preferred, want a lower tier")
+	}
+
+	ledger.NoteProbe("node", "env", rcxRoleOpen, rcxProbeOK, 50, now.Add(rcxLedgerProofTTL*4))
+	reproven := ledger.Facts("node", "env", true, now.Add(rcxLedgerProofTTL*4), rcxLedgerProofTTL)
+	reproven.Origin = rcxOriginForeign
+	if got := rcxAdmit(rcxTerrainNormal, reproven); got != rcxVerdictPreferred {
+		t.Fatalf("a fresh open probe must restore Preferred, got %v", got)
+	}
+}
+
+func TestDecideOrdersUnmeasuredProvenByThirtyMsSteps(t *testing.T) {
+	near := rcxNode("near", foreignProven())
+	near.MedianMs, near.HostMs = 0, 50
+	twin := rcxNode("twin", foreignProven())
+	twin.MedianMs, twin.HostMs = 0, 55
+	far := rcxNode("far", foreignProven())
+	far.MedianMs, far.HostMs = 0, 140
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	input := rcxDecisionInput{Terrain: rcxTerrainNormal, Policy: policy}
+
+	kNear, kTwin, kFar := rcxKeyOf(near, input), rcxKeyOf(twin, input), rcxKeyOf(far, input)
+	if kNear.latencyMs != kTwin.latencyMs {
+		t.Fatalf("50 and 55 fall in one 30ms step, want a tie: %d vs %d", kNear.latencyMs, kTwin.latencyMs)
+	}
+	if kNear.latencyMs >= kFar.latencyMs {
+		t.Fatalf("50 must rank ahead of 140: %d vs %d", kNear.latencyMs, kFar.latencyMs)
 	}
 }

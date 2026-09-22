@@ -1287,6 +1287,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage(
       "Silent autopilot",
     ),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("Singularity"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "The orb was held until it collapsed to a point and burst anew.",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("Turn"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "The session crossed New Year midnight.",
@@ -2767,6 +2771,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Average recovery",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "Avoid exit countries",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Never route through a server measured egressing in these countries, even as a last resort",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Back to automatic",
     ),
@@ -2776,9 +2786,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Not in the current server list",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "Exits through an avoided country",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Failed its checks here",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "Ignored by a rule",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "Local server, barred on this network",
@@ -2835,6 +2851,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "No server chosen yet",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "Country lookup services",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Endpoints that report a server\'s real exit country when verifying a suspicious node",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Check every server",
     ),
@@ -3025,6 +3047,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Last recovery",
     ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "Latency ladder",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Millisecond edges that group servers into speed tiers; empty uses the strategy default",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Respect a manual pick",
@@ -3123,7 +3151,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRanking": MessageLookupByLibrary.simpleMessage("Ranking"),
     "smartRoutingRankingDesc": MessageLookupByLibrary.simpleMessage(
-      "Latency bands are fixed: a knob here would let milliseconds outrank whether a server works",
+      "The latency ladder groups servers into speed tiers; a measured server always outranks an unmeasured one",
     ),
     "smartRoutingReasonColdStart": MessageLookupByLibrary.simpleMessage(
       "First pick on this network",
@@ -3193,8 +3221,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Server is not answering, looking for another",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("Add rule"),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
+      "Exit country",
+    ),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Group"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("Ignore"),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "Last resort",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "Matches any server",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
+      "Name contains",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Available in Rule mode only",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("Prefer"),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
+      "Provider",
+    ),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage("Server rules"),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "Ignore, hold back, or prefer servers by name, provider, or measured country",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(

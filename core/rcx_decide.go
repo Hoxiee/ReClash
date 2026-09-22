@@ -126,15 +126,21 @@ const (
 )
 
 type rcxFacts struct {
-	Origin      rcxOrigin
-	Exit        rcxOrigin
-	OpenedOnce  bool
-	OpenWorld   rcxProof
+	Origin     rcxOrigin
+	Exit       rcxOrigin
+	OpenedOnce bool
+	OpenWorld  rcxProof
+	// OpenWorld was disproven under the current markers and that disproof has since
+	// aged to Unknown: the node failed and no fresh probe overturned it, so it is
+	// distinct from a node whose success merely aged.
+	OpenLapsed  bool
 	Domestic    rcxProof
 	Transit     rcxProof
 	SupportsUDP bool
 	Breaker     bool
 	Trust       rcxTrust
+	// A measured domestic egress that survives an open proof and the Exit TTL.
+	HomeEgress bool
 }
 
 // Ranking, never filtering: an open network spends a specialist for nothing, but
@@ -224,7 +230,9 @@ func rcxAdmit(terrain rcxTerrain, f rcxFacts) rcxVerdict {
 	// censored world on this network keeps its tier until a probe disproves it, so
 	// latency decides between working foreign nodes, not proof-freshness roulette.
 	// Restricted to foreign origin so a fronted domestic node stays a mere prior.
-	if f.OpenedOnce && f.OpenWorld != rcxProofDisproven && f.Origin != rcxOriginDomestic {
+	// OpenLapsed excludes a node whose proof aged out of a disproof, not a success:
+	// it failed and must re-earn Preferred by a fresh probe, not latch back on a clock.
+	if f.OpenedOnce && f.OpenWorld != rcxProofDisproven && !f.OpenLapsed && f.Origin != rcxOriginDomestic {
 		if f.Breaker {
 			return row.breakerProven
 		}
@@ -354,6 +362,13 @@ type rcxCandidate struct {
 	Recurrence       int
 	QualityConfirmed bool
 	Circuit          bool
+	// User-rule outcomes, resolved against a candidate's attributes and measured
+	// egress before ranking. Ignore/AvoidExit block; LastResort caps the verdict;
+	// Prefer only breaks a tie in the node's favour.
+	Ignore         bool
+	AvoidExit      bool
+	RuleLastResort bool
+	Prefer         bool
 }
 
 type rcxPolicy struct {
@@ -383,8 +398,19 @@ type rcxDecision struct {
 	Detail string
 }
 
+func rcxCandidateVerdict(c rcxCandidate, terrain rcxTerrain) rcxVerdict {
+	verdict := rcxAdmit(terrain, c.Facts)
+	if c.RuleLastResort && verdict > rcxVerdictLastResort {
+		return rcxVerdictLastResort
+	}
+	return verdict
+}
+
 func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 	if !c.InSkeleton {
+		return false
+	}
+	if c.Ignore || c.AvoidExit {
 		return false
 	}
 	if in.Policy.RequireUDP && !c.Facts.SupportsUDP {
@@ -399,7 +425,7 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return false
 	}
-	verdict := rcxAdmit(in.Terrain, c.Facts)
+	verdict := rcxCandidateVerdict(c, in.Terrain)
 	if verdict == rcxVerdictReject {
 		return false
 	}
@@ -419,12 +445,16 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 	if recurrence < 2 {
 		recurrence = 0
 	}
-	latencyMs := rcxDiscoveryLatency(c)
+	latencyMs := rcxRankingLatency(c, in.Policy)
 	if latencyMs <= 0 {
 		latencyMs = int(^uint(0) >> 1)
 	}
+	order := c.Order
+	if c.Prefer {
+		order -= rcxPreferOrderBoost
+	}
 	return rcxKey{
-		verdict:    rcxAdmit(in.Terrain, c.Facts),
+		verdict:    rcxCandidateVerdict(c, in.Terrain),
 		misfit:     rcxMisfit(in.Terrain, c.Facts),
 		recurrence: recurrence,
 		degraded:   c.Degraded,
@@ -434,9 +464,11 @@ func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {
 		latencyMs:  latencyMs,
 		latBucket:  rcxLatencyBucket(c, in.Policy.LatencyBands),
 		challenger: c.Name != in.Incumbent,
-		order:      c.Order,
+		order:      order,
 	}
 }
+
+const rcxPreferOrderBoost = 1 << 20
 
 func rcxDiscoveryLatency(c rcxCandidate) int {
 	if c.MedianMs > 0 {
@@ -448,19 +480,47 @@ func rcxDiscoveryLatency(c rcxCandidate) int {
 	return 0
 }
 
-// Host-ping favours home, so an unmeasured domestic node would latch on latency before a probe exposes it; rank by egress-in-country instead.
-func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
-	if !policy.Censoring {
+// A measured median ranks truthfully; an unmeasured host-ping (to the entry, not
+// the egress) must never outrank it, and rounds to 30ms steps so real gaps
+// (50 vs 140) still order while jitter (45 vs 55) ties.
+const (
+	rcxUnmeasuredLatencyBase = 1 << 20
+	rcxLatencyStep           = 30
+)
+
+func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
+	if c.MedianMs > 0 {
+		return c.MedianMs
+	}
+	unproven := c.Facts.Transit != rcxProofProven && c.Facts.OpenWorld != rcxProofProven
+	if policy.Censoring && unproven {
 		return 0
 	}
-	if f.Transit == rcxProofProven || f.OpenWorld == rcxProofProven {
+	host := rcxDiscoveryLatency(c)
+	if host <= 0 {
+		return 0
+	}
+	return rcxUnmeasuredLatencyBase + host/rcxLatencyStep
+}
+
+// A fronted home node can open the censored world yet egress in-country, so a
+// measured home egress or a suspect flag sinks it before the proven-reaches
+// exemption; only a measured foreign egress clears it outright.
+func rcxHomeRisk(policy rcxPolicy, f rcxFacts) uint8 {
+	if !policy.Censoring {
 		return 0
 	}
 	if f.Exit == rcxOriginForeign {
 		return 0
 	}
+	if f.HomeEgress || f.Trust == rcxTrustSuspect {
+		return 2
+	}
 	if f.Exit == rcxOriginDomestic || f.Origin == rcxOriginDomestic {
 		return 2
+	}
+	if f.Transit == rcxProofProven || f.OpenWorld == rcxProofProven {
+		return 0
 	}
 	return 1
 }
@@ -572,10 +632,12 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		return rcxDecision{Reason: rcxReasonHold, Detail: in.Incumbent}
 	}
 
-	// A verdict gain escapes at once only when the incumbent cannot itself reach
-	// the open world; one that still can but merely lost tier (a terrain or
-	// breaker rerank) is a comfort move and waits out the dwell like any other.
-	if bestKey.verdict > incumbentKey.verdict && incumbent.Facts.OpenWorld != rcxProofProven {
+	// Escape the dwell only when the incumbent truly cannot reach now; live transit
+	// or an un-lapsed open latch count as reaching, so a working node that lost tier waits.
+	incumbentReaches := incumbent.Facts.OpenWorld == rcxProofProven ||
+		incumbent.Facts.Transit == rcxProofProven ||
+		incumbent.Facts.OpenedOnce && !incumbent.Facts.OpenLapsed
+	if bestKey.verdict > incumbentKey.verdict && !incumbentReaches {
 		return rcxDecision{
 			Switch: true,
 			To:     best.Name,
@@ -584,9 +646,6 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		}
 	}
 
-	// A verdict gain is a correctness change and never waits; a latency gain is
-	// a comfort change, so it waits out the dwell window — unless the incumbent is
-	// slow past the top band, where a node inside the bands escapes it at once.
 	dwell := time.Duration(in.Policy.DwellSeconds) * time.Second
 	if !rcxEscapesSlowIncumbent(in.Policy, incumbent, *best) &&
 		!in.IncumbentSince.IsZero() && in.Now.Sub(in.IncumbentSince) < dwell {
@@ -597,7 +656,8 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	if bestKey.recurrence < incumbentKey.recurrence ||
 		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded {
 		reason = rcxReasonReliabilityGain
-	} else if rcxLatencyImproves(in.Policy.Strategy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
+	} else if rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) {
+		// Comfort compares measured medians only; an unmeasured side (0) yields no gain.
 		reason = rcxReasonLatencyGain
 	}
 	if reason != rcxReasonHold {
@@ -644,6 +704,8 @@ type rcxBlock string
 const (
 	rcxBlockNone            rcxBlock = ""
 	rcxBlockAbsent          rcxBlock = "absent"
+	rcxBlockIgnored         rcxBlock = "ignored"
+	rcxBlockAvoidExit       rcxBlock = "avoid-exit"
 	rcxBlockNoUDP           rcxBlock = "no-udp"
 	rcxBlockCooling         rcxBlock = "cooling"
 	rcxBlockProviderCircuit rcxBlock = "provider-circuit"
@@ -655,6 +717,12 @@ const (
 func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	if !c.InSkeleton {
 		return rcxBlockAbsent
+	}
+	if c.AvoidExit {
+		return rcxBlockAvoidExit
+	}
+	if c.Ignore {
+		return rcxBlockIgnored
 	}
 	if in.Policy.RequireUDP && !c.Facts.SupportsUDP {
 		return rcxBlockNoUDP
@@ -668,7 +736,7 @@ func rcxBlockOf(c rcxCandidate, in rcxDecisionInput) rcxBlock {
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
 		return rcxBlockProviderCircuit
 	}
-	switch rcxAdmit(in.Terrain, c.Facts) {
+	switch rcxCandidateVerdict(c, in.Terrain) {
 	case rcxVerdictReject:
 		if _, ok := rcxAdmissionTable[in.Terrain]; !ok {
 			return rcxBlockTerrainUnfit

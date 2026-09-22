@@ -1369,6 +1369,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingSilentAutopilot": MessageLookupByLibrary.simpleMessage(
       "Jim avtopilot",
     ),
+    "findingSingularity": MessageLookupByLibrary.simpleMessage("Singulyarlik"),
+    "findingSingularityDesc": MessageLookupByLibrary.simpleMessage(
+      "Halqa bir nuqtaga qulaguncha ushlab turildi va yangidan portladi.",
+    ),
     "findingTurn": MessageLookupByLibrary.simpleMessage("Aylanish"),
     "findingTurnDesc": MessageLookupByLibrary.simpleMessage(
       "Seans Yangi yil yarim tundan o‘tdi.",

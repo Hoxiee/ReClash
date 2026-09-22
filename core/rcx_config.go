@@ -119,8 +119,12 @@ type rcxConfig struct {
 	LocalMarkers            []rcxMarker     `json:"lm"`
 	NameHints               []string        `json:"nh"`
 	EgressEchoes            []string        `json:"ee"`
+	CountryEchoes           []string        `json:"ce,omitempty"`
 	BreakerPatterns         []string        `json:"bp"`
 	Lanes                   []rcxLaneConfig `json:"ln"`
+	NodeRules               []rcxNodeRule   `json:"nr,omitempty"`
+	AvoidCountries          []string        `json:"ac,omitempty"`
+	LatencyBands            []int           `json:"lb,omitempty"`
 	AllowDomesticLastResort bool            `json:"dlr"`
 	RequireUDP              bool            `json:"udp"`
 	RespectPick             bool            `json:"rpk"`
@@ -128,6 +132,65 @@ type rcxConfig struct {
 	WaveWidth               int             `json:"ww"`
 	ProofTTLMinutes         int             `json:"pttl"`
 	DegradeConfirmSeconds   int             `json:"dgc"`
+}
+
+type rcxRuleAction string
+
+const (
+	rcxRuleIgnore     rcxRuleAction = "ignore"
+	rcxRuleLastResort rcxRuleAction = "last-resort"
+	rcxRulePrefer     rcxRuleAction = "prefer"
+)
+
+// A user rule matched on the attributes a candidate already carries. A country
+// match is the measured egress, not the mmdb origin, so it fires only once a
+// probe has placed the exit.
+type rcxNodeRule struct {
+	Provider     string        `json:"p,omitempty"`
+	NameContains string        `json:"n,omitempty"`
+	Group        string        `json:"g,omitempty"`
+	Country      string        `json:"c,omitempty"`
+	Action       rcxRuleAction `json:"a"`
+}
+
+func (r rcxNodeRule) matches(provider, name, group, country string) bool {
+	if r.Provider == "" && r.NameContains == "" && r.Group == "" && r.Country == "" {
+		return false
+	}
+	if r.Provider != "" && !strings.EqualFold(r.Provider, provider) {
+		return false
+	}
+	if r.NameContains != "" && !strings.Contains(strings.ToLower(name), strings.ToLower(r.NameContains)) {
+		return false
+	}
+	if r.Group != "" && !strings.EqualFold(r.Group, group) {
+		return false
+	}
+	if r.Country != "" && !strings.EqualFold(r.Country, country) {
+		return false
+	}
+	return true
+}
+
+func (c rcxConfig) ruleFor(provider, name, group, country string) rcxRuleAction {
+	for _, rule := range c.NodeRules {
+		if rule.matches(provider, name, group, country) {
+			return rule.Action
+		}
+	}
+	return ""
+}
+
+func (c rcxConfig) avoidsCountry(country string) bool {
+	if country == "" {
+		return false
+	}
+	for _, cc := range c.AvoidCountries {
+		if strings.EqualFold(cc, country) {
+			return true
+		}
+	}
+	return false
 }
 
 const (
@@ -154,9 +217,31 @@ const (
 	rcxDegradedPenalty    = 2
 )
 
-// Not a setting: a knob here lets milliseconds outrank whether a node works.
-func rcxLatencyBands() []int {
+func rcxDefaultLatencyBands() []int {
 	return []int{150, 300, 600, 1200}
+}
+
+// A usable ladder is non-empty and strictly increasing; anything else (a truncated
+// or mis-edited payload) falls back to the shipped bands rather than mis-bucketing.
+func rcxValidLatencyBands(bands []int) bool {
+	if len(bands) == 0 {
+		return false
+	}
+	previous := 0
+	for _, edge := range bands {
+		if edge <= previous {
+			return false
+		}
+		previous = edge
+	}
+	return true
+}
+
+func (c rcxConfig) latencyBands() []int {
+	if rcxValidLatencyBands(c.LatencyBands) {
+		return c.LatencyBands
+	}
+	return rcxDefaultLatencyBands()
 }
 
 // A strategy the host does not know must rank by the shipped order rather than
@@ -293,7 +378,7 @@ func (c rcxConfig) operable() bool {
 
 func (c rcxConfig) policy() rcxPolicy {
 	return rcxPolicy{
-		LatencyBands:        rcxLatencyBands(),
+		LatencyBands:        c.latencyBands(),
 		Strategy:            c.Strategy,
 		RequireUDP:          c.RequireUDP,
 		AllowDomesticLast:   c.AllowDomesticLastResort,
