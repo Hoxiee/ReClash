@@ -57,6 +57,7 @@ export 'proxy.dart';
 export 'render.dart';
 export 'request.dart';
 export 'routing_overview.dart';
+export 'screen_shake.dart';
 export 'scroll.dart';
 export 'shape.dart';
 export 'singbox_config.dart';

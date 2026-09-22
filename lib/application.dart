@@ -307,7 +307,7 @@ class ApplicationState extends ConsumerState<Application> {
             // The bridge's legacy Theme swaps in its own default IconTheme color,
             // which material_ui IconButton.filled reads as custom and loses onPrimary.
             // ignore: deprecated_member_use
-            return MaterialUiCompatibilityBridge(
+            final content = MaterialUiCompatibilityBridge(
               child: IconTheme(
                 data: Theme.of(context).iconTheme,
                 child: buildManagerStack(
@@ -316,6 +316,22 @@ class ApplicationState extends ConsumerState<Application> {
                   child: child!,
                 ),
               ),
+            );
+            return ValueListenableBuilder<Offset>(
+              valueListenable: screenImpactOffset,
+              child: content,
+              builder: (context, offset, child) {
+                final short = MediaQuery.sizeOf(context).shortestSide;
+                final overscan =
+                    1 + offset.distance / (short <= 0 ? 1 : short) * 2;
+                return Transform.translate(
+                  offset: offset,
+                  child: Transform.scale(
+                    scale: overscan,
+                    child: child,
+                  ),
+                );
+              },
             );
           },
           scrollBehavior: const BaseScrollBehavior(),

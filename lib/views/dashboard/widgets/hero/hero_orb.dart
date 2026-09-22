@@ -162,6 +162,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   OverlayEntry? _cinematicEntry;
   Rect _cinematicOrbRect = Rect.zero;
+  double _cinematicScreenShort = 0;
 
   Offset? _chargeOrigin;
   bool _swallowTap = false;
@@ -272,7 +273,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     _singularity = AnimationController(
       vsync: this,
       duration: _singularityDuration,
-    );
+    )..addListener(_driveImpact);
     _regrow = AnimationController(
       vsync: this,
       value: 1,
@@ -351,6 +352,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   @override
   void dispose() {
     _hideCinematic();
+    screenImpactOffset.value = Offset.zero;
     _connectingHold?.cancel();
     _swallowTimer?.cancel();
     _landingTimer?.cancel();
@@ -848,6 +850,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     final overlay = Overlay.maybeOf(context);
     if (box == null || !box.hasSize || overlay == null) return;
     _cinematicOrbRect = box.localToGlobal(Offset.zero) & box.size;
+    _cinematicScreenShort = MediaQuery.sizeOf(context).shortestSide;
     _cinematicEntry = OverlayEntry(builder: _buildCinematic);
     overlay.insert(_cinematicEntry!);
   }
@@ -855,6 +858,14 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   void _hideCinematic() {
     _cinematicEntry?.remove();
     _cinematicEntry = null;
+    screenImpactOffset.value = Offset.zero;
+  }
+
+  void _driveImpact() {
+    final s = _singularity.value;
+    screenImpactOffset.value = (s > 0 && s < 1)
+        ? _screenShake(s, _cinematicScreenShort)
+        : Offset.zero;
   }
 
   Offset _cinematicShake() {
@@ -892,11 +903,11 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     if (s < _evaporatePeak) return Offset.zero;
     final k = ((s - _evaporatePeak) / (1 - _evaporatePeak)).clamp(0.0, 1.0);
     final decay = math.pow(1 - k, 2.3).toDouble();
-    final gain = (screenShort / 720).clamp(0.8, 1.7);
-    final lurch = math.cos(k * 8 * math.pi) * 60 * decay;
-    final swing = math.sin(k * 6 * math.pi + 0.7) * 52 * decay;
-    final buzz = math.sin(s * 124) * 26 * decay;
-    return Offset((swing + buzz) * gain, (lurch + buzz * 0.7) * gain);
+    final amp = (screenShort <= 0 ? 720.0 : screenShort) * 0.055;
+    final lurch = math.cos(k * 8 * math.pi) * amp * decay;
+    final swing = math.sin(k * 6 * math.pi + 0.7) * amp * 0.9 * decay;
+    final buzz = math.sin(s * 130) * amp * 0.5 * decay;
+    return Offset(swing + buzz, lurch + buzz * 0.7);
   }
 
   Widget _buildCinematic(BuildContext overlayContext) {
@@ -950,10 +961,6 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
               ) *
               1.3;
           final shake = _cinematicShake();
-          final screenShake = _screenShake(s, screenShort);
-          // Overhang so the recoiling scrim and flash never uncover a bright
-          // strip of the app at the edge as the whole overlay is translated.
-          const shakePad = 96.0;
           final scrimEnvelope = showSingularity
               ? (1 -
                     Curves.easeInCubic.transform(
@@ -963,18 +970,12 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                       ),
                     ))
               : Curves.easeInCubic.transform(collapseLocal);
-          final scrim = 0.8 * scrimEnvelope;
+          // Lighter than a black-out so the recoiling app stays visible.
+          final scrim = 0.62 * scrimEnvelope;
 
-          return Transform.translate(
-            offset: screenShake,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-              Positioned(
-                left: -shakePad,
-                top: -shakePad,
-                right: -shakePad,
-                bottom: -shakePad,
+          return Stack(
+            children: [
+              Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
@@ -1036,11 +1037,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                       ),
               ),
               if (showSingularity && s >= _evaporatePeak)
-                Positioned(
-                  left: -shakePad,
-                  top: -shakePad,
-                  right: -shakePad,
-                  bottom: -shakePad,
+                Positioned.fill(
                   child: ColoredBox(
                     color: Colors.white.withValues(
                       alpha:
@@ -1056,8 +1053,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                     ),
                   ),
                 ),
-              ],
-            ),
+            ],
           );
         },
       ),
