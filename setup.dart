@@ -15,7 +15,7 @@ const _appImageToolSha256 = <String, String>{
 
 const _allTargets = <String, String>{
   'android': 'apk',
-  'linux': 'deb,appimage,rpm',
+  'linux': 'deb,appimage,rpm,pacman',
   'macos': 'dmg',
   'windows': 'exe,zip',
 };
@@ -171,7 +171,7 @@ String createPackageTargets(
         'forces ARCH=x86_64.',
       );
     }
-    return customTargets ?? 'deb,rpm';
+    return customTargets ?? 'deb,rpm,pacman';
   }
   return customTargets ?? _allTargets[platform]!;
 }
@@ -264,7 +264,24 @@ Future<int> _package(
     stderr.write(utf8.decode(data));
   });
   final exitCode = await process.exitCode;
+  if (exitCode == 0 &&
+      platform == 'linux' &&
+      targets.split(',').contains('pacman')) {
+    await renamePacmanArtifacts(rootDir);
+  }
   return exitCode;
+}
+
+/// Renames the maker's `.pacman` output to the manifest's `.pkg.tar.xz`.
+Future<void> renamePacmanArtifacts(String rootDir) async {
+  final dist = Directory(p.join(rootDir, 'dist'));
+  if (!dist.existsSync()) return;
+  const suffix = '.pacman';
+  for (final entity in dist.listSync()) {
+    if (entity is! File || !entity.path.endsWith(suffix)) continue;
+    final base = entity.path.substring(0, entity.path.length - suffix.length);
+    await entity.rename('$base.pkg.tar.xz');
+  }
 }
 
 Future<void> prepareLinuxVersionTools(String rootDir, String targets) async {
@@ -272,7 +289,11 @@ Future<void> prepareLinuxVersionTools(String rootDir, String targets) async {
     p.join(rootDir, '.dart_tool', 'release_tools', 'bin'),
   );
   await directory.create(recursive: true);
-  for (final entry in {'deb': 'dpkg-deb', 'rpm': 'rpmbuild'}.entries) {
+  for (final entry in {
+    'deb': 'dpkg-deb',
+    'rpm': 'rpmbuild',
+    'pacman': 'bsdtar',
+  }.entries) {
     if (!targets.split(',').contains(entry.key)) continue;
     final result = await Process.run('which', [entry.value]);
     final executable = (result.stdout as String).trim();
@@ -357,6 +378,7 @@ List<List<String>> linuxDependencyPackageGroups(String targets) {
     ['locate'],
     if (selectedTargets.contains('rpm')) ['rpm', 'patchelf'],
     if (selectedTargets.contains('appimage')) ['libfuse2'],
+    if (selectedTargets.contains('pacman')) ['libarchive-tools', 'xz-utils'],
   ];
 }
 

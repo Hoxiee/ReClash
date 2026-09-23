@@ -43,6 +43,12 @@ class ReleaseVersion {
   String get base => name.split('-').first;
   String get linuxVersion => name.replaceFirst('-pre.', '~pre.');
   String get debianVersion => '1:$linuxVersion-$buildNumber';
+
+  /// pacman `pkgver` forbids hyphens (they split `pkgver-pkgrel`). Joining the
+  /// marker without a separator (`0.1.0pre1`) makes vercmp sort the prerelease
+  /// below the `0.1.0` release like Debian's `~`; a dotted `.pre.` sorts above.
+  String get pacmanVersion => name.replaceFirst(RegExp(r'-pre\.'), 'pre');
+  String get pacmanRelease => buildNumber;
   String get macosBuildNumber => [
     buildNumber.substring(2, 6),
     buildNumber.substring(6, 8),

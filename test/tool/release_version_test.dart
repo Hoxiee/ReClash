@@ -15,6 +15,8 @@ void main() {
     expect(version.buildNumber, '2026091501');
     expect(version.debianVersion, '1:0.1.0~pre.1-2026091501');
     expect(version.linuxVersion, '0.1.0~pre.1');
+    expect(version.pacmanVersion, '0.1.0pre1');
+    expect(version.pacmanRelease, '2026091501');
     expect(version.macosBuildNumber, '2609.15.1');
     expect(setup.createBuildEnvironment('pre', version: version), {
       'APP_ENV': 'pre',
@@ -172,6 +174,121 @@ void main() {
         (metadata.stdout as String).trim(),
         ReleaseVersion.read(Directory.current.path).debianVersion,
       );
+    },
+  );
+
+  test(
+    'rewrites pacman metadata into a libalpm-parseable, upgradable form',
+    () {
+      const raw =
+          'pkgname=reclash\npkgver=0.1.0-pre.1+2026091501\n'
+          'license=(Other)\ngroups=(default)\narch=(x86_64)\n'
+          'depends=(gtk3, libsecret)\nsize=6604\n';
+      const expected =
+          'pkgname = reclash\npkgver = 1:0.1.0pre1-2026091501\n'
+          'license = Other\ngroup = default\narch = x86_64\n'
+          'depend = gtk3\ndepend = libsecret\nsize = 918273\n';
+      expect(
+        normalizePacmanPkgInfo(raw, version, installedSize: 918273),
+        expected,
+      );
+      expect(
+        normalizePacmanPkgInfo(expected, version, installedSize: 918273),
+        expected,
+      );
+      expect(
+        () => normalizePacmanPkgInfo('pkgname=other\npkgver=1\n', version),
+        throwsFormatException,
+      );
+      expect(
+        () => normalizePacmanPkgInfo('pkgname=reclash\ngarbage\n', version),
+        throwsFormatException,
+      );
+    },
+  );
+
+  test(
+    'the adapter builds a pacman package with a valid installable version',
+    () async {
+      if (!Platform.isLinux || !await setup.hasCommand('bsdtar')) return;
+      final temp = await Directory.systemTemp.createTemp(
+        'reclash-version-pacman-',
+      );
+      addTearDown(() => temp.delete(recursive: true));
+      final pkg = Directory('${temp.path}/package');
+      await Directory('${pkg.path}/opt/reclash').create(recursive: true);
+      await File(
+        '${pkg.path}/opt/reclash/reclash',
+      ).writeAsString('#!/bin/sh\n');
+      await File(
+        '${pkg.path}/.INSTALL',
+      ).writeAsString('post_install() {\n\t:\n}\n');
+      await File('${pkg.path}/.PKGINFO').writeAsString(
+        'pkgname=reclash\npkgver=0.1.0-pre.1+2026091501\n'
+        'pkgdesc=Version test\narch=(x86_64)\ndepends=(gtk3, libsecret)\n',
+      );
+      final which = await Process.run('which', ['bsdtar']);
+      final bsdtar = (which.stdout as String).trim();
+      final tool = '${Directory.current.path}/tool/linux_package.dart';
+      Future<ProcessResult> run(List<String> arguments) => Process.run(
+        'dart',
+        ['run', tool, bsdtar, ...arguments],
+        workingDirectory: pkg.path,
+        environment: {'LANG': 'C'},
+      );
+      final mtree = await run([
+        '-czf',
+        '.MTREE',
+        '--format=mtree',
+        '--options=!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link',
+        '.PKGINFO',
+        '.INSTALL',
+        'opt',
+      ]);
+      expect(mtree.exitCode, 0, reason: '${mtree.stdout}\n${mtree.stderr}');
+      final archive = await run([
+        '-cf',
+        'temptar',
+        '.MTREE',
+        '.INSTALL',
+        '.PKGINFO',
+        'opt',
+      ]);
+      expect(
+        archive.exitCode,
+        0,
+        reason: '${archive.stdout}\n${archive.stderr}',
+      );
+      final xz = await Process.run('xz', [
+        '-z',
+        'temptar',
+      ], workingDirectory: pkg.path);
+      expect(xz.exitCode, 0);
+      final output = '${temp.path}/app.pkg.tar.xz';
+      await File('${pkg.path}/temptar.xz').rename(output);
+      final current = ReleaseVersion.read(Directory.current.path);
+      final expected = '1:${current.pacmanVersion}-${current.pacmanRelease}';
+
+      final pkgInfo = await Process.run('bsdtar', ['-xOf', output, '.PKGINFO']);
+      expect(pkgInfo.stdout, contains('size = 10'));
+      expect(pkgInfo.stdout, isNot(contains('6604')));
+
+      final listing = await Process.run('bsdtar', ['-tvf', output]);
+      expect(listing.exitCode, 0);
+      expect(listing.stdout, contains('root'));
+      final user = Platform.environment['USER'];
+      if (user != null && user.isNotEmpty && user != 'root') {
+        expect(listing.stdout, isNot(contains(user)));
+      }
+
+      if (await setup.hasCommand('pacman')) {
+        final query = await Process.run('pacman', ['-Qp', output]);
+        expect(query.exitCode, 0, reason: '${query.stdout}\n${query.stderr}');
+        expect((query.stdout as String).trim(), 'reclash $expected');
+      } else {
+        final info = await Process.run('bsdtar', ['-xOf', output, '.PKGINFO']);
+        expect(info.stdout, contains('pkgver = $expected'));
+      }
     },
   );
 }

@@ -69,11 +69,11 @@ void main() {
     test('skips AppImage on ARM64 until its packager supports the host', () {
       expect(
         setup.createPackageTargets('linux', null, arch: 'amd64'),
-        'deb,appimage,rpm',
+        'deb,appimage,rpm,pacman',
       );
       expect(
         setup.createPackageTargets('linux', null, arch: 'arm64'),
-        'deb,rpm',
+        'deb,rpm,pacman',
       );
       expect(setup.createPackageTargets('linux', 'deb', arch: 'arm64'), 'deb');
       expect(
@@ -91,11 +91,16 @@ void main() {
       final appimage = setup
           .linuxDependencyPackageGroups('appimage')
           .expand((e) => e);
+      final pacman = setup
+          .linuxDependencyPackageGroups('pacman')
+          .expand((e) => e);
 
       expect(deb, isNot(contains('rpm')));
       expect(deb, isNot(contains('libfuse2')));
+      expect(deb, isNot(contains('libarchive-tools')));
       expect(rpm, containsAll(['rpm', 'patchelf']));
       expect(appimage, contains('libfuse2'));
+      expect(pacman, contains('libarchive-tools'));
     });
 
     test('downloads a pinned verified appimagetool for the host', () async {

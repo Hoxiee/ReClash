@@ -325,11 +325,52 @@ jobs:
           if-no-files-found: error
           overwrite: true
 
+  validate-linux-packages:
+    name: Validate Linux pacman packages
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist/
+          pattern: artifact-linux-*
+          merge-multiple: true
+
+      - name: Query and install with pacman
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          pkgs=(dist/ReClash-*-linux-*.pkg.tar.xz)
+          if (( ${#pkgs[@]} < 2 )); then
+            echo "::error::Expected >=2 pacman packages, found ${#pkgs[@]}."
+            exit 1
+          fi
+          docker run --rm -v "$PWD/dist:/dist" archlinux:latest \
+            bash -euo pipefail -c '
+              shopt -s nullglob
+              for f in /dist/ReClash-*-linux-*.pkg.tar.xz; do
+                echo "::group::$f"
+                out="$(pacman -Qp "$f")"
+                echo "$out"
+                grep -Eq "^reclash 1:[0-9].*-[0-9]+$" <<<"$out" \
+                  || { echo "::error::$f has a non-installable version: $out"; exit 1; }
+                echo "::endgroup::"
+              done
+              amd=(/dist/ReClash-*-linux-amd64.pkg.tar.xz)
+              pacman -U --noconfirm --nodeps "${amd[0]}"
+              info="$(pacman -Qi reclash)"
+              echo "$info"
+              grep -q gtk3 <<<"$info" \
+                || { echo "::error::Dependencies missing after install."; exit 1; }
+            '
+
   upload:
     name: Publish release
     permissions:
       contents: write
-    needs: [ build ]
+    needs: [ build, validate-linux-packages ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -366,8 +407,10 @@ jobs:
             "ReClash-$version-android-x86_64.apk"
             "ReClash-$version-linux-amd64.AppImage"
             "ReClash-$version-linux-amd64.deb"
+            "ReClash-$version-linux-amd64.pkg.tar.xz"
             "ReClash-$version-linux-amd64.rpm"
             "ReClash-$version-linux-arm64.deb"
+            "ReClash-$version-linux-arm64.pkg.tar.xz"
             "ReClash-$version-linux-arm64.rpm"
             "ReClash-$version-macos-amd64.dmg"
             "ReClash-$version-macos-arm64.dmg"
