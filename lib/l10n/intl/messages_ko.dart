@@ -204,58 +204,62 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m83(duration) => "${duration} 동안 측정";
 
-  static String m84(measured, total) => "${total}개 중 ${measured}개 측정";
+  static String m84(ms) => "${ms} ms";
 
-  static String m85(preset) => "${preset} · 조정됨";
+  static String m85(minutes) => "${minutes}분";
 
-  static String m86(left, cap) => "최근 1시간 동안 탐색 ${cap}회 중 ${left}회 남음";
+  static String m86(measured, total) => "${total}개 중 ${measured}개 측정";
 
-  static String m87(value, against) => "${value} 대 ${against}";
+  static String m87(preset) => "${preset} · 조정됨";
 
-  static String m88(seconds) => "${seconds}초";
+  static String m88(left, cap) => "최근 1시간 동안 탐색 ${cap}회 중 ${left}회 남음";
 
-  static String m89(eligible, total) => "${total}개 중 ${eligible}개 사용 가능";
+  static String m89(value, against) => "${value} 대 ${against}";
 
-  static String m90(count) => "전용 노드 선택기 ${count}개";
+  static String m90(seconds) => "${seconds}초";
 
-  static String m91(provider) => "제공자: ${provider}";
+  static String m91(eligible, total) => "${total}개 중 ${eligible}개 사용 가능";
 
-  static String m92(count) => "제공자가 공급한 선택기 ${count}개";
+  static String m92(count) => "전용 노드 선택기 ${count}개";
 
-  static String m93(eligible, total) => "서버 ${total}개 중 ${eligible}개 준비됨";
+  static String m93(provider) => "제공자: ${provider}";
 
-  static String m94(label) => "${label}은 UTF-8 기준 64바이트 이하여야 합니다";
+  static String m94(count) => "제공자가 공급한 선택기 ${count}개";
 
-  static String m95(node) => "${node} 경유";
+  static String m95(eligible, total) => "서버 ${total}개 중 ${eligible}개 준비됨";
 
-  static String m96(eligible, total, blocked) =>
+  static String m96(label) => "${label}은 UTF-8 기준 64바이트 이하여야 합니다";
+
+  static String m97(node) => "${node} 경유";
+
+  static String m98(eligible, total, blocked) =>
       "서버 ${total}개 중 ${eligible}개가 통과했고 ${blocked}개는 보류됐습니다";
 
-  static String m97(strategy) => "${strategy} · 변경됨";
+  static String m99(strategy) => "${strategy} · 변경됨";
 
-  static String m98(from, to) => "${from} → ${to}";
+  static String m100(from, to) => "${from} → ${to}";
 
-  static String m99(time) => "${time} 전에 전환됨";
+  static String m101(time) => "${time} 전에 전환됨";
 
-  static String m100(count) => "서버 ${count}개";
+  static String m102(count) => "서버 ${count}개";
 
-  static String m101(step) => "더 높은 줄: ${step}";
+  static String m103(step) => "더 높은 줄: ${step}";
 
-  static String m102(host) => "제공자가 ${host}(으)로 이동했습니다";
+  static String m104(host) => "제공자가 ${host}(으)로 이동했습니다";
 
-  static String m103(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, one: '구독이 내일 만료됩니다', other: '구독이 ${count}일 후에 만료됩니다')}";
 
-  static String m104(value) => "제공자 권장값: ${value}";
+  static String m106(value) => "제공자 권장값: ${value}";
 
-  static String m105(total) => "전체 ${total} 중 사용 가능";
+  static String m107(total) => "전체 ${total} 중 사용 가능";
 
-  static String m106(label) => "${label}은(는) URL이어야 합니다";
+  static String m108(label) => "${label}은(는) URL이어야 합니다";
 
-  static String m107(count) =>
+  static String m109(count) =>
       "배경은 최대 ${count}개까지 저장할 수 있습니다. 추가하려면 하나를 삭제하세요.";
 
-  static String m108(count) =>
+  static String m110(count) =>
       "${Intl.plural(count, one: '1년 전', other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2313,9 +2317,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
       "측정된 출구가 이 국가인 서버는 최후의 수단으로도 경유하지 않습니다",
     ),
+    "smartRoutingAxisData": MessageLookupByLibrary.simpleMessage("데이터 절약"),
+    "smartRoutingAxisSpeed": MessageLookupByLibrary.simpleMessage("속도"),
+    "smartRoutingAxisStability": MessageLookupByLibrary.simpleMessage("안정성"),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "자동 모드로 되돌리기",
     ),
+    "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("백업"),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("동작"),
@@ -2368,6 +2376,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingCanaryDomestic": MessageLookupByLibrary.simpleMessage("국내"),
     "smartRoutingCanaryForeign": MessageLookupByLibrary.simpleMessage("해외"),
+    "smartRoutingCeiling": MessageLookupByLibrary.simpleMessage("지연 상한"),
+    "smartRoutingCeilingDesc": MessageLookupByLibrary.simpleMessage(
+      "작동 중인 서버라도 지연이 이 상한을 넘으면 교체",
+    ),
     "smartRoutingCensor": MessageLookupByLibrary.simpleMessage("검열 국가"),
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "이 국가의 서버는 국내로 간주되어 차단이 시작되기 전까지 보류됩니다",
@@ -2377,11 +2389,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "아직 선택된 서버가 없습니다",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("국가 추가"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "국가 조회 서비스",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "의심스러운 노드를 확인할 때 서버의 실제 출구 국가를 알려주는 엔드포인트",
+    ),
+    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
+      "선택된 국가 없음",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "이름 또는 코드로 검색",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("모든 서버 점검"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2389,6 +2408,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDeepScanRunning": MessageLookupByLibrary.simpleMessage(
       "모든 서버를 점검하는 중…",
+    ),
+    "smartRoutingDegradeConfirm": MessageLookupByLibrary.simpleMessage(
+      "제한 확인 시간",
+    ),
+    "smartRoutingDegradeConfirmDesc": MessageLookupByLibrary.simpleMessage(
+      "서버를 교체하기 전 트래픽 저하가 지속되어야 하는 시간",
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("속도 제한됨"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
@@ -2410,6 +2435,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("안정화 시간"),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "더 빠른 서버가 나타났을 때 작동 중인 서버를 얼마나 오래 유지할지 정합니다",
+    ),
+    "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
+      "출구 에코 서비스",
+    ),
+    "smartRoutingEgressEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "호출자의 주소로 응답하여 위장된 서버의 실제 출구를 드러내는 엔드포인트",
     ),
     "smartRoutingEmpty": MessageLookupByLibrary.simpleMessage("아직 측정 결과가 없습니다"),
     "smartRoutingEngineAvailable": MessageLookupByLibrary.simpleMessage(
@@ -2469,7 +2500,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "시스템이 인터넷 연결을 확인했습니다",
     ),
+    "smartRoutingExport": MessageLookupByLibrary.simpleMessage("설정 내보내기"),
+    "smartRoutingExportDesc": MessageLookupByLibrary.simpleMessage(
+      "전체 스마트 라우팅 설정을 파일로 저장",
+    ),
+    "smartRoutingExported": MessageLookupByLibrary.simpleMessage(
+      "스마트 라우팅 설정을 내보냈습니다",
+    ),
     "smartRoutingFails": m81,
+    "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage(
+      "전략 기본값으로 재설정",
+    ),
     "smartRoutingFitNo": MessageLookupByLibrary.simpleMessage("부적합"),
     "smartRoutingFitYes": MessageLookupByLibrary.simpleMessage("적합"),
     "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage("연결 없음"),
@@ -2500,6 +2541,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "아직 전환이 없습니다",
     ),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("지연 테스트 결과"),
+    "smartRoutingImport": MessageLookupByLibrary.simpleMessage("설정 가져오기"),
+    "smartRoutingImportDesc": MessageLookupByLibrary.simpleMessage(
+      "파일에서 스마트 라우팅 설정 교체",
+    ),
+    "smartRoutingImportFailed": MessageLookupByLibrary.simpleMessage(
+      "해당 설정 파일을 읽을 수 없습니다",
+    ),
+    "smartRoutingImported": MessageLookupByLibrary.simpleMessage(
+      "스마트 라우팅 설정을 가져왔습니다",
+    ),
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage("감지된 장애"),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("도전자"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("사용 중"),
@@ -2566,6 +2617,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersEmpty": MessageLookupByLibrary.simpleMessage(
       "아직 설정된 확인 항목이 없습니다",
     ),
+    "smartRoutingMarkersLocal": MessageLookupByLibrary.simpleMessage(
+      "자국 전용 검사",
+    ),
+    "smartRoutingMarkersLocalDesc": MessageLookupByLibrary.simpleMessage(
+      "자국 서버로 표시하기 전에 자국에서만 응답하는지 확인",
+    ),
     "smartRoutingMarkersOpen": MessageLookupByLibrary.simpleMessage(
       "열린 인터넷 확인",
     ),
@@ -2574,6 +2631,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingMeasuredOver": m83,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage("종량제 네트워크"),
+    "smartRoutingMillis": m84,
+    "smartRoutingMinutes": m85,
+    "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage(
+      "자국 서버 이름 힌트",
+    ),
+    "smartRoutingNameHintsDesc": MessageLookupByLibrary.simpleMessage(
+      "서버가 자국에 있음을 암시하는 이름 조각",
+    ),
     "smartRoutingNetworkFormat": MessageLookupByLibrary.simpleMessage("네트워크"),
     "smartRoutingNeverSwitched": MessageLookupByLibrary.simpleMessage(
       "이 네트워크에서 아직 전환되지 않음",
@@ -2591,22 +2656,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingNodeChecks": MessageLookupByLibrary.simpleMessage("서버 점검"),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("UDP 없음"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m84,
+    "smartRoutingNodesMeasured": m86,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage("범용"),
     "smartRoutingOffHint": MessageLookupByLibrary.simpleMessage(
       "스마트 라우팅을 켜면 서버를 알아서 선택합니다",
     ),
     "smartRoutingOn": MessageLookupByLibrary.simpleMessage("스마트 라우팅이 켜져 있습니다"),
     "smartRoutingOverview": MessageLookupByLibrary.simpleMessage("라우팅 개요"),
+    "smartRoutingPacing": MessageLookupByLibrary.simpleMessage("속도"),
+    "smartRoutingPacingDesc": MessageLookupByLibrary.simpleMessage(
+      "엔진의 반응 속도와 검사 신뢰 유지 기간",
+    ),
     "smartRoutingPortal": MessageLookupByLibrary.simpleMessage("와이파이 로그인 필요"),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("프리셋"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("중국"),
-    "smartRoutingPresetEdited": m85,
+    "smartRoutingPresetEdited": m87,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("이란"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("기타"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("러시아"),
-    "smartRoutingProbeBudget": m86,
+    "smartRoutingProbeBudget": m88,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("탐색"),
+    "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage("확인 유효 기간"),
+    "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
+      "재검사 전 통과한 검사가 서버를 유효하게 유지하는 기간",
+    ),
     "smartRoutingProvenNo": MessageLookupByLibrary.simpleMessage("아직 없음"),
     "smartRoutingProvenYes": MessageLookupByLibrary.simpleMessage("예"),
     "smartRoutingProviderIncidents": MessageLookupByLibrary.simpleMessage(
@@ -2667,6 +2740,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("지금 점검"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("지역"),
+    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
+      "지역은 일반 설정에서 선택합니다",
+    ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("UDP 지원 필수"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "통화와 게임 트래픽을 처리하지 못하는 서버는 건너뜁니다",
@@ -2703,9 +2779,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "이름, 제공자 또는 측정된 국가별로 서버를 무시, 보류 또는 선호합니다",
     ),
-    "smartRoutingRungVersus": m87,
+    "smartRoutingRungVersus": m89,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage("서버를 찾는 중…"),
-    "smartRoutingSeconds": m88,
+    "smartRoutingSeconds": m90,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage("엔진"),
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage("서버"),
     "smartRoutingSectionHistory": MessageLookupByLibrary.simpleMessage("전환 기록"),
@@ -2721,11 +2797,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("결정"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("서버"),
-    "smartRoutingServersCount": m89,
+    "smartRoutingServersCount": m91,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "모든 제공자",
     ),
-    "smartRoutingServiceCandidates": m90,
+    "smartRoutingServiceCandidates": m92,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "서비스 경로 사용",
     ),
@@ -2776,8 +2852,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "엔진을 기다리는 중",
     ),
-    "smartRoutingServiceProvider": m91,
-    "smartRoutingServiceProviderCandidates": m92,
+    "smartRoutingServiceProvider": m93,
+    "smartRoutingServiceProviderCandidates": m94,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "제공자 정확한 이름이며, 비워 두면 모두 일치합니다",
     ),
@@ -2787,7 +2863,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "구독 매니페스트",
     ),
-    "smartRoutingServiceReady": m93,
+    "smartRoutingServiceReady": m95,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("경로"),
     "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage("서비스 경로"),
     "smartRoutingServiceRoutesEmpty": MessageLookupByLibrary.simpleMessage(
@@ -2797,8 +2873,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "선택기 출처",
     ),
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("상태"),
-    "smartRoutingServiceTokenTooLong": m94,
-    "smartRoutingServiceVia": m95,
+    "smartRoutingServiceTokenTooLong": m96,
+    "smartRoutingServiceVia": m97,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "광고 없는 YouTube",
     ),
@@ -2806,7 +2882,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "웜 스탠바이로 복구",
     ),
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage("허용 대상 결정"),
-    "smartRoutingStepAdmitBody": m96,
+    "smartRoutingStepAdmitBody": m98,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage("최종 선택"),
     "smartRoutingStepNetwork": MessageLookupByLibrary.simpleMessage("네트워크 파악"),
     "smartRoutingStepRank": MessageLookupByLibrary.simpleMessage("남은 서버 순위 결정"),
@@ -2818,12 +2894,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "모든 상황에 알맞습니다. 잘 모르겠다면 이대로 두세요",
     ),
-    "smartRoutingStrategyEdited": m97,
+    "smartRoutingStrategyEdited": m99,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "속도 우선",
     ),
     "smartRoutingStrategyLowestLatencyDesc":
         MessageLookupByLibrary.simpleMessage("연결되는 서버 중 가장 빠른 것을 고릅니다"),
+    "smartRoutingStrategyPace": MessageLookupByLibrary.simpleMessage("속도를 설정"),
     "smartRoutingStrategySaver": MessageLookupByLibrary.simpleMessage("절약"),
     "smartRoutingStrategySaverDesc": MessageLookupByLibrary.simpleMessage(
       "서버를 덜 확인해 데이터와 배터리를 아낍니다",
@@ -2832,9 +2909,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyStableDesc": MessageLookupByLibrary.simpleMessage(
       "연결된 서버를 유지하고 덜 바꿉니다",
     ),
-    "smartRoutingSwitchLine": m98,
+    "smartRoutingSwitchLine": m100,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("전환됨"),
-    "smartRoutingSwitchedAgo": m99,
+    "smartRoutingSwitchedAgo": m101,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage("세부 정보"),
     "smartRoutingTabOverview": MessageLookupByLibrary.simpleMessage("개요"),
     "smartRoutingTabRanking": MessageLookupByLibrary.simpleMessage("선정"),
@@ -2859,10 +2936,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "백그라운드 점검 한 번에 측정하는 서버 수입니다",
     ),
-    "smartRoutingWaveNodes": m100,
+    "smartRoutingWaveNodes": m102,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage("링크 점검"),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("이유"),
-    "smartRoutingWinsAt": m101,
+    "smartRoutingWinsAt": m103,
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS 포트"),
     "sort": MessageLookupByLibrary.simpleMessage("정렬"),
     "source": MessageLookupByLibrary.simpleMessage("소스"),
@@ -2930,9 +3007,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPN을 우회하여 다시 시도할까요?",
     ),
-    "subscriptionDomainMoved": m102,
+    "subscriptionDomainMoved": m104,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("구독이 만료됐습니다"),
-    "subscriptionExpiresInDays": m103,
+    "subscriptionExpiresInDays": m105,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "구독이 오늘 만료됩니다",
     ),
@@ -2944,7 +3021,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 구독에는 트래픽 한도나 만료일 정보가 없습니다",
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("구독 알림"),
-    "subscriptionProviderInterval": m104,
+    "subscriptionProviderInterval": m106,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "이 구독에서 일반적인 노드 주소를 찾지 못했습니다. 패널이 임시 구성을 반환했을 수 있습니다. 서버 연결은 테스트하지 않았습니다.",
     ),
@@ -2992,7 +3069,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("손전등"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("전체 트래픽"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy 포트"),
-    "trafficFreeOfTotal": m105,
+    "trafficFreeOfTotal": m107,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("트래픽 사용량"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash는 여러 나라 사람들이 쓸 수 있도록 당신의 언어를 지원합니다. 어색한 표현이 있으면 알려주세요. 고치겠습니다.",
@@ -3070,7 +3147,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "중지 상태면 연결하고, 실행 중이면 연결을 해제합니다",
     ),
-    "urlTip": m106,
+    "urlTip": m108,
     "useHosts": MessageLookupByLibrary.simpleMessage("호스트 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 호스트 사용"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("사용 트래픽"),
@@ -3109,7 +3186,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "올바른 PNG, JPEG 또는 WebP 이미지를 선택하세요.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("구도"),
-    "wallpaperLibraryFull": m107,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("이미지 불투명도"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("가독성"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("이미지 삭제"),
@@ -3142,7 +3219,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "코어가 아직 대시보드를 제공하고 있지 않습니다",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("화이트리스트 모드"),
-    "yearsAgo": m108,
+    "yearsAgo": m110,
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어(간체)"),
   };
 }

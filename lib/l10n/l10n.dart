@@ -8029,6 +8029,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Latency ceiling`
+  String get smartRoutingCeiling {
+    return Intl.message(
+      'Latency ceiling',
+      name: 'smartRoutingCeiling',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave a working server when its latency passes this limit`
+  String get smartRoutingCeilingDesc {
+    return Intl.message(
+      'Leave a working server when its latency passes this limit',
+      name: 'smartRoutingCeilingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{ms} ms`
+  String smartRoutingMillis(num ms) {
+    return Intl.message(
+      '$ms ms',
+      name: 'smartRoutingMillis',
+      desc: '',
+      args: [ms],
+    );
+  }
+
   /// `Servers per check`
   String get smartRoutingWave {
     return Intl.message(
@@ -10299,6 +10329,301 @@ class AppLocalizations {
     return Intl.message(
       'Restores the region defaults and keeps smart routing on',
       name: 'smartRoutingResetSectionDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stability`
+  String get smartRoutingAxisStability {
+    return Intl.message(
+      'Stability',
+      name: 'smartRoutingAxisStability',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Speed`
+  String get smartRoutingAxisSpeed {
+    return Intl.message(
+      'Speed',
+      name: 'smartRoutingAxisSpeed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Data saving`
+  String get smartRoutingAxisData {
+    return Intl.message(
+      'Data saving',
+      name: 'smartRoutingAxisData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sets the pace`
+  String get smartRoutingStrategyPace {
+    return Intl.message(
+      'Sets the pace',
+      name: 'smartRoutingStrategyPace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Region is chosen in General settings`
+  String get smartRoutingRegionManaged {
+    return Intl.message(
+      'Region is chosen in General settings',
+      name: 'smartRoutingRegionManaged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pace`
+  String get smartRoutingPacing {
+    return Intl.message('Pace', name: 'smartRoutingPacing', desc: '', args: []);
+  }
+
+  /// `How fast the engine reacts and how long checks stay trusted`
+  String get smartRoutingPacingDesc {
+    return Intl.message(
+      'How fast the engine reacts and how long checks stay trusted',
+      name: 'smartRoutingPacingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Throttle confirm time`
+  String get smartRoutingDegradeConfirm {
+    return Intl.message(
+      'Throttle confirm time',
+      name: 'smartRoutingDegradeConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How long a server must keep failing traffic before it is dropped`
+  String get smartRoutingDegradeConfirmDesc {
+    return Intl.message(
+      'How long a server must keep failing traffic before it is dropped',
+      name: 'smartRoutingDegradeConfirmDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proof lifetime`
+  String get smartRoutingProofTtl {
+    return Intl.message(
+      'Proof lifetime',
+      name: 'smartRoutingProofTtl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How long a passed check keeps a server proven before a recheck`
+  String get smartRoutingProofTtlDesc {
+    return Intl.message(
+      'How long a passed check keeps a server proven before a recheck',
+      name: 'smartRoutingProofTtlDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{minutes} min`
+  String smartRoutingMinutes(int minutes) {
+    return Intl.message(
+      '$minutes min',
+      name: 'smartRoutingMinutes',
+      desc: '',
+      args: [minutes],
+    );
+  }
+
+  /// `Home-country name hints`
+  String get smartRoutingNameHints {
+    return Intl.message(
+      'Home-country name hints',
+      name: 'smartRoutingNameHints',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name fragments that hint a server sits in the home country`
+  String get smartRoutingNameHintsDesc {
+    return Intl.message(
+      'Name fragments that hint a server sits in the home country',
+      name: 'smartRoutingNameHintsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Egress echo services`
+  String get smartRoutingEgressEchoes {
+    return Intl.message(
+      'Egress echo services',
+      name: 'smartRoutingEgressEchoes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Endpoints that answer with the caller's address, to reveal where a fronted server truly exits`
+  String get smartRoutingEgressEchoesDesc {
+    return Intl.message(
+      'Endpoints that answer with the caller\'s address, to reveal where a fronted server truly exits',
+      name: 'smartRoutingEgressEchoesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home-only checks`
+  String get smartRoutingMarkersLocal {
+    return Intl.message(
+      'Home-only checks',
+      name: 'smartRoutingMarkersLocal',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm a server answers only from the home country before it is branded local`
+  String get smartRoutingMarkersLocalDesc {
+    return Intl.message(
+      'Confirm a server answers only from the home country before it is branded local',
+      name: 'smartRoutingMarkersLocalDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup`
+  String get smartRoutingBackup {
+    return Intl.message(
+      'Backup',
+      name: 'smartRoutingBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export configuration`
+  String get smartRoutingExport {
+    return Intl.message(
+      'Export configuration',
+      name: 'smartRoutingExport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save the whole smart routing setup to a file`
+  String get smartRoutingExportDesc {
+    return Intl.message(
+      'Save the whole smart routing setup to a file',
+      name: 'smartRoutingExportDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Import configuration`
+  String get smartRoutingImport {
+    return Intl.message(
+      'Import configuration',
+      name: 'smartRoutingImport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace the smart routing setup from a file`
+  String get smartRoutingImportDesc {
+    return Intl.message(
+      'Replace the smart routing setup from a file',
+      name: 'smartRoutingImportDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing configuration exported`
+  String get smartRoutingExported {
+    return Intl.message(
+      'Smart routing configuration exported',
+      name: 'smartRoutingExported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing configuration imported`
+  String get smartRoutingImported {
+    return Intl.message(
+      'Smart routing configuration imported',
+      name: 'smartRoutingImported',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Could not read that configuration file`
+  String get smartRoutingImportFailed {
+    return Intl.message(
+      'Could not read that configuration file',
+      name: 'smartRoutingImportFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add country`
+  String get smartRoutingCountryAdd {
+    return Intl.message(
+      'Add country',
+      name: 'smartRoutingCountryAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No countries selected`
+  String get smartRoutingCountryEmpty {
+    return Intl.message(
+      'No countries selected',
+      name: 'smartRoutingCountryEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by name or code`
+  String get smartRoutingCountrySearch {
+    return Intl.message(
+      'Search by name or code',
+      name: 'smartRoutingCountrySearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset to strategy default`
+  String get smartRoutingFieldReset {
+    return Intl.message(
+      'Reset to strategy default',
+      name: 'smartRoutingFieldReset',
       desc: '',
       args: [],
     );

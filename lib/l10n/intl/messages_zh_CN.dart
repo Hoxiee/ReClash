@@ -193,56 +193,60 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m83(duration) => "统计时长 ${duration}";
 
-  static String m84(measured, total) => "已测量 ${measured} / ${total}";
+  static String m84(ms) => "${ms} 毫秒";
 
-  static String m85(preset) => "${preset} · 已调整";
+  static String m85(minutes) => "${minutes} 分钟";
 
-  static String m86(left, cap) => "本小时还剩 ${left}/${cap} 次探测";
+  static String m86(measured, total) => "已测量 ${measured} / ${total}";
 
-  static String m87(value, against) => "${value} 对 ${against}";
+  static String m87(preset) => "${preset} · 已调整";
 
-  static String m88(seconds) => "${seconds} 秒";
+  static String m88(left, cap) => "本小时还剩 ${left}/${cap} 次探测";
 
-  static String m89(eligible, total) => "${total} 台中 ${eligible} 台可用";
+  static String m89(value, against) => "${value} 对 ${against}";
 
-  static String m90(count) => "${count} 个专用节点选择器";
+  static String m90(seconds) => "${seconds} 秒";
 
-  static String m91(provider) => "提供商：${provider}";
+  static String m91(eligible, total) => "${total} 台中 ${eligible} 台可用";
 
-  static String m92(count) => "提供商提供了 ${count} 个选择器";
+  static String m92(count) => "${count} 个专用节点选择器";
 
-  static String m93(eligible, total) => "${total} 个服务器中 ${eligible} 个就绪";
+  static String m93(provider) => "提供商：${provider}";
 
-  static String m94(label) => "${label} 最多允许 64 个 UTF-8 字节";
+  static String m94(count) => "提供商提供了 ${count} 个选择器";
 
-  static String m95(node) => "通过 ${node}";
+  static String m95(eligible, total) => "${total} 个服务器中 ${eligible} 个就绪";
 
-  static String m96(eligible, total, blocked) =>
+  static String m96(label) => "${label} 最多允许 64 个 UTF-8 字节";
+
+  static String m97(node) => "通过 ${node}";
+
+  static String m98(eligible, total, blocked) =>
       "${total} 个中 ${eligible} 个通过，${blocked} 个被拦下";
 
-  static String m97(strategy) => "${strategy} · 已调整";
+  static String m99(strategy) => "${strategy} · 已调整";
 
-  static String m98(from, to) => "${from} → ${to}";
+  static String m100(from, to) => "${from} → ${to}";
 
-  static String m99(time) => "${time}前切换";
+  static String m101(time) => "${time}前切换";
 
-  static String m100(count) => "${count} 台";
+  static String m102(count) => "${count} 台";
 
-  static String m101(step) => "排名更高于：${step}";
+  static String m103(step) => "排名更高于：${step}";
 
-  static String m102(host) => "提供方已迁移至 ${host}";
+  static String m104(host) => "提供方已迁移至 ${host}";
 
-  static String m103(count) => "订阅将在 ${count} 天后到期";
+  static String m105(count) => "订阅将在 ${count} 天后到期";
 
-  static String m104(value) => "提供方建议 ${value}";
+  static String m106(value) => "提供方建议 ${value}";
 
-  static String m105(total) => "剩余（共 ${total}）";
+  static String m107(total) => "剩余（共 ${total}）";
 
-  static String m106(label) => "${label}必须为URL";
+  static String m108(label) => "${label}必须为URL";
 
-  static String m107(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
+  static String m109(count) => "最多可保存 ${count} 张背景。删除一张后才能添加新背景。";
 
-  static String m108(count) => "${count} 年前";
+  static String m110(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2049,7 +2053,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
       "绝不通过实测出口位于这些国家/地区的服务器路由，即使作为最后手段",
     ),
+    "smartRoutingAxisData": MessageLookupByLibrary.simpleMessage("省流量"),
+    "smartRoutingAxisSpeed": MessageLookupByLibrary.simpleMessage("速度"),
+    "smartRoutingAxisStability": MessageLookupByLibrary.simpleMessage("稳定性"),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage("恢复自动选择"),
+    "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("备份"),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("行为"),
@@ -2100,6 +2108,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingCanaryDomestic": MessageLookupByLibrary.simpleMessage("本地"),
     "smartRoutingCanaryForeign": MessageLookupByLibrary.simpleMessage("境外"),
+    "smartRoutingCeiling": MessageLookupByLibrary.simpleMessage("延迟上限"),
+    "smartRoutingCeilingDesc": MessageLookupByLibrary.simpleMessage(
+      "工作中的服务器延迟超过此上限时切换",
+    ),
     "smartRoutingCensor": MessageLookupByLibrary.simpleMessage("审查国家/地区"),
     "smartRoutingCensorDesc": MessageLookupByLibrary.simpleMessage(
       "这些地区的服务器算作本地，因此会保留到断网封锁时再用",
@@ -2107,11 +2119,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("已选服务器"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage("尚未选择服务器"),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("添加国家/地区"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "国家/地区查询服务",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "在核查可疑节点时报告服务器真实出口国家/地区的端点",
+    ),
+    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
+      "未选择国家/地区",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "按名称或代码搜索",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("检查所有服务器"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2119,6 +2138,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDeepScanRunning": MessageLookupByLibrary.simpleMessage(
       "正在检查所有服务器…",
+    ),
+    "smartRoutingDegradeConfirm": MessageLookupByLibrary.simpleMessage(
+      "限速确认时间",
+    ),
+    "smartRoutingDegradeConfirmDesc": MessageLookupByLibrary.simpleMessage(
+      "在切换前服务器持续丢流量的时间",
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("被限速"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
@@ -2138,6 +2163,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("稳定时间"),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "在更快的服务器胜出前，可用服务器保持多久",
+    ),
+    "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage("出口回显服务"),
+    "smartRoutingEgressEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "返回调用方地址、以揭示伪装服务器真实出口的端点",
     ),
     "smartRoutingEmpty": MessageLookupByLibrary.simpleMessage("暂无测量结果"),
     "smartRoutingEngineAvailable": MessageLookupByLibrary.simpleMessage(
@@ -2189,7 +2218,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "系统确认可以上网",
     ),
+    "smartRoutingExport": MessageLookupByLibrary.simpleMessage("导出配置"),
+    "smartRoutingExportDesc": MessageLookupByLibrary.simpleMessage(
+      "将整个智能路由设置保存到文件",
+    ),
+    "smartRoutingExported": MessageLookupByLibrary.simpleMessage("已导出智能路由配置"),
     "smartRoutingFails": m81,
+    "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage("重置为策略默认值"),
     "smartRoutingFitNo": MessageLookupByLibrary.simpleMessage("不契合"),
     "smartRoutingFitYes": MessageLookupByLibrary.simpleMessage("契合"),
     "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage("无法连接"),
@@ -2218,6 +2253,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近的切换"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage("还没有切换过"),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("来自延迟测试"),
+    "smartRoutingImport": MessageLookupByLibrary.simpleMessage("导入配置"),
+    "smartRoutingImportDesc": MessageLookupByLibrary.simpleMessage(
+      "从文件替换智能路由设置",
+    ),
+    "smartRoutingImportFailed": MessageLookupByLibrary.simpleMessage(
+      "无法读取该配置文件",
+    ),
+    "smartRoutingImported": MessageLookupByLibrary.simpleMessage("已导入智能路由配置"),
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage("检测到的中断"),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("挑战者"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("使用中"),
@@ -2268,12 +2311,22 @@ class MessageLookup extends MessageLookupByLibrary {
       "断网封锁期间用于本地服务器",
     ),
     "smartRoutingMarkersEmpty": MessageLookupByLibrary.simpleMessage("尚未配置检查"),
+    "smartRoutingMarkersLocal": MessageLookupByLibrary.simpleMessage("仅本国检查"),
+    "smartRoutingMarkersLocalDesc": MessageLookupByLibrary.simpleMessage(
+      "在标记为本国服务器前确认其仅从本国响应",
+    ),
     "smartRoutingMarkersOpen": MessageLookupByLibrary.simpleMessage("开放互联网检查"),
     "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
       "只有返回其中一个状态码，服务器才算通过",
     ),
     "smartRoutingMeasuredOver": m83,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage("计费网络"),
+    "smartRoutingMillis": m84,
+    "smartRoutingMinutes": m85,
+    "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage("本国服务器名称提示"),
+    "smartRoutingNameHintsDesc": MessageLookupByLibrary.simpleMessage(
+      "暗示服务器位于本国的名称片段",
+    ),
     "smartRoutingNetworkFormat": MessageLookupByLibrary.simpleMessage("网络"),
     "smartRoutingNeverSwitched": MessageLookupByLibrary.simpleMessage(
       "此网络尚未切换过",
@@ -2285,22 +2338,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingNodeChecks": MessageLookupByLibrary.simpleMessage("服务器检查"),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("无 UDP"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m84,
+    "smartRoutingNodesMeasured": m86,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage("通用"),
     "smartRoutingOffHint": MessageLookupByLibrary.simpleMessage(
       "开启智能路由，让它替你挑选服务器",
     ),
     "smartRoutingOn": MessageLookupByLibrary.simpleMessage("智能路由已开启"),
     "smartRoutingOverview": MessageLookupByLibrary.simpleMessage("路由概览"),
+    "smartRoutingPacing": MessageLookupByLibrary.simpleMessage("节奏"),
+    "smartRoutingPacingDesc": MessageLookupByLibrary.simpleMessage(
+      "引擎反应速度以及检查结果的信任时长",
+    ),
     "smartRoutingPortal": MessageLookupByLibrary.simpleMessage("需要登录 Wi-Fi"),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("预设"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("中国"),
-    "smartRoutingPresetEdited": m85,
+    "smartRoutingPresetEdited": m87,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("伊朗"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("其他"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("俄罗斯"),
-    "smartRoutingProbeBudget": m86,
+    "smartRoutingProbeBudget": m88,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("探测"),
+    "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage("验证有效期"),
+    "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
+      "在重新检查前通过的检查保持服务器有效的时长",
+    ),
     "smartRoutingProvenNo": MessageLookupByLibrary.simpleMessage("尚无"),
     "smartRoutingProvenYes": MessageLookupByLibrary.simpleMessage("有"),
     "smartRoutingProviderIncidents": MessageLookupByLibrary.simpleMessage(
@@ -2361,6 +2422,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("立即检查"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地区"),
+    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
+      "地区在常规设置中选择",
+    ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("要求支持 UDP"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "跳过无法承载通话和游戏的服务器",
@@ -2389,9 +2453,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "按名称、提供商或实测国家/地区忽略、抑制或优先选择服务器",
     ),
-    "smartRoutingRungVersus": m87,
+    "smartRoutingRungVersus": m89,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage("正在挑选服务器…"),
-    "smartRoutingSeconds": m88,
+    "smartRoutingSeconds": m90,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage("引擎"),
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage("服务器"),
     "smartRoutingSectionHistory": MessageLookupByLibrary.simpleMessage("早前的切换"),
@@ -2407,11 +2471,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("决策"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("服务器"),
-    "smartRoutingServersCount": m89,
+    "smartRoutingServersCount": m91,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "任意提供商",
     ),
-    "smartRoutingServiceCandidates": m90,
+    "smartRoutingServiceCandidates": m92,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "使用服务路由",
     ),
@@ -2462,8 +2526,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "正在等待引擎",
     ),
-    "smartRoutingServiceProvider": m91,
-    "smartRoutingServiceProviderCandidates": m92,
+    "smartRoutingServiceProvider": m93,
+    "smartRoutingServiceProviderCandidates": m94,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "提供商精确名称；留空则匹配任意提供商",
     ),
@@ -2473,7 +2537,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "订阅清单",
     ),
-    "smartRoutingServiceReady": m93,
+    "smartRoutingServiceReady": m95,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("路由"),
     "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage("服务路由"),
     "smartRoutingServiceRoutesEmpty": MessageLookupByLibrary.simpleMessage(
@@ -2481,14 +2545,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingServiceSources": MessageLookupByLibrary.simpleMessage("选择器来源"),
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("状态"),
-    "smartRoutingServiceTokenTooLong": m94,
-    "smartRoutingServiceVia": m95,
+    "smartRoutingServiceTokenTooLong": m96,
+    "smartRoutingServiceVia": m97,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "无广告 YouTube",
     ),
     "smartRoutingStandbyHits": MessageLookupByLibrary.simpleMessage("通过热备用恢复"),
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage("决定谁可参选"),
-    "smartRoutingStepAdmitBody": m96,
+    "smartRoutingStepAdmitBody": m98,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage("最终选择"),
     "smartRoutingStepNetwork": MessageLookupByLibrary.simpleMessage("读取网络"),
     "smartRoutingStepRank": MessageLookupByLibrary.simpleMessage("对余下的排序"),
@@ -2500,12 +2564,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "适合各种情况，拿不准就选这个",
     ),
-    "smartRoutingStrategyEdited": m97,
+    "smartRoutingStrategyEdited": m99,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "速度优先",
     ),
     "smartRoutingStrategyLowestLatencyDesc":
         MessageLookupByLibrary.simpleMessage("在可用的服务器中选择最快的"),
+    "smartRoutingStrategyPace": MessageLookupByLibrary.simpleMessage("设定节奏"),
     "smartRoutingStrategySaver": MessageLookupByLibrary.simpleMessage("省流量"),
     "smartRoutingStrategySaverDesc": MessageLookupByLibrary.simpleMessage(
       "更少检测服务器，节省流量和电量",
@@ -2514,9 +2579,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyStableDesc": MessageLookupByLibrary.simpleMessage(
       "保持可用的服务器，尽量少切换",
     ),
-    "smartRoutingSwitchLine": m98,
+    "smartRoutingSwitchLine": m100,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("已切换"),
-    "smartRoutingSwitchedAgo": m99,
+    "smartRoutingSwitchedAgo": m101,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage("详情"),
     "smartRoutingTabOverview": MessageLookupByLibrary.simpleMessage("概览"),
     "smartRoutingTabRanking": MessageLookupByLibrary.simpleMessage("选取"),
@@ -2541,10 +2606,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "一次后台检查测量多少台服务器",
     ),
-    "smartRoutingWaveNodes": m100,
+    "smartRoutingWaveNodes": m102,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage("链路检查"),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("原因"),
-    "smartRoutingWinsAt": m101,
+    "smartRoutingWinsAt": m103,
     "socksPort": MessageLookupByLibrary.simpleMessage("Socks端口"),
     "sort": MessageLookupByLibrary.simpleMessage("排序"),
     "source": MessageLookupByLibrary.simpleMessage("来源"),
@@ -2608,9 +2673,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "绕过 VPN 重试？",
     ),
-    "subscriptionDomainMoved": m102,
+    "subscriptionDomainMoved": m104,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage("订阅已过期"),
-    "subscriptionExpiresInDays": m103,
+    "subscriptionExpiresInDays": m105,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage("订阅今天到期"),
     "subscriptionInfo": MessageLookupByLibrary.simpleMessage("订阅信息"),
     "subscriptionLoopbackWarning": MessageLookupByLibrary.simpleMessage(
@@ -2620,7 +2685,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "此订阅未提供流量额度或到期时间",
     ),
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage("订阅提醒"),
-    "subscriptionProviderInterval": m104,
+    "subscriptionProviderInterval": m106,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "订阅中未找到常规节点地址。面板可能返回了占位配置。尚未测试服务器连接。",
     ),
@@ -2666,7 +2731,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("手电筒"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("总流量"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Tproxy端口"),
-    "trafficFreeOfTotal": m105,
+    "trafficFreeOfTotal": m107,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("流量统计"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash 支持你的语言，让来自不同国家的人都能使用。如果某处措辞别扭，欢迎告诉我们，我们会尽快修正。",
@@ -2726,7 +2791,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeProfiles": MessageLookupByLibrary.simpleMessage("配置文件"),
     "urlSchemeToggle": MessageLookupByLibrary.simpleMessage("切换"),
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage("停止时连接，运行时断开"),
-    "urlTip": m106,
+    "urlTip": m108,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("已用流量"),
@@ -2763,7 +2828,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "请选择有效的 PNG、JPEG 或 WebP 图片。",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
-    "wallpaperLibraryFull": m107,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("移除图片"),
@@ -2794,7 +2859,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "webDashboardUnreachable": MessageLookupByLibrary.simpleMessage("内核尚未提供面板"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
-    "yearsAgo": m108,
+    "yearsAgo": m110,
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

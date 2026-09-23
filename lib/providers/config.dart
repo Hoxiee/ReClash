@@ -310,7 +310,7 @@ List<Override> buildConfigOverrides(Config config) {
     vpnSettingProvider.overrideWithBuild((_, _) => config.vpnProps),
     networkSettingProvider.overrideWithBuild((_, _) => config.networkProps),
     smartRoutingSettingProvider.overrideWithBuild(
-      (_, _) => config.smartRoutingProps,
+      (_, _) => config.smartRoutingProps.reseedStrategyPacing(),
     ),
     desyncSettingProvider.overrideWithBuild((_, _) => config.desyncProps),
     themeSettingProvider.overrideWithBuild((_, _) => config.themeProps),

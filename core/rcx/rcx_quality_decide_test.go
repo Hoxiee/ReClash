@@ -44,7 +44,7 @@ func TestQualityDecisionRequiresConfirmation(t *testing.T) {
 	for _, strategy := range []string{rcxStrategyBalanced, rcxStrategyLatency, rcxStrategyStable, rcxStrategySaver} {
 		t.Run(strategy, func(t *testing.T) {
 			current := rcxNode("current", foreignProven())
-			current.MedianMs, current.Evidence = 249, rcxEvidenceLiveTraffic
+			current.MedianMs, current.Evidence = 900, rcxEvidenceLiveTraffic
 			better := rcxNode("better", foreignProven())
 			better.MedianMs = 69
 			policy := rcxTestPolicy()
@@ -64,17 +64,17 @@ func TestQualityDecisionRequiresConfirmation(t *testing.T) {
 	}
 }
 
-func TestQualityDecisionUsesMillisecondsNotBands(t *testing.T) {
+func TestQualityHoldsSubCeilingIncumbentButUpgradesPastCeiling(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		from int
 		to   int
 		want bool
 	}{
-		{"adjacent bands", 249, 69, true},
-		{"same band", 140, 100, true},
+		{"healthy holds", 140, 100, false},
+		{"laggy but sub-ceiling holds", 249, 69, false},
+		{"past ceiling upgrades", 700, 50, true},
 		{"noise", 70, 65, false},
-		{"band crossing noise", 151, 149, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			current := rcxNode("current", foreignProven())

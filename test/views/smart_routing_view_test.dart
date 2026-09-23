@@ -104,11 +104,13 @@ void main() {
       ),
     );
 
+    await _reveal(tester, find.text('Require UDP support'));
     expect(find.text('Require UDP support'), findsOne);
-    expect(find.text('Settle time'), findsOne);
+    expect(find.text('Settle time'), findsNothing);
 
     await _openAdvanced(tester);
 
+    expect(find.text('Settle time'), findsOne);
     expect(find.text('Servers per check'), findsOne);
   });
 
@@ -153,14 +155,15 @@ void main() {
       ),
     );
 
-    final resetButton = find.widgetWithText(FilledButton, 'Reset');
+    final resetButton = find.widgetWithText(FilledButton, 'Reset').first;
+    await _reveal(tester, find.text('Reset'));
     expect(
       tester.widget<FilledButton>(resetButton).onPressed,
       isNotNull,
       reason: 'an adjusted preset offers a reset',
     );
 
-    await tester.tap(resetButton);
+    await tester.tap(find.text('Reset'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Confirm'));
@@ -170,8 +173,8 @@ void main() {
     expect(props.matchesPreset, isTrue);
     expect(props.enabled, isTrue);
     expect(
-      tester.widget<FilledButton>(resetButton).onPressed,
-      isNull,
+      find.text('Reset'),
+      findsNothing,
       reason: 'a matching preset has nothing to reset',
     );
   });

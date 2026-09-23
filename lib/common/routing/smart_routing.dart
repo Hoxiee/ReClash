@@ -157,11 +157,17 @@ class SmartRoutingPacing {
     required this.dwellSeconds,
     required this.waveWidth,
     required this.latencyBands,
+    required this.absCeilingMs,
+    required this.degradeConfirmSeconds,
+    required this.proofTtlMinutes,
   });
 
   final int dwellSeconds;
   final int waveWidth;
   final List<int> latencyBands;
+  final int absCeilingMs;
+  final int degradeConfirmSeconds;
+  final int proofTtlMinutes;
 }
 
 extension SmartRoutingStrategyWire on SmartRoutingStrategy {
@@ -176,22 +182,34 @@ extension SmartRoutingStrategyWire on SmartRoutingStrategy {
     SmartRoutingStrategy.stable => const SmartRoutingPacing(
       dwellSeconds: 180,
       waveWidth: 8,
-      latencyBands: [200, 400, 800, 1500],
+      latencyBands: [120, 200, 320, 550],
+      absCeilingMs: 450,
+      degradeConfirmSeconds: 90,
+      proofTtlMinutes: 45,
     ),
     SmartRoutingStrategy.balanced => const SmartRoutingPacing(
       dwellSeconds: 90,
       waveWidth: 12,
-      latencyBands: [150, 300, 600, 1200],
+      latencyBands: [80, 120, 180, 320],
+      absCeilingMs: 300,
+      degradeConfirmSeconds: 60,
+      proofTtlMinutes: 30,
     ),
     SmartRoutingStrategy.lowestLatency => const SmartRoutingPacing(
       dwellSeconds: 30,
       waveWidth: 20,
-      latencyBands: [80, 150, 300, 600],
+      latencyBands: [65, 90, 130, 220],
+      absCeilingMs: 200,
+      degradeConfirmSeconds: 30,
+      proofTtlMinutes: 20,
     ),
     SmartRoutingStrategy.saver => const SmartRoutingPacing(
       dwellSeconds: 600,
       waveWidth: 4,
-      latencyBands: [250, 500, 1000, 2000],
+      latencyBands: [150, 260, 420, 750],
+      absCeilingMs: 650,
+      degradeConfirmSeconds: 120,
+      proofTtlMinutes: 60,
     ),
   };
 }
@@ -251,9 +269,29 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     dwellSeconds: value.pacing.dwellSeconds,
     waveWidth: value.pacing.waveWidth,
     latencyBands: value.pacing.latencyBands,
+    absCeilingMs: value.pacing.absCeilingMs,
+    degradeConfirmSeconds: value.pacing.degradeConfirmSeconds,
+    proofTtlMinutes: value.pacing.proofTtlMinutes,
   );
 
-  bool get matchesStrategy => this == applyStrategy(strategy);
+  /// Empty bands mean "unset, let the engine use its default", not a hand-tuned
+  /// pace, so they never count as a divergence from the strategy.
+  bool get matchesStrategy {
+    final seeded = applyStrategy(strategy);
+    return this ==
+        (latencyBands.isEmpty ? seeded.copyWith(latencyBands: const []) : seeded);
+  }
+
+  /// Reseed strategy thresholds only when the pace hasn't diverged, so an upgrade never clobbers a hand-tuned config.
+  SmartRoutingProps reseedStrategyPacing() {
+    final pace = strategy.pacing;
+    final seeded = copyWith(
+      absCeilingMs: pace.absCeilingMs,
+      degradeConfirmSeconds: pace.degradeConfirmSeconds,
+      proofTtlMinutes: pace.proofTtlMinutes,
+    );
+    return seeded.matchesStrategy ? seeded : this;
+  }
 
   RcxConfigParams rcxParamsFor(Profile? profile) => RcxConfigParams(
     enabled: enabled,
@@ -278,6 +316,9 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
     respectPick: respectPick,
     dwellSeconds: dwellSeconds,
     waveWidth: waveWidth,
+    absCeilingMs: absCeilingMs,
+    degradeConfirmSeconds: degradeConfirmSeconds,
+    proofTtlMinutes: proofTtlMinutes,
     lanes: _effectiveRcxLanes(profile),
   );
 

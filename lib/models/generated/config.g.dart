@@ -368,6 +368,9 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
   respectPick: json['respectPick'] as bool? ?? true,
   dwellSeconds: (json['dwellSeconds'] as num?)?.toInt() ?? 90,
   waveWidth: (json['waveWidth'] as num?)?.toInt() ?? 12,
+  absCeilingMs: (json['absCeilingMs'] as num?)?.toInt() ?? 300,
+  degradeConfirmSeconds: (json['degradeConfirmSeconds'] as num?)?.toInt() ?? 60,
+  proofTtlMinutes: (json['proofTtlMinutes'] as num?)?.toInt() ?? 30,
 );
 
 Map<String, dynamic> _$SmartRoutingPropsToJson(
@@ -394,6 +397,9 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   'respectPick': instance.respectPick,
   'dwellSeconds': instance.dwellSeconds,
   'waveWidth': instance.waveWidth,
+  'absCeilingMs': instance.absCeilingMs,
+  'degradeConfirmSeconds': instance.degradeConfirmSeconds,
+  'proofTtlMinutes': instance.proofTtlMinutes,
 };
 
 const _$SmartRoutingPresetEnumMap = {

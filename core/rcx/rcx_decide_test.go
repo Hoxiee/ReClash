@@ -14,6 +14,7 @@ func rcxTestPolicy() rcxPolicy {
 		AllowDomesticLast:   true,
 		DwellSeconds:        90,
 		DegradedBandPenalty: 2,
+		AbsCeilingMs:        500,
 	}
 }
 
@@ -337,7 +338,7 @@ func TestDecideMakesALatencyGainWaitOutDwell(t *testing.T) {
 	}
 }
 
-func TestDecideConfirmsAFasterHostPingBeforeCrowningIt(t *testing.T) {
+func TestDecideHoldsAHealthyIncumbentAgainstAFasterHostPing(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	slow := rcxNode("uk-1", foreignProven())
 	slow.MedianMs, slow.HostMs = 0, 130
@@ -352,17 +353,8 @@ func TestDecideConfirmsAFasterHostPingBeforeCrowningIt(t *testing.T) {
 		Now:            now,
 	}
 
-	if got := rcxDecideAt(input); got.Switch || got.Reason != rcxReasonQualityConfirming || got.Detail != "se-1" {
-		t.Errorf("decision = %+v, want a quality-confirming hold on the faster host-ping", got)
-	}
-
-	for i := range input.Candidates {
-		if input.Candidates[i].Name == "se-1" {
-			input.Candidates[i].QualityConfirmed = true
-		}
-	}
-	if got := rcxDecideAt(input); !got.Switch || got.To != "se-1" || got.Reason != rcxReasonLatencyGain {
-		t.Errorf("decision = %+v, want a latency-gain switch to the confirmed faster node", got)
+	if got := rcxDecideAt(input); got.Switch || got.Reason != rcxReasonHold {
+		t.Errorf("decision = %+v, want a hold: a healthy incumbent is not traded for a faster host-ping", got)
 	}
 }
 
@@ -897,7 +889,7 @@ func TestBreakerNodeStaysSecondTierBehindAWorkingNormalNode(t *testing.T) {
 
 func TestUpgradeReturnsFromASlowProvenIncumbentToAFastRival(t *testing.T) {
 	peru := rcxNode("peru", foreignProven())
-	peru.MedianMs = 435
+	peru.MedianMs = 700
 	sweden := rcxNode("sweden", rcxFacts{Origin: rcxOriginForeign, OpenedOnce: true, Transit: rcxProofProven, SupportsUDP: true})
 	sweden.MedianMs = 50
 	sweden.QualityConfirmed = true

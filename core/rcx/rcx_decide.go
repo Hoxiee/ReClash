@@ -379,6 +379,7 @@ type rcxPolicy struct {
 	Censoring           bool
 	DwellSeconds        int
 	DegradedBandPenalty uint8
+	AbsCeilingMs        int
 }
 
 type rcxDecisionInput struct {
@@ -551,17 +552,23 @@ func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
 	return gain >= absolute && gain >= required
 }
 
-// Neither side measured: a host-ping several 30ms steps faster only sets intent;
-// the quality probe a latency-gain triggers must confirm it on the real egress.
-func rcxHostPingImproves(strategy string, incumbent, best rcxKey) bool {
-	if incumbent.latencyMs < rcxUnmeasuredLatencyBase || best.latencyMs < rcxUnmeasuredLatencyBase {
+// A working incumbent yields for latency only when itself slow — past the absolute
+// ceiling or the slowest band — so live traffic is never dropped chasing a few ms.
+func rcxIncumbentTooSlow(policy rcxPolicy, incumbent rcxCandidate) bool {
+	inc := rcxDiscoveryLatency(incumbent)
+	if inc <= 0 {
 		return false
 	}
-	need := 2
-	if strategy == rcxStrategyStable || strategy == rcxStrategySaver {
-		need = 3
+	if policy.AbsCeilingMs > 0 && inc > policy.AbsCeilingMs {
+		return true
 	}
-	return incumbent.latencyMs-best.latencyMs >= need
+	if len(policy.LatencyBands) > 0 {
+		ceiling := policy.LatencyBands[len(policy.LatencyBands)-1]
+		if ceiling > 0 && inc > ceiling {
+			return true
+		}
+	}
+	return false
 }
 
 func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
@@ -669,10 +676,8 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	if bestKey.recurrence < incumbentKey.recurrence ||
 		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded {
 		reason = rcxReasonReliabilityGain
-	} else if rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) ||
-		rcxHostPingImproves(in.Policy.Strategy, incumbentKey, bestKey) {
-		// Measured medians decide when present; otherwise a clearly faster host-ping
-		// sets the intent, and the quality probe confirms the gap before the switch.
+	} else if rcxIncumbentTooSlow(in.Policy, incumbent) &&
+		rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) {
 		reason = rcxReasonLatencyGain
 	}
 	if reason != rcxReasonHold {

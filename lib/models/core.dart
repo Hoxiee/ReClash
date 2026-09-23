@@ -282,6 +282,9 @@ abstract class RcxConfigParams with _$RcxConfigParams {
     @JsonKey(name: 'rpk') required bool respectPick,
     @JsonKey(name: 'dwl') required int dwellSeconds,
     @JsonKey(name: 'ww') required int waveWidth,
+    @JsonKey(name: 'acm') @Default(300) int absCeilingMs,
+    @JsonKey(name: 'dgc') @Default(60) int degradeConfirmSeconds,
+    @JsonKey(name: 'pttl') @Default(30) int proofTtlMinutes,
     @JsonKey(name: 'ln') @Default([]) List<RcxLaneConfig> lanes,
   }) = _RcxConfigParams;
 

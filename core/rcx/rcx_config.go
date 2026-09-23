@@ -132,6 +132,7 @@ type rcxConfig struct {
 	WaveWidth               int             `json:"ww"`
 	ProofTTLMinutes         int             `json:"pttl"`
 	DegradeConfirmSeconds   int             `json:"dgc"`
+	AbsCeilingMs            int             `json:"acm"`
 }
 
 type rcxRuleAction string
@@ -209,6 +210,7 @@ const (
 	rcxWaveWidth          = 12
 	rcxProofTTLMinutes    = 30
 	rcxDegradeConfirmSec  = 60
+	rcxAbsCeilingMs       = 300
 	rcxColdConfirmSec     = 15
 	rcxProbeConcurrency   = 2
 	rcxProbeStaggerMs     = 250
@@ -218,7 +220,7 @@ const (
 )
 
 func rcxDefaultLatencyBands() []int {
-	return []int{150, 300, 600, 1200}
+	return []int{80, 120, 180, 320}
 }
 
 // A usable ladder is non-empty and strictly increasing; anything else (a truncated
@@ -266,6 +268,7 @@ func rcxDefaultConfig() rcxConfig {
 		WaveWidth:               rcxWaveWidth,
 		ProofTTLMinutes:         rcxProofTTLMinutes,
 		DegradeConfirmSeconds:   rcxDegradeConfirmSec,
+		AbsCeilingMs:            rcxAbsCeilingMs,
 	}
 }
 
@@ -282,6 +285,9 @@ func (c rcxConfig) normalized() rcxConfig {
 	}
 	if c.DegradeConfirmSeconds <= 0 {
 		c.DegradeConfirmSeconds = rcxDegradeConfirmSec
+	}
+	if c.AbsCeilingMs <= 0 {
+		c.AbsCeilingMs = rcxAbsCeilingMs
 	}
 	if !rcxKnownStrategy(c.Strategy) {
 		c.Strategy = rcxStrategyBalanced
@@ -385,6 +391,7 @@ func (c rcxConfig) policy() rcxPolicy {
 		Censoring:           len(c.CensorCountries) > 0,
 		DwellSeconds:        c.DwellSeconds,
 		DegradedBandPenalty: rcxDegradedPenalty,
+		AbsCeilingMs:        c.AbsCeilingMs,
 	}
 }
 

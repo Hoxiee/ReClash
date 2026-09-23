@@ -144,6 +144,12 @@ func (l *rcxLedger) ProofTTL() time.Duration {
 	return l.policy.ProofTTL
 }
 
+func (l *rcxLedger) SetProofTTL(ttl time.Duration) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.policy.ProofTTL = ttl
+}
+
 // A marker one node still passes is not down: the failures elsewhere are node
 // deaths, so they must not quarantine it and blind every other node with it.
 func (l *rcxLedger) MarkerFreshlyPassing(envKey, markerID string, now time.Time) bool {

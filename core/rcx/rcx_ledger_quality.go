@@ -6,14 +6,10 @@ import (
 )
 
 const (
-	rcxRecurrenceLimit = 6
-	rcxRecurrenceDecay = time.Hour
-	rcxQualityDepth    = 16
-	rcxQualityTTL      = 2 * time.Minute
-	// Ranking keeps a median as long as the open proof it rode in on: the tick
-	// re-proves the warm pool far slower than the 2-min confirm window, so a
-	// tighter TTL would blank MedianMs between probes and drop ranking to host-ping.
-	rcxRankingMedianTTL   = time.Duration(rcxProofTTLMinutes) * time.Minute
+	rcxRecurrenceLimit    = 6
+	rcxRecurrenceDecay    = time.Hour
+	rcxQualityDepth       = 16
+	rcxQualityTTL         = 2 * time.Minute
 	rcxQualityOriginProbe = "probe"
 )
 
@@ -77,7 +73,9 @@ func (l *rcxLedger) NoteRoleQualitySample(node, envKey, marker string, role rcxR
 func (l *rcxLedger) QualityMedian(node, envKey, marker string, epoch uint64, now time.Time) (ms, count int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, rcxRankingMedianTTL)
+	// Ranking keeps a median as long as the open proof it rode in on: a tighter
+	// window would blank MedianMs between probes and drop ranking to host-ping.
+	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, l.policy.ProofTTL)
 	if len(fresh) == 0 {
 		return 0, 0
 	}

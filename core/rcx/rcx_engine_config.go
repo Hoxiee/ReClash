@@ -44,6 +44,7 @@ func (e *rcxEngine) applyConfigLocked(config rcxConfig) {
 		e.pendingGrant = true
 	}
 	e.cfg = config
+	e.ledger.SetProofTTL(time.Duration(config.ProofTTLMinutes) * time.Minute)
 	e.syncLaneConfigs(config.Lanes)
 	e.configFP = next
 	e.ledger.SetFingerprints(next.Open, next.Domestic)

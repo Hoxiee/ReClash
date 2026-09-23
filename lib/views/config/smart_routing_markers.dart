@@ -1,5 +1,8 @@
 part of 'smart_routing.dart';
 
+/// Local: answers *only* from home, unlike domestic (still reachable from home).
+enum _MarkerKind { open, domestic, local }
+
 /// A marker is a URL plus the statuses that count, so it cannot ride the plain
 /// string-list editor: a bare URL would silently mean "any completed exchange".
 class _MarkersItem extends StatelessWidget {
@@ -7,13 +10,13 @@ class _MarkersItem extends StatelessWidget {
     required this.title,
     required this.desc,
     required this.markers,
-    required this.domestic,
+    required this.kind,
   });
 
   final String title;
   final String desc;
   final List<RcxMarker> markers;
-  final bool domestic;
+  final _MarkerKind kind;
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +26,16 @@ class _MarkersItem extends StatelessWidget {
         markers.isEmpty ? desc : markers.map((marker) => marker.url).join(', '),
       ),
       blur: false,
-      widget: _MarkersPage(title: title, domestic: domestic),
+      widget: _MarkersPage(title: title, kind: kind),
     );
   }
 }
 
 class _MarkersPage extends ConsumerStatefulWidget {
-  const _MarkersPage({required this.title, required this.domestic});
+  const _MarkersPage({required this.title, required this.kind});
 
   final String title;
-  final bool domestic;
+  final _MarkerKind kind;
 
   @override
   ConsumerState<_MarkersPage> createState() => _MarkersPageState();
@@ -44,10 +47,10 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
   void _deleteSelected() {
     _writeMarkers(
       ref,
-      widget.domestic,
+      widget.kind,
       _markerRowsOf(
         ref.read(smartRoutingSettingProvider),
-        widget.domestic,
+        widget.kind,
       ).where((marker) => !_selection.contains(marker.url)).toList(),
     );
     setState(() => _selection = {});
@@ -56,7 +59,7 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
   void _toggleSelectAll() {
     final markers = _markerRowsOf(
       ref.read(smartRoutingSettingProvider),
-      widget.domestic,
+      widget.kind,
     );
     setState(() {
       _selection = _selection.length == markers.length
@@ -98,14 +101,14 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
                   )
                 : FilledButton.tonal(
                     onPressed: () =>
-                        showMarkerDialog(context, ref, widget.domestic),
+                        _showMarkerDialog(context, ref, widget.kind),
                     child: Text(appLocalizations.add),
                   ),
           ),
           const SizedBox(width: 8),
         ],
         body: _MarkersBody(
-          domestic: widget.domestic,
+          kind: widget.kind,
           selection: selection,
           onSelected: (url) => setState(() {
             _selection = {..._selection}..addOrRemove(url);
@@ -116,26 +119,32 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
   }
 }
 
-List<RcxMarker> _markerRowsOf(SmartRoutingProps props, bool domestic) =>
-    domestic ? props.domesticMarkers : props.openMarkers;
+List<RcxMarker> _markerRowsOf(SmartRoutingProps props, _MarkerKind kind) =>
+    switch (kind) {
+      _MarkerKind.open => props.openMarkers,
+      _MarkerKind.domestic => props.domesticMarkers,
+      _MarkerKind.local => props.localMarkers,
+    };
 
-void _writeMarkers(WidgetRef ref, bool domestic, List<RcxMarker> next) {
+void _writeMarkers(WidgetRef ref, _MarkerKind kind, List<RcxMarker> next) {
   ref
       .read(smartRoutingSettingProvider.notifier)
       .update(
-        (state) => domestic
-            ? state.copyWith(domesticMarkers: next)
-            : state.copyWith(openMarkers: next),
+        (state) => switch (kind) {
+          _MarkerKind.open => state.copyWith(openMarkers: next),
+          _MarkerKind.domestic => state.copyWith(domesticMarkers: next),
+          _MarkerKind.local => state.copyWith(localMarkers: next),
+        },
       );
 }
 
-Future<void> showMarkerDialog(
+Future<void> _showMarkerDialog(
   BuildContext context,
   WidgetRef ref,
-  bool domestic, [
+  _MarkerKind kind, [
   int? index,
 ]) async {
-  final rows = _markerRowsOf(ref.read(smartRoutingSettingProvider), domestic);
+  final rows = _markerRowsOf(ref.read(smartRoutingSettingProvider), kind);
   final result = await dialogs.showCommonDialog<RcxMarker>(
     child: _MarkerDialog(marker: index == null ? null : rows[index]),
   );
@@ -148,17 +157,17 @@ Future<void> showMarkerDialog(
   } else {
     next[index] = result;
   }
-  _writeMarkers(ref, domestic, next);
+  _writeMarkers(ref, kind, next);
 }
 
 class _MarkersBody extends ConsumerWidget {
   const _MarkersBody({
-    required this.domestic,
+    required this.kind,
     required this.selection,
     required this.onSelected,
   });
 
-  final bool domestic;
+  final _MarkerKind kind;
   final Set<String> selection;
   final ValueChanged<String> onSelected;
 
@@ -166,7 +175,7 @@ class _MarkersBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final rows = _markerRowsOf(
       ref.watch(smartRoutingSettingProvider),
-      domestic,
+      kind,
     );
     if (rows.isEmpty) {
       return NullStatus(
@@ -187,7 +196,7 @@ class _MarkersBody extends ConsumerWidget {
       proxyDecorator: (child, index, animation) =>
           commonProxyDecorator(itemAt(index), index, animation),
       onReorderItem: (oldIndex, newIndex) =>
-          _writeMarkers(ref, domestic, rows.copyAndReorder(oldIndex, newIndex)),
+          _writeMarkers(ref, kind, rows.copyAndReorder(oldIndex, newIndex)),
     );
   }
 
@@ -216,7 +225,7 @@ class _MarkersBody extends ConsumerWidget {
           isEditing: selection.isNotEmpty,
           onSelected: () => onSelected(marker.url),
           onPressed: () => selection.isEmpty
-              ? showMarkerDialog(context, ref, domestic, index)
+              ? _showMarkerDialog(context, ref, kind, index)
               : onSelected(marker.url),
         ),
       ),

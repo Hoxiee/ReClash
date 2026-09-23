@@ -434,6 +434,9 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
     @Default(true) bool respectPick,
     @Default(90) int dwellSeconds,
     @Default(12) int waveWidth,
+    @Default(300) int absCeilingMs,
+    @Default(60) int degradeConfirmSeconds,
+    @Default(30) int proofTtlMinutes,
   }) = _SmartRoutingProps;
 
   factory SmartRoutingProps.fromJson(Map<String, Object?>? json) => json == null

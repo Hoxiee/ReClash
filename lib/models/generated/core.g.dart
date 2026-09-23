@@ -434,6 +434,9 @@ _RcxConfigParams _$RcxConfigParamsFromJson(
   respectPick: json['rpk'] as bool,
   dwellSeconds: (json['dwl'] as num).toInt(),
   waveWidth: (json['ww'] as num).toInt(),
+  absCeilingMs: (json['acm'] as num?)?.toInt() ?? 300,
+  degradeConfirmSeconds: (json['dgc'] as num?)?.toInt() ?? 60,
+  proofTtlMinutes: (json['pttl'] as num?)?.toInt() ?? 30,
   lanes:
       (json['ln'] as List<dynamic>?)
           ?.map((e) => RcxLaneConfig.fromJson(e as Map<String, dynamic>))
@@ -465,6 +468,9 @@ Map<String, dynamic> _$RcxConfigParamsToJson(_RcxConfigParams instance) =>
       'rpk': instance.respectPick,
       'dwl': instance.dwellSeconds,
       'ww': instance.waveWidth,
+      'acm': instance.absCeilingMs,
+      'dgc': instance.degradeConfirmSeconds,
+      'pttl': instance.proofTtlMinutes,
       'ln': instance.lanes,
     };
 

@@ -218,59 +218,63 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m83(duration) => "${duration} dowamynda ölçenildi";
 
-  static String m84(measured, total) => "${measured} ölçendi, jemi ${total}";
+  static String m84(ms) => "${ms} ms";
 
-  static String m85(preset) => "${preset} · sazlandy";
+  static String m85(minutes) => "${minutes} min";
 
-  static String m86(left, cap) => "Bu sagatda ${cap} synagyň ${left} galan";
+  static String m86(measured, total) => "${measured} ölçendi, jemi ${total}";
 
-  static String m87(value, against) => "${value} — ${against}";
+  static String m87(preset) => "${preset} · sazlandy";
 
-  static String m88(seconds) => "${seconds} s";
+  static String m88(left, cap) => "Bu sagatda ${cap} synagyň ${left} galan";
 
-  static String m89(eligible, total) => "${eligible} ýaranly, jemi ${total}";
+  static String m89(value, against) => "${value} — ${against}";
 
-  static String m90(count) => "Ýörite serwer nyşanlary: ${count}";
+  static String m90(seconds) => "${seconds} s";
 
-  static String m91(provider) => "Üpçün ediji: ${provider}";
+  static String m91(eligible, total) => "${eligible} ýaranly, jemi ${total}";
 
-  static String m92(count) => "Üçünji tarapdan gelen nyşanlar: ${count}";
+  static String m92(count) => "Ýörite serwer nyşanlary: ${count}";
 
-  static String m93(eligible, total) => "${total} serwerden ${eligible} taýýar";
+  static String m93(provider) => "Üpçün ediji: ${provider}";
 
-  static String m94(label) =>
+  static String m94(count) => "Üçünji tarapdan gelen nyşanlar: ${count}";
+
+  static String m95(eligible, total) => "${total} serwerden ${eligible} taýýar";
+
+  static String m96(label) =>
       "«${label}» UTF-8 boýunça 64 baýtdan köp bolmaly däl";
 
-  static String m95(node) => "${node} arkaly";
+  static String m97(node) => "${node} arkaly";
 
-  static String m96(eligible, total, blocked) =>
+  static String m98(eligible, total, blocked) =>
       "${total} serwerden ${eligible} geçdi, ${blocked} saklandy";
 
-  static String m97(strategy) => "${strategy} · üýtgedildi";
+  static String m99(strategy) => "${strategy} · üýtgedildi";
 
-  static String m98(from, to) => "${from} → ${to}";
+  static String m100(from, to) => "${from} → ${to}";
 
-  static String m99(time) => "${time} öň çalyşyldy";
+  static String m101(time) => "${time} öň çalyşyldy";
 
-  static String m100(count) => "${count} serwer";
+  static String m102(count) => "${count} serwer";
 
-  static String m101(step) => "Ýokarda duran hatar: ${step}";
+  static String m103(step) => "Ýokarda duran hatar: ${step}";
 
-  static String m102(host) => "Üpjün ediji ${host} salgyna geçdi";
+  static String m104(host) => "Üpjün ediji ${host} salgyna geçdi";
 
-  static String m103(count) =>
+  static String m105(count) =>
       "${Intl.plural(count, one: 'Abunaňyz ertir gutarýar', other: 'Abunaňyz ${count} günden soň gutarýar')}";
 
-  static String m104(value) => "Üpjün edijiniň teklifi: ${value}";
+  static String m106(value) => "Üpjün edijiniň teklifi: ${value}";
 
-  static String m105(total) => "galýan, umumy ${total}";
+  static String m107(total) => "galýan, umumy ${total}";
 
-  static String m106(label) => "${label} URL bolmaly";
+  static String m108(label) => "${label} URL bolmaly";
 
-  static String m107(count) =>
+  static String m109(count) =>
       "Iň köp ${count} fon saklap bolýar. Täzesini goşmak üçin birini aýyryň.";
 
-  static String m108(count) =>
+  static String m110(count) =>
       "${Intl.plural(count, one: '1 ýyl öň', other: '${count} ýyl öň')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2864,8 +2868,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
       "Çykyşy şu ýurtlarda ölçenen server arkaly hiç haçan, hatda iň soňky çäre hökmünde-de ugratmaň",
     ),
+    "smartRoutingAxisData": MessageLookupByLibrary.simpleMessage(
+      "Traffigi tygşytlamak",
+    ),
+    "smartRoutingAxisSpeed": MessageLookupByLibrary.simpleMessage("Tizlik"),
+    "smartRoutingAxisStability": MessageLookupByLibrary.simpleMessage(
+      "Durnuklylyk",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Awtomatiki saýlawa dolan",
+    ),
+    "smartRoutingBackup": MessageLookupByLibrary.simpleMessage(
+      "Ätiýaçlyk nusga",
     ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2927,6 +2941,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCanaryForeign": MessageLookupByLibrary.simpleMessage(
       "daşary ýurt",
     ),
+    "smartRoutingCeiling": MessageLookupByLibrary.simpleMessage(
+      "Gijikdirme çägi",
+    ),
+    "smartRoutingCeilingDesc": MessageLookupByLibrary.simpleMessage(
+      "Işläp duran serweri gijikdirmesi şu çäkden geçende çalyş",
+    ),
     "smartRoutingCensor": MessageLookupByLibrary.simpleMessage(
       "Senzura edýän ýurtlar",
     ),
@@ -2940,11 +2960,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Heniz serwer saýlanmady",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("Ýurt goş"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Ýurdy kesgitleýän hyzmatlar",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Şübheli düwni barlanda serweriň hakyky çykyş ýurduny habar berýän uç nokatlar",
+    ),
+    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
+      "Ýurt saýlanmady",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "Ady ýa-da kody boýunça gözle",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Her bir serweri barla",
@@ -2954,6 +2981,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDeepScanRunning": MessageLookupByLibrary.simpleMessage(
       "Her bir serwer barlanýar…",
+    ),
+    "smartRoutingDegradeConfirm": MessageLookupByLibrary.simpleMessage(
+      "Haýallamany tassyklama wagty",
+    ),
+    "smartRoutingDegradeConfirmDesc": MessageLookupByLibrary.simpleMessage(
+      "Serweri çalyşmazdan öň trafigiň näçe wagt pese gaçmalydygy",
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage(
       "Tizligi çäklendirilen",
@@ -2979,6 +3012,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "Işleýän serwer tizräk biri utýança näçe wagt saklanýar",
+    ),
+    "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
+      "Çykyş echo hyzmatlary",
+    ),
+    "smartRoutingEgressEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Çagyryjynyň salgysy bilen jogap berip, örtülen serweriň hakyky çykyşyny açýan nokatlar",
     ),
     "smartRoutingEmpty": MessageLookupByLibrary.simpleMessage(
       "Heniz ölçeg alynmady",
@@ -3052,7 +3091,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "Ulgam internete girişi tassyklady",
     ),
+    "smartRoutingExport": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalary eksport et",
+    ),
+    "smartRoutingExportDesc": MessageLookupByLibrary.simpleMessage(
+      "Ähli akylly ugrukdyrma sazlamalaryny faýla ýazdyr",
+    ),
+    "smartRoutingExported": MessageLookupByLibrary.simpleMessage(
+      "Akylly ugrukdyrma sazlamalary eksport edildi",
+    ),
     "smartRoutingFails": m81,
+    "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage(
+      "Strategiýanyň başlangyç bahasyna dolan",
+    ),
     "smartRoutingFitNo": MessageLookupByLibrary.simpleMessage("Gabat gelenok"),
     "smartRoutingFitYes": MessageLookupByLibrary.simpleMessage("Gabat gelýär"),
     "smartRoutingFormatOffline": MessageLookupByLibrary.simpleMessage(
@@ -3100,6 +3151,18 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage(
       "saklanma synagyndan",
+    ),
+    "smartRoutingImport": MessageLookupByLibrary.simpleMessage(
+      "Sazlamalary import et",
+    ),
+    "smartRoutingImportDesc": MessageLookupByLibrary.simpleMessage(
+      "Akylly ugrukdyrma sazlamalaryny faýldan çalyş",
+    ),
+    "smartRoutingImportFailed": MessageLookupByLibrary.simpleMessage(
+      "Ol sazlama faýlyny okap bolmady",
+    ),
+    "smartRoutingImported": MessageLookupByLibrary.simpleMessage(
+      "Akylly ugrukdyrma sazlamalary import edildi",
     ),
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage(
       "Ýüze çykarylan kesilmeler",
@@ -3187,6 +3250,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersEmpty": MessageLookupByLibrary.simpleMessage(
       "Sazlanan barlaglar ýok",
     ),
+    "smartRoutingMarkersLocal": MessageLookupByLibrary.simpleMessage(
+      "Diňe öý ýurdy barlaglary",
+    ),
+    "smartRoutingMarkersLocalDesc": MessageLookupByLibrary.simpleMessage(
+      "Serweri ýerli diýip bellemezden öň diňe öý ýurdundan jogap berýändigini tassyklaýar",
+    ),
     "smartRoutingMarkersOpen": MessageLookupByLibrary.simpleMessage(
       "Açyk internet barlaglary",
     ),
@@ -3196,6 +3265,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMeasuredOver": m83,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage(
       "Tölegli baglanyşyk",
+    ),
+    "smartRoutingMillis": m84,
+    "smartRoutingMinutes": m85,
+    "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage(
+      "Öý ýurdunyň serwer adynyň yşaratlary",
+    ),
+    "smartRoutingNameHintsDesc": MessageLookupByLibrary.simpleMessage(
+      "Serweriň öý ýurdunda ýerleşýändigini aňladýan at bölekleri",
     ),
     "smartRoutingNetworkFormat": MessageLookupByLibrary.simpleMessage("Tor"),
     "smartRoutingNeverSwitched": MessageLookupByLibrary.simpleMessage(
@@ -3216,7 +3293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("UDP ýok"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m84,
+    "smartRoutingNodesMeasured": m86,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "Umumy maksatly",
     ),
@@ -3229,17 +3306,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingOverview": MessageLookupByLibrary.simpleMessage(
       "Marşrutuň umumy görnüşi",
     ),
+    "smartRoutingPacing": MessageLookupByLibrary.simpleMessage("Depgin"),
+    "smartRoutingPacingDesc": MessageLookupByLibrary.simpleMessage(
+      "Hereketlendirijiniň reaksiýa tizligi we barlaglara ynam möhleti",
+    ),
     "smartRoutingPortal": MessageLookupByLibrary.simpleMessage(
       "Wi-Fi-da hasaba giriş gerek",
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Taýynlama"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Çin"),
-    "smartRoutingPresetEdited": m85,
+    "smartRoutingPresetEdited": m87,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Eýran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Başga"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russiýa"),
-    "smartRoutingProbeBudget": m86,
+    "smartRoutingProbeBudget": m88,
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Synaglar"),
+    "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
+      "Tassyklamanyň hereket möhleti",
+    ),
+    "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
+      "Gaýtadan barlanýança geçen barlagyň serweri näçe wagt tassyklanan saklaýandygy",
+    ),
     "smartRoutingProvenNo": MessageLookupByLibrary.simpleMessage("Heniz ýok"),
     "smartRoutingProvenYes": MessageLookupByLibrary.simpleMessage("Hawa"),
     "smartRoutingProviderIncidents": MessageLookupByLibrary.simpleMessage(
@@ -3302,6 +3389,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("Häzir barla"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Sebit"),
+    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
+      "Sebit umumy sazlamalarda saýlanýar",
+    ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Diňe UDP goldawly serwerler",
     ),
@@ -3354,11 +3444,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "Serwerleri ady, prowaýderi ýa-da ölçenen ýurdy boýunça äsgermezlik, saklamak ýa-da ileri tutmak",
     ),
-    "smartRoutingRungVersus": m87,
+    "smartRoutingRungVersus": m89,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Serwer saýlanýar…",
     ),
-    "smartRoutingSeconds": m88,
+    "smartRoutingSeconds": m90,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage(
       "Mehanizm",
     ),
@@ -3380,11 +3470,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("Karar"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Serwerler"),
-    "smartRoutingServersCount": m89,
+    "smartRoutingServersCount": m91,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "Islendik üpjün ediji",
     ),
-    "smartRoutingServiceCandidates": m90,
+    "smartRoutingServiceCandidates": m92,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "Hyzmat ugruny ulan",
     ),
@@ -3441,8 +3531,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "Dwijoga garaşylýar",
     ),
-    "smartRoutingServiceProvider": m91,
-    "smartRoutingServiceProviderCandidates": m92,
+    "smartRoutingServiceProvider": m93,
+    "smartRoutingServiceProviderCandidates": m94,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "Üpçün edijiniň takyk ady; islendigine gabat gelmek üçin boş goýuň",
     ),
@@ -3452,7 +3542,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "Abuna manifesti",
     ),
-    "smartRoutingServiceReady": m93,
+    "smartRoutingServiceReady": m95,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("Ugur"),
     "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage(
       "Hyzmat ugurlary",
@@ -3464,8 +3554,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Nyşan çeşmeleri",
     ),
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("Ýagdaý"),
-    "smartRoutingServiceTokenTooLong": m94,
-    "smartRoutingServiceVia": m95,
+    "smartRoutingServiceTokenTooLong": m96,
+    "smartRoutingServiceVia": m97,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "Mahabatsyz YouTube",
     ),
@@ -3475,7 +3565,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Kimiň geçýändigini anyklady",
     ),
-    "smartRoutingStepAdmitBody": m96,
+    "smartRoutingStepAdmitBody": m98,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Şu ýere gelip çykdy",
     ),
@@ -3495,7 +3585,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "Ählisine laýyk — ynamyňyz ýok bolsa, şuny goýuň",
     ),
-    "smartRoutingStrategyEdited": m97,
+    "smartRoutingStrategyEdited": m99,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Tizlik",
     ),
@@ -3503,6 +3593,9 @@ class MessageLookup extends MessageLookupByLibrary {
         MessageLookupByLibrary.simpleMessage(
           "Işleýän serwerleriň arasyndan iň çaltyny saýlaýar",
         ),
+    "smartRoutingStrategyPace": MessageLookupByLibrary.simpleMessage(
+      "Depgini kesgitleýär",
+    ),
     "smartRoutingStrategySaver": MessageLookupByLibrary.simpleMessage(
       "Tygşytly",
     ),
@@ -3515,9 +3608,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyStableDesc": MessageLookupByLibrary.simpleMessage(
       "Işleýän serweri saklaýar we ony seýrek çalyşýar",
     ),
-    "smartRoutingSwitchLine": m98,
+    "smartRoutingSwitchLine": m100,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("çalyşyldy"),
-    "smartRoutingSwitchedAgo": m99,
+    "smartRoutingSwitchedAgo": m101,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage(
       "Jikme-jiklik",
     ),
@@ -3556,12 +3649,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "Bir barlag näçe serweri ölçeýär",
     ),
-    "smartRoutingWaveNodes": m100,
+    "smartRoutingWaveNodes": m102,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Baglanyşyk barlagy",
     ),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Sebäbi"),
-    "smartRoutingWinsAt": m101,
+    "smartRoutingWinsAt": m103,
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS porty"),
     "sort": MessageLookupByLibrary.simpleMessage("Tertipleme"),
     "source": MessageLookupByLibrary.simpleMessage("Çeşme"),
@@ -3639,11 +3732,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "VPN-den daşarda gaýtadan synanyşmalymy?",
     ),
-    "subscriptionDomainMoved": m102,
+    "subscriptionDomainMoved": m104,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Abunaňyz möhleti gutardy",
     ),
-    "subscriptionExpiresInDays": m103,
+    "subscriptionExpiresInDays": m105,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Abunaňyz şu gün gutarýar",
     ),
@@ -3657,7 +3750,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Abuna ýatlatmalary",
     ),
-    "subscriptionProviderInterval": m104,
+    "subscriptionProviderInterval": m106,
     "subscriptionUndialable": MessageLookupByLibrary.simpleMessage(
       "Abunalykda adaty düwün salgylary tapylmady. Panel wagtlaýyn boş konfigurasiýa gaýtaran bolmagy mümkin. Serwerlere baglanyşyk barlanmady.",
     ),
@@ -3713,7 +3806,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "torch": MessageLookupByLibrary.simpleMessage("Fonar"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Jemi trafik"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy porty"),
-    "trafficFreeOfTotal": m105,
+    "trafficFreeOfTotal": m107,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Trafik ulanylyşy"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash dürli ýurtlardaky adamlaryň ulanyp bilmegi üçin siziň diliňizde gürleýär. Haýsy-da bir sözlem göwnüňize ýaramsa — ýazyň, düzedeliň.",
@@ -3807,7 +3900,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Beslenen bolsa baglanýar, işleýän bolsa aýrylýar",
     ),
-    "urlTip": m106,
+    "urlTip": m108,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostlary ulanmak"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Ulgamyň hostlaryny ulanmak",
@@ -3856,7 +3949,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "PNG, JPEG ýa-da WebP formatyndaky dogry suraty saýlaň.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Kadr sazlamalary"),
-    "wallpaperLibraryFull": m107,
+    "wallpaperLibraryFull": m109,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Suratyň dury dälligi",
     ),
@@ -3899,7 +3992,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Panel heniz elýeterli däl",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Ak sanaw usuly"),
-    "yearsAgo": m108,
+    "yearsAgo": m110,
     "zhCN": MessageLookupByLibrary.simpleMessage("Ýeňilleşdirilen hytaý dili"),
   };
 }
