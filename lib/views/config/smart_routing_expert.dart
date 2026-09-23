@@ -22,6 +22,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             top: 16,
             title: appLocalizations.smartRoutingPacing,
+            subTitle: appLocalizations.smartRoutingPacingDesc,
             items: [
               _pacingItem(
                 ref,
@@ -77,7 +78,8 @@ class _AdvancedRoutingPage extends ConsumerWidget {
             ],
           ),
           SettingSection(
-            title: appLocalizations.smartRoutingDetection,
+            title: appLocalizations.smartRoutingProbes,
+            subTitle: appLocalizations.smartRoutingRegionNote,
             items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingCanariesForeign,
@@ -91,6 +93,12 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 value: props.canaryDomestic,
                 write: (state, value) => state.copyWith(canaryDomestic: value),
               ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingCountryPolicy,
+            subTitle: appLocalizations.smartRoutingCountryPolicyDesc,
+            items: [
               _CountryListItem(
                 title: appLocalizations.smartRoutingCensor,
                 desc: appLocalizations.smartRoutingCensorDesc,
@@ -103,18 +111,12 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 value: props.avoidCountries,
                 write: (state, value) => state.copyWith(avoidCountries: value),
               ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingBreakerPatterns,
-                desc: appLocalizations.smartRoutingBreakerPatternsDesc,
-                value: props.breakerPatterns,
-                write: (state, value) => state.copyWith(breakerPatterns: value),
-              ),
-              _StringListItem(
-                title: appLocalizations.smartRoutingCountryEchoes,
-                desc: appLocalizations.smartRoutingCountryEchoesDesc,
-                value: props.countryEchoes,
-                write: (state, value) => state.copyWith(countryEchoes: value),
-              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingEgress,
+            subTitle: appLocalizations.smartRoutingEgressDesc,
+            items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingEgressEchoes,
                 desc: appLocalizations.smartRoutingEgressEchoesDesc,
@@ -122,16 +124,35 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 write: (state, value) => state.copyWith(egressEchoes: value),
               ),
               _StringListItem(
+                title: appLocalizations.smartRoutingCountryEchoes,
+                desc: appLocalizations.smartRoutingCountryEchoesDesc,
+                value: props.countryEchoes,
+                write: (state, value) => state.copyWith(countryEchoes: value),
+              ),
+            ],
+          ),
+          SettingSection(
+            title: appLocalizations.smartRoutingHeuristics,
+            subTitle: appLocalizations.smartRoutingHeuristicsDesc,
+            items: [
+              _StringListItem(
                 title: appLocalizations.smartRoutingNameHints,
                 desc: appLocalizations.smartRoutingNameHintsDesc,
                 value: props.nameHints,
                 write: (state, value) => state.copyWith(nameHints: value),
+              ),
+              _StringListItem(
+                title: appLocalizations.smartRoutingBreakerPatterns,
+                desc: appLocalizations.smartRoutingBreakerPatternsDesc,
+                value: props.breakerPatterns,
+                write: (state, value) => state.copyWith(breakerPatterns: value),
               ),
               _RulesItem(rules: props.nodeRules),
             ],
           ),
           SettingSection(
             title: appLocalizations.smartRoutingMarkers,
+            subTitle: appLocalizations.smartRoutingMarkersDesc,
             items: [
               _MarkersItem(
                 title: appLocalizations.smartRoutingMarkersOpen,
@@ -155,19 +176,13 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           ),
           SettingSection(
             title: appLocalizations.smartRoutingRanking,
+            subTitle: [
+              appLocalizations.smartRoutingKeyVerdict,
+              appLocalizations.smartRoutingKeyMisfit,
+              appLocalizations.smartRoutingKeyEvidence,
+              appLocalizations.smartRoutingKeyBand,
+            ].join(' → '),
             items: [
-              DecorationListItem(
-                minVerticalPadding: 8,
-                title: Text(appLocalizations.smartRoutingRankOrder),
-                subtitle: Text(
-                  [
-                    appLocalizations.smartRoutingKeyVerdict,
-                    appLocalizations.smartRoutingKeyMisfit,
-                    appLocalizations.smartRoutingKeyEvidence,
-                    appLocalizations.smartRoutingKeyBand,
-                  ].join(' → '),
-                ),
-              ),
               DecorationListItem(
                 minVerticalPadding: 8,
                 title: Text(appLocalizations.smartRoutingKeyBand),
@@ -176,6 +191,13 @@ class _AdvancedRoutingPage extends ConsumerWidget {
               _StringListItem(
                 title: appLocalizations.smartRoutingLatencyBands,
                 desc: appLocalizations.smartRoutingLatencyBandsDesc,
+                itemMaxLength: 6,
+                itemValidator: (value) {
+                  final edge = int.tryParse(value);
+                  return edge == null || edge <= 0
+                      ? appLocalizations.smartRoutingBandInvalid
+                      : null;
+                },
                 value: props.latencyBands
                     .map((edge) => edge.toString())
                     .toList(),
@@ -292,8 +314,11 @@ Future<void> _handleImport(BuildContext context, WidgetRef ref) async {
   dialogs.showNotifier(appLocalizations.smartRoutingImported);
 }
 
-/// Countries ride a picker rather than the plain string editor so a code is a
-/// recognised place with a flag, not a raw two-letter token the user must know.
+
+/// Countries ride the standard reorder-list editor, not a bespoke picker: a code
+/// is shown as a recognised place with its flag, but stored as the bare
+/// two-letter token the engine expects. The flag is presentation only, added on
+/// the way in and stripped on the way out.
 class _CountryListItem extends ConsumerWidget {
   const _CountryListItem({
     required this.title,
@@ -309,134 +334,65 @@ class _CountryListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.map(_countryLabel).join(', ')),
       blur: false,
-      widget: _CountryPickerPage(
+      widget: ListInputPage(
         title: title,
-        codes: value,
-        onCommit: (next) => ref
-            .read(smartRoutingSettingProvider.notifier)
-            .update((state) => write(state, next)),
+        items: value,
+        valueLabel: appLocalizations.smartRoutingRuleCountry,
+        itemMaxLength: 2,
+        itemNormalizer: _normalizeCountryCode,
+        itemValidator: (code) => _isoAlpha2.contains(code)
+            ? null
+            : appLocalizations.smartRoutingCountryInvalid,
+        titleBuilder: (code) => Text(_countryLabel(code)),
+        leadingBuilder: (code) {
+          final flag = countryCodeToEmoji(code);
+          return flag == null
+              ? const Icon(Icons.public_rounded)
+              : Text(flag, style: const TextStyle(fontSize: 24));
+        },
       ),
+      onChanged: (items) => ref
+          .read(smartRoutingSettingProvider.notifier)
+          .update((state) => write(state, List<String>.from(items as List))),
     );
   }
 }
+
+String _normalizeCountryCode(String value) =>
+    value.toUpperCase().replaceAll(RegExp('[^A-Z]'), '');
 
 String _countryLabel(String code) {
   final flag = countryCodeToEmoji(code);
   return flag == null ? code : '$flag $code';
 }
 
-class _CountryPickerPage extends StatefulWidget {
-  const _CountryPickerPage({
-    required this.title,
-    required this.codes,
-    required this.onCommit,
-  });
-
-  final String title;
-  final List<String> codes;
-  final ValueChanged<List<String>> onCommit;
-
-  @override
-  State<_CountryPickerPage> createState() => _CountryPickerPageState();
-}
-
-class _CountryPickerPageState extends State<_CountryPickerPage> {
-  late List<String> _codes = [...widget.codes];
-  final _controller = TextEditingController();
-  String _draft = '';
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  String get _normalized =>
-      _draft.toUpperCase().replaceAll(RegExp('[^A-Z]'), '');
-
-  bool get _canAdd {
-    final code = _normalized;
-    return countryCodeToEmoji(code) != null && !_codes.contains(code);
-  }
-
-  void _add() {
-    if (!_canAdd) {
-      return;
-    }
-    setState(() {
-      _codes = [..._codes, _normalized];
-      _controller.clear();
-      _draft = '';
-    });
-    widget.onCommit(_codes);
-  }
-
-  void _remove(String code) {
-    setState(() => _codes = _codes.where((item) => item != code).toList());
-    widget.onCommit(_codes);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final preview = countryCodeToEmoji(_normalized);
-    return CommonScaffold(
-      title: widget.title,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              spacing: 12,
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    textCapitalization: TextCapitalization.characters,
-                    maxLength: 2,
-                    decoration: InputDecoration(
-                      prefixText: preview == null ? null : '$preview  ',
-                      hintText: appLocalizations.smartRoutingCountrySearch,
-                      counterText: '',
-                      border: const OutlineInputBorder(),
-                    ),
-                    onChanged: (value) => setState(() => _draft = value),
-                    onSubmitted: (_) => _add(),
-                  ),
-                ),
-                CommonMinFilledButtonTheme(
-                  child: FilledButton(
-                    onPressed: _canAdd ? _add : null,
-                    child: Text(appLocalizations.smartRoutingCountryAdd),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _codes.isEmpty
-                ? NullStatus(label: appLocalizations.smartRoutingCountryEmpty)
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final code in _codes)
-                          Chip(
-                            label: Text(_countryLabel(code)),
-                            onDeleted: () => _remove(code),
-                          ),
-                      ],
-                    ),
-                  ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+/// ISO 3166-1 alpha-2 codes plus XK (Kosovo, user-assigned but what mmdb emits):
+/// countryCodeToEmoji builds a flag for any two letters, so the field validates
+/// against real codes instead.
+const _isoAlpha2 = {
+  'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU',
+  'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL',
+  'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC',
+  'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV',
+  'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE', 'EG',
+  'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD',
+  'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT',
+  'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM',
+  'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG', 'KH',
+  'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK',
+  'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH',
+  'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW',
+  'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR',
+  'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR',
+  'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW', 'SA', 'SB', 'SC',
+  'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS',
+  'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL',
+  'TM', 'TN', 'TO', 'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY',
+  'UZ', 'VA', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WS', 'XK', 'YE', 'YT',
+  'ZA', 'ZM', 'ZW',
+};

@@ -2065,15 +2065,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("已选服务器"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage("尚未选择服务器"),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("添加国家/地区"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "国家/地区查询服务",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "在核查可疑节点时报告服务器真实出口国家/地区的端点",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "未选择国家/地区",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "请输入有效的两位国家/地区代码",
@@ -2081,8 +2077,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "国家/地区策略",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "按名称或代码搜索",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "哪些国家/地区算作审查，哪些应避免作为出口",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("检查所有服务器"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2101,7 +2097,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "无需打开应用，为每个网络自动保持可用的服务器",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("网络判定"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage("断网期间使用本地服务器"),
     "smartRoutingDomesticDesc": MessageLookupByLibrary.simpleMessage(
       "白名单网络下的最后手段，让本地服务仍可使用",
@@ -2117,6 +2112,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "在更快的服务器胜出前，可用服务器保持多久",
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("出口验证"),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "揭示伪装服务器真实出口位置的服务",
+    ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage("出口回显服务"),
     "smartRoutingEgressEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "返回调用方地址、以揭示伪装服务器真实出口的端点",
@@ -2204,6 +2202,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("未检查"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("可用"),
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("节点推断规则"),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "影响服务器选择方式的名称提示和规则",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近的切换"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage("还没有切换过"),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("来自延迟测试"),
@@ -2218,9 +2219,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage("检测到的中断"),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("挑战者"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("使用中"),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "智能路由为当前网络保持可用的服务器，并在网络变化时自动切换。先选择区域预设，再在下方微调策略、探测与标记。",
-    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("保持"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage("允许参与比较"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("延迟档"),
@@ -2260,6 +2258,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("服务检查"),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "证明服务器可访问开放互联网或本地服务的 URL",
+    ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage("本地检查"),
     "smartRoutingMarkersDomesticDesc": MessageLookupByLibrary.simpleMessage(
       "断网封锁期间用于本地服务器",
@@ -2377,19 +2378,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("立即检查"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地区"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "地区在常规设置中选择",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "根据应用中所选的地区预设；仅在网络需要时再修改",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("要求支持 UDP"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "跳过无法承载通话和游戏的服务器",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage("恢复为预设"),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "恢复该地区默认值，并保持智能路由开启",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "受限网络 · 本地服务直连",

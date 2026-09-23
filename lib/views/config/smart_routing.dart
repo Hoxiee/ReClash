@@ -8,7 +8,6 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
-import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,10 +80,8 @@ class SmartRoutingView extends ConsumerWidget {
 
     if (props.enabled) {
       slivers.addAll([
-        const SettingSection.sliver(items: [_LiveStatusPanel()]),
         _strategySection(context, ref, props),
         _behaviourSection(context, ref, props),
-        _regionSection(context, ref, props),
         SettingSection.sliver(
           title: appLocalizations.smartRoutingServiceRoutes,
           items: [
@@ -219,155 +216,11 @@ class SmartRoutingView extends ConsumerWidget {
     );
   }
 
-  Widget _regionSection(
-    BuildContext context,
-    WidgetRef ref,
-    SmartRoutingProps props,
-  ) {
-    final appLocalizations = context.appLocalizations;
-    final flag = countryCodeToEmoji(_presetCode(props.preset));
-    return SettingSection.sliver(
-      title: appLocalizations.smartRoutingPreset,
-      items: [
-        DecorationListItem(
-          minVerticalPadding: 8,
-          leading: flag == null
-              ? const Icon(Icons.public_rounded)
-              : Text(flag, style: const TextStyle(fontSize: 24)),
-          title: Text(
-            props.matchesPreset
-                ? props.preset.label
-                : appLocalizations.smartRoutingPresetEdited(props.preset.label),
-          ),
-          subtitle: Text(appLocalizations.smartRoutingRegionManaged),
-          trailing: props.matchesPreset
-              ? null
-              : CommonMinFilledButtonTheme(
-                  child: FilledButton.tonal(
-                    onPressed: () => _handleReseedRegion(context, ref, props),
-                    child: Text(appLocalizations.reset),
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _handleReseedRegion(
-    BuildContext context,
-    WidgetRef ref,
-    SmartRoutingProps props,
-  ) async {
-    final appLocalizations = context.appLocalizations;
-    final confirmed = await dialogs.showMessage(
-      dangerous: true,
-      title: appLocalizations.smartRoutingResetSection,
-      message: TextSpan(text: appLocalizations.smartRoutingResetSectionDesc),
-    );
-    if (confirmed != true) {
-      return;
-    }
-    _update(ref, (state) => state.applyPreset(state.preset));
-  }
 }
 
-String _presetCode(SmartRoutingPreset preset) => switch (preset) {
-  SmartRoutingPreset.russia => 'RU',
-  SmartRoutingPreset.iran => 'IR',
-  SmartRoutingPreset.china => 'CN',
-  SmartRoutingPreset.off => '',
-};
-
-/// The compact read-out of what the engine is doing right now. It never restates
-/// the full diagnostics page: it names the format and the chosen node and hands
-/// off to the overview for the candidate table and the evidence behind it.
-class _LiveStatusPanel extends ConsumerWidget {
-  const _LiveStatusPanel();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    final status = ref.watch(smartRoutingStatusProvider);
-    final scanning = status?.deep == true || status?.searching == true;
-    final node = status?.node.trim() ?? '';
-    final delay = status?.delay ?? 0;
-    final reason = status?.reason ?? '';
-    final format = networkFormatOf(status?.terrain ?? 'unknown');
-    final chosen = node.isEmpty
-        ? appLocalizations.smartRoutingChosenNone
-        : delay > 0
-        ? '$node · ${appLocalizations.smartRoutingMillis(delay)}'
-        : node;
-    return DecorationListItem(
-      minVerticalPadding: 10,
-      leading: Icon(_formatIcon(format), color: colorScheme.primary),
-      title: Text(status == null ? appLocalizations.smartRoutingEmpty : format.label),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 2,
-        children: [
-          Text(chosen),
-          if (status != null)
-            Text(
-              appLocalizations.smartRoutingServersCount(
-                status.eligible,
-                status.candidates,
-              ),
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          if (reason.isNotEmpty)
-            Text(
-              routingReasonLabel(appLocalizations, reason),
-              style: context.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-        ],
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 4,
-        children: [
-          CommonMinIconButtonTheme(
-            child: IconButton.filledTonal(
-              tooltip: scanning
-                  ? appLocalizations.smartRoutingDeepScanRunning
-                  : appLocalizations.smartRoutingDeepScan,
-              onPressed: scanning
-                  ? null
-                  : () => ref.read(coreHandlerProvider).smartRoutingDeepScan(),
-              icon: scanning
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.travel_explore_rounded),
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded, color: colorScheme.outline),
-        ],
-      ),
-      onPressed: () => showExtend(
-        context,
-        builder: (_) => const RoutingOverviewView(),
-      ),
-    );
-  }
-}
-
-IconData _formatIcon(NetworkFormat format) => switch (format) {
-  NetworkFormat.open => Icons.public_rounded,
-  NetworkFormat.restricted => Icons.shield_rounded,
-  NetworkFormat.portal => Icons.wifi_lock_rounded,
-  NetworkFormat.offline => Icons.cloud_off_rounded,
-  NetworkFormat.unknown => Icons.help_outline_rounded,
-};
-
-/// A strategy is a pace, not a region, so the card shows the tradeoff it makes
-/// and the pacing numbers it seeds rather than a bare radio label.
+/// A strategy is a pace, not a region. The card stays a one-line choice; only
+/// the selected one expands with the tradeoff meters, so the list reads as four
+/// options rather than a wall of numbers.
 class _StrategyCard extends StatelessWidget {
   const _StrategyCard({
     required this.strategy,
@@ -419,8 +272,7 @@ class _StrategyCard extends StatelessWidget {
         spacing: 8,
         children: [
           Text(strategy.description),
-          _TradeoffBars(axes: _axesOf(strategy)),
-          _PacingChips(pacing: strategy.pacing),
+          if (selected) _TradeoffBars(axes: _axesOf(strategy)),
         ],
       ),
       onPressed: onPressed,
@@ -500,50 +352,22 @@ class _TradeoffBars extends StatelessWidget {
   }
 }
 
-class _PacingChips extends StatelessWidget {
-  const _PacingChips({required this.pacing});
-
-  final SmartRoutingPacing pacing;
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        _chip(context, appLocalizations.smartRoutingSeconds(pacing.dwellSeconds)),
-        _chip(context, appLocalizations.smartRoutingWaveNodes(pacing.waveWidth)),
-        _chip(context, appLocalizations.smartRoutingMillis(pacing.absCeilingMs)),
-      ],
-    );
-  }
-
-  Widget _chip(BuildContext context, String text) {
-    final colorScheme = context.colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(text, style: context.textTheme.labelSmall),
-    );
-  }
-}
-
 class _StringListItem extends ConsumerWidget {
   const _StringListItem({
     required this.title,
     required this.desc,
     required this.value,
     required this.write,
+    this.itemValidator,
+    this.itemMaxLength,
   });
 
   final String title;
   final String desc;
   final List<String> value;
   final SmartRoutingProps Function(SmartRoutingProps, List<String>) write;
+  final String? Function(String item)? itemValidator;
+  final int? itemMaxLength;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -551,7 +375,13 @@ class _StringListItem extends ConsumerWidget {
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.join(', ')),
       blur: false,
-      widget: ListInputPage(title: title, items: value, titleBuilder: Text.new),
+      widget: ListInputPage(
+        title: title,
+        items: value,
+        titleBuilder: Text.new,
+        itemValidator: itemValidator,
+        itemMaxLength: itemMaxLength,
+      ),
       onChanged: (items) => ref
           .read(smartRoutingSettingProvider.notifier)
           .update((state) => write(state, List<String>.from(items as List))),

@@ -145,38 +145,76 @@ void main() {
     });
   }
 
-  testWidgets('an adjusted preset says so and can be reset', (tester) async {
-    final container = await _pump(
+  testWidgets('the advanced page notes the region seeds the probes', (
+    tester,
+  ) async {
+    await _pump(
       tester,
       props: const SmartRoutingProps(
         enabled: true,
         preset: SmartRoutingPreset.russia,
-        requireUdp: true,
       ),
     );
 
-    final resetButton = find.widgetWithText(FilledButton, 'Reset').first;
-    await _reveal(tester, find.text('Reset'));
-    expect(
-      tester.widget<FilledButton>(resetButton).onPressed,
-      isNotNull,
-      reason: 'an adjusted preset offers a reset',
+    await _openAdvanced(tester);
+    await _reveal(
+      tester,
+      find.textContaining('region set in the app'),
+      scrollable: find.byType(Scrollable).last,
     );
 
-    await tester.tap(find.text('Reset'));
+    expect(find.textContaining('region set in the app'), findsOneWidget);
+  });
+
+  testWidgets('a censored country rides the standard list editor', (
+    tester,
+  ) async {
+    await _pump(tester, props: _russia);
+
+    await _openAdvanced(tester);
+    await _reveal(
+      tester,
+      find.text('Censoring countries'),
+      delta: 300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
+    expect(find.byType(ReorderableListView), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
+    expect(find.textContaining('RU'), findsWidgets);
+  });
+
+  testWidgets('the country field rejects a code that is not a real one', (
+    tester,
+  ) async {
+    await _pump(tester, props: _russia);
+
+    await _openAdvanced(tester);
+    await _reveal(
+      tester,
+      find.text('Censoring countries'),
+      delta: 300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), 'ZZ');
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
 
-    final props = container.read(smartRoutingSettingProvider);
-    expect(props.matchesPreset, isTrue);
-    expect(props.enabled, isTrue);
-    expect(
-      find.text('Reset'),
-      findsNothing,
-      reason: 'a matching preset has nothing to reset',
-    );
+    expect(find.text('Enter a valid two-letter country code'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextFormField), 'DE');
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter a valid two-letter country code'), findsNothing);
+    expect(find.textContaining('DE'), findsWidgets);
   });
 
   testWidgets('the strategy is named in plain words with what it does', (

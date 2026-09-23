@@ -7419,16 +7419,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.`
-  String get smartRoutingIntro {
-    return Intl.message(
-      'Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.',
-      name: 'smartRoutingIntro',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Available in Rule mode only`
   String get smartRoutingRuleOnly {
     return Intl.message(
@@ -9754,6 +9744,16 @@ class AppLocalizations {
     );
   }
 
+  /// `URLs that prove a server reaches the open internet or home services`
+  String get smartRoutingMarkersDesc {
+    return Intl.message(
+      'URLs that prove a server reaches the open internet or home services',
+      name: 'smartRoutingMarkersDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Open-internet checks`
   String get smartRoutingMarkersOpen {
     return Intl.message(
@@ -10074,16 +10074,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Detection`
-  String get smartRoutingDetection {
-    return Intl.message(
-      'Detection',
-      name: 'smartRoutingDetection',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Reachability probes`
   String get smartRoutingProbes {
     return Intl.message(
@@ -10114,6 +10104,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Which countries count as censored, and which to avoid as exits`
+  String get smartRoutingCountryPolicyDesc {
+    return Intl.message(
+      'Which countries count as censored, and which to avoid as exits',
+      name: 'smartRoutingCountryPolicyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Egress verification`
   String get smartRoutingEgress {
     return Intl.message(
@@ -10124,11 +10124,31 @@ class AppLocalizations {
     );
   }
 
+  /// `Services that reveal where a fronted server truly exits`
+  String get smartRoutingEgressDesc {
+    return Intl.message(
+      'Services that reveal where a fronted server truly exits',
+      name: 'smartRoutingEgressDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Node heuristics`
   String get smartRoutingHeuristics {
     return Intl.message(
       'Node heuristics',
       name: 'smartRoutingHeuristics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Name hints and rules that steer how servers are chosen`
+  String get smartRoutingHeuristicsDesc {
+    return Intl.message(
+      'Name hints and rules that steer how servers are chosen',
+      name: 'smartRoutingHeuristicsDesc',
       desc: '',
       args: [],
     );
@@ -10174,26 +10194,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Reset to preset`
-  String get smartRoutingResetSection {
-    return Intl.message(
-      'Reset to preset',
-      name: 'smartRoutingResetSection',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restores the region defaults and keeps smart routing on`
-  String get smartRoutingResetSectionDesc {
-    return Intl.message(
-      'Restores the region defaults and keeps smart routing on',
-      name: 'smartRoutingResetSectionDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Stability`
   String get smartRoutingAxisStability {
     return Intl.message(
@@ -10229,16 +10229,6 @@ class AppLocalizations {
     return Intl.message(
       'Sets the pace',
       name: 'smartRoutingStrategyPace',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Region is chosen in General settings`
-  String get smartRoutingRegionManaged {
-    return Intl.message(
-      'Region is chosen in General settings',
-      name: 'smartRoutingRegionManaged',
       desc: '',
       args: [],
     );
@@ -10444,36 +10434,6 @@ class AppLocalizations {
     return Intl.message(
       'Could not read that configuration file',
       name: 'smartRoutingImportFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Add country`
-  String get smartRoutingCountryAdd {
-    return Intl.message(
-      'Add country',
-      name: 'smartRoutingCountryAdd',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No countries selected`
-  String get smartRoutingCountryEmpty {
-    return Intl.message(
-      'No countries selected',
-      name: 'smartRoutingCountryEmpty',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Search by name or code`
-  String get smartRoutingCountrySearch {
-    return Intl.message(
-      'Search by name or code',
-      name: 'smartRoutingCountrySearch',
       desc: '',
       args: [],
     );

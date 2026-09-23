@@ -2809,17 +2809,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "No server chosen yet",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage(
-      "Add country",
-    ),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Country lookup services",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Endpoints that report a server\'s real exit country when verifying a suspicious node",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "No countries selected",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "Enter a valid two-letter country code",
@@ -2827,8 +2821,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Country policy",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "Search by name or code",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Which countries count as censored, and which to avoid as exits",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Check every server",
@@ -2849,7 +2843,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Keeps a working server picked for every network, without opening the app",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("Detection"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Local servers during a shutdown",
     ),
@@ -2868,6 +2861,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
       "Egress verification",
+    ),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "Services that reveal where a fronted server truly exits",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Egress echo services",
@@ -3000,6 +2996,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
       "Node heuristics",
     ),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "Name hints and rules that steer how servers are chosen",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Recent switches",
     ),
@@ -3028,9 +3027,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Challenger",
     ),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("In use"),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "Smart routing keeps a server that works on the current network and switches on its own when the network changes. Start from a region preset, then fine-tune strategy, checks and markers below.",
-    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("kept"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage(
       "Allowed to compete",
@@ -3093,6 +3089,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Service checks",
+    ),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "URLs that prove a server reaches the open internet or home services",
     ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "Local checks",
@@ -3245,9 +3244,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("Check now"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Region"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "Region is chosen in General settings",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Seeded from the region set in the app; edit them only if your network needs it",
     ),
@@ -3256,12 +3252,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "Skip servers that cannot carry calls and games",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "Reset to preset",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "Restores the region defaults and keeps smart routing on",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Restricted network · local services stay direct",

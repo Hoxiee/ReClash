@@ -2352,22 +2352,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "まだサーバーが選ばれていません",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("国を追加"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "国判定サービス",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "疑わしいノードの検証時にサーバーの実際の出口国を報告するエンドポイント",
     ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "国が選択されていません",
-    ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "有効な2文字の国コードを入力してください",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("国別ポリシー"),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "名前またはコードで検索",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "どの国を検閲国とみなし、どの国を出口として避けるか",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("すべてのサーバーを検査"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2386,7 +2382,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "アプリを開かなくても、ネットワークごとに使えるサーバーを選び続けます",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("ネットワーク判定"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "遮断中は国内サーバーを使う",
     ),
@@ -2404,6 +2399,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "より速いサーバーに切り替わるまで、使えるサーバーを保つ時間",
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("出口の検証"),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "偽装サーバーが実際にどこで出口となるかを明らかにするサービス",
+    ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "出口エコーサービス",
     ),
@@ -2507,6 +2505,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("未確認"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("使用可"),
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("ノードの推定ルール"),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "サーバーの選び方を左右する名前のヒントとルール",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近の切り替え"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
       "まだ切り替えはありません",
@@ -2525,9 +2526,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage("検出された障害"),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("挑戦側"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("使用中"),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "スマートルーティングは現在のネットワークで機能するサーバーを維持し、ネットワークが変わると自動で切り替えます。まずリージョンのプリセットを選び、下で戦略・検査・マーカーを調整します。",
-    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("維持"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage("比較の対象"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("遅延帯"),
@@ -2573,6 +2571,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("サービス検査"),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "サーバーがオープンインターネットや国内サービスに到達できることを証明する URL",
+    ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "国内向け検査",
     ),
@@ -2708,9 +2709,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("今すぐ確認"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地域"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "地域は一般設定で選択します",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "アプリで選んだ地域から設定されています。ネットワークに必要な場合のみ変更してください",
     ),
@@ -2719,12 +2717,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "通話やゲームを通せないサーバーを除外します",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "プリセットに戻す",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "地域の既定値に戻し、スマートルーティングは有効のままにします",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "制限されたネットワーク · 国内サービスは直接接続",

@@ -2969,17 +2969,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hozircha server tanlanmagan",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage(
-      "Davlat qo\'shish",
-    ),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Davlatni aniqlash xizmatlari",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Shubhali tugunni tekshirishda serverning haqiqiy chiqish davlatini xabar qiladigan endpointlar",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "Davlat tanlanmagan",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "To\'g\'ri ikki harfli davlat kodini kiriting",
@@ -2987,8 +2981,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Davlat siyosati",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "Nomi yoki kodi bo\'yicha qidirish",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Qaysi davlatlar senzura qiluvchi hisoblanadi va qaysilaridan chiqish sifatida qochish kerak",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Har bir serverni tekshirish",
@@ -3011,7 +3005,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Ilovani ochmasdan har bir tarmoq uchun ishlaydigan serverni tanlab turadi",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("Aniqlash"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Cheklov paytida mahalliy serverlar",
     ),
@@ -3032,6 +3025,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
       "Chiqish tekshiruvi",
+    ),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "Niqoblangan server aslida qayerdan chiqishini ochadigan xizmatlar",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Chiqish echo xizmatlari",
@@ -3168,6 +3164,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
       "Tugun taxminlari",
     ),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "Serverlar tanlanishiga taʼsir qiluvchi nom ishoralari va qoidalar",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Soʻnggi almashtirishlar",
     ),
@@ -3195,9 +3194,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("Da’vogar"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage(
       "Ishlamoqda",
-    ),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "Aqlli marshrutlash hozirgi tarmoqda ishlaydigan serverni saqlaydi va tarmoq oʻzgarganda oʻzi almashtiradi. Avval mintaqa tayyor sozlamasidan boshlang, soʻngra quyida strategiya, tekshiruvlar va belgilarni moslang.",
     ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("saqlangan"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage(
@@ -3263,6 +3259,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Xizmat tekshiruvlari",
+    ),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "Server ochiq internetga yoki mahalliy xizmatlarga yetishini isbotlaydigan URL manzillar",
     ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "Mahalliy tekshiruvlar",
@@ -3419,9 +3418,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hozirroq tekshirish",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Mintaqa"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "Hudud umumiy sozlamalarda tanlanadi",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Ilovada tanlangan hudud asosida o\'rnatilgan; faqat tarmog\'ingiz talab qilsa o\'zgartiring",
     ),
@@ -3430,12 +3426,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "Qoʻngʻiroq va oʻyinlarni oʻtkaza olmaydigan serverlar tanlanmaydi",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "Andozalarni tiklash",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "Mintaqa andozalarini tiklaydi va aqlli marshrutlash yoqilgan holda qoladi",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Cheklangan tarmoq · mahalliy xizmatlar toʻgʻridan-toʻgʻri",

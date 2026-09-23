@@ -2331,22 +2331,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "아직 선택된 서버가 없습니다",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("국가 추가"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "국가 조회 서비스",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "의심스러운 노드를 확인할 때 서버의 실제 출구 국가를 알려주는 엔드포인트",
     ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "선택된 국가 없음",
-    ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "유효한 두 글자 국가 코드를 입력하세요",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("국가 정책"),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "이름 또는 코드로 검색",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "어떤 국가를 검열 국가로 간주하고, 어떤 국가를 출구로 피할지",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("모든 서버 점검"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2365,7 +2361,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "앱을 열지 않고도 네트워크마다 작동하는 서버를 자동으로 골라 둡니다",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("탐지"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "인터넷 차단 시 로컬 서버 사용",
     ),
@@ -2383,6 +2378,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "더 빠른 서버가 나타났을 때 작동 중인 서버를 얼마나 오래 유지할지 정합니다",
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("출구 검증"),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "위장된 서버가 실제로 어디로 나가는지 밝혀 주는 서비스",
+    ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "출구 에코 서비스",
     ),
@@ -2484,6 +2482,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("미확인"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("사용 가능"),
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("노드 추론 규칙"),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "서버 선택 방식을 좌우하는 이름 힌트와 규칙",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("최근 전환"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
       "아직 전환이 없습니다",
@@ -2502,9 +2503,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingIncidents": MessageLookupByLibrary.simpleMessage("감지된 장애"),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("도전자"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("사용 중"),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "스마트 라우팅은 현재 네트워크에서 작동하는 서버를 골라 두고, 네트워크가 바뀌면 알아서 전환합니다. 지역 프리셋으로 시작한 다음 아래에서 전략, 검사, 마커를 세부 조정하세요.",
-    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("유지됨"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage("비교 대상"),
     "smartRoutingKeyBand": MessageLookupByLibrary.simpleMessage("지연 시간 대역"),
@@ -2556,6 +2554,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("서비스 확인"),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "서버가 열린 인터넷이나 국내 서비스에 도달함을 증명하는 URL",
+    ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "국내 확인",
     ),
@@ -2689,21 +2690,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("지금 점검"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("지역"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "지역은 일반 설정에서 선택합니다",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "앱에서 선택한 지역에 따라 설정됩니다. 네트워크에 필요할 때만 변경하세요",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("UDP 지원 필수"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "통화와 게임 트래픽을 처리하지 못하는 서버는 건너뜁니다",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "프리셋으로 재설정",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "지역 기본값을 복원하고 스마트 라우팅은 켜 둡니다",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "제한된 네트워크 · 로컬 서비스는 직접 연결 유지",

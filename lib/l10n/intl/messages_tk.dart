@@ -2898,15 +2898,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Heniz serwer saýlanmady",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("Ýurt goş"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Ýurdy kesgitleýän hyzmatlar",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Şübheli düwni barlanda serweriň hakyky çykyş ýurduny habar berýän uç nokatlar",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "Ýurt saýlanmady",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "Dogry iki harply ýurt kodyny giriziň",
@@ -2914,8 +2910,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Ýurt syýasaty",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "Ady ýa-da kody boýunça gözle",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Haýsy ýurtlar senzura edýän hasaplanýar we haýsylaryndan çykyş hökmünde gaça durmaly",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Her bir serweri barla",
@@ -2938,7 +2934,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Programmany açmazdan, her tor üçin işleýän serwer saýlanyp saklanýar",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("Anyklama"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Blokirlenme döwründe ýerli serwerler",
     ),
@@ -2958,6 +2953,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Işleýän serwer tizräk biri utýança näçe wagt saklanýar",
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("Çykyş barlagy"),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "Örtülen serweriň hakykatda nireden çykýandygyny açýan hyzmatlar",
+    ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Çykyş echo hyzmatlary",
     ),
@@ -3091,6 +3089,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
       "Düwün çaklamalary",
     ),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "Serwerleriň saýlanyşyna täsir edýän at yşaratlary we düzgünler",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Soňky çalyşyklar",
     ),
@@ -3118,9 +3119,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("Dalaşgär"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage(
       "Ulanylýar",
-    ),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "Akylly marşrut häzirki torda işleýän serweri saklaýar we tor üýtgende awtomatiki çalyşýar. Sebit taýynlamasyndan başlaň, soňra aşakdaky strategiýany, barlaglary we bellikleri inçe sazlaň.",
     ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("saklandy"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage(
@@ -3188,6 +3186,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Hyzmat barlaglary",
+    ),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "Serweriň açyk internete ýa-da ýerli hyzmatlara ýetýändigini subut edýän URL salgylar",
     ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "Ýerli barlaglar",
@@ -3340,9 +3341,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("Häzir barla"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Sebit"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "Sebit umumy sazlamalarda saýlanýar",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Programmada saýlanan sebit boýunça bellenýär; diňe toruňyz talap etse üýtgediň",
     ),
@@ -3351,12 +3349,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "Jaňlary we oýunlary geçirip bilmeýän serwerler hasaba alynmaýar",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "Deslapkysyna dolan",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "Sebitiň deslapky sazlamalaryny gaýtaryp getirýär we akylly marşruty açyk galdyrýar",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Çäklendirilen tor · ýerli hyzmatlar göni galýar",

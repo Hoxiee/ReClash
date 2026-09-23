@@ -2917,15 +2917,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Әлі сервер таңдалған жоқ",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage("Ел қосу"),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Елді анықтау қызметтері",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Күдікті түйінді тексергенде сервердің нақты шығу елін хабарлайтын эндпоинттер",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "Ел таңдалмаған",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "Жарамды екі әріптік ел кодын енгізіңіз",
@@ -2933,8 +2929,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Ел саясаты",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "Атауы немесе коды бойынша іздеу",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Қай елдер цензура қолданушы саналады және қайсысын шығыс ретінде болдырмау керек",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Әр серверді тексеру",
@@ -2955,7 +2951,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Қолданбаны ашпай-ақ, әр желі үшін жұмыс істейтін сервер дайын тұрады",
     ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage("Анықтау"),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Желі ажыратылғанда жергілікті серверлер",
     ),
@@ -2974,6 +2969,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
       "Шығысты тексеру",
+    ),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "Бүркемеленген сервердің шын мәнінде қайдан шығатынын ашатын қызметтер",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Шығыс эхо қызметтері",
@@ -3108,6 +3106,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
       "Түйін эвристикасы",
     ),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "Серверлерді таңдауға әсер ететін атау белгілері мен ережелер",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Соңғы ауысулар",
     ),
@@ -3134,9 +3135,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingIncumbentNo": MessageLookupByLibrary.simpleMessage("Үміткер"),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage("Жұмыста"),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "Смарт бағыттау ағымдағы желіде жұмыс істейтін серверді ұстап тұрады да, желі өзгергенде өз бетінше ауыстырады. Алдымен аймақтық дайын баптаулардан бастаңыз, содан кейін төменде стратегияны, тексерулерді және белгілерді нақтылаңыз.",
-    ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("ұсталды"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage(
       "Салыстыруға жіберілген",
@@ -3201,6 +3199,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Сервис тексерулері",
+    ),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "Сервердің ашық интернетке немесе отандық қызметтерге жететінін дәлелдейтін URL мекенжайлары",
     ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "Жергілікті тексерулер",
@@ -3357,9 +3358,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Қазір тексеру",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Өңір"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "Аймақ жалпы параметрлерде таңдалады",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Қолданбада таңдалған аймақ бойынша қойылған; тек желіңіз талап етсе өзгертіңіз",
     ),
@@ -3368,12 +3366,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "Қоңырау мен ойындарды көтере алмайтын серверлер ескерілмейді",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "Дайын баптауға қайтару",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "Өңір әдепкілерін қалпына келтіреді және ақылды бағыттауды қосулы қалдырады",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Шектеулі желі · жергілікті қызметтер тікелей жұмыс істейді",

@@ -8,6 +8,8 @@ class ListInputPage extends ConsumerStatefulWidget {
   final Widget Function(String item)? leadingBuilder;
   final String? valueLabel;
   final int? itemMaxLength;
+  final String Function(String item)? itemNormalizer;
+  final String? Function(String item)? itemValidator;
 
   const ListInputPage({
     super.key,
@@ -18,6 +20,8 @@ class ListInputPage extends ConsumerStatefulWidget {
     this.valueLabel,
     this.subtitleBuilder,
     this.itemMaxLength,
+    this.itemNormalizer,
+    this.itemValidator,
   });
 
   @override
@@ -34,6 +38,8 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
       items: widget.items,
       valueLabel: widget.valueLabel,
       itemMaxLength: widget.itemMaxLength,
+      itemNormalizer: widget.itemNormalizer,
+      itemValidator: widget.itemValidator,
     );
     _controller.addListener(_handleControllerChange);
   }
@@ -160,6 +166,8 @@ class ListEditingController extends ChangeNotifier {
     this.onChanged,
     this.valueLabel,
     this.itemMaxLength,
+    this.itemNormalizer,
+    this.itemValidator,
   }) {
     _items = items;
     _originItems = List<String>.from(items);
@@ -168,6 +176,8 @@ class ListEditingController extends ChangeNotifier {
   final ValueChanged<List<String>>? onChanged;
   final String? valueLabel;
   final int? itemMaxLength;
+  final String Function(String item)? itemNormalizer;
+  final String? Function(String item)? itemValidator;
 
   List<String> _items = [];
   late List<String> _originItems;
@@ -218,6 +228,7 @@ class ListEditingController extends ChangeNotifier {
     return (value ?? '')
         .split(_separator)
         .map((entry) => entry.trim())
+        .map((entry) => itemNormalizer?.call(entry) ?? entry)
         .where((entry) => entry.isNotEmpty)
         .toSet()
         .toList();
@@ -234,7 +245,12 @@ class ListEditingController extends ChangeNotifier {
     final isEdit = item != null;
 
     String? editValidator(String? value) {
-      final exists = _items.contains(value) && value != item;
+      final normalized = itemNormalizer?.call(value ?? '') ?? (value ?? '');
+      final itemError = itemValidator?.call(normalized);
+      if (itemError != null) {
+        return itemError;
+      }
+      final exists = _items.contains(normalized) && normalized != item;
       return exists ? appLocalizations.existsTip(label) : null;
     }
 
@@ -245,6 +261,14 @@ class ListEditingController extends ChangeNotifier {
       }
       if (maxLength != null && values.any((v) => v.length > maxLength)) {
         return appLocalizations.maxLengthTip(label, maxLength);
+      }
+      if (itemValidator != null) {
+        for (final value in values) {
+          final itemError = itemValidator!(value);
+          if (itemError != null) {
+            return itemError;
+          }
+        }
       }
       if (values.any(_items.contains)) {
         return appLocalizations.existsTip(label);
@@ -270,7 +294,7 @@ class ListEditingController extends ChangeNotifier {
       return;
     }
     if (isEdit) {
-      nextItems[_items.indexOf(item)] = value;
+      nextItems[_items.indexOf(item)] = itemNormalizer?.call(value) ?? value;
     } else {
       nextItems.addAll(splitValues(value));
     }

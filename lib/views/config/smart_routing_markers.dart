@@ -20,10 +20,13 @@ class _MarkersItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(
-        markers.isEmpty ? desc : markers.map((marker) => marker.url).join(', '),
+        markers.isEmpty
+            ? desc
+            : appLocalizations.entriesCount(markers.length),
       ),
       blur: false,
       widget: _MarkersPage(title: title, kind: kind),
@@ -157,7 +160,13 @@ Future<void> _showMarkerDialog(
   } else {
     next[index] = result;
   }
-  _writeMarkers(ref, kind, next);
+  // Rows are keyed by URL, so a repeat URL must collapse onto the latest edit
+  // rather than duplicate the key and crash the reorder list.
+  final deduped = <String, RcxMarker>{};
+  for (final marker in next) {
+    deduped[marker.url] = marker;
+  }
+  _writeMarkers(ref, kind, deduped.values.toList());
 }
 
 class _MarkersBody extends ConsumerWidget {
@@ -377,12 +386,7 @@ class _RulesItem extends StatelessWidget {
       subtitle: Text(
         rules.isEmpty
             ? l10n.smartRoutingRulesDesc
-            : rules
-                  .map(
-                    (rule) =>
-                        '${_ruleActionLabel(l10n, rule.action)}: ${_ruleMatch(l10n, rule)}',
-                  )
-                  .join('\n'),
+            : l10n.rulesCount(rules.length),
       ),
       blur: false,
       widget: const _RulesPage(),

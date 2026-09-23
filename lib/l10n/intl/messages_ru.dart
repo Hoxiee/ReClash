@@ -2902,17 +2902,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Сервер ещё не выбран",
     ),
     "smartRoutingCoolFor": m80,
-    "smartRoutingCountryAdd": MessageLookupByLibrary.simpleMessage(
-      "Добавить страну",
-    ),
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Сервисы определения страны",
     ),
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Эндпоинты, сообщающие реальную страну выхода сервера при проверке подозрительного узла",
-    ),
-    "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
-      "Страны не выбраны",
     ),
     "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
       "Введите корректный двухбуквенный код страны",
@@ -2920,8 +2914,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика по странам",
     ),
-    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
-      "Поиск по названию или коду",
+    "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
+      "Какие страны считать цензурирующими и каких избегать на выходе",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Проверить все серверы",
@@ -2941,9 +2935,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("Тормозит"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
       "Автоматически подбирает рабочий сервер для каждой сети — приложение можно не открывать",
-    ),
-    "smartRoutingDetection": MessageLookupByLibrary.simpleMessage(
-      "Определение сети",
     ),
     "smartRoutingDomestic": MessageLookupByLibrary.simpleMessage(
       "Домашние узлы при блокировке интернета",
@@ -2965,6 +2956,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
       "Проверка точки выхода",
+    ),
+    "smartRoutingEgressDesc": MessageLookupByLibrary.simpleMessage(
+      "Сервисы, которые показывают, где на самом деле выходит подменённый сервер",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Сервисы эхо-адреса",
@@ -3099,6 +3093,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
       "Эвристики узлов",
     ),
+    "smartRoutingHeuristicsDesc": MessageLookupByLibrary.simpleMessage(
+      "Подсказки по именам и правила, влияющие на выбор серверов",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Последние переключения",
     ),
@@ -3128,9 +3125,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingIncumbentYes": MessageLookupByLibrary.simpleMessage(
       "В работе",
-    ),
-    "smartRoutingIntro": MessageLookupByLibrary.simpleMessage(
-      "Умная маршрутизация выбирает сервер, который работает в текущей сети, и сама переключается при её смене. Начните с регионального пресета, затем настройте стратегию, проверки и маркеры ниже.",
     ),
     "smartRoutingKept": MessageLookupByLibrary.simpleMessage("оставлен"),
     "smartRoutingKeyAdmission": MessageLookupByLibrary.simpleMessage(
@@ -3198,6 +3192,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Проверки сервисов",
+    ),
+    "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
+      "URL-адреса, подтверждающие доступ сервера к открытому интернету или домашним сервисам",
     ),
     "smartRoutingMarkersDomestic": MessageLookupByLibrary.simpleMessage(
       "Местные проверки",
@@ -3352,9 +3349,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проверить сейчас",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Регион"),
-    "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
-      "Регион выбирается в общих настройках",
-    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Заданы регионом, выбранным в приложении; меняйте только если этого требует ваша сеть",
     ),
@@ -3363,12 +3357,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "Отсеивать серверы, через которые не пойдут звонки и игры",
-    ),
-    "smartRoutingResetSection": MessageLookupByLibrary.simpleMessage(
-      "Сбросить настройки",
-    ),
-    "smartRoutingResetSectionDesc": MessageLookupByLibrary.simpleMessage(
-      "Вернуть настройки региона и не выключать маршрутизацию",
     ),
     "smartRoutingRestricted": MessageLookupByLibrary.simpleMessage(
       "Ограниченная сеть · домашние сервисы напрямую",
