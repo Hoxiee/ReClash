@@ -64,6 +64,15 @@ internal class CompanionCredentialStore(context: Context, private val maxTargets
         )
     }
 
+    // Rediscovery landed a new address for the same pairing (DHCP/ephemeral-port change); keep the
+    // token and pin, move only host:port so the next dial hits the peer without a re-pair.
+    fun updateEndpoint(deviceId: String, host: String, port: Int): Boolean = synchronized(lock) {
+        val current = read()
+        if (current.none { it.deviceId == deviceId }) return false
+        write(current.map { if (it.deviceId == deviceId) it.copy(host = host, port = port) else it })
+        true
+    }
+
     fun remove(deviceId: String): Boolean = synchronized(lock) {
         val current = read()
         val next = current.filterNot { it.deviceId == deviceId }

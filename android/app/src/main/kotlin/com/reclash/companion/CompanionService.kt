@@ -15,8 +15,8 @@ import com.reclash.service.R as ServiceR
 import kotlinx.coroutines.launch
 
 // GATE A: companion receiver as a connectedDevice FGS. It never creates a VPN binding; it only
-// hosts the LAN HTTPS listener. START_NOT_STICKY and no BOOT autostart in the first version:
-// process death honestly makes the TV unreachable until the app is opened again.
+// hosts the LAN HTTPS listener. START_STICKY plus a null-intent resume rebinds the listener after
+// the system reclaims the process, so a paired peer keeps reaching the TV across an overnight kill.
 class CompanionService : Service() {
     private var server: CompanionServer? = null
 
@@ -30,8 +30,20 @@ class CompanionService : Service() {
                 GlobalState.log("CompanionGate result: $outcome")
             }
             ACTION_PROBE_ENGINE -> probeRetainedEngine()
+            // A null intent is the system redelivering the killed sticky service; the plugin is not
+            // in the loop, so the receiver must rebind its listener from persisted identity here.
+            else -> if (intent == null) resumeReceiver()
         }
-        return START_NOT_STICKY
+        return START_STICKY
+    }
+
+    private fun resumeReceiver() {
+        GlobalState.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val receiver = CompanionReceiver.get(applicationContext)
+            if (!receiver.isRunning()) {
+                GlobalState.log("CompanionResume result: ${receiver.enable()}")
+            }
+        }
     }
 
     override fun onDestroy() {

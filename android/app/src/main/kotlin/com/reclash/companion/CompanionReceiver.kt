@@ -1,6 +1,7 @@
 package com.reclash.companion
 
 import android.content.Context
+import android.net.wifi.WifiManager
 import java.io.File
 import java.security.SecureRandom
 
@@ -16,6 +17,8 @@ internal class CompanionReceiver private constructor(context: Context) {
     private var server: CompanionServer? = null
     private var endpoint: CompanionLanEndpoint? = null
     private var serverEpoch = randomB64(16)
+    private val advertiser = CompanionAdvertiser(appContext)
+    private var wifiLock: WifiManager.WifiLock? = null
 
     fun isRunning(): Boolean = server != null
 
@@ -28,31 +31,72 @@ internal class CompanionReceiver private constructor(context: Context) {
         val selected = CompanionNetwork(appContext).selectLanEndpoint()
             ?: return CompanionEnableResult.Error("noLan")
         serverEpoch = randomB64(16)
-        val started = CompanionServer(
-            hostname = selected.ipv4,
-            port = 0,
-            identity = identity,
-            trustStore = trustStore,
-            pairing = pairing,
-            serverEpoch = serverEpoch,
-            helloProvider = ::hello,
-        )
-        return try {
-            started.startSecure()
-            server = started
-            endpoint = selected
-            CompanionEnableResult.Running(deviceId, selected.ipv4, started.listeningPort)
+        val started = try {
+            startOn(selected, readLastPort())
         } catch (t: Throwable) {
-            CompanionEnableResult.Error(t.message ?: "tls")
+            return CompanionEnableResult.Error(t.message ?: "tls")
+        }
+        server = started
+        endpoint = selected
+        saveLastPort(started.listeningPort)
+        acquireWifiLock()
+        advertiser.start(deviceId, started.listeningPort)
+        return CompanionEnableResult.Running(deviceId, selected.ipv4, started.listeningPort)
+    }
+
+    // Reuse last run's port so the peer's stored address still resolves; fall back to ephemeral.
+    private fun startOn(selected: CompanionLanEndpoint, preferredPort: Int): CompanionServer {
+        val build = { port: Int ->
+            CompanionServer(
+                hostname = selected.ipv4,
+                port = port,
+                identity = identity,
+                trustStore = trustStore,
+                pairing = pairing,
+                serverEpoch = serverEpoch,
+                helloProvider = ::hello,
+            )
+        }
+        return try {
+            build(preferredPort).also { it.startSecure() }
+        } catch (t: Throwable) {
+            if (preferredPort == 0) throw t
+            build(0).also { it.startSecure() }
         }
     }
 
     @Synchronized
     fun disable() {
         pairing.cancelWindow()
+        advertiser.stop()
+        releaseWifiLock()
         server?.stop()
         server = null
         endpoint = null
+    }
+
+    @Suppress("DEPRECATION")
+    private fun acquireWifiLock() {
+        if (wifiLock != null) return
+        val wifi = appContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return
+        // LOW_LATENCY is foreground-only; a background LAN listener needs HIGH_PERF overnight.
+        wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "reclash:companion").apply {
+            setReferenceCounted(false)
+            runCatching { acquire() }
+        }
+    }
+
+    private fun releaseWifiLock() {
+        wifiLock?.let { lock -> runCatching { if (lock.isHeld) lock.release() } }
+        wifiLock = null
+    }
+
+    private fun readLastPort(): Int =
+        runCatching { File(receiverDir(appContext), "last_port").readText().trim().toInt() }
+            .getOrDefault(0)
+
+    private fun saveLastPort(port: Int) {
+        runCatching { File(receiverDir(appContext), "last_port").writeText(port.toString()) }
     }
 
     @Synchronized

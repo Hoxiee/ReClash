@@ -153,18 +153,36 @@ class CompanionClientPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private fun read(context: Context, deviceId: String?, path: String): Map<String, Any?> {
         if (deviceId == null) return failure("invalidInput")
         val store = CompanionCredentialStore(context)
-        val target = store.find(deviceId) ?: return failure("pairingExpired")
+        var target = store.find(deviceId) ?: return failure("pairingExpired")
         val network = CompanionNetwork(context).selectLanEndpoint()?.network
         val response = try {
             CompanionClient(target.spkiPin, network).get(target.baseUrl(), path, target.token)
         } catch (e: Exception) {
-            return failure(if (isIdentityMismatch(e)) "identityChanged" else "appUnavailable")
+            if (isIdentityMismatch(e)) return failure("identityChanged")
+            target = rediscover(context, store, target) ?: return failure("appUnavailable")
+            try {
+                CompanionClient(target.spkiPin, network).get(target.baseUrl(), path, target.token)
+            } catch (e2: Exception) {
+                return failure(if (isIdentityMismatch(e2)) "identityChanged" else "appUnavailable")
+            }
         }
         if (response.code != 200) return failure(mappedErrorCode(response.body))
         val data = parseObject(response.body) ?: return failure("appUnavailable")
         store.touch(deviceId)
         if (!target.named) adoptPeerName(store, target, network)
         return mapOf("ok" to true, "data" to data)
+    }
+
+    // Re-resolve host:port over mDNS and persist before retry; an unchanged address is a miss.
+    private fun rediscover(
+        context: Context,
+        store: CompanionCredentialStore,
+        target: CompanionTarget,
+    ): CompanionTarget? {
+        val found = CompanionResolver(context).resolve(target.deviceId) ?: return null
+        if (found.host == target.host && found.port == target.port) return null
+        store.updateEndpoint(target.deviceId, found.host, found.port)
+        return target.copy(host = found.host, port = found.port)
     }
 
     private fun adoptPeerName(
@@ -190,7 +208,7 @@ class CompanionClientPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     ): Map<String, Any?> {
         if (deviceId == null || kind == null) return failure("invalidInput")
         val store = CompanionCredentialStore(context)
-        val target = store.find(deviceId) ?: return failure("pairingExpired")
+        var target = store.find(deviceId) ?: return failure("pairingExpired")
         val network = CompanionNetwork(context).selectLanEndpoint()?.network
         val body = gson.toJson(
             mapOf(
@@ -202,7 +220,13 @@ class CompanionClientPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         val response = try {
             CompanionClient(target.spkiPin, network).postCommand(target.baseUrl(), target.token, body)
         } catch (e: Exception) {
-            return failure(if (isIdentityMismatch(e)) "identityChanged" else "appUnavailable")
+            if (isIdentityMismatch(e)) return failure("identityChanged")
+            target = rediscover(context, store, target) ?: return failure("appUnavailable")
+            try {
+                CompanionClient(target.spkiPin, network).postCommand(target.baseUrl(), target.token, body)
+            } catch (e2: Exception) {
+                return failure(if (isIdentityMismatch(e2)) "identityChanged" else "appUnavailable")
+            }
         }
         if (response.code != 200) return failure(mappedErrorCode(response.body))
         val data = parseObject(response.body) ?: return failure("appUnavailable")
