@@ -328,11 +328,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("서킷"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("에코"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("패싯"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("프랙탈"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("잉크"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("설치"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("메시"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage("아이콘 미리보기"),
     "appIconShatter": MessageLookupByLibrary.simpleMessage("섀터"),
     "appIconSolar": MessageLookupByLibrary.simpleMessage("솔라"),
@@ -341,7 +338,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("지형"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("트레이스"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("벨벳"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("불침번"),
     "appRegion": MessageLookupByLibrary.simpleMessage("앱 지역"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "네트워크 지역을 선택하세요. 러시아를 선택하면 HWID가 켜지며 아래에서 끌 수 있습니다. 스마트 라우팅은 별도로 설정합니다.",
@@ -633,6 +629,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncDesc": MessageLookupByLibrary.simpleMessage("ByeDPI 디싱크 전략"),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("엔진"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage("ByeDPI 활성화"),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "DPI 우회 엔진과 대시보드 모드를 켭니다. 꺼져 있는 동안 ByeDPI는 어디에도 표시되지 않습니다.",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("TCP 강제"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "위 카테고리의 QUIC를 차단합니다; 디싱크는 UDP에 닿지 못합니다",
@@ -2337,12 +2337,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "의심스러운 노드를 확인할 때 서버의 실제 출구 국가를 알려주는 엔드포인트",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "유효한 두 글자 국가 코드를 입력하세요",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "일치하는 국가 코드가 없습니다",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("국가 정책"),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "어떤 국가를 검열 국가로 간주하고, 어떤 국가를 출구로 피할지",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "국가 코드로 검색",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("모든 서버 점검"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2546,6 +2549,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "허용할 상태 코드",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "이 확인의 통과로 간주되는 HTTP 상태 코드",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "쉼표로 구분(예: 200, 204, 404)",
     ),
@@ -2553,6 +2559,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "HTTP 상태 코드를 쉼표로 구분하여 입력하세요",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "이 확인을 검증하기 위해 프로브가 요청하는 전체 URL",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("서비스 확인"),
     "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
       "서버가 열린 인터넷이나 국내 서비스에 도달함을 증명하는 URL",
@@ -2690,8 +2699,26 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("지금 점검"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("지역"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage(
+      "이 지역의 작동 방식",
+    ),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "이 지역이 설정하는 항목과 서버 선택 방식",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "모든 항목은 고급 설정에서 편집할 수 있습니다",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "스마트 라우팅은 작동 중인 서버를 유지하고 나머지를 백그라운드에서 확인하며, 열린 인터넷에 도달하는 빠른 서버를 선호합니다. 아래 지역이 이러한 확인을 설정합니다. 네트워크가 다르지 않다면 그대로 두세요.",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "앱에서 선택한 지역에 따라 설정됩니다. 네트워크에 필요할 때만 변경하세요",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "이 지역이 설정하는 항목",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "이 지역에서는 사용되지 않음",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("UDP 지원 필수"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
@@ -2703,22 +2730,47 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "서버가 응답하지 않아 다른 서버를 찾고 있습니다",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("동작"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("규칙 추가"),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("출구 국가"),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "측정된 출구 국가, 두 글자 코드",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("그룹"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "서버가 속한 프록시 그룹",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("무시"),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "일치하는 서버를 사용하지 않음",
+    ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
       "최후의 수단",
+    ),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "다른 방법이 없을 때만 일치하는 서버 사용",
     ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "모든 서버와 일치",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "무시하려면 필드를 비워 두세요. 입력한 모든 필드가 맞을 때만 규칙이 적용됩니다",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("이름에 포함"),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "이름에 이 텍스트가 포함된 서버와 일치",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "규칙 모드에서만 사용할 수 있습니다",
     ),
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("선호"),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "일치하는 서버가 정상일 때 우선 사용",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("제공자"),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "서버를 가져온 구독",
+    ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage("서버 규칙"),
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "이름, 제공자 또는 측정된 국가별로 서버를 무시, 보류 또는 선호합니다",

@@ -80,6 +80,7 @@ class SmartRoutingView extends ConsumerWidget {
 
     if (props.enabled) {
       slivers.addAll([
+        _regionSection(context, props),
         _strategySection(context, ref, props),
         _behaviourSection(context, ref, props),
         SettingSection.sliver(
@@ -132,6 +133,21 @@ class SmartRoutingView extends ConsumerWidget {
       body: SettingsScrollView(
         slivers: [...slivers, const SettingBottomInset.sliver()],
       ),
+    );
+  }
+
+  Widget _regionSection(BuildContext context, SmartRoutingProps props) {
+    final appLocalizations = context.appLocalizations;
+    return SettingSection.sliver(
+      items: [
+        DecorationListItem.open(
+          leading: const Icon(Icons.travel_explore_rounded),
+          title: Text(appLocalizations.smartRoutingRegionCard),
+          subtitle: Text(appLocalizations.smartRoutingRegionCardDesc),
+          blur: false,
+          widget: const _RegionDetailsPage(),
+        ),
+      ],
     );
   }
 
@@ -216,6 +232,73 @@ class SmartRoutingView extends ConsumerWidget {
     );
   }
 
+}
+
+/// Read-only tour of what the active region sets up. It reads the live props, so
+/// a region that seeds name hints and breaker patterns shows them filled while
+/// one that does not shows them as unused — the difference the user asked to see.
+/// Nothing here is a control; every value is edited under Advanced configuration.
+class _RegionDetailsPage extends ConsumerWidget {
+  const _RegionDetailsPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final props = ref.watch(smartRoutingSettingProvider);
+    final region = AppRegion.fromPreset(props.preset);
+    final facets = <(String, List<String>)>[
+      (appLocalizations.smartRoutingCensor, props.censorCountries),
+      (appLocalizations.smartRoutingCanariesForeign, props.canaryForeign),
+      (appLocalizations.smartRoutingCanariesDomestic, props.canaryDomestic),
+      (
+        appLocalizations.smartRoutingMarkersOpen,
+        [for (final marker in props.openMarkers) marker.url],
+      ),
+      (
+        appLocalizations.smartRoutingMarkersDomestic,
+        [for (final marker in props.domesticMarkers) marker.url],
+      ),
+      (
+        appLocalizations.smartRoutingMarkersLocal,
+        [for (final marker in props.localMarkers) marker.url],
+      ),
+      (appLocalizations.smartRoutingNameHints, props.nameHints),
+      (appLocalizations.smartRoutingBreakerPatterns, props.breakerPatterns),
+    ];
+    return CommonScaffold(
+      title: region.label(context),
+      body: SettingsListView(
+        children: [
+          SettingSection(
+            top: 16,
+            title: appLocalizations.smartRoutingRegionSeeds,
+            subTitle: appLocalizations.smartRoutingRegionHow,
+            items: [
+              for (final (label, values) in facets)
+                DecorationListItem(
+                  title: Text(label),
+                  subtitle: Text(
+                    values.isEmpty
+                        ? appLocalizations.smartRoutingRegionUnused
+                        : values.join(', '),
+                  ),
+                ),
+            ],
+          ),
+          SettingSection(
+            bottom: 24,
+            items: [
+              DecorationListItem(
+                leading: const Icon(Icons.edit_note_rounded),
+                title: Text(appLocalizations.smartRoutingRegionEditNote),
+              ),
+            ],
+          ),
+          const SettingBottomInset(),
+        ],
+      ),
+    );
+  }
 }
 
 /// A strategy is a pace, not a region. The card stays a one-line choice; only

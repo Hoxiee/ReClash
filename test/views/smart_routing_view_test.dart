@@ -166,7 +166,7 @@ void main() {
     expect(find.textContaining('region set in the app'), findsOneWidget);
   });
 
-  testWidgets('a censored country rides the standard list editor', (
+  testWidgets('a censored country opens a searchable picker, preselected', (
     tester,
   ) async {
     await _pump(tester, props: _russia);
@@ -181,12 +181,13 @@ void main() {
     await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.byType(ReorderableListView), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
-    expect(find.textContaining('RU'), findsWidgets);
+    expect(find.text('Search by country code'), findsOneWidget);
+    expect(find.byType(ReorderableListView), findsNothing);
+    expect(find.text('RU'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
   });
 
-  testWidgets('the country field rejects a code that is not a real one', (
+  testWidgets('the picker filters by code and toggles a country in place', (
     tester,
   ) async {
     await _pump(tester, props: _russia);
@@ -201,20 +202,31 @@ void main() {
     await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextFormField), 'ZZ');
-    await tester.tap(find.text('Confirm'));
+    await tester.enterText(find.byType(TextField), 'DE');
     await tester.pumpAndSettle();
 
-    expect(find.text('Enter a valid two-letter country code'), findsOneWidget);
+    expect(find.text('RU'), findsNothing);
+    expect(find.byIcon(Icons.circle_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
 
-    await tester.enterText(find.byType(TextFormField), 'DE');
-    await tester.tap(find.text('Confirm'));
+    await tester.tap(find.byIcon(Icons.circle_outlined));
     await tester.pumpAndSettle();
 
-    expect(find.text('Enter a valid two-letter country code'), findsNothing);
-    expect(find.textContaining('DE'), findsWidgets);
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+  });
+
+  testWidgets('the region card shows seeded facets and marks unused ones', (
+    tester,
+  ) async {
+    await _pump(tester, props: _russia);
+
+    await _reveal(tester, find.text('How this region works'));
+    await tester.tap(find.text('How this region works'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('What this region sets up'), findsOneWidget);
+    expect(find.text('RU'), findsOneWidget);
+    expect(find.text('Not used in this region'), findsOneWidget);
   });
 
   testWidgets('the strategy is named in plain words with what it does', (

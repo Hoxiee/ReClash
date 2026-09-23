@@ -320,8 +320,8 @@ class _MarkerDialogState extends State<_MarkerDialog> {
               minLines: 1,
               maxLines: 2,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
                 labelText: appLocalizations.smartRoutingMarkerUrl,
+                helperText: appLocalizations.smartRoutingMarkerUrlDesc,
               ),
               validator: (value) {
                 final raw = value?.trim() ?? '';
@@ -340,8 +340,8 @@ class _MarkerDialogState extends State<_MarkerDialog> {
             TextFormField(
               controller: _statuses,
               decoration: InputDecoration(
-                border: const OutlineInputBorder(),
                 labelText: appLocalizations.smartRoutingMarkerStatuses,
+                helperText: appLocalizations.smartRoutingMarkerStatusesDesc,
                 hintText: appLocalizations.smartRoutingMarkerStatusesHint,
               ),
               validator: (value) => _parseStatuses(value) == null
@@ -361,6 +361,14 @@ String _ruleActionLabel(AppLocalizations l10n, String action) =>
       'last-resort' => l10n.smartRoutingRuleLastResort,
       'prefer' => l10n.smartRoutingRulePrefer,
       _ => action,
+    };
+
+String _ruleActionDesc(AppLocalizations l10n, String action) =>
+    switch (action) {
+      'ignore' => l10n.smartRoutingRuleIgnoreDesc,
+      'last-resort' => l10n.smartRoutingRuleLastResortDesc,
+      'prefer' => l10n.smartRoutingRulePreferDesc,
+      _ => '',
     };
 
 String _ruleMatch(AppLocalizations l10n, RcxNodeRule rule) {
@@ -422,7 +430,10 @@ class _RulesPage extends ConsumerWidget {
         const SizedBox(width: 8),
       ],
       body: rules.isEmpty
-          ? NullStatus(label: l10n.smartRoutingRulesDesc)
+          ? NullStatus(
+              label: l10n.smartRoutingRulesDesc,
+              illustration: NullStatusIllustration.rules,
+            )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: rules.length,
@@ -497,6 +508,23 @@ class _RuleDialogState extends State<_RuleDialog> {
     );
   }
 
+  Future<void> _pickAction() async {
+    final l10n = context.appLocalizations;
+    final picked = await dialogs.showCommonDialog<String>(
+      filter: false,
+      child: OptionsDialog<String>(
+        title: l10n.smartRoutingRuleAction,
+        options: const ['ignore', 'last-resort', 'prefer'],
+        value: _action,
+        textBuilder: (value) => _ruleActionLabel(l10n, value),
+        subtitleBuilder: (value) => _ruleActionDesc(l10n, value),
+      ),
+    );
+    if (picked != null) {
+      setState(() => _action = picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.appLocalizations;
@@ -504,44 +532,51 @@ class _RuleDialogState extends State<_RuleDialog> {
       title: l10n.smartRoutingRuleAdd,
       actions: [TextButton(onPressed: _submit, child: Text(l10n.confirm))],
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16,
         children: [
-          DropdownButtonFormField<String>(
-            initialValue: _action,
-            items: [
-              DropdownMenuItem(
-                value: 'ignore',
-                child: Text(l10n.smartRoutingRuleIgnore),
+          Text(
+            l10n.smartRoutingRuleMatchHint,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: CommonMinFilledButtonTheme(
+              child: FilledButton.tonalIcon(
+                onPressed: _pickAction,
+                icon: const Icon(Icons.rule_rounded),
+                label: Text(_ruleActionLabel(l10n, _action)),
               ),
-              DropdownMenuItem(
-                value: 'last-resort',
-                child: Text(l10n.smartRoutingRuleLastResort),
-              ),
-              DropdownMenuItem(
-                value: 'prefer',
-                child: Text(l10n.smartRoutingRulePrefer),
-              ),
-            ],
-            onChanged: (value) => setState(() => _action = value ?? 'ignore'),
+            ),
           ),
           TextFormField(
             controller: _provider,
             decoration: InputDecoration(
               labelText: l10n.smartRoutingRuleProvider,
+              helperText: l10n.smartRoutingRuleProviderDesc,
             ),
           ),
           TextFormField(
             controller: _name,
-            decoration: InputDecoration(labelText: l10n.smartRoutingRuleName),
+            decoration: InputDecoration(
+              labelText: l10n.smartRoutingRuleName,
+              helperText: l10n.smartRoutingRuleNameDesc,
+            ),
           ),
           TextFormField(
             controller: _group,
-            decoration: InputDecoration(labelText: l10n.smartRoutingRuleGroup),
+            decoration: InputDecoration(
+              labelText: l10n.smartRoutingRuleGroup,
+              helperText: l10n.smartRoutingRuleGroupDesc,
+            ),
           ),
           TextFormField(
             controller: _country,
             decoration: InputDecoration(
               labelText: l10n.smartRoutingRuleCountry,
+              helperText: l10n.smartRoutingRuleCountryDesc,
             ),
           ),
         ],

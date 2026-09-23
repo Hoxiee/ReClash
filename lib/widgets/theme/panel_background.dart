@@ -18,10 +18,16 @@ class PanelProfileBackground extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final background = enabled ? ref.watch(panelBackgroundProvider) : null;
-    return Stack(
-      fit: StackFit.passthrough,
-      children: [
-        if (background != null) ...[
+    if (background == null) {
+      return child;
+    }
+    // The cover image fills the scaffold body, so it must be clipped to those
+    // bounds; a rounded side-sheet host does not clip its child, and without
+    // this the image bleeds past the panel edges. Mirrors AppWallpaper.
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
           Positioned.fill(
             key: const ValueKey('panel-profile-background'),
             child: ExcludeSemantics(
@@ -43,9 +49,9 @@ class PanelProfileBackground extends ConsumerWidget {
               ),
             ),
           ),
+          child,
         ],
-        child,
-      ],
+      ),
     );
   }
 }

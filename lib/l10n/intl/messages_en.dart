@@ -356,11 +356,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("Circuit"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("Echo"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("Facet"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("Fractal"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("Ink"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("Install"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("Mesh"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage("Icon preview"),
     "appIconShatter": MessageLookupByLibrary.simpleMessage("Shatter"),
     "appIconSolar": MessageLookupByLibrary.simpleMessage("Solar"),
@@ -369,7 +366,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("Topo"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("Trace"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("Velvet"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("Vigil"),
     "appRegion": MessageLookupByLibrary.simpleMessage("App region"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "Choose your network region. Choosing Russia turns on HWID; you can turn it off below. Smart Routing is a separate choice.",
@@ -743,6 +739,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("Engine"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage(
+      "Enable ByeDPI",
+    ),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "Turn on the DPI bypass engine and its dashboard mode. While off, ByeDPI is hidden everywhere.",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("Force TCP"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "Blocks QUIC for the categories above; a desync cannot reach UDP",
@@ -2815,14 +2817,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Endpoints that report a server\'s real exit country when verifying a suspicious node",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "Enter a valid two-letter country code",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "No matching country code",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Country policy",
     ),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Which countries count as censored, and which to avoid as exits",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "Search by country code",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Check every server",
@@ -3080,6 +3085,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "Accepted statuses",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP codes that count as a pass for this check",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "Comma-separated, e.g. 200, 204, 404",
     ),
@@ -3087,6 +3095,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter HTTP status codes separated by commas",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "Full URL the probe requests to confirm this check",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Service checks",
     ),
@@ -3244,8 +3255,26 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("Check now"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Region"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage(
+      "How this region works",
+    ),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "What this region sets up and how it picks servers",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "Everything here is editable under Advanced configuration",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "Smart routing keeps a working server and checks the others in the background, preferring fast ones that reach the open internet. The region below seeds these checks; leave them unless your network differs.",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Seeded from the region set in the app; edit them only if your network needs it",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "What this region sets up",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "Not used in this region",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Require UDP support",
@@ -3259,27 +3288,52 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Server is not answering, looking for another",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("Action"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("Add rule"),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
       "Exit country",
     ),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "Measured exit country, as a two-letter code",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Group"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "Proxy group the server belongs to",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("Ignore"),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Never route through servers that match",
+    ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
       "Last resort",
+    ),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "Use matching servers only when nothing else works",
     ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "Matches any server",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "Leave a field empty to ignore it; a rule matches a server only when every filled field fits",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
       "Name contains",
+    ),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Match servers whose name contains this text",
     ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Available in Rule mode only",
     ),
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("Prefer"),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "Favour matching servers while they are healthy",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
       "Provider",
+    ),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "Subscription the server came from",
     ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage("Server rules"),
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(

@@ -183,11 +183,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
               appLocalizations.smartRoutingKeyBand,
             ].join(' → '),
             items: [
-              DecorationListItem(
-                minVerticalPadding: 8,
-                title: Text(appLocalizations.smartRoutingKeyBand),
-                subtitle: Text(appLocalizations.smartRoutingRankingDesc),
-              ),
               _StringListItem(
                 title: appLocalizations.smartRoutingLatencyBands,
                 desc: appLocalizations.smartRoutingLatencyBandsDesc,
@@ -315,10 +310,10 @@ Future<void> _handleImport(BuildContext context, WidgetRef ref) async {
 }
 
 
-/// Countries ride the standard reorder-list editor, not a bespoke picker: a code
-/// is shown as a recognised place with its flag, but stored as the bare
-/// two-letter token the engine expects. The flag is presentation only, added on
-/// the way in and stripped on the way out.
+/// Countries are chosen, not typed: a searchable list of every ISO code shown
+/// with its flag means an invalid code cannot be entered and the flag is a
+/// preview, not a second copy of the label. Stored as the bare two-letter token
+/// the engine expects.
 class _CountryListItem extends ConsumerWidget {
   const _CountryListItem({
     required this.title,
@@ -334,28 +329,11 @@ class _CountryListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.map(_countryLabel).join(', ')),
       blur: false,
-      widget: ListInputPage(
-        title: title,
-        items: value,
-        valueLabel: appLocalizations.smartRoutingRuleCountry,
-        itemMaxLength: 2,
-        itemNormalizer: _normalizeCountryCode,
-        itemValidator: (code) => _isoAlpha2.contains(code)
-            ? null
-            : appLocalizations.smartRoutingCountryInvalid,
-        titleBuilder: (code) => Text(_countryLabel(code)),
-        leadingBuilder: (code) {
-          final flag = countryCodeToEmoji(code);
-          return flag == null
-              ? const Icon(Icons.public_rounded)
-              : Text(flag, style: const TextStyle(fontSize: 24));
-        },
-      ),
+      widget: _CountryPickerPage(title: title, selected: value),
       onChanged: (items) => ref
           .read(smartRoutingSettingProvider.notifier)
           .update((state) => write(state, List<String>.from(items as List))),
@@ -363,8 +341,118 @@ class _CountryListItem extends ConsumerWidget {
   }
 }
 
-String _normalizeCountryCode(String value) =>
-    value.toUpperCase().replaceAll(RegExp('[^A-Z]'), '');
+/// The flag is drawn once as the leading glyph; the code alone is the title, so
+/// a row never shows the flag twice.
+class _CountryPickerPage extends StatefulWidget {
+  const _CountryPickerPage({required this.title, required this.selected});
+
+  final String title;
+  final List<String> selected;
+
+  @override
+  State<_CountryPickerPage> createState() => _CountryPickerPageState();
+}
+
+class _CountryPickerPageState extends State<_CountryPickerPage> {
+  static final _sortedCodes = _isoAlpha2.toList()..sort();
+
+  late List<String> _selected;
+  final _search = TextEditingController();
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = [...widget.selected];
+    _search.addListener(
+      () => setState(() => _query = _search.text.trim().toUpperCase()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  void _toggle(String code) {
+    setState(() {
+      if (!_selected.remove(code)) {
+        _selected.add(code);
+      }
+    });
+  }
+
+  List<String> get _ordered {
+    final matches = _sortedCodes
+        .where((code) => _query.isEmpty || code.contains(_query))
+        .toList();
+    final chosen = _selected.where(matches.contains).toList();
+    final rest = matches.where((code) => !_selected.contains(code)).toList();
+    return [...chosen, ...rest];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final ordered = _ordered;
+    return CommonPopScope(
+      onPop: (_) {
+        Navigator.of(context).pop(_selected);
+        return false;
+      },
+      child: CommonScaffold(
+        title: widget.title,
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TextField(
+                controller: _search,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  labelText: appLocalizations.smartRoutingCountrySearch,
+                ),
+              ),
+            ),
+            Expanded(
+              child: ordered.isEmpty
+                  ? NullStatus(
+                      label: appLocalizations.smartRoutingCountryNoMatch,
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16 + 64),
+                      itemCount: ordered.length,
+                      itemBuilder: (context, index) {
+                        final code = ordered[index];
+                        final selected = _selected.contains(code);
+                        final flag = countryCodeToEmoji(code);
+                        return DecorationListItem(
+                          isSelected: selected,
+                          leading: flag == null
+                              ? const Icon(Icons.public_rounded)
+                              : Text(
+                                  flag,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                          title: Text(code),
+                          trailing: selected
+                              ? Icon(
+                                  Icons.check_circle_rounded,
+                                  color: context.colorScheme.primary,
+                                )
+                              : const Icon(Icons.circle_outlined),
+                          onPressed: () => _toggle(code),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 String _countryLabel(String code) {
   final flag = countryCodeToEmoji(code);

@@ -360,11 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("Сұлба"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("Жаңғырық"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("Қыр"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("Фрактал"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("Сия"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("Орнату"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("Тор"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage(
       "Белгішені алдын ала қарау",
     ),
@@ -375,7 +372,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("Топография"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("Із"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("Барқыт"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("Күзет"),
     "appRegion": MessageLookupByLibrary.simpleMessage("Қолданба өңірі"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "Желі өңірін таңдаңыз. Ресей таңдалса, HWID қосылады; оны төменде өшіруге болады. Ақылды бағыттау бөлек қосылады.",
@@ -765,6 +761,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("Движок"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage("ByeDPI қосу"),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "DPI айналып өту қозғалтқышын және оның бақылау тақтасындағы режимін қосады. Өшірулі кезде ByeDPI еш жерде көрсетілмейді.",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("TCP-ні мәжбүрлеу"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "Жоғарыдағы санаттар үшін QUIC блокталады; десинхронизация UDP-ге жетпейді",
@@ -2923,14 +2923,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Күдікті түйінді тексергенде сервердің нақты шығу елін хабарлайтын эндпоинттер",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "Жарамды екі әріптік ел кодын енгізіңіз",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "Сәйкес ел коды жоқ",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Ел саясаты",
     ),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Қай елдер цензура қолданушы саналады және қайсысын шығыс ретінде болдырмау керек",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "Ел коды бойынша іздеу",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Әр серверді тексеру",
@@ -3190,6 +3193,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "Қабылданатын статустар",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "Осы тексеру сәтті деп саналатын HTTP кодтары",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "Үтірмен бөліп жазыңыз, мысалы 200, 204, 404",
     ),
@@ -3197,6 +3203,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "HTTP кодтарын үтірмен бөліп енгізіңіз",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "Тексеруді растау үшін зонд сұрайтын толық URL",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Сервис тексерулері",
     ),
@@ -3358,8 +3367,26 @@ class MessageLookup extends MessageLookupByLibrary {
       "Қазір тексеру",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Өңір"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage(
+      "Бұл аймақ қалай жұмыс істейді",
+    ),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "Аймақ нені орнатады және серверлерді қалай таңдайды",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "Мұның бәрін кеңейтілген параметрлерде өзгертуге болады",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "Смарт бағыттау жұмыс істеп тұрған серверді ұстап, қалғандарын фонда тексереді әрі ашық интернетке жететін жылдамдарын артық көреді. Төмендегі аймақ осы тексерулерді орнатады; желіңіз өзгеше болмаса, өзгертпеңіз.",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Қолданбада таңдалған аймақ бойынша қойылған; тек желіңіз талап етсе өзгертіңіз",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "Бұл аймақ нені орнатады",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "Бұл аймақта қолданылмайды",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP қолдауын талап ету",
@@ -3373,18 +3400,37 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Сервер жауап бермейді, басқасы ізделуде",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("Әрекет"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("Ереже қосу"),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("Шығу елі"),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "Өлшенген шығу елі, екі әріптік код",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Топ"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "Сервер жататын прокси тобы",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("Елемеу"),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Сәйкес серверлерді ешқашан пайдаланбау",
+    ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
       "Амалсыздан",
+    ),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "Басқа ешнәрсе жұмыс істемегенде ғана сәйкес серверлерді пайдалану",
     ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "Кез келген серверге сәйкес",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "Ескермеу үшін өрісті бос қалдырыңыз; ереже барлық толтырылған өрістер сәйкес келгенде ғана іске қосылады",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
       "Атауы қамтиды",
+    ),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Атауында осы мәтін бар серверлерге сәйкес келу",
     ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Тек Ереже режимінде қолжетімді",
@@ -3392,8 +3438,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
       "Артық көру",
     ),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "Сәйкес серверлер сау болғанда оларға артықшылық беру",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
       "Провайдер",
+    ),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "Сервер алынған жазылым",
     ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
       "Сервер ережелері",

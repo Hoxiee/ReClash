@@ -306,11 +306,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("电路"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("回响"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("切面"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("分形"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("墨迹"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("安装"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("网格"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage("图标预览"),
     "appIconShatter": MessageLookupByLibrary.simpleMessage("碎裂"),
     "appIconSolar": MessageLookupByLibrary.simpleMessage("日耀"),
@@ -319,7 +316,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("地形"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("轨迹"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("天鹅绒"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("守望"),
     "appRegion": MessageLookupByLibrary.simpleMessage("应用地区"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "选择网络所在地区。选择俄罗斯会启用 HWID，您可以在下方关闭。智能路由单独设置。",
@@ -571,6 +567,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncDesc": MessageLookupByLibrary.simpleMessage("ByeDPI 失同步策略"),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("引擎"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage("启用 ByeDPI"),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "开启 DPI 绕过引擎及其仪表盘模式。关闭时，ByeDPI 不会在任何位置显示。",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("强制 TCP"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "阻止上述分类的 QUIC；失同步无法作用于 UDP",
@@ -2071,14 +2071,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "在核查可疑节点时报告服务器真实出口国家/地区的端点",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "请输入有效的两位国家/地区代码",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "没有匹配的国家/地区代码",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "国家/地区策略",
     ),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "哪些国家/地区算作审查，哪些应避免作为出口",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "按国家/地区代码搜索",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("检查所有服务器"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2250,6 +2253,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "可接受状态码",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "视为该检查通过的 HTTP 状态码",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "用逗号分隔，例如 200, 204, 404",
     ),
@@ -2257,6 +2263,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "请用逗号分隔 HTTP 状态码",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "探测请求的完整 URL，用于确认此检查",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("服务检查"),
     "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
       "证明服务器可访问开放互联网或本地服务的 URL",
@@ -2378,9 +2387,21 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("立即检查"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地区"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage("该地区的工作方式"),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "该地区的设置内容及其选择服务器的方式",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "以上所有内容均可在高级配置中修改",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "智能路由会保持一个可用服务器，并在后台检查其他服务器，优先选择能访问开放互联网的快速服务器。下面的地区会预设这些检查；除非你的网络不同，否则无需更改。",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "根据应用中所选的地区预设；仅在网络需要时再修改",
     ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage("该地区的设置内容"),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage("该地区未使用"),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("要求支持 UDP"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(
       "跳过无法承载通话和游戏的服务器",
@@ -2391,16 +2412,41 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "服务器无响应，正在寻找替代",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("操作"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("添加规则"),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("出口国家/地区"),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "实测出口国家/地区，两位字母代码",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("分组"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "服务器所属的代理组",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("忽略"),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "从不使用匹配的服务器",
+    ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage("最后手段"),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "仅在没有其他可用时才使用匹配的服务器",
+    ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage("匹配任意服务器"),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "留空字段表示忽略它；仅当所有已填字段都匹配时规则才生效",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("名称包含"),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "匹配名称包含此文本的服务器",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage("仅在规则模式下可用"),
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("优先"),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "在匹配的服务器健康时优先使用",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("提供商"),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "服务器来源的订阅",
+    ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage("服务器规则"),
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "按名称、提供商或实测国家/地区忽略、抑制或优先选择服务器",

@@ -359,11 +359,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("Контур"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("Эхо"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("Грань"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("Фрактал"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("Тушь"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("Установить"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("Сетка"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage(
       "Предпросмотр иконки",
     ),
@@ -374,7 +371,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("Топография"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("След"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("Бархат"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("Дозор"),
     "appRegion": MessageLookupByLibrary.simpleMessage("Регион приложения"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "Выберите регион сети. При выборе России включается HWID — его можно выключить ниже. Умная маршрутизация включается отдельно.",
@@ -754,6 +750,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("Движок"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage(
+      "Включить ByeDPI",
+    ),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "Включает движок обхода DPI и его режим на дашборде. Пока выключено, ByeDPI нигде не показывается.",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("Переводить на TCP"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "Блокирует QUIC для категорий выше; десинк не работает с UDP",
@@ -2908,14 +2910,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Эндпоинты, сообщающие реальную страну выхода сервера при проверке подозрительного узла",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "Введите корректный двухбуквенный код страны",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "Нет подходящего кода страны",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Политика по странам",
     ),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Какие страны считать цензурирующими и каких избегать на выходе",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "Поиск по коду страны",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Проверить все серверы",
@@ -3183,6 +3188,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "Допустимые статусы",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "HTTP-коды, которые считаются успешным прохождением проверки",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "Через запятую, например 200, 204, 404",
     ),
@@ -3190,6 +3198,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Укажите коды HTTP через запятую",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "Полный URL, который запрашивает проверка, чтобы подтвердить доступность",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Проверки сервисов",
     ),
@@ -3349,8 +3360,26 @@ class MessageLookup extends MessageLookupByLibrary {
       "Проверить сейчас",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Регион"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage(
+      "Как работает этот регион",
+    ),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "Что настраивает регион и как он выбирает серверы",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "Всё это можно изменить в расширенной настройке",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "Умная маршрутизация удерживает рабочий сервер и проверяет остальные в фоне, предпочитая быстрые с доступом к открытому интернету. Регион ниже задаёт эти проверки; меняйте их, только если ваша сеть отличается.",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Заданы регионом, выбранным в приложении; меняйте только если этого требует ваша сеть",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "Что настраивает этот регион",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "Не используется в этом регионе",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Требовать поддержку UDP",
@@ -3364,24 +3393,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Сервер не отвечает, ищем замену",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("Действие"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage(
       "Добавить правило",
     ),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
       "Страна выхода",
     ),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "Измеренная страна выхода, двухбуквенный код",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Группа"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "Группа прокси, к которой относится сервер",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage(
       "Игнорировать",
+    ),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Никогда не использовать подходящие серверы",
     ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
       "Крайний случай",
     ),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "Использовать подходящие серверы, только когда не работает ничего другого",
+    ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "Совпадает с любым сервером",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "Оставьте поле пустым, чтобы не учитывать его; правило срабатывает, только когда совпадают все заполненные поля",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
       "Имя содержит",
+    ),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Совпадение по фрагменту имени сервера",
     ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Доступна только в режиме «Правила»",
@@ -3389,8 +3437,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
       "Предпочитать",
     ),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "Предпочитать подходящие серверы, пока они исправны",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
       "Провайдер",
+    ),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "Подписка, из которой пришёл сервер",
     ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
       "Правила серверов",

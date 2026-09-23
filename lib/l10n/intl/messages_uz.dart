@@ -370,11 +370,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("Sxema"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("Aks-sado"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("Qirra"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("Fraktal"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("Siyoh"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("O‘rnatish"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("Toʻr"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage(
       "Ikonkani oldindan ko‘rish",
     ),
@@ -385,7 +382,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("Topografiya"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("Iz"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("Baxmal"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("Qo‘riq"),
     "appRegion": MessageLookupByLibrary.simpleMessage("Ilova hududi"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "Tarmoq hududini tanlang. Rossiya tanlansa, HWID yoqiladi; uni quyida o‘chirish mumkin. Aqlli yo‘naltirish alohida yoqiladi.",
@@ -785,6 +781,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("Dvigok"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage(
+      "ByeDPI ni yoqish",
+    ),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "DPI chetlab o‘tish dvigatelini va uning boshqaruv paneli rejimini yoqadi. O‘chirilgan holda ByeDPI hech qayerda ko‘rsatilmaydi.",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("TCP majburiy"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "Yuqoridagi kategoriyalar uchun QUIC bloklanadi; desinxronizatsiya UDP ga yetib bormaydi",
@@ -2975,14 +2977,17 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "Shubhali tugunni tekshirishda serverning haqiqiy chiqish davlatini xabar qiladigan endpointlar",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "To\'g\'ri ikki harfli davlat kodini kiriting",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "Mos mamlakat kodi yo‘q",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
       "Davlat siyosati",
     ),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "Qaysi davlatlar senzura qiluvchi hisoblanadi va qaysilaridan chiqish sifatida qochish kerak",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "Mamlakat kodi bo‘yicha qidirish",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Har bir serverni tekshirish",
@@ -3250,6 +3255,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "Qabul qilinadigan statuslar",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "Ushbu tekshiruv o‘tgan deb hisoblanadigan HTTP kodlari",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "Vergul bilan ajratilgan, masalan 200, 204, 404",
     ),
@@ -3257,6 +3265,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "HTTP status kodlarini vergul bilan ajratib kiriting",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "Tekshiruvni tasdiqlash uchun zond so‘raydigan to‘liq URL",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage(
       "Xizmat tekshiruvlari",
     ),
@@ -3418,8 +3429,26 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hozirroq tekshirish",
     ),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Mintaqa"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage(
+      "Bu mintaqa qanday ishlaydi",
+    ),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "Bu mintaqa nimalarni sozlaydi va serverlarni qanday tanlaydi",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "Bularning barchasini kengaytirilgan sozlamalarda tahrirlash mumkin",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "Aqlli marshrutlash ishlayotgan serverni ushlab turadi va qolganlarini fonda tekshiradi, ochiq internetga yetadigan tezlarini afzal ko‘radi. Quyidagi mintaqa shu tekshiruvlarni sozlaydi; tarmog‘ingiz boshqacha bo‘lmasa, o‘zgartirmang.",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "Ilovada tanlangan hudud asosida o\'rnatilgan; faqat tarmog\'ingiz talab qilsa o\'zgartiring",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "Bu mintaqa nimalarni sozlaydi",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "Bu mintaqada ishlatilmaydi",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP qoʻllab-quvvatlashi talab qilinadi",
@@ -3433,24 +3462,43 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Server javob bermayapti, boshqasi qidirilmoqda",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("Amal"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage(
       "Qoida qoʻshish",
     ),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
       "Chiqish davlati",
     ),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "O‘lchangan chiqish mamlakati, ikki harfli kod",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Guruh"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "Server tegishli proksi guruhi",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage(
       "Eʼtiborsiz qoldirish",
+    ),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "Mos keladigan serverlardan hech qachon foydalanmaslik",
     ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
       "Oxirgi chora",
     ),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "Faqat boshqa hech narsa ishlamaganda mos serverlardan foydalanish",
+    ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "Har qanday serverga mos keladi",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "E’tiborsiz qoldirish uchun maydonni bo‘sh qoldiring; qoida faqat barcha to‘ldirilgan maydonlar mos kelganda ishlaydi",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
       "Nomi tarkibida",
+    ),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "Nomida shu matn bo‘lgan serverlarga mos kelish",
     ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Faqat Rule rejimida mavjud",
@@ -3458,8 +3506,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
       "Afzal koʻrish",
     ),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "Mos serverlar sog‘lom bo‘lganda ularni afzal ko‘rish",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
       "Provayder",
+    ),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "Server olingan obuna",
     ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
       "Server qoidalari",

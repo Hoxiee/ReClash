@@ -10244,6 +10244,196 @@ class AppLocalizations {
     );
   }
 
+  /// `Full URL the probe requests to confirm this check`
+  String get smartRoutingMarkerUrlDesc {
+    return Intl.message(
+      'Full URL the probe requests to confirm this check',
+      name: 'smartRoutingMarkerUrlDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `HTTP codes that count as a pass for this check`
+  String get smartRoutingMarkerStatusesDesc {
+    return Intl.message(
+      'HTTP codes that count as a pass for this check',
+      name: 'smartRoutingMarkerStatusesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Action`
+  String get smartRoutingRuleAction {
+    return Intl.message(
+      'Action',
+      name: 'smartRoutingRuleAction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never route through servers that match`
+  String get smartRoutingRuleIgnoreDesc {
+    return Intl.message(
+      'Never route through servers that match',
+      name: 'smartRoutingRuleIgnoreDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use matching servers only when nothing else works`
+  String get smartRoutingRuleLastResortDesc {
+    return Intl.message(
+      'Use matching servers only when nothing else works',
+      name: 'smartRoutingRuleLastResortDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Favour matching servers while they are healthy`
+  String get smartRoutingRulePreferDesc {
+    return Intl.message(
+      'Favour matching servers while they are healthy',
+      name: 'smartRoutingRulePreferDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Leave a field empty to ignore it; a rule matches a server only when every filled field fits`
+  String get smartRoutingRuleMatchHint {
+    return Intl.message(
+      'Leave a field empty to ignore it; a rule matches a server only when every filled field fits',
+      name: 'smartRoutingRuleMatchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription the server came from`
+  String get smartRoutingRuleProviderDesc {
+    return Intl.message(
+      'Subscription the server came from',
+      name: 'smartRoutingRuleProviderDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match servers whose name contains this text`
+  String get smartRoutingRuleNameDesc {
+    return Intl.message(
+      'Match servers whose name contains this text',
+      name: 'smartRoutingRuleNameDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy group the server belongs to`
+  String get smartRoutingRuleGroupDesc {
+    return Intl.message(
+      'Proxy group the server belongs to',
+      name: 'smartRoutingRuleGroupDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Measured exit country, as a two-letter code`
+  String get smartRoutingRuleCountryDesc {
+    return Intl.message(
+      'Measured exit country, as a two-letter code',
+      name: 'smartRoutingRuleCountryDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by country code`
+  String get smartRoutingCountrySearch {
+    return Intl.message(
+      'Search by country code',
+      name: 'smartRoutingCountrySearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No matching country code`
+  String get smartRoutingCountryNoMatch {
+    return Intl.message(
+      'No matching country code',
+      name: 'smartRoutingCountryNoMatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How this region works`
+  String get smartRoutingRegionCard {
+    return Intl.message(
+      'How this region works',
+      name: 'smartRoutingRegionCard',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What this region sets up and how it picks servers`
+  String get smartRoutingRegionCardDesc {
+    return Intl.message(
+      'What this region sets up and how it picks servers',
+      name: 'smartRoutingRegionCardDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart routing keeps a working server and checks the others in the background, preferring fast ones that reach the open internet. The region below seeds these checks; leave them unless your network differs.`
+  String get smartRoutingRegionHow {
+    return Intl.message(
+      'Smart routing keeps a working server and checks the others in the background, preferring fast ones that reach the open internet. The region below seeds these checks; leave them unless your network differs.',
+      name: 'smartRoutingRegionHow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `What this region sets up`
+  String get smartRoutingRegionSeeds {
+    return Intl.message(
+      'What this region sets up',
+      name: 'smartRoutingRegionSeeds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not used in this region`
+  String get smartRoutingRegionUnused {
+    return Intl.message(
+      'Not used in this region',
+      name: 'smartRoutingRegionUnused',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Everything here is editable under Advanced configuration`
+  String get smartRoutingRegionEditNote {
+    return Intl.message(
+      'Everything here is editable under Advanced configuration',
+      name: 'smartRoutingRegionEditNote',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Ignored by a rule`
   String get smartRoutingBlockIgnored {
     return Intl.message(
@@ -10339,16 +10529,6 @@ class AppLocalizations {
     return Intl.message(
       'Name hints and rules that steer how servers are chosen',
       name: 'smartRoutingHeuristicsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter a valid two-letter country code`
-  String get smartRoutingCountryInvalid {
-    return Intl.message(
-      'Enter a valid two-letter country code',
-      name: 'smartRoutingCountryInvalid',
       desc: '',
       args: [],
     );
@@ -11354,16 +11534,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Mesh`
-  String get appIconMesh {
-    return Intl.message('Mesh', name: 'appIconMesh', desc: '', args: []);
-  }
-
-  /// `Facet`
-  String get appIconFacet {
-    return Intl.message('Facet', name: 'appIconFacet', desc: '', args: []);
-  }
-
   /// `Strata`
   String get appIconStrata {
     return Intl.message('Strata', name: 'appIconStrata', desc: '', args: []);
@@ -11809,6 +11979,26 @@ class AppLocalizations {
     return Intl.message(
       'ByeDPI desync strategies',
       name: 'desyncDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable ByeDPI`
+  String get desyncFeatureEnable {
+    return Intl.message(
+      'Enable ByeDPI',
+      name: 'desyncFeatureEnable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn on the DPI bypass engine and its dashboard mode. While off, ByeDPI is hidden everywhere.`
+  String get desyncFeatureEnableDesc {
+    return Intl.message(
+      'Turn on the DPI bypass engine and its dashboard mode. While off, ByeDPI is hidden everywhere.',
+      name: 'desyncFeatureEnableDesc',
       desc: '',
       args: [],
     );
@@ -15135,19 +15325,9 @@ class AppLocalizations {
     );
   }
 
-  /// `Vigil`
-  String get appIconVigil {
-    return Intl.message('Vigil', name: 'appIconVigil', desc: '', args: []);
-  }
-
   /// `Topo`
   String get appIconTopo {
     return Intl.message('Topo', name: 'appIconTopo', desc: '', args: []);
-  }
-
-  /// `Fractal`
-  String get appIconFractal {
-    return Intl.message('Fractal', name: 'appIconFractal', desc: '', args: []);
   }
 
   /// `Spark`

@@ -313,11 +313,8 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "appIconCircuit": MessageLookupByLibrary.simpleMessage("サーキット"),
     "appIconEcho": MessageLookupByLibrary.simpleMessage("エコー"),
-    "appIconFacet": MessageLookupByLibrary.simpleMessage("ファセット"),
-    "appIconFractal": MessageLookupByLibrary.simpleMessage("フラクタル"),
     "appIconInk": MessageLookupByLibrary.simpleMessage("インク"),
     "appIconInstall": MessageLookupByLibrary.simpleMessage("設定"),
-    "appIconMesh": MessageLookupByLibrary.simpleMessage("メッシュ"),
     "appIconPreview": MessageLookupByLibrary.simpleMessage("アイコンのプレビュー"),
     "appIconShatter": MessageLookupByLibrary.simpleMessage("シャッター"),
     "appIconSolar": MessageLookupByLibrary.simpleMessage("ソーラー"),
@@ -326,7 +323,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "appIconTopo": MessageLookupByLibrary.simpleMessage("地形"),
     "appIconTrace": MessageLookupByLibrary.simpleMessage("トレース"),
     "appIconVelvet": MessageLookupByLibrary.simpleMessage("ベルベット"),
-    "appIconVigil": MessageLookupByLibrary.simpleMessage("見張り"),
     "appRegion": MessageLookupByLibrary.simpleMessage("アプリの地域"),
     "appRegionDesc": MessageLookupByLibrary.simpleMessage(
       "ネットワークの地域を選択してください。ロシアを選ぶと HWID が有効になりますが、下で無効にできます。スマートルーティングは別に設定します。",
@@ -624,6 +620,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "desyncDesc": MessageLookupByLibrary.simpleMessage("ByeDPI デシンク戦略"),
     "desyncEngine": MessageLookupByLibrary.simpleMessage("エンジン"),
     "desyncEngineSummary": m16,
+    "desyncFeatureEnable": MessageLookupByLibrary.simpleMessage("ByeDPI を有効化"),
+    "desyncFeatureEnableDesc": MessageLookupByLibrary.simpleMessage(
+      "DPI 回避エンジンとダッシュボードのモードを有効にします。オフの間、ByeDPI はどこにも表示されません。",
+    ),
     "desyncForceTcp": MessageLookupByLibrary.simpleMessage("TCPへ強制"),
     "desyncForceTcpDesc": MessageLookupByLibrary.simpleMessage(
       "上記カテゴリのQUICをブロックします。デシンクはUDPに効きません",
@@ -2358,12 +2358,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "疑わしいノードの検証時にサーバーの実際の出口国を報告するエンドポイント",
     ),
-    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
-      "有効な2文字の国コードを入力してください",
+    "smartRoutingCountryNoMatch": MessageLookupByLibrary.simpleMessage(
+      "一致する国コードがありません",
     ),
     "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("国別ポリシー"),
     "smartRoutingCountryPolicyDesc": MessageLookupByLibrary.simpleMessage(
       "どの国を検閲国とみなし、どの国を出口として避けるか",
+    ),
+    "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
+      "国コードで検索",
     ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("すべてのサーバーを検査"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
@@ -2563,6 +2566,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkerStatuses": MessageLookupByLibrary.simpleMessage(
       "許容ステータス",
     ),
+    "smartRoutingMarkerStatusesDesc": MessageLookupByLibrary.simpleMessage(
+      "このチェックの成功と見なす HTTP ステータスコード",
+    ),
     "smartRoutingMarkerStatusesHint": MessageLookupByLibrary.simpleMessage(
       "カンマ区切り、例: 200, 204, 404",
     ),
@@ -2570,6 +2576,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "HTTP ステータスコードをカンマ区切りで入力してください",
     ),
     "smartRoutingMarkerUrl": MessageLookupByLibrary.simpleMessage("URL"),
+    "smartRoutingMarkerUrlDesc": MessageLookupByLibrary.simpleMessage(
+      "このチェックを確認するためにプローブが要求する完全な URL",
+    ),
     "smartRoutingMarkers": MessageLookupByLibrary.simpleMessage("サービス検査"),
     "smartRoutingMarkersDesc": MessageLookupByLibrary.simpleMessage(
       "サーバーがオープンインターネットや国内サービスに到達できることを証明する URL",
@@ -2709,8 +2718,24 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingRecheck": MessageLookupByLibrary.simpleMessage("今すぐ確認"),
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地域"),
+    "smartRoutingRegionCard": MessageLookupByLibrary.simpleMessage("この地域の仕組み"),
+    "smartRoutingRegionCardDesc": MessageLookupByLibrary.simpleMessage(
+      "この地域が設定する内容とサーバーの選び方",
+    ),
+    "smartRoutingRegionEditNote": MessageLookupByLibrary.simpleMessage(
+      "これらはすべて詳細設定で編集できます",
+    ),
+    "smartRoutingRegionHow": MessageLookupByLibrary.simpleMessage(
+      "スマートルーティングは動作中のサーバーを維持し、他のサーバーをバックグラウンドで確認して、オープンなインターネットに到達できる高速なものを優先します。下の地域がこれらのチェックを設定します。ネットワークが異なる場合を除き、変更は不要です。",
+    ),
     "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
       "アプリで選んだ地域から設定されています。ネットワークに必要な場合のみ変更してください",
+    ),
+    "smartRoutingRegionSeeds": MessageLookupByLibrary.simpleMessage(
+      "この地域が設定する内容",
+    ),
+    "smartRoutingRegionUnused": MessageLookupByLibrary.simpleMessage(
+      "この地域では使用しません",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP 対応を必須にする",
@@ -2724,20 +2749,45 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "サーバーが応答しません。別のサーバーを探しています",
     ),
+    "smartRoutingRuleAction": MessageLookupByLibrary.simpleMessage("アクション"),
     "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("ルールを追加"),
     "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("出口国"),
+    "smartRoutingRuleCountryDesc": MessageLookupByLibrary.simpleMessage(
+      "実測の出口国、2 文字のコード",
+    ),
     "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("グループ"),
+    "smartRoutingRuleGroupDesc": MessageLookupByLibrary.simpleMessage(
+      "サーバーが属するプロキシグループ",
+    ),
     "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("無視"),
+    "smartRoutingRuleIgnoreDesc": MessageLookupByLibrary.simpleMessage(
+      "一致するサーバーを使用しない",
+    ),
     "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage("最終手段"),
+    "smartRoutingRuleLastResortDesc": MessageLookupByLibrary.simpleMessage(
+      "他に使えるものがない場合のみ一致するサーバーを使用する",
+    ),
     "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
       "任意のサーバーに一致",
     ),
+    "smartRoutingRuleMatchHint": MessageLookupByLibrary.simpleMessage(
+      "空欄の項目は無視されます。入力したすべての項目が一致した場合のみルールが適用されます",
+    ),
     "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("名前に含む"),
+    "smartRoutingRuleNameDesc": MessageLookupByLibrary.simpleMessage(
+      "名前にこのテキストを含むサーバーに一致",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "ルールモードでのみ利用できます",
     ),
     "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("優先"),
+    "smartRoutingRulePreferDesc": MessageLookupByLibrary.simpleMessage(
+      "一致するサーバーが正常なときは優先する",
+    ),
     "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("プロバイダー"),
+    "smartRoutingRuleProviderDesc": MessageLookupByLibrary.simpleMessage(
+      "サーバーの取得元サブスクリプション",
+    ),
     "smartRoutingRules": MessageLookupByLibrary.simpleMessage("サーバールール"),
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "名前・プロバイダー・実測した国でサーバーを無視、抑制、または優先します",
