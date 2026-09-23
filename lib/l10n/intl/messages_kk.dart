@@ -2879,6 +2879,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Орташа қалпына келу",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "Шығу елдерін болдырмау",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Шығуы осы елдерде өлшенген сервер арқылы ешқашан, тіпті амалсыздан да, бағыттамау",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Автоматты режимге қайту",
     ),
@@ -2888,9 +2894,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Ағымдағы сервер тізімінде жоқ",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "Болдырмайтын ел арқылы шығады",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Мұндағы тексеруден өтпеді",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "Ереже елемейді",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "Жергілікті сервер, бұл желіде тыйым салынған",
@@ -2951,6 +2963,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Әлі сервер таңдалған жоқ",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "Елді анықтау қызметтері",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Күдікті түйінді тексергенде сервердің нақты шығу елін хабарлайтын эндпоинттер",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Әр серверді тексеру",
     ),
@@ -3143,6 +3161,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Соңғы қалпына келу",
     ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "Кідіріс сатылары",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Серверлерді жылдамдық деңгейлеріне бөлетін миллисекундтық шекаралар; бос болса — стратегия әдепкісі",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Қолмен таңдағанды ұстану",
@@ -3315,8 +3339,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Сервер жауап бермейді, басқасы ізделуде",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("Ереже қосу"),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("Шығу елі"),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Топ"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("Елемеу"),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "Амалсыздан",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "Кез келген серверге сәйкес",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
+      "Атауы қамтиды",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Тек Ереже режимінде қолжетімді",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
+      "Артық көру",
+    ),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
+      "Провайдер",
+    ),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
+      "Сервер ережелері",
+    ),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "Серверлерді атауы, провайдері немесе өлшенген елі бойынша елемеу, тежеу немесе артық көру",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(

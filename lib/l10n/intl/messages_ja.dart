@@ -2330,6 +2330,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "平均復旧時間",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "出口国を回避",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "実測した出口がこれらの国のサーバーは、最終手段でも決して経由しません",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage("自動選択に戻す"),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2337,9 +2343,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "現在のサーバー一覧にありません",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "回避対象の国から出ています",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "ここでは検査に通りませんでした",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "ルールにより無視",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "国内サーバー。このネットワークでは使いません",
@@ -2386,6 +2398,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "まだサーバーが選ばれていません",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "国判定サービス",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "疑わしいノードの検証時にサーバーの実際の出口国を報告するエンドポイント",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("すべてのサーバーを検査"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
       "検査の上限を無視するため通信量がかかります",
@@ -2526,6 +2544,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingLastFailover": MessageLookupByLibrary.simpleMessage("直近の切り替え"),
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage("直近の復旧時間"),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "レイテンシの階層",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "サーバーを速度ティアに分けるミリ秒の境界。空欄の場合は戦略の既定値を使用します",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "手動の選択を尊重する",
@@ -2680,8 +2704,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "サーバーが応答しません。別のサーバーを探しています",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("ルールを追加"),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("出口国"),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("グループ"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("無視"),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage("最終手段"),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "任意のサーバーに一致",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("名前に含む"),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "ルールモードでのみ利用できます",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("優先"),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("プロバイダー"),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage("サーバールール"),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "名前・プロバイダー・実測した国でサーバーを無視、抑制、または優先します",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(

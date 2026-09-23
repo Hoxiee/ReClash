@@ -2927,6 +2927,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Oʻrtacha tiklanish",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "Chiqish davlatlaridan qochish",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Chiqishi shu davlatlarda oʻlchangan server orqali hech qachon, hatto oxirgi chora sifatida ham yoʻnaltirmang",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Avtomatik rejimga qaytish",
     ),
@@ -2938,9 +2944,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Joriy serverlar roʻyxatida yoʻq",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "Qochiladigan davlat orqali chiqadi",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Bu yerda tekshiruvlardan oʻtmadi",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "Qoida tomonidan eʼtiborsiz qoldirilgan",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "Mahalliy server, bu tarmoqda taqiqlangan",
@@ -3001,6 +3013,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hozircha server tanlanmagan",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "Davlatni aniqlash xizmatlari",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Shubhali tugunni tekshirishda serverning haqiqiy chiqish davlatini xabar qiladigan endpointlar",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Har bir serverni tekshirish",
     ),
@@ -3201,6 +3219,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Soʻnggi tiklanish",
     ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "Kechikish bosqichlari",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Serverlarni tezlik darajalariga ajratadigan millisekundli chegaralar; boʻsh boʻlsa — strategiya standarti",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Qoʻlda tanlovni saqlash",
@@ -3373,8 +3397,39 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Server javob bermayapti, boshqasi qidirilmoqda",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage(
+      "Qoida qoʻshish",
+    ),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
+      "Chiqish davlati",
+    ),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Guruh"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage(
+      "Eʼtiborsiz qoldirish",
+    ),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "Oxirgi chora",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "Har qanday serverga mos keladi",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
+      "Nomi tarkibida",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Faqat Rule rejimida mavjud",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
+      "Afzal koʻrish",
+    ),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
+      "Provayder",
+    ),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
+      "Server qoidalari",
+    ),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "Serverlarni nomi, provayderi yoki oʻlchangan davlati boʻyicha eʼtiborsiz qoldirish, ushlab turish yoki afzal koʻrish",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(

@@ -2307,6 +2307,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "평균 복구 시간",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "출구 국가 회피",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "측정된 출구가 이 국가인 서버는 최후의 수단으로도 경유하지 않습니다",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "자동 모드로 되돌리기",
     ),
@@ -2316,9 +2322,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "현재 서버 목록에 없음",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "회피 대상 국가로 나감",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "이 네트워크에서 점검에 실패함",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "규칙에 의해 무시됨",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "로컬 서버라 이 네트워크에서는 제외됨",
@@ -2365,6 +2377,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "아직 선택된 서버가 없습니다",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "국가 조회 서비스",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "의심스러운 노드를 확인할 때 서버의 실제 출구 국가를 알려주는 엔드포인트",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("모든 서버 점검"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
       "탐색 횟수 제한을 무시하므로 트래픽이 더 들 수 있습니다",
@@ -2510,6 +2528,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastFailover": MessageLookupByLibrary.simpleMessage("최근 전환"),
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "최근 복구 시간",
+    ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "지연 시간 단계",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "서버를 속도 등급으로 나누는 밀리초 경계값. 비워 두면 전략 기본값을 사용합니다",
     ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage("수동 선택 우선"),
@@ -2659,8 +2683,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "서버가 응답하지 않아 다른 서버를 찾고 있습니다",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("규칙 추가"),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("출구 국가"),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("그룹"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("무시"),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "최후의 수단",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "모든 서버와 일치",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("이름에 포함"),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "규칙 모드에서만 사용할 수 있습니다",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("선호"),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("제공자"),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage("서버 규칙"),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "이름, 제공자 또는 측정된 국가별로 서버를 무시, 보류 또는 선호합니다",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage("서버를 찾는 중…"),

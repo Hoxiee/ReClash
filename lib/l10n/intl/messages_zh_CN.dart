@@ -2043,6 +2043,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "平均恢复耗时",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "避免出口国家/地区",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "绝不通过实测出口位于这些国家/地区的服务器路由，即使作为最后手段",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage("恢复自动选择"),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2050,10 +2056,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "不在当前服务器列表中",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "出口位于被规避的国家/地区",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "在这里未通过检查",
     ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage("被规则忽略"),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "本地服务器，在此网络被禁用",
     ),
@@ -2097,6 +2107,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosen": MessageLookupByLibrary.simpleMessage("已选服务器"),
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage("尚未选择服务器"),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "国家/地区查询服务",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "在核查可疑节点时报告服务器真实出口国家/地区的端点",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage("检查所有服务器"),
     "smartRoutingDeepScanHint": MessageLookupByLibrary.simpleMessage(
       "会忽略探测额度，因此消耗流量",
@@ -2223,6 +2239,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingLastFailover": MessageLookupByLibrary.simpleMessage("最近一次切换"),
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage("最近恢复耗时"),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage("延迟阶梯"),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "将服务器按速度分层的毫秒边界；留空则使用策略默认值",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage("尊重手动选择"),
     "smartRoutingManualHoldDesc": MessageLookupByLibrary.simpleMessage(
@@ -2355,7 +2375,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "服务器无响应，正在寻找替代",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage("添加规则"),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage("出口国家/地区"),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("分组"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage("忽略"),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage("最后手段"),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage("匹配任意服务器"),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage("名称包含"),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage("仅在规则模式下可用"),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage("优先"),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage("提供商"),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage("服务器规则"),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "按名称、提供商或实测国家/地区忽略、抑制或优先选择服务器",
+    ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage("正在挑选服务器…"),
     "smartRoutingSeconds": m88,

@@ -2858,6 +2858,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAverageRecovery": MessageLookupByLibrary.simpleMessage(
       "Ortaça dikeldiş",
     ),
+    "smartRoutingAvoidCountries": MessageLookupByLibrary.simpleMessage(
+      "Çykyş ýurtlaryndan gaça durmak",
+    ),
+    "smartRoutingAvoidCountriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Çykyşy şu ýurtlarda ölçenen server arkaly hiç haçan, hatda iň soňky çäre hökmünde-de ugratmaň",
+    ),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage(
       "Awtomatiki saýlawa dolan",
     ),
@@ -2867,9 +2873,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Häzirki serwer sanawynda ýok",
     ),
+    "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
+      "Gaça durulýan ýurt arkaly çykýar",
+    ),
     "smartRoutingBlockCooling": m78,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Bu ýerde barlaglaryndan geçip bilmedi",
+    ),
+    "smartRoutingBlockIgnored": MessageLookupByLibrary.simpleMessage(
+      "Düzgün tarapyndan äsgerilmedi",
     ),
     "smartRoutingBlockLastResort": MessageLookupByLibrary.simpleMessage(
       "Ýerli serwer — bu torda ulanylmaýar",
@@ -2928,6 +2940,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Heniz serwer saýlanmady",
     ),
     "smartRoutingCoolFor": m80,
+    "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
+      "Ýurdy kesgitleýän hyzmatlar",
+    ),
+    "smartRoutingCountryEchoesDesc": MessageLookupByLibrary.simpleMessage(
+      "Şübheli düwni barlanda serweriň hakyky çykyş ýurduny habar berýän uç nokatlar",
+    ),
     "smartRoutingDeepScan": MessageLookupByLibrary.simpleMessage(
       "Her bir serweri barla",
     ),
@@ -3128,6 +3146,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLastRecovery": MessageLookupByLibrary.simpleMessage(
       "Soňky dikeldiş",
     ),
+    "smartRoutingLatencyBands": MessageLookupByLibrary.simpleMessage(
+      "Gijikme basgançaklary",
+    ),
+    "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
+      "Serwerleri tizlik derejelerine bölýän millisekundlyk çäkler; boş bolsa — strategiýanyň deslapky bahasy",
+    ),
     "smartRoutingLostAt": m82,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Öz saýlawyňa sarpa bermek",
@@ -3296,8 +3320,39 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRetrying": MessageLookupByLibrary.simpleMessage(
       "Serwer jogap bermeýär, başgasy gözlenýär",
     ),
+    "smartRoutingRuleAdd": MessageLookupByLibrary.simpleMessage(
+      "Düzgün goşmak",
+    ),
+    "smartRoutingRuleCountry": MessageLookupByLibrary.simpleMessage(
+      "Çykyş ýurdy",
+    ),
+    "smartRoutingRuleGroup": MessageLookupByLibrary.simpleMessage("Topar"),
+    "smartRoutingRuleIgnore": MessageLookupByLibrary.simpleMessage(
+      "Äsgermezlik",
+    ),
+    "smartRoutingRuleLastResort": MessageLookupByLibrary.simpleMessage(
+      "Iň soňky çäre",
+    ),
+    "smartRoutingRuleMatchAny": MessageLookupByLibrary.simpleMessage(
+      "Islendik serwere gabat gelýär",
+    ),
+    "smartRoutingRuleName": MessageLookupByLibrary.simpleMessage(
+      "Ady öz içine alýar",
+    ),
     "smartRoutingRuleOnly": MessageLookupByLibrary.simpleMessage(
       "Diňe Düzgün usulynda elýeterli",
+    ),
+    "smartRoutingRulePrefer": MessageLookupByLibrary.simpleMessage(
+      "Ileri tutmak",
+    ),
+    "smartRoutingRuleProvider": MessageLookupByLibrary.simpleMessage(
+      "Prowaýder",
+    ),
+    "smartRoutingRules": MessageLookupByLibrary.simpleMessage(
+      "Serwer düzgünleri",
+    ),
+    "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
+      "Serwerleri ady, prowaýderi ýa-da ölçenen ýurdy boýunça äsgermezlik, saklamak ýa-da ileri tutmak",
     ),
     "smartRoutingRungVersus": m87,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
