@@ -292,15 +292,11 @@ void main() {
         'echo',
         'ink',
         'blueprint',
-        'mesh',
-        'facet',
         'strata',
         'shatter',
         'trace',
-        'vigil',
         'topo',
         'spark',
-        'fractal',
       ]) {
         final result = AppSettingProps.safeFromJson({'iconVariant': variant});
         expect(result.iconVariant, variant);
@@ -322,6 +318,10 @@ void main() {
         'glass',
         'prism',
         'eclipse',
+        'mesh',
+        'facet',
+        'vigil',
+        'fractal',
       ]) {
         final result = AppSettingProps.safeFromJson({'iconVariant': variant});
         expect(result.iconVariant, 'default');

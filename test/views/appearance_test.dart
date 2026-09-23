@@ -210,10 +210,14 @@ void main() {
     testWidgets('all app icons are always available', (tester) async {
       await pumpIconSections(tester);
 
-      expect(find.text('Vigil'), findsOneWidget);
+      expect(find.text('Velvet'), findsOneWidget);
       expect(find.text('Topo'), findsOneWidget);
       expect(find.text('Spark'), findsOneWidget);
-      expect(find.text('Fractal'), findsOneWidget);
+      expect(find.text('Trace'), findsOneWidget);
+      expect(find.text('Mesh'), findsNothing);
+      expect(find.text('Facet'), findsNothing);
+      expect(find.text('Vigil'), findsNothing);
+      expect(find.text('Fractal'), findsNothing);
     });
 
     testWidgets('cancels installation without changing the selected icon', (
@@ -256,8 +260,8 @@ void main() {
       final cards = find.byWidgetPredicate(
         (widget) => widget is SizedBox && widget.height == 112,
       );
-      expect(cards, findsNWidgets(16));
-      for (var index = 0; index < 16; index++) {
+      expect(cards, findsNWidgets(12));
+      for (var index = 0; index < 12; index++) {
         expect(tester.getSize(cards.at(index)).height, 112);
       }
     });

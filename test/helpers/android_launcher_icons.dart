@@ -13,15 +13,11 @@ const launcherVariants = <String>[
   'echo',
   'ink',
   'blueprint',
-  'mesh',
-  'facet',
   'strata',
   'shatter',
   'trace',
-  'vigil',
   'topo',
   'spark',
-  'fractal',
 ];
 
 const launcherDensities = <String, double>{

@@ -19,15 +19,11 @@ const _iconVariants = [
   'echo',
   'ink',
   'blueprint',
-  'mesh',
-  'facet',
   'strata',
   'shatter',
   'trace',
-  'vigil',
   'topo',
   'spark',
-  'fractal',
 ];
 
 class AppearanceColorSections extends ConsumerStatefulWidget {
@@ -355,15 +351,11 @@ String _iconVariantLabel(BuildContext context, String variant) {
     'echo' => appLocalizations.appIconEcho,
     'ink' => appLocalizations.appIconInk,
     'blueprint' => appLocalizations.appIconBlueprint,
-    'mesh' => appLocalizations.appIconMesh,
-    'facet' => appLocalizations.appIconFacet,
     'strata' => appLocalizations.appIconStrata,
     'shatter' => appLocalizations.appIconShatter,
     'trace' => appLocalizations.appIconTrace,
-    'vigil' => appLocalizations.appIconVigil,
     'topo' => appLocalizations.appIconTopo,
     'spark' => appLocalizations.appIconSpark,
-    'fractal' => appLocalizations.appIconFractal,
     _ => appLocalizations.defaultText,
   };
 }

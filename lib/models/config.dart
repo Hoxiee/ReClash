@@ -326,15 +326,11 @@ const _iconVariants = {
   'echo',
   'ink',
   'blueprint',
-  'mesh',
-  'facet',
   'strata',
   'shatter',
   'trace',
-  'vigil',
   'topo',
   'spark',
-  'fractal',
 };
 
 String _normalizeIconVariant(String? value) =>

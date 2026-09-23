@@ -291,32 +291,6 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".icons.MeshAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_mesh"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
-            android:name=".icons.FacetAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_facet"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
             android:name=".icons.StrataAlias"
             android:enabled="false"
             android:exported="true"
@@ -357,20 +331,6 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".icons.VigilAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_vigil"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-
-        <activity-alias
             android:name=".icons.TopoAlias"
             android:enabled="false"
             android:exported="true"
@@ -388,19 +348,6 @@
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_spark"
-            android:label="@string/app_name"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias
-            android:name=".icons.FractalAlias"
-            android:enabled="false"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher_fractal"
             android:label="@string/app_name"
             android:targetActivity=".MainActivity">
             <intent-filter>
