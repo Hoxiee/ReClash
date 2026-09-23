@@ -1,4 +1,4 @@
-package main
+package subscription
 
 import (
 	"context"
@@ -19,13 +19,13 @@ const subscriptionBodyLimit = 16 * 1024 * 1024
 var errSubscriptionProtection = errors.New("protected subscription transport unavailable")
 var errSubscriptionTooLarge = errors.New("subscription response is too large")
 
-type SubscriptionFetchParams struct {
+type FetchParams struct {
 	URL           string            `json:"url"`
 	Headers       map[string]string `json:"headers"`
 	TimeoutMillis int               `json:"timeoutMillis"`
 }
 
-type SubscriptionFetchResult struct {
+type FetchResult struct {
 	Status  int                 `json:"status"`
 	Headers map[string][]string `json:"headers"`
 	Body    []byte              `json:"body"`
@@ -117,7 +117,7 @@ type subscriptionConnector interface {
 	DialContext(context.Context, string, string) (net.Conn, error)
 }
 
-func fetchSubscription(params *SubscriptionFetchParams, dialer subscriptionConnector) (*SubscriptionFetchResult, error) {
+func fetchSubscription(params *FetchParams, dialer subscriptionConnector) (*FetchResult, error) {
 	parsed, err := url.Parse(params.URL)
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Hostname() == "" || parsed.User != nil || len(params.URL) > 8192 {
 		return nil, errors.New("invalid subscription URL")
@@ -160,7 +160,7 @@ func fetchSubscription(params *SubscriptionFetchParams, dialer subscriptionConne
 		return nil, err
 	}
 	defer response.Body.Close()
-	result := &SubscriptionFetchResult{Status: response.StatusCode, Headers: response.Header, Body: []byte{}}
+	result := &FetchResult{Status: response.StatusCode, Headers: response.Header, Body: []byte{}}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return result, nil
 	}
@@ -175,25 +175,4 @@ func fetchSubscription(params *SubscriptionFetchParams, dialer subscriptionConne
 		return nil, errSubscriptionTooLarge
 	}
 	return result, nil
-}
-
-func handleFetchSubscription(params *SubscriptionFetchParams, response MethodResponse) {
-	dialer, err := protectedSubscriptionDialer()
-	if err != nil {
-		response.failure("subscription_protection", "Protected subscription transport unavailable", nil)
-		return
-	}
-	result, err := fetchSubscription(params, dialer)
-	if err != nil {
-		code := "subscription_transport"
-		if errors.Is(err, errSubscriptionProtection) {
-			code = "subscription_protection"
-		}
-		if errors.Is(err, errSubscriptionTooLarge) {
-			code = "subscription_too_large"
-		}
-		response.failure(code, "Subscription download failed", nil)
-		return
-	}
-	response.success(result)
 }

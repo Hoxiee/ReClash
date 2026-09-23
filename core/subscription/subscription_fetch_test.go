@@ -1,4 +1,4 @@
-package main
+package subscription
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-func subscriptionParams(url string) *SubscriptionFetchParams {
-	return &SubscriptionFetchParams{URL: url, Headers: map[string]string{"User-Agent": "test-client", "X-Hwid": "test-id"}, TimeoutMillis: 1000}
+func subscriptionParams(url string) *FetchParams {
+	return &FetchParams{URL: url, Headers: map[string]string{"User-Agent": "test-client", "X-Hwid": "test-id"}, TimeoutMillis: 1000}
 }
 
 func TestSubscriptionFetchResponse(t *testing.T) {
