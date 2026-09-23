@@ -26,24 +26,9 @@ class CoreManager extends ConsumerStatefulWidget {
 class _CoreContainerState extends ConsumerState<CoreManager>
     with CoreEventListener {
   CoreController get _core => ref.read(coreHandlerProvider);
-  int? _profileSetupId;
 
   void _scheduleFullSetup() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-    });
-  }
-
-  void _scheduleProfileSetup(int? profileId) {
-    _profileSetupId = profileId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (_profileSetupId == profileId) {
-        _profileSetupId = null;
-      }
-      unawaited(ref.read(setupActionProvider.notifier).fullSetup());
-    });
+    unawaited(ref.read(setupActionProvider.notifier).scheduleFullSetup());
   }
 
   @override
@@ -60,7 +45,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     // the previous one hides the error and looks like the switch was lost.
     ref.listenManual(currentProfileIdProvider, (prev, next) {
       if (prev == next) return;
-      _scheduleProfileSetup(next);
+      _scheduleFullSetup();
     });
     ref.listenManual(updateParamsProvider, (prev, next) {
       if (prev == next) return;
@@ -101,6 +86,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
     ref.listenManual(
       currentProfileProvider.select(
         (profile) => (
+          id: profile?.id,
           policies: profile?.serviceRoutePolicies,
           manifest: profile?.capabilityManifest,
           manual: profile?.manualCapabilitySelectors,
@@ -122,8 +108,9 @@ class _CoreContainerState extends ConsumerState<CoreManager>
             }),
           );
         }
-        final profileId = ref.read(currentProfileIdProvider);
-        if (_profileSetupId != profileId) {
+        // A profile switch is the id listener's job; rebuild here only when the
+        // same profile's own metadata changed, or the two would race a double apply.
+        if (prev?.id == next.id) {
           _scheduleFullSetup();
         }
       },

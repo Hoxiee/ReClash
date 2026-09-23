@@ -2276,5 +2276,73 @@
   "quickEdit": "Жылдам өңдеу",
   "server": "Сервер",
   "writeToSystem": "Жүйеге жазу",
-  "writeToSystemDesc": "Алынған уақытты жүйелік сағатпен синхрондау"
+  "writeToSystemDesc": "Алынған уақытты жүйелік сағатпен синхрондау",
+  "devices": "Құрылғылар",
+  "devicesDescription": "Осы телефоннан теледидардағы ReClash-ты басқарыңыз",
+  "companionAddTelevision": "Теледидар қосу",
+  "companionAddPhone": "Телефон қосу",
+  "companionTrustedPhones": "Сенімді телефондар",
+  "companionEnableReceiver": "Телефоннан басқаруға рұқсат ету",
+  "companionReceiverRunning": "{host} мекенжайында жұптасуға дайын",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "Телефоннан басқару өшірулі",
+  "companionUnreachable": "Бұл желіде теледидарға қол жеткізу мүмкін емес",
+  "companionNoLan": "Алдымен теледидарды Wi-Fi немесе Ethernet желісіне қосыңыз",
+  "companionLanHelp": "Екі құрылғы да бір жергілікті желіде болуы керек.",
+  "companionScanTvQr": "Теледидарда көрсетілген кодты сканерлеңіз",
+  "companionPairingExpires": "Код {seconds} секундтан кейін жарамсыз болады",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "Теледидарда растауды күтуде",
+  "companionConfirmPhone": "Осы телефонды растайсыз ба?",
+  "companionConfirmCode": "Растау коды: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "Осы кодтың теледидардағы кодпен сәйкес келетінін тексеріп, теледидарда растаңыз.",
+  "companionPaired": "Жұптасты",
+  "companionPairingRejected": "Жұптасу қабылданбады",
+  "companionPairingExpired": "Жұптасу коды жарамсыз болды. Теледидардан жаңа кодты көрсетуін сұраңыз.",
+  "companionAccessRevoked": "Қатынау кері қайтарылды",
+  "companionIdentityChanged": "Осы теледидардың сәйкестендіргіші өзгерді. Оны жойып, қайта жұптастырыңыз.",
+  "companionForgetDevice": "Осы теледидарды ұмыту",
+  "companionRevokePhone": "Осы телефонды кері қайтару",
+  "companionDeviceLimit": "Бұл теледидарда сенімді телефондардың саны шегіне жетті",
+  "companionResetIdentity": "Жұптасу сәйкестендіргішін қалпына келтіру",
+  "companionResetIdentityDesc": "Барлық жұптасқан телефондарды және теледидардың қауіпсіздік кілтін жояды.",
+  "companionControlPanel": "Қашықтан басқару",
+  "companionStatusOn": "Қорғаныс қосулы",
+  "companionStatusOff": "Қорғаныс өшірулі",
+  "companionTurnOn": "Қосу",
+  "companionTurnOff": "Өшіру",
+  "companionCurrentNode": "Ағымдағы түйін",
+  "companionSelectNode": "Түйінді таңдау",
+  "companionActiveProfile": "Жазылым",
+  "companionUpdateSubscription": "Жазылымды жаңарту",
+  "companionNewSubscriptionUrl": "Жазылым сілтемесі",
+  "companionSetSubscription": "Жазылымды орнату",
+  "companionCommandFailed": "Орындалмады. Қайталап көріңіз.",
+  "companionCommandDone": "Дайын",
+  "companionReload": "Жаңарту"
 }

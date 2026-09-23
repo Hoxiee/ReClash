@@ -138,6 +138,24 @@ class ProxiesAction extends _$ProxiesAction {
     required String groupName,
     required String proxyName,
   }) async {
+    final message = await changeProxyChecked(
+      groupName: groupName,
+      proxyName: proxyName,
+    );
+    if (message != null) {
+      dialogs.showNotifier(
+        currentAppLocalizations.changeProxyFailedTip,
+        level: MessageLevel.error,
+      );
+    }
+  }
+
+  // Revision-safe variant for the companion path (I17): the core error survives to the caller
+  // instead of being swallowed after rollback. Returns null on success, the core message on failure.
+  Future<String?> changeProxyChecked({
+    required String groupName,
+    required String proxyName,
+  }) async {
     final profilesAction = ref.read(profilesActionProvider.notifier);
     final rollbackName =
         _pendingSelectedRollback.remove(groupName) ??
@@ -158,11 +176,7 @@ class ProxiesAction extends _$ProxiesAction {
         logLevel: coreFailureLogLevel(error),
       );
       profilesAction.updateCurrentSelectedMap(groupName, rollbackName);
-      dialogs.showNotifier(
-        currentAppLocalizations.changeProxyFailedTip,
-        level: MessageLevel.error,
-      );
-      return;
+      return error is MessageException ? error.message : error.toString();
     }
     try {
       if (ref.read(appSettingProvider).closeConnections) {
@@ -178,6 +192,7 @@ class ProxiesAction extends _$ProxiesAction {
     }
     ref.read(checkIpNumProvider.notifier).add();
     _testSelectedProxy(groupName);
+    return null;
   }
 
   void _testSelectedProxy(String groupName) {

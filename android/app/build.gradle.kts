@@ -104,6 +104,8 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.core.splashscreen)
     implementation(libs.gson)
+    implementation(libs.nanohttpd)
+    implementation(libs.okhttp)
     implementation(libs.smali.dexlib2) {
         exclude(group = "com.google.guava", module = "guava")
     }

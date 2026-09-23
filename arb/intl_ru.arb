@@ -2175,5 +2175,95 @@
   },
   "smartRoutingLogState": "Состояние",
   "smartRoutingLogCandidates": "Кандидаты",
-  "smartRoutingLogFilter": "Типы"
-}
+  "smartRoutingLogFilter": "Типы",
+  "devices": "Устройства",
+  "devicesDescription": "Управляйте ReClash на телевизоре с этого телефона",
+  "companionAddTelevision": "Добавить устройство",
+  "companionAddPhone": "Добавить телефон",
+  "companionTrustedPhones": "Доверенные телефоны",
+  "companionEnableReceiver": "Разрешить управление с телефона",
+  "companionReceiverRunning": "Готов к сопряжению на {host}",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "Управление с телефона выключено",
+  "companionUnreachable": "Телевизор недоступен в этой сети",
+  "companionNoLan": "Сначала подключите телевизор к Wi-Fi или Ethernet",
+  "companionLanHelp": "Оба устройства должны быть в одной локальной сети.",
+  "companionScanTvQr": "Отсканируйте код на другом устройстве",
+  "companionPairingExpires": "Код истечёт через {seconds} с",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "Ожидание подтверждения на телевизоре",
+  "companionConfirmPhone": "Подтвердить этот телефон?",
+  "companionConfirmCode": "Код подтверждения: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "Убедитесь, что этот код совпадает с кодом на телевизоре, затем подтвердите на телевизоре.",
+  "companionPaired": "Сопряжено",
+  "companionPairingRejected": "Сопряжение отклонено",
+  "companionPairingExpired": "Код сопряжения истёк. Попросите телевизор показать новый.",
+  "companionAccessRevoked": "Доступ отозван",
+  "companionIdentityChanged": "Идентификатор этого телевизора изменился. Удалите его и выполните сопряжение заново.",
+  "companionForgetDevice": "Забыть это устройство",
+  "companionRevokePhone": "Отозвать этот телефон",
+  "companionDeviceLimit": "На этом телевизоре уже максимальное число доверенных телефонов",
+  "companionResetIdentity": "Сбросить идентификатор сопряжения",
+  "companionResetIdentityDesc": "Удаляет все сопряжённые телефоны и ключ безопасности телевизора.",
+  "companionControlPanel": "Управление",
+  "companionStatusOn": "Защита включена",
+  "companionStatusOff": "Защита выключена",
+  "companionTurnOn": "Включить",
+  "companionTurnOff": "Выключить",
+  "companionCurrentNode": "Текущий узел",
+  "companionSelectNode": "Выбрать узел",
+  "companionActiveProfile": "Подписка",
+  "companionUpdateSubscription": "Обновить подписку",
+  "companionNewSubscriptionUrl": "Ссылка на подписку",
+  "companionSetSubscription": "Задать подписку",
+  "companionCommandFailed": "Не получилось. Попробуйте ещё раз.",
+  "companionCommandDone": "Готово",
+  "companionReload": "Обновить",
+  "companionStatusChecking": "Проверка…",
+  "companionOnline": "На связи",
+  "companionOffline": "Не в сети",
+  "companionLastSeen": "Был на связи {when}",
+  "companionNeverConnected": "Ещё не подключались",
+  "companionRename": "Переименовать",
+  "companionDeviceName": "Имя устройства",
+  "companionReconnect": "Переподключиться",
+  "companionReject": "Отклонить",
+  "companionStaleState": "Показано последнее известное состояние",
+  "companionOutcomeUnknown": "Не удалось подтвердить — проверьте состояние",
+  "companionRestartRequired": "Для применения перезапустите подключение",
+  "companionProfiles": "Профили",
+  "companionSendProfile": "Отправить профиль с телефона",
+  "companionSwitchProfile": "Переключиться на этот профиль",
+  "companionProfileActive": "Активен",
+  "companionNoMeasurement": "Нет измерения",
+  "companionControllingHint": "Вы управляете этим устройством",
+  "companionReceiverExplain": "Телефоны в этой сети смогут управлять этим ТВ, пока приём включён.",
+  "companionReceiverExplainPhone": "Другие телефоны в этой сети смогут управлять этим телефоном, пока приём включён.",
+  "companionScanWithPhone": "Откройте ReClash на телефоне и отсканируйте код",
+  "companionSendFromPhone": "Отправить с этого телефона",
+  "companionEnterUrl": "Ввести ссылку"}

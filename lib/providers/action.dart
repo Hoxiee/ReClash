@@ -13,6 +13,7 @@ import 'package:reclash/core/core.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/manager/setup_apply_coordinator.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/service.dart';

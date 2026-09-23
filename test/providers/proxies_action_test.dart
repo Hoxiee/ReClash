@@ -386,6 +386,35 @@ void main() {
       });
     });
 
+    test('changeProxyChecked returns null when the Core accepts', () async {
+      final container = buildContainer(profile: _selectedProfile('HK-00'));
+
+      final message = await actionOf(
+        container,
+      ).changeProxyChecked(groupName: 'Proxy', proxyName: 'HK-01');
+
+      expect(message, isNull);
+      expect(container.read(currentProfileProvider)?.selectedMap, {
+        'Proxy': 'HK-01',
+      });
+    });
+
+    test('changeProxyChecked surfaces the Core message on failure', () async {
+      when(
+        () => core.changeProxy(any()),
+      ).thenAnswer((_) async => 'Not found group');
+      final container = buildContainer(profile: _selectedProfile('HK-00'));
+
+      final message = await actionOf(
+        container,
+      ).changeProxyChecked(groupName: 'Proxy', proxyName: 'HK-01');
+
+      expect(message, 'Not found group');
+      expect(container.read(currentProfileProvider)?.selectedMap, {
+        'Proxy': 'HK-00',
+      });
+    });
+
     test(
       'rolls back to the last selection the Core applied, not the last tap',
       () async {

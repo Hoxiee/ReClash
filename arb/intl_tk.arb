@@ -2276,5 +2276,73 @@
   "quickEdit": "Çalt redaktirlemek",
   "server": "Serwer",
   "writeToSystem": "Ulgama ýazmak",
-  "writeToSystemDesc": "Alnan wagty ulgam sagadyna sinhronlaşdyrmak"
+  "writeToSystemDesc": "Alnan wagty ulgam sagadyna sinhronlaşdyrmak",
+  "devices": "Enjamlar",
+  "devicesDescription": "Bu telefondan telewizordaky ReClash-y dolandyryň",
+  "companionAddTelevision": "Telewizor goş",
+  "companionAddPhone": "Telefon goş",
+  "companionTrustedPhones": "Ynamdar telefonlar",
+  "companionEnableReceiver": "Telefondan dolandyrmaga rugsat ber",
+  "companionReceiverRunning": "{host} salgysynda jübütleşmäge taýýar",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "Telefondan dolandyrmak öçürilen",
+  "companionUnreachable": "Bu torda telewizor elýeterli däl",
+  "companionNoLan": "Ilki telewizory Wi-Fi ýa-da Ethernet-e birikdiriň",
+  "companionLanHelp": "Iki enjam hem bir ýerli tora birikmeli.",
+  "companionScanTvQr": "Telewizorda görkezilen kody skanerläň",
+  "companionPairingExpires": "Kod {seconds} sekuntdan soň möhleti gutarýar",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "Telewizorda tassyklama garaşylýar",
+  "companionConfirmPhone": "Bu telefony tassyklaýarsyňyzmy?",
+  "companionConfirmCode": "Tassyklama kody: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "Bu kodyň telewizordaky bilen gabat gelýändigini barlaň, soňra telewizorda tassyklaň.",
+  "companionPaired": "Jübütleşdi",
+  "companionPairingRejected": "Jübütleşme ret edildi",
+  "companionPairingExpired": "Jübütleşme kodynyň möhleti gutardy. Telewizordan täze kod görkezmegini soraň.",
+  "companionAccessRevoked": "Rugsat yzyna alyndy",
+  "companionIdentityChanged": "Bu telewizoryň kimligi üýtgedi. Ony aýyryp, gaýtadan jübütleşdiriň.",
+  "companionForgetDevice": "Bu telewizory unut",
+  "companionRevokePhone": "Bu telefony yzyna al",
+  "companionDeviceLimit": "Bu telewizorda ynamdar telefonlaryň iň köp sany eýýäm bar",
+  "companionResetIdentity": "Jübütleşme kimligini täzeden düzmek",
+  "companionResetIdentityDesc": "Ähli jübütleşen telefonlary we telewizoryň howpsuzlyk açaryny aýyrýar.",
+  "companionControlPanel": "Uzakdan dolandyrmak",
+  "companionStatusOn": "Goranmak açyk",
+  "companionStatusOff": "Goranmak öçük",
+  "companionTurnOn": "Açmak",
+  "companionTurnOff": "Öçürmek",
+  "companionCurrentNode": "Häzirki düwün",
+  "companionSelectNode": "Düwün saýlamak",
+  "companionActiveProfile": "Abunalyk",
+  "companionUpdateSubscription": "Abunalygy täzelemek",
+  "companionNewSubscriptionUrl": "Abunalyk salgysy",
+  "companionSetSubscription": "Abunalygy bellemek",
+  "companionCommandFailed": "Başartmady. Gaýtadan synanyşyň.",
+  "companionCommandDone": "Taýýar",
+  "companionReload": "Täzelemek"
 }

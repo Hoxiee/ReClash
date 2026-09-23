@@ -22,6 +22,7 @@ class SetupAction extends _$SetupAction {
   bool _runtimeUpdatesEnabled = true;
   final _setupScheduler = SerialTaskScheduler();
   final _listenerScheduler = SerialTaskScheduler();
+  late final _applyCoordinator = SetupApplyCoordinator(fullSetup);
   _RunRequest? _latestRunRequest;
   DateTime? _startTime;
   Future<bool?>? _authorizationAttempt;
@@ -61,6 +62,10 @@ class SetupAction extends _$SetupAction {
     );
     return SetupParams(selectedMap: selectedMap, testUrl: testUrl);
   }
+
+  // Frame-independent entry: local listeners and remote commands schedule apply here so a retained
+  // engine with no Activity still converges. Bursts coalesce into one trailing run.
+  Future<bool> scheduleFullSetup() => _applyCoordinator.request();
 
   Future<bool> fullSetup() async {
     if (!ref.read(initProvider)) return true;

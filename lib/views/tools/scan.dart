@@ -4,14 +4,19 @@ import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/companion/companion_protocol.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+enum ScanMode { profileImport, companionPairing }
+
 class ScanPage extends StatefulWidget {
-  const ScanPage({super.key});
+  const ScanPage({super.key, this.mode = ScanMode.profileImport});
+
+  final ScanMode mode;
 
   @override
   State<ScanPage> createState() => _ScanPageState();
@@ -51,7 +56,15 @@ class _ScanPageState extends State<ScanPage>
       return;
     }
     final value = barcodeCapture.barcodes.firstOrNull?.rawValue;
-    if (value?.isProfileImportLink ?? false) {
+    if (value == null) {
+      return;
+    }
+    // Each mode accepts only its own QR, so one flow never pops a link meant for the other (S02).
+    final matches = switch (widget.mode) {
+      ScanMode.profileImport => value.isProfileImportLink,
+      ScanMode.companionPairing => isCompanionPairingLink(value),
+    };
+    if (matches) {
       _handled = true;
       unawaited(_subscription?.cancel());
       _subscription = null;
@@ -229,7 +242,10 @@ class _ScanPageState extends State<ScanPage>
                   size: 56,
                   onPressed: () async {
                     final result = await globalState.safeRun(
-                      picker.pickerConfigQRCode,
+                      () => picker.pickerConfigQRCode(
+                        companionPairing:
+                            widget.mode == ScanMode.companionPairing,
+                      ),
                     );
                     if (result != null && context.mounted) {
                       Navigator.of(context).pop(result);

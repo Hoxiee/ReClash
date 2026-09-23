@@ -20,11 +20,12 @@ import 'package:path/path.dart' show dirname, join;
 
 import '../appearance/appearance.dart';
 import '../config/advanced.dart';
+import '../devices/devices.dart';
 import '../settings/developer.dart';
+import '../settings/url_scheme.dart';
 import 'connection_doctor.dart';
 import 'core.dart';
 import 'findings.dart';
-import '../settings/url_scheme.dart';
 
 const toolsDoctorPaneId = 'doctor';
 
@@ -104,6 +105,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
           if (system.isDesktop) const _HotkeyItem(),
           if (system.isWindows) const _LoopbackItem(),
           if (system.isAndroid) const _AccessItem(),
+          if (system.isAndroid) const _DevicesItem(),
           const _ConfigItem(),
           const _AdvancedConfigItem(),
           const _SettingItem(),
@@ -362,6 +364,20 @@ class _AccessItem extends StatelessWidget {
       subtitle: Text(context.appLocalizations.accessControlDesc),
       widget: const AccessView(),
       paneId: 'access',
+    );
+  }
+}
+
+class _DevicesItem extends StatelessWidget {
+  const _DevicesItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecorationListItem.open(
+      leading: const Icon(Icons.devices_other),
+      title: Text(context.appLocalizations.devices),
+      subtitle: Text(context.appLocalizations.devicesDescription),
+      widget: const DevicesView(),
     );
   }
 }

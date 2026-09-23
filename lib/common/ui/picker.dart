@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/companion/companion_protocol.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -47,7 +48,9 @@ class Picker {
     return uri;
   }
 
-  Future<String?> pickerConfigQRCode() async {
+  Future<String?> pickerConfigQRCode({
+    bool companionPairing = false,
+  }) async {
     final xFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (xFile == null) {
       return null;
@@ -59,7 +62,11 @@ class Picker {
         formats: [BarcodeFormat.qrCode],
       );
       final result = capture?.barcodes.firstOrNull?.rawValue;
-      if (result == null || !result.isProfileImportLink) {
+      final valid = result != null &&
+          (companionPairing
+              ? isCompanionPairingLink(result)
+              : result.isProfileImportLink);
+      if (!valid) {
         throw MessageException(currentAppLocalizations.pleaseUploadValidQrcode);
       }
       return result;

@@ -2391,5 +2391,104 @@
   },
   "smartRoutingLogState": "State",
   "smartRoutingLogCandidates": "Candidates",
-  "smartRoutingLogFilter": "Kinds"
-}
+  "smartRoutingLogFilter": "Kinds",
+  "devices": "Devices",
+  "devicesDescription": "Control ReClash on your TV from this phone",
+  "companionAddTelevision": "Add a device",
+  "companionAddPhone": "Add a phone",
+  "companionTrustedPhones": "Trusted phones",
+  "companionEnableReceiver": "Allow control from a phone",
+  "companionReceiverRunning": "Ready to pair on {host}",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "Control from a phone is off",
+  "companionUnreachable": "The TV isn't reachable on this network",
+  "companionNoLan": "Connect the TV to Wi-Fi or Ethernet first",
+  "companionLanHelp": "Both devices must be on the same local network.",
+  "companionScanTvQr": "Scan the code shown on the other device",
+  "companionPairingExpires": "Code expires in {seconds}s",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "Waiting for confirmation on the TV",
+  "companionConfirmPhone": "Confirm this phone?",
+  "companionConfirmCode": "Confirmation code: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "Check that this code matches the one on the TV, then confirm on the TV.",
+  "companionPaired": "Paired",
+  "companionPairingRejected": "Pairing was declined",
+  "companionPairingExpired": "The pairing code expired. Ask the TV to show a new one.",
+  "companionAccessRevoked": "Access was revoked",
+  "companionIdentityChanged": "This TV's identity changed. Remove it and pair again.",
+  "companionForgetDevice": "Forget this device",
+  "companionRevokePhone": "Revoke this phone",
+  "companionDeviceLimit": "This TV already has the maximum number of trusted phones",
+  "companionResetIdentity": "Reset pairing identity",
+  "companionResetIdentityDesc": "Removes every paired phone and the TV's security key.",
+  "companionControlPanel": "Remote control",
+  "companionStatusOn": "Protection is on",
+  "companionStatusOff": "Protection is off",
+  "companionTurnOn": "Turn on",
+  "companionTurnOff": "Turn off",
+  "companionCurrentNode": "Current node",
+  "companionSelectNode": "Choose a node",
+  "companionActiveProfile": "Subscription",
+  "companionUpdateSubscription": "Update subscription",
+  "companionNewSubscriptionUrl": "Subscription link",
+  "companionSetSubscription": "Set subscription",
+  "companionCommandFailed": "That didn't go through. Try again.",
+  "companionCommandDone": "Done",
+  "companionReload": "Refresh",
+  "companionStatusChecking": "Checking…",
+  "companionOnline": "Online",
+  "companionOffline": "Offline",
+  "companionLastSeen": "Last seen {when}",
+  "@companionLastSeen": {
+    "description": "Subtitle on a device row showing when the TV last answered.",
+    "placeholders": {
+      "when": {
+        "type": "String",
+        "description": "A relative time such as '5 min ago'."
+      }
+    }
+  },
+  "companionNeverConnected": "Not reached yet",
+  "companionRename": "Rename",
+  "companionDeviceName": "Device name",
+  "companionReconnect": "Reconnect",
+  "companionReject": "Reject",
+  "companionStaleState": "Showing the last known state",
+  "companionOutcomeUnknown": "Couldn't confirm — check the current state",
+  "companionRestartRequired": "Restart the connection to apply",
+  "companionProfiles": "Profiles",
+  "companionSendProfile": "Send a profile from this phone",
+  "companionSwitchProfile": "Switch to this profile",
+  "companionProfileActive": "Active",
+  "companionNoMeasurement": "No measurement",
+  "companionControllingHint": "You're controlling this device",
+  "companionReceiverExplain": "Phones on this network can control this TV while the receiver is on.",
+  "companionReceiverExplainPhone": "Other phones on this network can control this phone while the receiver is on.",
+  "companionScanWithPhone": "Open ReClash on your phone and scan this code",
+  "companionSendFromPhone": "Send from this phone",
+  "companionEnterUrl": "Enter a URL"}

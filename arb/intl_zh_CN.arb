@@ -2143,5 +2143,73 @@
   "quickEdit": "快速编辑",
   "server": "服务器",
   "writeToSystem": "写入系统",
-  "writeToSystemDesc": "将获取到的时间同步到系统时钟"
+  "writeToSystemDesc": "将获取到的时间同步到系统时钟",
+  "devices": "设备",
+  "devicesDescription": "用这部手机控制电视上的 ReClash",
+  "companionAddTelevision": "添加电视",
+  "companionAddPhone": "添加手机",
+  "companionTrustedPhones": "受信任的手机",
+  "companionEnableReceiver": "允许通过手机控制",
+  "companionReceiverRunning": "已可在 {host} 上配对",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "手机控制已关闭",
+  "companionUnreachable": "在此网络中无法连接到电视",
+  "companionNoLan": "请先将电视连接到 Wi-Fi 或以太网",
+  "companionLanHelp": "两台设备必须在同一局域网内。",
+  "companionScanTvQr": "扫描电视上显示的二维码",
+  "companionPairingExpires": "验证码将在 {seconds} 秒后失效",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "正在等待电视上的确认",
+  "companionConfirmPhone": "确认此手机？",
+  "companionConfirmCode": "确认码：{code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "请核对此码与电视上显示的一致，然后在电视上确认。",
+  "companionPaired": "已配对",
+  "companionPairingRejected": "配对已被拒绝",
+  "companionPairingExpired": "配对码已失效。请让电视显示新的配对码。",
+  "companionAccessRevoked": "访问权限已被撤销",
+  "companionIdentityChanged": "此电视的身份已更改。请移除后重新配对。",
+  "companionForgetDevice": "忘记此电视",
+  "companionRevokePhone": "撤销此手机",
+  "companionDeviceLimit": "此电视的受信任手机数量已达上限",
+  "companionResetIdentity": "重置配对身份",
+  "companionResetIdentityDesc": "移除所有已配对的手机以及电视的安全密钥。",
+  "companionControlPanel": "远程控制",
+  "companionStatusOn": "防护已开启",
+  "companionStatusOff": "防护已关闭",
+  "companionTurnOn": "开启",
+  "companionTurnOff": "关闭",
+  "companionCurrentNode": "当前节点",
+  "companionSelectNode": "选择节点",
+  "companionActiveProfile": "订阅",
+  "companionUpdateSubscription": "更新订阅",
+  "companionNewSubscriptionUrl": "订阅链接",
+  "companionSetSubscription": "设置订阅",
+  "companionCommandFailed": "操作未成功，请重试。",
+  "companionCommandDone": "完成",
+  "companionReload": "刷新"
 }

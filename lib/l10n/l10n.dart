@@ -16914,6 +16914,611 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `Devices`
+  String get devices {
+    return Intl.message('Devices', name: 'devices', desc: '', args: []);
+  }
+
+  /// `Control ReClash on your TV from this phone`
+  String get devicesDescription {
+    return Intl.message(
+      'Control ReClash on your TV from this phone',
+      name: 'devicesDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a device`
+  String get companionAddTelevision {
+    return Intl.message(
+      'Add a device',
+      name: 'companionAddTelevision',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a phone`
+  String get companionAddPhone {
+    return Intl.message(
+      'Add a phone',
+      name: 'companionAddPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Trusted phones`
+  String get companionTrustedPhones {
+    return Intl.message(
+      'Trusted phones',
+      name: 'companionTrustedPhones',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow control from a phone`
+  String get companionEnableReceiver {
+    return Intl.message(
+      'Allow control from a phone',
+      name: 'companionEnableReceiver',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ready to pair on {host}`
+  String companionReceiverRunning(String host) {
+    return Intl.message(
+      'Ready to pair on $host',
+      name: 'companionReceiverRunning',
+      desc: 'Status line telling the user the TV is ready to accept a pairing on the given host.',
+      args: [host],
+    );
+  }
+
+  /// `Control from a phone is off`
+  String get companionReceiverStopped {
+    return Intl.message(
+      'Control from a phone is off',
+      name: 'companionReceiverStopped',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The TV isn't reachable on this network`
+  String get companionUnreachable {
+    return Intl.message(
+      'The TV isn\'t reachable on this network',
+      name: 'companionUnreachable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connect the TV to Wi-Fi or Ethernet first`
+  String get companionNoLan {
+    return Intl.message(
+      'Connect the TV to Wi-Fi or Ethernet first',
+      name: 'companionNoLan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Both devices must be on the same local network.`
+  String get companionLanHelp {
+    return Intl.message(
+      'Both devices must be on the same local network.',
+      name: 'companionLanHelp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan the code shown on the other device`
+  String get companionScanTvQr {
+    return Intl.message(
+      'Scan the code shown on the other device',
+      name: 'companionScanTvQr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Code expires in {seconds}s`
+  String companionPairingExpires(int seconds) {
+    return Intl.message(
+      'Code expires in ${seconds}s',
+      name: 'companionPairingExpires',
+      desc: 'Countdown showing how many seconds remain before the pairing code expires.',
+      args: [seconds],
+    );
+  }
+
+  /// `Waiting for confirmation on the TV`
+  String get companionWaitingApproval {
+    return Intl.message(
+      'Waiting for confirmation on the TV',
+      name: 'companionWaitingApproval',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm this phone?`
+  String get companionConfirmPhone {
+    return Intl.message(
+      'Confirm this phone?',
+      name: 'companionConfirmPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirmation code: {code}`
+  String companionConfirmCode(String code) {
+    return Intl.message(
+      'Confirmation code: $code',
+      name: 'companionConfirmCode',
+      desc: 'Displays the confirmation code the user compares against the TV.',
+      args: [code],
+    );
+  }
+
+  /// `Check that this code matches the one on the TV, then confirm on the TV.`
+  String get companionConfirmOnTv {
+    return Intl.message(
+      'Check that this code matches the one on the TV, then confirm on the TV.',
+      name: 'companionConfirmOnTv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Paired`
+  String get companionPaired {
+    return Intl.message('Paired', name: 'companionPaired', desc: '', args: []);
+  }
+
+  /// `Pairing was declined`
+  String get companionPairingRejected {
+    return Intl.message(
+      'Pairing was declined',
+      name: 'companionPairingRejected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The pairing code expired. Ask the TV to show a new one.`
+  String get companionPairingExpired {
+    return Intl.message(
+      'The pairing code expired. Ask the TV to show a new one.',
+      name: 'companionPairingExpired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access was revoked`
+  String get companionAccessRevoked {
+    return Intl.message(
+      'Access was revoked',
+      name: 'companionAccessRevoked',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This TV's identity changed. Remove it and pair again.`
+  String get companionIdentityChanged {
+    return Intl.message(
+      'This TV\'s identity changed. Remove it and pair again.',
+      name: 'companionIdentityChanged',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forget this device`
+  String get companionForgetDevice {
+    return Intl.message(
+      'Forget this device',
+      name: 'companionForgetDevice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Revoke this phone`
+  String get companionRevokePhone {
+    return Intl.message(
+      'Revoke this phone',
+      name: 'companionRevokePhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This TV already has the maximum number of trusted phones`
+  String get companionDeviceLimit {
+    return Intl.message(
+      'This TV already has the maximum number of trusted phones',
+      name: 'companionDeviceLimit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset pairing identity`
+  String get companionResetIdentity {
+    return Intl.message(
+      'Reset pairing identity',
+      name: 'companionResetIdentity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Removes every paired phone and the TV's security key.`
+  String get companionResetIdentityDesc {
+    return Intl.message(
+      'Removes every paired phone and the TV\'s security key.',
+      name: 'companionResetIdentityDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remote control`
+  String get companionControlPanel {
+    return Intl.message(
+      'Remote control',
+      name: 'companionControlPanel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection is on`
+  String get companionStatusOn {
+    return Intl.message(
+      'Protection is on',
+      name: 'companionStatusOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection is off`
+  String get companionStatusOff {
+    return Intl.message(
+      'Protection is off',
+      name: 'companionStatusOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn on`
+  String get companionTurnOn {
+    return Intl.message('Turn on', name: 'companionTurnOn', desc: '', args: []);
+  }
+
+  /// `Turn off`
+  String get companionTurnOff {
+    return Intl.message(
+      'Turn off',
+      name: 'companionTurnOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current node`
+  String get companionCurrentNode {
+    return Intl.message(
+      'Current node',
+      name: 'companionCurrentNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose a node`
+  String get companionSelectNode {
+    return Intl.message(
+      'Choose a node',
+      name: 'companionSelectNode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription`
+  String get companionActiveProfile {
+    return Intl.message(
+      'Subscription',
+      name: 'companionActiveProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update subscription`
+  String get companionUpdateSubscription {
+    return Intl.message(
+      'Update subscription',
+      name: 'companionUpdateSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Subscription link`
+  String get companionNewSubscriptionUrl {
+    return Intl.message(
+      'Subscription link',
+      name: 'companionNewSubscriptionUrl',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Set subscription`
+  String get companionSetSubscription {
+    return Intl.message(
+      'Set subscription',
+      name: 'companionSetSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `That didn't go through. Try again.`
+  String get companionCommandFailed {
+    return Intl.message(
+      'That didn\'t go through. Try again.',
+      name: 'companionCommandFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Done`
+  String get companionCommandDone {
+    return Intl.message(
+      'Done',
+      name: 'companionCommandDone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Refresh`
+  String get companionReload {
+    return Intl.message('Refresh', name: 'companionReload', desc: '', args: []);
+  }
+
+  /// `Checking…`
+  String get companionStatusChecking {
+    return Intl.message(
+      'Checking…',
+      name: 'companionStatusChecking',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Online`
+  String get companionOnline {
+    return Intl.message('Online', name: 'companionOnline', desc: '', args: []);
+  }
+
+  /// `Offline`
+  String get companionOffline {
+    return Intl.message(
+      'Offline',
+      name: 'companionOffline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last seen {when}`
+  String companionLastSeen(String when) {
+    return Intl.message(
+      'Last seen $when',
+      name: 'companionLastSeen',
+      desc: 'Subtitle on a device row showing when the TV last answered.',
+      args: [when],
+    );
+  }
+
+  /// `Not reached yet`
+  String get companionNeverConnected {
+    return Intl.message(
+      'Not reached yet',
+      name: 'companionNeverConnected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rename`
+  String get companionRename {
+    return Intl.message('Rename', name: 'companionRename', desc: '', args: []);
+  }
+
+  /// `Device name`
+  String get companionDeviceName {
+    return Intl.message(
+      'Device name',
+      name: 'companionDeviceName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reconnect`
+  String get companionReconnect {
+    return Intl.message(
+      'Reconnect',
+      name: 'companionReconnect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reject`
+  String get companionReject {
+    return Intl.message('Reject', name: 'companionReject', desc: '', args: []);
+  }
+
+  /// `Showing the last known state`
+  String get companionStaleState {
+    return Intl.message(
+      'Showing the last known state',
+      name: 'companionStaleState',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't confirm — check the current state`
+  String get companionOutcomeUnknown {
+    return Intl.message(
+      'Couldn\'t confirm — check the current state',
+      name: 'companionOutcomeUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Restart the connection to apply`
+  String get companionRestartRequired {
+    return Intl.message(
+      'Restart the connection to apply',
+      name: 'companionRestartRequired',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Profiles`
+  String get companionProfiles {
+    return Intl.message(
+      'Profiles',
+      name: 'companionProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send a profile from this phone`
+  String get companionSendProfile {
+    return Intl.message(
+      'Send a profile from this phone',
+      name: 'companionSendProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch to this profile`
+  String get companionSwitchProfile {
+    return Intl.message(
+      'Switch to this profile',
+      name: 'companionSwitchProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Active`
+  String get companionProfileActive {
+    return Intl.message(
+      'Active',
+      name: 'companionProfileActive',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No measurement`
+  String get companionNoMeasurement {
+    return Intl.message(
+      'No measurement',
+      name: 'companionNoMeasurement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You're controlling this device`
+  String get companionControllingHint {
+    return Intl.message(
+      'You\'re controlling this device',
+      name: 'companionControllingHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Phones on this network can control this TV while the receiver is on.`
+  String get companionReceiverExplain {
+    return Intl.message(
+      'Phones on this network can control this TV while the receiver is on.',
+      name: 'companionReceiverExplain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other phones on this network can control this phone while the receiver is on.`
+  String get companionReceiverExplainPhone {
+    return Intl.message(
+      'Other phones on this network can control this phone while the receiver is on.',
+      name: 'companionReceiverExplainPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open ReClash on your phone and scan this code`
+  String get companionScanWithPhone {
+    return Intl.message(
+      'Open ReClash on your phone and scan this code',
+      name: 'companionScanWithPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send from this phone`
+  String get companionSendFromPhone {
+    return Intl.message(
+      'Send from this phone',
+      name: 'companionSendFromPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a URL`
+  String get companionEnterUrl {
+    return Intl.message(
+      'Enter a URL',
+      name: 'companionEnterUrl',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

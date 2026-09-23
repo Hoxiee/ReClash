@@ -2143,5 +2143,73 @@
   "quickEdit": "クイック編集",
   "server": "サーバー",
   "writeToSystem": "システムに書き込む",
-  "writeToSystemDesc": "取得した時刻をシステムクロックに同期します"
+  "writeToSystemDesc": "取得した時刻をシステムクロックに同期します",
+  "devices": "デバイス",
+  "devicesDescription": "この電話からテレビの ReClash を操作します",
+  "companionAddTelevision": "テレビを追加",
+  "companionAddPhone": "電話を追加",
+  "companionTrustedPhones": "信頼済みの電話",
+  "companionEnableReceiver": "電話からの操作を許可",
+  "companionReceiverRunning": "{host} でペアリングの準備ができました",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "電話からの操作はオフです",
+  "companionUnreachable": "このネットワークではテレビに接続できません",
+  "companionNoLan": "先にテレビを Wi-Fi またはイーサネットに接続してください",
+  "companionLanHelp": "両方のデバイスが同じローカルネットワークにある必要があります。",
+  "companionScanTvQr": "テレビに表示されたコードをスキャンしてください",
+  "companionPairingExpires": "コードは {seconds} 秒で失効します",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "テレビでの確認を待っています",
+  "companionConfirmPhone": "この電話を確認しますか？",
+  "companionConfirmCode": "確認コード: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "このコードがテレビに表示されたものと一致することを確認し、テレビ側で承認してください。",
+  "companionPaired": "ペアリング済み",
+  "companionPairingRejected": "ペアリングが拒否されました",
+  "companionPairingExpired": "ペアリングコードが失効しました。テレビで新しいコードを表示してください。",
+  "companionAccessRevoked": "アクセスが取り消されました",
+  "companionIdentityChanged": "このテレビの識別情報が変わりました。削除して再度ペアリングしてください。",
+  "companionForgetDevice": "このテレビを削除",
+  "companionRevokePhone": "この電話を取り消す",
+  "companionDeviceLimit": "このテレビには信頼済みの電話がすでに上限まで登録されています",
+  "companionResetIdentity": "ペアリング識別情報をリセット",
+  "companionResetIdentityDesc": "ペアリング済みのすべての電話とテレビのセキュリティキーを削除します。",
+  "companionControlPanel": "リモート操作",
+  "companionStatusOn": "保護は有効です",
+  "companionStatusOff": "保護は無効です",
+  "companionTurnOn": "オンにする",
+  "companionTurnOff": "オフにする",
+  "companionCurrentNode": "現在のノード",
+  "companionSelectNode": "ノードを選択",
+  "companionActiveProfile": "サブスクリプション",
+  "companionUpdateSubscription": "サブスクリプションを更新",
+  "companionNewSubscriptionUrl": "サブスクリプションのリンク",
+  "companionSetSubscription": "サブスクリプションを設定",
+  "companionCommandFailed": "実行できませんでした。もう一度お試しください。",
+  "companionCommandDone": "完了",
+  "companionReload": "更新"
 }

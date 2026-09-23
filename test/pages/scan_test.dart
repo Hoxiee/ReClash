@@ -98,6 +98,7 @@ void main() {
   Future<void> pumpScanPage(
     WidgetTester tester, {
     required void Function(String? result) onPopped,
+    ScanMode mode = ScanMode.profileImport,
   }) async {
     late BuildContext hostContext;
     await tester.pumpWidget(
@@ -115,7 +116,7 @@ void main() {
     unawaited(
       Navigator.of(hostContext)
           .push<String>(
-            MaterialPageRoute<String>(builder: (_) => const ScanPage()),
+            MaterialPageRoute<String>(builder: (_) => ScanPage(mode: mode)),
           )
           .then(onPopped),
     );
@@ -264,6 +265,59 @@ void main() {
 
       expect(platform.startCalls, 2);
       expect(find.widgetWithText(FilledButton, 'Allow'), findsNothing);
+    });
+  });
+
+  group('ScanPage companion mode (S02 never crosses over)', () {
+    const companionQr =
+        'reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM';
+
+    testWidgets('a companion pairing QR pops only in companion mode', (
+      tester,
+    ) async {
+      String? result;
+      await pumpScanPage(
+        tester,
+        mode: ScanMode.companionPairing,
+        onPopped: (value) => result = value,
+      );
+
+      platform.emit(_capture(type: BarcodeType.text, rawValue: companionQr));
+      await tester.pumpAndSettle();
+
+      expect(result, companionQr);
+    });
+
+    testWidgets('a subscription URL never pops in companion mode', (
+      tester,
+    ) async {
+      String? result = 'unset';
+      await pumpScanPage(
+        tester,
+        mode: ScanMode.companionPairing,
+        onPopped: (value) => result = value,
+      );
+
+      platform.emit(
+        _capture(type: BarcodeType.url, rawValue: 'https://sub.example/x'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(result, 'unset');
+      expect(find.byType(ScanPage), findsOneWidget);
+    });
+
+    testWidgets('a companion QR never pops in profile-import mode', (
+      tester,
+    ) async {
+      String? result = 'unset';
+      await pumpScanPage(tester, onPopped: (value) => result = value);
+
+      platform.emit(_capture(type: BarcodeType.text, rawValue: companionQr));
+      await tester.pumpAndSettle();
+
+      expect(result, 'unset');
+      expect(find.byType(ScanPage), findsOneWidget);
     });
   });
 

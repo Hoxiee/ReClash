@@ -5,6 +5,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/app/boot_guard.dart';
 import 'package:reclash/common/app/boot_record.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/companion/companion_bridge.dart';
+import 'package:reclash/common/companion/companion_gate_probe.dart';
 import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/common/app/migration.dart';
 import 'package:reclash/common/app/permission.dart';
@@ -200,6 +202,10 @@ class Bootstrap {
   Future<void> attach() async {
     if (globalState.isAttach == true) {
       return;
+    }
+    if (Platform.isAndroid) {
+      registerCompanionGateProbe();
+      registerCompanionBridge();
     }
     final outcome = await _initApp();
     if (outcome == StartupOutcome.completed) {

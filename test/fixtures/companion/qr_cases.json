@@ -1,0 +1,30 @@
+{
+  "note": "Shared Kotlin/Dart pairing-QR parser fixtures. No real device secrets: byte values are synthetic.",
+  "valid": {
+    "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM",
+    "deviceId": "AQIDBAUGBwgJCgsMDQ4PEA",
+    "host": "192.168.1.42",
+    "port": 35179,
+    "spkiPin": "CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk",
+    "pairingSecret": "ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"
+  },
+  "rejected": [
+    {"reason": "wrongScheme", "raw": "https://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "wrongScheme", "raw": "https://sub.example.com/config.yaml"},
+    {"reason": "wrongPath", "raw": "reclash://companion/connect?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "wrongPath", "raw": "reclash://install-config?url=https://sub.example.com/x"},
+    {"reason": "hasUserInfo", "raw": "reclash://user@companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "hasFragment", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM#frag"},
+    {"reason": "unsupportedVersion", "raw": "reclash://companion/pair?v=2&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "duplicateParam", "raw": "reclash://companion/pair?v=1&v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "missingParam", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk"},
+    {"reason": "invalidDeviceId", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4P&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidHost", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=8.8.8.8&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidHost", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.256&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidHost", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.01.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidPort", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=70000&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidPort", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=0&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidPin", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBES&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgoM"},
+    {"reason": "invalidSecret", "raw": "reclash://companion/pair?v=1&d=AQIDBAUGBwgJCgsMDQ4PEA&h=192.168.1.42&p=35179&k=CgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCk&s=ZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1-f4CBgg"}
+  ]
+}

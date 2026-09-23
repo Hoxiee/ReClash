@@ -2276,5 +2276,73 @@
   "quickEdit": "Tezkor tahrirlash",
   "server": "Server",
   "writeToSystem": "Tizimga yozish",
-  "writeToSystemDesc": "Olingan vaqtni tizim soatiga sinxronlash"
+  "writeToSystemDesc": "Olingan vaqtni tizim soatiga sinxronlash",
+  "devices": "Qurilmalar",
+  "devicesDescription": "Ushbu telefondan televizordagi ReClash’ni boshqaring",
+  "companionAddTelevision": "Televizor qo‘shish",
+  "companionAddPhone": "Telefon qo‘shish",
+  "companionTrustedPhones": "Ishonchli telefonlar",
+  "companionEnableReceiver": "Telefondan boshqarishga ruxsat berish",
+  "companionReceiverRunning": "{host} manzilida juftlashga tayyor",
+  "@companionReceiverRunning": {
+    "description": "Status line telling the user the TV is ready to accept a pairing on the given host.",
+    "placeholders": {
+      "host": {
+        "type": "String",
+        "description": "The LAN host/address the TV receiver is listening on."
+      }
+    }
+  },
+  "companionReceiverStopped": "Telefondan boshqarish o‘chirilgan",
+  "companionUnreachable": "Bu tarmoqda televizorga ulanib bo‘lmaydi",
+  "companionNoLan": "Avval televizorni Wi-Fi yoki Ethernet’ga ulang",
+  "companionLanHelp": "Ikkala qurilma ham bir xil mahalliy tarmoqda bo‘lishi kerak.",
+  "companionScanTvQr": "Televizorda ko‘rsatilgan kodni skanerlang",
+  "companionPairingExpires": "Kod {seconds} soniyada tugaydi",
+  "@companionPairingExpires": {
+    "description": "Countdown showing how many seconds remain before the pairing code expires.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "description": "Seconds remaining before the pairing code expires."
+      }
+    }
+  },
+  "companionWaitingApproval": "Televizorda tasdiqlash kutilmoqda",
+  "companionConfirmPhone": "Ushbu telefon tasdiqlansinmi?",
+  "companionConfirmCode": "Tasdiqlash kodi: {code}",
+  "@companionConfirmCode": {
+    "description": "Displays the confirmation code the user compares against the TV.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "description": "The short confirmation code shown for the pairing session."
+      }
+    }
+  },
+  "companionConfirmOnTv": "Ushbu kod televizordagi kodga mos kelishini tekshiring, so‘ng televizorda tasdiqlang.",
+  "companionPaired": "Juftlandi",
+  "companionPairingRejected": "Juftlash rad etildi",
+  "companionPairingExpired": "Juftlash kodi muddati tugadi. Televizordan yangi kod ko‘rsatishini so‘rang.",
+  "companionAccessRevoked": "Ruxsat bekor qilindi",
+  "companionIdentityChanged": "Ushbu televizor identifikatori o‘zgardi. Uni olib tashlab, qayta juftlang.",
+  "companionForgetDevice": "Ushbu televizorni unutish",
+  "companionRevokePhone": "Ushbu telefonni bekor qilish",
+  "companionDeviceLimit": "Bu televizorda ishonchli telefonlarning maksimal soni allaqachon mavjud",
+  "companionResetIdentity": "Juftlash identifikatorini tiklash",
+  "companionResetIdentityDesc": "Barcha juftlangan telefonlarni va televizorning xavfsizlik kalitini o‘chiradi.",
+  "companionControlPanel": "Masofadan boshqarish",
+  "companionStatusOn": "Himoya yoqilgan",
+  "companionStatusOff": "Himoya o‘chirilgan",
+  "companionTurnOn": "Yoqish",
+  "companionTurnOff": "O‘chirish",
+  "companionCurrentNode": "Joriy tugun",
+  "companionSelectNode": "Tugunni tanlash",
+  "companionActiveProfile": "Obuna",
+  "companionUpdateSubscription": "Obunani yangilash",
+  "companionNewSubscriptionUrl": "Obuna havolasi",
+  "companionSetSubscription": "Obunani o‘rnatish",
+  "companionCommandFailed": "Bajarilmadi. Qayta urinib ko‘ring.",
+  "companionCommandDone": "Tayyor",
+  "companionReload": "Yangilash"
 }
