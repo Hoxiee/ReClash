@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"strings"
@@ -13,7 +13,7 @@ func doctorEvidenceFromFlow(event tunnel.FlowEvidence) doctorEvidence {
 	fact := doctorEvidence{
 		Network: event.Network.String(),
 		Inbound: doctorInboundCode(event.InboundType),
-		at:      event.At,
+		At:      event.At,
 	}
 	switch event.Stage {
 	case tunnel.FlowEvidenceIngress:
@@ -83,7 +83,7 @@ func doctorEvidenceFromTracker(tracker statistic.Tracker, progress bool) doctorE
 		Outcome:    outcome,
 		Confidence: doctorConfirmed,
 		Code:       code,
-		at:         time.Now(),
+		At:         time.Now(),
 	}
 	if tracker != nil && tracker.Info() != nil && tracker.Info().Metadata != nil {
 		fact.Network = tracker.Info().Metadata.NetWork.String()

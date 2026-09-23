@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"context"
@@ -246,13 +246,13 @@ func (actor *doctorActor) ObserveFlow(event tunnel.FlowEvidence) {
 		}
 		if event.Stage == tunnel.FlowEvidenceIngress {
 			if expectation, candidate := actor.expectations.candidate(observation, tunGeneration, actor.now()); candidate {
-				safeGoDetached("connection doctor ingress identity", func() {
+				goDetached("connection doctor ingress identity", func() {
 					resolved, ok := actor.resolveProbeIdentity(observation)
 					if !ok {
 						actor.activeEvidence(expectation.ExamID, doctorEvidence{
 							Kind: doctorEvidenceIngress, Layer: doctorLayerIngress,
 							Outcome: doctorOutcomeSeen, Confidence: doctorInsufficient,
-							Code: "appIngressIdentityUnavailable", Inbound: "tun", at: actor.now(),
+							Code: "appIngressIdentityUnavailable", Inbound: "tun", At: actor.now(),
 						})
 						return
 					}

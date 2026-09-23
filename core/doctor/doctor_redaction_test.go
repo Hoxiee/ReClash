@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ func TestDoctorReportUsesExportTimeAndKeepsIdentifiersRedacted(t *testing.T) {
 		UpdatedAt: before,
 		Evidence: []doctorEvidence{{
 			Kind: doctorEvidenceProbe, Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded,
-			Confidence: doctorConfirmed, Network: "tcp", Inbound: "tun", at: time.Now(),
+			Confidence: doctorConfirmed, Network: "tcp", Inbound: "tun", At: time.Now(),
 		}},
 	})
 	if report.GeneratedAt <= before {

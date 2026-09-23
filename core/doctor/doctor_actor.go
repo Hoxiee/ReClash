@@ -1,12 +1,10 @@
-package main
+package doctor
 
 import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"slices"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -154,7 +152,7 @@ func newDoctorActor(runtime doctorRuntime, publish func(doctorStatusProjection))
 	actor.applyRuntimePathContext()
 	actor.refreshActions()
 	actor.storeView()
-	safeGoDetached("connection doctor actor", actor.loop)
+	goDetached("connection doctor actor", actor.loop)
 	return actor
 }
 
@@ -279,7 +277,7 @@ func (actor *doctorActor) start(params doctorStartParams) doctorSnapshot {
 	examID := actor.snapshot.ExamID
 	actor.scheduleExamDeadline(examID)
 	actor.changed()
-	safeGoDetached("connection doctor exam", func() {
+	goDetached("connection doctor exam", func() {
 		actor.runExam(ctx, examID, mode)
 	})
 	return actor.copySnapshot()
@@ -461,213 +459,11 @@ func (actor *doctorActor) bumpGeneration(kind doctorGenerationKind) {
 	actor.changed()
 }
 
-func (actor *doctorActor) handlePassive(evidence doctorEvidence) {
-	if actor.snapshot.State == doctorExamining {
-		return
-	}
-	listenerFailed := evidence.Code == "byeDpiListenerFailed" && evidence.Inbound == "byedpi"
-	freshExam := actor.snapshot.ExamID != "" &&
-		(actor.snapshot.State == doctorComplete || actor.snapshot.State == doctorInconclusive) &&
-		actor.snapshot.FreshUntil > actor.now().UnixMilli()
-	if freshExam && !listenerFailed {
-		return
-	}
-	if actor.snapshot.State != doctorObserving {
-		actor.resetObservation()
-	}
-	actor.snapshot.Scope = doctorScopeForEvidence(evidence)
-	actor.appendEvidence(evidence)
-	if doctorPassiveHealthEvidence(evidence, actor.pathContext()) {
-		actor.snapshot.Health = doctorHealthy
-		actor.snapshot.Confidence = doctorConfirmed
-		actor.snapshot.CauseCode = ""
-		actor.snapshot.Layer = ""
-		actor.snapshot.FreshUntil = actor.now().Add(doctorEvidenceFreshFor).UnixMilli()
-		actor.scheduleFreshnessExpiry()
-	}
-	if listenerFailed {
-		actor.snapshot.Health = doctorBroken
-		actor.snapshot.Confidence = doctorConfirmed
-		actor.snapshot.CauseCode = evidence.Code
-		actor.snapshot.Layer = evidence.Layer
-		actor.snapshot.FreshUntil = actor.now().Add(doctorEvidenceFreshFor).UnixMilli()
-		actor.scheduleFreshnessExpiry()
-	}
-	actor.snapshot.Severity = doctorSeverityFor(actor.snapshot.Health)
-	actor.passiveDirty = true
-	actor.schedulePassiveFlush()
-}
-
-func doctorPassiveHealthEvidence(evidence doctorEvidence, path doctorPathContext) bool {
-	return (path.PathKind == doctorPathLocalProxy || path.PathKind == doctorPathDirect || path.PathKind == doctorPathByeDPI) &&
-		evidence.Outcome == doctorOutcomeSucceeded && evidence.Confidence == doctorConfirmed && evidence.Layer == doctorLayerMarker
-}
-
-func (actor *doctorActor) resetObservation() {
-	actor.ingressGate.reset()
-	actor.snapshot.ExamID = ""
-	actor.snapshot.Mode = ""
-	actor.snapshot.State = doctorObserving
-	actor.snapshot.Health = doctorUnknown
-	actor.snapshot.Confidence = doctorInsufficient
-	actor.snapshot.CauseCode = ""
-	actor.snapshot.Layer = ""
-	actor.snapshot.Scope = doctorScopeUnknown
-	actor.snapshot.StartGenerations = doctorGenerations{}
-	actor.snapshot.StartedAt = 0
-	actor.snapshot.Progress = doctorProgress{}
-	actor.snapshot.Severity = doctorSeverityInfo
-	actor.snapshot.FreshUntil = 0
-	actor.snapshot.EvidenceDropped = 0
-	actor.snapshot.Evidence = []doctorEvidence{}
-	actor.snapshot.Stages = doctorStages(nil, actor.pathContext(), false)
-	actor.requireAppIngressProof = false
-	actor.stopFreshnessTimer()
-}
-
-func (actor *doctorActor) stopFreshnessTimer() {
-	actor.freshnessToken++
-	if actor.freshnessTimer != nil {
-		actor.freshnessTimer.Stop()
-	}
-}
-
-func (actor *doctorActor) schedulePassiveFlush() {
-	if actor.passiveFlushScheduled {
-		return
-	}
-	actor.passiveFlushScheduled = true
-	time.AfterFunc(doctorPassivePublishPeriod, func() {
-		actor.sendCommand(context.Background(), doctorCommand{kind: doctorPassiveFlushCommand})
-	})
-}
-
-func (actor *doctorActor) flushPassive() {
-	if !actor.passiveDirty {
-		return
-	}
-	actor.passiveDirty = false
-	actor.changed()
-}
-
-func (actor *doctorActor) scheduleFreshnessExpiry() {
-	actor.freshnessToken++
-	token := actor.freshnessToken
-	deadline := time.UnixMilli(actor.snapshot.FreshUntil)
-	delay := deadline.Sub(actor.now())
-	if delay < 0 {
-		delay = 0
-	}
-	if actor.freshnessTimer == nil {
-		actor.freshnessTimer = time.AfterFunc(delay, func() {
-			actor.sendCommand(context.Background(), doctorCommand{kind: doctorFreshnessExpiredCommand, token: token})
-		})
-		return
-	}
-	actor.freshnessTimer.Stop()
-	actor.freshnessTimer = time.AfterFunc(delay, func() {
-		actor.sendCommand(context.Background(), doctorCommand{kind: doctorFreshnessExpiredCommand, token: token})
-	})
-}
-
-func (actor *doctorActor) expireFreshness(token uint64) {
-	if (token != 0 && token != actor.freshnessToken) || !actor.freshnessExpired() {
-		return
-	}
-	actor.snapshot.Health = doctorUnknown
-	actor.snapshot.Confidence = doctorInsufficient
-	actor.snapshot.Severity = doctorSeverityInfo
-	actor.snapshot.CauseCode = "staleEvidence"
-	actor.snapshot.Layer = ""
-	actor.snapshot.FreshUntil = 0
-	actor.changed()
-}
-
-func (actor *doctorActor) applyPendingPlatformStatus() {
-	if actor.pendingPlatform == nil {
-		return
-	}
-	evidence := *actor.pendingPlatform
-	actor.pendingPlatform = nil
-	actor.handlePassive(evidence)
-}
-
 func (actor *doctorActor) appendEvidence(evidence doctorEvidence) {
-	if actor.snapshot.StartedAt != 0 && evidence.at.IsZero() == false {
-		evidence.OffsetMillis = evidence.at.UnixMilli() - actor.snapshot.StartedAt
+	if actor.snapshot.StartedAt != 0 && evidence.At.IsZero() == false {
+		evidence.OffsetMillis = evidence.At.UnixMilli() - actor.snapshot.StartedAt
 	}
 	actor.snapshot.Evidence = appendBounded(actor.snapshot.Evidence, evidence, doctorMaxFacts)
-}
-
-func (actor *doctorActor) updateExamVerdict() {
-	verdict := reduceDoctorEvidence(actor.snapshot.Evidence, false, actor.pathContext(), actor.requiresAppIngressProof())
-	actor.snapshot.Health = verdict.Health
-	actor.snapshot.Confidence = verdict.Confidence
-	actor.snapshot.CauseCode = verdict.CauseCode
-	actor.snapshot.Layer = verdict.Layer
-	actor.snapshot.Severity = doctorSeverityFor(verdict.Health)
-	actor.snapshot.Progress.Completed = doctorCompletedProbeCount(actor.snapshot.Evidence, actor.requireAppIngressProof)
-	if verdict.Layer != "" {
-		markDoctorConsequences(actor.snapshot.Evidence, verdict.Layer)
-	}
-	actor.snapshot.Stages = doctorStages(actor.snapshot.Evidence, actor.pathContext(), false)
-}
-
-func doctorCompletedProbeCount(evidence []doctorEvidence, requireAppIngressProof bool) int {
-	completed := 0
-	if slices.ContainsFunc(evidence, func(fact doctorEvidence) bool {
-		return fact.Code == "coreResolverSucceeded" || strings.HasPrefix(fact.Code, "coreResolver")
-	}) {
-		completed++
-	}
-	if slices.ContainsFunc(evidence, func(fact doctorEvidence) bool {
-		return fact.Code == "systemResolverSucceeded" || strings.HasPrefix(fact.Code, "systemResolver")
-	}) {
-		completed++
-	}
-	if requireAppIngressProof && slices.ContainsFunc(evidence, func(fact doctorEvidence) bool {
-		return (fact.Layer == doctorLayerIngress && fact.Kind == doctorEvidenceProbe) || fact.Code == "appIngressMatched"
-	}) {
-		completed++
-	}
-	if slices.ContainsFunc(evidence, func(fact doctorEvidence) bool {
-		return fact.Layer == doctorLayerMarker && strings.HasPrefix(fact.Code, "applicationProbe")
-	}) {
-		completed++
-	}
-	return completed
-}
-
-func (actor *doctorActor) appIngressProofAvailable() bool {
-	if !actor.snapshot.Capabilities.TunIngressProof {
-		return false
-	}
-	provider, ok := actor.runtime.(interface{ DoctorAppIngressAvailable() bool })
-	return ok && provider.DoctorAppIngressAvailable()
-}
-
-func (actor *doctorActor) requiresAppIngressProof() bool {
-	return actor.requireAppIngressProof
-}
-
-func (actor *doctorActor) applyVerdict(terminal bool) {
-	verdict := reduceDoctorEvidence(actor.snapshot.Evidence, terminal, actor.pathContext(), actor.requiresAppIngressProof())
-	actor.snapshot.State = verdict.State
-	actor.snapshot.Health = verdict.Health
-	actor.snapshot.Confidence = verdict.Confidence
-	actor.snapshot.CauseCode = verdict.CauseCode
-	actor.snapshot.Layer = verdict.Layer
-	actor.snapshot.Severity = doctorSeverityFor(verdict.Health)
-	if verdict.Layer != "" {
-		markDoctorConsequences(actor.snapshot.Evidence, verdict.Layer)
-	}
-	actor.snapshot.Stages = doctorStages(actor.snapshot.Evidence, actor.pathContext(), terminal)
-	if terminal {
-		actor.snapshot.Progress.Phase = "complete"
-		actor.snapshot.Progress.Completed = actor.snapshot.Progress.Total
-		actor.snapshot.FreshUntil = actor.now().Add(doctorEvidenceFreshFor).UnixMilli()
-		actor.scheduleFreshnessExpiry()
-	}
 }
 
 func (actor *doctorActor) finishIncident() {
@@ -680,7 +476,7 @@ func (actor *doctorActor) finishIncident() {
 		}
 	}
 	if actor.snapshot.State == doctorComplete {
-		odometerInstance.NoteExam(actor.snapshot.Health != doctorBroken)
+		doctorOdometer.NoteExam(actor.snapshot.Health != doctorBroken)
 	}
 	actor.snapshot.Incidents = appendBounded(actor.snapshot.Incidents, doctorIncident{
 		ExamID:     actor.snapshot.ExamID,
@@ -734,59 +530,6 @@ func eligibilityCode(eligible bool, code string) string {
 	return code
 }
 
-func (actor *doctorActor) storeView() {
-	copy := actor.copySnapshot()
-	actor.view.Store(&copy)
-}
-
-func (actor *doctorActor) copySnapshot() doctorSnapshot {
-	copy := actor.snapshot
-	copy.Evidence = append([]doctorEvidence(nil), actor.snapshot.Evidence...)
-	copy.Actions = append([]doctorAction(nil), actor.snapshot.Actions...)
-	copy.HealAudit = append([]doctorHealAudit(nil), actor.snapshot.HealAudit...)
-	copy.Incidents = append([]doctorIncident(nil), actor.snapshot.Incidents...)
-	copy.Stages = append([]doctorStage(nil), actor.snapshot.Stages...)
-	return copy
-}
-
-func (actor *doctorActor) pathContext() doctorPathContext {
-	return doctorPathContext{PathKind: actor.snapshot.PathKind, CaptureState: actor.snapshot.CaptureState}
-}
-
-func (actor *doctorActor) applyRuntimePathContext() {
-	if provider, ok := actor.runtime.(doctorPathContextProvider); ok {
-		actor.setPathContext(provider.DoctorPathContext())
-	}
-}
-
-func (actor *doctorActor) setPathContext(path doctorPathContext) {
-	if path.PathKind == "" {
-		path.PathKind = doctorPathUnknown
-	}
-	if path.CaptureState == "" {
-		path.CaptureState = doctorCaptureUnknown
-	}
-	actor.snapshot.PathKind = path.PathKind
-	actor.snapshot.CaptureState = path.CaptureState
-}
-
-func (actor *doctorActor) applyPathStatus(status doctorPathStatus) {
-	generationChanged := status.Generation != 0
-	if generationChanged && status.Generation <= actor.lastPathGeneration {
-		return
-	}
-	if generationChanged {
-		actor.lastPathGeneration = status.Generation
-		doctorAndroidPathStatus.Store(status)
-	}
-	before := actor.pathContext()
-	actor.setPathContext(doctorPathContextForStatus(status, tunUp.Load()))
-	if !generationChanged && before == actor.pathContext() {
-		return
-	}
-	actor.bumpGeneration(doctorTunGeneration)
-}
-
 func (actor *doctorActor) acceptMatchedProbeCommand(expectation doctorProbeExpectation, fact doctorEvidence) {
 	if expectation.ExamID != actor.snapshot.ExamID || actor.snapshot.State != doctorExamining {
 		return
@@ -823,28 +566,6 @@ func (actor *doctorActor) acceptMatchedProbeCommand(expectation doctorProbeExpec
 func (actor *doctorActor) freshnessExpired() bool {
 	return actor.snapshot.State != doctorExamining && actor.snapshot.FreshUntil != 0 &&
 		actor.now().UnixMilli() >= actor.snapshot.FreshUntil
-}
-
-func (actor *doctorActor) Snapshot() doctorSnapshot {
-	stored := actor.view.Load()
-	if stored == nil {
-		return doctorSnapshot{}
-	}
-	copy := *stored
-	copy.Evidence = append([]doctorEvidence(nil), stored.Evidence...)
-	copy.Actions = append([]doctorAction(nil), stored.Actions...)
-	copy.HealAudit = append([]doctorHealAudit(nil), stored.HealAudit...)
-	copy.Incidents = append([]doctorIncident(nil), stored.Incidents...)
-	copy.Stages = append([]doctorStage(nil), stored.Stages...)
-	if copy.State != doctorExamining && copy.FreshUntil != 0 && actor.now().UnixMilli() >= copy.FreshUntil {
-		copy.Health = doctorUnknown
-		copy.Confidence = doctorInsufficient
-		copy.Severity = doctorSeverityInfo
-		copy.CauseCode = "staleEvidence"
-		copy.Layer = ""
-		copy.Actions = doctorActionsFor(copy)
-	}
-	return copy
 }
 
 func (actor *doctorActor) Passive(evidence doctorEvidence) {

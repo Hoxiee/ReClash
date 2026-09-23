@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"errors"
@@ -21,7 +21,7 @@ func doctorEvidenceFromPlatformStatus(status doctorPlatformStatus) (doctorEviden
 		Layer:      doctorLayerCapture,
 		Confidence: doctorInsufficient,
 		Inbound:    "byedpi",
-		at:         at,
+		At:         at,
 	}
 	switch status.State {
 	case "stopped":

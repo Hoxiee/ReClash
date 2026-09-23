@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"context"
@@ -41,9 +41,9 @@ func (actor *doctorActor) heal(params doctorHealParams) (doctorSnapshot, error) 
 		BeforeRevision: actor.snapshot.Revision,
 	}, doctorMaxIncidents)
 	actor.changed()
-	safeGoDetached("connection doctor DNS flush", func() {
+	goDetached("connection doctor DNS flush", func() {
 		completed := make(chan struct{})
-		safeGoDetached("connection doctor DNS flush runtime", func() {
+		goDetached("connection doctor DNS flush runtime", func() {
 			actor.runtime.FlushDNS()
 			close(completed)
 		})

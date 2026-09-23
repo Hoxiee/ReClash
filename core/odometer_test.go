@@ -299,3 +299,12 @@ func TestStartReasonIsTakenOnce(t *testing.T) {
 		t.Fatalf("second reason = %q, want it consumed", got)
 	}
 }
+
+func TestOdometerNoteExamCountsCleanAndBroken(t *testing.T) {
+	o, _ := newTestOdometer(newOdoMemStorage())
+	o.NoteExam(true)
+	o.NoteExam(false)
+	if report := o.Report(); report.Exams != 2 || report.ExamsClean != 1 {
+		t.Fatalf("exam counters = %d/%d, want 2/1", report.Exams, report.ExamsClean)
+	}
+}

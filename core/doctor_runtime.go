@@ -7,13 +7,14 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/constant/features"
 	"github.com/metacubex/mihomo/listener"
+
+	"core/doctor"
 )
 
 const doctorProbeTimeout = 8 * time.Second
@@ -21,12 +22,7 @@ const doctorProbeTimeout = 8 * time.Second
 var (
 	errDoctorNoActiveProxy  = errors.New("no active proxy")
 	errDoctorStatusMismatch = errors.New("probe status mismatch")
-	doctorAndroidPathStatus atomic.Value
 )
-
-func init() {
-	doctorAndroidPathStatus.Store(doctorPathStatus{PathKind: doctorPathUnknown})
-}
 
 type coreDoctorRuntime struct {
 	probe         func(context.Context, string) error
@@ -84,7 +80,7 @@ func (runtime coreDoctorRuntime) runResolverProbe(ctx context.Context, compareSy
 		Outcome:    doctorOutcomeNotApplicable,
 		Confidence: doctorInsufficient,
 		Code:       "endpointDnsNotApplicable",
-		at:         started,
+		At:         started,
 	}
 	parsed, err := url.Parse(currentTestURL())
 	if err != nil || parsed.Hostname() == "" {
@@ -99,7 +95,7 @@ func (runtime coreDoctorRuntime) runResolverProbe(ctx context.Context, compareSy
 	coreErr := runtime.resolveWithCore(probeCtx, parsed.Hostname())
 	cancel()
 	fact.DurationBucketMs = doctorDurationBucket(time.Since(started))
-	fact.at = time.Now()
+	fact.At = time.Now()
 	if coreErr == nil {
 		fact.Outcome = doctorOutcomeSucceeded
 		fact.Confidence = doctorConfirmed
@@ -128,7 +124,7 @@ func (runtime coreDoctorRuntime) runResolverProbe(ctx context.Context, compareSy
 		Confidence:       doctorConfirmed,
 		Code:             "systemResolverSucceeded",
 		DurationBucketMs: doctorDurationBucket(time.Since(fallbackStarted)),
-		at:               time.Now(),
+		At:               time.Now(),
 	}
 	if fallbackErr != nil {
 		fallback.Outcome = doctorOutcomeFailed
@@ -166,14 +162,14 @@ func (runtime coreDoctorRuntime) DoctorAppIngressAvailable() bool {
 
 func (runtime coreDoctorRuntime) DoctorPathContext() doctorPathContext {
 	if runtime.pathContext != nil {
-		return normalizedDoctorPathContext(runtime.pathContext())
+		return doctor.NormalizePathContext(runtime.pathContext())
 	}
 	if runtime.tunActive != nil {
-		return doctorPathContextFor(doctorPathTun, runtime.tunActive())
+		return doctor.PathContextFor(doctorPathTun, runtime.tunActive())
 	}
 	if features.Android {
-		status, _ := doctorAndroidPathStatus.Load().(doctorPathStatus)
-		return doctorPathContextForStatus(status, tunUp.Load())
+		status, _ := doctor.AndroidPathStatus.Load().(doctorPathStatus)
+		return doctor.PathContextForStatus(status, tunUp.Load())
 	}
 	if tunUp.Load() {
 		return doctorPathContext{PathKind: doctorPathTun, CaptureState: doctorCaptureActive}
@@ -186,37 +182,6 @@ func (runtime coreDoctorRuntime) DoctorPathContext() doctorPathContext {
 		return doctorPathContext{PathKind: doctorPathLocalProxy, CaptureState: doctorCaptureNotApplicable}
 	}
 	return doctorPathContext{PathKind: doctorPathUnknown, CaptureState: doctorCaptureUnknown}
-}
-
-func doctorPathContextForStatus(status doctorPathStatus, tunActive bool) doctorPathContext {
-	if (status.PathKind == doctorPathVPN || status.PathKind == doctorPathTun) && status.Phase != "active" {
-		return doctorPathContext{PathKind: status.PathKind, CaptureState: doctorCaptureInactive}
-	}
-	return doctorPathContextFor(status.PathKind, tunActive)
-}
-
-func doctorPathContextFor(path doctorPathKind, tunActive bool) doctorPathContext {
-	switch path {
-	case doctorPathVPN, doctorPathTun:
-		if tunActive {
-			return doctorPathContext{PathKind: path, CaptureState: doctorCaptureActive}
-		}
-		return doctorPathContext{PathKind: path, CaptureState: doctorCaptureInactive}
-	case doctorPathLocalProxy, doctorPathDirect, doctorPathByeDPI:
-		return doctorPathContext{PathKind: path, CaptureState: doctorCaptureNotApplicable}
-	default:
-		return doctorPathContext{PathKind: doctorPathUnknown, CaptureState: doctorCaptureUnknown}
-	}
-}
-
-func normalizedDoctorPathContext(path doctorPathContext) doctorPathContext {
-	if path.PathKind == "" {
-		path.PathKind = doctorPathUnknown
-	}
-	if path.CaptureState == "" {
-		path.CaptureState = doctorCaptureUnknown
-	}
-	return path
 }
 
 func (runtime coreDoctorRuntime) networkSnapshot() (networkFactsPayload, bool) {
@@ -378,7 +343,7 @@ func (runtime coreDoctorRuntime) currentTime() time.Time {
 }
 
 func doctorPlatformProbeEvidence(result doctorPlatformProbeResult) doctorEvidence {
-	fact := doctorEvidence{Kind: doctorEvidenceProbe, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen, Confidence: doctorInsufficient, Code: result.ErrorCode, DurationBucketMs: result.DurationBucketMs, at: time.Now()}
+	fact := doctorEvidence{Kind: doctorEvidenceProbe, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen, Confidence: doctorInsufficient, Code: result.ErrorCode, DurationBucketMs: result.DurationBucketMs, At: time.Now()}
 	if result.Outcome == doctorPlatformProbeUnsupported {
 		fact.Outcome = doctorOutcomeNotApplicable
 	}
@@ -398,7 +363,7 @@ func (runtime coreDoctorRuntime) runApplicationProbe(ctx context.Context, emit f
 			emit(fact)
 		}
 	}
-	fact := doctorEvidence{Kind: doctorEvidenceProbe, Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded, Confidence: doctorConfirmed, Code: "applicationProbeSucceeded", DurationBucketMs: doctorDurationBucket(time.Since(started)), at: time.Now()}
+	fact := doctorEvidence{Kind: doctorEvidenceProbe, Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded, Confidence: doctorConfirmed, Code: "applicationProbeSucceeded", DurationBucketMs: doctorDurationBucket(time.Since(started)), At: time.Now()}
 	if err != nil {
 		fact.Outcome = doctorOutcomeFailed
 		fact.Confidence = doctorProbable
@@ -415,11 +380,11 @@ func (runtime coreDoctorRuntime) applicationFailureContext() []doctorEvidence {
 	now := time.Now()
 	switch {
 	case facts.Transport == "":
-		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorConfirmed, Code: "noPhysicalNetwork", at: now}}
+		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorConfirmed, Code: "noPhysicalNetwork", At: now}}
 	case facts.CaptivePortal:
-		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorProbable, Code: "captivePortal", at: now}}
+		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorProbable, Code: "captivePortal", At: now}}
 	case !facts.Validated:
-		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorProbable, Code: "networkUnvalidated", at: now}}
+		return []doctorEvidence{{Kind: doctorEvidenceProbe, Layer: doctorLayerCapture, Outcome: doctorOutcomeFailed, Confidence: doctorProbable, Code: "networkUnvalidated", At: now}}
 	default:
 		return nil
 	}
@@ -478,17 +443,6 @@ func doctorProbeErrorCode(err error, fallback string) string {
 	default:
 		return fallback
 	}
-}
-
-func doctorProbeCount(mode doctorExamMode, capabilities doctorCapabilities) int {
-	count := 2
-	if mode == doctorDeep {
-		count++
-	}
-	if capabilities.AndroidAppIngressProbe {
-		count++
-	}
-	return count
 }
 
 func (runtime coreDoctorRuntime) FlushDNS() {

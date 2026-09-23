@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"runtime"
@@ -32,7 +32,7 @@ type doctorReport struct {
 func buildDoctorReport(snapshot doctorSnapshot) doctorReport {
 	evidence := append([]doctorEvidence(nil), snapshot.Evidence...)
 	for index := range evidence {
-		evidence[index].at = time.Time{}
+		evidence[index].At = time.Time{}
 	}
 	return doctorReport{
 		SchemaVersion: doctorSchemaVersion,

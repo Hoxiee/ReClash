@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import "time"
 
@@ -128,7 +128,7 @@ type doctorEvidence struct {
 	OffsetMillis     int64                 `json:"offsetMillis"`
 	DurationBucketMs int64                 `json:"durationBucketMs,omitempty"`
 	Consequence      bool                  `json:"consequence,omitempty"`
-	at               time.Time
+	At               time.Time             `json:"-"`
 }
 
 type doctorAction struct {

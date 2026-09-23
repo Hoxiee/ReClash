@@ -1,4 +1,4 @@
-package main
+package doctor
 
 import (
 	"context"
@@ -206,7 +206,7 @@ func TestDoctorActorDoesNotTurnPassiveSeenEvidenceIntoHealth(t *testing.T) {
 	actor := newDoctorActor(&fakeDoctorRuntime{}, nil)
 	actor.Passive(doctorEvidence{
 		Kind: doctorEvidenceIngress, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen,
-		Confidence: doctorConfirmed, Inbound: "tun", at: time.Now(),
+		Confidence: doctorConfirmed, Inbound: "tun", At: time.Now(),
 	})
 	deadline := time.Now().Add(time.Second)
 	for time.Now().Before(deadline) {
@@ -377,7 +377,7 @@ func TestDoctorActorDoesNotPublishEveryPassiveFact(t *testing.T) {
 	for index := 0; index < 20; index++ {
 		actor.handlePassive(doctorEvidence{
 			Kind: doctorEvidenceIngress, Layer: doctorLayerIngress, Outcome: doctorOutcomeSeen,
-			Confidence: doctorConfirmed, Inbound: "tun", at: actor.now(),
+			Confidence: doctorConfirmed, Inbound: "tun", At: actor.now(),
 		})
 	}
 	if published.Load() != 0 {
@@ -412,7 +412,7 @@ func TestDoctorActorPassiveFlowFailureDoesNotBecomeGlobalFailure(t *testing.T) {
 	actor := newDoctorActor(&fakeDoctorRuntime{}, nil)
 	actor.handlePassive(doctorEvidence{
 		Kind: doctorEvidenceOuterDial, Layer: doctorLayerDial, Outcome: doctorOutcomeFailed,
-		Confidence: doctorConfirmed, Code: "outerDialTimeout", Inbound: "tun", at: actor.now(),
+		Confidence: doctorConfirmed, Code: "outerDialTimeout", Inbound: "tun", At: actor.now(),
 	})
 	actor.flushPassive()
 	snapshot := actor.Snapshot()

@@ -28,15 +28,3 @@ func TestDoctorGenerationClassifiesConfigAndRoutingChanges(t *testing.T) {
 		t.Fatalf("mode generation = %+v", got)
 	}
 }
-
-func TestDoctorActorBatchesGenerationChangesIntoOneRevision(t *testing.T) {
-	actor := newDoctorActor(&fakeDoctorRuntime{}, nil)
-	before := actor.Snapshot()
-	after, _ := actor.request(doctorCommand{
-		kind:        doctorGenerationCommand,
-		generations: doctorGenerationChange{Config: true, Routing: true},
-	})
-	if after.Revision != before.Revision+1 || after.Generations.Config != 1 || after.Generations.Routing != 1 {
-		t.Fatalf("before = %+v, after = %+v", before, after)
-	}
-}

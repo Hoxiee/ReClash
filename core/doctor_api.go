@@ -12,17 +12,17 @@ func init() {
 	}))
 	registerMethod(doctorStartMethod, withArguments(func(params *doctorStartParams, response MethodResponse) {
 		safeGo(response, func() {
-			snapshot, err := connectionDoctor.request(doctorCommand{kind: doctorStartCommand, start: *params})
+			snapshot, err := connectionDoctor.Start(*params)
 			respondDoctor(response, snapshot, err)
 		})
 	}))
 	registerMethod(doctorCancelMethod, withArguments(func(params *doctorCancelParams, response MethodResponse) {
-		snapshot, err := connectionDoctor.request(doctorCommand{kind: doctorCancelCommand, cancel: *params})
+		snapshot, err := connectionDoctor.Cancel(*params)
 		respondDoctor(response, snapshot, err)
 	}))
 	registerMethod(doctorFlushDNSMethod, withArguments(func(params *doctorHealParams, response MethodResponse) {
 		safeGo(response, func() {
-			snapshot, err := connectionDoctor.request(doctorCommand{kind: doctorHealCommand, heal: *params})
+			snapshot, err := connectionDoctor.Heal(*params)
 			respondDoctor(response, snapshot, err)
 		})
 	}))
@@ -30,7 +30,7 @@ func init() {
 		response.success(buildDoctorReport(connectionDoctor.Snapshot()))
 	}))
 	registerMethod(doctorPlatformStatusMethod, withArguments(func(status *doctorPlatformStatus, response MethodResponse) {
-		_, err := connectionDoctor.request(doctorCommand{kind: doctorPlatformStatusCommand, platform: *status})
+		_, err := connectionDoctor.PlatformStatus(*status)
 		if err != nil {
 			response.failure("invalid_platform_status", "connection doctor: invalid platform status", nil)
 			return
@@ -42,7 +42,7 @@ func init() {
 			response.failure("invalid_path_status", "connection doctor: invalid path status", nil)
 			return
 		}
-		snapshot, err := connectionDoctor.request(doctorCommand{kind: doctorPathStatusCommand, pathStatus: *status})
+		snapshot, err := connectionDoctor.PathStatus(*status)
 		respondDoctor(response, snapshot, err)
 	}))
 }
@@ -57,15 +57,15 @@ func respondDoctor(response MethodResponse, snapshot doctorSnapshot, err error) 
 }
 
 func doctorReset() {
-	_, _ = connectionDoctor.request(doctorCommand{kind: doctorResetCommand})
+	_, _ = connectionDoctor.Reset()
 }
 
 func doctorBumpGeneration(kind doctorGenerationKind) {
-	_, _ = connectionDoctor.request(doctorCommand{kind: doctorGenerationCommand, generation: kind})
+	_, _ = connectionDoctor.BumpGeneration(kind)
 }
 
 func doctorBumpGenerations(change doctorGenerationChange) {
-	_, _ = connectionDoctor.request(doctorCommand{kind: doctorGenerationCommand, generations: change})
+	_, _ = connectionDoctor.BumpGenerations(change)
 }
 
 func validDoctorPathKind(kind doctorPathKind) bool {

@@ -1,4 +1,4 @@
-package main
+package doctor
 
 func appendBounded[T any](values []T, value T, limit int) []T {
 	if limit <= 0 {

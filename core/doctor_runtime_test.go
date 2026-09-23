@@ -286,11 +286,11 @@ func TestDoctorActorCorrelatesRuntimePlatformProbe(t *testing.T) {
 		},
 	}
 	actor = newDoctorActor(runtime, nil)
-	actor.identity = func(observation doctorProbeObservation) (doctorProbeObservation, bool) {
+	actor.SetIdentity(func(observation doctorProbeObservation) (doctorProbeObservation, bool) {
 		observation.UID = 10001
 		return observation, true
-	}
-	started, err := actor.request(doctorCommand{kind: doctorStartCommand, start: doctorStartParams{Mode: doctorStandard}})
+	})
+	started, err := actor.Start(doctorStartParams{Mode: doctorStandard})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -429,7 +429,7 @@ func TestDoctorInactiveTunReturnsConfirmedCaptureFailure(t *testing.T) {
 	if !actor.Snapshot().Capabilities.TunIngressProof || runtime.DoctorAppIngressAvailable() {
 		t.Fatalf("capabilities = %+v, available = %v", actor.Snapshot().Capabilities, runtime.DoctorAppIngressAvailable())
 	}
-	started, err := actor.request(doctorCommand{kind: doctorStartCommand, start: doctorStartParams{Mode: doctorStandard}})
+	started, err := actor.Start(doctorStartParams{Mode: doctorStandard})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -445,35 +445,6 @@ func TestDoctorInactiveTunReturnsConfirmedCaptureFailure(t *testing.T) {
 		time.Sleep(time.Millisecond)
 	}
 	t.Fatal("inactive-TUN exam did not complete")
-}
-
-func TestDoctorResetClearsSessionStateAndQueuedEvidence(t *testing.T) {
-	actor := newDoctorActor(coreDoctorRuntime{pathContext: func() doctorPathContext {
-		return doctorPathContext{PathKind: doctorPathVPN, CaptureState: doctorCaptureActive}
-	}}, nil)
-	actor.passive <- doctorEvidence{Kind: doctorEvidenceProbe, Layer: doctorLayerMarker, Outcome: doctorOutcomeSucceeded, Confidence: doctorConfirmed, Code: "staleApplicationSuccess"}
-	actor.snapshot.Incidents = []doctorIncident{{ExamID: "stale"}}
-	actor.snapshot.HealAudit = []doctorHealAudit{{}}
-	actor.snapshot.Generations = doctorGenerations{Environment: 3, Config: 4, Routing: 5, Tun: 6}
-	actor.lastPathGeneration = 9
-	actor.lastPlatformGeneration = 8
-	actor.dropped.Store(7)
-
-	snapshot, err := actor.request(doctorCommand{kind: doctorResetCommand})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if snapshot.State != doctorObserving || snapshot.Health != doctorUnknown || snapshot.PathKind != doctorPathUnknown || snapshot.CaptureState != doctorCaptureUnknown {
-		t.Fatalf("snapshot = %+v", snapshot)
-	}
-	if snapshot.Generations != (doctorGenerations{}) || len(snapshot.Evidence) != 0 || len(snapshot.Incidents) != 0 || len(snapshot.HealAudit) != 0 || snapshot.EvidenceDropped != 0 {
-		t.Fatalf("reset retained session state: %+v", snapshot)
-	}
-	select {
-	case evidence := <-actor.passive:
-		t.Fatalf("reset retained queued evidence: %+v", evidence)
-	default:
-	}
 }
 
 func TestDoctorApplicationFailureClassifiesKnownNetworkFacts(t *testing.T) {
