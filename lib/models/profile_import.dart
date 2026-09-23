@@ -62,9 +62,9 @@ extension ProfileExtension on Profile {
   /// Null while `auto` has not yet settled on a format, so callers can tell
   /// "not probed" apart from a preset the user pinned.
   SubscriptionClient? get effectiveClient =>
-      clientEmulation == SubscriptionClient.auto
+      clientCompatibility == SubscriptionClient.auto
       ? lastWorkingClient
-      : clientEmulation;
+      : clientCompatibility;
 
   String get fileName => '$id.yaml';
 
@@ -157,15 +157,15 @@ extension ProfileExtension on Profile {
     Object? lastError;
     ProfilePanelException? panelFailure;
     PreparedProfileImport? stubFallback;
-    // The HWID gate belongs to the panel, not to the emulated client, so one
+    // The HWID gate belongs to the panel, not to the compatibility preset, so one
     // refusal is enough to stop paying for a second request per probe.
     var identityRejected = false;
     for (final host in subscriptionUrlCandidates(target, record.hostsFor(id))) {
       final clients = probeOrder(
-        clientEmulation,
+        clientCompatibility,
         lastWorking: lastWorkingClient,
       );
-      final probes = clientEmulation == SubscriptionClient.auto
+      final probes = clientCompatibility == SubscriptionClient.auto
           ? <SubscriptionClient?>[null, ...clients]
           : <SubscriptionClient?>[...clients];
       for (final probe in probes) {
@@ -480,9 +480,9 @@ extension ProfileExtension on Profile {
         autoUpdateDuration: updateInterval != null
             ? Duration(minutes: updateInterval)
             : autoUpdateDuration,
-        lastWorkingClient: clientEmulation == SubscriptionClient.auto
+        lastWorkingClient: clientCompatibility == SubscriptionClient.auto
             ? (workingClient == SubscriptionClient.auto ? null : workingClient)
-            : clientEmulation,
+            : clientCompatibility,
       ),
       content: content,
       skippedNodes: skipped,

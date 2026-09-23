@@ -36,7 +36,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
   late final TextEditingController _autoUpdateDurationController;
   late final TextEditingController _customUserAgentController;
   late bool _autoUpdate;
-  late SubscriptionClient _clientEmulation;
+  late SubscriptionClient _clientCompatibility;
   String? _rawText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _fileInfoNotifier = ValueNotifier<FileInfo?>(null);
@@ -49,7 +49,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     _labelController = TextEditingController(text: widget.profile.label);
     _urlController = TextEditingController(text: widget.profile.url);
     _autoUpdate = widget.profile.autoUpdate;
-    _clientEmulation = widget.profile.clientEmulation;
+    _clientCompatibility = widget.profile.clientCompatibility;
     _customUserAgentController = TextEditingController(
       text: widget.profile.customUserAgent,
     );
@@ -76,7 +76,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       label: _labelController.text,
       userLabel: _labelController.text.trim().isNotEmpty,
       autoUpdate: _autoUpdate,
-      clientEmulation: _clientEmulation,
+      clientCompatibility: _clientCompatibility,
       customUserAgent: _customUserAgentController.text.trim(),
       autoUpdateDuration: Duration(
         minutes: int.parse(_autoUpdateDurationController.text),
@@ -123,10 +123,10 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
     }
   }
 
-  void _setClientEmulation(SubscriptionClient value) {
-    if (_clientEmulation == value) return;
+  void _setClientCompatibility(SubscriptionClient value) {
+    if (_clientCompatibility == value) return;
     setState(() {
-      _clientEmulation = value;
+      _clientCompatibility = value;
     });
   }
 
@@ -259,9 +259,9 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
         ),
         if (_autoUpdate)
           _AutoUpdateIntervalField(controller: _autoUpdateDurationController),
-        _ClientEmulationItem(
-          selected: _clientEmulation,
-          onChanged: _setClientEmulation,
+        _ClientCompatibilityItem(
+          selected: _clientCompatibility,
+          onChanged: _setClientCompatibility,
           customUserAgentController: _customUserAgentController,
         ),
       ],
@@ -406,8 +406,8 @@ class _AutoUpdateIntervalField extends StatelessWidget {
   }
 }
 
-class _ClientEmulationItem extends StatelessWidget {
-  const _ClientEmulationItem({
+class _ClientCompatibilityItem extends StatelessWidget {
+  const _ClientCompatibilityItem({
     required this.selected,
     required this.onChanged,
     required this.customUserAgentController,

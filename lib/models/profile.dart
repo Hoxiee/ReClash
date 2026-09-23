@@ -145,7 +145,8 @@ abstract class Profile with _$Profile {
     int? scriptId,
     String? matchTarget,
     int? order,
-    @Default(SubscriptionClient.auto) SubscriptionClient clientEmulation,
+    @JsonKey(name: 'clientEmulation')
+    @Default(SubscriptionClient.auto) SubscriptionClient clientCompatibility,
     @Default('') String customUserAgent,
     @JsonKey(includeToJson: false, includeFromJson: false)
     SubscriptionClient? lastWorkingClient,
@@ -160,7 +161,7 @@ abstract class Profile with _$Profile {
   factory Profile.normal({
     String? label,
     String url = '',
-    SubscriptionClient clientEmulation = SubscriptionClient.auto,
+    SubscriptionClient clientCompatibility = SubscriptionClient.auto,
     String customUserAgent = '',
   }) {
     final id = snowflake.id;
@@ -168,7 +169,7 @@ abstract class Profile with _$Profile {
       label: label ?? '',
       url: url,
       id: id,
-      clientEmulation: clientEmulation,
+      clientCompatibility: clientCompatibility,
       customUserAgent: customUserAgent,
       autoUpdateDuration: defaultUpdateDuration,
     );

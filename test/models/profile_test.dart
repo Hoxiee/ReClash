@@ -70,7 +70,7 @@ void main() {
       const pinned = Profile(
         id: 1,
         autoUpdateDuration: defaultUpdateDuration,
-        clientEmulation: SubscriptionClient.happ,
+        clientCompatibility: SubscriptionClient.happ,
         lastWorkingClient: SubscriptionClient.incy,
       );
 

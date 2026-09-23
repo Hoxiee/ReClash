@@ -53,8 +53,8 @@ class Profiles extends Table {
 
   IntColumn get order => integer().nullable()();
 
-  TextColumn get clientEmulation =>
-      textEnum<SubscriptionClient>().withDefault(const Constant('auto'))();
+  TextColumn get clientCompatibility =>
+      textEnum<SubscriptionClient>().named('client_emulation').withDefault(const Constant('auto'))();
 
   TextColumn get customUserAgent => text().withDefault(const Constant(''))();
 
@@ -256,7 +256,7 @@ extension RawProfilExt on RawProfile {
       scriptId: scriptId,
       matchTarget: matchTarget,
       order: order,
-      clientEmulation: clientEmulation,
+      clientCompatibility: clientCompatibility,
       customUserAgent: customUserAgent,
       lastWorkingClient: lastWorkingClient,
       skippedNodes: skippedNodes,
@@ -289,7 +289,7 @@ extension ProfilesCompanionExt on Profile {
       scriptId: Value(scriptId),
       matchTarget: Value(matchTarget),
       order: Value(order ?? this.order),
-      clientEmulation: Value(clientEmulation),
+      clientCompatibility: Value(clientCompatibility),
       customUserAgent: Value(customUserAgent),
       lastWorkingClient: Value(lastWorkingClient),
       skippedNodes: Value(skippedNodes),

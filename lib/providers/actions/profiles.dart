@@ -565,7 +565,7 @@ class ProfilesAction extends _$ProfilesAction {
     return Profile.normal(
       url: request.url,
       label: request.name,
-      clientEmulation: request.client,
+      clientCompatibility: request.client,
       customUserAgent: request.customUserAgent,
     ).prepareUpdate(
       fetch: _subscriptionFetch(),

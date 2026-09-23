@@ -59,7 +59,7 @@ class Database extends _$Database {
         if (from < 4) {
           for (final column in [
             profiles.panelMeta,
-            profiles.clientEmulation,
+            profiles.clientCompatibility,
             profiles.customUserAgent,
             profiles.skippedNodes,
             profiles.capabilityManifest,

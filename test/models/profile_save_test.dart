@@ -331,7 +331,7 @@ void main() {
       final profile = Profile.normal(
         label: 'profile',
         url: 'https://provider.test/sub',
-        clientEmulation: SubscriptionClient.clash,
+        clientCompatibility: SubscriptionClient.clash,
       );
 
       final withText = await profile.update(
@@ -479,7 +479,7 @@ void main() {
         });
         final profile = Profile.normal(
           url: 'https://provider.test/sub',
-          clientEmulation: client,
+          clientCompatibility: client,
         );
         final local = await profile.prepareContent(
           raw,
@@ -717,7 +717,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
         Profile.normal(
           label: 'profile',
           url: 'https://provider.test/sub',
-          clientEmulation: SubscriptionClient.clash,
+          clientCompatibility: SubscriptionClient.clash,
         ),
         _capabilityHeader([
           {
@@ -744,7 +744,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
         final profile = Profile.normal(
           label: 'profile',
           url: 'https://primary.test/sub',
-          clientEmulation: SubscriptionClient.clash,
+          clientCompatibility: SubscriptionClient.clash,
         );
 
         final updated = await profile.update(
@@ -816,7 +816,7 @@ AllowedIPs = 0.0.0.0/0, ::/0
       final profile = Profile.normal(
         label: 'old',
         url: 'https://old.test:8443/sub?token=abc',
-        clientEmulation: SubscriptionClient.clash,
+        clientCompatibility: SubscriptionClient.clash,
       );
       final requests = <String>[];
       final sentHeaders = <Map<String, String>?>[];
@@ -989,7 +989,7 @@ Profile _profileWithManifest() =>
     Profile.normal(
       label: 'profile',
       url: 'https://provider.test/sub',
-      clientEmulation: SubscriptionClient.clash,
+      clientCompatibility: SubscriptionClient.clash,
     ).copyWith(
       capabilityManifest: ProviderCapabilityManifest(
         version: 1,
@@ -1040,7 +1040,7 @@ Future<void> _expectOldHostFallback(
   final profile = Profile.normal(
     label: 'old',
     url: 'https://old.test/sub?token=abc',
-    clientEmulation: SubscriptionClient.clash,
+    clientCompatibility: SubscriptionClient.clash,
   );
   final updated = await profile.update(
     validate: validate ?? (_) async => '',

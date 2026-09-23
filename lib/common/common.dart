@@ -3,7 +3,7 @@ export 'app/app_update.dart';
 export 'app/app_ports.dart';
 export 'app/changelog.dart';
 export 'ui/color.dart';
-export 'config/client_emulation.dart';
+export 'config/client_compatibility.dart';
 export 'subscription/incy_links.dart';
 export 'util/compute.dart';
 export 'routing/connection_answer.dart';

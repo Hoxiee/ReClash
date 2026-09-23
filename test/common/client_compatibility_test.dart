@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/config/client_emulation.dart';
+import 'package:reclash/common/config/client_compatibility.dart';
 import 'package:reclash/common/app/device_identity.dart';
 import 'package:reclash/enum/enum.dart';
 
@@ -73,7 +73,7 @@ void main() {
       }
     });
 
-    test('every emulated preset is flagged, custom included', () {
+    test('every compatibility preset is flagged, custom included', () {
       for (final client in [
         SubscriptionClient.happ,
         SubscriptionClient.incy,
