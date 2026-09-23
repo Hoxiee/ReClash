@@ -16,10 +16,9 @@ import 'package:material_ui/material_ui.dart';
 part 'application_notification/components.dart';
 part 'application_notification/component_editor.dart';
 part 'application_notification/delivery.dart';
-part 'application_notification/preview.dart';
 
-class NotificationSettingsTab extends ConsumerStatefulWidget {
-  const NotificationSettingsTab({
+class NotificationSettingsView extends ConsumerStatefulWidget {
+  const NotificationSettingsView({
     super.key,
     this.isAndroid,
     this.loadStatus,
@@ -33,12 +32,12 @@ class NotificationSettingsTab extends ConsumerStatefulWidget {
   final NotificationPermissionRequester? requestPermission;
 
   @override
-  ConsumerState<NotificationSettingsTab> createState() =>
-      _NotificationSettingsTabState();
+  ConsumerState<NotificationSettingsView> createState() =>
+      _NotificationSettingsViewState();
 }
 
-class _NotificationSettingsTabState
-    extends ConsumerState<NotificationSettingsTab>
+class _NotificationSettingsViewState
+    extends ConsumerState<NotificationSettingsView>
     with WidgetsBindingObserver {
   AndroidNotificationStatus? _status;
 
@@ -176,12 +175,6 @@ class _NotificationSettingsTabState
             ),
           ],
         ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          sliver: SliverToBoxAdapter(
-            child: NotificationPreview(settings: settings.projected),
-          ),
-        ),
         SettingSection.sliver(
           title: l.notificationProtectionTitle,
           subTitle: l.notificationProtectionDesc,
@@ -193,12 +186,6 @@ class _NotificationSettingsTabState
               subtitle: l.notificationTurnOffDesc,
               onPressed: () =>
                   _openSettings(_serviceChannelFor(settings.visibility)),
-            ),
-            _settingsLink(
-              icon: Icons.update_outlined,
-              title: l.notificationSubscriptionChannel,
-              subtitle: _subscriptionChannelId,
-              onPressed: () => _openSettings(_subscriptionChannelId),
             ),
           ],
         ),
@@ -220,30 +207,15 @@ class _NotificationSettingsTabState
                 ),
                 widget: const NotificationComponentsEditor(),
               ),
-            ],
-          ),
-        ),
-        _dependent(
-          settings.detailed,
-          SettingSection.sliver(
-            title: l.notificationControls,
-            subTitle: l.notificationControlsDesc,
-            items: [
               _toggle(
-                icon: Icons.pause_circle_outline_rounded,
-                title: l.notificationPauseAction,
-                subtitle: l.notificationPauseActionDesc,
-                value: settings.showPauseAction,
-                onChanged: (value) =>
-                    _update((state) => state.copyWith(showPauseAction: value)),
-              ),
-              _toggle(
-                icon: Icons.stop_circle_outlined,
-                title: l.showNotificationStopAction,
-                subtitle: l.showNotificationStopActionDesc,
-                value: settings.showStopAction,
-                onChanged: (value) =>
-                    _update((state) => state.copyWith(showStopAction: value)),
+                icon: Icons.touch_app_outlined,
+                title: l.notificationActionButtons,
+                subtitle: l.notificationActionButtonsDesc,
+                value: settings.showPauseAction || settings.showStopAction,
+                onChanged: (value) => _update(
+                  (state) =>
+                      state.copyWith(showPauseAction: value, showStopAction: value),
+                ),
               ),
             ],
           ),
@@ -274,6 +246,12 @@ class _NotificationSettingsTabState
               onChanged: (value) => _update(
                 (state) => state.copyWith(subscriptionReminders: value),
               ),
+            ),
+            _settingsLink(
+              icon: Icons.update_outlined,
+              title: l.notificationSubscriptionChannel,
+              subtitle: _subscriptionChannelId,
+              onPressed: () => _openSettings(_subscriptionChannelId),
             ),
           ],
         ),

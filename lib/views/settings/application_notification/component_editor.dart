@@ -50,7 +50,7 @@ class NotificationComponentsEditor extends ConsumerWidget {
         child: ItemPositionProvider(
           position: ItemPosition.get(index, components.length),
           child: DecorationListItem(
-            leading: _componentGlyph(context, component.type),
+            leading: Icon(_componentIcon(component.type)),
             title: Text(_componentLabel(l, component.type)),
             subtitle: notice == null
                 ? Text(_componentStatus(l, component))
@@ -77,7 +77,7 @@ class NotificationComponentsEditor extends ConsumerWidget {
   ) {
     final l = context.appLocalizations;
     return DecorationListItem(
-      leading: _componentGlyph(context, type, muted: true),
+      leading: Icon(_componentIcon(type)),
       title: Text(_componentLabel(l, type)),
       subtitle: Text(_componentDescription(l, type)),
       trailing: Icon(
@@ -109,18 +109,16 @@ class NotificationComponentsEditor extends ConsumerWidget {
       body: CustomScrollView(
         primary: false,
         slivers: [
-          SliverPadding(
-            padding: EdgeInsets.only(top: context.sheetTopPadding),
-            sliver: SliverToBoxAdapter(
+          SliverToBoxAdapter(
+            child: SizedBox(height: context.sheetTopPadding),
+          ),
+          if (components.isNotEmpty) ...[
+            SliverToBoxAdapter(
               child: ListHeader(
                 title: l.notificationComponentsActive,
                 subTitle: l.notificationComponentsOrderHint,
               ),
             ),
-          ),
-          if (components.isEmpty)
-            const SliverToBoxAdapter(child: _NoActiveComponents())
-          else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverReorderableList(
@@ -134,9 +132,15 @@ class NotificationComponentsEditor extends ConsumerWidget {
                 ),
               ),
             ),
+          ],
           if (available.isNotEmpty) ...[
             SliverToBoxAdapter(
-              child: ListHeader(title: l.notificationAddComponent),
+              child: ListHeader(
+                title: l.notificationAddComponent,
+                subTitle: components.isEmpty
+                    ? l.notificationComponentsEmptyDesc
+                    : null,
+              ),
             ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -156,53 +160,6 @@ class NotificationComponentsEditor extends ConsumerWidget {
           ],
           const SettingBottomInset.sliver(),
         ],
-      ),
-    );
-  }
-}
-
-class _NoActiveComponents extends StatelessWidget {
-  const _NoActiveComponents();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final colorScheme = context.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: CommonCard(
-        type: CommonCardType.filled,
-        radius: AppCorner.xl,
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.notifications_none_rounded,
-              size: 20,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l.notificationComponentsEmpty,
-                    style: context.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l.notificationComponentsEmptyDesc,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -239,8 +196,8 @@ class _NoticeText extends StatelessWidget {
   }
 }
 
-/// One component: the line it prints, when it prints it, the options it owns
-/// and the way back out of the notification.
+/// One component: what it prints, the options it owns and the way back out of
+/// the notification.
 class NotificationComponentSettings extends ConsumerWidget {
   const NotificationComponentSettings({super.key, required this.type});
 
@@ -375,99 +332,57 @@ class NotificationComponentSettings extends ConsumerWidget {
     }
     final component = components[index];
     final environment = _watchEnvironment(ref);
+    final notice = _componentNotice(l, type, environment);
     final options = _options(context, ref, component, environment);
     return AdaptiveSheetScaffold(
       title: _componentLabel(l, type),
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, context.sheetTopPadding, 16, 0),
         children: [
-          _ComponentLineCard(
-            component: component,
-            notice: _componentNotice(l, type, environment),
-            isFirst: index == 0,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
+            child: Text(
+              _componentDescription(l, type),
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ),
+          if (notice != null) ...[
+            generateSectionV3(
+              items: [
+                DecorationListItem(
+                  leading: Icon(
+                    _noticeIcon(notice),
+                    color: notice.severe ? context.colorScheme.error : null,
+                  ),
+                  title: Text(notice.text),
+                  invalid: notice.severe,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
           if (options.isNotEmpty) ...[
-            const SizedBox(height: 8),
             generateSectionV3(
               title: l.notificationComponentBehaviour,
               items: options,
             ),
+            const SizedBox(height: 16),
           ],
-          const SizedBox(height: 24),
           generateSectionV3(
             items: [
               DecorationListItem(
-                leading: const Icon(Icons.remove_circle_outline_rounded),
+                leading: Icon(
+                  Icons.remove_circle_outline_rounded,
+                  color: context.colorScheme.error,
+                ),
                 title: Text(l.notificationRemoveComponent),
                 onPressed: () => _remove(context, ref),
               ),
             ],
           ),
           const SettingBottomInset(),
-        ],
-      ),
-    );
-  }
-}
-
-class _ComponentLineCard extends StatelessWidget {
-  const _ComponentLineCard({
-    required this.component,
-    required this.notice,
-    required this.isFirst,
-  });
-
-  final NotificationComponent component;
-  final _ComponentNotice? notice;
-  final bool isFirst;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.appLocalizations;
-    final warning = notice;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.xl,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 14,
-        children: [
-          Row(
-            children: [
-              _componentGlyph(context, component.type),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  _componentSampleLine(l, component.type),
-                  style: context.textTheme.bodyMedium,
-                ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 8,
-            children: [
-              if (warning != null)
-                _previewLineRow(context, (
-                  icon: _noticeIcon(warning),
-                  text: warning.text,
-                  alert: warning.severe,
-                )),
-              _previewLineRow(context, (
-                icon: Icons.schedule_rounded,
-                text: _componentVisibility(l, component),
-                alert: false,
-              )),
-              if (isFirst)
-                _previewLineRow(context, (
-                  icon: Icons.unfold_less_rounded,
-                  text: l.notificationCollapsedLine,
-                  alert: false,
-                )),
-            ],
-          ),
         ],
       ),
     );

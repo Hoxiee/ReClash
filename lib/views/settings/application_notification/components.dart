@@ -24,20 +24,6 @@ String _componentDescription(
   NotificationComponentType.sessionTraffic => l.notificationSessionTrafficDesc,
 };
 
-/// The line the component contributes, with sample values. The component sheet
-/// and the preview card both read it, so both show the same wording.
-String _componentSampleLine(
-  AppLocalizations l,
-  NotificationComponentType type,
-) => switch (type) {
-  NotificationComponentType.connectionDoctor => l.notificationPreviewDoctor,
-  NotificationComponentType.networkState => l.notificationPreviewNetwork,
-  NotificationComponentType.currentServer => l.notificationPreviewServer,
-  NotificationComponentType.smartRouting => l.notificationPreviewRoute,
-  NotificationComponentType.speed => l.notificationPreviewSpeed,
-  NotificationComponentType.sessionTraffic => l.notificationPreviewSession,
-};
-
 /// When the line reaches the notification, given the component's own options.
 String _componentVisibility(
   AppLocalizations l,
@@ -80,25 +66,6 @@ IconData _componentIcon(NotificationComponentType type) => switch (type) {
   NotificationComponentType.speed => Icons.speed_rounded,
   NotificationComponentType.sessionTraffic => Icons.data_usage_rounded,
 };
-
-Widget _componentGlyph(
-  BuildContext context,
-  NotificationComponentType type, {
-  bool muted = false,
-}) {
-  final colorScheme = context.colorScheme;
-  final color = muted ? colorScheme.onSurfaceVariant : colorScheme.primary;
-  return Container(
-    width: 40,
-    height: 40,
-    alignment: Alignment.center,
-    decoration: ShapeDecoration(
-      color: muted ? colorScheme.surfaceContainerHighest : color.opacity12,
-      shape: AppShape.sm,
-    ),
-    child: Icon(_componentIcon(type), color: color, size: 22),
-  );
-}
 
 /// What the notification service needs before a component can print its line.
 /// The rows and the component sheet both report it, so a component that is

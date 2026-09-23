@@ -51,7 +51,7 @@ void main() {
     );
   }
 
-  Future<void> pumpTab(
+  Future<void> pumpView(
     WidgetTester tester, {
     bool isAndroid = true,
     NotificationStatusLoader? loadStatus,
@@ -64,29 +64,12 @@ void main() {
         container: container,
         child: TestApp(
           child: Scaffold(
-            body: NotificationSettingsTab(
+            body: NotificationSettingsView(
               isAndroid: isAndroid,
               loadStatus: loadStatus,
               openSettings: openSettings,
               requestPermission: requestPermission,
             ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> pumpPreview(
-    WidgetTester tester,
-    NotificationSettings settings,
-  ) async {
-    useViewport(tester, const Size(480, 1000));
-    await tester.pumpWidget(
-      TestApp(
-        child: Scaffold(
-          body: SingleChildScrollView(
-            child: NotificationPreview(settings: settings),
           ),
         ),
       ),
@@ -158,7 +141,7 @@ void main() {
     await pumpEditor(tester);
   }
 
-  testWidgets('application keeps General and Notification tabs', (
+  testWidgets('application reaches notification through a settings row', (
     tester,
   ) async {
     useViewport(tester, const Size(480, 900));
@@ -170,29 +153,31 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('General'), findsWidgets);
-    expect(find.text('Notification'), findsWidgets);
-    await tester.tap(find.text('Notification').first);
+    await tester.scrollUntilVisible(find.text('Notification'), 400);
     await tester.pumpAndSettle();
-
-    expect(find.text('Available on Android'), findsOneWidget);
+    expect(find.text('Notification'), findsWidgets);
+    expect(
+      find.text(
+        'The persistent notification shows whether your protection is active.',
+      ),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('notification controls update the nested settings', (
+  testWidgets('action buttons and reminders toggle the nested settings', (
     tester,
   ) async {
-    await pumpTab(tester);
-    await tester.scrollUntilVisible(find.text('Pause or resume'), 500);
-    await tester.ensureVisible(find.text('Pause or resume'));
+    await pumpView(tester);
+    await tester.scrollUntilVisible(find.text('Action buttons'), 500);
+    await tester.ensureVisible(find.text('Action buttons'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Pause or resume'));
+    await tester.tap(find.text('Action buttons'));
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(appSettingProvider).notificationSettings.showPauseAction,
-      false,
-    );
+    final settings = container.read(appSettingProvider).notificationSettings;
+    expect(settings.showPauseAction, false);
+    expect(settings.showStopAction, false);
 
     await tester.scrollUntilVisible(find.text('Subscription reminders'), 500);
     await tester.ensureVisible(find.text('Subscription reminders'));
@@ -212,7 +197,7 @@ void main() {
   testWidgets('level option strips the notification down to the status', (
     tester,
   ) async {
-    await pumpTab(tester);
+    await pumpView(tester);
     expect(
       container.read(appSettingProvider).notificationSettings.visibility,
       NotificationVisibility.detailed,
@@ -227,14 +212,13 @@ void main() {
     expect(settings.projected.components, isEmpty);
     expect(settings.projected.showPauseAction, false);
     expect(settings.projected.showStopAction, false);
-    expect(find.text('You are protected'), findsOneWidget);
-    expect(inert(find.text('Pause or resume')), findsOneWidget);
+    expect(inert(find.text('Action buttons')), findsOneWidget);
   });
 
   testWidgets('a disabled service channel reads as the off state', (
     tester,
   ) async {
-    await pumpTab(
+    await pumpView(
       tester,
       loadStatus: () async => const AndroidNotificationStatus(
         permissionGranted: true,
@@ -254,7 +238,7 @@ void main() {
     tester,
   ) async {
     final opened = <String?>[];
-    await pumpTab(
+    await pumpView(
       tester,
       openSettings: ({String? channelId}) async {
         opened.add(channelId);
@@ -314,8 +298,14 @@ void main() {
         );
     await openEditor(tester);
 
-    expect(find.text('No components added'), findsOneWidget);
     expect(find.byType(SliverReorderableList), findsNothing);
+    expect(find.text('In the notification'), findsNothing);
+    expect(
+      find.text(
+        'Without components the notification shows only the protection status.',
+      ),
+      findsOneWidget,
+    );
     expect(
       find.byIcon(Icons.add_rounded),
       findsNWidgets(NotificationComponentType.values.length),
@@ -404,39 +394,16 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('component sheet states the line, its timing and the exit', (
-    tester,
-  ) async {
+  testWidgets('component sheet states behaviour and the exit', (tester) async {
     await pushComponentSettings(tester, NotificationComponentType.speed);
 
-    expect(find.text('↓ 12.4 MB/s  ↑ 1.8 MB/s'), findsOneWidget);
-    expect(find.text('Hidden while no traffic is flowing'), findsOneWidget);
     expect(find.text('Behaviour'), findsOneWidget);
+    expect(find.text('Hide idle speed'), findsOneWidget);
 
     await tester.tap(find.text('Remove from notification'));
     await tester.pumpAndSettle();
     expect(find.text('Remove from notification'), findsNothing);
     expect(readTypes().contains(NotificationComponentType.speed), false);
-  });
-
-  testWidgets('component sheet marks the collapsed line', (tester) async {
-    await pumpComponentSettings(
-      tester,
-      NotificationComponentType.connectionDoctor,
-    );
-    expect(
-      find.text('Shown while the notification is collapsed'),
-      findsOneWidget,
-    );
-
-    await pumpComponentSettings(
-      tester,
-      NotificationComponentType.sessionTraffic,
-    );
-    expect(
-      find.text('Shown while the notification is collapsed'),
-      findsNothing,
-    );
   });
 
   testWidgets('doctor and speed component settings write provider', (
@@ -473,6 +440,7 @@ void main() {
       false,
     );
   });
+
   testWidgets('current server offers mode-filtered display groups', (
     tester,
   ) async {
@@ -517,81 +485,10 @@ void main() {
     );
   });
 
-  testWidgets('preview follows exact component order and empty fallback', (
-    tester,
-  ) async {
-    await pumpPreview(
-      tester,
-      const NotificationSettings(
-        components: [
-          NotificationComponent(type: NotificationComponentType.currentServer),
-          NotificationComponent(
-            type: NotificationComponentType.speed,
-            hideWhenIdle: false,
-          ),
-          NotificationComponent(type: NotificationComponentType.sessionTraffic),
-        ],
-      ),
-    );
-    final server = tester.getTopLeft(find.text('Server · Tokyo 01')).dy;
-    final speed = tester.getTopLeft(find.text('↓ 12.4 MB/s  ↑ 1.8 MB/s')).dy;
-    final session = tester
-        .getTopLeft(find.text('Session · ↓ 1.2 GB  ↑ 184 MB'))
-        .dy;
-    expect(server, lessThan(speed));
-    expect(speed, lessThan(session));
-
-    await pumpPreview(tester, const NotificationSettings(components: []));
-    expect(find.text('You are protected'), findsOneWidget);
-  });
-
-  testWidgets('preview applies active, paused and privacy availability', (
-    tester,
-  ) async {
-    await pumpPreview(
-      tester,
-      const NotificationSettings(
-        components: [
-          NotificationComponent(
-            type: NotificationComponentType.connectionDoctor,
-            doctorPriority: DoctorNotificationPriority.problems,
-          ),
-          NotificationComponent(type: NotificationComponentType.networkState),
-          NotificationComponent(type: NotificationComponentType.smartRouting),
-          NotificationComponent(
-            type: NotificationComponentType.speed,
-            hideWhenIdle: true,
-          ),
-        ],
-      ),
-    );
-    expect(find.text('↓ 12.4 MB/s  ↑ 1.8 MB/s'), findsNothing);
-    await tester.tap(find.text('Routing'));
-    await tester.pumpAndSettle();
-    expect(find.text('Network · Normal'), findsOneWidget);
-    expect(find.text('Smart Routing · Automatic route'), findsOneWidget);
-    expect(find.text('↓ 12.4 MB/s  ↑ 1.8 MB/s'), findsOneWidget);
-
-    await tester.tap(find.text('Problem'));
-    await tester.pumpAndSettle();
-    expect(find.text('Connection Doctor: problem detected'), findsOneWidget);
-    await tester.tap(find.text('Paused'));
-    await tester.pumpAndSettle();
-    expect(find.text('ReClash · Protection paused'), findsOneWidget);
-    expect(find.text('Pause'), findsNothing);
-    expect(find.text('Stop'), findsNothing);
-
-    await tester.tap(find.text('Lock screen'));
-    await tester.pumpAndSettle();
-    expect(find.text('ReClash · Protected details hidden'), findsOneWidget);
-    expect(find.text('Pause'), findsNothing);
-    expect(find.text('Stop'), findsNothing);
-  });
-
   testWidgets(
     'does not duplicate onlyStatisticsProxy in notification settings',
     (tester) async {
-      await pumpTab(tester);
+      await pumpView(tester);
 
       expect(find.text('Only count proxy traffic'), findsNothing);
     },
@@ -603,7 +500,7 @@ void main() {
     var granted = false;
     var requests = 0;
     final opened = <String?>[];
-    await pumpTab(
+    await pumpView(
       tester,
       loadStatus: () async => AndroidNotificationStatus(
         permissionGranted: granted,

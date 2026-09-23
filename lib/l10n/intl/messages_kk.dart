@@ -1866,9 +1866,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "Смарт бағыттау өшірулі, сондықтан бұл жол көрсетілмейді",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "Хабарландыру жиналғанда көрінеді",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "Тәртібі",
     ),
@@ -1897,10 +1894,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Байланыс диагностикасының қорытындысын көрсету",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("Мазмұн"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("Басқару"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "Хабарламадан тікелей қолжетімді әрекеттерді таңдаңыз.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "Ағымдағы сервер",
     ),
@@ -1991,45 +1984,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Рұқсат тізімі",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "Кідірту немесе жалғастыру",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "VPN-ді кідірту немесе жалғастыру әрекетін көрсету",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "Қосылым диагностикасы: мәселе жоқ",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Қорғалған мәліметтер жасырылған",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "Желі · Қалыпты",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Қорғау кідіртілді",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "Қосылым диагностикасы: мәселе анықталды",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Ағымдағы профиль",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "Смарт бағыттау · Автоматты бағыт",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "Алдын ала көру сценарийі",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "Сервер · Токио 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "Сеанс · ↓ 1,2 ГБ  ↑ 184 МБ",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12,4 МБ/с  ↑ 1,8 МБ/с",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Құпиялылық"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "Тұрақты хабарлама қорғаныстың белсенді екенін көрсетеді.",
@@ -2048,21 +2002,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage(
       "Ретін өзгерту",
-    ),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "Құлып экраны",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage(
-      "Қалыпты",
-    ),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "Кідіртілді",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
-      "Мәселе",
-    ),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "Бағыттау",
     ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "Серверлер тобын таңдау",
@@ -2839,12 +2778,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "showLess": MessageLookupByLibrary.simpleMessage("Жию"),
     "showMore": MessageLookupByLibrary.simpleMessage("Жаю"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "Хабарламадағы тоқтату түймесі",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Тұрақты хабарламада тоқтату түймесін көрсетеді. Жүйеңіз оның себебінен хабарламаны жайылған күйде ұстап тұрса, өшіріп қойыңыз",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Құпия сөзді көрсету"),
     "shrink": MessageLookupByLibrary.simpleMessage("Ықшам"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Жасырын іске қосу"),
@@ -2901,6 +2834,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage(
       "Сақтық көшірме",
+    ),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "Оң миллисекунд санын енгізіңіз",
     ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2991,6 +2927,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "Ел таңдалмаған",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "Жарамды екі әріптік ел кодын енгізіңіз",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "Ел саясаты",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "Атауы немесе коды бойынша іздеу",
     ),
@@ -3029,6 +2971,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("Орнығу уақыты"),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "Істеп тұрған сервер жылдамырағы табылғанша қанша уақыт ұсталады",
+    ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
+      "Шығысты тексеру",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Шығыс эхо қызметтері",
@@ -3160,6 +3105,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "тексерілмеген",
     ),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("жарамды"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
+      "Түйін эвристикасы",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Соңғы ауысулар",
     ),
@@ -3335,6 +3283,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Басқа"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Ресей"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
+      "Қолжетімділік тексерулері",
+    ),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Өлшеу"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
       "Растаудың жарамдылық мерзімі",
@@ -3408,6 +3359,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Өңір"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "Аймақ жалпы параметрлерде таңдалады",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "Қолданбада таңдалған аймақ бойынша қойылған; тек желіңіз талап етсе өзгертіңіз",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP қолдауын талап ету",

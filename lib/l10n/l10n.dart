@@ -2095,26 +2095,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Network · Normal`
-  String get notificationPreviewNetwork {
-    return Intl.message(
-      'Network · Normal',
-      name: 'notificationPreviewNetwork',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Server · Tokyo 01`
-  String get notificationPreviewServer {
-    return Intl.message(
-      'Server · Tokyo 01',
-      name: 'notificationPreviewServer',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Show the active Smart Routing decision`
   String get notificationSmartRoutingDesc {
     return Intl.message(
@@ -2175,41 +2155,21 @@ class AppLocalizations {
     );
   }
 
-  /// `Controls`
-  String get notificationControls {
+  /// `Action buttons`
+  String get notificationActionButtons {
     return Intl.message(
-      'Controls',
-      name: 'notificationControls',
+      'Action buttons',
+      name: 'notificationActionButtons',
       desc: '',
       args: [],
     );
   }
 
-  /// `Choose actions available directly from the notification.`
-  String get notificationControlsDesc {
+  /// `Show pause and stop buttons in the notification`
+  String get notificationActionButtonsDesc {
     return Intl.message(
-      'Choose actions available directly from the notification.',
-      name: 'notificationControlsDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Pause or resume`
-  String get notificationPauseAction {
-    return Intl.message(
-      'Pause or resume',
-      name: 'notificationPauseAction',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Show an action that pauses or resumes the VPN`
-  String get notificationPauseActionDesc {
-    return Intl.message(
-      'Show an action that pauses or resumes the VPN',
-      name: 'notificationPauseActionDesc',
+      'Show pause and stop buttons in the notification',
+      name: 'notificationActionButtonsDesc',
       desc: '',
       args: [],
     );
@@ -2260,56 +2220,6 @@ class AppLocalizations {
     return Intl.message(
       'Hide profile, routing and diagnostic details while the device is locked',
       name: 'notificationHideSensitiveDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `ReClash · Current profile`
-  String get notificationPreviewProfile {
-    return Intl.message(
-      'ReClash · Current profile',
-      name: 'notificationPreviewProfile',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection Doctor: no problems`
-  String get notificationPreviewDoctor {
-    return Intl.message(
-      'Connection Doctor: no problems',
-      name: 'notificationPreviewDoctor',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Smart Routing · Automatic route`
-  String get notificationPreviewRoute {
-    return Intl.message(
-      'Smart Routing · Automatic route',
-      name: 'notificationPreviewRoute',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `↓ 12.4 MB/s  ↑ 1.8 MB/s`
-  String get notificationPreviewSpeed {
-    return Intl.message(
-      '↓ 12.4 MB/s  ↑ 1.8 MB/s',
-      name: 'notificationPreviewSpeed',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Session · ↓ 1.2 GB  ↑ 184 MB`
-  String get notificationPreviewSession {
-    return Intl.message(
-      'Session · ↓ 1.2 GB  ↑ 184 MB',
-      name: 'notificationPreviewSession',
       desc: '',
       args: [],
     );
@@ -2475,96 +2385,6 @@ class AppLocalizations {
     );
   }
 
-  /// `Preview scenario`
-  String get notificationPreviewScenario {
-    return Intl.message(
-      'Preview scenario',
-      name: 'notificationPreviewScenario',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Normal`
-  String get notificationScenarioNormal {
-    return Intl.message(
-      'Normal',
-      name: 'notificationScenarioNormal',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Routing`
-  String get notificationScenarioRouting {
-    return Intl.message(
-      'Routing',
-      name: 'notificationScenarioRouting',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Problem`
-  String get notificationScenarioProblem {
-    return Intl.message(
-      'Problem',
-      name: 'notificationScenarioProblem',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Paused`
-  String get notificationScenarioPaused {
-    return Intl.message(
-      'Paused',
-      name: 'notificationScenarioPaused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Lock screen`
-  String get notificationScenarioLockScreen {
-    return Intl.message(
-      'Lock screen',
-      name: 'notificationScenarioLockScreen',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `ReClash · Protected details hidden`
-  String get notificationPreviewLocked {
-    return Intl.message(
-      'ReClash · Protected details hidden',
-      name: 'notificationPreviewLocked',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `ReClash · Protection paused`
-  String get notificationPreviewPaused {
-    return Intl.message(
-      'ReClash · Protection paused',
-      name: 'notificationPreviewPaused',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Connection Doctor: problem detected`
-  String get notificationPreviewProblem {
-    return Intl.message(
-      'Connection Doctor: problem detected',
-      name: 'notificationPreviewProblem',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Show the Connection Doctor verdict`
   String get notificationConnectionDoctorDesc {
     return Intl.message(
@@ -2610,16 +2430,6 @@ class AppLocalizations {
     return Intl.message(
       'Behaviour',
       name: 'notificationComponentBehaviour',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Shown while the notification is collapsed`
-  String get notificationCollapsedLine {
-    return Intl.message(
-      'Shown while the notification is collapsed',
-      name: 'notificationCollapsedLine',
       desc: '',
       args: [],
     );
@@ -3065,26 +2875,6 @@ class AppLocalizations {
     return Intl.message(
       'When enabled, only proxy traffic is counted',
       name: 'onlyStatisticsProxyDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Stop button in notification`
-  String get showNotificationStopAction {
-    return Intl.message(
-      'Stop button in notification',
-      name: 'showNotificationStopAction',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Show a stop button on the persistent notification. Turn it off if your system keeps the notification expanded because of it`
-  String get showNotificationStopActionDesc {
-    return Intl.message(
-      'Show a stop button on the persistent notification. Turn it off if your system keeps the notification expanded because of it',
-      name: 'showNotificationStopActionDesc',
       desc: '',
       args: [],
     );
@@ -10289,6 +10079,76 @@ class AppLocalizations {
     return Intl.message(
       'Detection',
       name: 'smartRoutingDetection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reachability probes`
+  String get smartRoutingProbes {
+    return Intl.message(
+      'Reachability probes',
+      name: 'smartRoutingProbes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Seeded from the region set in the app; edit them only if your network needs it`
+  String get smartRoutingRegionNote {
+    return Intl.message(
+      'Seeded from the region set in the app; edit them only if your network needs it',
+      name: 'smartRoutingRegionNote',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Country policy`
+  String get smartRoutingCountryPolicy {
+    return Intl.message(
+      'Country policy',
+      name: 'smartRoutingCountryPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Egress verification`
+  String get smartRoutingEgress {
+    return Intl.message(
+      'Egress verification',
+      name: 'smartRoutingEgress',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Node heuristics`
+  String get smartRoutingHeuristics {
+    return Intl.message(
+      'Node heuristics',
+      name: 'smartRoutingHeuristics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a valid two-letter country code`
+  String get smartRoutingCountryInvalid {
+    return Intl.message(
+      'Enter a valid two-letter country code',
+      name: 'smartRoutingCountryInvalid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter a positive number of milliseconds`
+  String get smartRoutingBandInvalid {
+    return Intl.message(
+      'Enter a positive number of milliseconds',
+      name: 'smartRoutingBandInvalid',
       desc: '',
       args: [],
     );

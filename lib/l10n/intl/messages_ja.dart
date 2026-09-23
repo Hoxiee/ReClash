@@ -1513,9 +1513,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "スマートルーティングが無効のため、この行は表示されません",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "折りたたみ時に表示されます",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "動作",
     ),
@@ -1542,10 +1539,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "接続診断の判定を表示します",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("内容"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("操作"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "通知から直接使える操作を選択します。",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "現在のサーバー",
     ),
@@ -1622,45 +1615,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "許可リスト",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "一時停止または再開",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "VPN を一時停止または再開する操作を表示します",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "接続ドクター：問題なし",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 保護された詳細を非表示",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "ネットワーク · 正常",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 保護は一時停止中",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "接続ドクター：問題を検出",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 現在のプロファイル",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "スマートルーティング · 自動ルート",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "プレビューの場面",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "サーバー · 東京 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "セッション · ↓ 1.2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12.4 MB/s  ↑ 1.8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("プライバシー"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "常駐通知で保護が有効かどうかを確認できます。",
@@ -1676,15 +1630,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "通知から削除",
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage("並べ替え"),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "ロック画面",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("通常"),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage("一時停止中"),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage("問題"),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "ルーティング中",
-    ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "サーバーグループを選択",
     ),
@@ -2298,12 +2243,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "showLabels": MessageLookupByLibrary.simpleMessage("サイドバーのラベル"),
     "showLess": MessageLookupByLibrary.simpleMessage("折りたたむ"),
     "showMore": MessageLookupByLibrary.simpleMessage("展開"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "通知に停止ボタンを表示",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "常駐通知に停止ボタンを表示します。これが原因で通知が常に展開される場合はオフにしてください",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("パスワードを表示"),
     "shrink": MessageLookupByLibrary.simpleMessage("コンパクト"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("サイレント起動"),
@@ -2345,6 +2284,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAxisStability": MessageLookupByLibrary.simpleMessage("安定性"),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage("自動選択に戻す"),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("バックアップ"),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "正のミリ秒数を入力してください",
+    ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("動作"),
@@ -2420,6 +2362,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "国が選択されていません",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "有効な2文字の国コードを入力してください",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("国別ポリシー"),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "名前またはコードで検索",
     ),
@@ -2457,6 +2403,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "より速いサーバーに切り替わるまで、使えるサーバーを保つ時間",
     ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("出口の検証"),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "出口エコーサービス",
     ),
@@ -2559,6 +2506,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthBlocked": MessageLookupByLibrary.simpleMessage("除外"),
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("未確認"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("使用可"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("ノードの推定ルール"),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近の切り替え"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
       "まだ切り替えはありません",
@@ -2694,6 +2642,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("その他"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("ロシア"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage("到達性チェック"),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("検査"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage("確認の有効期間"),
     "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
@@ -2761,6 +2710,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地域"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "地域は一般設定で選択します",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "アプリで選んだ地域から設定されています。ネットワークに必要な場合のみ変更してください",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP 対応を必須にする",

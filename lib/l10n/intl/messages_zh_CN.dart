@@ -1328,9 +1328,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "智能路由已关闭，该行不会显示",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "折叠通知时显示",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "行为",
     ),
@@ -1357,10 +1354,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "显示连接诊断的结论",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("内容"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("控制"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "选择可直接从通知执行的操作。",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage("当前服务器"),
     "notificationCurrentServerDesc": MessageLookupByLibrary.simpleMessage(
       "显示该策略组中选中的节点",
@@ -1425,41 +1418,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationNetworkUnknown": MessageLookupByLibrary.simpleMessage("未知"),
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage("白名单"),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage("暂停或继续"),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "显示暂停或继续 VPN 的操作",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "连接诊断：未发现问题",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 已隐藏受保护详情",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "网络 · 正常",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 保护已暂停",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "连接诊断：检测到问题",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 当前配置",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "智能路由 · 自动路由",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage("预览场景"),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "服务器 · 东京 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "会话 · ↓ 1.2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12.4 MB/s  ↑ 1.8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("隐私"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "常驻通知会显示保护是否处于活动状态。",
@@ -1473,13 +1431,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "从通知中移除",
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage("重新排序"),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "锁屏",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("正常"),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage("已暂停"),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage("出现问题"),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage("路由中"),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "选择服务器策略组",
     ),
@@ -2015,12 +1966,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "showLabels": MessageLookupByLibrary.simpleMessage("侧栏标签"),
     "showLess": MessageLookupByLibrary.simpleMessage("收起"),
     "showMore": MessageLookupByLibrary.simpleMessage("展开"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "通知栏显示停止按钮",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "在常驻通知上显示停止按钮。若系统因此总是展开通知，可关闭",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("显示密码"),
     "shrink": MessageLookupByLibrary.simpleMessage("紧凑"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("静默启动"),
@@ -2058,6 +2003,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingAxisStability": MessageLookupByLibrary.simpleMessage("稳定性"),
     "smartRoutingBackToAuto": MessageLookupByLibrary.simpleMessage("恢复自动选择"),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("备份"),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage("请输入正的毫秒数"),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("行为"),
@@ -2129,6 +2075,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "未选择国家/地区",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "请输入有效的两位国家/地区代码",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "国家/地区策略",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "按名称或代码搜索",
     ),
@@ -2164,6 +2116,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "在更快的服务器胜出前，可用服务器保持多久",
     ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("出口验证"),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage("出口回显服务"),
     "smartRoutingEgressEchoesDesc": MessageLookupByLibrary.simpleMessage(
       "返回调用方地址、以揭示伪装服务器真实出口的端点",
@@ -2250,6 +2203,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthBlocked": MessageLookupByLibrary.simpleMessage("已排除"),
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("未检查"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("可用"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("节点推断规则"),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("最近的切换"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage("还没有切换过"),
     "smartRoutingHostDelay": MessageLookupByLibrary.simpleMessage("来自延迟测试"),
@@ -2357,6 +2311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("其他"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("俄罗斯"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage("可达性探测"),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("探测"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage("验证有效期"),
     "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
@@ -2424,6 +2379,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("地区"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "地区在常规设置中选择",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "根据应用中所选的地区预设；仅在网络需要时再修改",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("要求支持 UDP"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(

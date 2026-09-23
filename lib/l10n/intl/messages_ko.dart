@@ -1500,9 +1500,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "스마트 라우팅이 꺼져 있어 이 줄은 표시되지 않습니다",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "알림이 접혀 있을 때 표시됩니다",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "동작",
     ),
@@ -1529,10 +1526,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "연결 진단 결과를 표시합니다",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("내용"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("제어"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "알림에서 직접 사용할 작업을 선택하세요.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage("현재 서버"),
     "notificationCurrentServerDesc": MessageLookupByLibrary.simpleMessage(
       "그룹에서 선택된 노드를 표시합니다",
@@ -1603,45 +1596,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "허용 목록",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "일시 중지 또는 재개",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "VPN을 일시 중지하거나 재개하는 작업을 표시합니다",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "연결 진단: 문제 없음",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 보호된 세부 정보 숨김",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "네트워크 · 정상",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 보호 일시 중지됨",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "연결 진단: 문제 감지",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · 현재 프로필",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "스마트 라우팅 · 자동 경로",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "미리보기 상황",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "서버 · 도쿄 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "세션 · ↓ 1.2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12.4 MB/s  ↑ 1.8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("개인정보"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "상시 알림에서 보호가 활성 상태인지 확인할 수 있습니다.",
@@ -1657,15 +1611,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "알림에서 제거",
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage("순서 변경"),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "잠금 화면",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("일반"),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "일시 중지됨",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage("문제"),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage("라우팅"),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "서버 그룹 선택",
     ),
@@ -2277,12 +2222,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "showLabels": MessageLookupByLibrary.simpleMessage("사이드바 레이블 표시"),
     "showLess": MessageLookupByLibrary.simpleMessage("접기"),
     "showMore": MessageLookupByLibrary.simpleMessage("펼치기"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "알림에 중지 버튼 표시",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "상시 알림에 중지 버튼을 표시합니다. 이 버튼 때문에 알림이 항상 펼쳐져 보인다면 끄세요.",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("비밀번호 표시"),
     "shrink": MessageLookupByLibrary.simpleMessage("컴팩트"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("백그라운드 시작"),
@@ -2324,6 +2263,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "자동 모드로 되돌리기",
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("백업"),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "양수 밀리초 값을 입력하세요",
+    ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("동작"),
@@ -2399,6 +2341,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "선택된 국가 없음",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "유효한 두 글자 국가 코드를 입력하세요",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage("국가 정책"),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "이름 또는 코드로 검색",
     ),
@@ -2436,6 +2382,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "더 빠른 서버가 나타났을 때 작동 중인 서버를 얼마나 오래 유지할지 정합니다",
     ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("출구 검증"),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "출구 에코 서비스",
     ),
@@ -2536,6 +2483,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingHealthBlocked": MessageLookupByLibrary.simpleMessage("차단됨"),
     "smartRoutingHealthUnknown": MessageLookupByLibrary.simpleMessage("미확인"),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("사용 가능"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage("노드 추론 규칙"),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage("최근 전환"),
     "smartRoutingHistoryEmpty": MessageLookupByLibrary.simpleMessage(
       "아직 전환이 없습니다",
@@ -2675,6 +2623,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("기타"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("러시아"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage("도달성 검사"),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("탐색"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage("확인 유효 기간"),
     "smartRoutingProofTtlDesc": MessageLookupByLibrary.simpleMessage(
@@ -2742,6 +2691,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("지역"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "지역은 일반 설정에서 선택합니다",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "앱에서 선택한 지역에 따라 설정됩니다. 네트워크에 필요할 때만 변경하세요",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage("UDP 지원 필수"),
     "smartRoutingRequireUdpDesc": MessageLookupByLibrary.simpleMessage(

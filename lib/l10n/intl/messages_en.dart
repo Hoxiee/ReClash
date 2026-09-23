@@ -1784,6 +1784,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Current network is not trusted",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Notification"),
+    "notificationActionButtons": MessageLookupByLibrary.simpleMessage(
+      "Action buttons",
+    ),
+    "notificationActionButtonsDesc": MessageLookupByLibrary.simpleMessage(
+      "Show pause and stop buttons in the notification",
+    ),
     "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
       "Add component",
     ),
@@ -1801,9 +1807,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "Smart routing is off, so this line is hidden",
-    ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "Shown while the notification is collapsed",
     ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "Behaviour",
@@ -1833,10 +1836,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Show the Connection Doctor verdict",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("Content"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("Controls"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "Choose actions available directly from the notification.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "Current server",
     ),
@@ -1921,45 +1920,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Whitelist",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "Pause or resume",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Show an action that pauses or resumes the VPN",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "Connection Doctor: no problems",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Protected details hidden",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "Network · Normal",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Protection paused",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "Connection Doctor: problem detected",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Current profile",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "Smart Routing · Automatic route",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "Preview scenario",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "Server · Tokyo 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "Session · ↓ 1.2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12.4 MB/s  ↑ 1.8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Privacy"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "The persistent notification shows whether your protection is active.",
@@ -1975,21 +1935,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Remove from notification",
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage("Reorder"),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "Lock screen",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage(
-      "Normal",
-    ),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "Paused",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
-      "Problem",
-    ),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "Routing",
-    ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "Choose server group",
     ),
@@ -2733,12 +2678,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "showLabels": MessageLookupByLibrary.simpleMessage("Show sidebar labels"),
     "showLess": MessageLookupByLibrary.simpleMessage("Collapse"),
     "showMore": MessageLookupByLibrary.simpleMessage("Expand"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "Stop button in notification",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Show a stop button on the persistent notification. Turn it off if your system keeps the notification expanded because of it",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Show password"),
     "shrink": MessageLookupByLibrary.simpleMessage("Compact"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Silent launch"),
@@ -2790,6 +2729,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Back to automatic",
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("Backup"),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "Enter a positive number of milliseconds",
+    ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Behaviour"),
@@ -2879,6 +2821,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "No countries selected",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "Enter a valid two-letter country code",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "Country policy",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "Search by name or code",
     ),
@@ -2917,6 +2865,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwell": MessageLookupByLibrary.simpleMessage("Settle time"),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "How long a working server is kept before a faster one wins",
+    ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
+      "Egress verification",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Egress echo services",
@@ -3046,6 +2997,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "unchecked",
     ),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("usable"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
+      "Node heuristics",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Recent switches",
     ),
@@ -3219,6 +3173,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Other"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russia"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
+      "Reachability probes",
+    ),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Probing"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
       "Proof lifetime",
@@ -3290,6 +3247,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Region"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "Region is chosen in General settings",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "Seeded from the region set in the app; edit them only if your network needs it",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Require UDP support",

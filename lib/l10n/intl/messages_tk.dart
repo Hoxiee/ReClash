@@ -1867,9 +1867,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "Akylly marşrut öçürilen, şonuň üçin bu setir görkezilmeýär",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "Bildiriş ýygnalanda görünýär",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "Häsiýeti",
     ),
@@ -1898,10 +1895,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Birikme anyklaýşynyň netijesini görkezmek",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("Mazmun"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("Dolandyryş"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "Duýduryşdan göni elýeterli hereketleri saýlaň.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "Häzirki serwer",
     ),
@@ -1986,45 +1979,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Rugsat sanawy",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "Wagtlaýyn duruzmak ýa-da dowam etdirmek",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "VPN-i wagtlaýyn duruzmak ýa-da dowam etdirmek hereketini görkezmek",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "Birikme diagnostikasy: mesele ýok",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Goralýan maglumatlar gizlenen",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "Tor · Kadaly",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Gorag wagtlaýyn duruzylan",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "Birikme diagnostikasy: mesele tapyldy",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Häzirki profil",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "Akylly marşrut · Awtomatiki ugur",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "Öňünden görmek ssenariýasy",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "Serwer · Tokio 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "Sessiýa · ↓ 1,2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12,4 MB/s  ↑ 1,8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Gizlinlik"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "Hemişelik duýduryş goragyň işjeňdigini görkezýär.",
@@ -2043,19 +1997,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage(
       "Tertibini üýtget",
-    ),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "Gulp ekrany",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("Adaty"),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "Wagtlaýyn duruzylan",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
-      "Mesele",
-    ),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "Marşrutlaşdyrma",
     ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "Serwer toparyny saýla",
@@ -2820,12 +2761,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "showLess": MessageLookupByLibrary.simpleMessage("Daralt"),
     "showMore": MessageLookupByLibrary.simpleMessage("Giňelt"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "Duýduryşdaky bes düwmesi",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Hemişelik duýduryşda bes düwmesi görkezilýär. Ulgam duýduryşy onuň sebäbi bilen giňeldip goýýan bolsa, ony öçüriň",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Paroly görkez"),
     "shrink": MessageLookupByLibrary.simpleMessage("Kompakt"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Sessiz işe girizmek"),
@@ -2880,6 +2815,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage(
       "Ätiýaçlyk nusga",
+    ),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "Noldan uly millisekund sanyny giriziň",
     ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2970,6 +2908,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "Ýurt saýlanmady",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "Dogry iki harply ýurt kodyny giriziň",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "Ýurt syýasaty",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "Ady ýa-da kody boýunça gözle",
     ),
@@ -3013,6 +2957,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "Işleýän serwer tizräk biri utýança näçe wagt saklanýar",
     ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage("Çykyş barlagy"),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Çykyş echo hyzmatlary",
     ),
@@ -3142,6 +3087,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage(
       "ulanmaga ýaramly",
+    ),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
+      "Düwün çaklamalary",
     ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Soňky çalyşyklar",
@@ -3320,6 +3268,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Başga"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russiýa"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
+      "Elýeterlilik synaglary",
+    ),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Synaglar"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
       "Tassyklamanyň hereket möhleti",
@@ -3391,6 +3342,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Sebit"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "Sebit umumy sazlamalarda saýlanýar",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "Programmada saýlanan sebit boýunça bellenýär; diňe toruňyz talap etse üýtgediň",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Diňe UDP goldawly serwerler",

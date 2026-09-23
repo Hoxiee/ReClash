@@ -1908,9 +1908,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "Aqlli marshrutlash o‘chirilgan, shuning uchun bu qator ko‘rsatilmaydi",
     ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "Bildirishnoma yig‘ilganda ko‘rinadi",
-    ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "Ishlashi",
     ),
@@ -1939,10 +1936,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ulanish diagnostikasi xulosasini ko‘rsatish",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("Tarkib"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("Boshqaruv"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "Bildirishnomadan bevosita foydalaniladigan amallarni tanlang.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "Joriy server",
     ),
@@ -2033,45 +2026,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Ruxsat ro‘yxati",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "To‘xtatib turish yoki davom ettirish",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "VPNni to‘xtatib turish yoki davom ettirish amalini ko‘rsatish",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "Ulanish diagnostikasi: muammo yo‘q",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Himoyalangan ma’lumotlar yashirilgan",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "Tarmoq · Me’yorda",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Himoya to‘xtatib turilgan",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "Ulanish diagnostikasi: muammo aniqlandi",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Joriy profil",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "Aqlli marshrutlash · Avtomatik yo‘nalish",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "Ko‘rish ssenariysi",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "Server · Tokio 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "Seans · ↓ 1,2 GB  ↑ 184 MB",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12,4 MB/s  ↑ 1,8 MB/s",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage("Maxfiylik"),
     "notificationProtectionDesc": MessageLookupByLibrary.simpleMessage(
       "Doimiy bildirishnoma himoya faol ekanini ko‘rsatadi.",
@@ -2087,19 +2041,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bildirishnomadan olib tashlash",
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage("Tartiblash"),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "Qulf ekrani",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage("Oddiy"),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "To‘xtatib turilgan",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
-      "Muammo",
-    ),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "Marshrutlash",
-    ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "Server guruhini tanlash",
     ),
@@ -2885,12 +2826,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "showLess": MessageLookupByLibrary.simpleMessage("Yigʻish"),
     "showMore": MessageLookupByLibrary.simpleMessage("Yoyish"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "Bildirishnomada toʻxtatish tugmasi",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Doimiy bildirishnomada toʻxtatish tugmasini koʻrsatadi. Agar bu tufayli bildirishnoma doim kengaytirilgan holda turadigan boʻlsa, oʻchirib qoʻying",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Parolni koʻrsatish"),
     "shrink": MessageLookupByLibrary.simpleMessage("Ixcham"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage(
@@ -2948,6 +2883,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Avtomatik rejimga qaytish",
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage("Zaxira nusxa"),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "Musbat millisekund sonini kiriting",
+    ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage(
@@ -3043,6 +2981,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "Davlat tanlanmagan",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "To\'g\'ri ikki harfli davlat kodini kiriting",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "Davlat siyosati",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "Nomi yoki kodi bo\'yicha qidirish",
     ),
@@ -3085,6 +3029,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "Tezroq server topilsa ham, ishlayotgan server qancha vaqt saqlanadi",
+    ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
+      "Chiqish tekshiruvi",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Chiqish echo xizmatlari",
@@ -3217,6 +3164,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage(
       "ishlatiladigan",
+    ),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
+      "Tugun taxminlari",
     ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Soʻnggi almashtirishlar",
@@ -3395,6 +3345,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Boshqa"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Rossiya"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
+      "Erishuvchanlik tekshiruvlari",
+    ),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Tekshiruvlar"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
       "Tasdiqning amal qilish muddati",
@@ -3468,6 +3421,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Mintaqa"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "Hudud umumiy sozlamalarda tanlanadi",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "Ilovada tanlangan hudud asosida o\'rnatilgan; faqat tarmog\'ingiz talab qilsa o\'zgartiring",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "UDP qoʻllab-quvvatlashi talab qilinadi",

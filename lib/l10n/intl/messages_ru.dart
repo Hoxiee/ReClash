@@ -1829,6 +1829,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Текущая сеть не из доверенных",
     ),
     "notification": MessageLookupByLibrary.simpleMessage("Уведомление"),
+    "notificationActionButtons": MessageLookupByLibrary.simpleMessage(
+      "Кнопки действий",
+    ),
+    "notificationActionButtonsDesc": MessageLookupByLibrary.simpleMessage(
+      "Показывать кнопки паузы и остановки в уведомлении",
+    ),
     "notificationAddComponent": MessageLookupByLibrary.simpleMessage(
       "Добавить компонент",
     ),
@@ -1846,9 +1852,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationBlockedSmartRoutingOff": MessageLookupByLibrary.simpleMessage(
       "Умная маршрутизация выключена, строка не показывается",
-    ),
-    "notificationCollapsedLine": MessageLookupByLibrary.simpleMessage(
-      "Видна в свёрнутом уведомлении",
     ),
     "notificationComponentBehaviour": MessageLookupByLibrary.simpleMessage(
       "Поведение",
@@ -1878,10 +1881,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Показывать вердикт диагностики соединения",
     ),
     "notificationContent": MessageLookupByLibrary.simpleMessage("Содержимое"),
-    "notificationControls": MessageLookupByLibrary.simpleMessage("Управление"),
-    "notificationControlsDesc": MessageLookupByLibrary.simpleMessage(
-      "Выберите действия, доступные прямо из уведомления.",
-    ),
     "notificationCurrentServer": MessageLookupByLibrary.simpleMessage(
       "Текущий сервер",
     ),
@@ -1968,45 +1967,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationNetworkWhitelist": MessageLookupByLibrary.simpleMessage(
       "Белый список",
     ),
-    "notificationPauseAction": MessageLookupByLibrary.simpleMessage(
-      "Пауза и продолжение",
-    ),
-    "notificationPauseActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Показывать кнопку паузы или продолжения VPN",
-    ),
-    "notificationPreviewDoctor": MessageLookupByLibrary.simpleMessage(
-      "Доктор соединения: проблем нет",
-    ),
-    "notificationPreviewLocked": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Защищённые данные скрыты",
-    ),
-    "notificationPreviewNetwork": MessageLookupByLibrary.simpleMessage(
-      "Сеть · Норма",
-    ),
-    "notificationPreviewPaused": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Защита приостановлена",
-    ),
-    "notificationPreviewProblem": MessageLookupByLibrary.simpleMessage(
-      "Доктор соединения: обнаружена проблема",
-    ),
-    "notificationPreviewProfile": MessageLookupByLibrary.simpleMessage(
-      "ReClash · Текущий профиль",
-    ),
-    "notificationPreviewRoute": MessageLookupByLibrary.simpleMessage(
-      "Умная маршрутизация · Автоматический маршрут",
-    ),
-    "notificationPreviewScenario": MessageLookupByLibrary.simpleMessage(
-      "Сценарий просмотра",
-    ),
-    "notificationPreviewServer": MessageLookupByLibrary.simpleMessage(
-      "Сервер · Токио 01",
-    ),
-    "notificationPreviewSession": MessageLookupByLibrary.simpleMessage(
-      "Сеанс · ↓ 1,2 ГБ  ↑ 184 МБ",
-    ),
-    "notificationPreviewSpeed": MessageLookupByLibrary.simpleMessage(
-      "↓ 12,4 МБ/с  ↑ 1,8 МБ/с",
-    ),
     "notificationPrivacy": MessageLookupByLibrary.simpleMessage(
       "Конфиденциальность",
     ),
@@ -2027,21 +1987,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "notificationReorder": MessageLookupByLibrary.simpleMessage(
       "Изменить порядок",
-    ),
-    "notificationScenarioLockScreen": MessageLookupByLibrary.simpleMessage(
-      "Экран блокировки",
-    ),
-    "notificationScenarioNormal": MessageLookupByLibrary.simpleMessage(
-      "Обычный",
-    ),
-    "notificationScenarioPaused": MessageLookupByLibrary.simpleMessage(
-      "Приостановлено",
-    ),
-    "notificationScenarioProblem": MessageLookupByLibrary.simpleMessage(
-      "Проблема",
-    ),
-    "notificationScenarioRouting": MessageLookupByLibrary.simpleMessage(
-      "Маршрутизация",
     ),
     "notificationSelectServerGroup": MessageLookupByLibrary.simpleMessage(
       "Выбрать группу серверов",
@@ -2820,12 +2765,6 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "showLess": MessageLookupByLibrary.simpleMessage("Свернуть"),
     "showMore": MessageLookupByLibrary.simpleMessage("Развернуть"),
-    "showNotificationStopAction": MessageLookupByLibrary.simpleMessage(
-      "Кнопка остановки в уведомлении",
-    ),
-    "showNotificationStopActionDesc": MessageLookupByLibrary.simpleMessage(
-      "Показывать кнопку остановки в постоянном уведомлении. Отключите, если из-за неё система всегда разворачивает уведомление.",
-    ),
     "showPassword": MessageLookupByLibrary.simpleMessage("Показать пароль"),
     "shrink": MessageLookupByLibrary.simpleMessage("Компактный"),
     "silentLaunch": MessageLookupByLibrary.simpleMessage("Запуск в фоне"),
@@ -2880,6 +2819,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingBackup": MessageLookupByLibrary.simpleMessage(
       "Резервная копия",
+    ),
+    "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
+      "Введите положительное число миллисекунд",
     ),
     "smartRoutingBandLabel": m76,
     "smartRoutingBands": m77,
@@ -2972,6 +2914,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCountryEmpty": MessageLookupByLibrary.simpleMessage(
       "Страны не выбраны",
     ),
+    "smartRoutingCountryInvalid": MessageLookupByLibrary.simpleMessage(
+      "Введите корректный двухбуквенный код страны",
+    ),
+    "smartRoutingCountryPolicy": MessageLookupByLibrary.simpleMessage(
+      "Политика по странам",
+    ),
     "smartRoutingCountrySearch": MessageLookupByLibrary.simpleMessage(
       "Поиск по названию или коду",
     ),
@@ -3014,6 +2962,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDwellDesc": MessageLookupByLibrary.simpleMessage(
       "Сколько держать рабочий сервер, прежде чем победит более быстрый",
+    ),
+    "smartRoutingEgress": MessageLookupByLibrary.simpleMessage(
+      "Проверка точки выхода",
     ),
     "smartRoutingEgressEchoes": MessageLookupByLibrary.simpleMessage(
       "Сервисы эхо-адреса",
@@ -3145,6 +3096,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "не проверены",
     ),
     "smartRoutingHealthUsable": MessageLookupByLibrary.simpleMessage("годны"),
+    "smartRoutingHeuristics": MessageLookupByLibrary.simpleMessage(
+      "Эвристики узлов",
+    ),
     "smartRoutingHistory": MessageLookupByLibrary.simpleMessage(
       "Последние переключения",
     ),
@@ -3322,6 +3276,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Другое"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Россия"),
     "smartRoutingProbeBudget": m88,
+    "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
+      "Проверки доступности",
+    ),
     "smartRoutingProbing": MessageLookupByLibrary.simpleMessage("Пробы"),
     "smartRoutingProofTtl": MessageLookupByLibrary.simpleMessage(
       "Срок годности проверок",
@@ -3397,6 +3354,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRegion": MessageLookupByLibrary.simpleMessage("Регион"),
     "smartRoutingRegionManaged": MessageLookupByLibrary.simpleMessage(
       "Регион выбирается в общих настройках",
+    ),
+    "smartRoutingRegionNote": MessageLookupByLibrary.simpleMessage(
+      "Заданы регионом, выбранным в приложении; меняйте только если этого требует ваша сеть",
     ),
     "smartRoutingRequireUdp": MessageLookupByLibrary.simpleMessage(
       "Требовать поддержку UDP",

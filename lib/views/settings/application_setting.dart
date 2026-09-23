@@ -5,7 +5,6 @@ import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/settings/application_notification.dart';
-import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -35,21 +34,26 @@ class ApplicationSettingView extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return BaseScaffold(
       title: appLocalizations.application,
-      body: DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            SettingsTabs(
-              labels: [appLocalizations.general, appLocalizations.notification],
-            ),
-            const Expanded(
-              child: TabBarView(
-                children: [_ApplicationGeneralTab(), NotificationSettingsTab()],
-              ),
-            ),
-          ],
-        ),
+      body: const _ApplicationGeneralTab(),
+    );
+  }
+}
+
+class _NotificationItem extends StatelessWidget {
+  const _NotificationItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return DecorationListItem.open(
+      leading: const Icon(Icons.notifications_active_outlined),
+      title: Text(appLocalizations.notification),
+      subtitle: Text(appLocalizations.notificationProtectionDesc),
+      widget: BaseScaffold(
+        title: appLocalizations.notification,
+        body: const NotificationSettingsView(),
       ),
+      paneId: 'notification',
     );
   }
 }
@@ -161,6 +165,7 @@ class _ApplicationGeneralTab extends StatelessWidget {
         SettingSection.sliver(
           title: appLocalizations.settings,
           items: [
+            const _NotificationItem(),
             DecorationListItem(
               title: Text(appLocalizations.setupRerun),
               subtitle: Text(appLocalizations.setupRerunDesc),
