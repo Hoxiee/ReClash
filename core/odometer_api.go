@@ -1,7 +1,6 @@
 package main
 
 import (
-	"sync"
 	"time"
 )
 
@@ -9,25 +8,6 @@ type odoSignal struct {
 	Kind   string `json:"kind"`
 	Reason string `json:"reason,omitempty"`
 	Value  int    `json:"value,omitempty"`
-}
-
-var odoStartIntent struct {
-	sync.Mutex
-	reason string
-}
-
-func setOdoStartReason(reason string) {
-	odoStartIntent.Lock()
-	odoStartIntent.reason = reason
-	odoStartIntent.Unlock()
-}
-
-func takeOdoStartReason() string {
-	odoStartIntent.Lock()
-	defer odoStartIntent.Unlock()
-	reason := odoStartIntent.reason
-	odoStartIntent.reason = ""
-	return reason
 }
 
 func init() {

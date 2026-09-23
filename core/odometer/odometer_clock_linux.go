@@ -1,6 +1,6 @@
 //go:build linux || android
 
-package main
+package odometer
 
 import (
 	"time"

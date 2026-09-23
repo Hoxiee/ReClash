@@ -1,4 +1,4 @@
-package main
+package odometer
 
 import (
 	"sync"
@@ -32,10 +32,9 @@ func startOdometerHeartbeat() {
 			defer ticker.Stop()
 			for {
 				// BOOTTIME accrual is exact across any gap, so parking a screen-off
-				// phone until wake loses no coverage and drops the 20s CPU wake-up.
-				// Reading the channel before isScreenOff keeps the wake unmissable.
+				// phone until wake loses no coverage; read the channel first so the wake is unmissable.
 				wake := odometerScreenWakeCh()
-				if isScreenOff.Load() {
+				if screenOff() {
 					<-wake
 					continue
 				}

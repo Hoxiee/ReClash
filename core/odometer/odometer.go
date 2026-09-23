@@ -1,4 +1,4 @@
-package main
+package odometer
 
 import (
 	"encoding/json"
