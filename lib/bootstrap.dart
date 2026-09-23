@@ -18,7 +18,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/navigation.dart';
+import 'package:reclash/views/settings/navigation.dart';
 import 'package:reclash/views/views.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';

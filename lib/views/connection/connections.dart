@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
-import 'package:reclash/features/features.dart';
+import 'package:reclash/views/views.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';

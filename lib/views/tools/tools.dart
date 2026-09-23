@@ -4,25 +4,25 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/about.dart';
-import 'package:reclash/views/access.dart';
-import 'package:reclash/views/application_setting.dart';
-import 'package:reclash/views/backup_and_restore.dart';
+import 'package:reclash/views/settings/about.dart';
+import 'package:reclash/views/settings/access.dart';
+import 'package:reclash/views/settings/application_setting.dart';
+import 'package:reclash/views/settings/backup_and_restore.dart';
 import 'package:reclash/views/config/config.dart';
-import 'package:reclash/views/hotkey.dart';
-import 'package:reclash/views/locale.dart';
+import 'package:reclash/views/settings/hotkey.dart';
+import 'package:reclash/views/settings/locale.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
 
-import 'appearance/appearance.dart';
-import 'config/advanced.dart';
-import 'developer.dart';
-import 'tools/connection_doctor.dart';
-import 'tools/core.dart';
-import 'tools/findings.dart';
-import 'url_scheme.dart';
+import '../appearance/appearance.dart';
+import '../config/advanced.dart';
+import '../settings/developer.dart';
+import 'connection_doctor.dart';
+import 'core.dart';
+import 'findings.dart';
+import '../settings/url_scheme.dart';
 
 const toolsDoctorPaneId = 'doctor';
 

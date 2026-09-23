@@ -4,7 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
-import 'package:reclash/views/application_notification.dart';
+import 'package:reclash/views/settings/application_notification.dart';
 import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/widgets/widgets.dart';

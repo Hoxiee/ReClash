@@ -1,5 +1,5 @@
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/features/overwrite/rule.dart';
+import 'package:reclash/views/profiles/overwrite/rule.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';

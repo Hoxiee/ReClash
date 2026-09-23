@@ -1,4 +1,4 @@
-import 'package:reclash/pages/editor.dart';
+import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:material_ui/material_ui.dart';

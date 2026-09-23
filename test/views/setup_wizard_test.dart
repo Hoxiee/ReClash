@@ -5,7 +5,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/application_setting.dart';
+import 'package:reclash/views/settings/application_setting.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/views/setup/steps/finish.dart';
 import 'package:reclash/views/setup/widgets.dart';

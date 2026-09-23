@@ -1,5 +1,5 @@
 import 'package:reclash/models/models.dart';
-import 'package:reclash/features/features.dart';
+import 'package:reclash/views/views.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';

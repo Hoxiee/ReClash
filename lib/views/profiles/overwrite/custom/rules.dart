@@ -1,6 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/features/overwrite/overwrite.dart';
+import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/models/state.dart';

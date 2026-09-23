@@ -18,7 +18,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'pages/pages.dart';
+import 'views/views.dart';
 
 Widget buildManagerStack({
   required bool isDesktop,

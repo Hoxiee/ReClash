@@ -2,7 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/pages/home.dart';
+import 'package:reclash/views/home/home.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';

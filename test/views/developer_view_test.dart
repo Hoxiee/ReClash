@@ -4,7 +4,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/developer.dart';
+import 'package:reclash/views/settings/developer.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

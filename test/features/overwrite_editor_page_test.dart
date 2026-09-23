@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:reclash/features/overwrite/overwrite.dart';
+import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';

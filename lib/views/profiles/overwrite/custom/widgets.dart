@@ -1,2 +1,2 @@
-export 'package:reclash/features/overwrite/overwrite_form_row.dart'
+export 'package:reclash/views/profiles/overwrite/overwrite_form_row.dart'
     show InfoMessageButton;

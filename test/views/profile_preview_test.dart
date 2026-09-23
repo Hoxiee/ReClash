@@ -1,6 +1,6 @@
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/profile.dart';
-import 'package:reclash/pages/editor.dart';
+import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/preview.dart';

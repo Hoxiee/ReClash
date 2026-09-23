@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/pages/scan.dart';
+import 'package:reclash/views/tools/scan.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/widgets/widgets.dart';

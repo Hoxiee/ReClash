@@ -1,6 +1,6 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/tools/tools.dart';
 import 'package:reclash/views/tools/findings.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';

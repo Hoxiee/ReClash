@@ -1,4 +1,4 @@
-import 'package:reclash/pages/error.dart';
+import 'package:reclash/views/error.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

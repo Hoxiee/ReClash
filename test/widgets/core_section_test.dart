@@ -5,7 +5,7 @@ import 'package:reclash/core/controller.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/tools.dart';
+import 'package:reclash/views/tools/tools.dart';
 import 'package:reclash/views/tools/core.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
