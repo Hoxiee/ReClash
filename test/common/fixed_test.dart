@@ -1,4 +1,4 @@
-import 'package:reclash/common/fixed.dart';
+import 'package:reclash/common/util/fixed.dart';
 import 'package:test/test.dart';
 
 void main() {

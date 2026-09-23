@@ -1,4 +1,4 @@
-import 'package:reclash/common/num.dart';
+import 'package:reclash/common/util/num.dart';
 import 'package:test/test.dart';
 
 void main() {

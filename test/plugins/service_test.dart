@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';

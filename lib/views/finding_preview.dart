@@ -1,5 +1,5 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/seasonal.dart';
+import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/about.dart';
 import 'package:reclash/views/config/desync.dart';

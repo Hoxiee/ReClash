@@ -1,4 +1,4 @@
-import 'package:reclash/common/tray.dart';
+import 'package:reclash/common/desktop/tray.dart';
 import 'package:test/test.dart';
 
 void main() {

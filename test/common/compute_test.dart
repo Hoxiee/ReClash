@@ -1,4 +1,4 @@
-import 'package:reclash/common/compute.dart';
+import 'package:reclash/common/util/compute.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:test/test.dart';

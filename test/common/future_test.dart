@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:reclash/common/future.dart';
+import 'package:reclash/common/util/future.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

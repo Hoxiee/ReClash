@@ -1,0 +1,229 @@
+import 'package:reclash/database/database.dart';
+import 'package:reclash/models/models.dart';
+
+import '../storage/preferences.dart';
+import '../tasks/task.dart';
+
+typedef MigrationTransform =
+    Future<MigrationData> Function(Map<String, Object?> configMap);
+
+abstract interface class MigrationStore {
+  /// False when the backing store could not be opened at all, as opposed to a
+  /// store that opened but holds nothing.
+  Future<bool> get isAvailable;
+
+  Future<Map<String, Object?>?> getConfigMap();
+
+  Future<int> getVersion();
+
+  Future<Map<String, Object?>?> getClashConfigMap();
+
+  Future<void> restore(MigrationData data);
+
+  Future<bool> saveConfig(Config config);
+
+  Future<void> clearClashConfig();
+
+  Future<void> setVersion(int version);
+}
+
+class _AppMigrationStore implements MigrationStore {
+  const _AppMigrationStore();
+
+  @override
+  Future<bool> get isAvailable => preferences.isInit;
+
+  @override
+  Future<Map<String, Object?>?> getConfigMap() => preferences.getConfigMap();
+
+  @override
+  Future<int> getVersion() => preferences.getVersion();
+
+  @override
+  Future<Map<String, Object?>?> getClashConfigMap() =>
+      preferences.getClashConfigMap();
+
+  @override
+  Future<void> restore(MigrationData data) {
+    return database.restore(
+      data.profiles,
+      data.scripts,
+      data.rules,
+      data.links,
+      data.proxyGroups,
+    );
+  }
+
+  @override
+  Future<bool> saveConfig(Config config) => preferences.saveConfig(config);
+
+  @override
+  Future<void> clearClashConfig() => preferences.clearClashConfig();
+
+  @override
+  Future<void> setVersion(int version) => preferences.setVersion(version);
+}
+
+class Migration {
+  final MigrationStore _store;
+  final MigrationTransform _migrateV0;
+
+  Migration({required MigrationStore store, MigrationTransform? migrateV0})
+    : _store = store,
+      _migrateV0 = migrateV0 ?? oldToNowTask;
+
+  static const currentVersion = currentDataVersion;
+
+  Future<Config> run() async {
+    final configMap = await _store.getConfigMap();
+    var oldVersion = await _store.getVersion();
+    Config? config;
+    if (oldVersion > currentVersion) {
+      throw StateError(
+        'Local data version $oldVersion is newer than $currentVersion.',
+      );
+    }
+    if (oldVersion == currentVersion) {
+      try {
+        config = Config.realFromJson(configMap);
+      } catch (_) {
+        if (!_isV0(configMap)) {
+          throw StateError(
+            'Local data is damaged. A reset is required to fix this issue.',
+          );
+        }
+        oldVersion = 0;
+      }
+      if (config != null) {
+        final storedDavPassword = _getStoredDavPassword(configMap);
+        final hasPlainTextDavPassword =
+            storedDavPassword != null &&
+            storedDavPassword == config.davProps?.password;
+        if (hasPlainTextDavPassword && !await _store.saveConfig(config)) {
+          throw StateError('Failed to obfuscate the legacy WebDAV password');
+        }
+        return _recoverDesyncTester(this, config);
+      }
+    }
+
+    MigrationData data = MigrationData(configMap: configMap);
+    var shouldClearClashConfig = false;
+    if (oldVersion == 0) {
+      final clashConfigMap = await _store.getClashConfigMap();
+      if (_isV0(configMap) && configMap != null) {
+        final legacyConfigMap = Map<String, Object?>.from(configMap);
+        if (clashConfigMap != null) {
+          legacyConfigMap['patchClashConfig'] = clashConfigMap;
+          shouldClearClashConfig = true;
+        }
+        data = await _migrateV0(legacyConfigMap);
+      } else if (clashConfigMap != null) {
+        final currentConfigMap = Map<String, Object?>.from(
+          configMap ?? const {},
+        );
+        currentConfigMap.putIfAbsent('patchClashConfig', () => clashConfigMap);
+        data = MigrationData(configMap: currentConfigMap);
+        shouldClearClashConfig = true;
+      }
+    }
+    if (oldVersion == 1) {
+      data = data.copyWith(configMap: _upgradeUpstreamV1(data.configMap));
+    } else {
+      data = data.copyWith(configMap: _withFlClashXUa(data.configMap));
+    }
+
+    config = Config.realFromJson(data.configMap);
+    await _store.restore(data);
+    if (!await _store.saveConfig(config)) {
+      // An unopenable store is reported later by the corrupt-cache dialog,
+      // which offers a reset; failing here would hide that path.
+      if (await _store.isAvailable) {
+        throw StateError('Failed to save migrated preferences');
+      }
+      return config;
+    }
+    if (shouldClearClashConfig) {
+      await _store.clearClashConfig();
+    }
+    await _store.setVersion(currentVersion);
+    return _recoverDesyncTester(this, config);
+  }
+}
+
+// A stored testRunning means the strategy tester died mid-run and left the
+// engine on some battery preset; put the user's strategy back and clear the
+// crash markers. An unsaved recovery simply retries on the next start.
+Future<Config> _recoverDesyncTester(Migration migration, Config config) async {
+  final desync = config.desyncProps;
+  if (!desync.testRunning) return config;
+  final recovered = config.copyWith(
+    desyncProps: desync.copyWith(
+      strategyArgs: desync.testRestoreArgs ?? desync.strategyArgs,
+      testRunning: false,
+      testRestoreArgs: null,
+    ),
+  );
+  await migration._store.saveConfig(recovered);
+  return recovered;
+}
+
+bool _isV0(Map<String, Object?>? configMap) =>
+    configMap?['proxiesStyle'] != null;
+
+// v1→v2: an unset global-ua becomes the FlClashX compat preset; a value the
+// user picked, including an explicit default, is kept.
+Map<String, Object?>? _withFlClashXUa(Map<String, Object?>? configMap) {
+  final patch = configMap?['patchClashConfig'];
+  if (configMap == null || patch is! Map || patch['global-ua'] != null) {
+    return configMap;
+  }
+  final map = Map<String, Object?>.from(configMap);
+  final patchCopy = Map<String, Object?>.from(patch);
+  patchCopy['global-ua'] = flClashXCompatUa;
+  map['patchClashConfig'] = patchCopy;
+  return map;
+}
+
+Map<String, Object?>? _upgradeUpstreamV1(Map<String, Object?>? configMap) {
+  final withUa = _withFlClashXUa(configMap);
+  if (withUa == null) return null;
+  final map = Map<String, Object?>.from(withUa);
+  final rawSettings = map['appSettingProps'];
+  final settings = Map<String, Object?>.from(
+    rawSettings is Map ? rawSettings : const {},
+  );
+  settings
+    ..['setupCompleted'] = true
+    ..['autoCheckUpdate'] = defaultAppSettingProps.autoCheckUpdate
+    ..['sendDeviceIdentity'] = defaultAppSettingProps.sendDeviceIdentity;
+  final legacyStopAction = settings['showNotificationStopAction'];
+  final rawNotification = settings['notificationSettings'];
+  final notification = Map<String, Object?>.from(
+    rawNotification is Map ? rawNotification : const {},
+  );
+  notification
+    ..['showStopAction'] = legacyStopAction is bool
+        ? legacyStopAction
+        : defaultNotificationSettings.showStopAction
+    ..['showPauseAction'] = defaultNotificationSettings.showPauseAction
+    ..['hideSensitiveOnLockScreen'] =
+        defaultNotificationSettings.hideSensitiveOnLockScreen
+    ..['subscriptionReminders'] =
+        defaultNotificationSettings.subscriptionReminders;
+  settings
+    ..remove('showNotificationStopAction')
+    ..['notificationSettings'] = notification;
+  map['appSettingProps'] = settings;
+  return map;
+}
+
+String? _getStoredDavPassword(Map<String, Object?>? configMap) {
+  final dav = configMap?['davProps'] ?? configMap?['dav'];
+  if (dav is! Map) {
+    return null;
+  }
+  final password = dav['password'];
+  return password is String && password.isNotEmpty ? password : null;
+}
+
+final migration = Migration(store: const _AppMigrationStore());

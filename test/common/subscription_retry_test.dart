@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/request.dart';
-import 'package:reclash/common/subscription_retry.dart';
+import 'package:reclash/common/net/request.dart';
+import 'package:reclash/common/subscription/subscription_retry.dart';
 import 'package:reclash/core/method.dart';
 
 DioException _failure(DioExceptionType type) => DioException(

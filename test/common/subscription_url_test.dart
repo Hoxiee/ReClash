@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:reclash/common/subscription_url.dart';
+import 'package:reclash/common/subscription/subscription_url.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 DioException _badResponse(int status) => DioException(

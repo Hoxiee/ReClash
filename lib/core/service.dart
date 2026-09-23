@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/common/constant.dart';
-import 'package:reclash/common/system.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/desktop/system.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/core.dart';
 import 'package:flutter/foundation.dart';

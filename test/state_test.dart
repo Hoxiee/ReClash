@@ -1,4 +1,4 @@
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';

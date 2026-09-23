@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:reclash/providers/app.dart';
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

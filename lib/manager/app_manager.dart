@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/permission.dart';
-import 'package:reclash/common/system_dns.dart';
+import 'package:reclash/common/app/permission.dart';
+import 'package:reclash/common/net/system_dns.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';

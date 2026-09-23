@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:reclash/common/color.dart';
-import 'package:reclash/common/context.dart';
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/ui/color.dart';
+import 'package:reclash/common/util/context.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 

@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/window.dart';
+import 'package:reclash/common/desktop/window.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/bootstrap.dart';
-import 'package:reclash/common/system_dns.dart';
+import 'package:reclash/common/net/system_dns.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';

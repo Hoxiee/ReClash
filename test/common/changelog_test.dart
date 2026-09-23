@@ -1,4 +1,4 @@
-import 'package:reclash/common/changelog.dart';
+import 'package:reclash/common/app/changelog.dart';
 import 'package:reclash/models/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
 

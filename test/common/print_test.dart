@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:reclash/common/print.dart';
+import 'package:reclash/common/util/print.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

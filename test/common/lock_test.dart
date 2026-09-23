@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/lock.dart';
-import 'package:reclash/common/path.dart';
+import 'package:reclash/common/storage/lock.dart';
+import 'package:reclash/common/storage/path.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 

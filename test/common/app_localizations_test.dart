@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:reclash/common/app_localizations.dart';
-import 'package:reclash/common/exception.dart';
-import 'package:reclash/common/incy_links.dart';
+import 'package:reclash/common/app/app_localizations.dart';
+import 'package:reclash/common/util/exception.dart';
+import 'package:reclash/common/subscription/incy_links.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';

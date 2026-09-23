@@ -2,8 +2,8 @@ import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:reclash/common/focus_visibility.dart';
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/ui/focus_visibility.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';

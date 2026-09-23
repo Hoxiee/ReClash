@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/client_emulation.dart';
-import 'package:reclash/common/device_identity.dart';
+import 'package:reclash/common/config/client_emulation.dart';
+import 'package:reclash/common/app/device_identity.dart';
 import 'package:reclash/enum/enum.dart';
 
 DeviceIdentityInfo details() => const DeviceIdentityInfo(

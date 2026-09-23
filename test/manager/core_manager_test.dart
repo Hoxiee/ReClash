@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/theme.dart';
+import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:reclash/common/cache.dart';
+import 'package:reclash/common/storage/cache.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/plugins/app.dart';

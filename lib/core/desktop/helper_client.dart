@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import 'package:reclash/common/constant.dart';
-import 'package:reclash/common/print.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/util/print.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:path/path.dart' as p;
 

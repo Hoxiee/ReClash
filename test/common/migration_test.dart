@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:reclash/common/migration.dart';
+import 'package:reclash/common/app/migration.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 

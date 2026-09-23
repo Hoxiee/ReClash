@@ -1,4 +1,4 @@
-import 'package:reclash/common/finding_events.dart';
+import 'package:reclash/common/milestones/finding_events.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 

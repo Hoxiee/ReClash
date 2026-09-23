@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:reclash/common/constant.dart';
-import 'package:reclash/common/http.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/net/http.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';

@@ -1,4 +1,4 @@
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

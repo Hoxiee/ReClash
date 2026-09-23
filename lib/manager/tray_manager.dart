@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/tray.dart';
-import 'package:reclash/common/window.dart';
+import 'package:reclash/common/desktop/tray.dart';
+import 'package:reclash/common/desktop/window.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';

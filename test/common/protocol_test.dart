@@ -1,4 +1,4 @@
-import 'package:reclash/common/protocol.dart';
+import 'package:reclash/common/config/protocol.dart';
 import 'package:test/test.dart';
 
 void main() {

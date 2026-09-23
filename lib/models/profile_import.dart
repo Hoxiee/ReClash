@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:reclash/common/amnezia_config.dart';
+import 'package:reclash/common/config/amnezia_config.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:path/path.dart' show basename, join;

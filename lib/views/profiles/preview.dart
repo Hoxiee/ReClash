@@ -1,4 +1,4 @@
-import 'package:reclash/common/task.dart';
+import 'package:reclash/common/tasks/task.dart';
 import 'package:reclash/models/profile.dart';
 import 'package:reclash/pages/editor.dart';
 import 'package:reclash/providers/action.dart';

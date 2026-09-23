@@ -1,4 +1,4 @@
-import 'package:reclash/common/milestone_rules.dart';
+import 'package:reclash/common/milestones/milestone_rules.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 

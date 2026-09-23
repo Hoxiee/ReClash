@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:reclash/common/function.dart';
+import 'package:reclash/common/util/function.dart';
 import 'package:test/test.dart';
 
 void main() {

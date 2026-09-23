@@ -1,4 +1,4 @@
-import 'package:reclash/common/system.dart';
+import 'package:reclash/common/desktop/system.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';

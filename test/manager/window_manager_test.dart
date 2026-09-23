@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/common/app_localizations.dart';
-import 'package:reclash/common/app_ports.dart';
+import 'package:reclash/common/app/app_localizations.dart';
+import 'package:reclash/common/app/app_ports.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/config.dart';

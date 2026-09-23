@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:reclash/common/app_localizations.dart';
+import 'package:reclash/common/app/app_localizations.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/tile.dart';

@@ -1,4 +1,4 @@
-import 'package:reclash/common/snowflake.dart';
+import 'package:reclash/common/milestones/snowflake.dart';
 import 'package:test/test.dart';
 
 void main() {

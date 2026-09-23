@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:reclash/common/boot_record.dart';
-import 'package:reclash/common/constant.dart';
-import 'package:reclash/common/preferences.dart';
+import 'package:reclash/common/app/boot_record.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/storage/preferences.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';

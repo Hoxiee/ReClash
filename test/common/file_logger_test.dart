@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:reclash/common/file_logger.dart';
+import 'package:reclash/common/storage/file_logger.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';

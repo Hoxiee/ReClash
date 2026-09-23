@@ -1,4 +1,4 @@
-import 'package:reclash/common/milestone_rules.dart';
+import 'package:reclash/common/milestones/milestone_rules.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

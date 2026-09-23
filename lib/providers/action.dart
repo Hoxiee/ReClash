@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:reclash/common/finding_events.dart';
-import 'package:reclash/common/boot_guard.dart';
-import 'package:reclash/common/boot_record.dart';
+import 'package:reclash/common/milestones/finding_events.dart';
+import 'package:reclash/common/app/boot_guard.dart';
+import 'package:reclash/common/app/boot_record.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/wallpaper_store.dart';
-import 'package:reclash/common/subscription_reminder.dart';
-import 'package:reclash/common/subscription_retry.dart';
-import 'package:reclash/common/system_dns.dart';
+import 'package:reclash/common/storage/wallpaper_store.dart';
+import 'package:reclash/common/subscription/subscription_reminder.dart';
+import 'package:reclash/common/subscription/subscription_retry.dart';
+import 'package:reclash/common/net/system_dns.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/database/database.dart';

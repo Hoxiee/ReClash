@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/singbox_config.dart';
-import 'package:reclash/common/skipped_node.dart';
+import 'package:reclash/common/config/singbox_config.dart';
+import 'package:reclash/common/routing/skipped_node.dart';
 
 String _json(Object? o) => jsonEncode(o);
 

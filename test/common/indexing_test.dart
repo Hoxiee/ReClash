@@ -1,4 +1,4 @@
-import 'package:reclash/common/indexing.dart';
+import 'package:reclash/common/util/indexing.dart';
 import 'package:test/test.dart';
 
 void main() {

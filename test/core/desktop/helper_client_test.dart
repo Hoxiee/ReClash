@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';

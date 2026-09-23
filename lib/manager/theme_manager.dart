@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/theme.dart';
+import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';

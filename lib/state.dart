@@ -4,7 +4,7 @@ import 'common/common.dart';
 import 'enum/enum.dart';
 import 'models/models.dart';
 
-import 'package:reclash/common/theme.dart';
+import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:flutter/foundation.dart';

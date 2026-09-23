@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reclash/common/doh.dart';
+import 'package:reclash/common/net/doh.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String _answer(String data, {int type = 1, int ttl = 300}) => json.encode({

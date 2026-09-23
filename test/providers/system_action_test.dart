@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/common/app_ports.dart';
-import 'package:reclash/common/preferences.dart';
+import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/common/storage/preferences.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/actions/system_exit.dart';

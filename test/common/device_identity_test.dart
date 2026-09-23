@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/device_identity.dart';
-import 'package:reclash/common/path.dart';
+import 'package:reclash/common/app/device_identity.dart';
+import 'package:reclash/common/storage/path.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';

@@ -1,4 +1,4 @@
-import 'package:reclash/common/permission.dart';
+import 'package:reclash/common/app/permission.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';

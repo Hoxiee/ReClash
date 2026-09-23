@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/permission.dart';
+import 'package:reclash/common/app/permission.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/plugins/app.dart';

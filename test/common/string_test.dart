@@ -1,4 +1,4 @@
-import 'package:reclash/common/string.dart';
+import 'package:reclash/common/util/string.dart';
 import 'package:test/test.dart';
 
 void main() {

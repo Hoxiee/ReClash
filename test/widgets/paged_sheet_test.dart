@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/widgets/inherited.dart';
 import 'package:reclash/widgets/paged_sheet.dart';
 import 'package:reclash/widgets/sheet.dart';

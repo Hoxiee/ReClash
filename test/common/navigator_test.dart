@@ -1,4 +1,4 @@
-import 'package:reclash/common/navigator.dart';
+import 'package:reclash/common/desktop/navigator.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

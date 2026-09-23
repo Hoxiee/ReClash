@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:reclash/common/notice.dart';
-import 'package:reclash/common/subscription_notice.dart';
-import 'package:reclash/common/subscription_reminder.dart';
+import 'package:reclash/common/ui/notice.dart';
+import 'package:reclash/common/subscription/subscription_notice.dart';
+import 'package:reclash/common/subscription/subscription_reminder.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/dav_client.dart';
+import 'package:reclash/common/desktop/dav_client.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';

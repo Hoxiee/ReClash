@@ -1,5 +1,5 @@
-import 'package:reclash/common/boot_record.dart';
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/app/boot_record.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

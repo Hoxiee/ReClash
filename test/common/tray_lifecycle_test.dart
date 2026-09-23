@@ -1,4 +1,4 @@
-import 'package:reclash/common/tray.dart';
+import 'package:reclash/common/desktop/tray.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';

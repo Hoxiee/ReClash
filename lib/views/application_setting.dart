@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/launch.dart';
+import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/application_notification.dart';

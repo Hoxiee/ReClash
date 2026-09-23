@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:reclash/common/constant.dart';
-import 'package:reclash/common/fixed.dart';
-import 'package:reclash/common/request.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/util/fixed.dart';
+import 'package:reclash/common/net/request.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';

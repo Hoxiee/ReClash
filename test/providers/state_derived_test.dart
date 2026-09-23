@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/app_ports.dart';
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';

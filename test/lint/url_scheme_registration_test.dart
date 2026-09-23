@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/protocol.dart';
-import 'package:reclash/common/subscription_links.dart';
+import 'package:reclash/common/config/protocol.dart';
+import 'package:reclash/common/subscription/subscription_links.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 

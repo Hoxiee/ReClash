@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:reclash/common/package.dart';
+import 'package:reclash/common/app/package.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reclash/common/skipped_node.dart';
-import 'package:reclash/common/subscription_links.dart';
+import 'package:reclash/common/routing/skipped_node.dart';
+import 'package:reclash/common/subscription/subscription_links.dart';
 
 List<String> _proxiesNames(String config) {
   final match = RegExp(r'^  - \{name: "((?:[^"\\]|\\.)*)"', multiLine: true);

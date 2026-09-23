@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:reclash/common/notice.dart';
+import 'package:reclash/common/ui/notice.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _notice = NoticeRequest(

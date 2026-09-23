@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui' show ClipOp;
 
 import 'package:reclash/common/common.dart';
-import 'package:reclash/common/launch.dart';
+import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';

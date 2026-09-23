@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:reclash/common/shape.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/widgets/loading.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';

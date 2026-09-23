@@ -1,4 +1,4 @@
-import 'package:reclash/common/exception.dart';
+import 'package:reclash/common/util/exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

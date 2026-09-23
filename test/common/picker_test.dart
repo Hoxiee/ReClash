@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:reclash/common/picker.dart';
+import 'package:reclash/common/ui/picker.dart';
 import 'package:test/test.dart';
 
 base class _LocalPlatformFile extends PlatformFile {

@@ -2,14 +2,14 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
-import 'package:reclash/common/seasonal.dart';
+import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-export 'package:reclash/common/seasonal.dart';
+export 'package:reclash/common/milestones/seasonal.dart';
 
 class SeasonalDashboardOverlay extends ConsumerStatefulWidget {
   const SeasonalDashboardOverlay({

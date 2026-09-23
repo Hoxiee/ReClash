@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
-import 'package:reclash/common/constant.dart';
+import 'package:reclash/common/util/constant.dart';
 
 import 'core_manifest.dart';
 
