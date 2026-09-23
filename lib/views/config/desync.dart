@@ -290,13 +290,36 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     final defaultActive = listEquals(props.strategyArgs, desyncDefaultStrategy);
+    final featureEnabled = props.featureEnabled;
+    // Sub-pages are only reachable while the feature is on, so they never hide.
+    final showBody = widget._section != null || featureEnabled;
     return Column(
       children: [
-        if (widget._section == null ||
-            widget._section == _DesyncSection.strategy)
+        if (widget._section == null)
+          SettingSection(
+            top: 16,
+            items: [
+              DecorationListItem.toggle(
+                title: Text(appLocalizations.desyncFeatureEnable),
+                subtitle: Text(appLocalizations.desyncFeatureEnableDesc),
+                value: featureEnabled,
+                onChanged: (value) => _update(
+                  ref,
+                  (state) => state.copyWith(
+                    featureEnabled: value,
+                    enabled: value && state.enabled,
+                    onlyDpi: value && state.onlyDpi,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        if (showBody &&
+            (widget._section == null ||
+                widget._section == _DesyncSection.strategy))
           SettingSection(
             title: appLocalizations.desyncStrategySection,
-            top: 16,
+            top: widget._section == null ? 0 : 16,
             actions: [
               const SizedBox(width: 8),
               CommonMinFilledButtonTheme(
@@ -352,12 +375,16 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 ),
             ]),
           ),
-        if (widget._section == null || widget._section == _DesyncSection.test)
+        if (showBody &&
+            (widget._section == null ||
+                widget._section == _DesyncSection.test))
           _DesyncTester(
             showOverview: widget._section == _DesyncSection.test,
             onRunningChanged: (value) => setState(() => _testing = value),
           ),
-        if (widget._section == null || widget._section == _DesyncSection.engine)
+        if (showBody &&
+            (widget._section == null ||
+                widget._section == _DesyncSection.engine))
           SettingSection(
             title: appLocalizations.desyncEngine,
             items: _locked([
@@ -416,7 +443,9 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 ),
             ]),
           ),
-        if (widget._section == null || widget._section == _DesyncSection.engine)
+        if (showBody &&
+            (widget._section == null ||
+                widget._section == _DesyncSection.engine))
           SettingSection(
             title: appLocalizations.desyncRouting,
             bottom: 24,
@@ -441,7 +470,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
               ),
             ]),
           ),
-        if (widget._section == _DesyncSection.engine)
+        if (showBody && widget._section == _DesyncSection.engine)
           _DesyncRoutingRules(props: props),
       ],
     );

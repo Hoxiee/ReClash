@@ -176,6 +176,15 @@ class DesyncSetting extends _$DesyncSetting with AutoDisposeNotifierMixin {
 
 final byeDpiSupportedProvider = Provider<bool>((_) => system.isAndroid);
 
+/// The ByeDPI feature only exists once the platform can run the engine and the
+/// user has switched it on from its settings page. Every dashboard surface that
+/// offers ByeDPI mode gates on this, not on [byeDpiSupportedProvider], so a
+/// disabled feature is neither drawn nor selectable anywhere.
+final byeDpiAvailableProvider = Provider<bool>((ref) {
+  if (!ref.watch(byeDpiSupportedProvider)) return false;
+  return ref.watch(desyncSettingProvider.select((state) => state.featureEnabled));
+});
+
 final effectiveDesyncSettingProvider = Provider<DesyncProps>((ref) {
   if (!ref.watch(byeDpiSupportedProvider)) return defaultDesyncProps;
   if (!ref
@@ -183,7 +192,9 @@ final effectiveDesyncSettingProvider = Provider<DesyncProps>((ref) {
       .contains(RegionalFacetId.desync)) {
     return defaultDesyncProps;
   }
-  return ref.watch(desyncSettingProvider);
+  final props = ref.watch(desyncSettingProvider);
+  if (!props.featureEnabled) return defaultDesyncProps;
+  return props;
 });
 
 @riverpod

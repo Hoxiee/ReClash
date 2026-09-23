@@ -166,7 +166,7 @@ void main() {
 
     container
         .read(desyncSettingProvider.notifier)
-        .update((state) => state.copyWith(enabled: true, onlyDpi: true));
+        .update((state) => state.copyWith(featureEnabled: true, enabled: true, onlyDpi: true));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

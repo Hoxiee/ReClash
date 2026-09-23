@@ -313,7 +313,7 @@ class ProfilesAction extends _$ProfilesAction {
 
   List<String> _activeSubscriptionPresets() {
     final routing = ref.read(smartRoutingSettingProvider);
-    final desync = ref.read(desyncSettingProvider);
+    final desync = ref.read(effectiveDesyncSettingProvider);
     return [
       'route=${routing.preset.name}',
       if (desync.enabled) 'desync=on' else 'desync=off',

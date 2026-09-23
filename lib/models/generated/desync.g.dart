@@ -18,6 +18,7 @@ Map<String, dynamic> _$DesyncStrategyToJson(_DesyncStrategy instance) =>
     <String, dynamic>{'name': instance.name, 'args': instance.args};
 
 _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
+  featureEnabled: json['featureEnabled'] as bool? ?? false,
   enabled: json['enabled'] as bool? ?? false,
   onlyDpi: json['onlyDpi'] as bool? ?? false,
   port: (json['port'] as num?)?.toInt() ?? defaultDesyncPort,
@@ -54,6 +55,7 @@ _DesyncProps _$DesyncPropsFromJson(Map<String, dynamic> json) => _DesyncProps(
 
 Map<String, dynamic> _$DesyncPropsToJson(_DesyncProps instance) =>
     <String, dynamic>{
+      'featureEnabled': instance.featureEnabled,
       'enabled': instance.enabled,
       'onlyDpi': instance.onlyDpi,
       'port': instance.port,

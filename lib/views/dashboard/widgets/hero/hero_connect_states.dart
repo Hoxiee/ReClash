@@ -34,7 +34,7 @@ class _EmptyHero extends ConsumerWidget {
     final description = hasSavedProfiles
         ? appLocalizations.dashboardNoActiveProfileDesc
         : appLocalizations.dashboardNoProfileDesc;
-    final hasByeDpiCard = ref.watch(byeDpiSupportedProvider);
+    final hasByeDpiCard = ref.watch(byeDpiAvailableProvider);
     return DashboardCenteredScrollView(
       controller: scrollController,
       child: Column(
@@ -345,7 +345,7 @@ class _ModeChip extends ConsumerWidget {
               label: item.label,
               onPressed: () => _selectOutboundMode(ref, item),
             ),
-          if (ref.watch(byeDpiSupportedProvider))
+          if (ref.watch(byeDpiAvailableProvider))
             CommonPopupMenuItem(
               icon: connectionModeIcon(DashboardMode.byedpi),
               label: connectionModeLabel(

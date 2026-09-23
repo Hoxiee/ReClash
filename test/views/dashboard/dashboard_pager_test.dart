@@ -109,7 +109,7 @@ void main() {
     await pumpPager(
       tester,
       profile: _profile(),
-      desync: const DesyncProps(enabled: true, onlyDpi: true),
+      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
     );
 
     expect(find.byKey(const ValueKey('dashboard-show-provider')), findsNothing);

@@ -17,12 +17,14 @@ class _TestDesyncSetting extends DesyncSetting {
   DesyncProps build() => _initial;
 }
 
+const _featureOn = DesyncProps(featureEnabled: true);
+
 void main() {
   late ProviderContainer container;
 
   Future<void> pumpView(
     WidgetTester tester, {
-    DesyncProps props = defaultDesyncProps,
+    DesyncProps props = _featureOn,
     Widget child = const DesyncView(),
   }) async {
     tester.view.physicalSize = const Size(1400, 1000);
@@ -82,13 +84,31 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
   });
 
+  testWidgets('the master toggle hides every control while off', (
+    tester,
+  ) async {
+    await pumpView(tester, props: defaultDesyncProps);
+
+    expect(find.text('Enable ByeDPI'), findsOneWidget);
+    expect(find.text('Strategy'), findsNothing);
+    expect(find.text('Engine'), findsNothing);
+    expect(find.text('Default ladder'), findsNothing);
+
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(container.read(desyncSettingProvider).featureEnabled, isTrue);
+    expect(find.text('Strategy'), findsOneWidget);
+    expect(find.text('Default ladder'), findsOneWidget);
+  });
+
   testWidgets('a saved strategy applies on tap and moves the check', (
     tester,
   ) async {
     const args = ['-A', 'conn', '--split', '1'];
     await pumpView(
       tester,
-      props: defaultDesyncProps.copyWith(
+      props: _featureOn.copyWith(
         savedStrategies: const [DesyncStrategy(name: 'Split only', args: args)],
       ),
     );
@@ -105,7 +125,7 @@ void main() {
   testWidgets('the default row restores the built-in ladder', (tester) async {
     await pumpView(
       tester,
-      props: defaultDesyncProps.copyWith(strategyArgs: const ['--split', '1']),
+      props: _featureOn.copyWith(strategyArgs: const ['--split', '1']),
     );
 
     await tester.tap(find.text('Default ladder'));
@@ -118,7 +138,7 @@ void main() {
   });
 
   testWidgets('the tester section reports a dead engine', (tester) async {
-    await pumpView(tester, props: defaultDesyncProps.copyWith(port: 1));
+    await pumpView(tester, props: _featureOn.copyWith(port: 1));
     expect(find.text('Start'), findsOneWidget);
 
     await tester.tap(find.text('Start'));

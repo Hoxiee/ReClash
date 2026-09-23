@@ -213,6 +213,7 @@ abstract class DesyncStrategy with _$DesyncStrategy {
 @freezed
 abstract class DesyncProps with _$DesyncProps {
   const factory DesyncProps({
+    @Default(false) bool featureEnabled,
     @Default(false) bool enabled,
     @Default(false) bool onlyDpi,
     @Default(defaultDesyncPort) int port,

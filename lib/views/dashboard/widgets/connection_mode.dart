@@ -30,7 +30,7 @@ IconData connectionModeIcon(DashboardMode mode) => switch (mode) {
 };
 
 bool changeDashboardMode(WidgetRef ref, DashboardMode mode) {
-  if (mode == DashboardMode.byedpi && !ref.read(byeDpiSupportedProvider)) {
+  if (mode == DashboardMode.byedpi && !ref.read(byeDpiAvailableProvider)) {
     return false;
   }
   final lifecycle = ref.read(heroLifecycleProvider);
