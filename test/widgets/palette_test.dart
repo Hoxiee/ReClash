@@ -1,6 +1,6 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/widgets/palette.dart';
+import 'package:reclash/widgets/theme/palette.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

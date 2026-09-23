@@ -4,7 +4,7 @@ import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:reclash/widgets/wallpaper.dart';
+import 'package:reclash/widgets/theme/wallpaper.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

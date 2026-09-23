@@ -1,10 +1,10 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/common.dart';
-import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'focus.dart';
+import '../base/focus.dart';
 import 'scaffold.dart';
 import 'side_sheet.dart';
 

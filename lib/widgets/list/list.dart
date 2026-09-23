@@ -2,16 +2,16 @@ import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'card.dart';
-import 'focus.dart';
-import 'input.dart';
-import 'open_container.dart';
-import 'scaffold.dart';
-import 'sheet.dart';
+import '../base/card.dart';
+import '../base/focus.dart';
+import '../input/input.dart';
+import '../layout/open_container.dart';
+import '../layout/scaffold.dart';
+import '../layout/sheet.dart';
 
 part 'list_selected.dart';
 

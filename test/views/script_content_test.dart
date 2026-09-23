@@ -5,7 +5,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/profiles/overwrite/script.dart';
-import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

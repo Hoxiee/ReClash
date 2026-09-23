@@ -3,7 +3,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'icon.dart';
+import '../base/icon.dart';
 
 class PanelProfileBackground extends ConsumerWidget {
   final Widget child;

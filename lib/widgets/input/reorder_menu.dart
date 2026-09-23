@@ -1,7 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'popup.dart';
+import '../layout/popup.dart';
 
 /// Dragging the handle reorders through the enclosing list; activating it with
 /// keyboard, D-pad or tap opens a move menu, so no reorder needs a drag.

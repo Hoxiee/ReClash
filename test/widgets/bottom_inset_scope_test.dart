@@ -1,7 +1,7 @@
 import 'package:reclash/providers/database.dart';
-import 'package:reclash/widgets/float_layout.dart';
-import 'package:reclash/widgets/inherited.dart';
-import 'package:reclash/widgets/scaffold.dart';
+import 'package:reclash/widgets/layout/float_layout.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/layout/scaffold.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 

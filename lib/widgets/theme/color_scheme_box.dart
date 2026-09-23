@@ -3,8 +3,8 @@ import 'package:reclash/common/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'card.dart';
-import 'grid.dart';
+import '../base/card.dart';
+import '../layout/grid.dart';
 
 class ColorSchemeBox extends StatelessWidget {
   final Color? primaryColor;

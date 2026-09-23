@@ -6,9 +6,9 @@ import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
-import 'fade_box.dart';
+import '../effect/fade_box.dart';
 import 'text.dart';
-import 'wallpaper_scope.dart';
+import '../theme/wallpaper_scope.dart';
 
 class Info {
   final String label;

@@ -3,7 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/requests.dart';
-import 'package:reclash/widgets/null_status.dart';
+import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

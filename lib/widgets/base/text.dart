@@ -2,7 +2,7 @@ import 'package:emoji_regex/emoji_regex.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../state.dart';
+import '../../state.dart';
 
 class TooltipText extends StatelessWidget {
   final Text text;

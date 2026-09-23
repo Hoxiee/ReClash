@@ -1,5 +1,5 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/widgets/fade_box.dart';
+import 'package:reclash/widgets/effect/fade_box.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';

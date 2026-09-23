@@ -7,7 +7,7 @@ import 'package:reclash/views/tools/connection_doctor.dart';
 import 'package:reclash/views/dashboard/widgets/traffic_usage.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/tools/findings.dart';
-import 'package:reclash/widgets/profile_patina.dart';
+import 'package:reclash/widgets/theme/profile_patina.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

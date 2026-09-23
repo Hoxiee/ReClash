@@ -1,4 +1,4 @@
-import 'package:reclash/widgets/line_chart.dart';
+import 'package:reclash/widgets/chart/line_chart.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

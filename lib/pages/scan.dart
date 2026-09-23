@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/activate_box.dart';
+import 'package:reclash/widgets/feedback/activate_box.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 

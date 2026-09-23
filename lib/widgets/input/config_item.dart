@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
-import 'list.dart';
+import '../list/list.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 

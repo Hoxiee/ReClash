@@ -1,5 +1,5 @@
 import 'package:reclash/common/common.dart';
-import 'package:reclash/widgets/dismissible.dart';
+import 'package:reclash/widgets/effect/dismissible.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

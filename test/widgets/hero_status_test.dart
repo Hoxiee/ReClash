@@ -7,7 +7,7 @@ import 'package:reclash/views/dashboard/widgets/hero/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
-import 'package:reclash/widgets/icon.dart' show ImageCacheWidget;
+import 'package:reclash/widgets/base/icon.dart' show ImageCacheWidget;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

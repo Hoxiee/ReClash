@@ -1,7 +1,7 @@
 import 'package:reclash/common/desktop/system.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'inherited.dart';
+import '../base/inherited.dart';
 
 class FloatLayout extends StatelessWidget {
   final Widget floatingWidget;

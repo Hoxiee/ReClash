@@ -1,4 +1,4 @@
-import 'package:reclash/widgets/keyed_animated_list.dart';
+import 'package:reclash/widgets/effect/keyed_animated_list.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,8 +1,8 @@
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'builder.dart';
-import 'card.dart';
+import '../base/builder.dart';
+import '../base/card.dart';
 
 class CommonFloatingActionButton extends StatelessWidget {
   final VoidCallback? onPressed;

@@ -8,7 +8,7 @@ import 'package:reclash/views/about.dart';
 import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/profiles/overwrite/standard.dart';
 import 'package:reclash/views/proxies/setting.dart';
-import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

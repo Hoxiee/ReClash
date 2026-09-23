@@ -4,9 +4,9 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/state.dart';
 import 'package:reclash/providers/app.dart';
-import 'package:reclash/widgets/inherited.dart';
-import 'package:reclash/widgets/scaffold.dart';
-import 'package:reclash/widgets/sheet.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/layout/scaffold.dart';
+import 'package:reclash/widgets/layout/sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

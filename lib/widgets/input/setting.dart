@@ -1,12 +1,12 @@
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'card.dart';
-import 'fade_box.dart';
-import 'focus.dart';
-import 'inherited.dart';
-import 'list.dart';
-import 'theme.dart';
+import '../base/card.dart';
+import '../effect/fade_box.dart';
+import '../base/focus.dart';
+import '../base/inherited.dart';
+import '../list/list.dart';
+import '../theme/theme.dart';
 
 class SettingInfoCard extends StatelessWidget {
   final Info info;

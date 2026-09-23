@@ -1,4 +1,4 @@
-import 'package:reclash/widgets/animated_visibility.dart';
+import 'package:reclash/widgets/effect/animated_visibility.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

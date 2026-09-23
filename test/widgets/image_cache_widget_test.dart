@@ -1,4 +1,4 @@
-import 'package:reclash/widgets/icon.dart';
+import 'package:reclash/widgets/base/icon.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';

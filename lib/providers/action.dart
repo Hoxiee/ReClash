@@ -19,7 +19,7 @@ import 'package:reclash/plugins/service.dart';
 import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/dialog.dart';
+import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart' show CancelToken, DioException, DioExceptionType;
 import 'package:material_ui/material_ui.dart';

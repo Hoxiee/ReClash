@@ -1,5 +1,5 @@
-import 'package:reclash/widgets/builder.dart';
-import 'package:reclash/widgets/inherited.dart';
+import 'package:reclash/widgets/base/builder.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

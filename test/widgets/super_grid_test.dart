@@ -1,5 +1,5 @@
-import 'package:reclash/widgets/grid.dart';
-import 'package:reclash/widgets/super_grid.dart';
+import 'package:reclash/widgets/layout/grid.dart';
+import 'package:reclash/widgets/layout/super_grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

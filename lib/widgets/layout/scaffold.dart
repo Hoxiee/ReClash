@@ -1,14 +1,14 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/widgets/pop_scope.dart';
+import 'package:reclash/widgets/base/pop_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'chip.dart';
-import 'inherited.dart';
-import 'panel_background.dart';
-import 'wallpaper.dart';
+import '../input/chip.dart';
+import '../base/inherited.dart';
+import '../theme/panel_background.dart';
+import '../theme/wallpaper.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
