@@ -255,4 +255,70 @@ void main() {
     expect(container.read(appSettingProvider).region, AppRegion.china);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
   });
+
+  test('config seed applies every regional default in one value', () {
+    final seeded = seedRegionIfUnsetConfig(
+      const Config(themeProps: defaultThemeProps),
+      const RegionSignals(simCountry: 'ru'),
+      const Locale('en'),
+    );
+    expect(seeded.appSettingProps.region, AppRegion.russia);
+    expect(seeded.appSettingProps.sendDeviceIdentity, isTrue);
+    expect(seeded.smartRoutingProps.preset, SmartRoutingPreset.russia);
+    expect(seeded.smartRoutingProps.enabled, isFalse);
+    expect(seeded.patchClashConfig.dns, dnsForRegion(AppRegion.russia));
+    expect(seeded.networkProps.bypassDomain, bypassForRegion(AppRegion.russia));
+  });
+
+  test('config seed is a no-op for an unshipped region or explicit choice', () {
+    const base = Config(themeProps: defaultThemeProps);
+    expect(
+      identical(
+        seedRegionIfUnsetConfig(
+          base,
+          const RegionSignals(simCountry: 'us'),
+          const Locale('en'),
+        ),
+        base,
+      ),
+      isTrue,
+    );
+    const chosen = Config(
+      themeProps: defaultThemeProps,
+      appSettingProps: AppSettingProps(region: AppRegion.china),
+    );
+    expect(
+      identical(
+        seedRegionIfUnsetConfig(
+          chosen,
+          const RegionSignals(simCountry: 'ru'),
+          const Locale('ru'),
+        ),
+        chosen,
+      ),
+      isTrue,
+    );
+  });
+
+  test('bootstrap-seeded DNS and bypass survive without a listener', () async {
+    final seeded = seedRegionIfUnsetConfig(
+      const Config(themeProps: defaultThemeProps),
+      const RegionSignals(simCountry: 'ru'),
+      const Locale('en'),
+    );
+    final container = ProviderContainer(overrides: buildConfigOverrides(seeded));
+    addTearDown(container.dispose);
+    // No listener: reproduces bootstrap, where mutating auto-dispose providers
+    // lost these facets before the fix baked them into the overrides.
+    await Future<void>.delayed(Duration.zero);
+    expect(
+      container.read(patchClashConfigProvider).dns,
+      dnsForRegion(AppRegion.russia),
+    );
+    expect(
+      container.read(networkSettingProvider).bypassDomain,
+      bypassForRegion(AppRegion.russia),
+    );
+    expect(container.read(appSettingProvider).region, AppRegion.russia);
+  });
 }

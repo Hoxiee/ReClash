@@ -103,6 +103,44 @@ void seedRegionIfUnset(
   selectAppRegion(read, region); // reuse explicit-pick path (preset, HWID, facets)
 }
 
+// Bootstrap has no listeners; seed the Config, not the auto-dispose providers.
+Config seedRegionIfUnsetConfig(
+  Config config,
+  RegionSignals signals,
+  Locale? locale,
+) {
+  if (config.appSettingProps.region != null) return config;
+  final region = detectRegion(signals, locale);
+  if (region == AppRegion.other) return config;
+  final previous = AppRegion.fromPreset(config.smartRoutingProps.preset);
+  var next = config.copyWith(
+    appSettingProps: config.appSettingProps.copyWith(
+      region: region,
+      sendDeviceIdentity:
+          region == AppRegion.russia ||
+          config.appSettingProps.sendDeviceIdentity,
+    ),
+  );
+  if (previous != region) {
+    next = next.copyWith(
+      smartRoutingProps: next.smartRoutingProps.applyPreset(region.preset),
+    );
+  }
+  if (isShippedDns(next.patchClashConfig.dns)) {
+    next = next.copyWith(
+      patchClashConfig: next.patchClashConfig.copyWith(dns: dnsForRegion(region)),
+    );
+  }
+  if (isShippedBypass(next.networkProps.bypassDomain)) {
+    next = next.copyWith(
+      networkProps: next.networkProps.copyWith(
+        bypassDomain: bypassForRegion(region),
+      ),
+    );
+  }
+  return next;
+}
+
 @Riverpod(keepAlive: true)
 class WindowSetting extends _$WindowSetting with AutoDisposeNotifierMixin {
   @override

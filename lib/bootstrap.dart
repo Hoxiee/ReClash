@@ -145,6 +145,19 @@ class Bootstrap {
       config = config.copyWith(currentProfileId: null);
       await preferences.saveConfig(config);
     }
+    final regionSignals = await app?.getRegionSignals() ?? const RegionSignals();
+    final effectiveLocale =
+        getLocaleForString(config.appSettingProps.locale) ??
+        WidgetsBinding.instance.platformDispatcher.locale;
+    final seededConfig = seedRegionIfUnsetConfig(
+      config,
+      regionSignals,
+      effectiveLocale,
+    );
+    if (!identical(seededConfig, config)) {
+      config = seededConfig;
+      await preferences.saveConfig(config);
+    }
     final appState = AppState(
       brightness: WidgetsBinding.instance.platformDispatcher.platformBrightness,
       version: version,
@@ -157,7 +170,6 @@ class Bootstrap {
     );
     final appStateOverrides = buildAppStateOverrides(appState);
     final configOverrides = buildConfigOverrides(config);
-    final regionSignals = await app?.getRegionSignals() ?? const RegionSignals();
     final container = ProviderContainer(
       overrides: [
         ...appStateOverrides,
@@ -175,11 +187,7 @@ class Bootstrap {
         );
     final profiles = await database.profilesDao.query().get();
     container.read(profilesProvider.notifier).setAndReorder(profiles);
-    final effectiveLocale =
-        getLocaleForString(config.appSettingProps.locale) ??
-        WidgetsBinding.instance.platformDispatcher.locale;
     await AppLocalizations.load(effectiveLocale);
-    seedRegionIfUnset(container.read, regionSignals, effectiveLocale);
     await window?.init(version, config.windowProps);
     if (system.isAndroid) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
