@@ -11,11 +11,11 @@ const _platformPackages = [
 ];
 
 const _platformModules = [
-  'lib/common/tray.dart',
-  'lib/common/window.dart',
-  'lib/common/launch.dart',
-  'lib/common/system_dns.dart',
-  'lib/common/permission.dart',
+  'lib/common/desktop/tray.dart',
+  'lib/common/desktop/window.dart',
+  'lib/common/desktop/launch.dart',
+  'lib/common/net/system_dns.dart',
+  'lib/common/app/permission.dart',
 ];
 
 final _platformImport = RegExp(

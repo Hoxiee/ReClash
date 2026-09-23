@@ -4,13 +4,13 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _evidence = 'core/doctor_evidence.go';
+const _evidence = 'core/doctor/doctor_evidence.go';
 const _flow = 'core/mihomo/tunnel/evidence.go';
-const _heal = 'core/doctor_heal.go';
+const _heal = 'core/doctor/doctor_heal.go';
 const _runtime = 'core/doctor_runtime.go';
-const _reducer = 'core/doctor_reducer.go';
-const _platform = 'core/doctor_platform_status.go';
-const _actor = 'core/doctor_actor.go';
+const _reducer = 'core/doctor/doctor_reducer.go';
+const _platform = 'core/doctor/doctor_platform_status.go';
+const _snapshot = 'core/doctor/doctor_snapshot.go';
 
 /// Codes the core writes as plain literals on a failed fact, by the file that
 /// mints them. Every one is re-checked against its source so a rename in the
@@ -27,7 +27,7 @@ const _literalCauses = {
   },
   _reducer: {'vpnNotActive', 'tunNotActive'},
   _platform: {'byeDpiListenerFailed'},
-  _actor: {'staleEvidence'},
+  _snapshot: {'staleEvidence'},
   _evidence: {'destinationDnsFailed'},
 };
 
@@ -199,7 +199,7 @@ void main() {
   });
 
   test('no cause in the table is dead against the core', () {
-    final table = _read('lib/common/connection_answer.dart');
+    final table = _read('lib/common/routing/connection_answer.dart');
     final listed = {
       for (final match in RegExp(
         "cause == '(\\w+)'|^\\s*'(\\w+)',?\$",

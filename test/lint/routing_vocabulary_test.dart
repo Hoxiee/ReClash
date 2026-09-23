@@ -6,7 +6,7 @@ import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _decide = 'core/rcx_decide.go';
+const _decide = 'core/rcx/rcx_decide.go';
 
 Set<String> _constants(String source, String type) => RegExp(
   'rcx$type'
@@ -36,7 +36,7 @@ void main() {
     l10n = await AppLocalizations.load(const Locale('en'));
     source = [
       File(_decide).readAsStringSync(),
-      File('core/rcx_selection.go').readAsStringSync(),
+      File('core/rcx/rcx_selection.go').readAsStringSync(),
     ].join('\n');
   });
 

@@ -63,6 +63,7 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
+    container.read(appSettingProvider.notifier).value = const AppSettingProps(region: AppRegion.russia);
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(900, 1600));

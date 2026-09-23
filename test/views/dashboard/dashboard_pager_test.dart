@@ -89,6 +89,7 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
+    container.read(appSettingProvider.notifier).value = const AppSettingProps(region: AppRegion.russia);
     container.read(viewSizeProvider.notifier).value = size;
 
     await tester.pumpWidget(
