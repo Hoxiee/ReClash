@@ -231,6 +231,13 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   Firebase uninitialized until the user consents.
 - Recovery is graded: the first failed launch only skips `initStatus`, and `currentProfileId` is cleared only from
   `crashRecoveryClearThreshold` consecutive failures on. Do not let a single interrupted launch write to the config.
+- Startup code before `runApp` (`bootstrap.dart` `init`/`_initData`) has no provider listeners yet: `configProvider`
+  persistence (`app_manager`'s `listenManual`) is unwired and the setting notifiers are auto-dispose. A `read().notifier`
+  mutation there is dropped on the next microtask, and unevenly — a facet a keepAlive `Provider` transitively watches
+  survives while its siblings reset, so the change lands half-applied (this is the bug that seeded a region but lost its
+  DNS/bypass). Bootstrap must mutate the persisted `Config` value and `preferences.saveConfig` it before building the
+  container overrides, as the `clearProfile` recovery and `seedRegionIfUnsetConfig` do; never call a provider-mutating
+  helper (`selectAppRegion`, `seedRegionIfUnset`) from bootstrap.
 - Desktop process ownership belongs to `DesktopCoreLifecycle`; do not start/kill `ReClashCore` from providers, widgets,
   managers, or ad hoc exit callbacks. Acquire and release it through a `CoreProcessLease`.
 - `CoreController.close()` and platform `close()` implementations are terminal and idempotent. Application shutdown must
