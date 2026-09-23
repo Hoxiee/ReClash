@@ -524,6 +524,7 @@ class _HeroCollapsePainter extends CustomPainter {
     required this.scale,
     required this.coreRadius,
     this.fade = 1,
+    this.windup = 0,
   });
 
   final double progress;
@@ -531,6 +532,10 @@ class _HeroCollapsePainter extends CustomPainter {
   final double scale;
   final double coreRadius;
   final double fade;
+
+  /// Handoff charge: winds the disk faster and cinches the well as it climbs
+  /// 0 → 1 across the seam into the singularity, so the beat is not a hold.
+  final double windup;
 
   static const _armCount = 26;
   static const _starCount = 44;
@@ -563,12 +568,13 @@ class _HeroCollapsePainter extends CustomPainter {
       );
     }
     final pull = Curves.easeInCubic.transform(local);
-    final spin = local * 2.2 + local * local * 6.0;
+    final spin = local * 2.2 + local * local * 6.0 + windup * 3 + windup * windup * 5;
     final open = Curves.easeOutBack.transform(
       ((local - 0.12) / 0.4).clamp(0.0, 1.0),
     );
     final breathe = 1 + 0.03 * math.sin(local * 4 * 2 * math.pi);
-    final horizon = coreRadius * lerpDouble(0.05, 0.52, open)! * breathe;
+    final horizon =
+        coreRadius * lerpDouble(0.05, 0.52, open)! * breathe * (1 - 0.22 * windup);
     final split = 0.5 * scale;
 
     _paintDeepSpace(canvas, center, reach, pull);
@@ -611,7 +617,53 @@ class _HeroCollapsePainter extends CustomPainter {
     _paintDoppler(canvas, center, pull, spin);
     _paintJets(canvas, center, horizon, reach, pull, spin);
     _paintShimmer(canvas, center, horizon, pull, spin);
+    if (windup > 0) _paintCharge(canvas, center, horizon, spin);
     if (faded) canvas.restore();
+  }
+
+  void _paintCharge(Canvas canvas, Offset center, double horizon, double spin) {
+    final gather = Curves.easeInCubic.transform(windup);
+    final ringR = horizon * 1.04;
+    canvas.drawCircle(
+      center,
+      ringR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (4 + 18 * gather) * scale
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, (5 + 6 * gather) * scale)
+        ..color = palette.ring.first
+            .lighten(20)
+            .withValues(alpha: (0.5 * gather).clamp(0.0, 1.0)),
+    );
+    canvas.drawCircle(
+      center,
+      ringR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (1.4 + 2.6 * gather) * scale
+        ..blendMode = BlendMode.plus
+        ..color = Colors.white.withValues(alpha: (0.85 * gather).clamp(0.0, 1.0)),
+    );
+    const arms = 12;
+    final draw = 0.35 + 0.55 * gather;
+    for (var i = 0; i < arms; i++) {
+      final base = i * 2.39996 + spin * 1.2;
+      final outer = horizon * lerpDouble(2.4, 1.18, gather)!;
+      final head = center + Offset.fromDirection(base + 1.1 * gather, horizon * 1.02);
+      final tail = center + Offset.fromDirection(base, outer);
+      canvas.drawLine(
+        tail,
+        head,
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = (0.8 + 1.6 * gather) * scale
+          ..blendMode = BlendMode.plus
+          ..color = palette.ring.first
+              .lighten(14)
+              .withValues(alpha: (0.5 * draw).clamp(0.0, 1.0)),
+      );
+    }
   }
 
   void _paintOrbBody(Canvas canvas, Offset center, double local, double pull) {
@@ -951,49 +1003,71 @@ class _HeroCollapsePainter extends CustomPainter {
   ) {
     final ignite = ((pull - 0.18) / 0.82).clamp(0.0, 1.0);
     if (ignite <= 0) return;
-    final length = reach * lerpDouble(0.35, 1.3, ignite)!;
+    final drive = ignite * (1 + 0.7 * windup);
+    final length = reach * lerpDouble(0.35, 1.3, ignite)! * (1 + 0.25 * windup);
     final tint = _shift(palette.ring.first, hue: -14, light: 0.2).lighten(6);
-    const steps = 14;
+    const knots = 4;
     for (final axis in [-math.pi / 2, math.pi / 2]) {
-      for (var s = 0; s < steps; s++) {
-        final t = s / steps;
-        final r0 = horizon * 0.5 + length * t;
-        final r1 = horizon * 0.5 + length * (s + 1) / steps;
-        final p0 = center + Offset.fromDirection(axis, r0);
-        final p1 = center + Offset.fromDirection(axis, r1);
-        final taper = 1 - t;
-        final width = (3 + 13 * taper) * scale;
-        final fade = math.pow(1 - t, 1.4).toDouble() * ignite;
-        canvas.drawLine(
-          p0,
-          p1,
-          Paint()
-            ..strokeCap = StrokeCap.round
-            ..strokeWidth = width * 2.6
-            ..blendMode = BlendMode.plus
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, width)
-            ..color = tint.withValues(alpha: 0.24 * fade),
-        );
-        canvas.drawLine(
-          p0,
-          p1,
-          Paint()
-            ..strokeCap = StrokeCap.round
-            ..strokeWidth = width * 0.5
-            ..blendMode = BlendMode.plus
-            ..color = Colors.white.withValues(alpha: 0.5 * fade),
-        );
-      }
-      for (var k = 0; k < 4; k++) {
-        final kt = (spin * 0.12 + k / 4) % 1.0;
+      final dir = Offset.fromDirection(axis, 1);
+      final perp = Offset.fromDirection(axis + math.pi / 2, 1);
+      final base = center + dir * (horizon * 0.5);
+      final tip = base + dir * length;
+      final halfBase = 9 * scale;
+      final halfTip = 1.6 * scale;
+      final rect = Rect.fromPoints(base, tip);
+      final baseEnd = dir.dy < 0 ? Alignment.bottomCenter : Alignment.topCenter;
+      final tipEnd = dir.dy < 0 ? Alignment.topCenter : Alignment.bottomCenter;
+      final sheath = Path()
+        ..moveTo(
+          base.dx + perp.dx * halfBase,
+          base.dy + perp.dy * halfBase,
+        )
+        ..lineTo(tip.dx + perp.dx * halfTip, tip.dy + perp.dy * halfTip)
+        ..lineTo(tip.dx - perp.dx * halfTip, tip.dy - perp.dy * halfTip)
+        ..lineTo(base.dx - perp.dx * halfBase, base.dy - perp.dy * halfBase)
+        ..close();
+      canvas.drawPath(
+        sheath,
+        Paint()
+          ..blendMode = BlendMode.plus
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 6 * scale)
+          ..shader = LinearGradient(
+            begin: baseEnd,
+            end: tipEnd,
+            colors: [
+              tint.withValues(alpha: 0.3 * drive),
+              tint.withValues(alpha: 0.1 * drive),
+              tint.withValues(alpha: 0),
+            ],
+            stops: const [0, 0.5, 1],
+          ).createShader(rect),
+      );
+      canvas.drawLine(
+        base,
+        tip,
+        Paint()
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 3 * scale
+          ..blendMode = BlendMode.plus
+          ..shader = LinearGradient(
+            begin: baseEnd,
+            end: tipEnd,
+            colors: [
+              Colors.white.withValues(alpha: 0.6 * drive),
+              Colors.white.withValues(alpha: 0),
+            ],
+          ).createShader(rect.inflate(1)),
+      );
+      for (var k = 0; k < knots; k++) {
+        final kt = (spin * 0.12 + k / knots) % 1.0;
         final rr = horizon * 0.5 + length * kt;
         final wob = math.sin(spin * 2 + k * 2) * 6 * scale * (1 - kt);
-        final p = center + Offset.fromDirection(axis, rr) + Offset(wob, 0);
+        final p = center + dir * rr + perp * wob;
         _bloom(
           canvas,
           p,
           (5 + 7 * (1 - kt)) * scale,
-          Colors.white.withValues(alpha: 0.7 * ignite * (1 - kt)),
+          Colors.white.withValues(alpha: 0.7 * drive * (1 - kt)),
           3 * scale,
         );
       }
@@ -1267,7 +1341,8 @@ class _HeroCollapsePainter extends CustomPainter {
       old.palette != palette ||
       old.scale != scale ||
       old.coreRadius != coreRadius ||
-      old.fade != fade;
+      old.fade != fade ||
+      old.windup != windup;
 }
 
 class _HeroSingularityPainter extends CustomPainter {
@@ -1302,6 +1377,7 @@ class _HeroSingularityPainter extends CustomPainter {
     _paintBlast(canvas, center, reach);
     _paintPoint(canvas, center);
     _paintFlash(canvas, center, reach);
+    _paintRip(canvas, center, reach);
     _paintShock(canvas, center, reach);
     _paintQuanta(canvas, center, reach);
     _paintShells(canvas, center, reach);
@@ -1453,7 +1529,7 @@ class _HeroSingularityPainter extends CustomPainter {
     final b = _span(_evaporatePeak, 0.55);
     if (b <= 0 || b >= 1) return;
     final e = Curves.easeOutCubic.transform(b);
-    final radius = lerpDouble(coreRadius * 0.12, reach * 1.45, e)!;
+    final radius = lerpDouble(coreRadius * 0.12, reach * 1.72, e)!;
     final fade = math.pow(1 - b, 2.0).toDouble();
     canvas.drawCircle(
       center,
@@ -1477,7 +1553,7 @@ class _HeroSingularityPainter extends CustomPainter {
     if (boil <= 0 || boil >= 1) return;
     final swell = Curves.easeOutCubic.transform(boil);
     final fade = math.pow(1 - boil, 1.8).toDouble();
-    final radius = lerpDouble(coreRadius * 0.2, reach * 1.25, swell)!;
+    final radius = lerpDouble(coreRadius * 0.2, reach * 1.5, swell)!;
     canvas.drawCircle(
       center,
       radius,
@@ -1600,6 +1676,73 @@ class _HeroSingularityPainter extends CustomPainter {
           ).createShader(rect),
       );
     }
+  }
+
+  void _paintRip(Canvas canvas, Offset center, double reach) {
+    final flare = _span(_evaporatePeak - 0.05, 0.5);
+    if (flare <= 0 || flare >= 1) return;
+    final e = Curves.easeOutCubic.transform(flare);
+    // A hump peaking just past the detonation so the streak snaps in and rings
+    // down, rather than being full-bright on its first frame.
+    final punch =
+        (math.pow(flare, 0.4) * math.pow(1 - flare, 2.2) * 3.1)
+            .clamp(0.0, 1.0)
+            .toDouble();
+    final tint = palette.glow.lighten(18);
+    _beam(
+      canvas,
+      center,
+      Offset(reach * lerpDouble(0.4, 1.95, e)!, 0),
+      3.6 * scale,
+      0.95 * punch,
+      tint,
+    );
+    _beam(
+      canvas,
+      center,
+      Offset(0, reach * lerpDouble(0.25, 0.95, e)!),
+      2.2 * scale,
+      0.5 * punch,
+      tint,
+    );
+    _bloom(
+      canvas,
+      center,
+      reach * 0.55 * e,
+      Colors.white.withValues(alpha: (0.55 * punch).clamp(0.0, 1.0)),
+      20 * scale,
+    );
+  }
+
+  void _beam(
+    Canvas canvas,
+    Offset center,
+    Offset arm,
+    double width,
+    double alpha,
+    Color tint,
+  ) {
+    final horizontal = arm.dx.abs() >= arm.dy.abs();
+    final rect = Rect.fromPoints(center - arm, center + arm).inflate(width * 2);
+    canvas.drawLine(
+      center - arm,
+      center + arm,
+      Paint()
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = width
+        ..blendMode = BlendMode.plus
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, width * 2)
+        ..shader = LinearGradient(
+          begin: horizontal ? Alignment.centerLeft : Alignment.topCenter,
+          end: horizontal ? Alignment.centerRight : Alignment.bottomCenter,
+          colors: [
+            tint.withValues(alpha: 0),
+            Colors.white.withValues(alpha: alpha.clamp(0.0, 1.0)),
+            tint.withValues(alpha: 0),
+          ],
+          stops: const [0, 0.5, 1],
+        ).createShader(rect),
+    );
   }
 
   void _bloom(

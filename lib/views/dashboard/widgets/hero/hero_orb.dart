@@ -63,7 +63,7 @@ const _chargeTell = 0.55;
 
 const _collapseCharge = Duration(milliseconds: 2400);
 
-const _singularityDuration = Duration(milliseconds: 2600);
+const _singularityDuration = Duration(milliseconds: 3200);
 const _singularitySparkCount = 66;
 
 const _evaporatePeak = 0.52;
@@ -929,10 +929,18 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                 1.0,
               );
           final showSingularity = s > 0 && s < 1;
-          final showCollapse = !showSingularity && collapseLocal > 0;
+          // Only before the singularity fires: once it has, the s == 1 frame
+          // must fall through to nothing, not flash the reborn hole for a beat.
+          final showCollapse = s == 0 && collapseLocal > 0;
           if (!showSingularity && !showCollapse) {
             return const SizedBox.shrink();
           }
+
+          const sHandoff = 0.36;
+          final windup = Curves.easeInCubic.transform(
+            (s / sHandoff).clamp(0.0, 1.0),
+          );
+          final singularitySpin = 3.0 + s * 4 + s * s * 6;
 
           final screen = MediaQuery.sizeOf(context);
           final screenShort = math.min(screen.width, screen.height);
@@ -1001,19 +1009,24 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                     ? Stack(
                         fit: StackFit.expand,
                         children: [
-                          if (sWarp < 0.22)
+                          if (s < sHandoff)
                             CustomPaint(
                               key: HeroOrb.collapseKey,
+                              isComplex: true,
+                              willChange: true,
                               painter: _HeroCollapsePainter(
                                 progress: 1,
                                 palette: _currentPalette,
                                 scale: cine,
                                 coreRadius: coreRadius,
-                                fade: 1 - (sWarp / 0.22),
+                                fade: 1 - windup,
+                                windup: windup,
                               ),
                             ),
                           CustomPaint(
                             key: HeroOrb.singularityKey,
+                            isComplex: true,
+                            willChange: true,
                             painter: _HeroSingularityPainter(
                               progress: sWarp,
                               palette: _currentPalette,
@@ -1021,13 +1034,15 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                               ringRadius: ringRadius,
                               coreRadius: coreRadius,
                               sparks: _singularitySparks,
-                              spinPhase: 1.8 + 5.0,
+                              spinPhase: singularitySpin,
                             ),
                           ),
                         ],
                       )
                     : CustomPaint(
                         key: HeroOrb.collapseKey,
+                        isComplex: true,
+                        willChange: true,
                         painter: _HeroCollapsePainter(
                           progress: _collapse.value,
                           palette: _currentPalette,
@@ -1041,14 +1056,22 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                   child: ColoredBox(
                     color: Colors.white.withValues(
                       alpha:
-                          0.32 *
-                          math
-                              .pow(
-                                1 -
-                                    ((s - _evaporatePeak) / (1 - _evaporatePeak))
-                                        .clamp(0.0, 1.0),
-                                5,
-                              )
+                          (0.55 *
+                                    math.pow(
+                                      1 -
+                                          ((s - _evaporatePeak) /
+                                                  (1 - _evaporatePeak))
+                                              .clamp(0.0, 1.0),
+                                      6,
+                                    ) +
+                                0.16 *
+                                    math.pow(
+                                      1 -
+                                          ((s - _evaporatePeak) /
+                                                  (1 - _evaporatePeak))
+                                              .clamp(0.0, 1.0),
+                                      1.4,
+                                    ))
                               .toDouble(),
                     ),
                   ),
