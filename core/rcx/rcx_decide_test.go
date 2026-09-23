@@ -337,6 +337,35 @@ func TestDecideMakesALatencyGainWaitOutDwell(t *testing.T) {
 	}
 }
 
+func TestDecideConfirmsAFasterHostPingBeforeCrowningIt(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	slow := rcxNode("uk-1", foreignProven())
+	slow.MedianMs, slow.HostMs = 0, 130
+	sweden := rcxNode("se-1", foreignProven())
+	sweden.MedianMs, sweden.HostMs = 0, 45
+
+	input := rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "uk-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{slow, sweden},
+		Now:            now,
+	}
+
+	if got := rcxDecideAt(input); got.Switch || got.Reason != rcxReasonQualityConfirming || got.Detail != "se-1" {
+		t.Errorf("decision = %+v, want a quality-confirming hold on the faster host-ping", got)
+	}
+
+	for i := range input.Candidates {
+		if input.Candidates[i].Name == "se-1" {
+			input.Candidates[i].QualityConfirmed = true
+		}
+	}
+	if got := rcxDecideAt(input); !got.Switch || got.To != "se-1" || got.Reason != rcxReasonLatencyGain {
+		t.Errorf("decision = %+v, want a latency-gain switch to the confirmed faster node", got)
+	}
+}
+
 func TestDecideRespectsAManualPinForLatencyOnly(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	slow := rcxNode("nl-1", foreignProven())

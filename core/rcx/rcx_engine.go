@@ -113,6 +113,7 @@ type rcxEngine struct {
 	rescueSeen       map[string]struct{}
 	rescueExhausted  bool
 	pendingHandoff   bool
+	pendingSweep     bool
 
 	reachGen            uint32
 	probeGen            uint32

@@ -84,6 +84,14 @@ func (e *rcxEngine) applyNetwork(payload rcxNetworkPayload) {
 func (e *rcxEngine) startHostSweep() {
 	if !e.Enabled() {
 		e.pendingHandoff = false
+		e.pendingSweep = false
+		return
+	}
+	// A screen-off link change must not host-ping the whole park: that burst
+	// woke the radio all night. Hold the sweep and the handoff it feeds until
+	// the screen comes back, when a probe is invisible to the user anyway.
+	if e.screenOff || e.suspended {
+		e.pendingSweep = true
 		return
 	}
 	members := e.runtime.Members()
@@ -97,6 +105,7 @@ func (e *rcxEngine) startHostSweep() {
 	}
 	e.sweepGen++
 	e.sweeping = true
+	e.pendingSweep = false
 	gen := e.sweepGen
 	quit := e.quit
 	sweep := e.runtime.Sweep
@@ -296,6 +305,9 @@ func (e *rcxEngine) applyScreenOff(off bool) {
 		e.screenFailedOver = false
 		if e.probing && e.probeScreenOff {
 			e.sealProbeDecision()
+		}
+		if e.pendingSweep {
+			e.startHostSweep()
 		}
 		e.startWakeProbe()
 		e.startReach()

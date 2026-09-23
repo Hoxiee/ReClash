@@ -464,6 +464,34 @@ func TestStalledIncumbentSurvivesOneIncidentMissThenDies(t *testing.T) {
 	}
 }
 
+func TestFreshChallengerSurvivesOneIncidentMissAndStaysEligible(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "rival")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent, runtime.selected = "current", "current"
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.probing, engine.probeKind = true, rcxWaveIncident
+	engine.probeStarted = map[string]struct{}{}
+	now := runtime.Now()
+	engine.ledger.NoteProbe("current", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+	engine.ledger.NoteProbe("rival", engine.envKey, rcxRoleOpen, rcxProbeOK, 40, now)
+
+	ttl := rcxScaledProofTTL(rcxProofTTLMinutes*time.Minute, 2)
+	miss := func() {
+		engine.applyProbeResult(rcxEvent{Gen: engine.probeGen, ConfigGen: engine.configGen, Results: []rcxProbeResult{
+			{Node: "rival", Role: rcxRoleOpen, Outcome: rcxProbeFail},
+		}})
+	}
+	miss()
+	if engine.ledger.Facts("rival", engine.envKey, false, now, ttl).OpenWorld == rcxProofDisproven {
+		t.Fatal("an incident the incumbent provoked refuted a fresh challenger on its first miss")
+	}
+	miss()
+	if engine.ledger.Facts("rival", engine.envKey, false, now, ttl).OpenWorld != rcxProofDisproven {
+		t.Fatal("a second consecutive incident miss must refute the challenger")
+	}
+}
+
 func TestHarvestMissKeepsAnyFreshlyProvenNode(t *testing.T) {
 	runtime := newFakeRuntime()
 	runtime.members = foreignMembers("current", "rival")

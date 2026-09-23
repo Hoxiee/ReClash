@@ -136,8 +136,12 @@ func (e *rcxEngine) freshlyOpenProven(key string, now time.Time) bool {
 }
 
 // A frozen server survives the open miss its own 12s freeze provoked; death waits for a second consecutive one.
+// A freshly proven challenger earns the same grace: an incident the incumbent
+// provoked must not mass-refute idle good nodes on one frozen marker and collapse
+// the eligible set onto the far tail.
 func (e *rcxEngine) pardonsOpenMiss(key, node string, now time.Time) bool {
-	if !e.ledger.Stalled(key, e.envKey) {
+	challenger := node != e.incumbent && e.freshlyOpenProven(key, now)
+	if !e.ledger.Stalled(key, e.envKey) && !challenger {
 		return false
 	}
 	window := time.Duration(rcxLiveWindowSeconds) * time.Second

@@ -551,6 +551,19 @@ func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
 	return gain >= absolute && gain >= required
 }
 
+// Neither side measured: a host-ping several 30ms steps faster only sets intent;
+// the quality probe a latency-gain triggers must confirm it on the real egress.
+func rcxHostPingImproves(strategy string, incumbent, best rcxKey) bool {
+	if incumbent.latencyMs < rcxUnmeasuredLatencyBase || best.latencyMs < rcxUnmeasuredLatencyBase {
+		return false
+	}
+	need := 2
+	if strategy == rcxStrategyStable || strategy == rcxStrategySaver {
+		need = 3
+	}
+	return incumbent.latencyMs-best.latencyMs >= need
+}
+
 func rcxLatencyBucket(c rcxCandidate, bands []int) uint8 {
 	if c.MedianMs > 0 {
 		return rcxLatBucket(c.MedianMs, bands)
@@ -656,8 +669,10 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	if bestKey.recurrence < incumbentKey.recurrence ||
 		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded {
 		reason = rcxReasonReliabilityGain
-	} else if rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) {
-		// Comfort compares measured medians only; an unmeasured side (0) yields no gain.
+	} else if rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) ||
+		rcxHostPingImproves(in.Policy.Strategy, incumbentKey, bestKey) {
+		// Measured medians decide when present; otherwise a clearly faster host-ping
+		// sets the intent, and the quality probe confirms the gap before the switch.
 		reason = rcxReasonLatencyGain
 	}
 	if reason != rcxReasonHold {

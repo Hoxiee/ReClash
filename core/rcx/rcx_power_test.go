@@ -167,3 +167,35 @@ func BenchmarkDirectDialIgnored(b *testing.B) {
 		engine.NoteDial("DIRECT", false, time.Second, now)
 	}
 }
+
+func TestScreenOffLinkChangeDefersSweepAndHandoff(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("node", "other")
+	runtime.selected = "node"
+	engine := newTestEngine(runtime, "ru")
+	engine.quit = make(chan struct{})
+	t.Cleanup(func() { close(engine.quit) })
+	engine.incumbent = "node"
+	engine.screenOff = true
+
+	engine.applyNetwork(rcxNetworkPayload{Transport: "wifi", SSID: "Cell", Validated: true})
+
+	if engine.sweeping || len(runtime.sweptNodes()) != 0 {
+		t.Fatal("screen-off link change host-swept the park")
+	}
+	if !engine.pendingSweep {
+		t.Fatal("deferred sweep was not recorded for wake")
+	}
+	if engine.probing {
+		t.Fatal("screen-off link change launched a handoff probe wave")
+	}
+	if !engine.pendingHandoff {
+		t.Fatal("handoff was dropped instead of held for wake")
+	}
+
+	engine.applyScreenOff(false)
+
+	if engine.pendingSweep || !engine.sweeping {
+		t.Fatal("wake did not run the deferred host sweep")
+	}
+}

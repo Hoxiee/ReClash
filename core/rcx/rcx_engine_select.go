@@ -259,12 +259,12 @@ func (e *rcxEngine) reconsider() {
 		e.reassertIncumbent()
 	}
 
-	if e.pendingHandoff && !e.probing {
+	if e.pendingHandoff && !e.probing && !e.screenOff && !e.suspended {
 		if !e.awaitsHostSweep(now) {
 			e.pendingHandoff = false
 			e.startProbe(candidates, members, rcxWaveHandoff)
 		}
-	} else if e.pendingGrant && !e.probing {
+	} else if e.pendingGrant && !e.probing && !e.screenOff && !e.suspended {
 		e.pendingGrant = false
 		e.startProbe(candidates, members, rcxWaveGrant)
 	} else if e.needsProbe(decision, candidates) {
@@ -272,7 +272,9 @@ func (e *rcxEngine) reconsider() {
 		if decision.Reason == rcxReasonStranded || decision.Reason == rcxReasonNoCandidate {
 			kind = rcxWaveRescue
 		}
-		e.startProbe(candidates, members, kind)
+		if e.screenOffProbeAllowed(decision.Reason, now) {
+			e.startProbe(candidates, members, kind)
+		}
 	}
 	if e.probing && (decision.Reason == rcxReasonStranded || decision.Reason == rcxReasonNoCandidate) {
 		decision.Reason = rcxReasonMeasuring
@@ -418,6 +420,17 @@ func (e *rcxEngine) needsProbe(decision rcxDecision, candidates []rcxCandidate) 
 		}
 	}
 	return e.incumbent == ""
+}
+
+// Screen-off, a reconsider buys a wave only to answer the incumbent's own death;
+// a routine re-verify or an enable grant waits for the narrow wake probe so a
+// dark link is never woken for a comfort measurement.
+func (e *rcxEngine) screenOffProbeAllowed(reason rcxReason, now time.Time) bool {
+	if !e.screenOff {
+		return true
+	}
+	return rcxDeathSwitch(reason) || reason == rcxReasonStranded ||
+		reason == rcxReasonNoCandidate || e.suspected(now)
 }
 
 // Domestic bytes are not open-world proof, so under censorship a live-but-unproven
