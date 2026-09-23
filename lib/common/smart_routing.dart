@@ -151,14 +151,6 @@ const _smartRoutingBundles = {
   ),
 };
 
-SmartRoutingPreset smartRoutingPresetForLocale(String? locale) {
-  final code = locale ?? '';
-  if (code.startsWith('ru')) return SmartRoutingPreset.russia;
-  if (code.startsWith('fa')) return SmartRoutingPreset.iran;
-  if (code.startsWith('zh')) return SmartRoutingPreset.china;
-  return SmartRoutingPreset.off;
-}
-
 /// The pace belongs to the strategy, not to the region that seeds the rest.
 class SmartRoutingPacing {
   const SmartRoutingPacing({

@@ -88,9 +88,10 @@ class App {
         false;
   }
 
-  Future<List<String>> getChinaPackageNames() async {
+  Future<List<String>> getDomesticPackageNames(AppRegion region) async {
     final packageNamesString = await methodChannel.invokeMethod<String>(
-      'getChinaPackageNames',
+      'getDomesticPackageNames',
+      {'region': region.wire},
     );
     final List<dynamic> packageNamesRaw =
         await packageNamesString?.decodeJson<List<dynamic>>() ?? [];

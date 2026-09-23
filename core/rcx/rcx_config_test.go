@@ -198,3 +198,15 @@ func TestNodeRulesAndAvoidCountries(t *testing.T) {
 		t.Error("an all-empty rule must match nothing")
 	}
 }
+
+func TestCensorsMatchesCountryCodeCaseInsensitively(t *testing.T) {
+	cfg := rcxConfig{CensorCountries: []string{"RU"}}
+	for _, code := range []string{"RU", "ru", "Ru"} {
+		if !cfg.censors(code) {
+			t.Errorf("censors(%q) = false, want true: mmdb case must not break the domestic side", code)
+		}
+	}
+	if cfg.censors("DE") {
+		t.Error("censors(\"DE\") = true, want false")
+	}
+}

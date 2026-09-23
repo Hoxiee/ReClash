@@ -83,6 +83,7 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
         PackageResolver(
             GlobalState.application.packageManager,
             GlobalState.application.packageName,
+            GlobalState.application.assets,
         )
     }
 
@@ -165,8 +166,9 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 gson.toJson(packageResolver.installedPackages)
             }
 
-            "getChinaPackageNames" -> reply(result) {
-                gson.toJson(packageResolver.getChinaPackageNames())
+            "getDomesticPackageNames" -> reply(result) {
+                val region = call.argument<String>("region") ?: "other"
+                gson.toJson(packageResolver.getDomesticPackageNames(region))
             }
 
             "isInstalledAppsPermissionGranted" -> reply(result) {

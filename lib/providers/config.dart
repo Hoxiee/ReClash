@@ -22,10 +22,51 @@ final appRegionProvider = Provider<AppRegion>((ref) {
       );
 });
 
+final regionCapabilitiesProvider = Provider<Set<RegionalFacetId>>((ref) {
+  return regionCapabilities(ref.watch(appRegionProvider));
+});
+
+class _DnsFacet implements SeededRegionalFacet {
+  const _DnsFacet();
+
+  @override
+  RegionalFacetId get id => RegionalFacetId.clashDns;
+
+  @override
+  bool isPristineFor(ProviderReader read, AppRegion region) =>
+      isShippedDns(read(patchClashConfigProvider).dns);
+
+  @override
+  void applyDefaults(ProviderReader read, AppRegion region) {
+    read(
+      patchClashConfigProvider.notifier,
+    ).update((state) => state.copyWith(dns: dnsForRegion(region)));
+  }
+}
+
+class _BypassDomainFacet implements SeededRegionalFacet {
+  const _BypassDomainFacet();
+
+  @override
+  RegionalFacetId get id => RegionalFacetId.clashDns;
+
+  @override
+  bool isPristineFor(ProviderReader read, AppRegion region) =>
+      isShippedBypass(read(networkSettingProvider).bypassDomain);
+
+  @override
+  void applyDefaults(ProviderReader read, AppRegion region) {
+    read(
+      networkSettingProvider.notifier,
+    ).update((state) => state.copyWith(bypassDomain: bypassForRegion(region)));
+  }
+}
+
+const _seededFacets = <SeededRegionalFacet>[_DnsFacet(), _BypassDomainFacet()];
+
 void selectAppRegion(ProviderReader read, AppRegion region) {
-  final settings = read(appSettingProvider);
-  if (settings.region == region) return;
   final previous = read(appRegionProvider);
+  if (read(appSettingProvider).region == region) return;
   read(appSettingProvider.notifier).update(
     (state) => state.copyWith(
       region: region,
@@ -37,6 +78,11 @@ void selectAppRegion(ProviderReader read, AppRegion region) {
     read(
       smartRoutingSettingProvider.notifier,
     ).update((state) => state.applyPreset(region.preset));
+  }
+  for (final facet in _seededFacets) {
+    if (facet.isPristineFor(read, previous)) {
+      facet.applyDefaults(read, region);
+    }
   }
 }
 
@@ -77,6 +123,11 @@ final byeDpiSupportedProvider = Provider<bool>((_) => system.isAndroid);
 
 final effectiveDesyncSettingProvider = Provider<DesyncProps>((ref) {
   if (!ref.watch(byeDpiSupportedProvider)) return defaultDesyncProps;
+  if (!ref
+      .watch(regionCapabilitiesProvider)
+      .contains(RegionalFacetId.desync)) {
+    return defaultDesyncProps;
+  }
   return ref.watch(desyncSettingProvider);
 });
 

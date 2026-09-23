@@ -403,7 +403,7 @@ func (c rcxConfig) breaker(node string) bool {
 
 func (c rcxConfig) censors(countryCode string) bool {
 	for _, code := range c.CensorCountries {
-		if code == countryCode {
+		if strings.EqualFold(code, countryCode) {
 			return true
 		}
 	}

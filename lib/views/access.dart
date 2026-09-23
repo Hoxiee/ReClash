@@ -150,7 +150,10 @@ class _AccessViewState extends ConsumerState<AccessView> {
     }
     final selectedPackageNames =
         (await globalState.loadingRun<List<String>>(() async {
-          return await app?.getChinaPackageNames() ?? [];
+          return await app?.getDomesticPackageNames(
+                ref.read(appRegionProvider),
+              ) ??
+              [];
         }, tag: LoadingTag.access))?.toSet() ??
         {};
     final acceptList = packageNames
@@ -286,6 +289,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
 
   List<Widget> _buildActions(BuildContext context, {required bool enable}) {
     final appLocalizations = context.appLocalizations;
+    final canMatch = ref.regionAllows(RegionalFacetId.packageMatcher);
     return [
       _buildConfirm(),
       CommonPopupBox(
@@ -311,11 +315,12 @@ class _AccessViewState extends ConsumerState<AccessView> {
               icon: Icons.emergency_outlined,
               label: appLocalizations.action,
               subItems: [
-                CommonPopupMenuItem(
-                  icon: Icons.auto_awesome,
-                  label: appLocalizations.intelligentSelected,
-                  onPressed: _intelligentSelected,
-                ),
+                if (canMatch)
+                  CommonPopupMenuItem(
+                    icon: Icons.auto_awesome,
+                    label: appLocalizations.intelligentSelected,
+                    onPressed: _intelligentSelected,
+                  ),
                 CommonPopupMenuItem(
                   icon: Icons.content_copy,
                   label: appLocalizations.clipboardExport,

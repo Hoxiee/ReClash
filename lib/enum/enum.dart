@@ -157,6 +157,13 @@ enum AppRegion {
     other => SmartRoutingPreset.off,
   };
 
+  String get wire => switch (this) {
+    russia => 'ru',
+    iran => 'ir',
+    china => 'cn',
+    other => 'other',
+  };
+
   String label(BuildContext context) {
     final l10n = context.appLocalizations;
     return switch (this) {

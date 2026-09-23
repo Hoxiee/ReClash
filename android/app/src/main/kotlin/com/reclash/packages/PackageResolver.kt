@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.ApplicationInfo
 import android.content.pm.ComponentInfo
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.os.Build
 import com.android.tools.smali.dexlib2.dexbacked.DexBackedDexFile
 import com.reclash.models.InstalledPackage
@@ -13,7 +14,10 @@ import java.util.zip.ZipFile
 internal class PackageResolver(
     private val packageManager: PackageManager,
     private val appPackageName: String,
+    assetManager: AssetManager,
 ) {
+    private val matcher = DomesticPackageMatcher { assetManager.open(it) }
+
     private val cacheLock = Any()
 
     @Volatile
@@ -36,9 +40,14 @@ internal class PackageResolver(
         synchronized(cacheLock) { cachedPackages = null }
     }
 
-    fun getChinaPackageNames(): List<String> = installedPackages
-        .map { it.packageName }
-        .filter(::isChinaPackage)
+    fun getDomesticPackageNames(region: String): List<String> {
+        if (region !in DOMESTIC_REGIONS) {
+            return emptyList()
+        }
+        return installedPackages
+            .map { it.packageName }
+            .filter { isDomesticPackage(it, region) }
+    }
 
     private fun loadPackages(): List<InstalledPackage> {
         val flags = PackageManager.GET_PERMISSIONS
@@ -69,18 +78,25 @@ internal class PackageResolver(
             }.toList()
     }
 
-    private fun isChinaPackage(packageName: String): Boolean {
-        if (ChinaPackageMatcher.isSkipped(packageName)) {
+    private fun isDomesticPackage(packageName: String, region: String): Boolean {
+        if (matcher.isSkipped(packageName)) {
             return false
         }
-        if (ChinaPackageMatcher.matchesKnownPrefix(packageName)) {
+        if (matcher.matchesExplicit(packageName, region)) {
             return true
+        }
+        if (matcher.matchesNamePrefix(packageName, region)) {
+            return true
+        }
+        if (!matcher.hasClassSignatures(region)) {
+            return false
         }
 
         return runCatching {
             val packageInfo = getPackageInfo(packageName)
-            packageInfo.componentNames().any(ChinaPackageMatcher::matchesKnownPrefix) ||
-                packageInfo.applicationInfo?.publicSourceDir?.let(::scanArchive) == true
+            packageInfo.componentNames().any { matcher.matchesClass(it, region) } ||
+                packageInfo.applicationInfo?.publicSourceDir
+                    ?.let { scanArchive(it, region) } == true
         }.getOrDefault(false)
     }
 
@@ -103,33 +119,34 @@ internal class PackageResolver(
         yieldAll(providers.orEmpty().asSequence().map(ComponentInfo::name))
     }
 
-    private fun scanArchive(sourcePath: String): Boolean = ZipFile(File(sourcePath)).use { archive ->
-        if (archive.entries().asSequence().any { it.name.startsWith("firebase-") }) {
-            return false
-        }
-        archive.entries().asSequence()
-            .filter { entry ->
-                entry.name.startsWith("classes") && entry.name.endsWith(".dex")
-            }.any { entry ->
-                if (entry.size > MAX_DEX_SIZE_BYTES) {
-                    return@any true
-                }
-                val dexFile = archive.getInputStream(entry).buffered().use { input ->
-                    DexBackedDexFile.fromInputStream(null, input)
-                }
-                dexFile.classes.any { clazz ->
-                    ChinaPackageMatcher.matchesKnownPrefix(
-                        ChinaPackageMatcher.classNameOf(clazz.type),
-                    )
-                }
+    private fun scanArchive(sourcePath: String, region: String): Boolean =
+        ZipFile(File(sourcePath)).use { archive ->
+            if (archive.entries().asSequence().any { it.name.startsWith("firebase-") }) {
+                return false
             }
-    }
+            archive.entries().asSequence()
+                .filter { entry ->
+                    entry.name.startsWith("classes") && entry.name.endsWith(".dex")
+                }.any { entry ->
+                    if (entry.size > MAX_DEX_SIZE_BYTES) {
+                        return@any true
+                    }
+                    val dexFile = archive.getInputStream(entry).buffered().use { input ->
+                        DexBackedDexFile.fromInputStream(null, input)
+                    }
+                    dexFile.classes.any { clazz ->
+                        matcher.matchesClass(matcher.classNameOf(clazz.type), region)
+                    }
+                }
+        }
 
     companion object {
         const val GET_INSTALLED_APPS = "com.android.permission.GET_INSTALLED_APPS"
 
         private const val ANDROID_PACKAGE_NAME = "android"
         private const val MAX_DEX_SIZE_BYTES = 15_000_000L
+
+        private val DOMESTIC_REGIONS = setOf("ru", "ir", "cn")
 
         private val PACKAGE_INFO_FLAGS = PackageManager.GET_ACTIVITIES or
             PackageManager.GET_SERVICES or

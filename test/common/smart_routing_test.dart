@@ -320,14 +320,6 @@ void main() {
     });
   });
 
-  test('a locale implies a region only where one ships', () {
-    expect(smartRoutingPresetForLocale('ru'), SmartRoutingPreset.russia);
-    expect(smartRoutingPresetForLocale('fa_IR'), SmartRoutingPreset.iran);
-    expect(smartRoutingPresetForLocale('zh_CN'), SmartRoutingPreset.china);
-    expect(smartRoutingPresetForLocale('en'), SmartRoutingPreset.off);
-    expect(smartRoutingPresetForLocale(null), SmartRoutingPreset.off);
-  });
-
   group('network format', () {
     test('every terrain the core reports maps to a format', () {
       expect(networkFormatOf('normal'), NetworkFormat.open);
