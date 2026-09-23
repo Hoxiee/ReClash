@@ -98,6 +98,17 @@ class App {
     return packageNamesRaw.map((e) => e.toString()).toList();
   }
 
+  Future<RegionSignals> getRegionSignals() async {
+    try {
+      final raw = await methodChannel.invokeMethod<Map<Object?, Object?>>(
+        'getRegionSignals',
+      );
+      return RegionSignals.fromMap(raw);
+    } catch (_) {
+      return const RegionSignals();
+    }
+  }
+
   Future<bool> isNotificationsPermissionGranted() async {
     return await methodChannel.invokeMethod<bool>(
           'isNotificationsPermissionGranted',

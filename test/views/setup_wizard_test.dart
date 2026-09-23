@@ -920,7 +920,7 @@ void main() {
     expect(container.read(profilesProvider), isEmpty);
   });
 
-  testWidgets('language does not choose a region or enable Smart Routing', (
+  testWidgets('stored ru language seeds Russia and HWID without routing', (
     tester,
   ) async {
     final container = await _pump(
@@ -929,18 +929,18 @@ void main() {
     );
     await _toFinish(tester);
 
-    expect(container.read(appSettingProvider).region, isNull);
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(
       find.byKey(const ValueKey('setup-smart-routing-preset')),
       findsWidgets,
     );
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.preset, SmartRoutingPreset.russia);
     expect(props.enabled, isFalse);
   });
 
-  testWidgets('system locale does not silently select Russia or HWID', (
+  testWidgets('ru system locale seeds Russia and HWID without routing', (
     tester,
   ) async {
     final container = await _pump(tester, locale: const Locale('ru'));
@@ -953,14 +953,34 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(container.read(appSettingProvider).region, isNull);
-    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
     expect(
       find.byKey(const ValueKey('setup-smart-routing-preset')),
       findsWidgets,
     );
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.preset, SmartRoutingPreset.off);
+    expect(props.preset, SmartRoutingPreset.russia);
+    expect(props.enabled, isFalse);
+  });
+
+  testWidgets('a Moscow time zone seeds Russia under an English locale', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      overrides: [
+        regionSignalsProvider.overrideWithValue(
+          const RegionSignals(timeZoneId: 'Europe/Moscow'),
+        ),
+      ],
+    );
+    await _toFinish(tester);
+
+    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+    final props = container.read(smartRoutingSettingProvider);
+    expect(props.preset, SmartRoutingPreset.russia);
     expect(props.enabled, isFalse);
   });
 

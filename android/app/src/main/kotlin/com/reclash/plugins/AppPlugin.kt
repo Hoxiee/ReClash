@@ -16,6 +16,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -52,6 +53,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.TimeZone
 
 class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -256,6 +258,10 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
                 )
             }
 
+            "getRegionSignals" -> reply(result) {
+                regionSignals()
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -265,6 +271,17 @@ class AppPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware 
     private fun handleGetPackageIcon(call: MethodCall, result: Result) = reply(result) {
         val packageName = call.argument<String>("packageName") ?: ""
         GlobalState.application.packageManager.getPackageIconPath(packageName)
+    }
+
+    private fun regionSignals(): Map<String, String?> {
+        val telephony = GlobalState.application
+            .getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+        fun clean(value: String?) = value?.trim()?.takeIf { it.isNotEmpty() }
+        return mapOf(
+            "simCountry" to clean(runCatching { telephony?.simCountryIso }.getOrNull()),
+            "networkCountry" to clean(runCatching { telephony?.networkCountryIso }.getOrNull()),
+            "timeZone" to clean(runCatching { TimeZone.getDefault()?.id }.getOrNull()),
+        )
     }
 
     // A throw inside the plugin scope has no handler and ends the process;

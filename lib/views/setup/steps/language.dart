@@ -17,6 +17,11 @@ class SetupLanguageStep extends ConsumerWidget {
     ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(locale: locale?.toString()));
+    seedRegionIfUnset(
+      ref.read,
+      ref.read(regionSignalsProvider),
+      locale ?? Localizations.localeOf(context),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (primaryFocus?.context != null && primaryFocus!.canRequestFocus) {
         primaryFocus.requestFocus();

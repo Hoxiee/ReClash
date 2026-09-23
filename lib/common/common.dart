@@ -56,6 +56,7 @@ export 'provider_reader.dart';
 export 'proxy.dart';
 export 'regional.dart';
 export 'regional_network.dart';
+export 'region_detection.dart';
 export 'render.dart';
 export 'request.dart';
 export 'routing_overview.dart';

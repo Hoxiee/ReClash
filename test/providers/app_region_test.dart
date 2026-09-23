@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show Locale;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -212,5 +213,46 @@ void main() {
       expect(restored.read(appSettingProvider).sendDeviceIdentity, consent);
       expect(restored.read(appSettingProvider).region, isNull);
     }
+  });
+
+  test('seed derives Russia from a native signal under an English locale', () {
+    final container = _container();
+    seedRegionIfUnset(
+      container.read,
+      const RegionSignals(simCountry: 'ru'),
+      const Locale('en'),
+    );
+    expect(container.read(appSettingProvider).region, AppRegion.russia);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
+    expect(container.read(smartRoutingSettingProvider).preset,
+        SmartRoutingPreset.russia);
+    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
+  });
+
+  test('seed leaves the region unset for an unshipped region', () {
+    final container = _container();
+    seedRegionIfUnset(
+      container.read,
+      const RegionSignals(simCountry: 'us'),
+      const Locale('en', 'US'),
+    );
+    expect(container.read(appSettingProvider).region, isNull);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+  });
+
+  test('seed never overrides an explicit choice', () {
+    final container = _container(
+      const Config(
+        themeProps: defaultThemeProps,
+        appSettingProps: AppSettingProps(region: AppRegion.china),
+      ),
+    );
+    seedRegionIfUnset(
+      container.read,
+      const RegionSignals(simCountry: 'ru'),
+      const Locale('ru'),
+    );
+    expect(container.read(appSettingProvider).region, AppRegion.china);
+    expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
   });
 }

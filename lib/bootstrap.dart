@@ -157,8 +157,13 @@ class Bootstrap {
     );
     final appStateOverrides = buildAppStateOverrides(appState);
     final configOverrides = buildConfigOverrides(config);
+    final regionSignals = await app?.getRegionSignals() ?? const RegionSignals();
     final container = ProviderContainer(
-      overrides: [...appStateOverrides, ...configOverrides],
+      overrides: [
+        ...appStateOverrides,
+        ...configOverrides,
+        regionSignalsProvider.overrideWithValue(regionSignals),
+      ],
     );
     globalState.container = container;
     container
@@ -170,10 +175,11 @@ class Bootstrap {
         );
     final profiles = await database.profilesDao.query().get();
     container.read(profilesProvider.notifier).setAndReorder(profiles);
-    await AppLocalizations.load(
-      getLocaleForString(config.appSettingProps.locale) ??
-          WidgetsBinding.instance.platformDispatcher.locale,
-    );
+    final effectiveLocale =
+        getLocaleForString(config.appSettingProps.locale) ??
+        WidgetsBinding.instance.platformDispatcher.locale;
+    await AppLocalizations.load(effectiveLocale);
+    seedRegionIfUnset(container.read, regionSignals, effectiveLocale);
     await window?.init(version, config.windowProps);
     if (system.isAndroid) {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

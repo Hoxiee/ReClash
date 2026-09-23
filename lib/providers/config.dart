@@ -1,3 +1,5 @@
+import 'dart:ui' show Locale;
+
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -25,6 +27,10 @@ final appRegionProvider = Provider<AppRegion>((ref) {
 final regionCapabilitiesProvider = Provider<Set<RegionalFacetId>>((ref) {
   return regionCapabilities(ref.watch(appRegionProvider));
 });
+
+final regionSignalsProvider = Provider<RegionSignals>(
+  (ref) => const RegionSignals(),
+);
 
 class _DnsFacet implements SeededRegionalFacet {
   const _DnsFacet();
@@ -84,6 +90,17 @@ void selectAppRegion(ProviderReader read, AppRegion region) {
       facet.applyDefaults(read, region);
     }
   }
+}
+
+void seedRegionIfUnset(
+  ProviderReader read,
+  RegionSignals signals,
+  Locale? locale,
+) {
+  if (read(appSettingProvider).region != null) return;
+  final region = detectRegion(signals, locale);
+  if (region == AppRegion.other) return;
+  selectAppRegion(read, region); // reuse explicit-pick path (preset, HWID, facets)
 }
 
 @Riverpod(keepAlive: true)

@@ -68,6 +68,18 @@ class _SetupWizardState extends ConsumerState<SetupWizard>
     _initialIndex = widget.revisit ? 0 : saved.clamp(0, _stepCount - 1);
     _index = _initialIndex;
     _controller = PageController(initialPage: _initialIndex);
+    if (!widget.revisit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _seedRegion();
+      });
+    }
+  }
+
+  void _seedRegion() {
+    final locale =
+        getLocaleForString(ref.read(appSettingProvider).locale) ??
+        Localizations.localeOf(context);
+    seedRegionIfUnset(ref.read, ref.read(regionSignalsProvider), locale);
   }
 
   @override
