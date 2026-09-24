@@ -479,7 +479,8 @@ enum DashboardWidget {
   smartRouting(modes: _vpnOnly),
   desyncStrategy(modes: _byedpiOnly),
   desyncTest(modes: _byedpiOnly),
-  desyncEngine(modes: _byedpiOnly);
+  desyncEngine(modes: _byedpiOnly),
+  serviceStatus(modes: _vpnOnly);
 
   final List<SupportPlatform> platforms;
   final List<DashboardMode> modes;

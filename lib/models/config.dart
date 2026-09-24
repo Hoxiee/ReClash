@@ -271,6 +271,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool sendDeviceIdentity,
     @Default('default') String iconVariant,
     @Default(false) bool reduceMotion,
+    @Default([]) List<String> serviceOrder,
+    @Default([]) List<String> disabledServices,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

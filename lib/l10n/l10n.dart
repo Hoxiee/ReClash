@@ -15929,6 +15929,146 @@ class AppLocalizations {
       args: [value],
     );
   }
+
+  /// `Service status`
+  String get serviceStatus {
+    return Intl.message(
+      'Service status',
+      name: 'serviceStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Available`
+  String get serviceAvailable {
+    return Intl.message(
+      'Available',
+      name: 'serviceAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Access restricted`
+  String get serviceRestricted {
+    return Intl.message(
+      'Access restricted',
+      name: 'serviceRestricted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unavailable`
+  String get serviceUnavailable {
+    return Intl.message(
+      'Unavailable',
+      name: 'serviceUnavailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Disallowed ISP`
+  String get serviceDisallowedIsp {
+    return Intl.message(
+      'Disallowed ISP',
+      name: 'serviceDisallowedIsp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Blocked`
+  String get serviceBlocked {
+    return Intl.message('Blocked', name: 'serviceBlocked', desc: '', args: []);
+  }
+
+  /// `Region not supported`
+  String get serviceUnsupportedRegion {
+    return Intl.message(
+      'Region not supported',
+      name: 'serviceUnsupportedRegion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Originals only`
+  String get serviceOriginalsOnly {
+    return Intl.message(
+      'Originals only',
+      name: 'serviceOriginalsOnly',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coming soon`
+  String get serviceComingSoon {
+    return Intl.message(
+      'Coming soon',
+      name: 'serviceComingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check failed`
+  String get serviceFailed {
+    return Intl.message(
+      'Check failed',
+      name: 'serviceFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not checked`
+  String get servicePending {
+    return Intl.message(
+      'Not checked',
+      name: 'servicePending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manage services`
+  String get serviceManage {
+    return Intl.message(
+      'Manage services',
+      name: 'serviceManage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check`
+  String get serviceCheck {
+    return Intl.message('Check', name: 'serviceCheck', desc: '', args: []);
+  }
+
+  /// `Check all`
+  String get serviceCheckAll {
+    return Intl.message(
+      'Check all',
+      name: 'serviceCheckAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checked at {time}`
+  String serviceCheckedAt(String time) {
+    return Intl.message(
+      'Checked at $time',
+      name: 'serviceCheckedAt',
+      desc: '',
+      args: [time],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

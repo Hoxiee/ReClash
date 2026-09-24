@@ -2037,5 +2037,27 @@
         "type": "String"
       }
     }
+  },
+  "serviceStatus": "Статус сервисов",
+  "serviceAvailable": "Доступен",
+  "serviceRestricted": "Доступ ограничен",
+  "serviceUnavailable": "Недоступен",
+  "serviceDisallowedIsp": "Провайдер заблокирован",
+  "serviceBlocked": "Заблокирован",
+  "serviceUnsupportedRegion": "Регион не поддерживается",
+  "serviceOriginalsOnly": "Только оригиналы",
+  "serviceComingSoon": "Скоро",
+  "serviceFailed": "Проверка не удалась",
+  "servicePending": "Не проверялся",
+  "serviceManage": "Настроить сервисы",
+  "serviceCheck": "Проверить",
+  "serviceCheckAll": "Проверить все",
+  "serviceCheckedAt": "Проверено в {time}",
+  "@serviceCheckedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

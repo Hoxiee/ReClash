@@ -2235,5 +2235,27 @@
         "type": "String"
       }
     }
+  },
+  "serviceStatus": "Service status",
+  "serviceAvailable": "Available",
+  "serviceRestricted": "Access restricted",
+  "serviceUnavailable": "Unavailable",
+  "serviceDisallowedIsp": "Disallowed ISP",
+  "serviceBlocked": "Blocked",
+  "serviceUnsupportedRegion": "Region not supported",
+  "serviceOriginalsOnly": "Originals only",
+  "serviceComingSoon": "Coming soon",
+  "serviceFailed": "Check failed",
+  "servicePending": "Not checked",
+  "serviceManage": "Manage services",
+  "serviceCheck": "Check",
+  "serviceCheckAll": "Check all",
+  "serviceCheckedAt": "Checked at {time}",
+  "@serviceCheckedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

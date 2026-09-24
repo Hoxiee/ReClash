@@ -115,6 +115,7 @@ flutter:
     - assets/images/empty/
     - assets/images/icon_variants/
     - assets/images/marks/
+    - assets/images/services/
     - path: assets/images/tray/unix/
       platforms: [ macos, linux ]
     - path: assets/images/tray/windows/

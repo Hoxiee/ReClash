@@ -22,5 +22,6 @@ export 'network_speed.dart';
 export 'outbound_mode.dart';
 export 'quick_options.dart';
 export 'service_info.dart';
+export 'service_status.dart';
 export 'smart_routing_card.dart';
 export 'traffic_usage.dart';

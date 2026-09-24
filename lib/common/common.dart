@@ -59,6 +59,7 @@ export 'regional/regional_network.dart';
 export 'regional/region_detection.dart';
 export 'ui/render.dart';
 export 'net/request.dart';
+export 'service_probe.dart';
 export 'routing/routing_overview.dart';
 export 'ui/screen_shake.dart';
 export 'ui/scroll.dart';

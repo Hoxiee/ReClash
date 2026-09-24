@@ -124,6 +124,16 @@ _AppSettingProps _$AppSettingPropsFromJson(Map<String, dynamic> json) =>
       sendDeviceIdentity: json['sendDeviceIdentity'] as bool? ?? false,
       iconVariant: json['iconVariant'] as String? ?? 'default',
       reduceMotion: json['reduceMotion'] as bool? ?? false,
+      serviceOrder:
+          (json['serviceOrder'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      disabledServices:
+          (json['disabledServices'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
@@ -161,6 +171,8 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'sendDeviceIdentity': instance.sendDeviceIdentity,
       'iconVariant': instance.iconVariant,
       'reduceMotion': instance.reduceMotion,
+      'serviceOrder': instance.serviceOrder,
+      'disabledServices': instance.disabledServices,
     };
 
 const _$AppRegionEnumMap = {
@@ -195,6 +207,7 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.desyncStrategy: 'desyncStrategy',
   DashboardWidget.desyncTest: 'desyncTest',
   DashboardWidget.desyncEngine: 'desyncEngine',
+  DashboardWidget.serviceStatus: 'serviceStatus',
 };
 
 _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>
