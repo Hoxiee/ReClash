@@ -45,8 +45,12 @@ class SubscriptionOverviewView extends ConsumerWidget {
     if (profile == null) {
       return CommonScaffold(
         title: appLocalizations.metaInfo,
+        floatBody: true,
         body: CustomScrollView(
           slivers: [
+            SliverToBoxAdapter(
+              child: SizedBox(height: context.appBarInset),
+            ),
             _sliver(
               _sheetCard(
                 _NoticeBody(
@@ -66,8 +70,10 @@ class SubscriptionOverviewView extends ConsumerWidget {
 
     return CommonScaffold(
       title: appLocalizations.metaInfo,
+      floatBody: true,
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
           for (final card in subscriptionDetailCards(
             context,
             profile,

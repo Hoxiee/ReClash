@@ -53,6 +53,27 @@ class BottomInsetScope extends InheritedWidget {
   }
 }
 
+class FloatingBarScope extends InheritedWidget {
+  final double inset;
+
+  const FloatingBarScope({
+    super.key,
+    required this.inset,
+    required super.child,
+  });
+
+  static double? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<FloatingBarScope>()
+        ?.inset;
+  }
+
+  @override
+  bool updateShouldNotify(FloatingBarScope oldWidget) {
+    return inset != oldWidget.inset;
+  }
+}
+
 class CommonScaffoldBackActionProvider extends InheritedWidget {
   final VoidCallback? backAction;
 

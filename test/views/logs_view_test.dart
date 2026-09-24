@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -66,12 +67,12 @@ void main() {
     expect(seedLogs().map((log) => log.dateTime), contains(label.data));
 
     final scrollableRect = tester.getRect(find.byType(Scrollable).first);
-    // The hint is pinned to the scrollbar thumb. Material's minimum thumb
-    // length is 48, so at the newest end the thumb center rests 24px below
-    // the track's top edge.
+    // The list scrolls under the floating bar, so the scrollbar track insets
+    // below it. Material's minimum thumb length is 48, so at the newest end
+    // the thumb center rests 24px below that inset track top.
     expect(
       tester.getCenter(find.byKey(hintKey)).dy,
-      closeTo(scrollableRect.top + 24, 6),
+      closeTo(scrollableRect.top + pageToolbarHeight + 24, 6),
     );
 
     for (var i = 0; i < 25; i++) {

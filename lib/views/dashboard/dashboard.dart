@@ -262,13 +262,17 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           (isEdit) => CommonScaffold(
             title: context.appLocalizations.dashboard,
             actions: _buildActions(isEdit),
+            floatBody: true,
             body: Align(
               alignment: Alignment.topCenter,
               child: Builder(
                 builder: (context) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(
-                    16,
-                  ).copyWith(bottom: 16 + BottomInsetScope.of(context)),
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: context.appBarInset,
+                    bottom: 16 + BottomInsetScope.of(context),
+                  ),
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(

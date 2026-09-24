@@ -77,7 +77,9 @@ class ResourcesView extends ConsumerWidget {
 
     return CommonScaffold(
       title: context.appLocalizations.resources,
+      floatBody: true,
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           SettingSection(
             top: 16,

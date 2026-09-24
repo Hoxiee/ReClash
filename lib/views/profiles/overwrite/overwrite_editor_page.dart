@@ -133,6 +133,7 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
     final selected = _selected;
     return CommonScaffold(
       title: widget.title,
+      floatBody: true,
       actions: [
         if (widget.selectionEnabled &&
             widget.onDelete != null &&
@@ -167,10 +168,12 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
           child: ReorderableListView.builder(
             scrollController: _scrollController,
             buildDefaultDragHandles: false,
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ).copyWith(bottom: 24),
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: context.appBarInset,
+              bottom: 24,
+            ),
             itemBuilder: (_, index) {
               final item = items[index];
               return _buildItem(context, item, index, items.length, selected);

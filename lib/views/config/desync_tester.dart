@@ -6,7 +6,9 @@ class DesyncLadderPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.developerFindings,
+    floatBody: true,
     body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
       child: _DesyncTester(
         showOverview: false,
         preview: true,
@@ -331,8 +333,10 @@ class _DesyncTestSitesPage extends ConsumerWidget {
     );
     return CommonScaffold(
       title: appLocalizations.desyncTestDomains,
+      floatBody: true,
       body: SettingsScrollView(
         slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
           SettingSection.sliver(
             bottom: 24,
             items: [
@@ -374,8 +378,10 @@ class _DesyncTestDomainListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: list.name,
+    floatBody: true,
     body: SettingsScrollView(
       slivers: [
+        SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(
           title: context.appLocalizations.desyncTestDomains,
           subTitle: context.appLocalizations.desyncTestDomainsCount(

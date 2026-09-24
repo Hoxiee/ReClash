@@ -71,8 +71,10 @@ class FindingsView extends ConsumerWidget {
 
     return CommonScaffold(
       title: localizations.findings,
+      floatBody: true,
       body: CustomScrollView(
         slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
           SettingSection.sliver(
             top: 12,
             items: [

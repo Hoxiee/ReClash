@@ -284,6 +284,7 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       title: appLocalizations.memoryInfo,
+      floatBody: true,
       actions: [
         IconButton(
           tooltip: appLocalizations.releaseMemory,
@@ -299,7 +300,7 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
         valueListenable: widget.snapshot,
         builder: (context, snapshot, _) {
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 20),
             children: [
               _MemoryOverview(snapshot: snapshot),
               _MemorySection(

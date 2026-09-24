@@ -17,8 +17,10 @@ class _AdvancedRoutingPage extends ConsumerWidget {
     final pacing = props.strategy.pacing;
     return CommonScaffold(
       title: appLocalizations.advancedConfig,
+      floatBody: true,
       body: SettingsListView(
         children: [
+          SizedBox(height: context.appBarInset),
           SettingSection(
             top: 16,
             title: appLocalizations.smartRoutingPacing,

@@ -255,6 +255,7 @@ class _ServiceRoutePage extends ConsumerWidget {
     );
     return CommonScaffold(
       title: title,
+      floatBody: true,
       actions: [
         CommonMinFilledButtonTheme(
           child: FilledButton.tonal(
@@ -266,6 +267,7 @@ class _ServiceRoutePage extends ConsumerWidget {
       ],
       body: SettingsListView(
         children: [
+          SizedBox(height: context.appBarInset),
           if (policy.enabled)
             SettingSection(
               top: 16,

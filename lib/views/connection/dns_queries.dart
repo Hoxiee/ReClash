@@ -91,6 +91,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
+      floatBody: true,
       title: appLocalizations.dnsQueries,
       searchState: AppBarSearchState(
         onSearch: _listController.search,
@@ -160,6 +161,7 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
                     physics: const NextClampingScrollPhysics(),
                     controller: _scrollController,
                     padding: EdgeInsets.only(
+                      top: context.appBarInset,
                       bottom: 16 + BottomInsetScope.of(context),
                     ),
                     dnsQueries: dnsQueries,

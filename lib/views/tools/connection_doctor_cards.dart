@@ -139,6 +139,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
     return CommonScaffold(
       title: appLocalizations.connectionDoctor,
       isLoading: _initializing,
+      floatBody: true,
       actions: [
         IconButton(
           tooltip: appLocalizations.doctorRefresh,
@@ -149,6 +150,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
         ),
       ],
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -540,7 +542,9 @@ class DoctorTimingPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.developerFindings,
+    floatBody: true,
     body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
       child: Column(
         children: [
           Padding(

@@ -134,6 +134,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       actions: _buildActions(),
+      floatBody: true,
       onKeywordsUpdate: _listController.updateKeywords,
       searchState: AppBarSearchState(
         onSearch: _listController.search,
@@ -203,6 +204,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
                     shrinkWrap: true,
                     controller: _scrollController,
                     padding: EdgeInsets.only(
+                      top: context.appBarInset,
                       bottom: 16 + BottomInsetScope.of(context),
                     ),
                     itemCount: logs.length,

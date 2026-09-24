@@ -25,9 +25,11 @@ class FindingPreviewView extends ConsumerWidget {
     final controller = ref.read(findingPreviewProvider.notifier);
     return CommonScaffold(
       title: localizations.developerFindings,
+      floatBody: true,
       body: !enabled
           ? Center(child: Text(localizations.developerMode))
           : ListView(
+              padding: EdgeInsets.only(top: context.appBarInset),
               children: [
                 SettingSection(
                   items: [

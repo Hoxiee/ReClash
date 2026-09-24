@@ -48,6 +48,7 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
       profileId: widget.profileId,
       child: CommonScaffold(
         title: appLocalizations.override,
+        floatBody: true,
         actions: [
           CommonMinFilledButtonTheme(
             child: FilledButton(
@@ -57,9 +58,15 @@ class _OverwriteViewState extends ConsumerState<OverwriteView> {
           ),
           const SizedBox(width: 8),
         ],
-        body: const ScrollConfiguration(
-          behavior: ShowBarScrollBehavior(),
-          child: CustomScrollView(slivers: [_Title(), _Content()]),
+        body: ScrollConfiguration(
+          behavior: const ShowBarScrollBehavior(),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
+              const _Title(),
+              const _Content(),
+            ],
+          ),
         ),
       ),
     );

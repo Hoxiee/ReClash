@@ -123,6 +123,7 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
         return CommonScaffold(
           isLoading: isLoading,
           title: appLocalizations.profiles,
+          floatBody: true,
           floatingActionButton: _buildFAB(),
           actions: _buildActions(state.profiles),
           body: NullStatusSwitcher(
@@ -170,7 +171,7 @@ class _ProfilesGrid extends ConsumerWidget {
           padding: EdgeInsets.only(
             left: _horizontalPadding,
             right: _horizontalPadding,
-            top: 16,
+            top: context.appBarInset,
             bottom: 16 + BottomInsetScope.of(context),
           ),
           crossAxisCount: columns,

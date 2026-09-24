@@ -142,12 +142,16 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     final viewMode = ref.watch(viewModeProvider);
     final list = ListView.builder(
       key: toolsStoreKey,
+      padding: viewMode == ViewMode.desktop
+          ? null
+          : EdgeInsets.only(top: context.appBarInset),
       itemCount: items.length,
       itemBuilder: (_, index) => items[index],
     );
     if (viewMode != ViewMode.desktop) {
       return CommonScaffold(
         title: context.appLocalizations.tools,
+        floatBody: true,
         body: SettingsPaneScope(
           active: false,
           selectedId: null,

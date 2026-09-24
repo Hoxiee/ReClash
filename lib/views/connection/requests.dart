@@ -52,6 +52,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       title: appLocalizations.requests,
+      floatBody: true,
       searchState: AppBarSearchState(
         onSearch: _listController.search,
         onRegexChange: (value) {
@@ -120,6 +121,7 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
                     physics: const NextClampingScrollPhysics(),
                     controller: _scrollController,
                     padding: EdgeInsets.only(
+                      top: context.appBarInset,
                       bottom: 16 + BottomInsetScope.of(context),
                     ),
                     trackerInfos: requests,

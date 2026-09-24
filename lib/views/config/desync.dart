@@ -23,8 +23,10 @@ class DesyncView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.desync,
-    body: const SingleChildScrollView(
-      child: Column(children: [DesyncControls(), SettingBottomInset()]),
+    floatBody: true,
+    body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
+      child: const Column(children: [DesyncControls(), SettingBottomInset()]),
     ),
   );
 }
@@ -35,8 +37,10 @@ class DesyncStrategyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.desyncStrategySection,
-    body: const SingleChildScrollView(
-      child: Column(
+    floatBody: true,
+    body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
+      child: const Column(
         children: [
           _DesyncStrategyOverview(),
           DesyncControls._focused(_DesyncSection.strategy),
@@ -53,8 +57,10 @@ class DesyncTestView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.desyncTestSection,
-    body: const SingleChildScrollView(
-      child: Column(
+    floatBody: true,
+    body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
+      child: const Column(
         children: [
           DesyncControls._focused(_DesyncSection.test),
           SettingBottomInset(),
@@ -70,8 +76,10 @@ class DesyncEngineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CommonScaffold(
     title: context.appLocalizations.desyncEngine,
-    body: const SingleChildScrollView(
-      child: Column(
+    floatBody: true,
+    body: SingleChildScrollView(
+      padding: EdgeInsets.only(top: context.appBarInset),
+      child: const Column(
         children: [
           _DesyncEngineOverview(),
           DesyncControls._focused(_DesyncSection.engine),

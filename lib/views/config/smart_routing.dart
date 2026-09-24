@@ -130,8 +130,13 @@ class SmartRoutingView extends ConsumerWidget {
 
     return CommonScaffold(
       title: appLocalizations.smartRouting,
+      floatBody: true,
       body: SettingsScrollView(
-        slivers: [...slivers, const SettingBottomInset.sliver()],
+        slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
+          ...slivers,
+          const SettingBottomInset.sliver(),
+        ],
       ),
     );
   }
@@ -267,8 +272,10 @@ class _RegionDetailsPage extends ConsumerWidget {
     ];
     return CommonScaffold(
       title: region.label(context),
+      floatBody: true,
       body: SettingsListView(
         children: [
+          SizedBox(height: context.appBarInset),
           SettingSection(
             top: 16,
             title: appLocalizations.smartRoutingRegionSeeds,

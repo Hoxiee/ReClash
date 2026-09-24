@@ -309,30 +309,30 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
                 controller: _controller,
                 thumbVisibility: true,
                 trackVisibility: true,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: ScrollConfiguration(
-                    behavior: const HiddenBarScrollBehavior(),
-                    child: _tvTraversalBoundary(
-                      CustomScrollView(
-                        key: proxiesListStoreKey,
-                        controller: _controller,
-                        slivers: [
-                          for (final group in state.groups)
-                            _buildGroup(
-                              context,
-                              group: group,
-                              currentUnfoldSet: state.currentUnfoldSet,
-                              columns: columns,
-                              cardType: state.proxyCardType,
-                            ),
-                          SliverToBoxAdapter(
-                            child: SizedBox(
-                              height: 16 + BottomInsetScope.of(context),
-                            ),
+                child: ScrollConfiguration(
+                  behavior: const HiddenBarScrollBehavior(),
+                  child: _tvTraversalBoundary(
+                    CustomScrollView(
+                      key: proxiesListStoreKey,
+                      controller: _controller,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: SizedBox(height: context.appBarInset),
+                        ),
+                        for (final group in state.groups)
+                          _buildGroup(
+                            context,
+                            group: group,
+                            currentUnfoldSet: state.currentUnfoldSet,
+                            columns: columns,
+                            cardType: state.proxyCardType,
                           ),
-                        ],
-                      ),
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 16 + BottomInsetScope.of(context),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

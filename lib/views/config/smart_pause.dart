@@ -579,8 +579,10 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
     );
     final selectedItems = ref.watch(itemsProvider(key));
     return CommonScaffold(
+      floatBody: true,
       body: SettingsScrollView(
         slivers: [
+          SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
           SliverToBoxAdapter(child: _buildPrerequisites()),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
           SliverToBoxAdapter(child: _buildSwitches()),

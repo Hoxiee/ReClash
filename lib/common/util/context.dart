@@ -40,6 +40,20 @@ extension BuildContextExtension on BuildContext {
     }
   }
 
+  bool get isInBottomSheet =>
+      SheetProvider.of(this)?.type == SheetType.bottomSheet;
+
+  /// Space the floating bar reserves at the top; pages pad their leading edge
+  /// by this so the first item clears the bar yet scrolls under its scrim.
+  double get appBarInset =>
+      FloatingBarScope.of(this) ??
+      (isInBottomSheet
+          ? sheetAppBarHeight
+          : MediaQuery.paddingOf(this).top + pageToolbarHeight);
+
+  double get contentTopPadding =>
+      isInBottomSheet ? sheetAppBarHeight : appBarInset + 12;
+
   void showNotifier(
     String text, {
     MessageLevel level = MessageLevel.info,

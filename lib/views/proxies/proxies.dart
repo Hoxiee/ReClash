@@ -133,6 +133,7 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
     return CommonScaffold(
       isLoading: isLoading,
+      floatBody: true,
       resizeToAvoidBottomInset: false,
       floatingActionButton: _buildFAB(),
       actions: _buildActions(context),

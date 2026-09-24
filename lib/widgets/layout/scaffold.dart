@@ -9,6 +9,7 @@ import '../input/chip.dart';
 import '../base/inherited.dart';
 import '../theme/panel_background.dart';
 import '../theme/wallpaper.dart';
+import 'floating_header.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -29,6 +30,10 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final AppBarSearchState? searchState;
   final OnKeywordsUpdateCallback? onKeywordsUpdate;
   final bool? resizeToAvoidBottomInset;
+  /// When true the body reaches under the floating bar and owns its own
+  /// top clearance via `context.appBarInset`; otherwise the scaffold insets
+  /// the body so its content rests below the bar.
+  final bool floatBody;
 
   const CommonScaffold({
     super.key,
@@ -45,6 +50,7 @@ class CommonScaffold extends ConsumerStatefulWidget {
     this.isTV,
     this.onKeywordsUpdate,
     this.resizeToAvoidBottomInset,
+    this.floatBody = false,
   });
 
   @override
@@ -287,28 +293,26 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     return appBar;
   }
 
-  PreferredSizeWidget _buildAppBar(
-    VoidCallback? backAction, {
-    bool wallpaper = false,
-  }) {
+  PreferredSizeWidget _buildAppBar(VoidCallback? backAction) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
+      preferredSize: const Size.fromHeight(pageToolbarHeight),
       child: Stack(
         alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
         children: [
           widget.appBar ??
               ValueListenableBuilder<AppBarState>(
                 valueListenable: _appBarState,
                 builder: (_, state, _) {
-                  return _buildAppBarWrap(
+                  final appBar = _buildAppBarWrap(
                     AppBar(
+                      clipBehavior: Clip.none,
+                      toolbarHeight: pageToolbarHeight,
                       automaticallyImplyLeading: backAction != null
                           ? false
                           : true,
-                      animateColor: true,
-                      backgroundColor: wallpaper ? Colors.transparent : null,
-                      surfaceTintColor: wallpaper ? Colors.transparent : null,
-                      scrolledUnderElevation: wallpaper ? 0 : null,
+                      // Float over the body, opaque only while searching.
+                      forceMaterialTransparency: !_isSearch,
                       centerTitle: widget.centerTitle ?? false,
                       leading: _buildLeading(backAction),
                       title: _buildTitle(state.searchState),
@@ -319,6 +323,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                             : widget.actions ?? [],
                       ),
                     ),
+                  );
+                  final top = MediaQuery.paddingOf(context).top;
+                  return FloatingHeader(
+                    backgroundColor:
+                        widget.backgroundColor ?? context.colorScheme.surface,
+                    fadeStart: top / (top + pageToolbarHeight),
+                    overhang: _headerOverhang,
+                    child: appBar,
                   );
                 },
               ),
@@ -342,52 +354,85 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final isTV = widget.isTV ?? system.isTV;
     final bottomInset = BottomInsetScope.of(context);
     final hasFab = !isTV && widget.floatingActionButton != null;
-    final body = SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isTV && widget.floatingActionButton != null)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: CommonScaffoldFabExtendedProvider(
-                isExtended: true,
-                child: widget.floatingActionButton!,
-              ),
+    final barFloats = widget.appBar == null;
+    final appBarInset =
+        MediaQuery.paddingOf(context).top + pageToolbarHeight;
+    final scrollsUnder = barFloats && widget.floatBody;
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isTV && widget.floatingActionButton != null)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: CommonScaffoldFabExtendedProvider(
+              isExtended: true,
+              child: widget.floatingActionButton!,
             ),
-          ValueListenableBuilder(
-            valueListenable: _keywordsNotifier,
-            builder: (_, keywords, _) {
-              if (widget.onKeywordsUpdate != null) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  widget.onKeywordsUpdate!(keywords);
-                });
-              }
-              if (keywords.isEmpty) {
-                return const SizedBox();
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                child: Wrap(
-                  runSpacing: 8,
-                  spacing: 8,
-                  children: [
-                    for (final keyword in keywords)
-                      CommonChip(
-                        label: keyword,
-                        onDeleted: () {
-                          _deleteKeyword(keyword);
-                        },
-                      ),
-                  ],
-                ),
-              );
-            },
           ),
-          Expanded(child: widget.body),
-        ],
+        ValueListenableBuilder(
+          valueListenable: _keywordsNotifier,
+          builder: (_, keywords, _) {
+            if (widget.onKeywordsUpdate != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                widget.onKeywordsUpdate!(keywords);
+              });
+            }
+            if (keywords.isEmpty) {
+              return const SizedBox();
+            }
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: scrollsUnder ? appBarInset + 16 : 16,
+                bottom: 16,
+              ),
+              child: Wrap(
+                runSpacing: 8,
+                spacing: 8,
+                children: [
+                  for (final keyword in keywords)
+                    CommonChip(
+                      label: keyword,
+                      onDeleted: () {
+                        _deleteKeyword(keyword);
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+        Expanded(
+          child: scrollsUnder
+              ? ValueListenableBuilder<List<String>>(
+                  valueListenable: _keywordsNotifier,
+                  builder: (context, keywords, child) {
+                    if (keywords.isEmpty) {
+                      return child!;
+                    }
+                    return MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: FloatingBarScope(inset: 0, child: child!),
+                    );
+                  },
+                  child: widget.body,
+                )
+              : widget.body,
+        ),
+      ],
+    );
+    final body = SafeArea(
+      top: !barFloats,
+      child: FloatingBarScope(
+        inset: appBarInset,
+        child: barFloats && !widget.floatBody
+            ? Padding(
+                padding: EdgeInsets.only(top: appBarInset),
+                child: content,
+              )
+            : content,
       ),
     );
     final fabChild = ValueListenableBuilder<bool>(
@@ -418,7 +463,8 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
     return AppWallpaper(
       builder: (context, active) => Scaffold(
-        appBar: _buildAppBar(backActionProvider?.backAction, wallpaper: active),
+        appBar: _buildAppBar(backActionProvider?.backAction),
+        extendBodyBehindAppBar: barFloats,
         body: PanelProfileBackground(enabled: !active, child: foreground),
         resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
         backgroundColor: active ? Colors.transparent : widget.backgroundColor,
@@ -434,6 +480,8 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
   }
 }
+
+const double _headerOverhang = 16;
 
 List<Widget> genActions(List<Widget> actions, {double? space}) {
   return <Widget>[
