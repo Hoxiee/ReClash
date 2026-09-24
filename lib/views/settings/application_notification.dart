@@ -141,15 +141,13 @@ class _NotificationSettingsViewState
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    if (!(widget.isAndroid ?? system.isAndroid)) {
-      return _AndroidOnly(l: l);
-    }
     final settings = ref.watch(
       appSettingProvider.select((state) => state.notificationSettings),
     );
     return CustomScrollView(
       primary: false,
       slivers: [
+        SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(
           top: 12,
           items: [

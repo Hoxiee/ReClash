@@ -73,6 +73,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     final running = ref.watch(isStartProvider);
     return CommonScaffold(
       title: appLocalizations.smartRoutingOverview,
+      floatBody: true,
       actions: [
         IconButton(
           tooltip: appLocalizations.smartRoutingTechnical,
@@ -86,47 +87,49 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
           icon: const Icon(Icons.tune_rounded),
         ),
       ],
-      body: switch ((enabled, report)) {
-        (false, _) => _notice(
-          icon: Icons.pause_circle_outline,
-          text: appLocalizations.smartRoutingOffHint,
-        ),
-        (true, null) => _notice(
-          icon: running
-              ? Icons.autorenew_rounded
-              : Icons.hourglass_empty_rounded,
-          text: running
-              ? appLocalizations.smartRoutingSearching
-              : appLocalizations.smartRoutingWaitingTunnel,
-        ),
-        (true, final RcxReport report) => DefaultTabController(
-          length: 3,
-          child: Column(
-            children: [
-              SettingsTabs(
-                labels: [
-                  appLocalizations.smartRoutingTabOverview,
-                  appLocalizations.smartRoutingTabDetails,
-                  appLocalizations.smartRoutingTabRanking,
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    RoutingOverviewTab(
-                      report: report,
-                      technical: _technical,
-                      onDeepScan: _handleDeepScan,
-                    ),
-                    RoutingDetailsTab(report: report, technical: _technical),
-                    RoutingRankingTab(report: report),
+      body: AppBarClearance(
+        child: switch ((enabled, report)) {
+          (false, _) => _notice(
+            icon: Icons.pause_circle_outline,
+            text: appLocalizations.smartRoutingOffHint,
+          ),
+          (true, null) => _notice(
+            icon: running
+                ? Icons.autorenew_rounded
+                : Icons.hourglass_empty_rounded,
+            text: running
+                ? appLocalizations.smartRoutingSearching
+                : appLocalizations.smartRoutingWaitingTunnel,
+          ),
+          (true, final RcxReport report) => DefaultTabController(
+            length: 3,
+            child: Column(
+              children: [
+                SettingsTabs(
+                  labels: [
+                    appLocalizations.smartRoutingTabOverview,
+                    appLocalizations.smartRoutingTabDetails,
+                    appLocalizations.smartRoutingTabRanking,
                   ],
                 ),
-              ),
-            ],
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      RoutingOverviewTab(
+                        report: report,
+                        technical: _technical,
+                        onDeepScan: _handleDeepScan,
+                      ),
+                      RoutingDetailsTab(report: report, technical: _technical),
+                      RoutingRankingTab(report: report),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      },
+        },
+      ),
     );
   }
 

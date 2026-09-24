@@ -133,17 +133,19 @@ class _WebDashboardPageState extends State<WebDashboardPage> {
             icon: const Icon(Icons.open_in_browser),
           ),
         ],
-        body: error != null
-            ? _WebDashboardError(
-                message: error,
-                onRetry: () => unawaited(_handleReload()),
-              )
-            : Stack(
-                children: [
-                  WebViewWidget(controller: _controller),
-                  if (_loading) const Center(child: CommonCircleLoading()),
-                ],
-              ),
+        body: AppBarClearance(
+          child: error != null
+              ? _WebDashboardError(
+                  message: error,
+                  onRetry: () => unawaited(_handleReload()),
+                )
+              : Stack(
+                  children: [
+                    WebViewWidget(controller: _controller),
+                    if (_loading) const Center(child: CommonCircleLoading()),
+                  ],
+                ),
+        ),
       ),
     );
   }

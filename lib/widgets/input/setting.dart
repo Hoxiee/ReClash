@@ -214,7 +214,11 @@ class _SettingsListViewState extends State<SettingsListView> {
   Widget build(BuildContext context) {
     return FocusedScrollView(
       controller: _controller,
-      child: ListView(controller: _controller, children: widget.children),
+      child: ListView(
+        controller: _controller,
+        padding: EdgeInsets.only(top: context.appBarInset),
+        children: widget.children,
+      ),
     );
   }
 }

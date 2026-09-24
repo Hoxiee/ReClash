@@ -712,28 +712,31 @@ class _AccessViewState extends ConsumerState<AccessView> {
     return CommonScaffold(
       isLoading: isLoading,
       title: context.appLocalizations.appAccessControl,
+      floatBody: true,
       actions: _buildActions(context, enable: accessControl.enable),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildControlPanel(
-            accessControl: accessControl,
-            query: query,
-            count: currentList.length,
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: needsInstalledAppsPermission
-                ? _buildInstalledAppsPermissionStatus()
-                : DisabledMask(
-                    status: !accessControl.enable,
-                    child: _buildContent(
-                      packages: viewPackages,
-                      valueSet: valueSet,
+      body: AppBarClearance(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildControlPanel(
+              accessControl: accessControl,
+              query: query,
+              count: currentList.length,
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: needsInstalledAppsPermission
+                  ? _buildInstalledAppsPermissionStatus()
+                  : DisabledMask(
+                      status: !accessControl.enable,
+                      child: _buildContent(
+                        packages: viewPackages,
+                        valueSet: valueSet,
+                      ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
       floatingActionButton:
           accessControl.enable &&

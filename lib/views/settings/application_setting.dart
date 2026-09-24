@@ -160,12 +160,13 @@ class _ApplicationGeneralTab extends StatelessWidget {
     ];
     return SettingsScrollView(
       slivers: [
+        SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(top: 12, items: behaviorItems),
         SettingSection.sliver(title: appLocalizations.other, items: otherItems),
         SettingSection.sliver(
           title: appLocalizations.settings,
           items: [
-            const _NotificationItem(),
+            if (system.isAndroid) const _NotificationItem(),
             DecorationListItem(
               title: Text(appLocalizations.setupRerun),
               subtitle: Text(appLocalizations.setupRerunDesc),

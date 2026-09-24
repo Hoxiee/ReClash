@@ -161,10 +161,16 @@ void main() {
     );
     expect(label.data, requests.last.start.showFull);
     // The hint is pinned to the thumb: at the newest end the thumb center
-    // rests 24px (half the 48px minimum thumb) below the track's top edge.
+    // rests 24px (half the 48px minimum thumb) below the track's top edge,
+    // which the floating bar insets by appBarInset (pageToolbarHeight here).
     expect(
       tester.getCenter(find.byKey(hintKey)).dy,
-      closeTo(tester.getRect(find.byType(Scrollable).first).top + 24, 6),
+      closeTo(
+        tester.getRect(find.byType(Scrollable).first).top +
+            pageToolbarHeight +
+            24,
+        6,
+      ),
     );
 
     await gesture.up();

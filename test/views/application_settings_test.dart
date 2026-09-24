@@ -141,9 +141,7 @@ void main() {
     await pumpEditor(tester);
   }
 
-  testWidgets('application reaches notification through a settings row', (
-    tester,
-  ) async {
+  testWidgets('the notification row is hidden off Android', (tester) async {
     useViewport(tester, const Size(480, 900));
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -153,14 +151,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.text('Notification'), 400);
-    await tester.pumpAndSettle();
-    expect(find.text('Notification'), findsWidgets);
     expect(
       find.text(
         'The persistent notification shows whether your protection is active.',
       ),
-      findsOneWidget,
+      findsNothing,
     );
     expect(tester.takeException(), isNull);
   });

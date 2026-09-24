@@ -92,6 +92,7 @@ class UrlSchemeView extends StatelessWidget {
     return BaseScaffold(
       title: appLocalizations.urlScheme,
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           SettingSection(
             top: 16,

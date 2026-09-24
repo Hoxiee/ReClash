@@ -307,6 +307,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                   final appBar = _buildAppBarWrap(
                     AppBar(
                       clipBehavior: Clip.none,
+                      animateColor: true,
                       toolbarHeight: pageToolbarHeight,
                       automaticallyImplyLeading: backAction != null
                           ? false
@@ -428,9 +429,13 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       child: FloatingBarScope(
         inset: appBarInset,
         child: barFloats && !widget.floatBody
-            ? Padding(
-                padding: EdgeInsets.only(top: appBarInset),
-                child: content,
+            ? MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: Padding(
+                  padding: EdgeInsets.only(top: appBarInset),
+                  child: content,
+                ),
               )
             : content,
       ),
@@ -483,6 +488,24 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
 
 const double _headerOverhang = 16;
 
+class AppBarClearance extends StatelessWidget {
+  const AppBarClearance({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: context.appBarInset),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: FloatingBarScope(inset: 0, child: child),
+      ),
+    );
+  }
+}
+
 List<Widget> genActions(List<Widget> actions, {double? space}) {
   return <Widget>[
     ...actions.separated(SizedBox(width: space ?? 4)),
@@ -504,6 +527,11 @@ class BaseScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CommonScaffold(body: body, title: title, actions: actions);
+    return CommonScaffold(
+      body: body,
+      title: title,
+      actions: actions,
+      floatBody: true,
+    );
   }
 }

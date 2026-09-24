@@ -28,6 +28,7 @@ class LocaleView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.language,
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           SettingSection(
             top: 16,

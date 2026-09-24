@@ -67,11 +67,9 @@ class _HomeShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(navigationStateProvider);
     final isMobile = state.viewMode == ViewMode.mobile;
-    // The hero dashboard's orb owns on/off, so the dock button hides on that
-    // page and fades back in on every other tab.
-    final heroDashboard =
-        ref.watch(currentPageLabelProvider) == PageLabel.dashboard &&
-        ref.watch(newDashboardEnabledProvider);
+    // The dock owns the start control on a phone; the hero orb owns it on the
+    // new dashboard, so the trailing button only rides the classic layout.
+    final onClassicDashboard = !ref.watch(newDashboardEnabledProvider);
     final hasStartControl =
         ref.watch(profilesProvider.select((state) => state.isNotEmpty)) ||
         ref.watch(
@@ -79,7 +77,7 @@ class _HomeShell extends ConsumerWidget {
             (state) => state.enabled && state.onlyDpi,
           ),
         );
-    final showStart = isMobile && hasStartControl && !heroDashboard;
+    final showStart = isMobile && onClassicDashboard && hasStartControl;
     // The bar is only collapsed in desktop view, never unmounted: one tree
     // shape across view modes.
     return Material(

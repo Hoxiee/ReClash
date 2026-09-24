@@ -68,7 +68,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
         label: appLocalizations.nullTip(appLocalizations.script),
       ),
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
         itemCount: scripts.length,
         itemBuilder: (_, index) {
           final script = scripts[index];
@@ -249,6 +249,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
           const SizedBox(width: 8),
         ],
         body: _buildContent(scripts, selectedScriptIds),
+        floatBody: true,
         title: appLocalizations.script,
       ),
     );

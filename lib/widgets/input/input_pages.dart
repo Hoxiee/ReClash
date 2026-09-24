@@ -68,6 +68,7 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
       },
       child: CommonScaffold(
         title: widget.title,
+        floatBody: true,
         actions: _controller.actions(context),
         body: ListInputBody(
           controller: _controller,
@@ -110,9 +111,9 @@ class ListInputBody extends StatelessWidget {
         return items.isEmpty
             ? NullStatus(label: appLocalizations.noData)
             : ReorderableListView.builder(
-                padding: const EdgeInsets.only(
+                padding: EdgeInsets.only(
                   bottom: 16 + 64,
-                  top: 16,
+                  top: context.appBarInset,
                   left: 16,
                   right: 16,
                 ),
@@ -601,6 +602,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
       },
       child: CommonScaffold(
         title: widget.title,
+        floatBody: true,
         actions: [
           if (selectedItems.isNotEmpty) ...[
             CommonMinIconButtonTheme(
@@ -643,9 +645,9 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
           isEmpty: _items.isEmpty,
           nullStatus: NullStatus(label: appLocalizations.noData),
           child: ReorderableListView.builder(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               bottom: 16 + 64,
-              top: 16,
+              top: context.appBarInset,
               left: 16,
               right: 16,
             ),

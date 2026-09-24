@@ -79,6 +79,7 @@ class AboutView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.about,
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 12),

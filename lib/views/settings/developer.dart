@@ -142,6 +142,7 @@ class DeveloperView extends ConsumerWidget {
     return BaseScaffold(
       title: appLocalizations.developerMode,
       body: ListView(
+        padding: EdgeInsets.only(top: context.appBarInset),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

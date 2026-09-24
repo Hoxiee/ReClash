@@ -15,53 +15,6 @@ String _serviceChannelFor(NotificationVisibility visibility) => _serviceChannelI
 /// What stands between the settings and the shade, and the way to clear it.
 typedef _Delivery = ({String text, VoidCallback? fix});
 
-class _AndroidOnly extends StatelessWidget {
-  const _AndroidOnly({required this.l});
-
-  final AppLocalizations l;
-
-  @override
-  Widget build(BuildContext context) => CustomScrollView(
-    primary: false,
-    slivers: [
-      SliverPadding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-        sliver: SliverToBoxAdapter(
-          child: CommonCard(
-            radius: AppCorner.xl,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                spacing: 12,
-                children: [
-                  Icon(
-                    Icons.notifications_none_rounded,
-                    size: 32,
-                    color: context.colorScheme.primary,
-                  ),
-                  Text(
-                    l.notificationAndroidOnly,
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.titleMedium,
-                  ),
-                  Text(
-                    l.notificationAndroidOnlyDesc,
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      const SettingBottomInset.sliver(),
-    ],
-  );
-}
-
 String _visibilityLabel(
   AppLocalizations l,
   NotificationVisibility visibility,

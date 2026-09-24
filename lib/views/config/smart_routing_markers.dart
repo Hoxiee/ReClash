@@ -85,6 +85,7 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
       },
       child: CommonScaffold(
         title: widget.title,
+        floatBody: true,
         actions: [
           if (selection.isNotEmpty) ...[
             CommonMinIconButtonTheme(
@@ -193,9 +194,9 @@ class _MarkersBody extends ConsumerWidget {
     }
     Widget itemAt(int index) => _markerRow(context, ref, rows, index);
     return ReorderableListView.builder(
-      padding: const EdgeInsets.only(
+      padding: EdgeInsets.only(
         bottom: 16 + 64,
-        top: 16,
+        top: context.appBarInset,
         left: 16,
         right: 16,
       ),
@@ -420,6 +421,7 @@ class _RulesPage extends ConsumerWidget {
     );
     return CommonScaffold(
       title: l10n.smartRoutingRules,
+      floatBody: true,
       actions: [
         CommonMinFilledButtonTheme(
           child: FilledButton.tonal(
@@ -435,7 +437,7 @@ class _RulesPage extends ConsumerWidget {
               illustration: NullStatusIllustration.rules,
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
               itemCount: rules.length,
               itemBuilder: (context, index) {
                 final rule = rules[index];

@@ -302,7 +302,7 @@ class _EditGlobalAddedRules extends ConsumerWidget {
         child: ScrollConfiguration(
           behavior: const ShowBarScrollBehavior(),
           child: ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
             itemExtent: ruleItemHeight,
             itemBuilder: (context, index) {
               final rule = rules[index];

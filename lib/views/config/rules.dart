@@ -110,7 +110,7 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
             illustration: NullStatusIllustration.rules,
           ),
           child: ReorderableList(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 16),
             itemBuilder: (context, index) {
               final rule = rules[index];
               final position = ItemPosition.get(index, rules.length);

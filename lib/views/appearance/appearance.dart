@@ -14,27 +14,30 @@ class AppearanceView extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return CommonScaffold(
       title: appLocalizations.appearance,
-      body: DefaultTabController(
-        length: 3,
-        child: Column(
-          children: [
-            SettingsTabs(
-              labels: [
-                appLocalizations.appearanceTheme,
-                appLocalizations.appearanceBackground,
-                appLocalizations.other,
-              ],
-            ),
-            const Expanded(
-              child: TabBarView(
-                children: [
-                  AppearanceThemeTab(),
-                  AppearanceBackgroundTab(),
-                  AppearanceMotionTab(),
+      floatBody: true,
+      body: AppBarClearance(
+        child: DefaultTabController(
+          length: 3,
+          child: Column(
+            children: [
+              SettingsTabs(
+                labels: [
+                  appLocalizations.appearanceTheme,
+                  appLocalizations.appearanceBackground,
+                  appLocalizations.other,
                 ],
               ),
-            ),
-          ],
+              const Expanded(
+                child: TabBarView(
+                  children: [
+                    AppearanceThemeTab(),
+                    AppearanceBackgroundTab(),
+                    AppearanceMotionTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
