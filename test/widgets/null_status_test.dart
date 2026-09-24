@@ -2,11 +2,18 @@ import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../helpers/test_app.dart';
+
 const _reducedMotion = MediaQueryData(disableAnimations: true);
 
-Widget _switcher({required bool isEmpty, MediaQueryData? mediaQuery}) {
+Widget _switcher({
+  required bool isEmpty,
+  bool isLoading = false,
+  MediaQueryData? mediaQuery,
+}) {
   final switcher = NullStatusSwitcher(
     isEmpty: isEmpty,
+    isLoading: isLoading,
     nullStatus: const NullStatus(label: 'Nothing here'),
     child: const Text('content', key: ValueKey('content')),
   );
@@ -31,7 +38,7 @@ void main() {
 
       final background = find.byKey(ValueKey(illustration));
       expect(background, findsOneWidget);
-      expect(tester.getSize(background), const Size.square(200));
+      expect(tester.getSize(background), const Size.square(160));
       expect(tester.takeException(), isNull);
     }
   });
@@ -206,5 +213,36 @@ void main() {
 
     expect(find.text('Nothing here'), findsNothing);
     expect(find.byKey(const ValueKey('content')), findsOneWidget);
+  });
+
+  testWidgets('shows the no-results state while searching', (tester) async {
+    await tester.pumpWidget(
+      const TestApp(
+        child: NullStatusSwitcher(
+          isEmpty: true,
+          isSearching: true,
+          nullStatus: NullStatus(label: 'Nothing here'),
+          child: Text('content', key: ValueKey('content')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('No matching results'), findsOneWidget);
+    expect(find.text('Nothing here'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('holds back the first load until it finishes', (tester) async {
+    await tester.pumpWidget(_switcher(isEmpty: true, isLoading: true));
+    await tester.pump();
+
+    expect(find.byType(NullStatus), findsNothing);
+
+    await tester.pumpWidget(_switcher(isEmpty: true, isLoading: false));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nothing here'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

@@ -279,6 +279,11 @@ class ProxiesAction extends _$ProxiesAction {
     ref.read(sortNumProvider.notifier).add();
   }
 
+  Future<void> delayTestGroups(List<Group> groups) async {
+    await _runDelayTests([for (final group in groups) ...group.all], null);
+    ref.read(sortNumProvider.notifier).add();
+  }
+
   List<_DelayTestTarget> _resolveDelayTestTargets(
     List<Proxy> proxies,
     String? testUrl,

@@ -305,10 +305,19 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "account": MessageLookupByLibrary.simpleMessage("Тіркелгі"),
     "action": MessageLookupByLibrary.simpleMessage("Әрекет"),
+    "actionDelayTest": MessageLookupByLibrary.simpleMessage(
+      "Барлық кідірістерді тексеру",
+    ),
+    "actionDirectMode": MessageLookupByLibrary.simpleMessage("Тікелей режим"),
+    "actionGlobalMode": MessageLookupByLibrary.simpleMessage("Глобалды режим"),
     "actionMode": MessageLookupByLibrary.simpleMessage("Режимді ауыстыру"),
     "actionProxy": MessageLookupByLibrary.simpleMessage("Жүйелік прокси"),
+    "actionRuleMode": MessageLookupByLibrary.simpleMessage("Ереже режимі"),
     "actionStart": MessageLookupByLibrary.simpleMessage("Іске қосу/Тоқтату"),
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "actionUpdateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Профильдерді жаңарту",
+    ),
     "actionView": MessageLookupByLibrary.simpleMessage("Көрсету/Жасыру"),
     "add": MessageLookupByLibrary.simpleMessage("Қосу"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Желі қосу"),
@@ -1563,10 +1572,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -1839,6 +1847,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("IP-ті анықтамау"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage(
       "Хост атауын шешпеу",
+    ),
+    "noSearchResults": MessageLookupByLibrary.simpleMessage(
+      "Сәйкес нәтиже табылмады",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Жоқ"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

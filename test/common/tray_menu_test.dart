@@ -43,6 +43,7 @@ TrayState _trayState({
   bool showTrayTitle = false,
   Mode mode = Mode.rule,
   List<Group> groups = const [],
+  Map<HotAction, HotKeyAction> hotKeys = const {},
 }) {
   return TrayState(
     mode: mode,
@@ -55,7 +56,17 @@ TrayState _trayState({
     groups: groups,
     selectedMap: const {},
     showTrayTitle: showTrayTitle,
+    hotKeys: hotKeys,
   );
+}
+
+Map<Object?, Object?>? _itemByLabel(MethodCall? call, String label) {
+  for (final item in _items(call)) {
+    if (item['label'] == label) {
+      return item;
+    }
+  }
+  return null;
 }
 
 List<Map<Object?, Object?>> _items(MethodCall? call) {
@@ -219,6 +230,27 @@ void main() {
         .map((item) => item['label'])
         .toList();
     expect(checkedModes, contains(Intl.message(Mode.global.name)));
+  });
+
+  test('a bound hotkey surfaces as the menu item detail', () async {
+    final binding = HotKeyAction(
+      action: HotAction.copyEnv,
+      key: PhysicalKeyboardKey.keyE.usbHidUsage,
+      modifiers: const {KeyboardModifier.control},
+    );
+    await update(_trayState(hotKeys: {HotAction.copyEnv: binding}));
+
+    final item = _itemByLabel(showCall(), currentAppLocalizations.copyEnvVar);
+    expect(item, isNotNull);
+    expect(item!['detail'], 'CTRL+E');
+  });
+
+  test('an unbound action leaves the menu item without a detail', () async {
+    await update(_trayState());
+
+    final item = _itemByLabel(showCall(), currentAppLocalizations.copyEnvVar);
+    expect(item, isNotNull);
+    expect(item!.containsKey('detail'), isFalse);
   });
 
   test('sends icon, tooltip and menu in a single show call', () async {

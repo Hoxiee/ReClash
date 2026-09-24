@@ -1,3 +1,4 @@
+import 'package:reclash/enum/enum.dart';
 import 'package:flutter/services.dart';
 import 'package:uni_platform/uni_platform.dart';
 
@@ -107,4 +108,17 @@ extension KeyboardKeyExt on KeyboardKey {
 SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
   final control = system.isMacOS ? false : true;
   return SingleActivator(trigger, control: control, meta: !control);
+}
+
+String? hotKeyLabel(int? key, Set<KeyboardModifier> modifiers) {
+  if (key == null) {
+    return null;
+  }
+  final modifierLabels = modifiers.map((item) => item.physicalKeys.first.label);
+  final buffer = StringBuffer();
+  if (modifierLabels.isNotEmpty) {
+    buffer.write('${modifierLabels.join(' ')}+');
+  }
+  buffer.write(PhysicalKeyboardKey(key).label);
+  return buffer.toString();
 }

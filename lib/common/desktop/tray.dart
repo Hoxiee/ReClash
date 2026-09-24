@@ -6,8 +6,10 @@ import 'package:flutter/services.dart';
 import 'package:tray/tray.dart';
 
 import '../app/app_localizations.dart';
-import '../app/l10n_labels.dart';
 import '../app/app_ports.dart';
+import '../app/l10n_labels.dart';
+import '../net/proxy.dart';
+import '../ui/keyboard.dart';
 import '../util/constant.dart';
 import '../util/provider_reader.dart';
 import 'system.dart';
@@ -162,6 +164,7 @@ class AppTray implements TrayPort {
     return [
       TrayMenuAction(
         label: appLocalizations.show,
+        detail: _shortcut(trayState, HotAction.view),
         onSelected: () {
           window?.show();
         },
@@ -171,6 +174,7 @@ class AppTray implements TrayPort {
             ? appLocalizations.stop
             : appLocalizations.start,
         checked: false,
+        detail: _shortcut(trayState, HotAction.start),
         onSelected: commonAction.toggleRunning,
       ),
       if (trayState.isStart && (trayState.tunEnable || trayState.paused))
@@ -192,6 +196,7 @@ class AppTray implements TrayPort {
         TrayMenuCheckbox(
           label: mode.label,
           checked: mode == trayState.mode,
+          detail: _shortcut(trayState, _modeHotAction(mode)),
           onSelected: () {
             setupAction.changeMode(mode);
           },
@@ -202,11 +207,13 @@ class AppTray implements TrayPort {
         TrayMenuCheckbox(
           label: appLocalizations.tun,
           checked: trayState.tunEnable,
+          detail: _shortcut(trayState, HotAction.tun),
           onSelected: systemAction.updateTun,
         ),
         TrayMenuCheckbox(
           label: appLocalizations.systemProxy,
           checked: trayState.systemProxy,
+          detail: _shortcut(trayState, HotAction.proxy),
           onSelected: systemAction.updateSystemProxy,
         ),
         const TrayMenuSeparator(),
@@ -218,6 +225,7 @@ class AppTray implements TrayPort {
       ),
       TrayMenuAction(
         label: appLocalizations.copyEnvVar,
+        detail: _shortcut(trayState, HotAction.copyEnv),
         onSelected: () {
           _copyEnv(trayState.port);
         },
@@ -225,11 +233,28 @@ class AppTray implements TrayPort {
       const TrayMenuSeparator(),
       TrayMenuAction(
         label: appLocalizations.exit,
+        detail: _shortcut(trayState, HotAction.exit),
         onSelected: () {
           systemAction.handleExit();
         },
       ),
     ];
+  }
+
+  HotAction _modeHotAction(Mode mode) {
+    return switch (mode) {
+      Mode.rule => HotAction.ruleMode,
+      Mode.global => HotAction.globalMode,
+      Mode.direct => HotAction.directMode,
+    };
+  }
+
+  String? _shortcut(TrayState trayState, HotAction action) {
+    final hotKeyAction = trayState.hotKeys[action];
+    if (hotKeyAction == null) {
+      return null;
+    }
+    return hotKeyLabel(hotKeyAction.key, hotKeyAction.modifiers);
   }
 
   List<TrayMenuItem> _buildGroupMenu({
@@ -262,13 +287,9 @@ class AppTray implements TrayPort {
   }
 
   Future<void> _copyEnv(int port) async {
-    final url = 'http://127.0.0.1:$port';
-
-    final cmdline = isWindows
-        ? 'set \$env:all_proxy=$url'
-        : 'export all_proxy=$url';
-
-    await Clipboard.setData(ClipboardData(text: cmdline));
+    await Clipboard.setData(
+      ClipboardData(text: proxyEnvCommand(port, isWindows: isWindows)),
+    );
   }
 }
 

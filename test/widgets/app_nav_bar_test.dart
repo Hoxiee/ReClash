@@ -4,7 +4,6 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/nav/app_nav_bar.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +12,11 @@ import '../helpers/test_app.dart';
 
 void main() {
   late ProviderContainer container;
+
+  final lens = find.descendant(
+    of: find.byType(FloatingNavigationBar),
+    matching: find.byType(PositionedDirectional),
+  );
 
   Future<void> pumpBar(WidgetTester tester) async {
     container = ProviderContainer(
@@ -63,13 +67,12 @@ void main() {
   void goTo(PageLabel label) =>
       container.read(currentPageLabelProvider.notifier).toPage(label);
 
-  testWidgets('the highlight travels instead of teleporting', (tester) async {
+  testWidgets('the lens travels instead of teleporting', (tester) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
     await pumpBar(tester);
-
     final start = highlightX(tester);
 
     goTo(PageLabel.tools);
@@ -93,7 +96,7 @@ void main() {
     expect(
       settled,
       closeTo(start + 2 * segmentWidth, 1.0),
-      reason: 'it must park exactly under the third segment',
+      reason: 'it must park under the third segment',
     );
   });
 
@@ -126,7 +129,7 @@ void main() {
     expect(settled, closeTo(start + segmentWidth, 1.0));
   });
 
-  testWidgets('each destination is painted twice', (tester) async {
+  testWidgets('each destination is painted once', (tester) async {
     tester.view.physicalSize = const Size(400, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -138,11 +141,11 @@ void main() {
         .value
         .map((item) => item.label.label);
     for (final label in labels) {
-      expect(find.text(label), findsNWidgets(2));
+      expect(find.text(label), findsOneWidget);
     }
   });
 
-  testWidgets('the highlight settles without a ticker under reduced motion', (
+  testWidgets('the lens settles without a ticker under reduced motion', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(400, 800);
@@ -183,5 +186,109 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
     expect(highlightX(tester), closeTo(start + 2 * segmentWidth, 1.0));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the lens keeps up with a finger that never pauses', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpBar(tester);
+    final bar = tester.getRect(find.byType(FloatingNavigationBar));
+    final extent = (bar.width - 8) / 3;
+    var finger = Offset(bar.left + 4 + extent / 2, bar.center.dy);
+    final gesture = await tester.startGesture(finger);
+    await tester.pump(const Duration(milliseconds: 16));
+    for (var i = 0; i < 30; i++) {
+      finger += Offset(extent * 2 / 30, 0);
+      await gesture.moveTo(finger);
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(tester.getCenter(lens).dx, closeTo(finger.dx, extent * 0.3));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('a press lifts the lens past the bar until it is let go', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpBar(tester);
+    final bar = tester.getRect(find.byType(FloatingNavigationBar));
+    final resting = tester.getRect(lens);
+    expect(resting.height, bar.height - 8);
+
+    final gesture = await tester.startGesture(resting.center);
+    await tester.pumpAndSettle();
+    final lifted = tester.getRect(lens);
+    expect(lifted.top, lessThan(bar.top));
+    expect(lifted.bottom, greaterThan(bar.bottom));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.getRect(lens), resting);
+  });
+
+  testWidgets('a long label shrinks to fit, then ellipsizes behind a tooltip', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    Future<List<Text>> pumpLabels(String label) async {
+      await tester.pumpWidget(
+        TestApp(
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: SizedBox(
+                width: 360,
+                height: 64,
+                child: FloatingNavigationBar(
+                  selectedIndex: 0,
+                  onSelected: (_) {},
+                  destinations: [
+                    for (final text in ['Home', 'Apps', 'Logs', label])
+                      NavBarDestination(icon: Icons.circle, label: text),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byType(FloatingNavigationBar),
+              matching: find.byType(Text),
+            ),
+          )
+          .toList();
+    }
+
+    final tooltips = find.descendant(
+      of: find.byType(FloatingNavigationBar),
+      matching: find.byType(Tooltip),
+    );
+
+    var labels = await pumpLabels('Settings');
+    final shrunk = labels.first.style!.fontSize!;
+    expect(shrunk, lessThan(11));
+    expect(shrunk, greaterThan(10));
+    expect(labels.map((text) => text.style!.fontSize).toSet(), {shrunk});
+    expect(tooltips, findsNothing);
+
+    labels = await pumpLabels('Configuration');
+    expect(labels.first.style!.fontSize, closeTo(10, 0.001));
+    expect(tester.widget<Tooltip>(tooltips).message, 'Configuration');
   });
 }

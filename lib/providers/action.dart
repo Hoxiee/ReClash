@@ -23,7 +23,8 @@ import 'package:reclash/widgets/feedback/dialog.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart' show CancelToken, DioException, DioExceptionType;
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart'
+    show Clipboard, ClipboardData, rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show basename, join;
 import 'package:riverpod_annotation/riverpod_annotation.dart';

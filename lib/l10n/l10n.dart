@@ -1680,6 +1680,16 @@ class AppLocalizations {
     return Intl.message('Search', name: 'search', desc: '', args: []);
   }
 
+  /// `No matching results`
+  String get noSearchResults {
+    return Intl.message(
+      'No matching results',
+      name: 'noSearchResults',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Allow apps to bypass VPN`
   String get allowBypass {
     return Intl.message(
@@ -3628,6 +3638,56 @@ class AppLocalizations {
   /// `TUN`
   String get actionTun {
     return Intl.message('TUN', name: 'actionTun', desc: '', args: []);
+  }
+
+  /// `Rule mode`
+  String get actionRuleMode {
+    return Intl.message(
+      'Rule mode',
+      name: 'actionRuleMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Global mode`
+  String get actionGlobalMode {
+    return Intl.message(
+      'Global mode',
+      name: 'actionGlobalMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Direct mode`
+  String get actionDirectMode {
+    return Intl.message(
+      'Direct mode',
+      name: 'actionDirectMode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Test all delays`
+  String get actionDelayTest {
+    return Intl.message(
+      'Test all delays',
+      name: 'actionDelayTest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update profiles`
+  String get actionUpdateProfiles {
+    return Intl.message(
+      'Update profiles',
+      name: 'actionUpdateProfiles',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Support`

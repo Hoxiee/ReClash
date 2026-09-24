@@ -306,10 +306,19 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "account": MessageLookupByLibrary.simpleMessage("Hasap"),
     "action": MessageLookupByLibrary.simpleMessage("Hereket"),
+    "actionDelayTest": MessageLookupByLibrary.simpleMessage(
+      "Ähli gijikmeleri syna",
+    ),
+    "actionDirectMode": MessageLookupByLibrary.simpleMessage("Göni usul"),
+    "actionGlobalMode": MessageLookupByLibrary.simpleMessage("Global usul"),
     "actionMode": MessageLookupByLibrary.simpleMessage("Usuly çalyş"),
     "actionProxy": MessageLookupByLibrary.simpleMessage("Ulgam proksisi"),
+    "actionRuleMode": MessageLookupByLibrary.simpleMessage("Düzgün usuly"),
     "actionStart": MessageLookupByLibrary.simpleMessage("Başlat/Bes et"),
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "actionUpdateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Profilleri täzele",
+    ),
     "actionView": MessageLookupByLibrary.simpleMessage("Görkez/Gizle"),
     "add": MessageLookupByLibrary.simpleMessage("Goş"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Tor goş"),
@@ -1568,10 +1577,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -1842,6 +1850,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("IP-i çözme"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage(
       "Host adyny çözme",
+    ),
+    "noSearchResults": MessageLookupByLibrary.simpleMessage(
+      "Gabat gelýän netije tapylmady",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Hiç biri"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

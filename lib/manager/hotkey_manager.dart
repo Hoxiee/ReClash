@@ -49,6 +49,7 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
   Future<void> _handleHotKeyAction(HotAction action) async {
     final commonAction = ref.read(commonActionProvider.notifier);
     final systemAction = ref.read(systemActionProvider.notifier);
+    final setupAction = ref.read(setupActionProvider.notifier);
     switch (action) {
       case HotAction.mode:
         commonAction.updateMode();
@@ -60,6 +61,28 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
         systemAction.updateSystemProxy();
       case HotAction.tun:
         systemAction.updateTun();
+      case HotAction.ruleMode:
+        setupAction.changeMode(Mode.rule);
+      case HotAction.globalMode:
+        setupAction.changeMode(Mode.global);
+      case HotAction.directMode:
+        setupAction.changeMode(Mode.direct);
+      case HotAction.delayTest:
+        unawaited(
+          ref
+              .read(proxiesActionProvider.notifier)
+              .delayTestGroups(ref.read(currentGroupsStateProvider).value),
+        );
+      case HotAction.updateProfiles:
+        unawaited(
+          globalState.safeRun(
+            ref.read(profilesActionProvider.notifier).updateProfiles,
+          ),
+        );
+      case HotAction.copyEnv:
+        unawaited(systemAction.copyProxyEnv());
+      case HotAction.exit:
+        unawaited(systemAction.handleExit());
     }
   }
 

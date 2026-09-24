@@ -1,194 +1,194 @@
-import 'dart:ui' show lerpDouble;
+import 'dart:math' as math;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Mobile floating bottom navigation. A single controller drives a fractional
-/// segment index; the highlight's position, the segment lift and the label
-/// colours all read that one number, so they cannot disagree. The row is
-/// painted twice — resting colours, and on-primary colours clipped to the
-/// highlight — so a label recolours exactly as the highlight sweeps it.
-class AppNavBar extends ConsumerStatefulWidget {
-  const AppNavBar({super.key, this.onToPage});
+const double _barPadding = 4;
+const double _iconSize = 24;
+const double _labelGap = 2;
+const double _labelInset = 2;
+const double _minLabelSize = 10;
+const double _lensGrowth = 14;
+const double _lensMagnify = 0.12;
+const double _jellySpeed = 8;
+const double _jellyStretch = 0.25;
+const double _overdrag = 0.35;
+final _trackSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 120),
+);
+final _liftSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 280),
+  bounce: 0.2,
+);
+final _settleSpring = SpringDescription.withDurationAndBounce(
+  duration: const Duration(milliseconds: 500),
+  bounce: 0.32,
+);
 
-  @visibleForTesting
-  static const Key highlightKey = Key('nav-bar-highlight');
-
-  final void Function(PageLabel label)? onToPage;
-
-  @override
-  ConsumerState<AppNavBar> createState() => _AppNavBarState();
+double _rubberBand(double overshoot, double limit) {
+  final pull = 1 - 1 / (overshoot.abs() * 0.55 / limit + 1);
+  return limit * pull * overshoot.sign;
 }
 
-class _AppNavBarState extends ConsumerState<AppNavBar>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+// A soft, wide drop in the manner of iOS rather than a Material elevation.
+List<BoxShadow> _dockShadows(ColorScheme colorScheme) {
+  final strength = colorScheme.brightness == Brightness.dark ? 3.0 : 1.0;
+  return [
+    BoxShadow(
+      color: colorScheme.shadow.withValues(alpha: 0.08 * strength),
+      blurRadius: 24,
+      offset: const Offset(0, 8),
+    ),
+    BoxShadow(
+      color: colorScheme.shadow.withValues(alpha: 0.04 * strength),
+      blurRadius: 3,
+      offset: const Offset(0, 1),
+    ),
+  ];
+}
 
-  double _from = 0;
-  double _to = 0;
+({double width, double height}) _measureLabel(
+  BuildContext context,
+  String label,
+  TextStyle? style,
+) {
+  final painter = TextPainter(
+    text: TextSpan(text: label, style: style),
+    textScaler: MediaQuery.textScalerOf(context),
+    textDirection: Directionality.of(context),
+    maxLines: 1,
+  )..layout();
+  final size = (width: painter.width, height: painter.height);
+  painter.dispose();
+  return size;
+}
 
-  @override
-  void initState() {
-    super.initState();
-    _from = _to = _indexOf(
-      ref.read(currentPageLabelProvider),
-      ref.read(currentNavigationItemsStateProvider).value,
-    ).toDouble();
-    _controller = AnimationController(
-      vsync: this,
-      duration: NavBarMetrics.motionDuration,
-      value: 1,
-    );
+/// A value that springs toward a target the finger may move every frame.
+///
+/// The [Ticker] restarts with each retarget and its first frame reads no
+/// elapsed time, so retargeting on every pointer move holds the value still
+/// while the finger keeps moving. [jumpTo] serves reduced motion, landing in
+/// a single frame without a ticker.
+class _Spring extends ChangeNotifier implements ValueListenable<double> {
+  _Spring(TickerProvider vsync, this._value) {
+    _ticker = vsync.createTicker(_tick);
   }
 
+  late final Ticker _ticker;
+  double _value;
+  double _target = 0;
+  SpringSimulation? _simulation;
+  double _now = 0;
+  double _start = 0;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (context.disableAnimations) {
-      _controller.stop();
-      _from = _to;
-      _controller.value = 1;
+  double get value => _value;
+
+  double get target => _simulation == null ? _value : _target;
+
+  double get velocity => _simulation?.dx(_now - _start) ?? 0;
+
+  void springTo(double target, SpringDescription spring) {
+    _simulation = SpringSimulation(spring, _value, target, velocity);
+    _target = target;
+    if (_ticker.isActive) {
+      _start = _now;
+      return;
     }
+    _now = _start = 0;
+    _ticker.start();
+  }
+
+  void jumpTo(double target) {
+    _simulation = null;
+    if (_ticker.isActive) {
+      _ticker.stop();
+    }
+    _value = _target = target;
+    notifyListeners();
+  }
+
+  void _tick(Duration elapsed) {
+    _now = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
+    final simulation = _simulation!;
+    final time = _now - _start;
+    if (simulation.isDone(time)) {
+      _value = _target;
+      _simulation = null;
+      _ticker.stop();
+    } else {
+      _value = simulation.x(time);
+    }
+    notifyListeners();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ticker.dispose();
     super.dispose();
   }
+}
 
-  int _indexOf(PageLabel label, List<NavigationItem> items) {
-    final index = items.indexWhere((item) => item.label == label);
-    return index < 0 ? 0 : index;
-  }
+class NavBarDestination {
+  const NavBarDestination({required this.icon, required this.label});
 
-  double get _position => lerpDouble(
-    _from,
-    _to,
-    NavBarMetrics.motionCurve.transform(_controller.value),
-  )!;
+  final IconData icon;
+  final String label;
+}
 
-  void _hopTo(int index) {
-    if (index.toDouble() == _to) {
-      return;
-    }
-    if (context.disableAnimations) {
-      _snapTo(index);
-      return;
-    }
-    _from = _position;
-    _to = index.toDouble();
-    _controller.forward(from: 0);
-  }
+typedef OnToPage = void Function(PageLabel label);
 
-  void _snapTo(int index) {
-    _from = _to = index.toDouble();
-    _controller.value = 1;
-  }
+class AppNavBar extends ConsumerWidget {
+  const AppNavBar({super.key, this.onToPage});
+
+  final OnToPage? onToPage;
+
+  static const Key highlightKey = Key('nav-bar-highlight');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(currentNavigationItemsStateProvider).value;
     if (items.length < 2) {
       return const SizedBox.shrink();
     }
-    final colorScheme = context.colorScheme;
-
-    // Listeners, not build: this also covers navigation that did not come
-    // from a tap here, and never marks the subtree dirty mid-build.
-    ref.listen(currentPageLabelProvider, (_, next) {
-      _hopTo(
-        _indexOf(next, ref.read(currentNavigationItemsStateProvider).value),
-      );
-    });
-    ref.listen(currentNavigationItemsStateProvider, (previous, next) {
-      if (previous?.value.length == next.value.length) {
-        return;
+    final currentLabel = ref.watch(currentPageLabelProvider);
+    final index = items.indexWhere((item) => item.label == currentLabel);
+    final notifier = ref.read(currentPageLabelProvider.notifier);
+    void handleSelected(int selected) {
+      final label = items[selected].label;
+      final onToPage = this.onToPage;
+      if (onToPage != null) {
+        onToPage(label);
+      } else {
+        notifier.toPage(label);
       }
-      _snapTo(_indexOf(ref.read(currentPageLabelProvider), next.value));
-    });
+    }
 
     return SafeArea(
       top: false,
       child: Padding(
         padding: NavBarMetrics.padding,
-        child: Material(
-          color: colorScheme.surfaceContainerHighest,
-          surfaceTintColor: Colors.transparent,
-          elevation: 6,
-          shadowColor: colorScheme.shadow.withValues(alpha: 0.10),
-          shape: AppShape.full,
-          child: Container(
-            height: NavBarMetrics.pillHeight,
-            padding: const EdgeInsets.all(NavBarMetrics.highlightInset),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final segmentWidth = constraints.maxWidth / items.length;
-                return AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, _) {
-                    final position = _position.clamp(
-                      0.0,
-                      (items.length - 1).toDouble(),
-                    );
-                    final highlightLeft = segmentWidth * position;
-                    return Stack(
-                      children: [
-                        Positioned(
-                          left: highlightLeft,
-                          top: 0,
-                          bottom: 0,
-                          width: segmentWidth,
-                          child: DecoratedBox(
-                            key: AppNavBar.highlightKey,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary,
-                              borderRadius: AppRadius.full,
-                            ),
-                          ),
-                        ),
-                        _SegmentRow(
-                          items: items,
-                          position: position,
-                          color: colorScheme.onSurfaceVariant,
-                          onToPage: (label) {
-                            final callback = widget.onToPage;
-                            if (callback != null) {
-                              callback(label);
-                            } else {
-                              ref
-                                  .read(currentPageLabelProvider.notifier)
-                                  .toPage(label);
-                            }
-                          },
-                        ),
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: ExcludeSemantics(
-                              child: ClipPath(
-                                clipper: _HighlightClip(
-                                  left: highlightLeft,
-                                  width: segmentWidth,
-                                ),
-                                child: _SegmentRow(
-                                  items: items,
-                                  position: position,
-                                  color: colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
+        child: SizedBox(
+          height: NavBarMetrics.pillHeight,
+          child: FloatingNavigationBar(
+            lensKey: highlightKey,
+            selectedIndex: index < 0 ? 0 : index,
+            onSelected: handleSelected,
+            destinations: [
+              for (final item in items)
+                NavBarDestination(
+                  icon: item.icon.icon ?? Icons.circle,
+                  label: item.label.label,
+                ),
+            ],
           ),
         ),
       ),
@@ -196,103 +196,416 @@ class _AppNavBarState extends ConsumerState<AppNavBar>
   }
 }
 
-class _SegmentRow extends StatelessWidget {
-  const _SegmentRow({
-    required this.items,
-    required this.position,
-    required this.color,
-    this.onToPage,
+/// A floating pill of destinations whose selection is a lens that springs
+/// between them. Pressing lifts the lens under the finger, and dragging
+/// slides it across the bar, selecting where it is let go.
+class FloatingNavigationBar extends StatefulWidget {
+  const FloatingNavigationBar({
+    super.key,
+    required this.destinations,
+    required this.selectedIndex,
+    required this.onSelected,
+    this.lensKey,
   });
 
-  final List<NavigationItem> items;
-  final double position;
-  final Color color;
-  final void Function(PageLabel label)? onToPage;
+  final List<NavBarDestination> destinations;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+  final Key? lensKey;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (var i = 0; i < items.length; i++)
-        Expanded(
-          child: _Segment(
-            item: items[i],
-            color: color,
-            covered: (1 - (position - i).abs()).clamp(0.0, 1.0),
-            onToPage: onToPage == null ? null : () => onToPage!(items[i].label),
-          ),
-        ),
-    ],
-  );
+  State<FloatingNavigationBar> createState() => _FloatingNavigationBarState();
 }
 
-class _Segment extends StatelessWidget {
-  const _Segment({
-    required this.item,
-    required this.color,
-    required this.covered,
-    this.onToPage,
-  });
+class _FloatingNavigationBarState extends State<FloatingNavigationBar>
+    with TickerProviderStateMixin {
+  late final _Spring _lens = _Spring(this, _selectedIndex.toDouble());
+  late final _Spring _lift = _Spring(this, 0);
+  late final Listenable _motion = Listenable.merge([_lens, _lift]);
+  int? _pointer;
+  int? _pressedIndex;
+  double _pressX = 0;
+  bool _dragging = false;
+  bool _reduceMotion = false;
 
-  final NavigationItem item;
-  final Color color;
-  final double covered;
-  final VoidCallback? onToPage;
+  int get _lastIndex => math.max(0, widget.destinations.length - 1);
+
+  int get _selectedIndex => widget.selectedIndex.clamp(0, _lastIndex);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = context.disableAnimations;
+  }
+
+  void _settle(_Spring spring, double target, SpringDescription description) {
+    if (_reduceMotion) {
+      spring.jumpTo(target);
+    } else {
+      spring.springTo(target, description);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant FloatingNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_pressedIndex == null && _lens.target != _selectedIndex) {
+      _settle(_lens, _selectedIndex.toDouble(), _settleSpring);
+    }
+  }
+
+  @override
+  void dispose() {
+    _lens.dispose();
+    _lift.dispose();
+    super.dispose();
+  }
+
+  double _positionAt(Offset localPosition) {
+    final width = context.size!.width;
+    final dx = Directionality.of(context) == TextDirection.ltr
+        ? localPosition.dx
+        : width - localPosition.dx;
+    final extent = (width - _barPadding * 2) / widget.destinations.length;
+    final position = (dx - _barPadding) / extent - 0.5;
+    if (position < 0) {
+      return _rubberBand(position, _overdrag);
+    }
+    if (position > _lastIndex) {
+      return _lastIndex + _rubberBand(position - _lastIndex, _overdrag);
+    }
+    return position;
+  }
+
+  int _indexAt(double position) => position.round().clamp(0, _lastIndex);
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (_pointer != null || event.buttons & kPrimaryButton == 0) {
+      return;
+    }
+    _pointer = event.pointer;
+    _press(event.localPosition);
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.pointer == _pointer) {
+      _slide(event.localPosition);
+    }
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    if (event.pointer != _pointer) {
+      return;
+    }
+    _pointer = null;
+    _release(commit: event is PointerUpEvent);
+  }
+
+  void _press(Offset localPosition) {
+    if (widget.destinations.isEmpty) {
+      return;
+    }
+    final index = _indexAt(_positionAt(localPosition));
+    _pressedIndex = index;
+    _pressX = localPosition.dx;
+    _dragging = false;
+    _settle(_lift, 1, _liftSpring);
+    _settle(_lens, index.toDouble(), _settleSpring);
+  }
+
+  void _slide(Offset localPosition) {
+    if (_pressedIndex == null) {
+      return;
+    }
+    if (!_dragging) {
+      if ((localPosition.dx - _pressX).abs() < kTouchSlop) {
+        return;
+      }
+      _dragging = true;
+    }
+    final position = _positionAt(localPosition);
+    _settle(_lens, position, _trackSpring);
+    final index = _indexAt(position);
+    if (index != _pressedIndex) {
+      HapticFeedback.selectionClick();
+      _pressedIndex = index;
+    }
+  }
+
+  void _release({required bool commit}) {
+    final index = _pressedIndex;
+    if (index == null) {
+      return;
+    }
+    _pressedIndex = null;
+    _dragging = false;
+    _settle(_lift, 0, _settleSpring);
+    if (!commit) {
+      _settle(_lens, _selectedIndex.toDouble(), _settleSpring);
+      return;
+    }
+    _settle(_lens, index.toDouble(), _settleSpring);
+    if (index != widget.selectedIndex) {
+      widget.onSelected(index);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final label = item.label.label;
-    final content = Transform.scale(
-      scale: lerpDouble(0.92, 1, covered)!,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(item.icon.icon ?? Icons.circle, size: 24, color: color),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelSmall?.copyWith(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: color,
+    final colorScheme = context.colorScheme;
+    final labelStyle = context.textTheme.labelSmall?.copyWith(
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0,
+    );
+    final fontSize = labelStyle?.fontSize ?? _minLabelSize;
+    final labels = [
+      for (final destination in widget.destinations)
+        _measureLabel(context, destination.label, labelStyle),
+    ];
+    final widest = labels.fold(
+      0.0,
+      (width, label) => math.max(width, label.width),
+    );
+    final lineHeight = labels.fold(
+      0.0,
+      (height, label) => math.max(height, label.height),
+    );
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: AppShape.full,
+        shadows: _dockShadows(colorScheme),
+      ),
+      child: Material(
+        color: colorScheme.surfaceContainer,
+        shape: AppShape.full,
+        // Raw pointers rather than recognizers: a drag has nothing to win the
+        // arena from, and a tap waiting on one lifts the lens late.
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerUp: _handlePointerEnd,
+          onPointerCancel: _handlePointerEnd,
+          child: Padding(
+            padding: const EdgeInsets.all(_barPadding),
+            child: RepaintBoundary(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final extent =
+                      constraints.maxWidth /
+                      math.max(1, widget.destinations.length);
+                  final room = extent - _labelInset * 2;
+                  final labelScale = widest <= room
+                      ? 1.0
+                      : math.max(room / widest, _minLabelSize / fontSize);
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      if (widget.destinations.isNotEmpty)
+                        AnimatedBuilder(
+                          animation: _motion,
+                          builder: (_, _) => _Lens(
+                            lensKey: widget.lensKey,
+                            position: _lens.value,
+                            velocity: _lens.velocity,
+                            extent: extent,
+                            height: constraints.maxHeight,
+                            lift: _lift.value,
+                          ),
+                        ),
+                      Row(
+                        children: [
+                          for (final (index, destination)
+                              in widget.destinations.indexed)
+                            Expanded(
+                              child: _FloatingBarItem(
+                                destination: destination,
+                                selected: index == _selectedIndex,
+                                index: index,
+                                lens: _lens,
+                                lift: _lift,
+                                labelStyle: labelStyle?.copyWith(
+                                  fontSize: fontSize * labelScale,
+                                ),
+                                labelHeight: lineHeight,
+                                labelOverflows:
+                                    labels[index].width * labelScale > room,
+                                onActivate: () => widget.onSelected(index),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
-        ],
-      ),
-    );
-    if (onToPage == null) {
-      return Center(child: content);
-    }
-    return Tooltip(
-      message: label,
-      child: InkWell(
-        onTap: onToPage,
-        customBorder: AppShape.full,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        child: Center(child: content),
+        ),
       ),
     );
   }
 }
 
-class _HighlightClip extends CustomClipper<Path> {
-  const _HighlightClip({required this.left, required this.width});
+class _Lens extends StatelessWidget {
+  const _Lens({
+    required this.lensKey,
+    required this.position,
+    required this.velocity,
+    required this.extent,
+    required this.height,
+    required this.lift,
+  });
 
-  final double left;
-  final double width;
+  final Key? lensKey;
+  final double position;
+  final double velocity;
+  final double extent;
+  final double height;
+  final double lift;
 
   @override
-  Path getClip(Size size) => Path()
-    ..addRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(left, 0, width, size.height),
-        const Radius.circular(AppCorner.full),
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final stretch =
+        (velocity.abs() / _jellySpeed).clamp(0.0, 1.0) * _jellyStretch;
+    final growth = _lensGrowth * 2 * lift;
+    final width = (extent + growth) * (1 + stretch);
+    final lensHeight = (height + growth) * (1 - stretch / 2);
+    return PositionedDirectional(
+      key: lensKey,
+      start: (position + 0.5) * extent - width / 2,
+      top: (height - lensHeight) / 2,
+      width: width,
+      height: lensHeight,
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: Color.alphaBlend(
+            colorScheme.onSecondaryContainer.withValues(
+              alpha: 0.08 * lift.clamp(0.0, 1.0),
+            ),
+            colorScheme.secondaryContainer,
+          ),
+          shape: AppShape.full,
+        ),
       ),
     );
+  }
+}
+
+class _FloatingBarItem extends StatefulWidget {
+  const _FloatingBarItem({
+    required this.destination,
+    required this.selected,
+    required this.index,
+    required this.lens,
+    required this.lift,
+    required this.labelStyle,
+    required this.labelHeight,
+    required this.labelOverflows,
+    required this.onActivate,
+  });
+
+  final NavBarDestination destination;
+  final bool selected;
+  final int index;
+  final ValueListenable<double> lens;
+  final ValueListenable<double> lift;
+  final TextStyle? labelStyle;
+  final double labelHeight;
+  final bool labelOverflows;
+  final VoidCallback onActivate;
 
   @override
-  bool shouldReclip(_HighlightClip oldClipper) =>
-      oldClipper.left != left || oldClipper.width != width;
+  State<_FloatingBarItem> createState() => _FloatingBarItemState();
+}
+
+class _FloatingBarItemState extends State<_FloatingBarItem> {
+  late final Map<Type, Action<Intent>> _actions = {
+    ActivateIntent: CallbackAction<ActivateIntent>(
+      onInvoke: (_) {
+        widget.onActivate();
+        return null;
+      },
+    ),
+  };
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final overlay = _focused
+        ? colorScheme.onSurface.withValues(alpha: 0.1)
+        : _hovered
+        ? colorScheme.onSurface.withValues(alpha: 0.06)
+        : Colors.transparent;
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _labelInset),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([widget.lens, widget.lift]),
+        builder: (context, _) {
+          final emphasis = (1 - (widget.lens.value - widget.index).abs()).clamp(
+            0.0,
+            1.0,
+          );
+          final color = Color.lerp(
+            colorScheme.onSurfaceVariant,
+            colorScheme.primary,
+            emphasis,
+          )!;
+          final column = Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(widget.destination.icon, size: _iconSize, color: color),
+              const SizedBox(height: _labelGap),
+              SizedBox(
+                height: widget.labelHeight,
+                child: Center(
+                  child: Text(
+                    widget.destination.label,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: widget.labelStyle?.copyWith(color: color),
+                  ),
+                ),
+              ),
+            ],
+          );
+          return Transform.scale(
+            scale: 1 + _lensMagnify * emphasis * widget.lift.value,
+            child: column,
+          );
+        },
+      ),
+    );
+    return FocusableActionDetector(
+      actions: _actions,
+      mouseCursor: SystemMouseCursors.click,
+      onShowHoverHighlight: (value) => setState(() => _hovered = value),
+      onShowFocusHighlight: (value) => setState(() => _focused = value),
+      child: Semantics(
+        container: true,
+        button: true,
+        selected: widget.selected,
+        label: widget.destination.label,
+        excludeSemantics: true,
+        onTap: widget.onActivate,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: overlay,
+            shape: AppShape.full.copyWith(
+              side: _focused
+                  ? BorderSide(color: colorScheme.secondary, width: 2)
+                  : BorderSide.none,
+            ),
+          ),
+          child: widget.labelOverflows
+              ? Tooltip(message: widget.destination.label, child: content)
+              : content,
+        ),
+      ),
+    );
+  }
 }

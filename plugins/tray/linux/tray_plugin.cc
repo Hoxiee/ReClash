@@ -88,21 +88,30 @@ static GtkWidget* build_menu(FlValue* items) {
       label = "";
     }
 
+    const char* detail = string_value(entry, "detail");
+    gchar* display_label = nullptr;
+    if (detail != nullptr && detail[0] != '\0') {
+      display_label = g_strdup_printf("%s  (%s)", label, detail);
+    }
+    const char* menu_label = display_label != nullptr ? display_label : label;
+
     GtkWidget* item;
     bool dispatches = true;
     if (strcmp(type, "checkbox") == 0) {
-      item = gtk_check_menu_item_new_with_label(label);
+      item = gtk_check_menu_item_new_with_label(menu_label);
       gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),
                                      bool_value(entry, "checked", false));
     } else if (strcmp(type, "submenu") == 0) {
-      item = gtk_menu_item_new_with_label(label);
+      item = gtk_menu_item_new_with_label(menu_label);
       gtk_menu_item_set_submenu(GTK_MENU_ITEM(item),
                                 build_menu(fl_value_lookup_string(entry,
                                                                   "items")));
       dispatches = false;
     } else {
-      item = gtk_menu_item_new_with_label(label);
+      item = gtk_menu_item_new_with_label(menu_label);
     }
+
+    g_free(display_label);
 
     if (!bool_value(entry, "enabled", true)) {
       gtk_widget_set_sensitive(item, FALSE);

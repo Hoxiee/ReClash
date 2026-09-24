@@ -14,53 +14,70 @@ class HotKeyView extends StatelessWidget {
   const HotKeyView({super.key});
 
   String getSubtitle(BuildContext context, HotKeyAction hotKeyAction) {
-    final appLocalizations = context.appLocalizations;
-    final key = hotKeyAction.key;
-    if (key == null) {
-      return appLocalizations.noHotKey;
-    }
-    final modifierLabels = hotKeyAction.modifiers.map(
-      (item) => item.physicalKeys.first.label,
+    return hotKeyLabel(hotKeyAction.key, hotKeyAction.modifiers) ??
+        context.appLocalizations.noHotKey;
+  }
+
+  Widget _buildItem(BuildContext context, HotAction hotAction) {
+    return Consumer(
+      builder: (_, ref, _) {
+        final hotKeyAction = ref.watch(getHotKeyActionProvider(hotAction));
+        return ListItem(
+          title: Text(hotAction.label),
+          subtitle: Text(
+            getSubtitle(context, hotKeyAction),
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.primary,
+            ),
+          ),
+          onTap: () {
+            dialogs.showCommonDialog(
+              child: HotKeyRecorder(hotKeyAction: hotKeyAction),
+            );
+          },
+        );
+      },
     );
-    var text = '';
-    if (modifierLabels.isNotEmpty) {
-      text += "${modifierLabels.join(" ")}+";
-    }
-    text += PhysicalKeyboardKey(key).label;
-    return text;
   }
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final sections = <(String, List<HotAction>)>[
+      (
+        appLocalizations.general,
+        const [HotAction.view, HotAction.start, HotAction.exit],
+      ),
+      (
+        appLocalizations.outboundMode,
+        const [
+          HotAction.mode,
+          HotAction.ruleMode,
+          HotAction.globalMode,
+          HotAction.directMode,
+        ],
+      ),
+      (
+        appLocalizations.network,
+        const [HotAction.proxy, HotAction.tun, HotAction.copyEnv],
+      ),
+      (
+        appLocalizations.proxies,
+        const [HotAction.delayTest, HotAction.updateProfiles],
+      ),
+    ];
     return BaseScaffold(
       title: appLocalizations.hotkeyManagement,
-      body: ListView.builder(
-        itemCount: HotAction.values.length,
-        itemBuilder: (_, index) {
-          final hotAction = HotAction.values[index];
-          return Consumer(
-            builder: (_, ref, _) {
-              final hotKeyAction = ref.watch(
-                getHotKeyActionProvider(hotAction),
-              );
-              return ListItem(
-                title: Text(hotAction.label),
-                subtitle: Text(
-                  getSubtitle(context, hotKeyAction),
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: context.colorScheme.primary,
-                  ),
-                ),
-                onTap: () {
-                  dialogs.showCommonDialog(
-                    child: HotKeyRecorder(hotKeyAction: hotKeyAction),
-                  );
-                },
-              );
-            },
-          );
-        },
+      body: ListView(
+        children: [
+          for (final (title, actions) in sections)
+            generateSectionV3(
+              title: title,
+              items: [
+                for (final action in actions) _buildItem(context, action),
+              ],
+            ),
+        ],
       ),
     );
   }

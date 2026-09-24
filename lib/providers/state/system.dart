@@ -53,6 +53,7 @@ TrayState trayState(Ref ref) {
   final groups = ref.watch(currentGroupsStateProvider).value;
   final selectedMap = ref.watch(selectedMapProvider);
   final paused = ref.watch(pausedProvider);
+  final hotKeyActions = ref.watch(hotKeyActionsProvider);
 
   return TrayState(
     mode: clashConfig.mode,
@@ -65,6 +66,7 @@ TrayState trayState(Ref ref) {
     groups: groups,
     selectedMap: selectedMap,
     showTrayTitle: appSetting.showTrayTitle,
+    hotKeys: {for (final action in hotKeyActions) action.action: action},
   );
 }
 

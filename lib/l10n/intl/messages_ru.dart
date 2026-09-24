@@ -302,10 +302,21 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
     "action": MessageLookupByLibrary.simpleMessage("Действие"),
+    "actionDelayTest": MessageLookupByLibrary.simpleMessage(
+      "Проверить все задержки",
+    ),
+    "actionDirectMode": MessageLookupByLibrary.simpleMessage("Прямой режим"),
+    "actionGlobalMode": MessageLookupByLibrary.simpleMessage(
+      "Глобальный режим",
+    ),
     "actionMode": MessageLookupByLibrary.simpleMessage("Переключить режим"),
     "actionProxy": MessageLookupByLibrary.simpleMessage("Системный прокси"),
+    "actionRuleMode": MessageLookupByLibrary.simpleMessage("Режим правил"),
     "actionStart": MessageLookupByLibrary.simpleMessage("Старт/Стоп"),
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "actionUpdateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Обновить профили",
+    ),
     "actionView": MessageLookupByLibrary.simpleMessage("Показать/Скрыть"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Добавить сеть"),
@@ -1552,10 +1563,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1822,6 +1832,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("Не определять IP"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage(
       "Не преобразовывать домен в IP",
+    ),
+    "noSearchResults": MessageLookupByLibrary.simpleMessage(
+      "Ничего не найдено",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Нет"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

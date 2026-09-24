@@ -7,11 +7,13 @@ sealed class TrayMenuItem {
 final class TrayMenuAction extends TrayMenuItem {
   const TrayMenuAction({
     required this.label,
+    this.detail,
     this.enabled = true,
     this.onSelected,
   });
 
   final String label;
+  final String? detail;
   final bool enabled;
   final TrayMenuItemSelectedCallback? onSelected;
 }
@@ -20,12 +22,14 @@ final class TrayMenuCheckbox extends TrayMenuItem {
   const TrayMenuCheckbox({
     required this.label,
     required this.checked,
+    this.detail,
     this.enabled = true,
     this.onSelected,
   });
 
   final String label;
   final bool checked;
+  final String? detail;
   final bool enabled;
   final TrayMenuItemSelectedCallback? onSelected;
 }

@@ -35,6 +35,7 @@ dependencies:
   wifi_ssid:
     path: plugins/wifi_ssid
   collection: ^1.19.1
+  path_parsing: ^1.1.0
   animations: ^3.0.0
   package_info_plus: ^10.2.1
   pub_semver: ^2.2.0

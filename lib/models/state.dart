@@ -117,6 +117,7 @@ abstract class TrayState with _$TrayState {
     required List<Group> groups,
     required Map<String, String> selectedMap,
     required bool showTrayTitle,
+    @Default(<HotAction, HotKeyAction>{}) Map<HotAction, HotKeyAction> hotKeys,
   }) = _TrayState;
 }
 

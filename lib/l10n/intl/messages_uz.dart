@@ -311,12 +311,23 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "account": MessageLookupByLibrary.simpleMessage("Hisob"),
     "action": MessageLookupByLibrary.simpleMessage("Amal"),
+    "actionDelayTest": MessageLookupByLibrary.simpleMessage(
+      "Barcha kechikishlarni tekshirish",
+    ),
+    "actionDirectMode": MessageLookupByLibrary.simpleMessage(
+      "Toʻgʻridan-toʻgʻri rejim",
+    ),
+    "actionGlobalMode": MessageLookupByLibrary.simpleMessage("Global rejim"),
     "actionMode": MessageLookupByLibrary.simpleMessage("Rejimni almashtirish"),
     "actionProxy": MessageLookupByLibrary.simpleMessage("Tizim proksisi"),
+    "actionRuleMode": MessageLookupByLibrary.simpleMessage("Qoida rejimi"),
     "actionStart": MessageLookupByLibrary.simpleMessage(
       "Ishga tushirish/Toʻxtatish",
     ),
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "actionUpdateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Profillarni yangilash",
+    ),
     "actionView": MessageLookupByLibrary.simpleMessage("Koʻrsatish/Yashirish"),
     "add": MessageLookupByLibrary.simpleMessage("Qoʻshish"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Tarmoq qoʻshish"),
@@ -1605,10 +1616,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -1883,6 +1893,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("IP aniqlanmasin"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage(
       "Host nomi aniqlanmasin",
+    ),
+    "noSearchResults": MessageLookupByLibrary.simpleMessage(
+      "Mos natija topilmadi",
     ),
     "none": MessageLookupByLibrary.simpleMessage("Yoʻq"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

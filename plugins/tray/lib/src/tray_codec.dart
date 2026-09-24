@@ -54,19 +54,27 @@ abstract final class TrayCodec {
       sink[id] = item;
       return switch (item) {
         TrayMenuSeparator() => <String, Object?>{'id': id, 'type': 'separator'},
-        TrayMenuAction(:final label, :final enabled) => <String, Object?>{
-          'id': id,
-          'type': 'action',
-          'label': label,
-          'enabled': enabled,
-        },
-        TrayMenuCheckbox(:final label, :final enabled, :final checked) =>
+        TrayMenuAction(:final label, :final enabled, :final detail) =>
+          <String, Object?>{
+            'id': id,
+            'type': 'action',
+            'label': label,
+            'enabled': enabled,
+            ..._encodeDetail(detail),
+          },
+        TrayMenuCheckbox(
+          :final label,
+          :final enabled,
+          :final checked,
+          :final detail,
+        ) =>
           <String, Object?>{
             'id': id,
             'type': 'checkbox',
             'label': label,
             'enabled': enabled,
             'checked': checked,
+            ..._encodeDetail(detail),
           },
         TrayMenuSubmenu(:final label, :final enabled, :final items) =>
           <String, Object?>{
@@ -78,6 +86,12 @@ abstract final class TrayCodec {
           },
       };
     }).toList();
+  }
+
+  static Map<String, Object?> _encodeDetail(String? detail) {
+    return detail == null || detail.isEmpty
+        ? const <String, Object?>{}
+        : <String, Object?>{'detail': detail};
   }
 }
 

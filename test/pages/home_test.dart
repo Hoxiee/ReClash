@@ -609,7 +609,9 @@ void main() {
 
     bool focusInNav() {
       final context = FocusManager.instance.primaryFocus?.context;
-      return context?.findAncestorWidgetOfExactType<InkWell>() != null &&
+      return context
+                  ?.findAncestorWidgetOfExactType<FocusableActionDetector>() !=
+              null &&
           context?.findAncestorWidgetOfExactType<AppNavBar>() != null;
     }
 
@@ -1002,7 +1004,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Profiles'), findsNWidgets(2));
+      expect(find.text('Profiles'), findsOneWidget);
       container
           .read(currentPageLabelProvider.notifier)
           .toPage(PageLabel.profiles);
@@ -1025,7 +1027,7 @@ void main() {
       ]);
       await tester.pump();
 
-      expect(find.text('Profiles'), findsNWidgets(2));
+      expect(find.text('Profiles'), findsOneWidget);
       await tester.tap(
         find
             .descendant(

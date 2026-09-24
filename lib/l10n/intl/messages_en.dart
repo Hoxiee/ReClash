@@ -301,10 +301,17 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "account": MessageLookupByLibrary.simpleMessage("Account"),
     "action": MessageLookupByLibrary.simpleMessage("Action"),
+    "actionDelayTest": MessageLookupByLibrary.simpleMessage("Test all delays"),
+    "actionDirectMode": MessageLookupByLibrary.simpleMessage("Direct mode"),
+    "actionGlobalMode": MessageLookupByLibrary.simpleMessage("Global mode"),
     "actionMode": MessageLookupByLibrary.simpleMessage("Switch mode"),
     "actionProxy": MessageLookupByLibrary.simpleMessage("System proxy"),
+    "actionRuleMode": MessageLookupByLibrary.simpleMessage("Rule mode"),
     "actionStart": MessageLookupByLibrary.simpleMessage("Start/Stop"),
     "actionTun": MessageLookupByLibrary.simpleMessage("TUN"),
+    "actionUpdateProfiles": MessageLookupByLibrary.simpleMessage(
+      "Update profiles",
+    ),
     "actionView": MessageLookupByLibrary.simpleMessage("Show/Hide"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Add network"),
@@ -1505,10 +1512,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1777,6 +1783,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "noResolve": MessageLookupByLibrary.simpleMessage("Don\'t resolve IP"),
     "noResolveHostname": MessageLookupByLibrary.simpleMessage(
       "Don\'t resolve hostname",
+    ),
+    "noSearchResults": MessageLookupByLibrary.simpleMessage(
+      "No matching results",
     ),
     "none": MessageLookupByLibrary.simpleMessage("None"),
     "notSelectedTip": MessageLookupByLibrary.simpleMessage(

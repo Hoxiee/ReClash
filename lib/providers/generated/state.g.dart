@@ -89,7 +89,7 @@ final class TrayStateProvider
   }
 }
 
-String _$trayStateHash() => r'4792c9d67109ebc34a5b13914a7e92fb787d2018';
+String _$trayStateHash() => r'4de00c12e6ed61810de6fb96beba1741ee2c5d74';
 
 @ProviderFor(trayTitleState)
 final trayTitleStateProvider = TrayTitleStateProvider._();
