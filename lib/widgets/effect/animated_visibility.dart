@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -6,21 +8,27 @@ enum _VisibilityMotion {
     axis: Axis.horizontal,
     alignment: AlignmentDirectional.topStart,
     hiddenOffset: Offset(-1, 0),
+    softTopEdge: false,
   ),
   bottomNavigation(
     axis: Axis.vertical,
     alignment: AlignmentDirectional.bottomStart,
     hiddenOffset: Offset(0, 1),
+    softTopEdge: true,
   );
 
   final Axis axis;
   final AlignmentGeometry alignment;
   final Offset hiddenOffset;
 
+  /// Drops the clip once settled so a docked bar's lens and ring paint past it.
+  final bool softTopEdge;
+
   const _VisibilityMotion({
     required this.axis,
     required this.alignment,
     required this.hiddenOffset,
+    required this.softTopEdge,
   });
 }
 
@@ -132,31 +140,74 @@ class _AnimatedVisibilityState extends State<AnimatedVisibility>
   @override
   Widget build(BuildContext context) {
     final motion = widget._motion;
-    final content = _includeChild
-        ? SizeTransition(
-            sizeFactor: _animation,
-            axis: motion.axis,
-            alignment: motion.alignment,
-            child: FadeTransition(
-              opacity: _animation,
-              child: SlideTransition(
-                position: _animation.drive(
-                  Tween(begin: motion.hiddenOffset, end: Offset.zero),
-                ),
-                child: _presentedChild,
+    final revealed = _includeChild
+        ? FadeTransition(
+            opacity: _animation,
+            child: SlideTransition(
+              position: _animation.drive(
+                Tween(begin: motion.hiddenOffset, end: Offset.zero),
               ),
+              child: _presentedChild,
             ),
           )
         : const SizedBox.shrink();
+    final content = motion.softTopEdge
+        ? _DockReveal(
+            sizeFactor: _animation,
+            alignment: motion.alignment,
+            child: revealed,
+          )
+        : ClipRect(
+            child: SizeTransition(
+              sizeFactor: _animation,
+              axis: motion.axis,
+              alignment: motion.alignment,
+              child: revealed,
+            ),
+          );
     return ExcludeSemantics(
       excluding: !widget.visible,
       child: ExcludeFocus(
         excluding: !widget.visible,
-        child: IgnorePointer(
-          ignoring: !widget.visible,
-          child: ClipRect(child: content),
-        ),
+        child: IgnorePointer(ignoring: !widget.visible, child: content),
       ),
+    );
+  }
+}
+
+/// Reveals like [SizeTransition] but unclips when open and fades the top edge.
+class _DockReveal extends AnimatedWidget {
+  const _DockReveal({
+    required Animation<double> sizeFactor,
+    required this.alignment,
+    required this.child,
+  }) : super(listenable: sizeFactor);
+
+  final AlignmentGeometry alignment;
+  final Widget child;
+
+  Animation<double> get _sizeFactor => listenable as Animation<double>;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = math.max(_sizeFactor.value, 0.0);
+    final settled = value >= 1;
+    final revealed = ClipRect(
+      clipBehavior: settled ? Clip.none : Clip.hardEdge,
+      child: Align(alignment: alignment, heightFactor: value, child: child),
+    );
+    if (settled) {
+      return revealed;
+    }
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.transparent, Colors.black],
+        stops: [0, 0.55],
+      ).createShader(bounds),
+      blendMode: BlendMode.dstIn,
+      child: revealed,
     );
   }
 }

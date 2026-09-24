@@ -99,28 +99,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  double highlightY(WidgetTester tester) =>
-      tester.getTopLeft(find.byKey(AppNavRail.highlightKey)).dy;
+  Rect highlightRect(WidgetTester tester) =>
+      tester.getRect(find.byKey(AppNavRail.highlightKey));
 
   void goTo(PageLabel label) =>
       container.read(currentPageLabelProvider.notifier).toPage(label);
 
-  testWidgets('the highlight travels between measured slot tops', (
+  testWidgets('the selection bar stretches toward the new slot', (
     tester,
   ) async {
     await pumpRail(tester);
-    final start = highlightY(tester);
+    final start = highlightRect(tester);
 
     goTo(PageLabel.tools);
     await tester.pump();
-    expect(highlightY(tester), closeTo(start, 0.5));
+    expect(highlightRect(tester).top, closeTo(start.top, 0.5));
 
-    await tester.pump(const Duration(milliseconds: 100));
-    final middle = highlightY(tester);
-    expect(middle, greaterThan(start));
+    await tester.pump(const Duration(milliseconds: 120));
+    final mid = highlightRect(tester);
+    // The leading edge runs ahead first, so the bar is taller mid-flight.
+    expect(mid.height, greaterThan(start.height));
+    expect(mid.bottom, greaterThan(start.bottom));
 
     await tester.pumpAndSettle();
-    expect(highlightY(tester), greaterThan(middle));
+    final end = highlightRect(tester);
+    expect(end.top, greaterThan(start.top));
+    expect(end.height, closeTo(start.height, 0.5));
   });
 
   testWidgets('tools follow logs with a group divider', (tester) async {
@@ -233,17 +237,17 @@ void main() {
     await pumpRail(tester, showLabel: true);
 
     expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
-    expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
+    expect(find.text(PageLabel.dashboard.label), findsOneWidget);
 
     container.read(viewSizeProvider.notifier).value = const Size(1400, 600);
     await tester.pumpAndSettle();
 
     expect(tester.getSize(find.byType(AppNavRail)).width, NavRailMetrics.width);
-    expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
+    expect(find.text(PageLabel.dashboard.label), findsOneWidget);
   });
 
   for (final locale in AppLocalizations.delegate.supportedLocales) {
-    testWidgets('the selected label stays inside the pill in $locale', (
+    testWidgets('the selected label stays inside its slot in $locale', (
       tester,
     ) async {
       await pumpRail(tester, showLabel: true, locale: locale);
@@ -251,23 +255,28 @@ void main() {
       for (final item in items()) {
         goTo(item.label);
         await tester.pumpAndSettle();
-        final highlight = find.byKey(AppNavRail.highlightKey);
-        final pill = tester.getRect(highlight);
-        final decoration = tester.widget<DecoratedBox>(highlight).decoration;
-        final contour = decoration.getClipPath(pill, TextDirection.ltr);
-        final label = tester.getRect(find.text(item.label.label).first);
-        for (final point in [
-          label.topLeft,
-          label.topRight,
-          label.bottomLeft,
-          label.bottomRight,
-        ]) {
-          expect(
-            contour.contains(point),
-            isTrue,
-            reason: '${item.label} in $locale crosses the rounded contour',
-          );
-        }
+        final labelFinder = find.text(item.label.label);
+        final slot = tester.getRect(
+          find.ancestor(of: labelFinder, matching: find.byType(InkWell)),
+        );
+        final label = tester.getRect(labelFinder);
+        final reason = '${item.label} in $locale overflows its slot';
+        expect(
+          label.left,
+          greaterThanOrEqualTo(slot.left - 0.5),
+          reason: reason,
+        );
+        expect(
+          label.right,
+          lessThanOrEqualTo(slot.right + 0.5),
+          reason: reason,
+        );
+        expect(label.top, greaterThanOrEqualTo(slot.top - 0.5), reason: reason);
+        expect(
+          label.bottom,
+          lessThanOrEqualTo(slot.bottom + 0.5),
+          reason: reason,
+        );
       }
       expect(tester.takeException(), isNull);
     });
@@ -279,7 +288,7 @@ void main() {
     await pumpRail(tester, showLabel: true, height: 340);
 
     expect(find.byType(SingleChildScrollView), findsOneWidget);
-    expect(find.text(PageLabel.dashboard.label), findsNWidgets(2));
+    expect(find.text(PageLabel.dashboard.label), findsOneWidget);
     await tester.drag(
       find.byType(SingleChildScrollView),
       const Offset(0, -200),

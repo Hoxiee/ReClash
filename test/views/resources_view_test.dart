@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(DecorationListItem), findsNWidgets(6));
-    expect(find.byType(ItemPositionProvider), findsNWidgets(4));
+    expect(find.byType(ItemPositionProvider), findsNWidgets(6));
     expect(find.byType(Switch), findsOneWidget);
     expect(find.byIcon(Icons.more_vert), findsNWidgets(4));
     expect(find.byType(FutureBuilder<FileInfo?>), findsNWidgets(4));

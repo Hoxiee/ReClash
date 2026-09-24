@@ -7,20 +7,28 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const double _barPadding = 4;
 const double _iconSize = 24;
+const double _fabGap = 8;
+const double _trailingIconSize = 28;
 const double _labelGap = 2;
 const double _labelInset = 2;
 const double _minLabelSize = 10;
+const double _pressGrowth = 1 / 8;
+const double _maxPressGrowth = 16;
 const double _lensGrowth = 14;
 const double _lensMagnify = 0.12;
 const double _jellySpeed = 8;
 const double _jellyStretch = 0.25;
 const double _overdrag = 0.35;
+const double _pullLimit = 7 / 32;
+const double _pullStretch = 0.5;
+const _slotDuration = Duration(milliseconds: 350);
 final _trackSpring = SpringDescription.withDurationAndBounce(
   duration: const Duration(milliseconds: 120),
 );
@@ -147,11 +155,20 @@ class NavBarDestination {
 typedef OnToPage = void Function(PageLabel label);
 
 class AppNavBar extends ConsumerWidget {
-  const AppNavBar({super.key, this.onToPage});
+  const AppNavBar({super.key, this.onToPage, this.trailing});
 
   final OnToPage? onToPage;
 
+  /// A button held at the dock's trailing edge, such as the start control that
+  /// replaces the floating action button on a phone.
+  final Widget? trailing;
+
   static const Key highlightKey = Key('nav-bar-highlight');
+
+  /// Whether [context] sits in the dock's trailing slot, where a button keeps
+  /// to a circle the bar's height instead of spreading into a labelled pill.
+  static bool isDocked(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_DockedMarker>() != null;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -178,20 +195,304 @@ class AppNavBar extends ConsumerWidget {
         padding: NavBarMetrics.padding,
         child: SizedBox(
           height: NavBarMetrics.pillHeight,
-          child: FloatingNavigationBar(
-            lensKey: highlightKey,
-            selectedIndex: index < 0 ? 0 : index,
-            onSelected: handleSelected,
-            destinations: [
-              for (final item in items)
-                NavBarDestination(
-                  icon: item.icon.icon ?? Icons.circle,
-                  label: item.label.label,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: FloatingNavigationBar(
+                  lensKey: highlightKey,
+                  selectedIndex: index < 0 ? 0 : index,
+                  onSelected: handleSelected,
+                  destinations: [
+                    for (final item in items)
+                      NavBarDestination(
+                        icon: item.icon.icon ?? Icons.circle,
+                        label: item.label.label,
+                      ),
+                  ],
                 ),
+              ),
+              _DockTrailing(height: NavBarMetrics.pillHeight, child: trailing),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DockedMarker extends InheritedWidget {
+  const _DockedMarker({required super.child});
+
+  @override
+  bool updateShouldNotify(_DockedMarker oldWidget) => false;
+}
+
+class _DockTrailing extends StatelessWidget {
+  const _DockTrailing({required this.height, required this.child});
+
+  final double height;
+  final Widget? child;
+
+  ThemeData _dockedTheme(ThemeData theme) {
+    return theme.copyWith(
+      floatingActionButtonTheme: theme.floatingActionButtonTheme.copyWith(
+        shape: AppShape.full,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        disabledElevation: 0,
+        sizeConstraints: BoxConstraints.tightFor(width: height, height: height),
+        iconSize: _trailingIconSize,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final child = this.child;
+    return AnimatedSize(
+      duration: _slotDuration,
+      curve: Easing.emphasizedDecelerate,
+      alignment: AlignmentDirectional.centerEnd,
+      clipBehavior: Clip.none,
+      child: AnimatedSwitcher(
+        duration: _slotDuration,
+        layoutBuilder: (current, previous) => Stack(
+          alignment: AlignmentDirectional.centerEnd,
+          children: [...previous, ?current],
+        ),
+        child: child == null
+            ? const SizedBox.shrink()
+            : Padding(
+                padding: const EdgeInsetsDirectional.only(start: _fabGap),
+                child: ElasticButton(
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: AppShape.full,
+                      shadows: _dockShadows(theme.colorScheme),
+                    ),
+                    child: Builder(
+                      builder: (context) => Theme(
+                        data: _dockedTheme(Theme.of(context)),
+                        child: _DockedMarker(child: child),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+/// Grows under a press and stretches after a dragging finger, springing back
+/// on release, as the bar's lens does.
+///
+/// The press only paints: layout, hit testing, and anything anchored to the
+/// child, such as a popup menu or a tooltip, see it at rest.
+class ElasticPress extends StatefulWidget {
+  const ElasticPress({super.key, this.enabled = true, required this.child});
+
+  /// Leaves a press on the button inside to the swell alone.
+  static const buttonStyle = ButtonStyle(
+    splashFactory: NoSplash.splashFactory,
+    overlayColor: WidgetStateMapper<Color?>({
+      WidgetState.pressed: Colors.transparent,
+    }),
+  );
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  State<ElasticPress> createState() => _ElasticPressState();
+}
+
+class _ElasticPressState extends State<ElasticPress>
+    with TickerProviderStateMixin {
+  late final _Spring _lift = _Spring(this, 0);
+  late final _Spring _pullX = _Spring(this, 0);
+  late final _Spring _pullY = _Spring(this, 0);
+  late final Listenable _motion = Listenable.merge([_lift, _pullX, _pullY]);
+  int? _pointer;
+  Offset _origin = Offset.zero;
+
+  @override
+  void dispose() {
+    _lift.dispose();
+    _pullX.dispose();
+    _pullY.dispose();
+    super.dispose();
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (!widget.enabled ||
+        _pointer != null ||
+        event.buttons & kPrimaryButton == 0) {
+      return;
+    }
+    _pointer = event.pointer;
+    _origin = event.localPosition;
+    _lift.springTo(1, _liftSpring);
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.pointer != _pointer) {
+      return;
+    }
+    final limit = context.size!.shortestSide * _pullLimit;
+    final pull = event.localPosition - _origin;
+    _pullX.springTo(_rubberBand(pull.dx, limit), _trackSpring);
+    _pullY.springTo(_rubberBand(pull.dy, limit), _trackSpring);
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    if (event.pointer != _pointer) {
+      return;
+    }
+    _pointer = null;
+    _lift.springTo(0, _settleSpring);
+    _pullX.springTo(0, _settleSpring);
+    _pullY.springTo(0, _settleSpring);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerMove: _handlePointerMove,
+      onPointerUp: _handlePointerEnd,
+      onPointerCancel: _handlePointerEnd,
+      child: AnimatedBuilder(
+        animation: _motion,
+        builder: (_, child) => _PressTransform(
+          lift: _lift.value,
+          pull: Offset(_pullX.value, _pullY.value),
+          child: child,
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Leaves a press on the filled button or FAB inside to [ElasticPress]; one
+/// whose style sets a foreground color merges [ElasticPress.buttonStyle].
+class ElasticButton extends StatelessWidget {
+  const ElasticButton({super.key, this.enabled = true, required this.child});
+
+  final bool enabled;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ElasticPress(
+      enabled: enabled,
+      child: Theme(
+        data: theme.copyWith(
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: Colors.transparent,
+        ),
+        child: IconTheme(
+          data: IconTheme.of(context),
+          child: IconButtonTheme(
+            data: IconButtonThemeData(
+              style: ElasticPress.buttonStyle.merge(
+                IconButtonTheme.of(context).style,
+              ),
+            ),
+            child: FilledButtonTheme(
+              data: FilledButtonThemeData(
+                style: ElasticPress.buttonStyle.merge(
+                  FilledButtonTheme.of(context).style,
+                ),
+              ),
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PressTransform extends SingleChildRenderObjectWidget {
+  const _PressTransform({required this.lift, required this.pull, super.child});
+
+  final double lift;
+  final Offset pull;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderPressTransform(lift: lift, pull: pull);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderPressTransform renderObject,
+  ) {
+    renderObject
+      ..lift = lift
+      ..pull = pull;
+  }
+}
+
+class _RenderPressTransform extends RenderProxyBox {
+  _RenderPressTransform({required double lift, required Offset pull})
+    : _lift = lift,
+      _pull = pull;
+
+  double _lift;
+  Offset _pull;
+
+  set lift(double value) {
+    if (value == _lift) {
+      return;
+    }
+    _lift = value;
+    markNeedsPaint();
+  }
+
+  set pull(Offset value) {
+    if (value == _pull) {
+      return;
+    }
+    _pull = value;
+    markNeedsPaint();
+  }
+
+  Matrix4 get _transform {
+    final swell =
+        1 +
+        _lift * math.min(_pressGrowth * 2, _maxPressGrowth / size.longestSide);
+    final scaleX = swell * (1 + _pull.dx.abs() / size.width * _pullStretch);
+    final scaleY = swell * (1 + _pull.dy.abs() / size.height * _pullStretch);
+    final center = size.center(Offset.zero);
+    return Matrix4.diagonal3Values(scaleX, scaleY, 1)..setTranslationRaw(
+      center.dx * (1 - scaleX) + _pull.dx,
+      center.dy * (1 - scaleY) + _pull.dy,
+      0,
+    );
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null || size.isEmpty || (_lift == 0 && _pull == Offset.zero)) {
+      layer = null;
+      super.paint(context, offset);
+      return;
+    }
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:reclash/common/common.dart';
@@ -8,7 +9,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AppNavRail extends ConsumerStatefulWidget {
+final _itemShape = AppShape.all(NavRailMetrics.itemCorner);
+
+class AppNavRail extends ConsumerWidget {
   const AppNavRail({super.key, this.leading, this.onToPage, this.onAbout});
 
   @visibleForTesting
@@ -21,78 +24,13 @@ class AppNavRail extends ConsumerStatefulWidget {
   final void Function(PageLabel label)? onToPage;
   final VoidCallback? onAbout;
 
-  @override
-  ConsumerState<AppNavRail> createState() => _AppNavRailState();
-}
-
-class _AppNavRailState extends ConsumerState<AppNavRail>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  double _from = 0;
-  double _to = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _from = _to = _indexOf(
-      ref.read(currentPageLabelProvider),
-      ref.read(currentNavigationItemsStateProvider).value,
-    ).toDouble();
-    _controller = AnimationController(
-      vsync: this,
-      duration: NavRailMetrics.motionDuration,
-      value: 1,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (context.disableAnimations) {
-      _controller.stop();
-      _from = _to;
-      _controller.value = 1;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  int _indexOf(PageLabel label, List<NavigationItem> items) {
+  static int _indexOf(PageLabel label, List<NavigationItem> items) {
     final index = items.indexWhere((item) => item.label == label);
     return index < 0 ? 0 : index;
   }
 
-  double get _position => lerpDouble(
-    _from,
-    _to,
-    NavRailMetrics.motionCurve.transform(_controller.value),
-  )!;
-
-  void _hopTo(int index) {
-    if (index.toDouble() == _to) {
-      return;
-    }
-    if (context.disableAnimations) {
-      _snapTo(index);
-      return;
-    }
-    _from = _position;
-    _to = index.toDouble();
-    _controller.forward(from: 0);
-  }
-
-  void _snapTo(int index) {
-    _from = _to = index.toDouble();
-    _controller.value = 1;
-  }
-
-  void _handleTap(PageLabel label) {
-    final callback = widget.onToPage;
+  void _handleTap(WidgetRef ref, PageLabel label) {
+    final callback = onToPage;
     if (callback != null) {
       callback(label);
       return;
@@ -101,21 +39,10 @@ class _AppNavRailState extends ConsumerState<AppNavRail>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(currentNavigationItemsStateProvider).value;
-
-    // Listeners, not build: this also covers navigation that did not come
-    // from a tap here, and never marks the subtree dirty mid-build.
-    ref.listen(currentPageLabelProvider, (_, next) {
-      _hopTo(
-        _indexOf(next, ref.read(currentNavigationItemsStateProvider).value),
-      );
-    });
-    ref.listen(currentNavigationItemsStateProvider, (_, next) {
-      _snapTo(_indexOf(ref.read(currentPageLabelProvider), next.value));
-    });
-
-    final leading = widget.leading;
+    final selectedIndex = _indexOf(ref.watch(currentPageLabelProvider), items);
+    final leading = this.leading;
     return SizedBox(
       width: NavRailMetrics.width,
       child: Column(
@@ -124,11 +51,9 @@ class _AppNavRailState extends ConsumerState<AppNavRail>
           Expanded(
             child: _RailBody(
               items: items,
-              controller: _controller,
-              positionOf: () => _position,
-              selectedIndexOf: () => _to.round(),
-              onToPage: _handleTap,
-              onAbout: widget.onAbout,
+              selectedIndex: selectedIndex,
+              onToPage: (label) => _handleTap(ref, label),
+              onAbout: onAbout,
             ),
           ),
         ],
@@ -140,17 +65,13 @@ class _AppNavRailState extends ConsumerState<AppNavRail>
 class _RailBody extends StatelessWidget {
   const _RailBody({
     required this.items,
-    required this.controller,
-    required this.positionOf,
-    required this.selectedIndexOf,
+    required this.selectedIndex,
     required this.onToPage,
     this.onAbout,
   });
 
   final List<NavigationItem> items;
-  final AnimationController controller;
-  final double Function() positionOf;
-  final int Function() selectedIndexOf;
+  final int selectedIndex;
   final void Function(PageLabel label) onToPage;
   final VoidCallback? onAbout;
 
@@ -175,6 +96,7 @@ class _RailBody extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final colorScheme = context.colorScheme;
+    final colors = _RailColors(colorScheme);
     const slotHeight = NavRailMetrics.stackedSlotHeight;
     final boundaries = <int>[
       for (var i = 1; i < items.length; i++)
@@ -205,75 +127,37 @@ class _RailBody extends StatelessWidget {
                   tops.add(y);
                   y += slotHeight;
                 }
+                final centers = [for (final top in tops) top + slotHeight / 2];
 
-                final body = AnimatedBuilder(
-                  animation: controller,
-                  builder: (context, _) {
-                    final position = positionOf().clamp(
-                      0.0,
-                      (items.length - 1).toDouble(),
-                    );
-                    final pillTop = _topAt(position, tops);
-                    return Stack(
-                      children: [
-                        for (final dividerY in dividers)
-                          Positioned(
-                            top: dividerY,
-                            left: NavRailMetrics.pillInsetX + 4,
-                            right: NavRailMetrics.pillInsetX + 4,
-                            height: NavRailMetrics.hairline,
-                            child: ColoredBox(
-                              color: colorScheme.outlineVariant.withValues(
-                                alpha: 0.6,
-                              ),
-                            ),
-                          ),
-                        Positioned(
-                          top: pillTop + NavRailMetrics.pillInsetY,
-                          left: NavRailMetrics.pillInsetX,
-                          right: NavRailMetrics.pillInsetX,
-                          height: slotHeight - NavRailMetrics.pillInsetY * 2,
-                          child: DecoratedBox(
-                            key: AppNavRail.highlightKey,
-                            decoration: ShapeDecoration(
-                              color: colorScheme.primary,
-                              shape: AppShape.md,
-                            ),
+                final body = Stack(
+                  children: [
+                    for (final dividerY in dividers)
+                      Positioned(
+                        top: dividerY,
+                        left: NavRailMetrics.pillInsetX + 4,
+                        right: NavRailMetrics.pillInsetX + 4,
+                        height: NavRailMetrics.hairline,
+                        child: ColoredBox(
+                          color: colorScheme.outlineVariant.withValues(
+                            alpha: 0.6,
                           ),
                         ),
-                        _SlotLayer(
-                          items: items,
-                          tops: tops,
-                          slotHeight: slotHeight,
-                          selectedIndex: selectedIndexOf(),
-                          color: colorScheme.onSurfaceVariant,
-                          onToPage: onToPage,
-                        ),
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: ExcludeSemantics(
-                              child: ClipPath(
-                                clipper: _HighlightClip(
-                                  shape: AppShape.md,
-                                  top: pillTop + NavRailMetrics.pillInsetY,
-                                  height:
-                                      slotHeight -
-                                      NavRailMetrics.pillInsetY * 2,
-                                ),
-                                child: _SlotLayer(
-                                  items: items,
-                                  tops: tops,
-                                  slotHeight: slotHeight,
-                                  selectedIndex: selectedIndexOf(),
-                                  color: colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                      ),
+                    _SlotLayer(
+                      items: items,
+                      tops: tops,
+                      slotHeight: slotHeight,
+                      selectedIndex: selectedIndex,
+                      colors: colors,
+                      onToPage: onToPage,
+                    ),
+                    _SelectionIndicator(
+                      key: AppNavRail.highlightKey,
+                      color: colors.indicator,
+                      index: selectedIndex,
+                      centers: centers,
+                    ),
+                  ],
                 );
 
                 if (extent <= constraints.maxHeight) {
@@ -312,7 +196,7 @@ class _RailBody extends StatelessWidget {
                 child: _RailSlot(
                   icon: Icons.info_outline,
                   label: context.appLocalizations.about,
-                  color: colorScheme.onSurfaceVariant,
+                  colors: colors,
                   selected: false,
                   onToPage: onAbout,
                 ),
@@ -323,12 +207,31 @@ class _RailBody extends StatelessWidget {
       ),
     );
   }
+}
 
-  double _topAt(double position, List<double> tops) {
-    final low = position.floor().clamp(0, tops.length - 1);
-    final high = position.ceil().clamp(0, tops.length - 1);
-    return lerpDouble(tops[low], tops[high], position - low)!;
-  }
+/// FlClash's sidebar palette: selection reads as a soft [selectedFill] tint
+/// plus the primary edge [indicator], and hover/press/focus ride the same
+/// low-alpha [overlay] rather than an ink splash.
+class _RailColors {
+  _RailColors(ColorScheme scheme)
+    : selectedFill = scheme.onSurface.withValues(alpha: 0.08),
+      foreground = scheme.onSurface,
+      foregroundMuted = scheme.onSurfaceVariant,
+      indicator = scheme.primary,
+      focusRing = scheme.primary,
+      overlay = WidgetStateProperty.fromMap({
+        WidgetState.pressed: scheme.onSurface.withValues(alpha: 0.06),
+        WidgetState.focused: scheme.onSurface.withValues(alpha: 0.1),
+        WidgetState.hovered: scheme.onSurface.withValues(alpha: 0.04),
+        WidgetState.any: Colors.transparent,
+      });
+
+  final Color selectedFill;
+  final Color foreground;
+  final Color foregroundMuted;
+  final Color indicator;
+  final Color focusRing;
+  final WidgetStateProperty<Color> overlay;
 }
 
 class _SlotLayer extends StatelessWidget {
@@ -337,16 +240,16 @@ class _SlotLayer extends StatelessWidget {
     required this.tops,
     required this.slotHeight,
     required this.selectedIndex,
-    required this.color,
-    this.onToPage,
+    required this.colors,
+    required this.onToPage,
   });
 
   final List<NavigationItem> items;
   final List<double> tops;
   final double slotHeight;
   final int selectedIndex;
-  final Color color;
-  final void Function(PageLabel label)? onToPage;
+  final _RailColors colors;
+  final void Function(PageLabel label) onToPage;
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -362,11 +265,9 @@ class _SlotLayer extends StatelessWidget {
             child: _RailSlot(
               icon: items[i].icon.icon ?? Icons.circle,
               label: items[i].label.label,
-              color: color,
+              colors: colors,
               selected: i == selectedIndex,
-              onToPage: onToPage == null
-                  ? null
-                  : () => onToPage!(items[i].label),
+              onToPage: () => onToPage(items[i].label),
             ),
           ),
         ),
@@ -378,14 +279,14 @@ class _RailSlot extends StatefulWidget {
   const _RailSlot({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.colors,
     required this.selected,
     this.onToPage,
   });
 
   final IconData icon;
   final String label;
-  final Color color;
+  final _RailColors colors;
   final bool selected;
   final VoidCallback? onToPage;
 
@@ -462,33 +363,31 @@ class _RailSlotState extends State<_RailSlot> {
 
   @override
   Widget build(BuildContext context) {
-    final label = widget.label;
-    final icon = Icon(widget.icon, size: 24, color: widget.color);
+    final colors = widget.colors;
+    final color = widget.selected ? colors.foreground : colors.foregroundMuted;
     final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          icon,
+          Icon(widget.icon, size: NavRailMetrics.iconSize, color: color),
           const SizedBox(height: 2),
           Text(
-            label,
+            widget.label,
             maxLines: 1,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.labelSmall?.copyWith(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: widget.color,
+              color: color,
             ),
           ),
         ],
       ),
     );
     final onToPage = widget.onToPage;
-    // Both layers pad identically, or the recoloured copy would sit off the
-    // resting one by the pill inset.
     const padding = EdgeInsets.symmetric(
       horizontal: NavRailMetrics.pillInsetX,
       vertical: NavRailMetrics.pillInsetY,
@@ -496,72 +395,133 @@ class _RailSlotState extends State<_RailSlot> {
     if (onToPage == null) {
       return Padding(padding: padding, child: content);
     }
+    final shape = _itemShape;
     return Semantics(
       selected: widget.selected,
       child: Padding(
         padding: padding,
-        child: Stack(
-          children: [
-            // Keyboard and D-pad focus has to read as its own state: the
-            // pill only ever shows the selected page.
-            if (_focused &&
-                !widget.selected &&
-                FocusHighlightVisibility.visible.value)
-              Positioned.fill(
-                child: DecoratedBox(
-                  key: AppNavRail.focusRingKey,
-                  decoration: ShapeDecoration(
-                    shape: AppShape.md.copyWith(
-                      side: BorderSide(
-                        color: context.colorScheme.primary,
-                        width: 2,
+        child: Material(
+          color: widget.selected ? colors.selectedFill : Colors.transparent,
+          shape: shape,
+          child: Stack(
+            children: [
+              // Keyboard and D-pad focus has to read as its own state: the
+              // selected fill only ever marks the current page.
+              if (_focused &&
+                  !widget.selected &&
+                  FocusHighlightVisibility.visible.value)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    key: AppNavRail.focusRingKey,
+                    decoration: ShapeDecoration(
+                      shape: shape.copyWith(
+                        side: BorderSide(color: colors.focusRing, width: 2),
                       ),
                     ),
                   ),
                 ),
+              Positioned.fill(
+                child: InkWell(
+                  onTap: onToPage,
+                  onFocusChange: (value) => setState(() => _focused = value),
+                  focusNode: _focusNode,
+                  customBorder: shape,
+                  mouseCursor: SystemMouseCursors.basic,
+                  splashFactory: NoSplash.splashFactory,
+                  overlayColor: colors.overlay,
+                  child: content,
+                ),
               ),
-            Positioned.fill(
-              child: InkWell(
-                onTap: onToPage,
-                onFocusChange: (value) => setState(() => _focused = value),
-                focusNode: _focusNode,
-                customBorder: AppShape.md,
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                child: content,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _HighlightClip extends CustomClipper<Path> {
-  const _HighlightClip({
-    required this.shape,
-    required this.top,
-    required this.height,
+/// FlClash's selection bar: it moves by stretching toward the new slot before
+/// its trailing edge catches up, rather than sliding at a fixed height.
+class _SelectionIndicator extends StatefulWidget {
+  const _SelectionIndicator({
+    super.key,
+    required this.color,
+    required this.index,
+    required this.centers,
   });
 
-  final ShapeBorder shape;
-  final double top;
-  final double height;
+  final Color color;
+  final int index;
+  final List<double> centers;
 
   @override
-  Path getClip(Size size) => shape.getOuterPath(
-    Rect.fromLTWH(
-      NavRailMetrics.pillInsetX,
-      top,
-      size.width - NavRailMetrics.pillInsetX * 2,
-      height,
-    ),
+  State<_SelectionIndicator> createState() => _SelectionIndicatorState();
+}
+
+class _SelectionIndicatorState extends State<_SelectionIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: NavRailMetrics.indicatorDuration,
+    value: 1,
   );
+  late int _from = widget.index;
 
   @override
-  bool shouldReclip(_HighlightClip oldClipper) =>
-      oldClipper.shape != shape ||
-      oldClipper.top != top ||
-      oldClipper.height != height;
+  void didUpdateWidget(covariant _SelectionIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != widget.index) {
+      _from = oldWidget.index;
+      if (context.disableAnimations) {
+        _controller.value = 1;
+      } else {
+        _controller.forward(from: 0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  double _topOf(int index) {
+    final clamped = index.clamp(0, widget.centers.length - 1);
+    return widget.centers[clamped] - NavRailMetrics.indicatorHeight / 2;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        final from = _topOf(_from);
+        final to = _topOf(widget.index);
+        final lead = Curves.easeOutCubic.transform(math.min(1, t / 0.6));
+        final trail = Curves.easeInOutCubic.transform(
+          math.max(0, (t - 0.35) / 0.65),
+        );
+        final (top, bottom) = to >= from
+            ? (lerpDouble(from, to, trail)!, lerpDouble(from, to, lead)!)
+            : (lerpDouble(from, to, lead)!, lerpDouble(from, to, trail)!);
+        return PositionedDirectional(
+          start: NavRailMetrics.pillInsetX,
+          top: top,
+          width: NavRailMetrics.indicatorWidth,
+          height: bottom - top + NavRailMetrics.indicatorHeight,
+          child: child!,
+        );
+      },
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            color: widget.color,
+            shape: AppShape.full,
+          ),
+        ),
+      ),
+    );
+  }
 }

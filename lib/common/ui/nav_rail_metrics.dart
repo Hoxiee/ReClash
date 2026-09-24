@@ -10,6 +10,12 @@ abstract final class NavRailMetrics {
   static const double pillInsetX = 6;
   static const double pillInsetY = 4;
 
+  static const double itemCorner = 10;
+  static const double iconSize = 24;
+
+  static const double indicatorWidth = 3;
+  static const double indicatorHeight = 16;
+
   static const double groupGap = 8;
   static const double hairline = 1;
 
@@ -22,4 +28,6 @@ abstract final class NavRailMetrics {
 
   static const Duration motionDuration = NavBarMetrics.motionDuration;
   static const Curve motionCurve = NavBarMetrics.motionCurve;
+
+  static const Duration indicatorDuration = Duration(milliseconds: 320);
 }

@@ -635,6 +635,25 @@ class LocationPermissions extends _$LocationPermissions
   }
 }
 
+/// True while the recorder dialog is open; the manager drops all registrations
+/// so the OS hands the recorder a bound combination instead of running it.
+@Riverpod(keepAlive: true)
+class HotKeyRecording extends _$HotKeyRecording with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
+/// Per-action reason a binding could not be registered, so the row can warn.
+@Riverpod(keepAlive: true)
+class HotKeyFailures extends _$HotKeyFailures with AutoDisposeNotifierMixin {
+  @override
+  Map<HotAction, String> build() {
+    return const {};
+  }
+}
+
 List<Override> buildAppStateOverrides(AppState appState) {
   return [
     initProvider.overrideWithBuild((_, _) => appState.isInit),

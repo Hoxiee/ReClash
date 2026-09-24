@@ -4,6 +4,7 @@ import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widgets/start_button.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,6 +67,19 @@ class _HomeShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(navigationStateProvider);
     final isMobile = state.viewMode == ViewMode.mobile;
+    // The dock owns the start control on a phone; the hero orb owns it on the
+    // new dashboard, so the trailing button gives way there.
+    final onLegacyDashboard =
+        ref.watch(currentPageLabelProvider) == PageLabel.dashboard &&
+        !ref.watch(newDashboardEnabledProvider);
+    final hasStartControl =
+        ref.watch(profilesProvider.select((state) => state.isNotEmpty)) ||
+        ref.watch(
+          effectiveDesyncSettingProvider.select(
+            (state) => state.enabled && state.onlyDpi,
+          ),
+        );
+    final showStart = isMobile && onLegacyDashboard && hasStartControl;
     // The bar is only collapsed in desktop view, never unmounted: one tree
     // shape across view modes.
     return Material(
@@ -102,6 +116,7 @@ class _HomeShell extends ConsumerWidget {
                 context: context,
                 child: AppNavBar(
                   onToPage: (label) => _handleToPage(label, ref),
+                  trailing: showStart ? const StartButton() : null,
                 ),
               ),
             ),

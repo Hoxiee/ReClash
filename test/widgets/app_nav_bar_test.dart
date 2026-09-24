@@ -18,7 +18,7 @@ void main() {
     matching: find.byType(PositionedDirectional),
   );
 
-  Future<void> pumpBar(WidgetTester tester) async {
+  Future<void> pumpBar(WidgetTester tester, {Widget? trailing}) async {
     container = ProviderContainer(
       overrides: [
         navigationItemsStateProvider.overrideWithValue(
@@ -50,10 +50,13 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(
+        child: TestApp(
           includeNavigatorKey: false,
           child: Scaffold(
-            body: Align(alignment: Alignment.bottomCenter, child: AppNavBar()),
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: AppNavBar(trailing: trailing),
+            ),
           ),
         ),
       ),
@@ -290,5 +293,41 @@ void main() {
     labels = await pumpLabels('Configuration');
     expect(labels.first.style!.fontSize, closeTo(10, 0.001));
     expect(tester.widget<Tooltip>(tooltips).message, 'Configuration');
+  });
+
+  testWidgets('the trailing slot renders docked, the bar itself does not', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    bool? dockedInTrailing;
+    await pumpBar(
+      tester,
+      trailing: Builder(
+        builder: (context) {
+          dockedInTrailing = AppNavBar.isDocked(context);
+          return const Icon(Icons.rocket_launch);
+        },
+      ),
+    );
+
+    expect(find.byIcon(Icons.rocket_launch), findsOneWidget);
+    expect(dockedInTrailing, isTrue);
+
+    final barContext = tester.element(find.byType(FloatingNavigationBar));
+    expect(AppNavBar.isDocked(barContext), isFalse);
+  });
+
+  testWidgets('an absent trailing slot leaves nothing behind', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await pumpBar(tester);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.rocket_launch), findsNothing);
   });
 }

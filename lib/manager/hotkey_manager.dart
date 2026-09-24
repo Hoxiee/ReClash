@@ -41,9 +41,20 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
     super.initState();
     ref.listenManual(hotKeyActionsProvider, (prev, next) {
       if (!hotKeyActionListEquality.equals(prev, next)) {
-        _updateHotKeys(hotKeyActions: next);
+        _scheduleUpdate();
       }
     }, fireImmediately: true);
+    ref.listenManual(hotKeyRecordingProvider, (prev, next) {
+      if (prev != next) {
+        _scheduleUpdate();
+      }
+    });
+  }
+
+  void _scheduleUpdate() {
+    _updating = (_updating ?? Future<void>.value())
+        .then((_) => _applyHotKeys())
+        .then((_) {}, onError: (_) {});
   }
 
   Future<void> _handleHotKeyAction(HotAction action) async {
@@ -88,38 +99,47 @@ class _HotKeyManagerState extends ConsumerState<HotKeyManager> {
 
   Future<void>? _updating;
 
-  Future<void> _updateHotKeys({required List<HotKeyAction> hotKeyActions}) {
-    final run = (_updating ?? Future<void>.value()).then(
-      (_) => _applyHotKeys(hotKeyActions: hotKeyActions),
-    );
-    _updating = run.then((_) {}, onError: (_) {});
-    return run;
-  }
-
-  Future<void> _applyHotKeys({
-    required List<HotKeyAction> hotKeyActions,
-  }) async {
+  /// While the recorder is open nothing stays registered, so the OS lets the
+  /// recorder capture a combination that is otherwise bound.
+  Future<void> _applyHotKeys() async {
+    if (!mounted) {
+      return;
+    }
     await hotKeyManager.unregisterAll();
-    final hotkeyActionHandles = hotKeyActions
+    if (ref.read(hotKeyRecordingProvider)) {
+      if (mounted) {
+        ref.read(hotKeyFailuresProvider.notifier).value = const {};
+      }
+      return;
+    }
+    final failures = <HotAction, String>{};
+    final handles = ref
+        .read(hotKeyActionsProvider)
         .where((hotKeyAction) {
           return hotKeyAction.key != null && hotKeyAction.modifiers.isNotEmpty;
         })
-        .map<Future>((hotKeyAction) async {
-          final modifiers = hotKeyAction.modifiers
-              .map((item) => item.toHotKeyModifier())
-              .toList();
+        .map<Future<void>>((hotKeyAction) async {
           final hotKey = HotKey(
             key: PhysicalKeyboardKey(hotKeyAction.key!),
-            modifiers: modifiers,
+            modifiers: hotKeyAction.modifiers
+                .map((item) => item.toHotKeyModifier())
+                .toList(),
           );
-          return hotKeyManager.register(
-            hotKey,
-            keyDownHandler: (_) {
-              _handleHotKeyAction(hotKeyAction.action);
-            },
-          );
+          try {
+            await hotKeyManager.register(
+              hotKey,
+              keyDownHandler: (_) {
+                _handleHotKeyAction(hotKeyAction.action);
+              },
+            );
+          } catch (error) {
+            failures[hotKeyAction.action] = '$error';
+          }
         });
-    await Future.wait(hotkeyActionHandles);
+    await Future.wait(handles);
+    if (mounted) {
+      ref.read(hotKeyFailuresProvider.notifier).value = failures;
+    }
   }
 
   Shortcuts _buildCloseShortcuts(Widget child) {

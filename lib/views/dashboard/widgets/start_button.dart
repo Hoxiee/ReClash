@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _widthAnimationDuration = Duration(milliseconds: 200);
 const _buttonHeight = 56.0;
+const _iconMorphDuration = Duration(milliseconds: 450);
 
 TextStyle? _runTimeTextStyle(BuildContext context) {
   return context.textTheme.titleMedium?.toSoftBold.copyWith(
@@ -164,6 +169,16 @@ class _StartButtonState extends ConsumerState<StartButton>
         24;
   }
 
+  Widget _buildPlayPauseIcon(bool isStart) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: isStart ? 1 : 0),
+      duration: _iconMorphDuration,
+      curve: Curves.easeOutBack,
+      builder: (_, progress, _) =>
+          GlyphIcon(AppGlyphs.playPause(progress), fill: 1),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasProfile = ref.watch(
@@ -179,6 +194,18 @@ class _StartButtonState extends ConsumerState<StartButton>
     }
     final paused = ref.watch(pausedProvider);
     final isStart = ref.watch(isStartProvider);
+    if (AppNavBar.isDocked(context)) {
+      final appLocalizations = context.appLocalizations;
+      return BreathingRing(
+        active: isStart && !paused,
+        child: FloatingActionButton(
+          heroTag: null,
+          tooltip: isStart ? appLocalizations.stop : appLocalizations.start,
+          onPressed: handleSwitchStart,
+          child: _buildPlayPauseIcon(isStart),
+        ),
+      );
+    }
     final showPauseButton =
         isStart && (ref.watch(tunEnabledProvider) || paused);
     final theme = Theme.of(context);
@@ -289,4 +316,141 @@ class _PauseFab extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// A soft ring that breathes around the docked start button while the core
+/// runs, so the trailing circle reads as live without a spinner.
+class BreathingRing extends StatefulWidget {
+  const BreathingRing({super.key, required this.active, required this.child});
+
+  final bool active;
+  final Widget child;
+
+  @override
+  State<BreathingRing> createState() => _BreathingRingState();
+}
+
+class _BreathingRingState extends State<BreathingRing> {
+  static const _breathDuration = Duration(milliseconds: 1400);
+  // A ticker would redraw the screen on every vsync for as long as the core runs.
+  static const _breathStep = Duration(milliseconds: 66);
+  static const _fadeDuration = Duration(milliseconds: 300);
+
+  final _breath = ValueNotifier<double>(0);
+  late final AppLifecycleListener _lifecycle;
+  Timer? _timer;
+  int _steps = 0;
+  bool _canAnimate = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onStateChange: (_) => _sync());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _canAnimate =
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(BreathingRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  bool get _isForeground => switch (WidgetsBinding.instance.lifecycleState) {
+    null || AppLifecycleState.resumed || AppLifecycleState.inactive => true,
+    _ => false,
+  };
+
+  void _sync() {
+    if (!widget.active || !_canAnimate || !_isForeground) {
+      _timer?.cancel();
+      _timer = null;
+      if (widget.active) _breath.value = 1;
+      return;
+    }
+    _timer ??= Timer.periodic(_breathStep, (_) => _step());
+  }
+
+  void _step() {
+    final period = _breathDuration.inMicroseconds / _breathStep.inMicroseconds;
+    final phase = ++_steps % (2 * period) / period;
+    _breath.value = Curves.easeInOut.transform(phase <= 1 ? phase : 2 - phase);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _lifecycle.dispose();
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        widget.child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: widget.active ? 1 : 0,
+              duration: _fadeDuration,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: _BreathingRingPainter(
+                    breath: _breath,
+                    color: theme.colorScheme.primary,
+                    shape:
+                        theme.floatingActionButtonTheme.shape ?? AppShape.full,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BreathingRingPainter extends CustomPainter {
+  _BreathingRingPainter({
+    required this.breath,
+    required this.color,
+    required this.shape,
+  }) : super(repaint: breath);
+
+  // The dock leaves 8 between the button and the bar and above it; the ring's
+  // outer edge stays inside that at its widest.
+  static const _gap = 3.0;
+  static const _spread = 2.0;
+  static const _width = 2.0;
+
+  final ValueNotifier<double> breath;
+  final Color color;
+  final ShapeBorder shape;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = breath.value;
+    final rect = (Offset.zero & size).inflate(_gap + _spread * t);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _width
+      ..color = color.withValues(alpha: 0.3 + 0.6 * t);
+    canvas.drawPath(shape.getOuterPath(rect), paint);
+  }
+
+  @override
+  bool shouldRepaint(_BreathingRingPainter oldDelegate) =>
+      color != oldDelegate.color || shape != oldDelegate.shape;
 }

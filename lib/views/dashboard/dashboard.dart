@@ -12,7 +12,6 @@ import 'widget_registry.dart';
 import 'widgets/connection_mode.dart';
 import 'widgets/core_status_button.dart';
 import 'widgets/dashboard_pager.dart';
-import 'widgets/start_button.dart';
 import 'widgets/seasonal_overlay.dart';
 import 'widgets/provider_effect_overlay.dart';
 
@@ -263,7 +262,6 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           (isEdit) => CommonScaffold(
             title: context.appLocalizations.dashboard,
             actions: _buildActions(isEdit),
-            floatingActionButton: const StartButton(),
             body: Align(
               alignment: Alignment.topCenter,
               child: Builder(
