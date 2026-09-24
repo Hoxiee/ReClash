@@ -616,4 +616,65 @@ void main() {
       expect(await database.iconRecords.count.getSingle(), 2);
     },
   );
+
+  test(
+    'deleteProfile cascades a profile\'s groups and links and purges its rules',
+    () async {
+      const doomed = Profile(id: 1, autoUpdateDuration: Duration.zero);
+      const kept = Profile(id: 2, autoUpdateDuration: Duration.zero);
+      const doomedRule = Rule(
+        id: 41,
+        content: 'doomed.example',
+        ruleTarget: 'DIRECT',
+      );
+      const keptRule = Rule(
+        id: 42,
+        content: 'kept.example',
+        ruleTarget: 'DIRECT',
+      );
+      const doomedLink = ProfileRuleLink(
+        profileId: 1,
+        ruleId: 41,
+        scene: RuleScene.custom,
+      );
+      const keptLink = ProfileRuleLink(
+        profileId: 2,
+        ruleId: 42,
+        scene: RuleScene.custom,
+      );
+      const doomedGroup = ProxyGroup(
+        id: 51,
+        profileId: 1,
+        name: 'Doomed',
+        type: GroupType.Selector,
+      );
+      const keptGroup = ProxyGroup(
+        id: 52,
+        profileId: 2,
+        name: 'Kept',
+        type: GroupType.Selector,
+      );
+      await database.restore(
+        [doomed, kept],
+        const [],
+        [doomedRule, keptRule],
+        [doomedLink, keptLink],
+        [doomedGroup, keptGroup],
+        isOverride: true,
+      );
+
+      await database.deleteProfile(1);
+
+      expect((await database.profilesDao.query().get()).single.id, 2);
+      expect(await database.proxyGroups.count.getSingle(), 1);
+      expect(await database.proxyGroupsDao.query(1).get(), isEmpty);
+      expect((await database.proxyGroupsDao.query(2).get()).single.id, 52);
+      expect(await database.profileRuleLinks.count.getSingle(), 1);
+      expect(
+        (await database.rulesDao.queryProfileCustomRules(2).get()).single.id,
+        42,
+      );
+      expect(await database.rules.count.getSingle(), 1);
+    },
+  );
 }

@@ -34,7 +34,7 @@ class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -74,8 +74,12 @@ class Database extends _$Database {
             await _addColumnIfMissing(m, profiles, column);
           }
         }
+        if (from < 5) {
+          await _purgeOrphans();
+        }
       },
       beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON');
         if (!details.wasCreated) {
           await _addColumnIfMissing(
             createMigrator(),
@@ -161,15 +165,19 @@ class Database extends _$Database {
     bool isOverride = false,
   }) async {
     if (profiles.isEmpty && !isOverride) return;
-    await batch((b) {
-      if (isOverride) {
-        profilesDao.setAllWithBatch(b, profiles);
-      } else {
-        profilesDao.putAllWithBatch(
-          b,
-          profiles.map((item) => item.toCompanion()),
-        );
-      }
+    await transaction(() async {
+      await customStatement('PRAGMA defer_foreign_keys = ON');
+      await batch((b) {
+        if (isOverride) {
+          profilesDao.setAllWithBatch(b, profiles);
+        } else {
+          profilesDao.putAllWithBatch(
+            b,
+            profiles.map((item) => item.toCompanion()),
+          );
+        }
+      });
+      await _purgeOrphans();
     });
   }
 
@@ -188,21 +196,25 @@ class Database extends _$Database {
         proxyGroups.isEmpty) {
       return;
     }
-    await batch((b) {
-      if (isOverride) {
-        profilesDao.setAllWithBatch(b, profiles);
-        scriptsDao.setAllWithBatch(b, scripts);
-        rulesDao.restoreWithBatch(b, rules, links);
-        proxyGroupsDao.setAllWithBatch(null, b, proxyGroups);
-        return;
-      }
-      profilesDao.putAllWithBatch(
-        b,
-        profiles.map((item) => item.toCompanion()),
-      );
-      scriptsDao.putAllWithBatch(b, scripts);
-      rulesDao.mergeWithBatch(b, rules, links);
-      proxyGroupsDao.putAllWithBatch(b, proxyGroups);
+    await transaction(() async {
+      await customStatement('PRAGMA defer_foreign_keys = ON');
+      await batch((b) {
+        if (isOverride) {
+          profilesDao.setAllWithBatch(b, profiles);
+          scriptsDao.setAllWithBatch(b, scripts);
+          rulesDao.restoreWithBatch(b, rules, links);
+          proxyGroupsDao.setAllWithBatch(null, b, proxyGroups);
+          return;
+        }
+        profilesDao.putAllWithBatch(
+          b,
+          profiles.map((item) => item.toCompanion()),
+        );
+        scriptsDao.putAllWithBatch(b, scripts);
+        rulesDao.mergeWithBatch(b, rules, links);
+        proxyGroupsDao.putAllWithBatch(b, proxyGroups);
+      });
+      await _purgeOrphans();
     });
   }
 
@@ -215,6 +227,27 @@ class Database extends _$Database {
       proxyGroupsDao.setAllWithBatch(profileId, b, groups);
       rulesDao.setCustomRulesWithBatch(profileId, b, rules);
     });
+  }
+
+  Future<void> deleteProfile(int profileId) {
+    return transaction(() async {
+      await profiles.remove((t) => t.id.equals(profileId));
+      await rulesDao.delUnlinkedRules();
+    });
+  }
+
+  Future<void> _purgeOrphans() async {
+    final profileIds = selectOnly(profiles)..addColumns([profiles.id]);
+    final ruleIds = selectOnly(rules)..addColumns([rules.id]);
+    await profileRuleLinks.remove(
+      (t) =>
+          t.ruleId.isNotInQuery(ruleIds) |
+          (t.profileId.isNotNull() & t.profileId.isNotInQuery(profileIds)),
+    );
+    await proxyGroups.remove(
+      (t) => t.profileId.isNotNull() & t.profileId.isNotInQuery(profileIds),
+    );
+    await rulesDao.delUnlinkedRules();
   }
 }
 

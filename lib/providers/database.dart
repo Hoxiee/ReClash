@@ -268,8 +268,7 @@ final class _DeleteProfileMutation extends _ProfileMutation {
       profiles.where((profile) => profile.id != id).toList();
 
   @override
-  Future<void> persist() =>
-      database.profiles.remove((profile) => profile.id.equals(id));
+  Future<void> persist() => database.deleteProfile(id);
 }
 
 final class _SetProfilesMutation extends _ProfileMutation {

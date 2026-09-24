@@ -181,18 +181,21 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
     return file.getFileInfo();
   }
 
-  Future<void> _handleUpdateGeoDataItem() async {
-    await globalState.safeRun<void>(() async {
-      await ref
-          .read(geoResourceActionProvider.notifier)
-          .updateGeoResource(widget.type);
-    }, silence: false);
+  void _refreshFileInfo() {
     if (!mounted) {
       return;
     }
     setState(() {
       _fileInfoFuture = _getGeoFileInfo(fileName);
     });
+  }
+
+  Future<void> _handleUpdateGeoDataItem() async {
+    await globalState.safeRun<void>(() async {
+      await ref
+          .read(geoResourceActionProvider.notifier)
+          .updateGeoResource(widget.type);
+    }, silence: false);
   }
 
   List<CommonPopupMenuItem> _menuItems(BuildContext context, String url) {
@@ -216,6 +219,11 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
   @override
   Widget build(BuildContext context) {
     final isUpdating = ref.watch(isUpdatingProvider(widget.type.updatingKey));
+    ref.listen(isUpdatingProvider(widget.type.updatingKey), (prev, next) {
+      if (prev == true && !next) {
+        _refreshFileInfo();
+      }
+    });
     final url = ref.watch(
       patchClashConfigProvider.select((state) => state.geoXUrl[widget.type]),
     );
