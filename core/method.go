@@ -282,9 +282,9 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	setUiActiveMethod: withArguments(func(active *bool, response MethodResponse) {
 		response.success(handleSetUiActive(*active))
 	}),
-	getMemoryMethod: withoutArguments(func(response MethodResponse) {
+	getMemoryStatsMethod: withoutArguments(func(response MethodResponse) {
 		safeGo(response, func() {
-			response.success(handleGetMemory())
+			response.success(handleGetMemoryStats())
 		})
 	}),
 	getGoroutineCountMethod: withoutArguments(func(response MethodResponse) {

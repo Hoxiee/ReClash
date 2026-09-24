@@ -104,7 +104,7 @@ mixin CoreInterface {
 
   FutureOr<Traffic> getTotalTraffic(bool onlyStatisticsProxy);
 
-  FutureOr<int> getMemory();
+  FutureOr<CoreMemoryStats?> getMemoryStats();
 
   FutureOr<int> getGoroutineCount();
 
@@ -609,8 +609,11 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<int> getMemory() async {
-    return await _invokeMethod<int>(method: CoreMethod.getMemory) ?? 0;
+  Future<CoreMemoryStats?> getMemoryStats() async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.getMemoryStats,
+    );
+    return data == null ? null : CoreMemoryStats.fromJson(data);
   }
 
   @override

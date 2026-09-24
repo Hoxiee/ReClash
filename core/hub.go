@@ -918,8 +918,18 @@ func handleStopLog() {
 	}
 }
 
-func handleGetMemory() uint64 {
-	return statistic.DefaultManager.Memory()
+// HeapIdle still counts spans the runtime has already handed back to the OS,
+// so the retained-but-unused figure subtracts HeapReleased.
+func handleGetMemoryStats() MemoryStats {
+	var stats runtime.MemStats
+	runtime.ReadMemStats(&stats)
+	return MemoryStats{
+		Rss:          statistic.DefaultManager.Memory(),
+		HeapInuse:    stats.HeapInuse,
+		HeapIdle:     stats.HeapIdle - stats.HeapReleased,
+		StackInuse:   stats.StackInuse,
+		RuntimeOther: stats.MSpanInuse + stats.MCacheInuse + stats.BuckHashSys + stats.GCSys + stats.OtherSys,
+	}
 }
 
 func handleGetGoroutineCount() int {

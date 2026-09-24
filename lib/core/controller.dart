@@ -317,8 +317,8 @@ class CoreController {
     return _interface.getTotalTraffic(onlyStatisticsProxy);
   }
 
-  Future<int> getMemory() async {
-    return _interface.getMemory();
+  Future<CoreMemoryStats?> getMemoryStats() async {
+    return _interface.getMemoryStats();
   }
 
   Future<int> getGoroutineCount() async {

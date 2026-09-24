@@ -84,7 +84,7 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         },
         'body': '',
       },
-      CoreMethod.getMemory => 2048,
+      CoreMethod.getMemoryStats => {'rss': 2048},
       CoreMethod.doctorSnapshot ||
       CoreMethod.doctorStart ||
       CoreMethod.doctorCancel ||
@@ -360,7 +360,7 @@ void main() {
       'mode': 'rule',
       'rule': ['MATCH,DIRECT'],
     });
-    expect(await handler.getMemory(), 2048);
+    expect((await handler.getMemoryStats())?.rss, 2048);
   });
 
   test(

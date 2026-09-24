@@ -36,7 +36,7 @@ enum CoreMethod {
   pauseTun,
   resumeTun,
   setUiActive,
-  getMemory,
+  getMemoryStats,
   getGoroutineCount,
   crash,
   setupConfig,

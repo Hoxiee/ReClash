@@ -82,6 +82,14 @@ type ProxiesData struct {
 	All     []string                  `json:"all"`
 }
 
+type MemoryStats struct {
+	Rss          uint64 `json:"rss"`
+	HeapInuse    uint64 `json:"heapInuse"`
+	HeapIdle     uint64 `json:"heapIdle"`
+	StackInuse   uint64 `json:"stackInuse"`
+	RuntimeOther uint64 `json:"runtimeOther"`
+}
+
 const (
 	messageMethod                    CoreMethod = "message"
 	initClashMethod                  CoreMethod = "initClash"
@@ -105,7 +113,7 @@ const (
 	closeConnectionMethod            CoreMethod = "closeConnection"
 	getExternalProvidersMethod       CoreMethod = "getExternalProviders"
 	getExternalProviderMethod        CoreMethod = "getExternalProvider"
-	getMemoryMethod                  CoreMethod = "getMemory"
+	getMemoryStatsMethod             CoreMethod = "getMemoryStats"
 	getGoroutineCountMethod          CoreMethod = "getGoroutineCount"
 	updateGeoDataMethod              CoreMethod = "updateGeoData"
 	updateExternalProviderMethod     CoreMethod = "updateExternalProvider"

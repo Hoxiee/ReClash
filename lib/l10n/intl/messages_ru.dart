@@ -143,141 +143,143 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(label, max) => "«${label}» — не более ${max} символов";
 
-  static String m53(count) =>
-      "${Intl.plural(count, one: '${count} минуту назад', few: '${count} минуты назад', many: '${count} минут назад', other: '${count} минуты назад')}";
+  static String m53(size) => "Освобождено ${size}";
 
   static String m54(count) =>
+      "${Intl.plural(count, one: '${count} минуту назад', few: '${count} минуты назад', many: '${count} минут назад', other: '${count} минуты назад')}";
+
+  static String m55(count) =>
       "${Intl.plural(count, one: '${count} месяц назад', few: '${count} месяца назад', many: '${count} месяцев назад', other: '${count} месяца назад')}";
 
-  static String m55(label) => "${label}: пока ничего нет";
+  static String m56(label) => "${label}: пока ничего нет";
 
-  static String m56(label) => "Значение «${label}» должно быть числом";
+  static String m57(label) => "Значение «${label}» должно быть числом";
 
-  static String m57(settings) =>
+  static String m58(settings) =>
       "Подписка запрашивает следующие общие настройки приложения:\n${settings}";
 
-  static String m58(label) =>
+  static String m59(label) =>
       "Значение «${label}» должно быть от 1024 до 49151";
 
-  static String m59(count) =>
+  static String m60(count) =>
       "Профиль импортирован; пропущено неподдерживаемых узлов: ${count}";
 
-  static String m60(format, client, nodes, groups) =>
+  static String m61(format, client, nodes, groups) =>
       "Импортировано: ${format} · ${client} · узлов: ${nodes} · групп: ${groups}";
 
-  static String m61(days) => "Не использовался ${days} дн.";
+  static String m62(days) => "Не использовался ${days} дн.";
 
-  static String m62(months) => "Не использовался ${months} мес.";
+  static String m63(months) => "Не использовался ${months} мес.";
 
-  static String m63(count) => "${count} прокси";
+  static String m64(count) => "${count} прокси";
 
-  static String m64(count) => "Профили: ${count}";
+  static String m65(count) => "Профили: ${count}";
 
-  static String m65(count) => "Группы прокси: ${count}";
+  static String m66(count) => "Группы прокси: ${count}";
 
-  static String m66(count) => "Правила: ${count}";
+  static String m67(count) => "Правила: ${count}";
 
-  static String m67(count) => "Сценарии: ${count}";
+  static String m68(count) => "Сценарии: ${count}";
 
-  static String m68(count) =>
+  static String m69(count) =>
       "${Intl.plural(count, one: '${count} правило', few: '${count} правила', many: '${count} правил', other: '${count} правила')}";
 
-  static String m69(darkAt, lightAt) => "Тёмная с ${darkAt} до ${lightAt}";
+  static String m70(darkAt, lightAt) => "Тёмная с ${darkAt} до ${lightAt}";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '${count} секунда', few: '${count} секунды', many: '${count} секунд', other: '${count} секунды')}";
 
-  static String m71(count) => "Выбрано: ${count}";
+  static String m72(count) => "Выбрано: ${count}";
 
-  static String m72(count) =>
+  static String m73(count) =>
       "${Intl.plural(count, one: 'Готов 1 профиль', few: 'Готово ${count} профиля', many: 'Готово ${count} профилей', other: 'Готово ${count} профиля')}";
 
-  static String m73(step, count) => "Шаг ${step} из ${count}";
+  static String m74(step, count) => "Шаг ${step} из ${count}";
 
-  static String m74(name) => "Профиль: ${name}";
+  static String m75(name) => "Профиль: ${name}";
 
-  static String m75(value) => "Умная маршрутизация: ${value}";
+  static String m76(value) => "Умная маршрутизация: ${value}";
 
-  static String m76(alive, total) =>
+  static String m77(alive, total) =>
       "Сейчас доступны ${alive} из ${total} серверов";
 
-  static String m77(percent, duration) => "${percent}% за ${duration}";
+  static String m78(percent, duration) => "${percent}% за ${duration}";
 
-  static String m78(band) => "полоса ${band}";
+  static String m79(band) => "полоса ${band}";
 
-  static String m79(bands) => "Полосы: ${bands}";
+  static String m80(bands) => "Полосы: ${bands}";
 
-  static String m80(count) => "Остывает после ${count} отказов";
+  static String m81(count) => "Остывает после ${count} отказов";
 
-  static String m81(answered, total) => "ответили ${answered} из ${total}";
+  static String m82(answered, total) => "ответили ${answered} из ${total}";
 
-  static String m82(seconds) => "осталось ${seconds} сек";
+  static String m83(seconds) => "осталось ${seconds} сек";
 
-  static String m83(count) => "${count} отказов подряд";
+  static String m84(count) => "${count} отказов подряд";
 
-  static String m84(step) => "Проиграл на строке: ${step}";
+  static String m85(step) => "Проиграл на строке: ${step}";
 
-  static String m85(duration) => "Измерено за ${duration}";
+  static String m86(duration) => "Измерено за ${duration}";
 
-  static String m86(ms) => "${ms} мс";
+  static String m87(ms) => "${ms} мс";
 
-  static String m87(minutes) => "${minutes} мин";
+  static String m88(minutes) => "${minutes} мин";
 
-  static String m88(measured, total) => "измерено ${measured} из ${total}";
+  static String m89(measured, total) => "измерено ${measured} из ${total}";
 
-  static String m89(preset) => "${preset} · изменён";
+  static String m90(preset) => "${preset} · изменён";
 
-  static String m90(left, cap) =>
+  static String m91(left, cap) =>
       "Осталось проб в этом часе: ${left} из ${cap}";
 
-  static String m91(value, against) => "${value} против ${against}";
+  static String m92(value, against) => "${value} против ${against}";
 
-  static String m92(seconds) => "${seconds} с";
+  static String m93(seconds) => "${seconds} с";
 
-  static String m93(eligible, total) => "${eligible} из ${total} пригодны";
+  static String m94(eligible, total) => "${eligible} из ${total} пригодны";
 
-  static String m94(count) => "Признаков специальных серверов: ${count}";
+  static String m95(count) => "Признаков специальных серверов: ${count}";
 
-  static String m95(provider) => "Провайдер: ${provider}";
+  static String m96(provider) => "Провайдер: ${provider}";
 
-  static String m96(count) => "Признаков от провайдера: ${count}";
+  static String m97(count) => "Признаков от провайдера: ${count}";
 
-  static String m97(eligible, total) =>
+  static String m98(eligible, total) =>
       "Готовы ${eligible} из ${total} серверов";
 
-  static String m98(label) =>
+  static String m99(label) =>
       "Поле «${label}» должно занимать не больше 64 байт UTF-8";
 
-  static String m99(node) => "Через ${node}";
+  static String m100(node) => "Через ${node}";
 
-  static String m100(eligible, total, blocked) =>
+  static String m101(eligible, total, blocked) =>
       "прошли ${eligible} из ${total}, отсеяно ${blocked}";
 
-  static String m101(strategy) => "${strategy} · изменено";
+  static String m102(strategy) => "${strategy} · изменено";
 
-  static String m102(from, to) => "${from} → ${to}";
+  static String m103(from, to) => "${from} → ${to}";
 
-  static String m103(time) => "Смена сервера ${time} назад";
+  static String m104(time) => "Смена сервера ${time} назад";
 
-  static String m104(count) => "${count} серверов";
+  static String m105(count) => "${count} серверов";
 
-  static String m105(step) => "Стоит выше на строке: ${step}";
+  static String m106(step) => "Стоит выше на строке: ${step}";
 
-  static String m106(host) => "Провайдер переехал на ${host}";
+  static String m107(host) => "Провайдер переехал на ${host}";
 
-  static String m107(count) =>
+  static String m108(count) =>
       "${Intl.plural(count, one: 'Подписка истекает через ${count} день', few: 'Подписка истекает через ${count} дня', many: 'Подписка истекает через ${count} дней', other: 'Подписка истекает через ${count} дней')}";
 
-  static String m108(value) => "Провайдер предлагает ${value}";
+  static String m109(value) => "Провайдер предлагает ${value}";
 
-  static String m109(total) => "свободно из ${total}";
+  static String m110(total) => "свободно из ${total}";
 
-  static String m110(label) => "Значение «${label}» должно быть URL";
-
-  static String m111(count) =>
-      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+  static String m111(label) => "Значение «${label}» должно быть URL";
 
   static String m112(count) =>
+      "Можно хранить до ${count} фонов. Удалите один, чтобы добавить новый.";
+
+  static String m113(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', many: '${count} лет назад', other: '${count} года назад')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1577,10 +1579,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1737,7 +1738,36 @@ class MessageLookup extends MessageLookupByLibrary {
     "maxLengthTip": m52,
     "maximize": MessageLookupByLibrary.simpleMessage("Развернуть"),
     "memory": MessageLookupByLibrary.simpleMessage("Память"),
+    "memoryAppResident": MessageLookupByLibrary.simpleMessage(
+      "Резидентная память",
+    ),
+    "memoryAppShared": MessageLookupByLibrary.simpleMessage(
+      "Приложение и общее",
+    ),
+    "memoryCoreHeapIdle": MessageLookupByLibrary.simpleMessage(
+      "Свободная куча",
+    ),
+    "memoryCoreHeapInuse": MessageLookupByLibrary.simpleMessage(
+      "Куча в использовании",
+    ),
+    "memoryCoreNotRunning": MessageLookupByLibrary.simpleMessage(
+      "Ядро не запущено",
+    ),
+    "memoryCoreRuntime": MessageLookupByLibrary.simpleMessage(
+      "Накладные расходы среды",
+    ),
+    "memoryCoreStack": MessageLookupByLibrary.simpleMessage("Стеки горутин"),
+    "memoryEstimateDesc": MessageLookupByLibrary.simpleMessage(
+      "Оценка по резидентной памяти процесса; может отличаться от данных системы.",
+    ),
+    "memoryEstimateSharedDesc": MessageLookupByLibrary.simpleMessage(
+      "Ядро работает внутри процесса приложения. Его доля оценивается по статистике среды выполнения, а остальное считается памятью приложения и общей памятью.",
+    ),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Память"),
+    "memoryReleased": MessageLookupByLibrary.simpleMessage(
+      "Память освобождена",
+    ),
+    "memoryReleasedSize": m53,
     "messageTest": MessageLookupByLibrary.simpleMessage("Тест сообщения"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage("Это сообщение."),
     "metaInfo": MessageLookupByLibrary.simpleMessage("Подписка"),
@@ -1780,13 +1810,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Изменяет стандартное поведение при выходе",
     ),
     "minute": MessageLookupByLibrary.simpleMessage("минута"),
-    "minutesAgo": m53,
+    "minutesAgo": m54,
     "minutesGenitive": MessageLookupByLibrary.simpleMessage("минут"),
     "minutesPlural": MessageLookupByLibrary.simpleMessage("минуты"),
     "mixedPort": MessageLookupByLibrary.simpleMessage("Смешанный порт"),
     "mode": MessageLookupByLibrary.simpleMessage("Режим"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Монохром"),
-    "monthsAgo": m54,
+    "monthsAgo": m55,
     "more": MessageLookupByLibrary.simpleMessage("Ещё"),
     "moveDown": MessageLookupByLibrary.simpleMessage("Ниже"),
     "moveToBottom": MessageLookupByLibrary.simpleMessage("В конец"),
@@ -2088,8 +2118,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профилей пока нет. Сначала добавьте профиль.",
     ),
-    "nullTip": m55,
-    "numberTip": m56,
+    "nullTip": m56,
+    "numberTip": m57,
     "off": MessageLookupByLibrary.simpleMessage("Выключено"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Только значок"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -2145,7 +2175,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "panelHwidNotSupportedTip": MessageLookupByLibrary.simpleMessage(
       "Панель вернула x-hwid-not-supported. Это не доказывает несовместимость клиента. Проверьте настройки HWID и условия подписки.",
     ),
-    "panelSettingsConfirmMessage": m57,
+    "panelSettingsConfirmMessage": m58,
     "panelSettingsConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Применить настройки провайдера",
     ),
@@ -2192,7 +2222,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Введите другой порт",
     ),
-    "portTip": m58,
+    "portTip": m59,
     "predictiveBack": MessageLookupByLibrary.simpleMessage(
       "Предиктивный жест «Назад»",
     ),
@@ -2237,19 +2267,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportInvalidConfig": MessageLookupByLibrary.simpleMessage(
       "Конфигурация профиля некорректна",
     ),
-    "profileImportSkippedNodes": m59,
+    "profileImportSkippedNodes": m60,
     "profileImportSuccess": MessageLookupByLibrary.simpleMessage(
       "Профиль импортирован",
     ),
-    "profileImportSuccessSummary": m60,
+    "profileImportSuccessSummary": m61,
     "profileImportUnsupportedLink": MessageLookupByLibrary.simpleMessage(
       "Ссылка импорта повреждена или не поддерживается",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Введите название профиля",
     ),
-    "profileUnusedForDays": m61,
-    "profileUnusedForMonths": m62,
+    "profileUnusedForDays": m62,
+    "profileUnusedForMonths": m63,
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Введите корректный URL профиля",
     ),
@@ -2273,7 +2303,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providers": MessageLookupByLibrary.simpleMessage("Внешние ресурсы"),
     "proxies": MessageLookupByLibrary.simpleMessage("Прокси"),
-    "proxiesCount": m63,
+    "proxiesCount": m64,
     "proxiesEmpty": MessageLookupByLibrary.simpleMessage("Список прокси пуст"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Цепочка прокси"),
     "proxyDetectedAbnormal": MessageLookupByLibrary.simpleMessage(
@@ -2334,6 +2364,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "regexSearch": MessageLookupByLibrary.simpleMessage(
       "Поиск по регулярному выражению",
+    ),
+    "releaseMemory": MessageLookupByLibrary.simpleMessage("Освободить память"),
+    "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
+      "Не удалось освободить память",
     ),
     "reload": MessageLookupByLibrary.simpleMessage("Перезагрузить"),
     "remaining": MessageLookupByLibrary.simpleMessage("Осталось"),
@@ -2403,10 +2437,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "restorePreviewTitle": MessageLookupByLibrary.simpleMessage(
       "Проверка восстановления",
     ),
-    "restoreProfilesCount": m64,
-    "restoreProxyGroupsCount": m65,
-    "restoreRulesCount": m66,
-    "restoreScriptsCount": m67,
+    "restoreProfilesCount": m65,
+    "restoreProxyGroupsCount": m66,
+    "restoreRulesCount": m67,
+    "restoreScriptsCount": m68,
     "restoreSettingsIncluded": MessageLookupByLibrary.simpleMessage(
       "Настройки включены",
     ),
@@ -2558,11 +2592,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleSet": MessageLookupByLibrary.simpleMessage("Набор правил"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Цель правила"),
     "rules": MessageLookupByLibrary.simpleMessage("Правила"),
-    "rulesCount": m68,
+    "rulesCount": m69,
     "save": MessageLookupByLibrary.simpleMessage("Сохранить"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Сохранить изменения?"),
     "schedule": MessageLookupByLibrary.simpleMessage("По расписанию"),
-    "scheduleDesc": m69,
+    "scheduleDesc": m70,
     "script": MessageLookupByLibrary.simpleMessage("Скрипт"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Режим скрипта: переопределяет конфигурацию внешними скриптами-расширениями",
@@ -2585,7 +2619,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Показывать ненавязчивые сезонные детали на главном экране",
     ),
     "seconds": MessageLookupByLibrary.simpleMessage("секунд"),
-    "secondsCount": m70,
+    "secondsCount": m71,
     "selectAll": MessageLookupByLibrary.simpleMessage("Выбрать всё"),
     "selectMatchTarget": MessageLookupByLibrary.simpleMessage(
       "Выбрать MATCH-TARGET",
@@ -2604,7 +2638,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите подправило",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Выбрано"),
-    "selectedCountTitle": m71,
+    "selectedCountTitle": m72,
     "sendDeviceIdentity": MessageLookupByLibrary.simpleMessage(
       "Отправлять HWID",
     ),
@@ -2709,7 +2743,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupProfileSourceNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash не продаёт доступ к VPN. Используйте ссылку, QR-код или файл конфигурации от провайдера, которому доверяете. Перед сохранением профиль будет проверен.",
     ),
-    "setupProfilesReady": m72,
+    "setupProfilesReady": m73,
     "setupRawConfig": MessageLookupByLibrary.simpleMessage(
       "Текст конфигурации",
     ),
@@ -2749,7 +2783,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Восстановить настройки и профили из копии ReClash, FlClashX или FlClash",
     ),
     "setupSkip": MessageLookupByLibrary.simpleMessage("Продолжить без профиля"),
-    "setupStepProgress": m73,
+    "setupStepProgress": m74,
     "setupSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
       "В профиле хранятся серверы и правила, необходимые ReClash для подключения. Импортируйте его у своего провайдера или из резервной копии.",
     ),
@@ -2768,8 +2802,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "Профиля VPN нет — VPN останется выключен; доступен режим «Только ByeDPI»",
     ),
-    "setupSummaryProfile": m74,
-    "setupSummaryRouting": m75,
+    "setupSummaryProfile": m75,
+    "setupSummaryRouting": m76,
     "setupSummarySystemProxyOff": MessageLookupByLibrary.simpleMessage(
       "Системный прокси: выключен",
     ),
@@ -2817,14 +2851,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Временно отложенные проверки",
     ),
     "smartRoutingAdmittedYes": MessageLookupByLibrary.simpleMessage("Допущен"),
-    "smartRoutingAliveCount": m76,
+    "smartRoutingAliveCount": m77,
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "Все серверы",
     ),
     "smartRoutingAvailability": MessageLookupByLibrary.simpleMessage(
       "Доступность",
     ),
-    "smartRoutingAvailabilityValue": m77,
+    "smartRoutingAvailabilityValue": m78,
     "smartRoutingAverageFailover": MessageLookupByLibrary.simpleMessage(
       "Среднее переключение",
     ),
@@ -2853,8 +2887,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
       "Введите положительное число миллисекунд",
     ),
-    "smartRoutingBandLabel": m78,
-    "smartRoutingBands": m79,
+    "smartRoutingBandLabel": m79,
+    "smartRoutingBands": m80,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Поведение"),
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Нет в текущем списке серверов",
@@ -2862,7 +2896,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
       "Выходит через избегаемую страну",
     ),
-    "smartRoutingBlockCooling": m80,
+    "smartRoutingBlockCooling": m81,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Не прошёл проверки в этой сети",
     ),
@@ -2894,7 +2928,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Фрагменты названий, по которым сервер считается запасным для ограниченных сетей",
     ),
     "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage("Канарейки"),
-    "smartRoutingCanariesAnswered": m81,
+    "smartRoutingCanariesAnswered": m82,
     "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
       "Местные канарейки",
     ),
@@ -2931,7 +2965,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "Сервер ещё не выбран",
     ),
-    "smartRoutingCoolFor": m82,
+    "smartRoutingCoolFor": m83,
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Сервисы определения страны",
     ),
@@ -3080,7 +3114,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingExported": MessageLookupByLibrary.simpleMessage(
       "Настройки умной маршрутизации экспортированы",
     ),
-    "smartRoutingFails": m83,
+    "smartRoutingFails": m84,
     "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage(
       "Сбросить к значению стратегии",
     ),
@@ -3200,7 +3234,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
       "Границы в миллисекундах, делящие серверы на тиры скорости; пусто — значение стратегии",
     ),
-    "smartRoutingLostAt": m84,
+    "smartRoutingLostAt": m85,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Учитывать ручной выбор",
     ),
@@ -3256,12 +3290,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
       "Сервер считается проверенным, только если вернул один из этих статусов",
     ),
-    "smartRoutingMeasuredOver": m85,
+    "smartRoutingMeasuredOver": m86,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage(
       "Лимитная сеть",
     ),
-    "smartRoutingMillis": m86,
-    "smartRoutingMinutes": m87,
+    "smartRoutingMillis": m87,
+    "smartRoutingMinutes": m88,
     "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage(
       "Подсказки по имени домашнего узла",
     ),
@@ -3287,7 +3321,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("Без UDP"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m88,
+    "smartRoutingNodesMeasured": m89,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage("Обычный"),
     "smartRoutingOffHint": MessageLookupByLibrary.simpleMessage(
       "Включите умную маршрутизацию — она будет подбирать серверы за вас",
@@ -3307,11 +3341,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Пресет"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("Китай"),
-    "smartRoutingPresetEdited": m89,
+    "smartRoutingPresetEdited": m90,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Иран"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Другое"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Россия"),
-    "smartRoutingProbeBudget": m90,
+    "smartRoutingProbeBudget": m91,
     "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
       "Проверки доступности",
     ),
@@ -3480,11 +3514,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "Игнорировать, придерживать или предпочитать серверы по имени, провайдеру или измеренной стране",
     ),
-    "smartRoutingRungVersus": m91,
+    "smartRoutingRungVersus": m92,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Подбор сервера…",
     ),
-    "smartRoutingSeconds": m92,
+    "smartRoutingSeconds": m93,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage("Движок"),
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
       "Серверы",
@@ -3504,11 +3538,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingSectionRound": MessageLookupByLibrary.simpleMessage("Решение"),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Серверы"),
-    "smartRoutingServersCount": m93,
+    "smartRoutingServersCount": m94,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "Любой провайдер",
     ),
-    "smartRoutingServiceCandidates": m94,
+    "smartRoutingServiceCandidates": m95,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "Использовать маршрут сервиса",
     ),
@@ -3565,8 +3599,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "Ожидание движка",
     ),
-    "smartRoutingServiceProvider": m95,
-    "smartRoutingServiceProviderCandidates": m96,
+    "smartRoutingServiceProvider": m96,
+    "smartRoutingServiceProviderCandidates": m97,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "Точное имя провайдера; оставьте пустым для любого",
     ),
@@ -3576,7 +3610,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "Манифест подписки",
     ),
-    "smartRoutingServiceReady": m97,
+    "smartRoutingServiceReady": m98,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("Маршрут"),
     "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage(
       "Маршруты сервисов",
@@ -3590,8 +3624,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage(
       "Состояние",
     ),
-    "smartRoutingServiceTokenTooLong": m98,
-    "smartRoutingServiceVia": m99,
+    "smartRoutingServiceTokenTooLong": m99,
+    "smartRoutingServiceVia": m100,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "YouTube без рекламы",
     ),
@@ -3601,7 +3635,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Решил, кого пропускать",
     ),
-    "smartRoutingStepAdmitBody": m100,
+    "smartRoutingStepAdmitBody": m101,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Остановился на этом",
     ),
@@ -3621,7 +3655,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "Подходит для всего — оставьте, если не уверены",
     ),
-    "smartRoutingStrategyEdited": m101,
+    "smartRoutingStrategyEdited": m102,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Скорость",
     ),
@@ -3644,9 +3678,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyStableDesc": MessageLookupByLibrary.simpleMessage(
       "Держится за работающий сервер и реже его меняет",
     ),
-    "smartRoutingSwitchLine": m102,
+    "smartRoutingSwitchLine": m103,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("сменён"),
-    "smartRoutingSwitchedAgo": m103,
+    "smartRoutingSwitchedAgo": m104,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage(
       "Подробности",
     ),
@@ -3685,12 +3719,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "Сколько серверов измеряет одна фоновая проверка",
     ),
-    "smartRoutingWaveNodes": m104,
+    "smartRoutingWaveNodes": m105,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Проверка связи",
     ),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Почему"),
-    "smartRoutingWinsAt": m105,
+    "smartRoutingWinsAt": m106,
     "socksPort": MessageLookupByLibrary.simpleMessage("Порт SOCKS"),
     "sort": MessageLookupByLibrary.simpleMessage("Сортировка"),
     "source": MessageLookupByLibrary.simpleMessage("Источник"),
@@ -3766,11 +3800,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "Повторить вне VPN?",
     ),
-    "subscriptionDomainMoved": m106,
+    "subscriptionDomainMoved": m107,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Подписка истекла",
     ),
-    "subscriptionExpiresInDays": m107,
+    "subscriptionExpiresInDays": m108,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Подписка истекает сегодня",
     ),
@@ -3820,7 +3854,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Напоминания о подписке",
     ),
-    "subscriptionProviderInterval": m108,
+    "subscriptionProviderInterval": m109,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Отчёт по подписке",
     ),
@@ -3899,9 +3933,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Докупить трафик"),
     "torch": MessageLookupByLibrary.simpleMessage("Фонарик"),
+    "total": MessageLookupByLibrary.simpleMessage("Всего"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Всего"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("Порт TProxy"),
-    "trafficFreeOfTotal": m109,
+    "trafficFreeOfTotal": m110,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Статистика трафика"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash говорит на вашем языке, чтобы им могли пользоваться люди из разных стран. Если какая-то формулировка режет глаз — напишите, поправим.",
@@ -3989,7 +4024,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Подключить, если остановлено; отключить, если работает",
     ),
-    "urlTip": m110,
+    "urlTip": m111,
     "useHosts": MessageLookupByLibrary.simpleMessage("Использовать hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Использовать системный hosts",
@@ -4042,7 +4077,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Выберите корректное изображение PNG, JPEG или WebP.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Кадрирование"),
-    "wallpaperLibraryFull": m111,
+    "wallpaperLibraryFull": m112,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
@@ -4089,7 +4124,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
     ),
-    "yearsAgo": m112,
+    "yearsAgo": m113,
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),
   };
 }

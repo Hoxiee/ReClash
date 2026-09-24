@@ -4224,6 +4224,141 @@ class AppLocalizations {
     return Intl.message('Memory info', name: 'memoryInfo', desc: '', args: []);
   }
 
+  /// `Total`
+  String get total {
+    return Intl.message('Total', name: 'total', desc: '', args: []);
+  }
+
+  /// `Release memory`
+  String get releaseMemory {
+    return Intl.message(
+      'Release memory',
+      name: 'releaseMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Heap in use`
+  String get memoryCoreHeapInuse {
+    return Intl.message(
+      'Heap in use',
+      name: 'memoryCoreHeapInuse',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Heap idle`
+  String get memoryCoreHeapIdle {
+    return Intl.message(
+      'Heap idle',
+      name: 'memoryCoreHeapIdle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Goroutine stacks`
+  String get memoryCoreStack {
+    return Intl.message(
+      'Goroutine stacks',
+      name: 'memoryCoreStack',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Runtime overhead`
+  String get memoryCoreRuntime {
+    return Intl.message(
+      'Runtime overhead',
+      name: 'memoryCoreRuntime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Core is not running`
+  String get memoryCoreNotRunning {
+    return Intl.message(
+      'Core is not running',
+      name: 'memoryCoreNotRunning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resident memory`
+  String get memoryAppResident {
+    return Intl.message(
+      'Resident memory',
+      name: 'memoryAppResident',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App & shared`
+  String get memoryAppShared {
+    return Intl.message(
+      'App & shared',
+      name: 'memoryAppShared',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Estimated from process resident memory; it may differ from what the system reports.`
+  String get memoryEstimateDesc {
+    return Intl.message(
+      'Estimated from process resident memory; it may differ from what the system reports.',
+      name: 'memoryEstimateDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.`
+  String get memoryEstimateSharedDesc {
+    return Intl.message(
+      'The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.',
+      name: 'memoryEstimateSharedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memory released`
+  String get memoryReleased {
+    return Intl.message(
+      'Memory released',
+      name: 'memoryReleased',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Released {size}`
+  String memoryReleasedSize(String size) {
+    return Intl.message(
+      'Released $size',
+      name: 'memoryReleasedSize',
+      desc: '',
+      args: [size],
+    );
+  }
+
+  /// `Failed to release memory`
+  String get releaseMemoryFailed {
+    return Intl.message(
+      'Failed to release memory',
+      name: 'releaseMemoryFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Goroutines`
   String get goroutineInfo {
     return Intl.message(

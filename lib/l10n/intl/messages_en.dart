@@ -145,138 +145,140 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m52(label, max) => "${label} must be at most ${max} characters";
 
-  static String m53(count) =>
-      "${Intl.plural(count, one: '1 minute ago', other: '${count} minutes ago')}";
+  static String m53(size) => "Released ${size}";
 
   static String m54(count) =>
+      "${Intl.plural(count, one: '1 minute ago', other: '${count} minutes ago')}";
+
+  static String m55(count) =>
       "${Intl.plural(count, one: '1 month ago', other: '${count} months ago')}";
 
-  static String m55(label) => "No ${label} yet";
+  static String m56(label) => "No ${label} yet";
 
-  static String m56(label) => "${label} must be a number";
+  static String m57(label) => "${label} must be a number";
 
-  static String m57(settings) =>
+  static String m58(settings) =>
       "This subscription requests these app-wide settings:\n${settings}";
 
-  static String m58(label) => "${label} must be between 1024 and 49151";
+  static String m59(label) => "${label} must be between 1024 and 49151";
 
-  static String m59(count) =>
+  static String m60(count) =>
       "Profile imported with ${count} unsupported nodes skipped";
 
-  static String m60(format, client, nodes, groups) =>
+  static String m61(format, client, nodes, groups) =>
       "Imported ${format} · ${client} · ${nodes} nodes · ${groups} groups";
 
-  static String m61(days) => "Not used for ${days} days";
+  static String m62(days) => "Not used for ${days} days";
 
-  static String m62(months) => "Not used for ${months} months";
+  static String m63(months) => "Not used for ${months} months";
 
-  static String m63(count) =>
+  static String m64(count) =>
       "${Intl.plural(count, one: '1 proxy', other: '${count} proxies')}";
 
-  static String m64(count) => "Profiles: ${count}";
+  static String m65(count) => "Profiles: ${count}";
 
-  static String m65(count) => "Proxy groups: ${count}";
+  static String m66(count) => "Proxy groups: ${count}";
 
-  static String m66(count) => "Rules: ${count}";
+  static String m67(count) => "Rules: ${count}";
 
-  static String m67(count) => "Scripts: ${count}";
+  static String m68(count) => "Scripts: ${count}";
 
-  static String m68(count) =>
+  static String m69(count) =>
       "${Intl.plural(count, one: '1 rule', other: '${count} rules')}";
 
-  static String m69(darkAt, lightAt) => "Dark from ${darkAt} to ${lightAt}";
+  static String m70(darkAt, lightAt) => "Dark from ${darkAt} to ${lightAt}";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '1 second', other: '${count} seconds')}";
 
-  static String m71(count) => "${count} selected";
+  static String m72(count) => "${count} selected";
 
-  static String m72(count) =>
+  static String m73(count) =>
       "${Intl.plural(count, one: '1 profile ready', other: '${count} profiles ready')}";
 
-  static String m73(step, count) => "Step ${step} of ${count}";
+  static String m74(step, count) => "Step ${step} of ${count}";
 
-  static String m74(name) => "Profile: ${name}";
+  static String m75(name) => "Profile: ${name}";
 
-  static String m75(value) => "Smart Routing: ${value}";
+  static String m76(value) => "Smart Routing: ${value}";
 
-  static String m76(alive, total) =>
+  static String m77(alive, total) =>
       "${alive} of ${total} servers can be used right now";
 
-  static String m77(percent, duration) => "${percent}% over ${duration}";
+  static String m78(percent, duration) => "${percent}% over ${duration}";
 
-  static String m78(band) => "band ${band}";
+  static String m79(band) => "band ${band}";
 
-  static String m79(bands) => "Bands: ${bands}";
+  static String m80(bands) => "Bands: ${bands}";
 
-  static String m80(count) => "Cooling down after ${count} failures";
+  static String m81(count) => "Cooling down after ${count} failures";
 
-  static String m81(answered, total) => "${answered} of ${total} answered";
+  static String m82(answered, total) => "${answered} of ${total} answered";
 
-  static String m82(seconds) => "${seconds} s left";
+  static String m83(seconds) => "${seconds} s left";
 
-  static String m83(count) => "${count} failures in a row";
+  static String m84(count) => "${count} failures in a row";
 
-  static String m84(step) => "Lost at: ${step}";
+  static String m85(step) => "Lost at: ${step}";
 
-  static String m85(duration) => "Measured over ${duration}";
+  static String m86(duration) => "Measured over ${duration}";
 
-  static String m86(ms) => "${ms} ms";
+  static String m87(ms) => "${ms} ms";
 
-  static String m87(minutes) => "${minutes} min";
+  static String m88(minutes) => "${minutes} min";
 
-  static String m88(measured, total) => "measured ${measured} of ${total}";
+  static String m89(measured, total) => "measured ${measured} of ${total}";
 
-  static String m89(preset) => "${preset} · adjusted";
+  static String m90(preset) => "${preset} · adjusted";
 
-  static String m90(left, cap) => "${left} of ${cap} probes left this hour";
+  static String m91(left, cap) => "${left} of ${cap} probes left this hour";
 
-  static String m91(value, against) => "${value} vs ${against}";
+  static String m92(value, against) => "${value} vs ${against}";
 
-  static String m92(seconds) => "${seconds} s";
+  static String m93(seconds) => "${seconds} s";
 
-  static String m93(eligible, total) => "${eligible} of ${total} usable";
+  static String m94(eligible, total) => "${eligible} of ${total} usable";
 
-  static String m94(count) => "${count} specialist selectors";
+  static String m95(count) => "${count} specialist selectors";
 
-  static String m95(provider) => "Provider: ${provider}";
+  static String m96(provider) => "Provider: ${provider}";
 
-  static String m96(count) => "${count} selectors supplied by the provider";
+  static String m97(count) => "${count} selectors supplied by the provider";
 
-  static String m97(eligible, total) => "${eligible} of ${total} servers ready";
+  static String m98(eligible, total) => "${eligible} of ${total} servers ready";
 
-  static String m98(label) => "${label} must be at most 64 UTF-8 bytes";
+  static String m99(label) => "${label} must be at most 64 UTF-8 bytes";
 
-  static String m99(node) => "Through ${node}";
+  static String m100(node) => "Through ${node}";
 
-  static String m100(eligible, total, blocked) =>
+  static String m101(eligible, total, blocked) =>
       "${eligible} of ${total} servers passed, ${blocked} were held back";
 
-  static String m101(strategy) => "${strategy} · adjusted";
+  static String m102(strategy) => "${strategy} · adjusted";
 
-  static String m102(from, to) => "${from} → ${to}";
+  static String m103(from, to) => "${from} → ${to}";
 
-  static String m103(time) => "Switched ${time} ago";
+  static String m104(time) => "Switched ${time} ago";
 
-  static String m104(count) => "${count} servers";
+  static String m105(count) => "${count} servers";
 
-  static String m105(step) => "Ranks higher at: ${step}";
+  static String m106(step) => "Ranks higher at: ${step}";
 
-  static String m106(host) => "The provider moved to ${host}";
+  static String m107(host) => "The provider moved to ${host}";
 
-  static String m107(count) =>
+  static String m108(count) =>
       "${Intl.plural(count, one: 'Your subscription expires tomorrow', other: 'Your subscription expires in ${count} days')}";
 
-  static String m108(value) => "The provider suggests ${value}";
+  static String m109(value) => "The provider suggests ${value}";
 
-  static String m109(total) => "free of ${total}";
+  static String m110(total) => "free of ${total}";
 
-  static String m110(label) => "${label} must be a URL";
-
-  static String m111(count) =>
-      "You can keep up to ${count} backgrounds. Remove one to add another.";
+  static String m111(label) => "${label} must be a URL";
 
   static String m112(count) =>
+      "You can keep up to ${count} backgrounds. Remove one to add another.";
+
+  static String m113(count) =>
       "${Intl.plural(count, one: '1 year ago', other: '${count} years ago')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1526,10 +1528,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1684,7 +1685,28 @@ class MessageLookup extends MessageLookupByLibrary {
     "maxLengthTip": m52,
     "maximize": MessageLookupByLibrary.simpleMessage("Maximize"),
     "memory": MessageLookupByLibrary.simpleMessage("Memory"),
+    "memoryAppResident": MessageLookupByLibrary.simpleMessage(
+      "Resident memory",
+    ),
+    "memoryAppShared": MessageLookupByLibrary.simpleMessage("App & shared"),
+    "memoryCoreHeapIdle": MessageLookupByLibrary.simpleMessage("Heap idle"),
+    "memoryCoreHeapInuse": MessageLookupByLibrary.simpleMessage("Heap in use"),
+    "memoryCoreNotRunning": MessageLookupByLibrary.simpleMessage(
+      "Core is not running",
+    ),
+    "memoryCoreRuntime": MessageLookupByLibrary.simpleMessage(
+      "Runtime overhead",
+    ),
+    "memoryCoreStack": MessageLookupByLibrary.simpleMessage("Goroutine stacks"),
+    "memoryEstimateDesc": MessageLookupByLibrary.simpleMessage(
+      "Estimated from process resident memory; it may differ from what the system reports.",
+    ),
+    "memoryEstimateSharedDesc": MessageLookupByLibrary.simpleMessage(
+      "The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.",
+    ),
     "memoryInfo": MessageLookupByLibrary.simpleMessage("Memory info"),
+    "memoryReleased": MessageLookupByLibrary.simpleMessage("Memory released"),
+    "memoryReleasedSize": m53,
     "messageTest": MessageLookupByLibrary.simpleMessage("Message test"),
     "messageTestTip": MessageLookupByLibrary.simpleMessage(
       "This is a message.",
@@ -1727,13 +1749,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Override the default system exit behavior",
     ),
     "minute": MessageLookupByLibrary.simpleMessage("minute"),
-    "minutesAgo": m53,
+    "minutesAgo": m54,
     "minutesGenitive": MessageLookupByLibrary.simpleMessage("minutes"),
     "minutesPlural": MessageLookupByLibrary.simpleMessage("minutes"),
     "mixedPort": MessageLookupByLibrary.simpleMessage("Mixed port"),
     "mode": MessageLookupByLibrary.simpleMessage("Mode"),
     "monochromeScheme": MessageLookupByLibrary.simpleMessage("Monochrome"),
-    "monthsAgo": m54,
+    "monthsAgo": m55,
     "more": MessageLookupByLibrary.simpleMessage("More"),
     "moveDown": MessageLookupByLibrary.simpleMessage("Move down"),
     "moveToBottom": MessageLookupByLibrary.simpleMessage("Move to bottom"),
@@ -2029,8 +2051,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "No profiles yet, please add one first",
     ),
-    "nullTip": m55,
-    "numberTip": m56,
+    "nullTip": m56,
+    "numberTip": m57,
     "off": MessageLookupByLibrary.simpleMessage("Off"),
     "onlyIcon": MessageLookupByLibrary.simpleMessage("Icon only"),
     "onlyStatisticsProxy": MessageLookupByLibrary.simpleMessage(
@@ -2078,7 +2100,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "panelHwidNotSupportedTip": MessageLookupByLibrary.simpleMessage(
       "The panel returned x-hwid-not-supported. This does not prove that the client is incompatible. Check your HWID settings and subscription requirements.",
     ),
-    "panelSettingsConfirmMessage": m57,
+    "panelSettingsConfirmMessage": m58,
     "panelSettingsConfirmTitle": MessageLookupByLibrary.simpleMessage(
       "Apply provider settings",
     ),
@@ -2123,7 +2145,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "portConflictTip": MessageLookupByLibrary.simpleMessage(
       "Please enter a different port",
     ),
-    "portTip": m58,
+    "portTip": m59,
     "predictiveBack": MessageLookupByLibrary.simpleMessage("Predictive back"),
     "preferH3Desc": MessageLookupByLibrary.simpleMessage(
       "Prefer HTTP/3 for DoH",
@@ -2166,19 +2188,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileImportInvalidConfig": MessageLookupByLibrary.simpleMessage(
       "The profile configuration is invalid",
     ),
-    "profileImportSkippedNodes": m59,
+    "profileImportSkippedNodes": m60,
     "profileImportSuccess": MessageLookupByLibrary.simpleMessage(
       "Profile imported",
     ),
-    "profileImportSuccessSummary": m60,
+    "profileImportSuccessSummary": m61,
     "profileImportUnsupportedLink": MessageLookupByLibrary.simpleMessage(
       "The import link is damaged or unsupported",
     ),
     "profileNameNullValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please enter the profile name",
     ),
-    "profileUnusedForDays": m61,
-    "profileUnusedForMonths": m62,
+    "profileUnusedForDays": m62,
+    "profileUnusedForMonths": m63,
     "profileUrlInvalidValidationDesc": MessageLookupByLibrary.simpleMessage(
       "Please enter a valid profile URL",
     ),
@@ -2198,7 +2220,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "providers": MessageLookupByLibrary.simpleMessage("External resources"),
     "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
-    "proxiesCount": m63,
+    "proxiesCount": m64,
     "proxiesEmpty": MessageLookupByLibrary.simpleMessage("Proxies are empty"),
     "proxyChains": MessageLookupByLibrary.simpleMessage("Proxy chain"),
     "proxyDetectedAbnormal": MessageLookupByLibrary.simpleMessage(
@@ -2254,6 +2276,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Already enabled in system settings",
     ),
     "regexSearch": MessageLookupByLibrary.simpleMessage("Regex search"),
+    "releaseMemory": MessageLookupByLibrary.simpleMessage("Release memory"),
+    "releaseMemoryFailed": MessageLookupByLibrary.simpleMessage(
+      "Failed to release memory",
+    ),
     "reload": MessageLookupByLibrary.simpleMessage("Reload"),
     "remaining": MessageLookupByLibrary.simpleMessage("Remaining"),
     "remainingTraffic": MessageLookupByLibrary.simpleMessage("Remaining"),
@@ -2320,10 +2346,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "restorePreviewTitle": MessageLookupByLibrary.simpleMessage(
       "Review restore",
     ),
-    "restoreProfilesCount": m64,
-    "restoreProxyGroupsCount": m65,
-    "restoreRulesCount": m66,
-    "restoreScriptsCount": m67,
+    "restoreProfilesCount": m65,
+    "restoreProxyGroupsCount": m66,
+    "restoreRulesCount": m67,
+    "restoreScriptsCount": m68,
     "restoreSettingsIncluded": MessageLookupByLibrary.simpleMessage(
       "Settings included",
     ),
@@ -2465,11 +2491,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "ruleSet": MessageLookupByLibrary.simpleMessage("Rule set"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),
-    "rulesCount": m68,
+    "rulesCount": m69,
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save the changes?"),
     "schedule": MessageLookupByLibrary.simpleMessage("Scheduled"),
-    "scheduleDesc": m69,
+    "scheduleDesc": m70,
     "script": MessageLookupByLibrary.simpleMessage("Script"),
     "scriptModeDesc": MessageLookupByLibrary.simpleMessage(
       "Script mode: uses external extension scripts to override the configuration in one click",
@@ -2492,7 +2518,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Show subtle seasonal details on the dashboard",
     ),
     "seconds": MessageLookupByLibrary.simpleMessage("seconds"),
-    "secondsCount": m70,
+    "secondsCount": m71,
     "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectMatchTarget": MessageLookupByLibrary.simpleMessage(
       "Select MATCH-TARGET",
@@ -2511,7 +2537,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please select a sub-rule",
     ),
     "selected": MessageLookupByLibrary.simpleMessage("Selected"),
-    "selectedCountTitle": m71,
+    "selectedCountTitle": m72,
     "sendDeviceIdentity": MessageLookupByLibrary.simpleMessage("Send HWID"),
     "sendDeviceIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "Send device identifier, app version and device name to proxy provider server",
@@ -2620,7 +2646,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupProfileSourceNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash does not sell VPN access. Use a link, QR code, or config file from a provider you trust. Every profile is checked before it is saved.",
     ),
-    "setupProfilesReady": m72,
+    "setupProfilesReady": m73,
     "setupRawConfig": MessageLookupByLibrary.simpleMessage("Raw configuration"),
     "setupRawConfigDesc": MessageLookupByLibrary.simpleMessage(
       "Paste a Clash-compatible YAML configuration",
@@ -2658,7 +2684,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSkip": MessageLookupByLibrary.simpleMessage(
       "Continue without a profile",
     ),
-    "setupStepProgress": m73,
+    "setupStepProgress": m74,
     "setupSubscriptionDesc": MessageLookupByLibrary.simpleMessage(
       "A profile contains the servers and rules ReClash needs to connect. Import one from your provider or a backup.",
     ),
@@ -2677,8 +2703,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "No VPN profile — VPN remains off; ByeDPI-only is available",
     ),
-    "setupSummaryProfile": m74,
-    "setupSummaryRouting": m75,
+    "setupSummaryProfile": m75,
+    "setupSummaryRouting": m76,
     "setupSummarySystemProxyOff": MessageLookupByLibrary.simpleMessage(
       "System proxy: off",
     ),
@@ -2726,14 +2752,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Checks temporarily held back",
     ),
     "smartRoutingAdmittedYes": MessageLookupByLibrary.simpleMessage("Allowed"),
-    "smartRoutingAliveCount": m76,
+    "smartRoutingAliveCount": m77,
     "smartRoutingAllServers": MessageLookupByLibrary.simpleMessage(
       "All servers",
     ),
     "smartRoutingAvailability": MessageLookupByLibrary.simpleMessage(
       "Availability",
     ),
-    "smartRoutingAvailabilityValue": m77,
+    "smartRoutingAvailabilityValue": m78,
     "smartRoutingAverageFailover": MessageLookupByLibrary.simpleMessage(
       "Average switchover",
     ),
@@ -2758,8 +2784,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBandInvalid": MessageLookupByLibrary.simpleMessage(
       "Enter a positive number of milliseconds",
     ),
-    "smartRoutingBandLabel": m78,
-    "smartRoutingBands": m79,
+    "smartRoutingBandLabel": m79,
+    "smartRoutingBands": m80,
     "smartRoutingBehaviour": MessageLookupByLibrary.simpleMessage("Behaviour"),
     "smartRoutingBlockAbsent": MessageLookupByLibrary.simpleMessage(
       "Not in the current server list",
@@ -2767,7 +2793,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingBlockAvoidExit": MessageLookupByLibrary.simpleMessage(
       "Exits through an avoided country",
     ),
-    "smartRoutingBlockCooling": m80,
+    "smartRoutingBlockCooling": m81,
     "smartRoutingBlockDisproven": MessageLookupByLibrary.simpleMessage(
       "Failed its checks here",
     ),
@@ -2801,7 +2827,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingCanaries": MessageLookupByLibrary.simpleMessage(
       "Canary addresses",
     ),
-    "smartRoutingCanariesAnswered": m81,
+    "smartRoutingCanariesAnswered": m82,
     "smartRoutingCanariesDomestic": MessageLookupByLibrary.simpleMessage(
       "Local canaries",
     ),
@@ -2834,7 +2860,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingChosenNone": MessageLookupByLibrary.simpleMessage(
       "No server chosen yet",
     ),
-    "smartRoutingCoolFor": m82,
+    "smartRoutingCoolFor": m83,
     "smartRoutingCountryEchoes": MessageLookupByLibrary.simpleMessage(
       "Country lookup services",
     ),
@@ -2979,7 +3005,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingExported": MessageLookupByLibrary.simpleMessage(
       "Smart routing configuration exported",
     ),
-    "smartRoutingFails": m83,
+    "smartRoutingFails": m84,
     "smartRoutingFieldReset": MessageLookupByLibrary.simpleMessage(
       "Reset to strategy default",
     ),
@@ -3093,7 +3119,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingLatencyBandsDesc": MessageLookupByLibrary.simpleMessage(
       "Millisecond edges that group servers into speed tiers; empty uses the strategy default",
     ),
-    "smartRoutingLostAt": m84,
+    "smartRoutingLostAt": m85,
     "smartRoutingManualHold": MessageLookupByLibrary.simpleMessage(
       "Respect a manual pick",
     ),
@@ -3149,10 +3175,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingMarkersOpenDesc": MessageLookupByLibrary.simpleMessage(
       "A server must return one of these statuses to count as proven",
     ),
-    "smartRoutingMeasuredOver": m85,
+    "smartRoutingMeasuredOver": m86,
     "smartRoutingMetered": MessageLookupByLibrary.simpleMessage("Metered link"),
-    "smartRoutingMillis": m86,
-    "smartRoutingMinutes": m87,
+    "smartRoutingMillis": m87,
+    "smartRoutingMinutes": m88,
     "smartRoutingNameHints": MessageLookupByLibrary.simpleMessage(
       "Home-country name hints",
     ),
@@ -3180,7 +3206,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingNodeNoUdp": MessageLookupByLibrary.simpleMessage("No UDP"),
     "smartRoutingNodeUdp": MessageLookupByLibrary.simpleMessage("UDP"),
-    "smartRoutingNodesMeasured": m88,
+    "smartRoutingNodesMeasured": m89,
     "smartRoutingNotBreaker": MessageLookupByLibrary.simpleMessage(
       "General purpose",
     ),
@@ -3202,11 +3228,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingPreset": MessageLookupByLibrary.simpleMessage("Preset"),
     "smartRoutingPresetChina": MessageLookupByLibrary.simpleMessage("China"),
-    "smartRoutingPresetEdited": m89,
+    "smartRoutingPresetEdited": m90,
     "smartRoutingPresetIran": MessageLookupByLibrary.simpleMessage("Iran"),
     "smartRoutingPresetOff": MessageLookupByLibrary.simpleMessage("Other"),
     "smartRoutingPresetRussia": MessageLookupByLibrary.simpleMessage("Russia"),
-    "smartRoutingProbeBudget": m90,
+    "smartRoutingProbeBudget": m91,
     "smartRoutingProbes": MessageLookupByLibrary.simpleMessage(
       "Reachability probes",
     ),
@@ -3363,11 +3389,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingRulesDesc": MessageLookupByLibrary.simpleMessage(
       "Ignore, hold back, or prefer servers by name, provider, or measured country",
     ),
-    "smartRoutingRungVersus": m91,
+    "smartRoutingRungVersus": m92,
     "smartRoutingSearching": MessageLookupByLibrary.simpleMessage(
       "Picking a server…",
     ),
-    "smartRoutingSeconds": m92,
+    "smartRoutingSeconds": m93,
     "smartRoutingSectionEngine": MessageLookupByLibrary.simpleMessage("Engine"),
     "smartRoutingSectionHealth": MessageLookupByLibrary.simpleMessage(
       "Servers",
@@ -3391,11 +3417,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Decision",
     ),
     "smartRoutingServers": MessageLookupByLibrary.simpleMessage("Servers"),
-    "smartRoutingServersCount": m93,
+    "smartRoutingServersCount": m94,
     "smartRoutingServiceAnyProvider": MessageLookupByLibrary.simpleMessage(
       "Any provider",
     ),
-    "smartRoutingServiceCandidates": m94,
+    "smartRoutingServiceCandidates": m95,
     "smartRoutingServiceEnabled": MessageLookupByLibrary.simpleMessage(
       "Use service route",
     ),
@@ -3452,8 +3478,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServicePending": MessageLookupByLibrary.simpleMessage(
       "Waiting for the engine",
     ),
-    "smartRoutingServiceProvider": m95,
-    "smartRoutingServiceProviderCandidates": m96,
+    "smartRoutingServiceProvider": m96,
+    "smartRoutingServiceProviderCandidates": m97,
     "smartRoutingServiceProviderDesc": MessageLookupByLibrary.simpleMessage(
       "Exact provider name; leave empty to match any provider",
     ),
@@ -3463,7 +3489,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingServiceProviderSource": MessageLookupByLibrary.simpleMessage(
       "Subscription manifest",
     ),
-    "smartRoutingServiceReady": m97,
+    "smartRoutingServiceReady": m98,
     "smartRoutingServiceRoute": MessageLookupByLibrary.simpleMessage("Route"),
     "smartRoutingServiceRoutes": MessageLookupByLibrary.simpleMessage(
       "Service routes",
@@ -3475,8 +3501,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Specialist sources",
     ),
     "smartRoutingServiceStatus": MessageLookupByLibrary.simpleMessage("Status"),
-    "smartRoutingServiceTokenTooLong": m98,
-    "smartRoutingServiceVia": m99,
+    "smartRoutingServiceTokenTooLong": m99,
+    "smartRoutingServiceVia": m100,
     "smartRoutingServiceYouTube": MessageLookupByLibrary.simpleMessage(
       "YouTube without ads",
     ),
@@ -3486,7 +3512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStepAdmit": MessageLookupByLibrary.simpleMessage(
       "Decided who is allowed",
     ),
-    "smartRoutingStepAdmitBody": m100,
+    "smartRoutingStepAdmitBody": m101,
     "smartRoutingStepDecision": MessageLookupByLibrary.simpleMessage(
       "Landed here",
     ),
@@ -3506,7 +3532,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyBalancedDesc": MessageLookupByLibrary.simpleMessage(
       "Suits everything — leave this if you are not sure",
     ),
-    "smartRoutingStrategyEdited": m101,
+    "smartRoutingStrategyEdited": m102,
     "smartRoutingStrategyLowestLatency": MessageLookupByLibrary.simpleMessage(
       "Fast",
     ),
@@ -3527,9 +3553,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingStrategyStableDesc": MessageLookupByLibrary.simpleMessage(
       "Keeps a working server and changes it less often",
     ),
-    "smartRoutingSwitchLine": m102,
+    "smartRoutingSwitchLine": m103,
     "smartRoutingSwitched": MessageLookupByLibrary.simpleMessage("switched"),
-    "smartRoutingSwitchedAgo": m103,
+    "smartRoutingSwitchedAgo": m104,
     "smartRoutingTabDetails": MessageLookupByLibrary.simpleMessage("Details"),
     "smartRoutingTabOverview": MessageLookupByLibrary.simpleMessage("Overview"),
     "smartRoutingTabRanking": MessageLookupByLibrary.simpleMessage("Ranking"),
@@ -3562,12 +3588,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingWaveDesc": MessageLookupByLibrary.simpleMessage(
       "How many servers one background check measures",
     ),
-    "smartRoutingWaveNodes": m104,
+    "smartRoutingWaveNodes": m105,
     "smartRoutingWhatWasTested": MessageLookupByLibrary.simpleMessage(
       "Link check",
     ),
     "smartRoutingWhy": MessageLookupByLibrary.simpleMessage("Why"),
-    "smartRoutingWinsAt": m105,
+    "smartRoutingWinsAt": m106,
     "socksPort": MessageLookupByLibrary.simpleMessage("SOCKS port"),
     "sort": MessageLookupByLibrary.simpleMessage("Sort"),
     "source": MessageLookupByLibrary.simpleMessage("Source"),
@@ -3639,11 +3665,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionDirectRetryTitle": MessageLookupByLibrary.simpleMessage(
       "Retry outside the VPN?",
     ),
-    "subscriptionDomainMoved": m106,
+    "subscriptionDomainMoved": m107,
     "subscriptionExpired": MessageLookupByLibrary.simpleMessage(
       "Your subscription has expired",
     ),
-    "subscriptionExpiresInDays": m107,
+    "subscriptionExpiresInDays": m108,
     "subscriptionExpiresToday": MessageLookupByLibrary.simpleMessage(
       "Your subscription expires today",
     ),
@@ -3695,7 +3721,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionNoticeChannel": MessageLookupByLibrary.simpleMessage(
       "Subscription reminders",
     ),
-    "subscriptionProviderInterval": m108,
+    "subscriptionProviderInterval": m109,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage(
       "Subscription report",
     ),
@@ -3766,9 +3792,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "topUpTraffic": MessageLookupByLibrary.simpleMessage("Top up traffic"),
     "torch": MessageLookupByLibrary.simpleMessage("Flashlight"),
+    "total": MessageLookupByLibrary.simpleMessage("Total"),
     "totalTraffic": MessageLookupByLibrary.simpleMessage("Total traffic"),
     "tproxyPort": MessageLookupByLibrary.simpleMessage("TProxy port"),
-    "trafficFreeOfTotal": m109,
+    "trafficFreeOfTotal": m110,
     "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
     "translationNotice": MessageLookupByLibrary.simpleMessage(
       "ReClash speaks your language so nobody is left out. If a phrase sounds off to a native ear, let us know and we will fix it.",
@@ -3858,7 +3885,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "urlSchemeToggleDesc": MessageLookupByLibrary.simpleMessage(
       "Connect if stopped, disconnect if running",
     ),
-    "urlTip": m110,
+    "urlTip": m111,
     "useHosts": MessageLookupByLibrary.simpleMessage("Use hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("Use system hosts"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Used traffic"),
@@ -3905,7 +3932,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose a valid PNG, JPEG or WebP image.",
     ),
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
-    "wallpaperLibraryFull": m111,
+    "wallpaperLibraryFull": m112,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
@@ -3942,7 +3969,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The core is not serving the dashboard yet",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
-    "yearsAgo": m112,
+    "yearsAgo": m113,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

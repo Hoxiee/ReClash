@@ -285,10 +285,12 @@ void main() {
       expect(result.down, 4);
     });
 
-    test('getMemory delegates numeric memory', () async {
-      when(() => mock.getMemory()).thenAnswer((_) async => 2048);
-      final result = await controller.getMemory();
-      expect(result, 2048);
+    test('getMemoryStats delegates the decoded stats', () async {
+      when(
+        () => mock.getMemoryStats(),
+      ).thenAnswer((_) async => const CoreMemoryStats(rss: 2048));
+      final result = await controller.getMemoryStats();
+      expect(result?.rss, 2048);
     });
   });
 

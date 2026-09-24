@@ -476,7 +476,7 @@ class _MemoryRowState extends ConsumerState<_MemoryRow>
   @override
   Future<void> poll(PollGuard isCurrent) async {
     final connected = ref.read(coreStatusProvider) == CoreStatus.connected;
-    final value = connected ? await _core.getMemory() : 0;
+    final value = connected ? (await _core.getMemoryStats())?.rss ?? 0 : 0;
     if (!isCurrent()) return;
     _memory.value = value;
   }
