@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS queries",
+  "dnsQueriesDesc": "Inspect DNS lookups resolved through the tunnel",
+  "recordType": "Record type",
+  "initiator": "Initiator",
+  "cache": "Cache",
+  "responseCode": "Response code",
+  "answers": "Answers",
+  "upstream": "Upstream",
+  "error": "Error",
   "subscriptionDirectRetryTitle": "Retry outside the VPN?",
   "subscriptionDirectRetryMessage": "The subscription could not be reached through the current connection. Retry this download directly without turning off the VPN? The panel will see your network’s IP address. Other app traffic will not change.",
   "subscriptionDirectRetryConfirm": "Retry directly",

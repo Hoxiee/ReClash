@@ -360,6 +360,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "animations": MessageLookupByLibrary.simpleMessage("Animations"),
     "announce": MessageLookupByLibrary.simpleMessage("Announcements"),
+    "answers": MessageLookupByLibrary.simpleMessage("Answers"),
     "app": MessageLookupByLibrary.simpleMessage("App"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "App access control",
@@ -494,6 +495,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Only takes effect while the system proxy is enabled",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("Cache"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "The cache is corrupted. Clear it?",
     ),
@@ -908,6 +910,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS hijacking"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS mode"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS queries"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Inspect DNS lookups resolved through the tunnel",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The check found where the connection stops working.",
     ),
@@ -1234,6 +1240,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("Enter manually"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("Error"),
     "exclude": MessageLookupByLibrary.simpleMessage("Hide from recent tasks"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Hide the app from recent tasks while it is in the background",
@@ -1518,6 +1525,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("Never expires"),
     "init": MessageLookupByLibrary.simpleMessage("Init"),
+    "initiator": MessageLookupByLibrary.simpleMessage("Initiator"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Please enter a valid hotkey",
     ),
@@ -1528,9 +1536,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -2266,6 +2275,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
+    "recordType": MessageLookupByLibrary.simpleMessage("Record type"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir port"),
     "redo": MessageLookupByLibrary.simpleMessage("Redo"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Reduce motion"),
@@ -2324,6 +2334,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS connections follow rules; requires proxy-server-nameserver",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("Response code"),
     "restart": MessageLookupByLibrary.simpleMessage("Restart"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to restart the core?",
@@ -3836,6 +3847,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "The downloaded file is damaged",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
+    "upstream": MessageLookupByLibrary.simpleMessage("Upstream"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Obtain a profile from a URL",

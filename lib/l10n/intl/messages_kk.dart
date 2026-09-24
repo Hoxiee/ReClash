@@ -364,6 +364,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "animations": MessageLookupByLibrary.simpleMessage("Анимациялар"),
     "announce": MessageLookupByLibrary.simpleMessage("Хабарландырулар"),
+    "answers": MessageLookupByLibrary.simpleMessage("Жауаптар"),
     "app": MessageLookupByLibrary.simpleMessage("Қолданба"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Қолданба қатынасын бақылау",
@@ -508,6 +509,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Тек жүйелік прокси іске қосылғанда күшіне енеді",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("Кэш"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Кэш зақымдалды. Тазалансын ба?",
     ),
@@ -940,6 +942,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS басып алу"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS режимі"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS сұраулары"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Туннель арқылы шешілген DNS сұрауларын қарау",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1280,6 +1286,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("Қолмен енгізу"),
     "entries": MessageLookupByLibrary.simpleMessage(" жазба"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("Қате"),
     "exclude": MessageLookupByLibrary.simpleMessage(
       "Соңғы қолданбалардан жасыру",
     ),
@@ -1576,6 +1583,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Мерзімі ешқашан бітпейді",
     ),
     "init": MessageLookupByLibrary.simpleMessage("Инициализация"),
+    "initiator": MessageLookupByLibrary.simpleMessage("Бастамашы"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Жарамды перне тіркесімін енгізіңіз",
     ),
@@ -1586,9 +1594,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -2321,6 +2330,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Жылдам толтыру"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Кемпірқосақ"),
+    "recordType": MessageLookupByLibrary.simpleMessage("Жазба түрі"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir порты"),
     "redo": MessageLookupByLibrary.simpleMessage("Қайтадан жасау"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Қимылды азайту"),
@@ -2377,6 +2387,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS қосылымдары ережелерге сәйкес жүреді; proxy-server-nameserver қажет",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("Жауап коды"),
     "restart": MessageLookupByLibrary.simpleMessage("Қайта іске қосу"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Ядро қайта іске қосылсын ба?",
@@ -3885,6 +3896,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Жүктелген файл зақымдалған",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Жүктеп салу"),
+    "upstream": MessageLookupByLibrary.simpleMessage("Апстрим"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL арқылы профиль алу"),
     "urlScheme": MessageLookupByLibrary.simpleMessage("URL-сұлбасы"),

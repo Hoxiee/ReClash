@@ -80,6 +80,7 @@ class _RailBody extends StatelessWidget {
     PageLabel.proxies || PageLabel.profiles => 1,
     PageLabel.requests ||
     PageLabel.connections ||
+    PageLabel.dns ||
     PageLabel.logs ||
     PageLabel.resources => 2,
     PageLabel.tools => 3,

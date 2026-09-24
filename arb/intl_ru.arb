@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS-запросы",
+  "dnsQueriesDesc": "Просмотр DNS-запросов, разрешённых через туннель",
+  "recordType": "Тип записи",
+  "initiator": "Инициатор",
+  "cache": "Кэш",
+  "responseCode": "Код ответа",
+  "answers": "Ответы",
+  "upstream": "Апстрим",
+  "error": "Ошибка",
   "subscriptionDirectRetryTitle": "Повторить вне VPN?",
   "subscriptionDirectRetryMessage": "Не удалось связаться с подпиской через текущее подключение. Повторить эту загрузку напрямую, не выключая VPN? Панель увидит IP-адрес вашей сети. Маршрут остального трафика не изменится.",
   "subscriptionDirectRetryConfirm": "Повторить напрямую",

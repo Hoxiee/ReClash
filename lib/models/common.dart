@@ -240,6 +240,73 @@ extension TrackerInfosStateExt on TrackerInfosState {
   }
 }
 
+@freezed
+abstract class DnsQuery with _$DnsQuery {
+  const factory DnsQuery({
+    @Default('') String domain,
+    @Default('') String type,
+    @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue)
+    DnsQueryInitiator? initiator,
+    @Default('') String upstream,
+    @Default(false) bool cached,
+    @Default([]) List<String> answers,
+    @Default('') String rcode,
+    @Default('') String error,
+    @Default(0) int delay,
+    required DateTime time,
+  }) = _DnsQuery;
+
+  factory DnsQuery.fromJson(Map<String, Object?> json) =>
+      _$DnsQueryFromJson(json);
+}
+
+extension DnsQueryExt on DnsQuery {
+  bool get hasFailureRcode => rcode.isNotEmpty && rcode != 'NOERROR';
+
+  bool get isFailed => error.isNotEmpty || hasFailureRcode;
+
+  List<String> get resultTags => [
+    if (initiator != null) initiator!.label,
+    if (cached) currentAppLocalizations.cache,
+    if (hasFailureRcode) rcode,
+  ];
+
+  List<String> get tags => [type, ...resultTags];
+
+  List<String> get searchFields => [
+    domain,
+    ...tags,
+    rcode,
+    upstream,
+    error,
+    ...answers,
+  ];
+}
+
+@freezed
+abstract class DnsQueriesState with _$DnsQueriesState {
+  const factory DnsQueriesState({
+    @Default([]) List<DnsQuery> dnsQueries,
+    @Default([]) List<String> keywords,
+    @Default('') String query,
+    @Default(false) bool useRegex,
+    @Default(true) bool autoScrollToEnd,
+  }) = _DnsQueriesState;
+}
+
+extension DnsQueriesStateExt on DnsQueriesState {
+  List<DnsQuery> get list {
+    final matcher = SearchMatcher(query.trim(), useRegex: useRegex);
+    return dnsQueries
+        .where(
+          (dnsQuery) =>
+              keywords.every(dnsQuery.tags.contains) &&
+              matcher.hasAnyMatch(dnsQuery.searchFields),
+        )
+        .toList();
+  }
+}
+
 const defaultDavFileName = 'backup.zip';
 const _davPasswordFormatVersion = 'v1';
 const _davPasswordNonceLength = 16;

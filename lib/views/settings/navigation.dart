@@ -52,6 +52,13 @@ class Navigation implements NavigationPort {
         modes: [NavigationItemMode.desktop, NavigationItemMode.more],
       ),
       NavigationItem(
+        icon: const Icon(Icons.dns),
+        label: PageLabel.dns,
+        builder: (_) =>
+            const DnsQueriesView(key: GlobalObjectKey(PageLabel.dns)),
+        modes: [NavigationItemMode.desktop, NavigationItemMode.more],
+      ),
+      NavigationItem(
         icon: const Icon(Icons.storage),
         label: PageLabel.resources,
         builder: (_) =>

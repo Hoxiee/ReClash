@@ -172,6 +172,7 @@ const (
 	GeoUpdateMessage    MessageType = "geoUpdate"
 	RcxStatusMessage    MessageType = "rcxStatus"
 	DoctorStatusMessage MessageType = "doctorStatus"
+	DnsMessage          MessageType = "dns"
 )
 
 type GeoUpdateStatus struct {

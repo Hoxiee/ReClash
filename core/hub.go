@@ -27,6 +27,7 @@ import (
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
 	cp "github.com/metacubex/mihomo/constant/provider"
+	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
@@ -1029,6 +1030,15 @@ func init() {
 	}
 	statistic.DefaultFirstProgressNotify = func(c statistic.Tracker) {
 		connectionDoctor.ObserveTracker(c, true)
+	}
+	dns.DefaultQueryNotify = func(record dns.QueryRecord) {
+		if !uiActive.Load() {
+			return
+		}
+		sendMessage(Message{
+			Type: DnsMessage,
+			Data: newDnsQuery(record),
+		})
 	}
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()

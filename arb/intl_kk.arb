@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS сұраулары",
+  "dnsQueriesDesc": "Туннель арқылы шешілген DNS сұрауларын қарау",
+  "recordType": "Жазба түрі",
+  "initiator": "Бастамашы",
+  "cache": "Кэш",
+  "responseCode": "Жауап коды",
+  "answers": "Жауаптар",
+  "upstream": "Апстрим",
+  "error": "Қате",
   "subscriptionDirectRetryTitle": "VPN-ді айналып өтіп қайталау керек пе?",
   "subscriptionDirectRetryMessage": "Ағымдағы қосылым арқылы жазылымға қол жеткізу мүмкін болмады. VPN-ді өшірмей, осы жүктеуді тікелей қайталау керек пе? Панель желіңіздің IP мекенжайын көреді. Қалған трафиктің бағыты өзгермейді.",
   "subscriptionDirectRetryConfirm": "Тікелей қайталау",

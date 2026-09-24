@@ -62,6 +62,7 @@ func TestClassOfMessageRoutesEachTier(t *testing.T) {
 		RcxStatusMessage:    priorityMessageClass,
 		LogMessage:          bulkMessageClass,
 		RequestMessage:      bulkMessageClass,
+		DnsMessage:          bulkMessageClass,
 	} {
 		if got := classOfMessage(Message{Type: messageType}); got != want {
 			t.Errorf("classOfMessage(%s) = %d, want %d", messageType, got, want)
@@ -74,7 +75,7 @@ func TestUiActivityOnlyGatesOptionalBulkMessages(t *testing.T) {
 	t.Cleanup(func() { uiActive.Store(previous) })
 
 	uiActive.Store(false)
-	for _, messageType := range []MessageType{LogMessage, RequestMessage} {
+	for _, messageType := range []MessageType{LogMessage, RequestMessage, DnsMessage} {
 		if shouldEnqueueMessage(Message{Type: messageType}) {
 			t.Errorf("%s was published while the UI was inactive", messageType)
 		}
@@ -93,7 +94,8 @@ func TestUiActivityOnlyGatesOptionalBulkMessages(t *testing.T) {
 
 	uiActive.Store(true)
 	if !shouldEnqueueMessage(Message{Type: LogMessage}) ||
-		!shouldEnqueueMessage(Message{Type: RequestMessage}) {
+		!shouldEnqueueMessage(Message{Type: RequestMessage}) ||
+		!shouldEnqueueMessage(Message{Type: DnsMessage}) {
 		t.Error("bulk messages stayed gated while the UI was active")
 	}
 }

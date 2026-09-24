@@ -121,8 +121,10 @@ double getWidgetHeight(num lines) {
 
 const maxLogsLength = 500;
 const maxRequestsLength = 500;
+const maxDnsQueriesLength = 500;
 const pausedMaxLogsLength = maxLogsLength * 2;
 const pausedMaxRequestsLength = maxRequestsLength * 2;
+const pausedMaxDnsQueriesLength = maxDnsQueriesLength * 2;
 
 const trafficSampleLength = 30;
 

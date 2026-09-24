@@ -376,6 +376,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "animations": MessageLookupByLibrary.simpleMessage("Animatsiyalar"),
     "announce": MessageLookupByLibrary.simpleMessage("E’lonlar"),
+    "answers": MessageLookupByLibrary.simpleMessage("Javoblar"),
     "app": MessageLookupByLibrary.simpleMessage("Ilova"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Ilovalar uchun kirish nazorati",
@@ -528,6 +529,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Faqat tizim proksisi yoqilganda kuchga kiradi",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("Kesh"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Kesh buzilgan. Tozalansinmi?",
     ),
@@ -964,6 +966,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS oʻgʻirlash"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS rejimi"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS soʻrovlari"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Tunnel orqali hal qilingan DNS soʻrovlarini koʻring",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1314,6 +1320,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("Qoʻlda kiritish"),
     "entries": MessageLookupByLibrary.simpleMessage(" ta yozuv"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("Xato"),
     "exclude": MessageLookupByLibrary.simpleMessage(
       "Oxirgi ilovalar roʻyxatidan yashirish",
     ),
@@ -1618,6 +1625,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Hech qachon tugamaydi",
     ),
     "init": MessageLookupByLibrary.simpleMessage("Initsializatsiya"),
+    "initiator": MessageLookupByLibrary.simpleMessage("Tashabbuskor"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Toʻgʻri tezkor tugma kiriting",
     ),
@@ -1630,9 +1638,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -2379,6 +2388,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Tez toʻldirish"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Kamalak"),
+    "recordType": MessageLookupByLibrary.simpleMessage("Yozuv turi"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir port"),
     "redo": MessageLookupByLibrary.simpleMessage("Qayta qilish"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage(
@@ -2437,6 +2447,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS ulanishlari qoidalarga amal qiladi; proxy-server-nameserver talab qilinadi",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("Javob kodi"),
     "restart": MessageLookupByLibrary.simpleMessage("Qayta ishga tushirish"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Yadro qayta ishga tushirilsinmi?",
@@ -3973,6 +3984,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Yuklab olingan fayl shikastlangan.",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Yuklab yuborish"),
+    "upstream": MessageLookupByLibrary.simpleMessage("Yuqori oqim"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage(
       "Profilni URL orqali olish",

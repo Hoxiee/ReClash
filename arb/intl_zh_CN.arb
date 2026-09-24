@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS查询",
+  "dnsQueriesDesc": "查看通过隧道解析的 DNS 请求",
+  "recordType": "记录类型",
+  "initiator": "发起方",
+  "cache": "缓存",
+  "responseCode": "响应码",
+  "answers": "应答",
+  "upstream": "上游",
+  "error": "错误",
   "subscriptionDirectRetryTitle": "绕过 VPN 重试？",
   "subscriptionDirectRetryMessage": "无法通过当前连接访问订阅。是否在不关闭 VPN 的情况下直接重试此次下载？面板将看到您所在网络的 IP 地址。其他流量的路由不会改变。",
   "subscriptionDirectRetryConfirm": "直接重试",

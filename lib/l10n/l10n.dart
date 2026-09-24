@@ -55,6 +55,61 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `DNS queries`
+  String get dnsQueries {
+    return Intl.message('DNS queries', name: 'dnsQueries', desc: '', args: []);
+  }
+
+  /// `Inspect DNS lookups resolved through the tunnel`
+  String get dnsQueriesDesc {
+    return Intl.message(
+      'Inspect DNS lookups resolved through the tunnel',
+      name: 'dnsQueriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Record type`
+  String get recordType {
+    return Intl.message('Record type', name: 'recordType', desc: '', args: []);
+  }
+
+  /// `Initiator`
+  String get initiator {
+    return Intl.message('Initiator', name: 'initiator', desc: '', args: []);
+  }
+
+  /// `Cache`
+  String get cache {
+    return Intl.message('Cache', name: 'cache', desc: '', args: []);
+  }
+
+  /// `Response code`
+  String get responseCode {
+    return Intl.message(
+      'Response code',
+      name: 'responseCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Answers`
+  String get answers {
+    return Intl.message('Answers', name: 'answers', desc: '', args: []);
+  }
+
+  /// `Upstream`
+  String get upstream {
+    return Intl.message('Upstream', name: 'upstream', desc: '', args: []);
+  }
+
+  /// `Error`
+  String get error {
+    return Intl.message('Error', name: 'error', desc: '', args: []);
+  }
+
   /// `Retry outside the VPN?`
   String get subscriptionDirectRetryTitle {
     return Intl.message(

@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS 쿼리",
+  "dnsQueriesDesc": "터널을 통해 확인된 DNS 조회를 살펴봅니다",
+  "recordType": "레코드 유형",
+  "initiator": "발신자",
+  "cache": "캐시",
+  "responseCode": "응답 코드",
+  "answers": "응답",
+  "upstream": "업스트림",
+  "error": "오류",
   "subscriptionDirectRetryTitle": "VPN을 우회하여 다시 시도할까요?",
   "subscriptionDirectRetryMessage": "현재 연결로 구독에 접근하지 못했습니다. VPN을 끄지 않고 이 다운로드만 직접 다시 시도할까요? 패널에 현재 네트워크의 IP 주소가 표시됩니다. 다른 트래픽의 경로는 바뀌지 않습니다.",
   "subscriptionDirectRetryConfirm": "직접 다시 시도",

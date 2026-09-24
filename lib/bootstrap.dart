@@ -145,7 +145,8 @@ class Bootstrap {
       config = config.copyWith(currentProfileId: null);
       await preferences.saveConfig(config);
     }
-    final regionSignals = await app?.getRegionSignals() ?? const RegionSignals();
+    final regionSignals =
+        await app?.getRegionSignals() ?? const RegionSignals();
     final effectiveLocale =
         getLocaleForString(config.appSettingProps.locale) ??
         WidgetsBinding.instance.platformDispatcher.locale;
@@ -163,6 +164,7 @@ class Bootstrap {
       version: version,
       viewSize: Size.zero,
       requests: FixedList(maxRequestsLength),
+      dnsQueries: FixedList(maxDnsQueriesLength),
       logs: FixedList(maxLogsLength),
       traffics: FixedList(trafficSampleLength),
       totalTraffic: const Traffic(),

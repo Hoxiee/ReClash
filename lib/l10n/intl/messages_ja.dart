@@ -314,6 +314,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("LAN経由でのプロキシ利用を許可します"),
     "animations": MessageLookupByLibrary.simpleMessage("アニメーション"),
     "announce": MessageLookupByLibrary.simpleMessage("お知らせ"),
+    "answers": MessageLookupByLibrary.simpleMessage("応答"),
     "app": MessageLookupByLibrary.simpleMessage("アプリ"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("アプリアクセス制御"),
     "appIconBlueprint": MessageLookupByLibrary.simpleMessage("ブループリント"),
@@ -418,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "システムプロキシが有効な場合のみ適用されます",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("キャッシュ"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "キャッシュが破損しています。クリアしますか？",
     ),
@@ -762,6 +764,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsDesc": MessageLookupByLibrary.simpleMessage("DNS関連の設定を更新します"),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNSハイジャック"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNSモード"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNSクエリ"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "トンネル経由で解決された DNS クエリを確認します",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "最初に失敗したレイヤーを確認しました。",
     ),
@@ -1038,6 +1044,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("手動で入力"),
     "entries": MessageLookupByLibrary.simpleMessage(" 件"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("エラー"),
     "exclude": MessageLookupByLibrary.simpleMessage("最近のタスクから隠す"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "バックグラウンド時に、最近のタスクからアプリを隠します",
@@ -1272,6 +1279,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("無期限"),
     "init": MessageLookupByLibrary.simpleMessage("初期化"),
+    "initiator": MessageLookupByLibrary.simpleMessage("発信元"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "正しいホットキーを入力してください",
     ),
@@ -1900,6 +1908,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
+    "recordType": MessageLookupByLibrary.simpleMessage("レコードタイプ"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redirポート"),
     "redo": MessageLookupByLibrary.simpleMessage("やり直す"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("モーションを減らす"),
@@ -1940,6 +1949,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS接続がルールに従います。proxy-server-nameserverの設定が必要です",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("応答コード"),
     "restart": MessageLookupByLibrary.simpleMessage("再起動"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage("コアを再起動してもよろしいですか？"),
     "restore": MessageLookupByLibrary.simpleMessage("復元"),
@@ -3203,6 +3213,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ダウンロードしたファイルが破損しています",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("アップロード"),
+    "upstream": MessageLookupByLibrary.simpleMessage("アップストリーム"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URLからプロファイルを取得します"),
     "urlScheme": MessageLookupByLibrary.simpleMessage("URLスキーム"),

@@ -204,6 +204,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.log: 'log',
   CoreEventType.delay: 'delay',
   CoreEventType.request: 'request',
+  CoreEventType.dns: 'dns',
   CoreEventType.loaded: 'loaded',
   CoreEventType.crash: 'crash',
   CoreEventType.geoUpdate: 'geoUpdate',

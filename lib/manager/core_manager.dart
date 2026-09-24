@@ -193,6 +193,12 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   }
 
   @override
+  void onDnsQuery(DnsQuery dnsQuery) {
+    ref.read(dnsQueriesProvider.notifier).addDnsQuery(dnsQuery);
+    super.onDnsQuery(dnsQuery);
+  }
+
+  @override
   Future<void> onLoaded(String providerName) async {
     final provider = await _core.getExternalProvider(providerName);
     if (!mounted) {

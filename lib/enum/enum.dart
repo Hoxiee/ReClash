@@ -334,6 +334,7 @@ enum CoreEventType {
   log,
   delay,
   request,
+  dns,
   loaded,
   crash,
   geoUpdate,
@@ -450,6 +451,7 @@ enum FunctionTag {
   removeProxy,
   smartPause,
   coreErrorNotifier,
+  dnsQueries,
 }
 
 /// ByeDPI-only runs without a profile, so server tiles have nothing to say.
@@ -537,7 +539,12 @@ enum PageLabel {
   requests,
   resources,
   connections,
+  dns,
 }
+
+/// The engine only distinguishes app-originated lookups from the rest; the
+/// finer FlClash split needs `component/resolver` wiring we did not vendor.
+enum DnsQueryInitiator { app, other }
 
 enum RuleAction {
   DOMAIN('DOMAIN'),

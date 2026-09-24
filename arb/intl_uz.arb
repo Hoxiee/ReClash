@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS soʻrovlari",
+  "dnsQueriesDesc": "Tunnel orqali hal qilingan DNS soʻrovlarini koʻring",
+  "recordType": "Yozuv turi",
+  "initiator": "Tashabbuskor",
+  "cache": "Kesh",
+  "responseCode": "Javob kodi",
+  "answers": "Javoblar",
+  "upstream": "Yuqori oqim",
+  "error": "Xato",
   "subscriptionDirectRetryTitle": "VPNni chetlab qayta urinish kerakmi?",
   "subscriptionDirectRetryMessage": "Joriy ulanish orqali obunaga ulanib bo‘lmadi. VPNni o‘chirmasdan, faqat shu yuklab olishni bevosita takrorlaysizmi? Panel tarmog‘ingizning IP manzilini ko‘radi. Boshqa trafik yo‘nalishi o‘zgarmaydi.",
   "subscriptionDirectRetryConfirm": "Bevosita qayta urinish",

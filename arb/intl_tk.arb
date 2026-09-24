@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNS soraglary",
+  "dnsQueriesDesc": "Tunnel arkaly çözülen DNS soraglaryna serediň",
+  "recordType": "Ýazgy görnüşi",
+  "initiator": "Başladyjy",
+  "cache": "Keş",
+  "responseCode": "Jogap kody",
+  "answers": "Jogaplar",
+  "upstream": "Ýokary akym",
+  "error": "Ýalňyşlyk",
   "subscriptionDirectRetryTitle": "VPN-den daşarda gaýtadan synanyşmalymy?",
   "subscriptionDirectRetryMessage": "Häzirki birikme arkaly abunalyga ýetip bolmady. VPN-i öçürmän, diňe şu ýüklemäni göni gaýtalamalymy? Panel toruňyzyň IP salgysyny görer. Beýleki traffigiň ugry üýtgemez.",
   "subscriptionDirectRetryConfirm": "Göni gaýtadan synanyş",

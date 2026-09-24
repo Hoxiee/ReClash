@@ -1,4 +1,13 @@
 {
+  "dnsQueries": "DNSクエリ",
+  "dnsQueriesDesc": "トンネル経由で解決された DNS クエリを確認します",
+  "recordType": "レコードタイプ",
+  "initiator": "発信元",
+  "cache": "キャッシュ",
+  "responseCode": "応答コード",
+  "answers": "応答",
+  "upstream": "アップストリーム",
+  "error": "エラー",
   "subscriptionDirectRetryTitle": "VPN を経由せずに再試行しますか？",
   "subscriptionDirectRetryMessage": "現在の接続ではサブスクリプションにアクセスできませんでした。VPN を無効にせず、このダウンロードだけを直接再試行しますか？パネルにはご利用のネットワークの IP アドレスが伝わります。他の通信経路は変わりません。",
   "subscriptionDirectRetryConfirm": "直接再試行",

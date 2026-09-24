@@ -65,6 +65,21 @@ class Requests extends _$Requests with AutoDisposeNotifierMixin {
 }
 
 @Riverpod(keepAlive: true)
+class DnsQueries extends _$DnsQueries with AutoDisposeNotifierMixin {
+  @override
+  FixedList<DnsQuery> build() {
+    return FixedList(maxDnsQueriesLength);
+  }
+
+  void addDnsQuery(DnsQuery value) {
+    if (!ref.mounted) {
+      return;
+    }
+    this.value = state.append(value);
+  }
+}
+
+@Riverpod(keepAlive: true)
 class Providers extends _$Providers with AutoDisposeNotifierMixin {
   @override
   List<ExternalProvider> build() {
@@ -669,6 +684,7 @@ List<Override> buildAppStateOverrides(AppState appState) {
     providersProvider.overrideWithBuild((_, _) => appState.providers),
     localIpProvider.overrideWithBuild((_, _) => appState.localIp),
     requestsProvider.overrideWithBuild((_, _) => appState.requests),
+    dnsQueriesProvider.overrideWithBuild((_, _) => appState.dnsQueries),
     versionProvider.overrideWithBuild((_, _) => appState.version),
     logsProvider.overrideWithBuild((_, _) => appState.logs),
     trafficsProvider.overrideWithBuild((_, _) => appState.traffics),

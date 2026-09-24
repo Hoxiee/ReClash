@@ -367,6 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "animations": MessageLookupByLibrary.simpleMessage("Animasiýalar"),
     "announce": MessageLookupByLibrary.simpleMessage("Bildirişler"),
+    "answers": MessageLookupByLibrary.simpleMessage("Jogaplar"),
     "app": MessageLookupByLibrary.simpleMessage("Programma"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Programmalaryň elýetmäsine gözegçilik",
@@ -511,6 +512,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Diňe ulgam proksisi açyk wagty güýje girer",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("Keş"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Keş bozuldy. Arassalamak isleýärsiňizmi?",
     ),
@@ -949,6 +951,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS-i ele geçirmek"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS usuly"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS soraglary"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Tunnel arkaly çözülen DNS soraglaryna serediň",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "The Doctor confirmed the first failing layer.",
     ),
@@ -1287,6 +1293,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("El bilen giriz"),
     "entries": MessageLookupByLibrary.simpleMessage(" ýazgy"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("Ýalňyşlyk"),
     "exclude": MessageLookupByLibrary.simpleMessage(
       "Soňky tapsyryklardan gizle",
     ),
@@ -1581,6 +1588,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("Hiç wagt gutarmaýar"),
     "init": MessageLookupByLibrary.simpleMessage("Başlangyçlaşdyrma"),
+    "initiator": MessageLookupByLibrary.simpleMessage("Başladyjy"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Dogry çalt klawişany giriziň",
     ),
@@ -1591,9 +1599,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -2324,6 +2333,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Çalt doldur"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Älemgoşar"),
+    "recordType": MessageLookupByLibrary.simpleMessage("Ýazgy görnüşi"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Redir porty"),
     "redo": MessageLookupByLibrary.simpleMessage("Täzeden et"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Hereketi kemelt"),
@@ -2376,6 +2386,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS baglanyşyklary düzgünlere uýýar; proxy-server-nameserver gerek",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("Jogap kody"),
     "restart": MessageLookupByLibrary.simpleMessage("Täzeden işlet"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Çekirdegi täzeden işletmek isleýärsiňizmi?",
@@ -3876,6 +3887,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Göçürip alnan faýl bozuk",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Ýükle"),
+    "upstream": MessageLookupByLibrary.simpleMessage("Ýokary akym"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL arkaly profil al"),
     "urlScheme": MessageLookupByLibrary.simpleMessage("URL şemasy"),

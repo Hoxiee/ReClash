@@ -367,6 +367,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "animations": MessageLookupByLibrary.simpleMessage("Анимации"),
     "announce": MessageLookupByLibrary.simpleMessage("Анонсы"),
+    "answers": MessageLookupByLibrary.simpleMessage("Ответы"),
     "app": MessageLookupByLibrary.simpleMessage("Приложение"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage(
       "Контроль доступа приложений",
@@ -505,6 +506,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "Действует только при включённом системном прокси",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("Кэш"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "Кэш повреждён. Очистить его?",
     ),
@@ -933,6 +935,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsDesc": MessageLookupByLibrary.simpleMessage("Настройки DNS"),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("Перехват DNS"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("Режим DNS"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS-запросы"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "Просмотр DNS-запросов, разрешённых через туннель",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "Проверка нашла место, где соединение перестаёт работать.",
     ),
@@ -1277,6 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("Ввести вручную"),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("Ошибка"),
     "exclude": MessageLookupByLibrary.simpleMessage("Скрыть из недавних задач"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "Скрывать приложение из недавних задач, когда оно в фоне",
@@ -1567,6 +1574,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("Бессрочно"),
     "init": MessageLookupByLibrary.simpleMessage("Инициализация"),
+    "initiator": MessageLookupByLibrary.simpleMessage("Инициатор"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "Введите правильную горячую клавишу",
     ),
@@ -1579,9 +1587,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2353,6 +2362,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радуга"),
+    "recordType": MessageLookupByLibrary.simpleMessage("Тип записи"),
     "redirPort": MessageLookupByLibrary.simpleMessage("Порт Redir"),
     "redo": MessageLookupByLibrary.simpleMessage("Повторить"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("Меньше движения"),
@@ -2411,6 +2421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS-соединения следуют правилам; требуется настроить proxy-server-nameserver",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("Код ответа"),
     "restart": MessageLookupByLibrary.simpleMessage("Перезапустить"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Перезапустить ядро?",
@@ -3977,6 +3988,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Загруженный файл повреждён",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("Отдача"),
+    "upstream": MessageLookupByLibrary.simpleMessage("Апстрим"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("Получить профиль по URL"),
     "urlScheme": MessageLookupByLibrary.simpleMessage("URL-схема"),

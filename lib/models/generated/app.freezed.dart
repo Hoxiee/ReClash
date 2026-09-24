@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppState {
 
- bool get isInit; PageLabel get pageLabel; List<Package> get packages; int get sortNum; Size get viewSize; DelayMap get delayMap; List<Group> get groups; int get checkIpNum; Brightness get brightness; int? get runTime; List<ExternalProvider> get providers; String? get localIp; FixedList<TrackerInfo> get requests; int get version; FixedList<Log> get logs; FixedList<Traffic> get traffics; Traffic get totalTraffic; TunAuthorizationState get authorizedTunEnable; bool get loading; SystemUiOverlayStyle get systemUiOverlayStyle; CoreStatus get coreStatus;
+ bool get isInit; PageLabel get pageLabel; List<Package> get packages; int get sortNum; Size get viewSize; DelayMap get delayMap; List<Group> get groups; int get checkIpNum; Brightness get brightness; int? get runTime; List<ExternalProvider> get providers; String? get localIp; FixedList<TrackerInfo> get requests; FixedList<DnsQuery> get dnsQueries; int get version; FixedList<Log> get logs; FixedList<Traffic> get traffics; Traffic get totalTraffic; TunAuthorizationState get authorizedTunEnable; bool get loading; SystemUiOverlayStyle get systemUiOverlayStyle; CoreStatus get coreStatus;
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,14 +27,14 @@ $AppStateCopyWith<AppState> get copyWith => _$AppStateCopyWithImpl<AppState>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as AppState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppState&&(identical(other.isInit, _this.isInit) || other.isInit == _this.isInit)&&(identical(other.pageLabel, _this.pageLabel) || other.pageLabel == _this.pageLabel)&&const DeepCollectionEquality().equals(other.packages, _this.packages)&&(identical(other.sortNum, _this.sortNum) || other.sortNum == _this.sortNum)&&(identical(other.viewSize, _this.viewSize) || other.viewSize == _this.viewSize)&&const DeepCollectionEquality().equals(other.delayMap, _this.delayMap)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.checkIpNum, _this.checkIpNum) || other.checkIpNum == _this.checkIpNum)&&(identical(other.brightness, _this.brightness) || other.brightness == _this.brightness)&&(identical(other.runTime, _this.runTime) || other.runTime == _this.runTime)&&const DeepCollectionEquality().equals(other.providers, _this.providers)&&(identical(other.localIp, _this.localIp) || other.localIp == _this.localIp)&&(identical(other.requests, _this.requests) || other.requests == _this.requests)&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.logs, _this.logs) || other.logs == _this.logs)&&(identical(other.traffics, _this.traffics) || other.traffics == _this.traffics)&&(identical(other.totalTraffic, _this.totalTraffic) || other.totalTraffic == _this.totalTraffic)&&(identical(other.authorizedTunEnable, _this.authorizedTunEnable) || other.authorizedTunEnable == _this.authorizedTunEnable)&&(identical(other.loading, _this.loading) || other.loading == _this.loading)&&(identical(other.systemUiOverlayStyle, _this.systemUiOverlayStyle) || other.systemUiOverlayStyle == _this.systemUiOverlayStyle)&&(identical(other.coreStatus, _this.coreStatus) || other.coreStatus == _this.coreStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppState&&(identical(other.isInit, _this.isInit) || other.isInit == _this.isInit)&&(identical(other.pageLabel, _this.pageLabel) || other.pageLabel == _this.pageLabel)&&const DeepCollectionEquality().equals(other.packages, _this.packages)&&(identical(other.sortNum, _this.sortNum) || other.sortNum == _this.sortNum)&&(identical(other.viewSize, _this.viewSize) || other.viewSize == _this.viewSize)&&const DeepCollectionEquality().equals(other.delayMap, _this.delayMap)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.checkIpNum, _this.checkIpNum) || other.checkIpNum == _this.checkIpNum)&&(identical(other.brightness, _this.brightness) || other.brightness == _this.brightness)&&(identical(other.runTime, _this.runTime) || other.runTime == _this.runTime)&&const DeepCollectionEquality().equals(other.providers, _this.providers)&&(identical(other.localIp, _this.localIp) || other.localIp == _this.localIp)&&(identical(other.requests, _this.requests) || other.requests == _this.requests)&&(identical(other.dnsQueries, _this.dnsQueries) || other.dnsQueries == _this.dnsQueries)&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.logs, _this.logs) || other.logs == _this.logs)&&(identical(other.traffics, _this.traffics) || other.traffics == _this.traffics)&&(identical(other.totalTraffic, _this.totalTraffic) || other.totalTraffic == _this.totalTraffic)&&(identical(other.authorizedTunEnable, _this.authorizedTunEnable) || other.authorizedTunEnable == _this.authorizedTunEnable)&&(identical(other.loading, _this.loading) || other.loading == _this.loading)&&(identical(other.systemUiOverlayStyle, _this.systemUiOverlayStyle) || other.systemUiOverlayStyle == _this.systemUiOverlayStyle)&&(identical(other.coreStatus, _this.coreStatus) || other.coreStatus == _this.coreStatus));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppState;
-  return Object.hashAll([runtimeType,_this.isInit,_this.pageLabel,const DeepCollectionEquality().hash(_this.packages),_this.sortNum,_this.viewSize,const DeepCollectionEquality().hash(_this.delayMap),const DeepCollectionEquality().hash(_this.groups),_this.checkIpNum,_this.brightness,_this.runTime,const DeepCollectionEquality().hash(_this.providers),_this.localIp,_this.requests,_this.version,_this.logs,_this.traffics,_this.totalTraffic,_this.authorizedTunEnable,_this.loading,_this.systemUiOverlayStyle,_this.coreStatus]);
+  return Object.hashAll([runtimeType,_this.isInit,_this.pageLabel,const DeepCollectionEquality().hash(_this.packages),_this.sortNum,_this.viewSize,const DeepCollectionEquality().hash(_this.delayMap),const DeepCollectionEquality().hash(_this.groups),_this.checkIpNum,_this.brightness,_this.runTime,const DeepCollectionEquality().hash(_this.providers),_this.localIp,_this.requests,_this.dnsQueries,_this.version,_this.logs,_this.traffics,_this.totalTraffic,_this.authorizedTunEnable,_this.loading,_this.systemUiOverlayStyle,_this.coreStatus]);
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $AppStateCopyWith<$Res>  {
   factory $AppStateCopyWith(AppState value, $Res Function(AppState) _then) = _$AppStateCopyWithImpl;
 @useResult
 $Res call({
- bool isInit, PageLabel pageLabel, List<Package> packages, int sortNum, Size viewSize, DelayMap delayMap, List<Group> groups, int checkIpNum, Brightness brightness, int? runTime, List<ExternalProvider> providers, String? localIp, FixedList<TrackerInfo> requests, int version, FixedList<Log> logs, FixedList<Traffic> traffics, Traffic totalTraffic, TunAuthorizationState authorizedTunEnable, bool loading, SystemUiOverlayStyle systemUiOverlayStyle, CoreStatus coreStatus
+ bool isInit, PageLabel pageLabel, List<Package> packages, int sortNum, Size viewSize, DelayMap delayMap, List<Group> groups, int checkIpNum, Brightness brightness, int? runTime, List<ExternalProvider> providers, String? localIp, FixedList<TrackerInfo> requests, FixedList<DnsQuery> dnsQueries, int version, FixedList<Log> logs, FixedList<Traffic> traffics, Traffic totalTraffic, TunAuthorizationState authorizedTunEnable, bool loading, SystemUiOverlayStyle systemUiOverlayStyle, CoreStatus coreStatus
 });
 
 
@@ -63,7 +63,7 @@ class _$AppStateCopyWithImpl<$Res>
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isInit = null,Object? pageLabel = null,Object? packages = null,Object? sortNum = null,Object? viewSize = null,Object? delayMap = null,Object? groups = null,Object? checkIpNum = null,Object? brightness = null,Object? runTime = freezed,Object? providers = null,Object? localIp = freezed,Object? requests = null,Object? version = null,Object? logs = null,Object? traffics = null,Object? totalTraffic = null,Object? authorizedTunEnable = null,Object? loading = null,Object? systemUiOverlayStyle = null,Object? coreStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isInit = null,Object? pageLabel = null,Object? packages = null,Object? sortNum = null,Object? viewSize = null,Object? delayMap = null,Object? groups = null,Object? checkIpNum = null,Object? brightness = null,Object? runTime = freezed,Object? providers = null,Object? localIp = freezed,Object? requests = null,Object? dnsQueries = null,Object? version = null,Object? logs = null,Object? traffics = null,Object? totalTraffic = null,Object? authorizedTunEnable = null,Object? loading = null,Object? systemUiOverlayStyle = null,Object? coreStatus = null,}) {
   return _then(AppState(
 isInit: null == isInit ? _self.isInit : isInit // ignore: cast_nullable_to_non_nullable
 as bool,pageLabel: null == pageLabel ? _self.pageLabel : pageLabel // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,8 @@ as Brightness,runTime: freezed == runTime ? _self.runTime : runTime // ignore: c
 as int?,providers: null == providers ? _self.providers : providers // ignore: cast_nullable_to_non_nullable
 as List<ExternalProvider>,localIp: freezed == localIp ? _self.localIp : localIp // ignore: cast_nullable_to_non_nullable
 as String?,requests: null == requests ? _self.requests : requests // ignore: cast_nullable_to_non_nullable
-as FixedList<TrackerInfo>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as FixedList<TrackerInfo>,dnsQueries: null == dnsQueries ? _self.dnsQueries : dnsQueries // ignore: cast_nullable_to_non_nullable
+as FixedList<DnsQuery>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,logs: null == logs ? _self.logs : logs // ignore: cast_nullable_to_non_nullable
 as FixedList<Log>,traffics: null == traffics ? _self.traffics : traffics // ignore: cast_nullable_to_non_nullable
 as FixedList<Traffic>,totalTraffic: null == totalTraffic ? _self.totalTraffic : totalTraffic // ignore: cast_nullable_to_non_nullable
@@ -180,10 +181,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  FixedList<DnsQuery> dnsQueries,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppState() when $default != null:
-return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
+return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.dnsQueries,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
   return orElse();
 
 }
@@ -201,10 +202,10 @@ return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  FixedList<DnsQuery> dnsQueries,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)  $default,) {final _that = this;
 switch (_that) {
 case _AppState():
-return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
+return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.dnsQueries,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -221,10 +222,10 @@ return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isInit,  PageLabel pageLabel,  List<Package> packages,  int sortNum,  Size viewSize,  DelayMap delayMap,  List<Group> groups,  int checkIpNum,  Brightness brightness,  int? runTime,  List<ExternalProvider> providers,  String? localIp,  FixedList<TrackerInfo> requests,  FixedList<DnsQuery> dnsQueries,  int version,  FixedList<Log> logs,  FixedList<Traffic> traffics,  Traffic totalTraffic,  TunAuthorizationState authorizedTunEnable,  bool loading,  SystemUiOverlayStyle systemUiOverlayStyle,  CoreStatus coreStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _AppState() when $default != null:
-return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
+return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.viewSize,_that.delayMap,_that.groups,_that.checkIpNum,_that.brightness,_that.runTime,_that.providers,_that.localIp,_that.requests,_that.dnsQueries,_that.version,_that.logs,_that.traffics,_that.totalTraffic,_that.authorizedTunEnable,_that.loading,_that.systemUiOverlayStyle,_that.coreStatus);case _:
   return null;
 
 }
@@ -236,7 +237,7 @@ return $default(_that.isInit,_that.pageLabel,_that.packages,_that.sortNum,_that.
 
 
 class _AppState implements AppState {
-  const _AppState({this.isInit = false, this.pageLabel = PageLabel.dashboard,  List<Package> packages = const [], this.sortNum = 0, required this.viewSize,  DelayMap delayMap = const {},  List<Group> groups = const [], this.checkIpNum = 0, required this.brightness, this.runTime,  List<ExternalProvider> providers = const [], this.localIp, required this.requests, required this.version, required this.logs, required this.traffics, required this.totalTraffic, this.authorizedTunEnable = TunAuthorizationState.none, this.loading = false, required this.systemUiOverlayStyle, this.coreStatus = CoreStatus.connecting}): _packages = packages,_delayMap = delayMap,_groups = groups,_providers = providers;
+  const _AppState({this.isInit = false, this.pageLabel = PageLabel.dashboard,  List<Package> packages = const [], this.sortNum = 0, required this.viewSize,  DelayMap delayMap = const {},  List<Group> groups = const [], this.checkIpNum = 0, required this.brightness, this.runTime,  List<ExternalProvider> providers = const [], this.localIp, required this.requests, required this.dnsQueries, required this.version, required this.logs, required this.traffics, required this.totalTraffic, this.authorizedTunEnable = TunAuthorizationState.none, this.loading = false, required this.systemUiOverlayStyle, this.coreStatus = CoreStatus.connecting}): _packages = packages,_delayMap = delayMap,_groups = groups,_providers = providers;
   
 
 @override@JsonKey() final  bool isInit;
@@ -276,6 +277,7 @@ class _AppState implements AppState {
 
 @override final  String? localIp;
 @override final  FixedList<TrackerInfo> requests;
+@override final  FixedList<DnsQuery> dnsQueries;
 @override final  int version;
 @override final  FixedList<Log> logs;
 @override final  FixedList<Traffic> traffics;
@@ -295,13 +297,13 @@ _$AppStateCopyWith<_AppState> get copyWith => __$AppStateCopyWithImpl<_AppState>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppState&&(identical(other.isInit, isInit) || other.isInit == isInit)&&(identical(other.pageLabel, pageLabel) || other.pageLabel == pageLabel)&&const DeepCollectionEquality().equals(other.packages, _packages)&&(identical(other.sortNum, sortNum) || other.sortNum == sortNum)&&(identical(other.viewSize, viewSize) || other.viewSize == viewSize)&&const DeepCollectionEquality().equals(other.delayMap, _delayMap)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.checkIpNum, checkIpNum) || other.checkIpNum == checkIpNum)&&(identical(other.brightness, brightness) || other.brightness == brightness)&&(identical(other.runTime, runTime) || other.runTime == runTime)&&const DeepCollectionEquality().equals(other.providers, _providers)&&(identical(other.localIp, localIp) || other.localIp == localIp)&&(identical(other.requests, requests) || other.requests == requests)&&(identical(other.version, version) || other.version == version)&&(identical(other.logs, logs) || other.logs == logs)&&(identical(other.traffics, traffics) || other.traffics == traffics)&&(identical(other.totalTraffic, totalTraffic) || other.totalTraffic == totalTraffic)&&(identical(other.authorizedTunEnable, authorizedTunEnable) || other.authorizedTunEnable == authorizedTunEnable)&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.systemUiOverlayStyle, systemUiOverlayStyle) || other.systemUiOverlayStyle == systemUiOverlayStyle)&&(identical(other.coreStatus, coreStatus) || other.coreStatus == coreStatus));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppState&&(identical(other.isInit, isInit) || other.isInit == isInit)&&(identical(other.pageLabel, pageLabel) || other.pageLabel == pageLabel)&&const DeepCollectionEquality().equals(other.packages, _packages)&&(identical(other.sortNum, sortNum) || other.sortNum == sortNum)&&(identical(other.viewSize, viewSize) || other.viewSize == viewSize)&&const DeepCollectionEquality().equals(other.delayMap, _delayMap)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.checkIpNum, checkIpNum) || other.checkIpNum == checkIpNum)&&(identical(other.brightness, brightness) || other.brightness == brightness)&&(identical(other.runTime, runTime) || other.runTime == runTime)&&const DeepCollectionEquality().equals(other.providers, _providers)&&(identical(other.localIp, localIp) || other.localIp == localIp)&&(identical(other.requests, requests) || other.requests == requests)&&(identical(other.dnsQueries, dnsQueries) || other.dnsQueries == dnsQueries)&&(identical(other.version, version) || other.version == version)&&(identical(other.logs, logs) || other.logs == logs)&&(identical(other.traffics, traffics) || other.traffics == traffics)&&(identical(other.totalTraffic, totalTraffic) || other.totalTraffic == totalTraffic)&&(identical(other.authorizedTunEnable, authorizedTunEnable) || other.authorizedTunEnable == authorizedTunEnable)&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.systemUiOverlayStyle, systemUiOverlayStyle) || other.systemUiOverlayStyle == systemUiOverlayStyle)&&(identical(other.coreStatus, coreStatus) || other.coreStatus == coreStatus));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,isInit,pageLabel,const DeepCollectionEquality().hash(_packages),sortNum,viewSize,const DeepCollectionEquality().hash(_delayMap),const DeepCollectionEquality().hash(_groups),checkIpNum,brightness,runTime,const DeepCollectionEquality().hash(_providers),localIp,requests,version,logs,traffics,totalTraffic,authorizedTunEnable,loading,systemUiOverlayStyle,coreStatus]);
+    return Object.hashAll([runtimeType,isInit,pageLabel,const DeepCollectionEquality().hash(_packages),sortNum,viewSize,const DeepCollectionEquality().hash(_delayMap),const DeepCollectionEquality().hash(_groups),checkIpNum,brightness,runTime,const DeepCollectionEquality().hash(_providers),localIp,requests,dnsQueries,version,logs,traffics,totalTraffic,authorizedTunEnable,loading,systemUiOverlayStyle,coreStatus]);
 }
 
 
@@ -313,7 +315,7 @@ abstract mixin class _$AppStateCopyWith<$Res> implements $AppStateCopyWith<$Res>
   factory _$AppStateCopyWith(_AppState value, $Res Function(_AppState) _then) = __$AppStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isInit, PageLabel pageLabel, List<Package> packages, int sortNum, Size viewSize, DelayMap delayMap, List<Group> groups, int checkIpNum, Brightness brightness, int? runTime, List<ExternalProvider> providers, String? localIp, FixedList<TrackerInfo> requests, int version, FixedList<Log> logs, FixedList<Traffic> traffics, Traffic totalTraffic, TunAuthorizationState authorizedTunEnable, bool loading, SystemUiOverlayStyle systemUiOverlayStyle, CoreStatus coreStatus
+ bool isInit, PageLabel pageLabel, List<Package> packages, int sortNum, Size viewSize, DelayMap delayMap, List<Group> groups, int checkIpNum, Brightness brightness, int? runTime, List<ExternalProvider> providers, String? localIp, FixedList<TrackerInfo> requests, FixedList<DnsQuery> dnsQueries, int version, FixedList<Log> logs, FixedList<Traffic> traffics, Traffic totalTraffic, TunAuthorizationState authorizedTunEnable, bool loading, SystemUiOverlayStyle systemUiOverlayStyle, CoreStatus coreStatus
 });
 
 
@@ -330,7 +332,7 @@ class __$AppStateCopyWithImpl<$Res>
 
 /// Create a copy of AppState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isInit = null,Object? pageLabel = null,Object? packages = null,Object? sortNum = null,Object? viewSize = null,Object? delayMap = null,Object? groups = null,Object? checkIpNum = null,Object? brightness = null,Object? runTime = freezed,Object? providers = null,Object? localIp = freezed,Object? requests = null,Object? version = null,Object? logs = null,Object? traffics = null,Object? totalTraffic = null,Object? authorizedTunEnable = null,Object? loading = null,Object? systemUiOverlayStyle = null,Object? coreStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isInit = null,Object? pageLabel = null,Object? packages = null,Object? sortNum = null,Object? viewSize = null,Object? delayMap = null,Object? groups = null,Object? checkIpNum = null,Object? brightness = null,Object? runTime = freezed,Object? providers = null,Object? localIp = freezed,Object? requests = null,Object? dnsQueries = null,Object? version = null,Object? logs = null,Object? traffics = null,Object? totalTraffic = null,Object? authorizedTunEnable = null,Object? loading = null,Object? systemUiOverlayStyle = null,Object? coreStatus = null,}) {
   return _then(_AppState(
 isInit: null == isInit ? _self.isInit : isInit // ignore: cast_nullable_to_non_nullable
 as bool,pageLabel: null == pageLabel ? _self.pageLabel : pageLabel // ignore: cast_nullable_to_non_nullable
@@ -345,7 +347,8 @@ as Brightness,runTime: freezed == runTime ? _self.runTime : runTime // ignore: c
 as int?,providers: null == providers ? _self._providers : providers // ignore: cast_nullable_to_non_nullable
 as List<ExternalProvider>,localIp: freezed == localIp ? _self.localIp : localIp // ignore: cast_nullable_to_non_nullable
 as String?,requests: null == requests ? _self.requests : requests // ignore: cast_nullable_to_non_nullable
-as FixedList<TrackerInfo>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as FixedList<TrackerInfo>,dnsQueries: null == dnsQueries ? _self.dnsQueries : dnsQueries // ignore: cast_nullable_to_non_nullable
+as FixedList<DnsQuery>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,logs: null == logs ? _self.logs : logs // ignore: cast_nullable_to_non_nullable
 as FixedList<Log>,traffics: null == traffics ? _self.traffics : traffics // ignore: cast_nullable_to_non_nullable
 as FixedList<Traffic>,totalTraffic: null == totalTraffic ? _self.totalTraffic : totalTraffic // ignore: cast_nullable_to_non_nullable

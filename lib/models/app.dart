@@ -26,6 +26,7 @@ abstract class AppState with _$AppState {
     @Default([]) List<ExternalProvider> providers,
     String? localIp,
     required FixedList<TrackerInfo> requests,
+    required FixedList<DnsQuery> dnsQueries,
     required int version,
     required FixedList<Log> logs,
     required FixedList<Traffic> traffics,

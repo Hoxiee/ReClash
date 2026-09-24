@@ -329,6 +329,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "allowLanDesc": MessageLookupByLibrary.simpleMessage("LAN에서 프록시 접근을 허용합니다"),
     "animations": MessageLookupByLibrary.simpleMessage("애니메이션"),
     "announce": MessageLookupByLibrary.simpleMessage("공지사항"),
+    "answers": MessageLookupByLibrary.simpleMessage("응답"),
     "app": MessageLookupByLibrary.simpleMessage("앱"),
     "appAccessControl": MessageLookupByLibrary.simpleMessage("앱 액세스 제어"),
     "appIconBlueprint": MessageLookupByLibrary.simpleMessage("블루프린트"),
@@ -431,6 +432,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "bypassDomainDesc": MessageLookupByLibrary.simpleMessage(
       "시스템 프록시가 켜져 있을 때만 적용됩니다",
     ),
+    "cache": MessageLookupByLibrary.simpleMessage("캐시"),
     "cacheCorrupt": MessageLookupByLibrary.simpleMessage(
       "캐시가 손상됐습니다. 지우시겠습니까?",
     ),
@@ -763,6 +765,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "dnsDesc": MessageLookupByLibrary.simpleMessage("DNS 관련 설정을 변경합니다"),
     "dnsHijacking": MessageLookupByLibrary.simpleMessage("DNS 하이재킹"),
     "dnsMode": MessageLookupByLibrary.simpleMessage("DNS 모드"),
+    "dnsQueries": MessageLookupByLibrary.simpleMessage("DNS 쿼리"),
+    "dnsQueriesDesc": MessageLookupByLibrary.simpleMessage(
+      "터널을 통해 확인된 DNS 조회를 살펴봅니다",
+    ),
     "doctorBrokenDesc": MessageLookupByLibrary.simpleMessage(
       "첫 번째 실패 계층을 확인했습니다.",
     ),
@@ -1029,6 +1035,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterManually": MessageLookupByLibrary.simpleMessage("직접 입력"),
     "entries": MessageLookupByLibrary.simpleMessage(" 항목"),
     "entriesCount": m32,
+    "error": MessageLookupByLibrary.simpleMessage("오류"),
     "exclude": MessageLookupByLibrary.simpleMessage("최근 앱 목록에서 숨기기"),
     "excludeDesc": MessageLookupByLibrary.simpleMessage(
       "백그라운드에 있을 때 앱을 최근 앱 목록에서 숨깁니다",
@@ -1267,6 +1274,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "infiniteTime": MessageLookupByLibrary.simpleMessage("만료되지 않음"),
     "init": MessageLookupByLibrary.simpleMessage("초기화"),
+    "initiator": MessageLookupByLibrary.simpleMessage("발신자"),
     "inputCorrectHotkey": MessageLookupByLibrary.simpleMessage(
       "올바른 단축키를 입력해 주세요",
     ),
@@ -1875,6 +1883,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QR 코드를 스캔해 프로필을 추가합니다"),
     "quickFill": MessageLookupByLibrary.simpleMessage("빠른 입력"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("무지개"),
+    "recordType": MessageLookupByLibrary.simpleMessage("레코드 유형"),
     "redirPort": MessageLookupByLibrary.simpleMessage("리다이렉트 포트"),
     "redo": MessageLookupByLibrary.simpleMessage("다시 실행"),
     "reduceMotion": MessageLookupByLibrary.simpleMessage("모션 줄이기"),
@@ -1915,6 +1924,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "respectRulesDesc": MessageLookupByLibrary.simpleMessage(
       "DNS 요청이 규칙을 따르며, proxy-server-nameserver 설정이 필요합니다",
     ),
+    "responseCode": MessageLookupByLibrary.simpleMessage("응답 코드"),
     "restart": MessageLookupByLibrary.simpleMessage("다시 시작"),
     "restartCoreTip": MessageLookupByLibrary.simpleMessage("코어를 다시 시작하시겠습니까?"),
     "restore": MessageLookupByLibrary.simpleMessage("복원"),
@@ -3121,6 +3131,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "다운로드한 파일이 손상됐습니다.",
     ),
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
+    "upstream": MessageLookupByLibrary.simpleMessage("업스트림"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlDesc": MessageLookupByLibrary.simpleMessage("URL로 프로필을 추가합니다"),
     "urlScheme": MessageLookupByLibrary.simpleMessage("URL 스킴"),

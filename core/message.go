@@ -38,7 +38,7 @@ func classOfMessage(message Message) messageClass {
 	switch message.Type {
 	case LoadedMessage, GeoUpdateMessage, DoctorStatusMessage:
 		return stateMessageClass
-	case LogMessage, RequestMessage:
+	case LogMessage, RequestMessage, DnsMessage:
 		return bulkMessageClass
 	default:
 		return priorityMessageClass

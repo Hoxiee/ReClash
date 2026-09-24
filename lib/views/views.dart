@@ -4,6 +4,7 @@ export 'settings/application_setting.dart';
 export 'settings/backup_and_restore.dart';
 export 'config/config.dart';
 export 'connection/connections.dart';
+export 'connection/dns_queries.dart';
 export 'connection/requests.dart';
 export 'dashboard/dashboard.dart';
 export 'settings/developer.dart';
