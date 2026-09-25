@@ -15,14 +15,14 @@ class _QuickSwitchCard extends StatelessWidget {
   const _QuickSwitchCard({
     required this.label,
     required this.glyph,
-    required this.items,
+    required this.sections,
     required this.selector,
     required this.onChanged,
   });
 
   final String label;
   final Glyph glyph;
-  final List<Widget> items;
+  final List<Widget> sections;
   final ProviderListenable<bool> selector;
   final void Function(WidgetRef ref, bool value) onChanged;
 
@@ -48,8 +48,14 @@ class _QuickSwitchCard extends StatelessWidget {
             context: context,
             builder: (_) {
               return AdaptiveSheetScaffold(
-                body: generateListView(generateSection(items: items)),
                 title: label,
+                body: SettingsListView(
+                  children: [
+                    const Padding(padding: EdgeInsets.only(top: 16)),
+                    ...sections,
+                    const SettingBottomInset(),
+                  ],
+                ),
               );
             },
           );
@@ -112,10 +118,14 @@ class TUNButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: context.appLocalizations.tun,
       glyph: AppGlyphs.chart,
-      items: [
-        if (system.isDesktop) const TUNItem(),
-        if (system.isMacOS) const AutoSetSystemDnsItem(),
-        const TunStackItem(),
+      sections: [
+        SettingSection(
+          items: [
+            if (system.isDesktop) const TUNItem(),
+            if (system.isMacOS) const AutoSetSystemDnsItem(),
+            const TunStackItem(),
+          ],
+        ),
       ],
       selector: patchClashConfigProvider.select((state) => state.tun.enable),
       onChanged: (ref, value) {
@@ -133,7 +143,9 @@ class SystemProxyButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: context.appLocalizations.systemProxy,
       glyph: AppGlyphs.shuffle,
-      items: const [SystemProxyItem(), BypassDomainItem()],
+      sections: const [
+        SettingSection(items: [SystemProxyItem(), BypassDomainItem()]),
+      ],
       selector: networkSettingProvider.select((state) => state.systemProxy),
       onChanged: (ref, value) {
         ref
@@ -152,7 +164,11 @@ class VpnButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: 'VPN',
       glyph: AppGlyphs.chart,
-      items: const [VPNItem(), VpnSystemProxyItem(), TunStackItem()],
+      sections: const [
+        SettingSection(
+          items: [VPNItem(), VpnSystemProxyItem(), TunStackItem()],
+        ),
+      ],
       selector: vpnSettingProvider.select((state) => state.enable),
       onChanged: (ref, value) {
         ref
@@ -171,7 +187,7 @@ class OverrideDnsButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: context.appLocalizations.overrideDns,
       glyph: AppGlyphs.dns,
-      items: dnsItems,
+      sections: dnsItems,
       selector: overrideDnsProvider,
       onChanged: (ref, value) {
         ref.read(overrideDnsProvider.notifier).value = value;

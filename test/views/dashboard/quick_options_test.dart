@@ -4,6 +4,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/database.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/quick_options.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -136,6 +137,27 @@ void main() {
         findsOneWidget,
         reason: '${testCase.name} must caption its current state',
       );
+    }
+  });
+
+  // Per case, not a loop: a sheet's modal route outlives a re-pump, so tapping the sole dashboard CommonCard (the caption sits off the button) stays unambiguous.
+  group('each card opens a grouped sheet, not a flat list', () {
+    for (final testCase in _cardCases) {
+      testWidgets(testCase.name, (tester) async {
+        await pumpCard(tester, testCase.widget);
+
+        await tester.tap(find.byType(CommonCard));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+        expect(
+          find.byType(SettingSection),
+          findsWidgets,
+          reason:
+              '${testCase.name} groups its options into rounded cards; a bare '
+              'item list is the old flat styling the sheet moved off.',
+        );
+      });
     }
   });
 }
