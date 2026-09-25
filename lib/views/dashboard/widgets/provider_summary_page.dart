@@ -33,9 +33,10 @@ class ProviderSummaryPage extends ConsumerWidget {
 /// The native status read-out shared 1:1 by the pager's supplementary page and
 /// the desktop split column.
 class ProviderStatusCards extends StatelessWidget {
-  const ProviderStatusCards({super.key, this.gap = 12});
+  const ProviderStatusCards({super.key, this.gap = 12, this.expanded = false});
 
   final double gap;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,7 @@ class ProviderStatusCards extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Announce(),
+                Announce(expanded: expanded),
                 SizedBox(height: gap),
                 const ServiceStatusCard(),
                 SizedBox(height: gap),
@@ -73,7 +74,10 @@ class _ProviderStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.fromLTRB(0, 8, 0, 16),
-      child: ProviderStatusCards(key: ValueKey('provider-plan-card')),
+      child: ProviderStatusCards(
+        expanded: true,
+        key: ValueKey('provider-plan-card'),
+      ),
     );
   }
 }

@@ -28,7 +28,12 @@ bool _exceedsLines(String text, TextStyle? style, double maxWidth, int maxLines)
 }
 
 class Announce extends ConsumerWidget {
-  const Announce({super.key});
+  const Announce({super.key, this.expanded = false});
+
+  /// When set, the tile grows to show the whole announcement instead of
+  /// clipping it to the deck row. The pager's dedicated page opts in; the
+  /// desktop split stays collapsed beside the orb.
+  final bool expanded;
 
   void _showAnnounceSheet(BuildContext context, String text) {
     showSheet(
@@ -50,55 +55,126 @@ class Announce extends ConsumerWidget {
     );
     final text = announce?.trim();
     final hasAnnouncement = text != null && text.isNotEmpty;
+    final showFull = expanded && hasAnnouncement;
     return DashboardInfoCard(
-      height: DashboardWidgetMetrics.heightOf(context, 2),
+      height: showFull ? null : DashboardWidgetMetrics.heightOf(context, 2),
       icon: AppGlyphs.announce,
       label: context.appLocalizations.announce,
-      action: hasAnnouncement
+      action: hasAnnouncement && !showFull
           ? const GlyphIcon(AppGlyphs.openExternal, size: 18)
           : null,
-      onPressed: hasAnnouncement
+      onPressed: hasAnnouncement && !showFull
           ? () => _showAnnounceSheet(context, text)
           : null,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final style = context.textTheme.bodyMedium?.copyWith(
-            color: hasAnnouncement
-                ? context.colorScheme.onSurface
-                : context.colorScheme.onSurfaceVariant,
-            height: _lineSpacing,
-          );
-          final lineHeight = (style?.fontSize ?? 14) * _lineSpacing;
-          final displayText = hasAnnouncement
-              ? text
-              : context.appLocalizations.noAnnouncements;
-          // A clipped half line reads as a rendering fault, so whole ones only.
-          final maxLines = max(1, constraints.maxHeight ~/ lineHeight);
-          final clipped =
-              hasAnnouncement &&
-              _exceedsLines(displayText, style, constraints.maxWidth, maxLines);
-          final content = Align(
-            alignment: Alignment.topLeft,
-            child: AnnounceText(
-              text: displayText,
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
-              style: style,
+      child: showFull
+          ? _AnnounceFull(text: text)
+          : _AnnounceCollapsed(text: text, hasAnnouncement: hasAnnouncement),
+    );
+  }
+}
+
+class _AnnounceFull extends StatelessWidget {
+  const _AnnounceFull({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = context.textTheme.bodyMedium?.copyWith(
+      color: context.colorScheme.onSurface,
+      height: _lineSpacing,
+    );
+    return Align(
+      alignment: Alignment.topLeft,
+      child: AnnounceText(text: text, style: style),
+    );
+  }
+}
+
+class _AnnounceCollapsed extends StatelessWidget {
+  const _AnnounceCollapsed({required this.text, required this.hasAnnouncement});
+
+  final String? text;
+  final bool hasAnnouncement;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final style = context.textTheme.bodyMedium?.copyWith(
+          color: hasAnnouncement
+              ? context.colorScheme.onSurface
+              : context.colorScheme.onSurfaceVariant,
+          height: _lineSpacing,
+        );
+        final lineHeight = (style?.fontSize ?? 14) * _lineSpacing;
+        final displayText = hasAnnouncement
+            ? text!
+            : context.appLocalizations.noAnnouncements;
+        // A clipped half line reads as a rendering fault, so whole ones only.
+        final maxLines = max(1, constraints.maxHeight ~/ lineHeight);
+        final clipped =
+            hasAnnouncement &&
+            _exceedsLines(displayText, style, constraints.maxWidth, maxLines);
+        final content = Align(
+          alignment: Alignment.topLeft,
+          child: AnnounceText(
+            text: displayText,
+            maxLines: maxLines,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          ),
+        );
+        if (!clipped) return content;
+        final fade = (lineHeight / constraints.maxHeight).clamp(0.0, 0.5);
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 1 - fade, 1],
+                  colors: const [
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                ).createShader(rect),
+                child: content,
+              ),
             ),
-          );
-          if (!clipped) return content;
-          final fade = (lineHeight / constraints.maxHeight).clamp(0.0, 0.5);
-          return ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (rect) => LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: [0, 1 - fade, 1],
-              colors: const [Colors.white, Colors.white, Colors.transparent],
-            ).createShader(rect),
-            child: content,
-          );
-        },
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: IgnorePointer(child: Center(child: _MoreHint())),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// A pill parked over the fade so the cut-off is unmistakable, not just a soft
+/// gradient a reader might miss.
+class _MoreHint extends StatelessWidget {
+  const _MoreHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+      decoration: ShapeDecoration(
+        color: context.colorScheme.surfaceContainerHigh,
+        shape: const StadiumBorder(),
+      ),
+      child: GlyphIcon(
+        AppGlyphs.chevronDown,
+        size: 16,
+        color: context.colorScheme.onSurfaceVariant,
       ),
     );
   }

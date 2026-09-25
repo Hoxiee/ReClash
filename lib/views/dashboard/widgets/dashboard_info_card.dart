@@ -16,7 +16,9 @@ class DashboardInfoCard extends StatelessWidget {
     this.onPressed,
   });
 
-  final double height;
+  /// A null height lets the card size to its content instead of the fixed
+  /// deck row, so a full announcement can grow the tile in a scroll.
+  final double? height;
   final Glyph icon;
   final String label;
   final Widget child;
@@ -66,7 +68,7 @@ class DashboardInfoCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Expanded(child: child),
+                if (height != null) Expanded(child: child) else child,
               ],
             ),
           ),
