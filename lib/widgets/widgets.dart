@@ -7,6 +7,7 @@ export 'nav/app_nav_rail.dart';
 export 'base/builder.dart';
 export 'input/button.dart';
 export 'base/card.dart';
+export 'base/tag.dart';
 export 'input/chip.dart';
 export 'theme/color_scheme_box.dart';
 export 'input/config_item.dart';

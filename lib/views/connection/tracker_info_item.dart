@@ -177,7 +177,20 @@ class TrackerInfoItem extends ConsumerWidget {
       clipBehavior: Clip.none,
       children: [
         avatar,
-        Positioned(right: -4, bottom: -4, child: _CountryBadge(code: code)),
+        Positioned(
+          right: -4,
+          bottom: -4,
+          child: AppTag(
+            code,
+            mono: true,
+            foreground: context.colorScheme.onSurface,
+            background: context.colorScheme.surfaceContainerHighest,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
+            shape: AppShape.full,
+            side: BorderSide(color: context.colorScheme.surface, width: 2),
+          ),
+        ),
       ],
     );
   }
@@ -227,7 +240,7 @@ class TrackerInfoItem extends ConsumerWidget {
                         spacing: 8,
                         children: [
                           if (networkTag.isNotEmpty)
-                            _MetaTag(label: networkTag),
+                            AppTag(networkTag, mono: true),
                           if (rule.isNotEmpty)
                             Flexible(
                               child: Text(
@@ -344,68 +357,6 @@ class _SpeedLine extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MetaTag extends StatelessWidget {
-  final String label;
-
-  const _MetaTag({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: AppShape.sm,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-        child: Text(
-          label,
-          style: context.textTheme.labelSmall
-              ?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              )
-              .toJetBrainsMono,
-        ),
-      ),
-    );
-  }
-}
-
-class _CountryBadge extends StatelessWidget {
-  final String code;
-
-  const _CountryBadge({required this.code});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        shape: AppShape.full.copyWith(
-          side: BorderSide(color: colorScheme.surface, width: 2),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-        child: Text(
-          code,
-          style: context.textTheme.labelSmall
-              ?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.3,
-              )
-              .toJetBrainsMono,
         ),
       ),
     );

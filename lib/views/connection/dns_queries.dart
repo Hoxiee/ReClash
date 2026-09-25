@@ -332,8 +332,8 @@ class DnsQueryItem extends StatelessWidget {
                         if (dnsQuery.cached)
                           MetaChip(label: appLocalizations.cache),
                         if (dnsQuery.hasFailureRcode)
-                          _ToneTag(
-                            label: dnsQuery.rcode,
+                          AppTag(
+                            dnsQuery.rcode,
                             background: colorScheme.errorContainer,
                             foreground: colorScheme.onErrorContainer,
                           ),
@@ -376,37 +376,6 @@ class DnsQueryItem extends StatelessWidget {
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ToneTag extends StatelessWidget {
-  final String label;
-  final Color background;
-  final Color foreground;
-
-  const _ToneTag({
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: ShapeDecoration(color: background, shape: AppShape.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.labelSmall?.copyWith(
-            color: foreground,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ),

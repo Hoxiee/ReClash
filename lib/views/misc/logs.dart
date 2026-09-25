@@ -322,11 +322,20 @@ class LogItem extends StatelessWidget {
               spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _LevelBadge(
-                  level: level,
-                  onPressed: () => onClick?.call(level.name),
+                AppTag(
+                  level.name,
+                  uppercase: true,
+                  foreground: level.onBadgeColor(context),
+                  background: level.badgeColor(context),
+                  letterSpacing: 0.4,
+                  onTap: () => onClick?.call(level.name),
                 ),
-                _SourceBadge(source: log.source),
+                AppTag(
+                  log.source.name,
+                  uppercase: true,
+                  letterSpacing: 0.4,
+                  side: BorderSide(color: context.colorScheme.outlineVariant),
+                ),
                 const Spacer(),
                 _TimeLabel(date: date, time: time),
               ],
@@ -344,65 +353,6 @@ class LogItem extends StatelessWidget {
                   .toJetBrainsMono,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LevelBadge extends StatelessWidget {
-  final LogLevel level;
-  final VoidCallback? onPressed;
-
-  const _LevelBadge({required this.level, this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final label = Text(
-      level.name.toUpperCase(),
-      style: context.textTheme.labelSmall?.copyWith(
-        color: level.onBadgeColor(context),
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.4,
-      ),
-    );
-    return Material(
-      color: level.badgeColor(context),
-      shape: AppShape.xs,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          child: label,
-        ),
-      ),
-    );
-  }
-}
-
-class _SourceBadge extends StatelessWidget {
-  final LogSource source;
-
-  const _SourceBadge({required this.source});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: AppShape.xs.copyWith(
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        child: Text(
-          source.name.toUpperCase(),
-          style: context.textTheme.labelSmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            letterSpacing: 0.4,
-          ),
         ),
       ),
     );
