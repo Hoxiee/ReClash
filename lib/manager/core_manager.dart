@@ -206,12 +206,14 @@ class _CoreContainerState extends ConsumerState<CoreManager>
   @override
   void onRequest(TrackerInfo trackerInfo) async {
     ref.read(requestsProvider.notifier).addRequest(trackerInfo);
+    ref.read(requestCountProvider.notifier).update((count) => count + 1);
     super.onRequest(trackerInfo);
   }
 
   @override
   void onDnsQuery(DnsQuery dnsQuery) {
     ref.read(dnsQueriesProvider.notifier).addDnsQuery(dnsQuery);
+    ref.read(dnsQueryCountProvider.notifier).update((count) => count + 1);
     super.onDnsQuery(dnsQuery);
   }
 

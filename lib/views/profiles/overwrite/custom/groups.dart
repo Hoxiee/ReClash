@@ -209,10 +209,16 @@ class _EditProxyGroupView extends ConsumerStatefulWidget {
 
 class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
   Future<void> _showTypeOptions(GroupType type) async {
+    // Keep an out-of-list current type visible so an imported group whose type
+    // the core rejects still shows selected and can be switched to a valid one.
+    final options = [
+      ...GroupTypeExtension.overrideSelectable,
+      if (!GroupTypeExtension.overrideSelectable.contains(type)) type,
+    ];
     final value = await dialogs.showCommonDialog<GroupType>(
       child: OptionsDialog<GroupType>(
         title: context.appLocalizations.proxyType,
-        options: GroupType.values,
+        options: options,
         textBuilder: (item) => item.name,
         value: type,
       ),

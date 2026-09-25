@@ -29,7 +29,7 @@ class ChangeServerButton extends ConsumerWidget {
           };
     return DashboardInfoCard(
       height: DashboardWidgetMetrics.heightOf(context, 1),
-      icon: smartRouting ? AppGlyphs.themeAuto : AppGlyphs.swap,
+      icon: smartRouting ? AppGlyphs.autoMode : AppGlyphs.swap,
       label: appLocalizations.changeServer,
       action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () => ref

@@ -952,6 +952,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Toʻgʻridan-toʻgʻri"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPni oʻchirish"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Oʻchirilgan"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("Ogohlantirish"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "Ushbu dastur faqat oʻrganish va tadqiqot kabi tijoriy boʻlmagan maqsadlar uchun moʻljallangan. Uni tijoriy maqsadda ishlatish qat’iyan taqiqlangan; har qanday tijoriy faoliyat ushbu dasturga aloqador emas.",
@@ -1317,6 +1318,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("Qoidani tahrirlash"),
     "emptyTip": m31,
     "en": MessageLookupByLibrary.simpleMessage("Ingliz tili"),
+    "enabled": MessageLookupByLibrary.simpleMessage("Yoqilgan"),
     "enterManually": MessageLookupByLibrary.simpleMessage("Qoʻlda kiritish"),
     "entries": MessageLookupByLibrary.simpleMessage(" ta yozuv"),
     "entriesCount": m32,

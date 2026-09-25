@@ -105,6 +105,41 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 8,
       child: ServiceStatusCard(),
     ),
+    DashboardWidget.connections => const GridItem(
+      key: ValueKey(DashboardWidget.connections),
+      crossAxisCellCount: 4,
+      child: ConnectionsCard(),
+    ),
+    DashboardWidget.dnsQueries => const GridItem(
+      key: ValueKey(DashboardWidget.dnsQueries),
+      crossAxisCellCount: 4,
+      child: DnsQueriesCard(),
+    ),
+    DashboardWidget.requests => const GridItem(
+      key: ValueKey(DashboardWidget.requests),
+      crossAxisCellCount: 4,
+      child: RequestsCard(),
+    ),
+    DashboardWidget.runTime => const GridItem(
+      key: ValueKey(DashboardWidget.runTime),
+      crossAxisCellCount: 4,
+      child: RunTimeCard(),
+    ),
+    DashboardWidget.proxyGroups => const GridItem(
+      key: ValueKey(DashboardWidget.proxyGroups),
+      crossAxisCellCount: 4,
+      child: ProxyGroupsCard(),
+    ),
+    DashboardWidget.profiles => const GridItem(
+      key: ValueKey(DashboardWidget.profiles),
+      crossAxisCellCount: 4,
+      child: ProfilesCard(),
+    ),
+    DashboardWidget.overrideDnsButton => const GridItem(
+      key: ValueKey(DashboardWidget.overrideDnsButton),
+      crossAxisCellCount: 4,
+      child: OverrideDnsButton(),
+    ),
   };
 }
 

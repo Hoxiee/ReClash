@@ -15,9 +15,9 @@ const commonCardIconSize = 20.0;
 
 class Info {
   final String label;
-  final Glyph? iconData;
+  final Glyph? glyph;
 
-  const Info({required this.label, this.iconData});
+  const Info({required this.label, this.glyph});
 }
 
 class InfoHeader extends StatelessWidget {
@@ -54,9 +54,9 @@ class InfoHeader extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: [
-                if (info.iconData != null) ...[
+                if (info.glyph != null) ...[
                   GlyphIcon(
-                    info.iconData!,
+                    info.glyph!,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),

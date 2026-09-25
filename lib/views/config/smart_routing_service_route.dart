@@ -259,17 +259,13 @@ class _ServiceRoutePage extends ConsumerWidget {
       title: title,
       floatBody: true,
       actions: [
-        CommonMinFilledButtonTheme(
-          child: FilledButton.tonal(
-            onPressed: () => _addManual(ref),
-            child: Text(appLocalizations.add),
-          ),
+        FilledButton.tonal(
+          onPressed: () => _addManual(ref),
+          child: Text(appLocalizations.add),
         ),
-        const SizedBox(width: 8),
       ],
       body: SettingsListView(
         children: [
-          SizedBox(height: context.appBarInset),
           if (policy.enabled)
             SettingSection(
               top: 16,

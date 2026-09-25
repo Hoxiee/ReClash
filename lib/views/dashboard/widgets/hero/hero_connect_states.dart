@@ -293,7 +293,7 @@ class _ModeChip extends ConsumerWidget {
   const _ModeChip();
 
   Glyph _modeIcon(UiOutboundMode mode) => switch (mode) {
-    UiOutboundMode.auto => AppGlyphs.themeAuto,
+    UiOutboundMode.auto => AppGlyphs.autoMode,
     UiOutboundMode.rule => AppGlyphs.rules,
     UiOutboundMode.global => AppGlyphs.language,
     UiOutboundMode.direct => AppGlyphs.bolt,

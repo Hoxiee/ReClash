@@ -28,7 +28,7 @@ class TrafficUsage extends StatelessWidget {
           ).copyWith(bottom: 0),
           info: Info(
             label: appLocalizations.trafficUsage,
-            iconData: AppGlyphs.dataUsage,
+            glyph: AppGlyphs.dataUsage,
           ),
           onPressed: () {},
           child: preview
@@ -142,6 +142,9 @@ class _TrafficUsageBody extends StatelessWidget {
   }
 }
 
+const _minChartSize = 56.0;
+const _maxChartSize = 96.0;
+
 class _TrafficChart extends StatelessWidget {
   const _TrafficChart({
     required this.up,
@@ -157,27 +160,46 @@ class _TrafficChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final legendWidth = _TrafficLegend.widthOf(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: DonutChart(
-              data: [
-                DonutChartData(value: up.toDouble(), color: upColor),
-                DonutChartData(value: down.toDouble(), color: downColor),
+      child: LayoutBuilder(
+        builder: (_, constraints) {
+          final besideLegend = constraints.maxWidth - legendWidth - 8;
+          final showsLegend = besideLegend >= _minChartSize.ap;
+          final chartSize = showsLegend
+              ? min(_maxChartSize.ap, besideLegend)
+              : _maxChartSize.ap;
+          return Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: chartSize,
+                  maxHeight: chartSize,
+                ),
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: DonutChart(
+                    data: [
+                      DonutChartData(value: up.toDouble(), color: upColor),
+                      DonutChartData(value: down.toDouble(), color: downColor),
+                    ],
+                    duration: context.motionDuration(commonDuration),
+                  ),
+                ),
+              ),
+              if (showsLegend) ...[
+                const SizedBox(width: 8),
+                Flexible(
+                  child: _TrafficLegend(upColor: upColor, downColor: downColor),
+                ),
               ],
-              duration: context.motionDuration(commonDuration),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: _TrafficLegend(upColor: upColor, downColor: downColor),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -189,39 +211,43 @@ class _TrafficLegend extends StatelessWidget {
   final Color upColor;
   final Color downColor;
 
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final labelStyle = context.textTheme.bodySmall;
-    return LayoutBuilder(
-      builder: (_, container) {
-        final uploadLabel = _label(appLocalizations.upload, labelStyle);
-        final downloadLabel = _label(appLocalizations.download, labelStyle);
-        final maxLabelWidth = max(
+  static double widthOf(BuildContext context) {
+    final (uploadLabel, downloadLabel) = _labels(context);
+    return max(
           globalState.measure.computeTextSize(uploadLabel).width,
           globalState.measure.computeTextSize(downloadLabel).width,
-        );
-        if (maxLabelWidth + 24 > container.maxWidth) {
-          return Container();
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _LegendEntry(color: upColor, label: uploadLabel),
-            const SizedBox(height: 4),
-            _LegendEntry(color: downColor, label: downloadLabel),
-          ],
-        );
-      },
+        ) +
+        24;
+  }
+
+  static (Text, Text) _labels(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    final labelStyle = context.textTheme.bodySmall;
+    return (
+      _label(appLocalizations.upload, labelStyle),
+      _label(appLocalizations.download, labelStyle),
     );
   }
 
-  Text _label(String text, TextStyle? style) {
+  static Text _label(String text, TextStyle? style) {
     return Text(
       maxLines: 1,
       text,
       overflow: TextOverflow.ellipsis,
       style: style,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final (uploadLabel, downloadLabel) = _labels(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _LegendEntry(color: upColor, label: uploadLabel),
+        const SizedBox(height: 4),
+        _LegendEntry(color: downColor, label: downloadLabel),
+      ],
     );
   }
 }

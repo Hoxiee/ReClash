@@ -936,6 +936,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Göni"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP-ni öçür"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Ýapyk"),
     "disclaimer": MessageLookupByLibrary.simpleMessage(
       "Jogapkärçilikden el çekmek",
     ),
@@ -1291,6 +1292,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("Düzgüni düzet"),
     "emptyTip": m31,
     "en": MessageLookupByLibrary.simpleMessage("Iňlis dili"),
+    "enabled": MessageLookupByLibrary.simpleMessage("Açyk"),
     "enterManually": MessageLookupByLibrary.simpleMessage("El bilen giriz"),
     "entries": MessageLookupByLibrary.simpleMessage(" ýazgy"),
     "entriesCount": m32,

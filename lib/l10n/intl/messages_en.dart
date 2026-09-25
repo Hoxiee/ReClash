@@ -907,6 +907,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("Disclaimer"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "This software is intended only for non-commercial uses such as learning and research. Using it for any commercial purpose is strictly prohibited; any commercial activity is unrelated to this software.",
@@ -1251,6 +1252,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enableExternalController": MessageLookupByLibrary.simpleMessage(
       "Enable external controller",
     ),
+    "enabled": MessageLookupByLibrary.simpleMessage("Enabled"),
     "enterManually": MessageLookupByLibrary.simpleMessage("Enter manually"),
     "entries": MessageLookupByLibrary.simpleMessage(" entries"),
     "entriesCount": m32,

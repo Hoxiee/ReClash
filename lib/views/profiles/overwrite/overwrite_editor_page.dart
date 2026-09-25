@@ -138,28 +138,21 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
       actions: [
         if (widget.selectionEnabled &&
             widget.onDelete != null &&
-            selected.isNotEmpty) ...[
-          CommonMinIconButtonTheme(
-            child: IconButton.filledTonal(
-              tooltip: appLocalizations.delete,
-              onPressed: _handleDelete,
-              icon: const GlyphIcon(AppGlyphs.delete),
-            ),
+            selected.isNotEmpty)
+          IconButton.filledTonal(
+            tooltip: appLocalizations.delete,
+            onPressed: _handleDelete,
+            icon: const GlyphIcon(AppGlyphs.delete),
           ),
-          const SizedBox(width: 2),
-        ],
-        CommonMinFilledButtonTheme(
-          child: widget.selectionEnabled && selected.isNotEmpty
-              ? FilledButton(
-                  onPressed: _handleSelectAll,
-                  child: Text(appLocalizations.selectAll),
-                )
-              : FilledButton.tonal(
-                  onPressed: widget.onAdd,
-                  child: Text(appLocalizations.add),
-                ),
-        ),
-        const SizedBox(width: 8),
+        widget.selectionEnabled && selected.isNotEmpty
+            ? FilledButton(
+                onPressed: _handleSelectAll,
+                child: Text(appLocalizations.selectAll),
+              )
+            : FilledButton.tonal(
+                onPressed: widget.onAdd,
+                child: Text(appLocalizations.add),
+              ),
       ],
       body: NullStatusSwitcher(
         isEmpty: items.isEmpty,

@@ -39,24 +39,29 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     }
   }
 
+  IconButtonData? _buildPrimaryAction() {
+    if (!_isTab) {
+      return null;
+    }
+    return IconButtonData(
+      glyph: AppGlyphs.bolt,
+      onPressed: _delayTestCurrentGroup,
+      tooltip: context.appLocalizations.delayTest,
+      isLoading: _isDelayTesting,
+    );
+  }
+
   List<IconButtonData> _buildIconActions() {
     if (!_isTab) {
       return const [];
     }
-    final appLocalizations = context.appLocalizations;
     return [
-      IconButtonData(
-        glyph: AppGlyphs.bolt,
-        onPressed: _delayTestCurrentGroup,
-        tooltip: appLocalizations.delayTest,
-        isLoading: _isDelayTesting,
-      ),
       IconButtonData(
         glyph: AppGlyphs.locate,
         onPressed: () {
           _proxiesTabKey.currentState?.scrollToGroupSelected();
         },
-        tooltip: appLocalizations.scrollToSelected,
+        tooltip: context.appLocalizations.scrollToSelected,
       ),
     ];
   }
@@ -134,13 +139,19 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       effectiveProxiesStyleProvider.select((state) => state.type),
     );
     final isLoading = ref.watch(loadingProvider(LoadingTag.proxies));
+    final smartRoutingPinned = ref.watch(
+      smartRoutingStatusProvider.select(
+        (state) => state?.enabled == true && state!.pinned,
+      ),
+    );
     return CommonScaffold(
       isLoading: isLoading,
       floatBody: true,
       resizeToAvoidBottomInset: false,
+      primaryAction: _buildPrimaryAction(),
       iconActions: _buildIconActions(),
       menuItems: _buildMenuItems(context),
-      actions: const [_ResumeSmartRoutingButton()],
+      actions: smartRoutingPinned ? const [_ResumeSmartRoutingButton()] : null,
       title: context.appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
@@ -156,21 +167,14 @@ class _ResumeSmartRoutingButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pinned = ref.watch(
-      smartRoutingStatusProvider.select(
-        (state) => state?.enabled == true && state!.pinned,
-      ),
-    );
     return FadeScaleBox(
-      child: !pinned
-          ? const SizedBox()
-          : IconButton(
-              tooltip: context.appLocalizations.smartRoutingBackToAuto,
-              onPressed: () {
-                ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
-              },
-              icon: const GlyphIcon(AppGlyphs.autoMode),
-            ),
+      child: IconButton(
+        tooltip: context.appLocalizations.smartRoutingBackToAuto,
+        onPressed: () {
+          ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
+        },
+        icon: const GlyphIcon(AppGlyphs.autoMode),
+      ),
     );
   }
 }

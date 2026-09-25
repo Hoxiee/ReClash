@@ -384,6 +384,8 @@
   "vpnTip": "VPN täzeden işledilenden soň üýtgeşmeler güýje girer",
   "vpnEnableDesc": "Ulgamyň tutuş trafigini awtomatik VpnService arkaly geçirmek",
   "options": "Wariantlar",
+  "enabled": "Açyk",
+  "disabled": "Ýapyk",
   "loopback": "Loopback guraly",
   "loopbackDesc": "UWP programmalarynyň loopback çäklendirmesini aýrmak üçin ulanylýar",
   "providers": "Daşarky çeşmeler",

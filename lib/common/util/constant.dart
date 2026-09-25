@@ -71,6 +71,7 @@ const maxConcurrentDelayTests = 16;
 const animateDuration = Duration(milliseconds: 100);
 const midDuration = Duration(milliseconds: 200);
 const commonDuration = Duration(milliseconds: 300);
+const renderThrottleDuration = Duration(milliseconds: 300);
 const dismissDuration = Duration(milliseconds: 400);
 const defaultUpdateDuration = Duration(days: 1);
 const MMDB = 'GEOIP.metadb';

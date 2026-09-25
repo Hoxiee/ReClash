@@ -2,17 +2,16 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class IntranetIP extends StatelessWidget {
-  const IntranetIP({super.key});
+class RunTimeCard extends StatelessWidget {
+  const RunTimeCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
     return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 1),
       child: CommonCard(
@@ -20,7 +19,10 @@ class IntranetIP extends StatelessWidget {
         infoPadding: DashboardWidgetMetrics.paddingOf(
           context,
         ).copyWith(bottom: 0),
-        info: Info(label: appLocalizations.intranetIP, glyph: AppGlyphs.devices),
+        info: Info(
+          label: context.appLocalizations.start,
+          glyph: AppGlyphs.history,
+        ),
         onPressed: () {},
         child: Container(
           padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
@@ -35,27 +37,20 @@ class IntranetIP extends StatelessWidget {
                     2,
                 child: Consumer(
                   builder: (_, ref, _) {
-                    final localIp = ref.watch(localIpProvider);
-                    return FadeThroughBox(
-                      child: localIp != null
-                          ? TooltipText(
-                              text: Text(
-                                localIp.isNotEmpty
-                                    ? localIp
-                                    : appLocalizations.noNetwork,
-                                style: context.textTheme.bodyMedium?.toLight
-                                    .adjustSize(1),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(2),
-                              child: const AspectRatio(
-                                aspectRatio: 1,
-                                child: CommonCircleLoading(),
-                              ),
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        getTimeText(ref.watch(runTimeProvider)),
+                        style: context.textTheme.bodyMedium?.toLight
+                            .adjustSize(1)
+                            .copyWith(
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
                             ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   },
                 ),

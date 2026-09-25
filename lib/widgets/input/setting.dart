@@ -32,7 +32,7 @@ class SettingInfoCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            if (info.iconData != null) GlyphIcon(info.iconData!),
+            if (info.glyph != null) GlyphIcon(info.glyph!),
             const SizedBox(width: 8),
             Flexible(
               child: Text(

@@ -62,7 +62,7 @@ class AppearanceThemeTab extends ConsumerWidget {
     return [
       for (final (mode, iconData, label) in modes)
         SettingInfoCard(
-          Info(label: label, iconData: iconData),
+          Info(label: label, glyph: iconData),
           isSelected: !scheduled && mode == themeMode,
           onPressed: () => _update(
             ref,

@@ -933,6 +933,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
     "disclaimer": MessageLookupByLibrary.simpleMessage(
       "Отказ от ответственности",
     ),
@@ -1295,6 +1296,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enableExternalController": MessageLookupByLibrary.simpleMessage(
       "Включить внешний контроллер",
     ),
+    "enabled": MessageLookupByLibrary.simpleMessage("Включено"),
     "enterManually": MessageLookupByLibrary.simpleMessage("Ввести вручную"),
     "entries": MessageLookupByLibrary.simpleMessage(" записей"),
     "entriesCount": m32,

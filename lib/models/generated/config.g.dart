@@ -212,6 +212,13 @@ const _$DashboardWidgetEnumMap = {
   DashboardWidget.desyncTest: 'desyncTest',
   DashboardWidget.desyncEngine: 'desyncEngine',
   DashboardWidget.serviceStatus: 'serviceStatus',
+  DashboardWidget.connections: 'connections',
+  DashboardWidget.dnsQueries: 'dnsQueries',
+  DashboardWidget.requests: 'requests',
+  DashboardWidget.runTime: 'runTime',
+  DashboardWidget.proxyGroups: 'proxyGroups',
+  DashboardWidget.profiles: 'profiles',
+  DashboardWidget.overrideDnsButton: 'overrideDnsButton',
 };
 
 _AccessControlProps _$AccessControlPropsFromJson(Map<String, dynamic> json) =>

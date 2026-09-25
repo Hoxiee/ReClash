@@ -124,16 +124,17 @@ void main() {
     );
   });
 
-  testWidgets('every card labels itself and offers its options', (
-    tester,
-  ) async {
+  testWidgets('every card captions the state it reads', (tester) async {
     for (final testCase in _cardCases) {
       await pumpCard(tester, testCase.widget);
 
+      final expected = testCase.initial
+          ? currentAppLocalizations.enabled
+          : currentAppLocalizations.disabled;
       expect(
-        find.text(currentAppLocalizations.options),
+        find.text(expected),
         findsOneWidget,
-        reason: '${testCase.name} must show the options affordance',
+        reason: '${testCase.name} must caption its current state',
       );
     }
   });

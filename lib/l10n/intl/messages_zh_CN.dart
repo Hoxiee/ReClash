@@ -685,6 +685,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("直连"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("禁用UDP"),
+    "disabled": MessageLookupByLibrary.simpleMessage("已关闭"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("免责声明"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "本软件仅供学习交流、科研等非商业性质的用途，严禁将本软件用于商业目的。如有任何商业行为，均与本软件无关。",
@@ -929,6 +930,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emptyTip": m31,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
     "enableExternalController": MessageLookupByLibrary.simpleMessage("启用外部控制器"),
+    "enabled": MessageLookupByLibrary.simpleMessage("已开启"),
     "enterManually": MessageLookupByLibrary.simpleMessage("手动输入"),
     "entries": MessageLookupByLibrary.simpleMessage("个条目"),
     "entriesCount": m32,

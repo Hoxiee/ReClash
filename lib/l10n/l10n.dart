@@ -3245,6 +3245,16 @@ class AppLocalizations {
     return Intl.message('Options', name: 'options', desc: '', args: []);
   }
 
+  /// `Enabled`
+  String get enabled {
+    return Intl.message('Enabled', name: 'enabled', desc: '', args: []);
+  }
+
+  /// `Disabled`
+  String get disabled {
+    return Intl.message('Disabled', name: 'disabled', desc: '', args: []);
+  }
+
   /// `Loopback unlock tool`
   String get loopback {
     return Intl.message(

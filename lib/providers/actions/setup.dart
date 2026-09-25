@@ -72,6 +72,8 @@ class SetupAction extends _$SetupAction {
     ref.read(dnsQueriesProvider.notifier).value = FixedList(
       maxDnsQueriesLength,
     );
+    ref.read(dnsQueryCountProvider.notifier).value = 0;
+    ref.read(requestCountProvider.notifier).value = 0;
     try {
       return await setupResult;
     } catch (e, s) {

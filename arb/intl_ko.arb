@@ -384,6 +384,8 @@
   "vpnTip": "변경 사항은 VPN을 다시 시작해야 적용됩니다",
   "vpnEnableDesc": "시스템의 모든 트래픽을 VpnService를 통해 자동으로 라우팅합니다",
   "options": "옵션",
+  "enabled": "켜짐",
+  "disabled": "꺼짐",
   "loopback": "루프백 잠금 해제 도구",
   "loopbackDesc": "UWP 루프백 예외에 사용됩니다",
   "providers": "외부 리소스",

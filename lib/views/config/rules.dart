@@ -79,30 +79,23 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
       child: BaseScaffold(
         title: appLocalizations.addedRules,
         actions: [
-          if (selectedRules.isNotEmpty) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.delete,
-                onPressed: _handleDelete,
-                icon: const GlyphIcon(AppGlyphs.delete),
-              ),
+          if (selectedRules.isNotEmpty)
+            IconButton.filledTonal(
+              tooltip: context.appLocalizations.delete,
+              onPressed: _handleDelete,
+              icon: const GlyphIcon(AppGlyphs.delete),
             ),
-            const SizedBox(width: 2),
-          ],
-          CommonMinFilledButtonTheme(
-            child: selectedRules.isNotEmpty
-                ? FilledButton(
-                    onPressed: _handleSelectAll,
-                    child: Text(appLocalizations.selectAll),
-                  )
-                : FilledButton.tonal(
-                    onPressed: () {
-                      _handleAddOrUpdate();
-                    },
-                    child: Text(appLocalizations.add),
-                  ),
-          ),
-          const SizedBox(width: 8),
+          selectedRules.isNotEmpty
+              ? FilledButton(
+                  onPressed: _handleSelectAll,
+                  child: Text(appLocalizations.selectAll),
+                )
+              : FilledButton.tonal(
+                  onPressed: () {
+                    _handleAddOrUpdate();
+                  },
+                  child: Text(appLocalizations.add),
+                ),
         ],
         body: NullStatusSwitcher(
           isEmpty: rules.isEmpty,

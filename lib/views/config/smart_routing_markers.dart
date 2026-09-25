@@ -87,29 +87,22 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
         title: widget.title,
         floatBody: true,
         actions: [
-          if (selection.isNotEmpty) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: appLocalizations.delete,
-                onPressed: _deleteSelected,
-                icon: const GlyphIcon(AppGlyphs.delete),
-              ),
+          if (selection.isNotEmpty)
+            IconButton.filledTonal(
+              tooltip: appLocalizations.delete,
+              onPressed: _deleteSelected,
+              icon: const GlyphIcon(AppGlyphs.delete),
             ),
-            const SizedBox(width: 2),
-          ],
-          CommonMinFilledButtonTheme(
-            child: selection.isNotEmpty
-                ? FilledButton(
-                    onPressed: _toggleSelectAll,
-                    child: Text(appLocalizations.selectAll),
-                  )
-                : FilledButton.tonal(
-                    onPressed: () =>
-                        _showMarkerDialog(context, ref, widget.kind),
-                    child: Text(appLocalizations.add),
-                  ),
-          ),
-          const SizedBox(width: 8),
+          selection.isNotEmpty
+              ? FilledButton(
+                  onPressed: _toggleSelectAll,
+                  child: Text(appLocalizations.selectAll),
+                )
+              : FilledButton.tonal(
+                  onPressed: () =>
+                      _showMarkerDialog(context, ref, widget.kind),
+                  child: Text(appLocalizations.add),
+                ),
         ],
         body: _MarkersBody(
           kind: widget.kind,
@@ -423,13 +416,10 @@ class _RulesPage extends ConsumerWidget {
       title: l10n.smartRoutingRules,
       floatBody: true,
       actions: [
-        CommonMinFilledButtonTheme(
-          child: FilledButton.tonal(
-            onPressed: () => showRuleDialog(context, ref),
-            child: Text(l10n.add),
-          ),
+        FilledButton.tonal(
+          onPressed: () => showRuleDialog(context, ref),
+          child: Text(l10n.add),
         ),
-        const SizedBox(width: 8),
       ],
       body: rules.isEmpty
           ? NullStatus(

@@ -63,7 +63,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                             padding: EdgeInsets.zero,
                             info: Info(
                               label: appLocalizations.networkSpeed,
-                              iconData: AppGlyphs.speed,
+                              glyph: AppGlyphs.speed,
                             ),
                           ),
                         ),

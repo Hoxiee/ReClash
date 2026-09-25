@@ -756,6 +756,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("ダイレクト"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDPを無効化"),
+    "disabled": MessageLookupByLibrary.simpleMessage("無効"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("免責事項"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "本ソフトウェアは、学習・交流や研究などの非商用目的でのみ使用できます。商用目的での使用は固く禁じられています。いかなる商業行為も本ソフトウェアとは一切関係ありません。",
@@ -1048,6 +1049,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "enableExternalController": MessageLookupByLibrary.simpleMessage(
       "外部コントローラーを有効化",
     ),
+    "enabled": MessageLookupByLibrary.simpleMessage("有効"),
     "enterManually": MessageLookupByLibrary.simpleMessage("手動で入力"),
     "entries": MessageLookupByLibrary.simpleMessage(" 件"),
     "entriesCount": m32,

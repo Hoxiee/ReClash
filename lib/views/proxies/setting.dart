@@ -79,7 +79,7 @@ class ProxiesSetting extends StatelessWidget {
                     SettingInfoCard(
                       Info(
                         label: item.label,
-                        iconData: _getIconWithProxiesType(item),
+                        glyph: _getIconWithProxiesType(item),
                       ),
                       isSelected: proxiesType == item,
                       onPressed: () {
@@ -121,7 +121,7 @@ class ProxiesSetting extends StatelessWidget {
                     SettingInfoCard(
                       Info(
                         label: _getStringProxiesSortType(context, item),
-                        iconData: _getIconWithProxiesSortType(item),
+                        glyph: _getIconWithProxiesSortType(item),
                       ),
                       isSelected: sortType == item,
                       onPressed: () {

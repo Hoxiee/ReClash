@@ -391,6 +391,8 @@
   "vpnTip": "Changes take effect after restarting the VPN",
   "vpnEnableDesc": "Route all system traffic through VpnService automatically",
   "options": "Options",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
   "loopback": "Loopback unlock tool",
   "loopbackDesc": "Used for UWP loopback exemption",
   "providers": "External resources",

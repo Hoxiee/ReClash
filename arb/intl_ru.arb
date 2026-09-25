@@ -391,6 +391,8 @@
   "vpnTip": "Изменения вступят в силу после перезапуска VPN",
   "vpnEnableDesc": "Автоматически направляет весь системный трафик через VpnService",
   "options": "Опции",
+  "enabled": "Включено",
+  "disabled": "Выключено",
   "loopback": "Разблокировка loopback",
   "loopbackDesc": "Снимает ограничение loopback для приложений UWP",
   "providers": "Внешние ресурсы",

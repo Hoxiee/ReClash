@@ -755,6 +755,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("직접"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP 사용 안 함"),
+    "disabled": MessageLookupByLibrary.simpleMessage("꺼짐"),
     "disclaimer": MessageLookupByLibrary.simpleMessage("면책 조항"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "이 소프트웨어는 학습, 연구 등 비상업적 용도로만 사용할 수 있습니다. 상업적 목적으로 사용하는 것은 엄격히 금지되며, 모든 상업적 활동은 이 소프트웨어와 무관합니다.",
@@ -1032,6 +1033,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("규칙 편집"),
     "emptyTip": m31,
     "en": MessageLookupByLibrary.simpleMessage("영어"),
+    "enabled": MessageLookupByLibrary.simpleMessage("켜짐"),
     "enterManually": MessageLookupByLibrary.simpleMessage("직접 입력"),
     "entries": MessageLookupByLibrary.simpleMessage(" 항목"),
     "entriesCount": m32,

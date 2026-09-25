@@ -29,6 +29,27 @@ void main() {
       expect(GroupType.Fallback.isComputedSelected, isTrue);
       expect(GroupType.Selector.isComputedSelected, isFalse);
     });
+
+    test('offers only core-buildable types for override creation', () {
+      expect(GroupTypeExtension.overrideSelectable, [
+        GroupType.Selector,
+        GroupType.URLTest,
+        GroupType.Fallback,
+        GroupType.LoadBalance,
+      ]);
+      expect(
+        GroupTypeExtension.overrideSelectable,
+        isNot(contains(GroupType.Relay)),
+      );
+      expect(
+        GroupTypeExtension.overrideSelectable,
+        isNot(contains(GroupType.Smart)),
+      );
+      expect(
+        GroupTypeExtension.overrideSelectable,
+        isNot(contains(GroupType.unknown)),
+      );
+    });
   });
 
   group('UsedProxyExtension', () {

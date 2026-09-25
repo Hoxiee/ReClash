@@ -927,6 +927,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "direct": MessageLookupByLibrary.simpleMessage("Тікелей"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("UDP-ні өшіру"),
+    "disabled": MessageLookupByLibrary.simpleMessage("Өшірулі"),
     "disclaimer": MessageLookupByLibrary.simpleMessage(
       "Жауапкершіліктен бас тарту",
     ),
@@ -1284,6 +1285,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "editRule": MessageLookupByLibrary.simpleMessage("Ережені өңдеу"),
     "emptyTip": m31,
     "en": MessageLookupByLibrary.simpleMessage("Ағылшынша"),
+    "enabled": MessageLookupByLibrary.simpleMessage("Қосулы"),
     "enterManually": MessageLookupByLibrary.simpleMessage("Қолмен енгізу"),
     "entries": MessageLookupByLibrary.simpleMessage(" жазба"),
     "entriesCount": m32,

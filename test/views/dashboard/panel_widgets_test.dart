@@ -161,7 +161,10 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('subscription-ring')),
+        findsOneWidget,
+      );
       expect(find.text('50B / 100B'), findsOneWidget);
     });
 
@@ -181,7 +184,7 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(find.byKey(const ValueKey('subscription-ring')), findsNothing);
     });
 
     testWidgets('fits long localized subscription values', (tester) async {

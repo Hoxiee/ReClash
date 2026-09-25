@@ -10,7 +10,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
-import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
+import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
@@ -144,39 +144,59 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
 
   @override
   Widget build(BuildContext context) {
-    return DashboardInfoCard(
+    final appLocalizations = context.appLocalizations;
+    return SizedBox(
       height: DashboardWidgetMetrics.heightOf(context, 1),
-      icon: AppGlyphs.memory,
-      label: context.appLocalizations.memoryInfo,
-      onPressed: _showDetail,
-      child: ValueListenableBuilder(
-        valueListenable: _memoryStateNotifier,
-        builder: (_, memory, _) {
-          final traffic = memory.total.traffic;
-          return Align(
-            alignment: Alignment.centerLeft,
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: traffic.value,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+      child: RepaintBoundary(
+        child: CommonCard(
+          radius: DashboardWidgetMetrics.radiusOf(context),
+          infoPadding: DashboardWidgetMetrics.paddingOf(
+            context,
+          ).copyWith(bottom: 0),
+          info: Info(
+            glyph: AppGlyphs.memory,
+            label: appLocalizations.memoryInfo,
+          ),
+          onPressed: _showDetail,
+          child: Container(
+            padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height:
+                      globalState.measure.bodyMediumHeight *
+                          DashboardWidgetMetrics.textScaleOf(context) +
+                      2,
+                  child: ValueListenableBuilder(
+                    valueListenable: _memoryStateNotifier,
+                    builder: (_, memory, _) {
+                      final traffic = memory.total.traffic;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            traffic.value,
+                            style: context.textTheme.bodyMedium?.toLight
+                                .adjustSize(1),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            traffic.unit,
+                            style: context.textTheme.bodyMedium?.toLight
+                                .adjustSize(1),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  TextSpan(
-                    text: ' ${traffic.unit}',
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -364,7 +384,7 @@ class _MemorySection extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: KeyedSubtree(
               key: contentKey,
-              child: generateSectionV3(items: items),
+              child: generateSectionV2(items: items),
             ),
           ),
         ),

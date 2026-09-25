@@ -78,6 +78,17 @@ extension GroupTypeExtension on GroupType {
   static List<String> get valueList =>
       GroupType.values.map((e) => e.toString().split('.').last).toList();
 
+  // Types the core actually builds; the rest of the enum exists only to parse
+  // external configs tolerantly (relay was removed upstream in favor of
+  // dialer-proxy, smart has no adapter), so they must never be offered as a
+  // creatable group type.
+  static const List<GroupType> overrideSelectable = [
+    GroupType.Selector,
+    GroupType.URLTest,
+    GroupType.Fallback,
+    GroupType.LoadBalance,
+  ];
+
   bool get isComputedSelected {
     return [GroupType.URLTest, GroupType.Fallback].contains(this);
   }
@@ -471,7 +482,14 @@ enum DashboardWidget {
   desyncStrategy(modes: _byedpiOnly),
   desyncTest(modes: _byedpiOnly),
   desyncEngine(modes: _byedpiOnly),
-  serviceStatus(modes: _vpnOnly);
+  serviceStatus(modes: _vpnOnly),
+  connections,
+  dnsQueries,
+  requests,
+  runTime,
+  proxyGroups,
+  profiles,
+  overrideDnsButton;
 
   final List<SupportPlatform> platforms;
   final List<DashboardMode> modes;

@@ -218,6 +218,109 @@ abstract class _$DnsQueries extends $Notifier<FixedList<DnsQuery>> {
   }
 }
 
+@ProviderFor(DnsQueryCount)
+final dnsQueryCountProvider = DnsQueryCountProvider._();
+
+final class DnsQueryCountProvider
+    extends $NotifierProvider<DnsQueryCount, int> {
+  DnsQueryCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dnsQueryCountProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dnsQueryCountHash();
+
+  @$internal
+  @override
+  DnsQueryCount create() => DnsQueryCount();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$dnsQueryCountHash() => r'2de3bcb1c2fd622af728158bd9a1e169af632395';
+
+abstract class _$DnsQueryCount extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(RequestCount)
+final requestCountProvider = RequestCountProvider._();
+
+final class RequestCountProvider extends $NotifierProvider<RequestCount, int> {
+  RequestCountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'requestCountProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$requestCountHash();
+
+  @$internal
+  @override
+  RequestCount create() => RequestCount();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$requestCountHash() => r'aedb813c287a83a2588517f6c5c13e3f8089e0bc';
+
+abstract class _$RequestCount extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(Providers)
 final providersProvider = ProvidersProvider._();
 

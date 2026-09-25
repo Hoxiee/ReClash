@@ -20,7 +20,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
       floatBody: true,
       body: SettingsListView(
         children: [
-          SizedBox(height: context.appBarInset),
           SettingSection(
             top: 16,
             title: appLocalizations.smartRoutingPacing,

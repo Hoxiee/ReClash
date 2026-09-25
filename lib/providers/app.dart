@@ -80,6 +80,22 @@ class DnsQueries extends _$DnsQueries with AutoDisposeNotifierMixin {
 }
 
 @Riverpod(keepAlive: true)
+class DnsQueryCount extends _$DnsQueryCount with AutoDisposeNotifierMixin {
+  @override
+  int build() {
+    return 0;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class RequestCount extends _$RequestCount with AutoDisposeNotifierMixin {
+  @override
+  int build() {
+    return 0;
+  }
+}
+
+@Riverpod(keepAlive: true)
 class Providers extends _$Providers with AutoDisposeNotifierMixin {
   @override
   List<ExternalProvider> build() {

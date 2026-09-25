@@ -389,6 +389,8 @@
   "vpnTip": "重启VPN后改变生效",
   "vpnEnableDesc": "通过VpnService自动路由系统所有流量",
   "options": "选项",
+  "enabled": "已开启",
+  "disabled": "已关闭",
   "loopback": "回环解锁工具",
   "loopbackDesc": "用于UWP回环解锁",
   "providers": "外部资源",

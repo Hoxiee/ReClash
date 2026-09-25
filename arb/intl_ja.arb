@@ -389,6 +389,8 @@
   "vpnTip": "変更はVPNの再起動後に有効になります",
   "vpnEnableDesc": "VpnServiceでシステムの全トラフィックを自動的にルーティングします",
   "options": "オプション",
+  "enabled": "有効",
+  "disabled": "無効",
   "loopback": "ループバック解除ツール",
   "loopbackDesc": "UWPのループバック解除に使用します",
   "providers": "外部リソース",

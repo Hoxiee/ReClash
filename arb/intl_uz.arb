@@ -384,6 +384,8 @@
   "vpnTip": "Oʻzgarishlar VPN qayta ishga tushirilgach kuchga kiradi",
   "vpnEnableDesc": "Butun tizim trafigini VpnService orqali avtomatik yoʻnaltirish",
   "options": "Tanlovlar",
+  "enabled": "Yoqilgan",
+  "disabled": "Oʻchirilgan",
   "loopback": "Loopbackni yoqish vositasi",
   "loopbackDesc": "UWP loopback istisnosi uchun",
   "providers": "Tashqi resurslar",
