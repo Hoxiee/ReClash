@@ -119,7 +119,11 @@ _AppSettingProps _$AppSettingPropsFromJson(
       RestoreStrategy.compatible,
   showTrayTitle: json['showTrayTitle'] as bool? ?? true,
   checkCertificate: json['checkCertificate'] as bool? ?? true,
-  customUserAgent: json['customUserAgent'] as String? ?? '',
+  userAgents:
+      (_readUserAgents(json, 'userAgents') as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      defaultUserAgents,
   sendDeviceIdentity: json['sendDeviceIdentity'] as bool? ?? false,
   iconVariant: json['iconVariant'] as String? ?? 'default',
   reduceMotion: json['reduceMotion'] as bool? ?? false,
@@ -169,7 +173,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'restoreStrategy': _$RestoreStrategyEnumMap[instance.restoreStrategy]!,
       'showTrayTitle': instance.showTrayTitle,
       'checkCertificate': instance.checkCertificate,
-      'customUserAgent': instance.customUserAgent,
+      'userAgents': instance.userAgents,
       'sendDeviceIdentity': instance.sendDeviceIdentity,
       'iconVariant': instance.iconVariant,
       'reduceMotion': instance.reduceMotion,

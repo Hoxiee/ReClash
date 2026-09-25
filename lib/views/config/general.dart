@@ -5,13 +5,13 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
+import 'package:reclash/views/config/user_agents.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'general/port_dialog.dart';
-part 'general/ua_dialog.dart';
 part 'general/external_controller_dialog.dart';
 
 class LogLevelItem extends ConsumerWidget {
@@ -35,41 +35,17 @@ class LogLevelItem extends ConsumerWidget {
 class UaItem extends ConsumerWidget {
   const UaItem({super.key});
 
-  Future<void> _handleShowUaDialog(WidgetRef ref) async {
-    final result = await dialogs.showCommonDialog<_UaDialogResult>(
-      child: _UaDialog(
-        value: ref.read(patchClashConfigProvider).globalUa,
-        customValue: ref.read(appSettingProvider).customUserAgent,
-      ),
-    );
-    if (result == null) {
-      return;
-    }
-    final userAgent = result.value.trim();
-    if (result.isCustom) {
-      ref
-          .read(appSettingProvider.notifier)
-          .update((state) => state.copyWith(customUserAgent: userAgent));
-    }
-    ref
-        .read(patchClashConfigProvider.notifier)
-        .update(
-          (state) =>
-              state.copyWith(globalUa: userAgent.isEmpty ? null : userAgent),
-        );
-  }
-
   @override
   Widget build(BuildContext context, ref) {
     final appLocalizations = context.appLocalizations;
     final globalUa = ref.watch(
       patchClashConfigProvider.select((state) => state.globalUa),
     );
-    return DecorationListItem(
+    return DecorationListItem.open(
       leading: const GlyphIcon(AppGlyphs.computer),
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
-      onPressed: () => _handleShowUaDialog(ref),
+      widget: const UserAgentsView(),
     );
   }
 }

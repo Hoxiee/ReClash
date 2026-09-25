@@ -51,6 +51,12 @@ const defaultNotificationComponents = [
 ];
 const defaultNotificationSettings = NotificationSettings();
 
+const defaultUserAgents = [
+  flClashXCompatUa,
+  'clash-verge/v2.4.2',
+  'ClashforWindows/0.19.23',
+];
+
 Map<String, Object?> migrateNotificationSettingsJson(
   Map<String, Object?> json,
 ) {
@@ -268,7 +274,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(RestoreStrategy.compatible) RestoreStrategy restoreStrategy,
     @Default(true) bool showTrayTitle,
     @Default(true) bool checkCertificate,
-    @Default('') String customUserAgent,
+    @Default(defaultUserAgents)
+    @JsonKey(readValue: _readUserAgents)
+    List<String> userAgents,
     @Default(false) bool sendDeviceIdentity,
     @Default('default') String iconVariant,
     @Default(false) bool reduceMotion,
@@ -299,6 +307,23 @@ abstract class AppSettingProps with _$AppSettingProps {
       return AppSettingProps.fromJson(migrated);
     }, () => defaultAppSettingProps);
   }
+}
+
+// v1→v2: the single customUserAgent slot becomes a managed list; a real
+// custom value not already among the presets is appended.
+Object? _readUserAgents(Map<dynamic, dynamic> json, String key) {
+  if (json.containsKey(key)) {
+    return json[key];
+  }
+  final legacy = json['customUserAgent'];
+  if (legacy is! String) {
+    return null;
+  }
+  final custom = legacy.trim();
+  if (custom.isEmpty || defaultUserAgents.contains(custom)) {
+    return null;
+  }
+  return [...defaultUserAgents, custom];
 }
 
 Map<String, Object?> _notificationSettingsSafeJson(

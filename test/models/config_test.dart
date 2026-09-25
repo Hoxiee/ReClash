@@ -116,7 +116,7 @@ void main() {
       expect(restored.setupStep, 0);
       expect(restored.minimizeOnExit, true);
       expect(restored.restoreStrategy, RestoreStrategy.compatible);
-      expect(restored.customUserAgent, '');
+      expect(restored.userAgents, defaultUserAgents);
       expect(restored.sendDeviceIdentity, false);
       expect(restored.testUrl, defaultTestUrl);
     });
@@ -144,7 +144,7 @@ void main() {
         closeConnections: false,
         setupStep: 3,
         testUrl: 'https://custom.test',
-        customUserAgent: 'CustomUA/1.0',
+        userAgents: ['CustomUA/1.0'],
       );
       final restored = roundTrip(
         () => props.toJson(),
@@ -171,7 +171,7 @@ void main() {
       expect(restored.closeConnections, false);
       expect(restored.setupStep, 3);
       expect(restored.testUrl, 'https://custom.test');
-      expect(restored.customUserAgent, 'CustomUA/1.0');
+      expect(restored.userAgents, ['CustomUA/1.0']);
     });
 
     test('safeFromJson returns default on null', () {
