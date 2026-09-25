@@ -166,7 +166,7 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: SizedBox(height: context.sheetTopPadding),
+                child: SizedBox(height: context.appBarInset),
               ),
               for (var i = 0; i < sections.length; i++)
                 ..._buildSection(sections[i], i == sections.length - 1),

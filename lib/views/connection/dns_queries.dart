@@ -426,7 +426,7 @@ class DnsQueryDetailView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
-      ).copyWith(bottom: 20, top: context.sheetTopPadding),
+      ).copyWith(bottom: 20, top: context.appBarInset),
       children: [
         generateSectionV3(
           title: appLocalizations.basicInfo,

@@ -183,7 +183,7 @@ class _OverwriteSelectionSheetState<T>
             controller: _controller,
             slivers: [
               SliverToBoxAdapter(
-                child: SizedBox(height: context.sheetTopPadding),
+                child: SizedBox(height: context.appBarInset),
               ),
               for (final (sectionIndex, section)
                   in widget.sections.indexed) ...[

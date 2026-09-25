@@ -168,7 +168,7 @@ class _NameListEditorState extends ConsumerState<NameListEditor>
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
-              child: SizedBox(height: context.sheetTopPadding + 8),
+              child: SizedBox(height: context.appBarInset + 8),
             ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

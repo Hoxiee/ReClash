@@ -756,7 +756,7 @@ class _ReorderableProfilesSheetState
           buildDefaultDragHandles: false,
           padding: const EdgeInsets.symmetric(
             horizontal: 16,
-          ).copyWith(top: context.sheetTopPadding),
+          ).copyWith(top: context.appBarInset),
           proxyDecorator: (child, index, animation) {
             return commonProxyDecorator(_buildItem(index), index, animation);
           },
