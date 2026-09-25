@@ -4,7 +4,6 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_sliver_list/super_sliver_list.dart';
@@ -423,7 +422,7 @@ class DnsQueryDetailView extends StatelessWidget {
   List<Widget> _buildRows(List<(String, String)> entries) {
     return [
       for (final (title, value) in entries)
-        if (value.isNotEmpty) _DetailRow(title: title, value: value),
+        if (value.isNotEmpty) DetailRow.text(title: title, value: value),
     ];
   }
 
@@ -479,43 +478,6 @@ class DnsQueryDetailView extends StatelessWidget {
             items: [_buildAnswers(context)],
           ),
       ],
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _DetailRow({required this.title, required this.value});
-
-  Future<void> _copy(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: value));
-    if (!context.mounted) return;
-    context.showNotifier(context.appLocalizations.copySuccess);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DecorationListItem(
-      onPressed: () => _copy(context),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 20,
-        children: [
-          Text(title),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: context.textTheme.bodyMedium?.copyWith(
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
