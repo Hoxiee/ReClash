@@ -79,9 +79,18 @@ class _SubscriptionStrip extends StatelessWidget {
                       ),
                     ),
                     if (expired)
-                      _SubscriptionExpiredPill(color: colorScheme.error)
+                      _SubscriptionPill(
+                        color: colorScheme.error,
+                        label: context
+                            .appLocalizations
+                            .dashboardSubscriptionExpired,
+                      )
                     else if (daysLeft != null)
-                      _DaysPill(days: daysLeft, color: daysColor),
+                      _SubscriptionPill(
+                        color: daysColor,
+                        label:
+                            '${context.appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
+                      ),
                   ],
                 ),
               ),
@@ -161,10 +170,11 @@ class _SubscriptionStrip extends StatelessWidget {
   }
 }
 
-class _SubscriptionExpiredPill extends StatelessWidget {
-  const _SubscriptionExpiredPill({required this.color});
+class _SubscriptionPill extends StatelessWidget {
+  const _SubscriptionPill({required this.color, required this.label});
 
   final Color color;
+  final String label;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -180,41 +190,7 @@ class _SubscriptionExpiredPill extends StatelessWidget {
         const SizedBox(width: 5),
         Flexible(
           child: Text(
-            context.appLocalizations.dashboardSubscriptionExpired,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _DaysPill extends StatelessWidget {
-  const _DaysPill({required this.days, required this.color});
-
-  final int days;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(heroPillRadius),
-      color: color.withValues(alpha: 0.14),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GlyphIcon(AppGlyphs.calendar, size: 14, color: color),
-        const SizedBox(width: 5),
-        Flexible(
-          child: Text(
-            '${context.appLocalizations.remaining} $days ${heroDaysWord(days)}',
+            label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.labelMedium?.copyWith(
