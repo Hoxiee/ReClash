@@ -96,7 +96,7 @@ Color _statusColor(
   }
   return switch (connectionDoctorAnswer(appLocalizations, snapshot).tone) {
     DoctorAnswerTone.bad => context.colorScheme.error,
-    DoctorAnswerTone.warning => Colors.orange,
+    DoctorAnswerTone.warning => context.colorScheme.warning,
     _ => context.colorScheme.onSurface,
   };
 }

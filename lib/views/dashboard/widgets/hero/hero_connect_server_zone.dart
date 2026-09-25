@@ -534,7 +534,7 @@ class _SignalBars extends StatelessWidget {
       level = 0;
       color = dim;
     } else {
-      color = getDelayColor(delay) ?? Colors.green;
+      color = getDelayColor(delay) ?? colorScheme.success;
       level = delay! < 150
           ? 4
           : delay! < 300
