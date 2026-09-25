@@ -243,18 +243,13 @@ class _AdvancedRoutingPage extends ConsumerWidget {
     required String Function(int) textBuilder,
     required SmartRoutingProps Function(SmartRoutingProps, int) write,
   }) {
-    return DecorationListItem.open(
+    return DecorationListItem.options(
       title: Text(title),
       subtitle: Text(desc),
-      blur: false,
-      forceFull: false,
-      maxWidth: 400,
-      widget: OptionsPickerPage<int>(
-        title: title,
-        options: options.contains(value) ? options : [value, ...options],
-        value: value,
-        textBuilder: textBuilder,
-      ),
+      dialogTitle: title,
+      options: options.contains(value) ? options : [value, ...options],
+      value: value,
+      textBuilder: (option) => textBuilder(option as int),
       trailing: value == seed
           ? null
           : Builder(

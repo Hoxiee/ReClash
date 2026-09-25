@@ -300,7 +300,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                   (policy) => policy.copyWith(enabled: value),
                 ),
               ),
-              DecorationListItem.open(
+              DecorationListItem.options(
                 title: Text(appLocalizations.smartRoutingServiceFallback),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,15 +315,11 @@ class _ServiceRoutePage extends ConsumerWidget {
                     ),
                   ],
                 ),
-                blur: false,
-                forceFull: false,
-                maxWidth: 400,
-                widget: OptionsPickerPage<ServiceRouteFallback>(
-                  title: appLocalizations.smartRoutingServiceFallback,
-                  options: ServiceRouteFallback.values,
-                  value: policy.fallback,
-                  textBuilder: (value) => _fallbackText(context, value),
-                ),
+                dialogTitle: appLocalizations.smartRoutingServiceFallback,
+                options: ServiceRouteFallback.values,
+                value: policy.fallback,
+                textBuilder: (value) =>
+                    _fallbackText(context, value as ServiceRouteFallback),
                 onChanged: (value) {
                   if (value == null) return;
                   _updatePolicy(
