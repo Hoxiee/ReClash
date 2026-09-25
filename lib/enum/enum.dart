@@ -2,8 +2,7 @@
 
 import 'dart:io';
 
-import 'package:reclash/common/util/context.dart';
-import 'package:reclash/common/desktop/system.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -291,8 +290,8 @@ extension MessageLevelExt on MessageLevel {
     final colorScheme = Theme.of(context).colorScheme;
     return switch (this) {
       MessageLevel.info => colorScheme.onSurfaceVariant,
-      MessageLevel.success => colorScheme.primary,
-      MessageLevel.warning => colorScheme.tertiary,
+      MessageLevel.success => colorScheme.success,
+      MessageLevel.warning => colorScheme.warning,
       MessageLevel.error => colorScheme.onErrorContainer,
     };
   }

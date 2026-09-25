@@ -152,4 +152,26 @@ void main() {
     }
     expect(offenders, isEmpty, reason: offenders.join('\n'));
   });
+
+  test('MessageLevel status tints route through success/warning tokens', () {
+    // Semantic status is one language app-wide: a success is the green
+    // success token, a warning is the amber warning token — never a bare
+    // theme accent (primary/tertiary). The LogLevel *badge* pair legitimately
+    // stays on tertiaryContainer/onTertiaryContainer because success/warning
+    // are single colours with no container/on-container companion; that is the
+    // documented exception, and this guard scopes to MessageLevel tints only.
+    final source = File(p.join('lib', 'enum', 'enum.dart')).readAsStringSync();
+    final offenders = <String>[];
+    for (final entry in const {
+      'MessageLevel.success => colorScheme.primary':
+          'success tint must be colorScheme.success, not the primary accent',
+      'MessageLevel.warning => colorScheme.tertiary':
+          'warning tint must be colorScheme.warning, not the tertiary accent',
+    }.entries) {
+      if (source.contains(entry.key)) {
+        offenders.add('lib/enum/enum.dart — ${entry.value}.');
+      }
+    }
+    expect(offenders, isEmpty, reason: offenders.join('\n'));
+  });
 }
