@@ -261,6 +261,26 @@ extension AppShapeThemeExt on ThemeData {
       ),
     ),
     inputDecorationTheme: inputDecorationTheme.copyWith(border: AppShape.input),
+    filledButtonTheme: FilledButtonThemeData(
+      style: (filledButtonTheme.style ?? const ButtonStyle()).copyWith(
+        shape: const WidgetStatePropertyAll(AppShape.md),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: (elevatedButtonTheme.style ?? const ButtonStyle()).copyWith(
+        shape: const WidgetStatePropertyAll(AppShape.md),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: (outlinedButtonTheme.style ?? const ButtonStyle()).copyWith(
+        shape: const WidgetStatePropertyAll(AppShape.md),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: (textButtonTheme.style ?? const ButtonStyle()).copyWith(
+        shape: const WidgetStatePropertyAll(AppShape.md),
+      ),
+    ),
     floatingActionButtonTheme: floatingActionButtonTheme.copyWith(
       shape: AppShape.md,
     ),
