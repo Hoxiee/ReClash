@@ -162,24 +162,31 @@ class SmartPauseNetworkPickerState
         illustration: NullStatusIllustration.wifi,
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      itemCount: known.length,
-      itemBuilder: (_, index) {
-        final ssid = known[index];
-        return DecorationListItem(
-          minVerticalPadding: 8,
-          contentPadding: const EdgeInsets.only(left: 16, right: 16),
-          leading: GlyphIcon(
-            AppGlyphs.wifi,
-            color: context.colorScheme.onSurfaceVariant,
-          ),
-          title: TooltipText(
-            text: Text(ssid, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ),
-          onPressed: () => widget.onSelected(ssid),
-        );
-      },
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 16),
+      children: [
+        SettingSection(
+          items: [
+            for (final ssid in known)
+              DecorationListItem(
+                minVerticalPadding: 8,
+                contentPadding: const EdgeInsets.only(left: 16, right: 16),
+                leading: GlyphIcon(
+                  AppGlyphs.wifi,
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+                title: TooltipText(
+                  text: Text(
+                    ssid,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                onPressed: () => widget.onSelected(ssid),
+              ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -192,9 +199,10 @@ class SmartPauseNetworkPickerState
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             appLocalizations.pickNetworkDesc,
             style: context.textTheme.bodySmall?.copyWith(
