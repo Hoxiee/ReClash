@@ -12,7 +12,7 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'client_preset_selector.dart';
 
@@ -615,10 +615,12 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
             textAlign: TextAlign.center,
           ),
           if (uri != null)
-            QrImageView(
+            StyledQrCode(
               data: uri.toString(),
               size: 220,
-              backgroundColor: Colors.white,
+              logo: SvgPicture.asset(
+                'assets/images/marks/reclash-mark-color.svg',
+              ),
             )
           else if (_startError == null)
             const SizedBox.square(

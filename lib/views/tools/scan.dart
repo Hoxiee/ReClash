@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
@@ -16,11 +17,17 @@ class ScanPage extends StatefulWidget {
   State<ScanPage> createState() => _ScanPageState();
 }
 
-class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
+class _ScanPageState extends State<ScanPage>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   MobileScannerController controller = MobileScannerController(
     autoStart: false,
     detectionSpeed: DetectionSpeed.noDuplicates,
     formats: const [BarcodeFormat.qrCode],
+  );
+
+  late final AnimationController _sweep = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
   );
 
   StreamSubscription<Object?>? _subscription;
@@ -31,6 +38,10 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // A perpetual repeat() would hang every pumpAndSettle in the page's tests.
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      _sweep.repeat(reverse: true);
+    }
     _listenBarcodes();
     unawaited(_startScanner());
   }
@@ -123,7 +134,18 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
               ),
             ),
           ),
-          CustomPaint(painter: ScannerOverlay(scanWindow: scanWindow)),
+          AnimatedBuilder(
+            animation: _sweep,
+            builder: (context, _) {
+              return CustomPaint(
+                painter: ScannerOverlay(
+                  scanWindow: scanWindow,
+                  sweep: _sweep.value,
+                  accent: context.colorScheme.primary,
+                ),
+              );
+            },
+          ),
           AppBar(
             backgroundColor: Colors.transparent,
             automaticallyImplyLeading: false,
@@ -262,6 +284,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _sweep.dispose();
     unawaited(_subscription?.cancel());
     _subscription = null;
     unawaited(controller.dispose());
@@ -272,44 +295,19 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
 class ScannerOverlay extends CustomPainter {
   const ScannerOverlay({
     required this.scanWindow,
+    this.sweep = 0,
+    this.accent = Colors.white,
     this.borderRadius = AppCorner.md,
   });
 
   final Rect scanWindow;
+  final double sweep;
+  final Color accent;
   final double borderRadius;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final backgroundPath = Path()..addRect(Rect.largest);
-
-    final cutoutPath = Path()
-      ..addRSuperellipse(
-        RSuperellipse.fromRectAndCorners(
-          scanWindow,
-          topLeft: Radius.circular(borderRadius),
-          topRight: Radius.circular(borderRadius),
-          bottomLeft: Radius.circular(borderRadius),
-          bottomRight: Radius.circular(borderRadius),
-        ),
-      );
-
-    final backgroundPaint = Paint()
-      ..color = Colors.black.opacity50
-      ..style = PaintingStyle.fill
-      ..blendMode = BlendMode.dstOut;
-
-    final backgroundWithCutout = Path.combine(
-      PathOperation.difference,
-      backgroundPath,
-      cutoutPath,
-    );
-
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0;
-
-    final border = RSuperellipse.fromRectAndCorners(
+    final window = RSuperellipse.fromRectAndCorners(
       scanWindow,
       topLeft: Radius.circular(borderRadius),
       topRight: Radius.circular(borderRadius),
@@ -317,13 +315,67 @@ class ScannerOverlay extends CustomPainter {
       bottomRight: Radius.circular(borderRadius),
     );
 
-    canvas.drawPath(backgroundWithCutout, backgroundPaint);
-    canvas.drawRSuperellipse(border, borderPaint);
+    final scrim = Path.combine(
+      PathOperation.difference,
+      Path()..addRect(Rect.largest),
+      Path()..addRSuperellipse(window),
+    );
+    canvas.drawPath(
+      scrim,
+      Paint()
+        ..color = Colors.black.opacity50
+        ..blendMode = BlendMode.dstOut,
+    );
+
+    canvas.save();
+    canvas.clipPath(Path()..addRSuperellipse(window));
+    final y = scanWindow.top + scanWindow.height * sweep;
+    final band = Rect.fromLTWH(scanWindow.left, y - 24, scanWindow.width, 48);
+    canvas.drawRect(
+      band,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [accent.withValues(alpha: 0), accent.opacity60, accent.withValues(alpha: 0)],
+        ).createShader(band),
+    );
+    canvas.restore();
+
+    _paintCorners(canvas);
+  }
+
+  void _paintCorners(Canvas canvas) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    const arm = 28.0;
+    final r = borderRadius;
+    final rect = scanWindow;
+    void corner(Offset pivot, Offset toX, Offset toY) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(pivot.dx + toX.dx * (arm + r), pivot.dy + toX.dy * (arm + r))
+          ..lineTo(pivot.dx + toX.dx * r, pivot.dy + toX.dy * r)
+          ..quadraticBezierTo(pivot.dx, pivot.dy, pivot.dx + toY.dx * r, pivot.dy + toY.dy * r)
+          ..lineTo(pivot.dx + toY.dx * (arm + r), pivot.dy + toY.dy * (arm + r)),
+        paint,
+      );
+    }
+
+    corner(rect.topLeft, const Offset(1, 0), const Offset(0, 1));
+    corner(rect.topRight, const Offset(-1, 0), const Offset(0, 1));
+    corner(rect.bottomLeft, const Offset(1, 0), const Offset(0, -1));
+    corner(rect.bottomRight, const Offset(-1, 0), const Offset(0, -1));
   }
 
   @override
   bool shouldRepaint(ScannerOverlay oldDelegate) {
     return scanWindow != oldDelegate.scanWindow ||
+        sweep != oldDelegate.sweep ||
+        accent != oldDelegate.accent ||
         borderRadius != oldDelegate.borderRadius;
   }
 }

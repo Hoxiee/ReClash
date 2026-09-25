@@ -49,3 +49,4 @@ export 'tab/tab.dart';
 export 'base/text.dart';
 export 'theme/theme.dart';
 export 'chart/wave.dart';
+export 'qr/styled_qr.dart';
