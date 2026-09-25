@@ -12,7 +12,7 @@ import 'package:material_ui/material_ui.dart';
 Glyph _glyphOf(HotAction action) {
   return switch (action) {
     HotAction.view => AppGlyphs.eye,
-    HotAction.start => AppGlyphs.playPause(0),
+    HotAction.start => AppGlyphs.play,
     HotAction.exit => AppGlyphs.close,
     HotAction.mode => AppGlyphs.split,
     HotAction.ruleMode => AppGlyphs.rules,

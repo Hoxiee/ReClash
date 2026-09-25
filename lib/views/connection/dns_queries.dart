@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -205,7 +206,7 @@ enum _DnsStatus { resolved, cached, failed }
 class _DnsStyle {
   final Color background;
   final Color foreground;
-  final IconData icon;
+  final Glyph icon;
 
   const _DnsStyle(this.background, this.foreground, this.icon);
 }
@@ -226,17 +227,17 @@ _DnsStyle _dnsStyle(BuildContext context, _DnsStatus status) {
     _DnsStatus.resolved => _DnsStyle(
       colorScheme.primaryContainer,
       colorScheme.onPrimaryContainer,
-      Icons.dns_outlined,
+      AppGlyphs.dns,
     ),
     _DnsStatus.cached => _DnsStyle(
       colorScheme.tertiaryContainer,
       colorScheme.onTertiaryContainer,
-      Icons.bolt,
+      AppGlyphs.bolt,
     ),
     _DnsStatus.failed => _DnsStyle(
       colorScheme.errorContainer,
       colorScheme.onErrorContainer,
-      Icons.error_outline,
+      AppGlyphs.error,
     ),
   };
 }
@@ -301,7 +302,7 @@ class DnsQueryItem extends StatelessWidget {
                   color: style.background,
                   shape: AppShape.md,
                 ),
-                child: Icon(style.icon, size: 22, color: style.foreground),
+                child: GlyphIcon(style.icon, size: 22, color: style.foreground),
               ),
               Expanded(
                 child: Column(

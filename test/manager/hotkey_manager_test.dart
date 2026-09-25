@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -43,12 +44,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const SizedBox.shrink(),
               ),
               NavigationItem(
-                icon: const Icon(Icons.folder),
+                glyph: AppGlyphs.profiles,
                 label: PageLabel.profiles,
                 builder: (_) => const SizedBox.shrink(),
               ),

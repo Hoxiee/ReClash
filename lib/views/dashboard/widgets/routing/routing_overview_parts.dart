@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
@@ -141,12 +142,12 @@ Color routingFormatAccent(BuildContext context, NetworkFormat format) {
   };
 }
 
-IconData routingFormatIcon(NetworkFormat format) => switch (format) {
-  NetworkFormat.open => Icons.public_rounded,
-  NetworkFormat.restricted => Icons.shield_moon_rounded,
-  NetworkFormat.portal => Icons.wifi_lock_rounded,
-  NetworkFormat.offline => Icons.cloud_off_rounded,
-  NetworkFormat.unknown => Icons.travel_explore_rounded,
+Glyph routingFormatIcon(NetworkFormat format) => switch (format) {
+  NetworkFormat.open => AppGlyphs.language,
+  NetworkFormat.restricted => AppGlyphs.shieldMoon,
+  NetworkFormat.portal => AppGlyphs.wifiLock,
+  NetworkFormat.offline => AppGlyphs.cloudOff,
+  NetworkFormat.unknown => AppGlyphs.globeSearch,
 };
 
 bool routingFailed(RcxStatus status) =>
@@ -216,7 +217,7 @@ class RoutingCard extends StatelessWidget {
 class RoutingNotice extends StatelessWidget {
   const RoutingNotice({super.key, required this.icon, required this.text});
 
-  final IconData icon;
+  final Glyph icon;
   final String text;
 
   @override
@@ -224,7 +225,7 @@ class RoutingNotice extends StatelessWidget {
     return RoutingCard(
       child: Row(
         children: [
-          Icon(icon, size: 18, color: context.colorScheme.onSurfaceVariant),
+          GlyphIcon(icon, size: 18, color: context.colorScheme.onSurfaceVariant),
           const SizedBox(width: 10),
           Expanded(child: Text(text, style: context.textTheme.bodyMedium)),
         ],
@@ -244,7 +245,7 @@ class RoutingBadge extends StatelessWidget {
     this.busy = false,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final Color tone;
   final double size;
   final bool busy;
@@ -264,7 +265,7 @@ class RoutingBadge extends StatelessWidget {
               dimension: size * 0.44,
               child: CommonCircleLoading(color: tone),
             )
-          : Icon(icon, size: size * 0.5, color: tone),
+          : GlyphIcon(icon, size: size * 0.5, color: tone),
     );
   }
 }
@@ -545,8 +546,8 @@ class _RoutingDisclosureState extends State<RoutingDisclosure> {
                   turns: _open ? 0.5 : 0,
                   duration: expandDuration,
                   curve: Curves.easeOutCubic,
-                  child: Icon(
-                    Icons.expand_more_rounded,
+                  child: GlyphIcon(
+                    AppGlyphs.chevronDown,
                     size: 17,
                     color: colorScheme.primary,
                   ),
@@ -676,12 +677,12 @@ class RoutingCandidateRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(
+          GlyphIcon(
             candidate.current
-                ? Icons.check_circle_rounded
+                ? AppGlyphs.checkCircle
                 : eligible
-                ? Icons.radio_button_unchecked
-                : Icons.block_rounded,
+                ? AppGlyphs.circleOutline
+                : AppGlyphs.block,
             size: 15,
             color: candidate.current
                 ? colorScheme.primary
@@ -765,10 +766,10 @@ class RoutingCanaryRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Icon(
+          GlyphIcon(
             canary.answered
-                ? Icons.check_circle_rounded
-                : Icons.remove_circle_outline_rounded,
+                ? AppGlyphs.checkCircle
+                : AppGlyphs.removeCircle,
             size: 16,
             color: canary.answered ? colorScheme.primary : muted,
           ),

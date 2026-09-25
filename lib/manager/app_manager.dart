@@ -173,6 +173,9 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
           lifecycleState: state,
           isAndroid: system.isAndroid,
         );
+    ref
+        .read(routeTrackerProvider.notifier)
+        .updateActivity(lifecycleState: state, isAndroid: system.isAndroid);
   }
 
   void _requestUiActiveSync({bool force = false}) {
@@ -254,6 +257,7 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         if (!mounted) {
           return;
         }
+        ref.read(routeTrackerProvider.notifier).markResumed();
         ref.read(setupActionProvider.notifier).tryCheckIp();
       });
     }

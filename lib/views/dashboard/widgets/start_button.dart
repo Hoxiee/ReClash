@@ -312,7 +312,7 @@ class _PauseFab extends ConsumerWidget {
         heroTag: null,
         tooltip: paused ? appLocalizations.resume : appLocalizations.pause,
         onPressed: () => ref.read(commonActionProvider.notifier).togglePaused(),
-        child: Icon(paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
+        child: GlyphIcon(paused ? AppGlyphs.play : AppGlyphs.pause),
       ),
     );
   }

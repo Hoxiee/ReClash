@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -90,11 +91,11 @@ class _Title extends ConsumerWidget {
     };
   }
 
-  IconData _getIcon(OverwriteType type) {
+  Glyph _getIcon(OverwriteType type) {
     return switch (type) {
-      OverwriteType.standard => Icons.stars,
-      OverwriteType.script => Icons.rocket,
-      OverwriteType.custom => Icons.dashboard_customize,
+      OverwriteType.standard => AppGlyphs.star,
+      OverwriteType.script => AppGlyphs.script,
+      OverwriteType.custom => AppGlyphs.customize,
     };
   }
 
@@ -140,7 +141,7 @@ class _Title extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(_getIcon(type)),
+                          GlyphIcon(_getIcon(type)),
                           const SizedBox(width: 8),
                           Flexible(child: Text(_getTitle(context, type))),
                         ],

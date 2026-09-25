@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:flutter/foundation.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -324,7 +326,7 @@ void main() {
   ) async {
     await pumpOrb(tester, phase: HeroOrbPhase.on, subscriptionExpired: true);
 
-    expect(find.byIcon(Icons.event_busy_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.calendar), findsOneWidget);
     expect(find.byKey(const ValueKey('core-mark')), findsNothing);
   });
 

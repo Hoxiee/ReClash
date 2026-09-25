@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../../helpers/glyph_finders.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
@@ -140,7 +142,7 @@ final _rankingScroll = find.descendant(
 );
 
 Future<void> _toggleTechnical(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.code_rounded));
+  await tester.tap(find.byGlyph(AppGlyphs.code));
   await tester.pumpAndSettle();
 }
 

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -142,7 +143,7 @@ class _OverwriteEditorPageState<T> extends ConsumerState<OverwriteEditorPage<T>>
             child: IconButton.filledTonal(
               tooltip: appLocalizations.delete,
               onPressed: _handleDelete,
-              icon: const Icon(Icons.delete),
+              icon: const GlyphIcon(AppGlyphs.delete),
             ),
           ),
           const SizedBox(width: 2),

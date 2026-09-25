@@ -30,9 +30,9 @@ bool isWebDashboardInstalledIn(String homeDirPath) {
 }
 
 /// zashboard reads its backend from the hash query, and `/ui` needs no secret.
-Uri webDashboardUri(String externalController) {
+Uri webDashboardUri(String externalController, {String secret = ''}) {
   final authority = externalController.isEmpty
-      ? ExternalControllerStatus.open.value
+      ? '$localhost:$defaultExternalControllerPort'
       : externalController;
   final separator = authority.lastIndexOf(':');
   final host = separator > 0 ? authority.substring(0, separator) : authority;
@@ -41,6 +41,7 @@ Uri webDashboardUri(String externalController) {
     'hostname': host,
     if (port.isNotEmpty) 'port': port,
     'protocol': 'http',
+    if (secret.isNotEmpty) 'secret': secret,
     'label': appName,
     // The Core binary and TUN belong to the app's lifecycle, not to a page.
     'disableUpgradeCore': '1',
@@ -102,27 +103,30 @@ Future<WebDashboardReadiness> probeWebDashboard(
 class WebDashboardSession {
   WebDashboardSession({required this.status, required this.setStatus});
 
-  final ExternalControllerStatus Function() status;
+  final String Function() status;
 
-  final Future<void> Function(ExternalControllerStatus status) setStatus;
+  final Future<void> Function(String status) setStatus;
 
-  ExternalControllerStatus? _borrowedFrom;
+  String? _borrowedFrom;
 
   bool get isBorrowed => _borrowedFrom != null;
 
   Future<void> open() async {
     final current = status();
-    if (current == ExternalControllerStatus.open) {
+    if (current.isNotEmpty) {
       return;
     }
     _borrowedFrom ??= current;
-    await setStatus(ExternalControllerStatus.open);
+    await setStatus('$localhost:$defaultExternalControllerPort');
   }
 
   Future<void> close() async {
     final borrowedFrom = _borrowedFrom;
     _borrowedFrom = null;
-    if (borrowedFrom == null || status() != ExternalControllerStatus.open) {
+    // Hand it back only while the live value is still the one we lent it: an
+    // empty value or a controller the user configured meanwhile is theirs.
+    if (borrowedFrom == null ||
+        status() != '$localhost:$defaultExternalControllerPort') {
       return;
     }
     await setStatus(borrowedFrom);

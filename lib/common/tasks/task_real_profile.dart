@@ -114,7 +114,8 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
     }
   }
 
-  rawConfig['external-controller'] = realPatchConfig.externalController.value;
+  rawConfig['external-controller'] = realPatchConfig.externalController;
+  rawConfig['secret'] = realPatchConfig.secret;
   // An external-ui the Core cannot read makes it download one instead, and it
   // does that synchronously inside every config apply.
   final homeDirPath = dirname(profilesPath);

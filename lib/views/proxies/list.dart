@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
@@ -567,7 +568,7 @@ class _GroupActions extends StatelessWidget {
             onPressed: onScrollToSelected,
             style: _shrinkWrap,
             iconSize: 19,
-            icon: const Icon(Icons.adjust),
+            icon: const GlyphIcon(AppGlyphs.target),
           ),
           const SizedBox(width: 2),
           IconButton(
@@ -577,7 +578,7 @@ class _GroupActions extends StatelessWidget {
             padding: const EdgeInsets.all(2),
             onPressed: onDelayTest,
             style: _shrinkWrap,
-            icon: const Icon(Icons.network_ping),
+            icon: const GlyphIcon(AppGlyphs.networkCheck),
           ),
           const SizedBox(width: 6),
         ] else ...[

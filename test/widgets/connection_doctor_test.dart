@@ -1,4 +1,6 @@
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/core/controller.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -491,7 +493,7 @@ void main() {
           .label,
       contains('Not checked'),
     );
-    expect(find.byIcon(Icons.close_rounded), findsNothing);
+    expect(find.byGlyph(AppGlyphs.close), findsNothing);
   });
 
   testWidgets('opening the screen answers with a check of its own', (
@@ -652,7 +654,13 @@ void main() {
     expect(find.text('This app'), findsOneWidget);
     expect(find.text('Confirmed'), findsWidgets);
     expect(find.text('Failed · Confirmed'), findsNWidgets(2));
-    expect(find.byIcon(Icons.subdirectory_arrow_right), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byTooltip('Consequence of an earlier fault'),
+        matching: find.byGlyph(AppGlyphs.subItem),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows inconclusive, superseded, and cancelled titles', (
@@ -793,7 +801,7 @@ void main() {
           MoreToolsSelectorState(
             navigationItems: [
               NavigationItem(
-                icon: const Icon(Icons.view_timeline),
+                glyph: AppGlyphs.requests,
                 label: PageLabel.requests,
                 builder: (_) => const SizedBox.shrink(),
               ),

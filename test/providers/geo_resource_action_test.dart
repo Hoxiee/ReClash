@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/core/controller.dart';
@@ -93,8 +95,8 @@ void main() {
       find.text(currentAppLocalizations.geoSkipped(GeoResource.MMDB.name)),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.check_circle_outline), findsNothing);
-    expect(find.byIcon(Icons.error_outline), findsNothing);
+    expect(find.byGlyph(AppGlyphs.checkCircle), findsNothing);
+    expect(find.byGlyph(AppGlyphs.error), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -211,7 +213,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('download failed'), findsOneWidget);
-    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.error), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

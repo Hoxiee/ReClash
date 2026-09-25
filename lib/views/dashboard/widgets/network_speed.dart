@@ -1,7 +1,9 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,10 +43,10 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
     final appLocalizations = context.appLocalizations;
     final color = context.colorScheme.onSurfaceVariant.opacity80;
     return SizedBox(
-      height: getWidgetHeight(2),
+      height: DashboardWidgetMetrics.heightOf(context, 2),
       child: RepaintBoundary(
         child: CommonCard(
-          radius: AppCorner.lg,
+          radius: DashboardWidgetMetrics.radiusOf(context),
           onPressed: () {},
           child: Consumer(
             builder: (_, ref, _) {
@@ -52,7 +54,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
               return Column(
                 children: [
                   Padding(
-                    padding: baseInfoEdgeInsets.copyWith(bottom: 0),
+                    padding: DashboardWidgetMetrics.paddingOf(context).copyWith(bottom: 0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -61,7 +63,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                             padding: EdgeInsets.zero,
                             info: Info(
                               label: appLocalizations.networkSpeed,
-                              iconData: Icons.speed_sharp,
+                              iconData: AppGlyphs.speed,
                             ),
                           ),
                         ),

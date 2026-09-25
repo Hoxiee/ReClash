@@ -3,6 +3,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
@@ -195,7 +196,7 @@ class _RailBody extends StatelessWidget {
               child: FocusTraversalOrder(
                 order: NumericFocusOrder(items.length.toDouble()),
                 child: _RailSlot(
-                  icon: Icons.info_outline,
+                  glyph: AppGlyphs.info,
                   label: context.appLocalizations.about,
                   colors: colors,
                   selected: false,
@@ -264,7 +265,7 @@ class _SlotLayer extends StatelessWidget {
           child: FocusTraversalOrder(
             order: NumericFocusOrder(i.toDouble()),
             child: _RailSlot(
-              icon: items[i].icon.icon ?? Icons.circle,
+              glyph: items[i].glyph,
               label: items[i].label.label,
               colors: colors,
               selected: i == selectedIndex,
@@ -278,14 +279,14 @@ class _SlotLayer extends StatelessWidget {
 
 class _RailSlot extends StatefulWidget {
   const _RailSlot({
-    required this.icon,
+    required this.glyph,
     required this.label,
     required this.colors,
     required this.selected,
     this.onToPage,
   });
 
-  final IconData icon;
+  final Glyph glyph;
   final String label;
   final _RailColors colors;
   final bool selected;
@@ -372,7 +373,7 @@ class _RailSlotState extends State<_RailSlot> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(widget.icon, size: NavRailMetrics.iconSize, color: color),
+          GlyphIcon(widget.glyph, size: NavRailMetrics.iconSize, color: color, fill: widget.selected ? 1 : 0),
           const SizedBox(height: 2),
           Text(
             widget.label,

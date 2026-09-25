@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_centered_scroll_view.dart';
@@ -85,8 +86,8 @@ class _ProviderEmptyState extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.folder_off_rounded,
+            GlyphIcon(
+              AppGlyphs.folder,
               size: 44,
               color: context.colorScheme.onSurfaceVariant,
             ),
@@ -113,7 +114,7 @@ class _ProviderEmptyState extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () =>
                   ref.read(currentPageLabelProvider.notifier).toProfiles(),
-              icon: const Icon(Icons.folder_open_rounded),
+              icon: const GlyphIcon(AppGlyphs.folder),
               label: Text(context.appLocalizations.dashboardSelectProfile),
             ),
           ],

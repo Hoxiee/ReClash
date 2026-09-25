@@ -187,12 +187,12 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
             SettingSection(
               items: [
                 DecorationListItem(
-                  leading: const Icon(Icons.tune_rounded),
+                  leading: const GlyphIcon(AppGlyphs.sliders),
                   title: Text(appLocalizations.doctorTechnicalDetails),
-                  trailing: Icon(
+                  trailing: GlyphIcon(
                     _showTechnicalDetails
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
+                        ? AppGlyphs.chevronUp
+                        : AppGlyphs.chevronDown,
                   ),
                   onPressed: () => setState(
                     () => _showTechnicalDetails = !_showTechnicalDetails,
@@ -346,8 +346,8 @@ class _DoctorAnswerCard extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(top: 2, right: 8),
-                        child: Icon(
-                          Icons.arrow_right_rounded,
+                        child: GlyphIcon(
+                          AppGlyphs.chevronForward,
                           size: 20,
                           color: colors.onSurfaceVariant,
                         ),
@@ -376,13 +376,13 @@ class _DoctorAnswerCard extends StatelessWidget {
                   if (showStart)
                     FilledButton.tonalIcon(
                       onPressed: busy ? null : onStart,
-                      icon: const Icon(Icons.play_arrow_rounded),
+                      icon: const GlyphIcon(AppGlyphs.play),
                       label: Text(appLocalizations.doctorStandardExam),
                     ),
                   if (examining && canCancel)
                     OutlinedButton.icon(
                       onPressed: busy ? null : onCancel,
-                      icon: const Icon(Icons.stop_circle_outlined),
+                      icon: const GlyphIcon(AppGlyphs.stop),
                       label: Text(appLocalizations.doctorCancelExam),
                     ),
                 ],
@@ -398,7 +398,7 @@ class _DoctorAnswerCard extends StatelessWidget {
 class _AnswerBadge extends StatelessWidget {
   const _AnswerBadge({required this.icon, required this.tone});
 
-  final IconData icon;
+  final Glyph icon;
   final Color tone;
 
   @override
@@ -411,7 +411,7 @@ class _AnswerBadge extends StatelessWidget {
         shape: AppShape.all(AppCorner.md),
         color: tone.withValues(alpha: 0.14),
       ),
-      child: Icon(icon, size: 24, color: tone),
+      child: GlyphIcon(icon, size: 24, color: tone),
     );
   }
 }
@@ -434,13 +434,13 @@ class _RemedyButton extends StatelessWidget {
     if (primary) {
       return FilledButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon),
+        icon: GlyphIcon(icon),
         label: Text(label),
       );
     }
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon),
+      icon: GlyphIcon(icon),
       label: Text(label),
     );
   }
@@ -469,12 +469,12 @@ class _DoctorExpertActions extends StatelessWidget {
     return SettingSection(
       items: [
         DecorationListItem(
-          leading: const Icon(Icons.manage_search_rounded),
+          leading: const GlyphIcon(AppGlyphs.search),
           title: Text(appLocalizations.doctorDeepExam),
           onPressed: busy || !canStart ? null : onDeepCheck,
         ),
         DecorationListItem(
-          leading: const Icon(Icons.ios_share_rounded),
+          leading: const GlyphIcon(AppGlyphs.share),
           title: Text(appLocalizations.doctorExportReport),
           onPressed: busy ? null : onExport,
         ),
@@ -496,33 +496,33 @@ class _DoctorDetails extends StatelessWidget {
       title: appLocalizations.doctorDetails,
       items: [
         DecorationListItem(
-          leading: const Icon(Icons.shield_outlined),
+          leading: const GlyphIcon(AppGlyphs.shield),
           title: Text(appLocalizations.doctorProtection),
           trailing: Text(
             _captureStateLabel(appLocalizations, snapshot.captureState),
           ),
         ),
         DecorationListItem(
-          leading: const Icon(Icons.layers_outlined),
+          leading: const GlyphIcon(AppGlyphs.layers),
           title: Text(appLocalizations.doctorLayer),
           trailing: Text(
             connectionDoctorLayerLabel(appLocalizations, snapshot.layer),
           ),
         ),
         DecorationListItem(
-          leading: const Icon(Icons.filter_center_focus_rounded),
+          leading: const GlyphIcon(AppGlyphs.target),
           title: Text(appLocalizations.doctorScope),
           trailing: Text(_scopeLabel(appLocalizations, snapshot.scope)),
         ),
         DecorationListItem(
-          leading: const Icon(Icons.fact_check_outlined),
+          leading: const GlyphIcon(AppGlyphs.checklist),
           title: Text(appLocalizations.doctorConfidence),
           trailing: Text(
             _confidenceLabel(appLocalizations, snapshot.confidence),
           ),
         ),
         DecorationListItem(
-          leading: const Icon(Icons.update_rounded),
+          leading: const GlyphIcon(AppGlyphs.update),
           title: Text(appLocalizations.status),
           trailing: Text(
             snapshot.isFresh
@@ -590,14 +590,14 @@ class _DoctorEvidenceSection extends StatelessWidget {
       items: evidence.isEmpty
           ? [
               DecorationListItem(
-                leading: const Icon(Icons.hourglass_empty_rounded),
+                leading: const GlyphIcon(AppGlyphs.hourglass),
                 title: Text(appLocalizations.doctorNoEvidence),
               ),
             ]
           : [
               for (final fact in evidence)
                 DecorationListItem(
-                  leading: Icon(_evidenceIcon(fact.outcome)),
+                  leading: GlyphIcon(_evidenceIcon(fact.outcome)),
                   title: Text(
                     connectionDoctorLayerLabel(appLocalizations, fact.layer),
                   ),
@@ -605,7 +605,7 @@ class _DoctorEvidenceSection extends StatelessWidget {
                   trailing: fact.consequence
                       ? Tooltip(
                           message: appLocalizations.doctorEvidenceConsequence,
-                          child: const Icon(Icons.subdirectory_arrow_right),
+                          child: const GlyphIcon(AppGlyphs.subItem),
                         )
                       : null,
                 ),
@@ -629,14 +629,14 @@ class _DoctorHistorySection extends StatelessWidget {
       items: incidents.isEmpty
           ? [
               DecorationListItem(
-                leading: const Icon(Icons.history_rounded),
+                leading: const GlyphIcon(AppGlyphs.history),
                 title: Text(appLocalizations.doctorNoIncidents),
               ),
             ]
           : [
               for (final incident in incidents)
                 DecorationListItem(
-                  leading: Icon(_incidentIcon(incident)),
+                  leading: GlyphIcon(_incidentIcon(incident)),
                   title: Text(_incidentTitle(appLocalizations, incident)),
                   subtitle: Text(
                     '${_modeLabel(appLocalizations, incident.mode)} · '
@@ -660,21 +660,21 @@ class _DoctorLimitationsSection extends StatelessWidget {
     if (!snapshot.supported) {
       items.add(
         DecorationListItem(
-          leading: const Icon(Icons.extension_off_outlined),
+          leading: const GlyphIcon(AppGlyphs.puzzle),
           title: Text(appLocalizations.doctorUnsupportedHint),
         ),
       );
     } else {
       items.add(
         DecorationListItem(
-          leading: const Icon(Icons.visibility_outlined),
+          leading: const GlyphIcon(AppGlyphs.eye),
           title: Text(appLocalizations.doctorPassiveHint),
         ),
       );
       if (!snapshot.isFresh) {
         items.add(
           DecorationListItem(
-            leading: const Icon(Icons.schedule_rounded),
+            leading: const GlyphIcon(AppGlyphs.clock),
             title: Text(appLocalizations.doctorStaleHint),
           ),
         );
@@ -682,7 +682,7 @@ class _DoctorLimitationsSection extends StatelessWidget {
       if (snapshot.evidenceDropped > 0) {
         items.add(
           DecorationListItem(
-            leading: const Icon(Icons.warning_amber_rounded),
+            leading: const GlyphIcon(AppGlyphs.warning),
             title: Text(
               appLocalizations.doctorEvidenceDropped(snapshot.evidenceDropped),
             ),

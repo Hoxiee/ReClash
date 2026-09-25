@@ -196,7 +196,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
               ),
             ),
           ),
-          const Icon(Icons.arrow_forward_ios),
+          const GlyphIcon(AppGlyphs.chevronForward),
         ],
       ),
     );
@@ -280,7 +280,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
               ),
             ),
           ),
-          const Icon(Icons.arrow_forward_ios),
+          const GlyphIcon(AppGlyphs.chevronForward),
         ],
       ),
     );
@@ -362,7 +362,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                         ),
                       );
                     },
-                    icon: Icon(Icons.info, size: 16.ap, color: foregroundColor),
+                    icon: GlyphIcon(AppGlyphs.info, size: 16.ap, color: foregroundColor),
                   ),
                 ),
               Flexible(
@@ -379,7 +379,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.arrow_forward_ios, color: foregroundColor),
+              GlyphIcon(AppGlyphs.chevronForward, color: foregroundColor),
             ],
           ),
         );
@@ -444,7 +444,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
               ),
             ),
           ),
-          const Icon(Icons.arrow_forward_ios),
+          const GlyphIcon(AppGlyphs.chevronForward),
         ],
       ),
     );

@@ -262,13 +262,13 @@ class _OrbCaption extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _SpeedEntry(
-                    icon: Icons.south_rounded,
+                    icon: AppGlyphs.arrowDown,
                     value: lastTraffic?.down,
                     accent: accent,
                   ),
                   const SizedBox(width: 22),
                   _SpeedEntry(
-                    icon: Icons.north_rounded,
+                    icon: AppGlyphs.arrowUp,
                     value: lastTraffic?.up,
                     accent: accent,
                   ),
@@ -285,7 +285,7 @@ class _OrbCaption extends ConsumerWidget {
 class _SpeedEntry extends StatelessWidget {
   const _SpeedEntry({required this.icon, required this.value, this.accent});
 
-  final IconData icon;
+  final Glyph icon;
   final num? value;
   final Color? accent;
 
@@ -296,7 +296,7 @@ class _SpeedEntry extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 15, color: accent ?? colorScheme.onSurfaceVariant),
+        GlyphIcon(icon, size: 15, color: accent ?? colorScheme.onSurfaceVariant),
         const SizedBox(width: 6),
         Text(
           show != null ? show.value : '—',

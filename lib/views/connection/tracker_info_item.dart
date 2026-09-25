@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
@@ -12,7 +13,7 @@ enum _Routing { direct, proxy, reject, unknown }
 class _RoutingStyle {
   final Color background;
   final Color foreground;
-  final IconData icon;
+  final Glyph icon;
 
   const _RoutingStyle(this.background, this.foreground, this.icon);
 }
@@ -40,22 +41,22 @@ _RoutingStyle _routingStyle(BuildContext context, _Routing routing) {
     _Routing.proxy => _RoutingStyle(
       colorScheme.primaryContainer,
       colorScheme.onPrimaryContainer,
-      Icons.vpn_lock_outlined,
+      AppGlyphs.vpn,
     ),
     _Routing.direct => _RoutingStyle(
       colorScheme.tertiaryContainer,
       colorScheme.onTertiaryContainer,
-      Icons.arrow_outward,
+      AppGlyphs.openExternal,
     ),
     _Routing.reject => _RoutingStyle(
       colorScheme.errorContainer,
       colorScheme.onErrorContainer,
-      Icons.block,
+      AppGlyphs.block,
     ),
     _Routing.unknown => _RoutingStyle(
       colorScheme.surfaceContainerHighest,
       colorScheme.onSurfaceVariant,
-      Icons.help_outline,
+      AppGlyphs.help,
     ),
   };
 }
@@ -124,7 +125,7 @@ class TrackerInfoItem extends ConsumerWidget {
       height: 44,
       alignment: Alignment.center,
       decoration: ShapeDecoration(color: style.background, shape: AppShape.md),
-      child: Icon(style.icon, size: 22, color: style.foreground),
+      child: GlyphIcon(style.icon, size: 22, color: style.foreground),
     );
   }
 
@@ -287,7 +288,7 @@ class _TrafficPanel extends StatelessWidget {
           ),
         ),
         _SpeedLine(
-          icon: Icons.arrow_downward_rounded,
+          icon: AppGlyphs.arrowDown,
           accent: colorScheme.primary,
           live: downLive,
           value: downLive
@@ -295,7 +296,7 @@ class _TrafficPanel extends StatelessWidget {
               : trackerInfo.download.traffic.show,
         ),
         _SpeedLine(
-          icon: Icons.arrow_upward_rounded,
+          icon: AppGlyphs.arrowUp,
           accent: colorScheme.tertiary,
           live: upLive,
           value: upLive
@@ -308,7 +309,7 @@ class _TrafficPanel extends StatelessWidget {
 }
 
 class _SpeedLine extends StatelessWidget {
-  final IconData icon;
+  final Glyph icon;
   final Color accent;
   final bool live;
   final String value;
@@ -335,7 +336,7 @@ class _SpeedLine extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 4,
           children: [
-            Icon(icon, size: 12, color: color),
+            GlyphIcon(icon, size: 12, color: color),
             Text(
               value,
               style: context.textTheme.labelSmall?.toJetBrainsMono.copyWith(
@@ -437,7 +438,7 @@ class _RoutingPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: 4,
             children: [
-              Icon(style.icon, size: 13, color: style.foreground),
+              GlyphIcon(style.icon, size: 13, color: style.foreground),
               Text(
                 label,
                 maxLines: 1,

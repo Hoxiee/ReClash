@@ -129,7 +129,6 @@ class NullStatus extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final compact = MediaQuery.sizeOf(context).height < _compactHeight;
     return Align(
-      alignment: const Alignment(0.0, -0.2),
       child: SingleChildScrollView(
         primary: false,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),

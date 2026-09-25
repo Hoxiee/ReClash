@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -86,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(currentAppLocalizations.selectAll), findsOneWidget);
-    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.delete), findsOneWidget);
   });
 
   testWidgets('select all covers every rule and toggles back off', (
@@ -99,7 +101,7 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.selectAll));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pumpAndSettle();
     await tester.tap(find.text(currentAppLocalizations.confirm));
     await tester.pumpAndSettle();
@@ -114,7 +116,7 @@ void main() {
 
     await tester.tap(find.byType(CommonCheckBox).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pumpAndSettle();
     await tester.tap(find.text(currentAppLocalizations.cancel));
     await tester.pumpAndSettle();
@@ -128,7 +130,7 @@ void main() {
 
     await tester.tap(find.byType(CommonCheckBox).last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pumpAndSettle();
     await tester.tap(find.text(currentAppLocalizations.confirm));
     await tester.pumpAndSettle();

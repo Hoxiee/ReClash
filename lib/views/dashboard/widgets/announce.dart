@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:emoji_regex/emoji_regex.dart';
 import 'package:reclash/common/common.dart';
@@ -6,6 +7,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,11 +40,11 @@ class Announce extends ConsumerWidget {
     final text = announce?.trim();
     final hasAnnouncement = text != null && text.isNotEmpty;
     return DashboardInfoCard(
-      height: getWidgetHeight(2),
-      icon: Icons.campaign_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 2),
+      icon: AppGlyphs.announce,
       label: context.appLocalizations.announce,
       action: hasAnnouncement
-          ? const Icon(Icons.open_in_full_rounded, size: 18)
+          ? const GlyphIcon(AppGlyphs.openExternal, size: 18)
           : null,
       onPressed: hasAnnouncement
           ? () => _showAnnounceSheet(context, text)

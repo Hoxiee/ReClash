@@ -1,10 +1,12 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +39,7 @@ class SmartRoutingCard extends ConsumerWidget {
             doctor: ref.watch(connectionDoctorProvider),
           )
         : (
-            icon: Icons.pause_circle_outline,
+            icon: AppGlyphs.pause,
             text: appLocalizations.off,
             accented: false,
           );
@@ -45,17 +47,17 @@ class SmartRoutingCard extends ConsumerWidget {
         ? context.colorScheme.primary
         : context.colorScheme.onSurfaceVariant;
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.alt_route_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.route,
       label: appLocalizations.smartRouting,
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const RoutingOverviewView()),
       child: FadeThroughBox(
         child: Row(
           key: ValueKey(view.text),
           children: [
-            Icon(view.icon, size: 18, color: color),
+            GlyphIcon(view.icon, size: 18, color: color),
             const SizedBox(width: 8),
             Expanded(
               child: TooltipText(

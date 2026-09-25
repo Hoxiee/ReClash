@@ -1,4 +1,6 @@
 import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/icons/icons.dart' hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/app_manager.dart';
@@ -40,12 +42,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const SizedBox.shrink(),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const SizedBox.shrink(),
               ),
@@ -94,14 +96,14 @@ void main() {
             NavigationItemsState(
               value: [
                 NavigationItem(
-                  icon: const Icon(Icons.space_dashboard),
+                  glyph: AppGlyphs.dashboard,
                   label: PageLabel.dashboard,
                   builder: (_) => const _StatefulContent(
                     key: GlobalObjectKey(PageLabel.dashboard),
                   ),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.construction),
+                  glyph: AppGlyphs.tools,
                   label: PageLabel.tools,
                   builder: (_) => const SizedBox.shrink(),
                 ),
@@ -160,7 +162,7 @@ void main() {
       final outgoingTools = find
           .descendant(
             of: find.byType(AppNavRail),
-            matching: find.byIcon(Icons.construction),
+            matching: find.byGlyph(AppGlyphs.tools),
           )
           .first;
       await tester.tap(outgoingTools, warnIfMissed: false);
@@ -200,14 +202,14 @@ void main() {
             NavigationItemsState(
               value: [
                 NavigationItem(
-                  icon: const Icon(Icons.space_dashboard),
+                  glyph: AppGlyphs.dashboard,
                   label: PageLabel.dashboard,
                   builder: (_) => const ToolsView(
                     key: GlobalObjectKey(PageLabel.dashboard),
                   ),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.construction),
+                  glyph: AppGlyphs.tools,
                   label: PageLabel.tools,
                   builder: (_) => const SizedBox.shrink(),
                 ),
@@ -251,12 +253,12 @@ void main() {
             NavigationItemsState(
               value: [
                 NavigationItem(
-                  icon: const Icon(Icons.space_dashboard),
+                  glyph: AppGlyphs.dashboard,
                   label: PageLabel.dashboard,
                   builder: (_) => const SizedBox.shrink(),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.article),
+                  glyph: AppGlyphs.proxies,
                   label: PageLabel.logs,
                   modes: const [
                     NavigationItemMode.desktop,
@@ -265,7 +267,7 @@ void main() {
                   builder: (_) => const SizedBox.shrink(),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.link),
+                  glyph: AppGlyphs.link,
                   label: PageLabel.connections,
                   modes: const [
                     NavigationItemMode.desktop,
@@ -274,7 +276,7 @@ void main() {
                   builder: (_) => const SizedBox.shrink(),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.construction),
+                  glyph: AppGlyphs.tools,
                   label: PageLabel.tools,
                   builder: (_) =>
                       const ToolsView(key: GlobalObjectKey(PageLabel.tools)),
@@ -428,7 +430,7 @@ void main() {
             NavigationItemsState(
               value: [
                 NavigationItem(
-                  icon: const Icon(Icons.space_dashboard),
+                  glyph: AppGlyphs.dashboard,
                   label: PageLabel.dashboard,
                   builder: (_) => Align(
                     alignment: Alignment.topLeft,
@@ -439,7 +441,7 @@ void main() {
                   ),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.article),
+                  glyph: AppGlyphs.proxies,
                   label: PageLabel.proxies,
                   builder: (_) => Align(
                     alignment: Alignment.topLeft,
@@ -472,7 +474,7 @@ void main() {
         return context?.findAncestorWidgetOfExactType<AppNavRail>() != null;
       }
 
-      IconData? focusedRailIcon() {
+      Glyph? focusedRailGlyph() {
         final focusNode = FocusManager.instance.primaryFocus;
         if (!focusInRail() || focusNode == null) {
           return null;
@@ -482,9 +484,9 @@ void main() {
         if (inkWell == null) return null;
         final icon = find.descendant(
           of: find.byWidget(inkWell),
-          matching: find.byType(Icon),
+          matching: find.byType(GlyphIcon),
         );
-        return tester.widget<Icon>(icon).icon;
+        return tester.widget<GlyphIcon>(icon).glyph;
       }
 
       for (var i = 0; i < 30 && !focusInRail(); i++) {
@@ -492,11 +494,11 @@ void main() {
         await tester.pump();
       }
       expect(focusInRail(), isTrue);
-      expect(focusedRailIcon(), Icons.space_dashboard);
+      expect(focusedRailGlyph(), AppGlyphs.dashboard);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
-      expect(focusedRailIcon(), Icons.article);
+      expect(focusedRailGlyph(), AppGlyphs.proxies);
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
 
@@ -507,21 +509,21 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(focusedRailIcon(), Icons.article);
+      expect(focusedRailGlyph(), AppGlyphs.proxies);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(focusedRailIcon(), Icons.space_dashboard);
+      expect(focusedRailGlyph(), AppGlyphs.dashboard);
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
 
       expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
-      expect(focusedRailIcon(), Icons.space_dashboard);
+      expect(focusedRailGlyph(), AppGlyphs.dashboard);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
 
-      expect(focusedRailIcon(), Icons.article);
+      expect(focusedRailGlyph(), AppGlyphs.proxies);
       expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
     },
   );
@@ -558,22 +560,22 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => page('dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.folder),
+                glyph: AppGlyphs.profiles,
                 label: PageLabel.profiles,
                 builder: (_) => page('profiles'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => page('tools'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.article),
+                glyph: AppGlyphs.proxies,
                 label: PageLabel.logs,
                 builder: (_) => page('logs'),
               ),
@@ -595,14 +597,14 @@ void main() {
     await tester.pump();
     expect(find.byType(AppNavBar), findsOneWidget);
 
-    Finder segmentIcon(IconData icon) => find
-        .descendant(of: find.byType(AppNavBar), matching: find.byIcon(icon))
+    Finder segmentIcon(Glyph glyph) => find
+        .descendant(of: find.byType(AppNavBar), matching: find.byGlyph(glyph))
         .first;
 
     double highlightX() =>
         tester.getTopLeft(find.byKey(AppNavBar.highlightKey)).dx;
 
-    await tester.tap(segmentIcon(Icons.construction));
+    await tester.tap(segmentIcon(AppGlyphs.tools));
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
     expect(find.text('page:tools'), findsOneWidget);
@@ -628,11 +630,11 @@ void main() {
     expect(container.read(currentPageLabelProvider), PageLabel.profiles);
     expect(find.text('page:profiles'), findsOneWidget);
 
-    await tester.tap(segmentIcon(Icons.construction));
+    await tester.tap(segmentIcon(AppGlyphs.tools));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(segmentIcon(Icons.article));
+    await tester.tap(segmentIcon(AppGlyphs.proxies));
     await tester.pump(const Duration(milliseconds: 100));
-    await tester.tap(segmentIcon(Icons.folder));
+    await tester.tap(segmentIcon(AppGlyphs.profiles));
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.profiles);
     expect(find.text('page:profiles'), findsOneWidget);
@@ -667,7 +669,7 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => CommonScaffold(
                   title: 'Search page',
@@ -680,7 +682,7 @@ void main() {
                 ),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const SizedBox.shrink(),
               ),
@@ -701,7 +703,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'needle');
@@ -711,7 +713,7 @@ void main() {
       find
           .descendant(
             of: find.byType(AppNavBar),
-            matching: find.byIcon(Icons.construction),
+            matching: find.byGlyph(AppGlyphs.tools),
           )
           .first,
     );
@@ -721,7 +723,7 @@ void main() {
       find
           .descendant(
             of: find.byType(AppNavBar),
-            matching: find.byIcon(Icons.space_dashboard),
+            matching: find.byGlyph(AppGlyphs.dashboard),
           )
           .first,
     );
@@ -745,7 +747,7 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => _NestedSearchLauncher(
                   onSearch: (value) {
@@ -754,7 +756,7 @@ void main() {
                 ),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const SizedBox.shrink(),
               ),
@@ -777,7 +779,7 @@ void main() {
 
     await tester.tap(find.text('Open nested search'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'needle');
     expect(query, 'needle');
@@ -787,7 +789,7 @@ void main() {
       find
           .descendant(
             of: navigationRail,
-            matching: find.byIcon(Icons.construction),
+            matching: find.byGlyph(AppGlyphs.tools),
           )
           .first,
     );
@@ -798,7 +800,7 @@ void main() {
       find
           .descendant(
             of: navigationRail,
-            matching: find.byIcon(Icons.space_dashboard),
+            matching: find.byGlyph(AppGlyphs.dashboard),
           )
           .first,
     );
@@ -835,12 +837,12 @@ void main() {
             NavigationItemsState(
               value: [
                 NavigationItem(
-                  icon: const Icon(Icons.space_dashboard),
+                  glyph: AppGlyphs.dashboard,
                   label: PageLabel.dashboard,
                   builder: (_) => pageContent('dashboard'),
                 ),
                 NavigationItem(
-                  icon: const Icon(Icons.folder),
+                  glyph: AppGlyphs.profiles,
                   label: PageLabel.profiles,
                   builder: (_) => pageContent('profiles'),
                 ),
@@ -862,15 +864,15 @@ void main() {
       await tester.pump();
       expect(find.byType(AppNavRail), findsOneWidget);
 
-      Finder railIcon(IconData icon) => find
-          .descendant(of: find.byType(AppNavRail), matching: find.byIcon(icon))
+      Finder railIcon(Glyph glyph) => find
+          .descendant(of: find.byType(AppNavRail), matching: find.byGlyph(glyph))
           .first;
 
       // Visit another page so its content stays alive in the PageView cache.
-      await tester.tap(railIcon(Icons.folder));
+      await tester.tap(railIcon(AppGlyphs.profiles));
       await tester.pumpAndSettle();
       expect(container.read(currentPageLabelProvider), PageLabel.profiles);
-      await tester.tap(railIcon(Icons.space_dashboard));
+      await tester.tap(railIcon(AppGlyphs.dashboard));
       await tester.pumpAndSettle();
       expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
 
@@ -912,17 +914,17 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.folder),
+                glyph: AppGlyphs.profiles,
                 label: PageLabel.profiles,
                 builder: (_) => const Text('page:profiles'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const Text('page:tools'),
               ),
@@ -968,12 +970,12 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       final dashboardItem = NavigationItem(
-        icon: const Icon(Icons.space_dashboard),
+        glyph: AppGlyphs.dashboard,
         label: PageLabel.dashboard,
         builder: (_) => const Text('page:dashboard'),
       );
       final profilesItem = NavigationItem(
-        icon: const Icon(Icons.folder),
+        glyph: AppGlyphs.profiles,
         label: PageLabel.profiles,
         builder: (_) => const Text('page:profiles'),
       );
@@ -1032,7 +1034,7 @@ void main() {
         find
             .descendant(
               of: find.byType(AppNavBar),
-              matching: find.byIcon(Icons.folder),
+              matching: find.byGlyph(AppGlyphs.profiles),
             )
             .first,
       );
@@ -1057,12 +1059,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const Text('page:tools'),
               ),
@@ -1118,12 +1120,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const Text('page:tools'),
               ),
@@ -1170,12 +1172,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.equalizer),
+                glyph: AppGlyphs.sliders,
                 label: PageLabel.proxies,
                 builder: (_) => const Text('page:proxies'),
               ),
@@ -1230,12 +1232,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.equalizer),
+                glyph: AppGlyphs.sliders,
                 label: PageLabel.proxies,
                 builder: (_) => const Text('page:proxies'),
               ),
@@ -1284,12 +1286,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const Text('page:dashboard'),
               ),
               NavigationItem(
-                icon: const Icon(Icons.equalizer),
+                glyph: AppGlyphs.sliders,
                 label: PageLabel.proxies,
                 builder: (_) => const Text('page:proxies'),
               ),

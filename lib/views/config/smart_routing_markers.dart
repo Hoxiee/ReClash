@@ -92,7 +92,7 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
               child: IconButton.filledTonal(
                 tooltip: appLocalizations.delete,
                 onPressed: _deleteSelected,
-                icon: const Icon(Icons.delete),
+                icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
             const SizedBox(width: 2),
@@ -447,7 +447,7 @@ class _RulesPage extends ConsumerWidget {
                   trailing: IconButton(
                     tooltip: l10n.delete,
                     onPressed: () => _remove(ref, index),
-                    icon: const Icon(Icons.delete_outline),
+                    icon: const GlyphIcon(AppGlyphs.delete),
                   ),
                 );
               },
@@ -548,7 +548,7 @@ class _RuleDialogState extends State<_RuleDialog> {
             child: CommonMinFilledButtonTheme(
               child: FilledButton.tonalIcon(
                 onPressed: _pickAction,
-                icon: const Icon(Icons.rule_rounded),
+                icon: const GlyphIcon(AppGlyphs.rules),
                 label: Text(_ruleActionLabel(l10n, _action)),
               ),
             ),

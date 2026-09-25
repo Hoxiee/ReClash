@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -129,14 +130,14 @@ class _AccessViewState extends ConsumerState<AccessView> {
               key: const ValueKey(true),
               onPressed: onPressed,
               label: Text(appLocalizations.cancelSelectAll),
-              icon: const Icon(Icons.deselect),
+              icon: const GlyphIcon(AppGlyphs.deselect),
             )
           : FloatingActionButton.extended(
               key: const ValueKey(false),
               tooltip: appLocalizations.selectAll,
               onPressed: onPressed,
               label: Text(appLocalizations.selectAll),
-              icon: const Icon(Icons.select_all),
+              icon: const GlyphIcon(AppGlyphs.selectAll),
             ),
     );
   }
@@ -299,35 +300,35 @@ class _AccessViewState extends ConsumerState<AccessView> {
             onPressed: () {
               open(offset: const Offset(0, 0));
             },
-            icon: const Icon(Icons.more_vert),
+            icon: const GlyphIcon(AppGlyphs.more),
           );
         },
         popupBuilder: (_) => CommonPopupMenu(
           items: [
             CommonPopupMenuItem(
-              icon: Icons.swap_horiz,
+              glyph: AppGlyphs.swap,
               label: enable
                   ? appLocalizations.turnOff
                   : appLocalizations.turnOn,
               onPressed: _handleToggle,
             ),
             CommonPopupMenuItem(
-              icon: Icons.emergency_outlined,
+              glyph: AppGlyphs.emergency,
               label: appLocalizations.action,
               subItems: [
                 if (canMatch)
                   CommonPopupMenuItem(
-                    icon: Icons.auto_awesome,
+                    glyph: AppGlyphs.sparkle,
                     label: appLocalizations.intelligentSelected,
                     onPressed: _intelligentSelected,
                   ),
                 CommonPopupMenuItem(
-                  icon: Icons.content_copy,
+                  glyph: AppGlyphs.copy,
                   label: appLocalizations.clipboardExport,
                   onPressed: _exportToClipboard,
                 ),
                 CommonPopupMenuItem(
-                  icon: Icons.paste,
+                  glyph: AppGlyphs.paste,
                   label: appLocalizations.clipboardImport,
                   onPressed: _importFormClipboard,
                 ),
@@ -388,7 +389,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       illustration: NullStatusIllustration.permission,
       action: FilledButton.tonalIcon(
         onPressed: _handleGrantInstalledAppsPermission,
-        icon: const Icon(Icons.lock_open),
+        icon: const GlyphIcon(AppGlyphs.lockOpen),
         label: Text(appLocalizations.authorize),
       ),
     );
@@ -413,12 +414,12 @@ class _AccessViewState extends ConsumerState<AccessView> {
         },
         children: {
           AccessControlMode.acceptSelected: _AccessModeTab(
-            icon: Icons.vpn_lock_outlined,
+            icon: AppGlyphs.vpn,
             label: appLocalizations.accessControlIncludeInVpn,
             isSelected: mode == AccessControlMode.acceptSelected,
           ),
           AccessControlMode.rejectSelected: _AccessModeTab(
-            icon: Icons.block_outlined,
+            icon: AppGlyphs.block,
             label: appLocalizations.accessControlExcludeFromVpn,
             isSelected: mode == AccessControlMode.rejectSelected,
           ),
@@ -437,7 +438,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
       onChanged: _onSearch,
       decoration: InputDecoration(
         hintText: appLocalizations.searchApps,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const GlyphIcon(AppGlyphs.search),
         suffixIcon: query.isEmpty
             ? null
             : IconButton(
@@ -446,7 +447,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                   _searchController.clear();
                   _onSearch('');
                 },
-                icon: const Icon(Icons.close),
+                icon: const GlyphIcon(AppGlyphs.close),
               ),
         filled: true,
         fillColor: context.colorScheme.surfaceContainerLow,
@@ -454,11 +455,11 @@ class _AccessViewState extends ConsumerState<AccessView> {
     );
   }
 
-  IconData _getSortIcon(AccessSortType type) {
+  Glyph _getSortIcon(AccessSortType type) {
     return switch (type) {
-      AccessSortType.none => Icons.sort,
-      AccessSortType.name => Icons.sort_by_alpha,
-      AccessSortType.time => Icons.update,
+      AccessSortType.none => AppGlyphs.sort,
+      AccessSortType.name => AppGlyphs.sortAlpha,
+      AccessSortType.time => AppGlyphs.update,
     };
   }
 
@@ -485,14 +486,14 @@ class _AccessViewState extends ConsumerState<AccessView> {
               tooltip:
                   '${appLocalizations.sort}: ${_getSortLabel(accessControl.sort)}',
               onPressed: () => open(offset: Offset.zero),
-              icon: Icon(_getSortIcon(accessControl.sort)),
+              icon: GlyphIcon(_getSortIcon(accessControl.sort)),
             ),
             popupBuilder: (_) => CommonPopupMenu(
               items: [
                 for (final type in AccessSortType.values)
                   CommonPopupMenuItem(
-                    icon: accessControl.sort == type
-                        ? Icons.check
+                    glyph: accessControl.sort == type
+                        ? AppGlyphs.check
                         : _getSortIcon(type),
                     label: _getSortLabel(type),
                     onPressed: () {
@@ -517,8 +518,8 @@ class _AccessViewState extends ConsumerState<AccessView> {
                     ),
                   );
             },
-            icon: const Icon(Icons.android_outlined),
-            selectedIcon: const Icon(Icons.android),
+            icon: const GlyphIcon(AppGlyphs.android),
+            selectedIcon: const GlyphIcon(AppGlyphs.android),
           ),
           IconButton(
             key: const ValueKey('access-offline-apps-filter'),
@@ -533,8 +534,8 @@ class _AccessViewState extends ConsumerState<AccessView> {
                     ),
                   );
             },
-            icon: const Icon(Icons.signal_wifi_off_outlined),
-            selectedIcon: const Icon(Icons.signal_wifi_off),
+            icon: const GlyphIcon(AppGlyphs.wifiOff),
+            selectedIcon: const GlyphIcon(AppGlyphs.wifiOff),
           ),
         ],
       ),
@@ -551,16 +552,16 @@ class _AccessViewState extends ConsumerState<AccessView> {
         ? appLocalizations.accessControlAllowDesc
         : appLocalizations.accessControlNotAllowDesc;
     final icon = mode == AccessControlMode.acceptSelected
-        ? Icons.vpn_lock_outlined
-        : Icons.block_outlined;
+        ? AppGlyphs.vpn
+        : AppGlyphs.block;
     return Card.filled(
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
-            Icon(
-              enable ? icon : Icons.info_outline,
+            GlyphIcon(
+              enable ? icon : AppGlyphs.info,
               color: enable
                   ? context.colorScheme.primary
                   : context.colorScheme.outline,
@@ -790,7 +791,7 @@ class _AccessModeTab extends StatelessWidget {
     required this.isSelected,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String label;
   final bool isSelected;
 
@@ -807,7 +808,7 @@ class _AccessModeTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 18, color: color),
+          GlyphIcon(icon, size: 18, color: color),
           const SizedBox(width: 8),
           Flexible(
             child: Text(

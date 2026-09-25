@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/providers.dart';
@@ -50,10 +51,10 @@ class LocaleView extends ConsumerWidget {
                     style: context.textTheme.bodySmall?.toLighter,
                   ),
                   trailing: locale == currentLocale
-                      ? Icon(
+                      ? GlyphIcon(
                           color: context.colorScheme.primary,
                           size: 20,
-                          Icons.check,
+                          AppGlyphs.check,
                         )
                       : null,
                   onPressed: () => _select(ref, locale),
@@ -92,7 +93,7 @@ class _TranslationNotice extends StatelessWidget {
                 'https://github.com/$repository/issues/new?template=translation.yml',
               );
             },
-            icon: const Icon(Icons.translate_outlined, size: 18),
+            icon: const GlyphIcon(AppGlyphs.language, size: 18),
             label: Text(appLocalizations.translationSuggestFix),
           ),
         ],

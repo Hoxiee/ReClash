@@ -43,6 +43,12 @@ mixin CoreInterface {
 
   Future<Delay?> asyncTestDelay(String url, String proxyName);
 
+  Future<OutboundIpResult?> outboundIp(OutboundIpParams params);
+
+  Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params);
+
+  Future<RouteSnapshot?> watchRoute(bool watch);
+
   Future<String> updateConfig(UpdateParams updateParams);
 
   Future<String> setupConfig(SetupParams setupParams);
@@ -81,6 +87,10 @@ mixin CoreInterface {
   Future<RcxReport?> smartRoutingReport();
 
   Future<bool> smartRoutingDeepScan();
+
+  Future<bool> setSmartRoutingDiagnostics(bool enabled);
+
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since);
 
   Future<OdometerSnapshot?> odometerReport();
 
@@ -382,6 +392,24 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
+  Future<bool> setSmartRoutingDiagnostics(bool enabled) async {
+    return await _invokeMethod<bool>(
+          method: CoreMethod.rcxDiagSet,
+          arguments: enabled,
+        ) ??
+        false;
+  }
+
+  @override
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.rcxDiagLog,
+      arguments: {'since': since},
+    );
+    return data == null ? null : RcxDiagBatch.fromJson(data);
+  }
+
+  @override
   Future<OdometerSnapshot?> odometerReport() async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.odometerReport,
@@ -619,5 +647,44 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<int> getGoroutineCount() async {
     return await _invokeMethod<int>(method: CoreMethod.getGoroutineCount) ?? 0;
+  }
+
+  @override
+  Future<OutboundIpResult?> outboundIp(OutboundIpParams params) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.outboundIp,
+      arguments: params.toJson(),
+      timeout: Duration(milliseconds: params.timeout * 2),
+    );
+    return data == null ? null : OutboundIpResult.fromJson(data);
+  }
+
+  @override
+  Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params) async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.serviceCheck,
+      arguments: params.toJson(),
+      timeout: coreGuardFor(
+        params.timeout,
+        budgetFactor: serviceSweepBudgetFactor,
+      ),
+    );
+    return data == null
+        ? const []
+        : data
+              .map(
+                (item) =>
+                    ServiceCheckItem.fromJson(item as Map<String, dynamic>),
+              )
+              .toList();
+  }
+
+  @override
+  Future<RouteSnapshot?> watchRoute(bool watch) async {
+    final data = await _invokeMethod<Map<String, dynamic>>(
+      method: CoreMethod.watchRoute,
+      arguments: watch,
+    );
+    return data == null ? null : RouteSnapshot.fromJson(data);
   }
 }

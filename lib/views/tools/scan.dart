@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
@@ -135,26 +136,26 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.close),
+              icon: const GlyphIcon(AppGlyphs.close),
             ),
             actions: [
               ValueListenableBuilder<MobileScannerState>(
                 valueListenable: controller,
                 builder: (context, state, _) {
-                  var icon = const Icon(Icons.flash_off);
+                  var icon = const GlyphIcon(AppGlyphs.torchOff);
                   var backgroundColor = Colors.black12;
                   switch (state.torchState) {
                     case TorchState.off:
-                      icon = const Icon(Icons.flash_off);
+                      icon = const GlyphIcon(AppGlyphs.torchOff);
                       backgroundColor = Colors.black12;
                     case TorchState.on:
-                      icon = const Icon(Icons.flash_on);
+                      icon = const GlyphIcon(AppGlyphs.bolt);
                       backgroundColor = Colors.orange;
                     case TorchState.unavailable:
-                      icon = const Icon(Icons.flash_off);
+                      icon = const GlyphIcon(AppGlyphs.torchOff);
                       backgroundColor = Colors.transparent;
                     case TorchState.auto:
-                      icon = const Icon(Icons.flash_auto);
+                      icon = const GlyphIcon(AppGlyphs.torchAuto);
                       backgroundColor = Colors.orange;
                   }
                   final available = state.torchState != TorchState.unavailable;
@@ -200,7 +201,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                   Navigator.of(context).pop(result);
                 }
               },
-              icon: const Icon(Icons.photo_camera_back),
+              icon: const GlyphIcon(AppGlyphs.camera),
             ),
           ),
         ],
@@ -230,8 +231,8 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.no_photography_outlined,
+              const GlyphIcon(
+                AppGlyphs.brokenImage,
                 color: Colors.white,
                 size: 48,
               ),

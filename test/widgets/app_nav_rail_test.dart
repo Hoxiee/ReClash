@@ -1,4 +1,6 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -24,27 +26,27 @@ void main() {
 
   List<NavigationItem> items() => [
     NavigationItem(
-      icon: const Icon(Icons.space_dashboard),
+      glyph: AppGlyphs.dashboard,
       label: PageLabel.dashboard,
       builder: (_) => const SizedBox.shrink(),
     ),
     NavigationItem(
-      icon: const Icon(Icons.folder),
+      glyph: AppGlyphs.profiles,
       label: PageLabel.profiles,
       builder: (_) => const SizedBox.shrink(),
     ),
     NavigationItem(
-      icon: const Icon(Icons.view_timeline),
+      glyph: AppGlyphs.requests,
       label: PageLabel.requests,
       builder: (_) => const SizedBox.shrink(),
     ),
     NavigationItem(
-      icon: const Icon(Icons.bug_report),
+      glyph: AppGlyphs.logs,
       label: PageLabel.logs,
       builder: (_) => const SizedBox.shrink(),
     ),
     NavigationItem(
-      icon: const Icon(Icons.construction),
+      glyph: AppGlyphs.tools,
       label: PageLabel.tools,
       builder: (_) => const SizedBox.shrink(),
     ),
@@ -131,13 +133,13 @@ void main() {
     await pumpRail(tester);
 
     final dashboardY = tester
-        .getCenter(find.byIcon(Icons.space_dashboard).first)
+        .getCenter(find.byGlyph(AppGlyphs.dashboard).first)
         .dy;
-    final profilesY = tester.getCenter(find.byIcon(Icons.folder).first).dy;
+    final profilesY = tester.getCenter(find.byGlyph(AppGlyphs.profiles).first).dy;
     final requestsY = tester
-        .getCenter(find.byIcon(Icons.view_timeline).first)
+        .getCenter(find.byGlyph(AppGlyphs.requests).first)
         .dy;
-    final toolsY = tester.getCenter(find.byIcon(Icons.construction).first).dy;
+    final toolsY = tester.getCenter(find.byGlyph(AppGlyphs.tools).first).dy;
 
     expect(
       profilesY - dashboardY,
@@ -147,7 +149,7 @@ void main() {
       requestsY - profilesY,
       greaterThan(NavRailMetrics.stackedSlotHeight),
     );
-    final logsY = tester.getCenter(find.byIcon(Icons.bug_report).first).dy;
+    final logsY = tester.getCenter(find.byGlyph(AppGlyphs.logs).first).dy;
     expect(logsY - requestsY, NavRailMetrics.stackedSlotHeight);
     expect(
       toolsY - logsY,
@@ -167,8 +169,8 @@ void main() {
     var aboutCalls = 0;
     await pumpRail(tester, onAbout: () => aboutCalls++);
 
-    final tools = find.byIcon(Icons.construction).first;
-    final about = find.byIcon(Icons.info_outline);
+    final tools = find.byGlyph(AppGlyphs.tools).first;
+    final about = find.byGlyph(AppGlyphs.info);
     final toolsButton = find.ancestor(
       of: tools,
       matching: find.byType(InkWell),
@@ -204,20 +206,20 @@ void main() {
     var aboutCalls = 0;
     await pumpRail(tester, height: 180, onAbout: () => aboutCalls++);
 
-    final aboutCenter = tester.getCenter(find.byIcon(Icons.info_outline));
+    final aboutCenter = tester.getCenter(find.byGlyph(AppGlyphs.info));
     await tester.drag(
       find.byType(SingleChildScrollView),
       const Offset(0, -400),
     );
     await tester.pumpAndSettle();
-    expect(tester.getCenter(find.byIcon(Icons.info_outline)), aboutCenter);
-    await tester.tap(find.byIcon(Icons.info_outline));
+    expect(tester.getCenter(find.byGlyph(AppGlyphs.info)), aboutCenter);
+    await tester.tap(find.byGlyph(AppGlyphs.info));
     await tester.pumpAndSettle();
     expect(aboutCalls, 1);
 
     final toolsButton = tester.widget<InkWell>(
       find.ancestor(
-        of: find.byIcon(Icons.construction).first,
+        of: find.byGlyph(AppGlyphs.tools).first,
         matching: find.byType(InkWell),
       ),
     );
@@ -294,7 +296,7 @@ void main() {
       const Offset(0, -200),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.construction).first);
+    await tester.tap(find.byGlyph(AppGlyphs.tools).first);
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);
     expect(tester.takeException(), isNull);

@@ -200,6 +200,11 @@ class RenderGrid extends RenderBox
     return child.parentData as GridParentData;
   }
 
+  /// A child that returns false is left for the subclass to lay out and
+  /// place; it takes no slot and does not move its neighbours.
+  @protected
+  bool participatesInLayout(RenderBox child) => true;
+
   void _layoutChild(
     RenderBox child,
     BoxConstraints constraints, {
@@ -230,6 +235,10 @@ class RenderGrid extends RenderBox
     final mainAxisExtents = <double>[];
     RenderBox? child = firstChild;
     while (child != null) {
+      if (!participatesInLayout(child)) {
+        child = childAfter(child);
+        continue;
+      }
       final childParentData = _getParentData(child);
       final crossAxisCellCount = _computeCrossAxisCellCount(
         childParentData,
@@ -254,7 +263,11 @@ class RenderGrid extends RenderBox
         final childSize = mainAxis == Axis.vertical
             ? Size(childCrossAxisExtent, childMainAxisExtent)
             : Size(childMainAxisExtent, childCrossAxisExtent);
-        _layoutChild(child, BoxConstraints.tight(childSize));
+        _layoutChild(
+          child,
+          BoxConstraints.tight(childSize),
+          parentUsesSize: true,
+        );
       }
       childParentData.realMainAxisExtent = childMainAxisExtent;
       children.add(child);
@@ -368,6 +381,7 @@ class GridItem extends ParentDataWidget<GridParentData> {
 
   GridItem wrap({required WrapBuilder builder}) {
     return GridItem(
+      key: key,
       mainAxisCellCount: mainAxisCellCount,
       crossAxisCellCount: crossAxisCellCount,
       child: builder(child),

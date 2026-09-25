@@ -1,4 +1,5 @@
 import 'package:reclash/common/ui/color.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/ui/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -28,8 +29,8 @@ class InitErrorScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(
-                    Icons.report_problem,
+                  GlyphIcon(
+                    AppGlyphs.warning,
                     color: colorScheme.error,
                     size: 32,
                   ),
@@ -92,7 +93,7 @@ class InitErrorScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _copyToClipboard(context),
         label: const Text('Copy Details'),
-        icon: const Icon(Icons.copy),
+        icon: const GlyphIcon(AppGlyphs.copy),
         backgroundColor: colorScheme.error,
         foregroundColor: colorScheme.onError,
       ),

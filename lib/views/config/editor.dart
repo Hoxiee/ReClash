@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -279,7 +280,7 @@ class _EditorSaveAction extends StatelessWidget {
             onPressed: isDirty
                 ? () => onSave(context, titleController.text, controller.text)
                 : null,
-            icon: const Icon(Icons.save),
+            icon: const GlyphIcon(AppGlyphs.save),
           );
         },
       ),
@@ -318,29 +319,29 @@ class _EditorMenuAction extends ConsumerWidget {
                 final isMobile = ref.read(isMobileViewProvider);
                 open(offset: Offset(0, isMobile ? 0 : 20));
               },
-              icon: const Icon(Icons.more_vert),
+              icon: const GlyphIcon(AppGlyphs.more),
             );
           },
           popupBuilder: (_) => CommonPopupMenu(
             items: [
               CommonPopupMenuItem(
-                icon: Icons.search,
+                glyph: AppGlyphs.search,
                 label: appLocalizations.search,
                 onPressed: onSearch,
               ),
               CommonPopupMenuItem(
-                icon: Icons.undo,
+                glyph: AppGlyphs.undo,
                 label: appLocalizations.undo,
                 onPressed: controller.canUndo ? controller.undo : null,
               ),
               CommonPopupMenuItem(
-                icon: Icons.redo,
+                glyph: AppGlyphs.redo,
                 label: appLocalizations.redo,
                 onPressed: controller.canRedo ? controller.redo : null,
               ),
               if (supportRemoteDownload && !readOnly)
                 CommonPopupMenuItem(
-                  icon: Icons.arrow_downward,
+                  glyph: AppGlyphs.arrowDown,
                   label: appLocalizations.externalFetch,
                   subItems: [
                     CommonPopupMenuItem(
@@ -548,7 +549,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
                       : () {
                           controller.previousMatch();
                         },
-                  icon: Icons.arrow_upward,
+                  icon: AppGlyphs.arrowUp,
                   tooltip: context.appLocalizations.previousMatch,
                 ),
                 _buildIconButton(
@@ -557,14 +558,14 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
                       : () {
                           controller.nextMatch();
                         },
-                  icon: Icons.arrow_downward,
+                  icon: AppGlyphs.arrowDown,
                   tooltip: context.appLocalizations.nextMatch,
                 ),
                 const SizedBox(width: 2),
                 IconButton.filledTonal(
                   tooltip: context.appLocalizations.close,
                   onPressed: controller.close,
-                  icon: const Icon(Icons.close, size: 16),
+                  icon: const GlyphIcon(AppGlyphs.close, size: 16),
                 ),
               ],
             ),
@@ -677,14 +678,14 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildIconButton({
-    required IconData icon,
+    required Glyph icon,
     required String tooltip,
     VoidCallback? onPressed,
   }) {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      icon: Icon(icon, size: 16),
+      icon: GlyphIcon(icon, size: 16),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:reclash/common/util/context.dart';
 import 'package:reclash/common/desktop/system.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -250,12 +251,12 @@ extension LogLevelExt on LogLevel {
 enum MessageLevel { info, success, warning, error }
 
 extension MessageLevelExt on MessageLevel {
-  IconData? get icon {
+  Glyph? get icon {
     return switch (this) {
       MessageLevel.info => null,
-      MessageLevel.success => Icons.check_circle_outline,
-      MessageLevel.warning => Icons.warning_amber_outlined,
-      MessageLevel.error => Icons.error_outline,
+      MessageLevel.success => AppGlyphs.checkCircle,
+      MessageLevel.warning => AppGlyphs.warning,
+      MessageLevel.error => AppGlyphs.error,
     };
   }
 
@@ -340,6 +341,7 @@ enum CoreEventType {
   geoUpdate,
   rcxStatus,
   doctorStatus,
+  routeChanged,
 }
 
 enum InvokeMessageType { protect, process }
@@ -365,17 +367,6 @@ enum DnsMode {
   @JsonValue('redir-host')
   redirHost,
   hosts,
-}
-
-enum ExternalControllerStatus {
-  @JsonValue('')
-  close(''),
-  @JsonValue('127.0.0.1:9090')
-  open('127.0.0.1:9090');
-
-  final String value;
-
-  const ExternalControllerStatus(this.value);
 }
 
 enum KeyboardModifier {
@@ -755,3 +746,22 @@ enum ItemPosition {
     return ItemPosition.get(visualIndex, visualLength);
   }
 }
+
+enum IpType { residential, mobile, business, hosting }
+
+enum IpQualityLevel { good, normal, risky }
+
+enum IpQualitySource {
+  identMe('ident.me'),
+  ipApiCom('ip-api.com'),
+  ipQuery('ipquery.io'),
+  ipLocate('iplocate.io'),
+  proxyCheck('proxycheck.io'),
+  ipApiIs('ipapi.is');
+
+  const IpQualitySource(this.label);
+
+  final String label;
+}
+
+enum IpQualitySourceStatus { noType, timeout, rateLimited, failed, ipMismatch }

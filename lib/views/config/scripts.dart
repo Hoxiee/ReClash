@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -228,7 +229,7 @@ class _ScriptsViewState extends ConsumerState<ScriptsView> {
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.delete,
                 onPressed: _handleDelete,
-                icon: const Icon(Icons.delete),
+                icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
             const SizedBox(width: 2),

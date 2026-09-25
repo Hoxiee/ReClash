@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -52,7 +53,7 @@ class ProxyCard extends ConsumerWidget {
                         ? const CommonCircleLoading()
                         : IconButton(
                             tooltip: context.appLocalizations.delayTest,
-                            icon: const Icon(Icons.bolt),
+                            icon: const GlyphIcon(AppGlyphs.bolt),
                             iconSize: globalState.measure.labelSmallHeight,
                             padding: EdgeInsets.zero,
                             onPressed: () => _handleTestCurrentDelay(ref),
@@ -239,8 +240,8 @@ class _ProxyPinMark extends ConsumerWidget {
                 shape: BoxShape.circle,
                 color: context.colorScheme.secondaryContainer,
               ),
-              child: Icon(
-                Icons.push_pin,
+              child: GlyphIcon(
+                AppGlyphs.pin,
                 size: 12,
                 color: context.colorScheme.onSecondaryContainer,
               ),

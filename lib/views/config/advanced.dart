@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/config/desync.dart';
@@ -23,7 +24,7 @@ class AdvancedConfigView extends ConsumerWidget {
       DecorationListItem.open(
         title: Text(appLocalizations.network),
         subtitle: Text(appLocalizations.networkDesc),
-        leading: const Icon(Icons.vpn_key),
+        leading: const GlyphIcon(AppGlyphs.key),
         blur: false,
         widget: BaseScaffold(
           title: appLocalizations.network,
@@ -33,7 +34,7 @@ class AdvancedConfigView extends ConsumerWidget {
       DecorationListItem.open(
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
-        leading: const Icon(Icons.dns),
+        leading: const GlyphIcon(AppGlyphs.dns),
         widget: BaseScaffold(
           title: 'DNS',
           actions: [
@@ -54,7 +55,7 @@ class AdvancedConfigView extends ConsumerWidget {
                         .update((state) => state.copyWith(dns: defaultDns));
                   },
                   tooltip: appLocalizations.reset,
-                  icon: const Icon(Icons.replay),
+                  icon: const GlyphIcon(AppGlyphs.replay),
                 );
               },
             ),
@@ -66,14 +67,14 @@ class AdvancedConfigView extends ConsumerWidget {
       DecorationListItem.open(
         title: Text(appLocalizations.addedRules),
         subtitle: Text(appLocalizations.controlGlobalAddedRules),
-        leading: const Icon(Icons.library_books),
+        leading: const GlyphIcon(AppGlyphs.document),
         widget: const AddedRulesView(),
         blur: false,
       ),
       DecorationListItem.open(
         title: Text(appLocalizations.script),
         subtitle: Text(appLocalizations.overrideScript),
-        leading: const Icon(Icons.rocket, fontWeight: FontWeight.w900),
+        leading: const GlyphIcon(AppGlyphs.script),
         widget: const ScriptsView(),
         blur: false,
       ),
@@ -82,14 +83,14 @@ class AdvancedConfigView extends ConsumerWidget {
       DecorationListItem.open(
         title: Text(appLocalizations.smartPause),
         subtitle: Text(appLocalizations.smartPauseDesc),
-        leading: const Icon(Icons.ssid_chart, fontWeight: FontWeight.w900),
+        leading: const GlyphIcon(AppGlyphs.signalChart),
         widget: const SmartPauseView(),
         blur: false,
       ),
       DecorationListItem.open(
         title: Text(appLocalizations.smartRouting),
         subtitle: Text(appLocalizations.smartRoutingDesc),
-        leading: const Icon(Icons.alt_route_rounded),
+        leading: const GlyphIcon(AppGlyphs.route),
         widget: const SmartRoutingView(),
         blur: false,
       ),
@@ -99,7 +100,7 @@ class AdvancedConfigView extends ConsumerWidget {
         DecorationListItem.open(
           title: Text(appLocalizations.desync),
           subtitle: Text(appLocalizations.desyncDesc),
-          leading: const Icon(Icons.bolt_rounded),
+          leading: const GlyphIcon(AppGlyphs.bolt),
           trailing: const CommonChip(label: 'Experimental'),
           widget: const DesyncView(),
           blur: false,

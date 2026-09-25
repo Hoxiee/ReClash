@@ -2,6 +2,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/widgets/layout/sheet.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class PageActivityScope extends InheritedWidget {
@@ -181,6 +182,48 @@ class SheetProvider<T> extends InheritedWidget {
   bool updateShouldNotify(SheetProvider oldWidget) =>
       type != oldWidget.type &&
       nestedNavigatorPop != oldWidget.nestedNavigatorPop;
+}
+
+/// How far the sheet hangs below the screen while dragged under its shortest
+/// detent, so content can lift clear of the off-screen part.
+class SheetOverhangScope extends InheritedWidget {
+  final ValueListenable<double> overhang;
+
+  const SheetOverhangScope({
+    super.key,
+    required this.overhang,
+    required super.child,
+  });
+
+  static ValueListenable<double>? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SheetOverhangScope>()
+        ?.overhang;
+  }
+
+  @override
+  bool updateShouldNotify(SheetOverhangScope oldWidget) =>
+      overhang != oldWidget.overhang;
+}
+
+class SheetSettlingScope extends InheritedWidget {
+  final ValueListenable<bool> settling;
+
+  const SheetSettlingScope({
+    super.key,
+    required this.settling,
+    required super.child,
+  });
+
+  static ValueListenable<bool>? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<SheetSettlingScope>()
+        ?.settling;
+  }
+
+  @override
+  bool updateShouldNotify(SheetSettlingScope oldWidget) =>
+      settling != oldWidget.settling;
 }
 
 /// When [active], an `open` list item selects into the detail pane instead of

@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -75,7 +77,7 @@ void main() {
     final container = await pumpHero(tester);
 
     expect(find.byType(SmartPauseNetworkPicker), findsNothing);
-    await tester.longPress(find.byIcon(Icons.pause_rounded));
+    await tester.longPress(find.byGlyph(AppGlyphs.pause));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(SmartPauseNetworkPicker), findsOneWidget);
@@ -96,7 +98,7 @@ void main() {
   testWidgets('a short tap still toggles pause', (tester) async {
     final container = await pumpHero(tester);
 
-    await tester.tap(find.byIcon(Icons.pause_rounded));
+    await tester.tap(find.byGlyph(AppGlyphs.pause));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(container.read(pausedProvider), isTrue);

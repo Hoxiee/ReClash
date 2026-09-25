@@ -39,27 +39,25 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
     }
   }
 
-  IconButtonData? _buildPrimaryAction() {
-    return _isTab
-        ? IconButtonData(
-            glyph: AppGlyphs.bolt,
-            onPressed: _delayTestCurrentGroup,
-            tooltip: context.appLocalizations.delayTest,
-            isLoading: _isDelayTesting,
-          )
-        : null;
-  }
-
   List<IconButtonData> _buildIconActions() {
+    if (!_isTab) {
+      return const [];
+    }
+    final appLocalizations = context.appLocalizations;
     return [
-      if (_isTab)
-        IconButtonData(
-          glyph: AppGlyphs.locate,
-          onPressed: () {
-            _proxiesTabKey.currentState?.scrollToGroupSelected();
-          },
-          tooltip: context.appLocalizations.scrollToSelected,
-        ),
+      IconButtonData(
+        glyph: AppGlyphs.bolt,
+        onPressed: _delayTestCurrentGroup,
+        tooltip: appLocalizations.delayTest,
+        isLoading: _isDelayTesting,
+      ),
+      IconButtonData(
+        glyph: AppGlyphs.locate,
+        onPressed: () {
+          _proxiesTabKey.currentState?.scrollToGroupSelected();
+        },
+        tooltip: appLocalizations.scrollToSelected,
+      ),
     ];
   }
 
@@ -140,7 +138,6 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       isLoading: isLoading,
       floatBody: true,
       resizeToAvoidBottomInset: false,
-      primaryAction: _buildPrimaryAction(),
       iconActions: _buildIconActions(),
       menuItems: _buildMenuItems(context),
       actions: const [_ResumeSmartRoutingButton()],
@@ -172,7 +169,7 @@ class _ResumeSmartRoutingButton extends ConsumerWidget {
               onPressed: () {
                 ref.read(proxiesActionProvider.notifier).resumeSmartRouting();
               },
-              icon: const Icon(Icons.auto_mode),
+              icon: const GlyphIcon(AppGlyphs.autoMode),
             ),
     );
   }

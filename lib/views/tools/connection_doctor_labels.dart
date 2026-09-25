@@ -121,45 +121,30 @@ String connectionDoctorHeroText(
   );
 }
 
-(String, IconData) _remedyLabel(
+(String, Glyph) _remedyLabel(
   AppLocalizations appLocalizations,
   DoctorRemedy remedy,
 ) => switch (remedy) {
   DoctorRemedy.startVpn => (
     appLocalizations.doctorRemedyStartVpn,
-    Icons.vpn_key_rounded,
+    AppGlyphs.vpn,
   ),
   DoctorRemedy.recheck => (
     appLocalizations.doctorStandardExam,
-    Icons.refresh_rounded,
+    AppGlyphs.refresh,
   ),
-  DoctorRemedy.deepCheck => (
-    appLocalizations.doctorDeepExam,
-    Icons.manage_search_rounded,
-  ),
-  DoctorRemedy.flushDns => (
-    appLocalizations.doctorFlushDns,
-    Icons.cached_rounded,
-  ),
-  DoctorRemedy.pickNode => (
-    appLocalizations.changeServer,
-    Icons.swap_horiz_rounded,
-  ),
-  DoctorRemedy.openProfiles => (
-    appLocalizations.profiles,
-    Icons.folder_open_rounded,
-  ),
-  DoctorRemedy.openDns => (
-    appLocalizations.doctorRemedyOpenDns,
-    Icons.dns_rounded,
-  ),
+  DoctorRemedy.deepCheck => (appLocalizations.doctorDeepExam, AppGlyphs.search),
+  DoctorRemedy.flushDns => (appLocalizations.doctorFlushDns, AppGlyphs.sync),
+  DoctorRemedy.pickNode => (appLocalizations.changeServer, AppGlyphs.swap),
+  DoctorRemedy.openProfiles => (appLocalizations.profiles, AppGlyphs.folder),
+  DoctorRemedy.openDns => (appLocalizations.doctorRemedyOpenDns, AppGlyphs.dns),
   DoctorRemedy.openAdvanced => (
     appLocalizations.advancedConfig,
-    Icons.tune_rounded,
+    AppGlyphs.sliders,
   ),
   DoctorRemedy.exportReport => (
     appLocalizations.doctorExportReport,
-    Icons.ios_share_rounded,
+    AppGlyphs.share,
   ),
 };
 
@@ -174,12 +159,12 @@ Color _answerColor(BuildContext context, DoctorAnswerTone tone) {
   };
 }
 
-IconData _answerIcon(DoctorAnswerTone tone) => switch (tone) {
-  DoctorAnswerTone.good => Icons.check_circle_outline,
-  DoctorAnswerTone.working => Icons.radar_rounded,
-  DoctorAnswerTone.warning => Icons.warning_amber_rounded,
-  DoctorAnswerTone.bad => Icons.error_outline_rounded,
-  DoctorAnswerTone.neutral => Icons.monitor_heart_outlined,
+Glyph _answerIcon(DoctorAnswerTone tone) => switch (tone) {
+  DoctorAnswerTone.good => AppGlyphs.checkCircle,
+  DoctorAnswerTone.working => AppGlyphs.radar,
+  DoctorAnswerTone.warning => AppGlyphs.warning,
+  DoctorAnswerTone.bad => AppGlyphs.error,
+  DoctorAnswerTone.neutral => AppGlyphs.healthMonitor,
 };
 
 String _captureStateLabel(
@@ -238,12 +223,12 @@ String _evidenceDescription(
   return values.join(' · ');
 }
 
-IconData _evidenceIcon(DoctorEvidenceOutcome outcome) => switch (outcome) {
-  DoctorEvidenceOutcome.succeeded => Icons.check_circle_outline,
-  DoctorEvidenceOutcome.failed => Icons.error_outline_rounded,
-  DoctorEvidenceOutcome.dropped => Icons.remove_circle_outline,
-  DoctorEvidenceOutcome.notApplicable => Icons.not_interested_rounded,
-  _ => Icons.radio_button_checked_rounded,
+Glyph _evidenceIcon(DoctorEvidenceOutcome outcome) => switch (outcome) {
+  DoctorEvidenceOutcome.succeeded => AppGlyphs.checkCircle,
+  DoctorEvidenceOutcome.failed => AppGlyphs.error,
+  DoctorEvidenceOutcome.dropped => AppGlyphs.removeCircle,
+  DoctorEvidenceOutcome.notApplicable => AppGlyphs.block,
+  _ => AppGlyphs.radio,
 };
 
 String _modeLabel(AppLocalizations appLocalizations, DoctorExamMode mode) =>
@@ -270,9 +255,9 @@ String _incidentTitle(
   };
 }
 
-IconData _incidentIcon(DoctorIncident incident) => switch (incident.health) {
-  DoctorHealth.healthy => Icons.check_circle_outline,
-  DoctorHealth.degraded => Icons.warning_amber_rounded,
-  DoctorHealth.broken => Icons.error_outline_rounded,
-  _ => Icons.help_outline_rounded,
+Glyph _incidentIcon(DoctorIncident incident) => switch (incident.health) {
+  DoctorHealth.healthy => AppGlyphs.checkCircle,
+  DoctorHealth.degraded => AppGlyphs.warning,
+  DoctorHealth.broken => AppGlyphs.error,
+  _ => AppGlyphs.help,
 };

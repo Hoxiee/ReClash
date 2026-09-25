@@ -234,7 +234,7 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
       children: [
         if (widget.showOverview)
           _DesyncOverviewCard(
-            icon: Icons.science_rounded,
+            icon: AppGlyphs.beaker,
             title: appLocalizations.desyncTestBattery,
             subtitle: appLocalizations.desyncTestBatterySummary(
               desyncTestPresets.length,
@@ -299,7 +299,7 @@ class _DesyncTesterState extends ConsumerState<_DesyncTester> {
                 trailing: widget.preview || outcome.failedSites.isEmpty
                     ? null
                     : IconButton(
-                        icon: const Icon(Icons.info_outline_rounded),
+                        icon: const GlyphIcon(AppGlyphs.info),
                         tooltip: appLocalizations.desyncTestFailedTitle,
                         onPressed: () => _showFailed(outcome),
                       ),
@@ -391,7 +391,7 @@ class _DesyncTestDomainListView extends StatelessWidget {
           items: [
             for (final domain in list.domains)
               DecorationListItem(
-                leading: const Icon(Icons.language_rounded),
+                leading: const GlyphIcon(AppGlyphs.language),
                 title: SelectableText(
                   domain,
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 13),

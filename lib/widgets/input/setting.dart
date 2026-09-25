@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../base/card.dart';
@@ -31,7 +32,7 @@ class SettingInfoCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(info.iconData),
+            if (info.iconData != null) GlyphIcon(info.iconData!),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -300,7 +301,7 @@ class SettingSliderItem extends StatelessWidget {
                     onPressed: () => onChanged(resetValue),
                     padding: EdgeInsets.zero,
                     iconSize: 18,
-                    icon: const Icon(Icons.replay),
+                    icon: const GlyphIcon(AppGlyphs.replay),
                   ),
                 ),
               ),

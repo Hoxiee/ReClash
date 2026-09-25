@@ -1,9 +1,10 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 class CommonChip extends StatelessWidget {
   final String label;
-  final IconData? icon;
+  final Glyph? icon;
   final VoidCallback? onPressed;
   final VoidCallback? onDeleted;
 
@@ -30,7 +31,7 @@ class CommonChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 4,
         children: [
-          if (icon != null) Icon(icon, size: 13, color: foregroundColor),
+          if (icon != null) GlyphIcon(icon!, size: 13, color: foregroundColor),
           Flexible(
             child: Text(
               label,
@@ -49,7 +50,7 @@ class CommonChip extends StatelessWidget {
                 onTap: onDeleted,
                 child: Padding(
                   padding: const EdgeInsets.all(2),
-                  child: Icon(Icons.close, size: 14, color: foregroundColor),
+                  child: GlyphIcon(AppGlyphs.close, size: 14, color: foregroundColor),
                 ),
               ),
             ),

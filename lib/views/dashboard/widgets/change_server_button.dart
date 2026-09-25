@@ -1,9 +1,11 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,18 +28,18 @@ class ChangeServerButton extends ConsumerWidget {
             _ => appLocalizations.timeout,
           };
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: smartRouting ? Icons.auto_mode_rounded : Icons.swap_horiz_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: smartRouting ? AppGlyphs.themeAuto : AppGlyphs.swap,
       label: appLocalizations.changeServer,
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () => ref
           .read(currentPageLabelProvider.notifier)
           .toPage(PageLabel.proxies, returnable: true),
       child: Row(
         children: [
           if (flag == null)
-            Icon(
-              Icons.public_rounded,
+            GlyphIcon(
+              AppGlyphs.language,
               size: 20,
               color: context.colorScheme.onSurfaceVariant,
             )

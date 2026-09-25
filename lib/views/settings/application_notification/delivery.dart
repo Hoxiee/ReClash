@@ -10,7 +10,8 @@ const _subscriptionChannelId = 'reclash_subscription_reminders';
 
 /// One channel carries every level; detailed and minimal differ only in the
 /// content posted to it, and turning it off is a system-settings toggle.
-String _serviceChannelFor(NotificationVisibility visibility) => _serviceChannelId;
+String _serviceChannelFor(NotificationVisibility visibility) =>
+    _serviceChannelId;
 
 /// What stands between the settings and the shade, and the way to clear it.
 typedef _Delivery = ({String text, VoidCallback? fix});
@@ -40,8 +41,8 @@ class _DeliverySummary extends StatelessWidget {
     final fix = delivery.fix;
     final color = fix == null ? null : context.colorScheme.error;
     return DecorationListItem(
-      leading: Icon(
-        fix == null ? Icons.info_outline_rounded : Icons.error_outline_rounded,
+      leading: GlyphIcon(
+        fix == null ? AppGlyphs.info : AppGlyphs.error,
         color: color,
       ),
       title: Text(l.notificationDelivery),

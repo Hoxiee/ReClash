@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -152,7 +153,7 @@ class _NotificationSettingsViewState
           top: 12,
           items: [
             DecorationListItem.options(
-              leading: const Icon(Icons.notifications_active_outlined),
+              leading: const GlyphIcon(AppGlyphs.bell),
               title: Text(l.notificationVisibility),
               subtitle: Text(_visibilityDesc(l, settings.visibility)),
               dialogTitle: l.notificationVisibility,
@@ -165,8 +166,9 @@ class _NotificationSettingsViewState
               onChanged: (value) {
                 if (value == null) return;
                 _update(
-                  (state) =>
-                      state.copyWith(visibility: value as NotificationVisibility),
+                  (state) => state.copyWith(
+                    visibility: value as NotificationVisibility,
+                  ),
                 );
                 unawaited(_loadStatus());
               },
@@ -179,7 +181,7 @@ class _NotificationSettingsViewState
           items: [
             _DeliverySummary(delivery: _delivery(l, settings)),
             _settingsLink(
-              icon: Icons.notifications_off_outlined,
+              icon: AppGlyphs.bell,
               title: l.notificationTurnOff,
               subtitle: l.notificationTurnOffDesc,
               onPressed: () =>
@@ -194,7 +196,7 @@ class _NotificationSettingsViewState
             subTitle: l.notificationComponentsDesc,
             items: [
               DecorationListItem.open(
-                leading: const Icon(Icons.dashboard_customize_outlined),
+                leading: const GlyphIcon(AppGlyphs.customize),
                 title: Text(l.notificationComponents),
                 subtitle: Text(
                   settings.components.isEmpty
@@ -206,13 +208,15 @@ class _NotificationSettingsViewState
                 widget: const NotificationComponentsEditor(),
               ),
               _toggle(
-                icon: Icons.touch_app_outlined,
+                icon: AppGlyphs.tap,
                 title: l.notificationActionButtons,
                 subtitle: l.notificationActionButtonsDesc,
                 value: settings.showPauseAction || settings.showStopAction,
                 onChanged: (value) => _update(
-                  (state) =>
-                      state.copyWith(showPauseAction: value, showStopAction: value),
+                  (state) => state.copyWith(
+                    showPauseAction: value,
+                    showStopAction: value,
+                  ),
                 ),
               ),
             ],
@@ -222,7 +226,7 @@ class _NotificationSettingsViewState
           title: l.notificationPrivacy,
           items: [
             _toggle(
-              icon: Icons.lock_outline_rounded,
+              icon: AppGlyphs.lock,
               title: l.notificationHideSensitive,
               subtitle: l.notificationHideSensitiveDesc,
               value: settings.hideSensitiveOnLockScreen,
@@ -237,7 +241,7 @@ class _NotificationSettingsViewState
           subTitle: l.notificationRemindersDesc,
           items: [
             _toggle(
-              icon: Icons.notifications_none_rounded,
+              icon: AppGlyphs.bell,
               title: l.notificationSubscriptionReminders,
               subtitle: l.notificationSubscriptionRemindersDesc,
               value: settings.subscriptionReminders,
@@ -246,7 +250,7 @@ class _NotificationSettingsViewState
               ),
             ),
             _settingsLink(
-              icon: Icons.update_outlined,
+              icon: AppGlyphs.update,
               title: l.notificationSubscriptionChannel,
               subtitle: _subscriptionChannelId,
               onPressed: () => _openSettings(_subscriptionChannelId),
@@ -259,29 +263,29 @@ class _NotificationSettingsViewState
   }
 
   DecorationListItem _settingsLink({
-    required IconData icon,
+    required Glyph icon,
     required String title,
     required String subtitle,
     required VoidCallback onPressed,
   }) {
     return DecorationListItem(
-      leading: Icon(icon),
+      leading: GlyphIcon(icon),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.open_in_new_rounded, size: 20),
+      trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
       onPressed: onPressed,
     );
   }
 
   DecorationListItem _toggle({
-    required IconData icon,
+    required Glyph icon,
     required String title,
     required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
     return DecorationListItem.toggle(
-      leading: Icon(icon),
+      leading: GlyphIcon(icon),
       title: Text(title),
       subtitle: Text(subtitle),
       value: value,

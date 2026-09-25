@@ -30,10 +30,7 @@ _UpdateParams _$UpdateParamsFromJson(Map<String, dynamic> json) =>
       logLevel: $enumDecode(_$LogLevelEnumMap, json['log-level']),
       ipv6: json['ipv6'] as bool,
       tcpConcurrent: json['tcp-concurrent'] as bool,
-      externalController: $enumDecode(
-        _$ExternalControllerStatusEnumMap,
-        json['external-controller'],
-      ),
+      externalController: json['external-controller'] as String,
       unifiedDelay: json['unified-delay'] as bool,
       authentication:
           (json['authentication'] as List<dynamic>?)
@@ -54,8 +51,7 @@ Map<String, dynamic> _$UpdateParamsToJson(_UpdateParams instance) =>
       'log-level': _$LogLevelEnumMap[instance.logLevel]!,
       'ipv6': instance.ipv6,
       'tcp-concurrent': instance.tcpConcurrent,
-      'external-controller':
-          _$ExternalControllerStatusEnumMap[instance.externalController]!,
+      'external-controller': instance.externalController,
       'unified-delay': instance.unifiedDelay,
       'authentication': instance.authentication,
       'geo-auto-update': instance.geoAutoUpdate,
@@ -79,11 +75,6 @@ const _$LogLevelEnumMap = {
   LogLevel.warning: 'warning',
   LogLevel.error: 'error',
   LogLevel.silent: 'silent',
-};
-
-const _$ExternalControllerStatusEnumMap = {
-  ExternalControllerStatus.close: '',
-  ExternalControllerStatus.open: '127.0.0.1:9090',
 };
 
 _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
@@ -210,6 +201,7 @@ const _$CoreEventTypeEnumMap = {
   CoreEventType.geoUpdate: 'geoUpdate',
   CoreEventType.rcxStatus: 'rcxStatus',
   CoreEventType.doctorStatus: 'doctorStatus',
+  CoreEventType.routeChanged: 'routeChanged',
 };
 
 _InvokeMessage _$InvokeMessageFromJson(Map<String, dynamic> json) =>
@@ -791,4 +783,220 @@ Map<String, dynamic> _$RcxReportToJson(_RcxReport instance) =>
       'manual': instance.manual,
       'discovery': instance.discovery,
       'at': instance.at,
+    };
+
+_RouteSnapshot _$RouteSnapshotFromJson(Map<String, dynamic> json) =>
+    _RouteSnapshot(
+      coreEpoch: (json['core-epoch'] as num?)?.toInt() ?? 0,
+      picksVersion: (json['picks-version'] as num?)?.toInt() ?? 0,
+      picks:
+          (json['picks'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
+    );
+
+Map<String, dynamic> _$RouteSnapshotToJson(_RouteSnapshot instance) =>
+    <String, dynamic>{
+      'core-epoch': instance.coreEpoch,
+      'picks-version': instance.picksVersion,
+      'picks': instance.picks,
+    };
+
+_OutboundIpParams _$OutboundIpParamsFromJson(Map<String, dynamic> json) =>
+    _OutboundIpParams(
+      proxyName: json['proxy-name'] as String? ?? '',
+      urls:
+          (json['urls'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
+      timeout: (json['timeout'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$OutboundIpParamsToJson(_OutboundIpParams instance) =>
+    <String, dynamic>{
+      'proxy-name': instance.proxyName,
+      'urls': instance.urls,
+      'timeout': instance.timeout,
+    };
+
+_OutboundIpResult _$OutboundIpResultFromJson(Map<String, dynamic> json) =>
+    _OutboundIpResult(
+      url: json['url'] as String? ?? '',
+      body: json['body'] as String? ?? '',
+      delay: (json['delay'] as num?)?.toInt() ?? 0,
+      chains:
+          (json['chains'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      error: json['error'] as String?,
+      coreEpoch: (json['core-epoch'] as num?)?.toInt() ?? 0,
+      picksVersion: (json['picks-version'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$OutboundIpResultToJson(_OutboundIpResult instance) =>
+    <String, dynamic>{
+      'url': instance.url,
+      'body': instance.body,
+      'delay': instance.delay,
+      'chains': instance.chains,
+      'error': instance.error,
+      'core-epoch': instance.coreEpoch,
+      'picks-version': instance.picksVersion,
+    };
+
+_ServiceCheckParams _$ServiceCheckParamsFromJson(Map<String, dynamic> json) =>
+    _ServiceCheckParams(
+      proxyName: json['proxy-name'] as String? ?? '',
+      names:
+          (json['names'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const [],
+      timeout: (json['timeout'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$ServiceCheckParamsToJson(_ServiceCheckParams instance) =>
+    <String, dynamic>{
+      'proxy-name': instance.proxyName,
+      'names': instance.names,
+      'timeout': instance.timeout,
+    };
+
+_ServiceCheckItem _$ServiceCheckItemFromJson(Map<String, dynamic> json) =>
+    _ServiceCheckItem(
+      name: json['name'] as String? ?? '',
+      status: json['status'] as String? ?? '',
+      region: json['region'] as String? ?? '',
+      delay: (json['delay'] as num?)?.toInt() ?? 0,
+      chains:
+          (json['chains'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      checkedAt: (json['checked-at'] as num?)?.toInt() ?? 0,
+      coreEpoch: (json['core-epoch'] as num?)?.toInt() ?? 0,
+      picksVersion: (json['picks-version'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$ServiceCheckItemToJson(_ServiceCheckItem instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'status': instance.status,
+      'region': instance.region,
+      'delay': instance.delay,
+      'chains': instance.chains,
+      'checked-at': instance.checkedAt,
+      'core-epoch': instance.coreEpoch,
+      'picks-version': instance.picksVersion,
+    };
+
+_RcxDiagContext _$RcxDiagContextFromJson(Map<String, dynamic> json) =>
+    _RcxDiagContext(
+      terrain: json['terrain'] as String? ?? '',
+      env: json['env'] as String? ?? '',
+      incumbent: json['incumbent'] as String? ?? '',
+      incumbentMs: (json['incumbentMs'] as num?)?.toInt() ?? 0,
+      sinceMs: (json['sinceMs'] as num?)?.toInt() ?? 0,
+      pin: json['pin'] as String? ?? '',
+      strategy: json['strategy'] as String? ?? '',
+      preset: json['preset'] as String? ?? '',
+      mode: json['mode'] as String? ?? '',
+      screenOff: json['screenOff'] as bool? ?? false,
+      suspended: json['suspended'] as bool? ?? false,
+      probing: json['probing'] as bool? ?? false,
+      deep: json['deep'] as bool? ?? false,
+      transport: json['transport'] as String? ?? '',
+      portal: json['portal'] as bool? ?? false,
+      metered: json['metered'] as bool? ?? false,
+      validated: json['validated'] as bool? ?? false,
+      reachF: json['reachF'] as String? ?? '',
+      reachD: json['reachD'] as String? ?? '',
+      direct: json['direct'] as String? ?? '',
+      probesLeft: (json['probesLeft'] as num?)?.toInt() ?? 0,
+      candidates: (json['candidates'] as num?)?.toInt() ?? 0,
+      eligible: (json['eligible'] as num?)?.toInt() ?? 0,
+      incidentConns: (json['incidentConns'] as num?)?.toInt() ?? 0,
+      frozenNodes: (json['frozenNodes'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$RcxDiagContextToJson(_RcxDiagContext instance) =>
+    <String, dynamic>{
+      'terrain': instance.terrain,
+      'env': instance.env,
+      'incumbent': instance.incumbent,
+      'incumbentMs': instance.incumbentMs,
+      'sinceMs': instance.sinceMs,
+      'pin': instance.pin,
+      'strategy': instance.strategy,
+      'preset': instance.preset,
+      'mode': instance.mode,
+      'screenOff': instance.screenOff,
+      'suspended': instance.suspended,
+      'probing': instance.probing,
+      'deep': instance.deep,
+      'transport': instance.transport,
+      'portal': instance.portal,
+      'metered': instance.metered,
+      'validated': instance.validated,
+      'reachF': instance.reachF,
+      'reachD': instance.reachD,
+      'direct': instance.direct,
+      'probesLeft': instance.probesLeft,
+      'candidates': instance.candidates,
+      'eligible': instance.eligible,
+      'incidentConns': instance.incidentConns,
+      'frozenNodes': instance.frozenNodes,
+    };
+
+_RcxDiagEntry _$RcxDiagEntryFromJson(Map<String, dynamic> json) =>
+    _RcxDiagEntry(
+      seq: (json['seq'] as num?)?.toInt() ?? 0,
+      at: (json['at'] as num?)?.toInt() ?? 0,
+      kind: json['kind'] as String? ?? '',
+      msg: json['msg'] as String? ?? '',
+      from: json['from'] as String? ?? '',
+      to: json['to'] as String? ?? '',
+      repeat: (json['repeat'] as num?)?.toInt() ?? 1,
+      ctx: json['ctx'] == null
+          ? null
+          : RcxDiagContext.fromJson(json['ctx'] as Map<String, dynamic>),
+      cands:
+          (json['cands'] as List<dynamic>?)
+              ?.map(
+                (e) => RcxCandidateReport.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$RcxDiagEntryToJson(_RcxDiagEntry instance) =>
+    <String, dynamic>{
+      'seq': instance.seq,
+      'at': instance.at,
+      'kind': instance.kind,
+      'msg': instance.msg,
+      'from': instance.from,
+      'to': instance.to,
+      'repeat': instance.repeat,
+      'ctx': instance.ctx,
+      'cands': instance.cands,
+    };
+
+_RcxDiagBatch _$RcxDiagBatchFromJson(Map<String, dynamic> json) =>
+    _RcxDiagBatch(
+      entries:
+          (json['entries'] as List<dynamic>?)
+              ?.map((e) => RcxDiagEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      cursor: (json['cursor'] as num?)?.toInt() ?? 0,
+      dropped: (json['dropped'] as num?)?.toInt() ?? 0,
+      enabled: json['enabled'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$RcxDiagBatchToJson(_RcxDiagBatch instance) =>
+    <String, dynamic>{
+      'entries': instance.entries,
+      'cursor': instance.cursor,
+      'dropped': instance.dropped,
+      'enabled': instance.enabled,
     };

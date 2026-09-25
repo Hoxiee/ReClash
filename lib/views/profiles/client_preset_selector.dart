@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -46,7 +47,7 @@ class ClientPresetSelector extends StatelessWidget {
             if (compatibilityProfile)
               CommonChip(
                 label: appLocalizations.subscriptionClientExperimentalLabel,
-                icon: Icons.science_outlined,
+                icon: AppGlyphs.beaker,
               ),
           ],
         ),

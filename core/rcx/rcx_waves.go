@@ -365,6 +365,7 @@ func (e *rcxEngine) startProbe(candidates []rcxCandidate, members []rcxMember, k
 }
 
 func (e *rcxEngine) startProbeWave(wave []rcxProbeNode, kind rcxWaveKind, lane string) {
+	e.recordWave(kind, lane, len(wave))
 	targets := e.probeTargets(wave, e.terrainCurrent(), kind)
 	e.probeGen++
 	e.paidWaveGen = e.probeGen

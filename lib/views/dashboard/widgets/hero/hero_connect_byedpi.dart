@@ -25,7 +25,7 @@ class _ByeDpiDashboard extends ConsumerWidget {
             children: [
               Expanded(
                 child: _ByeDpiActionCard(
-                  icon: Icons.bolt_rounded,
+                  icon: AppGlyphs.bolt,
                   title: appLocalizations.desyncTestSection,
                   subtitle: appLocalizations.desyncTestTitle,
                   onTap: () {
@@ -36,7 +36,7 @@ class _ByeDpiDashboard extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _ByeDpiActionCard(
-                  icon: Icons.settings_rounded,
+                  icon: AppGlyphs.settings,
                   title: appLocalizations.desyncEngine,
                   subtitle: '${appLocalizations.port} ${props.port}',
                   onTap: () {
@@ -77,7 +77,7 @@ class _ByeDpiStrategyCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
         child: Row(
           children: [
-            const _ByeDpiCardIcon(icon: Icons.shield_rounded, size: 46),
+            const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 46),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -112,8 +112,8 @@ class _ByeDpiStrategyCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
+            GlyphIcon(
+              AppGlyphs.chevronForward,
               size: 22,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -132,7 +132,7 @@ class _ByeDpiActionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -152,8 +152,8 @@ class _ByeDpiActionCard extends StatelessWidget {
               children: [
                 _ByeDpiCardIcon(icon: icon, size: 36),
                 const Spacer(),
-                Icon(
-                  Icons.chevron_right_rounded,
+                GlyphIcon(
+                  AppGlyphs.chevronForward,
                   size: 20,
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -187,7 +187,7 @@ class _ByeDpiActionCard extends StatelessWidget {
 class _ByeDpiCardIcon extends StatelessWidget {
   const _ByeDpiCardIcon({required this.icon, required this.size});
 
-  final IconData icon;
+  final Glyph icon;
   final double size;
 
   @override
@@ -201,7 +201,7 @@ class _ByeDpiCardIcon extends StatelessWidget {
         color: colorScheme.primaryContainer,
         shape: AppShape.md,
       ),
-      child: Icon(
+      child: GlyphIcon(
         icon,
         size: size * 0.48,
         color: colorScheme.onPrimaryContainer,

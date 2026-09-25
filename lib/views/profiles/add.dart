@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -152,32 +153,32 @@ class AddProfileView extends ConsumerWidget {
       if (system.isTV)
         ListItem(
           key: const Key('lan-profile-import'),
-          leading: const Icon(Icons.wifi_tethering),
+          leading: const GlyphIcon(AppGlyphs.tethering),
           title: Text(appLocalizations.lanProfileImport),
           subtitle: Text(appLocalizations.lanProfileImportDesc),
           onTap: () => _toLanImport(ref, context),
         ),
       if (!system.isTV)
         ListItem(
-          leading: const Icon(Icons.qr_code_sharp),
+          leading: const GlyphIcon(AppGlyphs.qrCode),
           title: Text(appLocalizations.qrcode),
           subtitle: Text(appLocalizations.qrcodeDesc),
           onTap: () => _toScan(ref, context),
         ),
       ListItem(
-        leading: const Icon(Icons.upload_file_sharp),
+        leading: const GlyphIcon(AppGlyphs.upload),
         title: Text(appLocalizations.file),
         subtitle: Text(appLocalizations.fileDesc),
         onTap: () => _handleAddProfileFormFile(ref, context),
       ),
       ListItem(
-        leading: const Icon(Icons.cloud_download_sharp),
+        leading: const GlyphIcon(AppGlyphs.cloudDownload),
         title: Text(appLocalizations.url),
         subtitle: Text(appLocalizations.urlDesc),
         onTap: () => _toAdd(ref, context),
       ),
       ListItem(
-        leading: const Icon(Icons.data_object_rounded),
+        leading: const GlyphIcon(AppGlyphs.storage),
         title: Text(appLocalizations.setupRawConfig),
         subtitle: Text(appLocalizations.setupRawConfigDesc),
         onTap: () => _toRaw(ref, context),
@@ -288,7 +289,7 @@ class _RawProfileDialogState extends State<RawProfileDialog>
         IconButton.filledTonal(
           tooltip: appLocalizations.pasteFromClipboard,
           onPressed: _pending ? null : _handlePaste,
-          icon: const Icon(Icons.content_paste),
+          icon: const GlyphIcon(AppGlyphs.paste),
         ),
         TextButton(
           onPressed: _pending ? null : _handleSubmit,
@@ -433,7 +434,7 @@ class _URLFormDialogState extends State<URLFormDialog>
                 IconButton.filledTonal(
                   tooltip: appLocalizations.pasteFromClipboard,
                   onPressed: _pending ? null : _handlePaste,
-                  icon: const Icon(Icons.content_paste),
+                  icon: const GlyphIcon(AppGlyphs.paste),
                 ),
               ],
             ),
@@ -627,8 +628,8 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
           else
             SizedBox.square(
               dimension: 220,
-              child: Icon(
-                Icons.wifi_off_rounded,
+              child: GlyphIcon(
+                AppGlyphs.wifiOff,
                 size: 72,
                 color: context.colorScheme.error,
               ),

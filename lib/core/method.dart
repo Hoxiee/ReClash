@@ -48,6 +48,8 @@ enum CoreMethod {
   rcxReport,
   rcxDeepScan,
   rcxSetEnabled,
+  rcxDiagSet,
+  rcxDiagLog,
   doctorSnapshot,
   doctorStart,
   doctorCancel,
@@ -57,6 +59,9 @@ enum CoreMethod {
   subscriptionReportExport,
   odometerReport,
   odometerSignal,
+  outboundIp,
+  serviceCheck,
+  watchRoute,
 }
 
 class CoreMethodCall {

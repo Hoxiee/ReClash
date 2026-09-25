@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -286,7 +287,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
             floatingWidget: FloatWrapper(
               child: CommonFloatingActionButton(
                 onPressed: _handleConfirm,
-                icon: const Icon(Icons.save),
+                icon: const GlyphIcon(AppGlyphs.save),
                 label: appLocalizations.save,
               ),
             ),
@@ -462,12 +463,12 @@ class _ProfileFileItem extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return [
       CommonPopupMenuItem(
-        icon: Icons.edit_outlined,
+        glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
         onPressed: onEdit,
       ),
       CommonPopupMenuItem(
-        icon: Icons.upload_outlined,
+        glyph: AppGlyphs.upload,
         label: appLocalizations.upload,
         onPressed: onUpload,
       ),
@@ -500,7 +501,7 @@ class _ProfileFileItem extends StatelessWidget {
                           return IconButton(
                             tooltip: appLocalizations.more,
                             onPressed: open,
-                            icon: const Icon(Icons.more_vert),
+                            icon: const GlyphIcon(AppGlyphs.more),
                           );
                         },
                       ),

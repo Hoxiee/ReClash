@@ -6,5 +6,8 @@ export 'core.dart';
 export 'database.dart';
 export 'finding_preview.dart';
 export 'milestones.dart';
+export 'outbound_ip.dart';
 export 'regional.dart';
+export 'route_state.dart';
+export 'routed_probe.dart';
 export 'state.dart';

@@ -50,7 +50,7 @@ class NotificationComponentsEditor extends ConsumerWidget {
         child: ItemPositionProvider(
           position: ItemPosition.get(index, components.length),
           child: DecorationListItem(
-            leading: Icon(_componentIcon(component.type)),
+            leading: GlyphIcon(_componentIcon(component.type)),
             title: Text(_componentLabel(l, component.type)),
             subtitle: notice == null
                 ? Text(_componentStatus(l, component))
@@ -77,11 +77,11 @@ class NotificationComponentsEditor extends ConsumerWidget {
   ) {
     final l = context.appLocalizations;
     return DecorationListItem(
-      leading: Icon(_componentIcon(type)),
+      leading: GlyphIcon(_componentIcon(type)),
       title: Text(_componentLabel(l, type)),
       subtitle: Text(_componentDescription(l, type)),
-      trailing: Icon(
-        Icons.add_rounded,
+      trailing: GlyphIcon(
+        AppGlyphs.add,
         color: context.colorScheme.onSurfaceVariant,
       ),
       onPressed: () =>
@@ -109,9 +109,7 @@ class NotificationComponentsEditor extends ConsumerWidget {
       body: CustomScrollView(
         primary: false,
         slivers: [
-          SliverToBoxAdapter(
-            child: SizedBox(height: context.sheetTopPadding),
-          ),
+          SliverToBoxAdapter(child: SizedBox(height: context.sheetTopPadding)),
           if (components.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: ListHeader(
@@ -165,8 +163,8 @@ class NotificationComponentsEditor extends ConsumerWidget {
   }
 }
 
-IconData _noticeIcon(_ComponentNotice notice) =>
-    notice.severe ? Icons.error_outline_rounded : Icons.visibility_off_outlined;
+Glyph _noticeIcon(_ComponentNotice notice) =>
+    notice.severe ? AppGlyphs.error : AppGlyphs.eyeOff;
 
 class _NoticeText extends StatelessWidget {
   const _NoticeText({required this.notice});
@@ -181,7 +179,7 @@ class _NoticeText extends StatelessWidget {
         : colorScheme.onSurfaceVariant;
     return Row(
       children: [
-        Icon(_noticeIcon(notice), size: 15, color: color),
+        GlyphIcon(_noticeIcon(notice), size: 15, color: color),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
@@ -245,7 +243,7 @@ class NotificationComponentSettings extends ConsumerWidget {
             component.doctorPriority ?? DoctorNotificationPriority.problems;
         return [
           DecorationListItem.options(
-            leading: const Icon(Icons.priority_high_rounded),
+            leading: const GlyphIcon(AppGlyphs.error),
             title: Text(l.notificationDoctorPriority),
             subtitle: Text(_doctorPriorityLabel(l, priority)),
             dialogTitle: l.notificationDoctorPriority,
@@ -270,7 +268,7 @@ class NotificationComponentSettings extends ConsumerWidget {
       case NotificationComponentType.speed:
         return [
           DecorationListItem.toggle(
-            leading: const Icon(Icons.bedtime_outlined),
+            leading: const GlyphIcon(AppGlyphs.moon),
             title: Text(l.notificationHideIdleSpeed),
             subtitle: Text(l.notificationHideIdleSpeedDesc),
             value: component.hideWhenIdle ?? true,
@@ -282,7 +280,7 @@ class NotificationComponentSettings extends ConsumerWidget {
         final missing = environment.serverGroupMissing;
         return [
           DecorationListItem.options(
-            leading: const Icon(Icons.dns_outlined),
+            leading: const GlyphIcon(AppGlyphs.dns),
             title: Text(l.notificationSelectServerGroup),
             subtitle: Text(
               missing
@@ -352,7 +350,7 @@ class NotificationComponentSettings extends ConsumerWidget {
             generateSectionV3(
               items: [
                 DecorationListItem(
-                  leading: Icon(
+                  leading: GlyphIcon(
                     _noticeIcon(notice),
                     color: notice.severe ? context.colorScheme.error : null,
                   ),
@@ -373,8 +371,8 @@ class NotificationComponentSettings extends ConsumerWidget {
           generateSectionV3(
             items: [
               DecorationListItem(
-                leading: Icon(
-                  Icons.remove_circle_outline_rounded,
+                leading: GlyphIcon(
+                  AppGlyphs.removeCircle,
                   color: context.colorScheme.error,
                 ),
                 title: Text(l.notificationRemoveComponent),

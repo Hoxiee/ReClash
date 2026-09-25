@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/finding_preview.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,13 +19,16 @@ class TrafficUsage extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return SizedBox(
-      height: getWidgetHeight(2),
+      height: DashboardWidgetMetrics.heightOf(context, 2),
       child: RepaintBoundary(
         child: CommonCard(
-          radius: AppCorner.lg,
+          radius: DashboardWidgetMetrics.radiusOf(context),
+          infoPadding: DashboardWidgetMetrics.paddingOf(
+            context,
+          ).copyWith(bottom: 0),
           info: Info(
             label: appLocalizations.trafficUsage,
-            iconData: Icons.data_saver_off,
+            iconData: AppGlyphs.dataUsage,
           ),
           onPressed: () {},
           child: preview
@@ -106,7 +111,7 @@ class _TrafficUsageBody extends StatelessWidget {
     final upColor = globalState.theme.darken3PrimaryContainer;
     final downColor = globalState.theme.darken2SecondaryContainer;
     return Padding(
-      padding: baseInfoEdgeInsets.copyWith(top: 0),
+      padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -121,13 +126,13 @@ class _TrafficUsageBody extends StatelessWidget {
             ),
           ),
           _TrafficDataItem(
-            icon: Icon(Icons.arrow_upward, color: upColor, size: 14),
+            icon: GlyphIcon(AppGlyphs.arrowUp, color: upColor, size: 14),
             value: up,
             rolling: rolling,
           ),
           const SizedBox(height: 8),
           _TrafficDataItem(
-            icon: Icon(Icons.arrow_downward, color: downColor, size: 14),
+            icon: GlyphIcon(AppGlyphs.arrowDown, color: downColor, size: 14),
             value: down,
             rolling: rolling,
           ),
@@ -251,7 +256,7 @@ class _TrafficDataItem extends StatelessWidget {
     required this.rolling,
   });
 
-  final Icon icon;
+  final GlyphIcon icon;
   final num value;
   final bool rolling;
 

@@ -177,6 +177,7 @@ func (e *rcxEngine) drainControl() {
 }
 
 func (e *rcxEngine) handle(event rcxEvent) {
+	e.recordEvent(event)
 	switch event.Kind {
 	case rcxEventConfigure:
 		e.applyConfigLocked(event.Config)

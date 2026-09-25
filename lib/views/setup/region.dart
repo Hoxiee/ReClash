@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -24,7 +25,7 @@ class SetupRegionSettings extends ConsumerWidget {
           children: [
             ListItem<AppRegion>.options(
               key: const ValueKey('setup-app-region'),
-              leading: const Icon(Icons.public_outlined),
+              leading: const GlyphIcon(AppGlyphs.language),
               title: Text(l10n.appRegion),
               subtitle: Text(region.label(context)),
               dialogTitle: l10n.appRegion,
@@ -38,7 +39,7 @@ class SetupRegionSettings extends ConsumerWidget {
             ),
             ListItem.toggle(
               key: const ValueKey('setup-send-hwid'),
-              leading: const Icon(Icons.perm_device_information_outlined),
+              leading: const GlyphIcon(AppGlyphs.deviceInfo),
               title: Text(l10n.sendDeviceIdentity),
               subtitle: Text(l10n.sendDeviceIdentityDesc),
               value: sendIdentity,

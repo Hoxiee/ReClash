@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../layout/popup.dart';
@@ -12,7 +13,7 @@ class ReorderMenuHandle extends StatelessWidget {
     required this.count,
     required this.onReorder,
     this.delayedDrag = false,
-    this.icon = Icons.drag_indicator_rounded,
+    this.icon = AppGlyphs.dragHandle,
     this.color,
     this.compact = false,
   });
@@ -24,7 +25,7 @@ class ReorderMenuHandle extends StatelessWidget {
   final void Function(int oldIndex, int newIndex) onReorder;
 
   final bool delayedDrag;
-  final IconData icon;
+  final Glyph icon;
   final Color? color;
 
   /// Shrinks the tap target to fit a dense fixed-height row without overflow.
@@ -38,25 +39,25 @@ class ReorderMenuHandle extends StatelessWidget {
     return [
       if (_canMoveUp)
         CommonPopupMenuItem(
-          icon: Icons.keyboard_arrow_up_rounded,
+          glyph: AppGlyphs.chevronUp,
           label: l.moveUp,
           onPressed: () => onReorder(index, index - 1),
         ),
       if (_canMoveDown)
         CommonPopupMenuItem(
-          icon: Icons.keyboard_arrow_down_rounded,
+          glyph: AppGlyphs.chevronDown,
           label: l.moveDown,
           onPressed: () => onReorder(index, index + 1),
         ),
       if (_canMoveUp)
         CommonPopupMenuItem(
-          icon: Icons.vertical_align_top_rounded,
+          glyph: AppGlyphs.scrollToTop,
           label: l.moveToTop,
           onPressed: () => onReorder(index, 0),
         ),
       if (_canMoveDown)
         CommonPopupMenuItem(
-          icon: Icons.vertical_align_bottom_rounded,
+          glyph: AppGlyphs.scrollToBottom,
           label: l.moveToBottom,
           onPressed: () => onReorder(index, count - 1),
         ),
@@ -70,7 +71,7 @@ class ReorderMenuHandle extends StatelessWidget {
     if (count <= 1) {
       return Padding(
         padding: EdgeInsets.all(compact ? 4 : 8),
-        child: Icon(icon, color: handleColor),
+        child: GlyphIcon(icon, color: handleColor),
       );
     }
     return CommonPopupBox(
@@ -89,7 +90,7 @@ class ReorderMenuHandle extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 )
               : null,
-          icon: Icon(icon, color: handleColor),
+          icon: GlyphIcon(icon, color: handleColor),
         );
         return delayedDrag
             ? ReorderableDelayedDragStartListener(index: index, child: handle)

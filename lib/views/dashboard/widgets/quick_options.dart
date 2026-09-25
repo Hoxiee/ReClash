@@ -1,6 +1,8 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/network.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,7 +17,7 @@ class _QuickSwitchCard extends StatelessWidget {
   });
 
   final String label;
-  final IconData iconData;
+  final Glyph iconData;
   final List<Widget> items;
   final ProviderListenable<bool> selector;
   final void Function(WidgetRef ref, bool value) onChanged;
@@ -25,7 +27,10 @@ class _QuickSwitchCard extends StatelessWidget {
     return SizedBox(
       height: getWidgetHeight(1),
       child: CommonCard(
-        radius: AppCorner.lg,
+        radius: DashboardWidgetMetrics.radiusOf(context),
+        infoPadding: DashboardWidgetMetrics.paddingOf(
+          context,
+        ).copyWith(bottom: 0),
         onPressed: () {
           showSheet(
             context: context,
@@ -81,7 +86,7 @@ class TUNButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuickSwitchCard(
       label: context.appLocalizations.tun,
-      iconData: Icons.stacked_line_chart,
+      iconData: AppGlyphs.chart,
       items: [
         if (system.isDesktop) const TUNItem(),
         if (system.isMacOS) const AutoSetSystemDnsItem(),
@@ -102,7 +107,7 @@ class SystemProxyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuickSwitchCard(
       label: context.appLocalizations.systemProxy,
-      iconData: Icons.shuffle,
+      iconData: AppGlyphs.shuffle,
       items: const [SystemProxyItem(), BypassDomainItem()],
       selector: networkSettingProvider.select((state) => state.systemProxy),
       onChanged: (ref, value) {
@@ -121,7 +126,7 @@ class VpnButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _QuickSwitchCard(
       label: 'VPN',
-      iconData: Icons.stacked_line_chart,
+      iconData: AppGlyphs.chart,
       items: const [VPNItem(), VpnSystemProxyItem(), TunStackItem()],
       selector: vpnSettingProvider.select((state) => state.enable),
       onChanged: (ref, value) {

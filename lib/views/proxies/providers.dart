@@ -207,7 +207,7 @@ class ProviderItem extends ConsumerWidget {
     final subscriptionInfo = provider.subscriptionInfo;
     return [
       CommonPopupMenuItem(
-        icon: Icons.upload_outlined,
+        glyph: AppGlyphs.upload,
         label: appLocalizations.upload,
         onPressed: () {
           _handleSideLoadProvider(ref);
@@ -215,7 +215,7 @@ class ProviderItem extends ConsumerWidget {
       ),
       if (provider.vehicleType == 'HTTP')
         CommonPopupMenuItem(
-          icon: Icons.sync,
+          glyph: AppGlyphs.sync,
           label: appLocalizations.sync,
           onPressed: () {
             _handleUpdateProvider(ref);
@@ -223,7 +223,7 @@ class ProviderItem extends ConsumerWidget {
         ),
       if (subscriptionInfo != null && subscriptionInfo.hasFacts)
         CommonPopupMenuItem(
-          icon: Icons.data_usage_outlined,
+          glyph: AppGlyphs.dataUsage,
           label: appLocalizations.subscriptionInfo,
           onPressed: _handleShowSubscriptionInfo,
         ),
@@ -252,7 +252,7 @@ class ProviderItem extends ConsumerWidget {
                       padding: EdgeInsets.all(12),
                       child: CommonCircleLoading(),
                     )
-                  : const Icon(Icons.more_vert),
+                  : const GlyphIcon(AppGlyphs.more),
             );
           },
         ),

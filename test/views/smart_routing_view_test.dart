@@ -1,8 +1,11 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/smart_routing.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -184,7 +187,7 @@ void main() {
     expect(find.text('Search by country code'), findsOneWidget);
     expect(find.byType(ReorderableListView), findsNothing);
     expect(find.text('RU'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.checkCircle), findsOneWidget);
   });
 
   testWidgets('the picker filters by code and toggles a country in place', (
@@ -205,14 +208,20 @@ void main() {
     await tester.enterText(find.byType(TextField), 'DE');
     await tester.pumpAndSettle();
 
+    final picker = find.byType(SideSheet).last;
     expect(find.text('RU'), findsNothing);
-    expect(find.byIcon(Icons.circle_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+    expect(
+      find.descendant(of: picker, matching: find.byGlyph(AppGlyphs.circleOutline)),
+      findsOneWidget,
+    );
+    expect(find.byGlyph(AppGlyphs.checkCircle), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.circle_outlined));
+    await tester.tap(
+      find.descendant(of: picker, matching: find.byGlyph(AppGlyphs.circleOutline)),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.checkCircle), findsOneWidget);
   });
 
   testWidgets('the region card shows seeded facets and marks unused ones', (
@@ -404,7 +413,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Status'), findsOneWidget);
-    expect(find.text('Waiting for the engine'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(SideSheet),
+        matching: find.text('Waiting for the engine'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the fallback row shows the choice and swaps it in place', (

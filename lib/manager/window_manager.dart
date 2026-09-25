@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart' hide captionGlyphSize;
 import 'dart:ui' show ClipOp;
 
 import 'package:reclash/common/common.dart';
@@ -172,6 +173,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     ref.read(storeActionProvider.notifier).savePreferencesDebounce();
     commonPrint.log('minimize');
     render?.pause();
+    ref.read(routeTrackerProvider.notifier).setVisible(false);
     super.onWindowMinimize();
   }
 
@@ -179,6 +181,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowRestore() {
     commonPrint.log('restore');
     render?.resume();
+    ref.read(routeTrackerProvider.notifier).setVisible(true);
     super.onWindowRestore();
     _scheduleWindowGeometryCapture();
   }
@@ -529,8 +532,9 @@ class WindowHeaderActions extends StatelessWidget {
                   iconSize: WidgetStatePropertyAll(pinIconSize),
                 ),
                 onPressed: onPin,
-                icon: Icon(
-                  state.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                icon: GlyphIcon(
+                  AppGlyphs.pin,
+                  fill: state.isPinned ? 1 : 0,
                 ),
               ),
             ),

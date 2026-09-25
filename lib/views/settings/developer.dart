@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -42,7 +43,7 @@ class DeveloperView extends ConsumerWidget {
               child: ImageCacheWidget(
                 src: fixture.logo,
                 fit: BoxFit.contain,
-                defaultWidget: const Icon(Icons.cloud_outlined),
+                defaultWidget: const GlyphIcon(AppGlyphs.cloud),
               ),
             ),
             title: Text(fixture.name),
@@ -167,7 +168,7 @@ class DeveloperView extends ConsumerWidget {
             SettingSection(
               items: [
                 DecorationListItem.open(
-                  leading: const Icon(Icons.science_outlined),
+                  leading: const GlyphIcon(AppGlyphs.beaker),
                   title: Text(appLocalizations.developerFindings),
                   widget: const FindingPreviewView(),
                 ),

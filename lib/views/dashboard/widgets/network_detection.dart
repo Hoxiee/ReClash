@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -7,6 +8,7 @@ import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/views/tools/connection_doctor.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,8 +24,8 @@ class NetworkDetection extends ConsumerWidget {
     final titleColor = context.colorScheme.onSurfaceVariant;
     final flag = ipInfo == null ? null : countryCodeToEmoji(ipInfo.countryCode);
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.monitor_heart_outlined,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.healthMonitor,
       label: appLocalizations.networkDetection,
       leading: flag == null
           ? null
@@ -33,7 +35,7 @@ class NetworkDetection extends ConsumerWidget {
                 fontFamily: FontFamily.twEmoji.value,
               ),
             ),
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const ConnectionDoctorView()),
       child: FadeThroughBox(

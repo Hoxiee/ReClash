@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/inherited.dart';
@@ -110,7 +111,7 @@ class _CommonExpandIconState extends State<CommonExpandIcon>
       builder: (_, child) {
         return RotationTransition(turns: _iconTurns, child: child!);
       },
-      child: const Icon(Icons.expand_more),
+      child: const GlyphIcon(AppGlyphs.chevronDown),
     );
   }
 }

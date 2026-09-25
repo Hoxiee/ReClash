@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -56,7 +55,7 @@ void main() {
 
   group('webDashboardUri', () {
     test('hands the controller host and port to the setup route', () {
-      final uri = webDashboardUri(ExternalControllerStatus.open.value);
+      final uri = webDashboardUri('127.0.0.1:9090');
 
       expect(uri.scheme, 'http');
       expect(uri.host, '127.0.0.1');
@@ -76,7 +75,7 @@ void main() {
     test('falls back to the default controller when none is configured', () {
       expect(
         webDashboardUri('').toString(),
-        webDashboardUri(ExternalControllerStatus.open.value).toString(),
+        webDashboardUri('127.0.0.1:9090').toString(),
       );
     });
 
@@ -281,12 +280,12 @@ void main() {
   group('WebDashboardSession', () {
     ({
       WebDashboardSession session,
-      List<ExternalControllerStatus> writes,
-      void Function(ExternalControllerStatus status) set,
+      List<String> writes,
+      void Function(String status) set,
     })
-    build(ExternalControllerStatus initial) {
+    build(String initial) {
       var current = initial;
-      final writes = <ExternalControllerStatus>[];
+      final writes = <String>[];
       final session = WebDashboardSession(
         status: () => current,
         setStatus: (status) async {
@@ -302,21 +301,18 @@ void main() {
     }
 
     test('borrows a closed controller and gives it back', () async {
-      final fixture = build(ExternalControllerStatus.close);
+      final fixture = build('');
 
       await fixture.session.open();
       expect(fixture.session.isBorrowed, isTrue);
       await fixture.session.close();
 
-      expect(fixture.writes, [
-        ExternalControllerStatus.open,
-        ExternalControllerStatus.close,
-      ]);
+      expect(fixture.writes, ['127.0.0.1:9090', '']);
       expect(fixture.session.isBorrowed, isFalse);
     });
 
     test('leaves a controller the user turned on alone', () async {
-      final fixture = build(ExternalControllerStatus.open);
+      final fixture = build('127.0.0.1:9090');
 
       await fixture.session.open();
       await fixture.session.close();
@@ -325,26 +321,33 @@ void main() {
     });
 
     test('does not fight a user who closed it during the session', () async {
-      final fixture = build(ExternalControllerStatus.close);
+      final fixture = build('');
 
       await fixture.session.open();
-      fixture.set(ExternalControllerStatus.close);
+      fixture.set('');
       await fixture.session.close();
 
-      expect(fixture.writes, [ExternalControllerStatus.open]);
+      expect(fixture.writes, ['127.0.0.1:9090']);
+    });
+
+    test('leaves a controller the user reconfigured during the session', () async {
+      final fixture = build('');
+
+      await fixture.session.open();
+      fixture.set('0.0.0.0:9091');
+      await fixture.session.close();
+
+      expect(fixture.writes, ['127.0.0.1:9090']);
     });
 
     test('gives the controller back once', () async {
-      final fixture = build(ExternalControllerStatus.close);
+      final fixture = build('');
 
       await fixture.session.open();
       await fixture.session.close();
       await fixture.session.close();
 
-      expect(fixture.writes, [
-        ExternalControllerStatus.open,
-        ExternalControllerStatus.close,
-      ]);
+      expect(fixture.writes, ['127.0.0.1:9090', '']);
     });
   });
 }

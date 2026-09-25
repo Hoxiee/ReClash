@@ -1,5 +1,7 @@
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 
 class DashboardInfoCard extends StatelessWidget {
@@ -15,7 +17,7 @@ class DashboardInfoCard extends StatelessWidget {
   });
 
   final double height;
-  final IconData icon;
+  final Glyph icon;
   final String label;
   final Widget child;
 
@@ -31,7 +33,7 @@ class DashboardInfoCard extends StatelessWidget {
       height: height,
       child: RepaintBoundary(
         child: CommonCard(
-          radius: AppCorner.lg,
+          radius: DashboardWidgetMetrics.radiusOf(context),
           onPressed: onPressed,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -41,7 +43,7 @@ class DashboardInfoCard extends StatelessWidget {
                 Row(
                   children: [
                     leading ??
-                        Icon(
+                        GlyphIcon(
                           icon,
                           size: 20,
                           color: context.colorScheme.onSurfaceVariant,

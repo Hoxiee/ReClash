@@ -499,6 +499,7 @@ func applyConfig(params *SetupParams) error {
 	currentConfig = cfg
 	hub.ApplyConfig(cfg)
 	patchSelectGroup(params.SelectedMap)
+	bumpRouteEpoch()
 	updateListeners(cfg)
 	reconcileGeoUpdater()
 	rcxEngineInstance.OnConfigApplied()

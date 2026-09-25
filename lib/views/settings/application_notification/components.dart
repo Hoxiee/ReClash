@@ -57,14 +57,13 @@ String _componentStatus(AppLocalizations l, NotificationComponent component) =>
       _ => _componentVisibility(l, component),
     };
 
-IconData _componentIcon(NotificationComponentType type) => switch (type) {
-  NotificationComponentType.connectionDoctor =>
-    Icons.health_and_safety_outlined,
-  NotificationComponentType.networkState => Icons.route_outlined,
-  NotificationComponentType.currentServer => Icons.dns_outlined,
-  NotificationComponentType.smartRouting => Icons.alt_route_rounded,
-  NotificationComponentType.speed => Icons.speed_rounded,
-  NotificationComponentType.sessionTraffic => Icons.data_usage_rounded,
+Glyph _componentIcon(NotificationComponentType type) => switch (type) {
+  NotificationComponentType.connectionDoctor => AppGlyphs.safety,
+  NotificationComponentType.networkState => AppGlyphs.route,
+  NotificationComponentType.currentServer => AppGlyphs.dns,
+  NotificationComponentType.smartRouting => AppGlyphs.route,
+  NotificationComponentType.speed => AppGlyphs.speed,
+  NotificationComponentType.sessionTraffic => AppGlyphs.dataUsage,
 };
 
 /// What the notification service needs before a component can print its line.

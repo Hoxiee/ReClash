@@ -340,7 +340,7 @@ class ProfileItem extends ConsumerWidget {
     final supportUrl = profile.panelMeta?.supportUrl;
     return [
       CommonPopupMenuItem(
-        icon: Icons.edit_outlined,
+        glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
         onPressed: () {
           _handleShowEditExtendPage(context);
@@ -348,14 +348,14 @@ class ProfileItem extends ConsumerWidget {
       ),
       if (supportUrl != null)
         CommonPopupMenuItem(
-          icon: Icons.support_agent_outlined,
+          glyph: AppGlyphs.support,
           label: appLocalizations.support,
           onPressed: () {
             dialogs.openUrl(supportUrl);
           },
         ),
       CommonPopupMenuItem(
-        icon: Icons.visibility_outlined,
+        glyph: AppGlyphs.eye,
         label: appLocalizations.preview,
         onPressed: () {
           _handlePreview(context);
@@ -363,18 +363,18 @@ class ProfileItem extends ConsumerWidget {
       ),
       if (isUrl)
         CommonPopupMenuItem(
-          icon: Icons.sync_alt_sharp,
+          glyph: AppGlyphs.swap,
           label: appLocalizations.sync,
           onPressed: () {
             updateProfile(ref);
           },
         ),
       CommonPopupMenuItem(
-        icon: Icons.emergency_outlined,
+        glyph: AppGlyphs.emergency,
         label: appLocalizations.more,
         subItems: [
           CommonPopupMenuItem(
-            icon: Icons.extension_outlined,
+            glyph: AppGlyphs.puzzle,
             label: appLocalizations.override,
             onPressed: () {
               _handlePushGenProfilePage(context, profile.id);
@@ -382,7 +382,7 @@ class ProfileItem extends ConsumerWidget {
           ),
           if (hasSubscriptionInfo)
             CommonPopupMenuItem(
-              icon: Icons.data_usage,
+              glyph: AppGlyphs.dataUsage,
               label: appLocalizations.subscriptionInfo,
               onPressed: () {
                 _handleShowSubscriptionInfo(context);
@@ -390,14 +390,14 @@ class ProfileItem extends ConsumerWidget {
             ),
           if (isUrl)
             CommonPopupMenuItem(
-              icon: Icons.copy,
+              glyph: AppGlyphs.copy,
               label: appLocalizations.copyLink,
               onPressed: () {
                 _handleCopyLink(context);
               },
             ),
           CommonPopupMenuItem(
-            icon: Icons.file_copy_outlined,
+            glyph: AppGlyphs.copy,
             label: appLocalizations.exportFile,
             onPressed: () {
               _handleExportFile(context);
@@ -405,7 +405,7 @@ class ProfileItem extends ConsumerWidget {
           ),
           if (isUrl)
             CommonPopupMenuItem(
-              icon: Icons.assignment_outlined,
+              glyph: AppGlyphs.document,
               label: appLocalizations.subscriptionReport,
               onPressed: () {
                 unawaited(_handleShowSubscriptionReport(context));
@@ -415,7 +415,7 @@ class ProfileItem extends ConsumerWidget {
       ),
       CommonPopupMenuItem(
         danger: true,
-        icon: Icons.delete_outlined,
+        glyph: AppGlyphs.delete,
         label: appLocalizations.delete,
         onPressed: () {
           _handleDeleteProfile(context, ref);
@@ -493,7 +493,7 @@ class ProfileItem extends ConsumerWidget {
                               onPressed: () {
                                 open();
                               },
-                              icon: const Icon(Icons.more_vert),
+                              icon: const GlyphIcon(AppGlyphs.more),
                             );
                           },
                         ),
@@ -586,7 +586,7 @@ class _ProfileCardTitle extends StatelessWidget {
                   dimension: 24,
                   child: ImageCacheWidget(
                     src: logo,
-                    defaultWidget: const Icon(Icons.cloud_outlined, size: 20),
+                    defaultWidget: const GlyphIcon(AppGlyphs.cloud, size: 20),
                   ),
                 ),
               ),
@@ -603,7 +603,7 @@ class _ProfileCardTitle extends StatelessWidget {
                 label:
                     '${subscriptionClientLabel(client, context.appLocalizations)}'
                     '${native ? '' : ' · Experimental'}',
-                icon: native ? null : Icons.science_outlined,
+                icon: native ? null : AppGlyphs.beaker,
               ),
             if (isDeveloperSubscriptionProfile(profile))
               const CommonChip(label: 'Dev'),
@@ -717,7 +717,7 @@ class _ReorderableProfilesSheetState
             index: index,
             count: profiles.length,
             delayedDrag: true,
-            icon: Icons.drag_handle,
+            icon: AppGlyphs.dragHandle,
             onReorder: (oldIndex, newIndex) {
               setState(() {
                 profiles = profiles.copyAndReorder(oldIndex, newIndex);

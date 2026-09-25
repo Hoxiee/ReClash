@@ -122,7 +122,7 @@ class _DesyncOverviewCard extends StatelessWidget {
     this.detail,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String title;
   final String subtitle;
   final String? detail;
@@ -145,7 +145,7 @@ class _DesyncOverviewCard extends StatelessWidget {
                 color: context.colorScheme.primaryContainer,
                 shape: AppShape.all(AppCorner.md),
               ),
-              child: Icon(icon, color: context.colorScheme.onPrimaryContainer),
+              child: GlyphIcon(icon, color: context.colorScheme.onPrimaryContainer),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -192,7 +192,7 @@ class _DesyncStrategyOverview extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     return _DesyncOverviewCard(
-      icon: Icons.tune_rounded,
+      icon: AppGlyphs.sliders,
       title: appLocalizations.desyncActiveStrategy,
       subtitle: desyncStrategyName(appLocalizations, props),
       detail: appLocalizations.desyncArgsCount(props.strategyArgs.length),
@@ -208,7 +208,7 @@ class _DesyncEngineOverview extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     return _DesyncOverviewCard(
-      icon: Icons.hub_rounded,
+      icon: AppGlyphs.hub,
       title: '127.0.0.1:${props.port}',
       subtitle: appLocalizations.desyncEngineSummary(props.categories.length),
       detail: props.cacheEnabled ? null : appLocalizations.desyncCacheDisabled,
@@ -354,7 +354,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 },
               ),
               DecorationListItem(
-                leading: defaultActive ? const Icon(Icons.check_rounded) : null,
+                leading: defaultActive ? const GlyphIcon(AppGlyphs.check) : null,
                 title: Text(appLocalizations.desyncDefaultName),
                 subtitle: const Text('split · disorder · fake · oob · tlsrec'),
                 onPressed: () => _update(
@@ -366,14 +366,14 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
               for (final strategy in props.savedStrategies)
                 DecorationListItem(
                   leading: listEquals(props.strategyArgs, strategy.args)
-                      ? const Icon(Icons.check_rounded)
+                      ? const GlyphIcon(AppGlyphs.check)
                       : null,
                   title: Text(strategy.name),
                   subtitle: Text(
                     appLocalizations.desyncArgsCount(strategy.args.length),
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete_rounded),
+                    icon: const GlyphIcon(AppGlyphs.delete),
                     tooltip: appLocalizations.delete,
                     onPressed: () => _handleDelete(context, ref, strategy),
                   ),
@@ -511,17 +511,17 @@ class _DesyncRoutingRules extends StatelessWidget {
       items: [
         if (rules.isEmpty)
           DecorationListItem(
-            leading: const Icon(Icons.route_rounded),
+            leading: const GlyphIcon(AppGlyphs.route),
             title: Text(appLocalizations.desyncRoutingNoCategories),
             subtitle: Text(appLocalizations.desyncRoutingNoCategoriesDesc),
           )
         else
           for (final rule in rules)
             DecorationListItem(
-              leading: Icon(
+              leading: GlyphIcon(
                 rule.endsWith('REJECT')
-                    ? Icons.block_rounded
-                    : Icons.alt_route_rounded,
+                    ? AppGlyphs.block
+                    : AppGlyphs.route,
               ),
               title: Text(
                 rule,
@@ -529,7 +529,7 @@ class _DesyncRoutingRules extends StatelessWidget {
               ),
             ),
         DecorationListItem(
-          leading: const Icon(Icons.public_rounded),
+          leading: const GlyphIcon(AppGlyphs.language),
           title: Text(
             desyncOnlyFallback().single,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 12),

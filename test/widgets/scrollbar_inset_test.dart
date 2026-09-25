@@ -62,6 +62,7 @@ void main() {
     (tester) async {
       await tester.pumpWidget(
         TestApp(
+          wrapInProviderScope: true,
           child: SheetProvider(
             type: SheetType.bottomSheet,
             child: AdaptiveSheetScaffold(
@@ -82,11 +83,12 @@ void main() {
   );
 
   testWidgets(
-    'an opaque tool bar shows the scroll bar without an inset',
+    'an opaque tool bar keeps the scroll bar below the floating header too',
     variant: _everyPlatform,
     (tester) async {
       await tester.pumpWidget(
         TestApp(
+          wrapInProviderScope: true,
           child: SheetProvider(
             type: SheetType.bottomSheet,
             child: AdaptiveSheetScaffold(title: 'title', body: _list()),
@@ -98,7 +100,7 @@ void main() {
       final scrollBar = tester.widget<CommonScrollBar>(
         find.byType(CommonScrollBar),
       );
-      expect(scrollBar.padding, EdgeInsets.zero);
+      expect(scrollBar.padding, const EdgeInsets.only(top: sheetAppBarHeight));
     },
   );
 }

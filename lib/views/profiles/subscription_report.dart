@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:convert';
 
 import 'package:reclash/common/common.dart';
@@ -187,7 +188,7 @@ class _ReportBody extends StatelessWidget {
         FilledButton.icon(
           autofocus: true,
           onPressed: saving ? null : () => onSave(report),
-          icon: const Icon(Icons.save_alt),
+          icon: const GlyphIcon(AppGlyphs.save),
           label: Text(appLocalizations.subscriptionReportSave),
         ),
       ],
@@ -215,9 +216,9 @@ class _VerdictCard extends StatelessWidget {
       _FaultTone.neutral => colors.onSurfaceVariant,
     };
     final icon = switch (tone) {
-      _FaultTone.bad => Icons.error_outline,
-      _FaultTone.caution => Icons.warning_amber_rounded,
-      _FaultTone.neutral => Icons.help_outline,
+      _FaultTone.bad => AppGlyphs.error,
+      _FaultTone.caution => AppGlyphs.warning,
+      _FaultTone.neutral => AppGlyphs.help,
     };
     return CommonCard(
       type: CommonCardType.filled,
@@ -228,7 +229,7 @@ class _VerdictCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: accent),
+            GlyphIcon(icon, color: accent),
             const SizedBox(width: 14),
             Expanded(
               child: Column(

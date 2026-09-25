@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,7 +20,7 @@ class OutboundMode extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final height = getWidgetHeight(2);
+    final height = DashboardWidgetMetrics.heightOf(context, 2);
     return SizedBox(
       height: height,
       child: Consumer(
@@ -31,12 +33,15 @@ class OutboundMode extends ConsumerWidget {
               hoverColor: Colors.transparent,
             ),
             child: CommonCard(
-              radius: AppCorner.lg,
+              radius: DashboardWidgetMetrics.radiusOf(context),
+              infoPadding: DashboardWidgetMetrics.paddingOf(
+                context,
+              ).copyWith(bottom: 0),
               onPressed: () {},
               skipTraversal: true,
               info: Info(
                 label: appLocalizations.outboundMode,
-                iconData: Icons.call_split_sharp,
+                iconData: AppGlyphs.split,
               ),
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 12),
@@ -122,11 +127,11 @@ class OutboundModeV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = getWidgetHeight(1);
+    final height = DashboardWidgetMetrics.heightOf(context, 1);
     return SizedBox(
       height: height,
       child: CommonCard(
-        radius: AppCorner.lg,
+        radius: DashboardWidgetMetrics.radiusOf(context),
         child: Consumer(
           builder: (_, ref, _) {
             final mode = ref.watch(uiOutboundModeProvider);

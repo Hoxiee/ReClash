@@ -4,6 +4,7 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/state.dart';
@@ -508,7 +509,7 @@ class _MessageContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (icon != null) ...[
-          Icon(icon, size: 20, color: level.iconColor(context)),
+          GlyphIcon(icon, size: 20, color: level.iconColor(context)),
           const SizedBox(width: 12),
         ],
         Flexible(

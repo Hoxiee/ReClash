@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -330,7 +331,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                             ? null
                             : _PageAffordance(
                                 key: const ValueKey('dashboard-show-provider'),
-                                icon: Icons.keyboard_arrow_down_rounded,
+                                icon: AppGlyphs.chevronDown,
                                 label: context
                                     .appLocalizations
                                     .dashboardShowProvider,
@@ -362,7 +363,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                         affordanceAtTop: true,
                         affordance: _PageAffordance(
                           key: const ValueKey('dashboard-show-connection'),
-                          icon: Icons.keyboard_arrow_up_rounded,
+                          icon: AppGlyphs.chevronUp,
                           label:
                               context.appLocalizations.dashboardShowConnection,
                           focusNode: _providerAffordanceNode,
@@ -491,7 +492,7 @@ class _PageAffordance extends StatelessWidget {
     this.onArrowUp,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String label;
   final VoidCallback onPressed;
   final bool badge;
@@ -501,7 +502,7 @@ class _PageAffordance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = Icon(this.icon, size: 22);
+    final icon = GlyphIcon(this.icon, size: 22);
     final button = TextButton.icon(
       focusNode: focusNode,
       style: TextButton.styleFrom(

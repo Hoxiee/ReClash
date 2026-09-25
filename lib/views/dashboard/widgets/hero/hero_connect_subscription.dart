@@ -87,15 +87,15 @@ class _SubscriptionStrip extends StatelessWidget {
               ),
               if (hasAnnounce) ...[
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.campaign_rounded,
+                GlyphIcon(
+                  AppGlyphs.announce,
                   size: 18,
                   color: colorScheme.primary,
                 ),
               ],
               const SizedBox(width: 4),
-              Icon(
-                Icons.chevron_right_rounded,
+              GlyphIcon(
+                AppGlyphs.chevronForward,
                 size: 20,
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -175,7 +175,7 @@ class _SubscriptionExpiredPill extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.event_busy_rounded, size: 14, color: color),
+        GlyphIcon(AppGlyphs.calendar, size: 14, color: color),
         const SizedBox(width: 5),
         Flexible(
           child: Text(
@@ -209,7 +209,7 @@ class _DaysPill extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.event_rounded, size: 14, color: color),
+        GlyphIcon(AppGlyphs.calendar, size: 14, color: color),
         const SizedBox(width: 5),
         Flexible(
           child: Text(

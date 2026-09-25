@@ -1,10 +1,12 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,10 +18,10 @@ class DesyncStrategyCard extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.shield_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.shield,
       label: appLocalizations.desyncStrategySection,
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const DesyncStrategyView()),
       child: Row(
@@ -63,10 +65,10 @@ class DesyncTestCard extends ConsumerWidget {
         if (props.testSiteLists.contains(list.id)) list,
     ];
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.bolt_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.bolt,
       label: appLocalizations.desyncTestSection,
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const DesyncTestView()),
       child: Row(
@@ -105,10 +107,10 @@ class DesyncEngineCard extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(desyncSettingProvider);
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.settings_ethernet_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.ports,
       label: appLocalizations.desyncEngine,
-      action: const Icon(Icons.chevron_right_rounded, size: 20),
+      action: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const DesyncEngineView()),
       child: Row(

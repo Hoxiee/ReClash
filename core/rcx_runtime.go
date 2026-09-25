@@ -316,7 +316,11 @@ func selectGroupMember(group, node string) error {
 	if !ok {
 		return errGroupNotSelect
 	}
-	return selector.Set(node)
+	if err := selector.Set(node); err != nil {
+		return err
+	}
+	refreshRouteLocked(false)
+	return nil
 }
 
 func (rcxCoreRuntime) SampleLink() (rcx.NetworkPayload, bool) {

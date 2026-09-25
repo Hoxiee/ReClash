@@ -1,5 +1,5 @@
 import 'package:reclash/l10n/l10n.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:reclash/icons/icons.dart';
 
 enum HeroBuyOffer { renewPlan, topUpTraffic }
 
@@ -26,18 +26,18 @@ List<HeroBuyOffer> heroBuyOffers({
   ];
 }
 
-typedef HeroBuyOfferView = ({IconData icon, String label});
+typedef HeroBuyOfferView = ({Glyph icon, String label});
 
 HeroBuyOfferView heroBuyOfferViewOf(
   AppLocalizations appLocalizations,
   HeroBuyOffer offer,
 ) => switch (offer) {
   HeroBuyOffer.renewPlan => (
-    icon: Icons.autorenew_rounded,
+    icon: AppGlyphs.sync,
     label: appLocalizations.renewSubscription,
   ),
   HeroBuyOffer.topUpTraffic => (
-    icon: Icons.add_shopping_cart_rounded,
+    icon: AppGlyphs.install,
     label: appLocalizations.topUpTraffic,
   ),
 };

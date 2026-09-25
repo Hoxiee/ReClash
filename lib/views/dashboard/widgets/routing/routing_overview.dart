@@ -1,10 +1,12 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
+import 'package:reclash/views/dashboard/widgets/routing/routing_diag.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
@@ -63,6 +65,10 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     showExtend(context, builder: (context) => const SmartRoutingView());
   }
 
+  void _handleLog() {
+    showExtend(context, builder: (context) => const RoutingDiagView());
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -79,24 +85,40 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
           tooltip: appLocalizations.smartRoutingTechnical,
           isSelected: _technical,
           onPressed: () => setState(() => _technical = !_technical),
-          icon: const Icon(Icons.code_rounded),
+          icon: const GlyphIcon(AppGlyphs.code),
         ),
         IconButton(
           tooltip: appLocalizations.settings,
           onPressed: _handleSettings,
-          icon: const Icon(Icons.tune_rounded),
+          icon: const GlyphIcon(AppGlyphs.sliders),
+        ),
+        CommonPopupBox(
+          popupBuilder: (_) => CommonPopupMenu(
+            items: [
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.history,
+                label: appLocalizations.smartRoutingLog,
+                onPressed: _handleLog,
+              ),
+            ],
+          ),
+          targetBuilder: (open) => IconButton(
+            tooltip: appLocalizations.smartRoutingMore,
+            onPressed: () => open(),
+            icon: const GlyphIcon(AppGlyphs.more),
+          ),
         ),
       ],
       body: AppBarClearance(
         child: switch ((enabled, report)) {
           (false, _) => _notice(
-            icon: Icons.pause_circle_outline,
+            icon: AppGlyphs.pause,
             text: appLocalizations.smartRoutingOffHint,
           ),
           (true, null) => _notice(
             icon: running
-                ? Icons.autorenew_rounded
-                : Icons.hourglass_empty_rounded,
+                ? AppGlyphs.sync
+                : AppGlyphs.hourglass,
             text: running
                 ? appLocalizations.smartRoutingSearching
                 : appLocalizations.smartRoutingWaitingTunnel,
@@ -133,7 +155,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     );
   }
 
-  Widget _notice({required IconData icon, required String text}) => Padding(
+  Widget _notice({required Glyph icon, required String text}) => Padding(
     padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
     child: Align(
       alignment: Alignment.topCenter,

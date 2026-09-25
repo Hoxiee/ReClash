@@ -1,6 +1,7 @@
 library;
 
 import 'package:collection/collection.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -85,7 +86,7 @@ class RuleItem extends StatelessWidget {
             ),
           );
         },
-        icon: Icon(Icons.info, size: 16.ap, color: context.colorScheme.error),
+        icon: GlyphIcon(AppGlyphs.info, size: 16.ap, color: context.colorScheme.error),
       ),
     );
   }
@@ -110,7 +111,7 @@ class RuleItem extends StatelessWidget {
               count: reorderCount,
               delayedDrag: true,
               compact: true,
-              icon: Icons.drag_handle,
+              icon: AppGlyphs.dragHandle,
               onReorder: onReorder,
             )
           : null,

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -10,9 +11,11 @@ import '../effect/fade_box.dart';
 import 'text.dart';
 import '../theme/wallpaper_scope.dart';
 
+const commonCardIconSize = 20.0;
+
 class Info {
   final String label;
-  final IconData? iconData;
+  final Glyph? iconData;
 
   const Info({required this.label, this.iconData});
 }
@@ -52,8 +55,8 @@ class InfoHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               children: [
                 if (info.iconData != null) ...[
-                  Icon(
-                    info.iconData,
+                  GlyphIcon(
+                    info.iconData!,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 8),
@@ -101,6 +104,7 @@ class CommonCard extends StatelessWidget {
     this.padding,
     this.enterAnimated = false,
     this.info,
+    this.infoPadding,
     this.infoActions,
     this.onLongPress,
     this.shape,
@@ -121,6 +125,7 @@ class CommonCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
   final Info? info;
+  final EdgeInsets? infoPadding;
   final List<Widget>? infoActions;
   final CommonCardType type;
   final double? radius;
@@ -257,7 +262,7 @@ class CommonCard extends StatelessWidget {
             FilledButton.styleFrom(
               padding: padding ?? EdgeInsets.zero,
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
-              iconSize: 20,
+              iconSize: commonCardIconSize,
               iconColor: _buildIconColor(context),
               foregroundColor: _buildForegroundColor(context),
               side: BorderSide.none,
@@ -286,7 +291,7 @@ class CommonCard extends StatelessWidget {
             OutlinedButton.styleFrom(
               padding: padding ?? EdgeInsets.zero,
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
-              iconSize: 20,
+              iconSize: commonCardIconSize,
               iconColor: _buildIconColor(context),
               foregroundColor: _buildForegroundColor(context),
               elevation: 0,
@@ -318,7 +323,7 @@ class CommonCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           InfoHeader(
-            padding: baseInfoEdgeInsets.copyWith(bottom: 0),
+            padding: infoPadding ?? baseInfoEdgeInsets.copyWith(bottom: 0),
             info: info!,
             actions: infoActions,
           ),
@@ -415,7 +420,7 @@ class SelectIcon extends StatelessWidget {
       shape: AppShape.circle,
       child: Container(
         padding: const EdgeInsets.all(4),
-        child: const Icon(Icons.check, size: 16),
+        child: const GlyphIcon(AppGlyphs.check, size: 16),
       ),
     );
   }

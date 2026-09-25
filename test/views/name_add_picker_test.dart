@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -203,7 +205,7 @@ void main() {
 
     holdStageKey(tester);
 
-    await tester.tap(find.byIcon(Icons.add));
+    await tester.tap(find.byGlyph(AppGlyphs.add));
     await tester.pump();
     // The staging flow debounces before it writes through.
     await tester.pump(const Duration(milliseconds: 400));
@@ -235,13 +237,13 @@ void main() {
 
     holdStageKey(tester, scenes: const ['a', 'b']);
 
-    await tester.tap(find.byIcon(Icons.add).first);
+    await tester.tap(find.byGlyph(AppGlyphs.add).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(container.read(proxyGroupProvider).proxies, ['alpha']);
 
-    await tester.tap(find.byIcon(Icons.add).last);
+    await tester.tap(find.byGlyph(AppGlyphs.add).last);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 

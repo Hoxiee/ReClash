@@ -214,14 +214,14 @@ class _AdvancedRoutingPage extends ConsumerWidget {
             items: [
               DecorationListItem(
                 minVerticalPadding: 8,
-                leading: const Icon(Icons.ios_share_rounded),
+                leading: const GlyphIcon(AppGlyphs.share),
                 title: Text(appLocalizations.smartRoutingExport),
                 subtitle: Text(appLocalizations.smartRoutingExportDesc),
                 onPressed: () => _handleExport(context, props),
               ),
               DecorationListItem(
                 minVerticalPadding: 8,
-                leading: const Icon(Icons.file_open_rounded),
+                leading: const GlyphIcon(AppGlyphs.document),
                 title: Text(appLocalizations.smartRoutingImport),
                 subtitle: Text(appLocalizations.smartRoutingImportDesc),
                 onPressed: () => _handleImport(context, ref),
@@ -244,13 +244,18 @@ class _AdvancedRoutingPage extends ConsumerWidget {
     required String Function(int) textBuilder,
     required SmartRoutingProps Function(SmartRoutingProps, int) write,
   }) {
-    return DecorationListItem.options(
+    return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(desc),
-      dialogTitle: title,
-      options: options.contains(value) ? options : [value, ...options],
-      value: value,
-      textBuilder: (option) => textBuilder(option as int),
+      blur: false,
+      forceFull: false,
+      maxWidth: 400,
+      widget: OptionsPickerPage<int>(
+        title: title,
+        options: options.contains(value) ? options : [value, ...options],
+        value: value,
+        textBuilder: textBuilder,
+      ),
       trailing: value == seed
           ? null
           : Builder(
@@ -258,7 +263,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 child: IconButton(
                   tooltip: context.appLocalizations.smartRoutingFieldReset,
                   onPressed: () => _update(ref, (state) => write(state, seed)),
-                  icon: const Icon(Icons.restart_alt_rounded),
+                  icon: const GlyphIcon(AppGlyphs.reset),
                 ),
               ),
             ),
@@ -335,6 +340,8 @@ class _CountryListItem extends ConsumerWidget {
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.map(_countryLabel).join(', ')),
       blur: false,
+      forceFull: false,
+      maxWidth: 400,
       widget: _CountryPickerPage(title: title, selected: value),
       onChanged: (items) => ref
           .read(smartRoutingSettingProvider.notifier)
@@ -412,7 +419,7 @@ class _CountryPickerPageState extends State<_CountryPickerPage> {
               child: TextField(
                 controller: _search,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search_rounded),
+                  prefixIcon: const GlyphIcon(AppGlyphs.search),
                   labelText: appLocalizations.smartRoutingCountrySearch,
                 ),
               ),
@@ -432,18 +439,18 @@ class _CountryPickerPageState extends State<_CountryPickerPage> {
                         return DecorationListItem(
                           isSelected: selected,
                           leading: flag == null
-                              ? const Icon(Icons.public_rounded)
+                              ? const GlyphIcon(AppGlyphs.language)
                               : Text(
                                   flag,
                                   style: const TextStyle(fontSize: 24),
                                 ),
                           title: Text(code),
                           trailing: selected
-                              ? Icon(
-                                  Icons.check_circle_rounded,
+                              ? GlyphIcon(
+                                  AppGlyphs.checkCircle,
                                   color: context.colorScheme.primary,
                                 )
-                              : const Icon(Icons.circle_outlined),
+                              : const GlyphIcon(AppGlyphs.circleOutline),
                           onPressed: () => _toggle(code),
                         );
                       },

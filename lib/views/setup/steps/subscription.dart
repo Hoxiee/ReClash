@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -144,7 +145,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
             ),
             SetupCard(
               child: ListItem(
-                leading: const Icon(Icons.settings_backup_restore_sharp),
+                leading: const GlyphIcon(AppGlyphs.restore),
                 title: Text(appLocalizations.setupRestore),
                 subtitle: Text(appLocalizations.setupRestoreDesc),
                 onTap: _handleRestore,
@@ -156,18 +157,18 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
               child: Column(
                 children: [
                   ListItem(
-                    leading: const Icon(Icons.add_rounded),
+                    leading: const GlyphIcon(AppGlyphs.add),
                     title: Text(appLocalizations.setupAddAnotherProfile),
                     onTap: _showAdd,
                   ),
                   ListItem(
-                    leading: const Icon(Icons.swap_horiz_rounded),
+                    leading: const GlyphIcon(AppGlyphs.swap),
                     title: Text(appLocalizations.setupReplaceProfile),
                     subtitle: Text(appLocalizations.setupReplaceProfileHint),
                     onTap: () => _showAdd(replacing: selected),
                   ),
                   ListItem(
-                    leading: const Icon(Icons.delete_outline_rounded),
+                    leading: const GlyphIcon(AppGlyphs.delete),
                     title: Text(appLocalizations.setupDeleteProfile),
                     onTap: () => _delete(selected),
                   ),
@@ -233,10 +234,10 @@ class _AddedProfile extends StatelessWidget {
             Row(
               spacing: 8,
               children: [
-                Icon(
+                GlyphIcon(
                   warning
-                      ? Icons.warning_amber_rounded
-                      : Icons.check_circle_rounded,
+                      ? AppGlyphs.warning
+                      : AppGlyphs.checkCircle,
                   size: 20,
                   color: tone,
                 ),

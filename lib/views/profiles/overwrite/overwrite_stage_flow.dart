@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -63,7 +64,7 @@ class OverwriteDismissItem extends ConsumerWidget {
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.remove,
                 onPressed: onRemove,
-                icon: const Icon(Icons.remove, size: 18),
+                icon: const GlyphIcon(AppGlyphs.remove, size: 18),
                 padding: EdgeInsets.zero,
               ),
             ),
@@ -76,7 +77,7 @@ class OverwriteDismissItem extends ConsumerWidget {
                   index: index,
                   count: count,
                   delayedDrag: true,
-                  icon: Icons.drag_handle,
+                  icon: AppGlyphs.dragHandle,
                   onReorder: onReorder,
                 ),
               ],

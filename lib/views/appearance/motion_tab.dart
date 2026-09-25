@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -77,7 +78,7 @@ class AppearanceMotionTab extends ConsumerWidget {
         SettingSection.sliver(
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.text_fields),
+              leading: const GlyphIcon(AppGlyphs.textShort),
               title: Text(appLocalizations.textScale),
               value: textScale.enable,
               onChanged: (value) => ref
@@ -101,7 +102,7 @@ class AppearanceMotionTab extends ConsumerWidget {
           title: appLocalizations.animations,
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.animation),
+              leading: const GlyphIcon(AppGlyphs.motion),
               title: Text(appLocalizations.pageAnimation),
               subtitle: Text(appLocalizations.pageAnimationDesc),
               value: motion.isAnimateToPage,
@@ -110,7 +111,7 @@ class AppearanceMotionTab extends ConsumerWidget {
                   .update((state) => state.copyWith(isAnimateToPage: value)),
             ),
             DecorationListItem.toggle(
-              leading: const Icon(Icons.motion_photos_off),
+              leading: const GlyphIcon(AppGlyphs.motion),
               title: Text(appLocalizations.reduceMotion),
               // ThemeManager already combines the OS flag with the setting,
               // so keep the user choice untouched and only surface the fact.
@@ -130,7 +131,7 @@ class AppearanceMotionTab extends ConsumerWidget {
           title: appLocalizations.appearance,
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.ac_unit),
+              leading: const GlyphIcon(AppGlyphs.snow),
               title: Text(appLocalizations.seasonalDecorations),
               subtitle: Text(appLocalizations.seasonalDecorationsDesc),
               value: milestones.seasonalEnabled,
@@ -139,7 +140,7 @@ class AppearanceMotionTab extends ConsumerWidget {
                   .update((state) => state.copyWith(seasonalEnabled: value)),
             ),
             DecorationListItem.toggle(
-              leading: const Icon(Icons.gradient_outlined),
+              leading: const GlyphIcon(AppGlyphs.gradient),
               title: Text(appLocalizations.providerEffects),
               subtitle: Text(appLocalizations.providerEffectsDesc),
               value: milestones.providerEffectsEnabled,
@@ -150,7 +151,7 @@ class AppearanceMotionTab extends ConsumerWidget {
                   ),
             ),
             DecorationListItem.toggle(
-              leading: const Icon(Icons.auto_awesome),
+              leading: const GlyphIcon(AppGlyphs.sparkle),
               title: Text(appLocalizations.milestoneDecorations),
               subtitle: Text(appLocalizations.milestoneDecorationsDesc),
               value: milestones.findingsEnabled,
@@ -532,8 +533,8 @@ class _StartButton extends StatelessWidget {
         color: colorScheme.primary,
         borderRadius: AppRadius.all(AppCorner.xs + 1),
       ),
-      child: Icon(
-        Icons.play_arrow_rounded,
+      child: GlyphIcon(
+        AppGlyphs.play,
         size: 11,
         color: colorScheme.onPrimary,
       ),
@@ -673,8 +674,8 @@ class _Orb extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: colorScheme.outlineVariant.opacity60),
             ),
-            child: Icon(
-              Icons.power_settings_new_rounded,
+            child: GlyphIcon(
+              AppGlyphs.power,
               size: 19,
               color: colorScheme.primary,
             ),

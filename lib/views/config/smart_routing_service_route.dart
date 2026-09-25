@@ -1,6 +1,6 @@
 part of 'smart_routing.dart';
 
-typedef _LaneView = ({IconData icon, Color color, String text});
+typedef _LaneView = ({Glyph icon, Color color, String text});
 
 /// One reading of a lane for the row and its detail header: the toggle state,
 /// then whichever live verdict the engine last reported. Without a status the
@@ -18,7 +18,7 @@ _LaneView _laneView(
   final muted = colorScheme.onSurfaceVariant;
   if (!enabled) {
     return (
-      icon: Icons.circle_outlined,
+      icon: AppGlyphs.circleOutline,
       color: muted,
       text: selectorCount == 0
           ? appLocalizations.smartRoutingServiceNoCandidates
@@ -29,7 +29,7 @@ _LaneView _laneView(
     case 'active':
       final node = status!.node.trim();
       return (
-        icon: Icons.bolt_rounded,
+        icon: AppGlyphs.bolt,
         color: colorScheme.primary,
         text: node.isEmpty
             ? appLocalizations.smartRoutingOn
@@ -37,7 +37,7 @@ _LaneView _laneView(
       );
     case 'searching':
       return (
-        icon: Icons.autorenew_rounded,
+        icon: AppGlyphs.sync,
         color: muted,
         text: appLocalizations.smartRoutingSearching,
       );
@@ -45,18 +45,18 @@ _LaneView _laneView(
       final reject = (status?.fallback ?? fallback.name) == 'reject';
       return reject
           ? (
-              icon: Icons.block_rounded,
+              icon: AppGlyphs.block,
               color: colorScheme.error,
               text: appLocalizations.smartRoutingServiceFallbackActiveReject,
             )
           : (
-              icon: Icons.alt_route_rounded,
+              icon: AppGlyphs.route,
               color: muted,
               text: appLocalizations.smartRoutingServiceFallbackActiveMain,
             );
     default:
       return (
-        icon: Icons.hourglass_empty_rounded,
+        icon: AppGlyphs.hourglass,
         color: muted,
         text: appLocalizations.smartRoutingServicePending,
       );
@@ -130,10 +130,12 @@ class _ServiceRouteItem extends StatelessWidget {
     );
     final title = capabilityTitle(context, capabilityId, manifest: manifest);
     return DecorationListItem.open(
-      leading: Icon(view.icon, color: view.color),
+      leading: GlyphIcon(view.icon, color: view.color),
       title: Text(title),
       subtitle: Text(view.text),
       blur: false,
+      forceFull: false,
+      maxWidth: 400,
       widget: _ServiceRoutePage(title: title, capabilityId: capabilityId),
     );
   }
@@ -274,7 +276,7 @@ class _ServiceRoutePage extends ConsumerWidget {
               title: appLocalizations.smartRoutingServiceStatus,
               items: [
                 DecorationListItem(
-                  leading: Icon(view.icon, color: view.color),
+                  leading: GlyphIcon(view.icon, color: view.color),
                   title: Text(view.text),
                   subtitle: status == null
                       ? null
@@ -302,7 +304,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                   (policy) => policy.copyWith(enabled: value),
                 ),
               ),
-              DecorationListItem.options(
+              DecorationListItem.open(
                 title: Text(appLocalizations.smartRoutingServiceFallback),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,11 +319,15 @@ class _ServiceRoutePage extends ConsumerWidget {
                     ),
                   ],
                 ),
-                dialogTitle: appLocalizations.smartRoutingServiceFallback,
-                options: ServiceRouteFallback.values,
-                value: policy.fallback,
-                textBuilder: (value) =>
-                    _fallbackText(context, value as ServiceRouteFallback),
+                blur: false,
+                forceFull: false,
+                maxWidth: 400,
+                widget: OptionsPickerPage<ServiceRouteFallback>(
+                  title: appLocalizations.smartRoutingServiceFallback,
+                  options: ServiceRouteFallback.values,
+                  value: policy.fallback,
+                  textBuilder: (value) => _fallbackText(context, value),
+                ),
                 onChanged: (value) {
                   if (value == null) return;
                   _updatePolicy(
@@ -374,7 +380,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                                 .where((item) => item != selector)
                                 .toList(),
                           ),
-                          icon: const Icon(Icons.delete_outline_rounded),
+                          icon: const GlyphIcon(AppGlyphs.delete),
                         ),
                         onPressed: () => _editManual(ref, selector),
                       ),

@@ -198,6 +198,7 @@ func (e *rcxEngine) publish(reason rcxReason, ranked []rcxRanked, input rcxDecis
 	if changed {
 		e.runtime.Publish(status)
 	}
+	e.recordDecision(reason, ranked, input)
 }
 
 func (e *rcxEngine) candidateReports(

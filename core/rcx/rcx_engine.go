@@ -47,6 +47,7 @@ type rcxEngine struct {
 	ledger         *rcxLedger
 	store          *rcxStore
 	budget         *rcxProbeBudget
+	diag           *rcxDiagRing
 
 	dials   chan rcxDialEvent
 	events  chan rcxEvent
@@ -170,6 +171,7 @@ func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 		ledger:        newRcxLedger(rcxDefaultLedgerPolicy()),
 		store:         newRcxStore(),
 		budget:        newRcxProbeBudget(rcxProbeBudgetCap, rcxProbeBudgetWin),
+		diag:          newRcxDiagRing(),
 		cfg:           rcxDefaultConfig(),
 		configFP:      rcxConfigFingerprints{},
 		dials:         make(chan rcxDialEvent, rcxDialQueueSize),

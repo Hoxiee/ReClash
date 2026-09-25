@@ -1,4 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
@@ -89,7 +90,7 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
       title: l10n.core,
       items: [
         DecorationListItem(
-          leading: const Icon(Icons.memory),
+          leading: const GlyphIcon(AppGlyphs.memory),
           title: FutureBuilder<String?>(
             future: _version,
             builder: (_, snapshot) => Text(
@@ -99,11 +100,11 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
           subtitle: Row(
             spacing: 6,
             children: [
-              Icon(
+              GlyphIcon(
                 switch (status) {
-                  CoreStatus.connected => Icons.check_circle_outline,
-                  CoreStatus.connecting => Icons.sync,
-                  CoreStatus.disconnected => Icons.stop_circle_outlined,
+                  CoreStatus.connected => AppGlyphs.checkCircle,
+                  CoreStatus.connecting => AppGlyphs.sync,
+                  CoreStatus.disconnected => AppGlyphs.stop,
                 },
                 size: 16,
                 color: color,
@@ -123,7 +124,7 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
                   onPressed: _restartPending || status == CoreStatus.connecting
                       ? null
                       : _restart,
-                  icon: const Icon(Icons.restart_alt),
+                  icon: const GlyphIcon(AppGlyphs.reset),
                 )
               : null,
         ),

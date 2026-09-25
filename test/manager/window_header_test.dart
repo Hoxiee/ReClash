@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart' hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/window_manager.dart';
@@ -32,7 +34,7 @@ Finder _glyph(CaptionGlyph glyph) => find.byWidgetPredicate(
 Finder _captionButton(Finder icon) =>
     find.ancestor(of: icon, matching: find.byType(IconButton));
 
-Finder get _pinIcon => find.byIcon(Icons.push_pin_outlined);
+Finder get _pinIcon => find.byGlyph(AppGlyphs.pin);
 
 List<Finder> get _captionIcons => [
   _glyph(CaptionGlyph.minimize),

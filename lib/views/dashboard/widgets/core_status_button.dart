@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
@@ -109,7 +110,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                   },
                 ),
                 onPressed: _handleConnection,
-                icon: const Icon(Icons.check, fontWeight: FontWeight.w900),
+                icon: const GlyphIcon(AppGlyphs.check),
               )
             : FilledButton.icon(
                 key: ValueKey(coreStatus),
@@ -143,13 +144,11 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                         color: context.colorScheme.onPrimary,
                       ),
                     ),
-                    CoreStatus.connected => const Icon(
-                      Icons.check_sharp,
-                      fontWeight: FontWeight.w900,
+                    CoreStatus.connected => const GlyphIcon(
+                      AppGlyphs.check,
                     ),
-                    CoreStatus.disconnected => const Icon(
-                      Icons.restart_alt_sharp,
-                      fontWeight: FontWeight.w900,
+                    CoreStatus.disconnected => const GlyphIcon(
+                      AppGlyphs.reset,
                     ),
                   },
                 ),

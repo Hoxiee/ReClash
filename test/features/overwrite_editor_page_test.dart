@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
@@ -76,16 +78,16 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
 
     await tester.tap(find.text('a'));
     await tester.pump();
-    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.delete), findsOneWidget);
     expect(find.text(AppLocalizations.current.selectAll), findsOneWidget);
 
     await tester.tap(find.text('a'));
     await tester.pump();
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -133,13 +135,13 @@ void main() {
 
     await tester.tap(find.text('a'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pump();
 
     expect(deleted.single, {'a'});
     expect(find.text('a'), findsNothing);
     expect(find.text('b'), findsOneWidget);
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -154,11 +156,11 @@ void main() {
 
     await tester.tap(find.text('a'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pump();
 
     expect(find.text('a'), findsOneWidget);
-    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.delete), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -179,7 +181,7 @@ void main() {
 
     await tester.tap(find.text('a'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pump();
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -200,7 +202,7 @@ void main() {
     await tester.tap(find.text('a'));
     await tester.pump();
 
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
     expect(find.text(AppLocalizations.current.selectAll), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());

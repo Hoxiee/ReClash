@@ -43,6 +43,13 @@ func init() {
 		rcxEngineInstance.DeepScan()
 		response.success(true)
 	}))
+	registerMethod(rcxDiagSetMethod, withArguments(func(on *bool, response MethodResponse) {
+		rcxEngineInstance.SetDiag(*on)
+		response.success(true)
+	}))
+	registerMethod(rcxDiagLogMethod, withArguments(func(query *rcx.DiagQuery, response MethodResponse) {
+		response.success(rcxEngineInstance.DiagLog(query.Since))
+	}))
 
 	adapter.DialResultHook = func(name, _ string, err error, elapsed time.Duration) {
 		rcxEngineInstance.NoteDial(name, err != nil, elapsed, time.Now())

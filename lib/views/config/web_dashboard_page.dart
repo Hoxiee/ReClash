@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -125,12 +126,12 @@ class _WebDashboardPageState extends State<WebDashboardPage> {
           IconButton(
             tooltip: appLocalizations.reload,
             onPressed: () => unawaited(_handleReload()),
-            icon: const Icon(Icons.refresh),
+            icon: const GlyphIcon(AppGlyphs.refresh),
           ),
           IconButton(
             tooltip: appLocalizations.openInBrowser,
             onPressed: () => unawaited(_handleBrowser()),
-            icon: const Icon(Icons.open_in_browser),
+            icon: const GlyphIcon(AppGlyphs.openExternal),
           ),
         ],
         body: AppBarClearance(
@@ -168,7 +169,7 @@ class _WebDashboardError extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 16,
           children: [
-            const Icon(Icons.cloud_off, size: 48),
+            const GlyphIcon(AppGlyphs.cloudOff, size: 48),
             Text(
               message,
               textAlign: TextAlign.center,

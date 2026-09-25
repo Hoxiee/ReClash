@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -188,7 +190,7 @@ void main() {
     final messageText = tester.widget<Text>(find.text(longMessage));
     expect(messageText.maxLines, 2);
     expect(messageText.overflow, TextOverflow.ellipsis);
-    expect(find.byIcon(Icons.error_outline), findsNothing);
+    expect(find.byGlyph(AppGlyphs.error), findsNothing);
     expect(
       find.ancestor(
         of: find.text(longMessage),

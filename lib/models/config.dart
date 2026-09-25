@@ -264,6 +264,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,
+    @Default(false) bool smartRoutingDiagnostics,
     @Default(RestoreStrategy.compatible) RestoreStrategy restoreStrategy,
     @Default(true) bool showTrayTitle,
     @Default(true) bool checkCertificate,
@@ -273,6 +274,8 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(false) bool reduceMotion,
     @Default([]) List<String> serviceOrder,
     @Default([]) List<String> disabledServices,
+    @Default('') String currentService,
+    @Default(false) bool hideIp,
   }) = _AppSettingProps;
 
   factory AppSettingProps.fromJson(Map<String, Object?> json) =>

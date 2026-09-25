@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -9,18 +10,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ProxiesSetting extends StatelessWidget {
   const ProxiesSetting({super.key});
 
-  IconData _getIconWithProxiesType(ProxiesType type) {
+  Glyph _getIconWithProxiesType(ProxiesType type) {
     return switch (type) {
-      ProxiesType.tab => Icons.view_carousel,
-      ProxiesType.list => Icons.view_list,
+      ProxiesType.tab => AppGlyphs.carousel,
+      ProxiesType.list => AppGlyphs.list,
     };
   }
 
-  IconData _getIconWithProxiesSortType(ProxiesSortType type) {
+  Glyph _getIconWithProxiesSortType(ProxiesSortType type) {
     return switch (type) {
-      ProxiesSortType.none => Icons.sort,
-      ProxiesSortType.delay => Icons.network_ping,
-      ProxiesSortType.name => Icons.sort_by_alpha,
+      ProxiesSortType.none => AppGlyphs.sort,
+      ProxiesSortType.delay => AppGlyphs.networkCheck,
+      ProxiesSortType.name => AppGlyphs.sortAlpha,
     };
   }
 

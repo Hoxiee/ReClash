@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -110,7 +111,7 @@ HeroServiceLine routingServiceLineOf({
   };
 }
 
-typedef HeroServiceLineView = ({IconData icon, String text, bool accented});
+typedef HeroServiceLineView = ({Glyph icon, String text, bool accented});
 
 /// Where a line sends a tap: the fault it names owns the screen that explains
 /// it, and a paused tunnel explains nothing.
@@ -125,73 +126,73 @@ HeroServiceLineView heroServiceLineViewOf({
 }) => switch (line) {
   HeroServiceLine.doctor => (
     icon: doctor.state == DoctorExamState.examining
-        ? Icons.radar_rounded
-        : Icons.monitor_heart_outlined,
+        ? AppGlyphs.radar
+        : AppGlyphs.healthMonitor,
     text: connectionDoctorHeroText(appLocalizations, doctor),
     accented: true,
   ),
   HeroServiceLine.paused => (
-    icon: Icons.pause_circle_outline,
+    icon: AppGlyphs.pause,
     text: appLocalizations.heroLinkPaused,
     accented: true,
   ),
   HeroServiceLine.linkSlow => (
-    icon: Icons.speed_rounded,
+    icon: AppGlyphs.speed,
     text: appLocalizations.heroLinkSlow,
     accented: true,
   ),
   HeroServiceLine.linkBroken => (
-    icon: Icons.error_outline_rounded,
+    icon: AppGlyphs.error,
     text: appLocalizations.heroLinkBroken,
     accented: true,
   ),
   HeroServiceLine.routingRuleOnly => (
-    icon: Icons.info_outline_rounded,
+    icon: AppGlyphs.info,
     text: appLocalizations.smartRoutingRuleOnly,
     accented: false,
   ),
   HeroServiceLine.routingWaitingTunnel => (
-    icon: Icons.hourglass_empty_rounded,
+    icon: AppGlyphs.hourglass,
     text: appLocalizations.smartRoutingWaitingTunnel,
     accented: false,
   ),
   HeroServiceLine.routingWaitingNetwork => (
-    icon: Icons.wifi_off_rounded,
+    icon: AppGlyphs.wifiOff,
     text: appLocalizations.smartRoutingWaitingNetwork,
     accented: false,
   ),
   HeroServiceLine.routingSearching => (
-    icon: Icons.autorenew_rounded,
+    icon: AppGlyphs.sync,
     text: appLocalizations.smartRoutingSearching,
     accented: false,
   ),
   HeroServiceLine.routingOn => (
-    icon: Icons.bolt_rounded,
+    icon: AppGlyphs.bolt,
     text: appLocalizations.smartRoutingOn,
     accented: true,
   ),
   HeroServiceLine.routingRestricted => (
-    icon: Icons.shield_moon_rounded,
+    icon: AppGlyphs.shieldMoon,
     text: appLocalizations.smartRoutingRestricted,
     accented: true,
   ),
   HeroServiceLine.routingPortal => (
-    icon: Icons.wifi_lock_rounded,
+    icon: AppGlyphs.wifiLock,
     text: appLocalizations.smartRoutingPortal,
     accented: true,
   ),
   HeroServiceLine.routingRetrying => (
-    icon: Icons.sync_problem_rounded,
+    icon: AppGlyphs.syncError,
     text: appLocalizations.smartRoutingRetrying,
     accented: true,
   ),
   HeroServiceLine.routingNoServers => (
-    icon: Icons.error_outline_rounded,
+    icon: AppGlyphs.error,
     text: appLocalizations.smartRoutingNoServers,
     accented: true,
   ),
   HeroServiceLine.idle => (
-    icon: Icons.alt_route_rounded,
+    icon: AppGlyphs.route,
     text:
         status == HeroStatus.secured &&
             (easterEggRoll ?? _heroStatusEasterEggRoll) == 0
@@ -268,7 +269,7 @@ class HeroServiceRow extends ConsumerWidget {
           child: Row(
             key: ValueKey(text),
             children: [
-              Icon(icon, size: 15, color: color),
+              GlyphIcon(icon, size: 15, color: color),
               const SizedBox(width: 9),
               Expanded(
                 child: Text(

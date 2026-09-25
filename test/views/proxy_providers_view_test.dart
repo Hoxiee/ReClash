@@ -96,7 +96,7 @@ void main() {
           of: find.text(name),
           matching: find.byType(DecorationListItem),
         ),
-        matching: find.byIcon(Icons.more_vert),
+        matching: find.byGlyph(AppGlyphs.more),
       ),
     );
     await tester.pumpAndSettle();
@@ -281,13 +281,13 @@ void main() {
     final container = containerFor(tester, [provider]);
     await pump(tester, container);
 
-    expect(find.byIcon(Icons.more_vert), findsOne);
+    expect(find.byGlyph(AppGlyphs.more), findsOne);
 
     final updating = container.read(updatingKeysProvider.notifier);
     updating.start(provider.updatingKey);
     await settleTrailing(tester);
 
-    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byGlyph(AppGlyphs.more), findsNothing);
     expect(find.byType(CommonCircleLoading), findsOne);
   });
 
@@ -408,14 +408,14 @@ void main() {
     await tester.tap(find.text(currentAppLocalizations.sync));
     await settleTrailing(tester);
 
-    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byGlyph(AppGlyphs.more), findsNothing);
     expect(find.byType(CommonCircleLoading), findsOne);
 
     completer.complete('');
     await tester.pumpAndSettle();
     await tester.pump(const Duration(milliseconds: 700));
 
-    expect(find.byIcon(Icons.more_vert), findsOne);
+    expect(find.byGlyph(AppGlyphs.more), findsOne);
     expect(find.byType(CommonCircleLoading), findsNothing);
   });
 }

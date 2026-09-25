@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -76,7 +77,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
               SettingSection.sliver(
                 items: [
                   DecorationListItem.toggle(
-                    leading: const Icon(Icons.wallpaper),
+                    leading: const GlyphIcon(AppGlyphs.wallpaper),
                     title: Text(l10n.wallpaperEnabled),
                     value: settings.enabled,
                     onChanged: (value) =>
@@ -156,7 +157,7 @@ class AppearanceBackgroundTab extends ConsumerWidget {
                     (v) => update((s) => s.copyWith(cardOpacity: v)),
                   ),
                   DecorationListItem(
-                    leading: const Icon(Icons.restore),
+                    leading: const GlyphIcon(AppGlyphs.restore),
                     title: Text(l10n.wallpaperReset),
                     onPressed: () => update(
                       (s) => WallpaperProps(
@@ -296,8 +297,8 @@ class _WallpaperTile extends ConsumerWidget {
             borderRadius: AppRadius.lg,
             child: missing
                 ? Center(
-                    child: Icon(
-                      Icons.broken_image_outlined,
+                    child: GlyphIcon(
+                      AppGlyphs.brokenImage,
                       color: colorScheme.onSurfaceVariant,
                     ),
                   )
@@ -312,7 +313,7 @@ class _WallpaperTile extends ConsumerWidget {
             top: 6,
             child: _Badge(
               color: colorScheme.primary,
-              child: Icon(Icons.check, size: 14, color: colorScheme.onPrimary),
+              child: GlyphIcon(AppGlyphs.check, size: 14, color: colorScheme.onPrimary),
             ),
           ),
         Positioned(
@@ -328,7 +329,7 @@ class _WallpaperTile extends ConsumerWidget {
             ),
             tooltip: context.appLocalizations.wallpaperRemove,
             onPressed: onRemove,
-            icon: const Icon(Icons.close),
+            icon: const GlyphIcon(AppGlyphs.close),
           ),
         ),
       ],
@@ -353,8 +354,8 @@ class _AddTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.add_photo_alternate_outlined,
+            GlyphIcon(
+              AppGlyphs.addImage,
               color: colorScheme.onSurfaceVariant,
             ),
             if (label != null) ...[

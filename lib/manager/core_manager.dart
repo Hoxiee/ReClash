@@ -9,6 +9,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/connection_doctor.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/providers/route_state.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -143,6 +144,22 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         _scheduleFullSetup();
       },
     );
+    ref.listenManual(
+      appSettingProvider.select((state) => state.smartRoutingDiagnostics),
+      (prev, next) {
+        if (prev == next) return;
+        if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
+        unawaited(
+          _core.setSmartRoutingDiagnostics(next).then(
+            (_) {},
+            onError: (Object error) => commonPrint.log(
+              'smart routing diagnostics sync skipped: $error',
+              logLevel: LogLevel.warning,
+            ),
+          ),
+        );
+      },
+    );
     ref.listenManual(appSettingProvider.select((state) => state.openLogs), (
       prev,
       next,
@@ -261,5 +278,11 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         .read(geoResourceActionProvider.notifier)
         .handleCoreUpdate(geoType, updating, skipped, error);
     super.onGeoUpdate(geoType, updating, skipped, error);
+  }
+
+  @override
+  void onRouteChanged(RouteSnapshot snapshot) {
+    ref.read(routeTrackerProvider.notifier).applySnapshot(snapshot);
+    super.onRouteChanged(snapshot);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/models/models.dart' hide FileInfo;
@@ -100,7 +101,7 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.add,
                 onPressed: onAdd,
-                icon: const Icon(Icons.add, size: 18),
+                icon: const GlyphIcon(AppGlyphs.add, size: 18),
               ),
             ),
           ),

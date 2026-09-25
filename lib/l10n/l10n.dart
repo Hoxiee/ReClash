@@ -1775,14 +1775,59 @@ class AppLocalizations {
     );
   }
 
-  /// `When enabled, the Clash core can be controlled on port 9090`
+  /// `Configure external access to the Clash core`
   String get externalControllerDesc {
     return Intl.message(
-      'When enabled, the Clash core can be controlled on port 9090',
+      'Configure external access to the Clash core',
       name: 'externalControllerDesc',
       desc: '',
       args: [],
     );
+  }
+
+  /// `Enable external controller`
+  String get enableExternalController {
+    return Intl.message(
+      'Enable external controller',
+      name: 'enableExternalController',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow LAN access`
+  String get allowLanAccess {
+    return Intl.message(
+      'Allow LAN access',
+      name: 'allowLanAccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Allow access to the external controller from the LAN`
+  String get allowLanAccessDesc {
+    return Intl.message(
+      'Allow access to the external controller from the LAN',
+      name: 'allowLanAccessDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Listening port`
+  String get listeningPort {
+    return Intl.message(
+      'Listening port',
+      name: 'listeningPort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Random`
+  String get random {
+    return Intl.message('Random', name: 'random', desc: '', args: []);
   }
 
   /// `When enabled, IPv6 traffic can be received`
@@ -16067,6 +16112,406 @@ class AppLocalizations {
       name: 'serviceCheckedAt',
       desc: '',
       args: [time],
+    );
+  }
+
+  /// `Outbound IP`
+  String get outboundIp {
+    return Intl.message('Outbound IP', name: 'outboundIp', desc: '', args: []);
+  }
+
+  /// `IP address`
+  String get ipAddress {
+    return Intl.message('IP address', name: 'ipAddress', desc: '', args: []);
+  }
+
+  /// `Level`
+  String get ipQualityLevel {
+    return Intl.message('Level', name: 'ipQualityLevel', desc: '', args: []);
+  }
+
+  /// `Good`
+  String get ipQualityGood {
+    return Intl.message('Good', name: 'ipQualityGood', desc: '', args: []);
+  }
+
+  /// `Normal`
+  String get ipQualityNormal {
+    return Intl.message('Normal', name: 'ipQualityNormal', desc: '', args: []);
+  }
+
+  /// `Risky`
+  String get ipQualityRisky {
+    return Intl.message('Risky', name: 'ipQualityRisky', desc: '', args: []);
+  }
+
+  /// `Type`
+  String get ipType {
+    return Intl.message('Type', name: 'ipType', desc: '', args: []);
+  }
+
+  /// `Residential`
+  String get ipTypeResidential {
+    return Intl.message(
+      'Residential',
+      name: 'ipTypeResidential',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mobile network`
+  String get ipTypeMobile {
+    return Intl.message(
+      'Mobile network',
+      name: 'ipTypeMobile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Business`
+  String get ipTypeBusiness {
+    return Intl.message('Business', name: 'ipTypeBusiness', desc: '', args: []);
+  }
+
+  /// `Data center`
+  String get ipTypeHosting {
+    return Intl.message(
+      'Data center',
+      name: 'ipTypeHosting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Flags`
+  String get ipFlags {
+    return Intl.message('Flags', name: 'ipFlags', desc: '', args: []);
+  }
+
+  /// `Proxy`
+  String get ipFlagProxy {
+    return Intl.message('Proxy', name: 'ipFlagProxy', desc: '', args: []);
+  }
+
+  /// `VPN`
+  String get ipFlagVpn {
+    return Intl.message('VPN', name: 'ipFlagVpn', desc: '', args: []);
+  }
+
+  /// `Tor`
+  String get ipFlagTor {
+    return Intl.message('Tor', name: 'ipFlagTor', desc: '', args: []);
+  }
+
+  /// `Abuse history`
+  String get ipFlagAbuser {
+    return Intl.message(
+      'Abuse history',
+      name: 'ipFlagAbuser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Organization`
+  String get ipOrganization {
+    return Intl.message(
+      'Organization',
+      name: 'ipOrganization',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ASN`
+  String get ipAsn {
+    return Intl.message('ASN', name: 'ipAsn', desc: '', args: []);
+  }
+
+  /// `Answered by`
+  String get ipQualitySource {
+    return Intl.message(
+      'Answered by',
+      name: 'ipQualitySource',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sources`
+  String get ipQualitySources {
+    return Intl.message(
+      'Sources',
+      name: 'ipQualitySources',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Couldn't determine the IP type`
+  String get ipQualityFailed {
+    return Intl.message(
+      'Couldn\'t determine the IP type',
+      name: 'ipQualityFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Check again`
+  String get ipQualityRetry {
+    return Intl.message(
+      'Check again',
+      name: 'ipQualityRetry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No type`
+  String get ipSourceNoType {
+    return Intl.message('No type', name: 'ipSourceNoType', desc: '', args: []);
+  }
+
+  /// `Rate limited`
+  String get ipSourceRateLimited {
+    return Intl.message(
+      'Rate limited',
+      name: 'ipSourceRateLimited',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Different outbound IP`
+  String get ipSourceIpMismatch {
+    return Intl.message(
+      'Different outbound IP',
+      name: 'ipSourceIpMismatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hide IP`
+  String get hideIp {
+    return Intl.message('Hide IP', name: 'hideIp', desc: '', args: []);
+  }
+
+  /// `Diagnostics logging`
+  String get smartRoutingDiagnostics {
+    return Intl.message(
+      'Diagnostics logging',
+      name: 'smartRoutingDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Capture every routing decision, switch, and probe for this session`
+  String get smartRoutingDiagnosticsDesc {
+    return Intl.message(
+      'Capture every routing decision, switch, and probe for this session',
+      name: 'smartRoutingDiagnosticsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Routing log`
+  String get smartRoutingLog {
+    return Intl.message(
+      'Routing log',
+      name: 'smartRoutingLog',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Full capture of engine behavior`
+  String get smartRoutingLogDesc {
+    return Intl.message(
+      'Full capture of engine behavior',
+      name: 'smartRoutingLogDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More`
+  String get smartRoutingMore {
+    return Intl.message('More', name: 'smartRoutingMore', desc: '', args: []);
+  }
+
+  /// `Diagnostics logging is off`
+  String get smartRoutingLogOffTitle {
+    return Intl.message(
+      'Diagnostics logging is off',
+      name: 'smartRoutingLogOffTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn it on to capture routing decisions, switches, and probes.`
+  String get smartRoutingLogOffHint {
+    return Intl.message(
+      'Turn it on to capture routing decisions, switches, and probes.',
+      name: 'smartRoutingLogOffHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable logging`
+  String get smartRoutingLogEnable {
+    return Intl.message(
+      'Enable logging',
+      name: 'smartRoutingLogEnable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No routing activity captured yet`
+  String get smartRoutingLogEmpty {
+    return Intl.message(
+      'No routing activity captured yet',
+      name: 'smartRoutingLogEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Waiting for the engine…`
+  String get smartRoutingLogWaiting {
+    return Intl.message(
+      'Waiting for the engine…',
+      name: 'smartRoutingLogWaiting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} entries dropped`
+  String smartRoutingLogDropped(num count) {
+    return Intl.message(
+      '$count entries dropped',
+      name: 'smartRoutingLogDropped',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Decision`
+  String get smartRoutingLogKindDecision {
+    return Intl.message(
+      'Decision',
+      name: 'smartRoutingLogKindDecision',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Switch`
+  String get smartRoutingLogKindSwitch {
+    return Intl.message(
+      'Switch',
+      name: 'smartRoutingLogKindSwitch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Event`
+  String get smartRoutingLogKindEvent {
+    return Intl.message(
+      'Event',
+      name: 'smartRoutingLogKindEvent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Probe`
+  String get smartRoutingLogKindProbe {
+    return Intl.message(
+      'Probe',
+      name: 'smartRoutingLogKindProbe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Export log`
+  String get smartRoutingLogExport {
+    return Intl.message(
+      'Export log',
+      name: 'smartRoutingLogExport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear view`
+  String get smartRoutingLogClear {
+    return Intl.message(
+      'Clear view',
+      name: 'smartRoutingLogClear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-scroll`
+  String get smartRoutingLogAutoScroll {
+    return Intl.message(
+      'Auto-scroll',
+      name: 'smartRoutingLogAutoScroll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `×{count}`
+  String smartRoutingLogRepeat(num count) {
+    return Intl.message(
+      '×$count',
+      name: 'smartRoutingLogRepeat',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `State`
+  String get smartRoutingLogState {
+    return Intl.message(
+      'State',
+      name: 'smartRoutingLogState',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Candidates`
+  String get smartRoutingLogCandidates {
+    return Intl.message(
+      'Candidates',
+      name: 'smartRoutingLogCandidates',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Kinds`
+  String get smartRoutingLogFilter {
+    return Intl.message(
+      'Kinds',
+      name: 'smartRoutingLogFilter',
+      desc: '',
+      args: [],
     );
   }
 }

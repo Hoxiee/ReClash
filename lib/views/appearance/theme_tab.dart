@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -54,9 +55,9 @@ class AppearanceThemeTab extends ConsumerWidget {
       ),
     );
     final modes = [
-      (ThemeMode.system, Icons.auto_mode, appLocalizations.auto),
-      (ThemeMode.light, Icons.light_mode, appLocalizations.light),
-      (ThemeMode.dark, Icons.dark_mode, appLocalizations.dark),
+      (ThemeMode.system, AppGlyphs.themeAuto, appLocalizations.auto),
+      (ThemeMode.light, AppGlyphs.sun, appLocalizations.light),
+      (ThemeMode.dark, AppGlyphs.moon, appLocalizations.dark),
     ];
     return [
       for (final (mode, iconData, label) in modes)
@@ -97,7 +98,7 @@ class AppearanceThemeTab extends ConsumerWidget {
         SettingSection.sliver(
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.schedule),
+              leading: const GlyphIcon(AppGlyphs.clock),
               title: Text(appLocalizations.schedule),
               subtitle: Text(
                 appLocalizations.scheduleDesc(theme.darkAt, theme.lightAt),
@@ -116,7 +117,7 @@ class AppearanceThemeTab extends ConsumerWidget {
             ),
             if (theme.scheduledTheme) ...[
               DecorationListItem(
-                leading: const Icon(Icons.bedtime),
+                leading: const GlyphIcon(AppGlyphs.moon),
                 title: Text(appLocalizations.darkAt),
                 trailing: Text(
                   theme.darkAt,
@@ -127,7 +128,7 @@ class AppearanceThemeTab extends ConsumerWidget {
                 onPressed: () => _editTime(context, ref, isDark: true),
               ),
               DecorationListItem(
-                leading: const Icon(Icons.wb_sunny),
+                leading: const GlyphIcon(AppGlyphs.sun),
                 title: Text(appLocalizations.lightAt),
                 trailing: Text(
                   theme.lightAt,
@@ -143,7 +144,7 @@ class AppearanceThemeTab extends ConsumerWidget {
         SettingSection.sliver(
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.nightlight_round),
+              leading: const GlyphIcon(AppGlyphs.moon),
               title: Text(appLocalizations.pureBlackMode),
               value: theme.pureBlack,
               onChanged: (value) =>
@@ -154,7 +155,7 @@ class AppearanceThemeTab extends ConsumerWidget {
                 message: theme.pureBlack
                     ? appLocalizations.contrastAmoledHint
                     : '',
-                child: const Icon(Icons.contrast),
+                child: const GlyphIcon(AppGlyphs.contrast),
               ),
               title: appLocalizations.contrast,
               valueLabel: _percent(contrast),

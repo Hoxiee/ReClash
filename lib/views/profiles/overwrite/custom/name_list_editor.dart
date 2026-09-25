@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -253,9 +254,9 @@ class _IncludeAllCard extends StatelessWidget {
                     cancelable: false,
                   );
                 },
-                icon: Icon(
+                icon: GlyphIcon(
                   size: 16.ap,
-                  Icons.info_outline,
+                  AppGlyphs.info,
                   color: context.colorScheme.onSurfaceVariant,
                 ),
               ),

@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../../helpers/glyph_finders.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -246,7 +248,7 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.byIcon(Icons.sync), findsOneWidget);
+      expect(find.byGlyph(AppGlyphs.sync), findsOneWidget);
     });
   });
 

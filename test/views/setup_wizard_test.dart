@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -630,7 +632,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('No regular node addresses'), findsOneWidget);
-    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.warning), findsOneWidget);
     expect(container.read(appSettingProvider).autoRun, isFalse);
   });
 
@@ -1293,7 +1295,7 @@ void main() {
 
       expect(gateway.notificationChecks, 1);
       expect(find.text('Requested on first connection'), findsOneWidget);
-      expect(find.byIcon(Icons.schedule_rounded), findsOneWidget);
+      expect(find.byGlyph(AppGlyphs.clock), findsOneWidget);
       expect(find.text('Allowed'), findsOneWidget);
     });
 

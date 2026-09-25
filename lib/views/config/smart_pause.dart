@@ -104,37 +104,12 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       await _handleEditNetwork(network);
       return;
     }
-    final appLocalizations = context.appLocalizations;
-    final picked = await showSheet<String>(
-      context: context,
-      props: const SheetProps(maxHeight: 520),
-      builder: (_) {
-        return SizedBox(
-          height: 460,
-          child: AdaptiveSheetScaffold(
-            title: appLocalizations.pickNetwork,
-            body: SmartPauseNetworkPicker(
-              selected: networks.toSet(),
-              onSelected: (ssid) {
-                Navigator.of(context).maybePop();
-                _handleAddNetwork(ssid);
-              },
-            ),
-            actions: [
-              IconButtonData(
-                tooltip: appLocalizations.enterManually,
-                glyph: AppGlyphs.keyboard,
-                onPressed: () => _handleEnterManually(networks),
-              ),
-            ],
-          ),
-        );
-      },
+    await showSmartPauseNetworkPickerSheet(
+      context,
+      selected: networks.toSet(),
+      onSelected: _handleAddNetwork,
+      onEnterManually: () => _handleEnterManually(networks),
     );
-    if (picked == null) {
-      return;
-    }
-    _handleAddNetwork(picked);
   }
 
   Future<void> _handleEnterManually(List<String> networks) async {
@@ -247,8 +222,8 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
           child: SelectedDecorationListItem(
             isEditing: isEditing,
             minVerticalPadding: 8,
-            leading: Icon(
-              isSubnetRule(network) ? Icons.router_rounded : Icons.wifi_rounded,
+            leading: GlyphIcon(
+              isSubnetRule(network) ? AppGlyphs.router : AppGlyphs.wifi,
               color: context.colorScheme.onSurfaceVariant,
             ),
             title: TooltipText(
@@ -480,10 +455,10 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(
               children: [
-                Icon(
+                GlyphIcon(
                   matched
-                      ? Icons.pause_circle_rounded
-                      : Icons.location_searching_rounded,
+                      ? AppGlyphs.pause
+                      : AppGlyphs.locate,
                   size: 18,
                   color: matched
                       ? colorScheme.primary
@@ -523,7 +498,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             child: IconButton.filledTonal(
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
-              icon: const Icon(Icons.delete),
+              icon: const GlyphIcon(AppGlyphs.delete),
             ),
           ),
         const SizedBox(width: 2),

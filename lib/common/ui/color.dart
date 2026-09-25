@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:material_color_utilities/hct/hct.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -34,6 +35,10 @@ extension ColorExtension on Color {
 
   Color get opacity10 {
     return withValues(alpha: 0.1);
+  }
+
+  Color get opacity2 {
+    return withValues(alpha: 0.02);
   }
 
   Color get opacity3 {
@@ -105,6 +110,10 @@ extension ColorExtension on Color {
 }
 
 extension ColorSchemeExtension on ColorScheme {
+  Color get success => Colors.green.harmonizeWith(primary);
+
+  Color get warning => Colors.orange.harmonizeWith(primary);
+
   ColorScheme toPureBlack(bool isPureBlack) {
     if (!isPureBlack || brightness != Brightness.dark) {
       return this;

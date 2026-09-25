@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -83,7 +85,7 @@ void main() {
 
     expect(find.text('Subscription expired'), findsNWidgets(2));
     expect(find.text('Remaining 0 days'), findsNothing);
-    expect(find.byIcon(Icons.event_busy_rounded), findsNWidgets(2));
+    expect(find.byGlyph(AppGlyphs.calendar), findsNWidgets(2));
   });
 
   testWidgets('a tap on the traffic card opens the subscription overview', (

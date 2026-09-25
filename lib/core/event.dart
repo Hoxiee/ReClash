@@ -44,6 +44,8 @@ abstract mixin class CoreEventListener {
   void onRcxStatus(RcxStatus status) {}
 
   void onDoctorStatus(DoctorStatus status) {}
+
+  void onRouteChanged(RouteSnapshot snapshot) {}
 }
 
 class CoreEventManager {
@@ -86,6 +88,13 @@ class CoreEventManager {
             case CoreEventType.doctorStatus:
               listener.onDoctorStatus(
                 DoctorStatus.fromJson(
+                  Map<String, Object?>.from(event.data as Map),
+                ),
+              );
+              break;
+            case CoreEventType.routeChanged:
+              listener.onRouteChanged(
+                RouteSnapshot.fromJson(
                   Map<String, Object?>.from(event.data as Map),
                 ),
               );

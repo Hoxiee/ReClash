@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
@@ -204,14 +205,14 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
     final appLocalizations = context.appLocalizations;
     return [
       CommonPopupMenuItem(
-        icon: Icons.edit_outlined,
+        glyph: AppGlyphs.edit,
         label: appLocalizations.edit,
         onPressed: () {
           _updateUrl(url);
         },
       ),
       CommonPopupMenuItem(
-        icon: Icons.sync,
+        glyph: AppGlyphs.sync,
         label: appLocalizations.sync,
         onPressed: _handleUpdateGeoDataItem,
       ),
@@ -272,7 +273,7 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
                                 padding: EdgeInsets.all(12),
                                 child: CommonCircleLoading(),
                               )
-                            : const Icon(Icons.more_vert),
+                            : const GlyphIcon(AppGlyphs.more),
                       );
                     },
                   ),

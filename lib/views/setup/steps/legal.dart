@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -92,7 +93,7 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
               title: Text(appLocalizations.setupLegalLicense),
               subtitle: const Text('GPL-3.0'),
               onTap: _showLicenses,
-              trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
             ),
           ],
         ),

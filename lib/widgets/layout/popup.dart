@@ -572,8 +572,8 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     final foregroundColor = enabled ? color : color.opacity30;
     Widget? arrow;
     if (item.subItems.isNotEmpty) {
-      arrow = Icon(
-        Icons.chevron_right,
+      arrow = GlyphIcon(
+        AppGlyphs.chevronForward,
         size: _itemIconSize,
         color: foregroundColor,
       );

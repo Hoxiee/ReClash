@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
@@ -32,7 +34,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.tap(find.byGlyph(AppGlyphs.more));
     await tester.pumpAndSettle();
     await tester.tap(find.text('External fetch'));
     await tester.pumpAndSettle();

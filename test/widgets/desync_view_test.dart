@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
@@ -81,7 +83,7 @@ void main() {
 
   testWidgets('the default ladder is marked active', (tester) async {
     await pumpView(tester);
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.check), findsOneWidget);
   });
 
   testWidgets('the master toggle hides every control while off', (
@@ -113,13 +115,13 @@ void main() {
       ),
     );
     expect(find.text('Split only'), findsOneWidget);
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.check), findsOneWidget);
 
     await tester.tap(find.text('Split only'));
     await tester.pumpAndSettle();
 
     expect(container.read(desyncSettingProvider).strategyArgs, args);
-    expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.check), findsOneWidget);
   });
 
   testWidgets('the default row restores the built-in ladder', (tester) async {

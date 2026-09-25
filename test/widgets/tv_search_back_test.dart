@@ -1,4 +1,6 @@
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -47,7 +49,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
 
@@ -89,7 +91,7 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => CommonScaffold(
                   key: const GlobalObjectKey(PageLabel.dashboard),
@@ -103,7 +105,7 @@ void main() {
                 ),
               ),
               NavigationItem(
-                icon: const Icon(Icons.construction),
+                glyph: AppGlyphs.tools,
                 label: PageLabel.tools,
                 builder: (_) => const SizedBox.shrink(),
               ),
@@ -135,7 +137,7 @@ void main() {
     await tester.pump();
     expect(find.byType(AppNavRail), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'needle');

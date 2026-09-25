@@ -12,6 +12,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -144,8 +145,8 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   @override
   Widget build(BuildContext context) {
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.memory_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.memory,
       label: context.appLocalizations.memoryInfo,
       onPressed: _showDetail,
       child: ValueListenableBuilder(
@@ -286,21 +287,22 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
       title: appLocalizations.memoryInfo,
       floatBody: true,
       actions: [
-        IconButton(
-          tooltip: appLocalizations.releaseMemory,
-          onPressed: _isReleasing ? null : _handleRelease,
-          icon: _isReleasing
-              ? const CommonCircleLoading(
-                  constraints: BoxConstraints.tightFor(width: 20, height: 20),
-                )
-              : const GlyphIcon(AppGlyphs.broom, size: 20),
+        AppBarActionButton(
+          data: IconButtonData(
+            glyph: AppGlyphs.broom,
+            tooltip: appLocalizations.releaseMemory,
+            isLoading: _isReleasing,
+            onPressed: _handleRelease,
+          ),
         ),
       ],
       body: ValueListenableBuilder<MemorySnapshot>(
         valueListenable: widget.snapshot,
         builder: (context, snapshot, _) {
           return ListView(
-            padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 20),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ).copyWith(top: context.contentTopPadding, bottom: 20),
             children: [
               _MemoryOverview(snapshot: snapshot),
               _MemorySection(
@@ -362,7 +364,7 @@ class _MemorySection extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: KeyedSubtree(
               key: contentKey,
-              child: Column(children: generateSection(items: items)),
+              child: generateSectionV3(items: items),
             ),
           ),
         ),
@@ -374,6 +376,9 @@ class _MemorySection extends StatelessWidget {
 class _MemoryOverview extends StatelessWidget {
   const _MemoryOverview({required this.snapshot});
 
+  /// The optical edge of the xl-radius cards below.
+  static const _inset = 5.0;
+
   final MemorySnapshot snapshot;
 
   @override
@@ -382,7 +387,7 @@ class _MemoryOverview extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final total = snapshot.total.traffic;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+      padding: const EdgeInsets.fromLTRB(_inset, 8, _inset, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

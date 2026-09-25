@@ -347,8 +347,8 @@ class _ServerZone extends ConsumerWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
+            GlyphIcon(
+              AppGlyphs.chevronForward,
               size: 20,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -387,8 +387,8 @@ class _FlagCircle extends StatelessWidget {
         color: colorScheme.surfaceContainerHighest,
         alignment: Alignment.center,
         child: emoji == null
-            ? Icon(
-                Icons.public_rounded,
+            ? GlyphIcon(
+                AppGlyphs.language,
                 size: side * 0.5,
                 color: colorScheme.onSurfaceVariant,
               )

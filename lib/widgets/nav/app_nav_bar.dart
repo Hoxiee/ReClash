@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -146,9 +147,9 @@ class _Spring extends ChangeNotifier implements ValueListenable<double> {
 }
 
 class NavBarDestination {
-  const NavBarDestination({required this.icon, required this.label});
+  const NavBarDestination({required this.glyph, required this.label});
 
-  final IconData icon;
+  final Glyph glyph;
   final String label;
 }
 
@@ -206,7 +207,7 @@ class AppNavBar extends ConsumerWidget {
                   destinations: [
                     for (final item in items)
                       NavBarDestination(
-                        icon: item.icon.icon ?? Icons.circle,
+                        glyph: item.glyph,
                         label: item.label.label,
                       ),
                   ],
@@ -858,7 +859,7 @@ class _FloatingBarItemState extends State<_FloatingBarItem> {
           final column = Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(widget.destination.icon, size: _iconSize, color: color),
+              GlyphIcon(widget.destination.glyph, size: _iconSize, color: color, fill: emphasis),
               const SizedBox(height: _labelGap),
               SizedBox(
                 height: widget.labelHeight,

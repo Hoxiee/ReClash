@@ -8,6 +8,7 @@ export 'config.dart';
 export 'connection_doctor.dart';
 export 'core.dart';
 export 'desync.dart';
+export 'ip_quality.dart';
 export 'developer_subscription.dart';
 export 'panel_appearance.dart';
 export 'panel_headers.dart';

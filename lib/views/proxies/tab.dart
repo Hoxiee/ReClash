@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
 import 'package:reclash/common/common.dart';
@@ -118,8 +119,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
           tooltip: context.appLocalizations.more,
           onPressed: _showMoreMenu,
           icon: isMobileView
-              ? const Icon(Icons.expand_more)
-              : const Icon(Icons.chevron_right),
+              ? const GlyphIcon(AppGlyphs.chevronDown)
+              : const GlyphIcon(AppGlyphs.chevronForward),
         );
       },
     );
@@ -509,7 +510,7 @@ class _DelayTestButtonState extends State<DelayTestButton>
       child: CommonFloatingActionButton(
         onPressed: _healthcheck,
         label: appLocalizations.delayTest,
-        icon: const Icon(Icons.network_ping),
+        icon: const GlyphIcon(AppGlyphs.networkCheck),
       ),
     );
   }

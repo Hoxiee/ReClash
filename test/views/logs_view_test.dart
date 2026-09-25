@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -119,9 +121,9 @@ void main() {
   testWidgets('filter button opens the source/level menu', (tester) async {
     await pumpLogsView(tester);
 
-    expect(find.byIcon(Icons.filter_alt_outlined), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.filter), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.filter_alt_outlined));
+    await tester.tap(find.byGlyph(AppGlyphs.filter));
     await tester.pumpAndSettle();
 
     expect(find.text('Source'), findsOneWidget);

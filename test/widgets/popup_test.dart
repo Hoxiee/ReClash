@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/widgets/layout/popup.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
@@ -172,7 +174,7 @@ void main() {
     open();
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.chevronForward), findsOneWidget);
 
     await tester.tap(find.text('parent'));
     await tester.pumpAndSettle();

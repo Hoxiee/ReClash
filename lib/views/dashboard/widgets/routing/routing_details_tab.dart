@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
@@ -58,7 +59,7 @@ class RoutingStepData {
     this.childLabel = '',
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String title;
   final String body;
   final Color? tone;
@@ -112,7 +113,7 @@ class RoutingRoundCard extends StatelessWidget {
           );
     return [
       RoutingStepData(
-        icon: Icons.wifi_find_outlined,
+        icon: AppGlyphs.networkCheck,
         title: appLocalizations.smartRoutingStepNetwork,
         body: [
           format.label,
@@ -124,7 +125,7 @@ class RoutingRoundCard extends StatelessWidget {
         ].join(' · '),
       ),
       RoutingStepData(
-        icon: Icons.filter_alt_outlined,
+        icon: AppGlyphs.filter,
         title: appLocalizations.smartRoutingStepAdmit,
         body: appLocalizations.smartRoutingStepAdmitBody(
           counts.eligible,
@@ -133,7 +134,7 @@ class RoutingRoundCard extends StatelessWidget {
         ),
       ),
       RoutingStepData(
-        icon: Icons.sort_rounded,
+        icon: AppGlyphs.sort,
         title: appLocalizations.smartRoutingStepRank,
         body: [
           appLocalizations.smartRoutingStepRankBody,
@@ -143,7 +144,7 @@ class RoutingRoundCard extends StatelessWidget {
         child: RoutingRankOrder(strategy: status.strategy),
       ),
       RoutingStepData(
-        icon: failed ? Icons.error_outline_rounded : Icons.verified_rounded,
+        icon: failed ? AppGlyphs.error : AppGlyphs.verified,
         tone: failed ? colorScheme.error : colorScheme.primary,
         title: appLocalizations.smartRoutingStepDecision,
         body: routingReasonLabel(appLocalizations, status.reason),
@@ -308,7 +309,7 @@ class RoutingEvidenceCard extends StatelessWidget {
         .toList();
     if (canaries.isEmpty && report.candidates.isEmpty) {
       return RoutingNotice(
-        icon: Icons.science_outlined,
+        icon: AppGlyphs.beaker,
         text: appLocalizations.smartRoutingEmpty,
       );
     }
@@ -486,8 +487,8 @@ class RoutingSafeguardList extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Icon(
-                    Icons.circle,
+                  child: GlyphIcon(
+                    AppGlyphs.dot,
                     size: 5,
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -523,7 +524,7 @@ class RoutingHistoryCard extends StatelessWidget {
     final history = report.history.reversed.toList();
     if (history.isEmpty) {
       return RoutingNotice(
-        icon: Icons.history_rounded,
+        icon: AppGlyphs.history,
         text: appLocalizations.smartRoutingHistoryEmpty,
       );
     }

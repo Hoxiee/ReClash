@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/app/permission.dart';
@@ -250,7 +251,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                   ),
                   ListItem<SmartRoutingStrategy>.options(
                     key: const ValueKey('setup-smart-routing-preset'),
-                    leading: const Icon(Icons.tune_rounded),
+                    leading: const GlyphIcon(AppGlyphs.sliders),
                     title: Text(appLocalizations.smartRoutingPreset),
                     subtitle: Text(
                       routing.matchesStrategy
@@ -272,14 +273,14 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                     },
                   ),
                   ListItem.next(
-                    leading: const Icon(Icons.public_outlined),
+                    leading: const GlyphIcon(AppGlyphs.language),
                     title: Text(appLocalizations.geoResources),
                     subtitle: Text(appLocalizations.resourcesDesc),
                     widget: const ResourcesView(),
                   ),
                   if (system.isAndroid)
                     ListItem.next(
-                      leading: const Icon(Icons.apps_rounded),
+                      leading: const GlyphIcon(AppGlyphs.appsList),
                       title: Text(appLocalizations.accessControl),
                       subtitle: Text(appLocalizations.accessControlDesc),
                       widget: const AccessView(),
@@ -341,7 +342,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                       title: appLocalizations.setupPermissionVpn,
                       desc: appLocalizations.setupPermissionVpnDesc,
                       status: appLocalizations.setupPermissionDeferred,
-                      trailing: const Icon(Icons.schedule_rounded, size: 20),
+                      trailing: const GlyphIcon(AppGlyphs.clock, size: 20),
                     ),
                     _PermissionRow(
                       title: appLocalizations.setupPermissionNotifications,
@@ -496,8 +497,8 @@ class _PermissionRow extends StatelessWidget {
             )
           : trailing ??
                 (onPressed == null
-                    ? Icon(Icons.check_rounded, size: 20, color: tone)
-                    : const Icon(Icons.chevron_right_rounded, size: 20)),
+                    ? GlyphIcon(AppGlyphs.check, size: 20, color: tone)
+                    : const GlyphIcon(AppGlyphs.chevronForward, size: 20)),
     );
   }
 }

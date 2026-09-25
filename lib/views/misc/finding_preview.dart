@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/settings/about.dart';
@@ -34,7 +35,7 @@ class FindingPreviewView extends ConsumerWidget {
                 SettingSection(
                   items: [
                     DecorationListItem(
-                      leading: const Icon(Icons.science_outlined),
+                      leading: const GlyphIcon(AppGlyphs.beaker),
                       title: Text(localizations.developerFindings),
                       subtitle: Text(localizations.developerFindingsDesc),
                     ),
@@ -95,10 +96,10 @@ class FindingPreviewView extends ConsumerWidget {
                     for (final id in findingIds)
                       DecorationListItem(
                         key: ValueKey('preview-finding-$id'),
-                        leading: Icon(
+                        leading: GlyphIcon(
                           preview.unlocked.contains(id)
-                              ? Icons.check_circle_outline
-                              : Icons.play_arrow_rounded,
+                              ? AppGlyphs.checkCircle
+                              : AppGlyphs.play,
                         ),
                         title: Text(findingName(context, id)),
                         subtitle: Text(findingDescription(context, id)),
@@ -182,7 +183,7 @@ class _PatinaLabState extends ConsumerState<PatinaLab> {
               seed: 0x5A11,
               reduceMotion: reduceMotion,
               child: ListItem(
-                leading: const Icon(Icons.cloud_outlined),
+                leading: const GlyphIcon(AppGlyphs.cloud),
                 title: Text(localizations.developerPatinaSample),
                 subtitle: Text(
                   localizations.developerPatinaDays(_days.round()),
@@ -192,7 +193,7 @@ class _PatinaLabState extends ConsumerState<PatinaLab> {
           ),
         ),
         SettingSliderItem(
-          leading: const Icon(Icons.hourglass_bottom),
+          leading: const GlyphIcon(AppGlyphs.hourglass),
           valueLabel: localizations.developerPatinaDays(_days.round()),
           min: 0,
           max: 365,
@@ -203,7 +204,7 @@ class _PatinaLabState extends ConsumerState<PatinaLab> {
           },
         ),
         DecorationListItem.toggle(
-          leading: const Icon(Icons.format_list_bulleted),
+          leading: const GlyphIcon(AppGlyphs.list),
           title: Text(localizations.developerPatinaApply),
           subtitle: Text(localizations.developerPatinaApplyDesc),
           value: applied != null,

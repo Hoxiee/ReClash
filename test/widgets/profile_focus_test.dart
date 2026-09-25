@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -156,7 +158,7 @@ void main() {
       matching: find.byType(ListItem),
     );
     await tester.tap(
-      find.descendant(of: profileItem, matching: find.byIcon(Icons.more_vert)),
+      find.descendant(of: profileItem, matching: find.byGlyph(AppGlyphs.more)),
     );
     await tester.pumpAndSettle();
 

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -153,7 +154,7 @@ class _OverwriteSelectionSheetState<T>
           ),
         ),
         isSelected: isSelected,
-        trailing: isSelected ? const Icon(Icons.check) : null,
+        trailing: isSelected ? const GlyphIcon(AppGlyphs.check) : null,
       ),
     );
   }

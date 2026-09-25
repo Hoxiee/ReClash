@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -1630,13 +1631,13 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
     HeroStatus.paused => context.appLocalizations.heroPaused,
   };
 
-  IconData get _statusIcon => switch (_status) {
-    HeroStatus.paused => Icons.play_arrow_rounded,
+  Glyph get _statusIcon => switch (_status) {
+    HeroStatus.paused => AppGlyphs.play,
     HeroStatus.checking ||
-    HeroStatus.diagnosing => Icons.wifi_tethering_rounded,
-    HeroStatus.subscriptionExpired => Icons.event_busy_rounded,
-    HeroStatus.offline => Icons.wifi_off_rounded,
-    _ => Icons.power_settings_new_rounded,
+    HeroStatus.diagnosing => AppGlyphs.tethering,
+    HeroStatus.subscriptionExpired => AppGlyphs.calendar,
+    HeroStatus.offline => AppGlyphs.wifiOff,
+    _ => AppGlyphs.power,
   };
 
   static const _coreMarkExtent = 0.54;
@@ -1644,8 +1645,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   Widget _coreChild(double core, Color accent) {
     if (widget.variant == HeroOrbVariant.byedpi && _status.flows) {
-      return Icon(
-        Icons.blur_on_rounded,
+      return GlyphIcon(
+        AppGlyphs.blur,
         key: const ValueKey('byedpi-core-mark'),
         size: core * 0.5,
         color: accent.opacity80,
@@ -1680,7 +1681,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
           ),
         );
       case HeroCoreMark.statusIcon:
-        return Icon(
+        return GlyphIcon(
           _statusIcon,
           key: ValueKey(_statusIcon),
           size: core * 0.46,

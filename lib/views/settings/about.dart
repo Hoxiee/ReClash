@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/milestones/seasonal.dart';
@@ -99,7 +100,7 @@ class AboutView extends ConsumerWidget {
             items: [
               DecorationListItem(
                 title: Text(appLocalizations.checkUpdate),
-                leading: const Icon(Icons.update),
+                leading: const GlyphIcon(AppGlyphs.update),
                 onPressed: () {
                   _checkUpdate(context, ref);
                 },
@@ -107,8 +108,8 @@ class AboutView extends ConsumerWidget {
               DecorationListItem(
                 title: Text(appLocalizations.sourceCode),
                 subtitle: const Text(repository),
-                leading: const Icon(Icons.code),
-                trailing: const Icon(Icons.launch, size: 20),
+                leading: const GlyphIcon(AppGlyphs.code),
+                trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
                 onPressed: () {
                   dialogs.openUrl('https://github.com/$repository');
                 },
@@ -116,8 +117,8 @@ class AboutView extends ConsumerWidget {
               DecorationListItem(
                 title: Text(appLocalizations.core),
                 subtitle: const Text('mihomo'),
-                leading: const Icon(Icons.memory),
-                trailing: const Icon(Icons.launch, size: 20),
+                leading: const GlyphIcon(AppGlyphs.memory),
+                trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
                 onPressed: () {
                   dialogs.openUrl(
                     'https://github.com/Hoxiee/mihomo/tree/ReClash',
@@ -126,8 +127,8 @@ class AboutView extends ConsumerWidget {
               ),
               DecorationListItem(
                 title: const Text('Telegram'),
-                leading: const Icon(Icons.telegram),
-                trailing: const Icon(Icons.launch, size: 20),
+                leading: const GlyphIcon(AppGlyphs.telegram),
+                trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
                 onPressed: () {
                   dialogs.openUrl('https://t.me/ReClashApp');
                 },
@@ -135,8 +136,8 @@ class AboutView extends ConsumerWidget {
               DecorationListItem(
                 title: Text(appLocalizations.license),
                 subtitle: const Text('GPL-3.0'),
-                leading: const Icon(Icons.balance),
-                trailing: const Icon(Icons.launch, size: 20),
+                leading: const GlyphIcon(AppGlyphs.balance),
+                trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
                 onPressed: () {
                   dialogs.openUrl(
                     'https://github.com/$repository/blob/main/LICENSE',
@@ -146,7 +147,7 @@ class AboutView extends ConsumerWidget {
               DecorationListItem(
                 title: Text(appLocalizations.licenses),
                 subtitle: Text(appLocalizations.licensesDesc),
-                leading: const Icon(Icons.menu_book),
+                leading: const GlyphIcon(AppGlyphs.document),
                 onPressed: () {
                   showLicensePage(
                     context: context,
@@ -402,7 +403,7 @@ class _CreditItem extends StatelessWidget {
       ),
       title: Text(credit.name),
       subtitle: Text(credit.role),
-      trailing: const Icon(Icons.launch, size: 20),
+      trailing: const GlyphIcon(AppGlyphs.openExternal, size: 20),
       onPressed: () {
         dialogs.openUrl(credit.link);
       },

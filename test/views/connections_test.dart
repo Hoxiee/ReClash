@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/models/models.dart';
@@ -13,6 +14,7 @@ import 'package:mocktail/mocktail.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+import '../helpers/glyph_finders.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
@@ -177,10 +179,10 @@ void main() {
 
     await pumpConnections(tester);
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.code), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.code), findsOneWidget);
 
     await teardownView(tester);
   });

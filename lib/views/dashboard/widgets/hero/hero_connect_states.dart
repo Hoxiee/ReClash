@@ -80,10 +80,10 @@ class _EmptyHero extends ConsumerWidget {
                               .read(currentPageLabelProvider.notifier)
                               .toProfiles()
                         : () => _showAddProfile(context),
-                    icon: Icon(
+                    icon: GlyphIcon(
                       hasSavedProfiles
-                          ? Icons.folder_open_rounded
-                          : Icons.add_rounded,
+                          ? AppGlyphs.folder
+                          : AppGlyphs.add,
                     ),
                     label: Text(
                       hasSavedProfiles
@@ -95,7 +95,7 @@ class _EmptyHero extends ConsumerWidget {
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => _showAddProfile(context),
-                      icon: const Icon(Icons.add_rounded),
+                      icon: const GlyphIcon(AppGlyphs.add),
                       label: Text(appLocalizations.addProfile),
                     ),
                   ],
@@ -115,7 +115,7 @@ class _EmptyHero extends ConsumerWidget {
                   child: Row(
                     children: [
                       const _ByeDpiCardIcon(
-                        icon: Icons.shield_rounded,
+                        icon: AppGlyphs.shield,
                         size: 44,
                       ),
                       const SizedBox(width: 14),
@@ -140,8 +140,8 @@ class _EmptyHero extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(
-                        Icons.chevron_right_rounded,
+                      GlyphIcon(
+                        AppGlyphs.chevronForward,
                         color: context.colorScheme.onSurfaceVariant,
                       ),
                     ],
@@ -169,7 +169,7 @@ class _NoticeOpenCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(
         children: [
-          Icon(Icons.campaign_rounded, size: 20, color: colorScheme.primary),
+          GlyphIcon(AppGlyphs.announce, size: 20, color: colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -193,8 +193,8 @@ class _NoticeOpenCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(
-            Icons.chevron_right_rounded,
+          GlyphIcon(
+            AppGlyphs.chevronForward,
             size: 20,
             color: colorScheme.onSurfaceVariant,
           ),
@@ -230,7 +230,7 @@ class _HeroActionRow extends ConsumerWidget {
       if (showUpdate)
         Expanded(
           child: _ActionChip(
-            icon: Icons.refresh_rounded,
+            icon: AppGlyphs.refresh,
             label: appLocalizations.update,
             busy: isUpdating,
             onTap: onUpdate,
@@ -239,7 +239,7 @@ class _HeroActionRow extends ConsumerWidget {
       if (hasSupport)
         Expanded(
           child: _ActionChip(
-            icon: Icons.support_agent_rounded,
+            icon: AppGlyphs.support,
             label: appLocalizations.support,
             onTap: () => unawaited(dialogs.openUrl(supportUrl!)),
           ),
@@ -278,8 +278,8 @@ class _PauseChip extends ConsumerWidget {
           width: 44,
           height: 44,
           alignment: Alignment.center,
-          child: Icon(
-            paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+          child: GlyphIcon(
+            paused ? AppGlyphs.play : AppGlyphs.pause,
             size: 18,
             color: colorScheme.primary,
           ),
@@ -292,11 +292,11 @@ class _PauseChip extends ConsumerWidget {
 class _ModeChip extends ConsumerWidget {
   const _ModeChip();
 
-  IconData _modeIcon(UiOutboundMode mode) => switch (mode) {
-    UiOutboundMode.auto => Icons.auto_mode,
-    UiOutboundMode.rule => Icons.rule,
-    UiOutboundMode.global => Icons.public,
-    UiOutboundMode.direct => Icons.flash_on,
+  Glyph _modeIcon(UiOutboundMode mode) => switch (mode) {
+    UiOutboundMode.auto => AppGlyphs.themeAuto,
+    UiOutboundMode.rule => AppGlyphs.rules,
+    UiOutboundMode.global => AppGlyphs.language,
+    UiOutboundMode.direct => AppGlyphs.bolt,
   };
 
   void _selectOutboundMode(WidgetRef ref, UiOutboundMode mode) {
@@ -333,7 +333,7 @@ class _ModeChip extends ConsumerWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            child: Icon(icon, size: 18, color: colorScheme.primary),
+            child: GlyphIcon(icon, size: 18, color: colorScheme.primary),
           ),
         ),
       ),
@@ -341,13 +341,13 @@ class _ModeChip extends ConsumerWidget {
         items: [
           for (final item in UiOutboundMode.values)
             CommonPopupMenuItem(
-              icon: _modeIcon(item),
+              glyph: _modeIcon(item),
               label: item.label,
               onPressed: () => _selectOutboundMode(ref, item),
             ),
           if (ref.watch(byeDpiAvailableProvider))
             CommonPopupMenuItem(
-              icon: connectionModeIcon(DashboardMode.byedpi),
+              glyph: connectionModeIcon(DashboardMode.byedpi),
               label: connectionModeLabel(
                 appLocalizations,
                 DashboardMode.byedpi,
@@ -369,7 +369,7 @@ class _ActionChip extends StatelessWidget {
     this.compact = false,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String label;
   final VoidCallback? onTap;
   final bool busy;
@@ -396,7 +396,7 @@ class _ActionChip extends StatelessWidget {
               height: iconSize,
               child: busy
                   ? CommonCircleLoading(color: colorScheme.primary)
-                  : Icon(icon, size: iconSize, color: colorScheme.primary),
+                  : GlyphIcon(icon, size: iconSize, color: colorScheme.primary),
             ),
             const SizedBox(width: 8),
             Flexible(

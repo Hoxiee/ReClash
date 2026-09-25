@@ -295,7 +295,7 @@ as String,
 /// @nodoc
 mixin _$UpdateParams {
 
- Tun get tun;@JsonKey(name: 'mixed-port') int get mixedPort;@JsonKey(name: 'allow-lan') bool get allowLan;@JsonKey(name: 'find-process-mode') FindProcessMode get findProcessMode; Mode get mode;@JsonKey(name: 'log-level') LogLevel get logLevel; bool get ipv6;@JsonKey(name: 'tcp-concurrent') bool get tcpConcurrent;@JsonKey(name: 'external-controller') ExternalControllerStatus get externalController;@JsonKey(name: 'unified-delay') bool get unifiedDelay; List<String> get authentication;@JsonKey(name: 'geo-auto-update') bool get geoAutoUpdate;@JsonKey(name: 'geo-update-interval') int get geoUpdateInterval;
+ Tun get tun;@JsonKey(name: 'mixed-port') int get mixedPort;@JsonKey(name: 'allow-lan') bool get allowLan;@JsonKey(name: 'find-process-mode') FindProcessMode get findProcessMode; Mode get mode;@JsonKey(name: 'log-level') LogLevel get logLevel; bool get ipv6;@JsonKey(name: 'tcp-concurrent') bool get tcpConcurrent;@JsonKey(name: 'external-controller') String get externalController;@JsonKey(name: 'unified-delay') bool get unifiedDelay; List<String> get authentication;@JsonKey(name: 'geo-auto-update') bool get geoAutoUpdate;@JsonKey(name: 'geo-update-interval') int get geoUpdateInterval;
 /// Create a copy of UpdateParams
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -333,7 +333,7 @@ abstract mixin class $UpdateParamsCopyWith<$Res>  {
   factory $UpdateParamsCopyWith(UpdateParams value, $Res Function(UpdateParams) _then) = _$UpdateParamsCopyWithImpl;
 @useResult
 $Res call({
- Tun tun,@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'find-process-mode') FindProcessMode findProcessMode, Mode mode,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController,@JsonKey(name: 'unified-delay') bool unifiedDelay, List<String> authentication,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval
+ Tun tun,@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'find-process-mode') FindProcessMode findProcessMode, Mode mode,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(name: 'external-controller') String externalController,@JsonKey(name: 'unified-delay') bool unifiedDelay, List<String> authentication,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval
 });
 
 
@@ -361,7 +361,7 @@ as Mode,logLevel: null == logLevel ? _self.logLevel : logLevel // ignore: cast_n
 as LogLevel,ipv6: null == ipv6 ? _self.ipv6 : ipv6 // ignore: cast_nullable_to_non_nullable
 as bool,tcpConcurrent: null == tcpConcurrent ? _self.tcpConcurrent : tcpConcurrent // ignore: cast_nullable_to_non_nullable
 as bool,externalController: null == externalController ? _self.externalController : externalController // ignore: cast_nullable_to_non_nullable
-as ExternalControllerStatus,unifiedDelay: null == unifiedDelay ? _self.unifiedDelay : unifiedDelay // ignore: cast_nullable_to_non_nullable
+as String,unifiedDelay: null == unifiedDelay ? _self.unifiedDelay : unifiedDelay // ignore: cast_nullable_to_non_nullable
 as bool,authentication: null == authentication ? _self.authentication : authentication // ignore: cast_nullable_to_non_nullable
 as List<String>,geoAutoUpdate: null == geoAutoUpdate ? _self.geoAutoUpdate : geoAutoUpdate // ignore: cast_nullable_to_non_nullable
 as bool,geoUpdateInterval: null == geoUpdateInterval ? _self.geoUpdateInterval : geoUpdateInterval // ignore: cast_nullable_to_non_nullable
@@ -459,7 +459,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  String externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateParams() when $default != null:
 return $default(_that.tun,_that.mixedPort,_that.allowLan,_that.findProcessMode,_that.mode,_that.logLevel,_that.ipv6,_that.tcpConcurrent,_that.externalController,_that.unifiedDelay,_that.authentication,_that.geoAutoUpdate,_that.geoUpdateInterval);case _:
@@ -480,7 +480,7 @@ return $default(_that.tun,_that.mixedPort,_that.allowLan,_that.findProcessMode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  String externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateParams():
 return $default(_that.tun,_that.mixedPort,_that.allowLan,_that.findProcessMode,_that.mode,_that.logLevel,_that.ipv6,_that.tcpConcurrent,_that.externalController,_that.unifiedDelay,_that.authentication,_that.geoAutoUpdate,_that.geoUpdateInterval);case _:
@@ -500,7 +500,7 @@ return $default(_that.tun,_that.mixedPort,_that.allowLan,_that.findProcessMode,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Tun tun, @JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'find-process-mode')  FindProcessMode findProcessMode,  Mode mode, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(name: 'external-controller')  String externalController, @JsonKey(name: 'unified-delay')  bool unifiedDelay,  List<String> authentication, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateParams() when $default != null:
 return $default(_that.tun,_that.mixedPort,_that.allowLan,_that.findProcessMode,_that.mode,_that.logLevel,_that.ipv6,_that.tcpConcurrent,_that.externalController,_that.unifiedDelay,_that.authentication,_that.geoAutoUpdate,_that.geoUpdateInterval);case _:
@@ -526,7 +526,7 @@ class _UpdateParams implements UpdateParams {
 @override@JsonKey(name: 'log-level') final  LogLevel logLevel;
 @override final  bool ipv6;
 @override@JsonKey(name: 'tcp-concurrent') final  bool tcpConcurrent;
-@override@JsonKey(name: 'external-controller') final  ExternalControllerStatus externalController;
+@override@JsonKey(name: 'external-controller') final  String externalController;
 @override@JsonKey(name: 'unified-delay') final  bool unifiedDelay;
  final  List<String> _authentication;
 @override@JsonKey() List<String> get authentication {
@@ -573,7 +573,7 @@ abstract mixin class _$UpdateParamsCopyWith<$Res> implements $UpdateParamsCopyWi
   factory _$UpdateParamsCopyWith(_UpdateParams value, $Res Function(_UpdateParams) _then) = __$UpdateParamsCopyWithImpl;
 @override @useResult
 $Res call({
- Tun tun,@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'find-process-mode') FindProcessMode findProcessMode, Mode mode,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController,@JsonKey(name: 'unified-delay') bool unifiedDelay, List<String> authentication,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval
+ Tun tun,@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'find-process-mode') FindProcessMode findProcessMode, Mode mode,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(name: 'external-controller') String externalController,@JsonKey(name: 'unified-delay') bool unifiedDelay, List<String> authentication,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval
 });
 
 
@@ -601,7 +601,7 @@ as Mode,logLevel: null == logLevel ? _self.logLevel : logLevel // ignore: cast_n
 as LogLevel,ipv6: null == ipv6 ? _self.ipv6 : ipv6 // ignore: cast_nullable_to_non_nullable
 as bool,tcpConcurrent: null == tcpConcurrent ? _self.tcpConcurrent : tcpConcurrent // ignore: cast_nullable_to_non_nullable
 as bool,externalController: null == externalController ? _self.externalController : externalController // ignore: cast_nullable_to_non_nullable
-as ExternalControllerStatus,unifiedDelay: null == unifiedDelay ? _self.unifiedDelay : unifiedDelay // ignore: cast_nullable_to_non_nullable
+as String,unifiedDelay: null == unifiedDelay ? _self.unifiedDelay : unifiedDelay // ignore: cast_nullable_to_non_nullable
 as bool,authentication: null == authentication ? _self._authentication : authentication // ignore: cast_nullable_to_non_nullable
 as List<String>,geoAutoUpdate: null == geoAutoUpdate ? _self.geoAutoUpdate : geoAutoUpdate // ignore: cast_nullable_to_non_nullable
 as bool,geoUpdateInterval: null == geoUpdateInterval ? _self.geoUpdateInterval : geoUpdateInterval // ignore: cast_nullable_to_non_nullable
@@ -8710,6 +8710,2394 @@ $RcxDiscoveryReportCopyWith<$Res> get discovery {
     return _then(_self.copyWith(discovery: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$RouteSnapshot {
+
+@JsonKey(name: 'core-epoch') int get coreEpoch;@JsonKey(name: 'picks-version') int get picksVersion; Map<String, String> get picks;
+/// Create a copy of RouteSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RouteSnapshotCopyWith<RouteSnapshot> get copyWith => _$RouteSnapshotCopyWithImpl<RouteSnapshot>(this as RouteSnapshot, _$identity);
+
+  /// Serializes this RouteSnapshot to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RouteSnapshot;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RouteSnapshot&&(identical(other.coreEpoch, _this.coreEpoch) || other.coreEpoch == _this.coreEpoch)&&(identical(other.picksVersion, _this.picksVersion) || other.picksVersion == _this.picksVersion)&&const DeepCollectionEquality().equals(other.picks, _this.picks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RouteSnapshot;
+  return Object.hash(runtimeType,_this.coreEpoch,_this.picksVersion,const DeepCollectionEquality().hash(_this.picks));
+}
+
+@override
+String toString() {
+  final _this = this as RouteSnapshot;
+  return 'RouteSnapshot(coreEpoch: ${_this.coreEpoch}, picksVersion: ${_this.picksVersion}, picks: ${_this.picks})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RouteSnapshotCopyWith<$Res>  {
+  factory $RouteSnapshotCopyWith(RouteSnapshot value, $Res Function(RouteSnapshot) _then) = _$RouteSnapshotCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion, Map<String, String> picks
+});
+
+
+
+
+}
+/// @nodoc
+class _$RouteSnapshotCopyWithImpl<$Res>
+    implements $RouteSnapshotCopyWith<$Res> {
+  _$RouteSnapshotCopyWithImpl(this._self, this._then);
+
+  final RouteSnapshot _self;
+  final $Res Function(RouteSnapshot) _then;
+
+/// Create a copy of RouteSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? coreEpoch = null,Object? picksVersion = null,Object? picks = null,}) {
+  return _then(RouteSnapshot(
+coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,picks: null == picks ? _self.picks : picks // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RouteSnapshot].
+extension RouteSnapshotPatterns on RouteSnapshot {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RouteSnapshot value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RouteSnapshot() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RouteSnapshot value)  $default,){
+final _that = this;
+switch (_that) {
+case _RouteSnapshot():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RouteSnapshot value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RouteSnapshot() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion,  Map<String, String> picks)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RouteSnapshot() when $default != null:
+return $default(_that.coreEpoch,_that.picksVersion,_that.picks);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion,  Map<String, String> picks)  $default,) {final _that = this;
+switch (_that) {
+case _RouteSnapshot():
+return $default(_that.coreEpoch,_that.picksVersion,_that.picks);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion,  Map<String, String> picks)?  $default,) {final _that = this;
+switch (_that) {
+case _RouteSnapshot() when $default != null:
+return $default(_that.coreEpoch,_that.picksVersion,_that.picks);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RouteSnapshot implements RouteSnapshot {
+  const _RouteSnapshot({@JsonKey(name: 'core-epoch') this.coreEpoch = 0, @JsonKey(name: 'picks-version') this.picksVersion = 0,  Map<String, String> picks = const {}}): _picks = picks;
+  factory _RouteSnapshot.fromJson(Map<String, dynamic> json) => _$RouteSnapshotFromJson(json);
+
+@override@JsonKey(name: 'core-epoch') final  int coreEpoch;
+@override@JsonKey(name: 'picks-version') final  int picksVersion;
+ final  Map<String, String> _picks;
+@override@JsonKey() Map<String, String> get picks {
+  if (_picks is EqualUnmodifiableMapView) return _picks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_picks);
+}
+
+
+/// Create a copy of RouteSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RouteSnapshotCopyWith<_RouteSnapshot> get copyWith => __$RouteSnapshotCopyWithImpl<_RouteSnapshot>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RouteSnapshotToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RouteSnapshot&&(identical(other.coreEpoch, coreEpoch) || other.coreEpoch == coreEpoch)&&(identical(other.picksVersion, picksVersion) || other.picksVersion == picksVersion)&&const DeepCollectionEquality().equals(other.picks, _picks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,coreEpoch,picksVersion,const DeepCollectionEquality().hash(_picks));
+}
+
+@override
+String toString() {
+    return 'RouteSnapshot(coreEpoch: $coreEpoch, picksVersion: $picksVersion, picks: $picks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RouteSnapshotCopyWith<$Res> implements $RouteSnapshotCopyWith<$Res> {
+  factory _$RouteSnapshotCopyWith(_RouteSnapshot value, $Res Function(_RouteSnapshot) _then) = __$RouteSnapshotCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion, Map<String, String> picks
+});
+
+
+
+
+}
+/// @nodoc
+class __$RouteSnapshotCopyWithImpl<$Res>
+    implements _$RouteSnapshotCopyWith<$Res> {
+  __$RouteSnapshotCopyWithImpl(this._self, this._then);
+
+  final _RouteSnapshot _self;
+  final $Res Function(_RouteSnapshot) _then;
+
+/// Create a copy of RouteSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? coreEpoch = null,Object? picksVersion = null,Object? picks = null,}) {
+  return _then(_RouteSnapshot(
+coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,picks: null == picks ? _self._picks : picks // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$OutboundIpParams {
+
+@JsonKey(name: 'proxy-name') String get proxyName; List<String> get urls; int get timeout;
+/// Create a copy of OutboundIpParams
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OutboundIpParamsCopyWith<OutboundIpParams> get copyWith => _$OutboundIpParamsCopyWithImpl<OutboundIpParams>(this as OutboundIpParams, _$identity);
+
+  /// Serializes this OutboundIpParams to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as OutboundIpParams;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OutboundIpParams&&(identical(other.proxyName, _this.proxyName) || other.proxyName == _this.proxyName)&&const DeepCollectionEquality().equals(other.urls, _this.urls)&&(identical(other.timeout, _this.timeout) || other.timeout == _this.timeout));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as OutboundIpParams;
+  return Object.hash(runtimeType,_this.proxyName,const DeepCollectionEquality().hash(_this.urls),_this.timeout);
+}
+
+@override
+String toString() {
+  final _this = this as OutboundIpParams;
+  return 'OutboundIpParams(proxyName: ${_this.proxyName}, urls: ${_this.urls}, timeout: ${_this.timeout})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OutboundIpParamsCopyWith<$Res>  {
+  factory $OutboundIpParamsCopyWith(OutboundIpParams value, $Res Function(OutboundIpParams) _then) = _$OutboundIpParamsCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'proxy-name') String proxyName, List<String> urls, int timeout
+});
+
+
+
+
+}
+/// @nodoc
+class _$OutboundIpParamsCopyWithImpl<$Res>
+    implements $OutboundIpParamsCopyWith<$Res> {
+  _$OutboundIpParamsCopyWithImpl(this._self, this._then);
+
+  final OutboundIpParams _self;
+  final $Res Function(OutboundIpParams) _then;
+
+/// Create a copy of OutboundIpParams
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? proxyName = null,Object? urls = null,Object? timeout = null,}) {
+  return _then(OutboundIpParams(
+proxyName: null == proxyName ? _self.proxyName : proxyName // ignore: cast_nullable_to_non_nullable
+as String,urls: null == urls ? _self.urls : urls // ignore: cast_nullable_to_non_nullable
+as List<String>,timeout: null == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [OutboundIpParams].
+extension OutboundIpParamsPatterns on OutboundIpParams {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OutboundIpParams value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _OutboundIpParams() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OutboundIpParams value)  $default,){
+final _that = this;
+switch (_that) {
+case _OutboundIpParams():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OutboundIpParams value)?  $default,){
+final _that = this;
+switch (_that) {
+case _OutboundIpParams() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> urls,  int timeout)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _OutboundIpParams() when $default != null:
+return $default(_that.proxyName,_that.urls,_that.timeout);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> urls,  int timeout)  $default,) {final _that = this;
+switch (_that) {
+case _OutboundIpParams():
+return $default(_that.proxyName,_that.urls,_that.timeout);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> urls,  int timeout)?  $default,) {final _that = this;
+switch (_that) {
+case _OutboundIpParams() when $default != null:
+return $default(_that.proxyName,_that.urls,_that.timeout);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _OutboundIpParams implements OutboundIpParams {
+  const _OutboundIpParams({@JsonKey(name: 'proxy-name') this.proxyName = '',  List<String> urls = const [], required this.timeout}): _urls = urls;
+  factory _OutboundIpParams.fromJson(Map<String, dynamic> json) => _$OutboundIpParamsFromJson(json);
+
+@override@JsonKey(name: 'proxy-name') final  String proxyName;
+ final  List<String> _urls;
+@override@JsonKey() List<String> get urls {
+  if (_urls is EqualUnmodifiableListView) return _urls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_urls);
+}
+
+@override final  int timeout;
+
+/// Create a copy of OutboundIpParams
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OutboundIpParamsCopyWith<_OutboundIpParams> get copyWith => __$OutboundIpParamsCopyWithImpl<_OutboundIpParams>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$OutboundIpParamsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OutboundIpParams&&(identical(other.proxyName, proxyName) || other.proxyName == proxyName)&&const DeepCollectionEquality().equals(other.urls, _urls)&&(identical(other.timeout, timeout) || other.timeout == timeout));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,proxyName,const DeepCollectionEquality().hash(_urls),timeout);
+}
+
+@override
+String toString() {
+    return 'OutboundIpParams(proxyName: $proxyName, urls: $urls, timeout: $timeout)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OutboundIpParamsCopyWith<$Res> implements $OutboundIpParamsCopyWith<$Res> {
+  factory _$OutboundIpParamsCopyWith(_OutboundIpParams value, $Res Function(_OutboundIpParams) _then) = __$OutboundIpParamsCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'proxy-name') String proxyName, List<String> urls, int timeout
+});
+
+
+
+
+}
+/// @nodoc
+class __$OutboundIpParamsCopyWithImpl<$Res>
+    implements _$OutboundIpParamsCopyWith<$Res> {
+  __$OutboundIpParamsCopyWithImpl(this._self, this._then);
+
+  final _OutboundIpParams _self;
+  final $Res Function(_OutboundIpParams) _then;
+
+/// Create a copy of OutboundIpParams
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? proxyName = null,Object? urls = null,Object? timeout = null,}) {
+  return _then(_OutboundIpParams(
+proxyName: null == proxyName ? _self.proxyName : proxyName // ignore: cast_nullable_to_non_nullable
+as String,urls: null == urls ? _self._urls : urls // ignore: cast_nullable_to_non_nullable
+as List<String>,timeout: null == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$OutboundIpResult {
+
+ String get url; String get body; int get delay; List<String> get chains; String? get error;@JsonKey(name: 'core-epoch') int get coreEpoch;@JsonKey(name: 'picks-version') int get picksVersion;
+/// Create a copy of OutboundIpResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OutboundIpResultCopyWith<OutboundIpResult> get copyWith => _$OutboundIpResultCopyWithImpl<OutboundIpResult>(this as OutboundIpResult, _$identity);
+
+  /// Serializes this OutboundIpResult to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as OutboundIpResult;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OutboundIpResult&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.body, _this.body) || other.body == _this.body)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&const DeepCollectionEquality().equals(other.chains, _this.chains)&&(identical(other.error, _this.error) || other.error == _this.error)&&(identical(other.coreEpoch, _this.coreEpoch) || other.coreEpoch == _this.coreEpoch)&&(identical(other.picksVersion, _this.picksVersion) || other.picksVersion == _this.picksVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as OutboundIpResult;
+  return Object.hash(runtimeType,_this.url,_this.body,_this.delay,const DeepCollectionEquality().hash(_this.chains),_this.error,_this.coreEpoch,_this.picksVersion);
+}
+
+@override
+String toString() {
+  final _this = this as OutboundIpResult;
+  return 'OutboundIpResult(url: ${_this.url}, body: ${_this.body}, delay: ${_this.delay}, chains: ${_this.chains}, error: ${_this.error}, coreEpoch: ${_this.coreEpoch}, picksVersion: ${_this.picksVersion})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OutboundIpResultCopyWith<$Res>  {
+  factory $OutboundIpResultCopyWith(OutboundIpResult value, $Res Function(OutboundIpResult) _then) = _$OutboundIpResultCopyWithImpl;
+@useResult
+$Res call({
+ String url, String body, int delay, List<String> chains, String? error,@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion
+});
+
+
+
+
+}
+/// @nodoc
+class _$OutboundIpResultCopyWithImpl<$Res>
+    implements $OutboundIpResultCopyWith<$Res> {
+  _$OutboundIpResultCopyWithImpl(this._self, this._then);
+
+  final OutboundIpResult _self;
+  final $Res Function(OutboundIpResult) _then;
+
+/// Create a copy of OutboundIpResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? url = null,Object? body = null,Object? delay = null,Object? chains = null,Object? error = freezed,Object? coreEpoch = null,Object? picksVersion = null,}) {
+  return _then(OutboundIpResult(
+url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,chains: null == chains ? _self.chains : chains // ignore: cast_nullable_to_non_nullable
+as List<String>,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [OutboundIpResult].
+extension OutboundIpResultPatterns on OutboundIpResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OutboundIpResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _OutboundIpResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OutboundIpResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _OutboundIpResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OutboundIpResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _OutboundIpResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String url,  String body,  int delay,  List<String> chains,  String? error, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _OutboundIpResult() when $default != null:
+return $default(_that.url,_that.body,_that.delay,_that.chains,_that.error,_that.coreEpoch,_that.picksVersion);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String url,  String body,  int delay,  List<String> chains,  String? error, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)  $default,) {final _that = this;
+switch (_that) {
+case _OutboundIpResult():
+return $default(_that.url,_that.body,_that.delay,_that.chains,_that.error,_that.coreEpoch,_that.picksVersion);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String url,  String body,  int delay,  List<String> chains,  String? error, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)?  $default,) {final _that = this;
+switch (_that) {
+case _OutboundIpResult() when $default != null:
+return $default(_that.url,_that.body,_that.delay,_that.chains,_that.error,_that.coreEpoch,_that.picksVersion);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _OutboundIpResult implements OutboundIpResult {
+  const _OutboundIpResult({this.url = '', this.body = '', this.delay = 0,  List<String> chains = const [], this.error, @JsonKey(name: 'core-epoch') this.coreEpoch = 0, @JsonKey(name: 'picks-version') this.picksVersion = 0}): _chains = chains;
+  factory _OutboundIpResult.fromJson(Map<String, dynamic> json) => _$OutboundIpResultFromJson(json);
+
+@override@JsonKey() final  String url;
+@override@JsonKey() final  String body;
+@override@JsonKey() final  int delay;
+ final  List<String> _chains;
+@override@JsonKey() List<String> get chains {
+  if (_chains is EqualUnmodifiableListView) return _chains;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chains);
+}
+
+@override final  String? error;
+@override@JsonKey(name: 'core-epoch') final  int coreEpoch;
+@override@JsonKey(name: 'picks-version') final  int picksVersion;
+
+/// Create a copy of OutboundIpResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OutboundIpResultCopyWith<_OutboundIpResult> get copyWith => __$OutboundIpResultCopyWithImpl<_OutboundIpResult>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$OutboundIpResultToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OutboundIpResult&&(identical(other.url, url) || other.url == url)&&(identical(other.body, body) || other.body == body)&&(identical(other.delay, delay) || other.delay == delay)&&const DeepCollectionEquality().equals(other.chains, _chains)&&(identical(other.error, error) || other.error == error)&&(identical(other.coreEpoch, coreEpoch) || other.coreEpoch == coreEpoch)&&(identical(other.picksVersion, picksVersion) || other.picksVersion == picksVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,url,body,delay,const DeepCollectionEquality().hash(_chains),error,coreEpoch,picksVersion);
+}
+
+@override
+String toString() {
+    return 'OutboundIpResult(url: $url, body: $body, delay: $delay, chains: $chains, error: $error, coreEpoch: $coreEpoch, picksVersion: $picksVersion)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OutboundIpResultCopyWith<$Res> implements $OutboundIpResultCopyWith<$Res> {
+  factory _$OutboundIpResultCopyWith(_OutboundIpResult value, $Res Function(_OutboundIpResult) _then) = __$OutboundIpResultCopyWithImpl;
+@override @useResult
+$Res call({
+ String url, String body, int delay, List<String> chains, String? error,@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion
+});
+
+
+
+
+}
+/// @nodoc
+class __$OutboundIpResultCopyWithImpl<$Res>
+    implements _$OutboundIpResultCopyWith<$Res> {
+  __$OutboundIpResultCopyWithImpl(this._self, this._then);
+
+  final _OutboundIpResult _self;
+  final $Res Function(_OutboundIpResult) _then;
+
+/// Create a copy of OutboundIpResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? url = null,Object? body = null,Object? delay = null,Object? chains = null,Object? error = freezed,Object? coreEpoch = null,Object? picksVersion = null,}) {
+  return _then(_OutboundIpResult(
+url: null == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,chains: null == chains ? _self._chains : chains // ignore: cast_nullable_to_non_nullable
+as List<String>,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ServiceCheckParams {
+
+@JsonKey(name: 'proxy-name') String get proxyName; List<String> get names; int get timeout;
+/// Create a copy of ServiceCheckParams
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ServiceCheckParamsCopyWith<ServiceCheckParams> get copyWith => _$ServiceCheckParamsCopyWithImpl<ServiceCheckParams>(this as ServiceCheckParams, _$identity);
+
+  /// Serializes this ServiceCheckParams to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ServiceCheckParams;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceCheckParams&&(identical(other.proxyName, _this.proxyName) || other.proxyName == _this.proxyName)&&const DeepCollectionEquality().equals(other.names, _this.names)&&(identical(other.timeout, _this.timeout) || other.timeout == _this.timeout));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ServiceCheckParams;
+  return Object.hash(runtimeType,_this.proxyName,const DeepCollectionEquality().hash(_this.names),_this.timeout);
+}
+
+@override
+String toString() {
+  final _this = this as ServiceCheckParams;
+  return 'ServiceCheckParams(proxyName: ${_this.proxyName}, names: ${_this.names}, timeout: ${_this.timeout})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ServiceCheckParamsCopyWith<$Res>  {
+  factory $ServiceCheckParamsCopyWith(ServiceCheckParams value, $Res Function(ServiceCheckParams) _then) = _$ServiceCheckParamsCopyWithImpl;
+@useResult
+$Res call({
+@JsonKey(name: 'proxy-name') String proxyName, List<String> names, int timeout
+});
+
+
+
+
+}
+/// @nodoc
+class _$ServiceCheckParamsCopyWithImpl<$Res>
+    implements $ServiceCheckParamsCopyWith<$Res> {
+  _$ServiceCheckParamsCopyWithImpl(this._self, this._then);
+
+  final ServiceCheckParams _self;
+  final $Res Function(ServiceCheckParams) _then;
+
+/// Create a copy of ServiceCheckParams
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? proxyName = null,Object? names = null,Object? timeout = null,}) {
+  return _then(ServiceCheckParams(
+proxyName: null == proxyName ? _self.proxyName : proxyName // ignore: cast_nullable_to_non_nullable
+as String,names: null == names ? _self.names : names // ignore: cast_nullable_to_non_nullable
+as List<String>,timeout: null == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ServiceCheckParams].
+extension ServiceCheckParamsPatterns on ServiceCheckParams {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ServiceCheckParams value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ServiceCheckParams() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ServiceCheckParams value)  $default,){
+final _that = this;
+switch (_that) {
+case _ServiceCheckParams():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ServiceCheckParams value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ServiceCheckParams() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> names,  int timeout)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ServiceCheckParams() when $default != null:
+return $default(_that.proxyName,_that.names,_that.timeout);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> names,  int timeout)  $default,) {final _that = this;
+switch (_that) {
+case _ServiceCheckParams():
+return $default(_that.proxyName,_that.names,_that.timeout);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'proxy-name')  String proxyName,  List<String> names,  int timeout)?  $default,) {final _that = this;
+switch (_that) {
+case _ServiceCheckParams() when $default != null:
+return $default(_that.proxyName,_that.names,_that.timeout);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ServiceCheckParams implements ServiceCheckParams {
+  const _ServiceCheckParams({@JsonKey(name: 'proxy-name') this.proxyName = '',  List<String> names = const [], required this.timeout}): _names = names;
+  factory _ServiceCheckParams.fromJson(Map<String, dynamic> json) => _$ServiceCheckParamsFromJson(json);
+
+@override@JsonKey(name: 'proxy-name') final  String proxyName;
+ final  List<String> _names;
+@override@JsonKey() List<String> get names {
+  if (_names is EqualUnmodifiableListView) return _names;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_names);
+}
+
+@override final  int timeout;
+
+/// Create a copy of ServiceCheckParams
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ServiceCheckParamsCopyWith<_ServiceCheckParams> get copyWith => __$ServiceCheckParamsCopyWithImpl<_ServiceCheckParams>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ServiceCheckParamsToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceCheckParams&&(identical(other.proxyName, proxyName) || other.proxyName == proxyName)&&const DeepCollectionEquality().equals(other.names, _names)&&(identical(other.timeout, timeout) || other.timeout == timeout));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,proxyName,const DeepCollectionEquality().hash(_names),timeout);
+}
+
+@override
+String toString() {
+    return 'ServiceCheckParams(proxyName: $proxyName, names: $names, timeout: $timeout)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ServiceCheckParamsCopyWith<$Res> implements $ServiceCheckParamsCopyWith<$Res> {
+  factory _$ServiceCheckParamsCopyWith(_ServiceCheckParams value, $Res Function(_ServiceCheckParams) _then) = __$ServiceCheckParamsCopyWithImpl;
+@override @useResult
+$Res call({
+@JsonKey(name: 'proxy-name') String proxyName, List<String> names, int timeout
+});
+
+
+
+
+}
+/// @nodoc
+class __$ServiceCheckParamsCopyWithImpl<$Res>
+    implements _$ServiceCheckParamsCopyWith<$Res> {
+  __$ServiceCheckParamsCopyWithImpl(this._self, this._then);
+
+  final _ServiceCheckParams _self;
+  final $Res Function(_ServiceCheckParams) _then;
+
+/// Create a copy of ServiceCheckParams
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? proxyName = null,Object? names = null,Object? timeout = null,}) {
+  return _then(_ServiceCheckParams(
+proxyName: null == proxyName ? _self.proxyName : proxyName // ignore: cast_nullable_to_non_nullable
+as String,names: null == names ? _self._names : names // ignore: cast_nullable_to_non_nullable
+as List<String>,timeout: null == timeout ? _self.timeout : timeout // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ServiceCheckItem {
+
+ String get name; String get status; String get region; int get delay; List<String> get chains;@JsonKey(name: 'checked-at') int get checkedAt;@JsonKey(name: 'core-epoch') int get coreEpoch;@JsonKey(name: 'picks-version') int get picksVersion;
+/// Create a copy of ServiceCheckItem
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ServiceCheckItemCopyWith<ServiceCheckItem> get copyWith => _$ServiceCheckItemCopyWithImpl<ServiceCheckItem>(this as ServiceCheckItem, _$identity);
+
+  /// Serializes this ServiceCheckItem to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ServiceCheckItem;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceCheckItem&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.region, _this.region) || other.region == _this.region)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&const DeepCollectionEquality().equals(other.chains, _this.chains)&&(identical(other.checkedAt, _this.checkedAt) || other.checkedAt == _this.checkedAt)&&(identical(other.coreEpoch, _this.coreEpoch) || other.coreEpoch == _this.coreEpoch)&&(identical(other.picksVersion, _this.picksVersion) || other.picksVersion == _this.picksVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ServiceCheckItem;
+  return Object.hash(runtimeType,_this.name,_this.status,_this.region,_this.delay,const DeepCollectionEquality().hash(_this.chains),_this.checkedAt,_this.coreEpoch,_this.picksVersion);
+}
+
+@override
+String toString() {
+  final _this = this as ServiceCheckItem;
+  return 'ServiceCheckItem(name: ${_this.name}, status: ${_this.status}, region: ${_this.region}, delay: ${_this.delay}, chains: ${_this.chains}, checkedAt: ${_this.checkedAt}, coreEpoch: ${_this.coreEpoch}, picksVersion: ${_this.picksVersion})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ServiceCheckItemCopyWith<$Res>  {
+  factory $ServiceCheckItemCopyWith(ServiceCheckItem value, $Res Function(ServiceCheckItem) _then) = _$ServiceCheckItemCopyWithImpl;
+@useResult
+$Res call({
+ String name, String status, String region, int delay, List<String> chains,@JsonKey(name: 'checked-at') int checkedAt,@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion
+});
+
+
+
+
+}
+/// @nodoc
+class _$ServiceCheckItemCopyWithImpl<$Res>
+    implements $ServiceCheckItemCopyWith<$Res> {
+  _$ServiceCheckItemCopyWithImpl(this._self, this._then);
+
+  final ServiceCheckItem _self;
+  final $Res Function(ServiceCheckItem) _then;
+
+/// Create a copy of ServiceCheckItem
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? status = null,Object? region = null,Object? delay = null,Object? chains = null,Object? checkedAt = null,Object? coreEpoch = null,Object? picksVersion = null,}) {
+  return _then(ServiceCheckItem(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,region: null == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,chains: null == chains ? _self.chains : chains // ignore: cast_nullable_to_non_nullable
+as List<String>,checkedAt: null == checkedAt ? _self.checkedAt : checkedAt // ignore: cast_nullable_to_non_nullable
+as int,coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ServiceCheckItem].
+extension ServiceCheckItemPatterns on ServiceCheckItem {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ServiceCheckItem value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ServiceCheckItem() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ServiceCheckItem value)  $default,){
+final _that = this;
+switch (_that) {
+case _ServiceCheckItem():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ServiceCheckItem value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ServiceCheckItem() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String status,  String region,  int delay,  List<String> chains, @JsonKey(name: 'checked-at')  int checkedAt, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ServiceCheckItem() when $default != null:
+return $default(_that.name,_that.status,_that.region,_that.delay,_that.chains,_that.checkedAt,_that.coreEpoch,_that.picksVersion);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String status,  String region,  int delay,  List<String> chains, @JsonKey(name: 'checked-at')  int checkedAt, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)  $default,) {final _that = this;
+switch (_that) {
+case _ServiceCheckItem():
+return $default(_that.name,_that.status,_that.region,_that.delay,_that.chains,_that.checkedAt,_that.coreEpoch,_that.picksVersion);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String status,  String region,  int delay,  List<String> chains, @JsonKey(name: 'checked-at')  int checkedAt, @JsonKey(name: 'core-epoch')  int coreEpoch, @JsonKey(name: 'picks-version')  int picksVersion)?  $default,) {final _that = this;
+switch (_that) {
+case _ServiceCheckItem() when $default != null:
+return $default(_that.name,_that.status,_that.region,_that.delay,_that.chains,_that.checkedAt,_that.coreEpoch,_that.picksVersion);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ServiceCheckItem implements ServiceCheckItem {
+  const _ServiceCheckItem({this.name = '', this.status = '', this.region = '', this.delay = 0,  List<String> chains = const [], @JsonKey(name: 'checked-at') this.checkedAt = 0, @JsonKey(name: 'core-epoch') this.coreEpoch = 0, @JsonKey(name: 'picks-version') this.picksVersion = 0}): _chains = chains;
+  factory _ServiceCheckItem.fromJson(Map<String, dynamic> json) => _$ServiceCheckItemFromJson(json);
+
+@override@JsonKey() final  String name;
+@override@JsonKey() final  String status;
+@override@JsonKey() final  String region;
+@override@JsonKey() final  int delay;
+ final  List<String> _chains;
+@override@JsonKey() List<String> get chains {
+  if (_chains is EqualUnmodifiableListView) return _chains;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chains);
+}
+
+@override@JsonKey(name: 'checked-at') final  int checkedAt;
+@override@JsonKey(name: 'core-epoch') final  int coreEpoch;
+@override@JsonKey(name: 'picks-version') final  int picksVersion;
+
+/// Create a copy of ServiceCheckItem
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ServiceCheckItemCopyWith<_ServiceCheckItem> get copyWith => __$ServiceCheckItemCopyWithImpl<_ServiceCheckItem>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ServiceCheckItemToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceCheckItem&&(identical(other.name, name) || other.name == name)&&(identical(other.status, status) || other.status == status)&&(identical(other.region, region) || other.region == region)&&(identical(other.delay, delay) || other.delay == delay)&&const DeepCollectionEquality().equals(other.chains, _chains)&&(identical(other.checkedAt, checkedAt) || other.checkedAt == checkedAt)&&(identical(other.coreEpoch, coreEpoch) || other.coreEpoch == coreEpoch)&&(identical(other.picksVersion, picksVersion) || other.picksVersion == picksVersion));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,name,status,region,delay,const DeepCollectionEquality().hash(_chains),checkedAt,coreEpoch,picksVersion);
+}
+
+@override
+String toString() {
+    return 'ServiceCheckItem(name: $name, status: $status, region: $region, delay: $delay, chains: $chains, checkedAt: $checkedAt, coreEpoch: $coreEpoch, picksVersion: $picksVersion)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ServiceCheckItemCopyWith<$Res> implements $ServiceCheckItemCopyWith<$Res> {
+  factory _$ServiceCheckItemCopyWith(_ServiceCheckItem value, $Res Function(_ServiceCheckItem) _then) = __$ServiceCheckItemCopyWithImpl;
+@override @useResult
+$Res call({
+ String name, String status, String region, int delay, List<String> chains,@JsonKey(name: 'checked-at') int checkedAt,@JsonKey(name: 'core-epoch') int coreEpoch,@JsonKey(name: 'picks-version') int picksVersion
+});
+
+
+
+
+}
+/// @nodoc
+class __$ServiceCheckItemCopyWithImpl<$Res>
+    implements _$ServiceCheckItemCopyWith<$Res> {
+  __$ServiceCheckItemCopyWithImpl(this._self, this._then);
+
+  final _ServiceCheckItem _self;
+  final $Res Function(_ServiceCheckItem) _then;
+
+/// Create a copy of ServiceCheckItem
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? status = null,Object? region = null,Object? delay = null,Object? chains = null,Object? checkedAt = null,Object? coreEpoch = null,Object? picksVersion = null,}) {
+  return _then(_ServiceCheckItem(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,region: null == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as int,chains: null == chains ? _self._chains : chains // ignore: cast_nullable_to_non_nullable
+as List<String>,checkedAt: null == checkedAt ? _self.checkedAt : checkedAt // ignore: cast_nullable_to_non_nullable
+as int,coreEpoch: null == coreEpoch ? _self.coreEpoch : coreEpoch // ignore: cast_nullable_to_non_nullable
+as int,picksVersion: null == picksVersion ? _self.picksVersion : picksVersion // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxDiagContext {
+
+ String get terrain; String get env; String get incumbent; int get incumbentMs; int get sinceMs; String get pin; String get strategy; String get preset; String get mode; bool get screenOff; bool get suspended; bool get probing; bool get deep; String get transport; bool get portal; bool get metered; bool get validated; String get reachF; String get reachD; String get direct; int get probesLeft; int get candidates; int get eligible; int get incidentConns; int get frozenNodes;
+/// Create a copy of RcxDiagContext
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxDiagContextCopyWith<RcxDiagContext> get copyWith => _$RcxDiagContextCopyWithImpl<RcxDiagContext>(this as RcxDiagContext, _$identity);
+
+  /// Serializes this RcxDiagContext to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxDiagContext;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxDiagContext&&(identical(other.terrain, _this.terrain) || other.terrain == _this.terrain)&&(identical(other.env, _this.env) || other.env == _this.env)&&(identical(other.incumbent, _this.incumbent) || other.incumbent == _this.incumbent)&&(identical(other.incumbentMs, _this.incumbentMs) || other.incumbentMs == _this.incumbentMs)&&(identical(other.sinceMs, _this.sinceMs) || other.sinceMs == _this.sinceMs)&&(identical(other.pin, _this.pin) || other.pin == _this.pin)&&(identical(other.strategy, _this.strategy) || other.strategy == _this.strategy)&&(identical(other.preset, _this.preset) || other.preset == _this.preset)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.screenOff, _this.screenOff) || other.screenOff == _this.screenOff)&&(identical(other.suspended, _this.suspended) || other.suspended == _this.suspended)&&(identical(other.probing, _this.probing) || other.probing == _this.probing)&&(identical(other.deep, _this.deep) || other.deep == _this.deep)&&(identical(other.transport, _this.transport) || other.transport == _this.transport)&&(identical(other.portal, _this.portal) || other.portal == _this.portal)&&(identical(other.metered, _this.metered) || other.metered == _this.metered)&&(identical(other.validated, _this.validated) || other.validated == _this.validated)&&(identical(other.reachF, _this.reachF) || other.reachF == _this.reachF)&&(identical(other.reachD, _this.reachD) || other.reachD == _this.reachD)&&(identical(other.direct, _this.direct) || other.direct == _this.direct)&&(identical(other.probesLeft, _this.probesLeft) || other.probesLeft == _this.probesLeft)&&(identical(other.candidates, _this.candidates) || other.candidates == _this.candidates)&&(identical(other.eligible, _this.eligible) || other.eligible == _this.eligible)&&(identical(other.incidentConns, _this.incidentConns) || other.incidentConns == _this.incidentConns)&&(identical(other.frozenNodes, _this.frozenNodes) || other.frozenNodes == _this.frozenNodes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxDiagContext;
+  return Object.hashAll([runtimeType,_this.terrain,_this.env,_this.incumbent,_this.incumbentMs,_this.sinceMs,_this.pin,_this.strategy,_this.preset,_this.mode,_this.screenOff,_this.suspended,_this.probing,_this.deep,_this.transport,_this.portal,_this.metered,_this.validated,_this.reachF,_this.reachD,_this.direct,_this.probesLeft,_this.candidates,_this.eligible,_this.incidentConns,_this.frozenNodes]);
+}
+
+@override
+String toString() {
+  final _this = this as RcxDiagContext;
+  return 'RcxDiagContext(terrain: ${_this.terrain}, env: ${_this.env}, incumbent: ${_this.incumbent}, incumbentMs: ${_this.incumbentMs}, sinceMs: ${_this.sinceMs}, pin: ${_this.pin}, strategy: ${_this.strategy}, preset: ${_this.preset}, mode: ${_this.mode}, screenOff: ${_this.screenOff}, suspended: ${_this.suspended}, probing: ${_this.probing}, deep: ${_this.deep}, transport: ${_this.transport}, portal: ${_this.portal}, metered: ${_this.metered}, validated: ${_this.validated}, reachF: ${_this.reachF}, reachD: ${_this.reachD}, direct: ${_this.direct}, probesLeft: ${_this.probesLeft}, candidates: ${_this.candidates}, eligible: ${_this.eligible}, incidentConns: ${_this.incidentConns}, frozenNodes: ${_this.frozenNodes})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxDiagContextCopyWith<$Res>  {
+  factory $RcxDiagContextCopyWith(RcxDiagContext value, $Res Function(RcxDiagContext) _then) = _$RcxDiagContextCopyWithImpl;
+@useResult
+$Res call({
+ String terrain, String env, String incumbent, int incumbentMs, int sinceMs, String pin, String strategy, String preset, String mode, bool screenOff, bool suspended, bool probing, bool deep, String transport, bool portal, bool metered, bool validated, String reachF, String reachD, String direct, int probesLeft, int candidates, int eligible, int incidentConns, int frozenNodes
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxDiagContextCopyWithImpl<$Res>
+    implements $RcxDiagContextCopyWith<$Res> {
+  _$RcxDiagContextCopyWithImpl(this._self, this._then);
+
+  final RcxDiagContext _self;
+  final $Res Function(RcxDiagContext) _then;
+
+/// Create a copy of RcxDiagContext
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? terrain = null,Object? env = null,Object? incumbent = null,Object? incumbentMs = null,Object? sinceMs = null,Object? pin = null,Object? strategy = null,Object? preset = null,Object? mode = null,Object? screenOff = null,Object? suspended = null,Object? probing = null,Object? deep = null,Object? transport = null,Object? portal = null,Object? metered = null,Object? validated = null,Object? reachF = null,Object? reachD = null,Object? direct = null,Object? probesLeft = null,Object? candidates = null,Object? eligible = null,Object? incidentConns = null,Object? frozenNodes = null,}) {
+  return _then(RcxDiagContext(
+terrain: null == terrain ? _self.terrain : terrain // ignore: cast_nullable_to_non_nullable
+as String,env: null == env ? _self.env : env // ignore: cast_nullable_to_non_nullable
+as String,incumbent: null == incumbent ? _self.incumbent : incumbent // ignore: cast_nullable_to_non_nullable
+as String,incumbentMs: null == incumbentMs ? _self.incumbentMs : incumbentMs // ignore: cast_nullable_to_non_nullable
+as int,sinceMs: null == sinceMs ? _self.sinceMs : sinceMs // ignore: cast_nullable_to_non_nullable
+as int,pin: null == pin ? _self.pin : pin // ignore: cast_nullable_to_non_nullable
+as String,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as String,screenOff: null == screenOff ? _self.screenOff : screenOff // ignore: cast_nullable_to_non_nullable
+as bool,suspended: null == suspended ? _self.suspended : suspended // ignore: cast_nullable_to_non_nullable
+as bool,probing: null == probing ? _self.probing : probing // ignore: cast_nullable_to_non_nullable
+as bool,deep: null == deep ? _self.deep : deep // ignore: cast_nullable_to_non_nullable
+as bool,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as String,portal: null == portal ? _self.portal : portal // ignore: cast_nullable_to_non_nullable
+as bool,metered: null == metered ? _self.metered : metered // ignore: cast_nullable_to_non_nullable
+as bool,validated: null == validated ? _self.validated : validated // ignore: cast_nullable_to_non_nullable
+as bool,reachF: null == reachF ? _self.reachF : reachF // ignore: cast_nullable_to_non_nullable
+as String,reachD: null == reachD ? _self.reachD : reachD // ignore: cast_nullable_to_non_nullable
+as String,direct: null == direct ? _self.direct : direct // ignore: cast_nullable_to_non_nullable
+as String,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as int,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,eligible: null == eligible ? _self.eligible : eligible // ignore: cast_nullable_to_non_nullable
+as int,incidentConns: null == incidentConns ? _self.incidentConns : incidentConns // ignore: cast_nullable_to_non_nullable
+as int,frozenNodes: null == frozenNodes ? _self.frozenNodes : frozenNodes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxDiagContext].
+extension RcxDiagContextPatterns on RcxDiagContext {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxDiagContext value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxDiagContext() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxDiagContext value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagContext():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxDiagContext value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagContext() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String terrain,  String env,  String incumbent,  int incumbentMs,  int sinceMs,  String pin,  String strategy,  String preset,  String mode,  bool screenOff,  bool suspended,  bool probing,  bool deep,  String transport,  bool portal,  bool metered,  bool validated,  String reachF,  String reachD,  String direct,  int probesLeft,  int candidates,  int eligible,  int incidentConns,  int frozenNodes)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxDiagContext() when $default != null:
+return $default(_that.terrain,_that.env,_that.incumbent,_that.incumbentMs,_that.sinceMs,_that.pin,_that.strategy,_that.preset,_that.mode,_that.screenOff,_that.suspended,_that.probing,_that.deep,_that.transport,_that.portal,_that.metered,_that.validated,_that.reachF,_that.reachD,_that.direct,_that.probesLeft,_that.candidates,_that.eligible,_that.incidentConns,_that.frozenNodes);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String terrain,  String env,  String incumbent,  int incumbentMs,  int sinceMs,  String pin,  String strategy,  String preset,  String mode,  bool screenOff,  bool suspended,  bool probing,  bool deep,  String transport,  bool portal,  bool metered,  bool validated,  String reachF,  String reachD,  String direct,  int probesLeft,  int candidates,  int eligible,  int incidentConns,  int frozenNodes)  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagContext():
+return $default(_that.terrain,_that.env,_that.incumbent,_that.incumbentMs,_that.sinceMs,_that.pin,_that.strategy,_that.preset,_that.mode,_that.screenOff,_that.suspended,_that.probing,_that.deep,_that.transport,_that.portal,_that.metered,_that.validated,_that.reachF,_that.reachD,_that.direct,_that.probesLeft,_that.candidates,_that.eligible,_that.incidentConns,_that.frozenNodes);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String terrain,  String env,  String incumbent,  int incumbentMs,  int sinceMs,  String pin,  String strategy,  String preset,  String mode,  bool screenOff,  bool suspended,  bool probing,  bool deep,  String transport,  bool portal,  bool metered,  bool validated,  String reachF,  String reachD,  String direct,  int probesLeft,  int candidates,  int eligible,  int incidentConns,  int frozenNodes)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagContext() when $default != null:
+return $default(_that.terrain,_that.env,_that.incumbent,_that.incumbentMs,_that.sinceMs,_that.pin,_that.strategy,_that.preset,_that.mode,_that.screenOff,_that.suspended,_that.probing,_that.deep,_that.transport,_that.portal,_that.metered,_that.validated,_that.reachF,_that.reachD,_that.direct,_that.probesLeft,_that.candidates,_that.eligible,_that.incidentConns,_that.frozenNodes);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxDiagContext implements RcxDiagContext {
+  const _RcxDiagContext({this.terrain = '', this.env = '', this.incumbent = '', this.incumbentMs = 0, this.sinceMs = 0, this.pin = '', this.strategy = '', this.preset = '', this.mode = '', this.screenOff = false, this.suspended = false, this.probing = false, this.deep = false, this.transport = '', this.portal = false, this.metered = false, this.validated = false, this.reachF = '', this.reachD = '', this.direct = '', this.probesLeft = 0, this.candidates = 0, this.eligible = 0, this.incidentConns = 0, this.frozenNodes = 0});
+  factory _RcxDiagContext.fromJson(Map<String, dynamic> json) => _$RcxDiagContextFromJson(json);
+
+@override@JsonKey() final  String terrain;
+@override@JsonKey() final  String env;
+@override@JsonKey() final  String incumbent;
+@override@JsonKey() final  int incumbentMs;
+@override@JsonKey() final  int sinceMs;
+@override@JsonKey() final  String pin;
+@override@JsonKey() final  String strategy;
+@override@JsonKey() final  String preset;
+@override@JsonKey() final  String mode;
+@override@JsonKey() final  bool screenOff;
+@override@JsonKey() final  bool suspended;
+@override@JsonKey() final  bool probing;
+@override@JsonKey() final  bool deep;
+@override@JsonKey() final  String transport;
+@override@JsonKey() final  bool portal;
+@override@JsonKey() final  bool metered;
+@override@JsonKey() final  bool validated;
+@override@JsonKey() final  String reachF;
+@override@JsonKey() final  String reachD;
+@override@JsonKey() final  String direct;
+@override@JsonKey() final  int probesLeft;
+@override@JsonKey() final  int candidates;
+@override@JsonKey() final  int eligible;
+@override@JsonKey() final  int incidentConns;
+@override@JsonKey() final  int frozenNodes;
+
+/// Create a copy of RcxDiagContext
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxDiagContextCopyWith<_RcxDiagContext> get copyWith => __$RcxDiagContextCopyWithImpl<_RcxDiagContext>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxDiagContextToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxDiagContext&&(identical(other.terrain, terrain) || other.terrain == terrain)&&(identical(other.env, env) || other.env == env)&&(identical(other.incumbent, incumbent) || other.incumbent == incumbent)&&(identical(other.incumbentMs, incumbentMs) || other.incumbentMs == incumbentMs)&&(identical(other.sinceMs, sinceMs) || other.sinceMs == sinceMs)&&(identical(other.pin, pin) || other.pin == pin)&&(identical(other.strategy, strategy) || other.strategy == strategy)&&(identical(other.preset, preset) || other.preset == preset)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.screenOff, screenOff) || other.screenOff == screenOff)&&(identical(other.suspended, suspended) || other.suspended == suspended)&&(identical(other.probing, probing) || other.probing == probing)&&(identical(other.deep, deep) || other.deep == deep)&&(identical(other.transport, transport) || other.transport == transport)&&(identical(other.portal, portal) || other.portal == portal)&&(identical(other.metered, metered) || other.metered == metered)&&(identical(other.validated, validated) || other.validated == validated)&&(identical(other.reachF, reachF) || other.reachF == reachF)&&(identical(other.reachD, reachD) || other.reachD == reachD)&&(identical(other.direct, direct) || other.direct == direct)&&(identical(other.probesLeft, probesLeft) || other.probesLeft == probesLeft)&&(identical(other.candidates, candidates) || other.candidates == candidates)&&(identical(other.eligible, eligible) || other.eligible == eligible)&&(identical(other.incidentConns, incidentConns) || other.incidentConns == incidentConns)&&(identical(other.frozenNodes, frozenNodes) || other.frozenNodes == frozenNodes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hashAll([runtimeType,terrain,env,incumbent,incumbentMs,sinceMs,pin,strategy,preset,mode,screenOff,suspended,probing,deep,transport,portal,metered,validated,reachF,reachD,direct,probesLeft,candidates,eligible,incidentConns,frozenNodes]);
+}
+
+@override
+String toString() {
+    return 'RcxDiagContext(terrain: $terrain, env: $env, incumbent: $incumbent, incumbentMs: $incumbentMs, sinceMs: $sinceMs, pin: $pin, strategy: $strategy, preset: $preset, mode: $mode, screenOff: $screenOff, suspended: $suspended, probing: $probing, deep: $deep, transport: $transport, portal: $portal, metered: $metered, validated: $validated, reachF: $reachF, reachD: $reachD, direct: $direct, probesLeft: $probesLeft, candidates: $candidates, eligible: $eligible, incidentConns: $incidentConns, frozenNodes: $frozenNodes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxDiagContextCopyWith<$Res> implements $RcxDiagContextCopyWith<$Res> {
+  factory _$RcxDiagContextCopyWith(_RcxDiagContext value, $Res Function(_RcxDiagContext) _then) = __$RcxDiagContextCopyWithImpl;
+@override @useResult
+$Res call({
+ String terrain, String env, String incumbent, int incumbentMs, int sinceMs, String pin, String strategy, String preset, String mode, bool screenOff, bool suspended, bool probing, bool deep, String transport, bool portal, bool metered, bool validated, String reachF, String reachD, String direct, int probesLeft, int candidates, int eligible, int incidentConns, int frozenNodes
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxDiagContextCopyWithImpl<$Res>
+    implements _$RcxDiagContextCopyWith<$Res> {
+  __$RcxDiagContextCopyWithImpl(this._self, this._then);
+
+  final _RcxDiagContext _self;
+  final $Res Function(_RcxDiagContext) _then;
+
+/// Create a copy of RcxDiagContext
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? terrain = null,Object? env = null,Object? incumbent = null,Object? incumbentMs = null,Object? sinceMs = null,Object? pin = null,Object? strategy = null,Object? preset = null,Object? mode = null,Object? screenOff = null,Object? suspended = null,Object? probing = null,Object? deep = null,Object? transport = null,Object? portal = null,Object? metered = null,Object? validated = null,Object? reachF = null,Object? reachD = null,Object? direct = null,Object? probesLeft = null,Object? candidates = null,Object? eligible = null,Object? incidentConns = null,Object? frozenNodes = null,}) {
+  return _then(_RcxDiagContext(
+terrain: null == terrain ? _self.terrain : terrain // ignore: cast_nullable_to_non_nullable
+as String,env: null == env ? _self.env : env // ignore: cast_nullable_to_non_nullable
+as String,incumbent: null == incumbent ? _self.incumbent : incumbent // ignore: cast_nullable_to_non_nullable
+as String,incumbentMs: null == incumbentMs ? _self.incumbentMs : incumbentMs // ignore: cast_nullable_to_non_nullable
+as int,sinceMs: null == sinceMs ? _self.sinceMs : sinceMs // ignore: cast_nullable_to_non_nullable
+as int,pin: null == pin ? _self.pin : pin // ignore: cast_nullable_to_non_nullable
+as String,strategy: null == strategy ? _self.strategy : strategy // ignore: cast_nullable_to_non_nullable
+as String,preset: null == preset ? _self.preset : preset // ignore: cast_nullable_to_non_nullable
+as String,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as String,screenOff: null == screenOff ? _self.screenOff : screenOff // ignore: cast_nullable_to_non_nullable
+as bool,suspended: null == suspended ? _self.suspended : suspended // ignore: cast_nullable_to_non_nullable
+as bool,probing: null == probing ? _self.probing : probing // ignore: cast_nullable_to_non_nullable
+as bool,deep: null == deep ? _self.deep : deep // ignore: cast_nullable_to_non_nullable
+as bool,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as String,portal: null == portal ? _self.portal : portal // ignore: cast_nullable_to_non_nullable
+as bool,metered: null == metered ? _self.metered : metered // ignore: cast_nullable_to_non_nullable
+as bool,validated: null == validated ? _self.validated : validated // ignore: cast_nullable_to_non_nullable
+as bool,reachF: null == reachF ? _self.reachF : reachF // ignore: cast_nullable_to_non_nullable
+as String,reachD: null == reachD ? _self.reachD : reachD // ignore: cast_nullable_to_non_nullable
+as String,direct: null == direct ? _self.direct : direct // ignore: cast_nullable_to_non_nullable
+as String,probesLeft: null == probesLeft ? _self.probesLeft : probesLeft // ignore: cast_nullable_to_non_nullable
+as int,candidates: null == candidates ? _self.candidates : candidates // ignore: cast_nullable_to_non_nullable
+as int,eligible: null == eligible ? _self.eligible : eligible // ignore: cast_nullable_to_non_nullable
+as int,incidentConns: null == incidentConns ? _self.incidentConns : incidentConns // ignore: cast_nullable_to_non_nullable
+as int,frozenNodes: null == frozenNodes ? _self.frozenNodes : frozenNodes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$RcxDiagEntry {
+
+ int get seq; int get at; String get kind; String get msg; String get from; String get to; int get repeat; RcxDiagContext? get ctx; List<RcxCandidateReport> get cands;
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxDiagEntryCopyWith<RcxDiagEntry> get copyWith => _$RcxDiagEntryCopyWithImpl<RcxDiagEntry>(this as RcxDiagEntry, _$identity);
+
+  /// Serializes this RcxDiagEntry to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxDiagEntry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxDiagEntry&&(identical(other.seq, _this.seq) || other.seq == _this.seq)&&(identical(other.at, _this.at) || other.at == _this.at)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.msg, _this.msg) || other.msg == _this.msg)&&(identical(other.from, _this.from) || other.from == _this.from)&&(identical(other.to, _this.to) || other.to == _this.to)&&(identical(other.repeat, _this.repeat) || other.repeat == _this.repeat)&&(identical(other.ctx, _this.ctx) || other.ctx == _this.ctx)&&const DeepCollectionEquality().equals(other.cands, _this.cands));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxDiagEntry;
+  return Object.hash(runtimeType,_this.seq,_this.at,_this.kind,_this.msg,_this.from,_this.to,_this.repeat,_this.ctx,const DeepCollectionEquality().hash(_this.cands));
+}
+
+@override
+String toString() {
+  final _this = this as RcxDiagEntry;
+  return 'RcxDiagEntry(seq: ${_this.seq}, at: ${_this.at}, kind: ${_this.kind}, msg: ${_this.msg}, from: ${_this.from}, to: ${_this.to}, repeat: ${_this.repeat}, ctx: ${_this.ctx}, cands: ${_this.cands})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxDiagEntryCopyWith<$Res>  {
+  factory $RcxDiagEntryCopyWith(RcxDiagEntry value, $Res Function(RcxDiagEntry) _then) = _$RcxDiagEntryCopyWithImpl;
+@useResult
+$Res call({
+ int seq, int at, String kind, String msg, String from, String to, int repeat, RcxDiagContext? ctx, List<RcxCandidateReport> cands
+});
+
+
+$RcxDiagContextCopyWith<$Res>? get ctx;
+
+}
+/// @nodoc
+class _$RcxDiagEntryCopyWithImpl<$Res>
+    implements $RcxDiagEntryCopyWith<$Res> {
+  _$RcxDiagEntryCopyWithImpl(this._self, this._then);
+
+  final RcxDiagEntry _self;
+  final $Res Function(RcxDiagEntry) _then;
+
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? seq = null,Object? at = null,Object? kind = null,Object? msg = null,Object? from = null,Object? to = null,Object? repeat = null,Object? ctx = freezed,Object? cands = null,}) {
+  return _then(RcxDiagEntry(
+seq: null == seq ? _self.seq : seq // ignore: cast_nullable_to_non_nullable
+as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,msg: null == msg ? _self.msg : msg // ignore: cast_nullable_to_non_nullable
+as String,from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,repeat: null == repeat ? _self.repeat : repeat // ignore: cast_nullable_to_non_nullable
+as int,ctx: freezed == ctx ? _self.ctx : ctx // ignore: cast_nullable_to_non_nullable
+as RcxDiagContext?,cands: null == cands ? _self.cands : cands // ignore: cast_nullable_to_non_nullable
+as List<RcxCandidateReport>,
+  ));
+}
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxDiagContextCopyWith<$Res>? get ctx {
+    if (_self.ctx == null) {
+    return null;
+  }
+
+  return $RcxDiagContextCopyWith<$Res>(_self.ctx!, (value) {
+    return _then(_self.copyWith(ctx: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [RcxDiagEntry].
+extension RcxDiagEntryPatterns on RcxDiagEntry {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxDiagEntry value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxDiagEntry() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxDiagEntry value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagEntry():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxDiagEntry value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagEntry() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seq,  int at,  String kind,  String msg,  String from,  String to,  int repeat,  RcxDiagContext? ctx,  List<RcxCandidateReport> cands)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxDiagEntry() when $default != null:
+return $default(_that.seq,_that.at,_that.kind,_that.msg,_that.from,_that.to,_that.repeat,_that.ctx,_that.cands);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seq,  int at,  String kind,  String msg,  String from,  String to,  int repeat,  RcxDiagContext? ctx,  List<RcxCandidateReport> cands)  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagEntry():
+return $default(_that.seq,_that.at,_that.kind,_that.msg,_that.from,_that.to,_that.repeat,_that.ctx,_that.cands);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seq,  int at,  String kind,  String msg,  String from,  String to,  int repeat,  RcxDiagContext? ctx,  List<RcxCandidateReport> cands)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagEntry() when $default != null:
+return $default(_that.seq,_that.at,_that.kind,_that.msg,_that.from,_that.to,_that.repeat,_that.ctx,_that.cands);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxDiagEntry implements RcxDiagEntry {
+  const _RcxDiagEntry({this.seq = 0, this.at = 0, this.kind = '', this.msg = '', this.from = '', this.to = '', this.repeat = 1, this.ctx,  List<RcxCandidateReport> cands = const []}): _cands = cands;
+  factory _RcxDiagEntry.fromJson(Map<String, dynamic> json) => _$RcxDiagEntryFromJson(json);
+
+@override@JsonKey() final  int seq;
+@override@JsonKey() final  int at;
+@override@JsonKey() final  String kind;
+@override@JsonKey() final  String msg;
+@override@JsonKey() final  String from;
+@override@JsonKey() final  String to;
+@override@JsonKey() final  int repeat;
+@override final  RcxDiagContext? ctx;
+ final  List<RcxCandidateReport> _cands;
+@override@JsonKey() List<RcxCandidateReport> get cands {
+  if (_cands is EqualUnmodifiableListView) return _cands;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_cands);
+}
+
+
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxDiagEntryCopyWith<_RcxDiagEntry> get copyWith => __$RcxDiagEntryCopyWithImpl<_RcxDiagEntry>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxDiagEntryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxDiagEntry&&(identical(other.seq, seq) || other.seq == seq)&&(identical(other.at, at) || other.at == at)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.msg, msg) || other.msg == msg)&&(identical(other.from, from) || other.from == from)&&(identical(other.to, to) || other.to == to)&&(identical(other.repeat, repeat) || other.repeat == repeat)&&(identical(other.ctx, ctx) || other.ctx == ctx)&&const DeepCollectionEquality().equals(other.cands, _cands));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,seq,at,kind,msg,from,to,repeat,ctx,const DeepCollectionEquality().hash(_cands));
+}
+
+@override
+String toString() {
+    return 'RcxDiagEntry(seq: $seq, at: $at, kind: $kind, msg: $msg, from: $from, to: $to, repeat: $repeat, ctx: $ctx, cands: $cands)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxDiagEntryCopyWith<$Res> implements $RcxDiagEntryCopyWith<$Res> {
+  factory _$RcxDiagEntryCopyWith(_RcxDiagEntry value, $Res Function(_RcxDiagEntry) _then) = __$RcxDiagEntryCopyWithImpl;
+@override @useResult
+$Res call({
+ int seq, int at, String kind, String msg, String from, String to, int repeat, RcxDiagContext? ctx, List<RcxCandidateReport> cands
+});
+
+
+@override $RcxDiagContextCopyWith<$Res>? get ctx;
+
+}
+/// @nodoc
+class __$RcxDiagEntryCopyWithImpl<$Res>
+    implements _$RcxDiagEntryCopyWith<$Res> {
+  __$RcxDiagEntryCopyWithImpl(this._self, this._then);
+
+  final _RcxDiagEntry _self;
+  final $Res Function(_RcxDiagEntry) _then;
+
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? seq = null,Object? at = null,Object? kind = null,Object? msg = null,Object? from = null,Object? to = null,Object? repeat = null,Object? ctx = freezed,Object? cands = null,}) {
+  return _then(_RcxDiagEntry(
+seq: null == seq ? _self.seq : seq // ignore: cast_nullable_to_non_nullable
+as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
+as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,msg: null == msg ? _self.msg : msg // ignore: cast_nullable_to_non_nullable
+as String,from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as String,to: null == to ? _self.to : to // ignore: cast_nullable_to_non_nullable
+as String,repeat: null == repeat ? _self.repeat : repeat // ignore: cast_nullable_to_non_nullable
+as int,ctx: freezed == ctx ? _self.ctx : ctx // ignore: cast_nullable_to_non_nullable
+as RcxDiagContext?,cands: null == cands ? _self._cands : cands // ignore: cast_nullable_to_non_nullable
+as List<RcxCandidateReport>,
+  ));
+}
+
+/// Create a copy of RcxDiagEntry
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RcxDiagContextCopyWith<$Res>? get ctx {
+    if (_self.ctx == null) {
+    return null;
+  }
+
+  return $RcxDiagContextCopyWith<$Res>(_self.ctx!, (value) {
+    return _then(_self.copyWith(ctx: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$RcxDiagBatch {
+
+ List<RcxDiagEntry> get entries; int get cursor; int get dropped; bool get enabled;
+/// Create a copy of RcxDiagBatch
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RcxDiagBatchCopyWith<RcxDiagBatch> get copyWith => _$RcxDiagBatchCopyWithImpl<RcxDiagBatch>(this as RcxDiagBatch, _$identity);
+
+  /// Serializes this RcxDiagBatch to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as RcxDiagBatch;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxDiagBatch&&const DeepCollectionEquality().equals(other.entries, _this.entries)&&(identical(other.cursor, _this.cursor) || other.cursor == _this.cursor)&&(identical(other.dropped, _this.dropped) || other.dropped == _this.dropped)&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as RcxDiagBatch;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.entries),_this.cursor,_this.dropped,_this.enabled);
+}
+
+@override
+String toString() {
+  final _this = this as RcxDiagBatch;
+  return 'RcxDiagBatch(entries: ${_this.entries}, cursor: ${_this.cursor}, dropped: ${_this.dropped}, enabled: ${_this.enabled})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RcxDiagBatchCopyWith<$Res>  {
+  factory $RcxDiagBatchCopyWith(RcxDiagBatch value, $Res Function(RcxDiagBatch) _then) = _$RcxDiagBatchCopyWithImpl;
+@useResult
+$Res call({
+ List<RcxDiagEntry> entries, int cursor, int dropped, bool enabled
+});
+
+
+
+
+}
+/// @nodoc
+class _$RcxDiagBatchCopyWithImpl<$Res>
+    implements $RcxDiagBatchCopyWith<$Res> {
+  _$RcxDiagBatchCopyWithImpl(this._self, this._then);
+
+  final RcxDiagBatch _self;
+  final $Res Function(RcxDiagBatch) _then;
+
+/// Create a copy of RcxDiagBatch
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? entries = null,Object? cursor = null,Object? dropped = null,Object? enabled = null,}) {
+  return _then(RcxDiagBatch(
+entries: null == entries ? _self.entries : entries // ignore: cast_nullable_to_non_nullable
+as List<RcxDiagEntry>,cursor: null == cursor ? _self.cursor : cursor // ignore: cast_nullable_to_non_nullable
+as int,dropped: null == dropped ? _self.dropped : dropped // ignore: cast_nullable_to_non_nullable
+as int,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [RcxDiagBatch].
+extension RcxDiagBatchPatterns on RcxDiagBatch {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _RcxDiagBatch value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _RcxDiagBatch() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _RcxDiagBatch value)  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagBatch():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _RcxDiagBatch value)?  $default,){
+final _that = this;
+switch (_that) {
+case _RcxDiagBatch() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<RcxDiagEntry> entries,  int cursor,  int dropped,  bool enabled)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _RcxDiagBatch() when $default != null:
+return $default(_that.entries,_that.cursor,_that.dropped,_that.enabled);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<RcxDiagEntry> entries,  int cursor,  int dropped,  bool enabled)  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagBatch():
+return $default(_that.entries,_that.cursor,_that.dropped,_that.enabled);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<RcxDiagEntry> entries,  int cursor,  int dropped,  bool enabled)?  $default,) {final _that = this;
+switch (_that) {
+case _RcxDiagBatch() when $default != null:
+return $default(_that.entries,_that.cursor,_that.dropped,_that.enabled);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _RcxDiagBatch implements RcxDiagBatch {
+  const _RcxDiagBatch({ List<RcxDiagEntry> entries = const [], this.cursor = 0, this.dropped = 0, this.enabled = false}): _entries = entries;
+  factory _RcxDiagBatch.fromJson(Map<String, dynamic> json) => _$RcxDiagBatchFromJson(json);
+
+ final  List<RcxDiagEntry> _entries;
+@override@JsonKey() List<RcxDiagEntry> get entries {
+  if (_entries is EqualUnmodifiableListView) return _entries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_entries);
+}
+
+@override@JsonKey() final  int cursor;
+@override@JsonKey() final  int dropped;
+@override@JsonKey() final  bool enabled;
+
+/// Create a copy of RcxDiagBatch
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RcxDiagBatchCopyWith<_RcxDiagBatch> get copyWith => __$RcxDiagBatchCopyWithImpl<_RcxDiagBatch>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RcxDiagBatchToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxDiagBatch&&const DeepCollectionEquality().equals(other.entries, _entries)&&(identical(other.cursor, cursor) || other.cursor == cursor)&&(identical(other.dropped, dropped) || other.dropped == dropped)&&(identical(other.enabled, enabled) || other.enabled == enabled));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries),cursor,dropped,enabled);
+}
+
+@override
+String toString() {
+    return 'RcxDiagBatch(entries: $entries, cursor: $cursor, dropped: $dropped, enabled: $enabled)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RcxDiagBatchCopyWith<$Res> implements $RcxDiagBatchCopyWith<$Res> {
+  factory _$RcxDiagBatchCopyWith(_RcxDiagBatch value, $Res Function(_RcxDiagBatch) _then) = __$RcxDiagBatchCopyWithImpl;
+@override @useResult
+$Res call({
+ List<RcxDiagEntry> entries, int cursor, int dropped, bool enabled
+});
+
+
+
+
+}
+/// @nodoc
+class __$RcxDiagBatchCopyWithImpl<$Res>
+    implements _$RcxDiagBatchCopyWith<$Res> {
+  __$RcxDiagBatchCopyWithImpl(this._self, this._then);
+
+  final _RcxDiagBatch _self;
+  final $Res Function(_RcxDiagBatch) _then;
+
+/// Create a copy of RcxDiagBatch
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? entries = null,Object? cursor = null,Object? dropped = null,Object? enabled = null,}) {
+  return _then(_RcxDiagBatch(
+entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
+as List<RcxDiagEntry>,cursor: null == cursor ? _self.cursor : cursor // ignore: cast_nullable_to_non_nullable
+as int,dropped: null == dropped ? _self.dropped : dropped // ignore: cast_nullable_to_non_nullable
+as int,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
 }
 
 // dart format on

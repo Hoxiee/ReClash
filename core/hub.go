@@ -26,7 +26,6 @@ import (
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/constant/features"
-	cp "github.com/metacubex/mihomo/constant/provider"
 	"github.com/metacubex/mihomo/dns"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/log"
@@ -47,7 +46,6 @@ const coreMemoryLimit = 96 * 1024 * 1024
 func handleInitClash(params *InitParams) bool {
 	debug.SetGCPercent(50)
 	debug.SetMemoryLimit(coreMemoryLimit)
-	startHealthCheckCadence()
 	func() {
 		configMu.Lock()
 		defer configMu.Unlock()
@@ -69,6 +67,7 @@ func handleStartListener() bool {
 	updateListeners(currentConfig)
 	syncTunUp()
 	resolver.ResetConnection()
+	refreshRoute()
 	return requestedTunError() == nil
 }
 
@@ -137,8 +136,8 @@ func handleForceGC() {
 func handleShutdown() bool {
 	odometerInstance.NoteDown(time.Now(), false)
 	odometerInstance.Flush()
-	stopHealthCheckCadence()
 	handleStopLog()
+	stopRouteWatch()
 	rcxEngineInstance.Stop()
 	provider.SetAutoHealthCheckSuppressed(false)
 	subscriptionReporterInstance.Stop()
@@ -381,6 +380,8 @@ func handleChangeProxy(params *ChangeProxyParams) string {
 	}(); err != "" {
 		return err
 	}
+
+	refreshRoute()
 
 	// The host already wrote the selector: the engine only learns the pick.
 	if params.GroupName == rcx.GroupNode {
@@ -706,60 +707,6 @@ func handleSideLoadExternalProvider(providerName string, data []byte) *MethodErr
 	return nil
 }
 
-const healthCheckCadenceInterval = 5 * time.Minute
-
-var (
-	healthCheckCadenceMu     sync.Mutex
-	healthCheckCadenceCancel context.CancelFunc
-	healthCheckCadenceEvery  = healthCheckCadenceInterval
-)
-
-func healthCheckProviders() []cp.ProxyProvider {
-	providers := make([]cp.ProxyProvider, 0)
-	healthCheckSeen := make(map[cp.ProxyProvider]struct{})
-	add := func(provider cp.ProxyProvider) {
-		if provider == nil {
-			return
-		}
-		if _, seen := healthCheckSeen[provider]; seen {
-			return
-		}
-		healthCheckSeen[provider] = struct{}{}
-		providers = append(providers, provider)
-	}
-	for _, provider := range tunnel.ProvidersSnapshot() {
-		add(provider)
-	}
-	for _, proxy := range tunnel.AllProxies() {
-		adapterProxy, ok := proxy.(*adapter.Proxy)
-		if !ok {
-			continue
-		}
-		group, ok := adapterProxy.ProxyAdapter.(outboundgroup.ProxyGroup)
-		if !ok {
-			continue
-		}
-		for _, provider := range group.Providers() {
-			add(provider)
-		}
-	}
-	return providers
-}
-
-func runHealthCheckRefresh() {
-	for _, provider := range healthCheckProviders() {
-		log.Debugln("[APP] re-checking provider %s", provider.Name())
-		provider.Touch()
-		provider.HealthCheck()
-	}
-}
-
-func defaultRefreshHealthChecks() {
-	safeGoDetached("refreshHealthChecks", runHealthCheckRefresh)
-}
-
-var refreshHealthChecks = defaultRefreshHealthChecks
-
 // A wake on the same physical network fires no connectivity callback, so the
 // stale-socket drop NetworkObserveModule does on handover has to be reissued here.
 func defaultDropStaleConnections() {
@@ -769,43 +716,6 @@ func defaultDropStaleConnections() {
 
 var dropStaleConnections = defaultDropStaleConnections
 
-func startHealthCheckCadence() {
-	healthCheckCadenceMu.Lock()
-	defer healthCheckCadenceMu.Unlock()
-	if healthCheckCadenceCancel != nil {
-		return
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	healthCheckCadenceCancel = cancel
-	every := healthCheckCadenceEvery
-	safeGoDetached("healthCheckCadence", func() {
-		ticker := time.NewTicker(every)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				if tunUp.Load() && !isScreenOff.Load() && !isSuspended.Load() && !rcxEngineInstance.Enabled() {
-					refreshHealthChecks()
-				}
-			}
-		}
-	})
-}
-
-func stopHealthCheckCadence() {
-	healthCheckCadenceMu.Lock()
-	defer healthCheckCadenceMu.Unlock()
-	if healthCheckCadenceCancel == nil {
-		return
-	}
-	healthCheckCadenceCancel()
-	healthCheckCadenceCancel = nil
-}
-
-// Doze is minutes away when a screen goes off, so a health check gated on
-// suspension alone still probes every provider from a pocketed phone.
 func handleScreenOff(off bool) {
 	wasOff := isScreenOff.Swap(off)
 	provider.SetScreenOff(off)
@@ -815,9 +725,6 @@ func handleScreenOff(off bool) {
 		if !off {
 			signalOdometerWake()
 		}
-	}
-	if wasOff && !off && tunUp.Load() && !isSuspended.Load() && !rcxEngineInstance.Enabled() {
-		refreshHealthChecks()
 	}
 }
 
@@ -836,17 +743,6 @@ func handleSuspend(suspended bool) bool {
 	woke := wasSuspended && !isScreenOff.Load() && isRunning.Load()
 	if woke {
 		dropStaleConnections()
-	}
-	// Provider health checks keep ticking through Doze, where the app has no
-	// network at all, so coming back means every proxy is marked dead and every
-	// delay reads Timeout. A lazy provider then skips its next tick because
-	// nothing touched it in the meantime, and the whole list stays wrong until
-	// the user tests by hand. Re-check now instead - but not while the
-	// listeners are stopped, since the service also resumes the core on its way
-	// down, and not when the routing engine is on: it buys one probe for the
-	// node in use instead of one per provider.
-	if woke && !rcxEngineInstance.Enabled() {
-		refreshHealthChecks()
 	}
 	rcxEngineInstance.OnSuspend(false)
 	return true
@@ -997,7 +893,6 @@ func handleSetupConfig(params *SetupParams) string {
 	if err := setupConfig(params); err != nil {
 		return err.Error()
 	}
-	refreshHealthChecks()
 	return ""
 }
 
@@ -1021,6 +916,7 @@ func init() {
 		subscriptionReporterInstance.ObserveFlow(event)
 	}
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
+		notifyProbeRoute(c)
 		connectionDoctor.ObserveTracker(c, false)
 		rcxEngineInstance.NoteTracker(c)
 		sendMessage(Message{
@@ -1043,6 +939,7 @@ func init() {
 	executor.DefaultProviderLoadedHook = func(providerName string) {
 		scheduleReclaimOwnership()
 		rcxEngineInstance.OnProvidersLoaded()
+		refreshRoute()
 		sendMessage(Message{
 			Type: LoadedMessage,
 			Data: providerName,
@@ -1054,6 +951,9 @@ func init() {
 		} else {
 			releaseGeoUpdateFromHook(geoType)
 			scheduleReclaimOwnership()
+			if !skipped && updateErr == nil {
+				bumpRouteEpoch()
+			}
 		}
 		status := GeoUpdateStatus{
 			Type:     geoType,

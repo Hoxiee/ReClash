@@ -355,6 +355,7 @@ func (e *rcxEngine) noteSwitch(from, to string, reason rcxReason, now time.Time)
 	if len(e.history) > rcxHistoryDepth {
 		e.history = e.history[len(e.history)-rcxHistoryDepth:]
 	}
+	e.recordSwitch(from, to, reason, now)
 }
 
 // Five switches in five seconds are one dark uplink misread five times: the round

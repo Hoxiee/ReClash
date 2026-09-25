@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:reclash/icons/icons.dart';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -7,6 +8,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/options_picker_page.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -83,6 +85,7 @@ class SmartRoutingView extends ConsumerWidget {
         _regionSection(context, props),
         _strategySection(context, ref, props),
         _behaviourSection(context, ref, props),
+        _diagnosticsSection(context, ref),
         SettingSection.sliver(
           title: appLocalizations.smartRoutingServiceRoutes,
           items: [
@@ -107,10 +110,12 @@ class SmartRoutingView extends ConsumerWidget {
           bottom: 24,
           items: [
             DecorationListItem.open(
-              leading: const Icon(Icons.tune_rounded),
+              leading: const GlyphIcon(AppGlyphs.sliders),
               title: Text(appLocalizations.advancedConfig),
               subtitle: Text(appLocalizations.advancedConfigDesc),
               blur: false,
+              forceFull: false,
+              maxWidth: 400,
               widget: const _AdvancedRoutingPage(),
             ),
           ],
@@ -146,10 +151,12 @@ class SmartRoutingView extends ConsumerWidget {
     return SettingSection.sliver(
       items: [
         DecorationListItem.open(
-          leading: const Icon(Icons.travel_explore_rounded),
+          leading: const GlyphIcon(AppGlyphs.globeSearch),
           title: Text(appLocalizations.smartRoutingRegionCard),
           subtitle: Text(appLocalizations.smartRoutingRegionCardDesc),
           blur: false,
+          forceFull: false,
+          maxWidth: 400,
           widget: const _RegionDetailsPage(),
         ),
       ],
@@ -237,6 +244,28 @@ class SmartRoutingView extends ConsumerWidget {
     );
   }
 
+  Widget _diagnosticsSection(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final enabled = ref.watch(
+      appSettingProvider.select((state) => state.smartRoutingDiagnostics),
+    );
+    return SettingSection.sliver(
+      title: appLocalizations.smartRoutingDiagnostics,
+      items: [
+        DecorationListItem.toggle(
+          title: Text(appLocalizations.smartRoutingDiagnostics),
+          subtitle: Text(appLocalizations.smartRoutingDiagnosticsDesc),
+          value: enabled,
+          onChanged: (value) => ref
+              .read(appSettingProvider.notifier)
+              .update(
+                (state) => state.copyWith(smartRoutingDiagnostics: value),
+              ),
+        ),
+      ],
+    );
+  }
+
 }
 
 /// Read-only tour of what the active region sets up. It reads the live props, so
@@ -296,7 +325,7 @@ class _RegionDetailsPage extends ConsumerWidget {
             bottom: 24,
             items: [
               DecorationListItem(
-                leading: const Icon(Icons.edit_note_rounded),
+                leading: const GlyphIcon(AppGlyphs.compose),
                 title: Text(appLocalizations.smartRoutingRegionEditNote),
               ),
             ],
@@ -331,10 +360,10 @@ class _StrategyCard extends StatelessWidget {
     return DecorationListItem(
       minVerticalPadding: 10,
       isSelected: selected,
-      leading: Icon(
+      leading: GlyphIcon(
         selected
-            ? Icons.radio_button_checked_rounded
-            : Icons.radio_button_unchecked_rounded,
+            ? AppGlyphs.radio
+            : AppGlyphs.circleOutline,
         color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
       title: Row(
@@ -465,6 +494,8 @@ class _StringListItem extends ConsumerWidget {
       title: Text(title),
       subtitle: Text(value.isEmpty ? desc : value.join(', ')),
       blur: false,
+      forceFull: false,
+      maxWidth: 400,
       widget: ListInputPage(
         title: title,
         items: value,

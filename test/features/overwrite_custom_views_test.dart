@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
@@ -174,7 +176,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.info), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.info), findsOneWidget);
 
     container.read(_testOverwriteDataProvider.notifier).setRuleTargets({
       ...container.read(_testOverwriteDataProvider).ruleTargets,
@@ -182,7 +184,7 @@ void main() {
     });
     await tester.pump();
 
-    expect(find.byIcon(Icons.info), findsNothing);
+    expect(find.byGlyph(AppGlyphs.info), findsNothing);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

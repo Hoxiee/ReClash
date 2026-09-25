@@ -282,6 +282,8 @@ class ApplicationState extends ConsumerState<Application> {
     final hasVpn = results.contains(ConnectivityResult.vpn);
     if (_preHasVpn != hasVpn) {
       ref.read(checkIpNumProvider.notifier).add();
+    } else {
+      ref.read(routeTrackerProvider.notifier).bumpHostEpoch();
     }
     _preHasVpn = hasVpn;
   }

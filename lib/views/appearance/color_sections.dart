@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -205,7 +206,7 @@ class _AppearanceColorSectionsState
           title: appLocalizations.themeColor,
           items: [
             DecorationListItem.toggle(
-              leading: const Icon(Icons.colorize),
+              leading: const GlyphIcon(AppGlyphs.eyedropper),
               title: Text(appLocalizations.systemColor),
               subtitle: Text(appLocalizations.systemColorDesc),
               value: isDynamic,
@@ -224,7 +225,7 @@ class _AppearanceColorSectionsState
             ),
             if (isDynamic) const _SystemSeedItem(),
             DecorationListItem(
-              leading: const Icon(Icons.gradient),
+              leading: const GlyphIcon(AppGlyphs.gradient),
               title: Text(appLocalizations.colorSchemes),
               trailing: Text(
                 themeColors.schemeVariant.label,
@@ -241,10 +242,10 @@ class _AppearanceColorSectionsState
           SettingSection.sliver(
             items: [
               DecorationListItem(
-                leading: const Icon(Icons.tonality_outlined),
+                leading: const GlyphIcon(AppGlyphs.contrast),
                 title: Text(appLocalizations.findingPorcelain),
                 subtitle: Text(appLocalizations.porcelainThemeDesc),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
                 onPressed: () {
                   const color = 0xFFB8C8D4;
                   _update(
@@ -373,7 +374,7 @@ class _SystemSeedItem extends ConsumerWidget {
     return DecorationListItem(
       minVerticalPadding: 8,
       contentPadding: const EdgeInsets.only(left: 16, right: 8),
-      leading: const Icon(Icons.water_drop_outlined),
+      leading: const GlyphIcon(AppGlyphs.drop),
       title: Text(context.appLocalizations.systemSeed),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -504,7 +505,7 @@ class _PrimaryColorTile extends StatelessWidget {
                 onPressed: onDelete,
                 padding: const EdgeInsets.all(12),
                 iconSize: 30,
-                icon: Icon(color: context.colorScheme.primary, Icons.delete),
+                icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.delete),
               ),
             ),
         ],
@@ -529,7 +530,7 @@ class _AddPrimaryColorTile extends StatelessWidget {
         tooltip: context.appLocalizations.add,
         onPressed: onPressed,
         iconSize: 32,
-        icon: Icon(color: context.colorScheme.primary, Icons.add),
+        icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.add),
       ),
     );
   }

@@ -29,7 +29,7 @@ abstract class UpdateParams with _$UpdateParams {
     required bool ipv6,
     @JsonKey(name: 'tcp-concurrent') required bool tcpConcurrent,
     @JsonKey(name: 'external-controller')
-    required ExternalControllerStatus externalController,
+    required String externalController,
     @JsonKey(name: 'unified-delay') required bool unifiedDelay,
     @Default([]) List<String> authentication,
     @Default(false) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
@@ -488,4 +488,138 @@ abstract class RcxReport with _$RcxReport {
 
   factory RcxReport.fromJson(Map<String, Object?> json) =>
       _$RcxReportFromJson(json);
+}
+
+@freezed
+abstract class RouteSnapshot with _$RouteSnapshot {
+  const factory RouteSnapshot({
+    @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
+    @JsonKey(name: 'picks-version') @Default(0) int picksVersion,
+    @Default({}) Map<String, String> picks,
+  }) = _RouteSnapshot;
+
+  factory RouteSnapshot.fromJson(Map<String, Object?> json) =>
+      _$RouteSnapshotFromJson(json);
+}
+
+@freezed
+abstract class OutboundIpParams with _$OutboundIpParams {
+  const factory OutboundIpParams({
+    @JsonKey(name: 'proxy-name') @Default('') String proxyName,
+    @Default([]) List<String> urls,
+    required int timeout,
+  }) = _OutboundIpParams;
+
+  factory OutboundIpParams.fromJson(Map<String, Object?> json) =>
+      _$OutboundIpParamsFromJson(json);
+}
+
+@freezed
+abstract class OutboundIpResult with _$OutboundIpResult {
+  const factory OutboundIpResult({
+    @Default('') String url,
+    @Default('') String body,
+    @Default(0) int delay,
+    @Default([]) List<String> chains,
+    String? error,
+    @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
+    @JsonKey(name: 'picks-version') @Default(0) int picksVersion,
+  }) = _OutboundIpResult;
+
+  factory OutboundIpResult.fromJson(Map<String, Object?> json) =>
+      _$OutboundIpResultFromJson(json);
+}
+
+@freezed
+abstract class ServiceCheckParams with _$ServiceCheckParams {
+  const factory ServiceCheckParams({
+    @JsonKey(name: 'proxy-name') @Default('') String proxyName,
+    @Default([]) List<String> names,
+    required int timeout,
+  }) = _ServiceCheckParams;
+
+  factory ServiceCheckParams.fromJson(Map<String, Object?> json) =>
+      _$ServiceCheckParamsFromJson(json);
+}
+
+@freezed
+abstract class ServiceCheckItem with _$ServiceCheckItem {
+  const factory ServiceCheckItem({
+    @Default('') String name,
+    @Default('') String status,
+    @Default('') String region,
+    @Default(0) int delay,
+    @Default([]) List<String> chains,
+    @JsonKey(name: 'checked-at') @Default(0) int checkedAt,
+    @JsonKey(name: 'core-epoch') @Default(0) int coreEpoch,
+    @JsonKey(name: 'picks-version') @Default(0) int picksVersion,
+  }) = _ServiceCheckItem;
+
+  factory ServiceCheckItem.fromJson(Map<String, Object?> json) =>
+      _$ServiceCheckItemFromJson(json);
+}
+
+@freezed
+abstract class RcxDiagContext with _$RcxDiagContext {
+  const factory RcxDiagContext({
+    @Default('') String terrain,
+    @Default('') String env,
+    @Default('') String incumbent,
+    @Default(0) int incumbentMs,
+    @Default(0) int sinceMs,
+    @Default('') String pin,
+    @Default('') String strategy,
+    @Default('') String preset,
+    @Default('') String mode,
+    @Default(false) bool screenOff,
+    @Default(false) bool suspended,
+    @Default(false) bool probing,
+    @Default(false) bool deep,
+    @Default('') String transport,
+    @Default(false) bool portal,
+    @Default(false) bool metered,
+    @Default(false) bool validated,
+    @Default('') String reachF,
+    @Default('') String reachD,
+    @Default('') String direct,
+    @Default(0) int probesLeft,
+    @Default(0) int candidates,
+    @Default(0) int eligible,
+    @Default(0) int incidentConns,
+    @Default(0) int frozenNodes,
+  }) = _RcxDiagContext;
+
+  factory RcxDiagContext.fromJson(Map<String, Object?> json) =>
+      _$RcxDiagContextFromJson(json);
+}
+
+@freezed
+abstract class RcxDiagEntry with _$RcxDiagEntry {
+  const factory RcxDiagEntry({
+    @Default(0) int seq,
+    @Default(0) int at,
+    @Default('') String kind,
+    @Default('') String msg,
+    @Default('') String from,
+    @Default('') String to,
+    @Default(1) int repeat,
+    RcxDiagContext? ctx,
+    @Default([]) List<RcxCandidateReport> cands,
+  }) = _RcxDiagEntry;
+
+  factory RcxDiagEntry.fromJson(Map<String, Object?> json) =>
+      _$RcxDiagEntryFromJson(json);
+}
+
+@freezed
+abstract class RcxDiagBatch with _$RcxDiagBatch {
+  const factory RcxDiagBatch({
+    @Default([]) List<RcxDiagEntry> entries,
+    @Default(0) int cursor,
+    @Default(0) int dropped,
+    @Default(false) bool enabled,
+  }) = _RcxDiagBatch;
+
+  factory RcxDiagBatch.fromJson(Map<String, Object?> json) =>
+      _$RcxDiagBatchFromJson(json);
 }

@@ -218,7 +218,12 @@
   "allowBypass": "Allow apps to bypass VPN",
   "allowBypassDesc": "When enabled, some apps can bypass the VPN",
   "externalController": "External controller",
-  "externalControllerDesc": "When enabled, the Clash core can be controlled on port 9090",
+  "externalControllerDesc": "Configure external access to the Clash core",
+  "enableExternalController": "Enable external controller",
+  "allowLanAccess": "Allow LAN access",
+  "allowLanAccessDesc": "Allow access to the external controller from the LAN",
+  "listeningPort": "Listening port",
+  "random": "Random",
   "ipv6Desc": "When enabled, IPv6 traffic can be received",
   "app": "App",
   "general": "General",
@@ -474,9 +479,21 @@
   "hotkeyNotSet": "Not set",
   "hotkeyUnavailable": "Not registered, it may be taken by another app",
   "hotkeyNeedsModifier": "Include at least one of {modifiers}",
-  "@hotkeyNeedsModifier": {"placeholders": {"modifiers": {"type": "String"}}},
+  "@hotkeyNeedsModifier": {
+    "placeholders": {
+      "modifiers": {
+        "type": "String"
+      }
+    }
+  },
   "hotkeyConflictWith": "Already used by “{action}”. Saving moves it here.",
-  "@hotkeyConflictWith": {"placeholders": {"action": {"type": "String"}}},
+  "@hotkeyConflictWith": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
   "hotkeyManagementDesc": "Control the app with the keyboard",
   "pressKeyboard": "Please press a key",
   "inputCorrectHotkey": "Please enter a valid hotkey",
@@ -526,7 +543,13 @@
   "memoryEstimateSharedDesc": "The Core runs inside the app process. Its share is estimated from runtime stats, and the rest counts as app and shared memory.",
   "memoryReleased": "Memory released",
   "memoryReleasedSize": "Released {size}",
-  "@memoryReleasedSize": {"placeholders": {"size": {"type": "String"}}},
+  "@memoryReleasedSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "releaseMemoryFailed": "Failed to release memory",
   "goroutineInfo": "Goroutines",
   "cancel": "Cancel",
@@ -1369,7 +1392,13 @@
   "smartRoutingProofTtl": "Proof lifetime",
   "smartRoutingProofTtlDesc": "How long a passed check keeps a server proven before a recheck",
   "smartRoutingMinutes": "{minutes} min",
-  "@smartRoutingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@smartRoutingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "smartRoutingNameHints": "Home-country name hints",
   "smartRoutingNameHintsDesc": "Name fragments that hint a server sits in the home country",
   "smartRoutingEgressEchoes": "Egress echo services",
@@ -2257,5 +2286,67 @@
         "type": "String"
       }
     }
-  }
+  },
+  "outboundIp": "Outbound IP",
+  "ipAddress": "IP address",
+  "ipQualityLevel": "Level",
+  "ipQualityGood": "Good",
+  "ipQualityNormal": "Normal",
+  "ipQualityRisky": "Risky",
+  "ipType": "Type",
+  "ipTypeResidential": "Residential",
+  "ipTypeMobile": "Mobile network",
+  "ipTypeBusiness": "Business",
+  "ipTypeHosting": "Data center",
+  "ipFlags": "Flags",
+  "ipFlagProxy": "Proxy",
+  "ipFlagVpn": "VPN",
+  "ipFlagTor": "Tor",
+  "ipFlagAbuser": "Abuse history",
+  "ipOrganization": "Organization",
+  "ipAsn": "ASN",
+  "ipQualitySource": "Answered by",
+  "ipQualitySources": "Sources",
+  "ipQualityFailed": "Couldn't determine the IP type",
+  "ipQualityRetry": "Check again",
+  "ipSourceNoType": "No type",
+  "ipSourceRateLimited": "Rate limited",
+  "ipSourceIpMismatch": "Different outbound IP",
+  "hideIp": "Hide IP",
+  "smartRoutingDiagnostics": "Diagnostics logging",
+  "smartRoutingDiagnosticsDesc": "Capture every routing decision, switch, and probe for this session",
+  "smartRoutingLog": "Routing log",
+  "smartRoutingLogDesc": "Full capture of engine behavior",
+  "smartRoutingMore": "More",
+  "smartRoutingLogOffTitle": "Diagnostics logging is off",
+  "smartRoutingLogOffHint": "Turn it on to capture routing decisions, switches, and probes.",
+  "smartRoutingLogEnable": "Enable logging",
+  "smartRoutingLogEmpty": "No routing activity captured yet",
+  "smartRoutingLogWaiting": "Waiting for the engine…",
+  "smartRoutingLogDropped": "{count} entries dropped",
+  "@smartRoutingLogDropped": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingLogKindDecision": "Decision",
+  "smartRoutingLogKindSwitch": "Switch",
+  "smartRoutingLogKindEvent": "Event",
+  "smartRoutingLogKindProbe": "Probe",
+  "smartRoutingLogExport": "Export log",
+  "smartRoutingLogClear": "Clear view",
+  "smartRoutingLogAutoScroll": "Auto-scroll",
+  "smartRoutingLogRepeat": "×{count}",
+  "@smartRoutingLogRepeat": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingLogState": "State",
+  "smartRoutingLogCandidates": "Candidates",
+  "smartRoutingLogFilter": "Kinds"
 }

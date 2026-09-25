@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
@@ -76,7 +78,7 @@ void main() {
 
   IconButton restartButton(WidgetTester tester) => tester.widget<IconButton>(
     find.ancestor(
-      of: find.byIcon(Icons.restart_alt),
+      of: find.byGlyph(AppGlyphs.reset),
       matching: find.byType(IconButton),
     ),
   );
@@ -168,7 +170,7 @@ void main() {
 
   testWidgets('cancel leaves the core untouched', (tester) async {
     await pumpSection(tester);
-    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.tap(find.byGlyph(AppGlyphs.reset));
     await tester.pumpAndSettle();
     expect(
       find.text('Are you sure you want to force restart the core?'),
@@ -192,7 +194,7 @@ void main() {
         container.read(coreActionProvider.notifier) as _RestartAction;
     action.completion = Completer<bool>();
 
-    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.tap(find.byGlyph(AppGlyphs.reset));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Confirm'));
     await tester.pumpAndSettle();
@@ -209,7 +211,7 @@ void main() {
     'does not restart if another transition began during confirmation',
     (tester) async {
       await pumpSection(tester);
-      await tester.tap(find.byIcon(Icons.restart_alt));
+      await tester.tap(find.byGlyph(AppGlyphs.reset));
       await tester.pumpAndSettle();
       container.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
       await tester.tap(find.text('Confirm'));

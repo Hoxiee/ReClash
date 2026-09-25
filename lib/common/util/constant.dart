@@ -59,6 +59,12 @@ const delayTestGuardDuration = Duration(seconds: 30);
 
 const coreConnectionWaitDuration = Duration(seconds: 10);
 
+Duration coreGuardFor(int timeout, {int budgetFactor = 2}) =>
+    Duration(milliseconds: timeout * budgetFactor) + const Duration(seconds: 5);
+
+/// Kept in step with serviceSweepBudgetFactor in core/service_check.go.
+const serviceSweepBudgetFactor = 6;
+
 /// Keep at or below the Core's delay-test concurrency (`delayTestConcurrency`
 /// in core/common.go).
 const maxConcurrentDelayTests = 16;
@@ -80,6 +86,7 @@ const providersDirectoryName = 'providers';
 const proxiesProviderDirectoryName = 'proxies';
 const rulesProviderDirectoryName = 'rules';
 const localhost = '127.0.0.1';
+const defaultExternalControllerPort = 9090;
 const clashConfigKey = 'clash_config';
 const configKey = 'config';
 const systemDnsRecordKey = 'system_dns_record';

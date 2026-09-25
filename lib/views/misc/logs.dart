@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -94,7 +95,7 @@ class _LogsViewState extends ConsumerState<LogsView> {
         onPressed: () {
           _handleExport();
         },
-        icon: const Icon(Icons.save_as_outlined),
+        icon: const GlyphIcon(AppGlyphs.save),
       ),
     ];
   }
@@ -225,7 +226,7 @@ class _LogFilterButton extends StatelessWidget {
     VoidCallback onPressed,
   ) {
     return CommonPopupMenuItem(
-      icon: selected ? Icons.check : Icons.check_box_outline_blank,
+      glyph: selected ? AppGlyphs.check : AppGlyphs.checkboxBlank,
       label: value.name.toUpperCase(),
       onPressed: onPressed,
     );
@@ -235,7 +236,7 @@ class _LogFilterButton extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return [
       CommonPopupMenuItem(
-        icon: Icons.source_outlined,
+        glyph: AppGlyphs.code,
         label: appLocalizations.source,
         subItems: [
           for (final source in LogSource.values)
@@ -247,7 +248,7 @@ class _LogFilterButton extends StatelessWidget {
         ],
       ),
       CommonPopupMenuItem(
-        icon: Icons.flag_outlined,
+        glyph: AppGlyphs.flag,
         label: appLocalizations.level,
         subItems: [
           for (final level in LogLevel.values)
@@ -260,7 +261,7 @@ class _LogFilterButton extends StatelessWidget {
         ],
       ),
       CommonPopupMenuItem(
-        icon: Icons.filter_alt_off_outlined,
+        glyph: AppGlyphs.filter,
         label: appLocalizations.reset,
         onPressed: onClear,
       ),
@@ -273,7 +274,7 @@ class _LogFilterButton extends StatelessWidget {
     return CommonPopupBox(
       popupBuilder: (_) => CommonPopupMenu(items: _buildItems(context)),
       targetBuilder: (open) {
-        const icon = Icon(Icons.filter_alt_outlined);
+        const icon = GlyphIcon(AppGlyphs.filter);
         return logsState.hasFilters
             ? IconButton.filledTonal(
                 tooltip: tooltip,

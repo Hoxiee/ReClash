@@ -1,3 +1,4 @@
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 void main() {
@@ -266,7 +268,7 @@ void main() {
     expect(find.text('Add component'), findsOneWidget);
     expect(find.text('Network state'), findsOneWidget);
     expect(find.text('Current server'), findsOneWidget);
-    expect(find.byIcon(Icons.add_rounded), findsNWidgets(2));
+    expect(find.byGlyph(AppGlyphs.add), findsNWidgets(2));
 
     await tester.tap(find.text('Network state'));
     await tester.pumpAndSettle();
@@ -276,7 +278,7 @@ void main() {
     await tester.tap(find.text('Current server'));
     await tester.pumpAndSettle();
     expect(find.text('Add component'), findsNothing);
-    expect(find.byIcon(Icons.add_rounded), findsNothing);
+    expect(find.byGlyph(AppGlyphs.add), findsNothing);
   });
 
   testWidgets('editor offers every component once nothing is active', (
@@ -302,7 +304,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byIcon(Icons.add_rounded),
+      find.byGlyph(AppGlyphs.add),
       findsNWidgets(NotificationComponentType.values.length),
     );
   });
@@ -355,8 +357,8 @@ void main() {
       find.text('The chosen group is missing from the profile'),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.error), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.eyeOff), findsOneWidget);
   });
 
   testWidgets('editor reorder callback and semantics preserve exact order', (

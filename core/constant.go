@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/metacubex/http"
 	"github.com/metacubex/mihomo/adapter/provider"
 	P "github.com/metacubex/mihomo/component/process"
 	"github.com/metacubex/mihomo/constant"
@@ -90,6 +91,30 @@ type MemoryStats struct {
 	RuntimeOther uint64 `json:"runtimeOther"`
 }
 
+type RouteState struct {
+	CoreEpoch    uint64            `json:"core-epoch"`
+	PicksVersion uint64            `json:"picks-version"`
+	Picks        map[string]string `json:"picks"`
+}
+
+type ProbeResult struct {
+	StatusCode  int      `json:"status-code"`
+	Delay       int64    `json:"delay"`
+	Body        string   `json:"body"`
+	Url         string   `json:"url"`
+	Chains      []string `json:"chains"`
+	Rule        string   `json:"rule"`
+	RulePayload string   `json:"rule-payload"`
+	Error       string   `json:"error,omitempty"`
+	Message     string   `json:"message,omitempty"`
+
+	CoreEpoch    uint64 `json:"core-epoch"`
+	PicksVersion uint64 `json:"picks-version"`
+
+	// Unexported so it never reaches Dart; only the in-core checks read headers.
+	header http.Header
+}
+
 const (
 	messageMethod                    CoreMethod = "message"
 	initClashMethod                  CoreMethod = "initClash"
@@ -147,6 +172,11 @@ const (
 	odometerSignalMethod             CoreMethod = "odometerSignal"
 	subscriptionReportMetadataMethod CoreMethod = "subscriptionReportMetadata"
 	subscriptionReportExportMethod   CoreMethod = "subscriptionReportExport"
+	outboundIpMethod                 CoreMethod = "outboundIp"
+	serviceCheckMethod               CoreMethod = "serviceCheck"
+	watchRouteMethod                 CoreMethod = "watchRoute"
+	rcxDiagSetMethod                 CoreMethod = "rcxDiagSet"
+	rcxDiagLogMethod                 CoreMethod = "rcxDiagLog"
 )
 
 type CoreMethod string
@@ -173,6 +203,7 @@ const (
 	RcxStatusMessage    MessageType = "rcxStatus"
 	DoctorStatusMessage MessageType = "doctorStatus"
 	DnsMessage          MessageType = "dns"
+	RouteChangedMessage MessageType = "routeChanged"
 )
 
 type GeoUpdateStatus struct {

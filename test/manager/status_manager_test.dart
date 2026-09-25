@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/models.dart';
@@ -283,7 +285,7 @@ void main() {
     state.message('boom', level: MessageLevel.error);
     await tester.pump();
 
-    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.error), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 4));
     await tester.pump(const Duration(milliseconds: 500));

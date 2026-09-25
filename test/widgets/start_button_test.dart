@@ -1,3 +1,4 @@
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
@@ -223,7 +224,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.byIcon(Icons.pause_rounded), findsNothing);
+    expect(find.byGlyph(AppGlyphs.pause), findsNothing);
     expect(tester.hasRunningAnimations, isFalse);
   });
 
@@ -300,24 +301,24 @@ void main() {
         .widget<FloatingActionButton>(find.byType(FloatingActionButton).last)
         .tooltip!;
 
-    expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.pause), findsOneWidget);
     expect(mainTooltip(), 'Stop');
 
-    await tester.tap(find.byIcon(Icons.pause_rounded));
+    await tester.tap(find.byGlyph(AppGlyphs.pause));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(container.read(pausedProvider), isTrue);
-    expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.play), findsOneWidget);
     expect(find.text('Paused'), findsOneWidget);
     expect(mainTooltip(), 'Stop');
 
-    await tester.tap(find.byIcon(Icons.play_arrow_rounded));
+    await tester.tap(find.byGlyph(AppGlyphs.play));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(container.read(pausedProvider), isFalse);
-    expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.pause), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -338,12 +339,12 @@ void main() {
           NavigationItemsState(
             value: [
               NavigationItem(
-                icon: const Icon(Icons.space_dashboard),
+                glyph: AppGlyphs.dashboard,
                 label: PageLabel.dashboard,
                 builder: (_) => const SizedBox.shrink(),
               ),
               NavigationItem(
-                icon: const Icon(Icons.folder),
+                glyph: AppGlyphs.profiles,
                 label: PageLabel.profiles,
                 builder: (_) => const SizedBox.shrink(),
               ),
@@ -371,7 +372,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(GlyphIcon), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(StartButton),
+        matching: find.byType(GlyphIcon),
+      ),
+      findsOneWidget,
+    );
     expect(find.byType(BreathingRing), findsOneWidget);
     expect(find.byType(RunTimeText), findsNothing);
   });

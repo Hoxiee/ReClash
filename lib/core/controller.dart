@@ -259,6 +259,14 @@ class CoreController {
     return _interface.smartRoutingDeepScan();
   }
 
+  Future<bool> setSmartRoutingDiagnostics(bool enabled) {
+    return _interface.setSmartRoutingDiagnostics(enabled);
+  }
+
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since) {
+    return _interface.smartRoutingDiagLog(since);
+  }
+
   Future<OdometerSnapshot?> odometerReport() {
     return _interface.odometerReport();
   }
@@ -297,6 +305,18 @@ class CoreController {
 
   Future<Delay?> getDelay(String url, String proxyName) async {
     return _interface.asyncTestDelay(url, proxyName);
+  }
+
+  Future<OutboundIpResult?> outboundIp(OutboundIpParams params) {
+    return _interface.outboundIp(params);
+  }
+
+  Future<List<ServiceCheckItem>> serviceCheck(ServiceCheckParams params) {
+    return _interface.serviceCheck(params);
+  }
+
+  Future<RouteSnapshot?> watchRoute(bool watch) {
+    return _interface.watchRoute(watch);
   }
 
   Future<Map<String, dynamic>> getConfig(int id) async {

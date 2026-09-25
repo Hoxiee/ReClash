@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
@@ -46,7 +47,7 @@ class _NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
-      leading: const Icon(Icons.notifications_active_outlined),
+      leading: const GlyphIcon(AppGlyphs.bell),
       title: Text(appLocalizations.notification),
       subtitle: Text(appLocalizations.notificationProtectionDesc),
       widget: BaseScaffold(
@@ -170,8 +171,8 @@ class _ApplicationGeneralTab extends StatelessWidget {
             DecorationListItem(
               title: Text(appLocalizations.setupRerun),
               subtitle: Text(appLocalizations.setupRerunDesc),
-              leading: const Icon(Icons.restart_alt_rounded),
-              trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+              leading: const GlyphIcon(AppGlyphs.reset),
+              trailing: const GlyphIcon(AppGlyphs.chevronForward, size: 20),
               onPressed: () => SetupWizard.show(context, revisit: true),
             ),
           ],

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
@@ -55,7 +56,7 @@ class SubscriptionOverviewView extends ConsumerWidget {
               _sheetCard(
                 _NoticeBody(
                   notice: (
-                    icon: Icons.folder_off_rounded,
+                    icon: AppGlyphs.folder,
                     text: appLocalizations.nullProfileDesc,
                     tone: null,
                   ),
@@ -96,7 +97,7 @@ Widget _sliver(Widget child) => SliverPadding(
 Widget _sheetCard(Widget child, {Color? tone}) =>
     _Card(tone: tone, child: child);
 
-typedef _Notice = ({IconData icon, String text, Color? tone});
+typedef _Notice = ({Glyph icon, String text, Color? tone});
 
 List<_Notice> _notices(BuildContext context, Profile profile) {
   final appLocalizations = context.appLocalizations;
@@ -106,25 +107,25 @@ List<_Notice> _notices(BuildContext context, Profile profile) {
   return [
     if (profile.undialableNodes)
       (
-        icon: Icons.wifi_off_rounded,
+        icon: AppGlyphs.wifiOff,
         text: appLocalizations.subscriptionUndialable,
         tone: colorScheme.error,
       ),
     if (panelMeta?.hwidMaxDevicesReached ?? false)
       (
-        icon: Icons.devices_other_rounded,
+        icon: AppGlyphs.devices,
         text: appLocalizations.deviceLimitReached,
         tone: colorScheme.error,
       ),
     if (panelMeta?.hwidNotSupported ?? false)
       (
-        icon: Icons.report_gmailerrorred_rounded,
+        icon: AppGlyphs.error,
         text: appLocalizations.panelHwidNotSupported,
         tone: colorScheme.tertiary,
       ),
     if (newDomain != null && newDomain.isNotEmpty)
       (
-        icon: Icons.swap_horiz_rounded,
+        icon: AppGlyphs.swap,
         text: appLocalizations.subscriptionDomainMoved(newDomain),
         tone: null,
       ),
@@ -166,7 +167,7 @@ class _NoticeBody extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(notice.icon, size: 20, color: tone),
+        GlyphIcon(notice.icon, size: 20, color: tone),
         const SizedBox(width: 12),
         Expanded(child: Text(notice.text, style: context.textTheme.bodyMedium)),
       ],
@@ -177,7 +178,7 @@ class _NoticeBody extends StatelessWidget {
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.icon, required this.label});
 
-  final IconData icon;
+  final Glyph icon;
   final String label;
 
   @override
@@ -185,7 +186,7 @@ class _SectionTitle extends StatelessWidget {
     final colorScheme = context.colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 18, color: colorScheme.primary),
+        GlyphIcon(icon, size: 18, color: colorScheme.primary),
         const SizedBox(width: 8),
         Text(
           label,
@@ -297,12 +298,12 @@ class _ProviderCard extends ConsumerWidget {
                 child: panelMeta?.serviceLogo?.isNotEmpty ?? false
                     ? ImageCacheWidget(
                         src: panelMeta!.serviceLogo!,
-                        defaultWidget: const Icon(
-                          Icons.cloud_outlined,
+                        defaultWidget: const GlyphIcon(
+                          AppGlyphs.cloud,
                           size: 28,
                         ),
                       )
-                    : const Icon(Icons.cloud_outlined, size: 28),
+                    : const GlyphIcon(AppGlyphs.cloud, size: 28),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -346,7 +347,7 @@ class _ProviderCard extends ConsumerWidget {
                           dimension: 18,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.refresh_rounded),
+                      : const GlyphIcon(AppGlyphs.refresh),
                 ),
             ],
           ),
@@ -399,7 +400,7 @@ class _AnnounceBody extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.campaign_rounded, size: 20, color: colorScheme.primary),
+            GlyphIcon(AppGlyphs.announce, size: 20, color: colorScheme.primary),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -438,7 +439,7 @@ class _SystemBody extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionTitle(
-          icon: Icons.memory_rounded,
+          icon: AppGlyphs.memory,
           label: appLocalizations.system,
         ),
         const SizedBox(height: 14),

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
@@ -19,7 +20,7 @@ class _DoctorPathStage {
 
   final String id;
   final String label;
-  final IconData icon;
+  final Glyph icon;
   final _DoctorPathState state;
   final bool dimmed;
   final bool culprit;
@@ -98,11 +99,11 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
       'response': appLocalizations.doctorPathResponse,
     };
     final icons = {
-      'app': Icons.apps_rounded,
+      'app': AppGlyphs.appsList,
       'ingress': _ingressIcon(snapshot.pathKind),
-      'route': Icons.alt_route_rounded,
-      'internet': Icons.public_rounded,
-      'response': Icons.mark_email_read_outlined,
+      'route': AppGlyphs.route,
+      'internet': AppGlyphs.language,
+      'response': AppGlyphs.mailRead,
     };
     final failedIndex = _stageIds.indexWhere(
       (id) => stageStates[id] == DoctorStageState.failed,
@@ -149,8 +150,7 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
             final progress = context.disableAnimations ? 1.0 : _intro.value;
             return LayoutBuilder(
               builder: (context, constraints) {
-                final vertical =
-                    constraints.maxWidth < 340 || textScale > 1.3;
+                final vertical = constraints.maxWidth < 340 || textScale > 1.3;
                 return vertical
                     ? _VerticalDoctorPath(stages: stages, progress: progress)
                     : _HorizontalDoctorPath(stages: stages, progress: progress);
@@ -182,12 +182,12 @@ String _ingressLabel(BuildContext context, DoctorPathKind pathKind) {
   };
 }
 
-IconData _ingressIcon(DoctorPathKind pathKind) => switch (pathKind) {
-  DoctorPathKind.vpn || DoctorPathKind.tun => Icons.vpn_lock_outlined,
-  DoctorPathKind.localProxy => Icons.lan_outlined,
-  DoctorPathKind.direct => Icons.arrow_forward_rounded,
-  DoctorPathKind.byeDpi => Icons.shield_outlined,
-  DoctorPathKind.unknown => Icons.device_unknown_rounded,
+Glyph _ingressIcon(DoctorPathKind pathKind) => switch (pathKind) {
+  DoctorPathKind.vpn || DoctorPathKind.tun => AppGlyphs.vpn,
+  DoctorPathKind.localProxy => AppGlyphs.router,
+  DoctorPathKind.direct => AppGlyphs.arrowForward,
+  DoctorPathKind.byeDpi => AppGlyphs.shield,
+  DoctorPathKind.unknown => AppGlyphs.deviceInfo,
 };
 
 class _HorizontalDoctorPath extends StatelessWidget {
@@ -285,7 +285,7 @@ class _DoctorPathNode extends StatelessWidget {
                 ],
         ),
         alignment: Alignment.center,
-        child: Icon(
+        child: GlyphIcon(
           visual.icon ?? stage.icon,
           color: visual.foreground,
           size: stage.culprit ? 26 : 22,
@@ -305,7 +305,9 @@ class _DoctorPathNode extends StatelessWidget {
         ),
       ),
     );
-    return vertical ? SizedBox(width: double.infinity, child: content) : content;
+    return vertical
+        ? SizedBox(width: double.infinity, child: content)
+        : content;
   }
 
   Widget _horizontalBody(BuildContext context, Widget marker) {
@@ -357,7 +359,7 @@ class _DoctorPathNode extends StatelessWidget {
 }
 
 ({Color color, double alpha, double blur, double spread})? _glow(
-  ({Color foreground, Color background, IconData? icon}) visual,
+  ({Color foreground, Color background, Glyph? icon}) visual,
   _DoctorPathStage stage,
 ) {
   if (stage.culprit) {
@@ -406,10 +408,7 @@ class _DoctorPathConnector extends StatelessWidget {
           color: track,
           borderRadius: BorderRadius.circular(2),
         ),
-        child: FractionallySizedBox(
-          heightFactor: progress,
-          child: _bar(color),
-        ),
+        child: FractionallySizedBox(heightFactor: progress, child: _bar(color)),
       );
     }
     return Container(
@@ -421,10 +420,7 @@ class _DoctorPathConnector extends StatelessWidget {
         color: track,
         borderRadius: BorderRadius.circular(2),
       ),
-      child: FractionallySizedBox(
-        widthFactor: progress,
-        child: _bar(color),
-      ),
+      child: FractionallySizedBox(widthFactor: progress, child: _bar(color)),
     );
   }
 
@@ -454,7 +450,7 @@ _DoctorPathState _connectorState(
   return DoctorStageState.unknown;
 }
 
-({Color foreground, Color background, IconData? icon}) _pathVisual(
+({Color foreground, Color background, Glyph? icon}) _pathVisual(
   BuildContext context,
   _DoctorPathState state,
 ) {
@@ -468,32 +464,32 @@ _DoctorPathState _connectorState(
     DoctorStageState.passed => (
       foreground: success,
       background: successBackground,
-      icon: Icons.check_rounded,
+      icon: AppGlyphs.check,
     ),
     DoctorStageState.failed => (
       foreground: colors.error,
       background: colors.errorContainer,
-      icon: Icons.priority_high_rounded,
+      icon: AppGlyphs.error,
     ),
     DoctorStageState.checking => (
       foreground: colors.primary,
       background: colors.primaryContainer,
-      icon: Icons.sync_rounded,
+      icon: AppGlyphs.sync,
     ),
     DoctorStageState.notApplicable => (
       foreground: colors.outline,
       background: colors.surfaceContainerHighest,
-      icon: Icons.remove_rounded,
+      icon: AppGlyphs.remove,
     ),
     DoctorStageState.consequence => (
       foreground: colors.outline,
       background: colors.surfaceContainerHighest,
-      icon: Icons.subdirectory_arrow_right_rounded,
+      icon: AppGlyphs.subItem,
     ),
     DoctorStageState.unknown => (
       foreground: colors.outline,
       background: colors.surfaceContainerHighest,
-      icon: Icons.circle_outlined,
+      icon: AppGlyphs.circleOutline,
     ),
   };
 }

@@ -1924,6 +1924,1002 @@ abstract final class AppGlyphs {
     GlyphCircle(16.4, 7.4, 2.2, solid: true),
   ]);
 
+
+  static const send = Glyph([
+    GlyphPolyline([
+      GlyphVertex(3.2, 10.8, 1),
+      GlyphVertex(20.6, 3.4, 1),
+      GlyphVertex(13.2, 20.8, 1),
+      GlyphVertex(10.6, 13.4, 0.6),
+    ], closed: true),
+    GlyphPolyline([
+      GlyphVertex(10.6, 13.4),
+      GlyphVertex(15.2, 8.8),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const wifiOff = Glyph([
+    GlyphPath('M3.32 9.56 A13.5 13.5 0 0 1 6.15 7.73', role: GlyphRole.line),
+    GlyphPath('M10.75 6.46 A13.5 13.5 0 0 1 20.68 9.56', role: GlyphRole.line),
+    GlyphPath('M6.54 13.39 A8.5 8.5 0 0 1 10.56 11.52', role: GlyphRole.line),
+    GlyphPath('M15.27 12.05 A8.5 8.5 0 0 1 17.46 13.39', role: GlyphRole.line),
+    GlyphCircle(12, 18.6, 1.7, role: GlyphRole.line, solid: true),
+    GlyphPolyline([
+      GlyphVertex(4.5, 3),
+      GlyphVertex(20.5, 19),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const wrap = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 6),
+      GlyphVertex(20, 6),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4, 12),
+      GlyphVertex(20, 12, 3),
+      GlyphVertex(20, 18, 3),
+      GlyphVertex(11, 18),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(13.8, 15.2),
+      GlyphVertex(11, 18, 0.4),
+      GlyphVertex(13.8, 20.8),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4, 18),
+      GlyphVertex(6.5, 18),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
+  static const list = Glyph([
+    GlyphCircle(5, 7, 1.2, solid: true),
+    GlyphCircle(5, 12, 1.2, solid: true),
+    GlyphCircle(5, 17, 1.2, solid: true),
+    GlyphPolyline([
+      GlyphVertex(9, 7),
+      GlyphVertex(19, 7),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(9, 12),
+      GlyphVertex(19, 12),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(9, 17),
+      GlyphVertex(19, 17),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
+  static const healthMonitor = Glyph([
+    GlyphPath(
+      'M12 19.5 C4.5 14 5.5 7.2 9 7.2 Q11.1 7.2 12 9.2 '
+      'Q12.9 7.2 15 7.2 C18.5 7.2 19.5 14 12 19.5 Z',
+    ),
+    GlyphPolyline([
+      GlyphVertex(6.5, 12.8),
+      GlyphVertex(9.4, 12.8),
+      GlyphVertex(10.8, 10.4),
+      GlyphVertex(12.6, 15.2),
+      GlyphVertex(14, 12.8),
+      GlyphVertex(17, 12.8),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const route = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 21),
+      GlyphVertex(12, 13, 2),
+      GlyphVertex(6.6, 7.4),
+    ]),
+    GlyphPolyline([
+      GlyphVertex(6.6, 10.8),
+      GlyphVertex(6.6, 7.4, 0.3),
+      GlyphVertex(10, 7.4),
+    ]),
+    GlyphPolyline([
+      GlyphVertex(12, 13),
+      GlyphVertex(17.4, 7.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(14, 7.4),
+      GlyphVertex(17.4, 7.4, 0.3),
+      GlyphVertex(17.4, 10.8),
+    ]),
+  ]);
+
+  static const shield = Glyph([
+    GlyphPath(
+      'M12 2.8 L19.5 5.6 L19.5 11.6 C19.5 16.6 16 19.7 12 21.2 '
+      'C8 19.7 4.5 16.6 4.5 11.6 L4.5 5.6 Z',
+    ),
+  ]);
+
+  static const shieldMoon = Glyph([
+    GlyphPath(
+      'M12 2.8 L19.5 5.6 L19.5 11.6 C19.5 16.6 16 19.7 12 21.2 '
+      'C8 19.7 4.5 16.6 4.5 11.6 L4.5 5.6 Z',
+    ),
+    GlyphPath(
+      'M13.6 8 A3.4 3.4 0 1 0 13.6 14.8 A2.6 2.6 0 0 1 13.6 8 Z',
+      role: GlyphRole.detail,
+    ),
+  ]);
+
+  static const beaker = Glyph([
+    GlyphPolyline([
+      GlyphVertex(9.5, 3.5),
+      GlyphVertex(14.5, 3.5),
+    ], role: GlyphRole.detail),
+    GlyphPath(
+      'M10 3.7 L10 9 L5.4 17.8 A2 2 0 0 0 7.2 20.8 L16.8 20.8 '
+      'A2 2 0 0 0 18.6 17.8 L14 9 L14 3.7',
+    ),
+    GlyphPolyline([
+      GlyphVertex(7.4, 14.4),
+      GlyphVertex(16.6, 14.4),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const hourglass = Glyph([
+    GlyphPolyline([
+      GlyphVertex(5.5, 3.5),
+      GlyphVertex(18.5, 3.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(5.5, 20.5),
+      GlyphVertex(18.5, 20.5),
+    ], role: GlyphRole.line),
+    GlyphPath(
+      'M6.8 3.5 L6.8 6.2 L12 12 L17.2 6.2 L17.2 3.5 '
+      'M6.8 20.5 L6.8 17.8 L12 12 L17.2 17.8 L17.2 20.5',
+    ),
+  ]);
+
+  static const announce = Glyph([
+    GlyphPath(
+      'M3.6 10.4 L10 10.4 L17.4 5.8 L17.4 18.2 L10 13.6 L3.6 13.6 Z',
+    ),
+    GlyphPolyline([
+      GlyphVertex(6, 13.6),
+      GlyphVertex(6, 18.4, 1.2),
+      GlyphVertex(9, 18.4),
+      GlyphVertex(8.2, 13.6),
+    ], role: GlyphRole.detail),
+    GlyphArc(17.6, 12, 2.6, -1.05, 2.1, role: GlyphRole.detail),
+  ]);
+
+  static const cloud = Glyph([
+    GlyphPath(
+      'M7 19.4A4.2 4.2 0 0 1 5.06 11.47A6 6 0 1 1 16.95 9.83'
+      'A4.8 4.8 0 0 1 16.4 19.4Z',
+    ),
+  ]);
+
+  static const cloudOff = Glyph([
+    GlyphPath(
+      'M7 19.4A4.2 4.2 0 0 1 5.06 11.47A6 6 0 1 1 16.95 9.83'
+      'A4.8 4.8 0 0 1 16.4 19.4Z',
+    ),
+    GlyphPolyline([
+      GlyphVertex(3.8, 3.8),
+      GlyphVertex(20.2, 20.2),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const power = Glyph([
+    GlyphArc(12, 12.4, 7.2, -0.63, 4.4, role: GlyphRole.body),
+    GlyphPolyline([
+      GlyphVertex(12, 3),
+      GlyphVertex(12, 11),
+    ]),
+  ]);
+
+  static const swap = Glyph([
+    GlyphPolyline([
+      GlyphVertex(6, 9),
+      GlyphVertex(18, 9),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(15, 6),
+      GlyphVertex(18, 9, 0.3),
+      GlyphVertex(15, 12),
+    ]),
+    GlyphPolyline([
+      GlyphVertex(18, 15),
+      GlyphVertex(6, 15),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(9, 12),
+      GlyphVertex(6, 15, 0.3),
+      GlyphVertex(9, 18),
+    ]),
+  ]);
+
+  static const bell = Glyph([
+    GlyphPath(
+      'M12 3.4 A6 6 0 0 1 18 9.4 C18 15 19.6 17.2 19.6 17.2 L4.4 17.2 '
+      'C4.4 17.2 6 15 6 9.4 A6 6 0 0 1 12 3.4 Z',
+    ),
+    GlyphArc(12, 17.4, 2.4, 0.2, 2.74, role: GlyphRole.detail),
+  ]);
+
+  static const folder = Glyph([
+    GlyphPath(
+      'M3.6 6.5 A2 2 0 0 1 5.6 4.5 L9.6 4.5 L11.6 7 L18.4 7 '
+      'A2 2 0 0 1 20.4 9 L20.4 17.5 A2 2 0 0 1 18.4 19.5 L5.6 19.5 '
+      'A2 2 0 0 1 3.6 17.5 Z',
+    ),
+  ], matchTextDirection: true);
+
+  static const filter = Glyph([
+    GlyphPath('M3.6 5 L20.4 5 L14 13 L14 19 L10 21 L10 13 Z'),
+  ]);
+
+  static const pause = Glyph([
+    GlyphPolyline([
+      GlyphVertex(9, 5.5),
+      GlyphVertex(9, 18.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(15, 5.5),
+      GlyphVertex(15, 18.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  /// The resting play triangle: identical to [playPause] at progress 0, but a
+  /// const instance so equality-by-identity finds it in non-morphing slots.
+  static const play = Glyph([
+    GlyphPolyline([
+      GlyphVertex(8.3, 5.6, 1.2),
+      GlyphVertex(18.8, 12, 1.2),
+      GlyphVertex(8.3, 18.4, 1.2),
+    ], closed: true),
+  ]);
+
+  static const share = Glyph([
+    GlyphPath(
+      'M7.8 10 A2 2 0 0 0 5.8 12 L5.8 19 A2 2 0 0 0 7.8 21 L16.2 21 '
+      'A2 2 0 0 0 18.2 19 L18.2 12 A2 2 0 0 0 16.2 10',
+    ),
+    GlyphPolyline([
+      GlyphVertex(12, 3.6),
+      GlyphVertex(12, 14),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8.8, 6.8),
+      GlyphVertex(12, 3.6, 0.3),
+      GlyphVertex(15.2, 6.8),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const help = Glyph([
+    GlyphCircle(12, 12, 8.8),
+    GlyphPath(
+      'M9.4 9.4 A2.6 2.6 0 1 1 12.3 12.5 C11.9 12.8 11.9 13.4 11.9 14.4',
+      role: GlyphRole.detail,
+    ),
+    GlyphCircle(11.9, 17.2, 0.95, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const verified = Glyph([
+    GlyphPolyline([
+      GlyphVertex(21, 12, 0.7),
+      GlyphVertex(18.28, 14.6, 0.7),
+      GlyphVertex(18.36, 18.36, 0.7),
+      GlyphVertex(14.6, 18.28, 0.7),
+      GlyphVertex(12, 21, 0.7),
+      GlyphVertex(9.4, 18.28, 0.7),
+      GlyphVertex(5.64, 18.36, 0.7),
+      GlyphVertex(5.72, 14.6, 0.7),
+      GlyphVertex(3, 12, 0.7),
+      GlyphVertex(5.72, 9.4, 0.7),
+      GlyphVertex(5.64, 5.64, 0.7),
+      GlyphVertex(9.4, 5.72, 0.7),
+      GlyphVertex(12, 3, 0.7),
+      GlyphVertex(14.6, 5.72, 0.7),
+      GlyphVertex(18.36, 5.64, 0.7),
+      GlyphVertex(18.28, 9.4, 0.7),
+    ], closed: true),
+    GlyphPolyline([
+      GlyphVertex(8.5, 12.2),
+      GlyphVertex(11, 14.7),
+      GlyphVertex(15.5, 9.6),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const radar = Glyph([
+    GlyphCircle(12, 12, 8.8),
+    GlyphCircle(12, 12, 4.7, role: GlyphRole.detail),
+    GlyphCircle(12, 12, 1, role: GlyphRole.detail, solid: true),
+    GlyphPolyline([
+      GlyphVertex(12, 12),
+      GlyphVertex(18.2, 7.6),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const support = Glyph([
+    GlyphArc(12, 12.5, 7.6, math.pi * 1.12, math.pi * 0.76, role: GlyphRole.line),
+    GlyphBox(3.6, 11.4, 6.6, 16.2, 1.4),
+    GlyphBox(17.4, 11.4, 20.4, 16.2, 1.4),
+    GlyphPolyline([
+      GlyphVertex(18.9, 16.2),
+      GlyphVertex(18.9, 18),
+      GlyphVertex(13, 18),
+      GlyphVertex(13, 19.6),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const router = Glyph([
+    GlyphBox(3.5, 13, 20.5, 19.8, 2.2),
+    GlyphCircle(6.8, 16.4, 1, role: GlyphRole.detail, solid: true),
+    GlyphCircle(9.6, 16.4, 1, role: GlyphRole.detail, solid: true),
+    GlyphPolyline([
+      GlyphVertex(15.5, 16.4),
+      GlyphVertex(18, 16.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(12, 13),
+      GlyphVertex(12, 8.6),
+    ], role: GlyphRole.line),
+    GlyphArc(12, 8.6, 3, math.pi * 1.15, math.pi * 0.7, role: GlyphRole.detail),
+  ]);
+
+  static const hub = Glyph([
+    GlyphCircle(12, 12, 2.6),
+    GlyphCircle(12, 4.6, 1.8, role: GlyphRole.detail),
+    GlyphCircle(5, 18, 1.8, role: GlyphRole.detail),
+    GlyphCircle(19, 18, 1.8, role: GlyphRole.detail),
+    GlyphLink(Offset(12, 12), Offset(12, 4.6), 2.2),
+    GlyphLink(Offset(12, 12), Offset(5, 18), 2.2),
+    GlyphLink(Offset(12, 12), Offset(19, 18), 2.2),
+  ]);
+
+  static const chart = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4.5, 3.5),
+      GlyphVertex(4.5, 19.5, 0.5),
+      GlyphVertex(20.5, 19.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(7, 15),
+      GlyphVertex(11, 11),
+      GlyphVertex(14, 13.5),
+      GlyphVertex(19, 7),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const restore = Glyph([
+    GlyphArc(12, 12, 7.5, math.pi * 1.15, math.pi * -1.65, role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12, 4.5),
+      GlyphVertex(9.9, 4.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(13.7, 8.3),
+      GlyphVertex(9.9, 4.5, 0.4),
+      GlyphVertex(13.7, 0.7),
+    ], role: GlyphRole.line),
+    GlyphCircle(12, 12, 1.3, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const replay = Glyph([
+    GlyphArc(12, 12, 7.5, math.pi * 1.2, math.pi * 1.5, role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8.3, 5.1),
+      GlyphVertex(4.6, 6.4, 0.4),
+      GlyphVertex(5.8, 10.1),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const update = Glyph([
+    GlyphArc(12, 12, 7.5, math.pi * -0.35, math.pi * 1.7, role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(15.4, 3.9),
+      GlyphVertex(18.4, 6.1, 0.4),
+      GlyphVertex(16.2, 9.1),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12, 8.6),
+      GlyphVertex(12, 12.4),
+      GlyphVertex(14.6, 12.4),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const autoMode = Glyph([
+    GlyphPath(
+      'M19.03 3.56c-1.67-1.39-3.74-2.3-6.03-2.51v2.01c1.73.19 3.31.88 '
+      '4.61 1.92l1.42-1.42z'
+      'M11 3.06V1.05c-2.29.2-4.36 1.12-6.03 2.51l1.42 1.42A8.928 8.928 '
+      '0 0 1 11 3.06z'
+      'M4.98 6.39 3.56 4.97C2.17 6.64 1.26 8.71 1.05 11h2.01c.19-1.73.88-3.31 '
+      '1.92-4.61z'
+      'M20.94 11h2.01c-.21-2.29-1.12-4.36-2.51-6.03l-1.42 1.42A8.928 8.928 '
+      '0 0 1 20.94 11z'
+      'M7 12l3.44 1.56L12 17l1.56-3.44L17 12l-3.44-1.56L12 7l-1.56 3.44z',
+      solid: true,
+    ),
+    GlyphPath(
+      'M12 21a8.96 8.96 0 0 1-7.46-4H7v-2H1v6h2v-2.7c1.99 2.84 5.27 4.7 9 4.7 '
+      '4.87 0 9-3.17 10.44-7.56l-1.96-.45C19.25 18.48 15.92 21 12 21z',
+      solid: true,
+    ),
+  ]);
+
+  static const appRegion = Glyph([
+    GlyphCircle(12, 12, 8.6),
+    GlyphPolyline([
+      GlyphVertex(3.4, 12),
+      GlyphVertex(20.6, 12),
+    ], role: GlyphRole.detail),
+    GlyphOval(8, 3.4, 16, 20.6, role: GlyphRole.detail),
+    GlyphPath('M5 7 Q12 8.8 19 7', role: GlyphRole.detail),
+    GlyphPath('M5 17 Q12 15.2 19 17', role: GlyphRole.detail),
+  ]);
+
+  static const findProcess = Glyph([
+    GlyphPath(
+      'M19 4h-4L7.11 16.63 4.5 12 9 4H5L.5 12 5 20h4l7.89-12.63L19.5 12 '
+      '15 20h4l4.5-8L19 4z',
+      role: GlyphRole.line,
+    ),
+  ]);
+
+  static const script = Glyph([
+    GlyphPath(
+      'M8 4.4 L18 4.4 A2.2 2.2 0 0 1 20.2 6.6 L20.2 17.4 '
+      'A2.2 2.2 0 0 1 18 19.6 L6 19.6 A2.2 2.2 0 0 1 3.8 17.4 '
+      'L3.8 15.4 L8 15.4 L8 6.6 A2.2 2.2 0 0 0 5.8 6.6 L5.8 8.2',
+      role: GlyphRole.line,
+    ),
+    GlyphPolyline([
+      GlyphVertex(11, 9.4),
+      GlyphVertex(17, 9.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(11, 13),
+      GlyphVertex(15, 13),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const syncError = Glyph([
+    GlyphArc(12, 12, 7.07, math.pi * 0.75, math.pi * 1.5, role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(6.6, 4.7),
+      GlyphVertex(4.5, 7.6, 0.4),
+      GlyphVertex(7.9, 8.9),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12, 9),
+      GlyphVertex(12, 13.4),
+    ], role: GlyphRole.detail),
+    GlyphCircle(12, 16.4, 0.95, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const stop = Glyph([
+    GlyphCircle(12, 12, 8.8),
+    GlyphBox(8.4, 8.4, 15.6, 15.6, 1.8, role: GlyphRole.detail),
+  ]);
+
+  static const contrast = Glyph([
+    GlyphCircle(12, 12, 8.5),
+    GlyphPath('M12 3.5 A8.5 8.5 0 0 1 12 20.5 Z', solid: true),
+  ]);
+
+  static const document = Glyph([
+    GlyphPath('M6 3.5 L14 3.5 L18.5 8 L18.5 20.5 L6 20.5 Z'),
+    GlyphPolyline([
+      GlyphVertex(14, 3.7),
+      GlyphVertex(14, 8),
+      GlyphVertex(18.3, 8),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(8.5, 12.5),
+      GlyphVertex(15.5, 12.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8.5, 16),
+      GlyphVertex(13, 16),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const storage = Glyph([
+    GlyphBox(3.2, 4, 20.8, 10, 2),
+    GlyphBox(3.2, 14, 20.8, 20, 2),
+    GlyphCircle(6.8, 7, 1, role: GlyphRole.detail, solid: true),
+    GlyphCircle(6.8, 17, 1, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const telegram = Glyph([
+    GlyphPath(
+      'M20.6 4.4 L3.2 11.2 Q2.4 11.5 3.2 11.9 L7.8 13.6 L17.6 7.4 '
+      'L9.8 14.4 L9.3 19.1 Q9.5 20 10.2 19.3 L12.8 16.8 L16.9 19.9 '
+      'Q17.7 20.4 18 19.4 L21.5 5.1 Q21.8 4 20.6 4.4 Z',
+    ),
+  ]);
+
+  static const globeSearch = Glyph([
+    GlyphCircle(10.4, 10.4, 6.4),
+    GlyphOval(5.4, 4, 15.4, 16.8, role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(4, 10.4),
+      GlyphVertex(16.8, 10.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(15.4, 15.4),
+      GlyphVertex(20.6, 20.6),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const trendUp = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 16),
+      GlyphVertex(9.5, 10.5),
+      GlyphVertex(13, 14),
+      GlyphVertex(19, 8),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(14.5, 8),
+      GlyphVertex(19, 8, 0.3),
+      GlyphVertex(19, 12.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const trendDown = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 8),
+      GlyphVertex(9.5, 13.5),
+      GlyphVertex(13, 10),
+      GlyphVertex(19, 16),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(14.5, 16),
+      GlyphVertex(19, 16, 0.3),
+      GlyphVertex(19, 11.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const computer = Glyph([
+    GlyphBox(3.5, 4.5, 20.5, 16, 2),
+    GlyphPolyline([
+      GlyphVertex(9, 19.5),
+      GlyphVertex(15, 19.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12, 16),
+      GlyphVertex(12, 19.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const android = Glyph([
+    GlyphPath('M6 13 A6 6 0 0 1 18 13 Z'),
+    GlyphCircle(9.4, 10.4, 0.9, role: GlyphRole.detail, solid: true),
+    GlyphCircle(14.6, 10.4, 0.9, role: GlyphRole.detail, solid: true),
+    GlyphPolyline([
+      GlyphVertex(7.6, 5.8),
+      GlyphVertex(9.2, 8.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(16.4, 5.8),
+      GlyphVertex(14.8, 8.4),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const dot = Glyph([GlyphCircle(12, 12, 4, solid: true)]);
+
+  static const circleOutline = Glyph([GlyphCircle(12, 12, 8.4)]);
+
+  static const radio = Glyph([
+    GlyphCircle(12, 12, 8.2),
+    GlyphCircle(12, 12, 3.6, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const checkboxBlank = Glyph([GlyphBox(4, 4, 20, 20, 3.5)]);
+
+  static const gradient = Glyph([
+    GlyphBox(4, 4, 20, 20, 3.5),
+    GlyphPolyline([
+      GlyphVertex(8, 20),
+      GlyphVertex(20, 8),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(13, 20),
+      GlyphVertex(20, 13),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(4, 16),
+      GlyphVertex(16, 4),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const wallpaper = Glyph([
+    GlyphBox(3.5, 3.5, 20.5, 20.5, 2.8),
+    GlyphCircle(8, 8.5, 1.8, role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(3.5, 17),
+      GlyphVertex(9, 12),
+      GlyphVertex(13.5, 15.5),
+      GlyphVertex(17, 12.5),
+      GlyphVertex(20.5, 15.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const drop = Glyph([
+    GlyphPath(
+      'M12 3.4 C12 3.4 5 11 5 15.2 A7 7 0 0 0 19 15.2 C19 11 12 3.4 12 3.4 Z',
+    ),
+  ]);
+
+  static const snow = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 3),
+      GlyphVertex(12, 21),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4.2, 7.5),
+      GlyphVertex(19.8, 16.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4.2, 16.5),
+      GlyphVertex(19.8, 7.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const calendar = Glyph([
+    GlyphBox(3.5, 5, 20.5, 20.5, 2.8),
+    GlyphPolyline([
+      GlyphVertex(3.5, 9.5),
+      GlyphVertex(20.5, 9.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(8, 3),
+      GlyphVertex(8, 7),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(16, 3),
+      GlyphVertex(16, 7),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const flag = Glyph([
+    GlyphPolyline([
+      GlyphVertex(6, 3),
+      GlyphVertex(6, 21),
+    ], role: GlyphRole.line),
+    GlyphPath(
+      'M6 4.5 L17.5 4.5 Q19 4.5 18 6 L16 8.6 Q15.4 9.4 16 10.2 L18 12.8 '
+      'Q19 14.3 17.5 14.3 L6 14.3 Z',
+    ),
+  ]);
+
+  static const tap = Glyph([
+    GlyphPath(
+      'M10 12 L10 6 A1.8 1.8 0 0 1 13.6 6 L13.6 12 L13.6 13.4 L17 14.2 '
+      'A2 2 0 0 1 18.4 16.6 L17.6 19.6 A2 2 0 0 1 15.7 21 L11.4 21 '
+      'A2 2 0 0 1 9.7 20 L6.4 14.4 A1.6 1.6 0 0 1 9 12.6 L10 13.4 Z',
+    ),
+  ]);
+
+  static const balance = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 3.5),
+      GlyphVertex(12, 20),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8, 20.5),
+      GlyphVertex(16, 20.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4.5, 6.5),
+      GlyphVertex(19.5, 6.5),
+    ], role: GlyphRole.line),
+    GlyphArc(4.5, 6.5, 3.6, 0, math.pi, role: GlyphRole.detail),
+    GlyphArc(19.5, 6.5, 3.6, 0, math.pi, role: GlyphRole.detail),
+  ]);
+
+  static const ports = Glyph([
+    GlyphPolyline([
+      GlyphVertex(8, 8),
+      GlyphVertex(3.5, 12),
+      GlyphVertex(8, 16),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(16, 8),
+      GlyphVertex(20.5, 12),
+      GlyphVertex(16, 16),
+    ], role: GlyphRole.line),
+    GlyphCircle(12, 12, 0.9, role: GlyphRole.detail, solid: true),
+  ]);
+
+  static const api = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 5),
+      GlyphVertex(19, 12),
+      GlyphVertex(12, 19),
+      GlyphVertex(5, 12),
+    ], closed: true),
+    GlyphPolyline([
+      GlyphVertex(12, 5),
+      GlyphVertex(12, 2.6),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(12, 19),
+      GlyphVertex(12, 21.4),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(5, 12),
+      GlyphVertex(2.6, 12),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(19, 12),
+      GlyphVertex(21.4, 12),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const signalChart = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4.5, 3.5),
+      GlyphVertex(4.5, 19.5, 0.5),
+      GlyphVertex(20.5, 19.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8, 16.5),
+      GlyphVertex(8, 13),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(12, 16.5),
+      GlyphVertex(12, 10),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(16, 16.5),
+      GlyphVertex(16, 7),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const tethering = Glyph([
+    GlyphCircle(12, 16, 1.7, role: GlyphRole.detail, solid: true),
+    GlyphArc(12, 16, 4.5, math.pi * 1.2, math.pi * 0.6, role: GlyphRole.line),
+    GlyphArc(12, 16, 8, math.pi * 1.25, math.pi * 0.5, role: GlyphRole.line),
+  ]);
+
+  static const compress = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 12),
+      GlyphVertex(20, 12),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(9, 5.5),
+      GlyphVertex(12, 8.5, 0.3),
+      GlyphVertex(15, 5.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(9, 18.5),
+      GlyphVertex(12, 15.5, 0.3),
+      GlyphVertex(15, 18.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const brokenImage = Glyph([
+    GlyphBox(3.5, 4.5, 20.5, 19.5, 2.5),
+    GlyphPolyline([
+      GlyphVertex(3.5, 13),
+      GlyphVertex(7, 10),
+      GlyphVertex(10, 12.5),
+      GlyphVertex(13, 9.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(15, 12),
+      GlyphVertex(17.5, 10),
+      GlyphVertex(20.5, 12.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const carousel = Glyph([
+    GlyphBox(8, 5, 16, 19, 2),
+    GlyphPolyline([
+      GlyphVertex(5.5, 7.5),
+      GlyphVertex(5.5, 16.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(18.5, 7.5),
+      GlyphVertex(18.5, 16.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const subItem = Glyph([
+    GlyphPolyline([
+      GlyphVertex(6.5, 4.5),
+      GlyphVertex(6.5, 15),
+      GlyphVertex(16.5, 15),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(13, 11.5),
+      GlyphVertex(16.5, 15, 0.3),
+      GlyphVertex(13, 18.5),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
+  static const scrollToBottom = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 3.5),
+      GlyphVertex(12, 15),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(7.5, 10.5),
+      GlyphVertex(12, 15, 0.4),
+      GlyphVertex(16.5, 10.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(5.5, 20),
+      GlyphVertex(18.5, 20),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const fastForward = Glyph([
+    GlyphPolyline([
+      GlyphVertex(5, 6),
+      GlyphVertex(11, 12, 0.4),
+      GlyphVertex(5, 18),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12, 6),
+      GlyphVertex(18, 12, 0.4),
+      GlyphVertex(12, 18),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
+  static const removeCircle = Glyph([
+    GlyphCircle(12, 12, 8.8),
+    GlyphPolyline([
+      GlyphVertex(7.5, 12),
+      GlyphVertex(16.5, 12),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const arrowForward = Glyph([
+    GlyphPolyline([
+      GlyphVertex(3.5, 12),
+      GlyphVertex(20.5, 12),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(14, 5.5),
+      GlyphVertex(20.5, 12, 0.4),
+      GlyphVertex(14, 18.5),
+    ], role: GlyphRole.line),
+  ], matchTextDirection: true);
+
+  static const deviceInfo = Glyph([
+    GlyphBox(6.5, 3, 17.5, 21, 2.5),
+    GlyphCircle(12, 8, 0.9, role: GlyphRole.detail, solid: true),
+    GlyphPolyline([
+      GlyphVertex(12, 11.5),
+      GlyphVertex(12, 16.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const mailRead = Glyph([
+    GlyphPath(
+      'M3.5 9 L12 14.5 L20.5 9 L20.5 18.5 A1.5 1.5 0 0 1 19 20 '
+      'L5 20 A1.5 1.5 0 0 1 3.5 18.5 Z',
+    ),
+    GlyphPolyline([
+      GlyphVertex(7, 8),
+      GlyphVertex(10.5, 11),
+      GlyphVertex(17, 4.5),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const safety = Glyph([
+    GlyphPath(
+      'M12 2.8 L19.5 5.6 L19.5 11.6 C19.5 16.6 16 19.7 12 21.2 '
+      'C8 19.7 4.5 16.6 4.5 11.6 L4.5 5.6 Z',
+    ),
+    GlyphPolyline([
+      GlyphVertex(12, 8.5),
+      GlyphVertex(12, 14.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(9, 11.5),
+      GlyphVertex(15, 11.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const emergency = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 4),
+      GlyphVertex(12, 20),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(5, 8),
+      GlyphVertex(19, 16),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(5, 16),
+      GlyphVertex(19, 8),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const checklist = Glyph([
+    GlyphPolyline([
+      GlyphVertex(4, 6),
+      GlyphVertex(6, 8, 0.3),
+      GlyphVertex(9, 4.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(4, 15),
+      GlyphVertex(6, 17, 0.3),
+      GlyphVertex(9, 13.5),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(12.5, 6.5),
+      GlyphVertex(20, 6.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(12.5, 15.5),
+      GlyphVertex(20, 15.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const rocket = Glyph([
+    GlyphPath(
+      'M12 2.6 C15.6 5 17.4 9 17.4 13 L14 16 L10 16 L6.6 13 '
+      'C6.6 9 8.4 5 12 2.6 Z',
+    ),
+    GlyphCircle(12, 9.5, 1.8, role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(10, 16),
+      GlyphVertex(7, 20),
+      GlyphVertex(9, 18.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(14, 16),
+      GlyphVertex(17, 20),
+      GlyphVertex(15, 18.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const install = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 3.5),
+      GlyphVertex(12, 14),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(8, 10),
+      GlyphVertex(12, 14, 0.4),
+      GlyphVertex(16, 10),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(5, 15.5),
+      GlyphVertex(5, 20),
+      GlyphVertex(19, 20),
+      GlyphVertex(19, 15.5),
+    ], role: GlyphRole.detail),
+  ]);
+
+  static const addImage = Glyph([
+    GlyphPath(
+      'M20.5 12.5 L20.5 6 A2 2 0 0 0 18.5 4 L5.5 4 A2 2 0 0 0 3.5 6 '
+      'L3.5 18 A2 2 0 0 0 5.5 20 L13 20',
+    ),
+    GlyphPolyline([
+      GlyphVertex(3.5, 16),
+      GlyphVertex(8, 12),
+      GlyphVertex(12.5, 15.5),
+    ], role: GlyphRole.detail),
+    GlyphPolyline([
+      GlyphVertex(17.5, 15),
+      GlyphVertex(17.5, 21),
+    ], role: GlyphRole.line),
+    GlyphPolyline([
+      GlyphVertex(14.5, 18),
+      GlyphVertex(20.5, 18),
+    ], role: GlyphRole.line),
+  ]);
+
+  static const wifiLock = Glyph([
+    GlyphArc(12, 15, 9.5, math.pi * 1.2, math.pi * 0.6, role: GlyphRole.line),
+    GlyphArc(12, 15, 5, math.pi * 1.2, math.pi * 0.6, role: GlyphRole.detail),
+    GlyphCircle(12, 15, 1.4, role: GlyphRole.detail, solid: true),
+  ]);
   static Glyph sidebar(double progress) {
     final divider = lerpDouble(8.5, 11.5, progress)!;
     return Glyph([

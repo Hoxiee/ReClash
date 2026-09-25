@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
@@ -79,7 +80,7 @@ class FindingsView extends ConsumerWidget {
             top: 12,
             items: [
               DecorationListItem(
-                leading: const Icon(Icons.auto_awesome_outlined),
+                leading: const GlyphIcon(AppGlyphs.sparkle),
                 title: Text(localizations.findingsDesc),
                 subtitle: Text(
                   '${localizations.findingsMoments}: '
@@ -97,7 +98,7 @@ class FindingsView extends ConsumerWidget {
           SettingSection.sliver(
             items: [
               DecorationListItem(
-                leading: const Icon(Icons.restart_alt_outlined),
+                leading: const GlyphIcon(AppGlyphs.reset),
                 title: Text(
                   preview
                       ? localizations.developerPreviewReset
@@ -151,7 +152,7 @@ class _ContinuityItem extends ConsumerWidget {
     );
 
     return DecorationListItem(
-      leading: const Icon(Icons.trending_up_outlined),
+      leading: const GlyphIcon(AppGlyphs.trendUp),
       title: Text(localizations.findingsNextMilestone(remainingDays)),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 8),
@@ -303,7 +304,7 @@ class _MomentsSection extends StatelessWidget {
           ),
         if (lockedCount > 0)
           DecorationListItem(
-            leading: const Icon(Icons.more_horiz),
+            leading: const GlyphIcon(AppGlyphs.more),
             title: Text(localizations.findingsLocked(lockedCount)),
           ),
       ],

@@ -34,6 +34,9 @@ class CoreAction extends _$CoreAction {
             .read(smartRoutingSettingProvider)
             .rcxParamsFor(ref.read(currentProfileProvider)),
       );
+      await _core.setSmartRoutingDiagnostics(
+        ref.read(appSettingProvider).smartRoutingDiagnostics,
+      );
     } on CoreMethodException catch (error) {
       commonPrint.log(
         'smart routing sync skipped: $error',

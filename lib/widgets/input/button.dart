@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../base/builder.dart';
@@ -89,7 +90,7 @@ class MoreActionButton extends StatelessWidget {
             vertical: 16,
           ),
           title: Text(label, style: context.textTheme.bodyLarge),
-          trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 18),
+          trailing: trailing ?? const GlyphIcon(AppGlyphs.chevronForward, size: 18),
         ),
       ),
     );

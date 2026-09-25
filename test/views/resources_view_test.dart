@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -39,7 +41,7 @@ void main() {
     expect(find.byType(DecorationListItem), findsNWidgets(6));
     expect(find.byType(ItemPositionProvider), findsNWidgets(6));
     expect(find.byType(Switch), findsOneWidget);
-    expect(find.byIcon(Icons.more_vert), findsNWidgets(4));
+    expect(find.byGlyph(AppGlyphs.more), findsNWidgets(4));
     expect(find.byType(FutureBuilder<FileInfo?>), findsNWidgets(4));
     for (final url in defaultGeoXUrl.values) {
       expect(find.text(url), findsNothing);
@@ -50,7 +52,7 @@ void main() {
       matching: find.byType(DecorationListItem),
     );
     await tester.tap(
-      find.descendant(of: mmdbItem, matching: find.byIcon(Icons.more_vert)),
+      find.descendant(of: mmdbItem, matching: find.byGlyph(AppGlyphs.more)),
     );
     await tester.pumpAndSettle();
 

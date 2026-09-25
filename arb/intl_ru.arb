@@ -218,7 +218,12 @@
   "allowBypass": "Разрешить приложениям обходить VPN",
   "allowBypassDesc": "Если включить, некоторые приложения смогут обходить VPN",
   "externalController": "Внешний контроллер",
-  "externalControllerDesc": "Если включить, ядром Clash можно управлять через порт 9090",
+  "externalControllerDesc": "Настройка внешнего доступа к ядру Clash",
+  "enableExternalController": "Включить внешний контроллер",
+  "allowLanAccess": "Разрешить доступ из локальной сети",
+  "allowLanAccessDesc": "Разрешить доступ к внешнему контроллеру из локальной сети",
+  "listeningPort": "Порт прослушивания",
+  "random": "Случайно",
   "ipv6Desc": "Если включить, приложение сможет принимать трафик IPv6",
   "app": "Приложение",
   "general": "Общие",
@@ -524,7 +529,13 @@
   "memoryEstimateSharedDesc": "Ядро работает внутри процесса приложения. Его доля оценивается по статистике среды выполнения, а остальное считается памятью приложения и общей памятью.",
   "memoryReleased": "Память освобождена",
   "memoryReleasedSize": "Освобождено {size}",
-  "@memoryReleasedSize": {"placeholders": {"size": {"type": "String"}}},
+  "@memoryReleasedSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "releaseMemoryFailed": "Не удалось освободить память",
   "goroutineInfo": "Горутины",
   "cancel": "Отмена",
@@ -2059,5 +2070,67 @@
         "type": "String"
       }
     }
-  }
+  },
+  "outboundIp": "Исходящий IP",
+  "ipAddress": "IP-адрес",
+  "ipQualityLevel": "Уровень",
+  "ipQualityGood": "Хороший",
+  "ipQualityNormal": "Обычный",
+  "ipQualityRisky": "Рискованный",
+  "ipType": "Тип",
+  "ipTypeResidential": "Домашний",
+  "ipTypeMobile": "Мобильная сеть",
+  "ipTypeBusiness": "Корпоративный",
+  "ipTypeHosting": "Дата-центр",
+  "ipFlags": "Метки",
+  "ipFlagProxy": "Прокси",
+  "ipFlagVpn": "VPN",
+  "ipFlagTor": "Tor",
+  "ipFlagAbuser": "История злоупотреблений",
+  "ipOrganization": "Организация",
+  "ipAsn": "ASN",
+  "ipQualitySource": "Ответил",
+  "ipQualitySources": "Источники",
+  "ipQualityFailed": "Не удалось определить тип IP",
+  "ipQualityRetry": "Проверить снова",
+  "ipSourceNoType": "Нет типа",
+  "ipSourceRateLimited": "Лимит запросов",
+  "ipSourceIpMismatch": "Другой исходящий IP",
+  "hideIp": "Скрыть IP",
+  "smartRoutingDiagnostics": "Журнал диагностики",
+  "smartRoutingDiagnosticsDesc": "Записывать каждое решение, переключение и зондирование маршрутизации в этой сессии",
+  "smartRoutingLog": "Журнал маршрутизации",
+  "smartRoutingLogDesc": "Полный захват поведения движка",
+  "smartRoutingMore": "Ещё",
+  "smartRoutingLogOffTitle": "Журнал диагностики выключен",
+  "smartRoutingLogOffHint": "Включите его, чтобы записывать решения, переключения и зондирования маршрутизации.",
+  "smartRoutingLogEnable": "Включить журнал",
+  "smartRoutingLogEmpty": "Активность маршрутизации ещё не зафиксирована",
+  "smartRoutingLogWaiting": "Ожидание движка…",
+  "smartRoutingLogDropped": "Потеряно записей: {count}",
+  "@smartRoutingLogDropped": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingLogKindDecision": "Решение",
+  "smartRoutingLogKindSwitch": "Переключение",
+  "smartRoutingLogKindEvent": "Событие",
+  "smartRoutingLogKindProbe": "Зонд",
+  "smartRoutingLogExport": "Экспорт журнала",
+  "smartRoutingLogClear": "Очистить вид",
+  "smartRoutingLogAutoScroll": "Автопрокрутка",
+  "smartRoutingLogRepeat": "×{count}",
+  "@smartRoutingLogRepeat": {
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "smartRoutingLogState": "Состояние",
+  "smartRoutingLogCandidates": "Кандидаты",
+  "smartRoutingLogFilter": "Типы"
 }

@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -160,7 +161,7 @@ class _CommandItem extends StatelessWidget {
       ),
       trailing: IconButton.filledTonal(
         tooltip: appLocalizations.copy,
-        icon: const Icon(Icons.copy_rounded, size: 20),
+        icon: const GlyphIcon(AppGlyphs.copy, size: 20),
         onPressed: () => onCopy(command.link),
       ),
     );

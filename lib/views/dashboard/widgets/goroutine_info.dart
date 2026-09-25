@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
@@ -6,6 +7,7 @@ import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -63,8 +65,8 @@ class _GoroutineInfoState extends ConsumerState<GoroutineInfo>
   @override
   Widget build(BuildContext context) {
     return DashboardInfoCard(
-      height: getWidgetHeight(1),
-      icon: Icons.account_tree_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 1),
+      icon: AppGlyphs.hub,
       label: context.appLocalizations.goroutineInfo,
       child: ValueListenableBuilder(
         valueListenable: _countNotifier,

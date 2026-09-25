@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
+import '../helpers/glyph_finders.dart';
 
 TrackerInfo _tracker({required String id, String host = 'example.com'}) {
   return TrackerInfo(
@@ -220,10 +222,10 @@ void main() {
 
     await pumpRequests(tester);
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byGlyph(AppGlyphs.search));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.code), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.code), findsOneWidget);
 
     await teardownView(tester);
   });

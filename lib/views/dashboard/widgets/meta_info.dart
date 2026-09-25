@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -6,6 +7,7 @@ import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,12 +21,12 @@ class MetaInfo extends ConsumerWidget {
     final profile = ref.watch(currentProfileProvider);
     final panelMeta = profile?.panelMeta;
     return DashboardInfoCard(
-      height: getWidgetHeight(2),
-      icon: Icons.event_available_rounded,
+      height: DashboardWidgetMetrics.heightOf(context, 2),
+      icon: AppGlyphs.calendar,
       label: context.appLocalizations.metaInfo,
       action: profile != null && profile.type == ProfileType.url
           ? _UpdateAction(profile: profile)
-          : const Icon(Icons.chevron_right_rounded, size: 20),
+          : const GlyphIcon(AppGlyphs.chevronForward, size: 20),
       onPressed: () =>
           showExtend(context, builder: (_) => const SubscriptionOverviewView()),
       child: _MetaInfoBody(
@@ -186,7 +188,7 @@ class _BuyOfferRow extends StatelessWidget {
               onPressed: () => dialogs.openUrl(
                 offer == HeroBuyOffer.renewPlan ? buyPlanUrl! : buyTrafficUrl!,
               ),
-              icon: Icon(
+              icon: GlyphIcon(
                 heroBuyOfferViewOf(appLocalizations, offer).icon,
                 size: 16,
               ),
@@ -242,7 +244,7 @@ class _UpdateAction extends ConsumerWidget {
               ),
               tooltip: context.appLocalizations.update,
               onPressed: () => _handleUpdate(ref),
-              icon: const Icon(Icons.sync),
+              icon: const GlyphIcon(AppGlyphs.sync),
             ),
     );
   }

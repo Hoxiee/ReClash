@@ -160,7 +160,7 @@ class _ProxyGroupItem extends ConsumerWidget {
             index: index,
             count: count,
             delayedDrag: true,
-            icon: Icons.drag_handle,
+            icon: AppGlyphs.dragHandle,
             onReorder: onReorder,
           ),
         ],
@@ -294,7 +294,7 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
                   : (!includeAllProviders
                         ? _NumberCard(number: use.length)
                         : const _CheckIcon()),
-              const Icon(Icons.arrow_forward_ios),
+              const GlyphIcon(AppGlyphs.chevronForward),
             ],
           ),
           onPressed: _handleToProvidersView,
@@ -477,7 +477,7 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
                   : (!includeAllProxies
                         ? _NumberCard(number: proxies.length)
                         : const _CheckIcon()),
-              const Icon(Icons.arrow_forward_ios),
+              const GlyphIcon(AppGlyphs.chevronForward),
             ],
           ),
           onPressed: _handleToProxiesView,
@@ -731,8 +731,8 @@ class _CheckIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(6),
-      child: Icon(
-        Icons.check_circle_outline,
+      child: GlyphIcon(
+        AppGlyphs.checkCircle,
         size: 20.ap,
         color: Colors.greenAccent.harmonizeWith(context.colorScheme.primary),
       ),

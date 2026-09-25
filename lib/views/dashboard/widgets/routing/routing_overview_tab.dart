@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/config/smart_routing.dart';
@@ -76,10 +77,10 @@ class RoutingVerdictCard extends StatelessWidget {
             children: [
               RoutingBadge(
                 icon: failed
-                    ? Icons.error_outline_rounded
+                    ? AppGlyphs.error
                     : status.searching
-                    ? Icons.autorenew_rounded
-                    : Icons.verified_rounded,
+                    ? AppGlyphs.sync
+                    : AppGlyphs.verified,
                 tone: tone,
                 size: 46,
                 busy: status.searching,
@@ -249,8 +250,8 @@ class RoutingNetworkCard extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Icon(
-                    Icons.circle,
+                  child: GlyphIcon(
+                    AppGlyphs.dot,
                     size: 5,
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -273,7 +274,7 @@ class RoutingNetworkCard extends StatelessWidget {
   }
 }
 
-typedef RoutingLaneView = ({IconData icon, Color color, String text});
+typedef RoutingLaneView = ({Glyph icon, Color color, String text});
 
 RoutingLaneView routingLaneView(BuildContext context, RcxLaneStatus lane) {
   final appLocalizations = context.appLocalizations;
@@ -281,29 +282,29 @@ RoutingLaneView routingLaneView(BuildContext context, RcxLaneStatus lane) {
   final muted = colorScheme.onSurfaceVariant;
   return switch (lane.state) {
     'active' => (
-      icon: Icons.bolt_rounded,
+      icon: AppGlyphs.bolt,
       color: colorScheme.primary,
       text: lane.node.isEmpty
           ? appLocalizations.smartRoutingOn
           : appLocalizations.smartRoutingServiceVia(lane.node),
     ),
     'searching' => (
-      icon: Icons.autorenew_rounded,
+      icon: AppGlyphs.sync,
       color: muted,
       text: appLocalizations.smartRoutingSearching,
     ),
     'fallback' when lane.fallback == 'reject' => (
-      icon: Icons.block_rounded,
+      icon: AppGlyphs.block,
       color: colorScheme.error,
       text: appLocalizations.smartRoutingServiceFallbackActiveReject,
     ),
     'fallback' => (
-      icon: Icons.alt_route_rounded,
+      icon: AppGlyphs.route,
       color: muted,
       text: appLocalizations.smartRoutingServiceFallbackActiveMain,
     ),
     _ => (
-      icon: Icons.hourglass_empty_rounded,
+      icon: AppGlyphs.hourglass,
       color: muted,
       text: appLocalizations.smartRoutingServicePending,
     ),
@@ -323,7 +324,7 @@ class RoutingLanesCard extends StatelessWidget {
     final lanes = report.status.lanes;
     if (lanes.isEmpty) {
       return RoutingNotice(
-        icon: Icons.alt_route_rounded,
+        icon: AppGlyphs.route,
         text: appLocalizations.smartRoutingServiceRoutesEmpty,
       );
     }

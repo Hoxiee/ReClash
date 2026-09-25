@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
@@ -85,7 +87,7 @@ void main() {
     expect(find.text('No trusted networks yet'), findsOneWidget);
     expect(find.text('Add'), findsOneWidget);
     expect(find.text('Select all'), findsNothing);
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
   });
 
   testWidgets('every trusted network is rendered', (tester) async {
@@ -99,8 +101,8 @@ void main() {
   testWidgets('subnets and SSIDs get their own leading icons', (tester) async {
     await pumpView(tester, networks: ['Home', '192.168.1.0/24']);
 
-    expect(find.byIcon(Icons.wifi_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.router_rounded), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.wifi), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.router), findsOneWidget);
   });
 
   testWidgets('the trusted-now status appears only with rules', (tester) async {
@@ -122,12 +124,12 @@ void main() {
     tester,
   ) async {
     await pumpView(tester, networks: ['Home', 'Office']);
-    expect(find.byIcon(Icons.delete), findsNothing);
+    expect(find.byGlyph(AppGlyphs.delete), findsNothing);
 
     await tester.tap(find.byType(CommonCheckBox).first);
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.delete), findsOneWidget);
     expect(find.text('Select all'), findsOneWidget);
     expect(find.text('Add'), findsNothing);
   });
@@ -155,7 +157,7 @@ void main() {
       await tester.tap(find.byType(CommonCheckBox).first);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete));
+      await tester.tap(find.byGlyph(AppGlyphs.delete));
       await tester.pumpAndSettle();
 
       expect(container.read(vpnSettingProvider).smartPauseNetworks, ['Office']);

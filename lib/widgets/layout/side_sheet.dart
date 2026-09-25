@@ -374,7 +374,7 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
     final String routeLabel = _getRouteLabel(localizations);
 
     return AnimatedBuilder(
-      animation: widget.route.animation!,
+      animation: widget.route._presence,
       child: SideSheet(
         animationController: widget.route._animationController,
         onClosing: () {
@@ -392,9 +392,9 @@ class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
         showDragHandle: widget.showDragHandle,
       ),
       builder: (BuildContext context, Widget? child) {
-        final double animationValue = animationCurve.transform(
-          widget.route.animation!.value,
-        );
+        final double animationValue =
+            animationCurve.transform(widget.route.animation!.value) *
+            (1 - (widget.route.aside?.value ?? 0));
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -441,7 +441,15 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
     this.anchorPoint,
     this.useSafeArea = false,
     super.filter,
+    this.aside,
   });
+
+  /// Slides the sheet off, scrim and all, as it runs to 1 without closing it.
+  final Animation<double>? aside;
+
+  late final Animation<double> _presence = aside == null
+      ? animation!
+      : _SidePresence(animation!, aside!);
 
   final WidgetBuilder builder;
 
@@ -567,7 +575,7 @@ class ModalSideSheetRoute<T> extends PopupRoute<T> {
   Widget buildModalBarrier() {
     if (barrierColor.a != 0 && !offstage) {
       assert(barrierColor != barrierColor.opacity0);
-      final Animation<Color?> color = animation!.drive(
+      final Animation<Color?> color = _presence.drive(
         ColorTween(
           begin: barrierColor.opacity0,
           end: barrierColor,
@@ -613,6 +621,7 @@ Future<T?> showModalSideSheet<T>({
   AnimationController? transitionAnimationController,
   Offset? anchorPoint,
   ImageFilter? filter,
+  Animation<double>? aside,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -647,6 +656,15 @@ Future<T?> showModalSideSheet<T>({
     transitionAnimationController: transitionAnimationController,
     anchorPoint: anchorPoint,
     useSafeArea: useSafeArea,
+    aside: aside,
   ).._resolveMotionFrom(context);
   return navigator.push(route);
+}
+
+class _SidePresence extends CompoundAnimation<double> {
+  _SidePresence(Animation<double> entrance, Animation<double> aside)
+    : super(first: entrance, next: aside);
+
+  @override
+  double get value => first.value * (1 - next.value);
 }

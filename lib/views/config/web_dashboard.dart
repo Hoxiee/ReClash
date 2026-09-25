@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:dio/dio.dart';
 import 'package:reclash/common/common.dart';
@@ -20,7 +21,7 @@ class WebDashboardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return DecorationListItem.open(
-      leading: const Icon(Icons.dashboard_customize_outlined),
+      leading: const GlyphIcon(AppGlyphs.customize),
       title: Text(appLocalizations.webDashboard),
       subtitle: Text(appLocalizations.webDashboardDesc),
       blur: false,
@@ -73,7 +74,7 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
 
   /// A patch reaches the Core on its own debounce, which the readiness probe
   /// outwaits.
-  void _setController(ExternalControllerStatus status) {
+  void _setController(String status) {
     ref
         .read(patchClashConfigProvider.notifier)
         .update((state) => state.copyWith(externalController: status));
@@ -190,8 +191,10 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
   /// A dashboard the Core is not serving yet means the running config carries no
   /// `external-ui`, and only a profile apply can put it there.
   Future<Uri?> _serveUri() async {
+    final config = ref.read(patchClashConfigProvider);
     final uri = webDashboardUri(
-      ref.read(patchClashConfigProvider).externalController.value,
+      config.externalController,
+      secret: config.secret,
     );
     var readiness = await probeWebDashboard(uri);
     if (readiness == WebDashboardReadiness.unmounted) {
@@ -248,10 +251,10 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
             top: 16,
             items: [
               DecorationListItem(
-                leading: Icon(
+                leading: GlyphIcon(
                   supportsInAppWebDashboard
-                      ? Icons.dashboard_outlined
-                      : Icons.open_in_browser,
+                      ? AppGlyphs.dashboard
+                      : AppGlyphs.openExternal,
                 ),
                 title: Text(
                   supportsInAppWebDashboard
@@ -263,21 +266,21 @@ class _WebDashboardViewState extends ConsumerState<WebDashboardView> {
                     ? IconButton(
                         tooltip: appLocalizations.cancel,
                         onPressed: cancelToken.cancel,
-                        icon: const Icon(Icons.close),
+                        icon: const GlyphIcon(AppGlyphs.close),
                       )
                     : null,
                 onPressed: _busy ? null : () => unawaited(_handleOpen()),
               ),
               if (_installed)
                 DecorationListItem(
-                  leading: const Icon(Icons.refresh),
+                  leading: const GlyphIcon(AppGlyphs.refresh),
                   title: Text(appLocalizations.update),
                   subtitle: Text(appLocalizations.webDashboardDesc),
                   onPressed: _busy ? null : () => unawaited(_handleInstall()),
                 ),
               if (_installed)
                 DecorationListItem(
-                  leading: const Icon(Icons.delete_outline),
+                  leading: const GlyphIcon(AppGlyphs.delete),
                   title: Text(appLocalizations.delete),
                   onPressed: _busy ? null : () => unawaited(_handleRemove()),
                 ),

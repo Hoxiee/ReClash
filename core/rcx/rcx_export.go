@@ -68,6 +68,8 @@ type (
 	LaneConfig   = rcxLaneConfig
 	Storage      = rcxStorage
 	CacheStorage = rcxCacheStorage
+	DiagQuery    = rcxDiagQuery
+	DiagBatch    = rcxDiagBatch
 )
 
 const (

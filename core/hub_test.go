@@ -217,345 +217,53 @@ func TestPatchSelectGroupRestoresASelectionWithoutValidatingIt(t *testing.T) {
 	}
 }
 
-type countingHealthProvider struct {
-	fakeProxyProvider
-	touches atomic.Int32
-	checks  atomic.Int32
-}
-
-func (p *countingHealthProvider) Touch() {
-	p.touches.Add(1)
-}
-
-func (p *countingHealthProvider) HealthCheck() {
-	p.checks.Add(1)
-}
-
-func healthSelectorGroup(
-	t *testing.T,
-	name string,
-	providers ...cp.ProxyProvider,
-) constant.Proxy {
-	t.Helper()
-	group, err := outboundgroup.NewSelector(
-		outboundgroup.GroupCommonOption{Name: name},
-		outboundgroup.SelectorOption{},
-		nil,
-		providers,
-	)
-	if err != nil {
-		t.Fatalf("NewSelector: %v", err)
-	}
-	return adapter.NewProxy(group)
-}
-
 func TestCoreMemoryLimitIsExplicitAndPositive(t *testing.T) {
 	if coreMemoryLimit <= 0 {
 		t.Fatalf("coreMemoryLimit = %d, want a positive soft limit", coreMemoryLimit)
 	}
 }
 
-func TestRunHealthCheckRefreshCoversAndDeduplicatesProviderGraph(t *testing.T) {
-	topLevel := &countingHealthProvider{
-		fakeProxyProvider: fakeProxyProvider{name: "top", vehicle: cp.HTTP},
-	}
-	groupOwned := &countingHealthProvider{
-		fakeProxyProvider: fakeProxyProvider{name: "group", vehicle: cp.Compatible},
-	}
-	group := healthSelectorGroup(t, "selector", topLevel, groupOwned, groupOwned)
-	tunnel.UpdateProxies(
-		map[string]constant.Proxy{"selector": group},
-		map[string]cp.ProxyProvider{"top": topLevel},
-	)
-	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
-
-	runHealthCheckRefresh()
-	for _, provider := range []*countingHealthProvider{topLevel, groupOwned} {
-		if got := provider.touches.Load(); got != 1 {
-			t.Errorf("%s Touch calls = %d, want 1", provider.Name(), got)
-		}
-		if got := provider.checks.Load(); got != 1 {
-			t.Errorf("%s HealthCheck calls = %d, want 1", provider.Name(), got)
-		}
-	}
-}
-
-func TestHandleSetupConfigRefreshesOnlyAfterSuccess(t *testing.T) {
+func TestHandleSetupConfigReturnsAfterApply(t *testing.T) {
 	previousSetup := setupConfig
-	previousRefresh := refreshHealthChecks
 	previousInit := isInit.Load()
-	var refreshes atomic.Int32
-	refreshHealthChecks = func() { refreshes.Add(1) }
 	isInit.Store(true)
 	t.Cleanup(func() {
 		setupConfig = previousSetup
-		refreshHealthChecks = previousRefresh
 		isInit.Store(previousInit)
 	})
 
-	setupConfig = func(*SetupParams) error { return nil }
+	var applies atomic.Int32
+	setupConfig = func(*SetupParams) error {
+		applies.Add(1)
+		return nil
+	}
 	if message := handleSetupConfig(defaultSetupParams()); message != "" {
 		t.Fatalf("successful setup returned %q", message)
-	}
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes after success = %d, want 1", got)
 	}
 
 	setupConfig = func(*SetupParams) error { return errors.New("apply failed") }
 	if message := handleSetupConfig(defaultSetupParams()); message != "apply failed" {
 		t.Fatalf("failed setup returned %q", message)
 	}
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes after failure = %d, want still 1", got)
-	}
-}
-
-func TestHealthCheckCadenceRequiresTunAndStops(t *testing.T) {
-	stopHealthCheckCadence()
-	previousEvery := healthCheckCadenceEvery
-	previousRefresh := refreshHealthChecks
-	previousTunUp := tunUp.Load()
-	previousScreenOff := isScreenOff.Load()
-	previousSuspended := isSuspended.Load()
-	healthCheckCadenceEvery = 10 * time.Millisecond
-	var refreshes atomic.Int32
-	refreshHealthChecks = func() { refreshes.Add(1) }
-	tunUp.Store(false)
-	t.Cleanup(func() {
-		stopHealthCheckCadence()
-		healthCheckCadenceEvery = previousEvery
-		refreshHealthChecks = previousRefresh
-		tunUp.Store(previousTunUp)
-		isScreenOff.Store(previousScreenOff)
-		isSuspended.Store(previousSuspended)
-	})
-
-	isScreenOff.Store(false)
-	isSuspended.Store(false)
-	startHealthCheckCadence()
-	startHealthCheckCadence()
-	time.Sleep(30 * time.Millisecond)
-	if got := refreshes.Load(); got != 0 {
-		t.Fatalf("refreshes with TUN down = %d, want 0", got)
-	}
-
-	tunUp.Store(true)
-	deadline := time.Now().Add(time.Second)
-	for refreshes.Load() == 0 && time.Now().Before(deadline) {
-		time.Sleep(time.Millisecond)
-	}
-	if got := refreshes.Load(); got == 0 {
-		t.Fatal("cadence did not refresh with TUN up")
-	}
-
-	isScreenOff.Store(true)
-	screenOffAt := refreshes.Load()
-	time.Sleep(30 * time.Millisecond)
-	if got := refreshes.Load(); got != screenOffAt {
-		t.Errorf("refreshes with screen off = %d, want %d", got, screenOffAt)
-	}
-	isScreenOff.Store(false)
-	isSuspended.Store(true)
-	suspendedAt := refreshes.Load()
-	time.Sleep(30 * time.Millisecond)
-	if got := refreshes.Load(); got != suspendedAt {
-		t.Errorf("refreshes while suspended = %d, want %d", got, suspendedAt)
-	}
-
-	stopHealthCheckCadence()
-	stoppedAt := refreshes.Load()
-	time.Sleep(30 * time.Millisecond)
-	if got := refreshes.Load(); got != stoppedAt {
-		t.Errorf("refreshes after stop = %d, want %d", got, stoppedAt)
-	}
-}
-
-// Coming out of Doze has to re-probe. The health checks that ran while the app
-// had no network at all left every proxy marked dead and every delay reading
-// Timeout, and a lazy provider skips its next tick because nothing touched it
-// in the meantime.
-
-func TestHandleScreenOnRefreshesHealthChecksOnce(t *testing.T) {
-	var refreshes atomic.Int32
-	previousRefresh := refreshHealthChecks
-	previousTunUp := tunUp.Load()
-	previousScreenOff := isScreenOff.Load()
-	previousSuspended := isSuspended.Load()
-	refreshHealthChecks = func() { refreshes.Add(1) }
-	t.Cleanup(func() {
-		refreshHealthChecks = previousRefresh
-		tunUp.Store(previousTunUp)
-		isScreenOff.Store(previousScreenOff)
-		isSuspended.Store(previousSuspended)
-		provider.SetScreenOff(previousScreenOff)
-	})
-
-	tunUp.Store(true)
-	isSuspended.Store(false)
-	isScreenOff.Store(false)
-	handleScreenOff(true)
-	if got := refreshes.Load(); got != 0 {
-		t.Fatalf("refreshes on screen off = %d, want 0", got)
-	}
-	handleScreenOff(false)
-	if got := refreshes.Load(); got != 1 {
-		t.Fatalf("refreshes on screen on = %d, want 1", got)
-	}
-	handleScreenOff(false)
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes after duplicate screen on = %d, want 1", got)
-	}
-}
-
-func TestHealthCheckCatchUpWaitsForScreenAndSuspendRecovery(t *testing.T) {
-	previousRefresh := refreshHealthChecks
-	previousDrop := dropStaleConnections
-	previousTunUp := tunUp.Load()
-	previousRunning := isRunning.Load()
-	previousScreenOff := isScreenOff.Load()
-	previousSuspended := isSuspended.Load()
-	dropStaleConnections = func() {}
-	t.Cleanup(func() {
-		refreshHealthChecks = previousRefresh
-		dropStaleConnections = previousDrop
-		tunUp.Store(previousTunUp)
-		isRunning.Store(previousRunning)
-		isScreenOff.Store(previousScreenOff)
-		isSuspended.Store(previousSuspended)
-		provider.SetScreenOff(previousScreenOff)
-		if previousSuspended {
-			tunnel.OnSuspend()
-		} else {
-			tunnel.OnRunning()
-		}
-	})
-
-	for _, resumeFirst := range []bool{false, true} {
-		name := "screen-on-first"
-		if resumeFirst {
-			name = "resume-first"
-		}
-		t.Run(name, func(t *testing.T) {
-			var refreshes atomic.Int32
-			refreshHealthChecks = func() { refreshes.Add(1) }
-			tunUp.Store(true)
-			isRunning.Store(true)
-			isScreenOff.Store(false)
-			isSuspended.Store(false)
-			handleScreenOff(true)
-			handleSuspend(true)
-
-			if resumeFirst {
-				handleSuspend(false)
-				handleScreenOff(false)
-			} else {
-				handleScreenOff(false)
-				handleSuspend(false)
-			}
-			if got := refreshes.Load(); got != 1 {
-				t.Fatalf("refreshes = %d, want one catch-up", got)
-			}
-			handleScreenOff(false)
-			handleSuspend(false)
-			if got := refreshes.Load(); got != 1 {
-				t.Errorf("refreshes after duplicate wake signals = %d, want 1", got)
-			}
-		})
-	}
-}
-
-func TestHandleSuspendRefreshesHealthChecksOnResume(t *testing.T) {
-	var refreshes atomic.Int32
-	var drops atomic.Int32
-
-	previous := refreshHealthChecks
-	previousDrop := dropStaleConnections
-	previousRunning := isRunning.Load()
-	previousScreenOff := isScreenOff.Load()
-	refreshHealthChecks = func() { refreshes.Add(1) }
-	dropStaleConnections = func() { drops.Add(1) }
-	t.Cleanup(func() {
-		refreshHealthChecks = previous
-		dropStaleConnections = previousDrop
-		isRunning.Store(previousRunning)
-		isScreenOff.Store(previousScreenOff)
-		isSuspended.Store(false)
-		tunnel.OnRunning()
-	})
-
-	isSuspended.Store(false)
-	isScreenOff.Store(false)
-	isRunning.Store(true)
-
-	handleSuspend(false)
-	if got := refreshes.Load(); got != 0 {
-		t.Errorf("refreshes = %d, want none: the device was never suspended", got)
-	}
-	if got := drops.Load(); got != 0 {
-		t.Errorf("drops = %d, want none: the device was never suspended", got)
-	}
-
-	handleSuspend(true)
-	if !isSuspended.Load() {
-		t.Error("handleSuspend(true) did not record the suspension")
-	}
-	if got := refreshes.Load(); got != 0 {
-		t.Errorf("refreshes = %d, want none while the device is still suspended", got)
-	}
-	if got := drops.Load(); got != 0 {
-		t.Errorf("drops = %d, want none while the device is still suspended", got)
-	}
-
-	handleSuspend(false)
-	if isSuspended.Load() {
-		t.Error("handleSuspend(false) did not clear the suspension")
-	}
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes = %d, want exactly one on resume", got)
-	}
-	if got := drops.Load(); got != 1 {
-		t.Errorf("drops = %d, want exactly one stale-socket drop on resume", got)
-	}
-
-	handleSuspend(false)
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes = %d, want a redundant resume to change nothing", got)
-	}
-	if got := drops.Load(); got != 1 {
-		t.Errorf("drops = %d, want a redundant resume to change nothing", got)
-	}
-
-	// The service resumes the core on its way down, and probing every node
-	// through a teardown only produces failures nobody asked for.
-	isRunning.Store(false)
-	handleSuspend(true)
-	handleSuspend(false)
-	if got := refreshes.Load(); got != 1 {
-		t.Errorf("refreshes = %d, want no probe while the listeners are stopped", got)
-	}
-	if got := drops.Load(); got != 1 {
-		t.Errorf("drops = %d, want no drop while the listeners are stopped", got)
+	if got := applies.Load(); got != 1 {
+		t.Errorf("successful applies = %d, want 1", got)
 	}
 }
 
 // The routing engine reselects nodes but never closes the app sockets that hold
 // the dead sessions, so a wake still has to drop them even with the engine on.
 func TestHandleSuspendDropsStaleConnectionsIndependentlyOfEngine(t *testing.T) {
-	var refreshes atomic.Int32
 	var drops atomic.Int32
 
-	previousRefresh := refreshHealthChecks
 	previousDrop := dropStaleConnections
 	previousRunning := isRunning.Load()
 	previousScreenOff := isScreenOff.Load()
 	previousEngine := rcxEngineInstance
-	refreshHealthChecks = func() { refreshes.Add(1) }
 	dropStaleConnections = func() { drops.Add(1) }
 	engine := rcx.NewEngine(rcxCoreRuntime{})
 	engine.SetEnabledForTest(true)
 	rcxEngineInstance = engine
 	t.Cleanup(func() {
-		refreshHealthChecks = previousRefresh
 		dropStaleConnections = previousDrop
 		isRunning.Store(previousRunning)
 		isScreenOff.Store(previousScreenOff)
@@ -572,9 +280,6 @@ func TestHandleSuspendDropsStaleConnectionsIndependentlyOfEngine(t *testing.T) {
 	handleSuspend(false)
 	if got := drops.Load(); got != 1 {
 		t.Errorf("drops = %d, want one wake drop even with the engine on", got)
-	}
-	if got := refreshes.Load(); got != 0 {
-		t.Errorf("refreshes = %d, want the engine to own probing while enabled", got)
 	}
 }
 

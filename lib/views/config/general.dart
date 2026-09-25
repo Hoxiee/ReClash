@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -6,10 +7,12 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/web_dashboard.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'general/port_dialog.dart';
 part 'general/ua_dialog.dart';
+part 'general/external_controller_dialog.dart';
 
 class LogLevelItem extends ConsumerWidget {
   const LogLevelItem({super.key});
@@ -17,7 +20,7 @@ class LogLevelItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigOptionsItem<LogLevel>(
-      leading: const Icon(Icons.info_outline),
+      leading: const GlyphIcon(AppGlyphs.info),
       title: (l) => l.logLevel,
       options: LogLevel.values,
       textBuilder: (logLevel) => logLevel.name,
@@ -63,7 +66,7 @@ class UaItem extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.globalUa),
     );
     return DecorationListItem(
-      leading: const Icon(Icons.computer_outlined),
+      leading: const GlyphIcon(AppGlyphs.computer),
       title: Text(appLocalizations.userAgent),
       subtitle: Text(globalUa ?? appLocalizations.defaultText),
       onPressed: () => _handleShowUaDialog(ref),
@@ -81,7 +84,7 @@ class KeepAliveIntervalItem extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.keepAliveInterval),
     );
     return DecorationListItem.input(
-      leading: const Icon(Icons.timer_outlined),
+      leading: const GlyphIcon(AppGlyphs.clock),
       title: Text(appLocalizations.keepAliveIntervalDesc),
       subtitle: Text(appLocalizations.secondsCount(keepAliveInterval)),
       dialogTitle: appLocalizations.keepAliveIntervalDesc,
@@ -122,7 +125,7 @@ class TestUrlItem extends ConsumerWidget {
       appSettingProvider.select((state) => state.testUrl),
     );
     return DecorationListItem.input(
-      leading: const Icon(Icons.timeline),
+      leading: const GlyphIcon(AppGlyphs.chart),
       title: Text(appLocalizations.testUrl),
       subtitle: Text(testUrl),
       resetValue: defaultTestUrl,
@@ -164,7 +167,7 @@ class PortItem extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.mixedPort),
     );
     return DecorationListItem(
-      leading: const Icon(Icons.adjust_outlined),
+      leading: const GlyphIcon(AppGlyphs.target),
       title: Text(appLocalizations.port),
       subtitle: Text('$mixedPort'),
       onPressed: () {
@@ -184,7 +187,7 @@ class HostsItem extends ConsumerWidget {
       patchClashConfigProvider.select((state) => state.hosts),
     );
     return DecorationListItem.open(
-      leading: const Icon(Icons.view_list_outlined),
+      leading: const GlyphIcon(AppGlyphs.list),
       title: const Text('Hosts'),
       subtitle: Text(appLocalizations.hostsDesc),
       blur: false,
@@ -211,7 +214,7 @@ class AuthenticationItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigToggleItem(
-      leading: const Icon(Icons.key_outlined),
+      leading: const GlyphIcon(AppGlyphs.key),
       title: (l) => l.authentication,
       subtitle: (l) => l.authenticationDesc,
       selector: networkSettingProvider.select(
@@ -238,7 +241,7 @@ class AuthenticationAccountItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigTextItem(
-      leading: const Icon(Icons.person_outline),
+      leading: const GlyphIcon(AppGlyphs.account),
       title: (l) => l.account,
       maxLength: TextInputLimits.userName,
       selector: networkSettingProvider.select(
@@ -260,7 +263,7 @@ class AuthenticationPasswordItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return ConfigTextItem(
-      leading: const Icon(Icons.password_outlined),
+      leading: const GlyphIcon(AppGlyphs.password),
       title: (l) => l.password,
       maxLength: TextInputLimits.password,
       selector: networkSettingProvider.select(
@@ -275,14 +278,14 @@ class AuthenticationPasswordItem extends ConsumerWidget {
 }
 
 ConfigToggleItem _clashToggle({
-  required IconData icon,
+  required Glyph icon,
   required ConfigLabel title,
   required ConfigLabel subtitle,
   required bool Function(PatchClashConfig state) select,
   required PatchClashConfig Function(PatchClashConfig state, bool value) update,
 }) {
   return ConfigToggleItem(
-    leading: Icon(icon),
+    leading: GlyphIcon(icon),
     title: title,
     subtitle: subtitle,
     selector: patchClashConfigProvider.select(select),
@@ -307,7 +310,7 @@ class GeneralListView extends ConsumerWidget {
           top: 16,
           items: [
             ConfigOptionsItem<AppRegion>(
-              leading: const Icon(Icons.public_outlined),
+              leading: const GlyphIcon(AppGlyphs.appRegion),
               title: (l) => l.appRegion,
               options: AppRegion.values,
               textBuilder: (region) => region.label(context),
@@ -321,24 +324,13 @@ class GeneralListView extends ConsumerWidget {
           items: [
             const PortItem(),
             _clashToggle(
-              icon: Icons.device_hub,
+              icon: AppGlyphs.hub,
               title: (l) => l.allowLan,
               subtitle: (l) => l.allowLanDesc,
               select: (state) => state.allowLan,
               update: (state, value) => state.copyWith(allowLan: value),
             ),
-            _clashToggle(
-              icon: Icons.api_outlined,
-              title: (l) => l.externalController,
-              subtitle: (l) => l.externalControllerDesc,
-              select: (state) =>
-                  state.externalController == ExternalControllerStatus.open,
-              update: (state, value) => state.copyWith(
-                externalController: value
-                    ? ExternalControllerStatus.open
-                    : ExternalControllerStatus.close,
-              ),
-            ),
+            const ExternalControllerItem(),
             const WebDashboardItem(),
             const AuthenticationItem(),
           ],
@@ -357,7 +349,7 @@ class GeneralListView extends ConsumerWidget {
           items: [
             const UaItem(),
             ConfigToggleItem(
-              leading: const Icon(Icons.perm_device_information_outlined),
+              leading: const GlyphIcon(AppGlyphs.deviceInfo),
               title: (l) => l.sendDeviceIdentity,
               subtitle: (l) => l.sendDeviceIdentityDesc,
               selector: appSettingProvider.select(
@@ -378,7 +370,7 @@ class GeneralListView extends ConsumerWidget {
             if (system.isDesktop) const KeepAliveIntervalItem(),
             const HostsItem(),
             ConfigToggleItem(
-              leading: const Icon(Icons.dns_outlined),
+              leading: const GlyphIcon(AppGlyphs.dns),
               title: (l) => l.appendSystemDns,
               subtitle: (l) => l.appendSystemDnsTip,
               selector: networkSettingProvider.select(
@@ -389,28 +381,28 @@ class GeneralListView extends ConsumerWidget {
                   .update((state) => state.copyWith(appendSystemDns: value)),
             ),
             _clashToggle(
-              icon: Icons.water_outlined,
+              icon: AppGlyphs.drop,
               title: (l) => 'IPv6',
               subtitle: (l) => l.ipv6Desc,
               select: (state) => state.ipv6,
               update: (state, value) => state.copyWith(ipv6: value),
             ),
             _clashToggle(
-              icon: Icons.compress_outlined,
+              icon: AppGlyphs.compress,
               title: (l) => l.unifiedDelay,
               subtitle: (l) => l.unifiedDelayDesc,
               select: (state) => state.unifiedDelay,
               update: (state, value) => state.copyWith(unifiedDelay: value),
             ),
             _clashToggle(
-              icon: Icons.double_arrow_outlined,
+              icon: AppGlyphs.fastForward,
               title: (l) => l.tcpConcurrent,
               subtitle: (l) => l.tcpConcurrentDesc,
               select: (state) => state.tcpConcurrent,
               update: (state, value) => state.copyWith(tcpConcurrent: value),
             ),
             _clashToggle(
-              icon: Icons.polymer_outlined,
+              icon: AppGlyphs.findProcess,
               title: (l) => l.findProcessMode,
               subtitle: (l) => l.findProcessModeDesc,
               select: (state) =>
@@ -422,7 +414,7 @@ class GeneralListView extends ConsumerWidget {
               ),
             ),
             _clashToggle(
-              icon: Icons.memory,
+              icon: AppGlyphs.memory,
               title: (l) => l.geodataLoader,
               subtitle: (l) => l.geodataLoaderDesc,
               select: (state) =>

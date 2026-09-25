@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -775,7 +777,7 @@ void main() {
       tester,
     ) async {
       await pumpHero(tester, delay: 140, serviceLogo: 'https://panel/l.png');
-      expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
+      expect(find.byGlyph(AppGlyphs.power), findsNothing);
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
       final markBox = tester.widget<SizedBox>(mark);
@@ -796,7 +798,7 @@ void main() {
       tester,
     ) async {
       await pumpHero(tester, delay: 140);
-      expect(find.byIcon(Icons.power_settings_new_rounded), findsNothing);
+      expect(find.byGlyph(AppGlyphs.power), findsNothing);
       final mark = find.byKey(const ValueKey('core-mark'));
       expect(mark, findsOne);
       final core = _coreExtent(tester);
@@ -838,14 +840,14 @@ void main() {
       expect(
         find.descendant(
           of: orbScope,
-          matching: find.byIcon(Icons.power_settings_new_rounded),
+          matching: find.byGlyph(AppGlyphs.power),
         ),
         findsNothing,
       );
       expect(
         find.descendant(
           of: orbScope,
-          matching: find.byIcon(Icons.play_arrow_rounded),
+          matching: find.byGlyph(AppGlyphs.play),
         ),
         findsOne,
       );

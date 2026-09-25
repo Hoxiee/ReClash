@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:reclash/icons/icons.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
@@ -210,7 +211,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
             items: [
               if (dav == null)
                 DecorationListItem(
-                  leading: const Icon(Icons.account_box),
+                  leading: const GlyphIcon(AppGlyphs.account),
                   title: Text(appLocalizations.noInfo),
                   subtitle: Text(appLocalizations.pleaseBindWebDAV),
                   trailing: FilledButton.tonal(
@@ -222,7 +223,7 @@ class _BackupAndRestoreState extends ConsumerState<BackupAndRestore>
                 )
               else ...[
                 DecorationListItem(
-                  leading: const Icon(Icons.account_box),
+                  leading: const GlyphIcon(AppGlyphs.account),
                   title: TooltipText(
                     text: Text(
                       dav.user,
@@ -516,7 +517,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
               minLines: 1,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.link),
+                prefixIcon: const GlyphIcon(AppGlyphs.link),
                 labelText: appLocalizations.address,
                 helperText: appLocalizations.addressHelp,
               ),
@@ -532,7 +533,7 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
               inputFormatters: TextInputLimits.limit(TextInputLimits.userName),
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.account_circle),
+                prefixIcon: const GlyphIcon(AppGlyphs.account),
                 labelText: appLocalizations.account,
               ),
               validator: (String? value) {
@@ -556,13 +557,13 @@ class _WebDAVFormDialogState extends ConsumerState<WebDAVFormDialog> {
                     _submit();
                   },
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.password),
+                    prefixIcon: const GlyphIcon(AppGlyphs.password),
                     suffixIcon: IconButton(
                       tooltip: obscure
                           ? context.appLocalizations.showPassword
                           : context.appLocalizations.hidePassword,
-                      icon: Icon(
-                        obscure ? Icons.visibility : Icons.visibility_off,
+                      icon: GlyphIcon(
+                        obscure ? AppGlyphs.eye : AppGlyphs.eyeOff,
                       ),
                       onPressed: () {
                         _obscureController.value = !obscure;

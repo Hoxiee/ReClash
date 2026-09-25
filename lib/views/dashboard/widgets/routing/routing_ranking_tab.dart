@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -36,7 +37,7 @@ class RoutingRankingTab extends StatelessWidget {
         if (chosen == null || rivals.isEmpty)
           routingSliver(
             RoutingNotice(
-              icon: Icons.compare_arrows_rounded,
+              icon: AppGlyphs.swap,
               text: appLocalizations.smartRoutingNoRivals,
             ),
           )
@@ -215,12 +216,12 @@ class RoutingDuelRow extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 1),
-            child: Icon(
+            child: GlyphIcon(
               rung == null
-                  ? Icons.drag_handle_rounded
+                  ? AppGlyphs.dragHandle
                   : ahead
-                  ? Icons.trending_up_rounded
-                  : Icons.trending_down_rounded,
+                  ? AppGlyphs.trendUp
+                  : AppGlyphs.trendDown,
               size: 15,
               color: tone,
             ),

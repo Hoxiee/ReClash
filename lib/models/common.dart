@@ -18,7 +18,7 @@ part 'generated/common.g.dart';
 @freezed
 abstract class NavigationItem with _$NavigationItem {
   const factory NavigationItem({
-    required Icon icon,
+    required Glyph glyph,
     required PageLabel label,
     required WidgetBuilder builder,
     @Default(true) bool keep,

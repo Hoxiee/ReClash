@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/settings/about.dart';
@@ -56,7 +57,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         const _ConnectionDoctorItem(),
         for (final navigationItem in navigationItems)
           DecorationListItem.open(
-            leading: navigationItem.icon,
+            leading: GlyphIcon(navigationItem.glyph),
             title: Text(navigationItem.label.label),
             subtitle: switch (navigationItem.label.description) {
               null => null,
@@ -225,7 +226,7 @@ class _ConnectionDoctorItem extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final snapshot = ref.watch(connectionDoctorProvider);
     return DecorationListItem.open(
-      leading: const Icon(Icons.monitor_heart_outlined),
+      leading: const GlyphIcon(AppGlyphs.healthMonitor),
       title: Text(appLocalizations.connectionDoctor),
       subtitle: Text(connectionDoctorTitle(appLocalizations, snapshot)),
       widget: const ConnectionDoctorView(),
@@ -240,7 +241,7 @@ class _FindingsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.auto_awesome_outlined),
+      leading: const GlyphIcon(AppGlyphs.sparkle),
       title: Text(context.appLocalizations.findings),
       widget: const FindingsView(),
       paneId: 'findings',
@@ -258,7 +259,7 @@ class _LocaleItem extends ConsumerWidget {
       ref.watch(appSettingProvider.select((state) => state.locale)),
     );
     return DecorationListItem.open(
-      leading: const Icon(Icons.language_outlined),
+      leading: const GlyphIcon(AppGlyphs.language),
       title: Text(appLocalizations.language),
       subtitle: Text(
         currentLocale?.nativeLabel ?? appLocalizations.defaultText,
@@ -275,7 +276,7 @@ class _ThemeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.style),
+      leading: const GlyphIcon(AppGlyphs.palette),
       title: Text(context.appLocalizations.appearance),
       subtitle: Text(context.appLocalizations.appearanceDesc),
       widget: const AppearanceView(),
@@ -290,7 +291,7 @@ class _BackupItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.cloud_sync),
+      leading: const GlyphIcon(AppGlyphs.cloudSync),
       title: Text(context.appLocalizations.backupAndRestore),
       subtitle: Text(context.appLocalizations.backupAndRestoreDesc),
       widget: const BackupAndRestore(),
@@ -305,7 +306,7 @@ class _HotkeyItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.keyboard),
+      leading: const GlyphIcon(AppGlyphs.keyboard),
       title: Text(context.appLocalizations.hotkeyManagement),
       subtitle: Text(context.appLocalizations.hotkeyManagementDesc),
       widget: const HotKeyView(),
@@ -320,7 +321,7 @@ class _LoopbackItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem(
-      leading: const Icon(Icons.lock),
+      leading: const GlyphIcon(AppGlyphs.lock),
       title: Text(context.appLocalizations.loopback),
       subtitle: Text(context.appLocalizations.loopbackDesc),
       onPressed: () {
@@ -339,7 +340,7 @@ class _AccessItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.view_list),
+      leading: const GlyphIcon(AppGlyphs.list),
       title: Text(context.appLocalizations.accessControl),
       subtitle: Text(context.appLocalizations.accessControlDesc),
       widget: const AccessView(),
@@ -354,7 +355,7 @@ class _ConfigItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.edit),
+      leading: const GlyphIcon(AppGlyphs.edit),
       title: Text(context.appLocalizations.basicConfig),
       subtitle: Text(context.appLocalizations.basicConfigDesc),
       widget: const ConfigView(),
@@ -369,7 +370,7 @@ class _AdvancedConfigItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.build),
+      leading: const GlyphIcon(AppGlyphs.wrench),
       title: Text(context.appLocalizations.advancedConfig),
       subtitle: Text(context.appLocalizations.advancedConfigDesc),
       widget: const AdvancedConfigView(),
@@ -384,7 +385,7 @@ class _SettingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.settings),
+      leading: const GlyphIcon(AppGlyphs.settings),
       title: Text(context.appLocalizations.application),
       subtitle: Text(context.appLocalizations.applicationDesc),
       widget: const ApplicationSettingView(),
@@ -399,7 +400,7 @@ class _DisclaimerItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     return DecorationListItem(
-      leading: const Icon(Icons.gavel),
+      leading: const GlyphIcon(AppGlyphs.gavel),
       title: Text(context.appLocalizations.disclaimer),
       onPressed: () async {
         final isDisclaimerAccepted = await dialogs.showDisclaimer();
@@ -417,7 +418,7 @@ class _UrlSchemeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.link),
+      leading: const GlyphIcon(AppGlyphs.link),
       title: Text(context.appLocalizations.urlScheme),
       widget: const UrlSchemeView(),
       paneId: 'urlScheme',
@@ -431,7 +432,7 @@ class _InfoItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.info),
+      leading: const GlyphIcon(AppGlyphs.info),
       title: Text(context.appLocalizations.about),
       widget: const AboutView(),
       paneId: 'about',
@@ -445,7 +446,7 @@ class _DeveloperItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecorationListItem.open(
-      leading: const Icon(Icons.developer_board),
+      leading: const GlyphIcon(AppGlyphs.cpu),
       title: Text(context.appLocalizations.developerMode),
       widget: const DeveloperView(),
       paneId: 'developer',

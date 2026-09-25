@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart' hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
 import 'package:reclash/common/app/app_localizations.dart';
@@ -380,7 +382,7 @@ void main() {
       await pumpActions(tester);
 
       expect(
-        tooltipOf(tester, find.byIcon(Icons.push_pin_outlined)),
+        tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
         currentAppLocalizations.pinWindow,
       );
       expect(
@@ -409,7 +411,7 @@ void main() {
       await tester.pump();
 
       expect(
-        tooltipOf(tester, find.byIcon(Icons.push_pin)),
+        tooltipOf(tester, find.byGlyph(AppGlyphs.pin)),
         currentAppLocalizations.unpinWindow,
       );
       expect(
@@ -439,7 +441,7 @@ void main() {
     testWidgets('each button reports its own press', (tester) async {
       await pumpActions(tester);
 
-      await tester.tap(find.byIcon(Icons.push_pin_outlined));
+      await tester.tap(find.byGlyph(AppGlyphs.pin));
       await tester.tap(glyph(CaptionGlyph.minimize));
       await tester.tap(glyph(CaptionGlyph.maximize));
       await tester.tap(glyph(CaptionGlyph.close));

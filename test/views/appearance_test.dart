@@ -1,3 +1,5 @@
+import 'package:reclash/icons/icons.dart';
+import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
@@ -313,7 +315,7 @@ void main() {
     bool resetVisible(WidgetTester tester) {
       final visibility = tester.widget<Visibility>(
         find.ancestor(
-          of: find.byIcon(Icons.replay),
+          of: find.byGlyph(AppGlyphs.replay),
           matching: find.byType(Visibility),
         ),
       );
@@ -323,7 +325,7 @@ void main() {
     testWidgets('resets back to the neutral level', (tester) async {
       await pumpAppearanceView(tester);
 
-      expect(find.byIcon(Icons.replay), findsOneWidget);
+      expect(find.byGlyph(AppGlyphs.replay), findsOneWidget);
       expect(resetVisible(tester), isFalse);
 
       container
@@ -333,7 +335,7 @@ void main() {
       expect(find.text('+50%'), findsOneWidget);
       expect(resetVisible(tester), isTrue);
 
-      await tester.tap(find.byIcon(Icons.replay));
+      await tester.tap(find.byGlyph(AppGlyphs.replay));
       await tester.pumpAndSettle();
 
       expect(readTheme().contrastLevel, 0);
@@ -429,7 +431,7 @@ void main() {
 
       await pumpAppearanceView(tester);
       await openTab(tester, 'Other');
-      await tester.tap(find.byIcon(Icons.replay));
+      await tester.tap(find.byGlyph(AppGlyphs.replay));
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.scale, 1);
