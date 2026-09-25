@@ -147,8 +147,8 @@ class ProxiesTabViewState extends ConsumerState<ProxiesTabView>
                     spacing: 8,
                     children: [
                       for (final groupName in groupNames)
-                        SettingTextCard(
-                          groupName,
+                        SettingInfoCard(
+                          Info(label: groupName),
                           onPressed: () {
                             final index = groupNames.indexWhere(
                               (item) => item == groupName,

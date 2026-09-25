@@ -32,8 +32,10 @@ class SettingInfoCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            if (info.glyph != null) GlyphIcon(info.glyph!),
-            const SizedBox(width: AppSpacing.sm),
+            if (info.glyph != null) ...[
+              GlyphIcon(info.glyph!),
+              const SizedBox(width: AppSpacing.sm),
+            ],
             Flexible(
               child: Text(
                 info.label,
@@ -44,37 +46,6 @@ class SettingInfoCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class SettingTextCard extends StatelessWidget {
-  final String text;
-  final bool? isSelected;
-  final VoidCallback onPressed;
-
-  const SettingTextCard(
-    this.text, {
-    super.key,
-    this.isSelected,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CommonCard(
-      onPressed: onPressed,
-      isSelected: isSelected,
-      child: Padding(
-        padding: AppInsets.md,
-        child: Text(
-          text,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          softWrap: false,
-          style: context.textTheme.bodyMedium,
         ),
       ),
     );

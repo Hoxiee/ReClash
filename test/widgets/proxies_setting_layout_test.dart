@@ -1,3 +1,4 @@
+import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -90,7 +91,16 @@ void main() {
       ProxiesLayout.standard,
     );
 
-    await tester.tap(find.byType(SettingTextCard).first);
+    final looseLabel = tester
+        .element(find.byType(ProxiesSetting))
+        .appLocalizations
+        .loose;
+    await tester.tap(
+      find.ancestor(
+        of: find.text(looseLabel),
+        matching: find.byType(SettingInfoCard),
+      ),
+    );
     await tester.pump();
 
     expect(

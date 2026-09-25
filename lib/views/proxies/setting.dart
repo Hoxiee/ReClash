@@ -160,8 +160,8 @@ class ProxiesSetting extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   for (final item in ProxyCardType.values)
-                    SettingTextCard(
-                      item.label,
+                    SettingInfoCard(
+                      Info(label: item.label),
                       isSelected: item == cardType,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
@@ -199,8 +199,8 @@ class ProxiesSetting extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   for (final item in ProxiesLayout.values)
-                    SettingTextCard(
-                      getTextForProxiesLayout(context, item),
+                    SettingInfoCard(
+                      Info(label: getTextForProxiesLayout(context, item)),
                       isSelected: item == layout,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
@@ -240,8 +240,8 @@ class ProxiesSetting extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   for (final item in ProxiesIconStyle.values)
-                    SettingTextCard(
-                      _getTextWithProxiesIconStyle(context, item),
+                    SettingInfoCard(
+                      Info(label: _getTextWithProxiesIconStyle(context, item)),
                       isSelected: iconStyle == item,
                       onPressed: () {
                         ref.read(proxiesStyleSettingProvider.notifier).update((
