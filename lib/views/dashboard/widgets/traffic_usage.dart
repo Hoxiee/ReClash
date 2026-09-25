@@ -344,7 +344,9 @@ class _RollingTrafficValue extends StatelessWidget {
               ClipRect(
                 key: ValueKey(value.length - index),
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 280),
+                  duration: context.motionDuration(
+                    const Duration(milliseconds: 280),
+                  ),
                   transitionBuilder: (child, animation) {
                     final offset =
                         Tween<Offset>(
