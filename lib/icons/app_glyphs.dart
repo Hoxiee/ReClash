@@ -2159,13 +2159,17 @@ abstract final class AppGlyphs {
 
   static const pause = Glyph([
     GlyphPolyline([
-      GlyphVertex(9, 5.5),
-      GlyphVertex(9, 18.5),
-    ], role: GlyphRole.line),
+      GlyphVertex(7.3, 5.6, 1),
+      GlyphVertex(10.7, 5.6, 1),
+      GlyphVertex(10.7, 18.4, 1),
+      GlyphVertex(7.3, 18.4, 1),
+    ], closed: true),
     GlyphPolyline([
-      GlyphVertex(15, 5.5),
-      GlyphVertex(15, 18.5),
-    ], role: GlyphRole.line),
+      GlyphVertex(13.3, 5.6, 1),
+      GlyphVertex(16.7, 5.6, 1),
+      GlyphVertex(16.7, 18.4, 1),
+      GlyphVertex(13.3, 18.4, 1),
+    ], closed: true),
   ]);
 
   /// The resting play triangle: identical to [playPause] at progress 0, but a
