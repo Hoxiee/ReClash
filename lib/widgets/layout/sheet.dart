@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../base/focus.dart';
+import 'popup.dart';
 import 'scaffold.dart';
 import 'side_sheet.dart';
 import 'snap_sheet.dart';
@@ -221,6 +222,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
   final bool sheetTransparentToolBar;
   final bool? centerTitle;
   final List<IconButtonData> actions;
+  final List<CommonPopupMenuItem> menuItems;
   final VoidCallback? backAction;
 
   const AdaptiveSheetScaffold({
@@ -230,6 +232,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     this.sheetTransparentToolBar = false,
     this.centerTitle,
     this.actions = const [],
+    this.menuItems = const [],
     this.backAction,
   });
 
@@ -239,6 +242,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
       title: title,
       centerTitle: centerTitle,
       iconActions: actions,
+      menuItems: menuItems,
       floatBody: sheetTransparentToolBar,
       backAction: backAction,
       body: ModalFocusScope(child: body),

@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart';
 import 'dart:convert';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -81,6 +81,24 @@ class _SubscriptionReportSheetState
     }
   }
 
+  Future<void> _copy(String text) async {
+    final message = context.appLocalizations.subscriptionReportCopied;
+    await Clipboard.setData(ClipboardData(text: text));
+    dialogs.showNotifier(message);
+  }
+
+  void _copyLink(SubscriptionReport report) {
+    final lang = Localizations.localeOf(context).languageCode;
+    unawaited(
+      _copy(
+        subscriptionReportDecoderUrl(
+          encodeSubscriptionReportBlob(report),
+          lang: lang,
+        ),
+      ),
+    );
+  }
+
   Future<void> _save(SubscriptionReport report) async {
     setState(() => _saving = true);
     final appLocalizations = context.appLocalizations;
@@ -111,10 +129,28 @@ class _SubscriptionReportSheetState
     }
   }
 
+  List<CommonPopupMenuItem> _exportMenu(SubscriptionReport report) {
+    final appLocalizations = context.appLocalizations;
+    return [
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.copy,
+        label: appLocalizations.subscriptionReportCopyCode,
+        onPressed: () => unawaited(_copy(encodeSubscriptionReportBlob(report))),
+      ),
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.save,
+        label: appLocalizations.subscriptionReportSave,
+        onPressed: _saving ? null : () => unawaited(_save(report)),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final report = _report;
     return AdaptiveSheetScaffold(
       title: context.appLocalizations.subscriptionReport,
+      menuItems: report == null ? const [] : _exportMenu(report),
       body: Padding(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -122,23 +158,22 @@ class _SubscriptionReportSheetState
           16,
           16 + BottomInsetScope.of(context),
         ),
-        child: _buildBody(context),
+        child: _buildBody(context, report),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, SubscriptionReport? report) {
     final appLocalizations = context.appLocalizations;
     if (_error != null) {
       return Center(
         child: Text(userFacingErrorMessage(_error!, appLocalizations)),
       );
     }
-    final report = _report;
     if (report == null) {
       return _Loading(label: appLocalizations.subscriptionReportGenerating);
     }
-    return _ReportBody(report: report, saving: _saving, onSave: _save);
+    return _ReportBody(report: report, onCopyLink: () => _copyLink(report));
   }
 }
 
@@ -161,27 +196,15 @@ class _Loading extends StatelessWidget {
 }
 
 class _ReportBody extends StatelessWidget {
-  const _ReportBody({
-    required this.report,
-    required this.saving,
-    required this.onSave,
-  });
+  const _ReportBody({required this.report, required this.onCopyLink});
 
   final SubscriptionReport report;
-  final bool saving;
-  final ValueChanged<SubscriptionReport> onSave;
-
-  Future<void> _copy(BuildContext context, String text) async {
-    final message = context.appLocalizations.subscriptionReportCopied;
-    await Clipboard.setData(ClipboardData(text: text));
-    dialogs.showNotifier(message);
-  }
+  final VoidCallback onCopyLink;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final fault = report.verdict?.fault ?? SubscriptionFault.unknown;
-    final lang = Localizations.localeOf(context).languageCode;
     return ListView(
       children: [
         _VerdictCard(
@@ -189,38 +212,14 @@ class _ReportBody extends StatelessWidget {
           body: _bodyOf(appLocalizations, fault),
           tone: _toneOf(fault),
         ),
-        const SizedBox(height: AppSpacing.lg),
-        _FactsCard(report: report),
+        const SizedBox(height: AppSpacing.xl),
+        _OverviewSection(report: report),
         const SizedBox(height: AppSpacing.xxl),
         FilledButton.icon(
           autofocus: true,
-          onPressed: () => _copy(
-            context,
-            subscriptionReportDecoderUrl(
-              encodeSubscriptionReportBlob(report),
-              lang: lang,
-            ),
-          ),
+          onPressed: onCopyLink,
           icon: const GlyphIcon(AppGlyphs.link),
           label: Text(appLocalizations.subscriptionReportCopyLink),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () =>
-                  _copy(context, encodeSubscriptionReportBlob(report)),
-              icon: const GlyphIcon(AppGlyphs.copy),
-              label: Text(appLocalizations.subscriptionReportCopyCode),
-            ),
-            OutlinedButton.icon(
-              onPressed: saving ? null : () => onSave(report),
-              icon: const GlyphIcon(AppGlyphs.save),
-              label: Text(appLocalizations.subscriptionReportSave),
-            ),
-          ],
         ),
       ],
     );
@@ -241,15 +240,10 @@ class _VerdictCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final accent = switch (tone) {
-      _FaultTone.bad => colors.error,
-      _FaultTone.caution => colors.tertiary,
-      _FaultTone.neutral => colors.onSurfaceVariant,
-    };
-    final icon = switch (tone) {
-      _FaultTone.bad => AppGlyphs.error,
-      _FaultTone.caution => AppGlyphs.warning,
-      _FaultTone.neutral => AppGlyphs.help,
+    final (accent, glyph) = switch (tone) {
+      _FaultTone.bad => (colors.error, AppGlyphs.error),
+      _FaultTone.caution => (colors.tertiary, AppGlyphs.warning),
+      _FaultTone.neutral => (colors.onSurfaceVariant, AppGlyphs.help),
     };
     return CommonCard(
       type: CommonCardType.filled,
@@ -260,7 +254,16 @@ class _VerdictCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GlyphIcon(icon, color: accent),
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: ShapeDecoration(
+                color: accent.opacity12,
+                shape: AppShape.full,
+              ),
+              child: GlyphIcon(glyph, color: accent),
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -289,8 +292,8 @@ class _VerdictCard extends StatelessWidget {
   }
 }
 
-class _FactsCard extends StatelessWidget {
-  const _FactsCard({required this.report});
+class _OverviewSection extends StatelessWidget {
+  const _OverviewSection({required this.report});
 
   final SubscriptionReport report;
 
@@ -299,54 +302,42 @@ class _FactsCard extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     final dial = report.runtimeDial;
     final update = report.subscriptionUpdate;
-    return CommonCard(
-      type: CommonCardType.filled,
-      radius: AppCorner.xl,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          children: [
-            _FactRow(
-              label: appLocalizations.subscriptionReportRuntimeDials,
-              value: '${dial.success}/${dial.attempts}',
-            ),
-            _FactRow(
-              label: appLocalizations.subscriptionReportFlaggedNodes,
-              value: '${report.nodes.length}',
-            ),
-            if (update != null && update.attempted)
-              _FactRow(
-                label: appLocalizations.subscriptionReportUpdateFailures,
-                value: '${update.failures}/${update.attempts}',
-              ),
-          ],
+    return generateSectionV3(
+      title: appLocalizations.basicInfo,
+      items: [
+        _StatRow(
+          label: appLocalizations.subscriptionReportRuntimeDials,
+          value: '${dial.success}/${dial.attempts}',
         ),
-      ),
+        _StatRow(
+          label: appLocalizations.subscriptionReportFlaggedNodes,
+          value: '${report.nodes.length}',
+        ),
+        if (update != null && update.attempted)
+          _StatRow(
+            label: appLocalizations.subscriptionReportUpdateFailures,
+            value: '${update.failures}/${update.attempts}',
+          ),
+      ],
     );
   }
 }
 
-class _FactRow extends StatelessWidget {
-  const _FactRow({required this.label, required this.value});
+class _StatRow extends StatelessWidget {
+  const _StatRow({required this.label, required this.value});
 
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: context.textTheme.bodyMedium),
-          Text(
-            value,
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+    return DecorationListItem(
+      title: Text(label),
+      trailing: Text(
+        value,
+        style: context.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

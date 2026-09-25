@@ -77,6 +77,17 @@ void main() {
     expect(find.text('The problem looks like the provider'), findsOneWidget);
     expect(find.text('57/120'), findsOneWidget);
     expect(find.text('1/3'), findsOneWidget);
+    expect(find.text('Copy report link'), findsOneWidget);
+    // The extra export actions hide behind the overflow menu.
+    expect(find.text('Save JSON'), findsNothing);
+    expect(find.text('Copy R1 code'), findsNothing);
+  });
+
+  testWidgets('overflow menu reveals the extra export actions', (tester) async {
+    await pump(tester, SubscriptionFault.server);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('Copy R1 code'), findsOneWidget);
     expect(find.text('Save JSON'), findsOneWidget);
   });
 
@@ -88,7 +99,7 @@ void main() {
     expect(find.text('The problem looks like the provider'), findsNothing);
   });
 
-  testWidgets('lands focus on the save action after a slow load', (
+  testWidgets('lands focus on the primary action after a slow load', (
     tester,
   ) async {
     final gate = Completer<void>();
