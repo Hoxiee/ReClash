@@ -3127,6 +3127,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "レポートには匿名化された診断情報のみが含まれます。プロトコル・トランスポート・出口国のラベル付きノード仮名、エラークラス、遅延の区分、ルートと desync のプリセットです。サブスクリプションの URL、実際のノード名、ホスト名、アドレス、ポートは一切含まれません。プロバイダーに送るために JSON として保存しますか?",
     ),
+    "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage(
+      "クリップボードにコピーしました",
+    ),
+    "subscriptionReportCopyCode": MessageLookupByLibrary.simpleMessage(
+      "R1 コードをコピー",
+    ),
+    "subscriptionReportCopyLink": MessageLookupByLibrary.simpleMessage(
+      "レポートのリンクをコピー",
+    ),
     "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
       "該当ノード",
     ),

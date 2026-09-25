@@ -4000,6 +4000,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "Отчёт содержит только обезличенную диагностику: псевдонимы нод с метками протокола, транспорта и страны выхода, классы ошибок, интервалы задержек и ваши пресеты маршрутизации и desync. В него никогда не попадают URL подписки, реальные имена нод, хосты, адреса и порты. Сохранить как JSON, чтобы отправить провайдеру?",
     ),
+    "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage(
+      "Скопировано в буфер обмена",
+    ),
+    "subscriptionReportCopyCode": MessageLookupByLibrary.simpleMessage(
+      "Скопировать код R1",
+    ),
+    "subscriptionReportCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Скопировать ссылку на отчёт",
+    ),
     "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
       "Проблемные ноды",
     ),

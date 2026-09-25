@@ -72,6 +72,7 @@ export 'subscription/subscription_import.dart';
 export 'subscription/subscription_metadata.dart';
 export 'subscription/subscription_links.dart';
 export 'subscription/subscription_notice.dart';
+export 'subscription/subscription_report_link.dart';
 export 'subscription/subscription_update_probe.dart';
 export 'subscription/subscription_verdict.dart';
 export 'subscription/subscription_url.dart';

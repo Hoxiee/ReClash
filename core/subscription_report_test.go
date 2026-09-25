@@ -138,3 +138,41 @@ func TestBuildReportOmitsHealthyNodesFromList(t *testing.T) {
 		t.Fatalf("observedNodeCount = %d, want 2 (healthy counted too)", report.ObservedNodeCount)
 	}
 }
+
+func TestBuildReportCoarsensEnvAndUsesMillis(t *testing.T) {
+	now := time.Now()
+	counters := newSubscriptionCounters(now.Add(-time.Minute))
+	counters.updatedAt = now
+	report := buildSubscriptionReport(counters, subscriptionNodeMetadata{}, now, "normal", "v2:w:HomeSSID#9689536add20", func(string) string { return "" })
+	if report.Env != "wifi" {
+		t.Fatalf("env = %q, want wifi", report.Env)
+	}
+	blob, err := json.Marshal(report)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	if strings.Contains(string(blob), "HomeSSID") || strings.Contains(string(blob), "9689536add20") {
+		t.Fatal("report leaked the network identity")
+	}
+	if report.GeneratedAt != now.UnixMilli() {
+		t.Fatalf("generatedAt = %d, want millis %d", report.GeneratedAt, now.UnixMilli())
+	}
+}
+
+func TestCoarseEnvClass(t *testing.T) {
+	cases := map[string]string{
+		"v2:w:HomeSSID#abc": "wifi",
+		"v2:c:Beeline#abc":  "cellular",
+		"v2:c:Beeline":      "cellular",
+		"v2:e:#abc":         "ethernet",
+		"v2:o:#abc":         "other",
+		"c:#legacy":         "cellular",
+		"cellular":          "cellular",
+		"":                  "",
+	}
+	for in, want := range cases {
+		if got := coarseEnvClass(in); got != want {
+			t.Errorf("coarseEnvClass(%q) = %q, want %q", in, got, want)
+		}
+	}
+}

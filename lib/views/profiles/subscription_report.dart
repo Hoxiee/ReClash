@@ -171,10 +171,17 @@ class _ReportBody extends StatelessWidget {
   final bool saving;
   final ValueChanged<SubscriptionReport> onSave;
 
+  Future<void> _copy(BuildContext context, String text) async {
+    final message = context.appLocalizations.subscriptionReportCopied;
+    await Clipboard.setData(ClipboardData(text: text));
+    dialogs.showNotifier(message);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final fault = report.verdict?.fault ?? SubscriptionFault.unknown;
+    final lang = Localizations.localeOf(context).languageCode;
     return ListView(
       children: [
         _VerdictCard(
@@ -187,9 +194,33 @@ class _ReportBody extends StatelessWidget {
         const SizedBox(height: 24),
         FilledButton.icon(
           autofocus: true,
-          onPressed: saving ? null : () => onSave(report),
-          icon: const GlyphIcon(AppGlyphs.save),
-          label: Text(appLocalizations.subscriptionReportSave),
+          onPressed: () => _copy(
+            context,
+            subscriptionReportDecoderUrl(
+              encodeSubscriptionReportBlob(report),
+              lang: lang,
+            ),
+          ),
+          icon: const GlyphIcon(AppGlyphs.link),
+          label: Text(appLocalizations.subscriptionReportCopyLink),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () =>
+                  _copy(context, encodeSubscriptionReportBlob(report)),
+              icon: const GlyphIcon(AppGlyphs.copy),
+              label: Text(appLocalizations.subscriptionReportCopyCode),
+            ),
+            OutlinedButton.icon(
+              onPressed: saving ? null : () => onSave(report),
+              icon: const GlyphIcon(AppGlyphs.save),
+              label: Text(appLocalizations.subscriptionReportSave),
+            ),
+          ],
         ),
       ],
     );

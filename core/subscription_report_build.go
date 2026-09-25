@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/metacubex/mihomo/constant"
@@ -15,6 +16,28 @@ const subscriptionReportSchemaVersion = 1
 // The worst offenders are what a provider acts on; the rest is already summed
 // into the bounded byProtocol/byGroup aggregates.
 const subscriptionReportTopNodes = 20
+
+// coarseEnvClass drops the rcx env key's SSID/carrier and fingerprint, leaving only the link class an anonymized report may show.
+func coarseEnvClass(env string) string {
+	env = strings.ToLower(strings.TrimSpace(env))
+	if env == "" {
+		return ""
+	}
+	prefix, rest, _ := strings.Cut(env, ":")
+	if prefix == "v2" {
+		prefix, _, _ = strings.Cut(rest, ":")
+	}
+	switch prefix {
+	case "w", "wifi":
+		return "wifi"
+	case "c", "cellular":
+		return "cellular"
+	case "e", "ethernet":
+		return "ethernet"
+	default:
+		return "other"
+	}
+}
 
 // egressLookup returns a node's measured exit country, or "" when unknown. It
 // must never trigger a geo query (IPInstance calls os.Exit on Android).
@@ -37,7 +60,7 @@ func buildSubscriptionReport(
 		WindowStart:       counters.startedAt.UnixMilli(),
 		WindowEnd:         counters.updatedAt.UnixMilli(),
 		Terrain:           terrain,
-		Env:               env,
+		Env:               coarseEnvClass(env),
 		Presets:           metadata.presets,
 		DroppedEvents:     counters.droppedEvents,
 		ConfigNodeCount:   len(metadata.nodes),

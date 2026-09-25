@@ -3335,6 +3335,36 @@ class AppLocalizations {
     );
   }
 
+  /// `Copy report link`
+  String get subscriptionReportCopyLink {
+    return Intl.message(
+      'Copy report link',
+      name: 'subscriptionReportCopyLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy R1 code`
+  String get subscriptionReportCopyCode {
+    return Intl.message(
+      'Copy R1 code',
+      name: 'subscriptionReportCopyCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copied to clipboard`
+  String get subscriptionReportCopied {
+    return Intl.message(
+      'Copied to clipboard',
+      name: 'subscriptionReportCopied',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Runtime dials`
   String get subscriptionReportRuntimeDials {
     return Intl.message(

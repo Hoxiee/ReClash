@@ -3852,6 +3852,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
       "The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?",
     ),
+    "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage(
+      "Copied to clipboard",
+    ),
+    "subscriptionReportCopyCode": MessageLookupByLibrary.simpleMessage(
+      "Copy R1 code",
+    ),
+    "subscriptionReportCopyLink": MessageLookupByLibrary.simpleMessage(
+      "Copy report link",
+    ),
     "subscriptionReportFlaggedNodes": MessageLookupByLibrary.simpleMessage(
       "Flagged nodes",
     ),
