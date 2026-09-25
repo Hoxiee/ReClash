@@ -46,7 +46,7 @@ class CommonChip extends StatelessWidget {
             Tooltip(
               message: context.appLocalizations.delete,
               child: InkWell(
-                customBorder: const CircleBorder(),
+                customBorder: AppShape.circle,
                 onTap: onDeleted,
                 child: Padding(
                   padding: AppInsets.xxs,

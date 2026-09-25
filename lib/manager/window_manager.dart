@@ -508,7 +508,7 @@ class WindowHeaderActions extends StatelessWidget {
                     ? appLocalizations.unpinWindow
                     : appLocalizations.pinWindow,
                 style: const ButtonStyle(
-                  shape: WidgetStatePropertyAll(CircleBorder()),
+                  shape: WidgetStatePropertyAll(AppShape.circle),
                   minimumSize: WidgetStatePropertyAll(Size.zero),
                   maximumSize: WidgetStatePropertyAll(Size.infinite),
                   iconSize: WidgetStatePropertyAll(pinIconSize),

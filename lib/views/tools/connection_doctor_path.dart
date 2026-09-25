@@ -270,7 +270,7 @@ class _DoctorPathNode extends StatelessWidget {
         height: diameter,
         decoration: ShapeDecoration(
           color: visual.background,
-          shape: CircleBorder(
+          shape: AppShape.circle.copyWith(
             side: BorderSide(color: visual.foreground, width: 2),
           ),
           shadows: glow == null

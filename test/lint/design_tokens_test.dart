@@ -55,6 +55,12 @@ void main() {
             'RoundedRectangleBorder.',
           );
         }
+        if (line.contains('CircleBorder(') || line.contains('StadiumBorder(')) {
+          offenders.add(
+            '$relative:${i + 1} — use AppShape.circle / AppShape.full, not a '
+            'raw CircleBorder/StadiumBorder.',
+          );
+        }
       }
     }
     expect(offenders, isEmpty, reason: offenders.join('\n'));
@@ -109,8 +115,13 @@ void main() {
   });
 
   test('status greens/oranges come from colorScheme.success/warning', () {
+    // Accent swatches carry the same status semantics; greenAccent slipped the
+    // old (green|orange)-only alternation.
     final harmonized = RegExp(
-      r'Colors\.(green|orange)\.harmonizeWith\([^)]*\.primary',
+      r'Colors\.(green|orange|greenAccent|orangeAccent)\.harmonizeWith\([^)]*\.primary',
+    );
+    final bareAccent = RegExp(
+      r'Colors\.(green|orange)Accent\b(?!\.harmonizeWith)',
     );
     final source = p.join('lib', 'common', 'ui', 'color.dart');
     final offenders = <String>[];
@@ -129,6 +140,12 @@ void main() {
           offenders.add(
             '$relative:${i + 1} — green/orange harmonized against primary is '
             'colorScheme.success/warning; use the named token.',
+          );
+        }
+        if (bareAccent.hasMatch(line)) {
+          offenders.add(
+            '$relative:${i + 1} — bare green/orange accent swatch as a status '
+            'fill; use colorScheme.success/warning.',
           );
         }
       }

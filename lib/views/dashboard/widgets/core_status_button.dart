@@ -117,7 +117,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   backgroundColor: switch (coreStatus) {
                     CoreStatus.connecting => null,
-                    CoreStatus.connected => Colors.greenAccent,
+                    CoreStatus.connected => context.colorScheme.success,
                     CoreStatus.disconnected => context.colorScheme.error,
                   },
                   foregroundColor: switch (coreStatus) {

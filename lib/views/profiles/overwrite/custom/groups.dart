@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
@@ -740,7 +739,7 @@ class _CheckIcon extends StatelessWidget {
       child: GlyphIcon(
         AppGlyphs.checkCircle,
         size: 20.ap,
-        color: Colors.greenAccent.harmonizeWith(context.colorScheme.primary),
+        color: context.colorScheme.success,
       ),
     );
   }
