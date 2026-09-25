@@ -21,7 +21,7 @@ import tray
 import url_launcher_macos
 import webview_flutter_wkwebview
 import wifi_ssid
-import window_manager
+import window
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
@@ -40,5 +40,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   WebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "WebViewFlutterPlugin"))
   WifiSsidPlugin.register(with: registry.registrar(forPlugin: "WifiSsidPlugin"))
-  WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
+  WindowPlugin.register(with: registry.registrar(forPlugin: "WindowPlugin"))
 }

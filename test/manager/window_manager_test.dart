@@ -13,13 +13,13 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:window_manager/window_manager.dart'
-    show WindowListener, windowManager;
+import 'package:window/window.dart'
+    show WindowListener, desktopWindow;
 
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
-const _windowChannel = MethodChannel('window_manager');
+const _windowChannel = MethodChannel('window');
 
 class _RecordingSystemAction extends SystemAction {
   static final calls = <String>[];
@@ -110,7 +110,7 @@ void main() {
         .setMockMethodCallHandler(_windowChannel, (call) async {
           windowCalls.add(call);
           if (call.method == 'setAlwaysOnTop') {
-            isAlwaysOnTop = call.arguments['isAlwaysOnTop'] as bool;
+            isAlwaysOnTop = call.arguments['value'] as bool;
           }
           return switch (call.method) {
             'isAlwaysOnTop' => isAlwaysOnTop,
@@ -176,7 +176,7 @@ void main() {
     final listener = await pumpWindowManager(tester);
     window.bounds = const Rect.fromLTWH(120, 64, 1000, 800);
 
-    listener.onWindowMove();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     final setting = container.read(windowSettingProvider);
@@ -188,7 +188,7 @@ void main() {
     final listener = await pumpWindowManager(tester);
     window.bounds = const Rect.fromLTWH(0, 0, 1280, 960);
 
-    listener.onWindowResize();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     final setting = container.read(windowSettingProvider);
@@ -228,7 +228,7 @@ void main() {
     final gate = Completer<void>();
     window.geometryGate = gate;
 
-    listener.onWindowMove();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
     await tester.pumpWidget(const SizedBox.shrink());
     gate.complete();
@@ -246,7 +246,7 @@ void main() {
     final gate = Completer<void>();
     window.geometryGate = gate;
 
-    listener.onWindowResize();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
     await tester.pumpWidget(const SizedBox.shrink());
     gate.complete();
@@ -261,7 +261,7 @@ void main() {
     window.bounds = const Rect.fromLTWH(0, 0, 1920, 1080);
     window.isNormal = false;
 
-    listener.onWindowResize();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     expect(container.read(windowSettingProvider).width, isNot(1920));
@@ -280,7 +280,7 @@ void main() {
     window.bounds = const Rect.fromLTWH(0, 0, 1200, 900);
     window.supportsPosition = false;
 
-    listener.onWindowMove();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     expect(
@@ -297,12 +297,12 @@ void main() {
     window.bounds = const Rect.fromLTWH(10, 10, 640, 480);
     window.geometryGate = firstGate;
 
-    listener.onWindowMove();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     window.bounds = const Rect.fromLTWH(80, 64, 1200, 900);
     window.geometryGate = null;
-    listener.onWindowMove();
+    listener.onWindowGeometryChanged();
     await settleWindowGeometry(tester);
 
     firstGate.complete();
@@ -457,7 +457,7 @@ void main() {
           .handlePlatformMessage(
             _windowChannel.name,
             _windowChannel.codec.encodeMethodCall(
-              MethodCall('onEvent', {'eventName': name}),
+              MethodCall('onEvent', {'name': name}),
             ),
             (_) {},
           );
@@ -533,7 +533,7 @@ void main() {
       final leave = windowCalls.singleWhere(
         (call) => call.method == 'setFullScreen',
       );
-      expect(leave.arguments, {'isFullScreen': false});
+      expect(leave.arguments, {'value': false});
 
       await emitWindowEvent('leave-full-screen');
 
@@ -572,11 +572,11 @@ void main() {
     testWidgets('disposing stops listening to the window', (tester) async {
       final caption = WindowCaptionController();
       await tester.pump();
-      expect(windowManager.listeners, contains(caption));
+      expect(desktopWindow.listeners, contains(caption));
 
       caption.dispose();
 
-      expect(windowManager.listeners, isNot(contains(caption)));
+      expect(desktopWindow.listeners, isNot(contains(caption)));
     });
   });
 }

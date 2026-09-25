@@ -13,7 +13,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../helpers/test_app.dart';
 
-const _windowChannel = MethodChannel('window_manager');
+const _windowChannel = MethodChannel('window');
 
 const _contentKey = Key('window-header-test-content');
 

@@ -3,7 +3,7 @@ import 'package:reclash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _windowChannel = MethodChannel('window_manager');
+const _windowChannel = MethodChannel('window');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

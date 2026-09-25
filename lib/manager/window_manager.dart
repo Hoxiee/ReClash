@@ -10,7 +10,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:window/window.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);
 
@@ -46,7 +46,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
         });
       }
     });
-    windowManager.addListener(this);
+    desktopWindow.addListener(this);
   }
 
   @override
@@ -114,26 +114,8 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   }
 
   @override
-  void onWindowMove() {
-    super.onWindowMove();
-    _scheduleWindowGeometryCapture();
-  }
-
-  @override
-  void onWindowMoved() {
-    super.onWindowMoved();
-    _scheduleWindowGeometryCapture();
-  }
-
-  @override
-  void onWindowResize() {
-    super.onWindowResize();
-    _scheduleWindowGeometryCapture();
-  }
-
-  @override
-  void onWindowResized() {
-    super.onWindowResized();
+  void onWindowGeometryChanged() {
+    super.onWindowGeometryChanged();
     _scheduleWindowGeometryCapture();
   }
 
@@ -142,7 +124,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     _invalidateWindowGeometryCapture();
     super.onWindowMaximize();
     if (system.isWindows) {
-      unawaited(windowManager.setWindowCornerPreference(round: false));
+      unawaited(desktopWindow.setRoundedCorners(false));
     }
   }
 
@@ -150,7 +132,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   void onWindowUnmaximize() {
     super.onWindowUnmaximize();
     if (system.isWindows) {
-      unawaited(windowManager.setWindowCornerPreference(round: true));
+      unawaited(desktopWindow.setRoundedCorners(true));
     }
     _scheduleWindowGeometryCapture();
   }
@@ -189,7 +171,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
   @override
   void dispose() {
     _invalidateWindowGeometryCapture();
-    windowManager.removeListener(this);
+    desktopWindow.removeListener(this);
     super.dispose();
   }
 }
@@ -297,7 +279,7 @@ class WindowCaptionState {
 class WindowCaptionController extends ValueNotifier<WindowCaptionState>
     with WindowListener {
   WindowCaptionController() : super(const WindowCaptionState()) {
-    windowManager.addListener(this);
+    desktopWindow.addListener(this);
     unawaited(_syncFromWindow());
   }
 
@@ -305,9 +287,9 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
 
   Future<void> _syncFromWindow() async {
     final states = await Future.wait<bool>([
-      windowManager.isAlwaysOnTop(),
-      windowManager.isMaximized(),
-      windowManager.isFullScreen(),
+      desktopWindow.isAlwaysOnTop(),
+      desktopWindow.isMaximized(),
+      desktopWindow.isFullScreen(),
     ]);
     _set(
       WindowCaptionState(
@@ -348,25 +330,25 @@ class WindowCaptionController extends ValueNotifier<WindowCaptionState>
   }
 
   Future<void> toggleMaximized() async {
-    if (await windowManager.isFullScreen()) {
-      await windowManager.setFullScreen(false);
-    } else if (await windowManager.isMaximized()) {
-      await windowManager.unmaximize();
+    if (await desktopWindow.isFullScreen()) {
+      await desktopWindow.setFullScreen(false);
+    } else if (await desktopWindow.isMaximized()) {
+      await desktopWindow.unmaximize();
     } else {
-      await windowManager.maximize();
+      await desktopWindow.maximize();
     }
   }
 
   Future<void> togglePin() async {
-    final isPinned = await windowManager.isAlwaysOnTop();
-    await windowManager.setAlwaysOnTop(!isPinned);
-    _set(value.copyWith(isPinned: await windowManager.isAlwaysOnTop()));
+    final isPinned = await desktopWindow.isAlwaysOnTop();
+    await desktopWindow.setAlwaysOnTop(!isPinned);
+    _set(value.copyWith(isPinned: await desktopWindow.isAlwaysOnTop()));
   }
 
   @override
   void dispose() {
     _disposed = true;
-    windowManager.removeListener(this);
+    desktopWindow.removeListener(this);
     super.dispose();
   }
 }
@@ -391,7 +373,7 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
   Widget build(BuildContext context) {
     return WindowHeaderBar(
       height: kHeaderHeight,
-      onDragStart: windowManager.startDragging,
+      onDragStart: desktopWindow.startDragging,
       onDoubleTap: caption.toggleMaximized,
       title: system.isMacOS ? const Text(appName) : null,
       actions: system.isMacOS
@@ -399,7 +381,7 @@ class _WindowHeaderState extends ConsumerState<WindowHeader> {
           : WindowHeaderActions(
               state: caption,
               onPin: caption.togglePin,
-              onMinimize: windowManager.minimize,
+              onMinimize: desktopWindow.minimize,
               onMaximize: caption.toggleMaximized,
               onClose: () {
                 ref.read(systemActionProvider.notifier).handleClose();
