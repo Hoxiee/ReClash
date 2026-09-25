@@ -114,6 +114,18 @@ extension ColorSchemeExtension on ColorScheme {
 
   Color get warning => Colors.orange.harmonizeWith(primary);
 
+  // Delay palette: a dead probe is an error, a fast one is healthy, and the
+  // slow middle keeps the fixed caution amber. error/success are scheme-tuned,
+  // so this reads correctly in light, dark, and pure-black instead of the raw
+  // red/green that ignores the theme. Null delay = no reading; the call site
+  // supplies its own placeholder.
+  Color? delayColor(int? delay) {
+    if (delay == null) return null;
+    if (delay < 0) return error;
+    if (delay < 600) return success;
+    return cautionColor;
+  }
+
   ColorScheme toPureBlack(bool isPureBlack) {
     if (!isPureBlack || brightness != Brightness.dark) {
       return this;
@@ -143,10 +155,3 @@ extension ColorSchemeExtension on ColorScheme {
 // Fixed caution amber for the mid-tier between primary and error (slow delay,
 // quota 70-90%); a set hex, not scheme-derived, so it reads on light and dark.
 const cautionColor = Color(0xFFC57F0A);
-
-Color? getDelayColor(int? delay) {
-  if (delay == null) return null;
-  if (delay < 0) return Colors.red;
-  if (delay < 600) return Colors.green;
-  return cautionColor;
-}

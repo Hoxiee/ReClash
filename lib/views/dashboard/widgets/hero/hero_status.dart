@@ -116,7 +116,7 @@ HeroOrbActivity heroActivityBandOf(HeroOrbActivity current, double activity) =>
         activity < 0.18 ? HeroOrbActivity.idle : HeroOrbActivity.active,
     };
 
-/// Matches `getDelayColor`, so amber in the proxy list is never healthy here.
+/// Matches `ColorScheme.delayColor`, so amber in the proxy list is never healthy here.
 const heroDegradedDelay = 600;
 
 HeroHealth heroHealthOf({required int? delay, required bool measuring}) {

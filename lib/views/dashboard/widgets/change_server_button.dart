@@ -70,7 +70,7 @@ class ChangeServerButton extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: context.textTheme.bodySmall?.copyWith(
               color:
-                  getDelayColor(server.delay) ??
+                  context.colorScheme.delayColor(server.delay) ??
                   context.colorScheme.onSurfaceVariant,
             ),
           ),

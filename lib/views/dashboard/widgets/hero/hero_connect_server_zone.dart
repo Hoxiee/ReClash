@@ -337,7 +337,7 @@ class _ServerZone extends ConsumerWidget {
                       textAlign: TextAlign.center,
                       style: context.textTheme.labelSmall?.copyWith(
                         color:
-                            getDelayColor(delay) ??
+                            colorScheme.delayColor(delay) ??
                             colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontFamily: FontFamily.jetBrainsMono.value,
@@ -534,7 +534,7 @@ class _SignalBars extends StatelessWidget {
       level = 0;
       color = dim;
     } else {
-      color = getDelayColor(delay) ?? colorScheme.success;
+      color = colorScheme.delayColor(delay) ?? colorScheme.success;
       level = delay! < 150
           ? 4
           : delay! < 300

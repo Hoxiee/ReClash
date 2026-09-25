@@ -343,7 +343,7 @@ class _ProxyDelay extends ConsumerWidget {
       delay > 0 ? '$delay' : 'Timeout',
       maxLines: 1,
       style: context.textTheme.labelSmall?.copyWith(
-        color: getDelayColor(delay),
+        color: context.colorScheme.delayColor(delay),
       ),
     );
   }

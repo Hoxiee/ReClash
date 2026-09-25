@@ -454,7 +454,7 @@ class RoutingDelayPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = getDelayColor(delay) ?? context.colorScheme.onSurfaceVariant;
+    final color = context.colorScheme.delayColor(delay) ?? context.colorScheme.onSurfaceVariant;
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: color.withValues(alpha: 0.14),
@@ -741,7 +741,7 @@ class RoutingCandidateRow extends StatelessWidget {
             style: context.textTheme.labelSmall?.copyWith(
               fontWeight: hosted || delay <= 0 ? null : FontWeight.w600,
               color: delay > 0
-                  ? (getDelayColor(delay) ?? colorScheme.onSurfaceVariant)
+                  ? (colorScheme.delayColor(delay) ?? colorScheme.onSurfaceVariant)
                   : muted,
             ),
           ),

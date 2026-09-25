@@ -119,9 +119,36 @@ Semantic status colors come from `lib/common/ui/color.dart`, never from a raw `C
   fails the raw harmonized form.
 - `cautionColor` is the fixed mid-tier amber (slow-delay, half-full quota). It lives only in
   `color.dart`; a guard fails its literal `0xFFC57F0A` anywhere else.
-- `getDelayColor(delay)` maps a latency to the delay palette; use it rather than branching on
-  thresholds at the call site.
+- `context.colorScheme.delayColor(delay)` maps a latency to the delay palette (dead=`error`, fast=`success`,
+  slow=`cautionColor`); use it rather than branching on thresholds at the call site. It returns null only for a
+  null delay, so supply the placeholder at the call site (`?? colorScheme.onSurfaceVariant`).
+
 - Errors use `colorScheme.error`; do not reach for `Colors.red`.
+
+## Component Catalog
+
+Reach for an existing component before writing a new one. When the choice between near-neighbors is not obvious this
+table is the answer; picking wrong is what spawns the duplicates the audit keeps finding.
+
+| Need | Use | Not |
+| --- | --- | --- |
+| A titled run of rows, flat inside a parent scroll | `generateSection` — `List<Widget>`, `ListHeader` + `Divider`-separated items | a hand-built `Column` with its own header |
+| The same, but each row is an inset filled card | `generateSectionV2` — wraps each item in a filled `CommonCard`, clips the run at `AppRadius.xl` | nesting `CommonCard`s by hand |
+| A grouped run whose first/last rows carry the outer corners | `generateSectionV3` — wraps items in `ItemPositionProvider` for `DecorationListItem` | computing per-row corners yourself |
+| A titled run headed by an `Info` (icon + text) block | `generateInfoSection` — `InfoHeader` instead of `ListHeader` | `generateSection` with a faked title row |
+| The scrolling list body itself | `generateListView` — adds the standard bottom inset | a raw `ListView.builder` |
+| A surface or panel | `CommonCard` (`type:` plain/filled, `radius:` from `AppCorner`) | a `Container` with `BoxDecoration` + `RoundedRectangleBorder` |
+| A grouped/selectable list row | `DecorationListItem` / `SelectedDecorationListItem` / `CommonSelectedListItem` (`lib/widgets/list/list_selected.dart`) | a bespoke `ListTile` clone |
+| A label/value info line | `DetailRow` (`lib/widgets/list/detail_row.dart`, shared) | a new private `_DetailRow` |
+| An interactive chip (tap, delete, optional icon) | `CommonChip` | a raw `Chip`/`ActionChip` |
+| A tiny static metadata tag (read-only) | `MetaChip` | `CommonChip` with no handlers |
+| Swap one child for another with a fade | the `Fade*Box` family (`lib/widgets/effect/fade_box.dart`; usually `FadeThroughBox`) | a bare `AnimatedSwitcher` |
+| An inline spinner | `CommonCircleLoading` | a raw `CircularProgressIndicator` |
+| A latency color | `context.colorScheme.delayColor(delay)` | branching on delay thresholds |
+
+Buttons, inputs, switches, sliders, and dialogs are stock `material_ui`; the theme in `withAppShapes` already gives
+them the app shape. Use them directly — there is deliberately no `CommonButton`/`CommonSwitch` wrapper, so the app
+never maintains a parallel hierarchy over canonical M3.
 
 ## Pitfalls
 

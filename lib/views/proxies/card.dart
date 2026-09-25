@@ -68,7 +68,7 @@ class ProxyCard extends ConsumerWidget {
                         maxLines: 1,
                         style: context.textTheme.labelSmall?.copyWith(
                           overflow: TextOverflow.ellipsis,
-                          color: getDelayColor(delay),
+                          color: context.colorScheme.delayColor(delay),
                         ),
                       ),
                     ),
