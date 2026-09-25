@@ -27,6 +27,7 @@ Use this for user-facing Flutter UI changes in `lib/`, including widgets, screen
 
    ```bash
    flutter analyze
+   flutter test test/lint/design_tokens_test.dart  # the token guards are part of done
    flutter test test/widgets/
    ```
 
