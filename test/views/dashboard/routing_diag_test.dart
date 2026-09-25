@@ -1,6 +1,7 @@
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_diag.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -156,5 +157,67 @@ void main() {
 
     expect(find.text('5 entries dropped'), findsOne);
     expect(find.text('probe 77.88.8.8:443 ok 24ms'), findsOne);
+  });
+
+  testWidgets('scrolling up pauses the tail follow, returning re-pins it', (
+    tester,
+  ) async {
+    RcxDiagBatch fill(int base, int count) => RcxDiagBatch(
+      entries: [
+        for (var i = 0; i < count; i++)
+          RcxDiagEntry(
+            seq: base + i,
+            at: base + i,
+            kind: 'event',
+            msg: 'row ${base + i}',
+          ),
+      ],
+      cursor: base + count - 1,
+      enabled: true,
+    );
+
+    final first = fill(1, 60);
+    final second = fill(1000, 20);
+    final third = fill(2000, 20);
+    Future<RcxDiagBatch?> reader(int since) async {
+      if (since == 0) return first;
+      if (since == first.cursor) return second;
+      if (since == second.cursor) return third;
+      return null;
+    }
+
+    await _pump(tester, logReader: reader);
+
+    final controller = tester
+        .widget<ListView>(find.byType(ListView))
+        .controller!;
+    expect(
+      controller.position.pixels,
+      controller.position.maxScrollExtent,
+      reason: 'auto-scroll pins the fresh log to the tail',
+    );
+
+    final offsetAfterScrollUp = controller.position.maxScrollExtent - 300;
+    controller.jumpTo(offsetAfterScrollUp);
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    expect(
+      controller.position.pixels,
+      offsetAfterScrollUp,
+      reason: 'new rows must not yank a reading user back to the bottom',
+    );
+
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+    expect(
+      controller.position.pixels,
+      controller.position.maxScrollExtent,
+      reason: 'returning to the bottom resumes following the tail',
+    );
+    expect(find.text('row 2019'), findsOne);
   });
 }

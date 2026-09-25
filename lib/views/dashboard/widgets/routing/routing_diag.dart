@@ -59,12 +59,15 @@ class RoutingDiagView extends ConsumerStatefulWidget {
 class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
     with WidgetsBindingObserver, ActivePollingMixin<RoutingDiagView> {
   final List<_DiagRow> _rows = [];
+  List<_DiagRow> _visible = const [];
   final Set<int> _expanded = {};
   final Set<String> _kinds = {..._diagKinds};
   final ScrollController _scrollController = ScrollController();
   int _cursor = 0;
   int _dropped = 0;
   bool _autoScroll = true;
+
+  static const _followThreshold = 48.0;
 
   CoreController get _core => ref.read(coreHandlerProvider);
 
@@ -74,6 +77,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_handleScroll);
     // The core wipes its ring on the off->on edge, so mirror that reset here
     // to keep the local rows aligned with the fresh session.
     ref.listenManual(
@@ -97,7 +101,27 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
       _expanded.clear();
       _cursor = 0;
       _dropped = 0;
+      _rebuildVisible();
     });
+  }
+
+  // Release the tail pin once the user scrolls up so new rows stop yanking them down.
+  void _handleScroll() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final atBottom =
+        position.pixels >= position.maxScrollExtent - _followThreshold;
+    if (atBottom == _autoScroll) return;
+    setState(() => _autoScroll = atBottom);
+  }
+
+  void _rebuildVisible() {
+    _visible = [
+      for (final row in _rows)
+        if (row is _GapRow ||
+            (row is _EntryRow && _kinds.contains(row.entry.kind)))
+          row,
+    ];
   }
 
   @override
@@ -112,8 +136,13 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
 
   void _ingest(RcxDiagBatch batch) {
     if (!mounted) return;
+    final hadDrop = batch.dropped > _dropped;
+    if (!hadDrop && batch.entries.isEmpty) {
+      if (batch.cursor > _cursor) _cursor = batch.cursor;
+      return;
+    }
     setState(() {
-      if (batch.dropped > _dropped) {
+      if (hadDrop) {
         _rows.add(_GapRow(batch.dropped - _dropped));
         _dropped = batch.dropped;
       }
@@ -126,6 +155,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
       if (_rows.length > _maxLocalRows) {
         _rows.removeRange(0, _rows.length - _maxLocalRows);
       }
+      _rebuildVisible();
     });
     _maybeAutoScroll();
   }
@@ -150,7 +180,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
   }
 
   void _maybeAutoScroll() {
-    if (!_autoScroll || !_scrollController.hasClients) return;
+    if (!_autoScroll) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
       _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -170,15 +200,16 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
       if (!_kinds.remove(kind)) {
         _kinds.add(kind);
       }
+      _rebuildVisible();
     });
+    _maybeAutoScroll();
   }
 
-  List<_DiagRow> get _visibleRows => [
-    for (final row in _rows)
-      if (row is _GapRow ||
-          (row is _EntryRow && _kinds.contains(row.entry.kind)))
-        row,
-  ];
+  void _toggleAutoScroll() {
+    final next = !_autoScroll;
+    setState(() => _autoScroll = next);
+    if (next) _maybeAutoScroll();
+  }
 
   Future<void> _handleExport() async {
     final appLocalizations = context.appLocalizations;
@@ -260,7 +291,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
       IconButton(
         tooltip: appLocalizations.smartRoutingLogAutoScroll,
         isSelected: _autoScroll,
-        onPressed: () => setState(() => _autoScroll = !_autoScroll),
+        onPressed: _toggleAutoScroll,
         icon: const GlyphIcon(AppGlyphs.arrowDown),
       ),
       IconButton(
@@ -270,6 +301,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
             : () => setState(() {
                 _rows.clear();
                 _expanded.clear();
+                _rebuildVisible();
               }),
         icon: const GlyphIcon(AppGlyphs.delete),
       ),
@@ -321,7 +353,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
   Widget _buildLog(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    final visible = _visibleRows;
+    final visible = _visible;
     if (visible.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
