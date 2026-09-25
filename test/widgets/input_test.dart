@@ -3,11 +3,13 @@ import 'dart:ui' as ui;
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
@@ -377,10 +379,10 @@ void main() {
 
     await tester.tap(find.byType(Checkbox).first);
     await tester.pump();
-    expect(find.byIcon(Icons.delete), findsOneWidget);
+    expect(find.byGlyph(AppGlyphs.delete), findsOneWidget);
     await tester.tap(find.text('Select all'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pump();
     expect(find.text('No data'), findsOneWidget);
   });
@@ -429,7 +431,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Select all'));
     await tester.pump();
-    await tester.tap(find.byIcon(Icons.delete));
+    await tester.tap(find.byGlyph(AppGlyphs.delete));
     await tester.pump();
     expect(find.text('No data'), findsOneWidget);
   });

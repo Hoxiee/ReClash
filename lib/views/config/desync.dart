@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -613,9 +614,9 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
       },
       child: CommonScaffold(
         title: appLocalizations.desyncArgs,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.replay),
+        iconActions: [
+          IconButtonData(
+            glyph: AppGlyphs.reset,
             tooltip: appLocalizations.reset,
             onPressed: _handleReset,
           ),

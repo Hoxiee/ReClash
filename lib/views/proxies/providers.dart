@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/models/core.dart';
@@ -97,7 +98,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
     return AdaptiveSheetScaffold(
       actions: [
         IconButtonData(
-          icon: Icons.sync,
+          glyph: AppGlyphs.sync,
           onPressed: _updateProviders,
           tooltip: appLocalizations.update,
         ),

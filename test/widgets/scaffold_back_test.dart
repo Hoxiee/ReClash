@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/views/dashboard/widget_registry.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
@@ -13,6 +14,8 @@ import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/glyph_finders.dart';
 
 void main() {
   testWidgets('back layers are consumed from inner to outer', (tester) async {
@@ -387,7 +390,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     final deleteButton = find.ancestor(
-      of: find.byIcon(Icons.close).first,
+      of: find.byGlyph(AppGlyphs.close).first,
       matching: find.byType(IconButton),
     );
     tester.widget<IconButton>(deleteButton).onPressed!();
@@ -395,8 +398,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 301));
     await tester.pump();
     expect(
-      tester.state<SuperGridState>(find.byType(SuperGrid)).snapshotChildren,
-      [DashboardWidget.outboundModeV2.widget],
+      tester
+          .state<SuperGridState>(find.byType(SuperGrid))
+          .items
+          .map(dashboardWidgetOf)
+          .toList(),
+      [DashboardWidget.outboundModeV2],
     );
     await tester.binding.handlePopRoute();
     await tester.pump(const Duration(milliseconds: 500));

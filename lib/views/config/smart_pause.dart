@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/app/permission.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -122,7 +123,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             actions: [
               IconButtonData(
                 tooltip: appLocalizations.enterManually,
-                icon: Icons.keyboard_rounded,
+                glyph: AppGlyphs.keyboard,
                 onPressed: () => _handleEnterManually(networks),
               ),
             ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -77,18 +78,18 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
     _isUpdating = false;
   }
 
-  List<Widget> _buildActions(List<Profile> profiles) {
+  List<IconButtonData> _buildActions(List<Profile> profiles) {
     return profiles.isNotEmpty
         ? [
-            IconButton(
-              tooltip: context.appLocalizations.update,
+            IconButtonData(
+              glyph: AppGlyphs.sync,
               onPressed: () {
                 _updateProfiles(profiles);
               },
-              icon: const Icon(Icons.sync),
+              tooltip: context.appLocalizations.update,
             ),
-            IconButton(
-              tooltip: context.appLocalizations.profilesSort,
+            IconButtonData(
+              glyph: AppGlyphs.sort,
               onPressed: () {
                 showSheet(
                   context: context,
@@ -97,19 +98,10 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
                   },
                 );
               },
-              icon: const Icon(Icons.sort),
-              iconSize: 26,
+              tooltip: context.appLocalizations.profilesSort,
             ),
           ]
         : [];
-  }
-
-  Widget _buildFAB() {
-    return CommonFloatingActionButton(
-      onPressed: _handleShowAddExtendPage,
-      icon: const Icon(Icons.add),
-      label: context.appLocalizations.addProfile,
-    );
   }
 
   @override
@@ -124,8 +116,13 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
           isLoading: isLoading,
           title: appLocalizations.profiles,
           floatBody: true,
-          floatingActionButton: _buildFAB(),
-          actions: _buildActions(state.profiles),
+          primaryAction: IconButtonData(
+            glyph: AppGlyphs.add,
+            onPressed: _handleShowAddExtendPage,
+            tooltip: appLocalizations.addProfile,
+          ),
+          iconActions: _buildActions(state.profiles),
+          foldPrimaryAction: true,
           body: NullStatusSwitcher(
             isEmpty: state.profiles.isEmpty,
             nullStatus: NullStatus(
@@ -745,7 +742,7 @@ class _ReorderableProfilesSheetState
       sheetTransparentToolBar: true,
       actions: [
         IconButtonData(
-          icon: Icons.check,
+          glyph: AppGlyphs.check,
           onPressed: _handleSave,
           tooltip: context.appLocalizations.save,
         ),

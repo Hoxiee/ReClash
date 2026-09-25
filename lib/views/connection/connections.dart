@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/views/views.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -68,15 +69,15 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
     return withSpeeds;
   }
 
-  List<Widget> _buildActions() {
+  List<IconButtonData> _buildActions() {
     return [
-      IconButton(
+      IconButtonData(
+        glyph: AppGlyphs.clearAll,
         tooltip: context.appLocalizations.closeConnections,
         onPressed: () async {
           unawaited(_core.closeConnections());
           await _refreshConnections();
         },
-        icon: const Icon(Icons.delete_sweep_outlined),
       ),
     ];
   }
@@ -157,7 +158,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         },
         useRegex: _listController.value.useRegex,
       ),
-      actions: _buildActions(),
+      iconActions: _buildActions(),
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
@@ -175,10 +176,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
               detailTitle: appLocalizations.details(
                 appLocalizations.connection,
               ),
-              trailingBuilder: (trackerInfo) => IconButton(
-                tooltip: appLocalizations.blockConnection,
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.block, size: 20),
+              trailingBuilder: (trackerInfo) => _BlockConnectionButton(
                 onPressed: () {
                   _handleBlockConnection(trackerInfo.id);
                 },
@@ -186,6 +184,37 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// One per live row: an IconButton would add a theme animation to each.
+class _BlockConnectionButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _BlockConnectionButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: context.appLocalizations.blockConnection,
+      child: Semantics(
+        button: true,
+        child: InkResponse(
+          onTap: onPressed,
+          radius: 14,
+          child: SizedBox.square(
+            dimension: 28,
+            child: Center(
+              child: GlyphIcon(
+                AppGlyphs.block,
+                size: 16,
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

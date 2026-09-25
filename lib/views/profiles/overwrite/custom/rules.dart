@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/models/clash_config.dart';
@@ -509,7 +510,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
     return AdaptiveSheetScaffold(
       actions: [
         IconButtonData(
-          icon: Icons.check,
+          glyph: AppGlyphs.check,
           onPressed: _handleSave,
           tooltip: context.appLocalizations.save,
         ),

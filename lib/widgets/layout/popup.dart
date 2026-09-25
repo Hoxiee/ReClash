@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -306,6 +307,7 @@ class CommonPopupMenuItem {
   const CommonPopupMenuItem({
     required this.label,
     this.icon,
+    this.glyph,
     this.onPressed,
     this.danger = false,
     this.subItems = const [],
@@ -313,6 +315,7 @@ class CommonPopupMenuItem {
 
   final String label;
   final IconData? icon;
+  final Glyph? glyph;
   final VoidCallback? onPressed;
   final bool danger;
   final List<CommonPopupMenuItem> subItems;
@@ -590,7 +593,14 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
         padding: arrow != null ? _itemArrowPadding : _itemPadding,
         child: Row(
           children: [
-            if (item.icon != null) ...[
+            if (item.glyph != null) ...[
+              GlyphIcon(
+                item.glyph!,
+                size: _itemIconSize,
+                color: foregroundColor,
+              ),
+              const SizedBox(width: 12),
+            ] else if (item.icon != null) ...[
               Icon(item.icon, size: _itemIconSize, color: foregroundColor),
               const SizedBox(width: 12),
             ],

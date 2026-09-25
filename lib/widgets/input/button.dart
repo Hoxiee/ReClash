@@ -3,10 +3,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../base/builder.dart';
 import '../base/card.dart';
+import '../nav/app_nav_bar.dart';
 
 class CommonFloatingActionButton extends StatelessWidget {
   final VoidCallback? onPressed;
-  final Icon icon;
+  final Widget icon;
   final String label;
 
   const CommonFloatingActionButton({
@@ -89,6 +90,116 @@ class MoreActionButton extends StatelessWidget {
           ),
           title: Text(label, style: context.textTheme.bodyLarge),
           trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 18),
+        ),
+      ),
+    );
+  }
+}
+
+enum TonalButtonSize {
+  bar(button: 40, icon: 22),
+  compact(button: 32, icon: 20);
+
+  const TonalButtonSize({required this.button, required this.icon});
+
+  final double button;
+  final double icon;
+}
+
+/// Buttons sharing one filled pill that answers a press on any of them as a
+/// single button does.
+class TonalButtonGroup extends StatelessWidget {
+  const TonalButtonGroup({
+    super.key,
+    this.size = TonalButtonSize.bar,
+    required this.children,
+  });
+
+  final TonalButtonSize size;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElasticPress(
+      child: DecoratedBox(
+        decoration: ShapeDecoration(
+          color: context.colorScheme.secondaryContainer,
+          shape: AppShape.full,
+        ),
+        child: TonalButtonTheme(
+          grouped: true,
+          size: size,
+          child: Row(mainAxisSize: MainAxisSize.min, children: children),
+        ),
+      ),
+    );
+  }
+}
+
+/// Fills the buttons below it and leaves a press to the swell of [ElasticPress];
+/// inside a [TonalButtonGroup] the group is the fill.
+class TonalButtonTheme extends StatelessWidget {
+  const TonalButtonTheme({
+    super.key,
+    this.grouped = false,
+    this.size = TonalButtonSize.bar,
+    required this.child,
+  });
+
+  final bool grouped;
+  final TonalButtonSize size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final fill = grouped ? Colors.transparent : colorScheme.secondaryContainer;
+    final foreground = colorScheme.onSecondaryContainer;
+    final disabledForeground = foreground.withValues(alpha: 0.38);
+    ButtonStyle feedback(Color? tint) => ButtonStyle(
+      splashFactory: NoSplash.splashFactory,
+      overlayColor: WidgetStateProperty<Color?>.fromMap({
+        if (tint != null) WidgetState.focused: tint.withValues(alpha: 0.1),
+        WidgetState.pressed: Colors.transparent,
+        if (tint != null) WidgetState.hovered: tint.withValues(alpha: 0.08),
+      }),
+    );
+    return IconButtonTheme(
+      data: IconButtonThemeData(
+        style: feedback(foreground).merge(
+          IconButton.styleFrom(
+            backgroundColor: fill,
+            foregroundColor: foreground,
+            disabledBackgroundColor: fill,
+            disabledForegroundColor: disabledForeground,
+            fixedSize: Size.square(size.button),
+            minimumSize: Size.square(size.button),
+            padding: EdgeInsets.zero,
+            iconSize: size.icon,
+            visualDensity: VisualDensity.standard,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+      ),
+      child: FilledButtonTheme(
+        data: FilledButtonThemeData(
+          style: feedback(grouped ? foreground : null).merge(
+            FilledButton.styleFrom(
+              backgroundColor: grouped ? fill : null,
+              foregroundColor: grouped ? foreground : null,
+              disabledBackgroundColor: grouped ? fill : null,
+              disabledForegroundColor: grouped ? disabledForeground : null,
+              minimumSize: Size.square(size.button),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              shape: AppShape.full,
+              visualDensity: VisualDensity.standard,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ),
+        ),
+        child: IconTheme.merge(
+          data: const IconThemeData(fill: 1),
+          child: child,
         ),
       ),
     );

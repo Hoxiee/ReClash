@@ -1,15 +1,20 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/base/pop_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../feedback/loading.dart';
+import '../input/button.dart';
 import '../input/chip.dart';
+import '../nav/app_nav_bar.dart';
 import '../base/inherited.dart';
 import '../theme/panel_background.dart';
 import '../theme/wallpaper.dart';
 import 'floating_header.dart';
+import 'popup.dart';
 
 typedef OnKeywordsUpdateCallback = void Function(List<String> keywords);
 
@@ -34,6 +39,14 @@ class CommonScaffold extends ConsumerStatefulWidget {
   /// top clearance via `context.appBarInset`; otherwise the scaffold insets
   /// the body so its content rests below the bar.
   final bool floatBody;
+  /// A page's chief action: a FAB on its own, riding into the bar where a dock owns the FAB corner.
+  final IconButtonData? primaryAction;
+  final bool foldPrimaryAction;
+  final List<IconButtonData> iconActions;
+  final List<CommonPopupMenuItem> menuItems;
+  final List<IconButtonData> searchActions;
+  final List<IconButtonData> selectionActions;
+  final VoidCallback? backAction;
 
   const CommonScaffold({
     super.key,
@@ -51,6 +64,13 @@ class CommonScaffold extends ConsumerStatefulWidget {
     this.onKeywordsUpdate,
     this.resizeToAvoidBottomInset,
     this.floatBody = false,
+    this.primaryAction,
+    this.foldPrimaryAction = false,
+    this.iconActions = const [],
+    this.menuItems = const [],
+    this.searchActions = const [],
+    this.selectionActions = const [],
+    this.backAction,
   });
 
   @override
@@ -198,6 +218,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   }
 
   Widget? _buildLeading(VoidCallback? backAction) {
+    final button = _buildLeadingButton(backAction);
+    return button == null ? null : Center(child: ElasticPress(child: button));
+  }
+
+  Widget? _buildLeadingButton(VoidCallback? backAction) {
     if (_isEdit) {
       return IconButton(
         tooltip: context.appLocalizations.close,
@@ -221,7 +246,19 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
               backAction();
             },
           )
-        : null;
+        : _autoLeadingButton();
+  }
+
+  /// Built by hand, not by `automaticallyImplyLeading`, so it can ride inside
+  /// [ElasticPress].
+  Widget? _autoLeadingButton() {
+    final route = ModalRoute.of(context);
+    if (route?.impliesAppBarDismissal != true) {
+      return null;
+    }
+    return route is PageRoute && route.fullscreenDialog
+        ? const CloseButton()
+        : const BackButton();
   }
 
   Widget _buildTitle(AppBarSearchState? startState) {
@@ -262,38 +299,100 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
           );
   }
 
-  List<Widget> _buildActions(bool hasSearch, List<Widget> actions) {
+  List<Widget> _buildActions(
+    bool hasSearch,
+    IconButtonData? primaryAction,
+    List<Widget> legacyActions,
+  ) {
+    final appLocalizations = context.appLocalizations;
     if (_isSearch) {
+      final fold = _foldBarActions(hasLead: true, icons: widget.searchActions);
+      final overflow = fold.overflow.isEmpty
+          ? null
+          : _OverflowMenuButton(items: fold.overflow);
       return genActions([
         IconButton(
-          tooltip: context.appLocalizations.clearSearch,
+          tooltip: appLocalizations.clearSearch,
           onPressed: _handleClear,
           icon: const Icon(Icons.close),
         ),
-      ]);
+        for (final data in fold.shown)
+          ElasticPress(
+            enabled: !data.isLoading,
+            child: AppBarActionButton(data: data),
+          ),
+        if (overflow != null) ElasticPress(child: overflow),
+      ], edge: AppBarActionEdge.container);
+    }
+    final widgets = legacyActions;
+    final selection = widget.selectionActions;
+    final selectionCount = selection.isEmpty ? 0 : 1;
+    final hasSearchButton =
+        hasSearch && widget.searchState?.autoAddSearch == true;
+    final fold = _foldBarActions(
+      hasLead: hasSearchButton,
+      primary: primaryAction,
+      foldPrimary: widget.foldPrimaryAction,
+      icons: widget.iconActions,
+      widgetCount: widgets.length + selectionCount,
+      menuItems: widget.menuItems,
+    );
+    final overflow = fold.overflow.isEmpty
+        ? null
+        : _OverflowMenuButton(items: fold.overflow);
+    final lead = hasSearchButton
+        ? IconButton(
+            tooltip: appLocalizations.search,
+            onPressed: handleToSearch,
+            icon: const Icon(Icons.search),
+          )
+        : null;
+    final shownCount = fold.shown.length + (overflow == null ? 0 : 1);
+    if (widgets.isEmpty &&
+        selection.isEmpty &&
+        lead == null &&
+        shownCount == 2) {
+      return genActions([
+        TonalButtonGroup(
+          children: [
+            for (final data in fold.shown) AppBarActionButton(data: data),
+            ?overflow,
+          ],
+        ),
+      ], edge: AppBarActionEdge.container);
     }
     return genActions([
-      if (hasSearch && widget.searchState?.autoAddSearch == true)
-        IconButton(
-          tooltip: context.appLocalizations.search,
-          onPressed: () {
-            _updateSearchState((state) => state?.copyWith(query: ''));
-          },
-          icon: const Icon(Icons.search),
+      ?lead,
+      for (final data in fold.shown)
+        ElasticPress(
+          enabled: !data.isLoading,
+          child: AppBarActionButton(data: data),
         ),
-      ...actions,
-    ]);
+      if (selection.isNotEmpty)
+        TonalButtonGroup(
+          children: [
+            for (final data in selection) AppBarActionButton(data: data),
+          ],
+        ),
+      for (final action in widgets) ElasticPress(child: action),
+      if (overflow != null) ElasticPress(child: overflow),
+    ], edge: AppBarActionEdge.container);
   }
 
   Widget _buildAppBarWrap(Widget child) {
-    final appBar = _isSearch ? _buildSearchingAppBarTheme(child) : child;
+    final appBar = TonalButtonTheme(
+      child: _isSearch ? _buildSearchingAppBarTheme(child) : child,
+    );
     if (_isEdit || _isSearch) {
       return BackLayerScope(onBack: _handleExitAppBarLayer, child: appBar);
     }
     return appBar;
   }
 
-  PreferredSizeWidget _buildAppBar(VoidCallback? backAction) {
+  PreferredSizeWidget _buildAppBar(
+    VoidCallback? backAction, {
+    required IconButtonData? primaryAction,
+  }) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(pageToolbarHeight),
       child: Stack(
@@ -309,9 +408,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                       clipBehavior: Clip.none,
                       animateColor: true,
                       toolbarHeight: pageToolbarHeight,
-                      automaticallyImplyLeading: backAction != null
-                          ? false
-                          : true,
+                      automaticallyImplyLeading: false,
                       // Float over the body, opaque only while searching.
                       forceMaterialTransparency: !_isSearch,
                       centerTitle: widget.centerTitle ?? false,
@@ -319,9 +416,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                       title: _buildTitle(state.searchState),
                       actions: _buildActions(
                         state.searchState != null,
+                        primaryAction,
                         state.actions.isNotEmpty
                             ? state.actions
-                            : widget.actions ?? [],
+                            : widget.actions ?? const [],
                       ),
                     ),
                   );
@@ -352,9 +450,18 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   Widget build(BuildContext context) {
     assert(widget.appBar != null || widget.title != null);
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
+    final backAction = widget.backAction ?? backActionProvider?.backAction;
     final isTV = widget.isTV ?? system.isTV;
     final bottomInset = BottomInsetScope.of(context);
-    final hasFab = !isTV && widget.floatingActionButton != null;
+    final primaryAction = widget.primaryAction;
+    final actionInBar = !isTV && DockedPageScope.of(context);
+    final fabSlot = actionInBar
+        ? null
+        : widget.floatingActionButton ??
+              (primaryAction == null
+                  ? null
+                  : _PrimaryActionFab(data: primaryAction));
+    final hasFab = !isTV && fabSlot != null;
     final barFloats = widget.appBar == null;
     final appBarInset =
         MediaQuery.paddingOf(context).top + pageToolbarHeight;
@@ -362,12 +469,12 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isTV && widget.floatingActionButton != null)
+        if (isTV && fabSlot != null)
           Padding(
             padding: const EdgeInsets.all(16),
             child: CommonScaffoldFabExtendedProvider(
               isExtended: true,
-              child: widget.floatingActionButton!,
+              child: fabSlot,
             ),
           ),
         ValueListenableBuilder(
@@ -448,15 +555,18 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
           child: child!,
         );
       },
-      child: widget.floatingActionButton,
+      child: fabSlot,
     );
     final foreground = NotificationListener<UserScrollNotification>(
-      child: hasFab
-          ? BottomInsetScope(
-              inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
-              child: body,
-            )
-          : body,
+      child: DockedPageScope(
+        docked: false,
+        child: hasFab
+            ? BottomInsetScope(
+                inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
+                child: body,
+              )
+            : body,
+      ),
       onNotification: (notification) {
         if (notification.direction == ScrollDirection.reverse) {
           _isFabExtendedNotifier.value = false;
@@ -468,7 +578,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
     return AppWallpaper(
       builder: (context, active) => Scaffold(
-        appBar: _buildAppBar(backActionProvider?.backAction),
+        appBar: _buildAppBar(
+          backAction,
+          primaryAction: actionInBar ? primaryAction : null,
+        ),
         extendBodyBehindAppBar: barFloats,
         body: PanelProfileBackground(enabled: !active, child: foreground),
         resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
@@ -506,10 +619,14 @@ class AppBarClearance extends StatelessWidget {
   }
 }
 
-List<Widget> genActions(List<Widget> actions, {double? space}) {
+List<Widget> genActions(
+  List<Widget> actions, {
+  double? space,
+  AppBarActionEdge? edge,
+}) {
   return <Widget>[
-    ...actions.separated(SizedBox(width: space ?? 4)),
-    const SizedBox(width: 8),
+    ...actions.separated(SizedBox(width: space ?? edge?.gap ?? 4)),
+    edge == null ? const SizedBox(width: 8) : _ActionEdgeGap(edge),
   ];
 }
 
@@ -533,5 +650,186 @@ class BaseScaffold extends StatelessWidget {
       actions: actions,
       floatBody: true,
     );
+  }
+}
+
+/// Whether a scaffold's page rides above a dock that owns the FAB corner, so
+/// its [CommonScaffold.primaryAction] belongs in the bar rather than as a FAB.
+/// Set by the home shell for mobile top-level pages; reset to false so a
+/// nested route gets a FAB again.
+class DockedPageScope extends InheritedWidget {
+  const DockedPageScope({
+    super.key,
+    required this.docked,
+    required super.child,
+  });
+
+  final bool docked;
+
+  static bool of(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<DockedPageScope>()
+          ?.docked ??
+      false;
+
+  @override
+  bool updateShouldNotify(DockedPageScope oldWidget) =>
+      docked != oldWidget.docked;
+}
+
+class _PrimaryActionFab extends StatelessWidget {
+  const _PrimaryActionFab({required this.data});
+
+  static const _duration = Duration(milliseconds: 400);
+
+  final IconButtonData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoading = data.isLoading;
+    return IgnorePointer(
+      ignoring: isLoading,
+      child: AnimatedScale(
+        scale: isLoading ? 0 : 1,
+        duration: _duration,
+        curve: Curves.easeInOutBack,
+        child: AnimatedOpacity(
+          opacity: isLoading ? 0 : 1,
+          duration: _duration,
+          child: CommonFloatingActionButton(
+            onPressed: data.onPressed,
+            icon: GlyphIcon(data.glyph, fill: 1),
+            label: data.tooltip ?? '',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+const _maxBarActions = 2;
+
+({List<IconButtonData> shown, List<CommonPopupMenuItem> overflow})
+_foldBarActions({
+  required bool hasLead,
+  IconButtonData? primary,
+  bool foldPrimary = false,
+  List<IconButtonData> icons = const [],
+  int widgetCount = 0,
+  List<CommonPopupMenuItem> menuItems = const [],
+}) {
+  final count =
+      (hasLead ? 1 : 0) +
+      (primary == null ? 0 : 1) +
+      icons.length +
+      widgetCount +
+      (menuItems.isEmpty ? 0 : 1);
+  if (count <= _maxBarActions) {
+    return (
+      shown: [?primary, ...icons],
+      overflow: menuItems,
+    );
+  }
+  final shown = hasLead
+      ? null
+      : foldPrimary && icons.isNotEmpty
+      ? icons.first
+      : primary;
+  return (
+    shown: [?shown],
+    overflow: [
+      for (final data in [?primary, ...icons])
+        if (!identical(data, shown))
+          CommonPopupMenuItem(
+            glyph: data.glyph,
+            label: data.tooltip ?? '',
+            onPressed: data.isLoading ? null : data.onPressed,
+          ),
+      ...menuItems,
+    ],
+  );
+}
+
+class _OverflowMenuButton extends StatelessWidget {
+  const _OverflowMenuButton({required this.items});
+
+  final List<CommonPopupMenuItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return CommonPopupBox(
+      targetBuilder: (open) => IconButton(
+        tooltip: context.appLocalizations.more,
+        onPressed: () => open(offset: Offset(0, context.isMobileView ? 0 : 20)),
+        icon: const GlyphIcon(AppGlyphs.more),
+      ),
+      popupBuilder: (_) => CommonPopupMenu(items: items),
+    );
+  }
+}
+
+/// An app bar action from [IconButtonData], standing in a spinner while it runs.
+class AppBarActionButton extends StatelessWidget {
+  const AppBarActionButton({super.key, required this.data});
+
+  final IconButtonData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: data.tooltip,
+      onPressed: data.isLoading ? null : data.onPressed,
+      icon: data.isLoading
+          ? SizedBox.square(
+              dimension: TonalButtonSize.bar.icon,
+              child: const Padding(
+                padding: EdgeInsets.all(2),
+                child: CommonCircleLoading(),
+              ),
+            )
+          : GlyphIcon(data.glyph),
+    );
+  }
+}
+
+const double appBarActionSpace = 4;
+
+const double _barButtonGap = 8;
+const double _iconButtonTapPadding = 4;
+
+/// Where a filled button sits from the app bar edge: the layout margin iOS
+/// gives a compact and a regular width.
+double appBarActionInset(bool compact) => compact ? 16 : 20;
+
+double _iconActionInset(bool isMobileView) => isMobileView ? 4 : 8;
+
+enum AppBarActionEdge {
+  icon,
+  container;
+
+  double spaceOf(BuildContext context, bool isMobileView) => switch (this) {
+    icon => _iconActionInset(isMobileView) - _tapPaddingOf(context),
+    container => appBarActionInset(isMobileView),
+  };
+
+  double get gap => switch (this) {
+    icon => appBarActionSpace,
+    container => _barButtonGap,
+  };
+}
+
+double _tapPaddingOf(BuildContext context) =>
+    Theme.of(context).materialTapTargetSize == MaterialTapTargetSize.padded
+    ? _iconButtonTapPadding
+    : 0;
+
+class _ActionEdgeGap extends StatelessWidget {
+  const _ActionEdgeGap(this.edge);
+
+  final AppBarActionEdge edge;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(width: edge.spaceOf(context, context.isMobileView));
   }
 }

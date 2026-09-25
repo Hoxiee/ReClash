@@ -102,34 +102,6 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
         useRegex: _listController.value.useRegex,
       ),
       onKeywordsUpdate: _listController.updateKeywords,
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: _listController,
-        builder: (_, state, _) {
-          final autoScrollToEnd = state.autoScrollToEnd;
-          return FloatingActionButton(
-            tooltip: autoScrollToEnd
-                ? appLocalizations.pause
-                : appLocalizations.resume,
-            onPressed: () {
-              if (autoScrollToEnd) {
-                _listController.setAutoScrollToEnd(false);
-              } else {
-                _listController.resumeAutoScrollToEnd(
-                  ref.read(dnsQueriesProvider).list,
-                );
-              }
-            },
-            child: FadeRotationScaleBox(
-              child: autoScrollToEnd
-                  ? const Icon(Icons.block, key: ValueKey('pause'))
-                  : const Icon(
-                      Icons.vertical_align_top,
-                      key: ValueKey('resume'),
-                    ),
-            ),
-          );
-        },
-      ),
       body: ValueListenableBuilder<DnsQueriesState>(
         valueListenable: _listController,
         builder: (context, state, _) {
@@ -154,6 +126,11 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
                   enable: state.autoScrollToEnd,
                   onCancelToEnd: () {
                     _listController.setAutoScrollToEnd(false);
+                  },
+                  onResumeToEnd: () {
+                    _listController.resumeAutoScrollToEnd(
+                      ref.read(dnsQueriesProvider).list,
+                    );
                   },
                   child: DnsQueryList(
                     reverse: true,

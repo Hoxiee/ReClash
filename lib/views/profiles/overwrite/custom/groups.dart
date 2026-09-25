@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/models/models.dart' hide FileInfo;
@@ -640,7 +641,7 @@ class _EditProxyGroupViewState extends ConsumerState<_EditProxyGroupView> {
       sheetTransparentToolBar: true,
       actions: [
         IconButtonData(
-          icon: Icons.check,
+          glyph: AppGlyphs.check,
           onPressed: _handleSave,
           tooltip: context.appLocalizations.save,
         ),

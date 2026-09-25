@@ -62,34 +62,6 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
         useRegex: _listController.value.useRegex,
       ),
       onKeywordsUpdate: _listController.updateKeywords,
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: _listController,
-        builder: (_, state, _) {
-          final autoScrollToEnd = state.autoScrollToEnd;
-          return FloatingActionButton(
-            tooltip: autoScrollToEnd
-                ? appLocalizations.pause
-                : appLocalizations.resume,
-            onPressed: () {
-              if (autoScrollToEnd) {
-                _listController.setAutoScrollToEnd(false);
-              } else {
-                _listController.resumeAutoScrollToEnd(
-                  ref.read(requestsProvider).list,
-                );
-              }
-            },
-            child: FadeRotationScaleBox(
-              child: autoScrollToEnd
-                  ? const Icon(Icons.block, key: ValueKey('pause'))
-                  : const Icon(
-                      Icons.vertical_align_top,
-                      key: ValueKey('resume'),
-                    ),
-            ),
-          );
-        },
-      ),
       body: ValueListenableBuilder<TrackerInfosState>(
         valueListenable: _listController,
         builder: (context, state, _) {
@@ -114,6 +86,11 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
                   enable: state.autoScrollToEnd,
                   onCancelToEnd: () {
                     _listController.setAutoScrollToEnd(false);
+                  },
+                  onResumeToEnd: () {
+                    _listController.resumeAutoScrollToEnd(
+                      ref.read(requestsProvider).list,
+                    );
                   },
                   child: TrackerInfoList(
                     reverse: true,

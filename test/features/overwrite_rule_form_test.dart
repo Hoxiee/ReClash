@@ -1,5 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
@@ -12,6 +13,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 
@@ -98,7 +100,7 @@ class _Harness {
   }
 
   Future<void> save(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.byGlyph(AppGlyphs.check));
     await tester.pumpAndSettle();
   }
 

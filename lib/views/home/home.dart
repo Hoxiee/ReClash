@@ -139,7 +139,9 @@ class _NavigationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scopedView = PageFocusScope(child: view);
+    final scopedView = PageFocusScope(
+      child: DockedPageScope(docked: isMobile, child: view),
+    );
     final keptView = KeepScope(
       key: ValueKey(item.label),
       keep: item.keep,

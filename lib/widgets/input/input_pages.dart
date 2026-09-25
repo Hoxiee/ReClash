@@ -366,7 +366,7 @@ class ListEditingController extends ChangeNotifier {
           child: IconButton.filledTonal(
             tooltip: context.appLocalizations.delete,
             onPressed: delete,
-            icon: const Icon(Icons.delete),
+            icon: const GlyphIcon(AppGlyphs.delete),
           ),
         ),
         const SizedBox(width: 2),
@@ -375,7 +375,7 @@ class ListEditingController extends ChangeNotifier {
           child: IconButton.filledTonal(
             tooltip: context.appLocalizations.reset,
             onPressed: () => reset(context),
-            icon: const Icon(Icons.replay),
+            icon: const GlyphIcon(AppGlyphs.reset),
           ),
         ),
         const SizedBox(width: 2),
@@ -392,28 +392,6 @@ class ListEditingController extends ChangeNotifier {
               ),
       ),
       const SizedBox(width: 8),
-    ];
-  }
-
-  List<IconButtonData> iconActions(BuildContext context) {
-    return [
-      if (_selection.isNotEmpty)
-        IconButtonData(
-          icon: Icons.delete,
-          onPressed: delete,
-          tooltip: context.appLocalizations.delete,
-        )
-      else if (!stringListEquality.equals(_items, _originItems))
-        IconButtonData(
-          icon: Icons.replay,
-          onPressed: () => reset(context),
-          tooltip: context.appLocalizations.reset,
-        ),
-      IconButtonData(
-        icon: Icons.add,
-        onPressed: () => addOrEdit(context),
-        tooltip: context.appLocalizations.add,
-      ),
     ];
   }
 }
@@ -609,7 +587,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.delete,
                 onPressed: _handleDelete,
-                icon: const Icon(Icons.delete),
+                icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
             const SizedBox(width: 2),
@@ -621,7 +599,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.reset,
                 onPressed: _handleReset,
-                icon: const Icon(Icons.replay),
+                icon: const GlyphIcon(AppGlyphs.reset),
               ),
             ),
             const SizedBox(width: 2),

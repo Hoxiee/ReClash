@@ -299,6 +299,7 @@ class ScrollToEndBox<T> extends StatefulWidget {
   final Widget child;
   final bool enable;
   final VoidCallback? onCancelToEnd;
+  final VoidCallback? onResumeToEnd;
 
   const ScrollToEndBox({
     super.key,
@@ -306,6 +307,7 @@ class ScrollToEndBox<T> extends StatefulWidget {
     required this.controller,
     required this.dataSource,
     this.onCancelToEnd,
+    this.onResumeToEnd,
     this.enable = true,
   });
 
@@ -314,8 +316,8 @@ class ScrollToEndBox<T> extends StatefulWidget {
 }
 
 class _ScrollToEndBoxState<T> extends State<ScrollToEndBox<T>> {
-  bool _isAtEnd(ScrollPosition position) =>
-      (position.maxScrollExtent - position.pixels).abs() <
+  bool _isAtEnd(ScrollMetrics metrics) =>
+      (metrics.maxScrollExtent - metrics.pixels).abs() <
       precisionErrorTolerance;
 
   void _scheduleScrollToEnd() {
@@ -371,10 +373,18 @@ class _ScrollToEndBoxState<T> extends State<ScrollToEndBox<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<UserScrollNotification>(
+    return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
-        if (notification.direction == ScrollDirection.forward) {
+        if (notification.depth != 0) {
+          return false;
+        }
+        if (notification is UserScrollNotification &&
+            notification.direction == ScrollDirection.forward) {
           widget.onCancelToEnd?.call();
+        } else if (!widget.enable &&
+            notification is ScrollEndNotification &&
+            _isAtEnd(notification.metrics)) {
+          widget.onResumeToEnd?.call();
         }
         return false;
       },

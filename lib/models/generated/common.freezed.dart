@@ -6507,7 +6507,7 @@ as String,
 /// @nodoc
 mixin _$IconButtonData {
 
- IconData get icon; VoidCallback get onPressed; String? get tooltip;
+ Glyph get glyph; VoidCallback get onPressed; String? get tooltip; bool get isLoading;
 /// Create a copy of IconButtonData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6519,20 +6519,20 @@ $IconButtonDataCopyWith<IconButtonData> get copyWith => _$IconButtonDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as IconButtonData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IconButtonData&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&(identical(other.onPressed, _this.onPressed) || other.onPressed == _this.onPressed)&&(identical(other.tooltip, _this.tooltip) || other.tooltip == _this.tooltip));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IconButtonData&&(identical(other.glyph, _this.glyph) || other.glyph == _this.glyph)&&(identical(other.onPressed, _this.onPressed) || other.onPressed == _this.onPressed)&&(identical(other.tooltip, _this.tooltip) || other.tooltip == _this.tooltip)&&(identical(other.isLoading, _this.isLoading) || other.isLoading == _this.isLoading));
 }
 
 
 @override
 int get hashCode {
   final _this = this as IconButtonData;
-  return Object.hash(runtimeType,_this.icon,_this.onPressed,_this.tooltip);
+  return Object.hash(runtimeType,_this.glyph,_this.onPressed,_this.tooltip,_this.isLoading);
 }
 
 @override
 String toString() {
   final _this = this as IconButtonData;
-  return 'IconButtonData(icon: ${_this.icon}, onPressed: ${_this.onPressed}, tooltip: ${_this.tooltip})';
+  return 'IconButtonData(glyph: ${_this.glyph}, onPressed: ${_this.onPressed}, tooltip: ${_this.tooltip}, isLoading: ${_this.isLoading})';
 }
 
 
@@ -6543,7 +6543,7 @@ abstract mixin class $IconButtonDataCopyWith<$Res>  {
   factory $IconButtonDataCopyWith(IconButtonData value, $Res Function(IconButtonData) _then) = _$IconButtonDataCopyWithImpl;
 @useResult
 $Res call({
- IconData icon, VoidCallback onPressed, String? tooltip
+ Glyph glyph, VoidCallback onPressed, String? tooltip, bool isLoading
 });
 
 
@@ -6560,12 +6560,13 @@ class _$IconButtonDataCopyWithImpl<$Res>
 
 /// Create a copy of IconButtonData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? icon = null,Object? onPressed = null,Object? tooltip = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? glyph = null,Object? onPressed = null,Object? tooltip = freezed,Object? isLoading = null,}) {
   return _then(IconButtonData(
-icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as IconData,onPressed: null == onPressed ? _self.onPressed : onPressed // ignore: cast_nullable_to_non_nullable
+glyph: null == glyph ? _self.glyph : glyph // ignore: cast_nullable_to_non_nullable
+as Glyph,onPressed: null == onPressed ? _self.onPressed : onPressed // ignore: cast_nullable_to_non_nullable
 as VoidCallback,tooltip: freezed == tooltip ? _self.tooltip : tooltip // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -6650,10 +6651,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( IconData icon,  VoidCallback onPressed,  String? tooltip)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Glyph glyph,  VoidCallback onPressed,  String? tooltip,  bool isLoading)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IconButtonData() when $default != null:
-return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
+return $default(_that.glyph,_that.onPressed,_that.tooltip,_that.isLoading);case _:
   return orElse();
 
 }
@@ -6671,10 +6672,10 @@ return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( IconData icon,  VoidCallback onPressed,  String? tooltip)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Glyph glyph,  VoidCallback onPressed,  String? tooltip,  bool isLoading)  $default,) {final _that = this;
 switch (_that) {
 case _IconButtonData():
-return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
+return $default(_that.glyph,_that.onPressed,_that.tooltip,_that.isLoading);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6691,10 +6692,10 @@ return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( IconData icon,  VoidCallback onPressed,  String? tooltip)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Glyph glyph,  VoidCallback onPressed,  String? tooltip,  bool isLoading)?  $default,) {final _that = this;
 switch (_that) {
 case _IconButtonData() when $default != null:
-return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
+return $default(_that.glyph,_that.onPressed,_that.tooltip,_that.isLoading);case _:
   return null;
 
 }
@@ -6706,12 +6707,13 @@ return $default(_that.icon,_that.onPressed,_that.tooltip);case _:
 
 
 class _IconButtonData implements IconButtonData {
-  const _IconButtonData({required this.icon, required this.onPressed, this.tooltip});
+  const _IconButtonData({required this.glyph, required this.onPressed, this.tooltip, this.isLoading = false});
   
 
-@override final  IconData icon;
+@override final  Glyph glyph;
 @override final  VoidCallback onPressed;
 @override final  String? tooltip;
+@override@JsonKey() final  bool isLoading;
 
 /// Create a copy of IconButtonData
 /// with the given fields replaced by the non-null parameter values.
@@ -6723,18 +6725,18 @@ _$IconButtonDataCopyWith<_IconButtonData> get copyWith => __$IconButtonDataCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IconButtonData&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.onPressed, onPressed) || other.onPressed == onPressed)&&(identical(other.tooltip, tooltip) || other.tooltip == tooltip));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IconButtonData&&(identical(other.glyph, glyph) || other.glyph == glyph)&&(identical(other.onPressed, onPressed) || other.onPressed == onPressed)&&(identical(other.tooltip, tooltip) || other.tooltip == tooltip)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,icon,onPressed,tooltip);
+    return Object.hash(runtimeType,glyph,onPressed,tooltip,isLoading);
 }
 
 @override
 String toString() {
-    return 'IconButtonData(icon: $icon, onPressed: $onPressed, tooltip: $tooltip)';
+    return 'IconButtonData(glyph: $glyph, onPressed: $onPressed, tooltip: $tooltip, isLoading: $isLoading)';
 }
 
 
@@ -6745,7 +6747,7 @@ abstract mixin class _$IconButtonDataCopyWith<$Res> implements $IconButtonDataCo
   factory _$IconButtonDataCopyWith(_IconButtonData value, $Res Function(_IconButtonData) _then) = __$IconButtonDataCopyWithImpl;
 @override @useResult
 $Res call({
- IconData icon, VoidCallback onPressed, String? tooltip
+ Glyph glyph, VoidCallback onPressed, String? tooltip, bool isLoading
 });
 
 
@@ -6762,12 +6764,13 @@ class __$IconButtonDataCopyWithImpl<$Res>
 
 /// Create a copy of IconButtonData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? icon = null,Object? onPressed = null,Object? tooltip = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? glyph = null,Object? onPressed = null,Object? tooltip = freezed,Object? isLoading = null,}) {
   return _then(_IconButtonData(
-icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as IconData,onPressed: null == onPressed ? _self.onPressed : onPressed // ignore: cast_nullable_to_non_nullable
+glyph: null == glyph ? _self.glyph : glyph // ignore: cast_nullable_to_non_nullable
+as Glyph,onPressed: null == onPressed ? _self.onPressed : onPressed // ignore: cast_nullable_to_non_nullable
 as VoidCallback,tooltip: freezed == tooltip ? _self.tooltip : tooltip // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

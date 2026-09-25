@@ -140,13 +140,12 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
       title: appLocalizations.connectionDoctor,
       isLoading: _initializing,
       floatBody: true,
-      actions: [
-        IconButton(
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.refresh,
           tooltip: appLocalizations.doctorRefresh,
-          onPressed: _busyAction == null
-              ? () => unawaited(_refresh(showError: true))
-              : null,
-          icon: const Icon(Icons.refresh_rounded),
+          isLoading: _busyAction != null,
+          onPressed: () => unawaited(_refresh(showError: true)),
         ),
       ],
       body: ListView(

@@ -6,12 +6,14 @@ class _Host extends StatefulWidget {
   final List<int> data;
   final bool enable;
   final VoidCallback onCancelToEnd;
+  final VoidCallback onResumeToEnd;
   final ScrollController controller;
 
   const _Host({
     required this.data,
     required this.enable,
     required this.onCancelToEnd,
+    required this.onResumeToEnd,
     required this.controller,
   });
 
@@ -29,6 +31,7 @@ class _HostState extends State<_Host> {
           dataSource: widget.data,
           enable: widget.enable,
           onCancelToEnd: widget.onCancelToEnd,
+          onResumeToEnd: widget.onResumeToEnd,
           child: ListView.builder(
             controller: widget.controller,
             itemCount: widget.data.length,
@@ -44,10 +47,12 @@ class _HostState extends State<_Host> {
 void main() {
   late ScrollController controller;
   late int cancelCount;
+  late int resumeCount;
 
   setUp(() {
     controller = ScrollController();
     cancelCount = 0;
+    resumeCount = 0;
   });
 
   tearDown(() {
@@ -65,6 +70,7 @@ void main() {
         enable: enable,
         controller: controller,
         onCancelToEnd: () => cancelCount++,
+        onResumeToEnd: () => resumeCount++,
       ),
     );
   }
@@ -116,5 +122,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.offset, controller.position.maxScrollExtent);
+  });
+
+  testWidgets('resumes when the user scrolls back to the end', (tester) async {
+    await pump(tester, data: List.generate(20, (i) => i));
+    await pump(tester, data: List.generate(21, (i) => i));
+    await tester.pumpAndSettle();
+    expect(controller.offset, controller.position.maxScrollExtent);
+
+    await pump(tester, data: List.generate(21, (i) => i), enable: false);
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(ListView), const Offset(0, 300));
+    await tester.pumpAndSettle();
+    expect(resumeCount, 0);
+
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+    expect(controller.offset, controller.position.maxScrollExtent);
+    expect(resumeCount, 1);
   });
 }

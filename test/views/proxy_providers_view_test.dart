@@ -4,6 +4,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/core/method.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/state.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
@@ -346,7 +348,7 @@ void main() {
     ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
     await pump(tester, container);
 
-    await tester.tap(find.byIcon(Icons.sync));
+    await tester.tap(find.byGlyph(AppGlyphs.sync));
     await tester.pump();
 
     expect(find.byType(CommonCircleLoading), findsOne);
@@ -372,7 +374,7 @@ void main() {
     ).thenAnswer((_) async => const ProxiesData(proxies: {}, all: []));
     await pump(tester, container);
 
-    await tester.tap(find.byIcon(Icons.sync));
+    await tester.tap(find.byGlyph(AppGlyphs.sync));
     await tester.pumpAndSettle();
 
     expect(find.text(currentAppLocalizations.networkException), findsOneWidget);

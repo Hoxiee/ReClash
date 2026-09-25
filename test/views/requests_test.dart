@@ -3,6 +3,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/requests.dart';
+import 'package:reclash/widgets/base/scroll.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -189,18 +190,27 @@ void main() {
     await teardownView(tester);
   });
 
-  testWidgets('the scroll-to-end button toggles its icon', (tester) async {
-    seedRequests([_tracker(id: 'a', host: 'alpha.test')]);
+  testWidgets('following pauses when the list is scrolled off its head and '
+      'resumes when it is scrolled back', (tester) async {
+    seedRequests([for (var i = 0; i < 60; i++) _tracker(id: '$i')]);
 
     await pumpRequests(tester);
-
-    expect(find.byIcon(Icons.block), findsOneWidget);
-    expect(find.byIcon(Icons.vertical_align_top), findsNothing);
-
-    await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.vertical_align_top), findsOneWidget);
+    final box = find.byType(ScrollToEndBox<TrackerInfo>);
+    bool following() => tester.widget<ScrollToEndBox<TrackerInfo>>(box).enable;
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(following(), isTrue);
+
+    // The list is reversed, so its head is the end of the scroll extent and
+    // an upward drag moves away from it.
+    await tester.drag(box, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    expect(following(), isFalse);
+
+    await tester.drag(box, const Offset(0, 600));
+    await tester.pumpAndSettle();
+    expect(following(), isTrue);
 
     await teardownView(tester);
   });

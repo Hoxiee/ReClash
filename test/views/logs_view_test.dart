@@ -79,12 +79,12 @@ void main() {
       await gesture.moveBy(const Offset(0, -2000));
       await tester.pump();
     }
-    // Near the oldest end the pill bottom-aligns above the FAB zone
-    // (56px FAB + 16px margin) with an 8px gap instead of following
-    // the thumb into it.
+    // With the scroll-to-end FAB gone, no FAB zone reserves the bottom, so the
+    // pill follows the thumb: at the oldest end its center rests 24px above the
+    // track bottom, mirroring the newest-end resting position.
     expect(
-      tester.getRect(find.byKey(hintKey)).bottom,
-      closeTo(scrollableRect.bottom - 72 - 8, 2),
+      tester.getCenter(find.byKey(hintKey)).dy,
+      closeTo(scrollableRect.bottom - 24, 6),
     );
 
     await gesture.up();

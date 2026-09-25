@@ -1,7 +1,7 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/widgets/base/inherited.dart';
-import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../base/focus.dart';
@@ -130,22 +130,6 @@ class AdaptiveSheetScaffold extends StatefulWidget {
 }
 
 class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
-  IconData get backIconData {
-    if (kIsWeb) {
-      return Icons.arrow_back;
-    }
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return Icons.arrow_back;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return Icons.arrow_back_ios_new_rounded;
-    }
-  }
-
   @override
   void didUpdateWidget(covariant AdaptiveSheetScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -164,13 +148,13 @@ class _AdaptiveSheetScaffoldState extends State<AdaptiveSheetScaffold> {
   }) {
     if (useCloseIcon) {
       return IconButtonData(
-        icon: Icons.close,
+        glyph: AppGlyphs.close,
         onPressed: context.safeNestedPop,
         tooltip: context.appLocalizations.close,
       );
     }
     return IconButtonData(
-      icon: backIconData,
+      glyph: AppGlyphs.backFor(Theme.of(context).platform),
       onPressed: widget.backAction ?? () => Navigator.of(context).pop(),
       tooltip: context.appLocalizations.back,
     );
@@ -273,7 +257,7 @@ class _SheetIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = Icon(data.icon);
+    final icon = GlyphIcon(data.glyph);
     if (filled) {
       return IconButton.filledTonal(
         tooltip: data.tooltip,

@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -785,8 +786,9 @@ abstract class UpdatingMessage with _$UpdatingMessage {
 @freezed
 abstract class IconButtonData with _$IconButtonData {
   const factory IconButtonData({
-    required IconData icon,
+    required Glyph glyph,
     required VoidCallback onPressed,
     String? tooltip,
+    @Default(false) bool isLoading,
   }) = _IconButtonData;
 }

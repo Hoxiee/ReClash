@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/state.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/proxies/list.dart';
 import 'package:reclash/views/proxies/providers.dart';
@@ -22,75 +23,79 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
   final GlobalKey<ProxiesTabViewState> _proxiesTabKey = GlobalKey();
   bool _hasProviders = false;
   bool _isTab = false;
+  bool _isDelayTesting = false;
 
-  List<Widget> _buildActions(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
+  Future<void> _delayTestCurrentGroup() async {
+    if (_isDelayTesting) {
+      return;
+    }
+    setState(() => _isDelayTesting = true);
+    try {
+      await _proxiesTabKey.currentState?.delayTestCurrentGroup();
+    } finally {
+      if (mounted) {
+        setState(() => _isDelayTesting = false);
+      }
+    }
+  }
+
+  IconButtonData? _buildPrimaryAction() {
+    return _isTab
+        ? IconButtonData(
+            glyph: AppGlyphs.bolt,
+            onPressed: _delayTestCurrentGroup,
+            tooltip: context.appLocalizations.delayTest,
+            isLoading: _isDelayTesting,
+          )
+        : null;
+  }
+
+  List<IconButtonData> _buildIconActions() {
     return [
-      const _ResumeSmartRoutingButton(),
       if (_isTab)
-        IconButton(
-          tooltip: context.appLocalizations.scrollToSelected,
+        IconButtonData(
+          glyph: AppGlyphs.locate,
           onPressed: () {
             _proxiesTabKey.currentState?.scrollToGroupSelected();
           },
-          icon: const Icon(Icons.adjust, weight: 1),
+          tooltip: context.appLocalizations.scrollToSelected,
         ),
-      CommonPopupBox(
-        targetBuilder: (open) {
-          return IconButton(
-            tooltip: context.appLocalizations.more,
-            onPressed: () {
-              final isMobile = ref.read(isMobileViewProvider);
-              open(offset: Offset(0, isMobile ? 0 : 20));
-            },
-            icon: const Icon(Icons.more_vert),
-          );
-        },
-        popupBuilder: (_) => CommonPopupMenu(
-          items: [
-            CommonPopupMenuItem(
-              icon: Icons.tune,
-              label: appLocalizations.settings,
-              onPressed: () {
-                showSheet(
-                  context: context,
-                  props: const SheetProps(isScrollControlled: true),
-                  builder: (_) {
-                    return AdaptiveSheetScaffold(
-                      body: const ProxiesSetting(),
-                      title: appLocalizations.settings,
-                    );
-                  },
-                );
-              },
-            ),
-            if (_hasProviders)
-              CommonPopupMenuItem(
-                icon: Icons.poll_outlined,
-                label: appLocalizations.providers,
-                onPressed: () {
-                  showExtend(
-                    context,
-                    builder: (_) {
-                      return const ProvidersView();
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
     ];
   }
 
-  Widget? _buildFAB() {
-    return _isTab
-        ? DelayTestButton(
-            onClick: () async {
-              await _proxiesTabKey.currentState?.delayTestCurrentGroup();
+  List<CommonPopupMenuItem> _buildMenuItems(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return [
+      CommonPopupMenuItem(
+        glyph: AppGlyphs.sliders,
+        label: appLocalizations.settings,
+        onPressed: () {
+          showSheet(
+            context: context,
+            props: const SheetProps(isScrollControlled: true),
+            builder: (_) {
+              return AdaptiveSheetScaffold(
+                body: const ProxiesSetting(),
+                title: appLocalizations.settings,
+              );
             },
-          )
-        : null;
+          );
+        },
+      ),
+      if (_hasProviders)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.layers,
+          label: appLocalizations.providers,
+          onPressed: () {
+            showExtend(
+              context,
+              builder: (_) {
+                return const ProvidersView();
+              },
+            );
+          },
+        ),
+    ];
   }
 
   void _onSearch(String value) {
@@ -135,8 +140,10 @@ class _ProxiesViewState extends ConsumerState<ProxiesView> {
       isLoading: isLoading,
       floatBody: true,
       resizeToAvoidBottomInset: false,
-      floatingActionButton: _buildFAB(),
-      actions: _buildActions(context),
+      primaryAction: _buildPrimaryAction(),
+      iconActions: _buildIconActions(),
+      menuItems: _buildMenuItems(context),
+      actions: const [_ResumeSmartRoutingButton()],
       title: context.appLocalizations.proxies,
       searchState: AppBarSearchState(onSearch: _onSearch),
       body: switch (proxiesType) {
