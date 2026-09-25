@@ -6,6 +6,7 @@ import 'package:riverpod/misc.dart' show ProviderListenable;
 
 import 'input.dart';
 import '../list/list.dart';
+import '../feedback/null_status.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 
@@ -189,12 +190,14 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
     required super.onChanged,
     this.itemMaxLength,
     this.maxWidth,
+    this.illustration = NullStatusIllustration.data,
     super.subtitle,
     super.leading,
   });
 
   final int? itemMaxLength;
   final double? maxWidth;
+  final NullStatusIllustration illustration;
 
   @override
   Widget buildItem(
@@ -215,6 +218,7 @@ class ConfigListInputItem extends _ConfigItem<List<String>> {
         items: value,
         itemMaxLength: itemMaxLength,
         titleBuilder: (item) => Text(item),
+        illustration: illustration,
       ),
       onChanged: (items) => onChanged(ref, List<String>.from(items as List)),
     );

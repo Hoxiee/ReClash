@@ -522,7 +522,10 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
         sliver: SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 48),
-            child: NullStatus(label: context.appLocalizations.networksEmpty),
+            child: NullStatus(
+              label: context.appLocalizations.networksEmpty,
+              illustration: NullStatusIllustration.wifi,
+            ),
           ),
         ),
       );

@@ -325,7 +325,10 @@ class NotificationComponentSettings extends ConsumerWidget {
     if (index == -1) {
       return AdaptiveSheetScaffold(
         title: _componentLabel(l, type),
-        body: NullStatus(label: l.notificationComponentsEmpty),
+        body: NullStatus(
+          label: l.notificationComponentsEmpty,
+          illustration: NullStatusIllustration.notifications,
+        ),
       );
     }
     final component = components[index];

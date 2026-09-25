@@ -427,6 +427,7 @@ class _CountryPickerPageState extends State<_CountryPickerPage> {
               child: ordered.isEmpty
                   ? NullStatus(
                       label: appLocalizations.smartRoutingCountryNoMatch,
+                      illustration: NullStatusIllustration.search,
                     )
                   : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16 + 64),

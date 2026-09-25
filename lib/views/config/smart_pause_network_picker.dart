@@ -159,6 +159,7 @@ class SmartPauseNetworkPickerState
       return NullStatus(
         label: appLocalizations.pickNetworkEmpty,
         description: appLocalizations.networkEntryHint,
+        illustration: NullStatusIllustration.wifi,
       );
     }
     return ListView.builder(

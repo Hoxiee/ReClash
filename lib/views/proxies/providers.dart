@@ -103,18 +103,25 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
           tooltip: appLocalizations.update,
         ),
       ],
-      body: CustomScrollView(
-        slivers: [
-          ..._buildSection(
-            title: appLocalizations.proxies,
-            providers: proxyProviders,
-          ),
-          ..._buildSection(
-            title: appLocalizations.rules,
-            providers: ruleProviders,
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
-        ],
+      body: NullStatusSwitcher(
+        isEmpty: proxyProviders.isEmpty && ruleProviders.isEmpty,
+        nullStatus: NullStatus(
+          label: appLocalizations.nullTip(appLocalizations.providers),
+          illustration: NullStatusIllustration.proxies,
+        ),
+        child: CustomScrollView(
+          slivers: [
+            ..._buildSection(
+              title: appLocalizations.proxies,
+              providers: proxyProviders,
+            ),
+            ..._buildSection(
+              title: appLocalizations.rules,
+              providers: ruleProviders,
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+          ],
+        ),
       ),
       title: appLocalizations.providers,
     );

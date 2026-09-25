@@ -4,6 +4,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/widgets/effect/fade_box.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -25,6 +26,8 @@ enum NullStatusIllustration {
   camera,
   error,
   search,
+  routing,
+  notifications,
 }
 
 class NullStatusSwitcher extends StatefulWidget {
@@ -280,16 +283,22 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     value: 1,
   );
   final _entrance = _Entrance.values[_random.nextInt(_Entrance.values.length)];
-  var _started = false;
+  bool? _wasVisible;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_started) {
-      return;
-    }
-    _started = true;
-    if (!_skipsEntrance(context)) {
+    // Kept-alive nav pages use AutomaticKeepAlive, which never mutes their
+    // tickers, so PageActivityScope is the only signal that a page was
+    // reopened; pushed routes additionally mute tickers when covered. Replay
+    // the entrance on the rising edge of either so the glyph animates on every
+    // open, not just the first mount.
+    final visible =
+        TickerMode.valuesOf(context).enabled &&
+        PageActivityScope.isActiveOf(context);
+    final becameVisible = visible && !(_wasVisible ?? false);
+    _wasVisible = visible;
+    if (becameVisible && !_skipsEntrance(context)) {
       _controller.forward(from: 0);
     }
   }
@@ -375,6 +384,11 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     ),
     NullStatusIllustration.error => (MaterialShapes.softBurst, AppGlyphs.error),
     NullStatusIllustration.search => (MaterialShapes.flower, AppGlyphs.search),
+    NullStatusIllustration.routing => (MaterialShapes.gem, AppGlyphs.route),
+    NullStatusIllustration.notifications => (
+      MaterialShapes.diamond,
+      AppGlyphs.bell,
+    ),
   };
 }
 

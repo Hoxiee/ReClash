@@ -10,6 +10,7 @@ class ListInputPage extends ConsumerStatefulWidget {
   final int? itemMaxLength;
   final String Function(String item)? itemNormalizer;
   final String? Function(String item)? itemValidator;
+  final NullStatusIllustration illustration;
 
   const ListInputPage({
     super.key,
@@ -22,6 +23,7 @@ class ListInputPage extends ConsumerStatefulWidget {
     this.itemMaxLength,
     this.itemNormalizer,
     this.itemValidator,
+    this.illustration = NullStatusIllustration.data,
   });
 
   @override
@@ -75,6 +77,7 @@ class _ListInputPageState extends ConsumerState<ListInputPage> {
           titleBuilder: widget.titleBuilder,
           subtitleBuilder: widget.subtitleBuilder,
           leadingBuilder: widget.leadingBuilder,
+          illustration: widget.illustration,
         ),
       ),
     );
@@ -91,6 +94,7 @@ class ListInputBody extends StatelessWidget {
   final Widget Function(String item) titleBuilder;
   final Widget Function(String item)? subtitleBuilder;
   final Widget Function(String item)? leadingBuilder;
+  final NullStatusIllustration illustration;
 
   const ListInputBody({
     super.key,
@@ -98,6 +102,7 @@ class ListInputBody extends StatelessWidget {
     required this.titleBuilder,
     this.leadingBuilder,
     this.subtitleBuilder,
+    this.illustration = NullStatusIllustration.data,
   });
 
   @override
@@ -109,7 +114,10 @@ class ListInputBody extends StatelessWidget {
         final selectedItems = controller.selection;
         final items = controller.items;
         return items.isEmpty
-            ? NullStatus(label: appLocalizations.noData)
+            ? NullStatus(
+                label: appLocalizations.noData,
+                illustration: illustration,
+              )
             : ReorderableListView.builder(
                 padding: EdgeInsets.only(
                   bottom: 16 + 64,
@@ -406,6 +414,7 @@ class MapInputPage extends ConsumerStatefulWidget {
   final String? valueLabel;
   final int? keyMaxLength;
   final int? valueMaxLength;
+  final NullStatusIllustration illustration;
 
   const MapInputPage({
     super.key,
@@ -418,6 +427,7 @@ class MapInputPage extends ConsumerStatefulWidget {
     this.subtitleBuilder,
     this.keyMaxLength,
     this.valueMaxLength,
+    this.illustration = NullStatusIllustration.data,
   });
 
   @override
@@ -621,7 +631,10 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
         ],
         body: NullStatusSwitcher(
           isEmpty: _items.isEmpty,
-          nullStatus: NullStatus(label: appLocalizations.noData),
+          nullStatus: NullStatus(
+            label: appLocalizations.noData,
+            illustration: widget.illustration,
+          ),
           child: ReorderableListView.builder(
             padding: EdgeInsets.only(
               bottom: 16 + 64,

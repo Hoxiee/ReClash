@@ -183,6 +183,7 @@ class _MarkersBody extends ConsumerWidget {
     if (rows.isEmpty) {
       return NullStatus(
         label: context.appLocalizations.smartRoutingMarkersEmpty,
+        illustration: NullStatusIllustration.routing,
       );
     }
     Widget itemAt(int index) => _markerRow(context, ref, rows, index);

@@ -60,6 +60,7 @@ ConfigListInputItem _dnsList({
     selector: _dnsSelector(select),
     onChanged: _dnsWriter(update),
     itemMaxLength: itemMaxLength,
+    illustration: NullStatusIllustration.dns,
   );
 }
 
@@ -161,6 +162,7 @@ class NameserverPolicyItem extends ConsumerWidget {
         valueMaxLength: TextInputLimits.dnsServer,
         titleBuilder: (item) => Text(item.key),
         subtitleBuilder: (item) => Text(item.value),
+        illustration: NullStatusIllustration.dns,
       ),
       onChanged: (value) {
         ref

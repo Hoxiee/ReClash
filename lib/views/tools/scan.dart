@@ -7,6 +7,7 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/feedback/activate_box.dart';
+import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -233,49 +234,34 @@ class _ScanPageState extends State<ScanPage>
 
   Widget _buildError(BuildContext context, MobileScannerException error) {
     final l10n = context.appLocalizations;
-    final String message;
+    final NullStatus status;
     switch (error.errorCode) {
       case MobileScannerErrorCode.permissionDenied:
-        message = l10n.cameraPermissionRequired;
-      case MobileScannerErrorCode.unsupported:
-        message = l10n.qrScanUnsupported;
-      default:
-        message = error.errorDetails?.message ?? error.errorCode.message;
-    }
-    final canOpenSettings =
-        error.errorCode == MobileScannerErrorCode.permissionDenied &&
-        app != null;
-    return ColoredBox(
-      color: Colors.black,
-      child: Center(
-        child: Padding(
-          padding: AppInsets.xxxl,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const GlyphIcon(
-                AppGlyphs.brokenImage,
-                color: Colors.white,
-                size: 48,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white),
-              ),
-              if (canOpenSettings) ...[
-                const SizedBox(height: AppSpacing.lg),
-                FilledButton(
+        status = NullStatus(
+          label: l10n.cameraPermissionRequired,
+          illustration: NullStatusIllustration.permission,
+          action: app != null
+              ? FilledButton.tonalIcon(
                   onPressed: () => unawaited(app!.openAppSettings()),
-                  child: Text(l10n.setupPermissionOpenSettings),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
+                  icon: const GlyphIcon(AppGlyphs.settings, fill: 1),
+                  label: Text(l10n.setupPermissionOpenSettings),
+                )
+              : null,
+        );
+      case MobileScannerErrorCode.unsupported:
+        status = NullStatus(
+          label: l10n.qrScanUnsupported,
+          illustration: NullStatusIllustration.camera,
+        );
+      default:
+        status = NullStatus(
+          label: error.errorDetails?.message ?? error.errorCode.message,
+          illustration: NullStatusIllustration.camera,
+        );
+    }
+    // The scanner preview is gone under an error, so paint the theme surface
+    // rather than leaving the glyph on the camera's black backdrop.
+    return ColoredBox(color: context.colorScheme.surface, child: status);
   }
 
   // `StatefulElement.unmount` asserts that `super.dispose()` already ran by the

@@ -127,7 +127,10 @@ class SmartRoutingView extends ConsumerWidget {
           hasScrollBody: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 48),
-            child: NullStatus(label: appLocalizations.smartRoutingOffHint),
+            child: NullStatus(
+              label: appLocalizations.smartRoutingOffHint,
+              illustration: NullStatusIllustration.routing,
+            ),
           ),
         ),
       );
