@@ -44,6 +44,7 @@ void main() {
     WidgetTester tester,
     SubscriptionFault fault, {
     Future<void>? gate,
+    String? reportUrl,
   }) async {
     const size = Size(900, 1600);
     tester.view.physicalSize = size;
@@ -65,7 +66,9 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: Scaffold(body: SubscriptionReportSheet())),
+        child: TestApp(
+          child: Scaffold(body: SubscriptionReportSheet(reportUrl: reportUrl)),
+        ),
       ),
     );
     if (gate == null) await tester.pumpAndSettle();
@@ -78,17 +81,37 @@ void main() {
     expect(find.text('57/120'), findsOneWidget);
     expect(find.text('1/3'), findsOneWidget);
     expect(find.text('Copy report link'), findsOneWidget);
-    // The extra export actions hide behind the overflow menu.
+    // The extra export actions stay behind the inline export menu.
     expect(find.text('Save JSON'), findsNothing);
     expect(find.text('Copy R1 code'), findsNothing);
   });
 
-  testWidgets('overflow menu reveals the extra export actions', (tester) async {
+  testWidgets('export menu reveals the extra export actions', (tester) async {
     await pump(tester, SubscriptionFault.server);
     await tester.tap(find.byTooltip('More'));
     await tester.pumpAndSettle();
     expect(find.text('Copy R1 code'), findsOneWidget);
     expect(find.text('Save JSON'), findsOneWidget);
+  });
+
+  testWidgets('offers send-to-provider when the panel sets a report URL', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      SubscriptionFault.server,
+      reportUrl: 'https://example.com/report',
+    );
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('Send to provider'), findsOneWidget);
+  });
+
+  testWidgets('hides send-to-provider without a report URL', (tester) async {
+    await pump(tester, SubscriptionFault.server);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('Send to provider'), findsNothing);
   });
 
   testWidgets('inconclusive reads as no single cause, not a blame', (

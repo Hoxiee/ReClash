@@ -324,11 +324,14 @@ class ProfileItem extends ConsumerWidget {
     final confirmed = await dialogs.showMessage(
       context: context,
       title: appLocalizations.subscriptionReport,
-      confirmText: appLocalizations.subscriptionReport,
+      confirmText: appLocalizations.show,
       message: TextSpan(text: appLocalizations.subscriptionReportConfirm),
     );
     if (confirmed != true || !context.mounted) return;
-    await showSubscriptionReportSheet(context);
+    await showSubscriptionReportSheet(
+      context,
+      reportUrl: profile.panelMeta?.reportUrl,
+    );
   }
 
   List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {

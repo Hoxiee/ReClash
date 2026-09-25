@@ -3852,7 +3852,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Subscription report",
     ),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
-      "The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?",
+      "Only anonymized diagnostics — no subscription URL, real node names or addresses. Share it with your provider to help pinpoint the fault.",
     ),
     "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage(
       "Copied to clipboard",
@@ -3873,6 +3873,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Runtime dials",
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("Save JSON"),
+    "subscriptionReportSend": MessageLookupByLibrary.simpleMessage(
+      "Send to provider",
+    ),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "Update failures",
     ),

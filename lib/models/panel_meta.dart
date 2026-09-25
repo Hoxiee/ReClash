@@ -14,6 +14,7 @@ abstract class PanelMeta with _$PanelMeta {
     @Default(false) bool hwidNotSupported,
     String? announce,
     String? supportUrl,
+    String? reportUrl,
     int? updateIntervalMinutes,
     String? serviceName,
     String? serviceLogo,
@@ -57,6 +58,7 @@ abstract class PanelMeta with _$PanelMeta {
       hwidNotSupported: map['hwidNotSupported']?.toLowerCase() == 'true',
       announce: map['announce'],
       supportUrl: map['supportUrl'],
+      reportUrl: map['reportUrl'],
       updateIntervalMinutes: interval != null && interval > 0 ? interval : null,
       serviceName: map['serviceName'],
       serviceLogo: map['serviceLogo'],
@@ -89,6 +91,7 @@ extension PanelMetaExt on PanelMeta {
       hwidNotSupported ||
       announce != null ||
       supportUrl != null ||
+      reportUrl != null ||
       updateIntervalMinutes != null ||
       serviceName != null ||
       serviceLogo != null ||

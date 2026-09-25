@@ -13,11 +13,14 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-Future<void> showSubscriptionReportSheet(BuildContext context) {
+Future<void> showSubscriptionReportSheet(
+  BuildContext context, {
+  String? reportUrl,
+}) {
   return showSheet(
     context: context,
     props: const SheetProps(isScrollControlled: true),
-    builder: (_) => const SubscriptionReportSheet(),
+    builder: (_) => SubscriptionReportSheet(reportUrl: reportUrl),
   );
 }
 
@@ -51,7 +54,9 @@ String _bodyOf(AppLocalizations l10n, SubscriptionFault fault) =>
     };
 
 class SubscriptionReportSheet extends ConsumerStatefulWidget {
-  const SubscriptionReportSheet({super.key});
+  const SubscriptionReportSheet({super.key, this.reportUrl});
+
+  final String? reportUrl;
 
   @override
   ConsumerState<SubscriptionReportSheet> createState() =>
@@ -131,7 +136,14 @@ class _SubscriptionReportSheetState
 
   List<CommonPopupMenuItem> _exportMenu(SubscriptionReport report) {
     final appLocalizations = context.appLocalizations;
+    final reportUrl = widget.reportUrl;
     return [
+      if (reportUrl != null)
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.send,
+          label: appLocalizations.subscriptionReportSend,
+          onPressed: () => dialogs.openUrl(reportUrl),
+        ),
       CommonPopupMenuItem(
         glyph: AppGlyphs.copy,
         label: appLocalizations.subscriptionReportCopyCode,
@@ -150,14 +162,9 @@ class _SubscriptionReportSheetState
     final report = _report;
     return AdaptiveSheetScaffold(
       title: context.appLocalizations.subscriptionReport,
-      menuItems: report == null ? const [] : _exportMenu(report),
       body: Padding(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          context.sheetTopPadding,
-          16,
-          16 + BottomInsetScope.of(context),
-        ),
+        // The scaffold already reserves the toolbar height above the body.
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + BottomInsetScope.of(context)),
         child: _buildBody(context, report),
       ),
     );
@@ -173,7 +180,11 @@ class _SubscriptionReportSheetState
     if (report == null) {
       return _Loading(label: appLocalizations.subscriptionReportGenerating);
     }
-    return _ReportBody(report: report, onCopyLink: () => _copyLink(report));
+    return _ReportBody(
+      report: report,
+      onCopyLink: () => _copyLink(report),
+      exportItems: _exportMenu(report),
+    );
   }
 }
 
@@ -196,32 +207,58 @@ class _Loading extends StatelessWidget {
 }
 
 class _ReportBody extends StatelessWidget {
-  const _ReportBody({required this.report, required this.onCopyLink});
+  const _ReportBody({
+    required this.report,
+    required this.onCopyLink,
+    required this.exportItems,
+  });
 
   final SubscriptionReport report;
   final VoidCallback onCopyLink;
+  final List<CommonPopupMenuItem> exportItems;
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final fault = report.verdict?.fault ?? SubscriptionFault.unknown;
-    return ListView(
-      children: [
-        _VerdictCard(
-          headline: _headlineOf(appLocalizations, fault),
-          body: _bodyOf(appLocalizations, fault),
-          tone: _toneOf(fault),
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        _OverviewSection(report: report),
-        const SizedBox(height: AppSpacing.xxl),
-        FilledButton.icon(
-          autofocus: true,
-          onPressed: onCopyLink,
-          icon: const GlyphIcon(AppGlyphs.link),
-          label: Text(appLocalizations.subscriptionReportCopyLink),
-        ),
-      ],
+    // A shrink-wrapping scroll view lets the sheet hug its short content.
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _VerdictCard(
+            headline: _headlineOf(appLocalizations, fault),
+            body: _bodyOf(appLocalizations, fault),
+            tone: _toneOf(fault),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          _OverviewSection(report: report),
+          const SizedBox(height: AppSpacing.xxl),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  autofocus: true,
+                  onPressed: onCopyLink,
+                  icon: const GlyphIcon(AppGlyphs.link),
+                  label: Text(appLocalizations.subscriptionReportCopyLink),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              CommonPopupBox(
+                targetBuilder: (open) => IconButton.filledTonal(
+                  tooltip: appLocalizations.more,
+                  onPressed: () =>
+                      open(offset: Offset(0, context.isMobileView ? 0 : 20)),
+                  icon: const GlyphIcon(AppGlyphs.more),
+                ),
+                popupBuilder: (_) => CommonPopupMenu(items: exportItems),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

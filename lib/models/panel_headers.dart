@@ -73,6 +73,10 @@ const _panelHeaderConverters = <_PanelHeaderConverter>[
     canonicalKey: 'supportUrl',
   ),
   _PanelHeaderConverter(
+    sourceKeys: ['reclash-reporturl', 'report-url'],
+    canonicalKey: 'reportUrl',
+  ),
+  _PanelHeaderConverter(
     sourceKeys: ['reclash-autoupdateinterval'],
     canonicalKey: 'updateIntervalMinutes',
   ),

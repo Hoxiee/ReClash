@@ -163,6 +163,15 @@ void main() {
       expect(meta.hasContent, isTrue);
     });
 
+    test('parses the report submission URL', () {
+      final meta = PanelMeta.fromHeaders({
+        'reclash-reporturl': ['https://panel.example.com/report'],
+      });
+
+      expect(meta.reportUrl, 'https://panel.example.com/report');
+      expect(meta.hasContent, isTrue);
+    });
+
     test('parses service and widget headers', () {
       final meta = PanelMeta.fromHeaders({
         'reclash-servicename': ['Example VPN'],

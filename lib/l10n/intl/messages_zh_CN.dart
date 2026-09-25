@@ -2748,7 +2748,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderInterval": m112,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("订阅报告"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
-      "报告仅包含匿名化的诊断信息：带有协议、传输和出口国家标签的节点代号、错误类别、延迟区间以及你的路由和 desync 预设。绝不包含订阅 URL、真实节点名称、主机名、地址或端口。是否保存为 JSON 以发送给你的提供商?",
+      "仅包含匿名化的诊断信息，不含订阅 URL、真实节点名称或地址。将其分享给你的提供商，以帮助定位故障。",
     ),
     "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage("已复制到剪贴板"),
     "subscriptionReportCopyCode": MessageLookupByLibrary.simpleMessage(
@@ -2767,6 +2767,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "运行时连接",
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("保存 JSON"),
+    "subscriptionReportSend": MessageLookupByLibrary.simpleMessage("发送给提供商"),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新失败",
     ),

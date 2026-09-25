@@ -3315,10 +3315,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?`
+  /// `Only anonymized diagnostics — no subscription URL, real node names or addresses. Share it with your provider to help pinpoint the fault.`
   String get subscriptionReportConfirm {
     return Intl.message(
-      'The report contains only anonymized diagnostics: node pseudonyms with protocol, transport and egress-country labels, error classes, timing buckets and your route and desync presets. It never includes the subscription URL, real node names, hostnames, addresses or ports. Save it as JSON to send to your provider?',
+      'Only anonymized diagnostics — no subscription URL, real node names or addresses. Share it with your provider to help pinpoint the fault.',
       name: 'subscriptionReportConfirm',
       desc: '',
       args: [],
@@ -3360,6 +3360,16 @@ class AppLocalizations {
     return Intl.message(
       'Copy R1 code',
       name: 'subscriptionReportCopyCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send to provider`
+  String get subscriptionReportSend {
+    return Intl.message(
+      'Send to provider',
+      name: 'subscriptionReportSend',
       desc: '',
       args: [],
     );

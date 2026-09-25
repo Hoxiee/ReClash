@@ -3127,7 +3127,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "subscriptionProviderInterval": m112,
     "subscriptionReport": MessageLookupByLibrary.simpleMessage("サブスクリプションレポート"),
     "subscriptionReportConfirm": MessageLookupByLibrary.simpleMessage(
-      "レポートには匿名化された診断情報のみが含まれます。プロトコル・トランスポート・出口国のラベル付きノード仮名、エラークラス、遅延の区分、ルートと desync のプリセットです。サブスクリプションの URL、実際のノード名、ホスト名、アドレス、ポートは一切含まれません。プロバイダーに送るために JSON として保存しますか?",
+      "匿名化された診断情報のみです。サブスクリプションの URL、実際のノード名、アドレスは含まれません。原因の特定に役立つよう、プロバイダーに共有してください。",
     ),
     "subscriptionReportCopied": MessageLookupByLibrary.simpleMessage(
       "クリップボードにコピーしました",
@@ -3148,6 +3148,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "ランタイム接続",
     ),
     "subscriptionReportSave": MessageLookupByLibrary.simpleMessage("JSON を保存"),
+    "subscriptionReportSend": MessageLookupByLibrary.simpleMessage("プロバイダーに送信"),
     "subscriptionReportUpdateFailures": MessageLookupByLibrary.simpleMessage(
       "更新の失敗",
     ),
