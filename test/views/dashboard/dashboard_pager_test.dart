@@ -7,6 +7,12 @@ import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
+import 'package:reclash/views/dashboard/widgets/announce.dart';
+import 'package:reclash/views/dashboard/widgets/connections.dart';
+import 'package:reclash/views/dashboard/widgets/dns_queries.dart';
+import 'package:reclash/views/dashboard/widgets/memory_info.dart';
+import 'package:reclash/views/dashboard/widgets/requests.dart';
+import 'package:reclash/views/dashboard/widgets/service_status.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -324,7 +330,7 @@ void main() {
           expire: DateTime(2027).millisecondsSinceEpoch ~/ 1000,
         ),
       ),
-      size: const Size(900, 700),
+      size: const Size(520, 240),
     );
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
@@ -453,10 +459,9 @@ void main() {
     );
   });
 
-  testWidgets('provider summary shows practical subscription details', (
+  testWidgets('provider page composes the native status widgets', (
     tester,
   ) async {
-    final expire = DateTime(2027).millisecondsSinceEpoch ~/ 1000;
     await pumpPager(
       tester,
       profile: _profile(
@@ -465,7 +470,7 @@ void main() {
           upload: 25,
           download: 25,
           total: 100,
-          expire: expire,
+          expire: DateTime(2027).millisecondsSinceEpoch ~/ 1000,
         ),
       ),
     );
@@ -473,46 +478,26 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Example VPN'), findsOneWidget);
-    expect(find.text('Local profile'), findsOneWidget);
-    expect(find.text('Traffic usage'), findsNothing);
-    expect(find.text('2026-09-08'), findsOneWidget);
+    final page = find.byType(ProviderSummaryPage);
+    for (final matcher in [
+      find.byType(Announce),
+      find.byType(ServiceStatusCard),
+      find.byType(MemoryInfo),
+      find.byType(DnsQueriesCard),
+      find.byType(ConnectionsCard),
+      find.byType(RequestsCard),
+    ]) {
+      expect(find.descendant(of: page, matching: matcher), findsOneWidget);
+    }
+    // The page no longer restates subscription facts the sheet and split show.
+    expect(find.text('Example VPN'), findsNothing);
+    expect(find.text('2026-09-08'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('summary shows expired, attention, and perpetual states', (
+  testWidgets('provider page surfaces the provider announcement', (
     tester,
   ) async {
-    final expired = DateTime(2025).millisecondsSinceEpoch ~/ 1000;
-    var container = await pumpPager(
-      tester,
-      profile: _profile(subscriptionInfo: SubscriptionInfo(expire: expired)),
-    );
-    await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
-    await tester.pumpAndSettle();
-    expect(find.text('2025-01-01'), findsOneWidget);
-
-    container.dispose();
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-
-    container = await pumpPager(
-      tester,
-      profile: _profile(
-        subscriptionInfo: SubscriptionInfo(
-          expire: DateTime(2099).millisecondsSinceEpoch ~/ 1000,
-        ),
-      ).copyWith(undialableNodes: true),
-    );
-    await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
-    await tester.pumpAndSettle();
-    expect(
-      find.textContaining('No regular node addresses were found'),
-      findsOneWidget,
-    );
-    expect(find.text('Perpetual subscription'), findsOneWidget);
-  });
-
-  testWidgets('provider summary shows full announcement text', (tester) async {
     const announcement =
         'Maintenance starts Friday at 21:00 UTC. Connections may reconnect '
         'briefly while every region is upgraded. Follow https://example.com/status '
@@ -531,18 +516,25 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
 
-    final announcementText = tester.widget<Text>(
+    expect(find.text('Announcements'), findsOneWidget);
+    final announce = find.descendant(
+      of: find.byType(ProviderSummaryPage),
+      matching: find.byType(Announce),
+    );
+    expect(announce, findsOneWidget);
+    // The full text stays one tap away: the card opens it in a sheet.
+    await tester.tap(announce);
+    await tester.pumpAndSettle();
+    expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Text && widget.textSpan?.toPlainText() == announcement,
       ),
+      findsWidgets,
     );
-    expect(announcementText.maxLines, isNull);
-    expect(announcementText.overflow, isNull);
-    expect(find.text('Announcements'), findsOneWidget);
   });
 
-  testWidgets('summary falls back to profile without panel metadata', (
+  testWidgets('provider page renders for a profile without panel metadata', (
     tester,
   ) async {
     await pumpPager(tester, profile: _profile());
@@ -550,28 +542,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('dashboard-show-provider')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Local profile'), findsOneWidget);
-    expect(
-      find.text('This subscription reports no traffic quota or end date'),
-      findsOneWidget,
-    );
-    expect(find.text('2026-09-08'), findsOneWidget);
     expect(find.byKey(const ValueKey('provider-plan-card')), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(ProviderSummaryPage),
-        matching: find.text('Support'),
-      ),
-      findsNothing,
-    );
-    // The refresh control now lives on the provider card as an icon button.
-    expect(
-      find.descendant(
-        of: find.byType(ProviderSummaryPage),
-        matching: find.byTooltip('Update'),
-      ),
-      findsOneWidget,
-    );
+    final page = find.byType(ProviderSummaryPage);
+    for (final matcher in [
+      find.byType(Announce),
+      find.byType(ServiceStatusCard),
+      find.byType(MemoryInfo),
+      find.byType(DnsQueriesCard),
+      find.byType(ConnectionsCard),
+      find.byType(RequestsCard),
+    ]) {
+      expect(find.descendant(of: page, matching: matcher), findsOneWidget);
+    }
     expect(tester.takeException(), isNull);
   });
 

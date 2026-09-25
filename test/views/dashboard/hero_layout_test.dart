@@ -2,12 +2,15 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_pager.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_connect.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_elastic_flow.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_layout.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
+import 'package:reclash/views/dashboard/widgets/requests.dart';
+import 'package:reclash/views/dashboard/widgets/service_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -266,7 +269,21 @@ void main() {
       expect(find.byKey(_splitBoard), findsOneWidget);
       expect(find.byKey(_showProvider), findsNothing);
       expect(find.byKey(_subscriptionStrip), findsOneWidget);
-      expect(find.text('Example VPN'), findsWidgets);
+      // Same native provider cards as the pager's second page, not a glass read-out.
+      expect(
+        find.descendant(
+          of: find.byType(HeroSplitDetails),
+          matching: find.byType(ServiceStatusCard),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HeroSplitDetails),
+          matching: find.byType(Announce),
+        ),
+        findsOneWidget,
+      );
       expect(
         find.descendant(
           of: find.byType(HeroSplitDetails),
@@ -288,38 +305,41 @@ void main() {
   ) async {
     await pumpBoard(tester, size: const Size(1280, 800), profile: _profile());
 
-    final cards = find.descendant(
-      of: find.byType(HeroSplitDetails),
-      matching: find.byType(HeroSurface),
-    );
-    final count = cards.evaluate().length;
-    expect(count, greaterThan(1));
-
-    final first = tester.getRect(cards.first);
-    for (var i = 1; i < count; i++) {
-      final rect = tester.getRect(cards.at(i));
-      expect(rect.left, first.left, reason: 'card $i left');
-      expect(rect.right, first.right, reason: 'card $i right');
+    final split = find.byType(HeroSplitDetails);
+    // Full-width cards share the column edges; the half-width pairs split it.
+    final edges = <Finder>[
+      find.descendant(of: split, matching: find.byType(HeroSurface)),
+      find.descendant(of: split, matching: find.byType(Announce)),
+      find.descendant(of: split, matching: find.byType(ServiceStatusCard)),
+    ];
+    final first = tester.getRect(edges.first);
+    for (final finder in edges.skip(1)) {
+      final rect = tester.getRect(finder);
+      expect(rect.left, closeTo(first.left, 0.5));
+      expect(rect.right, closeTo(first.right, 0.5));
     }
   });
 
   testWidgets('the detail column centres content that fits its height', (
     tester,
   ) async {
-    await pumpBoard(tester, size: const Size(1280, 1400), profile: _profile());
+    await pumpBoard(tester, size: const Size(1280, 2400), profile: _profile());
 
-    final column = tester.getRect(find.byType(HeroSplitDetails));
-    final cards = find.descendant(
-      of: find.byType(HeroSplitDetails),
-      matching: find.byType(HeroSurface),
-    );
-    final top = tester.getRect(cards.first).top;
-    final bottom = tester.getRect(cards.at(cards.evaluate().length - 1)).bottom;
+    final split = find.byType(HeroSplitDetails);
+    final column = tester.getRect(split);
+    final top = tester
+        .getRect(find.descendant(of: split, matching: find.byType(HeroSurface)))
+        .top;
+    final bottom = tester
+        .getRect(
+          find.descendant(of: split, matching: find.byType(RequestsCard)),
+        )
+        .bottom;
 
     expect(
       (top - column.top) - (column.bottom - bottom),
       closeTo(0, 24),
-      reason: 'the cards must not hug the top of their column',
+      reason: 'content shorter than the column sits centred, not hugging top',
     );
   });
 

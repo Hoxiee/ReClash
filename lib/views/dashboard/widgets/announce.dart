@@ -16,6 +16,17 @@ final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
 const _lineSpacing = 1.35;
 
+bool _exceedsLines(String text, TextStyle? style, double maxWidth, int maxLines) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    maxLines: maxLines,
+    textDirection: TextDirection.ltr,
+  )..layout(maxWidth: maxWidth);
+  final exceeded = painter.didExceedMaxLines;
+  painter.dispose();
+  return exceeded;
+}
+
 class Announce extends ConsumerWidget {
   const Announce({super.key});
 
@@ -58,17 +69,34 @@ class Announce extends ConsumerWidget {
             height: _lineSpacing,
           );
           final lineHeight = (style?.fontSize ?? 14) * _lineSpacing;
-          return Align(
+          final displayText = hasAnnouncement
+              ? text
+              : context.appLocalizations.noAnnouncements;
+          // A clipped half line reads as a rendering fault, so whole ones only.
+          final maxLines = max(1, constraints.maxHeight ~/ lineHeight);
+          final clipped =
+              hasAnnouncement &&
+              _exceedsLines(displayText, style, constraints.maxWidth, maxLines);
+          final content = Align(
             alignment: Alignment.topLeft,
             child: AnnounceText(
-              text: hasAnnouncement
-                  ? text
-                  : context.appLocalizations.noAnnouncements,
-              // A clipped half line reads as a rendering fault, so whole ones only.
-              maxLines: max(1, constraints.maxHeight ~/ lineHeight),
+              text: displayText,
+              maxLines: maxLines,
               overflow: TextOverflow.ellipsis,
               style: style,
             ),
+          );
+          if (!clipped) return content;
+          final fade = (lineHeight / constraints.maxHeight).clamp(0.0, 0.5);
+          return ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (rect) => LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, 1 - fade, 1],
+              colors: const [Colors.white, Colors.white, Colors.transparent],
+            ).createShader(rect),
+            child: content,
           );
         },
       ),

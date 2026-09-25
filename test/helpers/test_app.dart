@@ -40,9 +40,10 @@ class TestApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.delegate.supportedLocales,
       builder: (context, child) {
-        globalState.measure = Measure.of(context, 1);
+        final ts = MediaQuery.textScalerOf(context).scale(1.0);
+        globalState.measure = Measure.of(context, ts);
         if (setTheme) {
-          globalState.theme = CommonTheme.of(context, 1);
+          globalState.theme = CommonTheme.of(context, ts);
         }
         // ignore: deprecated_member_use
         return MaterialUiCompatibilityBridge(

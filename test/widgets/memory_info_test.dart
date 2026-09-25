@@ -513,6 +513,40 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   });
+
+  testWidgets('MemoryInfo ellipsizes a large reading in a half-width cell', (
+    tester,
+  ) async {
+    Future<MemorySnapshot> readMemory() async =>
+        const MemorySnapshot(app: 1073000000);
+
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpWidget(
+      TestApp(
+        wrapInProviderScope: true,
+        homeBuilder: (child) =>
+            Scaffold(body: Center(child: SizedBox(width: 150, child: child))),
+        child: MemoryInfo(memoryReader: readMemory),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(
+      find.descendant(
+        of: find.byType(MemoryInfo),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Text && widget.overflow == TextOverflow.ellipsis,
+        ),
+      ),
+      findsWidgets,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }
 
 const _estimateDesc =

@@ -399,7 +399,7 @@ class HeroSplitDetails extends ConsumerWidget {
         ),
         if (profile != null) ...[
           SizedBox(height: metrics.gapCard),
-          ...providerSummaryCards(context, profile, gap: metrics.gapCard),
+          ProviderStatusCards(gap: metrics.gapCard),
         ],
       ],
     );

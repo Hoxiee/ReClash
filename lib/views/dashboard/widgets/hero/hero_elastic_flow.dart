@@ -167,12 +167,32 @@ class RenderHeroElasticFlow extends RenderBox
       child.parentData! as _HeroElasticFlowParentData;
 
   @override
-  void paint(PaintingContext context, Offset offset) =>
-      defaultPaint(context, offset);
+  void paint(PaintingContext context, Offset offset) {
+    final head = firstChild;
+    if (head == null) return;
+    // Head paints last so the orb's overflowing hold burst sits above the cards.
+    var child = childAfter(head);
+    while (child != null) {
+      context.paintChild(child, offset + _dataOf(child).offset);
+      child = childAfter(child);
+    }
+    context.paintChild(head, offset + _dataOf(head).offset);
+  }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
-      defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    for (var child = firstChild; child != null; child = childAfter(child)) {
+      final data = _dataOf(child);
+      final hit = result.addWithPaintOffset(
+        offset: data.offset,
+        position: position,
+        hitTest: (result, transformed) =>
+            child!.hitTest(result, position: transformed),
+      );
+      if (hit) return true;
+    }
+    return false;
+  }
 }
 
 /// Resolves the orb's own size from the room its slot was given and animates

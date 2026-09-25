@@ -177,10 +177,17 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text(
-                            traffic.value,
-                            style: context.textTheme.bodyMedium?.toLight
-                                .adjustSize(1),
+                          // Half-width cells (compact grid, provider pair) can
+                          // be narrower than a large RSS reading; ellipsize the
+                          // figure instead of overflowing.
+                          Flexible(
+                            child: Text(
+                              traffic.value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodyMedium?.toLight
+                                  .adjustSize(1),
+                            ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Text(
