@@ -372,18 +372,10 @@ class _StrategyCard extends StatelessWidget {
         children: [
           Flexible(child: Text(strategy.label)),
           if (adjusted)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: colorScheme.tertiaryContainer,
-                borderRadius: AppRadius.sm,
-              ),
-              child: Text(
-                appLocalizations.smartRoutingStrategyPace,
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onTertiaryContainer,
-                ),
-              ),
+            AppTag(
+              appLocalizations.smartRoutingStrategyPace,
+              foreground: colorScheme.onTertiaryContainer,
+              background: colorScheme.tertiaryContainer,
             ),
         ],
       ),

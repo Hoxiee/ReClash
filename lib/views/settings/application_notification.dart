@@ -145,8 +145,7 @@ class _NotificationSettingsViewState
     final settings = ref.watch(
       appSettingProvider.select((state) => state.notificationSettings),
     );
-    return CustomScrollView(
-      primary: false,
+    return SettingsScrollView(
       slivers: [
         SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(
