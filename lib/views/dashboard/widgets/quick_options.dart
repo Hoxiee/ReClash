@@ -49,12 +49,9 @@ class _QuickSwitchCard extends StatelessWidget {
             builder: (_) {
               return AdaptiveSheetScaffold(
                 title: label,
-                body: SettingsListView(
-                  children: [
-                    const Padding(padding: EdgeInsets.only(top: 16)),
-                    ...sections,
-                    const SettingBottomInset(),
-                  ],
+                body: ListView(
+                  padding: const EdgeInsets.only(top: 8, bottom: 16),
+                  children: [...sections],
                 ),
               );
             },
