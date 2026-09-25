@@ -1991,17 +1991,19 @@ abstract final class AppGlyphs {
   ], matchTextDirection: true);
 
   static const healthMonitor = Glyph([
+    GlyphBox(2.5, 4.5, 21.5, 17, 2.5),
     GlyphPath(
-      'M12 19.5 C4.5 14 5.5 7.2 9 7.2 Q11.1 7.2 12 9.2 '
-      'Q12.9 7.2 15 7.2 C18.5 7.2 19.5 14 12 19.5 Z',
+      'M8.5 13.47 C5.35 11.16 5.77 8.3 7.24 8.3 Q8.12 8.3 8.5 9.14 '
+      'Q8.88 8.3 9.76 8.3 C11.23 8.3 11.65 11.16 8.5 13.47 Z',
+      solid: true,
     ),
     GlyphPolyline([
-      GlyphVertex(6.5, 12.8),
-      GlyphVertex(9.4, 12.8),
-      GlyphVertex(10.8, 10.4),
-      GlyphVertex(12.6, 15.2),
-      GlyphVertex(14, 12.8),
-      GlyphVertex(17, 12.8),
+      GlyphVertex(12.3, 10.9),
+      GlyphVertex(14, 10.9),
+      GlyphVertex(15, 9),
+      GlyphVertex(16.4, 12.9),
+      GlyphVertex(17.4, 10.9),
+      GlyphVertex(19, 10.9),
     ], role: GlyphRole.line),
   ]);
 
