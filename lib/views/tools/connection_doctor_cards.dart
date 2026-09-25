@@ -279,7 +279,11 @@ class _DoctorAnswerCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _AnswerBadge(icon: _answerIcon(answer.tone), tone: tone),
+                AppMedallion(
+                  icon: _answerIcon(answer.tone),
+                  tone: tone,
+                  size: 44,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -391,27 +395,6 @@ class _DoctorAnswerCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AnswerBadge extends StatelessWidget {
-  const _AnswerBadge({required this.icon, required this.tone});
-
-  final Glyph icon;
-  final Color tone;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        shape: AppShape.all(AppCorner.md),
-        color: tone.withValues(alpha: 0.14),
-      ),
-      child: GlyphIcon(icon, size: 24, color: tone),
     );
   }
 }

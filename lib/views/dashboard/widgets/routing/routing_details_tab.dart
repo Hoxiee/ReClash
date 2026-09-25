@@ -240,7 +240,7 @@ class RoutingStepTile extends StatelessWidget {
           children: [
             SizedBox(
               width: _railWidth,
-              child: RoutingBadge(
+              child: AppMedallion(
                 icon: data.icon,
                 tone: tone,
                 size: _railWidth,

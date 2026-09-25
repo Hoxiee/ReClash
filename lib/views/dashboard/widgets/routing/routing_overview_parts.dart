@@ -238,42 +238,6 @@ class RoutingNotice extends StatelessWidget {
   }
 }
 
-/// A tinted square with an icon: the one shape on the page that marks a thing
-/// with a state.
-class RoutingBadge extends StatelessWidget {
-  const RoutingBadge({
-    super.key,
-    required this.icon,
-    required this.tone,
-    this.size = 38,
-    this.busy = false,
-  });
-
-  final Glyph icon;
-  final Color tone;
-  final double size;
-  final bool busy;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: ShapeDecoration(
-        shape: AppShape.all(size / 2.8),
-        color: tone.withValues(alpha: 0.14),
-      ),
-      child: busy
-          ? SizedBox.square(
-              dimension: size * 0.44,
-              child: CommonCircleLoading(color: tone),
-            )
-          : GlyphIcon(icon, size: size * 0.5, color: tone),
-    );
-  }
-}
-
 /// A short reading rides the label's line; a sentence-long one drops under it,
 /// so a ledger of mixed counts and phrases never wraps to a ragged right edge.
 class RoutingStat extends StatelessWidget {
@@ -454,7 +418,9 @@ class RoutingDelayPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = context.colorScheme.delayColor(delay) ?? context.colorScheme.onSurfaceVariant;
+    final color =
+        context.colorScheme.delayColor(delay) ??
+        context.colorScheme.onSurfaceVariant;
     return DecoratedBox(
       decoration: ShapeDecoration(
         color: color.withValues(alpha: 0.14),
@@ -741,7 +707,8 @@ class RoutingCandidateRow extends StatelessWidget {
             style: context.textTheme.labelSmall?.copyWith(
               fontWeight: hosted || delay <= 0 ? null : FontWeight.w600,
               color: delay > 0
-                  ? (colorScheme.delayColor(delay) ?? colorScheme.onSurfaceVariant)
+                  ? (colorScheme.delayColor(delay) ??
+                        colorScheme.onSurfaceVariant)
                   : muted,
             ),
           ),

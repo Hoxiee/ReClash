@@ -23,6 +23,7 @@ export 'layout/grid.dart';
 export 'layout/motion_grid.dart';
 export 'base/icon.dart';
 export 'base/inherited.dart';
+export 'base/medallion.dart';
 export 'input/input.dart';
 export 'list/keep_scope.dart';
 export 'effect/keyed_animated_list.dart';

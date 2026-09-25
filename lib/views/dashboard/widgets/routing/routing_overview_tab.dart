@@ -75,7 +75,7 @@ class RoutingVerdictCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              RoutingBadge(
+              AppMedallion(
                 icon: failed
                     ? AppGlyphs.error
                     : status.searching
@@ -222,7 +222,7 @@ class RoutingNetworkCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              RoutingBadge(icon: routingFormatIcon(format), tone: accent),
+              AppMedallion(icon: routingFormatIcon(format), tone: accent),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
@@ -359,7 +359,7 @@ class RoutingLaneRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 9),
       child: Row(
         children: [
-          RoutingBadge(icon: view.icon, tone: view.color, size: 32),
+          AppMedallion(icon: view.icon, tone: view.color, size: 32),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
