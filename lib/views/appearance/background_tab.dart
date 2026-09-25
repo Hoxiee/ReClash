@@ -313,7 +313,11 @@ class _WallpaperTile extends ConsumerWidget {
             top: 6,
             child: _Badge(
               color: colorScheme.primary,
-              child: GlyphIcon(AppGlyphs.check, size: 14, color: colorScheme.onPrimary),
+              child: GlyphIcon(
+                AppGlyphs.check,
+                size: 14,
+                color: colorScheme.onPrimary,
+              ),
             ),
           ),
         Positioned(
@@ -354,12 +358,9 @@ class _AddTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            GlyphIcon(
-              AppGlyphs.addImage,
-              color: colorScheme.onSurfaceVariant,
-            ),
+            GlyphIcon(AppGlyphs.addImage, color: colorScheme.onSurfaceVariant),
             if (label != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 label!,
                 textAlign: TextAlign.center,

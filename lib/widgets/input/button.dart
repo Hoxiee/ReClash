@@ -25,7 +25,7 @@ class CommonFloatingActionButton extends StatelessWidget {
         floatingActionButtonTheme: Theme.of(context).floatingActionButtonTheme
             .copyWith(
               extendedIconLabelSpacing: 0,
-              extendedPadding: const EdgeInsets.all(16),
+              extendedPadding: AppInsets.lg,
             ),
       ),
       child: FloatingActionButtonExtendedBuilder(
@@ -90,7 +90,8 @@ class MoreActionButton extends StatelessWidget {
             vertical: 16,
           ),
           title: Text(label, style: context.textTheme.bodyLarge),
-          trailing: trailing ?? const GlyphIcon(AppGlyphs.chevronForward, size: 18),
+          trailing:
+              trailing ?? const GlyphIcon(AppGlyphs.chevronForward, size: 18),
         ),
       ),
     );

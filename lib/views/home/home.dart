@@ -94,7 +94,7 @@ class _HomeShell extends ConsumerWidget {
                 removeRight: isMobile,
                 context: context,
                 child: BottomInsetScope(
-                  inset: isMobile ? NavBarMetrics.reservedHeight : 0,
+                  inset: isMobile ? AppNavBar.insetOf(context) : 0,
                   child: child,
                 ),
               ),

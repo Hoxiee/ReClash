@@ -153,7 +153,7 @@ class _Loading extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const CircularProgressIndicator(),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         Text(label, style: context.textTheme.bodyMedium),
       ],
     );
@@ -189,9 +189,9 @@ class _ReportBody extends StatelessWidget {
           body: _bodyOf(appLocalizations, fault),
           tone: _toneOf(fault),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         _FactsCard(report: report),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.xxl),
         FilledButton.icon(
           autofocus: true,
           onPressed: () => _copy(
@@ -204,7 +204,7 @@ class _ReportBody extends StatelessWidget {
           icon: const GlyphIcon(AppGlyphs.link),
           label: Text(appLocalizations.subscriptionReportCopyLink),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -256,7 +256,7 @@ class _VerdictCard extends StatelessWidget {
       radius: AppCorner.xl,
       isError: tone == _FaultTone.bad,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppInsets.lg,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

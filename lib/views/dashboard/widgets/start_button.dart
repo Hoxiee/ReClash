@@ -219,14 +219,16 @@ class _StartButtonState extends ConsumerState<StartButton>
         mainAxisSize: MainAxisSize.min,
         children: [
           widthDuration == Duration.zero
-              ? (showPauseButton ? const _PauseFab() : const SizedBox(width: 8))
+              ? (showPauseButton
+                    ? const _PauseFab()
+                    : const SizedBox(width: AppSpacing.sm))
               : AnimatedSize(
                   duration: widthDuration,
                   curve: Easing.standard,
                   alignment: Alignment.centerRight,
                   child: showPauseButton
                       ? const _PauseFab()
-                      : const SizedBox(width: 8),
+                      : const SizedBox(width: AppSpacing.sm),
                 ),
           Theme(
             data: theme.copyWith(

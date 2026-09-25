@@ -48,7 +48,7 @@ class DashboardInfoCard extends StatelessWidget {
                           size: 20,
                           color: context.colorScheme.onSurfaceVariant,
                         ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         label,
@@ -59,10 +59,13 @@ class DashboardInfoCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (action != null) ...[const SizedBox(width: 8), action!],
+                    if (action != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      action!,
+                    ],
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Expanded(child: child),
               ],
             ),

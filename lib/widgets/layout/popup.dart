@@ -599,10 +599,10 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
                 size: _itemIconSize,
                 color: foregroundColor,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
             ] else if (item.icon != null) ...[
               Icon(item.icon, size: _itemIconSize, color: foregroundColor),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
             ],
             Expanded(
               child: Text(
@@ -614,7 +614,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
                 ),
               ),
             ),
-            if (arrow != null) ...[const SizedBox(width: 8), arrow],
+            if (arrow != null) ...[const SizedBox(width: AppSpacing.sm), arrow],
           ],
         ),
       ),

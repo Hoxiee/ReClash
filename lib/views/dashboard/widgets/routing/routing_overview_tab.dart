@@ -223,7 +223,7 @@ class RoutingNetworkCard extends StatelessWidget {
           Row(
             children: [
               RoutingBadge(icon: routingFormatIcon(format), tone: accent),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   format.label,
@@ -256,7 +256,7 @@ class RoutingNetworkCard extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     line,
@@ -360,7 +360,7 @@ class RoutingLaneRow extends StatelessWidget {
       child: Row(
         children: [
           RoutingBadge(icon: view.icon, tone: view.color, size: 32),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +389,7 @@ class RoutingLaneRow extends StatelessWidget {
             ),
           ),
           if (lane.candidates > 0) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               appLocalizations.smartRoutingServiceReady(
                 lane.eligible,
@@ -436,7 +436,7 @@ class RoutingHealthCard extends StatelessWidget {
                   color: colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   appLocalizations.smartRoutingAliveCount(
@@ -551,7 +551,7 @@ class RoutingLegend extends StatelessWidget {
             color: context.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           label,
           style: context.textTheme.labelMedium?.copyWith(

@@ -164,7 +164,7 @@ class _WebDashboardError extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppInsets.xxl,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 16,

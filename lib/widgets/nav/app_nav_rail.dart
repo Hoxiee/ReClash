@@ -48,7 +48,10 @@ class AppNavRail extends ConsumerWidget {
       width: NavRailMetrics.width,
       child: Column(
         children: [
-          if (leading != null) ...[leading, const SizedBox(height: 12)],
+          if (leading != null) ...[
+            leading,
+            const SizedBox(height: AppSpacing.md),
+          ],
           Expanded(
             child: _RailBody(
               items: items,
@@ -373,8 +376,13 @@ class _RailSlotState extends State<_RailSlot> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          GlyphIcon(widget.glyph, size: NavRailMetrics.iconSize, color: color, fill: widget.selected ? 1 : 0),
-          const SizedBox(height: 2),
+          GlyphIcon(
+            widget.glyph,
+            size: NavRailMetrics.iconSize,
+            color: color,
+            fill: widget.selected ? 1 : 0,
+          ),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             widget.label,
             maxLines: 1,

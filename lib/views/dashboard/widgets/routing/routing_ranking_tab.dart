@@ -103,7 +103,7 @@ class RoutingLadderCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               MetaChip(label: routingStrategyLabel(appLocalizations, strategy)),
             ],
           ),
@@ -131,7 +131,7 @@ class RoutingLadderCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: chosen == null
                         ? Text(
@@ -244,7 +244,7 @@ class RoutingDuelRow extends StatelessWidget {
                       ),
                     ),
                     if (versus.isNotEmpty) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 156),
                         child: TooltipText(

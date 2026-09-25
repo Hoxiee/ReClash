@@ -25,7 +25,7 @@ class _SubscriptionStrip extends StatelessWidget {
     final barColor = progress > 0.9
         ? colorScheme.error
         : progress > 0.7
-        ? const Color(0xFFC57F0A)
+        ? cautionColor
         : colorScheme.primary;
 
     final expireDate = subscriptionExpireDate(sub.expire);
@@ -86,14 +86,14 @@ class _SubscriptionStrip extends StatelessWidget {
                 ),
               ),
               if (hasAnnounce) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 GlyphIcon(
                   AppGlyphs.announce,
                   size: 18,
                   color: colorScheme.primary,
                 ),
               ],
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               GlyphIcon(
                 AppGlyphs.chevronForward,
                 size: 20,
@@ -101,7 +101,7 @@ class _SubscriptionStrip extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           if (unlimited)
             Text(
               used.traffic.show,
@@ -129,19 +129,20 @@ class _SubscriptionStrip extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           if (!unlimited) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             _SubscriptionBar(
               progress: progress <= 0 ? 0.0 : progress,
               color: barColor,
             ),
           ],
           if (offers.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 for (final offer in offers) ...[
-                  if (offer != offers.first) const SizedBox(width: 8),
+                  if (offer != offers.first)
+                    const SizedBox(width: AppSpacing.sm),
                   Flexible(
                     child: _BuyChip(
                       offer: offer,

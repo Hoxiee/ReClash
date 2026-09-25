@@ -191,7 +191,7 @@ class _ToolViewState extends ConsumerState<ToolsView> {
     if (detail == null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppInsets.xxl,
           child: Text(
             context.appLocalizations.toolsSelectPanePlaceholder,
             textAlign: TextAlign.center,

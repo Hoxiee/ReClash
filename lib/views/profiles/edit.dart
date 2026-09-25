@@ -304,7 +304,7 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
                       return items[index];
                     },
                     separatorBuilder: (_, _) {
-                      return const SizedBox(height: 24);
+                      return const SizedBox(height: AppSpacing.xxl);
                     },
                     itemCount: items.length,
                   ),

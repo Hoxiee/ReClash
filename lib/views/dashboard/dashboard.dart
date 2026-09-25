@@ -97,13 +97,19 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
             ? IconButton(
                 tooltip: context.appLocalizations.save,
                 key: const ValueKey(true),
-                icon: const GlyphIcon(AppGlyphs.save, key: ValueKey('save-icon')),
+                icon: const GlyphIcon(
+                  AppGlyphs.save,
+                  key: ValueKey('save-icon'),
+                ),
                 onPressed: _handleExitEdit,
               )
             : IconButton(
                 tooltip: context.appLocalizations.edit,
                 key: const ValueKey(false),
-                icon: const GlyphIcon(AppGlyphs.edit, key: ValueKey('edit-icon')),
+                icon: const GlyphIcon(
+                  AppGlyphs.edit,
+                  key: ValueKey('edit-icon'),
+                ),
                 onPressed: _handleEnterEdit,
               ),
       ),
@@ -291,7 +297,7 @@ class _AddDashboardWidgetModal extends StatelessWidget {
   Widget build(BuildContext context) {
     return DeferredPointerHandler(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: AppInsets.lg,
         child: Grid(
           crossAxisCount: 8,
           crossAxisSpacing: 16,
@@ -344,7 +350,7 @@ class _AddedContainer extends StatelessWidget {
               child: IconButton.filled(
                 tooltip: context.appLocalizations.add,
                 iconSize: 20,
-                padding: const EdgeInsets.all(2),
+                padding: AppInsets.xxs,
                 onPressed: () => _handleAdd(context),
                 icon: const GlyphIcon(AppGlyphs.add),
               ),

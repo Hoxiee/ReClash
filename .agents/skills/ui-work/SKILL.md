@@ -32,7 +32,7 @@ Use this for user-facing Flutter UI changes in `lib/`, including widgets, screen
 
 ## Corner Radii
 
-All corner radii come from `lib/common/shape.dart`. Never write a radius literal in a widget.
+All corner radii come from `lib/common/ui/shape.dart`. Never write a radius literal in a widget.
 
 The scale is picked by the component's **shortest side**, not by what looks good in isolation. A radius that reads as
 a soft card at 64 logical pixels tall reads as a pill at 24 and as a square at 400, so a single radius everywhere is
@@ -88,9 +88,40 @@ survives large radii and the package one does not. The border needs no `contentP
 defaults alone.
 
 Nested radii are derived, never tokens. Concentric corners need `outer = inner + inset`, so name the inset and
-compute the outer value: `_cardRadius` in `lib/widgets/popup.dart`, `_kCornerRadius` in `lib/widgets/tab.dart`, and
-the selection ring in `lib/widgets/palette.dart` all do this. Adding an intermediate token to spell one of these out
+compute the outer value: `_cardRadius` in `lib/widgets/layout/popup.dart`, `_kCornerRadius` in `lib/widgets/tab/tab.dart`, and
+the selection ring in `lib/widgets/theme/palette.dart` all do this. Adding an intermediate token to spell one of these out
 is what makes a scale grow without bound.
+
+## Spacing
+
+Spacing on the token scale comes from `lib/common/ui/spacing.dart`; do not write a raw
+`EdgeInsets.all(N)` or `SizedBox(height/width: N)` for an `N` the scale names. A `design_tokens`
+test fails a view or widget that does.
+
+- `AppSpacing` holds the scale as `double`: `xxs 2`, `xs 4`, `sm 8`, `md 12`, `lg 16`, `xl 20`,
+  `xxl 24`, `xxxl 32`. Use it for `SizedBox(height/width: AppSpacing.x)`, `EdgeInsets.symmetric`, and
+  arithmetic.
+- `AppInsets` mirrors it as `EdgeInsets.all`: `AppInsets.lg` is `EdgeInsets.all(16)`.
+- Gaps stay directional — `SizedBox(height: AppSpacing.sm)` or `SizedBox(width: AppSpacing.sm)`. A
+  square spacer forces the cross axis and can widen a content-hugging `Column`.
+- The names are a t-shirt scale that does not line up with `AppCorner`; the same name carries a
+  different number on each axis.
+- Off-grid values (6, 9, 10, 14, ...) are not in the scale and stay as raw literals. The guard only
+  covers the eight scale values.
+
+## Status Colors
+
+Semantic status colors come from `lib/common/ui/color.dart`, never from a raw `Colors.*` swatch.
+
+- `context.colorScheme.success` and `.warning` are the harmonized green/orange. They are *defined* as
+  `Colors.green.harmonizeWith(primary)` / `Colors.orange.harmonizeWith(primary)`, so writing that
+  expression by hand is the token spelled out the long way — use the getter. A `design_tokens` test
+  fails the raw harmonized form.
+- `cautionColor` is the fixed mid-tier amber (slow-delay, half-full quota). It lives only in
+  `color.dart`; a guard fails its literal `0xFFC57F0A` anywhere else.
+- `getDelayColor(delay)` maps a latency to the delay palette; use it rather than branching on
+  thresholds at the call site.
+- Errors use `colorScheme.error`; do not reach for `Colors.red`.
 
 ## Pitfalls
 

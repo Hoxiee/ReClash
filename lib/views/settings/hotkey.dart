@@ -417,7 +417,7 @@ class _HotKeyRecorderState extends ConsumerState<HotKeyRecorder> {
     }
     return Container(
       constraints: const BoxConstraints(minHeight: 96),
-      padding: const EdgeInsets.all(16),
+      padding: AppInsets.lg,
       alignment: Alignment.center,
       decoration: ShapeDecoration(
         color: colorScheme.surfaceContainerLow,

@@ -57,7 +57,7 @@ class FindingPreviewView extends ConsumerWidget {
                   title: localizations.seasonalDecorations,
                   items: [
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppInsets.lg,
                       child: Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -118,7 +118,7 @@ class FindingPreviewView extends ConsumerWidget {
                               builder: (_) => CommonScaffold(
                                 title: localizations.developerFindings,
                                 body: const Padding(
-                                  padding: EdgeInsets.all(16),
+                                  padding: AppInsets.lg,
                                   child: TrafficUsage(preview: true),
                                 ),
                               ),

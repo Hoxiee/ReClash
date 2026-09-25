@@ -63,7 +63,7 @@ class ChangeServerButton extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             delay,
             maxLines: 1,

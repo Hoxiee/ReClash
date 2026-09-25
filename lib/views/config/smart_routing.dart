@@ -173,7 +173,7 @@ class SmartRoutingView extends ConsumerWidget {
       title: appLocalizations.smartRoutingStrategy,
       actions: [
         if (!props.matchesStrategy) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           CommonMinFilledButtonTheme(
             child: FilledButton.tonal(
               onPressed: () => _handleReseedStrategy(context, ref),
@@ -195,7 +195,10 @@ class SmartRoutingView extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleReseedStrategy(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleReseedStrategy(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final appLocalizations = context.appLocalizations;
     final confirmed = await dialogs.showMessage(
       dangerous: true,
@@ -265,7 +268,6 @@ class SmartRoutingView extends ConsumerWidget {
       ],
     );
   }
-
 }
 
 /// Read-only tour of what the active region sets up. It reads the live props, so
@@ -360,9 +362,7 @@ class _StrategyCard extends StatelessWidget {
       minVerticalPadding: 10,
       isSelected: selected,
       leading: GlyphIcon(
-        selected
-            ? AppGlyphs.radio
-            : AppGlyphs.circleOutline,
+        selected ? AppGlyphs.radio : AppGlyphs.circleOutline,
         color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
       title: Row(
@@ -374,7 +374,7 @@ class _StrategyCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: colorScheme.tertiaryContainer,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppRadius.sm,
               ),
               child: Text(
                 appLocalizations.smartRoutingStrategyPace,
@@ -415,7 +415,7 @@ class _TradeoffBars extends StatelessWidget {
             axes.stability,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: _meter(
             context,
@@ -423,7 +423,7 @@ class _TradeoffBars extends StatelessWidget {
             axes.speed,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Expanded(
           child: _meter(
             context,
@@ -460,7 +460,7 @@ class _TradeoffBars extends StatelessWidget {
                   color: i < level
                       ? colorScheme.primary
                       : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: AppRadius.full,
                 ),
               ),
           ],

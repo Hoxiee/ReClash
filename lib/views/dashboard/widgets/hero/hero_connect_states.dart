@@ -39,16 +39,16 @@ class _EmptyHero extends ConsumerWidget {
       controller: scrollController,
       child: Column(
         children: [
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           const _Logo(),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Text(
             appName,
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.xl),
           _TailEdgeFocus(
             onDown: hasByeDpiCard ? null : onRequestAfterTailFocus,
             child: HeroSurface(
@@ -81,9 +81,7 @@ class _EmptyHero extends ConsumerWidget {
                               .toProfiles()
                         : () => _showAddProfile(context),
                     icon: GlyphIcon(
-                      hasSavedProfiles
-                          ? AppGlyphs.folder
-                          : AppGlyphs.add,
+                      hasSavedProfiles ? AppGlyphs.folder : AppGlyphs.add,
                     ),
                     label: Text(
                       hasSavedProfiles
@@ -92,7 +90,7 @@ class _EmptyHero extends ConsumerWidget {
                     ),
                   ),
                   if (hasSavedProfiles) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     OutlinedButton.icon(
                       onPressed: () => _showAddProfile(context),
                       icon: const GlyphIcon(AppGlyphs.add),
@@ -104,20 +102,17 @@ class _EmptyHero extends ConsumerWidget {
             ),
           ),
           if (hasByeDpiCard) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             _TailEdgeFocus(
               onDown: onRequestAfterTailFocus,
               child: FocusableTap(
                 borderRadius: heroCardRadius,
                 onTap: () => changeDashboardMode(ref, DashboardMode.byedpi),
                 child: HeroSurface(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppInsets.lg,
                   child: Row(
                     children: [
-                      const _ByeDpiCardIcon(
-                        icon: AppGlyphs.shield,
-                        size: 44,
-                      ),
+                      const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 44),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -139,7 +134,7 @@ class _EmptyHero extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       GlyphIcon(
                         AppGlyphs.chevronForward,
                         color: context.colorScheme.onSurfaceVariant,
@@ -170,7 +165,7 @@ class _NoticeOpenCard extends StatelessWidget {
       child: Row(
         children: [
           GlyphIcon(AppGlyphs.announce, size: 20, color: colorScheme.primary),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +177,7 @@ class _NoticeOpenCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 EmojiText(
                   text,
                   maxLines: 1,
@@ -192,7 +187,7 @@ class _NoticeOpenCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           GlyphIcon(
             AppGlyphs.chevronForward,
             size: 20,
@@ -398,7 +393,7 @@ class _ActionChip extends StatelessWidget {
                   ? CommonCircleLoading(color: colorScheme.primary)
                   : GlyphIcon(icon, size: iconSize, color: colorScheme.primary),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Text(
                 label,

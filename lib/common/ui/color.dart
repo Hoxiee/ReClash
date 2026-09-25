@@ -140,9 +140,13 @@ extension ColorSchemeExtension on ColorScheme {
   }
 }
 
+// Fixed caution amber for the mid-tier between primary and error (slow delay,
+// quota 70-90%); a set hex, not scheme-derived, so it reads on light and dark.
+const cautionColor = Color(0xFFC57F0A);
+
 Color? getDelayColor(int? delay) {
   if (delay == null) return null;
   if (delay < 0) return Colors.red;
   if (delay < 600) return Colors.green;
-  return const Color(0xFFC57F0A);
+  return cautionColor;
 }

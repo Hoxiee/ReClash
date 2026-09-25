@@ -145,9 +145,12 @@ class _DesyncOverviewCard extends StatelessWidget {
                 color: context.colorScheme.primaryContainer,
                 shape: AppShape.all(AppCorner.md),
               ),
-              child: GlyphIcon(icon, color: context.colorScheme.onPrimaryContainer),
+              child: GlyphIcon(
+                icon,
+                color: context.colorScheme.onPrimaryContainer,
+              ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +169,7 @@ class _DesyncOverviewCard extends StatelessWidget {
                     ),
                   ),
                   if (detail case final detail?) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       detail,
                       style: context.textTheme.bodySmall?.copyWith(
@@ -330,7 +333,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             title: appLocalizations.desyncStrategySection,
             top: widget._section == null ? 0 : 16,
             actions: [
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               CommonMinFilledButtonTheme(
                 child: FilledButton.tonal(
                   onPressed: () => _handleSave(context, ref),
@@ -354,7 +357,9 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
                 },
               ),
               DecorationListItem(
-                leading: defaultActive ? const GlyphIcon(AppGlyphs.check) : null,
+                leading: defaultActive
+                    ? const GlyphIcon(AppGlyphs.check)
+                    : null,
                 title: Text(appLocalizations.desyncDefaultName),
                 subtitle: const Text('split · disorder · fake · oob · tlsrec'),
                 onPressed: () => _update(
@@ -385,8 +390,7 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
             ]),
           ),
         if (showBody &&
-            (widget._section == null ||
-                widget._section == _DesyncSection.test))
+            (widget._section == null || widget._section == _DesyncSection.test))
           _DesyncTester(
             showOverview: widget._section == _DesyncSection.test,
             onRunningChanged: (value) => setState(() => _testing = value),
@@ -519,9 +523,7 @@ class _DesyncRoutingRules extends StatelessWidget {
           for (final rule in rules)
             DecorationListItem(
               leading: GlyphIcon(
-                rule.endsWith('REJECT')
-                    ? AppGlyphs.block
-                    : AppGlyphs.route,
+                rule.endsWith('REJECT') ? AppGlyphs.block : AppGlyphs.route,
               ),
               title: Text(
                 rule,
@@ -622,7 +624,7 @@ class _DesyncArgsEditorState extends State<_DesyncArgsEditor> {
           ),
         ],
         body: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppInsets.lg,
           child: TextField(
             controller: _controller,
             maxLines: null,

@@ -54,7 +54,9 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
               return Column(
                 children: [
                   Padding(
-                    padding: DashboardWidgetMetrics.paddingOf(context).copyWith(bottom: 0),
+                    padding: DashboardWidgetMetrics.paddingOf(
+                      context,
+                    ).copyWith(bottom: 0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -67,7 +69,7 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Text(
                           _getLastTraffic(traffics).speedText,
                           style: context.textTheme.bodySmall?.copyWith(

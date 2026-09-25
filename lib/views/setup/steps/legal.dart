@@ -54,7 +54,7 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
       applicationName: appName,
       applicationVersion: 'v${globalState.packageInfo.version}',
       applicationIcon: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: AppInsets.sm,
         child: Image.asset('assets/images/icon.png', width: 48, height: 48),
       ),
       applicationLegalese: 'GPL-3.0',
@@ -71,7 +71,7 @@ class _SetupLegalStepState extends ConsumerState<SetupLegalStep> {
       fillBody: SetupScrollCard(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppInsets.lg,
             child: Text(
               appLocalizations.disclaimerDesc,
               style: context.textTheme.bodyMedium?.copyWith(height: 1.45),

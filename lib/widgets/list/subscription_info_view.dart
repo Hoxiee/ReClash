@@ -36,7 +36,7 @@ class SubscriptionInfoView extends StatelessWidget {
       return context.colorScheme.error;
     }
     if (progress >= _trafficWarnRatio) {
-      return const Color(0xFFC57F0A);
+      return cautionColor;
     }
     return context.colorScheme.primary;
   }
@@ -102,7 +102,7 @@ class SubscriptionInfoView extends StatelessWidget {
           },
         ),
         if (!unlimited) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           LinearProgressIndicator(
             minHeight: 4,
             value: progress,
@@ -189,7 +189,7 @@ class SubscriptionInfoDetailView extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           generateSectionV3(
             title: appLocalizations.expireTime,
             items: [_buildItem(value: expire)],

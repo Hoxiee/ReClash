@@ -181,7 +181,7 @@ class _RelicsSection extends StatelessWidget {
       title: localizations.findingsRelics,
       items: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppInsets.lg,
           child: LayoutBuilder(
             builder: (context, constraints) {
               const spacing = 12.0;
@@ -239,7 +239,7 @@ class _RelicTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 revealed ? findingName(context, id) : '',
                 maxLines: 2,

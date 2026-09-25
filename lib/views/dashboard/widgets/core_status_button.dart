@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:reclash/icons/icons.dart';
 
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
@@ -100,9 +99,7 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                 iconSize: 20,
                 padding: EdgeInsets.zero,
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.green.harmonizeWith(
-                    context.colorScheme.primary,
-                  ),
+                  backgroundColor: context.colorScheme.success,
                   foregroundColor: switch (Theme.brightnessOf(context)) {
                     Brightness.light => context.colorScheme.onSurfaceVariant,
                     Brightness.dark =>
@@ -139,17 +136,13 @@ class _CoreStatusButtonState extends ConsumerState<CoreStatusButton> {
                   width: globalState.measure.bodyMediumHeight,
                   child: switch (coreStatus) {
                     CoreStatus.connecting => Padding(
-                      padding: const EdgeInsets.all(2),
+                      padding: AppInsets.xxs,
                       child: CommonCircleLoading(
                         color: context.colorScheme.onPrimary,
                       ),
                     ),
-                    CoreStatus.connected => const GlyphIcon(
-                      AppGlyphs.check,
-                    ),
-                    CoreStatus.disconnected => const GlyphIcon(
-                      AppGlyphs.reset,
-                    ),
+                    CoreStatus.connected => const GlyphIcon(AppGlyphs.check),
+                    CoreStatus.disconnected => const GlyphIcon(AppGlyphs.reset),
                   },
                 ),
                 label: Text(switch (coreStatus) {

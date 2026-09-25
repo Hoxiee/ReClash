@@ -27,13 +27,13 @@ class SettingInfoCard extends StatelessWidget {
       isSelected: isSelected,
       onPressed: onPressed,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppInsets.md,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             if (info.glyph != null) GlyphIcon(info.glyph!),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Flexible(
               child: Text(
                 info.label,
@@ -68,7 +68,7 @@ class SettingTextCard extends StatelessWidget {
       onPressed: onPressed,
       isSelected: isSelected,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppInsets.md,
         child: Text(
           text,
           maxLines: 1,

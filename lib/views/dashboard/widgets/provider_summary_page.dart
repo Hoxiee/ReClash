@@ -46,7 +46,7 @@ List<Widget> providerSummaryCards(
 /// with a soft tint when a notice carries a tone.
 Widget _heroCard(Widget child, {Color? tone}) {
   return HeroSurface(
-    padding: const EdgeInsets.all(20),
+    padding: AppInsets.xl,
     child: tone == null
         ? child
         : IconTheme.merge(
@@ -82,7 +82,7 @@ class _ProviderEmptyState extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: HeroSurface(
-        padding: const EdgeInsets.all(20),
+        padding: AppInsets.xl,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

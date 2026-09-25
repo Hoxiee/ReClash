@@ -331,7 +331,7 @@ class LogItem extends StatelessWidget {
                 _TimeLabel(date: date, time: time),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             SelectableText(
               log.payload,
               style: context.textTheme.bodyMedium

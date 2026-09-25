@@ -137,7 +137,7 @@ class _ServerLoadingCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 context.appLocalizations.loading,
@@ -262,7 +262,7 @@ class _ServerZone extends ConsumerWidget {
               stackCount: otherLocations,
               size: 44,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

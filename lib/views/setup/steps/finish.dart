@@ -382,7 +382,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
             caption: appLocalizations.setupSummaryTitle,
             child: SetupCard(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppInsets.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 4,

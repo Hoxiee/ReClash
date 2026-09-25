@@ -2,7 +2,6 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/clash_config.dart';
@@ -51,12 +50,12 @@ class RuleItem extends StatelessWidget {
       if (ruleTarget.toUpperCase() == 'DIRECT') {
         return (
           invalid: false,
-          color: Colors.green.harmonizeWith(context.colorScheme.primary),
+          color: context.colorScheme.success,
         );
       } else if (ruleTarget.toUpperCase() == 'REJECT') {
         return (
           invalid: false,
-          color: Colors.orange.harmonizeWith(context.colorScheme.primary),
+          color: context.colorScheme.warning,
         );
       } else if (hasMatch && ruleTarget.toUpperCase() == 'MATCH') {
         return (invalid: false, color: context.colorScheme.tertiary);
@@ -86,7 +85,11 @@ class RuleItem extends StatelessWidget {
             ),
           );
         },
-        icon: GlyphIcon(AppGlyphs.info, size: 16.ap, color: context.colorScheme.error),
+        icon: GlyphIcon(
+          AppGlyphs.info,
+          size: 16.ap,
+          color: context.colorScheme.error,
+        ),
       ),
     );
   }
@@ -379,12 +382,12 @@ class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
                     },
                     child: Text(_ruleAction.value),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
                   _RuleContentField(
                     controller: _contentController,
                     onSubmitted: _handleSubmit,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
                   _RuleTargetField(
                     controller: _ruleTargetController,
                     entries: _targetItems,
@@ -395,7 +398,7 @@ class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
                     },
                   ),
                   if (_ruleAction.hasParams) ...[
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
                     Wrap(
                       spacing: 8,
                       children: [
@@ -420,7 +423,7 @@ class _AddOrEditRuleDialogState extends ConsumerState<AddOrEditRuleDialog> {
                       ],
                     ),
                   ],
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               );
             },

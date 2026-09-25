@@ -201,7 +201,7 @@ class SmartPauseNetworkPickerState
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Expanded(child: _buildBody()),
       ],
     );

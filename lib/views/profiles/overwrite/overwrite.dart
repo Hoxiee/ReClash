@@ -133,13 +133,13 @@ class _Title extends ConsumerWidget {
                       _handleChangeType(ref, profileId, type);
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: AppInsets.lg,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           GlyphIcon(_getIcon(type)),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Flexible(child: Text(_getTitle(context, type))),
                         ],
                       ),
@@ -148,7 +148,7 @@ class _Title extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(

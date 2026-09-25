@@ -154,7 +154,7 @@ class AboutView extends ConsumerWidget {
                     applicationName: appName,
                     applicationVersion: 'v${globalState.packageInfo.version}',
                     applicationIcon: Padding(
-                      padding: const EdgeInsets.all(8),
+                      padding: AppInsets.sm,
                       child: Image.asset(
                         'assets/images/icon.png',
                         width: 48,
@@ -209,7 +209,7 @@ class _IdentityCardState extends ConsumerState<_IdentityCard> {
     return CommonCard(
       type: CommonCardType.filled,
       radius: AppCorner.xl,
-      padding: const EdgeInsets.all(20),
+      padding: AppInsets.xl,
       onPressed: _handleTap,
       onLongPress: () {
         Clipboard.setData(

@@ -175,7 +175,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
               child: CommonCard(
                 radius: AppCorner.xl,
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: AppInsets.xl,
                   child: ConnectionDoctorPathMap(
                     snapshot: snapshot,
                     blame: answer.blame,
@@ -272,7 +272,7 @@ class _DoctorAnswerCard extends StatelessWidget {
       radius: AppCorner.xl,
       isError: answer.tone == DoctorAnswerTone.bad,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppInsets.lg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -291,7 +291,7 @@ class _DoctorAnswerCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         answer.meaning,
                         style: context.textTheme.bodyMedium?.copyWith(
@@ -315,9 +315,9 @@ class _DoctorAnswerCard extends StatelessWidget {
               ],
             ),
             if (examining) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               LinearProgressIndicator(value: progressValue, minHeight: 4),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 appLocalizations.doctorProgress(
                   progress.completed,
@@ -329,7 +329,7 @@ class _DoctorAnswerCard extends StatelessWidget {
               ),
             ],
             if (answer.steps.isNotEmpty) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 appLocalizations.doctorWhatToTry,
                 style: context.textTheme.labelLarge?.copyWith(
@@ -337,7 +337,7 @@ class _DoctorAnswerCard extends StatelessWidget {
                   color: colors.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               for (final step in answer.steps)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
@@ -362,7 +362,7 @@ class _DoctorAnswerCard extends StatelessWidget {
             if (remedies.isNotEmpty ||
                 showStart ||
                 (examining && canCancel)) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -547,7 +547,7 @@ class DoctorTimingPreview extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppInsets.lg,
             child: Text(context.appLocalizations.developerFindingsDesc),
           ),
           _DoctorEvidenceSection(

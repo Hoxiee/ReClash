@@ -130,7 +130,7 @@ class _TrafficUsageBody extends StatelessWidget {
             value: up,
             rolling: rolling,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _TrafficDataItem(
             icon: GlyphIcon(AppGlyphs.arrowDown, color: downColor, size: 14),
             value: down,
@@ -192,7 +192,7 @@ class _TrafficChart extends StatelessWidget {
                 ),
               ),
               if (showsLegend) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Flexible(
                   child: _TrafficLegend(upColor: upColor, downColor: downColor),
                 ),
@@ -245,7 +245,7 @@ class _TrafficLegend extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _LegendEntry(color: upColor, label: uploadLabel),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         _LegendEntry(color: downColor, label: downloadLabel),
       ],
     );
@@ -268,7 +268,7 @@ class _LegendEntry extends StatelessWidget {
           height: 8,
           decoration: ShapeDecoration(color: color, shape: AppShape.full),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         label,
       ],
     );
@@ -299,7 +299,7 @@ class _TrafficDataItem extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               icon,
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Flexible(
                 flex: 1,
                 child: _RollingTrafficValue(

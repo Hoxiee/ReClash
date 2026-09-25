@@ -164,7 +164,7 @@ class ProxyCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 proxyNameText,
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 if (type == ProxyCardType.expand) ...[
                   SizedBox(
                     height: measure.bodySmallHeight,
@@ -234,8 +234,8 @@ class _ProxyPinMark extends ConsumerWidget {
       child: !held
           ? const SizedBox()
           : Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(4),
+              margin: AppInsets.sm,
+              padding: AppInsets.xs,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: context.colorScheme.secondaryContainer,
@@ -307,9 +307,9 @@ class _ProxyComputedMark extends ConsumerWidget {
     }
     return Container(
       alignment: Alignment.topRight,
-      margin: const EdgeInsets.all(8),
+      margin: AppInsets.sm,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: AppInsets.xs,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Theme.of(context).colorScheme.secondaryContainer,

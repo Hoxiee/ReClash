@@ -155,7 +155,7 @@ class NullStatus extends StatelessWidget {
                 ),
               ),
               if (description != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 _EnterItem(
                   delay: _staggerStep * 2,
                   child: Text(
@@ -168,7 +168,7 @@ class NullStatus extends StatelessWidget {
                 ),
               ],
               if (action != null) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xxl),
                 _EnterItem(
                   delay: _staggerStep * (description != null ? 3 : 2),
                   child: action,
@@ -260,7 +260,11 @@ class EmptyIllustration extends StatefulWidget {
   final NullStatusIllustration type;
   final double dimension;
 
-  const EmptyIllustration({super.key, required this.type, required this.dimension});
+  const EmptyIllustration({
+    super.key,
+    required this.type,
+    required this.dimension,
+  });
 
   @override
   State<EmptyIllustration> createState() => _EmptyIllustrationState();

@@ -142,7 +142,8 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
           );
         }, childCount: entries.length),
       ),
-      if (!isLast) const SliverToBoxAdapter(child: SizedBox(height: 8)),
+      if (!isLast)
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
     ];
   }
 
@@ -169,7 +170,7 @@ class _NameAddPickerState extends ConsumerState<NameAddPicker>
               ),
               for (var i = 0; i < sections.length; i++)
                 ..._buildSection(sections[i], i == sections.length - 1),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
             ],
           ),
         ),

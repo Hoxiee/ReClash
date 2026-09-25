@@ -264,7 +264,7 @@ class ProfileItem extends ConsumerWidget {
         lastUpdateDate: profile.lastUpdateDate,
         style: context.textTheme.bodySmall?.toLighter,
       ),
-      const SizedBox(height: 2),
+      const SizedBox(height: AppSpacing.xxs),
       LastUsedTimeText(
         lastUsedAt: profile.lastUsedAt,
         style: context.textTheme.bodySmall?.toLighter,
@@ -278,7 +278,7 @@ class ProfileItem extends ConsumerWidget {
         lastUpdateDate: profile.lastUpdateDate,
         style: context.textTheme.bodySmall?.toLighter,
       ),
-      const SizedBox(height: 2),
+      const SizedBox(height: AppSpacing.xxs),
       LastUsedTimeText(
         lastUsedAt: profile.lastUsedAt,
         style: context.textTheme.bodySmall?.toLighter,
@@ -476,7 +476,7 @@ class ProfileItem extends ConsumerWidget {
                   child: isUpdating
                       ? const Padding(
                           key: ValueKey('loading'),
-                          padding: EdgeInsets.all(8),
+                          padding: AppInsets.sm,
                           child: CommonCircleLoading(),
                         )
                       : CommonPopupBox(

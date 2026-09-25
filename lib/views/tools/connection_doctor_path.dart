@@ -4,7 +4,6 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 
 typedef _DoctorPathState = DoctorStageState;
 
@@ -143,7 +142,7 @@ class _ConnectionDoctorPathMapState extends State<ConnectionDoctorPathMap>
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         AnimatedBuilder(
           animation: _intro,
           builder: (context, _) {
@@ -314,7 +313,7 @@ class _DoctorPathNode extends StatelessWidget {
     return Column(
       children: [
         marker,
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           stage.label,
           maxLines: 2,
@@ -337,7 +336,7 @@ class _DoctorPathNode extends StatelessWidget {
     return Row(
       children: [
         marker,
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,10 +403,7 @@ class _DoctorPathConnector extends StatelessWidget {
         height: 20,
         margin: const EdgeInsets.only(left: 20),
         alignment: Alignment.topCenter,
-        decoration: BoxDecoration(
-          color: track,
-          borderRadius: BorderRadius.circular(2),
-        ),
+        decoration: BoxDecoration(color: track, borderRadius: AppRadius.full),
         child: FractionallySizedBox(heightFactor: progress, child: _bar(color)),
       );
     }
@@ -416,19 +412,13 @@ class _DoctorPathConnector extends StatelessWidget {
       height: 4,
       margin: const EdgeInsets.only(top: 20),
       alignment: Alignment.centerLeft,
-      decoration: BoxDecoration(
-        color: track,
-        borderRadius: BorderRadius.circular(2),
-      ),
+      decoration: BoxDecoration(color: track, borderRadius: AppRadius.full),
       child: FractionallySizedBox(widthFactor: progress, child: _bar(color)),
     );
   }
 
   Widget _bar(Color color) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(2),
-    ),
+    decoration: BoxDecoration(color: color, borderRadius: AppRadius.full),
   );
 }
 
@@ -455,7 +445,7 @@ _DoctorPathState _connectorState(
   _DoctorPathState state,
 ) {
   final colors = context.colorScheme;
-  final success = Colors.green.harmonizeWith(colors.primary);
+  final success = colors.success;
   final successBackground = Color.alphaBlend(
     success.withValues(alpha: 0.16),
     colors.surfaceContainerHighest,

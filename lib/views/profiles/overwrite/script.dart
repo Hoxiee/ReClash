@@ -32,7 +32,7 @@ class ScriptContent extends ConsumerWidget {
     final scripts = ref.watch(scriptsProvider).value ?? [];
     return SliverMainAxisGroup(
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
         SliverToBoxAdapter(
           child: Column(
             children: [
@@ -40,7 +40,7 @@ class ScriptContent extends ConsumerWidget {
             ],
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

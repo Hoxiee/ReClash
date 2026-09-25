@@ -234,7 +234,7 @@ class _PortDialogState extends ConsumerState<_PortDialog> {
                   onPressed: _handleReset,
                   child: Text(appLocalizations.reset),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 TextButton(
                   onPressed: _handleUpdate,
                   child: Text(appLocalizations.submit),

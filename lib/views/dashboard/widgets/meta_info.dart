@@ -84,7 +84,7 @@ class _SubscriptionCard extends StatelessWidget {
     final ringColor = usedFraction > 0.9
         ? colorScheme.error
         : usedFraction > 0.7
-        ? const Color(0xFFC57F0A)
+        ? cautionColor
         : colorScheme.primary;
 
     final trafficCaption = info == null || hasQuota
@@ -158,7 +158,7 @@ class _SubscriptionCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: AppSpacing.lg),
                     ExcludeSemantics(
                       child: SizedBox.square(
                         dimension: side,
@@ -243,7 +243,7 @@ class _Footer extends StatelessWidget {
                   buyTrafficUrl: buyTrafficUrl,
                 ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Text(
           trafficValue,
           maxLines: 1,
@@ -341,7 +341,13 @@ class _QuotaRingPainter extends CustomPainter {
         colors: [color.withValues(alpha: 0.6), color],
         transform: const GradientRotation(-pi / 2),
       ).createShader(rect);
-    canvas.drawArc(rect, -pi / 2, 2 * pi * fraction.clamp(0.0, 1.0), false, arc);
+    canvas.drawArc(
+      rect,
+      -pi / 2,
+      2 * pi * fraction.clamp(0.0, 1.0),
+      false,
+      arc,
+    );
   }
 
   @override
@@ -392,7 +398,7 @@ class _BuyOfferRow extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (final offer in offers) ...[
-          if (offer != offers.first) const SizedBox(width: 4),
+          if (offer != offers.first) const SizedBox(width: AppSpacing.xs),
           Flexible(
             child: TextButton.icon(
               style: TextButton.styleFrom(
@@ -450,7 +456,7 @@ class _UpdateAction extends ConsumerWidget {
               width: 36,
               height: 36,
               child: Padding(
-                padding: EdgeInsets.all(8),
+                padding: AppInsets.sm,
                 child: CommonCircleLoading(),
               ),
             )

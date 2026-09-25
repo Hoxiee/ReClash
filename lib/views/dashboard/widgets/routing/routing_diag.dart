@@ -195,7 +195,8 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
         buffer.writeln(jsonEncode(entry.toJson()));
       }
       final bytes = Uint8List.fromList(utf8.encode(buffer.toString()));
-      final name = 'reclash-rcx-${DateTime.now().millisecondsSinceEpoch}.ndjson';
+      final name =
+          'reclash-rcx-${DateTime.now().millisecondsSinceEpoch}.ndjson';
       final uri = await picker.saveFile(name, bytes);
       return uri != null;
     }, title: appLocalizations.smartRoutingLogExport);
@@ -294,7 +295,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
               appLocalizations.smartRoutingLogOffTitle,
               style: context.textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               appLocalizations.smartRoutingLogOffHint,
               textAlign: TextAlign.center,
@@ -302,7 +303,7 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.xl),
             FilledButton(
               onPressed: () => ref
                   .read(appSettingProvider.notifier)
@@ -452,7 +453,8 @@ class _DiagEntryTile extends StatelessWidget {
                     ?.copyWith(color: colorScheme.onSurface, height: 1.35)
                     .toJetBrainsMono,
               ),
-              if (entry.kind == 'switch' && (entry.from.isNotEmpty || entry.to.isNotEmpty))
+              if (entry.kind == 'switch' &&
+                  (entry.from.isNotEmpty || entry.to.isNotEmpty))
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
@@ -627,8 +629,7 @@ class _CandidateList extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        for (final candidate in sorted)
-          _CandidateRow(candidate: candidate),
+        for (final candidate in sorted) _CandidateRow(candidate: candidate),
       ],
     );
   }
@@ -702,7 +703,7 @@ class _CandidateRow extends StatelessWidget {
                 )
                 .toJetBrainsMono,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             _detail(),
             style: context.textTheme.labelSmall
@@ -714,7 +715,3 @@ class _CandidateRow extends StatelessWidget {
     );
   }
 }
-
-
-
-

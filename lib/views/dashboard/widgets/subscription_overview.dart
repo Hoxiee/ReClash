@@ -49,9 +49,7 @@ class SubscriptionOverviewView extends ConsumerWidget {
         floatBody: true,
         body: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: SizedBox(height: context.appBarInset),
-            ),
+            SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
             _sliver(
               _sheetCard(
                 _NoticeBody(
@@ -168,7 +166,7 @@ class _NoticeBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GlyphIcon(notice.icon, size: 20, color: tone),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(child: Text(notice.text, style: context.textTheme.bodyMedium)),
       ],
     );
@@ -187,7 +185,7 @@ class _SectionTitle extends StatelessWidget {
     return Row(
       children: [
         GlyphIcon(icon, size: 18, color: colorScheme.primary),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         Text(
           label,
           style: context.textTheme.titleSmall?.copyWith(
@@ -219,7 +217,7 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Flexible(
           child: Text(
             value,
@@ -322,7 +320,7 @@ class _ProviderCard extends ConsumerWidget {
                       ),
                     ),
                     if (displayName != profile.realLabel) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xxs),
                       Text(
                         profile.realLabel,
                         maxLines: 1,
@@ -371,7 +369,7 @@ class _ProviderCard extends ConsumerWidget {
             value: autoUpdateValue,
           ),
           if (!hasFacts && expire <= 0) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               appLocalizations.subscriptionNoQuota,
               style: context.textTheme.bodyMedium?.copyWith(
@@ -412,7 +410,7 @@ class _AnnounceBody extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         SelectionArea(
           child: AnnounceText(
             text: text,
@@ -438,10 +436,7 @@ class _SystemBody extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(
-          icon: AppGlyphs.memory,
-          label: appLocalizations.system,
-        ),
+        _SectionTitle(icon: AppGlyphs.memory, label: appLocalizations.system),
         const SizedBox(height: 14),
         const _MemoryRow(),
         if (!context.isMobileView) ...[

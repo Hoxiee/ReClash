@@ -18,7 +18,7 @@ class _ByeDpiDashboard extends ConsumerWidget {
             showExtend(context, builder: (_) => const DesyncStrategyView());
           },
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,7 +33,7 @@ class _ByeDpiDashboard extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _ByeDpiActionCard(
                   icon: AppGlyphs.settings,
@@ -99,7 +99,7 @@ class _ByeDpiStrategyCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     argsCount,
                     maxLines: 1,
@@ -111,7 +111,7 @@ class _ByeDpiStrategyCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             GlyphIcon(
               AppGlyphs.chevronForward,
               size: 22,
@@ -168,7 +168,7 @@ class _ByeDpiActionCard extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               subtitle,
               maxLines: 1,

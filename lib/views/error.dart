@@ -1,6 +1,7 @@
 import 'package:reclash/common/ui/color.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/ui/shape.dart';
+import 'package:reclash/common/ui/spacing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -34,7 +35,7 @@ class InitErrorScreen extends StatelessWidget {
                     color: colorScheme.error,
                     size: 32,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   const Expanded(
                     child: Text(
                       'The application encountered a critical error during startup and cannot continue.',
@@ -46,11 +47,11 @@ class InitErrorScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               _buildSectionLabel('Error Details:'),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: AppInsets.md,
                 decoration: ShapeDecoration(
                   color: colorScheme.errorContainer.opacity50,
                   shape: RoundedSuperellipseBorder(
@@ -66,11 +67,11 @@ class InitErrorScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
               _buildSectionLabel('Stack Trace:'),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: AppInsets.md,
                 decoration: ShapeDecoration(
                   color: Theme.of(context).brightness == Brightness.dark
                       ? Colors.grey[900]

@@ -225,7 +225,11 @@ class RoutingNotice extends StatelessWidget {
     return RoutingCard(
       child: Row(
         children: [
-          GlyphIcon(icon, size: 18, color: context.colorScheme.onSurfaceVariant),
+          GlyphIcon(
+            icon,
+            size: 18,
+            color: context.colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 10),
           Expanded(child: Text(text, style: context.textTheme.bodyMedium)),
         ],
@@ -342,7 +346,7 @@ class RoutingStat extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label, style: labelStyle),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.xxs),
             Text(value, style: valueStyle),
           ],
         );
@@ -377,7 +381,7 @@ class RoutingTile extends StatelessWidget {
             color: valueColor ?? context.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: AppSpacing.xxs),
         Padding(
           padding: const EdgeInsets.only(right: 10),
           child: Text(
@@ -433,7 +437,7 @@ class RoutingTileGrid extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (var index = 0; index < rows.length; index++) ...[
-          if (index > 0) const SizedBox(height: 16),
+          if (index > 0) const SizedBox(height: AppSpacing.lg),
           rows[index],
         ],
       ],
@@ -725,7 +729,7 @@ class RoutingCandidateRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             switch (delay) {
               > 0 when hosted => '≈$delay ms',
@@ -767,9 +771,7 @@ class RoutingCanaryRow extends StatelessWidget {
       child: Row(
         children: [
           GlyphIcon(
-            canary.answered
-                ? AppGlyphs.checkCircle
-                : AppGlyphs.removeCircle,
+            canary.answered ? AppGlyphs.checkCircle : AppGlyphs.removeCircle,
             size: 16,
             color: canary.answered ? colorScheme.primary : muted,
           ),
@@ -785,7 +787,7 @@ class RoutingCanaryRow extends StatelessWidget {
             ),
           ),
           if (technical) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               canary.domestic
                   ? appLocalizations.smartRoutingCanaryDomestic
@@ -793,7 +795,7 @@ class RoutingCanaryRow extends StatelessWidget {
               style: context.textTheme.labelSmall?.copyWith(color: muted),
             ),
           ],
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             canary.answered
                 ? '${canary.delay} ms'

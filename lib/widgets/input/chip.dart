@@ -49,8 +49,12 @@ class CommonChip extends StatelessWidget {
                 customBorder: const CircleBorder(),
                 onTap: onDeleted,
                 child: Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: GlyphIcon(AppGlyphs.close, size: 14, color: foregroundColor),
+                  padding: AppInsets.xxs,
+                  child: GlyphIcon(
+                    AppGlyphs.close,
+                    size: 14,
+                    color: foregroundColor,
+                  ),
                 ),
               ),
             ),

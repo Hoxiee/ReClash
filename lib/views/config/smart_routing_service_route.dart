@@ -306,7 +306,7 @@ class _ServiceRoutePage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(appLocalizations.smartRoutingServiceFallbackDesc),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       _fallbackText(context, policy.fallback),
                       style: context.textTheme.bodyMedium?.copyWith(

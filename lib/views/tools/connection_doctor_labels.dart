@@ -151,9 +151,9 @@ String connectionDoctorHeroText(
 Color _answerColor(BuildContext context, DoctorAnswerTone tone) {
   final colors = context.colorScheme;
   return switch (tone) {
-    DoctorAnswerTone.good => Colors.green.harmonizeWith(colors.primary),
+    DoctorAnswerTone.good => colors.success,
     DoctorAnswerTone.working => colors.primary,
-    DoctorAnswerTone.warning => Colors.orange.harmonizeWith(colors.primary),
+    DoctorAnswerTone.warning => colors.warning,
     DoctorAnswerTone.bad => colors.error,
     DoctorAnswerTone.neutral => colors.onSurfaceVariant,
   };

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:reclash/icons/icons.dart';
 
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/dav_client.dart';
 import 'package:reclash/enum/enum.dart';
@@ -333,9 +332,7 @@ class _DavConnectionIndicator extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: !isConnected
                           ? context.colorScheme.error
-                          : Colors.green.harmonizeWith(
-                              context.colorScheme.primary,
-                            ),
+                          : context.colorScheme.success,
                     ),
                     width: 12,
                     height: 12,
@@ -403,7 +400,7 @@ class _RestorePreviewDialogState extends State<RestorePreviewDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(appLocalizations.restorePreviewDescription),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             Text(appLocalizations.restoreProfilesCount(summary.profiles)),
             Text(appLocalizations.restoreScriptsCount(summary.scripts)),
             Text(appLocalizations.restoreRulesCount(summary.rules)),
@@ -413,7 +410,7 @@ class _RestorePreviewDialogState extends State<RestorePreviewDialog> {
                   ? appLocalizations.restoreSettingsIncluded
                   : appLocalizations.restoreSettingsNotIncluded,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             RadioGroup<RestoreOption>(
               groupValue: _option,
               onChanged: (value) {

@@ -101,7 +101,8 @@ class _ModeRows extends StatelessWidget {
         );
         final leading = IconTheme.of(context).size ?? Glyph.size;
         final colors = [
-          for (final item in UiOutboundMode.values) _ModeColors.of(context, item),
+          for (final item in UiOutboundMode.values)
+            _ModeColors.of(context, item),
         ];
         return TweenAnimationBuilder<double>(
           tween: Tween(end: UiOutboundMode.values.indexOf(mode).toDouble()),
@@ -186,8 +187,14 @@ class _ModeColors {
         colorScheme.secondaryContainer,
         colorScheme.onSecondaryContainer,
       ),
-      UiOutboundMode.global => _ModeColors.tonal(colorScheme.warning, colorScheme),
-      UiOutboundMode.direct => _ModeColors.tonal(colorScheme.success, colorScheme),
+      UiOutboundMode.global => _ModeColors.tonal(
+        colorScheme.warning,
+        colorScheme,
+      ),
+      UiOutboundMode.direct => _ModeColors.tonal(
+        colorScheme.success,
+        colorScheme,
+      ),
     };
   }
 
@@ -311,7 +318,7 @@ class OutboundModeV2 extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppInsets.md,
                         constraints: const BoxConstraints.expand(),
                         child: CommonTabBar<UiOutboundMode>(
                           children: {
@@ -371,7 +378,7 @@ class _ModeTab extends StatelessWidget {
       alignment: Alignment.center,
       decoration: const BoxDecoration(),
       height: height,
-      padding: const EdgeInsets.all(4),
+      padding: AppInsets.xs,
       child: Text(
         label,
         maxLines: 1,

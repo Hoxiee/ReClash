@@ -96,7 +96,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
       },
       child: SliverMainAxisGroup(
         slivers: [
-          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -113,7 +113,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
                           icon: const GlyphIcon(AppGlyphs.delete),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                     ],
                     CommonMinFilledButtonTheme(
                       child: selectedRules.isNotEmpty
@@ -135,7 +135,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
               ],
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
           SliverReorderableList(
             itemCount: addedRules.length,
             itemBuilder: (_, index) {
@@ -169,7 +169,7 @@ class _StandardContentState extends ConsumerState<StandardContent> {
                 .read(profileAddedRulesProvider(_profileId).notifier)
                 .order,
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           SliverToBoxAdapter(child: _MatchTargetItem(_profileId)),
           SliverToBoxAdapter(
             child: MoreActionButton(

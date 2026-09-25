@@ -70,7 +70,7 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
       children: [
         if (widget.header case final header?) ...[
           header,
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
         ],
         Semantics(
           header: true,
@@ -83,7 +83,7 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
           ),
         ),
         if (widget.subtitle case final subtitle?) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             subtitle,
             textAlign: TextAlign.center,
@@ -92,7 +92,10 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
             ),
           ),
         ],
-        if (widget.body case final body?) ...[const SizedBox(height: 24), body],
+        if (widget.body case final body?) ...[
+          const SizedBox(height: AppSpacing.xxl),
+          body,
+        ],
       ],
     );
   }
@@ -156,7 +159,7 @@ class _SetupStepScaffoldState extends State<SetupStepScaffold> {
     for (var index = 0; index < widget.actions.length; index++) {
       footerChildren.add(TvFocusOutline(child: widget.actions[index]));
       if (index < widget.actions.length - 1) {
-        footerChildren.add(const SizedBox(height: 8));
+        footerChildren.add(const SizedBox(height: AppSpacing.sm));
       }
     }
     return Column(
@@ -316,7 +319,7 @@ class SetupSectionLabel extends StatelessWidget {
           ),
         ),
         if (description case final description?) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
@@ -349,7 +352,7 @@ class SetupSection extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       SetupSectionLabel(caption: caption, description: description),
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpacing.sm),
       child,
     ],
   );

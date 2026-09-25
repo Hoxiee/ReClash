@@ -296,7 +296,11 @@ class _SpeedEntry extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GlyphIcon(icon, size: 15, color: accent ?? colorScheme.onSurfaceVariant),
+        GlyphIcon(
+          icon,
+          size: 15,
+          color: accent ?? colorScheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 6),
         Text(
           show != null ? show.value : '—',
@@ -305,7 +309,7 @@ class _SpeedEntry extends StatelessWidget {
             fontFamily: FontFamily.jetBrainsMono.value,
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           show != null ? '${show.unit}/s' : '',
           style: context.textTheme.bodySmall?.copyWith(

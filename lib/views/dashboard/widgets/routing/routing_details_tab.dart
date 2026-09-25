@@ -270,7 +270,7 @@ class RoutingStepTile extends StatelessWidget {
                       ),
                     ],
                     if (data.chips.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Wrap(spacing: 6, runSpacing: 6, children: data.chips),
                     ],
                     if (child != null)
@@ -376,7 +376,7 @@ class RoutingReliabilityCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               RoutingCaption(text: appLocalizations.smartRoutingAvailability),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 appLocalizations.smartRoutingAvailabilityValue(
                   metrics.availability,
@@ -478,7 +478,7 @@ class RoutingSafeguardList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         RoutingCaption(text: label),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         ...items.map(
           (item) => Padding(
             padding: const EdgeInsets.only(bottom: 4),
@@ -493,7 +493,7 @@ class RoutingSafeguardList extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     item,

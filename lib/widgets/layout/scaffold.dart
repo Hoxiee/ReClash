@@ -36,10 +36,12 @@ class CommonScaffold extends ConsumerStatefulWidget {
   final AppBarSearchState? searchState;
   final OnKeywordsUpdateCallback? onKeywordsUpdate;
   final bool? resizeToAvoidBottomInset;
+
   /// When true the body reaches under the floating bar and owns its own
   /// top clearance via `context.appBarInset`; otherwise the scaffold insets
   /// the body so its content rests below the bar.
   final bool floatBody;
+
   /// A page's chief action: a FAB on its own, riding into the bar where a dock owns the FAB corner.
   final IconButtonData? primaryAction;
   final bool foldPrimaryAction;
@@ -481,9 +483,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
                       ),
                     ),
                   );
-                  return isBottomSheet
-                      ? appBar
-                      : _buildFloatingHeader(appBar);
+                  return isBottomSheet ? appBar : _buildFloatingHeader(appBar);
                 },
               ),
           ValueListenableBuilder(
@@ -509,8 +509,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final isTV = widget.isTV ?? system.isTV;
     final bottomInset = BottomInsetScope.of(context);
     final primaryAction = widget.primaryAction;
-    final actionInBar =
-        isBottomSheet || (!isTV && DockedPageScope.of(context));
+    final actionInBar = isBottomSheet || (!isTV && DockedPageScope.of(context));
     final fabSlot = actionInBar
         ? null
         : widget.floatingActionButton ??
@@ -551,15 +550,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       );
     }
     final barFloats = widget.appBar == null;
-    final appBarInset =
-        MediaQuery.paddingOf(context).top + pageToolbarHeight;
+    final appBarInset = MediaQuery.paddingOf(context).top + pageToolbarHeight;
     final scrollsUnder = barFloats && widget.floatBody;
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isTV && fabSlot != null)
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppInsets.lg,
             child: CommonScaffoldFabExtendedProvider(
               isExtended: true,
               child: fabSlot,
@@ -817,7 +815,7 @@ List<Widget> genActions(
 }) {
   return <Widget>[
     ...actions.separated(SizedBox(width: space ?? edge?.gap ?? 4)),
-    edge == null ? const SizedBox(width: 8) : _ActionEdgeGap(edge),
+    edge == null ? const SizedBox(width: AppSpacing.sm) : _ActionEdgeGap(edge),
   ];
 }
 
@@ -858,9 +856,7 @@ class DockedPageScope extends InheritedWidget {
   final bool docked;
 
   static bool of(BuildContext context) =>
-      context
-          .dependOnInheritedWidgetOfExactType<DockedPageScope>()
-          ?.docked ??
+      context.dependOnInheritedWidgetOfExactType<DockedPageScope>()?.docked ??
       false;
 
   @override
@@ -912,8 +908,7 @@ _foldBarActions({
 }) {
   final foldable = [?primary, ...icons];
   final fixed = (hasLead ? 1 : 0) + widgetCount;
-  if (fixed + foldable.length + (menuItems.isEmpty ? 0 : 1) <=
-      _maxBarButtons) {
+  if (fixed + foldable.length + (menuItems.isEmpty ? 0 : 1) <= _maxBarButtons) {
     return (shown: foldable, overflow: menuItems);
   }
   final slots = _maxBarButtons - 1 - fixed;
@@ -922,7 +917,10 @@ _foldBarActions({
       .toList();
   bool isKept(IconButtonData data) => kept.any((it) => identical(it, data));
   return (
-    shown: [for (final data in foldable) if (isKept(data)) data],
+    shown: [
+      for (final data in foldable)
+        if (isKept(data)) data,
+    ],
     overflow: [
       for (final data in foldable)
         if (!isKept(data))
@@ -969,7 +967,7 @@ class AppBarActionButton extends StatelessWidget {
           ? SizedBox.square(
               dimension: TonalButtonSize.bar.icon,
               child: const Padding(
-                padding: EdgeInsets.all(2),
+                padding: AppInsets.xxs,
                 child: CommonCircleLoading(),
               ),
             )

@@ -128,7 +128,7 @@ class _ProxiesListViewState extends ConsumerState<ProxiesListView> {
           );
         })
         .fill(columns, filler: (_) => const Flexible(child: SizedBox()))
-        .separated(const SizedBox(width: 8));
+        .separated(const SizedBox(width: AppSpacing.sm));
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
       child: Row(children: children.toList()),
@@ -508,7 +508,7 @@ class _GroupSummary extends StatelessWidget {
           groupDisplayName(groupName),
           style: context.textTheme.titleMedium,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xs),
         Flexible(flex: 1, child: _SelectedProxyName(groupName: groupName)),
       ],
     );
@@ -564,18 +564,18 @@ class _GroupActions extends StatelessWidget {
           IconButton(
             tooltip: context.appLocalizations.scrollToSelected,
             visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.all(2),
+            padding: AppInsets.xxs,
             onPressed: onScrollToSelected,
             style: _shrinkWrap,
             iconSize: 19,
             icon: const GlyphIcon(AppGlyphs.target),
           ),
-          const SizedBox(width: 2),
+          const SizedBox(width: AppSpacing.xxs),
           IconButton(
             tooltip: context.appLocalizations.delayTest,
             iconSize: 20,
             visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.all(2),
+            padding: AppInsets.xxs,
             onPressed: onDelayTest,
             style: _shrinkWrap,
             icon: const GlyphIcon(AppGlyphs.networkCheck),
@@ -590,7 +590,7 @@ class _GroupActions extends StatelessWidget {
               ? context.appLocalizations.showLess
               : context.appLocalizations.showMore,
           visualDensity: VisualDensity.compact,
-          padding: const EdgeInsets.all(2),
+          padding: AppInsets.xxs,
           iconSize: 24,
           style: _shrinkWrap,
           onPressed: onToggle,

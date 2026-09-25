@@ -20,7 +20,10 @@ class IntranetIP extends StatelessWidget {
         infoPadding: DashboardWidgetMetrics.paddingOf(
           context,
         ).copyWith(bottom: 0),
-        info: Info(label: appLocalizations.intranetIP, glyph: AppGlyphs.devices),
+        info: Info(
+          label: appLocalizations.intranetIP,
+          glyph: AppGlyphs.devices,
+        ),
         onPressed: () {},
         child: Container(
           padding: DashboardWidgetMetrics.paddingOf(context).copyWith(top: 0),
@@ -50,7 +53,7 @@ class IntranetIP extends StatelessWidget {
                               ),
                             )
                           : Container(
-                              padding: const EdgeInsets.all(2),
+                              padding: AppInsets.xxs,
                               child: const AspectRatio(
                                 aspectRatio: 1,
                                 child: CommonCircleLoading(),

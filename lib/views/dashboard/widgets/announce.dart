@@ -25,7 +25,7 @@ class Announce extends ConsumerWidget {
       builder: (_) => AdaptiveSheetScaffold(
         title: context.appLocalizations.announce,
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: AppInsets.lg,
           child: SelectionArea(child: AnnounceText(text: text, links: true)),
         ),
       ),

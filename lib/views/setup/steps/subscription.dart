@@ -179,7 +179,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
           if (profiles.isEmpty)
             SetupCard(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: AppInsets.lg,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 4,
@@ -227,7 +227,7 @@ class _AddedProfile extends StatelessWidget {
     final tone = warning ? colorScheme.error : colorScheme.primary;
     return SetupCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppInsets.lg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -235,9 +235,7 @@ class _AddedProfile extends StatelessWidget {
               spacing: 8,
               children: [
                 GlyphIcon(
-                  warning
-                      ? AppGlyphs.warning
-                      : AppGlyphs.checkCircle,
+                  warning ? AppGlyphs.warning : AppGlyphs.checkCircle,
                   size: 20,
                   color: tone,
                 ),
@@ -256,14 +254,14 @@ class _AddedProfile extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               appLocalizations.setupProfilesReady(count),
               style: context.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
             SubscriptionInfoView(subscriptionInfo: profile.subscriptionInfo),
           ],
         ),

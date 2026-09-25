@@ -362,7 +362,11 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                         ),
                       );
                     },
-                    icon: GlyphIcon(AppGlyphs.info, size: 16.ap, color: foregroundColor),
+                    icon: GlyphIcon(
+                      AppGlyphs.info,
+                      size: 16.ap,
+                      color: foregroundColor,
+                    ),
                   ),
                 ),
               Flexible(
@@ -378,7 +382,7 @@ class _AddOrEditRuleViewState extends ConsumerState<_AddOrEditRuleView> {
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xs),
               GlyphIcon(AppGlyphs.chevronForward, color: foregroundColor),
             ],
           ),

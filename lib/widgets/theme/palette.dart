@@ -67,7 +67,7 @@ class _PaletteState extends State<Palette> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _HueSlider(hue: _hue, onChanged: _onHueChanged),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               _ChromaSlider(
                 hue: _hue,
                 chroma: _chroma,
@@ -80,7 +80,7 @@ class _PaletteState extends State<Palette> {
                 selectedTone: _tone,
                 onToneSelected: _onToneSelected,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               InfoHeader(info: Info(label: context.appLocalizations.preview)),
               PrimaryColorBox(
                 primaryColor: widget.controller.value,

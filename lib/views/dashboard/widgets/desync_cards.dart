@@ -38,7 +38,7 @@ class DesyncStrategyCard extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             appLocalizations.desyncArgsCount(props.strategyArgs.length),
             maxLines: 1,
@@ -75,7 +75,7 @@ class DesyncTestCard extends ConsumerWidget {
         children: [
           if (props.testRunning) ...[
             const SizedBox.square(dimension: 14, child: CommonCircleLoading()),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
             child: TooltipText(
@@ -127,7 +127,7 @@ class DesyncEngineCard extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             '127.0.0.1:${props.port}',
             maxLines: 1,

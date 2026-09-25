@@ -55,7 +55,7 @@ class NetworkDetection extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             if (ipInfo != null)
               Text(
                 ipInfo.ip,

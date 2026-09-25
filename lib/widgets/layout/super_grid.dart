@@ -596,7 +596,7 @@ class _DeletableContainer extends StatelessWidget {
                 child: IconButton.filled(
                   tooltip: context.appLocalizations.remove,
                   iconSize: 16,
-                  padding: const EdgeInsets.all(4),
+                  padding: AppInsets.xs,
                   onPressed: onDelete,
                   icon: const GlyphIcon(AppGlyphs.close, fill: 1),
                 ),

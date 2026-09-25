@@ -359,14 +359,14 @@ class NotificationComponentSettings extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
           ],
           if (options.isNotEmpty) ...[
             generateSectionV3(
               title: l.notificationComponentBehaviour,
               items: options,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
           ],
           generateSectionV3(
             items: [

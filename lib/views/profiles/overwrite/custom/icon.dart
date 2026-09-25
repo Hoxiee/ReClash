@@ -186,7 +186,7 @@ class _IconEditViewState extends ConsumerState<IconEditView>
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: _IconSrcRow(
@@ -221,7 +221,7 @@ class _IconEditViewState extends ConsumerState<IconEditView>
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.xl),
               ],
             );
           },
@@ -307,7 +307,7 @@ class _IconPreview extends StatelessWidget {
                         ? CommonCard(
                             type: CommonCardType.filled,
                             radius: AppCorner.md,
-                            padding: const EdgeInsets.all(8),
+                            padding: AppInsets.sm,
                             child: CommonImage(
                               isSvg: srcController.text.isSvg,
                               data: file,

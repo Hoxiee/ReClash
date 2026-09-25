@@ -182,7 +182,7 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
                             style: context.textTheme.bodyMedium?.toLight
                                 .adjustSize(1),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           Text(
                             traffic.unit,
                             style: context.textTheme.bodyMedium?.toLight
@@ -417,7 +417,7 @@ class _MemoryOverview extends StatelessWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
@@ -438,14 +438,14 @@ class _MemoryOverview extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _MemoryBar(
             segments: [
               (bytes: snapshot.app, color: colorScheme.primary),
               (bytes: snapshot.coreTotal, color: colorScheme.tertiary),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             snapshot.coreInProcess
                 ? appLocalizations.memoryEstimateSharedDesc

@@ -181,7 +181,7 @@ class _NameListEditorState extends ConsumerState<NameListEditor>
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverToBoxAdapter(
@@ -211,7 +211,7 @@ class _NameListEditorState extends ConsumerState<NameListEditor>
                 hasScrollBody: false,
                 child: NullStatus(label: widget.labels.empty),
               ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           ],
         ),
       ),

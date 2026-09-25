@@ -284,15 +284,15 @@ void main() {
       matching: find.byType(Tooltip),
     );
 
-    var labels = await pumpLabels('Settings');
+    var labels = await pumpLabels('Dashboard');
     final shrunk = labels.first.style!.fontSize!;
-    expect(shrunk, lessThan(11));
-    expect(shrunk, greaterThan(10));
+    expect(shrunk, lessThan(10));
+    expect(shrunk, greaterThan(9));
     expect(labels.map((text) => text.style!.fontSize).toSet(), {shrunk});
     expect(tooltips, findsNothing);
 
     labels = await pumpLabels('Configuration');
-    expect(labels.first.style!.fontSize, closeTo(10, 0.001));
+    expect(labels.first.style!.fontSize, closeTo(9, 0.001));
     expect(tester.widget<Tooltip>(tooltips).message, 'Configuration');
   });
 

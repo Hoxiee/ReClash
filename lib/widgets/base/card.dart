@@ -59,7 +59,7 @@ class InfoHeader extends StatelessWidget {
                     info.glyph!,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                 ],
                 Flexible(
                   flex: 1,
@@ -77,7 +77,7 @@ class InfoHeader extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           if (actions.isNotEmpty)
             SizedBox(
               height: globalState.measure.titleSmallHeight + 16.ap,
@@ -419,7 +419,7 @@ class SelectIcon extends StatelessWidget {
       color: Theme.of(context).colorScheme.inversePrimary,
       shape: AppShape.circle,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: AppInsets.xs,
         child: const GlyphIcon(AppGlyphs.check, size: 16),
       ),
     );
@@ -435,7 +435,7 @@ class SettingsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: AppInsets.sm,
       child: Column(
         children: [
           InfoHeader(info: Info(label: title)),

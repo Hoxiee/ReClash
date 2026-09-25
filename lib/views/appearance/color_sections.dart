@@ -499,13 +499,16 @@ class _PrimaryColorTile extends StatelessWidget {
           if (isRemovable)
             Container(
               color: Colors.white.opacity0,
-              padding: const EdgeInsets.all(8),
+              padding: AppInsets.sm,
               child: IconButton.filledTonal(
                 tooltip: context.appLocalizations.delete,
                 onPressed: onDelete,
-                padding: const EdgeInsets.all(12),
+                padding: AppInsets.md,
                 iconSize: 30,
-                icon: GlyphIcon(color: context.colorScheme.primary, AppGlyphs.delete),
+                icon: GlyphIcon(
+                  color: context.colorScheme.primary,
+                  AppGlyphs.delete,
+                ),
               ),
             ),
         ],
@@ -525,7 +528,7 @@ class _AddPrimaryColorTile extends StatelessWidget {
     return Container(
       width: width,
       height: width,
-      padding: const EdgeInsets.all(4),
+      padding: AppInsets.xs,
       child: IconButton.filledTonal(
         tooltip: context.appLocalizations.add,
         onPressed: onPressed,
@@ -560,7 +563,7 @@ class _AppIconTile extends StatelessWidget {
         isSelected: isSelected,
         onPressed: onPressed,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: AppInsets.md,
           child: Column(
             spacing: 8,
             children: [
@@ -618,7 +621,7 @@ class _AppIconPreviewDialog extends StatelessWidget {
               shape: AppShape.xxl,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: AppInsets.xxl,
               child: ClipRSuperellipse(
                 borderRadius: AppRadius.xxl,
                 child: Image.asset(asset, width: 220, height: 220),

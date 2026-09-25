@@ -270,7 +270,7 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
                         onPressed: isUpdating ? () {} : open,
                         icon: isUpdating
                             ? const Padding(
-                                padding: EdgeInsets.all(12),
+                                padding: AppInsets.md,
                                 child: CommonCircleLoading(),
                               )
                             : const GlyphIcon(AppGlyphs.more),

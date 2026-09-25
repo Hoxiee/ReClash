@@ -189,7 +189,7 @@ class _DashboardStyleCard extends StatelessWidget {
       isSelected: isSelected,
       onPressed: onPressed,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: AppInsets.md,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 10,
@@ -295,7 +295,7 @@ class _Panel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: height,
-      padding: const EdgeInsets.all(4),
+      padding: AppInsets.xs,
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
         borderRadius: AppRadius.all(AppCorner.xs + 2),
@@ -533,11 +533,7 @@ class _StartButton extends StatelessWidget {
         color: colorScheme.primary,
         borderRadius: AppRadius.all(AppCorner.xs + 1),
       ),
-      child: GlyphIcon(
-        AppGlyphs.play,
-        size: 11,
-        color: colorScheme.onPrimary,
-      ),
+      child: GlyphIcon(AppGlyphs.play, size: 11, color: colorScheme.onPrimary),
     );
   }
 }
@@ -606,7 +602,7 @@ class _HeroPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.xxs),
           const Center(child: _Orb()),
           const SizedBox(height: 5),
           Center(
@@ -616,7 +612,7 @@ class _HeroPreview extends StatelessWidget {
               color: colorScheme.onSurface.opacity30,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           const Center(child: _Bar(width: 28)),
           const SizedBox(height: 5),
           const _HeroSpeedRow(),

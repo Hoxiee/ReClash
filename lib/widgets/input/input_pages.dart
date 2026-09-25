@@ -369,7 +369,7 @@ class ListEditingController extends ChangeNotifier {
             icon: const GlyphIcon(AppGlyphs.delete),
           ),
         ),
-        const SizedBox(width: 2),
+        const SizedBox(width: AppSpacing.xxs),
       ] else if (!stringListEquality.equals(_items, _originItems)) ...[
         CommonMinIconButtonTheme(
           child: IconButton.filledTonal(
@@ -378,7 +378,7 @@ class ListEditingController extends ChangeNotifier {
             icon: const GlyphIcon(AppGlyphs.reset),
           ),
         ),
-        const SizedBox(width: 2),
+        const SizedBox(width: AppSpacing.xxs),
       ],
       CommonMinFilledButtonTheme(
         child: _selection.isNotEmpty
@@ -391,7 +391,7 @@ class ListEditingController extends ChangeNotifier {
                 child: Text(appLocalizations.add),
               ),
       ),
-      const SizedBox(width: 8),
+      const SizedBox(width: AppSpacing.sm),
     ];
   }
 }
@@ -590,7 +590,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
                 icon: const GlyphIcon(AppGlyphs.delete),
               ),
             ),
-            const SizedBox(width: 2),
+            const SizedBox(width: AppSpacing.xxs),
           ] else if (!stringAndStringMapEntryListEquality.equals(
             _items,
             _originItems,
@@ -602,7 +602,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
                 icon: const GlyphIcon(AppGlyphs.reset),
               ),
             ),
-            const SizedBox(width: 2),
+            const SizedBox(width: AppSpacing.xxs),
           ],
           CommonMinFilledButtonTheme(
             child: selectedItems.isNotEmpty
@@ -617,7 +617,7 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
                     child: Text(appLocalizations.add),
                   ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
         ],
         body: NullStatusSwitcher(
           isEmpty: _items.isEmpty,

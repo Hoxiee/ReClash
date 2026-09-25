@@ -58,13 +58,13 @@ class CustomContent extends ConsumerWidget {
     final hasDefaultRules = defaults.hasRules;
     return SliverMainAxisGroup(
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
         SliverToBoxAdapter(
           child: Column(
             children: [InfoHeader(info: Info(label: appLocalizations.custom))],
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
         SliverToBoxAdapter(
           child: MoreActionButton(
             label: appLocalizations.proxyGroup,
@@ -74,7 +74,7 @@ class CustomContent extends ConsumerWidget {
             trailing: _CountBadge(count: proxyGroupNum),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 4)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xs)),
         SliverToBoxAdapter(
           child: MoreActionButton(
             label: appLocalizations.rule,
@@ -84,7 +84,7 @@ class CustomContent extends ConsumerWidget {
             trailing: _CountBadge(count: ruleNum),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
         if ((proxyGroupNum == 0 && hasDefaultGroups) ||
             (ruleNum == 0 && hasDefaultRules) ||
             kDebugMode)
@@ -136,7 +136,7 @@ class _QuickFillBanner extends StatelessWidget {
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: const ShapeDecoration(shape: AppShape.md),
-        margin: const EdgeInsets.all(12),
+        margin: AppInsets.md,
         child: MaterialBanner(
           elevation: 0,
           dividerColor: Colors.transparent,

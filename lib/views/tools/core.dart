@@ -1,4 +1,3 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
@@ -80,9 +79,7 @@ class _CoreSectionState extends ConsumerState<CoreSection> {
     final status = ref.watch(coreStatusProvider);
     final l10n = context.appLocalizations;
     final color = switch (status) {
-      CoreStatus.connected => Colors.green.harmonizeWith(
-        context.colorScheme.primary,
-      ),
+      CoreStatus.connected => context.colorScheme.success,
       CoreStatus.connecting => context.colorScheme.primary,
       CoreStatus.disconnected => context.colorScheme.onSurfaceVariant,
     };

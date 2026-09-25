@@ -38,11 +38,7 @@ class SmartRoutingCard extends ConsumerWidget {
             status: status,
             doctor: ref.watch(connectionDoctorProvider),
           )
-        : (
-            icon: AppGlyphs.pause,
-            text: appLocalizations.off,
-            accented: false,
-          );
+        : (icon: AppGlyphs.pause, text: appLocalizations.off, accented: false);
     final color = view.accented
         ? context.colorScheme.primary
         : context.colorScheme.onSurfaceVariant;
@@ -58,7 +54,7 @@ class SmartRoutingCard extends ConsumerWidget {
           key: ValueKey(view.text),
           children: [
             GlyphIcon(view.icon, size: 18, color: color),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: TooltipText(
                 text: Text(

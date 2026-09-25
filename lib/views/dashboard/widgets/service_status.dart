@@ -52,7 +52,10 @@ Color _statusColor(BuildContext context, ServiceProbeStatus status) {
   };
 }
 
-(String, Color) _statusOf(BuildContext context, ProbeEntry<ServiceCheck> entry) {
+(String, Color) _statusOf(
+  BuildContext context,
+  ProbeEntry<ServiceCheck> entry,
+) {
   final l = context.appLocalizations;
   final check = entry.value;
   if (entry.isLoading) {
@@ -649,7 +652,7 @@ class ServiceManageView extends ConsumerWidget {
                 onReorderItem: reorder,
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
           ],
         ),
       ),
@@ -696,7 +699,7 @@ class _ServiceManageItem extends StatelessWidget {
               index: index,
               child: Container(
                 color: Colors.transparent,
-                padding: const EdgeInsets.all(12),
+                padding: AppInsets.md,
                 child: const GlyphIcon(AppGlyphs.dragHandle),
               ),
             ),
@@ -853,7 +856,9 @@ class _ServicePickerState extends State<_ServicePicker> {
                                       height: 28,
                                       semanticsLabel: target.label,
                                       colorFilter: ColorFilter.mode(
-                                        context.colorScheme.onSecondaryContainer,
+                                        context
+                                            .colorScheme
+                                            .onSecondaryContainer,
                                         BlendMode.srcIn,
                                       ),
                                     ),

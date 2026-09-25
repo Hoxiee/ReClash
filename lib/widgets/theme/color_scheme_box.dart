@@ -1,6 +1,7 @@
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/ui/shape.dart';
+import 'package:reclash/common/ui/spacing.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,7 +39,7 @@ class ColorSchemeBox extends StatelessWidget {
                     child: const SelectIcon(),
                   ),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: AppInsets.sm,
                     child: ClipRSuperellipse(
                       borderRadius: AppRadius.full,
                       child: SizedBox(

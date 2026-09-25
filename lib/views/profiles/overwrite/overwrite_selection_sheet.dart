@@ -194,7 +194,9 @@ class _OverwriteSelectionSheetState<T>
                       child: InfoHeader(info: Info(label: section.label!)),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 4)),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppSpacing.xs),
+                  ),
                 ],
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -216,7 +218,7 @@ class _OverwriteSelectionSheetState<T>
                   ),
                 ),
               ],
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
             ],
           ),
         ),

@@ -113,7 +113,7 @@ class _ProvidersViewState extends ConsumerState<ProvidersView> {
             title: appLocalizations.rules,
             providers: ruleProviders,
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
         ],
       ),
       title: appLocalizations.providers,
@@ -249,7 +249,7 @@ class ProviderItem extends ConsumerWidget {
               onPressed: isUpdating ? () {} : open,
               icon: isUpdating
                   ? const Padding(
-                      padding: EdgeInsets.all(12),
+                      padding: AppInsets.md,
                       child: CommonCircleLoading(),
                     )
                   : const GlyphIcon(AppGlyphs.more),

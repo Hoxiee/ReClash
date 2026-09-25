@@ -191,7 +191,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.grey,
               ),
-              padding: const EdgeInsets.all(16),
+              padding: AppInsets.lg,
               iconSize: 32.0,
               onPressed: () async {
                 final result = await globalState.safeRun(
@@ -227,7 +227,7 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
       color: Colors.black,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: AppInsets.xxxl,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -236,14 +236,14 @@ class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
                 color: Colors.white,
                 size: 48,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white),
               ),
               if (canOpenSettings) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 FilledButton(
                   onPressed: () => unawaited(app!.openAppSettings()),
                   child: Text(l10n.setupPermissionOpenSettings),

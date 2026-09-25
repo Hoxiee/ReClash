@@ -456,9 +456,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
             child: Row(
               children: [
                 GlyphIcon(
-                  matched
-                      ? AppGlyphs.pause
-                      : AppGlyphs.locate,
+                  matched ? AppGlyphs.pause : AppGlyphs.locate,
                   size: 18,
                   color: matched
                       ? colorScheme.primary
@@ -492,7 +490,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
       title: appLocalizations.trustedNetworks,
       subTitle: appLocalizations.trustedNetworksDesc,
       actions: [
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         if (hasSelection)
           CommonMinIconButtonTheme(
             child: IconButton.filledTonal(
@@ -501,7 +499,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
               icon: const GlyphIcon(AppGlyphs.delete),
             ),
           ),
-        const SizedBox(width: 2),
+        const SizedBox(width: AppSpacing.xxs),
         CommonMinFilledButtonTheme(
           child: hasSelection
               ? FilledButton(
@@ -560,7 +558,7 @@ class _SmartPauseViewState extends ConsumerState<SmartPauseView>
         slivers: [
           SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
           SliverToBoxAdapter(child: _buildPrerequisites()),
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
           SliverToBoxAdapter(child: _buildSwitches()),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -566,7 +566,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                   ? context.colorScheme.primary
                   : context.colorScheme.outline,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 enable
@@ -579,7 +579,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             if (enable)
               Semantics(
                 label: appLocalizations.selected,
@@ -637,7 +637,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                   ? Column(
                       children: [
                         _buildSearchField(query),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         _buildFilterBar(accessControl),
                       ],
                     )
@@ -645,7 +645,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(flex: 3, child: _buildSearchField(query)),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
                           flex: 4,
                           child: _buildFilterBar(accessControl),
@@ -658,18 +658,18 @@ class _AccessViewState extends ConsumerState<AccessView> {
               children: [
                 if (isCompact) ...[
                   modeTabs,
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   status,
                 ] else
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(flex: 3, child: modeTabs),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.md),
                       Expanded(flex: 2, child: status),
                     ],
                   ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 searchAndFilters,
               ],
             );
@@ -809,7 +809,7 @@ class _AccessModeTab extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GlyphIcon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Flexible(
             child: Text(
               label,

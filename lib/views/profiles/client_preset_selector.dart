@@ -51,10 +51,10 @@ class ClientPresetSelector extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Wrap(spacing: 8, runSpacing: 8, children: chips),
         if (compatibilityProfile) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             appLocalizations.subscriptionClientExperimentalTip,
             style: context.textTheme.bodySmall?.toLighter,
@@ -62,7 +62,7 @@ class ClientPresetSelector extends StatelessWidget {
         ],
         if (selected == SubscriptionClient.custom &&
             customUserAgentController != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             controller: customUserAgentController,
             keyboardType: TextInputType.text,

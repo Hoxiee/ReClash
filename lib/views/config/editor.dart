@@ -535,7 +535,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
               constraints: const BoxConstraints(maxWidth: 360),
               child: _buildFindInput(context, value),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
           ],
           Text(result, style: context.textTheme.bodyMedium),
           Expanded(
@@ -561,7 +561,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
                   icon: AppGlyphs.arrowDown,
                   tooltip: context.appLocalizations.nextMatch,
                 ),
-                const SizedBox(width: 2),
+                const SizedBox(width: AppSpacing.xxs),
                 IconButton.filledTonal(
                   tooltip: context.appLocalizations.close,
                   onPressed: controller.close,
@@ -579,7 +579,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           bar,
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           _buildFindInput(context, value),
         ],
       );
@@ -622,7 +622,7 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
             controller.toggleRegex();
           },
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
       ],
     );
   }
@@ -665,12 +665,12 @@ class FindPanel extends StatelessWidget implements PreferredSizeWidget {
         child: isSelected
             ? IconButton.filledTonal(
                 onPressed: onPressed,
-                padding: const EdgeInsets.all(2),
+                padding: AppInsets.xxs,
                 icon: Text(text, style: context.textTheme.bodySmall),
               )
             : IconButton(
                 onPressed: onPressed,
-                padding: const EdgeInsets.all(2),
+                padding: AppInsets.xxs,
                 icon: Text(text, style: context.textTheme.bodySmall),
               ),
       ),
