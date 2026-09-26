@@ -19,6 +19,7 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   int startCalls = 0;
   int stopCalls = 0;
   int disposeCalls = 0;
+  bool denyPermission = false;
 
   void emit(BarcodeCapture capture) => _barcodes.add(capture);
 
@@ -37,6 +38,14 @@ class _FakeScannerPlatform extends MobileScannerPlatform {
   @override
   Future<MobileScannerViewAttributes> start(StartOptions startOptions) async {
     startCalls++;
+    if (denyPermission) {
+      throw const MobileScannerException(
+        errorCode: MobileScannerErrorCode.permissionDenied,
+        errorDetails: MobileScannerErrorDetails(
+          message: 'Camera permission denied.',
+        ),
+      );
+    }
     return const MobileScannerViewAttributes(
       cameraDirection: CameraFacing.back,
       currentTorchMode: TorchState.off,
@@ -229,6 +238,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result, 'incy://subscription');
+    });
+  });
+
+  group('ScanPage camera permission', () {
+    testWidgets('a denied camera is requested once, not in a retry loop', (
+      tester,
+    ) async {
+      platform.denyPermission = true;
+      await pumpScanPage(tester, onPopped: (_) {});
+
+      // The old loop called start() five times, re-prompting on each attempt.
+      expect(platform.startCalls, 1);
+    });
+
+    testWidgets('the permission error offers a working retry', (tester) async {
+      platform.denyPermission = true;
+      await pumpScanPage(tester, onPopped: (_) {});
+      expect(platform.startCalls, 1);
+      expect(find.widgetWithText(FilledButton, 'Allow'), findsOneWidget);
+
+      platform.denyPermission = false;
+      await tester.tap(find.widgetWithText(FilledButton, 'Allow'));
+      await tester.pumpAndSettle();
+
+      expect(platform.startCalls, 2);
+      expect(find.widgetWithText(FilledButton, 'Allow'), findsNothing);
     });
   });
 

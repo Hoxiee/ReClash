@@ -69,8 +69,19 @@ class _ScanPageState extends State<ScanPage>
       if (!mounted || controller.value.isRunning) {
         return;
       }
+      // Retrying a denied or unsupported camera only re-spams the permission dialog.
+      final errorCode = controller.value.error?.errorCode;
+      if (errorCode == MobileScannerErrorCode.permissionDenied ||
+          errorCode == MobileScannerErrorCode.unsupported) {
+        return;
+      }
       await Future<void>.delayed(const Duration(milliseconds: 300));
     }
+  }
+
+  Future<void> _retryScanner() async {
+    _listenBarcodes();
+    await _startScanner();
   }
 
   void _listenBarcodes() {
@@ -134,14 +145,20 @@ class _ScanPageState extends State<ScanPage>
               ),
             ),
           ),
-          AnimatedBuilder(
-            animation: _sweep,
-            builder: (context, _) {
-              return CustomPaint(
-                painter: ScannerOverlay(
-                  scanWindow: scanWindow,
-                  sweep: _sweep.value,
-                  accent: context.colorScheme.primary,
+          ValueListenableBuilder<MobileScannerState>(
+            valueListenable: controller,
+            builder: (context, state, _) {
+              if (state.error != null) {
+                return const SizedBox.shrink();
+              }
+              return AnimatedBuilder(
+                animation: _sweep,
+                builder: (context, _) => CustomPaint(
+                  painter: ScannerOverlay(
+                    scanWindow: scanWindow,
+                    sweep: _sweep.value,
+                    accent: context.colorScheme.primary,
+                  ),
                 ),
               );
             },
@@ -165,6 +182,9 @@ class _ScanPageState extends State<ScanPage>
                     builder: (context, state, _) {
                       final available =
                           state.torchState != TorchState.unavailable;
+                      if (state.error != null || !available) {
+                        return const SizedBox.shrink();
+                      }
                       final active =
                           state.torchState == TorchState.on ||
                           state.torchState == TorchState.auto;
@@ -177,9 +197,7 @@ class _ScanPageState extends State<ScanPage>
                         tooltip: context.appLocalizations.torch,
                         glyph: glyph,
                         active: active,
-                        onPressed: available
-                            ? () => controller.toggleTorch()
-                            : null,
+                        onPressed: () => controller.toggleTorch(),
                       );
                     },
                   ),
@@ -221,13 +239,23 @@ class _ScanPageState extends State<ScanPage>
         status = NullStatus(
           label: l10n.cameraPermissionRequired,
           illustration: NullStatusIllustration.permission,
-          action: app != null
-              ? FilledButton.tonalIcon(
+          action: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FilledButton.icon(
+                onPressed: () => unawaited(_retryScanner()),
+                icon: const GlyphIcon(AppGlyphs.refresh, fill: 1),
+                label: Text(l10n.setupPermissionRequest),
+              ),
+              if (app != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
                   onPressed: () => unawaited(app!.openAppSettings()),
-                  icon: const GlyphIcon(AppGlyphs.settings, fill: 1),
-                  label: Text(l10n.setupPermissionOpenSettings),
-                )
-              : null,
+                  child: Text(l10n.setupPermissionOpenSettings),
+                ),
+              ],
+            ],
+          ),
         );
       case MobileScannerErrorCode.unsupported:
         status = NullStatus(
