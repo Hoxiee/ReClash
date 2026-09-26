@@ -482,7 +482,7 @@ class _ServiceRow extends StatelessWidget {
           if (loading)
             const SizedBox.square(
               dimension: 10,
-              child: CircularProgressIndicator(strokeWidth: 1.5),
+              child: CommonCircleLoading(),
             ),
           if (flag != null)
             Text(

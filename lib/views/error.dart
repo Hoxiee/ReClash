@@ -73,12 +73,10 @@ class InitErrorScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: AppInsets.md,
                 decoration: ShapeDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[900]
-                      : Colors.grey[200],
+                  color: colorScheme.surfaceContainerHighest,
                   shape: RoundedSuperellipseBorder(
                     borderRadius: AppRadius.sm,
-                    side: BorderSide(color: Colors.grey.opacity50),
+                    side: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
                 child: SelectableText(

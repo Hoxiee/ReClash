@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/feedback/activate_box.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -147,84 +146,66 @@ class _ScanPageState extends State<ScanPage>
               );
             },
           ),
-          AppBar(
-            backgroundColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            leading: IconButton(
-              tooltip: context.appLocalizations.close,
-              style: IconButton.styleFrom(
-                iconSize: 32,
-                foregroundColor: Colors.white,
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const GlyphIcon(AppGlyphs.close),
-            ),
-            actions: [
-              ValueListenableBuilder<MobileScannerState>(
-                valueListenable: controller,
-                builder: (context, state, _) {
-                  var icon = const GlyphIcon(AppGlyphs.torchOff);
-                  var backgroundColor = Colors.black12;
-                  switch (state.torchState) {
-                    case TorchState.off:
-                      icon = const GlyphIcon(AppGlyphs.torchOff);
-                      backgroundColor = Colors.black12;
-                    case TorchState.on:
-                      icon = const GlyphIcon(AppGlyphs.bolt);
-                      backgroundColor = Colors.orange;
-                    case TorchState.unavailable:
-                      icon = const GlyphIcon(AppGlyphs.torchOff);
-                      backgroundColor = Colors.transparent;
-                    case TorchState.auto:
-                      icon = const GlyphIcon(AppGlyphs.torchAuto);
-                      backgroundColor = Colors.orange;
-                  }
-                  final available = state.torchState != TorchState.unavailable;
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ActivateBox(
-                      active: available,
-                      child: IconButton(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _OverlayButton(
+                    tooltip: context.appLocalizations.close,
+                    glyph: AppGlyphs.close,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  ValueListenableBuilder<MobileScannerState>(
+                    valueListenable: controller,
+                    builder: (context, state, _) {
+                      final available =
+                          state.torchState != TorchState.unavailable;
+                      final active =
+                          state.torchState == TorchState.on ||
+                          state.torchState == TorchState.auto;
+                      final glyph = switch (state.torchState) {
+                        TorchState.on => AppGlyphs.bolt,
+                        TorchState.auto => AppGlyphs.torchAuto,
+                        _ => AppGlyphs.torchOff,
+                      };
+                      return _OverlayButton(
                         tooltip: context.appLocalizations.torch,
-                        color: Colors.white,
-                        icon: icon,
-                        style: IconButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: backgroundColor,
-                        ),
+                        glyph: glyph,
+                        active: active,
                         onPressed: available
                             ? () => controller.toggleTorch()
                             : null,
-                      ),
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          Container(
-            margin: const EdgeInsets.only(bottom: 32),
-            alignment: Alignment.bottomCenter,
-            child: IconButton(
-              tooltip: context.appLocalizations.pickFromAlbum,
-              color: Colors.white,
-              style: IconButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.grey,
+          SafeArea(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                child: _OverlayButton(
+                  tooltip: context.appLocalizations.pickFromAlbum,
+                  glyph: AppGlyphs.camera,
+                  size: 56,
+                  onPressed: () async {
+                    final result = await globalState.safeRun(
+                      picker.pickerConfigQRCode,
+                    );
+                    if (result != null && context.mounted) {
+                      Navigator.of(context).pop(result);
+                    }
+                  },
+                ),
               ),
-              padding: AppInsets.lg,
-              iconSize: 32.0,
-              onPressed: () async {
-                final result = await globalState.safeRun(
-                  picker.pickerConfigQRCode,
-                );
-                if (result != null && context.mounted) {
-                  Navigator.of(context).pop(result);
-                }
-              },
-              icon: const GlyphIcon(AppGlyphs.camera),
             ),
           ),
         ],
@@ -275,6 +256,43 @@ class _ScanPageState extends State<ScanPage>
     _subscription = null;
     unawaited(controller.dispose());
     super.dispose();
+  }
+}
+
+class _OverlayButton extends StatelessWidget {
+  const _OverlayButton({
+    required this.tooltip,
+    required this.glyph,
+    required this.onPressed,
+    this.active = false,
+    this.size = 48,
+  });
+
+  final String tooltip;
+  final Glyph glyph;
+  final VoidCallback? onPressed;
+  final bool active;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return SizedBox.square(
+      dimension: size,
+      child: IconButton(
+        tooltip: tooltip,
+        onPressed: onPressed,
+        icon: GlyphIcon(glyph, size: size * 0.5),
+        style: IconButton.styleFrom(
+          backgroundColor: active
+              ? colorScheme.primary
+              : Colors.black.opacity30,
+          foregroundColor: active ? colorScheme.onPrimary : Colors.white,
+          disabledBackgroundColor: Colors.black.opacity30,
+          disabledForegroundColor: Colors.white.opacity38,
+        ),
+      ),
+    );
   }
 }
 

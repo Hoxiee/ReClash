@@ -198,7 +198,7 @@ class _Loading extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const CircularProgressIndicator(),
+        const CommonCircleLoading(),
         const SizedBox(height: AppSpacing.lg),
         Text(label, style: context.textTheme.bodyMedium),
       ],

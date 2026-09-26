@@ -510,7 +510,7 @@ class _PermissionRow extends StatelessWidget {
       trailing: pending
           ? const SizedBox.square(
               dimension: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CommonCircleLoading(),
             )
           : trailing ??
                 (onPressed == null

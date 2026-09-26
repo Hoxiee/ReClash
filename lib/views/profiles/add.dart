@@ -296,7 +296,7 @@ class _RawProfileDialogState extends State<RawProfileDialog>
           child: _pending
               ? const SizedBox.square(
                   dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CommonCircleLoading(),
                 )
               : Text(appLocalizations.submit),
         ),
@@ -443,7 +443,7 @@ class _URLFormDialogState extends State<URLFormDialog>
               child: _pending
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CommonCircleLoading(),
                     )
                   : Text(appLocalizations.submit),
             ),
@@ -625,7 +625,7 @@ class _LanProfileImportDialogState extends State<LanProfileImportDialog> {
           else if (_startError == null)
             const SizedBox.square(
               dimension: 220,
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CommonCircleLoading()),
             )
           else
             SizedBox.square(

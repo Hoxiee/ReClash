@@ -343,7 +343,7 @@ class _ProviderCard extends ConsumerWidget {
                   icon: isUpdating
                       ? const SizedBox.square(
                           dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CommonCircleLoading(),
                         )
                       : const GlyphIcon(AppGlyphs.refresh),
                 ),
