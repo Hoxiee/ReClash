@@ -1258,6 +1258,9 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final orbOpacity = ref.watch(
+      themeSettingProvider.select((value) => value.wallpaper.orbOpacity),
+    );
     final size = widget.size;
     final scale = size / heroOrbBaseSize;
     final haloSpread = _haloSpread * scale;
@@ -1495,8 +1498,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                                     : Curves.easeOut.transform(_onset.value),
                                 trackColor:
                                     colorScheme.outlineVariant.opacity60,
-                                coreColor:
-                                    colorScheme.surfaceContainerHigh.opacity60,
+                                coreColor: colorScheme.surfaceContainerHigh
+                                    .withValues(alpha: orbOpacity),
                                 coreHighlight: colorScheme.surfaceBright,
                                 coreBorder:
                                     colorScheme.outlineVariant.opacity60,

@@ -4,15 +4,19 @@ class _SubscriptionStrip extends StatelessWidget {
   const _SubscriptionStrip({
     super.key,
     required this.sub,
+    required this.serviceName,
     this.buyPlanUrl,
     this.buyTrafficUrl,
     this.hasAnnounce = false,
+    this.onTap,
   });
 
   final SubscriptionInfo sub;
+  final String serviceName;
   final String? buyPlanUrl;
   final String? buyTrafficUrl;
   final bool hasAnnounce;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +59,7 @@ class _SubscriptionStrip extends StatelessWidget {
 
     return HeroSurface(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      onPressed: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,7 +75,7 @@ class _SubscriptionStrip extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      appLocalizations.subscriptionCaption,
+                      serviceName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: context.textTheme.labelLarge?.copyWith(

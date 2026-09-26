@@ -88,7 +88,7 @@ void main() {
     expect(find.byGlyph(AppGlyphs.calendar), findsNWidgets(2));
   });
 
-  testWidgets('a tap on the traffic card opens the subscription overview', (
+  testWidgets('a tap on the traffic card opens the subscription sheet', (
     tester,
   ) async {
     await pumpHero(tester);
@@ -97,11 +97,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('System'), findsOneWidget);
+    expect(find.text('Used traffic'), findsOneWidget);
+    expect(find.text('Subscription report'), findsOneWidget);
+    expect(find.text('Subscription info'), findsOneWidget);
 
     await tester.pumpWidget(const SizedBox.shrink());
-    // The memory row's in-flight getMemory arms a 10s connect timeout; let it
-    // drain before teardown checks for pending timers.
-    await tester.pump(const Duration(seconds: 11));
   });
 }

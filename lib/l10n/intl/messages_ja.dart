@@ -3318,6 +3318,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("構図"),
     "wallpaperLibraryFull": m115,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("画像の不透明度"),
+    "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("オーブの不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("読みやすさ"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("画像を削除"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("調整をリセット"),

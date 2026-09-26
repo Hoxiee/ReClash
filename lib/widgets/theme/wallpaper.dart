@@ -10,9 +10,10 @@ import 'package:reclash/providers/wallpaper.dart';
 import 'wallpaper_scope.dart';
 
 class AppWallpaper extends ConsumerWidget {
-  const AppWallpaper({super.key, required this.builder});
+  const AppWallpaper({super.key, required this.builder, this.surfaceOpacity});
 
   final Widget Function(BuildContext context, bool active) builder;
+  final double? surfaceOpacity;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +25,7 @@ class AppWallpaper extends ConsumerWidget {
         : null;
     final active = image != null;
     return WallpaperSurfaceScope(
-      opacity: active ? settings.cardOpacity : 1,
+      opacity: surfaceOpacity ?? settings.cardOpacity,
       child: Stack(
         fit: StackFit.expand,
         children: [

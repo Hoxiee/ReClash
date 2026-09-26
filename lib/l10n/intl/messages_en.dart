@@ -4084,6 +4084,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("Framing"),
     "wallpaperLibraryFull": m115,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("Image opacity"),
+    "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("Orb opacity"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Readability"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("Remove image"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("Reset adjustments"),

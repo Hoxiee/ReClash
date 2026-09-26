@@ -147,29 +147,41 @@ class AppearanceBackgroundTab extends ConsumerWidget {
                   ),
                 ],
               ),
-              SettingSection.sliver(
-                title: l10n.wallpaperReadability,
-                items: [
-                  slider(
-                    l10n.wallpaperCardOpacity,
-                    settings.cardOpacity,
-                    0.9,
-                    (v) => update((s) => s.copyWith(cardOpacity: v)),
-                  ),
-                  DecorationListItem(
-                    leading: const GlyphIcon(AppGlyphs.restore),
-                    title: Text(l10n.wallpaperReset),
-                    onPressed: () => update(
-                      (s) => WallpaperProps(
-                        enabled: s.enabled,
-                        fileName: s.fileName,
-                        library: s.library,
-                      ),
+            ],
+            SettingSection.sliver(
+              title: l10n.wallpaperReadability,
+              items: [
+                slider(
+                  l10n.wallpaperCardOpacity,
+                  settings.cardOpacity,
+                  0.9,
+                  (v) => update((s) => s.copyWith(cardOpacity: v)),
+                ),
+                slider(
+                  l10n.wallpaperHeroOpacity,
+                  settings.heroOpacity,
+                  0.85,
+                  (v) => update((s) => s.copyWith(heroOpacity: v)),
+                ),
+                slider(
+                  l10n.wallpaperOrbOpacity,
+                  settings.orbOpacity,
+                  1,
+                  (v) => update((s) => s.copyWith(orbOpacity: v)),
+                ),
+                DecorationListItem(
+                  leading: const GlyphIcon(AppGlyphs.restore),
+                  title: Text(l10n.wallpaperReset),
+                  onPressed: () => update(
+                    (s) => WallpaperProps(
+                      enabled: s.enabled,
+                      fileName: s.fileName,
+                      library: s.library,
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
             const SettingBottomInset.sliver(),
           ],
         ),

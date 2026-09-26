@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:reclash/icons/icons.dart';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/providers.dart';
@@ -43,6 +44,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
   Offset? _pointerPosition;
   var _pageDragDistance = 0.0;
   var _pageDragEligible = false;
+  var _pageDragBlocked = false;
   var _panZoomDistance = 0.0;
   ModalRoute<dynamic>? _route;
   LocalHistoryEntry? _backEntry;
@@ -128,12 +130,28 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
     _pointerPosition = event.position;
     _pageDragDistance = 0;
     _pageDragEligible = false;
+    _pageDragBlocked = _reservesGesture(event);
     _velocityTracker = VelocityTracker.withKind(event.kind)
       ..addPosition(event.timeStamp, event.position);
   }
 
+  // A hero button that owns its vertical drag (the action chips) marks its
+  // hit region so a small drag there presses the button instead of paging.
+  bool _reservesGesture(PointerDownEvent event) {
+    final result = HitTestResult();
+    GestureBinding.instance.hitTestInView(result, event.position, event.viewId);
+    for (final entry in result.path) {
+      final target = entry.target;
+      if (target is RenderMetaData && target.metaData == heroReserveGesture) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _handlePointerMove(PointerMoveEvent event) {
     if (event.pointer != _pointer || _pointerPosition == null) return;
+    if (_pageDragBlocked) return;
     _velocityTracker?.addPosition(event.timeStamp, event.position);
     final delta = event.position - _pointerPosition!;
     _pointerPosition = event.position;
@@ -176,6 +194,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
     _pointerPosition = null;
     _pageDragDistance = 0;
     _pageDragEligible = false;
+    _pageDragBlocked = false;
     _velocityTracker = null;
   }
 

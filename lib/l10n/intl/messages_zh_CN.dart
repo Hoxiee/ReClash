@@ -2917,6 +2917,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperLayout": MessageLookupByLibrary.simpleMessage("构图"),
     "wallpaperLibraryFull": m115,
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage("图片不透明度"),
+    "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage("宝珠不透明度"),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("可读性"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage("移除图片"),
     "wallpaperReset": MessageLookupByLibrary.simpleMessage("重置调整"),

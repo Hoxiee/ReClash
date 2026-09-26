@@ -1379,6 +1379,7 @@
   "wallpaperBlur": "Размытие",
   "wallpaperCardOpacity": "Непрозрачность карточек",
   "wallpaperHeroOpacity": "Непрозрачность панелей главного экрана",
+  "wallpaperOrbOpacity": "Непрозрачность орба",
   "wallpaperReset": "Сбросить параметры",
   "wallpaperImageError": "Выберите корректное изображение PNG, JPEG или WebP.",
   "wallpaperTooLarge": "Выберите изображение размером до 20 МБ и 50 мегапикселей.",

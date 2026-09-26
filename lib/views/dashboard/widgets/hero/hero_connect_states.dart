@@ -105,42 +105,39 @@ class _EmptyHero extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             _TailEdgeFocus(
               onDown: onRequestAfterTailFocus,
-              child: FocusableTap(
-                borderRadius: heroCardRadius,
-                onTap: () => changeDashboardMode(ref, DashboardMode.byedpi),
-                child: HeroSurface(
-                  padding: AppInsets.lg,
-                  child: Row(
-                    children: [
-                      const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 44),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              appLocalizations.dashboardByedpiTitle,
-                              style: context.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
+              child: HeroSurface(
+                padding: AppInsets.lg,
+                onPressed: () => changeDashboardMode(ref, DashboardMode.byedpi),
+                child: Row(
+                  children: [
+                    const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 44),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            appLocalizations.dashboardByedpiTitle,
+                            style: context.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              appLocalizations.dashboardByedpiDesc,
-                              style: context.textTheme.bodySmall?.copyWith(
-                                color: context.colorScheme.onSurfaceVariant,
-                              ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            appLocalizations.dashboardByedpiDesc,
+                            style: context.textTheme.bodySmall?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      GlyphIcon(
-                        AppGlyphs.chevronForward,
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    GlyphIcon(
+                      AppGlyphs.chevronForward,
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -153,15 +150,17 @@ class _EmptyHero extends ConsumerWidget {
 }
 
 class _NoticeOpenCard extends StatelessWidget {
-  const _NoticeOpenCard({required this.text});
+  const _NoticeOpenCard({required this.text, this.onTap});
 
   final String text;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     return HeroSurface(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      onPressed: onTap,
       child: Row(
         children: [
           GlyphIcon(AppGlyphs.announce, size: 20, color: colorScheme.primary),
@@ -242,14 +241,16 @@ class _HeroActionRow extends ConsumerWidget {
       if (showPauseChip) const _PauseChip(),
       const _ModeChip(),
     ];
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (var i = 0; i < chips.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
-          chips[i],
+    return HeroReserveGesture(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          for (var i = 0; i < chips.length; i++) ...[
+            if (i > 0) const SizedBox(width: 10),
+            chips[i],
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -264,20 +265,17 @@ class _PauseChip extends ConsumerWidget {
     final paused = ref.watch(pausedProvider);
     return Tooltip(
       message: paused ? appLocalizations.resume : appLocalizations.pause,
-      child: FocusableTap(
-        borderRadius: heroPillRadius,
-        onTap: () => ref.read(commonActionProvider.notifier).togglePaused(),
+      child: HeroSurface(
+        radius: heroPillRadius,
+        width: 44,
+        height: 44,
+        alignment: Alignment.center,
+        onPressed: () => ref.read(commonActionProvider.notifier).togglePaused(),
         onLongPress: () => showSmartPauseNetworkSheet(context, ref),
-        child: HeroSurface(
-          radius: heroPillRadius,
-          width: 44,
-          height: 44,
-          alignment: Alignment.center,
-          child: GlyphIcon(
-            paused ? AppGlyphs.play : AppGlyphs.pause,
-            size: 18,
-            color: colorScheme.primary,
-          ),
+        child: GlyphIcon(
+          paused ? AppGlyphs.play : AppGlyphs.pause,
+          size: 18,
+          color: colorScheme.primary,
         ),
       ),
     );
@@ -320,16 +318,13 @@ class _ModeChip extends ConsumerWidget {
     return CommonPopupBox(
       targetBuilder: (open) => Tooltip(
         message: label,
-        child: FocusableTap(
-          borderRadius: heroPillRadius,
-          onTap: () => open(offset: const Offset(0, 20)),
-          child: HeroSurface(
-            radius: heroPillRadius,
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            child: GlyphIcon(icon, size: 18, color: colorScheme.primary),
-          ),
+        child: HeroSurface(
+          radius: heroPillRadius,
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          onPressed: () => open(offset: const Offset(0, 20)),
+          child: GlyphIcon(icon, size: 18, color: colorScheme.primary),
         ),
       ),
       popupBuilder: (_) => CommonPopupMenu(
@@ -375,39 +370,36 @@ class _ActionChip extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final height = compact ? 34.0 : 44.0;
     final iconSize = compact ? 16.0 : 18.0;
-    return FocusableTap(
-      borderRadius: heroPillRadius,
-      onTap: busy ? null : onTap,
-      child: HeroSurface(
-        radius: heroPillRadius,
-        height: height,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: iconSize,
-              height: iconSize,
-              child: busy
-                  ? CommonCircleLoading(color: colorScheme.primary)
-                  : GlyphIcon(icon, size: iconSize, color: colorScheme.primary),
+    return HeroSurface(
+      radius: heroPillRadius,
+      height: height,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      onPressed: busy ? null : onTap,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: iconSize,
+            height: iconSize,
+            child: busy
+                ? CommonCircleLoading(color: colorScheme.primary)
+                : GlyphIcon(icon, size: iconSize, color: colorScheme.primary),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(
+            child: Text(
+              label,
+              style:
+                  (compact
+                          ? context.textTheme.labelMedium
+                          : context.textTheme.labelLarge)
+                      ?.copyWith(fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Text(
-                label,
-                style:
-                    (compact
-                            ? context.textTheme.labelMedium
-                            : context.textTheme.labelLarge)
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

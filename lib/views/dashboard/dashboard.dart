@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/theme/wallpaper.dart';
+import 'package:reclash/widgets/theme/wallpaper_scope.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -186,8 +187,12 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
   @override
   Widget build(BuildContext context) {
     final newDashboard = ref.watch(newDashboardEnabledProvider);
+    final heroOpacity = ref.watch(
+      themeSettingProvider.select((value) => value.wallpaper.heroOpacity),
+    );
     if (newDashboard) {
       return AppWallpaper(
+        surfaceOpacity: heroOpacity,
         builder: (context, active) => Scaffold(
           backgroundColor: active ? Colors.transparent : null,
           body: SafeArea(
@@ -207,75 +212,78 @@ class _DashboardViewState extends ConsumerState<DashboardView> {
           .where((item) => item.visibleIn(mode))
           .map((item) => item.widget),
     ];
-    return SeasonalDashboardOverlay(
-      child: ProviderEffectOverlay(
-        child: _buildIsEdit(
-          (isEdit) => CommonScaffold(
-            title: context.appLocalizations.dashboard,
-            actions: _buildActions(isEdit),
-            floatBody: true,
-            // SingleChildScrollView snaps a bounce back to its edge whenever a
-            // card's refresh relays it out; a sliver viewport keeps the
-            // overscroll.
-            body: Align(
-              alignment: Alignment.topCenter,
-              child: Builder(
-                builder: (context) {
-                  final padding = EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    top: context.appBarInset,
-                    bottom: 16 + BottomInsetScope.of(context),
-                  );
-                  return CustomScrollView(
-                    slivers: [
-                      SliverPadding(
-                        padding: padding,
-                        sliver: SliverToBoxAdapter(
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: dashboardMaxGridWidth,
-                              ),
-                              child: LayoutBuilder(
-                                builder: (_, constraints) {
-                                  final columns = DashboardGridBand.of(
-                                    constraints.maxWidth,
-                                  ).columns;
-                                  final grid = SuperGrid(
-                                    key: key,
-                                    editing: isEdit,
-                                    crossAxisCount: columns,
-                                    crossAxisSpacing: spacing,
-                                    mainAxisSpacing: spacing,
-                                    onChanged: _saveDashboardWidgets,
-                                    revealPadding: padding.copyWith(
-                                      left: 0,
-                                      right: 0,
-                                    ),
-                                    children: children,
-                                  );
-                                  return DashboardWidgetMetrics(
-                                    unitHeight: dashboardUnitHeight(
+    return WallpaperSurfaceScope(
+      opacity: heroOpacity,
+      child: SeasonalDashboardOverlay(
+        child: ProviderEffectOverlay(
+          child: _buildIsEdit(
+            (isEdit) => CommonScaffold(
+              title: context.appLocalizations.dashboard,
+              actions: _buildActions(isEdit),
+              floatBody: true,
+              // SingleChildScrollView snaps a bounce back to its edge whenever a
+              // card's refresh relays it out; a sliver viewport keeps the
+              // overscroll.
+              body: Align(
+                alignment: Alignment.topCenter,
+                child: Builder(
+                  builder: (context) {
+                    final padding = EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: context.appBarInset,
+                      bottom: 16 + BottomInsetScope.of(context),
+                    );
+                    return CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: padding,
+                          sliver: SliverToBoxAdapter(
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: dashboardMaxGridWidth,
+                                ),
+                                child: LayoutBuilder(
+                                  builder: (_, constraints) {
+                                    final columns = DashboardGridBand.of(
                                       constraints.maxWidth,
-                                    ),
-                                    child: isEdit
-                                        ? BackLayerScope(
-                                            onBack: _handleExitEdit,
-                                            child: grid,
-                                          )
-                                        : grid,
-                                  );
-                                },
+                                    ).columns;
+                                    final grid = SuperGrid(
+                                      key: key,
+                                      editing: isEdit,
+                                      crossAxisCount: columns,
+                                      crossAxisSpacing: spacing,
+                                      mainAxisSpacing: spacing,
+                                      onChanged: _saveDashboardWidgets,
+                                      revealPadding: padding.copyWith(
+                                        left: 0,
+                                        right: 0,
+                                      ),
+                                      children: children,
+                                    );
+                                    return DashboardWidgetMetrics(
+                                      unitHeight: dashboardUnitHeight(
+                                        constraints.maxWidth,
+                                      ),
+                                      child: isEdit
+                                          ? BackLayerScope(
+                                              onBack: _handleExitEdit,
+                                              child: grid,
+                                            )
+                                          : grid,
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),

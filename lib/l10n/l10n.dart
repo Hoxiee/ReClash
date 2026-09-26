@@ -11789,6 +11789,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Orb opacity`
+  String get wallpaperOrbOpacity {
+    return Intl.message(
+      'Orb opacity',
+      name: 'wallpaperOrbOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Reset adjustments`
   String get wallpaperReset {
     return Intl.message(

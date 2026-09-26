@@ -4250,6 +4250,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperOpacity": MessageLookupByLibrary.simpleMessage(
       "Непрозрачность изображения",
     ),
+    "wallpaperOrbOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность орба",
+    ),
     "wallpaperReadability": MessageLookupByLibrary.simpleMessage("Читаемость"),
     "wallpaperRemove": MessageLookupByLibrary.simpleMessage(
       "Удалить изображение",

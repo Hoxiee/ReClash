@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 const double heroPillRadius = AppCorner.full;
@@ -12,6 +13,18 @@ const double heroBoardMaxWidth = 560;
 const double heroSplitLeftMaxWidth = 420;
 const double heroSplitRightMaxWidth = 560;
 const double heroSplitGap = 24;
+
+const Object heroReserveGesture = Object();
+
+class HeroReserveGesture extends StatelessWidget {
+  const HeroReserveGesture({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      MetaData(metaData: heroReserveGesture, child: child);
+}
 
 BoxDecoration heroSurfaceDecoration(
   BuildContext context, {
@@ -55,6 +68,8 @@ class HeroSurface extends StatelessWidget {
     this.height,
     this.alignment,
     this.accent,
+    this.onPressed,
+    this.onLongPress,
   });
 
   final Widget child;
@@ -64,16 +79,25 @@ class HeroSurface extends StatelessWidget {
   final double? height;
   final AlignmentGeometry? alignment;
   final Color? accent;
+  final VoidCallback? onPressed;
+  final VoidCallback? onLongPress;
 
   @override
-  Widget build(BuildContext context) => AnimatedContainer(
-    duration: context.motionDuration(const Duration(milliseconds: 420)),
-    curve: Easing.standard,
-    width: width,
-    height: height,
-    padding: padding,
-    alignment: alignment,
-    decoration: heroSurfaceDecoration(context, radius: radius, accent: accent),
-    child: child,
-  );
+  Widget build(BuildContext context) {
+    Widget card = CommonCard(
+      radius: radius,
+      accent: accent,
+      padding: padding,
+      onPressed: onPressed,
+      onLongPress: onLongPress,
+      minimumSize: Size.zero,
+      child: alignment == null
+          ? child
+          : Align(alignment: alignment!, child: child),
+    );
+    if (width != null || height != null) {
+      card = SizedBox(width: width, height: height, child: card);
+    }
+    return card;
+  }
 }

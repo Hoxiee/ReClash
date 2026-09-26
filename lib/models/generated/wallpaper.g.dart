@@ -25,6 +25,8 @@ _WallpaperProps _$WallpaperPropsFromJson(Map<String, dynamic> json) =>
       dimming: (json['dimming'] as num?)?.toDouble() ?? 0.0,
       blur: (json['blur'] as num?)?.toDouble() ?? 0.0,
       cardOpacity: (json['cardOpacity'] as num?)?.toDouble() ?? 0.9,
+      heroOpacity: (json['heroOpacity'] as num?)?.toDouble() ?? 0.85,
+      orbOpacity: (json['orbOpacity'] as num?)?.toDouble() ?? 1.0,
     );
 
 Map<String, dynamic> _$WallpaperPropsToJson(_WallpaperProps instance) =>
@@ -40,6 +42,8 @@ Map<String, dynamic> _$WallpaperPropsToJson(_WallpaperProps instance) =>
       'dimming': instance.dimming,
       'blur': instance.blur,
       'cardOpacity': instance.cardOpacity,
+      'heroOpacity': instance.heroOpacity,
+      'orbOpacity': instance.orbOpacity,
     };
 
 const _$WallpaperFitEnumMap = {

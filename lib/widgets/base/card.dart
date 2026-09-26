@@ -111,6 +111,8 @@ class CommonCard extends StatelessWidget {
     this.isError = false,
     this.enterActionsOnRight = false,
     this.skipTraversal = false,
+    this.accent,
+    this.minimumSize,
     required this.child,
   }) : isSelected = isSelected ?? false;
 
@@ -130,6 +132,10 @@ class CommonCard extends StatelessWidget {
   final CommonCardType type;
   final double? radius;
   final OutlinedBorder? shape;
+
+  // A hero-panel alert tint bleeding into fill and border, kept on the standard card.
+  final Color? accent;
+  final Size? minimumSize;
 
   // Flutter keeps `focused` set after a mouse click; honor `:focus-visible`.
   Set<WidgetState> _effectiveStates(Set<WidgetState> states) {
@@ -173,9 +179,16 @@ class CommonCard extends StatelessWidget {
     final hoverColor = isSelected
         ? colorScheme.primary.opacity80
         : colorScheme.primary.opacity60;
-    if (states.contains(WidgetState.hovered) ||
+    final interactive =
+        states.contains(WidgetState.hovered) ||
         states.contains(WidgetState.focused) ||
-        states.contains(WidgetState.pressed)) {
+        states.contains(WidgetState.pressed);
+    if (accent != null && !isSelected) {
+      return BorderSide(
+        color: accent!.withValues(alpha: interactive ? 0.7 : 0.42),
+      );
+    }
+    if (interactive) {
       return BorderSide(color: hoverColor);
     }
     return BorderSide(
@@ -202,6 +215,9 @@ class CommonCard extends StatelessWidget {
         colorScheme.primary.withValues(alpha: system.isTV ? 0.22 : 0.12),
         color,
       );
+    }
+    if (accent != null) {
+      color = Color.alphaBlend(accent!.withValues(alpha: 0.06), color);
     }
     return WallpaperSurfaceScope.colorOf(context, color);
   }
@@ -267,6 +283,10 @@ class CommonCard extends StatelessWidget {
               foregroundColor: _buildForegroundColor(context),
               side: BorderSide.none,
               elevation: 0,
+              minimumSize: minimumSize,
+              tapTargetSize: minimumSize != null
+                  ? MaterialTapTargetSize.shrinkWrap
+                  : null,
             ).copyWith(
               backgroundColor: WidgetStateProperty.resolveWith(
                 (states) =>
@@ -295,6 +315,10 @@ class CommonCard extends StatelessWidget {
               iconColor: _buildIconColor(context),
               foregroundColor: _buildForegroundColor(context),
               elevation: 0,
+              minimumSize: minimumSize,
+              tapTargetSize: minimumSize != null
+                  ? MaterialTapTargetSize.shrinkWrap
+                  : null,
             ).copyWith(
               backgroundColor: WidgetStateProperty.resolveWith(
                 (states) =>

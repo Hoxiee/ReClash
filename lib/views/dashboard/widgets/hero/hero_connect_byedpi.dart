@@ -70,55 +70,52 @@ class _ByeDpiStrategyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    return FocusableTap(
-      borderRadius: heroCardRadius,
-      onTap: onTap,
-      child: HeroSurface(
-        padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
-        child: Row(
-          children: [
-            const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 46),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    appLocalizations.desyncStrategySection,
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return HeroSurface(
+      padding: const EdgeInsets.fromLTRB(18, 16, 14, 16),
+      onPressed: onTap,
+      child: Row(
+        children: [
+          const _ByeDpiCardIcon(icon: AppGlyphs.shield, size: 46),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  appLocalizations.desyncStrategySection,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    argsCount,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  argsCount,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.sm),
-            GlyphIcon(
-              AppGlyphs.chevronForward,
-              size: 22,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          GlyphIcon(
+            AppGlyphs.chevronForward,
+            size: 22,
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ],
       ),
     );
   }
@@ -140,45 +137,42 @@ class _ByeDpiActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return FocusableTap(
-      borderRadius: heroCardRadius,
-      onTap: onTap,
-      child: HeroSurface(
-        padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _ByeDpiCardIcon(icon: icon, size: 36),
-                const Spacer(),
-                GlyphIcon(
-                  AppGlyphs.chevronForward,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.bodySmall?.copyWith(
+    return HeroSurface(
+      padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
+      onPressed: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _ByeDpiCardIcon(icon: icon, size: 36),
+              const Spacer(),
+              GlyphIcon(
+                AppGlyphs.chevronForward,
+                size: 20,
                 color: colorScheme.onSurfaceVariant,
               ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }

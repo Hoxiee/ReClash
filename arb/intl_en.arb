@@ -1595,6 +1595,7 @@
   "wallpaperBlur": "Blur",
   "wallpaperCardOpacity": "Card opacity",
   "wallpaperHeroOpacity": "Home panel opacity",
+  "wallpaperOrbOpacity": "Orb opacity",
   "wallpaperReset": "Reset adjustments",
   "wallpaperImageError": "Choose a valid PNG, JPEG or WebP image.",
   "wallpaperTooLarge": "Choose an image up to 20 MB and 50 megapixels.",

@@ -64,6 +64,8 @@ abstract class WallpaperProps with _$WallpaperProps {
     @Default(0.0) double dimming,
     @Default(0.0) double blur,
     @Default(0.9) double cardOpacity,
+    @Default(0.85) double heroOpacity,
+    @Default(1.0) double orbOpacity,
   }) = _WallpaperProps;
 
   factory WallpaperProps.fromJson(Map<String, Object?> json) =>
@@ -99,6 +101,8 @@ abstract class WallpaperProps with _$WallpaperProps {
       dimming: number('dimming', 0, 0, 1),
       blur: number('blur', 0, 0, 30),
       cardOpacity: number('cardOpacity', 0.9, 0, 1),
+      heroOpacity: number('heroOpacity', 0.85, 0, 1),
+      orbOpacity: number('orbOpacity', 1, 0, 1),
     );
   }
 }

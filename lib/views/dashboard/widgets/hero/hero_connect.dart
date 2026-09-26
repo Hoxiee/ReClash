@@ -20,7 +20,7 @@ import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_orb.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
-import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_sheet.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
@@ -169,7 +169,7 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
       onShowProvider();
       return;
     }
-    showExtend(context, builder: (_) => const SubscriptionOverviewView());
+    unawaited(showSubscriptionSheet(context));
   }
 
   @override
@@ -245,6 +245,10 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
     final activeProfile = profile!;
     final panelMeta = activeProfile.panelMeta;
     final announce = panelMeta?.announce?.trim();
+    final serviceName = panelMeta?.serviceName?.trim();
+    final subscriptionName = serviceName == null || serviceName.isEmpty
+        ? activeProfile.realLabel
+        : serviceName;
     final sub = activeProfile.subscriptionInfo;
     final subscriptionExpired =
         sub != null &&
@@ -303,17 +307,15 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
                     key: const ValueKey('hero-sub'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      FocusableTap(
-                        borderRadius: heroCardRadius,
+                      _SubscriptionStrip(
+                        key: const ValueKey('hero-subscription-strip'),
+                        sub: sub,
+                        serviceName: subscriptionName,
+                        buyPlanUrl: buyPlanUrl,
+                        buyTrafficUrl: buyTrafficUrl,
+                        hasAnnounce:
+                            !split && announce != null && announce.isNotEmpty,
                         onTap: _handleShowSubscription,
-                        child: _SubscriptionStrip(
-                          key: const ValueKey('hero-subscription-strip'),
-                          sub: sub,
-                          buyPlanUrl: buyPlanUrl,
-                          buyTrafficUrl: buyTrafficUrl,
-                          hasAnnounce:
-                              !split && announce != null && announce.isNotEmpty,
-                        ),
                       ),
                       SizedBox(height: metrics.gapCard),
                     ],
@@ -323,10 +325,9 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
                     key: const ValueKey('hero-notice'),
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      FocusableTap(
-                        borderRadius: heroCardRadius,
+                      _NoticeOpenCard(
+                        text: announce,
                         onTap: _handleShowSubscription,
-                        child: _NoticeOpenCard(text: announce),
                       ),
                       SizedBox(height: metrics.gapCard),
                     ],
