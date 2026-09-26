@@ -84,7 +84,6 @@ class SmartRoutingView extends ConsumerWidget {
         _regionSection(context, props),
         _strategySection(context, ref, props),
         _behaviourSection(context, ref, props),
-        _diagnosticsSection(context, ref),
         SettingSection.sliver(
           title: appLocalizations.smartRoutingServiceRoutes,
           items: [
@@ -219,6 +218,9 @@ class SmartRoutingView extends ConsumerWidget {
     SmartRoutingProps props,
   ) {
     final appLocalizations = context.appLocalizations;
+    final diagnostics = ref.watch(
+      appSettingProvider.select((state) => state.smartRoutingDiagnostics),
+    );
     return SettingSection.sliver(
       title: appLocalizations.smartRoutingBehaviour,
       items: [
@@ -245,22 +247,10 @@ class SmartRoutingView extends ConsumerWidget {
           onChanged: (value) =>
               _update(ref, (state) => state.copyWith(respectPick: value)),
         ),
-      ],
-    );
-  }
-
-  Widget _diagnosticsSection(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final enabled = ref.watch(
-      appSettingProvider.select((state) => state.smartRoutingDiagnostics),
-    );
-    return SettingSection.sliver(
-      title: appLocalizations.smartRoutingDiagnostics,
-      items: [
         DecorationListItem.toggle(
           title: Text(appLocalizations.smartRoutingDiagnostics),
           subtitle: Text(appLocalizations.smartRoutingDiagnosticsDesc),
-          value: enabled,
+          value: diagnostics,
           onChanged: (value) => ref
               .read(appSettingProvider.notifier)
               .update(

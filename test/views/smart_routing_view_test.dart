@@ -96,6 +96,29 @@ void main() {
     expect(find.textContaining('Start from a region preset'), findsNothing);
   });
 
+  testWidgets('diagnostics folds into Behaviour, not its own section', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      props: const SmartRoutingProps(
+        enabled: true,
+        preset: SmartRoutingPreset.russia,
+      ),
+    );
+
+    await _reveal(tester, find.text('Diagnostics logging'));
+    expect(find.text('Diagnostics logging'), findsOne);
+
+    await tester.tap(find.text('Diagnostics logging'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(
+      container.read(appSettingProvider).smartRoutingDiagnostics,
+      isTrue,
+    );
+  });
+
   testWidgets('the mid layer is settings, never weights', (tester) async {
     await _pump(
       tester,
@@ -145,6 +168,30 @@ void main() {
       expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
     });
   }
+
+  testWidgets('the ranking key is a labelled row, not a crammed subtitle', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      props: const SmartRoutingProps(
+        enabled: true,
+        preset: SmartRoutingPreset.russia,
+      ),
+    );
+
+    await _openAdvanced(tester);
+    await _reveal(
+      tester,
+      find.textContaining('Verdict → Fit for this network'),
+      scrollable: find.byType(Scrollable).last,
+    );
+
+    expect(
+      find.textContaining('Verdict → Fit for this network'),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('the advanced page notes the region seeds the probes', (
     tester,

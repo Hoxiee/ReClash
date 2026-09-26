@@ -175,14 +175,19 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           ),
           SettingSection(
             title: appLocalizations.smartRoutingRanking,
-            subTitle: [
-              appLocalizations.smartRoutingKeyVerdict,
-              appLocalizations.smartRoutingKeyMisfit,
-              appLocalizations.smartRoutingKeyEvidence,
-              appLocalizations.smartRoutingKeyBand,
-            ].join(' → '),
             actions: _resetActions(context, ref, props, RoutingFacetGroup.bands),
             items: [
+              DecorationListItem(
+                leading: const GlyphIcon(AppGlyphs.sort),
+                title: Text(
+                  [
+                    appLocalizations.smartRoutingKeyVerdict,
+                    appLocalizations.smartRoutingKeyMisfit,
+                    appLocalizations.smartRoutingKeyEvidence,
+                    appLocalizations.smartRoutingKeyBand,
+                  ].join(' → '),
+                ),
+              ),
               _StringListItem(
                 title: appLocalizations.smartRoutingLatencyBands,
                 desc: appLocalizations.smartRoutingLatencyBandsDesc,
