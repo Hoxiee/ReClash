@@ -310,6 +310,17 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 301));
 
+    container.read(packagesProvider.notifier).value = [
+      const Package(
+        packageName: 'com.example.browser',
+        label: 'Browser',
+        system: false,
+        internet: true,
+        lastUpdateTime: 0,
+      ),
+    ];
+    await tester.pump();
+
     const searchFieldKey = ValueKey('access-search-field');
     expect(find.byKey(searchFieldKey), findsOneWidget);
 

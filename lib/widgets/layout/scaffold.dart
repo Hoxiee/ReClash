@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../feedback/loading.dart';
 import '../input/button.dart';
 import '../input/chip.dart';
+import '../input/search_field.dart';
 import '../nav/app_nav_bar.dart';
 import '../base/inherited.dart';
 import '../theme/panel_background.dart';
@@ -86,6 +87,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   final ValueNotifier<bool> _isFabExtendedNotifier = ValueNotifier(true);
   final ValueNotifier<List<String>> _keywordsNotifier = ValueNotifier([]);
   final _textController = TextEditingController();
+  final _searchFocusNode = FocusNode();
 
   bool get _isSearch {
     return _appBarState.value.searchState?.query != null;
@@ -208,6 +210,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   void dispose() {
     _appBarState.dispose();
     _textController.dispose();
+    _searchFocusNode.dispose();
     _isFabExtendedNotifier.dispose();
     _loadingNotifier.dispose();
     _keywordsNotifier.dispose();
@@ -349,7 +352,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     final appLocalizations = context.appLocalizations;
     final pop = form.pop;
     final hasSearchButton =
-        hasSearch && widget.searchState?.autoAddSearch == true;
+        hasSearch &&
+        widget.searchState?.autoAddSearch == true &&
+        !form.hasDockedSearch;
     final lead = _isSearch
         ? IconButtonData(
             glyph: AppGlyphs.close,
@@ -504,7 +509,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     assert(widget.appBar != null || widget.title != null);
     final backActionProvider = CommonScaffoldBackActionProvider.of(context);
     final backAction = widget.backAction ?? backActionProvider?.backAction;
-    final form = _SheetForm.of(context, hasActions: _hasActions);
+    final form = _SheetForm.of(
+      context,
+      hasActions: _hasActions,
+      searchState: widget.searchState,
+    );
     final isBottomSheet = form.isBottomSheet;
     final isTV = widget.isTV ?? system.isTV;
     final bottomInset = BottomInsetScope.of(context);
@@ -547,6 +556,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         hasFab: hasFab,
         bottomInset: bottomInset,
         fab: fab,
+        form: form,
       );
     }
     final barFloats = widget.appBar == null;
@@ -664,6 +674,14 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     );
   }
 
+  Widget _buildDockedSearch(AppBarSearchState searchState) {
+    return DockedSearchBar(
+      controller: _textController,
+      focusNode: _searchFocusNode,
+      onChanged: searchState.onSearch,
+    );
+  }
+
   /// Renders the modal bottom-sheet form: the toolbar folds into a floating,
   /// fading header over the body, matching every other sheet. A snap sheet
   /// (one that brings a [SheetOverhangScope]) fills its detent and clips its
@@ -674,6 +692,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     required bool hasFab,
     required double bottomInset,
     required Widget? fab,
+    required _SheetForm form,
   }) {
     final hugsContent = SheetOverhangScope.of(context) == null;
     const overlap = sheetAppBarHeight;
@@ -733,15 +752,21 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         );
       },
     );
+    final insetContent = form.hasDockedSearch
+        ? BottomInsetScope(
+            inset: bottomInset + BottomInsetScope.dockedSearchInset,
+            child: sheetContent,
+          )
+        : sheetContent;
     final foreground = NotificationListener<UserScrollNotification>(
       child: DockedPageScope(
         docked: false,
         child: hasFab
             ? BottomInsetScope(
                 inset: bottomInset + BottomInsetScope.floatingActionButtonInset,
-                child: sheetContent,
+                child: insetContent,
               )
-            : sheetContent,
+            : insetContent,
       ),
       onNotification: (notification) {
         if (notification.direction == ScrollDirection.reverse) {
@@ -763,6 +788,9 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         behavior: HitTestBehavior.opaque,
         child: SheetToolBar(appBar: appBar),
       ),
+      footer: form.dockedSearch == null
+          ? null
+          : _buildDockedSearch(form.dockedSearch!),
       body: foreground,
     );
     final sheetFab = fab == null ? null : SheetOverhangLift(child: fab);
@@ -781,7 +809,8 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
         children: [
           Flexible(child: sheetBody),
           SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
-          SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
+          if (!form.hasDockedSearch)
+            SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
         ],
       ),
     );
@@ -1036,23 +1065,33 @@ class _SheetForm {
     required this.isSheet,
     required this.isBottomSheet,
     required this.pop,
+    required this.dockedSearch,
   });
 
-  factory _SheetForm.of(BuildContext context, {required bool hasActions}) {
+  factory _SheetForm.of(
+    BuildContext context, {
+    required bool hasActions,
+    AppBarSearchState? searchState,
+  }) {
     final provider = SheetProvider.of(context);
     final isModal = provider != null && provider.type != SheetType.page;
+    final isBottomSheet = provider?.type == SheetType.bottomSheet;
     return _SheetForm(
       isSheet: provider != null,
-      isBottomSheet: provider?.type == SheetType.bottomSheet,
+      isBottomSheet: isBottomSheet,
       pop: isModal
           ? _SheetPop.of(context, provider, hasActions: hasActions)
           : null,
+      dockedSearch: isBottomSheet ? searchState : null,
     );
   }
 
   final bool isSheet;
   final bool isBottomSheet;
   final _SheetPop? pop;
+  final AppBarSearchState? dockedSearch;
+
+  bool get hasDockedSearch => dockedSearch != null;
 }
 
 /// The pop control a modal sheet draws for itself: a close glyph when the sheet

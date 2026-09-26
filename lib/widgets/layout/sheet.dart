@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/common.dart';
+import 'package:reclash/models/state.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
@@ -224,6 +225,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
   final List<IconButtonData> actions;
   final List<CommonPopupMenuItem> menuItems;
   final VoidCallback? backAction;
+  final AppBarSearchState? searchState;
 
   const AdaptiveSheetScaffold({
     super.key,
@@ -234,6 +236,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
     this.actions = const [],
     this.menuItems = const [],
     this.backAction,
+    this.searchState,
   });
 
   @override
@@ -245,6 +248,7 @@ class AdaptiveSheetScaffold extends StatelessWidget {
       menuItems: menuItems,
       floatBody: sheetTransparentToolBar,
       backAction: backAction,
+      searchState: searchState,
       body: ModalFocusScope(child: body),
     );
   }

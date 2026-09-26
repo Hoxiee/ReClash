@@ -42,6 +42,7 @@ export 'theme/panel_background.dart';
 export 'base/pop_scope.dart';
 export 'layout/popup.dart';
 export 'input/reorder_menu.dart';
+export 'input/search_field.dart';
 export 'layout/scaffold.dart';
 export 'base/scroll.dart';
 export 'input/setting.dart';

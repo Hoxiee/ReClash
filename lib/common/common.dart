@@ -51,6 +51,7 @@ export 'desktop/process_icon.dart';
 export 'ui/picker.dart';
 export 'storage/preferences.dart';
 export 'util/print.dart';
+export 'util/search.dart';
 export 'config/protocol.dart';
 export 'util/provider_reader.dart';
 export 'net/proxy.dart';

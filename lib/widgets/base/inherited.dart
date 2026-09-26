@@ -33,6 +33,10 @@ class BottomInsetScope extends InheritedWidget {
   static const double floatingActionButtonInset =
       kFloatingActionButtonMargin + _floatingActionButtonHeight;
 
+  static const double dockedSearchHeight = 48;
+  static const double dockedSearchMargin = kFloatingActionButtonMargin;
+  static const double dockedSearchInset = dockedSearchMargin + dockedSearchHeight;
+
   final double inset;
 
   const BottomInsetScope({

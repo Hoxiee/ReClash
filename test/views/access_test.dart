@@ -336,13 +336,13 @@ void main() {
       await teardownView(tester);
     });
 
-    testWidgets('the action button selects then clears every visible app', (
+    testWidgets('the toolbar action selects then clears every visible app', (
       tester,
     ) async {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester);
 
-      await tester.tap(find.byType(FloatingActionButton).first);
+      await tester.tap(find.byTooltip('Select all'));
       await tester.pump();
       expect(
         [...container.read(accessControlStateProvider).currentList]..sort(),
@@ -350,7 +350,7 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.byType(FloatingActionButton).first);
+      await tester.tap(find.byTooltip('Deselect all'));
       await tester.pump();
       expect(container.read(accessControlStateProvider).currentList, isEmpty);
 

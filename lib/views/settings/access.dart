@@ -105,15 +105,18 @@ class _AccessViewState extends ConsumerState<AccessView> {
     super.dispose();
   }
 
-  Widget _buildSelectedAllButton({
+  Widget? _buildSelectAllAction({
+    required bool visible,
     required bool isSelectedAll,
     required Set<String> allValues,
   }) {
+    if (!visible) {
+      return null;
+    }
     void onPressed() {
       ref.read(accessControlStateProvider.notifier).update((state) {
         final newSet = Set<String>.from(state.currentList);
-        final isSelectedAll = newSet.containsAll(allValues);
-        if (isSelectedAll) {
+        if (newSet.containsAll(allValues)) {
           newSet.removeAll(allValues);
         } else {
           newSet.addAll(allValues);
@@ -123,22 +126,12 @@ class _AccessViewState extends ConsumerState<AccessView> {
     }
 
     final appLocalizations = context.appLocalizations;
-    return FadeRotationScaleBox(
-      alignment: Alignment.centerRight,
-      child: isSelectedAll
-          ? FloatingActionButton.extended(
-              key: const ValueKey(true),
-              onPressed: onPressed,
-              label: Text(appLocalizations.cancelSelectAll),
-              icon: const GlyphIcon(AppGlyphs.deselect),
-            )
-          : FloatingActionButton.extended(
-              key: const ValueKey(false),
-              tooltip: appLocalizations.selectAll,
-              onPressed: onPressed,
-              label: Text(appLocalizations.selectAll),
-              icon: const GlyphIcon(AppGlyphs.selectAll),
-            ),
+    return IconButton(
+      tooltip: isSelectedAll
+          ? appLocalizations.cancelSelectAll
+          : appLocalizations.selectAll,
+      onPressed: onPressed,
+      icon: GlyphIcon(isSelectedAll ? AppGlyphs.deselect : AppGlyphs.selectAll),
     );
   }
 
@@ -288,10 +281,15 @@ class _AccessViewState extends ConsumerState<AccessView> {
     });
   }
 
-  List<Widget> _buildActions(BuildContext context, {required bool enable}) {
+  List<Widget> _buildActions(
+    BuildContext context, {
+    required bool enable,
+    Widget? selectAllAction,
+  }) {
     final appLocalizations = context.appLocalizations;
     final canMatch = ref.regionAllows(RegionalFacetId.packageMatcher);
     return [
+      ?selectAllAction,
       _buildConfirm(),
       CommonPopupBox(
         targetBuilder: (open) {
@@ -343,6 +341,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
   Widget _buildContent({
     required List<Package> packages,
     required Set<String> valueSet,
+    required bool showDockedSearch,
   }) {
     return FutureBuilder(
       future: _completer.future,
@@ -351,8 +350,13 @@ class _AccessViewState extends ConsumerState<AccessView> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CommonCircleLoading());
         }
+        final bottomInset = showDockedSearch
+            ? BottomInsetScope.dockedSearchInset +
+                  MediaQuery.paddingOf(context).bottom
+            : 0.0;
         return NullStatusSwitcher(
           isEmpty: packages.isEmpty,
+          isSearching: ref.read(queryProvider(QueryTag.access)).isNotEmpty,
           nullStatus: NullStatus(
             label: appLocalizations.noData,
             illustration: NullStatusIllustration.apps,
@@ -361,6 +365,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
             controller: _controller,
             child: ListView.builder(
               controller: _controller,
+              padding: EdgeInsets.only(bottom: bottomInset),
               itemCount: packages.length,
               itemExtent: 72,
               itemBuilder: (_, index) {
@@ -424,33 +429,6 @@ class _AccessViewState extends ConsumerState<AccessView> {
             isSelected: mode == AccessControlMode.rejectSelected,
           ),
         },
-      ),
-    );
-  }
-
-  Widget _buildSearchField(String query) {
-    final appLocalizations = context.appLocalizations;
-    return TextField(
-      key: const ValueKey('access-search-field'),
-      controller: _searchController,
-      inputFormatters: TextInputLimits.limit(TextInputLimits.search),
-      textInputAction: TextInputAction.search,
-      onChanged: _onSearch,
-      decoration: InputDecoration(
-        hintText: appLocalizations.searchApps,
-        prefixIcon: const GlyphIcon(AppGlyphs.search),
-        suffixIcon: query.isEmpty
-            ? null
-            : IconButton(
-                tooltip: appLocalizations.clearSearch,
-                onPressed: () {
-                  _searchController.clear();
-                  _onSearch('');
-                },
-                icon: const GlyphIcon(AppGlyphs.close),
-              ),
-        filled: true,
-        fillColor: context.colorScheme.surfaceContainerLow,
       ),
     );
   }
@@ -614,7 +592,6 @@ class _AccessViewState extends ConsumerState<AccessView> {
 
   Widget _buildControlPanel({
     required AccessControlProps accessControl,
-    required String query,
     required int count,
   }) {
     return Material(
@@ -631,27 +608,9 @@ class _AccessViewState extends ConsumerState<AccessView> {
               mode: accessControl.mode,
               count: count,
             );
-            final searchAndFilters = DisabledMask(
+            final filters = DisabledMask(
               status: !accessControl.enable,
-              child: isCompact
-                  ? Column(
-                      children: [
-                        _buildSearchField(query),
-                        const SizedBox(height: AppSpacing.sm),
-                        _buildFilterBar(accessControl),
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(flex: 3, child: _buildSearchField(query)),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          flex: 4,
-                          child: _buildFilterBar(accessControl),
-                        ),
-                      ],
-                    ),
+              child: _buildFilterBar(accessControl),
             );
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -670,7 +629,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
                     ],
                   ),
                 const SizedBox(height: AppSpacing.md),
-                searchAndFilters,
+                filters,
               ],
             );
           },
@@ -710,44 +669,61 @@ class _AccessViewState extends ConsumerState<AccessView> {
     final valueSet = currentList.toSet().intersection(viewPackageNameSet);
     final needsInstalledAppsPermission =
         packages.isEmpty && !_installedAppsPermissionGranted;
+    final showDockedSearch =
+        !needsInstalledAppsPermission && viewPackageNameSet.isNotEmpty;
+    final selectAllAction = _buildSelectAllAction(
+      visible: showDockedSearch && accessControl.enable,
+      isSelectedAll: valueSet.length == viewPackageNameSet.length,
+      allValues: viewPackageNameSet,
+    );
     return CommonScaffold(
       isLoading: isLoading,
       title: context.appLocalizations.appAccessControl,
       floatBody: true,
-      actions: _buildActions(context, enable: accessControl.enable),
+      actions: _buildActions(
+        context,
+        enable: accessControl.enable,
+        selectAllAction: selectAllAction,
+      ),
       body: AppBarClearance(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
           children: [
-            _buildControlPanel(
-              accessControl: accessControl,
-              query: query,
-              count: currentList.length,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildControlPanel(
+                  accessControl: accessControl,
+                  count: currentList.length,
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: needsInstalledAppsPermission
+                      ? _buildInstalledAppsPermissionStatus()
+                      : DisabledMask(
+                          status: !accessControl.enable,
+                          child: _buildContent(
+                            packages: viewPackages,
+                            valueSet: valueSet,
+                            showDockedSearch: showDockedSearch,
+                          ),
+                        ),
+                ),
+              ],
             ),
-            const Divider(height: 1),
-            Expanded(
-              child: needsInstalledAppsPermission
-                  ? _buildInstalledAppsPermissionStatus()
-                  : DisabledMask(
-                      status: !accessControl.enable,
-                      child: _buildContent(
-                        packages: viewPackages,
-                        valueSet: valueSet,
-                      ),
-                    ),
-            ),
+            if (showDockedSearch)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: DockedSearchBar(
+                  key: const ValueKey('access-search-field'),
+                  controller: _searchController,
+                  onChanged: _onSearch,
+                ),
+              ),
           ],
         ),
       ),
-      floatingActionButton:
-          accessControl.enable &&
-              !needsInstalledAppsPermission &&
-              viewPackageNameSet.isNotEmpty
-          ? _buildSelectedAllButton(
-              isSelectedAll: valueSet.length == viewPackageNameSet.length,
-              allValues: viewPackageNameSet,
-            )
-          : null,
     );
   }
 }

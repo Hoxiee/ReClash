@@ -1,6 +1,7 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
@@ -50,6 +51,7 @@ class _OverwriteSelectionSheetState<T>
   final _controller = ScrollController();
   final _selectedKey = GlobalKey();
   var _revealRequested = false;
+  var _query = SearchQuery('');
 
   @override
   void dispose() {
@@ -57,22 +59,55 @@ class _OverwriteSelectionSheetState<T>
     super.dispose();
   }
 
-  int get _itemCount =>
-      widget.sections.fold(0, (value, section) => value + section.items.length);
+  void _handleSearch(String value) {
+    setState(() => _query = SearchQuery(value));
+  }
 
-  List<int> get _sectionOffsets {
+  List<OverwriteSelectionSection<T>> _matchingSections(BuildContext context) {
+    if (_query.isEmpty) {
+      return widget.sections;
+    }
+    final result = <OverwriteSelectionSection<T>>[];
+    for (final section in widget.sections) {
+      final items = section.items
+          .whereMatches(
+            _query,
+            (item) => [
+              widget.labelBuilder(item),
+              section.subtitleBuilder?.call(context, item),
+            ],
+          )
+          .toList();
+      if (items.isEmpty) {
+        continue;
+      }
+      result.add(
+        OverwriteSelectionSection<T>(
+          label: section.label,
+          items: items,
+          subtitleBuilder: section.subtitleBuilder,
+        ),
+      );
+    }
+    return result;
+  }
+
+  int _countOf(List<OverwriteSelectionSection<T>> sections) =>
+      sections.fold(0, (value, section) => value + section.items.length);
+
+  List<int> _offsetsOf(List<OverwriteSelectionSection<T>> sections) {
     final offsets = <int>[];
     var offset = 0;
-    for (final section in widget.sections) {
+    for (final section in sections) {
       offsets.add(offset);
       offset += section.items.length;
     }
     return offsets;
   }
 
-  int _indexOf(T? selected) {
+  int _indexOf(List<OverwriteSelectionSection<T>> sections, T? selected) {
     var index = 0;
-    for (final section in widget.sections) {
+    for (final section in sections) {
       for (final item in section.items) {
         if (item == selected) {
           return index;
@@ -162,10 +197,13 @@ class _OverwriteSelectionSheetState<T>
   @override
   Widget build(BuildContext context) {
     final height = ref.sheetHeight(context, (widget.bottomHeightFactor ?? 1));
-    final count = _itemCount;
+    final total = _countOf(widget.sections);
+    final sections = _matchingSections(context);
+    final count = _countOf(sections);
     final selected = widget.selectedOf(ref);
-    final selectedIndex = _indexOf(selected);
-    final sectionOffsets = _sectionOffsets;
+    final selectedIndex = _indexOf(sections, selected);
+    final sectionOffsets = _offsetsOf(sections);
+    final searchable = _query.isNotEmpty || total >= sheetSearchMinItemCount;
     if (!_revealRequested && selectedIndex > 0) {
       _revealRequested = true;
       WidgetsBinding.instance.addPostFrameCallback(
@@ -174,10 +212,14 @@ class _OverwriteSelectionSheetState<T>
     }
     return AdaptiveSheetScaffold(
       sheetTransparentToolBar: true,
+      searchState: searchable
+          ? AppBarSearchState(onSearch: _handleSearch)
+          : null,
       body: SizedBox(
         height: height,
         child: NullStatusSwitcher(
-          isEmpty: count == 0 && widget.emptyLabel != null,
+          isEmpty: count == 0 && (widget.emptyLabel != null || _query.isNotEmpty),
+          isSearching: _query.isNotEmpty,
           nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
           child: CustomScrollView(
             controller: _controller,
@@ -185,8 +227,7 @@ class _OverwriteSelectionSheetState<T>
               SliverToBoxAdapter(
                 child: SizedBox(height: context.appBarInset),
               ),
-              for (final (sectionIndex, section)
-                  in widget.sections.indexed) ...[
+              for (final (sectionIndex, section) in sections.indexed) ...[
                 if (section.label != null) ...[
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -218,7 +259,11 @@ class _OverwriteSelectionSheetState<T>
                   ),
                 ),
               ],
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: AppSpacing.xl + BottomInsetScope.of(context),
+                ),
+              ),
             ],
           ),
         ),
