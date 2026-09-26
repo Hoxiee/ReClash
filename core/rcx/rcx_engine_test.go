@@ -4049,3 +4049,20 @@ func TestFastForeignWinnerIsNotSunkButVerifiedOnWin(t *testing.T) {
 		t.Fatal("a node with a measured foreign egress needs no further check")
 	}
 }
+
+func TestHoldsForLinkBlocksAFollowOnSwitchAfterAFreshSwitch(t *testing.T) {
+	runtime := newFakeRuntime()
+	engine := newTestEngine(runtime, "ru")
+	engine.since = runtime.Now().Add(-time.Hour)
+	engine.reaching = true
+	engine.switchedAt = runtime.Now()
+
+	if !engine.holdsForLink(rcxReasonIncumbentDead, runtime.Now()) {
+		t.Fatal("a follow-on death inside a fresh switch's probation must wait for the link verdict")
+	}
+
+	runtime.advance(rcxSwitchProbation)
+	if engine.holdsForLink(rcxReasonIncumbentDead, runtime.Now()) {
+		t.Fatal("once the switch probation lapses the hold must release")
+	}
+}

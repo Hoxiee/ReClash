@@ -487,6 +487,7 @@ func rcxDiscoveryLatency(c rcxCandidate) int {
 const (
 	rcxUnmeasuredLatencyBase = 1 << 20
 	rcxLatencyStep           = 30
+	rcxHostOnlyPenaltyMs     = rcxLatencyStep / 2
 )
 
 func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
@@ -501,7 +502,36 @@ func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
 	if host <= 0 {
 		return 0
 	}
+	// A proven node with no timed egress competes on its 30ms-rounded entry ping,
+	// padded so an equally fast measured node edges it; unproven nodes sink to medians.
+	if !unproven {
+		return host/rcxLatencyStep*rcxLatencyStep + rcxHostOnlyPenaltyMs
+	}
 	return rcxUnmeasuredLatencyBase + host/rcxLatencyStep
+}
+
+func rcxExitsDomestic(f rcxFacts) bool {
+	if f.Exit == rcxOriginForeign {
+		return false
+	}
+	return f.HomeEgress || f.Exit == rcxOriginDomestic || f.Origin == rcxOriginDomestic
+}
+
+// True when a pin is dialable and only an open-world verdict rejects it, not an operational death.
+func rcxPinHoldsThroughBlip(c rcxCandidate, in rcxDecisionInput) bool {
+	if c.HostDead || c.Facts.Transit == rcxProofDisproven {
+		return false
+	}
+	if in.Policy.RequireUDP && !c.Facts.SupportsUDP {
+		return false
+	}
+	if !c.CoolUntil.IsZero() && in.Now.Before(c.CoolUntil) {
+		return false
+	}
+	if c.Circuit && c.Facts.Transit != rcxProofProven {
+		return false
+	}
+	return !c.Ignore && !c.AvoidExit
 }
 
 // A fronted home node can open the censored world yet egress in-country, so a
@@ -552,6 +582,17 @@ func rcxLatencyImproves(strategy string, incumbent, challenger int) bool {
 	return gain >= absolute && gain >= required
 }
 
+// True when best is clearly slower than the incumbent (beyond one latency step);
+// a missing timing on either side answers false, so it never blocks a move alone.
+func rcxSlowerThanIncumbent(incumbent, best rcxCandidate) bool {
+	inc := rcxDiscoveryLatency(incumbent)
+	alt := rcxDiscoveryLatency(best)
+	if inc <= 0 || alt <= 0 {
+		return false
+	}
+	return alt > inc+rcxLatencyStep
+}
+
 // A working incumbent yields for latency only when itself slow — past the absolute
 // ceiling or the slowest band — so live traffic is never dropped chasing a few ms.
 func rcxIncumbentTooSlow(policy rcxPolicy, incumbent rcxCandidate) bool {
@@ -586,11 +627,17 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	var bestKey rcxKey
 	var incumbentKey rcxKey
 	incumbentEligible := false
+	incumbentPresent := false
 	var incumbent rcxCandidate
+	var incumbentCand rcxCandidate
 	pinEligible := false
 	compare := rcxCompareFor(in.Policy.Strategy)
 	for i := range in.Candidates {
 		c := &in.Candidates[i]
+		if c.Name == in.Incumbent {
+			incumbentPresent = true
+			incumbentCand = *c
+		}
 		if !rcxEligible(*c, in) {
 			continue
 		}
@@ -635,17 +682,25 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 		}
 	}
 
+	// A manual pin holds across an open-world blip on its own node instead of auto-
+	// switching to a worse egress; an operationally dead pin falls through below.
+	if in.Pin == in.Incumbent && incumbentPresent && rcxPinHoldsThroughBlip(incumbentCand, in) {
+		return rcxDecision{Reason: rcxReasonManualHold, Detail: in.Incumbent}
+	}
+
 	if !incumbentEligible {
+		// Fleeing a transient foreign-node death to a censored-side exit surfaces
+		// real traffic at home; hold and let probes recover a foreign node.
+		if in.Policy.Censoring && incumbentPresent &&
+			!rcxExitsDomestic(incumbentCand.Facts) && rcxExitsDomestic(best.Facts) {
+			return rcxDecision{Reason: rcxReasonStranded, Detail: in.Incumbent}
+		}
 		return rcxDecision{
 			Switch: true,
 			To:     best.Name,
 			Reason: rcxReasonIncumbentDead,
 			Detail: in.Incumbent,
 		}
-	}
-
-	if in.Pin == in.Incumbent {
-		return rcxDecision{Reason: rcxReasonManualHold, Detail: in.Incumbent}
 	}
 
 	if best.Name == in.Incumbent {
@@ -673,11 +728,17 @@ func rcxDecide(in rcxDecisionInput) rcxDecision {
 	}
 
 	reason := rcxReasonHold
-	if bestKey.recurrence < incumbentKey.recurrence ||
-		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded {
+	reliabilityGain := bestKey.recurrence < incumbentKey.recurrence ||
+		bestKey.recurrence == incumbentKey.recurrence && incumbentKey.degraded && !bestKey.degraded
+	// A reaching incumbent that merely flapped keeps the route: reliability alone
+	// never trades a working fast node away for a measurably slower one.
+	if reliabilityGain && incumbentReaches && rcxSlowerThanIncumbent(incumbent, *best) {
+		reliabilityGain = false
+	}
+	if reliabilityGain {
 		reason = rcxReasonReliabilityGain
 	} else if rcxIncumbentTooSlow(in.Policy, incumbent) &&
-		rcxLatencyImproves(in.Policy.Strategy, incumbent.MedianMs, best.MedianMs) {
+		rcxLatencyImproves(in.Policy.Strategy, rcxDiscoveryLatency(incumbent), rcxDiscoveryLatency(*best)) {
 		reason = rcxReasonLatencyGain
 	}
 	if reason != rcxReasonHold {

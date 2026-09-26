@@ -358,6 +358,27 @@ func TestDecideHoldsAHealthyIncumbentAgainstAFasterHostPing(t *testing.T) {
 	}
 }
 
+func TestDecideEscapesAHostPingSlowIncumbentForAFastOne(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	slow := rcxNode("id-1", foreignProven())
+	slow.MedianMs, slow.HostMs = 0, 900
+	fast := rcxNode("ie-1", foreignProven())
+	fast.MedianMs, fast.HostMs = 0, 90
+	fast.QualityConfirmed = true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "id-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{slow, fast},
+		Now:            now,
+	})
+
+	if !got.Switch || got.To != "ie-1" || got.Reason != rcxReasonLatencyGain {
+		t.Errorf("decision = %+v, want a host-ping latency-gain escape once the incumbent is over the ceiling", got)
+	}
+}
+
 func TestDecideRespectsAManualPinForLatencyOnly(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	slow := rcxNode("nl-1", foreignProven())
@@ -657,7 +678,7 @@ func TestDecideStillOrdersUnmeasuredNodesByHostPingWhenNotCensored(t *testing.T)
 	}
 }
 
-func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
+func TestDecideKeepsAReachingFastIncumbentOverASlowerHealthyNode(t *testing.T) {
 	now := time.Unix(1_700_000_000, 0)
 	throttled := rcxNode("nl-1", foreignProven())
 	throttled.MedianMs = 90
@@ -674,8 +695,30 @@ func TestDecideDemotesAThrottledNodeWithoutEvictingIt(t *testing.T) {
 		Now:            now,
 	})
 
+	if got.Switch {
+		t.Errorf("decision = %+v, want a reaching fast incumbent kept over a slower healthy node", got)
+	}
+}
+
+func TestDecideTakesAFasterHealthyNodeOffAFlappingIncumbent(t *testing.T) {
+	now := time.Unix(1_700_000_000, 0)
+	throttled := rcxNode("nl-1", foreignProven())
+	throttled.MedianMs = 280
+	throttled.Degraded = true
+	healthy := rcxNode("de-1", foreignProven())
+	healthy.MedianMs = 90
+	healthy.QualityConfirmed = true
+
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:        rcxTerrainNormal,
+		Incumbent:      "nl-1",
+		IncumbentSince: now.Add(-time.Hour),
+		Candidates:     []rcxCandidate{throttled, healthy},
+		Now:            now,
+	})
+
 	if !got.Switch || got.To != "de-1" {
-		t.Errorf("decision = %+v, want the throttled incumbent outranked by a slower healthy node", got)
+		t.Errorf("decision = %+v, want the flapping incumbent yield to a faster healthy node", got)
 	}
 	if got.Reason != rcxReasonReliabilityGain {
 		t.Errorf("reason = %s, want %s", got.Reason, rcxReasonReliabilityGain)
@@ -1113,5 +1156,60 @@ func TestDecideOrdersUnmeasuredProvenByThirtyMsSteps(t *testing.T) {
 	}
 	if kNear.latencyMs >= kFar.latencyMs {
 		t.Fatalf("50 must rank ahead of 140: %d vs %d", kNear.latencyMs, kFar.latencyMs)
+	}
+}
+
+func TestDecideHoldsAManualPinThroughAnOpenWorldBlip(t *testing.T) {
+	pinned := rcxNode("be-1", foreignProven())
+	pinned.Facts.OpenWorld = rcxProofDisproven
+	pinned.HostMs = 101
+	faster := rcxNode("de-1", foreignProven())
+	faster.HostMs = 40
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Incumbent:  "be-1",
+		Pin:        "be-1",
+		Candidates: []rcxCandidate{pinned, faster},
+		Policy:     policy,
+	})
+
+	if got.Switch || got.Reason != rcxReasonManualHold {
+		t.Fatalf("decision = %+v, want the working pin held through an open-world blip", got)
+	}
+}
+
+func TestDecideReleasesAManualPinWhoseNodeVanished(t *testing.T) {
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Incumbent:  "gone",
+		Pin:        "gone",
+		Candidates: []rcxCandidate{rcxNode("de-1", foreignProven())},
+	})
+
+	if !got.Switch || got.To != "de-1" || got.Reason != rcxReasonIncumbentDead {
+		t.Fatalf("decision = %+v, want an absent pin to fall through, not hold forever", got)
+	}
+}
+
+func TestDecideDoesNotStrandTrafficHomeWhenAForeignExitDies(t *testing.T) {
+	dead := rcxNode("be-1", foreignProven())
+	dead.Facts.OpenWorld = rcxProofDisproven
+	home := rcxNode("moscow", domesticUntested())
+	home.HostMs = 30
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainWhitelist,
+		Incumbent:  "be-1",
+		Candidates: []rcxCandidate{dead, home},
+		Policy:     policy,
+	})
+
+	if got.Switch || got.Reason != rcxReasonStranded {
+		t.Fatalf("decision = %+v, want a censored foreign death held, not surfaced at home", got)
 	}
 }

@@ -358,13 +358,16 @@ func (e *rcxEngine) noteSwitch(from, to string, reason rcxReason, now time.Time)
 	e.recordSwitch(from, to, reason, now)
 }
 
-// Five switches in five seconds are one dark uplink misread five times: the round
-// in flight tells a dead node from a dead link, so the second switch waits for it.
+// A burst of deaths in seconds is one dark uplink misread, not many dead nodes:
+// the round in flight tells a dead node from a dead link, so a follow-on waits.
 func (e *rcxEngine) holdsForLink(reason rcxReason, now time.Time) bool {
-	if !e.reaching || e.since.IsZero() {
+	if reason == rcxReasonPinReturn || reason == rcxReasonColdStart {
 		return false
 	}
-	if reason == rcxReasonPinReturn || reason == rcxReasonColdStart {
+	if !e.switchedAt.IsZero() && now.Sub(e.switchedAt) < rcxSwitchProbation {
+		return true
+	}
+	if !e.reaching || e.since.IsZero() {
 		return false
 	}
 	return now.Sub(e.since) < rcxSwitchProbation
