@@ -177,11 +177,11 @@ void main() {
     const blob = 'R1.test';
     expect(
       subscriptionReportDecoderUrl(blob, lang: 'ru'),
-      'https://hoxiee.github.io/ReClash-site/ru/report.html#d=R1.test',
+      'https://reclash.pages.dev/ru/report.html#d=R1.test',
     );
     expect(
       subscriptionReportDecoderUrl(blob, lang: 'de'),
-      'https://hoxiee.github.io/ReClash-site/en/report.html#d=R1.test',
+      'https://reclash.pages.dev/en/report.html#d=R1.test',
     );
   });
 }

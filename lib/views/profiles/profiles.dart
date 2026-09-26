@@ -405,6 +405,14 @@ class ProfileItem extends ConsumerWidget {
             ),
           if (isUrl)
             CommonPopupMenuItem(
+              glyph: AppGlyphs.openExternal,
+              label: appLocalizations.openInBrowser,
+              onPressed: () {
+                dialogs.openUrl(profile.url);
+              },
+            ),
+          if (isUrl)
+            CommonPopupMenuItem(
               glyph: AppGlyphs.copy,
               label: appLocalizations.copyLink,
               onPressed: () {

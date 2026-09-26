@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:reclash/models/models.dart';
 
-const subscriptionReportDecoderBase = 'https://hoxiee.github.io/ReClash-site';
+const subscriptionReportDecoderBase = 'https://reclash.pages.dev';
 
 String encodeSubscriptionReportBlob(SubscriptionReport report) {
   final payload = jsonEncode(report.toJson());
