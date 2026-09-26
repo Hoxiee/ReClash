@@ -27,6 +27,7 @@ const (
 	rcxEventWakeResults
 	rcxEventTerrainReach
 	rcxEventSetEnabled
+	rcxEventSetRunning
 	rcxEventHarvested
 	rcxEventDeepScan
 	rcxEventHostSweep
@@ -118,7 +119,7 @@ func (e *rcxEngine) loop() {
 	var ticker, watchdog *time.Ticker
 	var tick, watch <-chan time.Time
 	syncTickers := func() {
-		active := e.Enabled() && !e.screenOff && !e.suspended
+		active := e.Enabled() && e.running && !e.screenOff && !e.suspended
 		if active && ticker == nil {
 			ticker = time.NewTicker(rcxTickInterval)
 			watchdog = time.NewTicker(rcxWatchInterval)
@@ -196,6 +197,8 @@ func (e *rcxEngine) handle(event rcxEvent) {
 		e.applyScreenOff(event.Flag)
 	case rcxEventSuspend:
 		e.applySuspend(event.Flag)
+	case rcxEventSetRunning:
+		e.applyRunning(event.Flag)
 	case rcxEventSetEnabled:
 		config := e.cfg
 		config.Enabled = event.Flag

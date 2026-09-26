@@ -4083,3 +4083,71 @@ func TestHoldsForLinkBlocksAFollowOnSwitchAfterAFreshSwitch(t *testing.T) {
 		t.Fatal("once the switch probation lapses the hold must release")
 	}
 }
+
+func TestFreshHostKeepsALiveTrafficNodeThroughAUrlTestMiss(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "carry", Type: "Vless", Port: 443, SupportsUDP: true, HostDead: true, HostAt: runtime.Now()},
+	}
+	engine := newTestEngine(runtime, "ru")
+	engine.ledger.NoteTrafficProgress("carry", engine.envKey, false, runtime.Now())
+
+	cands := engine.candidates(runtime.members)
+	if len(cands) != 1 {
+		t.Fatalf("candidates = %d, want 1", len(cands))
+	}
+	if cands[0].HostDead {
+		t.Fatal("a node carrying live traffic stayed HostDead through a url-test miss")
+	}
+}
+
+func TestFreshHostStillDropsAUrlTestMissWithoutLiveTraffic(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "silent", Type: "Vless", Port: 443, SupportsUDP: true, HostDead: true, HostAt: runtime.Now()},
+	}
+	engine := newTestEngine(runtime, "ru")
+
+	cands := engine.candidates(runtime.members)
+	if len(cands) != 1 || !cands[0].HostDead {
+		t.Fatal("a url-test miss with no live traffic must stay HostDead")
+	}
+}
+
+func TestEngineHoldsAllRoutingWhileTheTunnelIsDown(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	runtime.selected = "current"
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+	engine.running = false
+
+	engine.reconsider()
+
+	if len(runtime.selects) != 0 {
+		t.Fatalf("selects = %v: RCX switched proxies with the tunnel down", runtime.selects)
+	}
+	if got := runtime.lastStatus().Reason; got != string(rcxReasonHold) {
+		t.Fatalf("reason = %v, want hold while the listener is down", got)
+	}
+}
+
+func TestEngineQuietsInFlightProbesWhenTheTunnelStopsAndRearmsOnStart(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "standby")
+	engine := newTestEngine(runtime, "ru")
+	engine.probing = true
+
+	engine.applyRunning(false)
+	if engine.running || engine.probing {
+		t.Fatalf("running = %v, probing = %v: stopping the tunnel left RCX working", engine.running, engine.probing)
+	}
+
+	engine.applyRunning(true)
+	if !engine.running {
+		t.Fatal("starting the tunnel did not rearm RCX")
+	}
+	if !engine.sweeping {
+		t.Fatal("tunnel-up did not sweep the park, so cold-start ranking stays blind")
+	}
+}

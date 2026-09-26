@@ -170,7 +170,10 @@ func (e *rcxEngine) freshHost(member rcxMember) rcxMember {
 	if member.HostDead {
 		now := e.runtime.Now()
 		proof := e.ledger.ProbeGoodAt(member.key(), e.envKey)
-		if e.trafficSince(member.key(), member.HostAt, now) ||
+		// A url-test miss renews HostAt, so flooring the traffic check at HostAt would
+		// mask payload that moved seconds earlier; a node still carrying live traffic on
+		// this link is working whatever the probe says and keeps its host standing.
+		if e.trafficSince(member.key(), e.envSince, now) ||
 			(!proof.IsZero() && proof.After(member.HostAt) && !proof.Before(e.envSince) && now.Sub(proof) <= e.ledger.ProofTTL()) {
 			member.HostDead = false
 		}

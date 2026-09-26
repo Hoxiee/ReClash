@@ -89,6 +89,7 @@ type rcxEngine struct {
 	suspendAt        time.Time
 	suspendTo        time.Time
 	suspended        bool
+	running          bool
 	screenOff        bool
 	screenEpisode    uint64
 	screenDead       string
@@ -166,6 +167,9 @@ type rcxEngine struct {
 func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 	return &rcxEngine{
 		runtime:       runtime,
+		// Tests drive reconsider() directly, bypassing the loop; Start() lowers this to
+		// false so production stays idle until the listener reports the tunnel up.
+		running:       true,
 		odometer:      rcxNoopOdometer{},
 		sessionEpoch:  rcxNewSeed(),
 		ledger:        newRcxLedger(rcxDefaultLedgerPolicy()),
@@ -312,6 +316,7 @@ func (e *rcxEngine) Start() {
 	e.ledger.SetFingerprints(e.configFP.Open, e.configFP.Domestic)
 	e.applyConfigLocked(e.snapshot.Config)
 	e.networkFacts = nil
+	e.running = false
 	e.sampleLink()
 	e.started = true
 	safeGoDetached("rcx engine", e.loop)
@@ -354,6 +359,13 @@ func (e *rcxEngine) OnScreenOff(off bool) {
 }
 func (e *rcxEngine) OnSuspend(suspended bool) {
 	e.control.Suspend(suspended)
+}
+
+// OnRunning tracks whether the tunnel listeners are up. RCX does no probing or
+// switching while they are down: on desktop the core initialises with the VPN
+// off, so the engine must stay idle until the listener actually starts.
+func (e *rcxEngine) OnRunning(running bool) {
+	e.control.Running(running)
 }
 func (e *rcxEngine) SetEnabled(enabled bool) { e.control.SetEnabled(enabled) }
 

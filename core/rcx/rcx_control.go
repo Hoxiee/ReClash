@@ -11,6 +11,8 @@ type rcxControl struct {
 	network   *rcxNetworkPayload
 	screenOff bool
 	screenOn  bool
+	runUp     bool
+	runDown   bool
 	frozen    bool
 	thawed    bool
 	pick      *rcxEvent
@@ -75,6 +77,19 @@ func (c *rcxControl) Suspend(suspended bool) {
 	c.signal()
 }
 
+// Listener up/down is an edge pair like suspend: a collapse would drop the start
+// that arms the engine or the stop that quiets it.
+func (c *rcxControl) Running(running bool) {
+	c.mu.Lock()
+	if running {
+		c.runUp = true
+	} else {
+		c.runDown = true
+	}
+	c.mu.Unlock()
+	c.signal()
+}
+
 func (c *rcxControl) Pick(event rcxEvent) {
 	c.mu.Lock()
 	c.pick = &event
@@ -94,7 +109,7 @@ func (c *rcxControl) take() []rcxEvent {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	events := make([]rcxEvent, 0, 9)
+	events := make([]rcxEvent, 0, 11)
 	if c.config != nil {
 		events = append(events, rcxEvent{Kind: rcxEventConfigure, Config: *c.config})
 		c.config = nil
@@ -111,6 +126,10 @@ func (c *rcxControl) take() []rcxEvent {
 		events = append(events, rcxEvent{Kind: rcxEventScreenOff, Flag: true})
 		c.screenOff = false
 	}
+	if c.runDown {
+		events = append(events, rcxEvent{Kind: rcxEventSetRunning, Flag: false})
+		c.runDown = false
+	}
 	if c.frozen {
 		events = append(events, rcxEvent{Kind: rcxEventSuspend, Flag: true})
 		c.frozen = false
@@ -118,6 +137,10 @@ func (c *rcxControl) take() []rcxEvent {
 	if c.thawed {
 		events = append(events, rcxEvent{Kind: rcxEventSuspend, Flag: false})
 		c.thawed = false
+	}
+	if c.runUp {
+		events = append(events, rcxEvent{Kind: rcxEventSetRunning, Flag: true})
+		c.runUp = false
 	}
 	if c.screenOn {
 		events = append(events, rcxEvent{Kind: rcxEventScreenOff, Flag: false})

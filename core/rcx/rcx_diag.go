@@ -41,6 +41,7 @@ type rcxDiagContext struct {
 	Mode          string `json:"mode"`
 	ScreenOff     bool   `json:"screenOff"`
 	Suspended     bool   `json:"suspended"`
+	Running       bool   `json:"running"`
 	Probing       bool   `json:"probing"`
 	Deep          bool   `json:"deep"`
 	Transport     string `json:"transport"`
@@ -205,6 +206,7 @@ func (entry rcxDiagEntry) signature() uint64 {
 		diagHashString(h, strconv.Itoa(c.Candidates))
 		diagHashString(h, strconv.FormatBool(c.ScreenOff))
 		diagHashString(h, strconv.FormatBool(c.Suspended))
+		diagHashString(h, strconv.FormatBool(c.Running))
 		diagHashString(h, strconv.FormatBool(c.Probing))
 	}
 	for i := range entry.Cands {
@@ -311,6 +313,7 @@ func (e *rcxEngine) diagContext(input rcxDecisionInput, ranked []rcxRanked) *rcx
 		Mode:          e.runtime.Mode(),
 		ScreenOff:     e.screenOff,
 		Suspended:     e.suspended,
+		Running:       e.running,
 		Probing:       e.probing,
 		Deep:          e.deep,
 		Transport:     e.transport,

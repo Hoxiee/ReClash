@@ -325,6 +325,34 @@ func (e *rcxEngine) applyScreenOff(off bool) {
 	}
 }
 
+// A down link carries no traffic to route, so the engine quiets until the
+// listener reports the tunnel back up: desktop inits the core with the VPN off.
+func (e *rcxEngine) applyRunning(running bool) {
+	if e.running == running {
+		return
+	}
+	now := e.runtime.Now()
+	e.running = running
+	if !running {
+		e.supersedeProbe()
+		e.supersedeWake()
+		e.supersedeReach()
+		e.reachAgain = false
+		e.closeIncident(now, false)
+		e.persist(true)
+		return
+	}
+	e.reachF, e.reachD = rcxProbeOverloaded, rcxProbeOverloaded
+	e.supersedeReach()
+	if !e.screenOff {
+		e.startWakeProbe()
+	}
+	e.startReach()
+	// Only a park-wide host delay test unblinds cold-start ranking; a probe trickles.
+	e.startHostSweep()
+	e.reconsider()
+}
+
 func (e *rcxEngine) applySuspend(suspended bool) {
 	now := e.runtime.Now()
 	e.suspended = suspended

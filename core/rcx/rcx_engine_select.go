@@ -160,6 +160,10 @@ func (e *rcxEngine) sealProbeDecision() {
 }
 
 func (e *rcxEngine) reconsider() {
+	if !e.running {
+		e.publish(rcxReasonHold, nil, rcxDecisionInput{})
+		return
+	}
 	if !e.Enabled() {
 		e.publish(rcxReasonHold, nil, rcxDecisionInput{})
 		return
