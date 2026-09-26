@@ -61,8 +61,8 @@ class SettingSection extends StatelessWidget {
     this.title,
     this.subTitle,
     this.actions,
-    this.top = 0,
-    this.bottom = 12,
+    this.top,
+    this.bottom = 0,
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
   }) : _isSliver = false;
@@ -73,8 +73,8 @@ class SettingSection extends StatelessWidget {
     this.title,
     this.subTitle,
     this.actions,
-    this.top = 0,
-    this.bottom = 12,
+    this.top,
+    this.bottom = 0,
     this.animateEnter = true,
     this.enterDelay = Duration.zero,
   }) : _isSliver = true;
@@ -83,7 +83,7 @@ class SettingSection extends StatelessWidget {
   final String? title;
   final String? subTitle;
   final List<Widget>? actions;
-  final double top;
+  final double? top;
   final double bottom;
   final bool animateEnter;
   final Duration enterDelay;
@@ -94,24 +94,31 @@ class SettingSection extends StatelessWidget {
     final header = (title != null && items.isNotEmpty)
         ? ListHeader(title: title!, subTitle: subTitle, actions: actions)
         : null;
+    // A header carries its own leading gap (listHeaderPadding.top), so titled
+    // groups stay tight. A header-less group has nothing to separate it from
+    // the group above, so it falls back to that same gap unless the caller
+    // pinned an explicit top (e.g. the first group under the app bar).
+    final effectiveTop = top ?? (header == null ? _headerlessSectionGap : 0);
     final body = generateSectionV3(items: items);
     final content = Column(children: [?header, body]);
     final animated = animateEnter
         ? FadeSlideEnterBox(delay: enterDelay, child: content)
         : content;
     final padded = Padding(
-      padding: EdgeInsets.fromLTRB(16, top, 16, bottom),
+      padding: EdgeInsets.fromLTRB(16, effectiveTop, 16, bottom),
       child: animated,
     );
     if (!_isSliver) {
       return padded;
     }
     return SliverPadding(
-      padding: EdgeInsets.fromLTRB(16, top, 16, bottom),
+      padding: EdgeInsets.fromLTRB(16, effectiveTop, 16, bottom),
       sliver: SliverToBoxAdapter(child: animated),
     );
   }
 }
+
+const double _headerlessSectionGap = 12;
 
 class SettingBottomInset extends StatelessWidget {
   const SettingBottomInset({super.key, this.height = 16}) : _isSliver = false;

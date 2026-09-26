@@ -1460,6 +1460,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logcat": MessageLookupByLibrary.simpleMessage("ログキャプチャ"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage("無効にするとログの入り口が非表示になります"),
     "logs": MessageLookupByLibrary.simpleMessage("ログ"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("ログと診断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("キャプチャしたログの記録"),
     "logsTest": MessageLookupByLibrary.simpleMessage("ログテスト"),
     "loopback": MessageLookupByLibrary.simpleMessage("ループバック解除ツール"),
@@ -2516,7 +2517,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("帯域制限中"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "アプリを開かなくても、ネットワークごとに使えるサーバーを選び続けます",
+      "ネットワークごとに使えるサーバーを選び続けます",
     ),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage("診断ログ"),
     "smartRoutingDiagnosticsDesc": MessageLookupByLibrary.simpleMessage(

@@ -449,6 +449,7 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
   @JsonSerializable(explicitToJson: true)
   const factory SmartRoutingProps({
     @Default(false) bool enabled,
+    @Default(false) bool unlocked,
     @Default(SmartRoutingPreset.off) SmartRoutingPreset preset,
     @Default(SmartRoutingStrategy.balanced) SmartRoutingStrategy strategy,
     @Default([]) List<String> censorCountries,
@@ -477,6 +478,18 @@ abstract class SmartRoutingProps with _$SmartRoutingProps {
   factory SmartRoutingProps.fromJson(Map<String, Object?>? json) => json == null
       ? defaultSmartRoutingProps
       : _$SmartRoutingPropsFromJson(json);
+
+  // Legacy `enabled` meant both "Auto unlocked" and "Auto active"; a stored
+  // config from before the split has no `unlocked` key, so an existing Auto
+  // user keeps the mode selectable after the upgrade.
+  factory SmartRoutingProps.safeFromJson(Map<String, Object?>? json) {
+    if (json == null) {
+      return defaultSmartRoutingProps;
+    }
+    final map = Map<String, Object?>.of(json);
+    map.putIfAbsent('unlocked', () => map['enabled'] ?? false);
+    return SmartRoutingProps.fromJson(map);
+  }
 }
 
 @freezed
@@ -675,7 +688,9 @@ abstract class Config with _$Config {
     DAVProps? davProps,
     @Default(defaultNetworkProps) NetworkProps networkProps,
     @Default(defaultVpnProps) VpnProps vpnProps,
-    @Default(defaultSmartRoutingProps) SmartRoutingProps smartRoutingProps,
+    @JsonKey(fromJson: SmartRoutingProps.safeFromJson)
+    @Default(defaultSmartRoutingProps)
+    SmartRoutingProps smartRoutingProps,
     @JsonKey(fromJson: DesyncProps.safeFromJson)
     @Default(defaultDesyncProps)
     DesyncProps desyncProps,

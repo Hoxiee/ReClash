@@ -321,6 +321,7 @@ _SmartRoutingProps _$SmartRoutingPropsFromJson(
   Map<String, dynamic> json,
 ) => _SmartRoutingProps(
   enabled: json['enabled'] as bool? ?? false,
+  unlocked: json['unlocked'] as bool? ?? false,
   preset:
       $enumDecodeNullable(_$SmartRoutingPresetEnumMap, json['preset']) ??
       SmartRoutingPreset.off,
@@ -404,6 +405,7 @@ Map<String, dynamic> _$SmartRoutingPropsToJson(
   _SmartRoutingProps instance,
 ) => <String, dynamic>{
   'enabled': instance.enabled,
+  'unlocked': instance.unlocked,
   'preset': _$SmartRoutingPresetEnumMap[instance.preset]!,
   'strategy': _$SmartRoutingStrategyEnumMap[instance.strategy]!,
   'censorCountries': instance.censorCountries,
@@ -702,8 +704,8 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
       : VpnProps.fromJson(json['vpnProps'] as Map<String, dynamic>?),
   smartRoutingProps: json['smartRoutingProps'] == null
       ? defaultSmartRoutingProps
-      : SmartRoutingProps.fromJson(
-          json['smartRoutingProps'] as Map<String, dynamic>?,
+      : SmartRoutingProps.safeFromJson(
+          json['smartRoutingProps'] as Map<String, Object?>?,
         ),
   desyncProps: json['desyncProps'] == null
       ? defaultDesyncProps

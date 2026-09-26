@@ -1,8 +1,11 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' as ui show Image;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
@@ -10,21 +13,24 @@ typedef PopupAnchorResolver = Rect? Function();
 
 typedef PopupOpen = void Function({Offset offset});
 
+enum PopupPlacement { overAnchorEnd, belowPoint }
+
 const _screenMargin = 16.0;
 
 const _anchorOverlap = 8.0;
 
 const _cardInset = 8.0;
 
-const _popupEnterDuration = Duration(milliseconds: 250);
+const _popupEnterDuration = Duration(milliseconds: 550);
 
-const _popupExitDuration = Duration(milliseconds: 150);
+const _popupExitDuration = Duration(milliseconds: 280);
 
 const _itemRadius = AppCorner.md;
 
 const _cardRadius = _itemRadius + _cardInset;
 
 const _itemIconSize = 20.0;
+const _submenuArrowSize = 16.0;
 
 const _itemPadding = EdgeInsets.symmetric(horizontal: 12, vertical: 12);
 
@@ -35,17 +41,68 @@ const _itemArrowPadding = EdgeInsets.only(
   right: 8,
 );
 
+const _dividerHeight = _cardInset * 2 + 1;
+
+const _cardElevation = 12.0;
+
+const _maxContentBlur = 8.0;
+
+final _growSpring = SpringCurve(
+  SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 420),
+    bounce: 0.28,
+  ),
+  seconds: 0.55,
+);
+
+final _moveYSpring = SpringCurve(
+  SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 280),
+    bounce: 0.1,
+  ),
+  seconds: 0.55,
+);
+
+final _moveXSpring = SpringCurve(
+  SpringDescription.withDurationAndBounce(
+    duration: const Duration(milliseconds: 400),
+    bounce: 0.15,
+  ),
+  seconds: 0.55,
+);
+
 class CommonPopupRoute<T> extends PopupRoute<T> {
   CommonPopupRoute({
     required this.builder,
     required this.anchorOf,
     required this.barrierLabel,
+    this.placement = PopupPlacement.overAnchorEnd,
+    this.anchorShift = Offset.zero,
+    this.sourceColor = Colors.transparent,
+    this.sourceImage,
+    this.modal = true,
     this.transitionDuration = _popupEnterDuration,
     this.reverseTransitionDuration = _popupExitDuration,
-  });
+  }) : super(requestFocus: modal ? null : false);
 
   final WidgetBuilder builder;
+
+  /// Resolves the rect of the control the popup grows out of.
   final PopupAnchorResolver anchorOf;
+  final PopupPlacement placement;
+
+  /// Moves where the popup is placed without moving where it grows from.
+  final Offset anchorShift;
+
+  /// The background of the source control, which the platter starts from.
+  final Color sourceColor;
+
+  /// A snapshot of the source control, drawn inside the platter while the
+  /// control itself is hidden; null while it is still being taken.
+  final ValueListenable<ui.Image?>? sourceImage;
+
+  /// Off, focus stays on the page and touches outside pass through to it.
+  final bool modal;
 
   @override
   final String? barrierLabel;
@@ -62,10 +119,64 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
   @override
   final Duration reverseTransitionDuration;
 
+  late final CurvedAnimation _grow = CurvedAnimation(
+    parent: animation!,
+    curve: _growSpring,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  late final CurvedAnimation _moveX = CurvedAnimation(
+    parent: animation!,
+    curve: _moveXSpring,
+    reverseCurve: Curves.easeInOutCubic,
+  );
+
+  late final CurvedAnimation _moveY = CurvedAnimation(
+    parent: animation!,
+    curve: _moveYSpring,
+    reverseCurve: Curves.easeOutCubic,
+  );
+
+  late final CurvedAnimation _content = CurvedAnimation(
+    parent: animation!,
+    curve: const Interval(0.08, 0.5, curve: Curves.easeOut),
+    reverseCurve: const Interval(0.5, 1, curve: Curves.easeIn),
+  );
+
+  @override
+  void dispose() {
+    _grow.dispose();
+    _moveX.dispose();
+    _moveY.dispose();
+    _content.dispose();
+    super.dispose();
+  }
+
   void _handleDismiss() {
     if (isCurrent) {
       navigator?.pop();
     }
+  }
+
+  @override
+  Widget buildModalBarrier() {
+    return modal ? super.buildModalBarrier() : const SizedBox.shrink();
+  }
+
+  Widget _buildDismissLayer() {
+    if (modal) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        onTap: _handleDismiss,
+      );
+    }
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _handleDismiss(),
+      onPointerPanZoomStart: (_) => _handleDismiss(),
+      onPointerSignal: (_) => _handleDismiss(),
+    );
   }
 
   @override
@@ -84,42 +195,311 @@ class CommonPopupRoute<T> extends PopupRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    const alignment = Alignment.topRight;
-    final fade = animation.drive(CurveTween(curve: Curves.easeOut));
-    final scale = animation.drive(CurveTween(curve: Curves.easeOutBack));
+    final colorScheme = context.colorScheme;
     return Stack(
       children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            excludeFromSemantics: true,
-            onTap: _handleDismiss,
-          ),
-        ),
+        Positioned.fill(child: _buildDismissLayer()),
         _PopupAnchorTracker(
           anchorOf: anchorOf,
           builder: (anchor, safeInsets, child) => CustomSingleChildLayout(
             delegate: _PopupLayoutDelegate(
-              anchor: anchor,
+              anchor: anchor.shift(anchorShift),
               safeInsets: safeInsets,
+              placement: placement,
             ),
-            child: child,
-          ),
-          child: FadeTransition(
-            opacity: fade,
-            child: ScaleTransition(
-              alignment: alignment,
-              scale: scale,
-              child: SlideTransition(
-                position: scale.drive(
-                  Tween(begin: const Offset(0, -0.02), end: Offset.zero),
-                ),
-                child: child,
-              ),
+            child: _PopupMorph(
+              anchor: anchor,
+              animation: animation,
+              grow: _grow,
+              moveX: _moveX,
+              moveY: _moveY,
+              content: _content,
+              sourceColor: sourceColor,
+              sourceImage: sourceImage,
+              surfaceColor: colorScheme.surfaceContainer,
+              shadowColor: colorScheme.shadow,
+              child: child,
             ),
           ),
+          child: child,
         ),
       ],
+    );
+  }
+}
+
+class _PopupMorph extends SingleChildRenderObjectWidget {
+  const _PopupMorph({
+    required this.anchor,
+    required this.animation,
+    required this.grow,
+    required this.moveX,
+    required this.moveY,
+    required this.content,
+    required this.sourceColor,
+    required this.sourceImage,
+    required this.surfaceColor,
+    required this.shadowColor,
+    super.child,
+  });
+
+  final Rect anchor;
+  final Animation<double> animation;
+  final Animation<double> grow;
+  final Animation<double> moveX;
+  final Animation<double> moveY;
+  final Animation<double> content;
+  final Color sourceColor;
+  final ValueListenable<ui.Image?>? sourceImage;
+  final Color surfaceColor;
+  final Color shadowColor;
+
+  @override
+  _RenderPopupMorph createRenderObject(BuildContext context) {
+    return _RenderPopupMorph(
+      anchor: anchor,
+      animation: animation,
+      grow: grow,
+      moveX: moveX,
+      moveY: moveY,
+      content: content,
+      sourceColor: sourceColor,
+      sourceImage: sourceImage,
+      surfaceColor: surfaceColor,
+      shadowColor: shadowColor,
+    );
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderPopupMorph renderObject,
+  ) {
+    renderObject
+      ..anchor = anchor
+      ..animation = animation
+      ..grow = grow
+      ..moveX = moveX
+      ..moveY = moveY
+      ..content = content
+      ..sourceColor = sourceColor
+      ..sourceImage = sourceImage
+      ..surfaceColor = surfaceColor
+      ..shadowColor = shadowColor;
+  }
+}
+
+/// Grows the popup out of its anchor the way iOS 26 menus leave their button:
+/// a platter flies from the anchor's capsule to the card's center on an arc,
+/// growing on its own spring, while the content rides inside it, scaling,
+/// fading and sharpening in; closing shrinks it first and flies it back.
+class _RenderPopupMorph extends RenderProxyBox {
+  _RenderPopupMorph({
+    required Rect anchor,
+    required Animation<double> animation,
+    required this.grow,
+    required this.moveX,
+    required this.moveY,
+    required this.content,
+    required Color sourceColor,
+    required ValueListenable<ui.Image?>? sourceImage,
+    required Color surfaceColor,
+    required Color shadowColor,
+  }) : _anchor = anchor,
+       _animation = animation,
+       _sourceColor = sourceColor,
+       _sourceImage = sourceImage,
+       _surfaceColor = surfaceColor,
+       _shadowColor = shadowColor;
+
+  Animation<double> grow;
+  Animation<double> moveX;
+  Animation<double> moveY;
+  Animation<double> content;
+
+  Rect _anchor;
+
+  set anchor(Rect value) {
+    if (value == _anchor) {
+      return;
+    }
+    _anchor = value;
+    markNeedsPaint();
+  }
+
+  Animation<double> _animation;
+
+  set animation(Animation<double> value) {
+    if (value == _animation) {
+      return;
+    }
+    if (attached) {
+      _animation.removeListener(markNeedsPaint);
+      value.addListener(markNeedsPaint);
+    }
+    _animation = value;
+    markNeedsPaint();
+  }
+
+  Color _sourceColor;
+
+  set sourceColor(Color value) {
+    if (value == _sourceColor) {
+      return;
+    }
+    _sourceColor = value;
+    markNeedsPaint();
+  }
+
+  ValueListenable<ui.Image?>? _sourceImage;
+
+  set sourceImage(ValueListenable<ui.Image?>? value) {
+    if (value == _sourceImage) {
+      return;
+    }
+    if (attached) {
+      _sourceImage?.removeListener(markNeedsPaint);
+      value?.addListener(markNeedsPaint);
+    }
+    _sourceImage = value;
+    markNeedsPaint();
+  }
+
+  Color _surfaceColor;
+
+  set surfaceColor(Color value) {
+    if (value == _surfaceColor) {
+      return;
+    }
+    _surfaceColor = value;
+    markNeedsPaint();
+  }
+
+  Color _shadowColor;
+
+  set shadowColor(Color value) {
+    if (value == _shadowColor) {
+      return;
+    }
+    _shadowColor = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _animation.addListener(markNeedsPaint);
+    _sourceImage?.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _animation.removeListener(markNeedsPaint);
+    _sourceImage?.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null;
+
+  bool get _closing => _animation.status == AnimationStatus.reverse;
+
+  // While closing, the content still covers the platter until it fades, and
+  // an open sub menu does not fill the platter's bounding shape.
+  double get _fillOpacity =>
+      _closing ? (2 * (1 - content.value)).clamp(0.0, 1.0) : 1.0;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final child = this.child;
+    if (child == null) {
+      return;
+    }
+    if (_animation.isCompleted) {
+      context.paintChild(child, offset);
+      return;
+    }
+    // The anchor comes in the coordinates of the layout box that places this
+    // one, so the placement offset turns it local.
+    final placement = (parentData! as BoxParentData).offset;
+    final from = _anchor.shift(-placement);
+    final bounds = Offset.zero & size;
+    final progress = grow.value;
+    final extent = Size.lerp(from.size, bounds.size, progress)!;
+    final rect = Rect.fromCenter(
+      center: Offset(
+        lerpDouble(from.center.dx, bounds.center.dx, moveX.value)!,
+        lerpDouble(from.center.dy, bounds.center.dy, moveY.value)!,
+      ),
+      width: math.max(0.0, extent.width),
+      height: math.max(0.0, extent.height),
+    );
+    final radius = lerpDouble(from.shortestSide / 2, _cardRadius, progress)!;
+    final clip = AppShape.all(math.max(0.0, radius)).getOuterPath(rect);
+    final sourceImage = _sourceImage;
+    final image = sourceImage?.value;
+    // The source control stays visible until its snapshot exists, so the
+    // platter would only cover it.
+    if (sourceImage != null && image == null && !_closing) {
+      return;
+    }
+    final settled = progress.clamp(0.0, 1.0);
+    final reveal = content.value;
+    final path = clip.shift(offset);
+    final canvas = context.canvas
+      ..drawShadow(
+        path,
+        _shadowColor.withValues(alpha: _shadowColor.a * settled),
+        _cardElevation * settled,
+        false,
+      );
+    final fill = Color.lerp(_sourceColor, _surfaceColor, settled)!;
+    canvas.drawPath(
+      path,
+      Paint()..color = fill.withValues(alpha: fill.a * _fillOpacity),
+    );
+    final glyph = 1 - reveal;
+    if (image != null && glyph > 0) {
+      final source = from.shift(rect.center - from.center + offset);
+      canvas.drawImageRect(
+        image,
+        Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
+        source,
+        Paint()
+          ..color = Color.fromRGBO(0, 0, 0, glyph)
+          ..filterQuality = FilterQuality.medium,
+      );
+    }
+    if (reveal <= 0 || size.isEmpty) {
+      return;
+    }
+    final scale = math.max(rect.width / size.width, rect.height / size.height);
+    final transform =
+        Matrix4.translationValues(rect.center.dx, rect.center.dy, 0)
+          ..scaleByDouble(scale, scale, 1, 1)
+          ..translateByDouble(-size.width / 2, -size.height / 2, 0, 1);
+    final sigma = _maxContentBlur * (1 - reveal);
+    context.pushClipPath(
+      needsCompositing,
+      offset,
+      bounds,
+      clip,
+      (context, offset) => context.pushOpacity(
+        offset,
+        Color.getAlphaFromOpacity(reveal),
+        (context, offset) => context.pushLayer(
+          ImageFilterLayer(
+            imageFilter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          ),
+          (context, offset) => context.pushTransform(
+            needsCompositing,
+            offset,
+            transform,
+            (context, offset) => context.paintChild(child, offset),
+          ),
+          offset,
+        ),
+      ),
     );
   }
 }
@@ -179,10 +559,15 @@ class _PopupAnchorTrackerState extends State<_PopupAnchorTracker> {
 }
 
 class _PopupLayoutDelegate extends SingleChildLayoutDelegate {
-  const _PopupLayoutDelegate({required this.anchor, required this.safeInsets});
+  const _PopupLayoutDelegate({
+    required this.anchor,
+    required this.safeInsets,
+    required this.placement,
+  });
 
   final Rect anchor;
   final EdgeInsets safeInsets;
+  final PopupPlacement placement;
 
   EdgeInsets get _insets => safeInsets + const EdgeInsets.all(_screenMargin);
 
@@ -205,21 +590,24 @@ class _PopupLayoutDelegate extends SingleChildLayoutDelegate {
     final insets = _insets;
     final maxX = size.width - insets.right - childSize.width;
     final maxY = size.height - insets.bottom - childSize.height;
+    final (x, y) = switch (placement) {
+      PopupPlacement.overAnchorEnd => (
+        anchor.right - childSize.width,
+        anchor.top - _anchorOverlap,
+      ),
+      PopupPlacement.belowPoint => (anchor.left, anchor.bottom),
+    };
     return Offset(
-      (anchor.right - childSize.width).clamp(
-        insets.left,
-        math.max(insets.left, maxX),
-      ),
-      (anchor.top - _anchorOverlap).clamp(
-        insets.top,
-        math.max(insets.top, maxY),
-      ),
+      x.clamp(insets.left, math.max(insets.left, maxX)),
+      y.clamp(insets.top, math.max(insets.top, maxY)),
     );
   }
 
   @override
   bool shouldRelayout(_PopupLayoutDelegate oldDelegate) {
-    return oldDelegate.anchor != anchor || oldDelegate.safeInsets != safeInsets;
+    return oldDelegate.anchor != anchor ||
+        oldDelegate.safeInsets != safeInsets ||
+        oldDelegate.placement != placement;
   }
 }
 
@@ -239,7 +627,16 @@ class CommonPopupBox extends StatefulWidget {
 }
 
 class _CommonPopupBoxState extends State<CommonPopupBox> {
-  Rect? _anchorOf(Offset offset) {
+  final _sourceKey = GlobalKey();
+  final _sourceHidden = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    _sourceHidden.dispose();
+    super.dispose();
+  }
+
+  Rect? _sourceRect() {
     if (!mounted) {
       return null;
     }
@@ -250,26 +647,96 @@ class _CommonPopupBoxState extends State<CommonPopupBox> {
     final navigatorBox =
         Navigator.maybeOf(context)?.context.findRenderObject() as RenderBox?;
     final origin = renderBox.localToGlobal(Offset.zero, ancestor: navigatorBox);
-    return (origin & renderBox.size).shift(offset);
+    return origin & renderBox.size;
+  }
+
+  Color _sourceColor() {
+    Color? color;
+    void visit(Element element) {
+      if (color != null) {
+        return;
+      }
+      if (element.widget case final Material material) {
+        color = material.type == MaterialType.transparency
+            ? Colors.transparent
+            : material.color ?? Colors.transparent;
+        return;
+      }
+      element.visitChildren(visit);
+    }
+
+    context.visitChildElements(visit);
+    final resolved = color;
+    if (resolved == null || resolved.a == 0) {
+      return context.colorScheme.surfaceContainer;
+    }
+    return resolved;
+  }
+
+  void _captureSource(
+    CommonPopupRoute<void> route,
+    ValueNotifier<ui.Image?> snapshot,
+  ) {
+    if (!mounted || !route.isActive) {
+      return;
+    }
+    final boundary = _sourceKey.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary || !boundary.hasSize) {
+      return;
+    }
+    snapshot.value = boundary.toImageSync(
+      pixelRatio: MediaQuery.devicePixelRatioOf(context),
+    );
+    _sourceHidden.value = true;
   }
 
   void _open({Offset offset = Offset.zero}) {
-    Navigator.of(context).push(
-      CommonPopupRoute<void>(
-        barrierLabel: MaterialLocalizations.of(
-          context,
-        ).modalBarrierDismissLabel,
-        builder: (context) => widget.popupBuilder(context),
-        anchorOf: () => _anchorOf(offset),
-        transitionDuration: context.motionDuration(_popupEnterDuration),
-        reverseTransitionDuration: context.motionDuration(_popupExitDuration),
-      ),
+    final snapshot = ValueNotifier<ui.Image?>(null);
+    final route = CommonPopupRoute<void>(
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      builder: (context) => widget.popupBuilder(context),
+      anchorOf: _sourceRect,
+      anchorShift: offset,
+      sourceColor: _sourceColor(),
+      sourceImage: snapshot,
+      transitionDuration: context.motionDuration(_popupEnterDuration),
+      reverseTransitionDuration: context.motionDuration(_popupExitDuration),
+    );
+    Navigator.of(context).push(route);
+    void reveal() {
+      if (mounted) {
+        _sourceHidden.value = false;
+      }
+    }
+
+    route.animation!.addStatusListener((status) {
+      if (status.isDismissed) {
+        reveal();
+      }
+    });
+    route.completed.whenComplete(() {
+      reveal();
+      snapshot.value?.dispose();
+      snapshot.dispose();
+    });
+    // The control repaints its ink as it is tapped, so it can only be
+    // captured once that frame has been painted.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _captureSource(route, snapshot),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.targetBuilder(_open);
+    return ValueListenableBuilder<bool>(
+      valueListenable: _sourceHidden,
+      builder: (_, hidden, child) =>
+          Opacity(opacity: hidden ? 0 : 1, child: child),
+      child: RepaintBoundary(
+        key: _sourceKey,
+        child: widget.targetBuilder(_open),
+      ),
+    );
   }
 }
 
@@ -574,7 +1041,7 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
     if (item.subItems.isNotEmpty) {
       arrow = GlyphIcon(
         AppGlyphs.chevronForward,
-        size: _itemIconSize,
+        size: _submenuArrowSize,
         color: foregroundColor,
       );
       if (arrowTurns != null) {
@@ -730,7 +1197,10 @@ class _CommonPopupMenuState extends State<CommonPopupMenu>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [const Divider(height: 1, thickness: 1), ...items],
+              children: [
+                const Divider(height: _dividerHeight, thickness: 1),
+                ...items,
+              ],
             ),
           ),
         ),

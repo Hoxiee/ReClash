@@ -273,6 +273,22 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
         : openMarkers,
   );
 
+  /// Unlocking only opens Auto as a selectable mode; it never activates it.
+  /// Locking retires an active Auto so the outbound mode can never point at a
+  /// mode the selectors no longer offer.
+  SmartRoutingProps withUnlocked(bool value) => copyWith(
+    unlocked: value,
+    enabled: value && enabled,
+    canaryForeign:
+        value && preset == SmartRoutingPreset.off && canaryForeign.isEmpty
+        ? _neutral.canaryForeign
+        : canaryForeign,
+    openMarkers:
+        value && preset == SmartRoutingPreset.off && openMarkers.isEmpty
+        ? _neutral.openMarkers
+        : openMarkers,
+  );
+
   bool get matchesPreset => this == applyPreset(preset);
 
   SmartRoutingProps applyStrategy(SmartRoutingStrategy value) => copyWith(

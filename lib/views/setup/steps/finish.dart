@@ -221,7 +221,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
     }
     ref
         .read(smartRoutingSettingProvider.notifier)
-        .update((state) => state.withEnabled(value));
+        .update((state) => state.withUnlocked(value));
   }
 
   @override
@@ -263,7 +263,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                       ],
                     ),
                     subtitle: Text(appLocalizations.smartRoutingDesc),
-                    value: routing.enabled,
+                    value: routing.unlocked,
                     onChanged: (value) => _handleSmartRouting(context, value),
                   ),
                   ListItem<SmartRoutingStrategy>.options(
@@ -415,7 +415,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                     ),
                     Text(
                       appLocalizations.setupSummaryRouting(
-                        routing.enabled
+                        routing.unlocked
                             ? routing.preset.label
                             : appLocalizations.off,
                       ),

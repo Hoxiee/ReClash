@@ -1285,6 +1285,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logcat": MessageLookupByLibrary.simpleMessage("日志捕获"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage("禁用将会隐藏日志入口"),
     "logs": MessageLookupByLibrary.simpleMessage("日志"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("日志与诊断"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("日志捕获记录"),
     "logsTest": MessageLookupByLibrary.simpleMessage("日志测试"),
     "loopback": MessageLookupByLibrary.simpleMessage("回环解锁工具"),
@@ -2216,9 +2217,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "在切换前服务器持续丢流量的时间",
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("被限速"),
-    "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "无需打开应用，为每个网络自动保持可用的服务器",
-    ),
+    "smartRoutingDesc": MessageLookupByLibrary.simpleMessage("为每个网络自动保持可用的服务器"),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage("诊断日志"),
     "smartRoutingDiagnosticsDesc": MessageLookupByLibrary.simpleMessage(
       "记录本次会话的每一次路由决策、切换和探测",

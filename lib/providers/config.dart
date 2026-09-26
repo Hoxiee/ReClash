@@ -293,6 +293,21 @@ UiOutboundMode _uiOutboundMode(Ref ref) {
   return mode.uiMode(smartRouting: smartRouting);
 }
 
+/// Auto only joins the outbound-mode selectors once smart routing is unlocked;
+/// until then the toggle in settings governs whether the mode exists at all.
+@Riverpod(name: 'availableOutboundModesProvider')
+List<UiOutboundMode> _availableOutboundModes(Ref ref) {
+  final unlocked = ref.watch(
+    smartRoutingSettingProvider.select((state) => state.unlocked),
+  );
+  if (unlocked) {
+    return UiOutboundMode.values;
+  }
+  return UiOutboundMode.values
+      .where((mode) => mode != UiOutboundMode.auto)
+      .toList();
+}
+
 @Riverpod(name: 'configProvider')
 Config _config(Ref ref) {
   final appSettingProps = ref.watch(appSettingProvider);

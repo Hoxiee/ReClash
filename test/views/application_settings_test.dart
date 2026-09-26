@@ -7,6 +7,7 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/application_notification.dart';
 import 'package:reclash/views/settings/application_setting.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,56 +93,29 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> pumpComponentSettings(
-    WidgetTester tester,
-    NotificationComponentType type,
-  ) async {
-    useViewport(tester, const Size(480, 900));
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: TestApp(
-          child: Scaffold(body: NotificationComponentSettings(type: type)),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-  }
-
-  Future<void> pushComponentSettings(
-    WidgetTester tester,
-    NotificationComponentType type,
-  ) async {
-    useViewport(tester, const Size(480, 900));
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: TestApp(
-          child: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => Scaffold(
-                      body: NotificationComponentSettings(type: type),
-                    ),
-                  ),
-                ),
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-  }
-
   Future<void> openEditor(WidgetTester tester) async {
     await pumpEditor(tester);
   }
+
+  // Add and Reset live in the scaffold overflow menu, mirroring the DNS/NTP
+  // override editors; a new component is chosen from the selection sheet Add
+  // opens.
+  Future<void> addComponent(WidgetTester tester, String label) async {
+    await tester.tap(find.byGlyph(AppGlyphs.more));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(label));
+    await tester.pumpAndSettle();
+  }
+
+  Finder removeButtonFor(String title) => find.descendant(
+    of: find.ancestor(
+      of: find.text(title),
+      matching: find.byType(DecorationListItem),
+    ),
+    matching: find.byTooltip('Remove'),
+  );
 
   testWidgets('the notification row is hidden off Android', (tester) async {
     useViewport(tester, const Size(480, 900));
@@ -256,29 +230,22 @@ void main() {
       .map((item) => item.type)
       .toList();
 
-  testWidgets('editor splits active components from the ones left to add', (
+  testWidgets('editor shows active rows and adds the rest from the menu', (
     tester,
   ) async {
     await openEditor(tester);
 
-    expect(find.text('In the notification'), findsOneWidget);
     expect(find.text('Connection Doctor'), findsOneWidget);
-    expect(find.byTooltip('Reorder'), findsNWidgets(4));
+    expect(find.byTooltip('Remove'), findsNWidgets(4));
+    expect(find.text('Network state'), findsNothing);
+    expect(find.text('Current server'), findsNothing);
 
-    expect(find.text('Add component'), findsOneWidget);
-    expect(find.text('Network state'), findsOneWidget);
-    expect(find.text('Current server'), findsOneWidget);
-    expect(find.byGlyph(AppGlyphs.add), findsNWidgets(2));
-
-    await tester.tap(find.text('Network state'));
-    await tester.pumpAndSettle();
+    await addComponent(tester, 'Network state');
     expect(readTypes().last, NotificationComponentType.networkState);
-    expect(find.byTooltip('Reorder'), findsNWidgets(5));
+    expect(find.byTooltip('Remove'), findsNWidgets(5));
 
-    await tester.tap(find.text('Current server'));
-    await tester.pumpAndSettle();
-    expect(find.text('Add component'), findsNothing);
-    expect(find.byGlyph(AppGlyphs.add), findsNothing);
+    await addComponent(tester, 'Current server');
+    expect(readTypes().length, NotificationComponentType.values.length);
   });
 
   testWidgets('editor offers every component once nothing is active', (
@@ -295,18 +262,17 @@ void main() {
         );
     await openEditor(tester);
 
-    expect(find.byType(SliverReorderableList), findsNothing);
-    expect(find.text('In the notification'), findsNothing);
     expect(
       find.text(
         'Without components the notification shows only the protection status.',
       ),
       findsOneWidget,
     );
-    expect(
-      find.byGlyph(AppGlyphs.add),
-      findsNWidgets(NotificationComponentType.values.length),
-    );
+    expect(find.byTooltip('Remove'), findsNothing);
+
+    await addComponent(tester, 'Connection Doctor');
+    expect(readTypes(), [NotificationComponentType.connectionDoctor]);
+    expect(find.byTooltip('Remove'), findsOneWidget);
   });
 
   testWidgets('editor reports the components the service cannot print', (
@@ -320,8 +286,7 @@ void main() {
     );
     expect(find.text('Hidden while no traffic is flowing'), findsOneWidget);
 
-    await tester.tap(find.text('Current server'));
-    await tester.pumpAndSettle();
+    await addComponent(tester, 'Current server');
     expect(
       find.text('No server group is resolved, so this line is hidden'),
       findsOneWidget,
@@ -391,28 +356,27 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('component sheet states behaviour and the exit', (tester) async {
-    await pushComponentSettings(tester, NotificationComponentType.speed);
+  testWidgets('inline remove drops the component from the notification', (
+    tester,
+  ) async {
+    await openEditor(tester);
 
-    expect(find.text('Behaviour'), findsOneWidget);
-    expect(find.text('Hide idle speed'), findsOneWidget);
-
-    await tester.tap(find.text('Remove from notification'));
+    expect(find.text('Network speed'), findsOneWidget);
+    await tester.tap(removeButtonFor('Network speed'));
     await tester.pumpAndSettle();
-    expect(find.text('Remove from notification'), findsNothing);
+
+    expect(find.text('Network speed'), findsNothing);
     expect(readTypes().contains(NotificationComponentType.speed), false);
   });
 
-  testWidgets('doctor and speed component settings write provider', (
+  testWidgets('doctor and speed rows edit their option in place', (
     tester,
   ) async {
-    await pumpComponentSettings(
-      tester,
-      NotificationComponentType.connectionDoctor,
-    );
-    await tester.tap(find.text('Problems only'));
+    await openEditor(tester);
+
+    await tester.tap(find.text('Connection Doctor'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Always'));
+    await tester.tap(find.text('Always').last);
     await tester.pumpAndSettle();
     expect(
       container
@@ -424,8 +388,7 @@ void main() {
       DoctorNotificationPriority.always,
     );
 
-    await pumpComponentSettings(tester, NotificationComponentType.speed);
-    await tester.tap(find.text('Hide idle speed'));
+    await tester.tap(find.text('Network speed'));
     await tester.pumpAndSettle();
     expect(
       container
@@ -438,7 +401,7 @@ void main() {
     );
   });
 
-  testWidgets('current server offers mode-filtered display groups', (
+  testWidgets('current server row offers mode-filtered display groups', (
     tester,
   ) async {
     container.read(groupsProvider.notifier).value = const [
@@ -459,11 +422,9 @@ void main() {
             ),
           ),
         );
-    await pumpComponentSettings(
-      tester,
-      NotificationComponentType.currentServer,
-    );
-    await tester.tap(find.text('Automatic group'));
+    await openEditor(tester);
+
+    await tester.tap(find.text('Current server'));
     await tester.pumpAndSettle();
 
     expect(find.text('Visible'), findsOneWidget);

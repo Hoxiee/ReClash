@@ -1637,9 +1637,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -1803,6 +1804,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Öçürilse, hasaba alyşyň giriş nokady gizlenýär",
     ),
     "logs": MessageLookupByLibrary.simpleMessage("Hasaba alyş"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Hasaba alyş we diagnostika",
+    ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Hasaba alynan ýazgylar"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Hasaba alyş synagy"),
     "loopback": MessageLookupByLibrary.simpleMessage("Loopback guraly"),
@@ -3119,7 +3123,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tizligi çäklendirilen",
     ),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "Programmany açmazdan, her tor üçin işleýän serwer saýlanyp saklanýar",
+      "Her tor üçin işleýän serwer saýlanyp saklanýar",
     ),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage(
       "Diagnostika ýazgysy",

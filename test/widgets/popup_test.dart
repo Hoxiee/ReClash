@@ -60,7 +60,7 @@ void main() {
     expect(find.byKey(const Key('popup')), findsOneWidget);
   });
 
-  testWidgets('dismissing mid-enter reverses without an opacity jump', (
+  testWidgets('dismissing mid-enter reverses without an animation jump', (
     tester,
   ) async {
     final open = await pumpBox(tester);
@@ -68,19 +68,18 @@ void main() {
     open();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    final routeFade = find.byWidgetPredicate(
-      (widget) => widget is FadeTransition && widget.child is ScaleTransition,
-    );
-    final beforeDismiss = tester
-        .widget<FadeTransition>(routeFade)
-        .opacity
-        .value;
+    final route = ModalRoute.of(
+      tester.element(find.byKey(const Key('popup'))),
+    )!;
+    final beforeDismiss = route.animation!.value;
+    expect(route.animation!.status, AnimationStatus.forward);
 
     await tester.tapAt(const Offset(10, 10));
     await tester.pump();
-    final afterDismiss = tester.widget<FadeTransition>(routeFade).opacity.value;
+    final afterDismiss = route.animation!.value;
 
     expect(afterDismiss, closeTo(beforeDismiss, 0.001));
+    expect(route.animation!.status, AnimationStatus.reverse);
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('popup')), findsNothing);
   });

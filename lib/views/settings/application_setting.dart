@@ -3,6 +3,7 @@ import 'package:reclash/icons/icons.dart';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/settings/application_notification.dart';
@@ -25,6 +26,23 @@ ConfigToggleItem _appSettingToggle({
         .read(appSettingProvider.notifier)
         .update((state) => update(state, value)),
   );
+}
+
+class LogLevelItem extends ConsumerWidget {
+  const LogLevelItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return ConfigOptionsItem<LogLevel>(
+      title: (l) => l.logLevel,
+      options: LogLevel.values,
+      textBuilder: (logLevel) => logLevel.name,
+      selector: patchClashConfigProvider.select((state) => state.logLevel),
+      onChanged: (ref, value) => ref
+          .read(patchClashConfigProvider.notifier)
+          .update((state) => state.copyWith(logLevel: value)),
+    );
+  }
 }
 
 class ApplicationSettingView extends StatelessWidget {
@@ -128,24 +146,11 @@ class _ApplicationGeneralTab extends StatelessWidget {
     ];
     final otherItems = <Widget>[
       _appSettingToggle(
-        title: (l) => l.logcat,
-        subtitle: (l) => l.logcatDesc,
-        select: (state) => state.openLogs,
-        update: (state, value) => state.copyWith(openLogs: value),
-      ),
-      _appSettingToggle(
         title: (l) => l.onlyStatisticsProxy,
         subtitle: (l) => l.onlyStatisticsProxyDesc,
         select: (state) => state.onlyStatisticsProxy,
         update: (state, value) => state.copyWith(onlyStatisticsProxy: value),
       ),
-      if (system.isAndroid)
-        _appSettingToggle(
-          title: (l) => l.crashlytics,
-          subtitle: (l) => l.crashlyticsTip,
-          select: (state) => state.crashlytics,
-          update: (state, value) => state.copyWith(crashlytics: value),
-        ),
       _appSettingToggle(
         title: (l) => l.autoCheckUpdate,
         subtitle: (l) => l.autoCheckUpdateDesc,
@@ -159,11 +164,31 @@ class _ApplicationGeneralTab extends StatelessWidget {
         update: (state, value) => state.copyWith(checkCertificate: value),
       ),
     ];
+    final logItems = <Widget>[
+      const LogLevelItem(),
+      _appSettingToggle(
+        title: (l) => l.logcat,
+        subtitle: (l) => l.logcatDesc,
+        select: (state) => state.openLogs,
+        update: (state, value) => state.copyWith(openLogs: value),
+      ),
+      if (system.isAndroid)
+        _appSettingToggle(
+          title: (l) => l.crashlytics,
+          subtitle: (l) => l.crashlyticsTip,
+          select: (state) => state.crashlytics,
+          update: (state, value) => state.copyWith(crashlytics: value),
+        ),
+    ];
     return SettingsScrollView(
       slivers: [
         SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
         SettingSection.sliver(top: 12, items: behaviorItems),
         SettingSection.sliver(title: appLocalizations.other, items: otherItems),
+        SettingSection.sliver(
+          title: appLocalizations.logsAndDiagnostics,
+          items: logItems,
+        ),
         SettingSection.sliver(
           title: appLocalizations.settings,
           items: [

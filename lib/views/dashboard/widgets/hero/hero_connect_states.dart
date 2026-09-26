@@ -319,6 +319,7 @@ class _ModeChip extends ConsumerWidget {
     final appLocalizations = context.appLocalizations;
     final dashboardMode = ref.watch(dashboardModeProvider);
     final outboundMode = ref.watch(uiOutboundModeProvider);
+    final availableModes = ref.watch(availableOutboundModesProvider);
     final byedpi = dashboardMode == DashboardMode.byedpi;
     final label = byedpi
         ? connectionModeLabel(appLocalizations, dashboardMode)
@@ -340,7 +341,7 @@ class _ModeChip extends ConsumerWidget {
       ),
       popupBuilder: (_) => CommonPopupMenu(
         items: [
-          for (final item in UiOutboundMode.values)
+          for (final item in availableModes)
             CommonPopupMenuItem(
               glyph: _modeIcon(item),
               label: item.label,

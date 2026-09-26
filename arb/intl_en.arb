@@ -37,6 +37,7 @@
   "tools": "Tools",
   "toolsSelectPanePlaceholder": "Select a setting to view it here.",
   "logs": "Logs",
+  "logsAndDiagnostics": "Logs and diagnostics",
   "logsDesc": "Captured log records",
   "resources": "Resources",
   "resourcesDesc": "Information about external resources",
@@ -981,7 +982,7 @@
     }
   },
   "smartRouting": "Smart routing",
-  "smartRoutingDesc": "Keeps a working server picked for every network, without opening the app",
+  "smartRoutingDesc": "Keeps a working server picked for every network",
   "experimentalLabel": "Experimental",
   "experimentalNoticeTitle": "Experimental feature",
   "experimentalEnable": "Enable anyway",

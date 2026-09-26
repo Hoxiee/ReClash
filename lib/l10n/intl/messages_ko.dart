@@ -1449,6 +1449,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "logcat": MessageLookupByLibrary.simpleMessage("Logcat"),
     "logcatDesc": MessageLookupByLibrary.simpleMessage("끄면 로그 메뉴가 표시되지 않습니다"),
     "logs": MessageLookupByLibrary.simpleMessage("로그"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage("로그 및 진단"),
     "logsDesc": MessageLookupByLibrary.simpleMessage("수집된 로그"),
     "logsTest": MessageLookupByLibrary.simpleMessage("로그 테스트"),
     "loopback": MessageLookupByLibrary.simpleMessage("루프백 잠금 해제 도구"),
@@ -2501,7 +2502,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("속도 제한됨"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "앱을 열지 않고도 네트워크마다 작동하는 서버를 자동으로 골라 둡니다",
+      "네트워크마다 작동하는 서버를 자동으로 골라 둡니다",
     ),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage("진단 로깅"),
     "smartRoutingDiagnosticsDesc": MessageLookupByLibrary.simpleMessage(

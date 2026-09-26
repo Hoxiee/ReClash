@@ -837,6 +837,62 @@ final class _UiOutboundModeProvider
 
 String _$_uiOutboundModeHash() => r'ab6f66e5530556a738ba0c3e056b112e7d514fa3';
 
+/// Auto only joins the outbound-mode selectors once smart routing is unlocked;
+/// until then the toggle in settings governs whether the mode exists at all.
+
+@ProviderFor(_availableOutboundModes)
+final availableOutboundModesProvider = _AvailableOutboundModesProvider._();
+
+/// Auto only joins the outbound-mode selectors once smart routing is unlocked;
+/// until then the toggle in settings governs whether the mode exists at all.
+
+final class _AvailableOutboundModesProvider
+    extends
+        $FunctionalProvider<
+          List<UiOutboundMode>,
+          List<UiOutboundMode>,
+          List<UiOutboundMode>
+        >
+    with $Provider<List<UiOutboundMode>> {
+  /// Auto only joins the outbound-mode selectors once smart routing is unlocked;
+  /// until then the toggle in settings governs whether the mode exists at all.
+  _AvailableOutboundModesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'availableOutboundModesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$_availableOutboundModesHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<UiOutboundMode>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<UiOutboundMode> create(Ref ref) {
+    return _availableOutboundModes(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<UiOutboundMode> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<UiOutboundMode>>(value),
+    );
+  }
+}
+
+String _$_availableOutboundModesHash() =>
+    r'8a4aa703cfd5a5d7174e7f5e936369b42f190584';
+
 @ProviderFor(_config)
 final configProvider = _ConfigProvider._();
 

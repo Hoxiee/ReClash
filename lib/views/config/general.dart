@@ -14,24 +14,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 part 'general/port_dialog.dart';
 part 'general/external_controller_dialog.dart';
 
-class LogLevelItem extends ConsumerWidget {
-  const LogLevelItem({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    return ConfigOptionsItem<LogLevel>(
-      leading: const GlyphIcon(AppGlyphs.info),
-      title: (l) => l.logLevel,
-      options: LogLevel.values,
-      textBuilder: (logLevel) => logLevel.name,
-      selector: patchClashConfigProvider.select((state) => state.logLevel),
-      onChanged: (ref, value) => ref
-          .read(patchClashConfigProvider.notifier)
-          .update((state) => state.copyWith(logLevel: value)),
-    );
-  }
-}
-
 class UaItem extends ConsumerWidget {
   const UaItem({super.key});
 
@@ -341,7 +323,6 @@ class GeneralListView extends ConsumerWidget {
         SettingSection(
           title: appLocalizations.other,
           items: [
-            const LogLevelItem(),
             const TestUrlItem(),
             if (system.isDesktop) const KeepAliveIntervalItem(),
             const HostsItem(),

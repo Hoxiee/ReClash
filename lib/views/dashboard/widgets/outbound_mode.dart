@@ -33,6 +33,7 @@ class OutboundModeV2 extends StatelessWidget {
         child: Consumer(
           builder: (_, ref, _) {
             final mode = ref.watch(uiOutboundModeProvider);
+            final modes = ref.watch(availableOutboundModesProvider);
             final thumbColor = switch (mode) {
               UiOutboundMode.auto => context.colorScheme.primaryContainer,
               UiOutboundMode.rule => context.colorScheme.secondaryContainer,
@@ -51,7 +52,7 @@ class OutboundModeV2 extends StatelessWidget {
                         constraints: const BoxConstraints.expand(),
                         child: CommonTabBar<UiOutboundMode>(
                           children: {
-                            for (final item in UiOutboundMode.values)
+                            for (final item in modes)
                               item: CommonTabLabel(
                                 label: item.label,
                                 selected: item == mode,

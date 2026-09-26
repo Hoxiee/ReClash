@@ -106,18 +106,21 @@ class HotKeyView extends StatelessWidget {
     final labels = ShortcutLabels.host();
     return BaseScaffold(
       title: appLocalizations.hotkeyManagement,
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(16, context.appBarInset, 16, 20),
+      body: SettingsListView(
         children: [
-          const _HotKeyIntro(),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: FadeSlideEnterBox(child: _HotKeyIntro()),
+          ),
           for (final (title, actions) in _sections(appLocalizations))
-            generateSectionV3(
+            SettingSection(
               title: title,
               items: [
                 for (final action in actions)
                   _HotKeyItem(action: action, labels: labels),
               ],
             ),
+          const SettingBottomInset(),
         ],
       ),
     );

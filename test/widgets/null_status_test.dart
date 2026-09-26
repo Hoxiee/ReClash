@@ -125,6 +125,70 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('draws the glyph in once a pushed route settles', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const NullStatus(label: 'Nothing here'),
+              ),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    // Held at the start while the route animates in.
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    // Route has landed; the glyph entrance is now the animation still running.
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('replays the entrance when the glyph is tapped', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: NullStatus(label: 'Nothing here')),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+
+    await tester.tap(find.byKey(const ValueKey(NullStatusIllustration.data)));
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ignores a tap under reduced motion', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: _reducedMotion,
+          child: NullStatus(label: 'Nothing here'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey(NullStatusIllustration.data)));
+    await tester.pump();
+    expect(tester.hasRunningAnimations, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('skips the entrance fade under reduced motion', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(

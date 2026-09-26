@@ -65,7 +65,7 @@ class SmartRoutingView extends ConsumerWidget {
     if (!context.mounted) {
       return;
     }
-    _update(ref, (state) => state.withEnabled(value));
+    _update(ref, (state) => state.withUnlocked(value));
   }
 
   @override
@@ -98,14 +98,14 @@ class SmartRoutingView extends ConsumerWidget {
               ],
             ),
             subtitle: Text(appLocalizations.smartRoutingDesc),
-            value: props.enabled,
+            value: props.unlocked,
             onChanged: (value) => _handleEnabled(context, ref, value),
           ),
         ],
       ),
     ];
 
-    if (props.enabled) {
+    if (props.unlocked) {
       slivers.addAll([
         _regionSection(context, props),
         _strategySection(context, ref, props),

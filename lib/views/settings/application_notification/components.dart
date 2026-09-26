@@ -57,15 +57,6 @@ String _componentStatus(AppLocalizations l, NotificationComponent component) =>
       _ => _componentVisibility(l, component),
     };
 
-Glyph _componentIcon(NotificationComponentType type) => switch (type) {
-  NotificationComponentType.connectionDoctor => AppGlyphs.safety,
-  NotificationComponentType.networkState => AppGlyphs.route,
-  NotificationComponentType.currentServer => AppGlyphs.dns,
-  NotificationComponentType.smartRouting => AppGlyphs.route,
-  NotificationComponentType.speed => AppGlyphs.speed,
-  NotificationComponentType.sessionTraffic => AppGlyphs.dataUsage,
-};
-
 /// What the notification service needs before a component can print its line.
 /// The rows and the component sheet both report it, so a component that is
 /// configured but silent right now says why.
@@ -152,6 +143,10 @@ String _doctorPriorityLabel(
   DoctorNotificationPriority.problems => l.notificationDoctorPriorityProblems,
   DoctorNotificationPriority.always => l.notificationDoctorPriorityAlways,
 };
+
+final _componentsSelector = appSettingProvider.select(
+  (state) => state.notificationSettings.components,
+);
 
 void _writeComponents(WidgetRef ref, List<NotificationComponent> components) {
   ref

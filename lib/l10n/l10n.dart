@@ -340,6 +340,16 @@ class AppLocalizations {
     return Intl.message('Logs', name: 'logs', desc: '', args: []);
   }
 
+  /// `Logs and diagnostics`
+  String get logsAndDiagnostics {
+    return Intl.message(
+      'Logs and diagnostics',
+      name: 'logsAndDiagnostics',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Captured log records`
   String get logsDesc {
     return Intl.message(
@@ -8119,10 +8129,10 @@ class AppLocalizations {
     );
   }
 
-  /// `Keeps a working server picked for every network, without opening the app`
+  /// `Keeps a working server picked for every network`
   String get smartRoutingDesc {
     return Intl.message(
-      'Keeps a working server picked for every network, without opening the app',
+      'Keeps a working server picked for every network',
       name: 'smartRoutingDesc',
       desc: '',
       args: [],

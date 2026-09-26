@@ -37,6 +37,7 @@
   "tools": "Инструменты",
   "toolsSelectPanePlaceholder": "Выберите настройку, чтобы посмотреть её здесь.",
   "logs": "Логи",
+  "logsAndDiagnostics": "Логи и диагностика",
   "logsDesc": "Собранные логи",
   "resources": "Ресурсы",
   "resourcesDesc": "Внешние ресурсы и их состояние",
@@ -967,7 +968,7 @@
     }
   },
   "smartRouting": "Умная маршрутизация",
-  "smartRoutingDesc": "Автоматически подбирает рабочий сервер для каждой сети — приложение можно не открывать",
+  "smartRoutingDesc": "Автоматически подбирает рабочий сервер для каждой сети",
   "experimentalLabel": "Экспериментально",
   "experimentalNoticeTitle": "Экспериментальная функция",
   "experimentalEnable": "Всё равно включить",

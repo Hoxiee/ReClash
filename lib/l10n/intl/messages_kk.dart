@@ -1630,9 +1630,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -1798,6 +1799,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Өшірілгенде журнал бөлімі жасырылады",
     ),
     "logs": MessageLookupByLibrary.simpleMessage("Журналдар"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Журналдар және диагностика",
+    ),
     "logsDesc": MessageLookupByLibrary.simpleMessage(
       "Жиналған журнал жазбалары",
     ),
@@ -3136,7 +3140,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("Тежелген"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "Қолданбаны ашпай-ақ, әр желі үшін жұмыс істейтін сервер дайын тұрады",
+      "Әр желі үшін жұмыс істейтін сервер дайын тұрады",
     ),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage(
       "Диагностика журналы",

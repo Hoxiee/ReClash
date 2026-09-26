@@ -1626,9 +1626,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -1796,6 +1797,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Если отключить, раздел логов будет скрыт",
     ),
     "logs": MessageLookupByLibrary.simpleMessage("Логи"),
+    "logsAndDiagnostics": MessageLookupByLibrary.simpleMessage(
+      "Логи и диагностика",
+    ),
     "logsDesc": MessageLookupByLibrary.simpleMessage("Собранные логи"),
     "logsTest": MessageLookupByLibrary.simpleMessage("Тест логов"),
     "loopback": MessageLookupByLibrary.simpleMessage("Разблокировка loopback"),
@@ -3126,7 +3130,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "smartRoutingDegraded": MessageLookupByLibrary.simpleMessage("Тормозит"),
     "smartRoutingDesc": MessageLookupByLibrary.simpleMessage(
-      "Автоматически подбирает рабочий сервер для каждой сети — приложение можно не открывать",
+      "Автоматически подбирает рабочий сервер для каждой сети",
     ),
     "smartRoutingDiagnostics": MessageLookupByLibrary.simpleMessage(
       "Журнал диагностики",
