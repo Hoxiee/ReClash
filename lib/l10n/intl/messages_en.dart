@@ -1270,6 +1270,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "exitFullScreen": MessageLookupByLibrary.simpleMessage("Exit full screen"),
     "expand": MessageLookupByLibrary.simpleMessage("Standard"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Expected status"),
+    "experimentalEnable": MessageLookupByLibrary.simpleMessage("Enable anyway"),
+    "experimentalLabel": MessageLookupByLibrary.simpleMessage("Experimental"),
+    "experimentalNoticeTitle": MessageLookupByLibrary.simpleMessage(
+      "Experimental feature",
+    ),
     "expireTime": MessageLookupByLibrary.simpleMessage("Expiration time"),
     "exportFile": MessageLookupByLibrary.simpleMessage("Export file"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Export logs"),
@@ -3084,6 +3089,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "The system confirmed internet access",
     ),
+    "smartRoutingExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Smart Routing is experimental and still in development. It can behave unexpectedly and may not always pick the best-fit server. Turn it on only if you are comfortable with that.",
+    ),
     "smartRoutingExport": MessageLookupByLibrary.simpleMessage(
       "Export configuration",
     ),
@@ -4063,6 +4071,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Stretch"),
     "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
       "Tap a saved background to use it, or add a new one.",
+    ),
+    "wallpaperHeroOpacity": MessageLookupByLibrary.simpleMessage(
+      "Home panel opacity",
     ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Horizontal position",

@@ -194,6 +194,10 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
   }
 
   Future<void> _handleUpdateGeoDataItem() async {
+    if (ref.read(coreStatusProvider) != CoreStatus.connected) {
+      dialogs.showNotifier(context.appLocalizations.memoryCoreNotRunning);
+      return;
+    }
     await globalState.safeRun<void>(() async {
       await ref
           .read(geoResourceActionProvider.notifier)

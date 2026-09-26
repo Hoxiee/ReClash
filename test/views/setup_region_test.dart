@@ -176,6 +176,8 @@ void main() {
       final toggle = find.byKey(const ValueKey('setup-smart-routing')).last;
       await tester.tap(toggle);
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Enable anyway'));
+      await tester.pumpAndSettle();
       final props = container.read(smartRoutingSettingProvider);
       expect(props.enabled, isTrue);
       expect(props.rcxParams.openMarkers, isNotEmpty);

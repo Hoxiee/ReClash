@@ -7999,6 +7999,46 @@ class AppLocalizations {
     );
   }
 
+  /// `Experimental`
+  String get experimentalLabel {
+    return Intl.message(
+      'Experimental',
+      name: 'experimentalLabel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Experimental feature`
+  String get experimentalNoticeTitle {
+    return Intl.message(
+      'Experimental feature',
+      name: 'experimentalNoticeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable anyway`
+  String get experimentalEnable {
+    return Intl.message(
+      'Enable anyway',
+      name: 'experimentalEnable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart Routing is experimental and still in development. It can behave unexpectedly and may not always pick the best-fit server. Turn it on only if you are comfortable with that.`
+  String get smartRoutingExperimentalNotice {
+    return Intl.message(
+      'Smart Routing is experimental and still in development. It can behave unexpectedly and may not always pick the best-fit server. Turn it on only if you are comfortable with that.',
+      name: 'smartRoutingExperimentalNotice',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Available in Rule mode only`
   String get smartRoutingRuleOnly {
     return Intl.message(
@@ -11734,6 +11774,16 @@ class AppLocalizations {
     return Intl.message(
       'Card opacity',
       name: 'wallpaperCardOpacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home panel opacity`
+  String get wallpaperHeroOpacity {
+    return Intl.message(
+      'Home panel opacity',
+      name: 'wallpaperHeroOpacity',
       desc: '',
       args: [],
     );

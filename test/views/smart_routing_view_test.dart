@@ -92,6 +92,8 @@ void main() {
 
     await tester.tap(find.byType(Switch), warnIfMissed: false);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Enable anyway'));
+    await tester.pumpAndSettle();
 
     expect(find.textContaining('Start from a region preset'), findsNothing);
   });
@@ -587,6 +589,8 @@ void main() {
 
     await tester.tap(find.byType(Switch), warnIfMissed: false);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Enable anyway'));
+    await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
     expect(props.enabled, isTrue);
@@ -597,5 +601,30 @@ void main() {
     expect(props.censorCountries, isEmpty);
     expect(container.read(appSettingProvider).region, isNull);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isFalse);
+  });
+
+  testWidgets('the engine is flagged experimental', (tester) async {
+    await _pump(tester, props: const SmartRoutingProps());
+
+    expect(find.byType(ExperimentalBadge), findsOneWidget);
+  });
+
+  testWidgets('enabling asks for experimental consent first', (tester) async {
+    final container = await _pump(tester, props: const SmartRoutingProps());
+
+    await tester.tap(find.byType(Switch), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.byType(ExperimentalNoticeDialog), findsOneWidget);
+    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
+
+    await tester.tap(find.byType(Switch), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Enable anyway'));
+    await tester.pumpAndSettle();
+    expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
   });
 }

@@ -1347,6 +1347,7 @@
   "wallpaperDimming": "调暗",
   "wallpaperBlur": "模糊",
   "wallpaperCardOpacity": "卡片不透明度",
+  "wallpaperHeroOpacity": "主页面板不透明度",
   "wallpaperReset": "重置调整",
   "wallpaperImageError": "请选择有效的 PNG、JPEG 或 WebP 图片。",
   "wallpaperTooLarge": "请选择大小不超过 20 MB、像素总数不超过 5000 万的图片。",

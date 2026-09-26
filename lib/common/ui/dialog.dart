@@ -139,6 +139,25 @@ class Dialogs {
     );
   }
 
+  Future<bool> showExperimentalNotice({
+    required String message,
+    String? title,
+    String? confirmText,
+    String? cancelText,
+    BuildContext? context,
+  }) async {
+    return await showCommonDialog<bool>(
+          context: context,
+          child: ExperimentalNoticeDialog(
+            message: message,
+            title: title,
+            confirmText: confirmText,
+            cancelText: cancelText,
+          ),
+        ) ??
+        false;
+  }
+
   Future<bool> showDisclaimer() async {
     return await showCommonDialog<bool>(
           dismissible: false,

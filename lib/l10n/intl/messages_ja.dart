@@ -3308,6 +3308,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
       "保存済みの背景をタップして適用するか、新しい背景を追加します。",
     ),
+    "wallpaperHeroOpacity": MessageLookupByLibrary.simpleMessage("ホームパネルの不透明度"),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "水平方向の位置",
     ),

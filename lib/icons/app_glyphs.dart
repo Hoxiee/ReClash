@@ -2029,6 +2029,20 @@ abstract final class AppGlyphs {
     ]),
   ]);
 
+  static const smartRoute = Glyph([
+    GlyphPolyline([
+      GlyphVertex(12, 3.4, 1),
+      GlyphVertex(20.6, 12, 1),
+      GlyphVertex(12, 20.6, 1),
+      GlyphVertex(3.4, 12, 1),
+    ], closed: true),
+    GlyphPath(
+      'M12 7.6 L16.4 12 L12 16.4 L7.6 12 Z',
+      role: GlyphRole.detail,
+      solid: true,
+    ),
+  ]);
+
   static const shield = Glyph([
     GlyphPath(
       'M12 2.8 L19.5 5.6 L19.5 11.6 C19.5 16.6 16 19.7 12 21.2 '

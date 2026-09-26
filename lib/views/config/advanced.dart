@@ -90,7 +90,8 @@ class AdvancedConfigView extends ConsumerWidget {
       DecorationListItem.open(
         title: Text(appLocalizations.smartRouting),
         subtitle: Text(appLocalizations.smartRoutingDesc),
-        leading: const GlyphIcon(AppGlyphs.route),
+        leading: const GlyphIcon(AppGlyphs.smartRoute),
+        trailing: const ExperimentalBadge(),
         widget: const SmartRoutingView(),
         blur: false,
       ),
@@ -101,7 +102,7 @@ class AdvancedConfigView extends ConsumerWidget {
           title: Text(appLocalizations.desync),
           subtitle: Text(appLocalizations.desyncDesc),
           leading: const GlyphIcon(AppGlyphs.bolt),
-          trailing: const CommonChip(label: 'Experimental'),
+          trailing: const ExperimentalBadge(),
           widget: const DesyncView(),
           blur: false,
         ),

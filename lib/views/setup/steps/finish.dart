@@ -9,6 +9,7 @@ import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/settings/access.dart';
 import 'package:reclash/views/settings/resources.dart';
+import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -211,6 +212,18 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
     };
   }
 
+  Future<void> _handleSmartRouting(BuildContext context, bool value) async {
+    if (value && !await confirmSmartRoutingExperimental(context)) {
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    ref
+        .read(smartRoutingSettingProvider.notifier)
+        .update((state) => state.withEnabled(value));
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -242,12 +255,16 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                 children: [
                   ListItem.toggle(
                     key: const ValueKey('setup-smart-routing'),
-                    title: Text(appLocalizations.smartRouting),
+                    title: Row(
+                      spacing: AppSpacing.sm,
+                      children: [
+                        Flexible(child: Text(appLocalizations.smartRouting)),
+                        const ExperimentalBadge(),
+                      ],
+                    ),
                     subtitle: Text(appLocalizations.smartRoutingDesc),
                     value: routing.enabled,
-                    onChanged: (value) => ref
-                        .read(smartRoutingSettingProvider.notifier)
-                        .update((state) => state.withEnabled(value)),
+                    onChanged: (value) => _handleSmartRouting(context, value),
                   ),
                   ListItem<SmartRoutingStrategy>.options(
                     key: const ValueKey('setup-smart-routing-preset'),

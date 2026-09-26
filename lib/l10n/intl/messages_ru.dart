@@ -1316,6 +1316,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "expand": MessageLookupByLibrary.simpleMessage("Стандартный"),
     "expectedStatus": MessageLookupByLibrary.simpleMessage("Ожидаемый статус"),
+    "experimentalEnable": MessageLookupByLibrary.simpleMessage(
+      "Всё равно включить",
+    ),
+    "experimentalLabel": MessageLookupByLibrary.simpleMessage(
+      "Экспериментально",
+    ),
+    "experimentalNoticeTitle": MessageLookupByLibrary.simpleMessage(
+      "Экспериментальная функция",
+    ),
     "expireTime": MessageLookupByLibrary.simpleMessage("Срок действия"),
     "exportFile": MessageLookupByLibrary.simpleMessage("Экспорт файла"),
     "exportLogs": MessageLookupByLibrary.simpleMessage("Экспорт логов"),
@@ -3200,6 +3209,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "smartRoutingEvidenceValidated": MessageLookupByLibrary.simpleMessage(
       "Система подтвердила доступ в интернет",
     ),
+    "smartRoutingExperimentalNotice": MessageLookupByLibrary.simpleMessage(
+      "Умная маршрутизация — экспериментальная функция и всё ещё в разработке. Она может работать не так, как ожидается, и не всегда выбирает подходящий сервер. Включайте её, только если вас это устраивает.",
+    ),
     "smartRoutingExport": MessageLookupByLibrary.simpleMessage(
       "Экспорт настроек",
     ),
@@ -4223,6 +4235,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperFitFill": MessageLookupByLibrary.simpleMessage("Растянуть"),
     "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
       "Нажмите на сохранённый фон, чтобы применить его, или добавьте новый.",
+    ),
+    "wallpaperHeroOpacity": MessageLookupByLibrary.simpleMessage(
+      "Непрозрачность панелей главного экрана",
     ),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage(
       "Положение по горизонтали",

@@ -9,6 +9,7 @@ import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/state.dart';
 import 'package:material_ui/material_ui.dart';
@@ -236,6 +237,24 @@ void main() {
       find.text(currentAppLocalizations.geoUpdated(GeoResource.MMDB.name)),
       findsNothing,
     );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('editing a geo URL persists to the patched config without core', (
+    tester,
+  ) async {
+    final coreInterface = _MockCoreHandlerInterface();
+    final container = await _pumpGeoResourceAction(tester, coreInterface);
+    final action = container.read(geoResourceActionProvider.notifier);
+
+    action.updateGeoResourceUrl(GeoResource.MMDB, 'https://example.com/mmdb');
+
+    expect(
+      container.read(patchClashConfigProvider).geoXUrl[GeoResource.MMDB],
+      'https://example.com/mmdb',
+    );
+    verifyNever(() => coreInterface.updateGeoData(any()));
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

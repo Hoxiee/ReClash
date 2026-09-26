@@ -2909,6 +2909,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "wallpaperGalleryHint": MessageLookupByLibrary.simpleMessage(
       "点按已保存的背景即可应用，或添加新背景。",
     ),
+    "wallpaperHeroOpacity": MessageLookupByLibrary.simpleMessage("主页面板不透明度"),
     "wallpaperHorizontalPosition": MessageLookupByLibrary.simpleMessage("水平位置"),
     "wallpaperImageError": MessageLookupByLibrary.simpleMessage(
       "请选择有效的 PNG、JPEG 或 WebP 图片。",

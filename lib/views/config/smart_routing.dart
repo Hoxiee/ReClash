@@ -34,6 +34,16 @@ _StrategyAxes _axesOf(SmartRoutingStrategy strategy) => switch (strategy) {
   SmartRoutingStrategy.saver => (stability: 1, speed: 1, data: 3),
 };
 
+/// One shared consent so the wizard and settings toggles warn identically.
+Future<bool> confirmSmartRoutingExperimental(BuildContext context) {
+  final appLocalizations = context.appLocalizations;
+  return dialogs.showExperimentalNotice(
+    context: context,
+    message: appLocalizations.smartRoutingExperimentalNotice,
+    confirmText: appLocalizations.experimentalEnable,
+  );
+}
+
 /// Everything a preset seeds is editable here, because a preset is named defaults
 /// and nothing more: canaries and markers go stale, and a user on a network the
 /// region table never modelled has to be able to correct them.
@@ -44,7 +54,17 @@ class SmartRoutingView extends ConsumerWidget {
     ref.read(smartRoutingSettingProvider.notifier).update(f);
   }
 
-  void _handleEnabled(WidgetRef ref, bool value) {
+  Future<void> _handleEnabled(
+    BuildContext context,
+    WidgetRef ref,
+    bool value,
+  ) async {
+    if (value && !await confirmSmartRoutingExperimental(context)) {
+      return;
+    }
+    if (!context.mounted) {
+      return;
+    }
     _update(ref, (state) => state.withEnabled(value));
   }
 
@@ -70,10 +90,16 @@ class SmartRoutingView extends ConsumerWidget {
         top: 16,
         items: [
           DecorationListItem.toggle(
-            title: Text(appLocalizations.smartRouting),
+            title: Row(
+              spacing: AppSpacing.sm,
+              children: [
+                Flexible(child: Text(appLocalizations.smartRouting)),
+                const ExperimentalBadge(),
+              ],
+            ),
             subtitle: Text(appLocalizations.smartRoutingDesc),
             value: props.enabled,
-            onChanged: (value) => _handleEnabled(ref, value),
+            onChanged: (value) => _handleEnabled(context, ref, value),
           ),
         ],
       ),

@@ -1347,6 +1347,7 @@
   "wallpaperDimming": "暗さ",
   "wallpaperBlur": "ぼかし",
   "wallpaperCardOpacity": "カードの不透明度",
+  "wallpaperHeroOpacity": "ホームパネルの不透明度",
   "wallpaperReset": "調整をリセット",
   "wallpaperImageError": "有効な PNG、JPEG、WebP 形式の画像を選択してください。",
   "wallpaperTooLarge": "20 MB 以下、5,000 万画素以下の画像を選択してください。",
