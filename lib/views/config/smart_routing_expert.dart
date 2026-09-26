@@ -103,14 +103,12 @@ class _AdvancedRoutingPage extends ConsumerWidget {
               _CountryListItem(
                 title: appLocalizations.smartRoutingCensor,
                 desc: appLocalizations.smartRoutingCensorDesc,
-                value: props.censorCountries,
-                write: (state, value) => state.copyWith(censorCountries: value),
+                kind: _CountryKind.censor,
               ),
               _CountryListItem(
                 title: appLocalizations.smartRoutingAvoidCountries,
                 desc: appLocalizations.smartRoutingAvoidCountriesDesc,
-                value: props.avoidCountries,
-                write: (state, value) => state.copyWith(avoidCountries: value),
+                kind: _CountryKind.avoid,
               ),
             ],
           ),
@@ -311,62 +309,239 @@ Future<void> _handleImport(BuildContext context, WidgetRef ref) async {
 }
 
 
-/// Countries are chosen, not typed: a searchable list of every ISO code shown
-/// with its flag means an invalid code cannot be entered and the flag is a
-/// preview, not a second copy of the label. Stored as the bare two-letter token
-/// the engine expects.
+/// Countries are chosen, not typed: Add opens a searchable dialog over every
+/// ISO code, so an invalid code cannot be entered, and a pick lands in a
+/// reorderable list. Stored as the bare two-letter tokens the engine expects,
+/// in the order the user arranges.
+enum _CountryKind { censor, avoid }
+
+List<String> _countriesOf(SmartRoutingProps props, _CountryKind kind) =>
+    switch (kind) {
+      _CountryKind.censor => props.censorCountries,
+      _CountryKind.avoid => props.avoidCountries,
+    };
+
+void _writeCountries(WidgetRef ref, _CountryKind kind, List<String> next) {
+  ref
+      .read(smartRoutingSettingProvider.notifier)
+      .update(
+        (state) => switch (kind) {
+          _CountryKind.censor => state.copyWith(censorCountries: next),
+          _CountryKind.avoid => state.copyWith(avoidCountries: next),
+        },
+      );
+}
+
 class _CountryListItem extends ConsumerWidget {
   const _CountryListItem({
     required this.title,
     required this.desc,
-    required this.value,
-    required this.write,
+    required this.kind,
   });
 
   final String title;
   final String desc;
-  final List<String> value;
-  final SmartRoutingProps Function(SmartRoutingProps, List<String>) write;
+  final _CountryKind kind;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final value = _countriesOf(ref.watch(smartRoutingSettingProvider), kind);
     return DecorationListItem.open(
       title: Text(title),
-      subtitle: Text(value.isEmpty ? desc : value.map(_countryLabel).join(', ')),
+      subtitle: Text(
+        value.isEmpty ? desc : value.map(_countryLabel).join(', '),
+      ),
       blur: false,
       forceFull: false,
       maxWidth: 400,
-      widget: _CountryPickerPage(title: title, selected: value),
-      onChanged: (items) => ref
-          .read(smartRoutingSettingProvider.notifier)
-          .update((state) => write(state, List<String>.from(items as List))),
+      widget: _CountryListPage(title: title, desc: desc, kind: kind),
     );
   }
 }
 
-/// The flag is drawn once as the leading glyph; the code alone is the title, so
-/// a row never shows the flag twice.
-class _CountryPickerPage extends StatefulWidget {
-  const _CountryPickerPage({required this.title, required this.selected});
+class _CountryListPage extends ConsumerStatefulWidget {
+  const _CountryListPage({
+    required this.title,
+    required this.desc,
+    required this.kind,
+  });
 
   final String title;
-  final List<String> selected;
+  final String desc;
+  final _CountryKind kind;
 
   @override
-  State<_CountryPickerPage> createState() => _CountryPickerPageState();
+  ConsumerState<_CountryListPage> createState() => _CountryListPageState();
 }
 
-class _CountryPickerPageState extends State<_CountryPickerPage> {
+class _CountryListPageState extends ConsumerState<_CountryListPage> {
+  Set<String> _selection = {};
+
+  void _deleteSelected() {
+    _writeCountries(
+      ref,
+      widget.kind,
+      _countriesOf(ref.read(smartRoutingSettingProvider), widget.kind)
+          .where((code) => !_selection.contains(code))
+          .toList(),
+    );
+    setState(() => _selection = {});
+  }
+
+  void _toggleSelectAll() {
+    final codes = _countriesOf(
+      ref.read(smartRoutingSettingProvider),
+      widget.kind,
+    );
+    setState(() {
+      _selection = _selection.length == codes.length ? {} : codes.toSet();
+    });
+  }
+
+  Future<void> _add() async {
+    final current = _countriesOf(
+      ref.read(smartRoutingSettingProvider),
+      widget.kind,
+    );
+    final picked = await dialogs.showCommonDialog<String>(
+      child: _CountryPickDialog(title: widget.title, exclude: current),
+    );
+    if (picked == null || current.contains(picked)) {
+      return;
+    }
+    _writeCountries(ref, widget.kind, [...current, picked]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selection = _selection;
+    final appLocalizations = context.appLocalizations;
+    return CommonPopScope(
+      onPop: (_) {
+        if (selection.isEmpty) {
+          return true;
+        }
+        setState(() => _selection = {});
+        return false;
+      },
+      child: CommonScaffold(
+        title: widget.title,
+        floatBody: true,
+        actions: [
+          if (selection.isNotEmpty)
+            IconButton.filledTonal(
+              tooltip: appLocalizations.delete,
+              onPressed: _deleteSelected,
+              icon: const GlyphIcon(AppGlyphs.delete),
+            ),
+          selection.isNotEmpty
+              ? FilledButton(
+                  onPressed: _toggleSelectAll,
+                  child: Text(appLocalizations.selectAll),
+                )
+              : FilledButton.tonal(
+                  onPressed: _add,
+                  child: Text(appLocalizations.add),
+                ),
+        ],
+        body: _CountryListBody(
+          kind: widget.kind,
+          desc: widget.desc,
+          selection: selection,
+          onSelected: (code) => setState(() {
+            _selection = {..._selection}..addOrRemove(code);
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryListBody extends ConsumerWidget {
+  const _CountryListBody({
+    required this.kind,
+    required this.desc,
+    required this.selection,
+    required this.onSelected,
+  });
+
+  final _CountryKind kind;
+  final String desc;
+  final Set<String> selection;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final codes = _countriesOf(ref.watch(smartRoutingSettingProvider), kind);
+    if (codes.isEmpty) {
+      return NullStatus(
+        label: desc,
+        illustration: NullStatusIllustration.routing,
+      );
+    }
+    Widget itemAt(int index) => _countryRow(context, codes, index);
+    return ReorderableListView.builder(
+      padding: EdgeInsets.only(
+        bottom: 16 + 64,
+        top: context.appBarInset,
+        left: 16,
+        right: 16,
+      ),
+      buildDefaultDragHandles: false,
+      itemCount: codes.length,
+      itemBuilder: (_, index) => itemAt(index),
+      proxyDecorator: (child, index, animation) =>
+          commonProxyDecorator(itemAt(index), index, animation),
+      onReorderItem: (oldIndex, newIndex) =>
+          _writeCountries(ref, kind, codes.copyAndReorder(oldIndex, newIndex)),
+    );
+  }
+
+  Widget _countryRow(BuildContext context, List<String> codes, int index) {
+    final code = codes[index];
+    final flag = countryCodeToEmoji(code);
+    return ReorderableDelayedDragStartListener(
+      key: ValueKey(code),
+      index: index,
+      child: ItemPositionProvider(
+        position: ItemPosition.get(index, codes.length),
+        child: SelectedDecorationListItem(
+          leading: flag == null
+              ? const GlyphIcon(AppGlyphs.language)
+              : Text(flag, style: const TextStyle(fontSize: 24)),
+          title: Text(code),
+          isSelected: selection.contains(code),
+          isEditing: selection.isNotEmpty,
+          onSelected: () => onSelected(code),
+          onPressed: () => onSelected(code),
+        ),
+      ),
+    );
+  }
+}
+
+/// The Add dialog: the code alone is the title with the flag as the leading
+/// glyph, so a row never shows the flag twice; already-picked codes drop out so
+/// the list only offers what can still be added.
+class _CountryPickDialog extends StatefulWidget {
+  const _CountryPickDialog({required this.title, required this.exclude});
+
+  final String title;
+  final List<String> exclude;
+
+  @override
+  State<_CountryPickDialog> createState() => _CountryPickDialogState();
+}
+
+class _CountryPickDialogState extends State<_CountryPickDialog> {
   static final _sortedCodes = _isoAlpha2.toList()..sort();
 
-  late List<String> _selected;
   final _search = TextEditingController();
   String _query = '';
 
   @override
   void initState() {
     super.initState();
-    _selected = [...widget.selected];
     _search.addListener(
       () => setState(() => _query = _search.text.trim().toUpperCase()),
     );
@@ -378,81 +553,52 @@ class _CountryPickerPageState extends State<_CountryPickerPage> {
     super.dispose();
   }
 
-  void _toggle(String code) {
-    setState(() {
-      if (!_selected.remove(code)) {
-        _selected.add(code);
-      }
-    });
-  }
-
-  List<String> get _ordered {
-    final matches = _sortedCodes
-        .where((code) => _query.isEmpty || code.contains(_query))
-        .toList();
-    final chosen = _selected.where(matches.contains).toList();
-    final rest = matches.where((code) => !_selected.contains(code)).toList();
-    return [...chosen, ...rest];
-  }
-
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
-    final ordered = _ordered;
-    return CommonPopScope(
-      onPop: (_) {
-        Navigator.of(context).pop(_selected);
-        return false;
-      },
-      child: CommonScaffold(
-        title: widget.title,
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                controller: _search,
-                decoration: InputDecoration(
-                  prefixIcon: const GlyphIcon(AppGlyphs.search),
-                  labelText: appLocalizations.smartRoutingCountrySearch,
-                ),
-              ),
+    final matches = _sortedCodes
+        .where((code) => !widget.exclude.contains(code))
+        .where((code) => _query.isEmpty || code.contains(_query))
+        .toList();
+    return CommonDialog(
+      title: widget.title,
+      overrideScroll: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _search,
+            decoration: InputDecoration(
+              prefixIcon: const GlyphIcon(AppGlyphs.search),
+              labelText: appLocalizations.smartRoutingCountrySearch,
             ),
-            Expanded(
-              child: ordered.isEmpty
-                  ? NullStatus(
-                      label: appLocalizations.smartRoutingCountryNoMatch,
-                      illustration: NullStatusIllustration.search,
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16 + 64),
-                      itemCount: ordered.length,
-                      itemBuilder: (context, index) {
-                        final code = ordered[index];
-                        final selected = _selected.contains(code);
-                        final flag = countryCodeToEmoji(code);
-                        return DecorationListItem(
-                          isSelected: selected,
-                          leading: flag == null
-                              ? const GlyphIcon(AppGlyphs.language)
-                              : Text(
-                                  flag,
-                                  style: const TextStyle(fontSize: 24),
-                                ),
-                          title: Text(code),
-                          trailing: selected
-                              ? GlyphIcon(
-                                  AppGlyphs.checkCircle,
-                                  color: context.colorScheme.primary,
-                                )
-                              : const GlyphIcon(AppGlyphs.circleOutline),
-                          onPressed: () => _toggle(code),
-                        );
-                      },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Flexible(
+            child: matches.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.xxl,
                     ),
-            ),
-          ],
-        ),
+                    child: Text(appLocalizations.smartRoutingCountryNoMatch),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: matches.length,
+                    itemBuilder: (context, index) {
+                      final code = matches[index];
+                      final flag = countryCodeToEmoji(code);
+                      return DecorationListItem(
+                        leading: flag == null
+                            ? const GlyphIcon(AppGlyphs.language)
+                            : Text(flag, style: const TextStyle(fontSize: 24)),
+                        title: Text(code),
+                        onPressed: () => Navigator.of(context).pop(code),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

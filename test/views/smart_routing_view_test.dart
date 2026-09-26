@@ -1,5 +1,3 @@
-import 'package:reclash/icons/icons.dart';
-import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
@@ -169,7 +167,7 @@ void main() {
     expect(find.textContaining('region set in the app'), findsOneWidget);
   });
 
-  testWidgets('a censored country opens a searchable picker, preselected', (
+  testWidgets('a censored country lands in a reorderable list, preselected', (
     tester,
   ) async {
     await _pump(tester, props: _russia);
@@ -182,46 +180,43 @@ void main() {
       scrollable: find.byType(Scrollable).last,
     );
     await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ReorderableListView), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Add'), findsOneWidget);
+    expect(find.text('RU'), findsOneWidget);
+  });
+
+  testWidgets('Add opens a searchable dialog that appends the country', (
+    tester,
+  ) async {
+    final container = await _pump(tester, props: _russia);
+
+    await _openAdvanced(tester);
+    await _reveal(
+      tester,
+      find.text('Censoring countries'),
+      delta: 300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     expect(find.text('Search by country code'), findsOneWidget);
-    expect(find.byType(ReorderableListView), findsNothing);
-    expect(find.text('RU'), findsOneWidget);
-    expect(find.byGlyph(AppGlyphs.checkCircle), findsOneWidget);
-  });
-
-  testWidgets('the picker filters by code and toggles a country in place', (
-    tester,
-  ) async {
-    await _pump(tester, props: _russia);
-
-    await _openAdvanced(tester);
-    await _reveal(
-      tester,
-      find.text('Censoring countries'),
-      delta: 300,
-      scrollable: find.byType(Scrollable).last,
-    );
-    await tester.tap(find.text('Censoring countries'), warnIfMissed: false);
-    await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), 'DE');
     await tester.pumpAndSettle();
 
-    final picker = find.byType(SideSheet).last;
-    expect(find.text('RU'), findsNothing);
-    expect(
-      find.descendant(of: picker, matching: find.byGlyph(AppGlyphs.circleOutline)),
-      findsOneWidget,
-    );
-    expect(find.byGlyph(AppGlyphs.checkCircle), findsNothing);
-
-    await tester.tap(
-      find.descendant(of: picker, matching: find.byGlyph(AppGlyphs.circleOutline)),
-    );
+    await tester.tap(find.widgetWithText(DecorationListItem, 'DE'));
     await tester.pumpAndSettle();
 
-    expect(find.byGlyph(AppGlyphs.checkCircle), findsOneWidget);
+    expect(
+      container.read(smartRoutingSettingProvider).censorCountries,
+      containsAll(['RU', 'DE']),
+    );
   });
 
   testWidgets('the region card shows seeded facets and marks unused ones', (
