@@ -223,23 +223,27 @@ class _HeroActionRow extends ConsumerWidget {
     final chips = <Widget>[
       if (showUpdate)
         Expanded(
-          child: _ActionChip(
-            icon: AppGlyphs.refresh,
-            label: appLocalizations.update,
-            busy: isUpdating,
-            onTap: onUpdate,
+          child: ElasticPress(
+            child: _ActionChip(
+              icon: AppGlyphs.refresh,
+              label: appLocalizations.update,
+              busy: isUpdating,
+              onTap: onUpdate,
+            ),
           ),
         ),
       if (hasSupport)
         Expanded(
-          child: _ActionChip(
-            icon: AppGlyphs.support,
-            label: appLocalizations.support,
-            onTap: () => unawaited(dialogs.openUrl(supportUrl!)),
+          child: ElasticPress(
+            child: _ActionChip(
+              icon: AppGlyphs.support,
+              label: appLocalizations.support,
+              onTap: () => unawaited(dialogs.openUrl(supportUrl!)),
+            ),
           ),
         ),
-      if (showPauseChip) const _PauseChip(),
-      const _ModeChip(),
+      if (showPauseChip) const ElasticPress(child: _PauseChip()),
+      const ElasticPress(child: _ModeChip()),
     ];
     return HeroReserveGesture(
       child: Row(

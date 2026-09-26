@@ -45,13 +45,11 @@ class HeroConnect extends ConsumerStatefulWidget {
   const HeroConnect({
     super.key,
     this.scrollController,
-    this.onShowProvider,
     this.mode = HeroLayoutMode.column,
     this.onRequestAfterTailFocus,
   });
 
   final ScrollController? scrollController;
-  final VoidCallback? onShowProvider;
   final HeroLayoutMode mode;
   final VoidCallback? onRequestAfterTailFocus;
 
@@ -164,11 +162,6 @@ class _HeroConnectState extends ConsumerState<HeroConnect> {
   }
 
   void _handleShowSubscription() {
-    final onShowProvider = widget.onShowProvider;
-    if (onShowProvider != null) {
-      onShowProvider();
-      return;
-    }
     unawaited(showSubscriptionSheet(context));
   }
 

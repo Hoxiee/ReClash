@@ -368,9 +368,6 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
                           isActive: _pageActive && _page == 0 && !_animating,
                           child: HeroConnect(
                             scrollController: _heroScrollController,
-                            onShowProvider: byedpiMode
-                                ? null
-                                : () => _goToPage(1),
                             onRequestAfterTailFocus: hasProviderPage
                                 ? () => _heroAffordanceNode.requestFocus()
                                 : null,
