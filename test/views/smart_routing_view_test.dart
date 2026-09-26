@@ -301,6 +301,39 @@ void main() {
     expect(props.dwellSeconds, SmartRoutingStrategy.stable.pacing.dwellSeconds);
   });
 
+  testWidgets('a seeded advanced page offers no section resets', (
+    tester,
+  ) async {
+    await _pump(tester, props: _russia);
+
+    await _openAdvanced(tester);
+
+    expect(find.widgetWithText(FilledButton, 'Reset'), findsNothing);
+  });
+
+  testWidgets('an edited section offers a reset that restores its seed', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      props: _russia.copyWith(canaryForeign: const ['9.9.9.9:443']),
+    );
+
+    await _openAdvanced(tester);
+    final reset = find.widgetWithText(FilledButton, 'Reset');
+    await _reveal(tester, reset, scrollable: find.byType(Scrollable).last);
+    expect(reset, findsOneWidget);
+
+    await tester.tap(reset);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
+
+    final props = container.read(smartRoutingSettingProvider);
+    expect(props.canaryForeign, _russia.canaryForeign);
+    expect(props.matchesSeedGroup(RoutingFacetGroup.probes), isTrue);
+  });
+
   testWidgets('service routes summarize profile capability sources', (
     tester,
   ) async {

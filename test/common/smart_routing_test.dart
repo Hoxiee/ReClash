@@ -404,4 +404,37 @@ void main() {
       expect(rcxTrailWith(trail, ''), same(trail));
     });
   });
+
+  group('a section reset touches only the facets it owns', () {
+    final russia = const SmartRoutingProps().applyPreset(SmartRoutingPreset.russia);
+
+    test('resetting Pace leaves the Ranking bands, and the reverse', () {
+      final tuned = russia.copyWith(
+        dwellSeconds: 999,
+        latencyBands: const [10, 20],
+      );
+      final pace = tuned.resetSeedGroup(RoutingFacetGroup.pacing);
+      expect(pace.dwellSeconds, SmartRoutingStrategy.balanced.pacing.dwellSeconds);
+      expect(pace.latencyBands, const [10, 20]);
+      final bands = tuned.resetSeedGroup(RoutingFacetGroup.bands);
+      expect(bands.latencyBands, SmartRoutingStrategy.balanced.pacing.latencyBands);
+      expect(bands.dwellSeconds, 999);
+    });
+
+    test('empty latency bands never read as a divergence', () {
+      expect(russia.matchesSeedGroup(RoutingFacetGroup.bands), isTrue);
+      expect(russia.matchesSeedGroup(RoutingFacetGroup.probes), isTrue);
+    });
+
+    test('resetting a mixed section spares its user-owned neighbours', () {
+      final tuned = russia.copyWith(
+        censorCountries: const ['US'],
+        avoidCountries: const ['FR'],
+      );
+      expect(tuned.matchesSeedGroup(RoutingFacetGroup.censorship), isFalse);
+      final reset = tuned.resetSeedGroup(RoutingFacetGroup.censorship);
+      expect(reset.avoidCountries, const ['FR']);
+      expect(reset.matchesSeedGroup(RoutingFacetGroup.censorship), isTrue);
+    });
+  });
 }

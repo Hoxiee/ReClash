@@ -14,7 +14,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final props = ref.watch(smartRoutingSettingProvider);
-    final pacing = props.strategy.pacing;
     return CommonScaffold(
       title: appLocalizations.advancedConfig,
       floatBody: true,
@@ -24,6 +23,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
             top: 16,
             title: appLocalizations.smartRoutingPacing,
             subTitle: appLocalizations.smartRoutingPacingDesc,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.pacing),
             items: [
               _pacingItem(
                 ref,
@@ -31,7 +31,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 desc: appLocalizations.smartRoutingDwellDesc,
                 options: _dwellChoices,
                 value: props.dwellSeconds,
-                seed: pacing.dwellSeconds,
                 textBuilder: appLocalizations.smartRoutingSeconds,
                 write: (state, value) => state.copyWith(dwellSeconds: value),
               ),
@@ -41,7 +40,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 desc: appLocalizations.smartRoutingWaveDesc,
                 options: _waveChoices,
                 value: props.waveWidth,
-                seed: pacing.waveWidth,
                 textBuilder: appLocalizations.smartRoutingWaveNodes,
                 write: (state, value) => state.copyWith(waveWidth: value),
               ),
@@ -51,7 +49,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 desc: appLocalizations.smartRoutingCeilingDesc,
                 options: _ceilingChoices,
                 value: props.absCeilingMs,
-                seed: pacing.absCeilingMs,
                 textBuilder: appLocalizations.smartRoutingMillis,
                 write: (state, value) => state.copyWith(absCeilingMs: value),
               ),
@@ -61,7 +58,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 desc: appLocalizations.smartRoutingDegradeConfirmDesc,
                 options: _degradeChoices,
                 value: props.degradeConfirmSeconds,
-                seed: pacing.degradeConfirmSeconds,
                 textBuilder: appLocalizations.smartRoutingSeconds,
                 write: (state, value) =>
                     state.copyWith(degradeConfirmSeconds: value),
@@ -72,7 +68,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
                 desc: appLocalizations.smartRoutingProofTtlDesc,
                 options: _proofTtlChoices,
                 value: props.proofTtlMinutes,
-                seed: pacing.proofTtlMinutes,
                 textBuilder: appLocalizations.smartRoutingMinutes,
                 write: (state, value) => state.copyWith(proofTtlMinutes: value),
               ),
@@ -81,6 +76,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.smartRoutingProbes,
             subTitle: appLocalizations.smartRoutingRegionNote,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.probes),
             items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingCanariesForeign,
@@ -99,6 +95,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.smartRoutingCountryPolicy,
             subTitle: appLocalizations.smartRoutingCountryPolicyDesc,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.censorship),
             items: [
               _CountryListItem(
                 title: appLocalizations.smartRoutingCensor,
@@ -115,6 +112,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.smartRoutingEgress,
             subTitle: appLocalizations.smartRoutingEgressDesc,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.egress),
             items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingEgressEchoes,
@@ -133,6 +131,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.smartRoutingHeuristics,
             subTitle: appLocalizations.smartRoutingHeuristicsDesc,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.heuristics),
             items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingNameHints,
@@ -152,6 +151,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
           SettingSection(
             title: appLocalizations.smartRoutingMarkers,
             subTitle: appLocalizations.smartRoutingMarkersDesc,
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.markers),
             items: [
               _MarkersItem(
                 title: appLocalizations.smartRoutingMarkersOpen,
@@ -181,6 +181,7 @@ class _AdvancedRoutingPage extends ConsumerWidget {
               appLocalizations.smartRoutingKeyEvidence,
               appLocalizations.smartRoutingKeyBand,
             ].join(' → '),
+            actions: _resetActions(context, ref, props, RoutingFacetGroup.bands),
             items: [
               _StringListItem(
                 title: appLocalizations.smartRoutingLatencyBands,
@@ -237,7 +238,6 @@ class _AdvancedRoutingPage extends ConsumerWidget {
     required String desc,
     required List<int> options,
     required int value,
-    required int seed,
     required String Function(int) textBuilder,
     required SmartRoutingProps Function(SmartRoutingProps, int) write,
   }) {
@@ -248,22 +248,47 @@ class _AdvancedRoutingPage extends ConsumerWidget {
       options: options.contains(value) ? options : [value, ...options],
       value: value,
       textBuilder: (option) => textBuilder(option as int),
-      trailing: value == seed
-          ? null
-          : Builder(
-              builder: (context) => CommonMinIconButtonTheme(
-                child: IconButton(
-                  tooltip: context.appLocalizations.smartRoutingFieldReset,
-                  onPressed: () => _update(ref, (state) => write(state, seed)),
-                  icon: const GlyphIcon(AppGlyphs.reset),
-                ),
-              ),
-            ),
       onChanged: (option) {
         if (option == null) return;
         _update(ref, (state) => write(state, option as int));
       },
     );
+  }
+
+  List<Widget>? _resetActions(
+    BuildContext context,
+    WidgetRef ref,
+    SmartRoutingProps props,
+    RoutingFacetGroup group,
+  ) {
+    if (props.matchesSeedGroup(group)) {
+      return null;
+    }
+    return [
+      CommonMinFilledButtonTheme(
+        child: FilledButton.tonal(
+          onPressed: () => _handleSectionReset(context, ref, group),
+          child: Text(context.appLocalizations.reset),
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _handleSectionReset(
+    BuildContext context,
+    WidgetRef ref,
+    RoutingFacetGroup group,
+  ) async {
+    final appLocalizations = context.appLocalizations;
+    final confirmed = await dialogs.showMessage(
+      dangerous: true,
+      title: appLocalizations.reset,
+      message: TextSpan(text: appLocalizations.resetTip),
+    );
+    if (confirmed != true) {
+      return;
+    }
+    _update(ref, (state) => state.resetSeedGroup(group));
   }
 }
 

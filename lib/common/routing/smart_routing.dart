@@ -226,6 +226,17 @@ extension SmartRoutingPresetBundle on SmartRoutingPreset {
   };
 }
 
+/// Reset spares the user-owned avoidCountries/nodeRules, as applyPreset does.
+enum RoutingFacetGroup {
+  pacing,
+  bands,
+  probes,
+  censorship,
+  egress,
+  heuristics,
+  markers,
+}
+
 extension SmartRoutingPropsRcx on SmartRoutingProps {
   /// A preset seeds every field it owns, so picking a region also rewrites the
   /// canaries and markers the user could since have edited. Enablement is the
@@ -291,6 +302,49 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
       proofTtlMinutes: pace.proofTtlMinutes,
     );
     return seeded.matchesStrategy ? seeded : this;
+  }
+
+  /// Empty bands are "unset", never a divergence, mirroring matchesStrategy.
+  bool matchesSeedGroup(RoutingFacetGroup group) {
+    if (group == RoutingFacetGroup.bands && latencyBands.isEmpty) {
+      return true;
+    }
+    return resetSeedGroup(group) == this;
+  }
+
+  SmartRoutingProps resetSeedGroup(RoutingFacetGroup group) {
+    final seed = applyPreset(preset);
+    final pace = strategy.pacing;
+    return switch (group) {
+      RoutingFacetGroup.pacing => copyWith(
+        dwellSeconds: pace.dwellSeconds,
+        waveWidth: pace.waveWidth,
+        absCeilingMs: pace.absCeilingMs,
+        degradeConfirmSeconds: pace.degradeConfirmSeconds,
+        proofTtlMinutes: pace.proofTtlMinutes,
+      ),
+      RoutingFacetGroup.bands => copyWith(latencyBands: pace.latencyBands),
+      RoutingFacetGroup.probes => copyWith(
+        canaryForeign: seed.canaryForeign,
+        canaryDomestic: seed.canaryDomestic,
+      ),
+      RoutingFacetGroup.censorship => copyWith(
+        censorCountries: seed.censorCountries,
+      ),
+      RoutingFacetGroup.egress => copyWith(
+        egressEchoes: seed.egressEchoes,
+        countryEchoes: seed.countryEchoes,
+      ),
+      RoutingFacetGroup.heuristics => copyWith(
+        nameHints: seed.nameHints,
+        breakerPatterns: seed.breakerPatterns,
+      ),
+      RoutingFacetGroup.markers => copyWith(
+        openMarkers: seed.openMarkers,
+        domesticMarkers: seed.domesticMarkers,
+        localMarkers: seed.localMarkers,
+      ),
+    };
   }
 
   RcxConfigParams rcxParamsFor(Profile? profile) => RcxConfigParams(
