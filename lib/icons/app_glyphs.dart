@@ -1924,7 +1924,6 @@ abstract final class AppGlyphs {
     GlyphCircle(16.4, 7.4, 2.2, solid: true),
   ]);
 
-
   static const send = Glyph([
     GlyphPolyline([
       GlyphVertex(3.2, 10.8, 1),
@@ -2092,9 +2091,7 @@ abstract final class AppGlyphs {
   ]);
 
   static const announce = Glyph([
-    GlyphPath(
-      'M3.6 10.4 L10 10.4 L17.4 5.8 L17.4 18.2 L10 13.6 L3.6 13.6 Z',
-    ),
+    GlyphPath('M3.6 10.4 L10 10.4 L17.4 5.8 L17.4 18.2 L10 13.6 L3.6 13.6 Z'),
     GlyphPolyline([
       GlyphVertex(6, 13.6),
       GlyphVertex(6, 18.4, 1.2),
@@ -2124,10 +2121,7 @@ abstract final class AppGlyphs {
 
   static const power = Glyph([
     GlyphArc(12, 12.4, 7.2, -0.63, 4.4, role: GlyphRole.body),
-    GlyphPolyline([
-      GlyphVertex(12, 3),
-      GlyphVertex(12, 11),
-    ]),
+    GlyphPolyline([GlyphVertex(12, 3), GlyphVertex(12, 11)]),
   ]);
 
   static const swap = Glyph([
@@ -2258,7 +2252,14 @@ abstract final class AppGlyphs {
   ]);
 
   static const support = Glyph([
-    GlyphArc(12, 12.5, 7.6, math.pi * 1.12, math.pi * 0.76, role: GlyphRole.line),
+    GlyphArc(
+      12,
+      12.5,
+      7.6,
+      math.pi * 1.12,
+      math.pi * 0.76,
+      role: GlyphRole.line,
+    ),
     GlyphBox(3.6, 11.4, 6.6, 16.2, 1.4),
     GlyphBox(17.4, 11.4, 20.4, 16.2, 1.4),
     GlyphPolyline([
@@ -2309,7 +2310,14 @@ abstract final class AppGlyphs {
   ]);
 
   static const restore = Glyph([
-    GlyphArc(12, 12, 7.5, math.pi * 1.15, math.pi * -1.65, role: GlyphRole.line),
+    GlyphArc(
+      12,
+      12,
+      7.5,
+      math.pi * 1.15,
+      math.pi * -1.65,
+      role: GlyphRole.line,
+    ),
     GlyphPolyline([
       GlyphVertex(12, 4.5),
       GlyphVertex(9.9, 4.5),
@@ -2590,10 +2598,7 @@ abstract final class AppGlyphs {
       GlyphVertex(3.5, 9.5),
       GlyphVertex(20.5, 9.5),
     ], role: GlyphRole.detail),
-    GlyphPolyline([
-      GlyphVertex(8, 3),
-      GlyphVertex(8, 7),
-    ], role: GlyphRole.line),
+    GlyphPolyline([GlyphVertex(8, 3), GlyphVertex(8, 7)], role: GlyphRole.line),
     GlyphPolyline([
       GlyphVertex(16, 3),
       GlyphVertex(16, 7),

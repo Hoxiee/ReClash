@@ -1,10 +1,10 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/models/clash_config.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
+import 'package:reclash/views/config/ntp.dart';
 import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/config/scripts.dart';
@@ -35,33 +35,14 @@ class AdvancedConfigView extends ConsumerWidget {
         title: const Text('DNS'),
         subtitle: Text(appLocalizations.dnsDesc),
         leading: const GlyphIcon(AppGlyphs.dns),
-        widget: BaseScaffold(
-          title: 'DNS',
-          actions: [
-            Consumer(
-              builder: (_, ref, _) {
-                return IconButton(
-                  onPressed: () async {
-                    final res = await dialogs.showMessage(
-                      dangerous: true,
-                      title: appLocalizations.reset,
-                      message: TextSpan(text: appLocalizations.resetTip),
-                    );
-                    if (res != true) {
-                      return;
-                    }
-                    ref
-                        .read(patchClashConfigProvider.notifier)
-                        .update((state) => state.copyWith(dns: defaultDns));
-                  },
-                  tooltip: appLocalizations.reset,
-                  icon: const GlyphIcon(AppGlyphs.replay),
-                );
-              },
-            ),
-          ],
-          body: const DnsListView(),
-        ),
+        widget: const DnsView(),
+        blur: false,
+      ),
+      DecorationListItem.open(
+        title: const Text('NTP'),
+        subtitle: Text(appLocalizations.ntpDesc),
+        leading: const GlyphIcon(AppGlyphs.clock),
+        widget: const NtpView(),
         blur: false,
       ),
       DecorationListItem.open(

@@ -1,5 +1,10 @@
 typedef TrayMenuItemSelectedCallback = void Function();
 
+/// How a platform that colors details should color one; others ignore it.
+/// macOS recolors a detail carrying a measurement; the plain tone keeps the
+/// dimmed default used by shortcut hints.
+enum TrayDetailTone { plain, success, warning, error }
+
 sealed class TrayMenuItem {
   const TrayMenuItem();
 }
@@ -8,12 +13,14 @@ final class TrayMenuAction extends TrayMenuItem {
   const TrayMenuAction({
     required this.label,
     this.detail,
+    this.detailTone = TrayDetailTone.plain,
     this.enabled = true,
     this.onSelected,
   });
 
   final String label;
   final String? detail;
+  final TrayDetailTone detailTone;
   final bool enabled;
   final TrayMenuItemSelectedCallback? onSelected;
 }
@@ -23,6 +30,7 @@ final class TrayMenuCheckbox extends TrayMenuItem {
     required this.label,
     required this.checked,
     this.detail,
+    this.detailTone = TrayDetailTone.plain,
     this.enabled = true,
     this.onSelected,
   });
@@ -30,6 +38,7 @@ final class TrayMenuCheckbox extends TrayMenuItem {
   final String label;
   final bool checked;
   final String? detail;
+  final TrayDetailTone detailTone;
   final bool enabled;
   final TrayMenuItemSelectedCallback? onSelected;
 }
@@ -38,11 +47,15 @@ final class TrayMenuSubmenu extends TrayMenuItem {
   const TrayMenuSubmenu({
     required this.label,
     required this.items,
+    this.detail,
+    this.detailTone = TrayDetailTone.plain,
     this.enabled = true,
   });
 
   final String label;
   final List<TrayMenuItem> items;
+  final String? detail;
+  final TrayDetailTone detailTone;
   final bool enabled;
 }
 

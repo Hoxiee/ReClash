@@ -54,19 +54,25 @@ abstract final class TrayCodec {
       sink[id] = item;
       return switch (item) {
         TrayMenuSeparator() => <String, Object?>{'id': id, 'type': 'separator'},
-        TrayMenuAction(:final label, :final enabled, :final detail) =>
+        TrayMenuAction(
+          :final label,
+          :final enabled,
+          :final detail,
+          :final detailTone,
+        ) =>
           <String, Object?>{
             'id': id,
             'type': 'action',
             'label': label,
             'enabled': enabled,
-            ..._encodeDetail(detail),
+            ..._encodeDetail(detail, detailTone),
           },
         TrayMenuCheckbox(
           :final label,
           :final enabled,
           :final checked,
           :final detail,
+          :final detailTone,
         ) =>
           <String, Object?>{
             'id': id,
@@ -74,24 +80,37 @@ abstract final class TrayCodec {
             'label': label,
             'enabled': enabled,
             'checked': checked,
-            ..._encodeDetail(detail),
+            ..._encodeDetail(detail, detailTone),
           },
-        TrayMenuSubmenu(:final label, :final enabled, :final items) =>
+        TrayMenuSubmenu(
+          :final label,
+          :final enabled,
+          :final items,
+          :final detail,
+          :final detailTone,
+        ) =>
           <String, Object?>{
             'id': id,
             'type': 'submenu',
             'label': label,
             'enabled': enabled,
             'items': _encodeItems(items, sink, allocator),
+            ..._encodeDetail(detail, detailTone),
           },
       };
     }).toList();
   }
 
-  static Map<String, Object?> _encodeDetail(String? detail) {
+  static Map<String, Object?> _encodeDetail(
+    String? detail,
+    TrayDetailTone tone,
+  ) {
     return detail == null || detail.isEmpty
         ? const <String, Object?>{}
-        : <String, Object?>{'detail': detail};
+        : <String, Object?>{
+            'detail': detail,
+            if (tone != TrayDetailTone.plain) 'detailTone': tone.name,
+          };
   }
 }
 

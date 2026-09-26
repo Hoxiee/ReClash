@@ -29,10 +29,7 @@ class StyledQrCode extends StatelessWidget {
     final QrImage image;
     try {
       image = QrImage(
-        QrCode.fromData(
-          data: data,
-          errorCorrectLevel: QrErrorCorrectLevel.H,
-        ),
+        QrCode.fromData(data: data, errorCorrectLevel: QrErrorCorrectLevel.H),
       );
     } on Object {
       // The only expected failure is data that overflows the largest symbol.
@@ -71,7 +68,10 @@ Gradient _themeGradient(ColorScheme scheme) {
   return LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [_darkenForContrast(scheme.primary), _darkenForContrast(scheme.tertiary)],
+    colors: [
+      _darkenForContrast(scheme.primary),
+      _darkenForContrast(scheme.tertiary),
+    ],
   );
 }
 
@@ -146,14 +146,27 @@ class _StyledQrPainter extends CustomPainter {
         if (!solid(r, c)) {
           continue;
         }
-        final rect = Rect.fromLTWH(origin + c * cell, origin + r * cell, cell, cell);
+        final rect = Rect.fromLTWH(
+          origin + c * cell,
+          origin + r * cell,
+          cell,
+          cell,
+        );
         modules.addRRect(
           RRect.fromRectAndCorners(
             rect,
-            topLeft: Radius.circular(!solid(r, c - 1) && !solid(r - 1, c) ? radius : 0.0),
-            topRight: Radius.circular(!solid(r, c + 1) && !solid(r - 1, c) ? radius : 0.0),
-            bottomLeft: Radius.circular(!solid(r, c - 1) && !solid(r + 1, c) ? radius : 0.0),
-            bottomRight: Radius.circular(!solid(r, c + 1) && !solid(r + 1, c) ? radius : 0.0),
+            topLeft: Radius.circular(
+              !solid(r, c - 1) && !solid(r - 1, c) ? radius : 0.0,
+            ),
+            topRight: Radius.circular(
+              !solid(r, c + 1) && !solid(r - 1, c) ? radius : 0.0,
+            ),
+            bottomLeft: Radius.circular(
+              !solid(r, c - 1) && !solid(r + 1, c) ? radius : 0.0,
+            ),
+            bottomRight: Radius.circular(
+              !solid(r, c + 1) && !solid(r + 1, c) ? radius : 0.0,
+            ),
           ),
         );
       }
@@ -208,10 +221,21 @@ bool _isFinder(int r, int c, int count) {
       (r >= count - 7 && c < 7);
 }
 
-RRect _cellRRect(double origin, double cell, int r, int c, int span, double radius) {
+RRect _cellRRect(
+  double origin,
+  double cell,
+  int r,
+  int c,
+  int span,
+  double radius,
+) {
   return RRect.fromRectAndRadius(
-    Rect.fromLTWH(origin + c * cell, origin + r * cell, span * cell, span * cell),
+    Rect.fromLTWH(
+      origin + c * cell,
+      origin + r * cell,
+      span * cell,
+      span * cell,
+    ),
     Radius.circular(radius),
   );
 }
-

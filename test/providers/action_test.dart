@@ -450,7 +450,7 @@ void main() {
       expect(state.openLogs, isTrue);
       expect(state.silentLaunch, isFalse);
       expect(state.autoLaunch, isFalse);
-      expect(state.autoCheckUpdate, isFalse);
+      expect(state.autoCheckUpdate, isTrue);
       expect(state.closeConnections, isTrue);
     });
   });

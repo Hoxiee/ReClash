@@ -1,7 +1,6 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/providers/config.dart';
-import 'package:riverpod/riverpod.dart'
-    show Provider, ProviderListenableSelect;
+import 'package:riverpod/riverpod.dart' show Provider, ProviderListenableSelect;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'core.dart';

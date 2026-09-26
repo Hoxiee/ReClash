@@ -142,6 +142,7 @@ List<ServiceTarget> orderServiceTargets(
     ...allowed,
   }.toList();
 }
+
 @immutable
 class ServiceCheck {
   const ServiceCheck(
@@ -231,7 +232,9 @@ Future<Map<ServiceTarget, ServiceCheck>> checkServices(
   return results;
 }
 
-IpInfo Function(String) _jsonIpInfo(IpInfo Function(Map<String, dynamic>) parse) {
+IpInfo Function(String) _jsonIpInfo(
+  IpInfo Function(Map<String, dynamic>) parse,
+) {
   return (body) => parse(jsonDecode(body) as Map<String, dynamic>);
 }
 

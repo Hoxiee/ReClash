@@ -262,15 +262,18 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
       reverseDuration: const Duration(milliseconds: 260),
     )..addStatusListener(_handleCharge);
     _nova = AnimationController(vsync: this, duration: _novaDuration);
-    _collapse = AnimationController(
-      vsync: this,
-      duration: _collapseCharge,
-      reverseDuration: const Duration(milliseconds: 620),
-    )
-      ..addStatusListener(_handleCollapse)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed && !_spent) _hideCinematic();
-      });
+    _collapse =
+        AnimationController(
+            vsync: this,
+            duration: _collapseCharge,
+            reverseDuration: const Duration(milliseconds: 620),
+          )
+          ..addStatusListener(_handleCollapse)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.dismissed && !_spent) {
+              _hideCinematic();
+            }
+          });
     _singularity = AnimationController(
       vsync: this,
       duration: _singularityDuration,
@@ -918,7 +921,8 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
         builder: (context, _) {
           final s = _singularity.value;
           final sWarp = s < _evaporatePeak
-              ? _evaporatePeak * Curves.easeInOutCubic.transform(s / _evaporatePeak)
+              ? _evaporatePeak *
+                    Curves.easeInOutCubic.transform(s / _evaporatePeak)
               : _evaporatePeak +
                     (1 - _evaporatePeak) *
                         Curves.easeOutQuart.transform(
@@ -1058,21 +1062,21 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
                     color: Colors.white.withValues(
                       alpha:
                           (0.55 *
-                                    math.pow(
-                                      1 -
-                                          ((s - _evaporatePeak) /
-                                                  (1 - _evaporatePeak))
-                                              .clamp(0.0, 1.0),
-                                      6,
-                                    ) +
-                                0.16 *
-                                    math.pow(
-                                      1 -
-                                          ((s - _evaporatePeak) /
-                                                  (1 - _evaporatePeak))
-                                              .clamp(0.0, 1.0),
-                                      1.4,
-                                    ))
+                                      math.pow(
+                                        1 -
+                                            ((s - _evaporatePeak) /
+                                                    (1 - _evaporatePeak))
+                                                .clamp(0.0, 1.0),
+                                        6,
+                                      ) +
+                                  0.16 *
+                                      math.pow(
+                                        1 -
+                                            ((s - _evaporatePeak) /
+                                                    (1 - _evaporatePeak))
+                                                .clamp(0.0, 1.0),
+                                        1.4,
+                                      ))
                               .toDouble(),
                     ),
                   ),
@@ -1202,9 +1206,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   double get _orbBodyOpacity {
     final r = _regrow.value;
     if (r < 1) {
-      return Curves.easeOutCubic.transform(
-        ((r - 0.14) / 0.34).clamp(0.0, 1.0),
-      );
+      return Curves.easeOutCubic.transform(((r - 0.14) / 0.34).clamp(0.0, 1.0));
     }
     if (_singularity.value > 0) return 0;
     final c = _collapse.value;
@@ -1636,8 +1638,7 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
 
   Glyph get _statusIcon => switch (_status) {
     HeroStatus.paused => AppGlyphs.play,
-    HeroStatus.checking ||
-    HeroStatus.diagnosing => AppGlyphs.tethering,
+    HeroStatus.checking || HeroStatus.diagnosing => AppGlyphs.tethering,
     HeroStatus.subscriptionExpired => AppGlyphs.calendar,
     HeroStatus.offline => AppGlyphs.wifiOff,
     _ => AppGlyphs.power,

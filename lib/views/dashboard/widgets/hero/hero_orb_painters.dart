@@ -112,17 +112,19 @@ class _NovaSpark {
   final int tint;
 }
 
-List<_NovaSpark> _novaSparks(math.Random random, {int count = _novaSparkCount}) =>
-    [
-      for (var i = 0; i < count; i++)
-        _NovaSpark(
-          angle: (i + random.nextDouble() * 0.8) / count * 2 * math.pi,
-          reach: 0.62 + random.nextDouble() * 0.46,
-          delay: random.nextDouble() * 0.14,
-          width: 1.2 + random.nextDouble() * 2.4,
-          tint: random.nextInt(3),
-        ),
-    ];
+List<_NovaSpark> _novaSparks(
+  math.Random random, {
+  int count = _novaSparkCount,
+}) => [
+  for (var i = 0; i < count; i++)
+    _NovaSpark(
+      angle: (i + random.nextDouble() * 0.8) / count * 2 * math.pi,
+      reach: 0.62 + random.nextDouble() * 0.46,
+      delay: random.nextDouble() * 0.14,
+      width: 1.2 + random.nextDouble() * 2.4,
+      tint: random.nextInt(3),
+    ),
+];
 
 /// The wind-up: shards falling inwards while the hold is still being made.
 /// It starts only past `_chargeTell`, so a finger that leaves early never
@@ -568,13 +570,17 @@ class _HeroCollapsePainter extends CustomPainter {
       );
     }
     final pull = Curves.easeInCubic.transform(local);
-    final spin = local * 2.2 + local * local * 6.0 + windup * 3 + windup * windup * 5;
+    final spin =
+        local * 2.2 + local * local * 6.0 + windup * 3 + windup * windup * 5;
     final open = Curves.easeOutBack.transform(
       ((local - 0.12) / 0.4).clamp(0.0, 1.0),
     );
     final breathe = 1 + 0.03 * math.sin(local * 4 * 2 * math.pi);
     final horizon =
-        coreRadius * lerpDouble(0.05, 0.52, open)! * breathe * (1 - 0.22 * windup);
+        coreRadius *
+        lerpDouble(0.05, 0.52, open)! *
+        breathe *
+        (1 - 0.22 * windup);
     final split = 0.5 * scale;
 
     _paintDeepSpace(canvas, center, reach, pull);
@@ -631,7 +637,10 @@ class _HeroCollapsePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = (4 + 18 * gather) * scale
         ..blendMode = BlendMode.plus
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, (5 + 6 * gather) * scale)
+        ..maskFilter = MaskFilter.blur(
+          BlurStyle.normal,
+          (5 + 6 * gather) * scale,
+        )
         ..color = palette.ring.first
             .lighten(20)
             .withValues(alpha: (0.5 * gather).clamp(0.0, 1.0)),
@@ -643,14 +652,17 @@ class _HeroCollapsePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = (1.4 + 2.6 * gather) * scale
         ..blendMode = BlendMode.plus
-        ..color = Colors.white.withValues(alpha: (0.85 * gather).clamp(0.0, 1.0)),
+        ..color = Colors.white.withValues(
+          alpha: (0.85 * gather).clamp(0.0, 1.0),
+        ),
     );
     const arms = 12;
     final draw = 0.35 + 0.55 * gather;
     for (var i = 0; i < arms; i++) {
       final base = i * 2.39996 + spin * 1.2;
       final outer = horizon * lerpDouble(2.4, 1.18, gather)!;
-      final head = center + Offset.fromDirection(base + 1.1 * gather, horizon * 1.02);
+      final head =
+          center + Offset.fromDirection(base + 1.1 * gather, horizon * 1.02);
       final tail = center + Offset.fromDirection(base, outer);
       canvas.drawLine(
         tail,
@@ -721,7 +733,12 @@ class _HeroCollapsePainter extends CustomPainter {
     );
   }
 
-  void _paintDeepSpace(Canvas canvas, Offset center, double reach, double pull) {
+  void _paintDeepSpace(
+    Canvas canvas,
+    Offset center,
+    double reach,
+    double pull,
+  ) {
     final rect = Rect.fromCenter(
       center: center,
       width: reach * 2,
@@ -761,7 +778,8 @@ class _HeroCollapsePainter extends CustomPainter {
       final r = reach * seed * (1 - 0.58 * pull);
       final angle = i * 2.39996 + spin * (0.35 + seed * 0.6);
       final head = center + Offset.fromDirection(angle, r);
-      final lens = 1 + 1.6 * math.exp(-math.pow((r - lensR) / (lensR * 0.5), 2));
+      final lens =
+          1 + 1.6 * math.exp(-math.pow((r - lensR) / (lensR * 0.5), 2));
       final stretch = (5 + 30 * pull) * scale * (1 - seed * 0.5) * lens;
       final tail = center + Offset.fromDirection(angle + 0.16, r + stretch);
       final twinkle = 0.5 + 0.5 * (0.5 + 0.5 * math.sin(spin * 1.1 + i));
@@ -1018,10 +1036,7 @@ class _HeroCollapsePainter extends CustomPainter {
       final baseEnd = dir.dy < 0 ? Alignment.bottomCenter : Alignment.topCenter;
       final tipEnd = dir.dy < 0 ? Alignment.topCenter : Alignment.bottomCenter;
       final sheath = Path()
-        ..moveTo(
-          base.dx + perp.dx * halfBase,
-          base.dy + perp.dy * halfBase,
-        )
+        ..moveTo(base.dx + perp.dx * halfBase, base.dy + perp.dy * halfBase)
         ..lineTo(tip.dx + perp.dx * halfTip, tip.dy + perp.dy * halfTip)
         ..lineTo(tip.dx - perp.dx * halfTip, tip.dy - perp.dy * halfTip)
         ..lineTo(base.dx - perp.dx * halfBase, base.dy - perp.dy * halfBase)
@@ -1179,9 +1194,9 @@ class _HeroCollapsePainter extends CustomPainter {
         ..strokeWidth = (10 + 10 * pull) * scale
         ..blendMode = BlendMode.plus
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 7 * scale)
-        ..color = palette.ring.first.lighten(18).withValues(
-          alpha: (0.36 * pull * form).clamp(0.0, 1.0),
-        ),
+        ..color = palette.ring.first
+            .lighten(18)
+            .withValues(alpha: (0.36 * pull * form).clamp(0.0, 1.0)),
     );
     canvas.drawCircle(
       center,
@@ -1454,7 +1469,9 @@ class _HeroSingularityPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = (1.4 + 1.4 * eased) * scale
         ..blendMode = BlendMode.plus
-        ..color = Colors.white.withValues(alpha: (0.7 * glowUp).clamp(0.0, 1.0)),
+        ..color = Colors.white.withValues(
+          alpha: (0.7 * glowUp).clamp(0.0, 1.0),
+        ),
     );
   }
 
@@ -1467,8 +1484,7 @@ class _HeroSingularityPainter extends CustomPainter {
       final b = ((progress - 0.2) / (_evaporatePeak - 0.2)).clamp(0.0, 1.0);
       final throb = 0.5 + 0.5 * math.sin(b * 2.5 * 2 * math.pi);
       strength =
-          (0.6 + 0.4 * throb) *
-          (0.5 + 0.5 * Curves.easeInCubic.transform(b));
+          (0.6 + 0.4 * throb) * (0.5 + 0.5 * Curves.easeInCubic.transform(b));
       r = coreRadius * (0.05 + 0.015 * throb);
     } else {
       final d = ((progress - _evaporatePeak) / 0.33).clamp(0.0, 1.0);
@@ -1479,7 +1495,9 @@ class _HeroSingularityPainter extends CustomPainter {
       canvas,
       center,
       r * 4.5,
-      palette.glow.lighten(16).withValues(alpha: (0.7 * strength).clamp(0.0, 1.0)),
+      palette.glow
+          .lighten(16)
+          .withValues(alpha: (0.7 * strength).clamp(0.0, 1.0)),
       12 * scale,
     );
     canvas.drawCircle(
@@ -1625,8 +1643,11 @@ class _HeroSingularityPainter extends CustomPainter {
       final local = _span(_evaporatePeak - 0.04 + spark.delay * 0.4, 0.7);
       if (local <= 0 || local >= 1) continue;
       final eased = Curves.easeOutCubic.transform(local);
-      final distance =
-          lerpDouble(coreRadius * 0.1, reach * spark.reach * 1.25, eased)!;
+      final distance = lerpDouble(
+        coreRadius * 0.1,
+        reach * spark.reach * 1.25,
+        eased,
+      )!;
       final tail = (12 + 56 * (1 - eased)) * scale;
       final fade = math.pow(1 - local, 1.7).toDouble();
       final drift = spark.angle + math.sin(local * math.pi) * 0.2;
@@ -1656,8 +1677,11 @@ class _HeroSingularityPainter extends CustomPainter {
       final local = _span(_evaporatePeak + i * 0.07, 0.62);
       if (local <= 0 || local >= 1) continue;
       final eased = Curves.easeOutQuart.transform(local);
-      final radius =
-          lerpDouble(ringRadius * 0.5, reach * (1.2 - i * 0.16), eased)!;
+      final radius = lerpDouble(
+        ringRadius * 0.5,
+        reach * (1.2 - i * 0.16),
+        eased,
+      )!;
       final fade = math.pow(1 - local, 2).toDouble();
       final rect = Rect.fromCircle(center: center, radius: radius);
       canvas.drawCircle(
@@ -1684,10 +1708,9 @@ class _HeroSingularityPainter extends CustomPainter {
     final e = Curves.easeOutCubic.transform(flare);
     // A hump peaking just past the detonation so the streak snaps in and rings
     // down, rather than being full-bright on its first frame.
-    final punch =
-        (math.pow(flare, 0.4) * math.pow(1 - flare, 2.2) * 3.1)
-            .clamp(0.0, 1.0)
-            .toDouble();
+    final punch = (math.pow(flare, 0.4) * math.pow(1 - flare, 2.2) * 3.1)
+        .clamp(0.0, 1.0)
+        .toDouble();
     final tint = palette.glow.lighten(18);
     _beam(
       canvas,

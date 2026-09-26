@@ -4,6 +4,9 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/ui/focus_visibility.dart';
 import 'package:reclash/common/ui/shape.dart';
+import 'package:reclash/common/ui/spacing.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/nav/app_nav_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -20,13 +23,13 @@ const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(
 
 const double _kThumbInset = 1;
 
-const Radius _kCornerRadius = Radius.circular(AppCorner.sm + _kThumbInset);
+const Radius _kCornerRadius = Radius.circular(AppCorner.full);
 
-const Radius _kThumbRadius = Radius.circular(AppCorner.sm);
+const Radius _kThumbRadius = Radius.circular(AppCorner.full);
 
 const EdgeInsets _kThumbInsets = EdgeInsets.symmetric(horizontal: _kThumbInset);
 
-const double _kMinSegmentedControlHeight = 28.0;
+const double _kMinSegmentedControlHeight = 40.0;
 
 const EdgeInsets _kSeparatorInset = EdgeInsets.symmetric(vertical: 5);
 
@@ -40,7 +43,7 @@ const double _kTouchYDistanceThreshold = 50.0 * 50.0;
 
 const double _kContentPressedMinOpacity = 0.2;
 
-const double _kFontSize = 13.0;
+const double _kFontSize = 14.0;
 
 const FontWeight _kFontWeight = FontWeight.w500;
 
@@ -58,6 +61,10 @@ final SpringSimulation _kThumbSpringAnimationSimulation = SpringSimulation(
 const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);
 
 const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
+
+const Duration _kContentPressFadeDuration = Duration(milliseconds: 140);
+
+const double _kSegmentPressStrength = 0.4;
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
@@ -493,6 +500,57 @@ class _CommonTabBarState<T extends Object> extends State<CommonTabBar<T>>
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Shared content for a [CommonTabBar] segment: an optional leading glyph and a
+/// label, tinted by selection. It sets no font size or weight on purpose so the
+/// segment keeps animating them as the sliding thumb moves.
+class CommonTabLabel extends StatelessWidget {
+  const CommonTabLabel({
+    super.key,
+    required this.label,
+    required this.selected,
+    this.icon,
+    this.selectedColor,
+    this.unselectedColor,
+    this.height,
+  });
+
+  final String label;
+  final bool selected;
+  final Glyph? icon;
+  final Color? selectedColor;
+  final Color? unselectedColor;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = selected
+        ? (selectedColor ?? colorScheme.onSecondaryContainer)
+        : (unselectedColor ?? colorScheme.onSurfaceVariant);
+    final icon = this.icon;
+    return Container(
+      height: height,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            GlyphIcon(icon, size: 18, color: color),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: color),
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ],
       ),
     );
   }

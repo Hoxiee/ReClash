@@ -123,6 +123,7 @@ const (
 	forceGcMethod                    CoreMethod = "forceGc"
 	shutdownMethod                   CoreMethod = "shutdown"
 	validateConfigMethod             CoreMethod = "validateConfig"
+	validateProxiesMethod            CoreMethod = "validateProxies"
 	inspectConfigMethod              CoreMethod = "inspectConfig"
 	fetchSubscriptionMethod          CoreMethod = "fetchSubscription"
 	updateConfigMethod               CoreMethod = "updateConfig"

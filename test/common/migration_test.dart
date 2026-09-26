@@ -289,7 +289,7 @@ void main() {
       final notification = config.appSettingProps.notificationSettings;
 
       expect(config.appSettingProps.setupCompleted, isTrue);
-      expect(config.appSettingProps.autoCheckUpdate, isFalse);
+      expect(config.appSettingProps.autoCheckUpdate, isTrue);
       expect(config.appSettingProps.sendDeviceIdentity, isFalse);
       expect(notification.showStopAction, isFalse);
       expect(notification.showPauseAction, isTrue);

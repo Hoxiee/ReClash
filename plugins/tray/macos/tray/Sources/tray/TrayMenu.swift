@@ -32,7 +32,8 @@ final class TrayMenu: NSMenu {
             item.attributedTitle = TrayMenu.attributedTitle(
                 item.title,
                 detail: detail,
-                tab: detailTab
+                tab: detailTab,
+                detailColor: TrayMenu.detailColor(entry)
             )
         }
 
@@ -70,10 +71,22 @@ final class TrayMenu: NSMenu {
         return hasDetail ? maxWidth + 32 : 0
     }
 
+    /// Delay tones recolor the detail as a measurement; every other detail
+    /// (shortcut hints) keeps the dimmed tertiary label it drew before.
+    private static func detailColor(_ entry: [String: Any]) -> NSColor {
+        switch entry["detailTone"] as? String {
+        case "success": return .systemGreen
+        case "warning": return .systemOrange
+        case "error": return .systemRed
+        default: return .tertiaryLabelColor
+        }
+    }
+
     private static func attributedTitle(
         _ label: String,
         detail: String,
-        tab: CGFloat
+        tab: CGFloat,
+        detailColor: NSColor
     ) -> NSAttributedString {
         let paragraph = NSMutableParagraphStyle()
         paragraph.tabStops = [NSTextTab(textAlignment: .right, location: tab)]
@@ -88,7 +101,7 @@ final class TrayMenu: NSMenu {
         )
         result.addAttribute(
             .foregroundColor,
-            value: NSColor.tertiaryLabelColor,
+            value: detailColor,
             range: detailRange
         )
         return result

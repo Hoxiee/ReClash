@@ -184,7 +184,7 @@ class OverrideDnsButton extends StatelessWidget {
     return _QuickSwitchCard(
       label: context.appLocalizations.overrideDns,
       glyph: AppGlyphs.dns,
-      sections: dnsItems,
+      sections: const [DnsOverrideQuickList()],
       selector: overrideDnsProvider,
       onChanged: (ref, value) {
         ref.read(overrideDnsProvider.notifier).value = value;

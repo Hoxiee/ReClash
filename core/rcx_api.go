@@ -48,7 +48,7 @@ func init() {
 		response.success(true)
 	}))
 	registerMethod(rcxDiagLogMethod, withArguments(func(query *rcx.DiagQuery, response MethodResponse) {
-		response.success(rcxEngineInstance.DiagLog(query.Since))
+		response.success(rcxEngineInstance.DiagLog(query.Since, query.Limit))
 	}))
 
 	adapter.DialResultHook = func(name, _ string, err error, elapsed time.Duration) {

@@ -169,6 +169,23 @@ func handleValidateConfig(path string) string {
 	return ""
 }
 
+// UnmarshalRawConfig only checks YAML shape, so a bad proxy passes
+// handleValidateConfig and is rejected only later at apply. This parses each
+// mapping in place, returning its reason (empty = ok). Close releases the
+// proxy a successful parse opens, which would otherwise leak per entry.
+func handleValidateProxies(mappings []map[string]any) []string {
+	results := make([]string, len(mappings))
+	for i, mapping := range mappings {
+		proxy, err := adapter.ParseProxy(mapping)
+		if err != nil {
+			results[i] = err.Error()
+			continue
+		}
+		_ = proxy.Close()
+	}
+	return results
+}
+
 // The host decides whether a parsed profile is worth keeping, so validation
 // hands over the proxy servers it saw instead of only a yes/no.
 func handleInspectConfig(path string) map[string]any {

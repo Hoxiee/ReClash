@@ -7,7 +7,7 @@ import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
-import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_sheet.dart';
 import 'package:reclash/widgets/theme/wallpaper_scope.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
@@ -130,8 +130,7 @@ class _SubscriptionCard extends StatelessWidget {
       action: profile != null && profile.type == ProfileType.url
           ? _UpdateAction(profile: profile)
           : const GlyphIcon(AppGlyphs.chevronForward, size: 20),
-      onPressed: () =>
-          showExtend(context, builder: (_) => const SubscriptionOverviewView()),
+      onPressed: () => showSubscriptionSheet(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

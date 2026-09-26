@@ -110,14 +110,14 @@ class _ExternalControllerDialogState
           mainAxisSize: MainAxisSize.min,
           spacing: 16,
           children: [
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
+            ListItem.toggle(
+              padding: EdgeInsets.zero,
               title: Text(appLocalizations.enableExternalController),
               value: _enabled,
               onChanged: (value) => setState(() => _enabled = value),
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
+            ListItem.toggle(
+              padding: EdgeInsets.zero,
               title: Text(appLocalizations.allowLanAccess),
               subtitle: Text(appLocalizations.allowLanAccessDesc),
               value: _allowLan,
@@ -147,7 +147,9 @@ class _ExternalControllerDialogState
                   );
                 }
                 if (port < _minPort || port > _maxPort) {
-                  return appLocalizations.portTip(appLocalizations.listeningPort);
+                  return appLocalizations.portTip(
+                    appLocalizations.listeningPort,
+                  );
                 }
                 return null;
               },

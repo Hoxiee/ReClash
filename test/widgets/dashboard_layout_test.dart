@@ -147,7 +147,9 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
-    container.read(appSettingProvider.notifier).value = const AppSettingProps(region: AppRegion.russia);
+    container.read(appSettingProvider.notifier).value = const AppSettingProps(
+      region: AppRegion.russia,
+    );
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -168,7 +170,13 @@ void main() {
 
     container
         .read(desyncSettingProvider.notifier)
-        .update((state) => state.copyWith(featureEnabled: true, enabled: true, onlyDpi: true));
+        .update(
+          (state) => state.copyWith(
+            featureEnabled: true,
+            enabled: true,
+            onlyDpi: true,
+          ),
+        );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -222,9 +230,11 @@ void main() {
     // dropping the last one must not drag the hidden widget out of its slot.
     final deletes = find.byGlyph(AppGlyphs.close);
     expect(deletes, findsNWidgets(3));
-    tester.widget<IconButton>(
-      find.ancestor(of: deletes.at(2), matching: find.byType(IconButton)),
-    ).onPressed!();
+    tester
+        .widget<IconButton>(
+          find.ancestor(of: deletes.at(2), matching: find.byType(IconButton)),
+        )
+        .onPressed!();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 301));
     await tester.pump();

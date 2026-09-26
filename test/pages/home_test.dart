@@ -1,5 +1,6 @@
 import 'package:reclash/common/app/app_ports.dart';
-import 'package:reclash/icons/icons.dart' hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+import 'package:reclash/icons/icons.dart'
+    hide CaptionGlyph, CaptionIcon, captionGlyphSize;
 import '../helpers/glyph_finders.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -865,7 +866,10 @@ void main() {
       expect(find.byType(AppNavRail), findsOneWidget);
 
       Finder railIcon(Glyph glyph) => find
-          .descendant(of: find.byType(AppNavRail), matching: find.byGlyph(glyph))
+          .descendant(
+            of: find.byType(AppNavRail),
+            matching: find.byGlyph(glyph),
+          )
           .first;
 
       // Visit another page so its content stays alive in the PageView cache.

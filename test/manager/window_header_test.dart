@@ -1,4 +1,5 @@
-import 'package:reclash/icons/icons.dart' hide CaptionGlyph, CaptionIcon, captionGlyphSize;
+import 'package:reclash/icons/icons.dart'
+    hide CaptionGlyph, CaptionIcon, captionGlyphSize;
 import '../helpers/glyph_finders.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';

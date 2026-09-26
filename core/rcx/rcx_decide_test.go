@@ -1162,6 +1162,9 @@ func TestDecideOrdersUnmeasuredProvenByThirtyMsSteps(t *testing.T) {
 func TestDecideHoldsAManualPinThroughAnOpenWorldBlip(t *testing.T) {
 	pinned := rcxNode("be-1", foreignProven())
 	pinned.Facts.OpenWorld = rcxProofDisproven
+	// A node that blips open-world opened it once before; the latch is what tells a
+	// transient failure of a working exit from a node that never proved one.
+	pinned.Facts.OpenedOnce = true
 	pinned.HostMs = 101
 	faster := rcxNode("de-1", foreignProven())
 	faster.HostMs = 40
@@ -1178,6 +1181,111 @@ func TestDecideHoldsAManualPinThroughAnOpenWorldBlip(t *testing.T) {
 
 	if got.Switch || got.Reason != rcxReasonManualHold {
 		t.Fatalf("decision = %+v, want the working pin held through an open-world blip", got)
+	}
+}
+
+func TestDecideLeavesADisprovedZombiePinWithNoEgressHistory(t *testing.T) {
+	// A self-asserted pin coasting on stale entry transit, its exit just measured
+	// dead: no open-world history, so it hands off instead of latching forever.
+	zombie := rcxNode("fi-2", rcxFacts{
+		Origin:      rcxOriginForeign,
+		Transit:     rcxProofProven,
+		OpenWorld:   rcxProofDisproven,
+		SupportsUDP: true,
+	})
+	zombie.HostMs = 114
+	working := rcxNode("nl-1", foreignProven())
+	working.QualityConfirmed = true
+	working.HostMs = 120
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Incumbent:  "fi-2",
+		Pin:        "fi-2",
+		Candidates: []rcxCandidate{zombie, working},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want the disproved zombie left for the working node", got)
+	}
+}
+
+func TestRankingLatencySinksATransitOnlyNodeBelowMeasured(t *testing.T) {
+	policy := rcxTestPolicy()
+	transitOnly := rcxCandidate{Facts: rcxFacts{Origin: rcxOriginForeign, Transit: rcxProofProven}, HostMs: 90}
+	measured := rcxCandidate{Facts: foreignProven(), MedianMs: 300}
+	if rcxRankingLatency(transitOnly, policy) <= rcxRankingLatency(measured, policy) {
+		t.Fatalf("a transit-only host ping must rank below a slower node with a proven exit")
+	}
+}
+
+func TestRankingLatencyKeepsAnAgedOpenIncumbentInTheFastBand(t *testing.T) {
+	// A node that opened the world in this env, whose open proof merely aged past
+	// the TTL (never a disproof), keeps its fast-band host ping: aging is not
+	// evidence the exit died, so ranking alone must not sink a node that once
+	// proved egress. Only a fresh failing egress probe hands it off — the recovery
+	// backstop below, not this ranking step.
+	agedOpen := rcxNode("fi-2", rcxFacts{
+		Origin:      rcxOriginForeign,
+		Transit:     rcxProofProven,
+		OpenedOnce:  true,
+		SupportsUDP: true,
+	})
+	agedOpen.MedianMs = 0
+	agedOpen.HostMs = 114
+	working := rcxNode("nl-1", foreignProven())
+	working.QualityConfirmed = true
+	working.MedianMs = 300
+
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Incumbent:  "fi-2",
+		Candidates: []rcxCandidate{agedOpen, working},
+		Policy:     policy,
+	})
+
+	if got.Switch {
+		t.Fatalf("decision = %+v, want hold: an aged-but-never-disproved open latch keeps its fast route", got)
+	}
+}
+
+func TestLedgerDisprovesAStuckTransitOnlyIncumbentOnAFailingMarker(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	// The log snapshot: entry transit moved bytes (Transit=Proven) but the exit was
+	// never opened or measured (OpenWorld=Unknown, Exit=Unknown) — the zombie a live
+	// entry ping keeps crowning while nothing disproves the dead egress.
+	ledger.NoteTrafficProgress("fi-2", "wifi:home", false, now)
+	facts := ledger.Facts("fi-2", "wifi:home", true, now, rcxLedgerProofTTL)
+	if facts.Transit != rcxProofProven || facts.OpenWorld != rcxProofUnknown || facts.Exit != rcxOriginUnknown {
+		t.Fatalf("seed facts = %+v, want the stuck transit-only snapshot", facts)
+	}
+
+	// A failing open-marker probe is the only signal that disproves the dead exit.
+	ledger.NoteProbe("fi-2", "wifi:home", rcxRoleOpen, rcxProbeStatusMismatch, 40, now)
+	facts = ledger.Facts("fi-2", "wifi:home", true, now, rcxLedgerProofTTL)
+	if facts.OpenWorld != rcxProofDisproven {
+		t.Fatalf("openWorld = %v, want disproven after a failing egress probe", facts.OpenWorld)
+	}
+
+	zombie := rcxNode("fi-2", facts)
+	working := rcxNode("nl-1", foreignProven())
+	working.QualityConfirmed = true
+	policy := rcxTestPolicy()
+	policy.Censoring = true
+	got := rcxDecideAt(rcxDecisionInput{
+		Terrain:    rcxTerrainNormal,
+		Incumbent:  "fi-2",
+		Candidates: []rcxCandidate{zombie, working},
+		Policy:     policy,
+	})
+
+	if !got.Switch || got.To != "nl-1" {
+		t.Fatalf("decision = %+v, want a switch off the disproved incumbent to the working node", got)
 	}
 }
 

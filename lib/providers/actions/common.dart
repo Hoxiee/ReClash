@@ -1,5 +1,13 @@
 part of '../action.dart';
 
+/// Throttles the startup update check so a frequently relaunched app does not
+/// hit the releases API every cold start. A manual check bypasses this.
+bool shouldRunAutoUpdateCheck(int lastCheckedAtMillis, DateTime now) {
+  if (lastCheckedAtMillis <= 0) return true;
+  return now.millisecondsSinceEpoch - lastCheckedAtMillis >=
+      autoUpdateCheckInterval.inMilliseconds;
+}
+
 @Riverpod(keepAlive: true)
 class CommonAction extends _$CommonAction {
   CoreController get _core => ref.read(coreHandlerProvider);
@@ -96,6 +104,14 @@ class CommonAction extends _$CommonAction {
 
   Future<bool> autoCheckUpdate() async {
     if (!ref.read(appSettingProvider).autoCheckUpdate) return false;
+    final now = DateTime.now();
+    if (!shouldRunAutoUpdateCheck(
+      await preferences.getLastUpdateCheckAt(),
+      now,
+    )) {
+      return false;
+    }
+    await preferences.saveLastUpdateCheckAt(now.millisecondsSinceEpoch);
     final res = await request.checkForUpdate();
     await checkUpdateResultHandle(data: res);
     return res != null;

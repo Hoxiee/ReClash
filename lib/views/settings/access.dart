@@ -6,6 +6,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -105,14 +106,10 @@ class _AccessViewState extends ConsumerState<AccessView> {
     super.dispose();
   }
 
-  Widget? _buildSelectAllAction({
-    required bool visible,
+  Widget _buildSelectAllButton({
     required bool isSelectedAll,
     required Set<String> allValues,
   }) {
-    if (!visible) {
-      return null;
-    }
     void onPressed() {
       ref.read(accessControlStateProvider.notifier).update((state) {
         final newSet = Set<String>.from(state.currentList);
@@ -132,6 +129,15 @@ class _AccessViewState extends ConsumerState<AccessView> {
           : appLocalizations.selectAll,
       onPressed: onPressed,
       icon: GlyphIcon(isSelectedAll ? AppGlyphs.deselect : AppGlyphs.selectAll),
+    );
+  }
+
+  Widget _buildSmartSelectButton() {
+    return IconButton(
+      key: const ValueKey('access-intelligent-select'),
+      tooltip: context.appLocalizations.intelligentSelected,
+      onPressed: _intelligentSelected,
+      icon: const GlyphIcon(AppGlyphs.sparkle),
     );
   }
 
@@ -281,15 +287,9 @@ class _AccessViewState extends ConsumerState<AccessView> {
     });
   }
 
-  List<Widget> _buildActions(
-    BuildContext context, {
-    required bool enable,
-    Widget? selectAllAction,
-  }) {
+  List<Widget> _buildActions(BuildContext context, {required bool enable}) {
     final appLocalizations = context.appLocalizations;
-    final canMatch = ref.regionAllows(RegionalFacetId.packageMatcher);
     return [
-      ?selectAllAction,
       _buildConfirm(),
       CommonPopupBox(
         targetBuilder: (open) {
@@ -314,12 +314,6 @@ class _AccessViewState extends ConsumerState<AccessView> {
               glyph: AppGlyphs.emergency,
               label: appLocalizations.action,
               subItems: [
-                if (canMatch)
-                  CommonPopupMenuItem(
-                    glyph: AppGlyphs.sparkle,
-                    label: appLocalizations.intelligentSelected,
-                    onPressed: _intelligentSelected,
-                  ),
                 CommonPopupMenuItem(
                   glyph: AppGlyphs.copy,
                   label: appLocalizations.clipboardExport,
@@ -418,15 +412,15 @@ class _AccessViewState extends ConsumerState<AccessView> {
               .update((state) => state.copyWith(mode: value));
         },
         children: {
-          AccessControlMode.acceptSelected: _AccessModeTab(
+          AccessControlMode.acceptSelected: CommonTabLabel(
             icon: AppGlyphs.vpn,
             label: appLocalizations.accessControlIncludeInVpn,
-            isSelected: mode == AccessControlMode.acceptSelected,
+            selected: mode == AccessControlMode.acceptSelected,
           ),
-          AccessControlMode.rejectSelected: _AccessModeTab(
+          AccessControlMode.rejectSelected: CommonTabLabel(
             icon: AppGlyphs.block,
             label: appLocalizations.accessControlExcludeFromVpn,
-            isSelected: mode == AccessControlMode.rejectSelected,
+            selected: mode == AccessControlMode.rejectSelected,
           ),
         },
       ),
@@ -450,189 +444,186 @@ class _AccessViewState extends ConsumerState<AccessView> {
     };
   }
 
-  Widget _buildFilterBar(AccessControlProps accessControl) {
+  Widget _buildSortButton(AccessControlProps accessControl) {
     final appLocalizations = context.appLocalizations;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          CommonPopupBox(
-            targetBuilder: (open) => IconButton.filledTonal(
-              key: const ValueKey('access-sort-chip'),
-              tooltip:
-                  '${appLocalizations.sort}: ${_getSortLabel(accessControl.sort)}',
-              onPressed: () => open(offset: Offset.zero),
-              icon: GlyphIcon(_getSortIcon(accessControl.sort)),
+    return CommonPopupBox(
+      targetBuilder: (open) => IconButton(
+        key: const ValueKey('access-sort-chip'),
+        tooltip:
+            '${appLocalizations.sort}: ${_getSortLabel(accessControl.sort)}',
+        onPressed: () => open(offset: Offset.zero),
+        icon: GlyphIcon(_getSortIcon(accessControl.sort)),
+      ),
+      popupBuilder: (_) => CommonPopupMenu(
+        items: [
+          for (final type in AccessSortType.values)
+            CommonPopupMenuItem(
+              glyph: accessControl.sort == type
+                  ? AppGlyphs.check
+                  : _getSortIcon(type),
+              label: _getSortLabel(type),
+              onPressed: () {
+                ref
+                    .read(accessControlStateProvider.notifier)
+                    .update((state) => state.copyWith(sort: type));
+              },
             ),
-            popupBuilder: (_) => CommonPopupMenu(
-              items: [
-                for (final type in AccessSortType.values)
-                  CommonPopupMenuItem(
-                    glyph: accessControl.sort == type
-                        ? AppGlyphs.check
-                        : _getSortIcon(type),
-                    label: _getSortLabel(type),
-                    onPressed: () {
-                      ref
-                          .read(accessControlStateProvider.notifier)
-                          .update((state) => state.copyWith(sort: type));
-                    },
-                  ),
-              ],
-            ),
-          ),
-          IconButton(
-            key: const ValueKey('access-system-apps-filter'),
-            tooltip: appLocalizations.systemApp,
-            isSelected: !accessControl.isFilterSystemApp,
-            onPressed: () {
-              ref
-                  .read(accessControlStateProvider.notifier)
-                  .update(
-                    (state) => state.copyWith(
-                      isFilterSystemApp: !state.isFilterSystemApp,
-                    ),
-                  );
-            },
-            icon: const GlyphIcon(AppGlyphs.android),
-            selectedIcon: const GlyphIcon(AppGlyphs.android),
-          ),
-          IconButton(
-            key: const ValueKey('access-offline-apps-filter'),
-            tooltip: appLocalizations.noNetworkApp,
-            isSelected: !accessControl.isFilterNonInternetApp,
-            onPressed: () {
-              ref
-                  .read(accessControlStateProvider.notifier)
-                  .update(
-                    (state) => state.copyWith(
-                      isFilterNonInternetApp: !state.isFilterNonInternetApp,
-                    ),
-                  );
-            },
-            icon: const GlyphIcon(AppGlyphs.wifiOff),
-            selectedIcon: const GlyphIcon(AppGlyphs.wifiOff),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusCard({
-    required bool enable,
-    required AccessControlMode mode,
-    required int count,
-  }) {
-    final appLocalizations = context.appLocalizations;
-    final description = mode == AccessControlMode.acceptSelected
-        ? appLocalizations.accessControlAllowDesc
-        : appLocalizations.accessControlNotAllowDesc;
-    final icon = mode == AccessControlMode.acceptSelected
-        ? AppGlyphs.vpn
-        : AppGlyphs.block;
-    return Card.filled(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            GlyphIcon(
-              enable ? icon : AppGlyphs.info,
-              color: enable
-                  ? context.colorScheme.primary
-                  : context.colorScheme.outline,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Text(
-                enable
-                    ? description
-                    : appLocalizations.accessControlDisabledDesc,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
+  Widget _buildSystemToggle(AccessControlProps accessControl) {
+    return IconButton(
+      key: const ValueKey('access-system-apps-filter'),
+      tooltip: context.appLocalizations.systemApp,
+      isSelected: !accessControl.isFilterSystemApp,
+      onPressed: () {
+        ref
+            .read(accessControlStateProvider.notifier)
+            .update(
+              (state) =>
+                  state.copyWith(isFilterSystemApp: !state.isFilterSystemApp),
+            );
+      },
+      icon: const GlyphIcon(AppGlyphs.android),
+      selectedIcon: const GlyphIcon(AppGlyphs.android),
+    );
+  }
+
+  Widget _buildOfflineToggle(AccessControlProps accessControl) {
+    return IconButton(
+      key: const ValueKey('access-offline-apps-filter'),
+      tooltip: context.appLocalizations.noNetworkApp,
+      isSelected: !accessControl.isFilterNonInternetApp,
+      onPressed: () {
+        ref
+            .read(accessControlStateProvider.notifier)
+            .update(
+              (state) => state.copyWith(
+                isFilterNonInternetApp: !state.isFilterNonInternetApp,
               ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            if (enable)
-              Semantics(
-                label: appLocalizations.selected,
-                value: '$count',
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: ShapeDecoration(
-                    color: context.colorScheme.primaryContainer,
-                    shape: AppShape.full,
-                  ),
-                  child: Text(
-                    '$count',
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: context.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              )
-            else
-              FilledButton.tonal(
-                onPressed: _handleToggle,
-                child: Text(appLocalizations.turnOn),
-              ),
-          ],
+            );
+      },
+      icon: const GlyphIcon(AppGlyphs.wifiOff),
+      selectedIcon: const GlyphIcon(AppGlyphs.wifiOff),
+    );
+  }
+
+  Widget _buildCountPill(int count) {
+    return Semantics(
+      label: context.appLocalizations.selected,
+      value: '$count',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: ShapeDecoration(
+          color: context.colorScheme.primaryContainer,
+          shape: AppShape.full,
+        ),
+        child: Text(
+          '$count',
+          style: context.textTheme.labelLarge?.copyWith(
+            color: context.colorScheme.onPrimaryContainer,
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDisabledBanner() {
+    final appLocalizations = context.appLocalizations;
+    return Row(
+      children: [
+        GlyphIcon(AppGlyphs.info, color: context.colorScheme.outline),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Text(
+            appLocalizations.accessControlDisabledDesc,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        CommonMinFilledButtonTheme(
+          child: FilledButton.tonal(
+            onPressed: _handleToggle,
+            child: Text(appLocalizations.turnOn),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionRow({
+    required AccessControlProps accessControl,
+    required int count,
+    Widget? selectAllButton,
+    Widget? smartSelectButton,
+  }) {
+    final hasSelectionActions =
+        selectAllButton != null || smartSelectButton != null;
+    return Row(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildSortButton(accessControl),
+                _buildSystemToggle(accessControl),
+                _buildOfflineToggle(accessControl),
+                if (hasSelectionActions) const SizedBox(width: AppSpacing.sm),
+                ?selectAllButton,
+                ?smartSelectButton,
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _buildCountPill(count),
+      ],
     );
   }
 
   Widget _buildControlPanel({
     required AccessControlProps accessControl,
     required int count,
+    Widget? selectAllButton,
+    Widget? smartSelectButton,
   }) {
+    // colorOf only scales the surface toward the card opacity, which still
+    // leaves a near-opaque full-width band over a wallpaper; drop the fill
+    // entirely so the backdrop shows through behind the tabs and actions.
+    final wallpaperActive =
+        ref.watch(
+          themeSettingProvider.select((value) => value.wallpaper.enabled),
+        ) &&
+        ref.watch(wallpaperImageProvider).asData?.value != null;
     return Material(
       key: const ValueKey('access-control-panel'),
-      color: context.colorScheme.surface,
+      color: wallpaperActive
+          ? Colors.transparent
+          : context.colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isCompact = constraints.maxWidth < 840;
-            final modeTabs = _buildModeTabs(accessControl.mode);
-            final status = _buildStatusCard(
-              enable: accessControl.enable,
-              mode: accessControl.mode,
-              count: count,
-            );
-            final filters = DisabledMask(
-              status: !accessControl.enable,
-              child: _buildFilterBar(accessControl),
-            );
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isCompact) ...[
-                  modeTabs,
-                  const SizedBox(height: AppSpacing.sm),
-                  status,
-                ] else
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 3, child: modeTabs),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(flex: 2, child: status),
-                    ],
-                  ),
-                const SizedBox(height: AppSpacing.md),
-                filters,
-              ],
-            );
-          },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildModeTabs(accessControl.mode),
+            const SizedBox(height: AppSpacing.sm),
+            if (accessControl.enable)
+              _buildActionRow(
+                accessControl: accessControl,
+                count: count,
+                selectAllButton: selectAllButton,
+                smartSelectButton: smartSelectButton,
+              )
+            else
+              _buildDisabledBanner(),
+          ],
         ),
       ),
     );
@@ -671,20 +662,22 @@ class _AccessViewState extends ConsumerState<AccessView> {
         packages.isEmpty && !_installedAppsPermissionGranted;
     final showDockedSearch =
         !needsInstalledAppsPermission && viewPackageNameSet.isNotEmpty;
-    final selectAllAction = _buildSelectAllAction(
-      visible: showDockedSearch && accessControl.enable,
-      isSelectedAll: valueSet.length == viewPackageNameSet.length,
-      allValues: viewPackageNameSet,
-    );
+    final showSelectionActions = showDockedSearch && accessControl.enable;
+    final selectAllButton = showSelectionActions
+        ? _buildSelectAllButton(
+            isSelectedAll: valueSet.length == viewPackageNameSet.length,
+            allValues: viewPackageNameSet,
+          )
+        : null;
+    final canMatch = ref.regionAllows(RegionalFacetId.packageMatcher);
+    final smartSelectButton = showSelectionActions && canMatch
+        ? _buildSmartSelectButton()
+        : null;
     return CommonScaffold(
       isLoading: isLoading,
       title: context.appLocalizations.appAccessControl,
       floatBody: true,
-      actions: _buildActions(
-        context,
-        enable: accessControl.enable,
-        selectAllAction: selectAllAction,
-      ),
+      actions: _buildActions(context, enable: accessControl.enable),
       body: AppBarClearance(
         child: Stack(
           children: [
@@ -694,6 +687,8 @@ class _AccessViewState extends ConsumerState<AccessView> {
                 _buildControlPanel(
                   accessControl: accessControl,
                   count: currentList.length,
+                  selectAllButton: selectAllButton,
+                  smartSelectButton: smartSelectButton,
                 ),
                 const Divider(height: 1),
                 Expanded(
@@ -756,46 +751,6 @@ class PackageListItem extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-    );
-  }
-}
-
-class _AccessModeTab extends StatelessWidget {
-  const _AccessModeTab({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-  });
-
-  final Glyph icon;
-  final String label;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final color = isSelected
-        ? colorScheme.onSecondaryContainer
-        : colorScheme.onSurfaceVariant;
-    return Container(
-      alignment: Alignment.center,
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GlyphIcon(icon, size: 18, color: color),
-          const SizedBox(width: AppSpacing.sm),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.textTheme.titleSmall?.copyWith(color: color),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

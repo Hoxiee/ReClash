@@ -14,7 +14,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../helpers/test_app.dart';
 
@@ -223,7 +222,7 @@ void main() {
     await tester.tap(find.text('open LAN import'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
-    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.byType(StyledQrCode), findsOneWidget);
     final address = tester.widget<SelectableText>(find.byType(SelectableText));
     expect(address.data, contains('http://127.0.0.1:'));
 

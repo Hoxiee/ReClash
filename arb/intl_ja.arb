@@ -2112,5 +2112,19 @@
   "smartRoutingLogRepeat": "×{count}",
   "smartRoutingLogState": "状態",
   "smartRoutingLogCandidates": "候補",
-  "smartRoutingLogFilter": "種類"
+  "smartRoutingLogFilter": "種類",
+  "addOverrideEntry": "上書き項目を追加",
+  "dialerProxy": "ダイヤラープロキシ",
+  "dialerProxyDesc": "NTP サーバーへの接続に使用するプロキシ",
+  "discardChanges": "変更を破棄しますか？",
+  "ntpDesc": "ネットワーク時刻同期を設定します",
+  "overrideEntries": "上書き項目",
+  "overrideKeys": "上書きするキー",
+  "overrideKeysDesc": "選択したキーのみがプロファイルの値を置き換えます",
+  "overrideNtp": "NTP を上書き",
+  "overrideNtpDesc": "プロファイルの NTP 設定を選択したキーで置き換えます",
+  "quickEdit": "クイック編集",
+  "server": "サーバー",
+  "writeToSystem": "システムに書き込む",
+  "writeToSystemDesc": "取得した時刻をシステムクロックに同期します"
 }

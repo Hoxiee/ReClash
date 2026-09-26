@@ -9,9 +9,7 @@ void main() {
     await tester.pumpWidget(
       const TestApp(
         includeNavigatorKey: false,
-        child: Center(
-          child: StyledQrCode(data: 'https://example.com/import'),
-        ),
+        child: Center(child: StyledQrCode(data: 'https://example.com/import')),
       ),
     );
     await tester.pump();

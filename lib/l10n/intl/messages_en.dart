@@ -329,6 +329,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionView": MessageLookupByLibrary.simpleMessage("Show/Hide"),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Add network"),
+    "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
+      "Add override entry",
+    ),
     "addProfile": MessageLookupByLibrary.simpleMessage("Add profile"),
     "addProxies": MessageLookupByLibrary.simpleMessage("Add proxies"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage("Add proxy group"),
@@ -905,9 +908,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "deviceLimitReachedTip": MessageLookupByLibrary.simpleMessage(
       "The provider reports the device limit for this subscription as reached. The subscription was still updated.",
     ),
+    "dialerProxy": MessageLookupByLibrary.simpleMessage("Dialer proxy"),
+    "dialerProxyDesc": MessageLookupByLibrary.simpleMessage(
+      "Proxy used to reach the NTP server",
+    ),
     "direct": MessageLookupByLibrary.simpleMessage("Direct"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Disable UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Disabled"),
+    "discardChanges": MessageLookupByLibrary.simpleMessage(
+      "Discard the changes?",
+    ),
     "disclaimer": MessageLookupByLibrary.simpleMessage("Disclaimer"),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "This software is intended only for non-commercial uses such as learning and research. Using it for any commercial purpose is strictly prohibited; any commercial activity is unrelated to this software.",
@@ -1558,10 +1568,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -2108,6 +2117,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilitySpeedIdle": MessageLookupByLibrary.simpleMessage(
       "Hidden while no traffic is flowing",
     ),
+    "ntpDesc": MessageLookupByLibrary.simpleMessage(
+      "Configure network time synchronization",
+    ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "No profiles yet, please add one first",
     ),
@@ -2135,12 +2147,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
       "When enabled, the DNS options in the profile are overridden",
     ),
+    "overrideEntries": MessageLookupByLibrary.simpleMessage("Override entries"),
+    "overrideKeys": MessageLookupByLibrary.simpleMessage("Overridden keys"),
+    "overrideKeysDesc": MessageLookupByLibrary.simpleMessage(
+      "Only the selected keys replace the profile\'s values",
+    ),
     "overrideMode": MessageLookupByLibrary.simpleMessage("Override mode"),
     "overrideNetworkSettings": MessageLookupByLibrary.simpleMessage(
       "Override network settings",
     ),
     "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "Apply the app port, IPv6, allow-lan, find-process-mode and TUN stack instead of the subscription values",
+    ),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("Override NTP"),
+    "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
+      "Replace the profile\'s NTP settings with the selected keys",
     ),
     "overrideScript": MessageLookupByLibrary.simpleMessage("Override script"),
     "overwriteTypeCustom": MessageLookupByLibrary.simpleMessage("Custom"),
@@ -2325,6 +2346,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan a QR code to obtain a profile",
     ),
+    "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
     "random": MessageLookupByLibrary.simpleMessage("Random"),
@@ -2609,6 +2631,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendDeviceIdentityDisableWarning": MessageLookupByLibrary.simpleMessage(
       "Turning off HWID will stop most subscriptions from working. Continue?",
     ),
+    "server": MessageLookupByLibrary.simpleMessage("Server"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Available"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Blocked"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Check"),
@@ -4120,6 +4143,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "The core is not serving the dashboard yet",
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("Whitelist mode"),
+    "writeToSystem": MessageLookupByLibrary.simpleMessage("Write to system"),
+    "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
+      "Sync the resolved time to the system clock",
+    ),
     "yearsAgo": m116,
     "zhCN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };

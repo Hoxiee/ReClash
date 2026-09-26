@@ -5,7 +5,6 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/views/dashboard/widgets/subscription_overview.dart';
 import 'package:reclash/views/profiles/subscription_report.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
@@ -38,9 +37,7 @@ class _SubscriptionSheet extends ConsumerWidget {
     final displayName = serviceName == null || serviceName.isEmpty
         ? profile.realLabel
         : serviceName;
-    final title = account != null && account.isNotEmpty
-        ? account
-        : displayName;
+    final title = account != null && account.isNotEmpty ? account : displayName;
     return AdaptiveSheetScaffold(
       title: title,
       body: _Body(profile: profile, displayName: displayName),
@@ -60,18 +57,15 @@ class _Body extends ConsumerWidget {
     final info = profile.subscriptionInfo;
     return ListView(
       shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-        top: context.contentTopPadding,
-        bottom: 20 + BottomInsetScope.of(context),
-      ),
+      // The scaffold already reserves the toolbar height above the body.
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ).copyWith(bottom: 20 + BottomInsetScope.of(context)),
       children: [
         _ServiceField(profile: profile, displayName: displayName),
         if (info != null && info.hasFacts) ...[
           const SizedBox(height: AppSpacing.lg),
-          generateSectionV3(
-            title: l10n.metaInfo,
-            items: _facts(context, info),
-          ),
+          generateSectionV3(title: l10n.metaInfo, items: _facts(context, info)),
         ],
         const SizedBox(height: AppSpacing.lg),
         generateSectionV3(items: _actions(context, ref)),
@@ -110,8 +104,11 @@ class _Body extends ConsumerWidget {
     final buyTrafficUrl = panelMeta?.buyTrafficUrl;
     final supportUrl = panelMeta?.supportUrl;
     final reportUrl = panelMeta?.reportUrl;
-    Widget link() =>
-        GlyphIcon(AppGlyphs.link, size: 18, color: colorScheme.onSurfaceVariant);
+    Widget link() => GlyphIcon(
+      AppGlyphs.link,
+      size: 18,
+      color: colorScheme.onSurfaceVariant,
+    );
     Widget chevron() => GlyphIcon(
       AppGlyphs.chevronForward,
       size: 18,
@@ -143,18 +140,22 @@ class _Body extends ConsumerWidget {
         leading: const GlyphIcon(AppGlyphs.send),
         title: Text(l10n.subscriptionReport),
         trailing: chevron(),
-        onPressed: () =>
-            unawaited(showSubscriptionReportSheet(context, reportUrl: reportUrl)),
-      ),
-      DecorationListItem(
-        leading: const GlyphIcon(AppGlyphs.info),
-        title: Text(l10n.subscriptionInfo),
-        trailing: chevron(),
-        onPressed: () => unawaited(
-          showExtend(context, builder: (_) => const SubscriptionOverviewView()),
-        ),
+        onPressed: () => unawaited(_openReport(context, reportUrl)),
       ),
     ];
+  }
+
+  // The report is a modal sheet of its own; opening it over this one would
+  // stack two bottom sheets and let the report's async load resize on top of
+  // a still-visible parent. Dismiss this sheet first, then raise the report
+  // on the root navigator once the exit animation has cleared.
+  Future<void> _openReport(BuildContext context, String? reportUrl) async {
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+    final delay = context.motionDuration(Dialogs.dismissDuration);
+    Navigator.of(context).pop();
+    await Future<void>.delayed(delay);
+    if (!rootContext.mounted) return;
+    await showSubscriptionReportSheet(rootContext, reportUrl: reportUrl);
   }
 }
 

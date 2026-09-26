@@ -150,13 +150,15 @@ class _CoreContainerState extends ConsumerState<CoreManager>
         if (prev == next) return;
         if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
         unawaited(
-          _core.setSmartRoutingDiagnostics(next).then(
-            (_) {},
-            onError: (Object error) => commonPrint.log(
-              'smart routing diagnostics sync skipped: $error',
-              logLevel: LogLevel.warning,
-            ),
-          ),
+          _core
+              .setSmartRoutingDiagnostics(next)
+              .then(
+                (_) {},
+                onError: (Object error) => commonPrint.log(
+                  'smart routing diagnostics sync skipped: $error',
+                  logLevel: LogLevel.warning,
+                ),
+              ),
         );
       },
     );

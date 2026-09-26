@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../effect/effect.dart';
 import '../list/list.dart';
 import 'reorder_menu.dart';
-import '../theme/theme.dart';
 part 'input_pages.dart';
 
 class OptionsDialog<T> extends StatelessWidget {

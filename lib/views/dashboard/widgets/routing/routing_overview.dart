@@ -69,6 +69,10 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     showExtend(context, builder: (context) => const RoutingDiagView());
   }
 
+  void _handleExportLog() {
+    exportSmartRoutingLog(context.appLocalizations, core: _core);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
@@ -82,12 +86,6 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
       floatBody: true,
       actions: [
         IconButton(
-          tooltip: appLocalizations.smartRoutingTechnical,
-          isSelected: _technical,
-          onPressed: () => setState(() => _technical = !_technical),
-          icon: const GlyphIcon(AppGlyphs.code),
-        ),
-        IconButton(
           tooltip: appLocalizations.settings,
           onPressed: _handleSettings,
           icon: const GlyphIcon(AppGlyphs.sliders),
@@ -96,9 +94,21 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
           popupBuilder: (_) => CommonPopupMenu(
             items: [
               CommonPopupMenuItem(
+                glyph: _technical
+                    ? AppGlyphs.checkCircle
+                    : AppGlyphs.checkboxBlank,
+                label: appLocalizations.smartRoutingTechnical,
+                onPressed: () => setState(() => _technical = !_technical),
+              ),
+              CommonPopupMenuItem(
                 glyph: AppGlyphs.history,
                 label: appLocalizations.smartRoutingLog,
                 onPressed: _handleLog,
+              ),
+              CommonPopupMenuItem(
+                glyph: AppGlyphs.export,
+                label: appLocalizations.smartRoutingLogExport,
+                onPressed: _handleExportLog,
               ),
             ],
           ),
@@ -116,9 +126,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
             text: appLocalizations.smartRoutingOffHint,
           ),
           (true, null) => _notice(
-            icon: running
-                ? AppGlyphs.sync
-                : AppGlyphs.hourglass,
+            icon: running ? AppGlyphs.sync : AppGlyphs.hourglass,
             text: running
                 ? appLocalizations.smartRoutingSearching
                 : appLocalizations.smartRoutingWaitingTunnel,

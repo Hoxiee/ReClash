@@ -24,20 +24,41 @@ class AppWallpaper extends ConsumerWidget {
         ? ref.watch(wallpaperImageProvider).asData?.value
         : null;
     final active = image != null;
-    return WallpaperSurfaceScope(
+    final scoped = WallpaperSurfaceScope(
       opacity: surfaceOpacity ?? settings.cardOpacity,
+      child: Builder(builder: (context) => builder(context, active)),
+    );
+    // A single ancestor paints the image once, so nested scaffolds/panes share
+    // one continuous backdrop instead of each aligning its own crop. Descendants
+    // still provide their own surface scope opacity.
+    final alreadyPainted =
+        context
+            .getElementForInheritedWidgetOfExactType<
+              _WallpaperPaintedMarker
+            >() !=
+        null;
+    if (image == null || alreadyPainted) {
+      return scoped;
+    }
+    return _WallpaperPaintedMarker(
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (image != null)
-            Positioned.fill(
-              child: WallpaperLayer(image: image, settings: settings),
-            ),
-          Builder(builder: (context) => builder(context, active)),
+          Positioned.fill(
+            child: WallpaperLayer(image: image, settings: settings),
+          ),
+          scoped,
         ],
       ),
     );
   }
+}
+
+class _WallpaperPaintedMarker extends InheritedWidget {
+  const _WallpaperPaintedMarker({required super.child});
+
+  @override
+  bool updateShouldNotify(_WallpaperPaintedMarker oldWidget) => false;
 }
 
 class WallpaperLayer extends StatelessWidget {

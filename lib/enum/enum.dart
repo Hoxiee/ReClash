@@ -464,7 +464,6 @@ const _byedpiOnly = [DashboardMode.byedpi];
 enum DashboardWidget {
   networkSpeed,
   outboundModeV2(modes: _vpnOnly),
-  outboundMode(modes: _vpnOnly),
   trafficUsage,
   networkDetection,
   tunButton(platforms: desktopPlatforms),
@@ -782,3 +781,55 @@ enum IpQualitySource {
 }
 
 enum IpQualitySourceStatus { noType, timeout, rateLimited, failed, ipMismatch }
+
+/// mihomo DNS keys ReClash can edit; a path the `Dns` model does not serialize would write a null over the profile's own value.
+@JsonEnum(valueField: 'path')
+enum DnsOverrideKey {
+  enable('enable'),
+  listen('listen'),
+  useHosts('use-hosts'),
+  useSystemHosts('use-system-hosts'),
+  ipv6('ipv6'),
+  respectRules('respect-rules'),
+  preferH3('prefer-h3'),
+  enhancedMode('enhanced-mode'),
+  fakeIpRange('fake-ip-range'),
+  fakeIpFilter('fake-ip-filter'),
+  defaultNameserver('default-nameserver'),
+  nameserverPolicy('nameserver-policy'),
+  nameserver('nameserver'),
+  fallback('fallback'),
+  proxyServerNameserver('proxy-server-nameserver'),
+  fallbackFilterGeoip('fallback-filter.geoip'),
+  fallbackFilterGeoipCode('fallback-filter.geoip-code'),
+  fallbackFilterGeosite('fallback-filter.geosite'),
+  fallbackFilterIpcidr('fallback-filter.ipcidr'),
+  fallbackFilterDomain('fallback-filter.domain');
+
+  const DnsOverrideKey(this.path);
+
+  final String path;
+
+  static const fallbackFilterSection = 'fallback-filter';
+
+  bool get isFallbackFilter => path.startsWith('$fallbackFilterSection.');
+
+  String get jsonKey => isFallbackFilter
+      ? path.substring(fallbackFilterSection.length + 1)
+      : path;
+}
+
+/// mihomo NTP keys ReClash can edit; paths mirror the `Ntp` model JSON keys.
+@JsonEnum(valueField: 'path')
+enum NtpOverrideKey {
+  enable('enable'),
+  server('server'),
+  port('port'),
+  interval('interval'),
+  dialerProxy('dialer-proxy'),
+  writeToSystem('write-to-system');
+
+  const NtpOverrideKey(this.path);
+
+  final String path;
+}

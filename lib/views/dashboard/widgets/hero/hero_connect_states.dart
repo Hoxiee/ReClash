@@ -1,5 +1,9 @@
 part of 'hero_connect.dart';
 
+/// The board chips want the elastic press felt, not seen: a quarter of the
+/// default travel reads as a soft acknowledgement under the finger.
+const double _heroChipElastic = 0.25;
+
 class _EmptyHero extends ConsumerWidget {
   const _EmptyHero({
     required this.hasSavedProfiles,
@@ -224,6 +228,7 @@ class _HeroActionRow extends ConsumerWidget {
       if (showUpdate)
         Expanded(
           child: ElasticPress(
+            strength: _heroChipElastic,
             child: _ActionChip(
               icon: AppGlyphs.refresh,
               label: appLocalizations.update,
@@ -235,6 +240,7 @@ class _HeroActionRow extends ConsumerWidget {
       if (hasSupport)
         Expanded(
           child: ElasticPress(
+            strength: _heroChipElastic,
             child: _ActionChip(
               icon: AppGlyphs.support,
               label: appLocalizations.support,
@@ -242,8 +248,9 @@ class _HeroActionRow extends ConsumerWidget {
             ),
           ),
         ),
-      if (showPauseChip) const ElasticPress(child: _PauseChip()),
-      const ElasticPress(child: _ModeChip()),
+      if (showPauseChip)
+        const ElasticPress(strength: _heroChipElastic, child: _PauseChip()),
+      const ElasticPress(strength: _heroChipElastic, child: _ModeChip()),
     ];
     return HeroReserveGesture(
       child: Row(

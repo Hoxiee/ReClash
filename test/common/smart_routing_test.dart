@@ -406,7 +406,9 @@ void main() {
   });
 
   group('a section reset touches only the facets it owns', () {
-    final russia = const SmartRoutingProps().applyPreset(SmartRoutingPreset.russia);
+    final russia = const SmartRoutingProps().applyPreset(
+      SmartRoutingPreset.russia,
+    );
 
     test('resetting Pace leaves the Ranking bands, and the reverse', () {
       final tuned = russia.copyWith(
@@ -414,10 +416,16 @@ void main() {
         latencyBands: const [10, 20],
       );
       final pace = tuned.resetSeedGroup(RoutingFacetGroup.pacing);
-      expect(pace.dwellSeconds, SmartRoutingStrategy.balanced.pacing.dwellSeconds);
+      expect(
+        pace.dwellSeconds,
+        SmartRoutingStrategy.balanced.pacing.dwellSeconds,
+      );
       expect(pace.latencyBands, const [10, 20]);
       final bands = tuned.resetSeedGroup(RoutingFacetGroup.bands);
-      expect(bands.latencyBands, SmartRoutingStrategy.balanced.pacing.latencyBands);
+      expect(
+        bands.latencyBands,
+        SmartRoutingStrategy.balanced.pacing.latencyBands,
+      );
       expect(bands.dwellSeconds, 999);
     });
 

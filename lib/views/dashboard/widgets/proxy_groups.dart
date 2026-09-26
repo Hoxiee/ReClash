@@ -104,7 +104,10 @@ class _GroupsPane extends StatelessWidget {
     return RowCardPane(
       header: InfoHeader(
         padding: DashboardWidgetMetrics.paddingOf(context).copyWith(bottom: 0),
-        info: Info(label: appLocalizations.proxyGroup, glyph: AppGlyphs.proxies),
+        info: Info(
+          label: appLocalizations.proxyGroup,
+          glyph: AppGlyphs.proxies,
+        ),
       ),
       body: groups.isEmpty
           ? RowCardEmpty(
@@ -249,7 +252,10 @@ class _ProxiesPaneState extends ConsumerState<_ProxiesPane> {
                               : null,
                         ),
                       ),
-                      _ProxyDelay(proxyName: proxy.name, testUrl: group.testUrl),
+                      _ProxyDelay(
+                        proxyName: proxy.name,
+                        testUrl: group.testUrl,
+                      ),
                     ],
                   ),
                 ),
@@ -286,8 +292,7 @@ class _GroupSummary extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final proxyName =
-        ref.watch(selectedProxyNameProvider(group.name)) ?? '';
+    final proxyName = ref.watch(selectedProxyNameProvider(group.name)) ?? '';
     final nameStyle = context.textTheme.bodyMedium;
     final proxyStyle = context.textTheme.labelSmall?.toLight;
     return LayoutBuilder(

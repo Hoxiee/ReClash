@@ -502,12 +502,21 @@ func rcxRankingLatency(c rcxCandidate, policy rcxPolicy) int {
 	if host <= 0 {
 		return 0
 	}
-	// A proven node with no timed egress competes on its 30ms-rounded entry ping,
-	// padded so an equally fast measured node edges it; unproven nodes sink to medians.
-	if !unproven {
+	// Only a node with proven egress competes on its 30ms-rounded entry ping; entry
+	// transit alone no longer crowns the fast band, so a dead exit behind a live
+	// entry sinks beneath every measured node instead of winning on host-ping.
+	if rcxProvenEgressEver(c.Facts) {
 		return host/rcxLatencyStep*rcxLatencyStep + rcxHostOnlyPenaltyMs
 	}
 	return rcxUnmeasuredLatencyBase + host/rcxLatencyStep
+}
+
+// True when the node has ever demonstrated a working exit, not merely moved entry
+// bytes: an open-world proof, a measured exit country, a home egress, or an aged
+// open latch that never lapsed. Stale entry transit does not qualify.
+func rcxProvenEgressEver(f rcxFacts) bool {
+	return f.OpenWorld == rcxProofProven || f.HomeEgress ||
+		f.Exit != rcxOriginUnknown || (f.OpenedOnce && !f.OpenLapsed)
 }
 
 func rcxExitsDomestic(f rcxFacts) bool {
@@ -529,6 +538,12 @@ func rcxPinHoldsThroughBlip(c rcxCandidate, in rcxDecisionInput) bool {
 		return false
 	}
 	if c.Circuit && c.Facts.Transit != rcxProofProven {
+		return false
+	}
+	// A pin blipping open-world rides the grace only if it ever proved an exit; one
+	// measured dead with no working history (never opened, no measured exit) is
+	// released so the disproof hands off instead of latching a dead egress forever.
+	if c.Facts.OpenWorld == rcxProofDisproven && !rcxProvenEgressEver(c.Facts) {
 		return false
 	}
 	return !c.Ignore && !c.AvoidExit

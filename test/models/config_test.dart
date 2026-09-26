@@ -111,7 +111,7 @@ void main() {
       expect(restored.openLogs, false);
       expect(restored.closeConnections, true);
       expect(restored.isAnimateToPage, true);
-      expect(restored.autoCheckUpdate, false);
+      expect(restored.autoCheckUpdate, true);
       expect(restored.showLabel, false);
       expect(restored.setupStep, 0);
       expect(restored.minimizeOnExit, true);

@@ -508,10 +508,7 @@ class _PermissionRow extends StatelessWidget {
       ),
       onTap: pending ? null : onPressed,
       trailing: pending
-          ? const SizedBox.square(
-              dimension: 20,
-              child: CommonCircleLoading(),
-            )
+          ? const SizedBox.square(dimension: 20, child: CommonCircleLoading())
           : trailing ??
                 (onPressed == null
                     ? GlyphIcon(AppGlyphs.check, size: 20, color: tone)

@@ -330,15 +330,18 @@ void main() {
       expect(fixture.writes, ['127.0.0.1:9090']);
     });
 
-    test('leaves a controller the user reconfigured during the session', () async {
-      final fixture = build('');
+    test(
+      'leaves a controller the user reconfigured during the session',
+      () async {
+        final fixture = build('');
 
-      await fixture.session.open();
-      fixture.set('0.0.0.0:9091');
-      await fixture.session.close();
+        await fixture.session.open();
+        fixture.set('0.0.0.0:9091');
+        await fixture.session.close();
 
-      expect(fixture.writes, ['127.0.0.1:9090']);
-    });
+        expect(fixture.writes, ['127.0.0.1:9090']);
+      },
+    );
 
     test('gives the controller back once', () async {
       final fixture = build('');

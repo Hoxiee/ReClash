@@ -95,7 +95,9 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
-    container.read(appSettingProvider.notifier).value = const AppSettingProps(region: AppRegion.russia);
+    container.read(appSettingProvider.notifier).value = const AppSettingProps(
+      region: AppRegion.russia,
+    );
     container.read(viewSizeProvider.notifier).value = size;
 
     await tester.pumpWidget(
@@ -115,7 +117,11 @@ void main() {
     await pumpPager(
       tester,
       profile: _profile(),
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     expect(find.byKey(const ValueKey('dashboard-show-provider')), findsNothing);

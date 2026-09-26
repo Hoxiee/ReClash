@@ -9,6 +9,7 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/effect/animated_visibility.dart';
 import 'package:reclash/widgets/nav/app_nav_rail.dart';
+import 'package:reclash/widgets/theme/wallpaper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -444,7 +445,12 @@ class AppSidebarContainer extends ConsumerWidget {
             child: Focus(
               canRequestFocus: false,
               onKeyEvent: (node, event) => _handleContentKey(ref, node, event),
-              child: ClipRect(child: child),
+              // One backdrop for the whole content region: pages, per-page
+              // navigators and side sheets share it, so nested scaffolds no
+              // longer each paint a mis-aligned crop.
+              child: ClipRect(
+                child: AppWallpaper(builder: (context, _) => child),
+              ),
             ),
           ),
         ],

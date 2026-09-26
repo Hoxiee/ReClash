@@ -35,20 +35,22 @@ class Window implements WindowPort {
       commonPrint.log('another instance owns the data directory, exiting');
       exit(0);
     }
-    if (system.isWindows) {
-      for (final scheme in allProtocolSchemes) {
-        protocol.register(scheme);
+    if (!safeModeBuild) {
+      if (system.isWindows) {
+        for (final scheme in allProtocolSchemes) {
+          protocol.register(scheme);
+        }
       }
-    }
-    if (system.isLinux) {
-      unawaited(
-        protocol.registerLinux(
-          schemes: allProtocolSchemes,
-          // incy/happ stay advertised but never forced: their owners' apps
-          // keep the default handler on a dual install.
-          defaults: configProtocolSchemes,
-        ),
-      );
+      if (system.isLinux) {
+        unawaited(
+          protocol.registerLinux(
+            schemes: allProtocolSchemes,
+            // incy/happ stay advertised but never forced: their owners' apps
+            // keep the default handler on a dual install.
+            defaults: configProtocolSchemes,
+          ),
+        );
+      }
     }
     await desktopWindow.ensureInitialized();
     _supportsPosition = !system.isMacOS;

@@ -27,6 +27,7 @@ enum NullStatusIllustration {
   error,
   search,
   routing,
+  desync,
   notifications,
 }
 
@@ -384,7 +385,11 @@ class _EmptyIllustrationState extends State<EmptyIllustration>
     ),
     NullStatusIllustration.error => (MaterialShapes.softBurst, AppGlyphs.error),
     NullStatusIllustration.search => (MaterialShapes.flower, AppGlyphs.search),
-    NullStatusIllustration.routing => (MaterialShapes.gem, AppGlyphs.route),
+    NullStatusIllustration.routing => (
+      MaterialShapes.gem,
+      AppGlyphs.smartRoute,
+    ),
+    NullStatusIllustration.desync => (MaterialShapes.burst, AppGlyphs.bolt),
     NullStatusIllustration.notifications => (
       MaterialShapes.diamond,
       AppGlyphs.bell,

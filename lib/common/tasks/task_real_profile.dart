@@ -80,6 +80,7 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   final profilesPath = data.profilesPath;
   final profileId = data.profileId;
   final overrideDns = data.overrideDns;
+  final overrideNtp = data.overrideNtp;
   final addedRules = data.addedRules;
   final appendSystemDns = data.appendSystemDns;
   final defaultUA = data.defaultUA;
@@ -196,23 +197,31 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   for (final host in realPatchConfig.hosts.entries) {
     rawConfig['hosts'][host.key] = host.value.splitByMultipleSeparators;
   }
-  final rawDns = rawConfig['dns'] is Map
+  var rawDns = rawConfig['dns'] is Map
       ? Map<String, dynamic>.from(rawConfig['dns'] as Map)
       : <String, dynamic>{};
-  rawConfig['dns'] = rawDns;
   final isEnableDns = rawDns['enable'] == true;
   const systemDns = 'system://';
+  if (!isEnableDns) {
+    rawDns = mergeDnsOverride(
+      rawDns,
+      defaultDns.overrideJson(baselineDnsOverrideKeys),
+    );
+  }
   if (overrideDns || !isEnableDns) {
-    final dns = realPatchConfig.dns;
-    final nameserverPolicy = <String, dynamic>{};
-    for (final entry in dns.nameserverPolicy.entries) {
-      nameserverPolicy[entry.key] = entry.value.splitByMultipleSeparators;
-    }
-    // Merged, not assigned: the model only covers the keys ReClash can edit.
-    rawConfig['dns'] = {
-      ...rawDns,
-      ...dns.toJson(),
-      'nameserver-policy': nameserverPolicy,
+    rawDns = mergeDnsOverride(
+      rawDns,
+      realPatchConfig.dns.overrideJson(realPatchConfig.dnsOverrideKeys),
+    );
+  }
+  rawConfig['dns'] = rawDns;
+  if (overrideNtp) {
+    final rawNtp = rawConfig['ntp'] is Map
+        ? Map<String, dynamic>.from(rawConfig['ntp'] as Map)
+        : <String, dynamic>{};
+    rawConfig['ntp'] = {
+      ...rawNtp,
+      ...realPatchConfig.ntp.overrideJson(realPatchConfig.ntpOverrideKeys),
     };
   }
   if (appendSystemDns) {

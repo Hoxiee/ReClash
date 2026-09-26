@@ -98,16 +98,16 @@ void main() {
     _downgradeToV1(raw);
     expect(_userVersion(raw), 1);
 
-    await openAndMigrate();
+    final database = await openAndMigrate();
 
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
   });
 
   test('the v4 upgrade adds every ReClash profile column', () async {
     _downgradeToV3(raw);
     expect(_columnsOf(raw, 'profiles'), isNot(contains('panel_meta')));
 
-    await openAndMigrate();
+    final database = await openAndMigrate();
 
     expect(
       _columnsOf(raw, 'profiles'),
@@ -126,7 +126,7 @@ void main() {
         'last_used_at',
       ]),
     );
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
   });
 
   test('a current v4 database backfills the added profile column', () async {
@@ -134,20 +134,20 @@ void main() {
     raw.execute('PRAGMA user_version = 4');
     expect(_columnsOf(raw, 'profiles'), isNot(contains('last_used_at')));
 
-    await openAndMigrate();
+    final database = await openAndMigrate();
 
     expect(_columnsOf(raw, 'profiles'), contains('last_used_at'));
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
   });
 
   test('the v3 upgrade adds match_target to profiles', () async {
     _downgradeToV2(raw);
     expect(_columnsOf(raw, 'profiles'), isNot(contains('match_target')));
 
-    await openAndMigrate();
+    final database = await openAndMigrate();
 
     expect(_columnsOf(raw, 'profiles'), contains('match_target'));
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
   });
 
   test(
@@ -156,10 +156,10 @@ void main() {
       raw.execute('PRAGMA user_version = 2');
       expect(_columnsOf(raw, 'profiles'), contains('match_target'));
 
-      await openAndMigrate();
+      final database = await openAndMigrate();
 
       expect(_columnsOf(raw, 'profiles'), contains('match_target'));
-      expect(_userVersion(raw), 4);
+      expect(_userVersion(raw), database.schemaVersion);
     },
   );
 
@@ -205,6 +205,14 @@ void main() {
       'INSERT INTO rules (id, value) '
       "VALUES (2, 'IP-CIDR,10.0.0.0/8,REJECT,no-resolve')",
     );
+    // v5's onUpgrade purges rules with no profile_rule_mapping row, so each
+    // rule is linked globally (profile_id NULL) to survive the column split.
+    raw.execute(
+      "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('l1', 1)",
+    );
+    raw.execute(
+      "INSERT INTO profile_rule_mapping (id, rule_id) VALUES ('l2', 2)",
+    );
 
     final database = await openAndMigrate();
     final rows = await database
@@ -234,17 +242,17 @@ void main() {
 
     final database = await openAndMigrate();
 
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
     expect(await database.customSelect('SELECT * FROM rules').get(), isEmpty);
   });
 
   test('opening a database already at v2 changes nothing', () async {
     final before = _columnsOf(raw, 'rules');
 
-    await openAndMigrate();
+    final database = await openAndMigrate();
 
     expect(_columnsOf(raw, 'rules'), before);
-    expect(_userVersion(raw), 4);
+    expect(_userVersion(raw), database.schemaVersion);
     expect(_hasTable(raw, 'proxy_groups'), isTrue);
   });
 }

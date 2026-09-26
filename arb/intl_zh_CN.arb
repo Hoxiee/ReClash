@@ -2112,5 +2112,19 @@
   "smartRoutingLogRepeat": "×{count}",
   "smartRoutingLogState": "状态",
   "smartRoutingLogCandidates": "候选",
-  "smartRoutingLogFilter": "类型"
+  "smartRoutingLogFilter": "类型",
+  "addOverrideEntry": "添加覆写项",
+  "dialerProxy": "拨号代理",
+  "dialerProxyDesc": "用于连接 NTP 服务器的代理",
+  "discardChanges": "放弃更改？",
+  "ntpDesc": "配置网络时间同步",
+  "overrideEntries": "覆写项",
+  "overrideKeys": "覆写的键",
+  "overrideKeysDesc": "仅所选的键会覆写配置中的值",
+  "overrideNtp": "覆写 NTP",
+  "overrideNtpDesc": "使用所选的键覆写配置的 NTP 设置",
+  "quickEdit": "快速编辑",
+  "server": "服务器",
+  "writeToSystem": "写入系统",
+  "writeToSystemDesc": "将获取到的时间同步到系统时钟"
 }

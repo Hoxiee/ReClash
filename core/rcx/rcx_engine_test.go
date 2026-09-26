@@ -1148,6 +1148,23 @@ func TestHarvestedSuccessClosesItsProviderCircuit(t *testing.T) {
 	}
 }
 
+func TestEngineUrlTestTimeoutDemotesACoastingTransitIncumbent(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("fi-2")
+	engine := newTestEngine(runtime, "ru")
+	engine.syncIdentity(runtime.members)
+	engine.incumbent = "fi-2"
+	engine.ledger.NoteTrafficProgress("fi-2", engine.envKey, false, runtime.Now())
+	runtime.advance(2 * time.Minute)
+
+	engine.handle(rcxEvent{Kind: rcxEventHarvested, Node: "fi-2", DelayMs: 0})
+
+	facts := engine.ledger.Facts("fi-2", engine.envKey, true, runtime.Now(), rcxLedgerProofTTL)
+	if facts.Transit == rcxProofProven {
+		t.Errorf("transit = %v, want the coasting proof dropped by the trusted timeout", facts.Transit)
+	}
+}
+
 func TestEnvironmentMigrationMergesEveryPersistedDomain(t *testing.T) {
 	runtime := newFakeRuntime()
 	engine := newTestEngine(runtime, "ru")

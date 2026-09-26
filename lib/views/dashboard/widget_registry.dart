@@ -15,11 +15,6 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 8,
       child: OutboundModeV2(),
     ),
-    DashboardWidget.outboundMode => const GridItem(
-      key: ValueKey(DashboardWidget.outboundMode),
-      crossAxisCellCount: 4,
-      child: OutboundMode(),
-    ),
     DashboardWidget.trafficUsage => const GridItem(
       key: ValueKey(DashboardWidget.trafficUsage),
       crossAxisCellCount: 4,

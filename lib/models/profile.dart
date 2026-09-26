@@ -146,7 +146,8 @@ abstract class Profile with _$Profile {
     String? matchTarget,
     int? order,
     @JsonKey(name: 'clientEmulation')
-    @Default(SubscriptionClient.auto) SubscriptionClient clientCompatibility,
+    @Default(SubscriptionClient.auto)
+    SubscriptionClient clientCompatibility,
     @Default('') String customUserAgent,
     @JsonKey(includeToJson: false, includeFromJson: false)
     SubscriptionClient? lastWorkingClient,

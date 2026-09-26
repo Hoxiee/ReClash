@@ -838,17 +838,11 @@ void main() {
       expect(find.text('Protected by provider'), findsNothing);
       final orbScope = find.byType(HeroOrb);
       expect(
-        find.descendant(
-          of: orbScope,
-          matching: find.byGlyph(AppGlyphs.power),
-        ),
+        find.descendant(of: orbScope, matching: find.byGlyph(AppGlyphs.power)),
         findsNothing,
       );
       expect(
-        find.descendant(
-          of: orbScope,
-          matching: find.byGlyph(AppGlyphs.play),
-        ),
+        find.descendant(of: orbScope, matching: find.byGlyph(AppGlyphs.play)),
         findsOne,
       );
     });

@@ -69,14 +69,27 @@ class _ProfilesCardState extends ConsumerState<ProfilesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = ref.watch(profilesProvider);
+    final developerMode = ref.watch(
+      appSettingProvider.select((state) => state.developerMode),
+    );
+    final profiles = developerMode
+        ? ref.watch(profilesProvider)
+        : ref
+              .watch(profilesProvider)
+              .where((profile) => !isDeveloperSubscriptionProfile(profile))
+              .toList();
     final currentId = ref.watch(currentProfileIdProvider);
     final appLocalizations = context.appLocalizations;
     return RowCardFrame(
       child: RowCardPane(
         header: InfoHeader(
-          padding: DashboardWidgetMetrics.paddingOf(context).copyWith(bottom: 0),
-          info: Info(label: appLocalizations.profiles, glyph: AppGlyphs.profiles),
+          padding: DashboardWidgetMetrics.paddingOf(
+            context,
+          ).copyWith(bottom: 0),
+          info: Info(
+            label: appLocalizations.profiles,
+            glyph: AppGlyphs.profiles,
+          ),
         ),
         body: profiles.isEmpty
             ? RowCardEmpty(

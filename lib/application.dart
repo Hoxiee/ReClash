@@ -51,6 +51,19 @@ Widget buildManagerStack({
   );
 }
 
+PageTransitionsTheme buildPageTransitionsTheme({required bool predictiveBack}) {
+  return PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: predictiveBack
+          ? const PredictiveBackPageTransitionsBuilder()
+          : commonSharedXPageTransitions,
+      TargetPlatform.windows: commonSharedXPageTransitions,
+      TargetPlatform.linux: commonSharedXPageTransitions,
+      TargetPlatform.macOS: commonSharedXPageTransitions,
+    },
+  );
+}
+
 class Application extends ConsumerStatefulWidget {
   const Application({super.key});
 
@@ -62,15 +75,6 @@ class ApplicationState extends ConsumerState<Application> {
   Timer? _autoUpdateProfilesTaskTimer;
   bool _preHasVpn = false;
 
-  final _pageTransitionsTheme = const PageTransitionsTheme(
-    builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: commonSharedXPageTransitions,
-      TargetPlatform.windows: commonSharedXPageTransitions,
-      TargetPlatform.linux: commonSharedXPageTransitions,
-      TargetPlatform.macOS: commonSharedXPageTransitions,
-    },
-  );
-
   ColorScheme _getAppColorScheme({required Brightness brightness}) {
     return ref.read(genColorSchemeProvider(brightness));
   }
@@ -79,7 +83,9 @@ class ApplicationState extends ConsumerState<Application> {
   void initState() {
     super.initState();
     FocusHighlightVisibility.ensureInstalled();
-    SystemNavigator.setFrameworkHandlesBack(true);
+    if (!system.supportsPredictiveBack(ref.read(versionProvider))) {
+      SystemNavigator.setFrameworkHandlesBack(true);
+    }
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       if (globalState.navigatorKey.currentContext != null) {
         await bootstrap.attach();
@@ -89,7 +95,9 @@ class ApplicationState extends ConsumerState<Application> {
       if (!globalState.isAttach) return;
       _autoUpdateProfilesTask();
       _initLink();
-      unawaited(app?.initShortcuts());
+      if (!safeModeBuild) {
+        unawaited(app?.initShortcuts());
+      }
     });
   }
 
@@ -296,10 +304,18 @@ class ApplicationState extends ConsumerState<Application> {
           appSettingProvider.select((state) => state.locale),
         );
         final themeProps = ref.watch(effectiveThemePropsProvider);
+        final predictiveBackSupported = system.supportsPredictiveBack(
+          ref.watch(versionProvider),
+        );
+        final pageTransitionsTheme = buildPageTransitionsTheme(
+          predictiveBack: predictiveBackSupported && themeProps.predictiveBack,
+        );
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: globalState.navigatorKey,
-          onNavigationNotification: (_) => true,
+          onNavigationNotification: predictiveBackSupported
+              ? null
+              : (_) => true,
           localizationsDelegates: [
             AppLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
@@ -328,10 +344,7 @@ class ApplicationState extends ConsumerState<Application> {
                     1 + offset.distance / (short <= 0 ? 1 : short) * 2;
                 return Transform.translate(
                   offset: offset,
-                  child: Transform.scale(
-                    scale: overscan,
-                    child: child,
-                  ),
+                  child: Transform.scale(scale: overscan, child: child),
                 );
               },
             );
@@ -343,12 +356,12 @@ class ApplicationState extends ConsumerState<Application> {
           themeMode: ref.watch(effectiveThemeModeProvider),
           theme: ThemeData(
             useMaterial3: true,
-            pageTransitionsTheme: _pageTransitionsTheme,
+            pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(brightness: Brightness.light),
           ).withAppShapes,
           darkTheme: ThemeData(
             useMaterial3: true,
-            pageTransitionsTheme: _pageTransitionsTheme,
+            pageTransitionsTheme: pageTransitionsTheme,
             colorScheme: _getAppColorScheme(
               brightness: Brightness.dark,
             ).toPureBlack(themeProps.pureBlack),

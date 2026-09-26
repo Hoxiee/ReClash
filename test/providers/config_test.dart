@@ -249,13 +249,14 @@ void main() {
         overrideDns: true,
       );
       final overrides = buildConfigOverrides(config);
-      expect(overrides.length, 14);
+      expect(overrides.length, 15);
 
       final overrideContainer = ProviderContainer(overrides: overrides);
       addTearDown(overrideContainer.dispose);
 
       expect(overrideContainer.read(currentProfileIdProvider), 7);
       expect(overrideContainer.read(overrideDnsProvider), true);
+      expect(overrideContainer.read(overrideNtpProvider), false);
       expect(
         overrideContainer.read(patchClashConfigProvider),
         config.patchClashConfig,

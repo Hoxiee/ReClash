@@ -333,6 +333,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "actionView": MessageLookupByLibrary.simpleMessage("Показать/Скрыть"),
     "add": MessageLookupByLibrary.simpleMessage("Добавить"),
     "addNetwork": MessageLookupByLibrary.simpleMessage("Добавить сеть"),
+    "addOverrideEntry": MessageLookupByLibrary.simpleMessage(
+      "Добавить переопределение",
+    ),
     "addProfile": MessageLookupByLibrary.simpleMessage("Добавить профиль"),
     "addProxies": MessageLookupByLibrary.simpleMessage("Добавить прокси"),
     "addProxyGroup": MessageLookupByLibrary.simpleMessage(
@@ -931,9 +934,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "deviceLimitReachedTip": MessageLookupByLibrary.simpleMessage(
       "Провайдер сообщает, что лимит устройств для этой подписки достигнут. Подписка всё равно обновлена.",
     ),
+    "dialerProxy": MessageLookupByLibrary.simpleMessage(
+      "Прокси для подключения",
+    ),
+    "dialerProxyDesc": MessageLookupByLibrary.simpleMessage(
+      "Прокси для доступа к серверу NTP",
+    ),
     "direct": MessageLookupByLibrary.simpleMessage("Прямой"),
     "disableUDP": MessageLookupByLibrary.simpleMessage("Отключить UDP"),
     "disabled": MessageLookupByLibrary.simpleMessage("Выключено"),
+    "discardChanges": MessageLookupByLibrary.simpleMessage(
+      "Отменить изменения?",
+    ),
     "disclaimer": MessageLookupByLibrary.simpleMessage(
       "Отказ от ответственности",
     ),
@@ -1614,10 +1626,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2184,6 +2195,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "notificationVisibilitySpeedIdle": MessageLookupByLibrary.simpleMessage(
       "Скрывается, когда трафика нет",
     ),
+    "ntpDesc": MessageLookupByLibrary.simpleMessage(
+      "Настройка синхронизации сетевого времени",
+    ),
     "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
       "Профилей пока нет. Сначала добавьте профиль.",
     ),
@@ -2213,6 +2227,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "overrideDnsDesc": MessageLookupByLibrary.simpleMessage(
       "Если включить, настройки DNS из профиля будут переопределяться",
     ),
+    "overrideEntries": MessageLookupByLibrary.simpleMessage("переопределения"),
+    "overrideKeys": MessageLookupByLibrary.simpleMessage(
+      "Переопределяемые ключи",
+    ),
+    "overrideKeysDesc": MessageLookupByLibrary.simpleMessage(
+      "Заменяются только выбранные ключи, остальные берутся из профиля",
+    ),
     "overrideMode": MessageLookupByLibrary.simpleMessage(
       "Режим переопределения",
     ),
@@ -2221,6 +2242,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "overrideNetworkSettingsDesc": MessageLookupByLibrary.simpleMessage(
       "Применять порты, IPv6, allow-lan, find-process-mode и стек TUN из приложения вместо значений подписки",
+    ),
+    "overrideNtp": MessageLookupByLibrary.simpleMessage("Переопределить NTP"),
+    "overrideNtpDesc": MessageLookupByLibrary.simpleMessage(
+      "Заменять настройки NTP из профиля выбранными ключами",
     ),
     "overrideScript": MessageLookupByLibrary.simpleMessage(
       "Скрипт переопределения",
@@ -2421,6 +2446,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканируйте QR-код, чтобы получить профиль",
     ),
+    "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радуга"),
     "random": MessageLookupByLibrary.simpleMessage("Случайно"),
@@ -2721,6 +2747,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "sendDeviceIdentityDisableWarning": MessageLookupByLibrary.simpleMessage(
       "При отключении HWID большинство подписок перестанет работать. Продолжить?",
     ),
+    "server": MessageLookupByLibrary.simpleMessage("Сервер"),
     "serviceAvailable": MessageLookupByLibrary.simpleMessage("Доступен"),
     "serviceBlocked": MessageLookupByLibrary.simpleMessage("Заблокирован"),
     "serviceCheck": MessageLookupByLibrary.simpleMessage("Проверить"),
@@ -4295,6 +4322,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "whitelistMode": MessageLookupByLibrary.simpleMessage(
       "Режим белого списка",
+    ),
+    "writeToSystem": MessageLookupByLibrary.simpleMessage(
+      "Записывать в систему",
+    ),
+    "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
+      "Синхронизировать полученное время с системными часами",
     ),
     "yearsAgo": m116,
     "zhCN": MessageLookupByLibrary.simpleMessage("Упрощённый китайский"),

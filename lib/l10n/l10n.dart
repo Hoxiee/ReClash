@@ -765,6 +765,41 @@ class AppLocalizations {
     return Intl.message('Add', name: 'add', desc: '', args: []);
   }
 
+  /// `Add override entry`
+  String get addOverrideEntry {
+    return Intl.message(
+      'Add override entry',
+      name: 'addOverrideEntry',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Quick edit`
+  String get quickEdit {
+    return Intl.message('Quick edit', name: 'quickEdit', desc: '', args: []);
+  }
+
+  /// `Override entries`
+  String get overrideEntries {
+    return Intl.message(
+      'Override entries',
+      name: 'overrideEntries',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discard the changes?`
+  String get discardChanges {
+    return Intl.message(
+      'Discard the changes?',
+      name: 'discardChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Save`
   String get save {
     return Intl.message('Save', name: 'save', desc: '', args: []);
@@ -3540,6 +3575,101 @@ class AppLocalizations {
     return Intl.message(
       'Override DNS',
       name: 'overrideDns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Override NTP`
+  String get overrideNtp {
+    return Intl.message(
+      'Override NTP',
+      name: 'overrideNtp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace the profile's NTP settings with the selected keys`
+  String get overrideNtpDesc {
+    return Intl.message(
+      'Replace the profile\'s NTP settings with the selected keys',
+      name: 'overrideNtpDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Overridden keys`
+  String get overrideKeys {
+    return Intl.message(
+      'Overridden keys',
+      name: 'overrideKeys',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only the selected keys replace the profile's values`
+  String get overrideKeysDesc {
+    return Intl.message(
+      'Only the selected keys replace the profile\'s values',
+      name: 'overrideKeysDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Server`
+  String get server {
+    return Intl.message('Server', name: 'server', desc: '', args: []);
+  }
+
+  /// `Dialer proxy`
+  String get dialerProxy {
+    return Intl.message(
+      'Dialer proxy',
+      name: 'dialerProxy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Proxy used to reach the NTP server`
+  String get dialerProxyDesc {
+    return Intl.message(
+      'Proxy used to reach the NTP server',
+      name: 'dialerProxyDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Write to system`
+  String get writeToSystem {
+    return Intl.message(
+      'Write to system',
+      name: 'writeToSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sync the resolved time to the system clock`
+  String get writeToSystemDesc {
+    return Intl.message(
+      'Sync the resolved time to the system clock',
+      name: 'writeToSystemDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configure network time synchronization`
+  String get ntpDesc {
+    return Intl.message(
+      'Configure network time synchronization',
+      name: 'ntpDesc',
       desc: '',
       args: [],
     );

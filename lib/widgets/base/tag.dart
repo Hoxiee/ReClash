@@ -38,7 +38,9 @@ class AppTag extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final fill =
         background ??
-        (side != null ? Colors.transparent : colorScheme.surfaceContainerHighest);
+        (side != null
+            ? Colors.transparent
+            : colorScheme.surfaceContainerHighest);
     var shapeBorder = shape ?? AppShape.sm;
     if (side != null) {
       shapeBorder = shapeBorder.copyWith(side: side);

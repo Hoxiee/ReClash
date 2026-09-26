@@ -36,6 +36,16 @@ class Preferences {
     await preferences?.setInt('version', version);
   }
 
+  Future<int> getLastUpdateCheckAt() async {
+    final preferences = await sharedPreferencesCompleter.future;
+    return preferences?.getInt(updateCheckKey) ?? 0;
+  }
+
+  Future<void> saveLastUpdateCheckAt(int millisSinceEpoch) async {
+    final preferences = await sharedPreferencesCompleter.future;
+    await preferences?.setInt(updateCheckKey, millisSinceEpoch);
+  }
+
   Future<void> saveShareState(SharedState shareState) async {
     final preferences = await sharedPreferencesCompleter.future;
     await preferences?.setString('sharedState', json.encode(shareState));

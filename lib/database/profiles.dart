@@ -53,8 +53,9 @@ class Profiles extends Table {
 
   IntColumn get order => integer().nullable()();
 
-  TextColumn get clientCompatibility =>
-      textEnum<SubscriptionClient>().named('client_emulation').withDefault(const Constant('auto'))();
+  TextColumn get clientCompatibility => textEnum<SubscriptionClient>()
+      .named('client_emulation')
+      .withDefault(const Constant('auto'))();
 
   TextColumn get customUserAgent => text().withDefault(const Constant(''))();
 

@@ -62,10 +62,17 @@ class _ScanPageState extends State<ScanPage>
   // start() reports a busy camera through controller.value instead of throwing, so poll isRunning and retry: a fresh controller usually loses the first race with the previous session's background camera teardown and comes back not running.
   Future<void> _startScanner() async {
     for (var attempt = 0; attempt < 5; attempt++) {
-      if (!mounted || controller.value.isRunning) {
+      if (!mounted ||
+          controller.value.isRunning ||
+          controller.value.isStarting) {
         return;
       }
-      await controller.start();
+      try {
+        await controller.start();
+      } on MobileScannerException {
+        // A concurrent start throws (not-attached/initializing) while camera
+        // faults surface through controller.value; retry rather than crash.
+      }
       if (!mounted || controller.value.isRunning) {
         return;
       }
@@ -106,6 +113,12 @@ class _ScanPageState extends State<ScanPage>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    // A denied or not-yet-initialized camera reports no permission; resuming it
+    // would restart the pending start() and re-spam the OS prompt, so leave that
+    // first attempt (and its retry button) to _startScanner.
+    if (!controller.value.hasCameraPermission) {
+      return;
+    }
     switch (state) {
       case AppLifecycleState.detached:
       case AppLifecycleState.hidden:
@@ -369,7 +382,11 @@ class ScannerOverlay extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [accent.withValues(alpha: 0), accent.opacity60, accent.withValues(alpha: 0)],
+          colors: [
+            accent.withValues(alpha: 0),
+            accent.opacity60,
+            accent.withValues(alpha: 0),
+          ],
         ).createShader(band),
     );
     canvas.restore();
@@ -391,8 +408,16 @@ class ScannerOverlay extends CustomPainter {
         Path()
           ..moveTo(pivot.dx + toX.dx * (arm + r), pivot.dy + toX.dy * (arm + r))
           ..lineTo(pivot.dx + toX.dx * r, pivot.dy + toX.dy * r)
-          ..quadraticBezierTo(pivot.dx, pivot.dy, pivot.dx + toY.dx * r, pivot.dy + toY.dy * r)
-          ..lineTo(pivot.dx + toY.dx * (arm + r), pivot.dy + toY.dy * (arm + r)),
+          ..quadraticBezierTo(
+            pivot.dx,
+            pivot.dy,
+            pivot.dx + toY.dx * r,
+            pivot.dy + toY.dy * r,
+          )
+          ..lineTo(
+            pivot.dx + toY.dx * (arm + r),
+            pivot.dy + toY.dy * (arm + r),
+          ),
         paint,
       );
     }

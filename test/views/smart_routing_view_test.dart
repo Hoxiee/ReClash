@@ -115,10 +115,7 @@ void main() {
     await tester.tap(find.text('Diagnostics logging'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(appSettingProvider).smartRoutingDiagnostics,
-      isTrue,
-    );
+    expect(container.read(appSettingProvider).smartRoutingDiagnostics, isTrue);
   });
 
   testWidgets('the mid layer is settings, never weights', (tester) async {

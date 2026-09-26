@@ -218,15 +218,14 @@ class _OverwriteSelectionSheetState<T>
       body: SizedBox(
         height: height,
         child: NullStatusSwitcher(
-          isEmpty: count == 0 && (widget.emptyLabel != null || _query.isNotEmpty),
+          isEmpty:
+              count == 0 && (widget.emptyLabel != null || _query.isNotEmpty),
           isSearching: _query.isNotEmpty,
           nullStatus: NullStatus(label: widget.emptyLabel ?? ''),
           child: CustomScrollView(
             controller: _controller,
             slivers: [
-              SliverToBoxAdapter(
-                child: SizedBox(height: context.appBarInset),
-              ),
+              SliverToBoxAdapter(child: SizedBox(height: context.appBarInset)),
               for (final (sectionIndex, section) in sections.indexed) ...[
                 if (section.label != null) ...[
                   SliverPadding(

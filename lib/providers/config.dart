@@ -100,7 +100,10 @@ void seedRegionIfUnset(
   if (read(appSettingProvider).region != null) return;
   final region = detectRegion(signals, locale);
   if (region == AppRegion.other) return;
-  selectAppRegion(read, region); // reuse explicit-pick path (preset, HWID, facets)
+  selectAppRegion(
+    read,
+    region,
+  ); // reuse explicit-pick path (preset, HWID, facets)
 }
 
 // Bootstrap has no listeners; seed the Config, not the auto-dispose providers.
@@ -128,7 +131,9 @@ Config seedRegionIfUnsetConfig(
   }
   if (isShippedDns(next.patchClashConfig.dns)) {
     next = next.copyWith(
-      patchClashConfig: next.patchClashConfig.copyWith(dns: dnsForRegion(region)),
+      patchClashConfig: next.patchClashConfig.copyWith(
+        dns: dnsForRegion(region),
+      ),
     );
   }
   if (isShippedBypass(next.networkProps.bypassDomain)) {
@@ -182,14 +187,14 @@ final byeDpiSupportedProvider = Provider<bool>((_) => system.isAndroid);
 /// disabled feature is neither drawn nor selectable anywhere.
 final byeDpiAvailableProvider = Provider<bool>((ref) {
   if (!ref.watch(byeDpiSupportedProvider)) return false;
-  return ref.watch(desyncSettingProvider.select((state) => state.featureEnabled));
+  return ref.watch(
+    desyncSettingProvider.select((state) => state.featureEnabled),
+  );
 });
 
 final effectiveDesyncSettingProvider = Provider<DesyncProps>((ref) {
   if (!ref.watch(byeDpiSupportedProvider)) return defaultDesyncProps;
-  if (!ref
-      .watch(regionCapabilitiesProvider)
-      .contains(RegionalFacetId.desync)) {
+  if (!ref.watch(regionCapabilitiesProvider).contains(RegionalFacetId.desync)) {
     return defaultDesyncProps;
   }
   final props = ref.watch(desyncSettingProvider);
@@ -246,6 +251,14 @@ class OverrideDns extends _$OverrideDns with AutoDisposeNotifierMixin {
 }
 
 @riverpod
+class OverrideNtp extends _$OverrideNtp with AutoDisposeNotifierMixin {
+  @override
+  bool build() {
+    return false;
+  }
+}
+
+@riverpod
 class HotKeyActions extends _$HotKeyActions with AutoDisposeNotifierMixin {
   @override
   List<HotKeyAction> build() {
@@ -293,6 +306,7 @@ Config _config(Ref ref) {
   final milestoneProps = ref.watch(milestoneSettingProvider);
   final davProps = ref.watch(davSettingProvider);
   final overrideDns = ref.watch(overrideDnsProvider);
+  final overrideNtp = ref.watch(overrideNtpProvider);
   final hotKeyActions = ref.watch(hotKeyActionsProvider);
   final proxiesStyleProps = ref.watch(proxiesStyleSettingProvider);
   final patchClashConfig = ref.watch(patchClashConfigProvider);
@@ -308,6 +322,7 @@ Config _config(Ref ref) {
     milestoneProps: milestoneProps,
     davProps: davProps,
     overrideDns: overrideDns,
+    overrideNtp: overrideNtp,
     hotKeyActions: hotKeyActions,
     proxiesStyleProps: proxiesStyleProps,
     patchClashConfig: patchClashConfig,
@@ -331,6 +346,7 @@ List<Override> buildConfigOverrides(Config config) {
     milestoneSettingProvider.overrideWithBuild((_, _) => config.milestoneProps),
     davSettingProvider.overrideWithBuild((_, _) => config.davProps),
     overrideDnsProvider.overrideWithBuild((_, _) => config.overrideDns),
+    overrideNtpProvider.overrideWithBuild((_, _) => config.overrideNtp),
     hotKeyActionsProvider.overrideWithBuild((_, _) => config.hotKeyActions),
     proxiesStyleSettingProvider.overrideWithBuild(
       (_, _) => config.proxiesStyleProps,

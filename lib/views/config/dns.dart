@@ -1,13 +1,21 @@
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
+import 'package:reclash/views/config/editor.dart';
+import 'package:reclash/views/profiles/overwrite/overwrite_selection_sheet.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef _DnsUpdate<T> =
     PatchClashConfig Function(PatchClashConfig state, T value);
+
+final _dnsOverrideKeysSelector = patchClashConfigProvider.select(
+  (state) => state.dnsOverrideKeys,
+);
 
 ProviderListenable<T> _dnsSelector<T>(T Function(Dns dns) select) {
   return patchClashConfigProvider.select((state) => select(state.dns));
@@ -19,145 +27,435 @@ ConfigWriter<T> _dnsWriter<T>(_DnsUpdate<T> update) {
       .update((state) => update(state, value));
 }
 
-ConfigToggleItem _dnsToggle({
-  required ConfigLabel title,
-  required bool Function(Dns dns) select,
-  required _DnsUpdate<bool> update,
-  ConfigLabel? subtitle,
-}) {
-  return ConfigToggleItem(
-    title: title,
-    subtitle: subtitle,
-    selector: _dnsSelector(select),
-    onChanged: _dnsWriter(update),
-  );
+extension on DnsOverrideKey {
+  String label(AppLocalizations l) => switch (this) {
+    DnsOverrideKey.enable => l.status,
+    DnsOverrideKey.listen => l.listen,
+    DnsOverrideKey.useHosts => l.useHosts,
+    DnsOverrideKey.useSystemHosts => l.useSystemHosts,
+    DnsOverrideKey.ipv6 => 'IPv6',
+    DnsOverrideKey.respectRules => l.respectRules,
+    DnsOverrideKey.preferH3 => 'PreferH3',
+    DnsOverrideKey.enhancedMode => l.dnsMode,
+    DnsOverrideKey.fakeIpRange => l.fakeipRange,
+    DnsOverrideKey.fakeIpFilter => l.fakeipFilter,
+    DnsOverrideKey.defaultNameserver => l.defaultNameserver,
+    DnsOverrideKey.nameserverPolicy => l.nameserverPolicy,
+    DnsOverrideKey.nameserver => l.nameserver,
+    DnsOverrideKey.fallback => l.fallback,
+    DnsOverrideKey.proxyServerNameserver => l.proxyNameserver,
+    DnsOverrideKey.fallbackFilterGeoip => 'Geoip',
+    DnsOverrideKey.fallbackFilterGeoipCode => l.geoipCode,
+    DnsOverrideKey.fallbackFilterGeosite => 'Geosite',
+    DnsOverrideKey.fallbackFilterIpcidr => l.ipcidr,
+    DnsOverrideKey.fallbackFilterDomain => l.domain,
+  };
+
+  ConfigLabel? get description => switch (this) {
+    DnsOverrideKey.enable => (l) => l.statusDesc,
+    DnsOverrideKey.respectRules => (l) => l.respectRulesDesc,
+    _ => null,
+  };
 }
 
-ConfigTextItem _dnsText({
-  required ConfigLabel title,
-  required String Function(Dns dns) select,
-  required _DnsUpdate<String> update,
-  required int maxLength,
-}) {
-  return ConfigTextItem(
-    title: title,
-    selector: _dnsSelector(select),
-    onChanged: _dnsWriter(update),
-    maxLength: maxLength,
-  );
+List<(String, List<DnsOverrideKey>)> _sectionsOf(
+  AppLocalizations l,
+  Iterable<DnsOverrideKey> keys,
+) {
+  return [
+    (l.options, keys.where((key) => !key.isFallbackFilter).toList()),
+    (l.fallbackFilter, keys.where((key) => key.isFallbackFilter).toList()),
+  ];
 }
 
-ConfigListInputItem _dnsList({
-  required ConfigLabel title,
-  required List<String> Function(Dns dns) select,
-  required _DnsUpdate<List<String>> update,
-  required int itemMaxLength,
-  ConfigLabel? subtitle,
-}) {
-  return ConfigListInputItem(
-    title: title,
-    subtitle: subtitle,
-    selector: _dnsSelector(select),
-    onChanged: _dnsWriter(update),
-    itemMaxLength: itemMaxLength,
-    illustration: NullStatusIllustration.dns,
-  );
-}
+class DnsView extends ConsumerWidget {
+  const DnsView({super.key});
 
-class OverrideItem extends ConsumerWidget {
-  const OverrideItem({super.key});
+  Future<void> _handleAdd(BuildContext context, WidgetRef ref) async {
+    final appLocalizations = context.appLocalizations;
+    final added = ref.read(_dnsOverrideKeysSelector);
+    final remaining = DnsOverrideKey.values.where(
+      (key) => !added.contains(key),
+    );
+    final key = await showSheet<DnsOverrideKey>(
+      context: context,
+      props: const SheetProps(isScrollControlled: true),
+      builder: (context) => OverwriteSelectionSheet<DnsOverrideKey>(
+        title: appLocalizations.addOverrideEntry,
+        sections: [
+          for (final (label, keys) in _sectionsOf(appLocalizations, remaining))
+            if (keys.isNotEmpty)
+              OverwriteSelectionSection(label: label, items: keys),
+        ],
+        labelBuilder: (key) => key.label(appLocalizations),
+        selectedOf: (_) => null,
+        onSelected: (key) => Navigator.of(context).pop(key),
+      ),
+    );
+    if (key == null || !context.mounted) {
+      return;
+    }
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update(
+          (state) =>
+              state.copyWith(dnsOverrideKeys: {...state.dnsOverrideKeys, key}),
+        );
+  }
+
+  Future<void> _handleQuickEdit(BuildContext context, WidgetRef ref) {
+    final config = ref.read(patchClashConfigProvider);
+    final raw = config.dns.overrideYaml(config.dnsOverrideKeys);
+    return BaseNavigator.push(
+      context,
+      EditorPage(
+        title: 'DNS',
+        content: raw,
+        onPop: (context, title, content) =>
+            _handleQuickEditPop(ref, content, raw),
+      ),
+    );
+  }
+
+  Future<bool> _handleQuickEditPop(
+    WidgetRef ref,
+    String content,
+    String raw,
+  ) async {
+    if (content == raw) {
+      return true;
+    }
+    try {
+      final result = ref
+          .read(patchClashConfigProvider)
+          .dns
+          .applyOverrideYaml(content);
+      ref
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) =>
+                state.copyWith(dns: result.dns, dnsOverrideKeys: result.keys),
+          );
+      return true;
+    } catch (error) {
+      final res = await dialogs.showMessage(
+        message: TextSpan(
+          text:
+              '${compactError(error)}\n\n'
+              '${currentAppLocalizations.discardChanges}',
+        ),
+      );
+      return res == true;
+    }
+  }
+
+  Future<void> _handleReset(BuildContext context, WidgetRef ref) async {
+    final appLocalizations = context.appLocalizations;
+    final res = await dialogs.showMessage(
+      dangerous: true,
+      title: appLocalizations.reset,
+      message: TextSpan(text: appLocalizations.resetTip),
+    );
+    if (res != true) {
+      return;
+    }
+    ref
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(dns: defaultDns));
+  }
 
   @override
-  Widget build(BuildContext context, ref) {
-    return SettingSection(
-      top: 16,
-      items: [
-        ConfigToggleItem(
-          title: (l) => l.overrideDns,
-          subtitle: (l) => l.overrideDnsDesc,
-          selector: overrideDnsProvider,
-          onChanged: (ref, value) =>
-              ref.read(overrideDnsProvider.notifier).value = value,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final canAdd = ref.watch(
+      _dnsOverrideKeysSelector.select(
+        (keys) => keys.length < DnsOverrideKey.values.length,
+      ),
+    );
+    return CommonScaffold(
+      title: 'DNS',
+      floatBody: true,
+      menuItems: [
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.add,
+          label: appLocalizations.add,
+          onPressed: canAdd ? () => _handleAdd(context, ref) : null,
         ),
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.compose,
+          label: appLocalizations.quickEdit,
+          onPressed: () => _handleQuickEdit(context, ref),
+        ),
+        CommonPopupMenuItem(
+          glyph: AppGlyphs.replay,
+          label: appLocalizations.reset,
+          danger: true,
+          onPressed: () => _handleReset(context, ref),
+        ),
+      ],
+      body: const _OverrideList(),
+    );
+  }
+}
+
+class _OverrideList extends ConsumerWidget {
+  const _OverrideList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final keys = ref.watch(_dnsOverrideKeysSelector);
+    final entries = DnsOverrideKey.values.where(keys.contains);
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: context.contentTopPadding,
+            bottom: entries.isEmpty ? 0 : 16,
+          ),
+          sliver: SliverList.list(
+            children: [
+              generateSectionV3(
+                items: [
+                  ConfigToggleItem(
+                    title: (l) => l.overrideDns,
+                    selector: overrideDnsProvider,
+                    onChanged: (ref, value) =>
+                        ref.read(overrideDnsProvider.notifier).value = value,
+                  ),
+                ],
+              ),
+              for (final (title, keys) in _sectionsOf(
+                appLocalizations,
+                entries,
+              ))
+                if (keys.isNotEmpty)
+                  generateSectionV3(
+                    title: title,
+                    items: [
+                      for (final key in keys)
+                        _OverrideItem(key: ValueKey(key), overrideKey: key),
+                    ],
+                  ),
+            ],
+          ),
+        ),
+        if (entries.isEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: NullStatus(
+              label: appLocalizations.nullTip(appLocalizations.overrideEntries),
+              illustration: NullStatusIllustration.dns,
+            ),
+          ),
       ],
     );
   }
 }
 
-class StatusItem extends ConsumerWidget {
-  const StatusItem({super.key});
+class _OverrideItem extends StatelessWidget {
+  const _OverrideItem({super.key, required this.overrideKey});
+
+  final DnsOverrideKey overrideKey;
 
   @override
-  Widget build(BuildContext context, ref) {
-    return _dnsToggle(
-      title: (l) => l.status,
-      subtitle: (l) => l.statusDesc,
-      select: (dns) => dns.enable,
-      update: (state, value) => state.copyWith.dns(enable: value),
-    );
-  }
-}
+  Widget build(BuildContext context) {
+    final leading = _RemoveButton(overrideKey);
+    final title = overrideKey.label;
 
-class PreferH3Item extends ConsumerWidget {
-  const PreferH3Item({super.key});
+    Widget toggle(bool Function(Dns dns) select, _DnsUpdate<bool> update) {
+      return ConfigToggleItem(
+        leading: leading,
+        title: title,
+        subtitle: overrideKey.description,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context, ref) {
-    return _dnsToggle(
-      title: (l) => 'PreferH3',
-      subtitle: (l) => l.preferH3Desc,
-      select: (dns) => dns.preferH3,
-      update: (state, value) => state.copyWith.dns(preferH3: value),
-    );
-  }
-}
+    Widget text(
+      String Function(Dns dns) select,
+      _DnsUpdate<String> update, {
+      required int maxLength,
+    }) {
+      return ConfigTextItem(
+        leading: leading,
+        title: title,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+        maxLength: maxLength,
+      );
+    }
 
-class IPv6Item extends ConsumerWidget {
-  const IPv6Item({super.key});
+    Widget options<T extends Enum>(
+      List<T> values,
+      T Function(Dns dns) select,
+      _DnsUpdate<T> update,
+    ) {
+      return ConfigOptionsItem<T>(
+        leading: leading,
+        title: title,
+        options: values,
+        textBuilder: (value) => value.name,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+      );
+    }
 
-  @override
-  Widget build(BuildContext context, ref) {
-    return _dnsToggle(
-      title: (l) => 'IPv6',
-      select: (dns) => dns.ipv6,
-      update: (state, value) => state.copyWith.dns(ipv6: value),
-    );
-  }
-}
+    Widget policy(
+      Map<String, String> Function(Dns dns) select,
+      _DnsUpdate<Map<String, String>> update,
+    ) {
+      return _PolicyItem(
+        overrideKey: overrideKey,
+        leading: leading,
+        select: select,
+        update: update,
+      );
+    }
 
-class DnsModeItem extends ConsumerWidget {
-  const DnsModeItem({super.key});
+    Widget list(
+      List<String> Function(Dns dns) select,
+      _DnsUpdate<List<String>> update, {
+      required int itemMaxLength,
+    }) {
+      return ConfigListInputItem(
+        leading: leading,
+        title: title,
+        subtitle: overrideKey.description,
+        selector: _dnsSelector(select),
+        onChanged: _dnsWriter(update),
+        itemMaxLength: itemMaxLength,
+        illustration: NullStatusIllustration.dns,
+      );
+    }
 
-  @override
-  Widget build(BuildContext context, ref) {
-    return ConfigOptionsItem<DnsMode>(
-      title: (l) => l.dnsMode,
-      options: DnsMode.values,
-      textBuilder: (dnsMode) => dnsMode.name,
-      selector: _dnsSelector((dns) => dns.enhancedMode),
-      onChanged: _dnsWriter(
+    return switch (overrideKey) {
+      DnsOverrideKey.enable => toggle(
+        (dns) => dns.enable,
+        (state, value) => state.copyWith.dns(enable: value),
+      ),
+      DnsOverrideKey.listen => text(
+        (dns) => dns.listen,
+        (state, value) => state.copyWith.dns(listen: value),
+        maxLength: TextInputLimits.dnsListen,
+      ),
+      DnsOverrideKey.useHosts => toggle(
+        (dns) => dns.useHosts,
+        (state, value) => state.copyWith.dns(useHosts: value),
+      ),
+      DnsOverrideKey.useSystemHosts => toggle(
+        (dns) => dns.useSystemHosts,
+        (state, value) => state.copyWith.dns(useSystemHosts: value),
+      ),
+      DnsOverrideKey.ipv6 => toggle(
+        (dns) => dns.ipv6,
+        (state, value) => state.copyWith.dns(ipv6: value),
+      ),
+      DnsOverrideKey.respectRules => toggle(
+        (dns) => dns.respectRules,
+        (state, value) => state.copyWith.dns(respectRules: value),
+      ),
+      DnsOverrideKey.preferH3 => toggle(
+        (dns) => dns.preferH3,
+        (state, value) => state.copyWith.dns(preferH3: value),
+      ),
+      DnsOverrideKey.enhancedMode => options(
+        DnsMode.values,
+        (dns) => dns.enhancedMode,
         (state, value) => state.copyWith.dns(enhancedMode: value),
       ),
-    );
+      DnsOverrideKey.fakeIpRange => text(
+        (dns) => dns.fakeIpRange,
+        (state, value) => state.copyWith.dns(fakeIpRange: value),
+        maxLength: TextInputLimits.cidr,
+      ),
+      DnsOverrideKey.fakeIpFilter => list(
+        (dns) => dns.fakeIpFilter,
+        (state, value) => state.copyWith.dns(fakeIpFilter: value),
+        itemMaxLength: TextInputLimits.domain,
+      ),
+      DnsOverrideKey.defaultNameserver => list(
+        (dns) => dns.defaultNameserver,
+        (state, value) => state.copyWith.dns(defaultNameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.nameserverPolicy => policy(
+        (dns) => dns.nameserverPolicy,
+        (state, value) => state.copyWith.dns(nameserverPolicy: value),
+      ),
+      DnsOverrideKey.nameserver => list(
+        (dns) => dns.nameserver,
+        (state, value) => state.copyWith.dns(nameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.fallback => list(
+        (dns) => dns.fallback,
+        (state, value) => state.copyWith.dns(fallback: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.proxyServerNameserver => list(
+        (dns) => dns.proxyServerNameserver,
+        (state, value) => state.copyWith.dns(proxyServerNameserver: value),
+        itemMaxLength: TextInputLimits.dnsServer,
+      ),
+      DnsOverrideKey.fallbackFilterGeoip => toggle(
+        (dns) => dns.fallbackFilter.geoip,
+        (state, value) => state.copyWith.dns.fallbackFilter(geoip: value),
+      ),
+      DnsOverrideKey.fallbackFilterGeoipCode => text(
+        (dns) => dns.fallbackFilter.geoipCode,
+        (state, value) => state.copyWith.dns.fallbackFilter(geoipCode: value),
+        maxLength: TextInputLimits.geoIpCode,
+      ),
+      DnsOverrideKey.fallbackFilterGeosite => list(
+        (dns) => dns.fallbackFilter.geosite,
+        (state, value) => state.copyWith.dns.fallbackFilter(geosite: value),
+        itemMaxLength: TextInputLimits.geoSite,
+      ),
+      DnsOverrideKey.fallbackFilterIpcidr => list(
+        (dns) => dns.fallbackFilter.ipcidr,
+        (state, value) => state.copyWith.dns.fallbackFilter(ipcidr: value),
+        itemMaxLength: TextInputLimits.cidr,
+      ),
+      DnsOverrideKey.fallbackFilterDomain => list(
+        (dns) => dns.fallbackFilter.domain,
+        (state, value) => state.copyWith.dns.fallbackFilter(domain: value),
+        itemMaxLength: TextInputLimits.domain,
+      ),
+    };
   }
 }
 
-class NameserverPolicyItem extends ConsumerWidget {
-  const NameserverPolicyItem({super.key});
+class _PolicyItem extends ConsumerWidget {
+  const _PolicyItem({
+    required this.overrideKey,
+    required this.leading,
+    required this.select,
+    required this.update,
+  });
+
+  final DnsOverrideKey overrideKey;
+  final Widget leading;
+  final Map<String, String> Function(Dns dns) select;
+  final _DnsUpdate<Map<String, String>> update;
 
   @override
-  Widget build(BuildContext context, ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
-    final nameserverPolicy = ref.watch(
-      _dnsSelector((dns) => dns.nameserverPolicy),
-    );
+    final title = overrideKey.label(appLocalizations);
+    final description = overrideKey.description;
+    final policy = ref.watch(_dnsSelector(select));
     return DecorationListItem.open(
-      title: Text(appLocalizations.nameserverPolicy),
-      subtitle: Text(appLocalizations.nameserverPolicyDesc),
+      leading: leading,
+      title: Text(title),
+      subtitle: description == null
+          ? null
+          : Text(description(appLocalizations)),
       blur: false,
       widget: MapInputPage(
-        title: appLocalizations.nameserverPolicy,
-        map: nameserverPolicy,
+        title: title,
+        map: policy,
         keyMaxLength: TextInputLimits.domain,
         valueMaxLength: TextInputLimits.dnsServer,
         titleBuilder: (item) => Text(item.key),
@@ -165,159 +463,73 @@ class NameserverPolicyItem extends ConsumerWidget {
         illustration: NullStatusIllustration.dns,
       ),
       onChanged: (value) {
-        ref
-            .read(patchClashConfigProvider.notifier)
-            .update((state) => state.copyWith.dns(nameserverPolicy: value));
+        if (value is Map) {
+          _dnsWriter(update)(ref, Map<String, String>.from(value));
+        }
       },
     );
   }
 }
 
-class DnsOptions extends StatelessWidget {
-  const DnsOptions({super.key});
+class _RemoveButton extends ConsumerWidget {
+  const _RemoveButton(this.overrideKey);
+
+  final DnsOverrideKey overrideKey;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingSection(
-      title: context.appLocalizations.options,
-      items: [
-        const StatusItem(),
-        _dnsText(
-          title: (l) => l.listen,
-          select: (dns) => dns.listen,
-          update: (state, value) => state.copyWith.dns(listen: value),
-          maxLength: TextInputLimits.dnsListen,
+  Widget build(BuildContext context, WidgetRef ref) {
+    return CommonMinIconButtonTheme(
+      child: ElasticButton(
+        child: IconButton.filledTonal(
+          tooltip: context.appLocalizations.remove,
+          onPressed: () => ref
+              .read(patchClashConfigProvider.notifier)
+              .update(
+                (state) => state.copyWith(
+                  dnsOverrideKeys: {...state.dnsOverrideKeys}
+                    ..remove(overrideKey),
+                ),
+              ),
+          icon: const GlyphIcon(AppGlyphs.remove, size: 18, fill: 1),
+          padding: EdgeInsets.zero,
         ),
-        _dnsToggle(
-          title: (l) => l.useHosts,
-          select: (dns) => dns.useHosts,
-          update: (state, value) => state.copyWith.dns(useHosts: value),
-        ),
-        _dnsToggle(
-          title: (l) => l.useSystemHosts,
-          select: (dns) => dns.useSystemHosts,
-          update: (state, value) => state.copyWith.dns(useSystemHosts: value),
-        ),
-        const IPv6Item(),
-        _dnsToggle(
-          title: (l) => l.respectRules,
-          subtitle: (l) => l.respectRulesDesc,
-          select: (dns) => dns.respectRules,
-          update: (state, value) => state.copyWith.dns(respectRules: value),
-        ),
-        const PreferH3Item(),
-        const DnsModeItem(),
-        _dnsText(
-          title: (l) => l.fakeipRange,
-          select: (dns) => dns.fakeIpRange,
-          update: (state, value) => state.copyWith.dns(fakeIpRange: value),
-          maxLength: TextInputLimits.cidr,
-        ),
-        _dnsList(
-          title: (l) => l.fakeipFilter,
-          select: (dns) => dns.fakeIpFilter,
-          update: (state, value) => state.copyWith.dns(fakeIpFilter: value),
-          itemMaxLength: TextInputLimits.domain,
-        ),
-        _dnsList(
-          title: (l) => l.defaultNameserver,
-          subtitle: (l) => l.defaultNameserverDesc,
-          select: (dns) => dns.defaultNameserver,
-          update: (state, value) =>
-              state.copyWith.dns(defaultNameserver: value),
-          itemMaxLength: TextInputLimits.dnsServer,
-        ),
-        const NameserverPolicyItem(),
-        _dnsList(
-          title: (l) => l.nameserver,
-          subtitle: (l) => l.nameserverDesc,
-          select: (dns) => dns.nameserver,
-          update: (state, value) => state.copyWith.dns(nameserver: value),
-          itemMaxLength: TextInputLimits.dnsServer,
-        ),
-        _dnsList(
-          title: (l) => l.fallback,
-          subtitle: (l) => l.fallbackDesc,
-          select: (dns) => dns.fallback,
-          update: (state, value) => state.copyWith.dns(fallback: value),
-          itemMaxLength: TextInputLimits.dnsServer,
-        ),
-        _dnsList(
-          title: (l) => l.proxyNameserver,
-          subtitle: (l) => l.proxyNameserverDesc,
-          select: (dns) => dns.proxyServerNameserver,
-          update: (state, value) =>
-              state.copyWith.dns(proxyServerNameserver: value),
-          itemMaxLength: TextInputLimits.dnsServer,
-        ),
-      ],
+      ),
     );
   }
 }
 
-class FallbackFilterOptions extends StatelessWidget {
-  const FallbackFilterOptions({super.key});
+class DnsOverrideQuickList extends ConsumerWidget {
+  const DnsOverrideQuickList({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SettingSection(
-      title: context.appLocalizations.fallbackFilter,
-      items: [
-        _dnsToggle(
-          title: (l) => 'Geoip',
-          select: (dns) => dns.fallbackFilter.geoip,
-          update: (state, value) =>
-              state.copyWith.dns.fallbackFilter(geoip: value),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final keys = ref.watch(_dnsOverrideKeysSelector);
+    final entries = DnsOverrideKey.values.where(keys.contains);
+    if (entries.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Text(
+          appLocalizations.nullTip(appLocalizations.overrideEntries),
+          style: context.textTheme.bodyMedium?.toLight,
         ),
-        _dnsText(
-          title: (l) => l.geoipCode,
-          select: (dns) => dns.fallbackFilter.geoipCode,
-          update: (state, value) =>
-              state.copyWith.dns.fallbackFilter(geoipCode: value),
-          maxLength: TextInputLimits.geoIpCode,
-        ),
-        _dnsList(
-          title: (l) => 'Geosite',
-          select: (dns) => dns.fallbackFilter.geosite,
-          update: (state, value) =>
-              state.copyWith.dns.fallbackFilter(geosite: value),
-          itemMaxLength: TextInputLimits.geoSite,
-        ),
-        _dnsList(
-          title: (l) => l.ipcidr,
-          select: (dns) => dns.fallbackFilter.ipcidr,
-          update: (state, value) =>
-              state.copyWith.dns.fallbackFilter(ipcidr: value),
-          itemMaxLength: TextInputLimits.cidr,
-        ),
-        _dnsList(
-          title: (l) => l.domain,
-          select: (dns) => dns.fallbackFilter.domain,
-          update: (state, value) =>
-              state.copyWith.dns.fallbackFilter(domain: value),
-          itemMaxLength: TextInputLimits.domain,
-        ),
-      ],
-    );
-  }
-}
-
-const dnsItems = <Widget>[
-  OverrideItem(),
-  DnsOptions(),
-  FallbackFilterOptions(),
-];
-
-class DnsListView extends ConsumerWidget {
-  const DnsListView({super.key});
-
-  @override
-  Widget build(BuildContext context, ref) {
-    return const SettingsListView(
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(padding: EdgeInsets.only(top: 16)),
-        ...dnsItems,
-        SettingBottomInset(),
+        for (final (title, sectionKeys) in _sectionsOf(
+          appLocalizations,
+          entries,
+        ))
+          if (sectionKeys.isNotEmpty)
+            generateSectionV3(
+              title: title,
+              items: [
+                for (final key in sectionKeys)
+                  _OverrideItem(key: ValueKey(key), overrideKey: key),
+              ],
+            ),
       ],
     );
   }

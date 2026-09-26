@@ -87,42 +87,46 @@ class _SegmentState<T> extends State<_Segment<T>>
 
     return MetaData(
       behavior: HitTestBehavior.opaque,
-      child: IndexedStack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          AnimatedOpacity(
-            opacity: widget.shouldFadeoutContent
-                ? _kContentPressedMinOpacity
-                : 1,
-            duration: _kOpacityAnimationDuration,
-            curve: Curves.ease,
-            child: AnimatedDefaultTextStyle(
-              style: DefaultTextStyle.of(context).style.merge(
-                TextStyle(
-                  fontWeight: widget.highlighted
-                      ? _kHighlightedFontWeight
-                      : _kFontWeight,
-                  fontSize: _kFontSize,
-                  color: widget.enabled ? null : _kDisabledContentColor,
+      child: ElasticPress(
+        strength: _kSegmentPressStrength,
+        enabled: widget.enabled && !widget.isDragging,
+        child: IndexedStack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            AnimatedOpacity(
+              opacity: widget.shouldFadeoutContent
+                  ? _kContentPressedMinOpacity
+                  : 1,
+              duration: _kContentPressFadeDuration,
+              curve: Curves.ease,
+              child: AnimatedDefaultTextStyle(
+                style: DefaultTextStyle.of(context).style.merge(
+                  TextStyle(
+                    fontWeight: widget.highlighted
+                        ? _kHighlightedFontWeight
+                        : _kFontWeight,
+                    fontSize: _kFontSize,
+                    color: widget.enabled ? null : _kDisabledContentColor,
+                  ),
+                ),
+                duration: _kHighlightAnimationDuration,
+                curve: Curves.ease,
+                child: ScaleTransition(
+                  alignment: scaleAlignment,
+                  scale: highlightPressScaleAnimation,
+                  child: widget.child,
                 ),
               ),
-              duration: _kHighlightAnimationDuration,
-              curve: Curves.ease,
-              child: ScaleTransition(
-                alignment: scaleAlignment,
-                scale: highlightPressScaleAnimation,
-                child: widget.child,
+            ),
+            DefaultTextStyle.merge(
+              style: const TextStyle(
+                fontWeight: _kHighlightedFontWeight,
+                fontSize: _kFontSize,
               ),
+              child: widget.child,
             ),
-          ),
-          DefaultTextStyle.merge(
-            style: const TextStyle(
-              fontWeight: _kHighlightedFontWeight,
-              fontSize: _kFontSize,
-            ),
-            child: widget.child,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

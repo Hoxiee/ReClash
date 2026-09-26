@@ -80,9 +80,7 @@ class _ConnectionDoctorViewState extends ConsumerState<ConnectionDoctorView> {
       case DoctorRemedy.openProfiles:
         _leaveTo(PageLabel.profiles);
       case DoctorRemedy.openDns:
-        await _openConfig(
-          const BaseScaffold(title: 'DNS', body: DnsListView()),
-        );
+        await _openConfig(const DnsView());
       case DoctorRemedy.openAdvanced:
         await _openConfig(const AdvancedConfigView());
       case DoctorRemedy.exportReport:

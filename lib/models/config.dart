@@ -102,7 +102,7 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkSpeed,
   DashboardWidget.systemProxyButton,
   DashboardWidget.tunButton,
-  DashboardWidget.outboundMode,
+  DashboardWidget.outboundModeV2,
   DashboardWidget.networkDetection,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
@@ -115,15 +115,24 @@ const List<DashboardWidget> defaultDashboardWidgets = [
 List<DashboardWidget> dashboardWidgetsSafeFormJson(
   List<dynamic>? dashboardWidgets,
 ) {
-  return decodeOrRestoreDefault(
-    'dashboard widgets',
-    () =>
-        dashboardWidgets
-            ?.map((e) => $enumDecode(_$DashboardWidgetEnumMap, e))
-            .toList() ??
-        defaultDashboardWidgets,
-    () => defaultDashboardWidgets,
-  );
+  return decodeOrRestoreDefault('dashboard widgets', () {
+    final raw = dashboardWidgets;
+    if (raw == null) {
+      return defaultDashboardWidgets;
+    }
+    final seen = <DashboardWidget>{};
+    final result = <DashboardWidget>[];
+    for (final e in raw) {
+      // The classic outboundMode tile folded into outboundModeV2; upgrade saved
+      // layouts in place so a retired key does not reset the whole list.
+      final key = e == 'outboundMode' ? 'outboundModeV2' : e;
+      final widget = $enumDecode(_$DashboardWidgetEnumMap, key);
+      if (seen.add(widget)) {
+        result.add(widget);
+      }
+    }
+    return result;
+  }, () => defaultDashboardWidgets);
 }
 
 @freezed
@@ -260,7 +269,7 @@ abstract class AppSettingProps with _$AppSettingProps {
     @Default(true) bool newDashboard,
     @Default(defaultTestUrl) String testUrl,
     @Default(true) bool isAnimateToPage,
-    @Default(false) bool autoCheckUpdate,
+    @Default(true) bool autoCheckUpdate,
     @Default(false) bool showLabel,
     @Default(false) bool disclaimerAccepted,
     @Default(false) bool setupCompleted,
@@ -544,6 +553,7 @@ abstract class ThemeProps with _$ThemeProps {
     String? lightAt,
     @Default(DynamicSchemeVariant.content) DynamicSchemeVariant schemeVariant,
     @Default(false) bool pureBlack,
+    @Default(true) bool predictiveBack,
     @Default(0) double contrastLevel,
     @Default(TextScale()) TextScale textScale,
     @JsonKey(fromJson: WallpaperProps.safeFromJson)
@@ -654,6 +664,7 @@ abstract class Config with _$Config {
   const factory Config({
     int? currentProfileId,
     @Default(false) bool overrideDns,
+    @Default(false) bool overrideNtp,
     @JsonKey(fromJson: MilestoneProps.safeFromJson)
     @Default(MilestoneProps())
     MilestoneProps milestoneProps,

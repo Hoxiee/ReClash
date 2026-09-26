@@ -9,6 +9,7 @@ import 'package:reclash/views/appearance/appearance.dart';
 import 'package:reclash/views/config/advanced.dart';
 import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/dns.dart';
+import 'package:reclash/views/config/ntp.dart';
 import 'package:reclash/views/config/general.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/smart_pause.dart';
@@ -47,7 +48,8 @@ void main() {
     'logs': const LogsView(),
     'tools': const ToolsView(),
     'basic config': const ConfigView(),
-    'dns config': const Scaffold(body: DnsListView()),
+    'dns config': const DnsView(),
+    'ntp config': const NtpView(),
     'network config': const Scaffold(body: NetworkListView()),
     'advanced config': const AdvancedConfigView(),
     'smart pause config': const SmartPauseView(),
@@ -154,7 +156,7 @@ void main() {
     });
   }
 
-  testWidgets('user agent dialog applies a preset', (tester) async {
+  testWidgets('user agent view switches the selected agent', (tester) async {
     tester.view.physicalSize = const Size(1000, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -181,17 +183,15 @@ void main() {
 
     await tester.tap(find.text('User-Agent'));
     await tester.pumpAndSettle();
-    // The preset string shows both in the item subtitle and the dialog row.
-    expect(find.text(flClashXCompatUa), findsNWidgets(2));
-    expect(find.text('clash-verge/v2.4.2'), findsOneWidget);
+    // The reworked view lists the active agent and a default entry instead of
+    // the old preset dialog.
+    expect(find.text(flClashXCompatUa), findsWidgets);
+    expect(find.text('Default'), findsOneWidget);
 
-    await tester.tap(find.text('clash-verge/v2.4.2'));
+    await tester.tap(find.text('Default'));
     await tester.pumpAndSettle();
 
-    expect(
-      container.read(patchClashConfigProvider).globalUa,
-      'clash-verge/v2.4.2',
-    );
+    expect(container.read(patchClashConfigProvider).globalUa, null);
     expect(tester.takeException(), null);
   });
 
@@ -297,7 +297,7 @@ void main() {
     expect(find.text('SOCKS port cannot be empty'), findsOneWidget);
   });
 
-  testWidgets('DNS mode options update the patch configuration', (
+  testWidgets('DNS override entries update the patch configuration', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1000, 800);
@@ -313,14 +313,26 @@ void main() {
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(1000, 800));
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update(
+          (state) => state.copyWith(
+            dnsOverrideKeys: {
+              DnsOverrideKey.enable,
+              DnsOverrideKey.preferH3,
+              DnsOverrideKey.ipv6,
+              DnsOverrideKey.enhancedMode,
+            },
+          ),
+        );
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const TestApp(child: Scaffold(body: DnsModeItem())),
+        child: const TestApp(child: DnsView()),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('DNS mode'));
     await tester.pumpAndSettle();
@@ -336,24 +348,7 @@ void main() {
 
     final previousOverride = container.read(overrideDnsProvider);
     final previousDns = container.read(patchClashConfigProvider).dns;
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(
-          child: Scaffold(
-            body: Column(
-              children: [
-                OverrideItem(),
-                StatusItem(),
-                PreferH3Item(),
-                IPv6Item(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+
     await tester.tap(find.text('Override DNS'));
     await tester.pump();
     await tester.tap(find.text('Status'));

@@ -738,7 +738,7 @@ void main() {
           );
           final appSettings = data.configMap?['appSettingProps'] as Map;
           expect(appSettings['setupCompleted'], isTrue);
-          expect(appSettings['autoCheckUpdate'], isFalse);
+          expect(appSettings['autoCheckUpdate'], isTrue);
           expect(appSettings['sendDeviceIdentity'], isFalse);
           expect(settings['showStopAction'], isFalse);
           expect(settings['showPauseAction'], isTrue);

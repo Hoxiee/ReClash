@@ -93,7 +93,7 @@ class _StatPair extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: left),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(child: right),
       ],
     );

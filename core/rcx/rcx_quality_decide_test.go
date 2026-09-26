@@ -108,9 +108,9 @@ func TestQualityReliabilityNeedsRepeatedFailureAndConfirmation(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			current := rcxNode("current", foreignProven())
-			current.MedianMs, current.Recurrence, current.Degraded = 70, tc.recurrence, tc.degraded
+			current.MedianMs, current.Recurrence, current.Degraded = 120, tc.recurrence, tc.degraded
 			better := rcxNode("better", foreignProven())
-			better.MedianMs, better.QualityConfirmed = 150, tc.confirmed
+			better.MedianMs, better.QualityConfirmed = 90, tc.confirmed
 			input := rcxDecisionInput{
 				Terrain: rcxTerrainNormal, Incumbent: current.Name,
 				Candidates: []rcxCandidate{current, better},
@@ -172,9 +172,11 @@ func TestQualityDiscoveryUsesHostFallbackAndUnknownIsNotFastest(t *testing.T) {
 	own.MedianMs, own.HostMs, own.Order = 249, 20, 1
 	input := rcxDecisionInput{Terrain: rcxTerrainNormal, Candidates: []rcxCandidate{unknown, own, host}}
 	ranked := rcxRank(input)
-	// A measured median outranks a lower unmeasured entry-ping; among the unmeasured
-	// host-ping is only a fallback, and a signal-less node is never fastest.
-	if ranked[0].Candidate.Name != own.Name || ranked[1].Candidate.Name != host.Name || ranked[2].Candidate.Name != unknown.Name {
+	// A proven fast entry-ping outranks a much slower measured median: a working
+	// low-latency node belongs on top, not buried behind a timed-but-slow exit.
+	// Among the unmeasured a host-ping is the fallback, and a signal-less node is
+	// never fastest.
+	if ranked[0].Candidate.Name != host.Name || ranked[1].Candidate.Name != own.Name || ranked[2].Candidate.Name != unknown.Name {
 		t.Fatalf("unexpected shortlist: %+v", ranked)
 	}
 	input.Incumbent = unknown.Name

@@ -43,6 +43,18 @@ void main() {
     });
   });
 
+  group('update check timestamp', () {
+    test('defaults to 0 when never written', () async {
+      expect(await preferences.getLastUpdateCheckAt(), 0);
+    });
+
+    test('round-trips a written timestamp', () async {
+      await preferences.saveLastUpdateCheckAt(1737000000000);
+
+      expect(await preferences.getLastUpdateCheckAt(), 1737000000000);
+    });
+  });
+
   group('config', () {
     test('getConfig returns null when nothing is stored', () async {
       expect(await preferences.getConfig(), isNull);

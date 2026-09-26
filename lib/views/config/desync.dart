@@ -326,6 +326,15 @@ class _DesyncControlsState extends ConsumerState<DesyncControls> {
               ),
             ],
           ),
+        if (widget._section == null && !featureEnabled)
+          SizedBox(
+            height: MediaQuery.sizeOf(context).height * 0.58,
+            child: NullStatus(
+              illustration: NullStatusIllustration.desync,
+              label: appLocalizations.desync,
+              description: appLocalizations.desyncFeatureEnableDesc,
+            ),
+          ),
         if (showBody &&
             (widget._section == null ||
                 widget._section == _DesyncSection.strategy))

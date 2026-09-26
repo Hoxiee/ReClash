@@ -103,7 +103,7 @@ _AppSettingProps _$AppSettingPropsFromJson(
   newDashboard: json['newDashboard'] as bool? ?? true,
   testUrl: json['testUrl'] as String? ?? defaultTestUrl,
   isAnimateToPage: json['isAnimateToPage'] as bool? ?? true,
-  autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? false,
+  autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
   showLabel: json['showLabel'] as bool? ?? false,
   disclaimerAccepted: json['disclaimerAccepted'] as bool? ?? false,
   setupCompleted: json['setupCompleted'] as bool? ?? false,
@@ -198,7 +198,6 @@ const _$RestoreStrategyEnumMap = {
 const _$DashboardWidgetEnumMap = {
   DashboardWidget.networkSpeed: 'networkSpeed',
   DashboardWidget.outboundModeV2: 'outboundModeV2',
-  DashboardWidget.outboundMode: 'outboundMode',
   DashboardWidget.trafficUsage: 'trafficUsage',
   DashboardWidget.networkDetection: 'networkDetection',
   DashboardWidget.tunButton: 'tunButton',
@@ -597,6 +596,7 @@ _ThemeProps _$ThemePropsFromJson(Map<String, dynamic> json) => _ThemeProps(
       ) ??
       DynamicSchemeVariant.content,
   pureBlack: json['pureBlack'] as bool? ?? false,
+  predictiveBack: json['predictiveBack'] as bool? ?? true,
   contrastLevel: (json['contrastLevel'] as num?)?.toDouble() ?? 0,
   textScale: json['textScale'] == null
       ? const TextScale()
@@ -616,6 +616,7 @@ Map<String, dynamic> _$ThemePropsToJson(_ThemeProps instance) =>
       'lightAt': instance.lightAt,
       'schemeVariant': _$DynamicSchemeVariantEnumMap[instance.schemeVariant]!,
       'pureBlack': instance.pureBlack,
+      'predictiveBack': instance.predictiveBack,
       'contrastLevel': instance.contrastLevel,
       'textScale': instance.textScale,
       'wallpaper': instance.wallpaper,
@@ -674,6 +675,7 @@ Map<String, dynamic> _$MilestonePropsToJson(_MilestoneProps instance) =>
 _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
   currentProfileId: (json['currentProfileId'] as num?)?.toInt(),
   overrideDns: json['overrideDns'] as bool? ?? false,
+  overrideNtp: json['overrideNtp'] as bool? ?? false,
   milestoneProps: json['milestoneProps'] == null
       ? const MilestoneProps()
       : MilestoneProps.safeFromJson(
@@ -727,6 +729,7 @@ _Config _$ConfigFromJson(Map<String, dynamic> json) => _Config(
 Map<String, dynamic> _$ConfigToJson(_Config instance) => <String, dynamic>{
   'currentProfileId': instance.currentProfileId,
   'overrideDns': instance.overrideDns,
+  'overrideNtp': instance.overrideNtp,
   'milestoneProps': instance.milestoneProps,
   'hotKeyActions': instance.hotKeyActions,
   'appSettingProps': instance.appSettingProps,

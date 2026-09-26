@@ -161,10 +161,7 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(
-        find.byKey(const ValueKey('subscription-ring')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const ValueKey('subscription-ring')), findsOneWidget);
       expect(find.text('50B / 100B'), findsOneWidget);
     });
 
@@ -207,7 +204,7 @@ void main() {
       expect(tester.takeException(), null);
     });
 
-    testWidgets('opens the subscription overview on tap', (tester) async {
+    testWidgets('opens the subscription sheet on tap', (tester) async {
       setProfile(
         _profile(
           subscriptionInfo: const SubscriptionInfo(
@@ -222,7 +219,9 @@ void main() {
       await tester.tap(find.byType(MetaInfo));
       await tester.pumpAndSettle();
 
-      expect(find.text('System'), findsOneWidget);
+      expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+      expect(find.text('Used traffic'), findsOneWidget);
+      expect(find.text('Subscription report'), findsOneWidget);
     });
 
     testWidgets('opens even when the panel sent no subscription data', (
@@ -234,10 +233,8 @@ void main() {
       await tester.tap(find.byType(MetaInfo));
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('This subscription reports no traffic quota or end date'),
-        findsOneWidget,
-      );
+      expect(find.byType(AdaptiveSheetScaffold), findsOneWidget);
+      expect(find.text('Subscription report'), findsOneWidget);
     });
 
     testWidgets('offers a sync action for url profiles', (tester) async {

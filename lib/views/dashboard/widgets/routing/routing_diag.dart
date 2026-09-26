@@ -17,6 +17,47 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 const _diagKinds = ['decision', 'switch', 'event', 'probe'];
 const _maxLocalRows = 6000;
 
+// The platform UTF-8-encodes each reply whole, so a full-ring pull once OOM-crashed the app on open; pull in bounded pages instead.
+const _diagPageLimit = 256;
+const _maxCatchUpPages = 64;
+
+Future<void> exportSmartRoutingLog(
+  AppLocalizations l10n, {
+  required CoreController core,
+  Future<RcxDiagBatch?> Function(int since)? reader,
+}) async {
+  Future<RcxDiagBatch?> fetch(int since) => reader != null
+      ? reader(since)
+      : core.smartRoutingDiagLog(since, limit: _diagPageLimit);
+  final res = await globalState.safeRun<bool>(() async {
+    final buffer = StringBuffer();
+    var since = 0;
+    for (var page = 0; page < _maxCatchUpPages * 16; page++) {
+      final batch = await fetch(since);
+      if (batch == null) break;
+      for (final entry in batch.entries) {
+        buffer.writeln(jsonEncode(entry.toJson()));
+      }
+      if (batch.entries.length < _diagPageLimit || batch.cursor <= since) {
+        break;
+      }
+      since = batch.cursor;
+    }
+    if (buffer.isEmpty) return false;
+    final bytes = Uint8List.fromList(utf8.encode(buffer.toString()));
+    final name = 'reclash-rcx-${DateTime.now().millisecondsSinceEpoch}.ndjson';
+    final uri = await picker.saveFile(name, bytes);
+    return uri != null;
+  }, title: l10n.smartRoutingLogExport);
+  if (res != true) return;
+  unawaited(
+    dialogs.showMessage(
+      title: l10n.smartRoutingLogExport,
+      message: TextSpan(text: l10n.exportSuccess),
+    ),
+  );
+}
+
 String _kindLabel(AppLocalizations l10n, String kind) => switch (kind) {
   'decision' => l10n.smartRoutingLogKindDecision,
   'switch' => l10n.smartRoutingLogKindSwitch,
@@ -127,11 +168,15 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
   @override
   Future<void> poll(PollGuard isCurrent) async {
     final reader = widget.logReader;
-    final batch = reader != null
-        ? await reader(_cursor)
-        : await _core.smartRoutingDiagLog(_cursor);
-    if (batch == null || !isCurrent()) return;
-    _ingest(batch);
+    for (var page = 0; page < _maxCatchUpPages; page++) {
+      final since = _cursor;
+      final batch = reader != null
+          ? await reader(since)
+          : await _core.smartRoutingDiagLog(since, limit: _diagPageLimit);
+      if (batch == null || !isCurrent()) return;
+      _ingest(batch);
+      if (batch.entries.length < _diagPageLimit || _cursor <= since) break;
+    }
   }
 
   void _ingest(RcxDiagBatch batch) {
@@ -211,34 +256,11 @@ class _RoutingDiagViewState extends ConsumerState<RoutingDiagView>
     if (next) _maybeAutoScroll();
   }
 
-  Future<void> _handleExport() async {
-    final appLocalizations = context.appLocalizations;
-    final res = await globalState.safeRun<bool>(() async {
-      final reader = widget.logReader;
-      final batch = reader != null
-          ? await reader(0)
-          : await _core.smartRoutingDiagLog(0);
-      if (batch == null || batch.entries.isEmpty) {
-        return false;
-      }
-      final buffer = StringBuffer();
-      for (final entry in batch.entries) {
-        buffer.writeln(jsonEncode(entry.toJson()));
-      }
-      final bytes = Uint8List.fromList(utf8.encode(buffer.toString()));
-      final name =
-          'reclash-rcx-${DateTime.now().millisecondsSinceEpoch}.ndjson';
-      final uri = await picker.saveFile(name, bytes);
-      return uri != null;
-    }, title: appLocalizations.smartRoutingLogExport);
-    if (res != true) return;
-    unawaited(
-      dialogs.showMessage(
-        title: appLocalizations.smartRoutingLogExport,
-        message: TextSpan(text: appLocalizations.exportSuccess),
-      ),
-    );
-  }
+  Future<void> _handleExport() => exportSmartRoutingLog(
+    context.appLocalizations,
+    core: _core,
+    reader: widget.logReader,
+  );
 
   @override
   Widget build(BuildContext context) {

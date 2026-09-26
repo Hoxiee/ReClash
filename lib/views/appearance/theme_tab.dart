@@ -75,6 +75,9 @@ class AppearanceThemeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final predictiveBackSupported = system.supportsPredictiveBack(
+      ref.watch(versionProvider),
+    );
     final theme = ref.watch(
       themeSettingProvider.select(
         (state) => (
@@ -82,6 +85,7 @@ class AppearanceThemeTab extends ConsumerWidget {
           darkAt: state.darkAt ?? _defaultDarkAt,
           lightAt: state.lightAt ?? _defaultLightAt,
           pureBlack: state.pureBlack,
+          predictiveBack: state.predictiveBack,
           contrastLevel: state.contrastLevel,
         ),
       ),
@@ -150,6 +154,16 @@ class AppearanceThemeTab extends ConsumerWidget {
               onChanged: (value) =>
                   _update(ref, (state) => state.copyWith(pureBlack: value)),
             ),
+            if (predictiveBackSupported)
+              DecorationListItem.toggle(
+                leading: const GlyphIcon(AppGlyphs.dragHandle),
+                title: Text(appLocalizations.predictiveBack),
+                value: theme.predictiveBack,
+                onChanged: (value) => _update(
+                  ref,
+                  (state) => state.copyWith(predictiveBack: value),
+                ),
+              ),
             SettingSliderItem(
               leading: Tooltip(
                 message: theme.pureBlack

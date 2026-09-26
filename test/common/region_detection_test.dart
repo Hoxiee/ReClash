@@ -32,12 +32,19 @@ void main() {
     );
   });
 
-  test('the locale is the last resort when no native signal names a region', () {
-    expect(detectRegion(const RegionSignals(), const Locale('zh')),
-        AppRegion.china);
-    expect(detectRegion(const RegionSignals(), const Locale('fa')),
-        AppRegion.iran);
-  });
+  test(
+    'the locale is the last resort when no native signal names a region',
+    () {
+      expect(
+        detectRegion(const RegionSignals(), const Locale('zh')),
+        AppRegion.china,
+      );
+      expect(
+        detectRegion(const RegionSignals(), const Locale('fa')),
+        AppRegion.iran,
+      );
+    },
+  );
 
   test('nothing recognizable falls through to other', () {
     expect(

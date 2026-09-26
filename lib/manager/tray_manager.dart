@@ -7,6 +7,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/state.dart';
+import 'package:reclash/providers/tray_delays.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tray/tray.dart';
@@ -45,6 +46,11 @@ class _TrayManagerState extends ConsumerState<TrayManager> {
       });
     }
     if (system.isMacOS) {
+      ref.listenManual(trayDelaysProvider, (prev, next) {
+        if (prev != next) {
+          _reportFailure(ref.read(systemActionProvider.notifier).updateTray());
+        }
+      });
       ref.listenManual(trayTitleStateProvider, (prev, next) {
         if (prev != next) {
           _reportFailure(

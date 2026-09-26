@@ -163,7 +163,9 @@ void main() {
         serviceStatusProvider.overrideWith(
           () => _SeededServiceStatus(_freshServices(chains: ['US-Node-01'])),
         ),
-        outboundIpProbeProvider.overrideWith(() => _SeededOutboundIpProbe(seed)),
+        outboundIpProbeProvider.overrideWith(
+          () => _SeededOutboundIpProbe(seed),
+        ),
         ipQualityProvider(
           '1.2.3.4',
         ).overrideWith((ref) => Completer<IpQuality>().future),

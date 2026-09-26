@@ -37,8 +37,7 @@ class RegionalDefaults<T> {
 
   T forRegion(AppRegion region) => _table[region] ?? _fallback;
 
-  bool isShipped(T value) =>
-      _fallback == value || _table.containsValue(value);
+  bool isShipped(T value) => _fallback == value || _table.containsValue(value);
 }
 
 /// Editable state re-seeded on a region switch only while still pristine.

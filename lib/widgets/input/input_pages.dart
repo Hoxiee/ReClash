@@ -369,37 +369,28 @@ class ListEditingController extends ChangeNotifier {
   List<Widget> actions(BuildContext context) {
     final appLocalizations = context.appLocalizations;
     return [
-      if (_selection.isNotEmpty) ...[
-        CommonMinIconButtonTheme(
-          child: IconButton.filledTonal(
-            tooltip: context.appLocalizations.delete,
-            onPressed: delete,
-            icon: const GlyphIcon(AppGlyphs.delete),
-          ),
+      if (_selection.isNotEmpty)
+        IconButton(
+          tooltip: context.appLocalizations.delete,
+          onPressed: delete,
+          icon: const GlyphIcon(AppGlyphs.delete),
+        )
+      else if (!stringListEquality.equals(_items, _originItems))
+        IconButton(
+          tooltip: context.appLocalizations.reset,
+          onPressed: () => reset(context),
+          icon: const GlyphIcon(AppGlyphs.reset),
         ),
-        const SizedBox(width: AppSpacing.xxs),
-      ] else if (!stringListEquality.equals(_items, _originItems)) ...[
-        CommonMinIconButtonTheme(
-          child: IconButton.filledTonal(
-            tooltip: context.appLocalizations.reset,
-            onPressed: () => reset(context),
-            icon: const GlyphIcon(AppGlyphs.reset),
-          ),
+      if (_selection.isNotEmpty)
+        FilledButton(
+          onPressed: selectAll,
+          child: Text(appLocalizations.selectAll),
+        )
+      else
+        FilledButton.tonal(
+          onPressed: () => addOrEdit(context),
+          child: Text(appLocalizations.add),
         ),
-        const SizedBox(width: AppSpacing.xxs),
-      ],
-      CommonMinFilledButtonTheme(
-        child: _selection.isNotEmpty
-            ? FilledButton(
-                onPressed: selectAll,
-                child: Text(appLocalizations.selectAll),
-              )
-            : FilledButton.tonal(
-                onPressed: () => addOrEdit(context),
-                child: Text(appLocalizations.add),
-              ),
-      ),
-      const SizedBox(width: AppSpacing.sm),
     ];
   }
 }
@@ -592,42 +583,33 @@ class _MapInputPageState extends ConsumerState<MapInputPage> {
         title: widget.title,
         floatBody: true,
         actions: [
-          if (selectedItems.isNotEmpty) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.delete,
-                onPressed: _handleDelete,
-                icon: const GlyphIcon(AppGlyphs.delete),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xxs),
-          ] else if (!stringAndStringMapEntryListEquality.equals(
+          if (selectedItems.isNotEmpty)
+            IconButton(
+              tooltip: context.appLocalizations.delete,
+              onPressed: _handleDelete,
+              icon: const GlyphIcon(AppGlyphs.delete),
+            )
+          else if (!stringAndStringMapEntryListEquality.equals(
             _items,
             _originItems,
-          )) ...[
-            CommonMinIconButtonTheme(
-              child: IconButton.filledTonal(
-                tooltip: context.appLocalizations.reset,
-                onPressed: _handleReset,
-                icon: const GlyphIcon(AppGlyphs.reset),
-              ),
+          ))
+            IconButton(
+              tooltip: context.appLocalizations.reset,
+              onPressed: _handleReset,
+              icon: const GlyphIcon(AppGlyphs.reset),
             ),
-            const SizedBox(width: AppSpacing.xxs),
-          ],
-          CommonMinFilledButtonTheme(
-            child: selectedItems.isNotEmpty
-                ? FilledButton(
-                    onPressed: _handleSelectAll,
-                    child: Text(appLocalizations.selectAll),
-                  )
-                : FilledButton.tonal(
-                    onPressed: () {
-                      _handleAddOrEdit();
-                    },
-                    child: Text(appLocalizations.add),
-                  ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          if (selectedItems.isNotEmpty)
+            FilledButton(
+              onPressed: _handleSelectAll,
+              child: Text(appLocalizations.selectAll),
+            )
+          else
+            FilledButton.tonal(
+              onPressed: () {
+                _handleAddOrEdit();
+              },
+              child: Text(appLocalizations.add),
+            ),
         ],
         body: NullStatusSwitcher(
           isEmpty: _items.isEmpty,

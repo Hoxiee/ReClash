@@ -260,7 +260,10 @@ void main() {
                   onSelected: (_) {},
                   destinations: [
                     for (final text in ['Home', 'Apps', 'Logs', label])
-                      NavBarDestination(glyph: AppGlyphs.dashboard, label: text),
+                      NavBarDestination(
+                        glyph: AppGlyphs.dashboard,
+                        label: text,
+                      ),
                   ],
                 ),
               ),

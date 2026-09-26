@@ -84,6 +84,12 @@ func (e *rcxEngine) finishQuality(now time.Time) {
 	}
 	from, to := delays[q.From], delays[q.To]
 	reliable := e.ledger.Recurrence(q.From, e.envKey, now) >= 2 && e.ledger.Recurrence(q.To, e.envKey, now) < 2 || e.ledger.Degraded(q.From, e.envKey, now) && !e.ledger.Degraded(q.To, e.envKey, now)
+	// A shakier record does not justify confirming a move onto a measurably
+	// slower exit: the just-timed marker RTT overrides the reliability edge, so
+	// this collapses to the latency test and refuses the switch.
+	if reliable && from > 0 && to > from+rcxLatencyStep {
+		reliable = false
+	}
 	if from <= 0 || to <= 0 || !reliable && !rcxLatencyImproves(e.cfg.Strategy, from, to) {
 		q.Rounds = 0
 		return

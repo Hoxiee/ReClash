@@ -88,6 +88,11 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
   final ValueNotifier<List<String>> _keywordsNotifier = ValueNotifier([]);
   final _textController = TextEditingController();
   final _searchFocusNode = FocusNode();
+  // The docked search field grows past its 48px estimate with the clear button
+  // or a larger text scale, so the reserved inset tracks its measured height.
+  final ValueNotifier<double?> _dockedSearchHeightNotifier = ValueNotifier(
+    null,
+  );
 
   bool get _isSearch {
     return _appBarState.value.searchState?.query != null;
@@ -214,6 +219,7 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
     _isFabExtendedNotifier.dispose();
     _loadingNotifier.dispose();
     _keywordsNotifier.dispose();
+    _dockedSearchHeightNotifier.dispose();
     super.dispose();
   }
 
@@ -753,9 +759,22 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       },
     );
     final insetContent = form.hasDockedSearch
-        ? BottomInsetScope(
-            inset: bottomInset + BottomInsetScope.dockedSearchInset,
+        ? ValueListenableBuilder<double?>(
+            valueListenable: _dockedSearchHeightNotifier,
             child: sheetContent,
+            builder: (context, dockedHeight, child) {
+              // The docked search bar lifts itself above the safe area and grows
+              // with its content, so the reserved inset follows its real height
+              // (falling back to the static estimate before the first measure).
+              final reserved =
+                  dockedHeight ??
+                  BottomInsetScope.dockedSearchInset +
+                      MediaQuery.paddingOf(context).bottom;
+              return BottomInsetScope(
+                inset: bottomInset + reserved,
+                child: child!,
+              );
+            },
           )
         : sheetContent;
     final foreground = NotificationListener<UserScrollNotification>(
@@ -790,7 +809,10 @@ class CommonScaffoldState extends ConsumerState<CommonScaffold> {
       ),
       footer: form.dockedSearch == null
           ? null
-          : _buildDockedSearch(form.dockedSearch!),
+          : _MeasureHeight(
+              onChanged: (height) => _dockedSearchHeightNotifier.value = height,
+              child: _buildDockedSearch(form.dockedSearch!),
+            ),
       body: foreground,
     );
     final sheetFab = fab == null ? null : SheetOverhangLift(child: fab);
@@ -1116,4 +1138,39 @@ class _SheetPop {
 
   final bool useCloseIcon;
   final bool asSuffix;
+}
+
+class _MeasureHeight extends SingleChildRenderObjectWidget {
+  final ValueChanged<double> onChanged;
+
+  const _MeasureHeight({required this.onChanged, required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _MeasureHeightRenderObject(onChanged);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _MeasureHeightRenderObject renderObject,
+  ) {
+    renderObject.onChanged = onChanged;
+  }
+}
+
+class _MeasureHeightRenderObject extends RenderProxyBox {
+  _MeasureHeightRenderObject(this.onChanged);
+
+  ValueChanged<double> onChanged;
+  double? _oldHeight;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (_oldHeight == size.height) return;
+    _oldHeight = size.height;
+    final newHeight = size.height;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onChanged(newHeight));
+  }
 }

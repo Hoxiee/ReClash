@@ -17,7 +17,11 @@ class InfoMessageButton extends StatelessWidget {
         onPressed: () {
           dialogs.showMessage(message: TextSpan(text: message));
         },
-        icon: GlyphIcon(AppGlyphs.info, size: 20.ap, color: context.colorScheme.error),
+        icon: GlyphIcon(
+          AppGlyphs.info,
+          size: 20.ap,
+          color: context.colorScheme.error,
+        ),
       ),
     );
   }

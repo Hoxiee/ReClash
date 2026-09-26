@@ -514,10 +514,7 @@ class WindowHeaderActions extends StatelessWidget {
                   iconSize: WidgetStatePropertyAll(pinIconSize),
                 ),
                 onPressed: onPin,
-                icon: GlyphIcon(
-                  AppGlyphs.pin,
-                  fill: state.isPinned ? 1 : 0,
-                ),
+                icon: GlyphIcon(AppGlyphs.pin, fill: state.isPinned ? 1 : 0),
               ),
             ),
             IconButton(

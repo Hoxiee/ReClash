@@ -142,7 +142,9 @@ final _rankingScroll = find.descendant(
 );
 
 Future<void> _toggleTechnical(WidgetTester tester) async {
-  await tester.tap(find.byGlyph(AppGlyphs.code));
+  await tester.tap(find.byGlyph(AppGlyphs.more));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Technical detail'));
   await tester.pumpAndSettle();
 }
 

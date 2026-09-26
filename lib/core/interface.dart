@@ -31,6 +31,8 @@ mixin CoreInterface {
 
   Future<String> validateConfig(String path);
 
+  Future<List<String>> validateProxies(List<Map<String, dynamic>> proxies);
+
   Future<ConfigInspection?> inspectConfig(String path);
 
   Future<Map<String, dynamic>> fetchSubscription({
@@ -90,7 +92,7 @@ mixin CoreInterface {
 
   Future<bool> setSmartRoutingDiagnostics(bool enabled);
 
-  Future<RcxDiagBatch?> smartRoutingDiagLog(int since);
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since, {int limit = 0});
 
   Future<OdometerSnapshot?> odometerReport();
 
@@ -216,6 +218,23 @@ abstract class CoreHandlerInterface with CoreInterface {
   @override
   Future<String> validateConfig(String path) async {
     return _invokeMessage(method: CoreMethod.validateConfig, arguments: path);
+  }
+
+  @override
+  Future<List<String>> validateProxies(
+    List<Map<String, dynamic>> proxies,
+  ) async {
+    final data = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.validateProxies,
+      arguments: proxies,
+    );
+    if (data == null || data.length != proxies.length) {
+      throw CoreMethodException(
+        code: 'no_response',
+        message: 'Core did not answer ${CoreMethod.validateProxies.name}',
+      );
+    }
+    return data.map((item) => item?.toString() ?? '').toList();
   }
 
   @override
@@ -401,10 +420,10 @@ abstract class CoreHandlerInterface with CoreInterface {
   }
 
   @override
-  Future<RcxDiagBatch?> smartRoutingDiagLog(int since) async {
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since, {int limit = 0}) async {
     final data = await _invokeMethod<Map<String, dynamic>>(
       method: CoreMethod.rcxDiagLog,
-      arguments: {'since': since},
+      arguments: {'since': since, 'limit': limit},
     );
     return data == null ? null : RcxDiagBatch.fromJson(data);
   }

@@ -13,6 +13,11 @@ import (
 // process exits. The host opts in per session and pulls by cursor.
 const rcxDiagCapacity = 4096
 
+// A single decision can rank a whole subscription; the log keeps only the
+// leading candidates so a cursor-0 pull of a full ring cannot grow the channel
+// reply past what the platform can UTF-8 encode without exhausting the heap.
+const rcxDiagMaxCands = 12
+
 type rcxDiagKind string
 
 const (
@@ -66,6 +71,7 @@ type rcxDiagEntry struct {
 
 type rcxDiagQuery struct {
 	Since uint64 `json:"since"`
+	Limit int    `json:"limit"`
 }
 
 type rcxDiagBatch struct {
@@ -146,19 +152,27 @@ func (r *rcxDiagRing) push(entry rcxDiagEntry) {
 	r.count++
 }
 
-func (r *rcxDiagRing) since(cursor uint64) rcxDiagBatch {
+func (r *rcxDiagRing) since(cursor uint64, limit int) rcxDiagBatch {
 	on := r.on.Load()
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	batch := rcxDiagBatch{Cursor: r.seq, Dropped: r.dropped, Enabled: on}
+	batch := rcxDiagBatch{Cursor: cursor, Dropped: r.dropped, Enabled: on}
 	// Physical order equals seq order: appends raise seq, and the only in-place
 	// rewrite (the dedupe tail) only ever raises the last row's seq. So one
-	// forward scan stays monotonic and preserves ordering.
+	// forward scan stays monotonic and preserves ordering. The cursor rides the
+	// last row emitted so a limited pull resumes exactly where it stopped, and a
+	// full drain still reports the head.
 	for i := 0; i < r.count; i++ {
 		idx := (r.start + i) % len(r.entries)
-		if r.entries[idx].Seq > cursor {
-			batch.Entries = append(batch.Entries, r.entries[idx])
+		entry := r.entries[idx]
+		if entry.Seq <= cursor {
+			continue
 		}
+		if limit > 0 && len(batch.Entries) >= limit {
+			break
+		}
+		batch.Entries = append(batch.Entries, entry)
+		batch.Cursor = entry.Seq
 	}
 	return batch
 }
@@ -321,12 +335,16 @@ func (e *rcxEngine) recordDecision(reason rcxReason, ranked []rcxRanked, input r
 		return
 	}
 	now := e.runtime.Now()
+	cands := e.candidateReports(ranked, input, now)
+	if len(cands) > rcxDiagMaxCands {
+		cands = cands[:rcxDiagMaxCands]
+	}
 	e.diag.push(rcxDiagEntry{
 		At:    rcxMillis(now),
 		Kind:  rcxDiagDecision,
 		Msg:   string(reason),
 		Ctx:   e.diagContext(input, ranked),
-		Cands: e.candidateReports(ranked, input, now),
+		Cands: cands,
 	})
 }
 
@@ -371,4 +389,6 @@ func (e *rcxEngine) recordWave(kind rcxWaveKind, lane string, size int) {
 
 func (e *rcxEngine) SetDiag(on bool)              { e.diag.setEnabled(on) }
 func (e *rcxEngine) DiagEnabled() bool            { return e.diag.enabled() }
-func (e *rcxEngine) DiagLog(since uint64) rcxDiagBatch { return e.diag.since(since) }
+func (e *rcxEngine) DiagLog(since uint64, limit int) rcxDiagBatch {
+	return e.diag.since(since, limit)
+}

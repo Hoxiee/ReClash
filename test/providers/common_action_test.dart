@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
@@ -167,6 +168,29 @@ void main() {
         container.read(commonActionProvider.notifier).autoCheckUpdate(),
         completion(isFalse),
       );
+    });
+  });
+
+  group('shouldRunAutoUpdateCheck', () {
+    final now = DateTime.fromMillisecondsSinceEpoch(2000000000000);
+
+    test('runs when never checked before', () {
+      expect(shouldRunAutoUpdateCheck(0, now), isTrue);
+    });
+
+    test('skips within the throttle window', () {
+      final recent =
+          now.millisecondsSinceEpoch -
+          (autoUpdateCheckInterval.inMilliseconds ~/ 2);
+
+      expect(shouldRunAutoUpdateCheck(recent, now), isFalse);
+    });
+
+    test('runs once the window has elapsed', () {
+      final stale =
+          now.millisecondsSinceEpoch - autoUpdateCheckInterval.inMilliseconds;
+
+      expect(shouldRunAutoUpdateCheck(stale, now), isTrue);
     });
   });
 }

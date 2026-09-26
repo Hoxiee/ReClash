@@ -113,6 +113,8 @@ class CommonCard extends StatelessWidget {
     this.skipTraversal = false,
     this.accent,
     this.minimumSize,
+    this.visualDensity,
+    this.clipBehavior = Clip.antiAlias,
     required this.child,
   }) : isSelected = isSelected ?? false;
 
@@ -136,6 +138,12 @@ class CommonCard extends StatelessWidget {
   // A hero-panel alert tint bleeding into fill and border, kept on the standard card.
   final Color? accent;
   final Size? minimumSize;
+
+  // Hero cards opt out of the app-wide compact density (which trims button
+  // padding vertically) and out of content clipping, so their padding and any
+  // deliberately overflowing child (stacked flags) render as a plain surface.
+  final VisualDensity? visualDensity;
+  final Clip clipBehavior;
 
   // Flutter keeps `focused` set after a mouse click; honor `:focus-visible`.
   Set<WidgetState> _effectiveStates(Set<WidgetState> states) {
@@ -273,10 +281,11 @@ class CommonCard extends StatelessWidget {
       true => FilledButton(
         focusNode: focusNode,
         onLongPress: onLongPress,
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: clipBehavior,
         style:
             FilledButton.styleFrom(
               padding: padding ?? EdgeInsets.zero,
+              visualDensity: visualDensity,
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
               iconSize: commonCardIconSize,
               iconColor: _buildIconColor(context),
@@ -306,10 +315,11 @@ class CommonCard extends StatelessWidget {
       false => OutlinedButton(
         focusNode: focusNode,
         onLongPress: onLongPress,
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: clipBehavior,
         style:
             OutlinedButton.styleFrom(
               padding: padding ?? EdgeInsets.zero,
+              visualDensity: visualDensity,
               shape: shape ?? AppShape.all(radius ?? AppCorner.md),
               iconSize: commonCardIconSize,
               iconColor: _buildIconColor(context),

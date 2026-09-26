@@ -107,6 +107,12 @@ class CoreController {
     return res;
   }
 
+  Future<List<String>> validateProxies(
+    List<Map<String, dynamic>> proxies,
+  ) async {
+    return _interface.validateProxies(proxies);
+  }
+
   Future<ConfigInspection?> inspectConfig(String path) async {
     return _interface.inspectConfig(path);
   }
@@ -263,8 +269,8 @@ class CoreController {
     return _interface.setSmartRoutingDiagnostics(enabled);
   }
 
-  Future<RcxDiagBatch?> smartRoutingDiagLog(int since) {
-    return _interface.smartRoutingDiagLog(since);
+  Future<RcxDiagBatch?> smartRoutingDiagLog(int since, {int limit = 0}) {
+    return _interface.smartRoutingDiagLog(since, limit: limit);
   }
 
   Future<OdometerSnapshot?> odometerReport() {

@@ -774,6 +774,11 @@ func (l *rcxLedger) NoteHarvestedProbe(node, envKey string, delayMs int, now tim
 	if state.OpenWorld == rcxProofProven {
 		state.OpenWorld = rcxProofUnknown
 	}
+	// A trusted url-test timeout drops a transit proof kept warm only by entry pings;
+	// fresh payload (live TrafficAt) means the exit truly answers, so its rank stands.
+	if !rcxFreshAt(state.TrafficAt, now, time.Duration(rcxLiveWindowSeconds)*time.Second) {
+		state.ProgressAt = time.Time{}
+	}
 }
 
 // Rolls back what a shutdown or a dead radio wrote: without it one commute leaves

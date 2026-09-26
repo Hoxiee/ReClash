@@ -111,6 +111,14 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
         final appLocalizations = context.appLocalizations;
         final isLoading = ref.watch(loadingProvider(LoadingTag.profiles));
         final state = ref.watch(profilesStateProvider);
+        final developerMode = ref.watch(
+          appSettingProvider.select((state) => state.developerMode),
+        );
+        final visibleProfiles = developerMode
+            ? state.profiles
+            : state.profiles
+                  .where((profile) => !isDeveloperSubscriptionProfile(profile))
+                  .toList();
         final spacing = 14.mAp;
         return CommonScaffold(
           isLoading: isLoading,
@@ -121,16 +129,16 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
             onPressed: _handleShowAddExtendPage,
             tooltip: appLocalizations.addProfile,
           ),
-          iconActions: _buildActions(state.profiles),
+          iconActions: _buildActions(visibleProfiles),
           foldPrimaryAction: true,
           body: NullStatusSwitcher(
-            isEmpty: state.profiles.isEmpty,
+            isEmpty: visibleProfiles.isEmpty,
             nullStatus: NullStatus(
               label: appLocalizations.nullProfileDesc,
               illustration: NullStatusIllustration.profile,
             ),
             child: _ProfilesGrid(
-              profiles: state.profiles,
+              profiles: visibleProfiles,
               currentProfileId: state.currentProfileId,
               spacing: spacing,
             ),
@@ -328,6 +336,10 @@ class ProfileItem extends ConsumerWidget {
       message: TextSpan(text: appLocalizations.subscriptionReportConfirm),
     );
     if (confirmed != true || !context.mounted) return;
+    // Let the confirm dialog finish fading before the sheet rises, so its
+    // centered card does not linger over the sheet's entrance.
+    await Future<void>.delayed(context.motionDuration(Dialogs.dismissDuration));
+    if (!context.mounted) return;
     await showSubscriptionReportSheet(
       context,
       reportUrl: profile.panelMeta?.reportUrl,

@@ -374,6 +374,33 @@ func TestLedgerHarvestedFailureLowersAProvenClass(t *testing.T) {
 	}
 }
 
+func TestLedgerUrlTestTimeoutDropsACoastingTransitProof(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.NoteTrafficProgress("fi-2", "wifi:home", false, now)
+
+	later := now.Add(2 * time.Minute)
+	if got := ledger.Facts("fi-2", "wifi:home", true, later, rcxLedgerProofTTL).Transit; got != rcxProofProven {
+		t.Fatalf("transit = %v, want proven before the timeout: proof still within its TTL", got)
+	}
+
+	ledger.NoteHarvestedProbe("fi-2", "wifi:home", 0, later)
+
+	if got := ledger.Facts("fi-2", "wifi:home", true, later, rcxLedgerProofTTL).Transit; got == rcxProofProven {
+		t.Error("a trusted url-test timeout must drop a transit proof no live traffic backs")
+	}
+}
+
+func TestLedgerUrlTestTimeoutSparesANodeStillCarryingTraffic(t *testing.T) {
+	ledger, now := rcxTestLedger()
+	ledger.NoteTrafficProgress("nl-1", "wifi:home", false, now)
+
+	ledger.NoteHarvestedProbe("nl-1", "wifi:home", 0, now.Add(10*time.Second))
+
+	if got := ledger.Facts("nl-1", "wifi:home", true, now.Add(10*time.Second), rcxLedgerProofTTL).Transit; got != rcxProofProven {
+		t.Errorf("transit = %v, want proven: live payload outranks a single ping blip", got)
+	}
+}
+
 func TestLedgerStatusMismatchDisprovesTheRole(t *testing.T) {
 	ledger, now := rcxTestLedger()
 

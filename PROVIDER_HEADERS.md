@@ -20,10 +20,12 @@ ReClash-ServerInfo: Proxy
 ReClash-ActiveText: Protected by Example VPN
 ReClash-BuyPlan: https://example.com/plans
 ReClash-BuyTraffic: https://example.com/traffic
+ReClash-ReportURL: https://example.com/report
 ReClash-View: type:list; sort:delay; layout:tight; icon:none; card:min
 ReClash-Hex: FF5733:vibrant:pureblack
 ReClash-Background: https://cdn.example.com/background.webp,18
 ReClash-HeroRing: 2E5BFF;7A36F0;FF1744
+ReClash-HeroEffect: aurora
 ReClash-Widgets: networkSpeed,trafficUsage,serviceInfo,changeServerButton
 ReClash-Custom: add
 ReClash-Settings: autorun,autoupdate
@@ -42,6 +44,7 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 | `content-disposition` | A response filename | Used as a profile-name fallback. |
 | `profile-update-interval` | Positive integer, in hours | Sets the profile update interval. |
 | `support-url` | Provider support URL | Adds a support action. Use an absolute HTTPS URL. |
+| `report-url` | Provider issue-report URL | Adds a subscription issue-report action. Use an absolute HTTPS URL. |
 | `announce` | Plain text or Base64 | Shows a provider announcement. |
 
 ## ReClash headers
@@ -57,10 +60,12 @@ ReClash-FallbackHosts: spare-a.example.com,spare-b.example.com
 | `reclash-activetext` | Plain text or Base64 | Replaces the active protection caption under the hero orb and in the Android notification. |
 | `reclash-buyplan` | Provider URL | Subscription renewal or plan purchase action. Use an absolute HTTPS URL. |
 | `reclash-buytraffic` | Provider URL | Extra-traffic purchase action. Use an absolute HTTPS URL. |
+| `reclash-reporturl` | Provider URL | Subscription issue-report action. Use an absolute HTTPS URL. |
 | `reclash-view` | Proxy-page tokens | Suggests the proxy-page presentation for this profile. |
 | `reclash-hex` | Theme tokens | Applies a theme while this profile is active. |
 | `reclash-background` | Image URL and optional opacity | Applies a dashboard background while this profile is active. |
 | `reclash-heroring` | Three colors | Sets the connected-state hero-ring gradient. |
+| `reclash-heroeffect` | `aurora` or `none` | Adds an animated aurora effect to the connected-state hero orb. Default `none`. |
 | `reclash-widgets` | Comma-separated widget names | Suggests dashboard widgets and their order. |
 | `reclash-custom` | `add` or `update` | Controls how `reclash-widgets` is merged. |
 | `reclash-settings` | Comma-separated setting tokens | Supplies application defaults when the profile is first added. |
@@ -109,6 +114,14 @@ ReClash-Background: https://cdn.example.com/background.webp,18
 ReClash-HeroRing: 2E5BFF;7A36F0;FF1744
 ```
 
+### Hero effect
+
+`reclash-heroeffect` turns on an animated effect behind the connected-state hero orb. The only supported effect is `aurora`; `none`, the default, keeps the orb static. The value is case-insensitive.
+
+```http
+ReClash-HeroEffect: aurora
+```
+
 ### Proxy page
 
 `reclash-view` is a semicolon- or comma-separated set of `key:value` tokens:
@@ -147,6 +160,7 @@ ReClash-View: type:list; sort:delay; layout:tight; icon:none; card:min
 | `announce` | All platforms |
 | `serviceInfo` | All platforms |
 | `changeServerButton` | All platforms |
+| `smartRouting` | All platforms |
 
 Unsupported names and widgets unavailable on the current platform are ignored. Duplicates are removed.
 
@@ -212,6 +226,7 @@ ReClash accepts selected Clash and FlClashX spellings for interoperability. This
 | --- | --- |
 | Announcement | `reclash-announce`, `announce` |
 | Support URL | `reclash-supporturl`, `support-url`, `flclashx-supporturl` |
+| Issue-report URL | `reclash-reporturl`, `report-url` |
 | Update interval | `reclash-autoupdateinterval` (minutes), `profile-update-interval` (hours), `flclashx-autoupdateinterval` (hours) |
 | Service name | `reclash-servicename`, `flclashx-servicename` |
 | Service logo | `reclash-servicelogo`, `flclashx-servicelogo` |
@@ -224,7 +239,7 @@ ReClash accepts selected Clash and FlClashX spellings for interoperability. This
 | Background | `reclash-background`, `flclashx-background` |
 | New domain | `reclash-newdomain`, `flclashx-newdomain` |
 
-There are no FlClashX aliases for the active protection text, hero ring, widget list, widget merge mode, initial settings, or fallback hosts.
+There are no FlClashX aliases for the active protection text, hero ring, hero effect, widget list, widget merge mode, initial settings, or fallback hosts.
 
 ## Security and privacy
 

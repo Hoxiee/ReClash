@@ -201,7 +201,13 @@ class _FloatingScrollbarState extends State<FloatingScrollbar> {
             children: [
               CommonScrollBar(
                 controller: widget.controller,
-                child: widget.child,
+                // This bar owns the only scrollbar; suppress the ambient one
+                // the sheet/desktop behavior draws on the same controller,
+                // which showed up as a second thumb beside it.
+                child: ScrollConfiguration(
+                  behavior: const HiddenBarScrollBehavior(),
+                  child: widget.child,
+                ),
               ),
               if (label != null)
                 Positioned(

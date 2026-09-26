@@ -302,6 +302,24 @@ const _$DnsModeEnumMap = {
   DnsMode.hosts: 'hosts',
 };
 
+_Ntp _$NtpFromJson(Map<String, dynamic> json) => _Ntp(
+  enable: json['enable'] as bool? ?? false,
+  server: json['server'] as String? ?? 'time.apple.com',
+  port: (json['port'] as num?)?.toInt() ?? 123,
+  interval: (json['interval'] as num?)?.toInt() ?? 30,
+  dialerProxy: json['dialer-proxy'] as String? ?? '',
+  writeToSystem: json['write-to-system'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$NtpToJson(_Ntp instance) => <String, dynamic>{
+  'enable': instance.enable,
+  'server': instance.server,
+  'port': instance.port,
+  'interval': instance.interval,
+  'dialer-proxy': instance.dialerProxy,
+  'write-to-system': instance.writeToSystem,
+};
+
 _Rule _$RuleFromJson(Map<String, dynamic> json) => _Rule(
   id: (json['id'] as num?)?.toInt() ?? -1,
   ruleAction:
@@ -446,6 +464,19 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
       dns: json['dns'] == null
           ? defaultDns
           : Dns.safeDnsFromJson(json['dns'] as Map<String, Object?>),
+      dnsOverrideKeys:
+          (json['dns-override-keys'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$DnsOverrideKeyEnumMap, e))
+              .toSet() ??
+          const {},
+      ntp: json['ntp'] == null
+          ? defaultNtp
+          : Ntp.safeNtpFromJson(json['ntp'] as Map<String, Object?>),
+      ntpOverrideKeys:
+          (json['ntp-override-keys'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$NtpOverrideKeyEnumMap, e))
+              .toSet() ??
+          const {},
       geoXUrl: json['geox-url'] == null
           ? defaultGeoXUrl
           : _geoXUrlFromJson(json['geox-url'] as Map<String, Object?>?),
@@ -460,7 +491,7 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
-      geoAutoUpdate: json['geo-auto-update'] as bool? ?? false,
+      geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
     );
 
@@ -484,6 +515,13 @@ Map<String, dynamic> _$PatchClashConfigToJson(_PatchClashConfig instance) =>
       'tcp-concurrent': instance.tcpConcurrent,
       'tun': instance.tun,
       'dns': instance.dns,
+      'dns-override-keys': instance.dnsOverrideKeys
+          .map((e) => _$DnsOverrideKeyEnumMap[e]!)
+          .toList(),
+      'ntp': instance.ntp,
+      'ntp-override-keys': instance.ntpOverrideKeys
+          .map((e) => _$NtpOverrideKeyEnumMap[e]!)
+          .toList(),
       'geox-url': _geoXUrlToJson(instance.geoXUrl),
       'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
       'global-ua': instance.globalUa,
@@ -517,6 +555,38 @@ const _$InterfaceNameModeEnumMap = {
   InterfaceNameMode.clear: 'clear',
   InterfaceNameMode.follow: 'follow',
   InterfaceNameMode.custom: 'custom',
+};
+
+const _$DnsOverrideKeyEnumMap = {
+  DnsOverrideKey.enable: 'enable',
+  DnsOverrideKey.listen: 'listen',
+  DnsOverrideKey.useHosts: 'use-hosts',
+  DnsOverrideKey.useSystemHosts: 'use-system-hosts',
+  DnsOverrideKey.ipv6: 'ipv6',
+  DnsOverrideKey.respectRules: 'respect-rules',
+  DnsOverrideKey.preferH3: 'prefer-h3',
+  DnsOverrideKey.enhancedMode: 'enhanced-mode',
+  DnsOverrideKey.fakeIpRange: 'fake-ip-range',
+  DnsOverrideKey.fakeIpFilter: 'fake-ip-filter',
+  DnsOverrideKey.defaultNameserver: 'default-nameserver',
+  DnsOverrideKey.nameserverPolicy: 'nameserver-policy',
+  DnsOverrideKey.nameserver: 'nameserver',
+  DnsOverrideKey.fallback: 'fallback',
+  DnsOverrideKey.proxyServerNameserver: 'proxy-server-nameserver',
+  DnsOverrideKey.fallbackFilterGeoip: 'fallback-filter.geoip',
+  DnsOverrideKey.fallbackFilterGeoipCode: 'fallback-filter.geoip-code',
+  DnsOverrideKey.fallbackFilterGeosite: 'fallback-filter.geosite',
+  DnsOverrideKey.fallbackFilterIpcidr: 'fallback-filter.ipcidr',
+  DnsOverrideKey.fallbackFilterDomain: 'fallback-filter.domain',
+};
+
+const _$NtpOverrideKeyEnumMap = {
+  NtpOverrideKey.enable: 'enable',
+  NtpOverrideKey.server: 'server',
+  NtpOverrideKey.port: 'port',
+  NtpOverrideKey.interval: 'interval',
+  NtpOverrideKey.dialerProxy: 'dialer-proxy',
+  NtpOverrideKey.writeToSystem: 'write-to-system',
 };
 
 const _$GeodataLoaderEnumMap = {

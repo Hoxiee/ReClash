@@ -224,8 +224,10 @@ void main() {
     );
     expect(container.read(appSettingProvider).region, AppRegion.russia);
     expect(container.read(appSettingProvider).sendDeviceIdentity, isTrue);
-    expect(container.read(smartRoutingSettingProvider).preset,
-        SmartRoutingPreset.russia);
+    expect(
+      container.read(smartRoutingSettingProvider).preset,
+      SmartRoutingPreset.russia,
+    );
     expect(container.read(smartRoutingSettingProvider).enabled, isFalse);
   });
 
@@ -306,7 +308,9 @@ void main() {
       const RegionSignals(simCountry: 'ru'),
       const Locale('en'),
     );
-    final container = ProviderContainer(overrides: buildConfigOverrides(seeded));
+    final container = ProviderContainer(
+      overrides: buildConfigOverrides(seeded),
+    );
     addTearDown(container.dispose);
     // No listener: reproduces bootstrap, where mutating auto-dispose providers
     // lost these facets before the fix baked them into the overrides.

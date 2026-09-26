@@ -14,6 +14,12 @@ class Dialogs {
   static const _enterDuration = Duration(milliseconds: 300);
   static const _exitDuration = Duration(milliseconds: 200);
 
+  /// How long the dialog takes to fade out. [showMessage] resolves when the
+  /// pop begins, not when this exit ends, so a confirm flow that opens a sheet
+  /// or route next should wait this out first — otherwise the centered dialog
+  /// fades over the incoming surface.
+  static const dismissDuration = _exitDuration;
+
   BuildContext get _context => rootNavigatorKey.currentContext!;
 
   Future<T?> showCommonDialog<T>({

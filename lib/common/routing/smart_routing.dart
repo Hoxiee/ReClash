@@ -290,7 +290,9 @@ extension SmartRoutingPropsRcx on SmartRoutingProps {
   bool get matchesStrategy {
     final seeded = applyStrategy(strategy);
     return this ==
-        (latencyBands.isEmpty ? seeded.copyWith(latencyBands: const []) : seeded);
+        (latencyBands.isEmpty
+            ? seeded.copyWith(latencyBands: const [])
+            : seeded);
   }
 
   /// Reseed strategy thresholds only when the pace hasn't diverged, so an upgrade never clobbers a hand-tuned config.

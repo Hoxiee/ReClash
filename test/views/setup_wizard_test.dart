@@ -11,6 +11,7 @@ import 'package:reclash/views/settings/application_setting.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/views/setup/steps/finish.dart';
 import 'package:reclash/views/setup/widgets.dart';
+import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1312,7 +1313,7 @@ void main() {
       await tester.pump();
 
       expect(gateway.notificationRequests, 1);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CommonCircleLoading), findsOneWidget);
 
       gateway.notificationGranted = true;
       gateway.notificationRequest!.complete();
@@ -1399,7 +1400,7 @@ void main() {
 
       expect(gateway.batterySettingsOpens, 1);
       expect(find.text('Allow'), findsNWidgets(2));
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(CommonCircleLoading), findsNothing);
     });
   });
 

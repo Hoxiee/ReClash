@@ -488,6 +488,7 @@ class SetupAction extends _$SetupAction {
         ? <String, dynamic>{}
         : await _core.getConfig(profileId);
     final overrideDns = ref.read(overrideDnsProvider);
+    final overrideNtp = ref.read(overrideNtpProvider);
     final appendSystemDns = networkSetting.appendSystemDns;
     final routeMode = networkSetting.routeMode;
     final overrideNetwork = networkSetting.overrideNetwork;
@@ -520,6 +521,7 @@ class SetupAction extends _$SetupAction {
         rawConfig: rawConfig,
         realPatchConfig: realPatchConfig,
         overrideDns: overrideDns,
+        overrideNtp: overrideNtp,
         appendSystemDns: appendSystemDns,
         overrideNetwork: overrideNetwork,
         addedRules: addedRules,
@@ -567,6 +569,9 @@ class SetupAction extends _$SetupAction {
   bool get rechecksTunAuthorization => system.isLinux;
 
   bool _getEffectiveTunEnable(bool enableTun) {
+    if (safeModeBuild) {
+      return false;
+    }
     if (!supportsTunElevation ||
         (requiresHelperSession && !helperSessionActive)) {
       return false;
@@ -626,6 +631,7 @@ class SetupAction extends _$SetupAction {
 
   @visibleForTesting
   Future<bool?> requestAdmin(bool enableTun) async {
+    if (safeModeBuild) return true;
     if (!requiresHelperSession) return _requestAdmin(enableTun, null);
     if (!enableTun) return true;
     final revision = _authorizationRevision;

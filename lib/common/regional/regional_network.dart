@@ -68,7 +68,13 @@ const _sharedBypass = [
 ];
 
 const _regionalBypassHead = <AppRegion, List<String>>{
-  AppRegion.china: ['*zhihu.com', '*zhimg.com', '*jd.com', '100ime-iat-api.xfyun.cn', '*360buyimg.com'],
+  AppRegion.china: [
+    '*zhihu.com',
+    '*zhimg.com',
+    '*jd.com',
+    '100ime-iat-api.xfyun.cn',
+    '*360buyimg.com',
+  ],
 };
 
 List<String> bypassForRegion(AppRegion region) => [
@@ -76,8 +82,9 @@ List<String> bypassForRegion(AppRegion region) => [
   ..._sharedBypass,
 ];
 
-bool isShippedBypass(List<String> domains) =>
-    AppRegion.values.any((region) => _listEquals(bypassForRegion(region), domains));
+bool isShippedBypass(List<String> domains) => AppRegion.values.any(
+  (region) => _listEquals(bypassForRegion(region), domains),
+);
 
 String systemDnsFallbackForRegion(AppRegion region) {
   final servers = dnsForRegion(region).defaultNameserver;

@@ -116,35 +116,8 @@ class _SettingsTabsState extends State<SettingsTabs> {
           onValueChanged: _handleSelect,
           children: {
             for (final (index, label) in widget.labels.indexed)
-              index: _TabLabel(label: label, isSelected: index == _index),
+              index: CommonTabLabel(label: label, selected: index == _index),
           },
-        ),
-      ),
-    );
-  }
-}
-
-class _TabLabel extends StatelessWidget {
-  const _TabLabel({required this.label, required this.isSelected});
-
-  final String label;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Container(
-      alignment: Alignment.center,
-      height: 36,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: context.textTheme.titleSmall?.copyWith(
-          color: isSelected
-              ? colorScheme.onSecondaryContainer
-              : colorScheme.onSurfaceVariant,
         ),
       ),
     );

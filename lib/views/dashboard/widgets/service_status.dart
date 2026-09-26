@@ -480,10 +480,7 @@ class _ServiceRow extends StatelessWidget {
         spacing: 6,
         children: [
           if (loading)
-            const SizedBox.square(
-              dimension: 10,
-              child: CommonCircleLoading(),
-            ),
+            const SizedBox.square(dimension: 10, child: CommonCircleLoading()),
           if (flag != null)
             Text(
               flag,

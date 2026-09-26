@@ -63,7 +63,9 @@ void main() {
     );
     addTearDown(container.dispose);
     globalState.container = container;
-    container.read(appSettingProvider.notifier).value = const AppSettingProps(region: AppRegion.russia);
+    container.read(appSettingProvider.notifier).value = const AppSettingProps(
+      region: AppRegion.russia,
+    );
     container
         .read(viewSizeProvider.notifier)
         .update((_) => const Size(900, 1600));
@@ -110,7 +112,11 @@ void main() {
   ) async {
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     expect(find.byType(HeroOrb), findsOneWidget);
@@ -203,7 +209,11 @@ void main() {
     );
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
       profiles: const [profile],
       currentProfileId: profile.id,
       byeDpiSupported: false,
@@ -229,7 +239,11 @@ void main() {
     _ModeSetupAction.selected = null;
     final container = await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     await tester.tap(find.byTooltip('ByeDPI'));
@@ -259,7 +273,11 @@ void main() {
   ) async {
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     expect(find.byType(DesyncControls), findsNothing);
@@ -275,7 +293,11 @@ void main() {
   testWidgets('strategy card opens the strategy page', (tester) async {
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     await tester.tap(find.text('Default ladder'));
@@ -295,7 +317,11 @@ void main() {
   testWidgets('test card opens the strategy test page', (tester) async {
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     await tester.tap(find.text('Strategy test'));
@@ -315,7 +341,11 @@ void main() {
   testWidgets('engine card opens engine and routing settings', (tester) async {
     await pumpHero(
       tester,
-      desync: const DesyncProps(featureEnabled: true, enabled: true, onlyDpi: true),
+      desync: const DesyncProps(
+        featureEnabled: true,
+        enabled: true,
+        onlyDpi: true,
+      ),
     );
 
     await tester.tap(find.text('Engine'));

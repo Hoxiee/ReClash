@@ -42,7 +42,7 @@ class ExperimentalNoticeDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: ShapeDecoration(
               color: colorScheme.tertiaryContainer,
-              shape: const RoundedRectangleBorder(borderRadius: AppRadius.md),
+              shape: AppShape.md,
             ),
             child: Row(
               spacing: 10,

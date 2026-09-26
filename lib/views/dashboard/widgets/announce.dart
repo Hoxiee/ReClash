@@ -16,7 +16,12 @@ final _urlPattern = RegExp(r'https?://[^\s]+', caseSensitive: false);
 
 const _lineSpacing = 1.35;
 
-bool _exceedsLines(String text, TextStyle? style, double maxWidth, int maxLines) {
+bool _exceedsLines(
+  String text,
+  TextStyle? style,
+  double maxWidth,
+  int maxLines,
+) {
   final painter = TextPainter(
     text: TextSpan(text: text, style: style),
     maxLines: maxLines,
@@ -169,7 +174,7 @@ class _MoreHint extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
       decoration: ShapeDecoration(
         color: context.colorScheme.surfaceContainerHigh,
-        shape: const StadiumBorder(),
+        shape: AppShape.full,
       ),
       child: GlyphIcon(
         AppGlyphs.chevronDown,

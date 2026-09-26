@@ -409,7 +409,12 @@ class _SlotMaterialize extends StatelessWidget {
 /// The press only paints: layout, hit testing, and anything anchored to the
 /// child, such as a popup menu or a tooltip, see it at rest.
 class ElasticPress extends StatefulWidget {
-  const ElasticPress({super.key, this.enabled = true, required this.child});
+  const ElasticPress({
+    super.key,
+    this.enabled = true,
+    this.strength = 1,
+    required this.child,
+  });
 
   /// Leaves a press on the button inside to the swell alone.
   static const buttonStyle = ButtonStyle(
@@ -420,6 +425,10 @@ class ElasticPress extends StatefulWidget {
   );
 
   final bool enabled;
+
+  /// Scales the whole visual response (swell, stretch, finger-follow). 1 is the
+  /// default feel; a smaller value keeps the interaction but softens the motion.
+  final double strength;
   final Widget child;
 
   @override
@@ -486,6 +495,7 @@ class _ElasticPressState extends State<ElasticPress>
         builder: (_, child) => _PressTransform(
           lift: _lift.value,
           pull: Offset(_pullX.value, _pullY.value),
+          strength: widget.strength,
           child: child,
         ),
         child: widget.child,
@@ -536,14 +546,20 @@ class ElasticButton extends StatelessWidget {
 }
 
 class _PressTransform extends SingleChildRenderObjectWidget {
-  const _PressTransform({required this.lift, required this.pull, super.child});
+  const _PressTransform({
+    required this.lift,
+    required this.pull,
+    this.strength = 1,
+    super.child,
+  });
 
   final double lift;
   final Offset pull;
+  final double strength;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderPressTransform(lift: lift, pull: pull);
+    return _RenderPressTransform(lift: lift, pull: pull, strength: strength);
   }
 
   @override
@@ -553,17 +569,23 @@ class _PressTransform extends SingleChildRenderObjectWidget {
   ) {
     renderObject
       ..lift = lift
-      ..pull = pull;
+      ..pull = pull
+      ..strength = strength;
   }
 }
 
 class _RenderPressTransform extends RenderProxyBox {
-  _RenderPressTransform({required double lift, required Offset pull})
-    : _lift = lift,
-      _pull = pull;
+  _RenderPressTransform({
+    required double lift,
+    required Offset pull,
+    required double strength,
+  }) : _lift = lift,
+       _pull = pull,
+       _strength = strength;
 
   double _lift;
   Offset _pull;
+  double _strength;
 
   set lift(double value) {
     if (value == _lift) {
@@ -581,16 +603,26 @@ class _RenderPressTransform extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  set strength(double value) {
+    if (value == _strength) {
+      return;
+    }
+    _strength = value;
+    markNeedsPaint();
+  }
+
   Matrix4 get _transform {
+    final lift = _lift * _strength;
+    final pull = _pull * _strength;
     final swell =
         1 +
-        _lift * math.min(_pressGrowth * 2, _maxPressGrowth / size.longestSide);
-    final scaleX = swell * (1 + _pull.dx.abs() / size.width * _pullStretch);
-    final scaleY = swell * (1 + _pull.dy.abs() / size.height * _pullStretch);
+        lift * math.min(_pressGrowth * 2, _maxPressGrowth / size.longestSide);
+    final scaleX = swell * (1 + pull.dx.abs() / size.width * _pullStretch);
+    final scaleY = swell * (1 + pull.dy.abs() / size.height * _pullStretch);
     final center = size.center(Offset.zero);
     return Matrix4.diagonal3Values(scaleX, scaleY, 1)..setTranslationRaw(
-      center.dx * (1 - scaleX) + _pull.dx,
-      center.dy * (1 - scaleY) + _pull.dy,
+      center.dx * (1 - scaleX) + pull.dx,
+      center.dy * (1 - scaleY) + pull.dy,
       0,
     );
   }

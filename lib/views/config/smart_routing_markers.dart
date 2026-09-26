@@ -24,9 +24,7 @@ class _MarkersItem extends StatelessWidget {
     return DecorationListItem.open(
       title: Text(title),
       subtitle: Text(
-        markers.isEmpty
-            ? desc
-            : appLocalizations.entriesCount(markers.length),
+        markers.isEmpty ? desc : appLocalizations.entriesCount(markers.length),
       ),
       blur: false,
       widget: _MarkersPage(title: title, kind: kind),
@@ -99,8 +97,7 @@ class _MarkersPageState extends ConsumerState<_MarkersPage> {
                   child: Text(appLocalizations.selectAll),
                 )
               : FilledButton.tonal(
-                  onPressed: () =>
-                      _showMarkerDialog(context, ref, widget.kind),
+                  onPressed: () => _showMarkerDialog(context, ref, widget.kind),
                   child: Text(appLocalizations.add),
                 ),
         ],
@@ -176,10 +173,7 @@ class _MarkersBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rows = _markerRowsOf(
-      ref.watch(smartRoutingSettingProvider),
-      kind,
-    );
+    final rows = _markerRowsOf(ref.watch(smartRoutingSettingProvider), kind);
     if (rows.isEmpty) {
       return NullStatus(
         label: context.appLocalizations.smartRoutingMarkersEmpty,

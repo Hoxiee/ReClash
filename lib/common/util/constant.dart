@@ -74,6 +74,7 @@ const commonDuration = Duration(milliseconds: 300);
 const renderThrottleDuration = Duration(milliseconds: 300);
 const dismissDuration = Duration(milliseconds: 400);
 const defaultUpdateDuration = Duration(days: 1);
+const autoUpdateCheckInterval = Duration(hours: 24);
 const MMDB = 'GEOIP.metadb';
 const ASN = 'ASN.mmdb';
 const GEOIP = 'GEOIP.dat';
@@ -92,6 +93,7 @@ const clashConfigKey = 'clash_config';
 const configKey = 'config';
 const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
+const updateCheckKey = 'update_check_at';
 const subscriptionNoticeKey = 'subscription_notice';
 const subscriptionHostsKey = 'subscription_hosts';
 const subscriptionUpdateReportKey = 'subscription_update_report';
@@ -155,3 +157,5 @@ const main = (config) => {
 
 const backupDatabaseName = 'database.sqlite';
 const configJsonName = 'config.json';
+
+const safeModeBuild = bool.fromEnvironment('SAFE_MODE');

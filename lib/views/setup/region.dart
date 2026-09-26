@@ -47,10 +47,7 @@ class SetupRegionSettings extends ConsumerWidget {
                 // Regions that seed HWID on by default are the ones whose
                 // providers rely on it; elsewhere the warning would cry wolf.
                 if (!value &&
-                    regionAllowsFacet(
-                      region,
-                      RegionalFacetId.deviceIdentity,
-                    )) {
+                    regionAllowsFacet(region, RegionalFacetId.deviceIdentity)) {
                   final confirmed = await dialogs.showMessage(
                     context: context,
                     title: l10n.sendDeviceIdentity,

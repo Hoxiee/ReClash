@@ -25,20 +25,45 @@ class FocusableTap extends StatefulWidget {
 
 class _FocusableTapState extends State<FocusableTap> {
   bool _focused = false;
+  bool _hovered = false;
+
+  void _handleTap() {
+    final onTap = widget.onTap;
+    if (onTap == null) return;
+    Feedback.forTap(context);
+    onTap();
+  }
+
+  void _handleLongPress() {
+    final onLongPress = widget.onLongPress;
+    if (onLongPress == null) return;
+    Feedback.forLongPress(context);
+    onLongPress();
+  }
 
   @override
   Widget build(BuildContext context) {
     final enabled = widget.onTap != null;
+    final colorScheme = context.colorScheme;
+    final borderColor = _focused
+        ? colorScheme.primary
+        : _hovered
+        ? colorScheme.primary.opacity60
+        : Colors.transparent;
     return FocusableActionDetector(
       enabled: enabled,
       autofocus: widget.autofocus && enabled,
+      mouseCursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
       onShowFocusHighlight: (value) {
         if (mounted && value != _focused) setState(() => _focused = value);
+      },
+      onShowHoverHighlight: (value) {
+        if (mounted && value != _hovered) setState(() => _hovered = value);
       },
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
-            widget.onTap?.call();
+            _handleTap();
             return null;
           },
         ),
@@ -48,8 +73,10 @@ class _FocusableTapState extends State<FocusableTap> {
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: widget.onTap,
-            onLongPress: widget.onLongPress,
+            // Match the tap feedback the Material-button cards emit; a bare
+            // GestureDetector otherwise stays silent where InkWell would click.
+            onTap: enabled ? _handleTap : null,
+            onLongPress: widget.onLongPress == null ? null : _handleLongPress,
             child: widget.child,
           ),
           Positioned.fill(
@@ -58,16 +85,14 @@ class _FocusableTapState extends State<FocusableTap> {
                 duration: context.motionDuration(_borderDuration),
                 curve: Easing.standard,
                 decoration: ShapeDecoration(
+                  color: _hovered
+                      ? colorScheme.onSurface.withValues(alpha: 0.06)
+                      : null,
                   shape: RoundedSuperellipseBorder(
                     borderRadius: BorderRadius.circular(
                       widget.borderRadius + 4,
                     ),
-                    side: BorderSide(
-                      color: _focused
-                          ? context.colorScheme.primary
-                          : Colors.transparent,
-                      width: 2,
-                    ),
+                    side: BorderSide(color: borderColor, width: 2),
                   ),
                 ),
               ),

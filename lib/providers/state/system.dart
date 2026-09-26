@@ -253,12 +253,15 @@ SharedState sharedState(Ref ref) {
     pauseTip: currentAppLocalizations.pauseVpn,
     setupParams: SetupParams(selectedMap: selectedMap, testUrl: testUrl),
     vpnOptions: VpnOptions(
-      enable: vpnSetting.enable,
+      enable: vpnSetting.enable && !safeModeBuild,
       stack: stack,
       // VpnService.setHttpProxy cannot carry credentials, so an authenticated
       // mixed port must not be declared as the system HTTP proxy; traffic
       // still flows through TUN.
-      systemProxy: vpnSetting.systemProxy && !networkSetting.authenticated,
+      systemProxy:
+          vpnSetting.systemProxy &&
+          !networkSetting.authenticated &&
+          !safeModeBuild,
       port: port,
       ipv6: vpnSetting.ipv6,
       dnsHijacking: vpnSetting.dnsHijacking,

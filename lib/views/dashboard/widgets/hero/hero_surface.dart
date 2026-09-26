@@ -91,6 +91,8 @@ class HeroSurface extends StatelessWidget {
       onPressed: onPressed,
       onLongPress: onLongPress,
       minimumSize: Size.zero,
+      visualDensity: VisualDensity.standard,
+      clipBehavior: Clip.none,
       child: alignment == null
           ? child
           : Align(alignment: alignment!, child: child),

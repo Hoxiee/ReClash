@@ -152,6 +152,12 @@ func (e *rcxEngine) startSuspectCheck() bool {
 		return false
 	}
 	now := e.runtime.Now()
+	// The incumbent is verified too, and first: a node carrying traffic on an
+	// unmeasured exit can be dead behind a live entry, and only a marker probe
+	// disproves it so the engine can hand off instead of coasting on entry transit.
+	if e.incumbent != "" && e.wantsLocate(e.incumbent, now) {
+		return e.startLocate(e.incumbent, now)
+	}
 	for _, member := range e.runtime.Members() {
 		if member.Name != e.incumbent && e.wantsLocate(member.Name, now) {
 			return e.startLocate(member.Name, now)

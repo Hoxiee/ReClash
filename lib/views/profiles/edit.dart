@@ -14,8 +14,28 @@ import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:yaml/yaml.dart';
 
 import 'client_preset_selector.dart';
+
+Object? _plainYaml(Object? node) => switch (node) {
+  YamlMap() => {
+    for (final entry in node.entries)
+      entry.key.toString(): _plainYaml(entry.value),
+  },
+  YamlList() => [for (final item in node) _plainYaml(item)],
+  _ => node,
+};
+
+Map<String, dynamic>? _proxyMapping(Object? node) {
+  if (node is! YamlMap) {
+    return null;
+  }
+  return {
+    for (final entry in node.entries)
+      entry.key.toString(): _plainYaml(entry.value),
+  };
+}
 
 class EditProfileView extends ConsumerStatefulWidget {
   final Profile profile;
@@ -154,8 +174,63 @@ class _EditProfileViewState extends ConsumerState<EditProfileView> {
       );
       return;
     }
+    final rejected = await _rejectedProxies(data);
+    if (rejected.isNotEmpty) {
+      final detail = rejected
+          .map((entry) => '${entry.name}: ${entry.message}')
+          .join('\n');
+      unawaited(
+        dialogs.showMessage(
+          title: currentAppLocalizations.tip,
+          message: TextSpan(text: detail),
+        ),
+      );
+      return;
+    }
     if (context.mounted) {
       Navigator.of(context).pop(data);
+    }
+  }
+
+  // validateConfig only checks YAML shape, so a bad node saves clean and fails
+  // only at apply; validateProxies names the rejects, degrading to no report.
+  Future<List<({int index, String name, String message})>> _rejectedProxies(
+    String data,
+  ) async {
+    try {
+      final document = loadYaml(data);
+      if (document is! YamlMap) {
+        return const [];
+      }
+      final proxies = document['proxies'];
+      if (proxies is! YamlList) {
+        return const [];
+      }
+      final mappings = <Map<String, dynamic>>[];
+      for (final entry in proxies) {
+        final mapping = _proxyMapping(entry);
+        if (mapping != null) {
+          mappings.add(mapping);
+        }
+      }
+      if (mappings.isEmpty) {
+        return const [];
+      }
+      final errors = await ref
+          .read(coreHandlerProvider)
+          .validateProxies(mappings);
+      final rejected = <({int index, String name, String message})>[];
+      for (var i = 0; i < errors.length && i < mappings.length; i++) {
+        if (errors[i].isEmpty) {
+          continue;
+        }
+        final rawName = mappings[i]['name']?.toString().trim() ?? '';
+        final name = rawName.isNotEmpty ? rawName : '#${i + 1}';
+        rejected.add((index: i, name: name, message: errors[i]));
+      }
+      return rejected;
+    } catch (_) {
+      return const [];
     }
   }
 

@@ -48,15 +48,9 @@ class RuleItem extends StatelessWidget {
     if (rule.ruleAction != RuleAction.SUB_RULE) {
       final ruleTarget = rule.ruleTarget ?? '';
       if (ruleTarget.toUpperCase() == 'DIRECT') {
-        return (
-          invalid: false,
-          color: context.colorScheme.success,
-        );
+        return (invalid: false, color: context.colorScheme.success);
       } else if (ruleTarget.toUpperCase() == 'REJECT') {
-        return (
-          invalid: false,
-          color: context.colorScheme.warning,
-        );
+        return (invalid: false, color: context.colorScheme.warning);
       } else if (hasMatch && ruleTarget.toUpperCase() == 'MATCH') {
         return (invalid: false, color: context.colorScheme.tertiary);
       }

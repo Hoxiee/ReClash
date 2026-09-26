@@ -164,7 +164,12 @@ class _SubscriptionReportSheetState
       title: context.appLocalizations.subscriptionReport,
       body: Padding(
         // The scaffold already reserves the toolbar height above the body.
-        padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + BottomInsetScope.of(context)),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          16 + BottomInsetScope.of(context),
+        ),
         child: _buildBody(context, report),
       ),
     );
@@ -195,13 +200,19 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const CommonCircleLoading(),
-        const SizedBox(height: AppSpacing.lg),
-        Text(label, style: context.textTheme.bodyMedium),
-      ],
+    // A content-hugging sheet lays this out under a loose Flexible; a max
+    // Column would balloon it to full height, then snap shut once the report
+    // loads. Hug the loader so the sheet enters at a stable size.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CommonCircleLoading(),
+          const SizedBox(height: AppSpacing.lg),
+          Text(label, style: context.textTheme.bodyMedium),
+        ],
+      ),
     );
   }
 }

@@ -308,6 +308,24 @@ void main() {
       expect(popCount, 1);
     });
 
+    testWidgets('a resume after denial does not re-prompt for permission', (
+      tester,
+    ) async {
+      platform.denyPermission = true;
+      await pumpScanPage(tester, onPopped: (_) {});
+      expect(platform.startCalls, 1);
+
+      // The OS permission dialog cycles the app through inactive/resumed; a
+      // denied camera reports no permission, so resume must not restart start()
+      // and re-spam the prompt.
+      await sendLifecycle(tester, AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      await sendLifecycle(tester, AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(platform.startCalls, 1);
+    });
+
     testWidgets('repeated resumes do not stack barcode subscriptions', (
       tester,
     ) async {

@@ -1,6 +1,7 @@
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/tray_delays.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:tray/tray.dart';
@@ -264,26 +265,72 @@ class AppTray implements TrayPort {
     if (trayState.groups.isEmpty) {
       return const [];
     }
+    final delays = read(trayDelaysProvider);
+    final proxiesAction = read(proxiesActionProvider.notifier);
     return [
       for (final group in trayState.groups)
-        TrayMenuSubmenu(
-          label: groupDisplayName(group.name),
-          items: [
-            for (final proxy in group.all)
-              TrayMenuCheckbox(
-                label: proxy.name,
-                checked:
-                    read(selectedProxyNameProvider(group.name)) == proxy.name,
-                onSelected: () {
-                  read(
-                    proxiesActionProvider.notifier,
-                  ).changeProxy(groupName: group.name, proxyName: proxy.name);
-                },
-              ),
-          ],
+        _buildGroupSubmenu(
+          group,
+          selectedName: read(selectedProxyNameProvider(group.name)),
+          delays: delays[group.name] ?? const {},
+          onSelected: (proxyName) {
+            proxiesAction.changeProxy(
+              groupName: group.name,
+              proxyName: proxyName,
+            );
+          },
         ),
+      TrayMenuAction(
+        label: HotAction.delayTest.label,
+        detail: _shortcut(trayState, HotAction.delayTest),
+        onSelected: () {
+          proxiesAction.delayTestGroups(trayState.groups);
+        },
+      ),
       const TrayMenuSeparator(),
     ];
+  }
+
+  TrayMenuSubmenu _buildGroupSubmenu(
+    Group group, {
+    required String? selectedName,
+    required Map<String, int> delays,
+    required void Function(String proxyName) onSelected,
+  }) {
+    return TrayMenuSubmenu(
+      label: groupDisplayName(group.name),
+      detail: _delayText(delays[selectedName]),
+      detailTone: _delayTone(delays[selectedName]),
+      items: [
+        for (final proxy in group.all)
+          TrayMenuCheckbox(
+            label: proxy.name,
+            checked: selectedName == proxy.name,
+            detail: _delayText(delays[proxy.name]),
+            detailTone: _delayTone(delays[proxy.name]),
+            onSelected: () {
+              onSelected(proxy.name);
+            },
+          ),
+      ],
+    );
+  }
+
+  String? _delayText(int? delay) {
+    if (delay == null) {
+      return null;
+    }
+    return delay > 0 ? '$delay' : currentAppLocalizations.timeout;
+  }
+
+  // Matches the 600 ms threshold of ColorScheme.delayColor on a proxy card.
+  TrayDetailTone _delayTone(int? delay) {
+    return switch (delay) {
+      null => TrayDetailTone.plain,
+      <= 0 => TrayDetailTone.error,
+      < 600 => TrayDetailTone.success,
+      _ => TrayDetailTone.warning,
+    };
   }
 
   Future<void> _copyEnv(int port) async {

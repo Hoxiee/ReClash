@@ -526,8 +526,9 @@ void main() {
     await tester.pumpWidget(
       TestApp(
         wrapInProviderScope: true,
-        homeBuilder: (child) =>
-            Scaffold(body: Center(child: SizedBox(width: 150, child: child))),
+        homeBuilder: (child) => Scaffold(
+          body: Center(child: SizedBox(width: 150, child: child)),
+        ),
         child: MemoryInfo(memoryReader: readMemory),
       ),
     );
@@ -539,7 +540,8 @@ void main() {
       find.descendant(
         of: find.byType(MemoryInfo),
         matching: find.byWidgetPredicate(
-          (widget) => widget is Text && widget.overflow == TextOverflow.ellipsis,
+          (widget) =>
+              widget is Text && widget.overflow == TextOverflow.ellipsis,
         ),
       ),
       findsWidgets,

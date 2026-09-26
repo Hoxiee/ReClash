@@ -135,7 +135,9 @@ void main() {
     final dashboardY = tester
         .getCenter(find.byGlyph(AppGlyphs.dashboard).first)
         .dy;
-    final profilesY = tester.getCenter(find.byGlyph(AppGlyphs.profiles).first).dy;
+    final profilesY = tester
+        .getCenter(find.byGlyph(AppGlyphs.profiles).first)
+        .dy;
     final requestsY = tester
         .getCenter(find.byGlyph(AppGlyphs.requests).first)
         .dy;

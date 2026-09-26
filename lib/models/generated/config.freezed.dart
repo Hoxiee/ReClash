@@ -829,7 +829,7 @@ return $default(_that.locale,_that.region,_that.dashboardWidgets,_that.onlyStati
 @JsonSerializable()
 
 class _AppSettingProps implements AppSettingProps {
-  const _AppSettingProps({this.locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) this.region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.notificationSettings = defaultNotificationSettings, this.autoLaunch = false, this.silentLaunch = false, this.highPriorityAutoLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = false, this.showLabel = false, this.disclaimerAccepted = false, this.setupCompleted = false, this.setupStep = 0, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.smartRoutingDiagnostics = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, @JsonKey(readValue: _readUserAgents)  List<String> userAgents = defaultUserAgents, this.sendDeviceIdentity = false, this.iconVariant = 'default', this.reduceMotion = false,  List<String> serviceOrder = const [],  List<String> disabledServices = const [], this.currentService = '', this.hideIp = false}): _dashboardWidgets = dashboardWidgets,_userAgents = userAgents,_serviceOrder = serviceOrder,_disabledServices = disabledServices;
+  const _AppSettingProps({this.locale, @JsonKey(unknownEnumValue: JsonKey.nullForUndefinedEnumValue) this.region, @JsonKey(fromJson: dashboardWidgetsSafeFormJson)  List<DashboardWidget> dashboardWidgets = defaultDashboardWidgets, this.onlyStatisticsProxy = false, this.notificationSettings = defaultNotificationSettings, this.autoLaunch = false, this.silentLaunch = false, this.highPriorityAutoLaunch = false, this.autoRun = false, this.openLogs = false, this.closeConnections = true, this.newDashboard = true, this.testUrl = defaultTestUrl, this.isAnimateToPage = true, this.autoCheckUpdate = true, this.showLabel = false, this.disclaimerAccepted = false, this.setupCompleted = false, this.setupStep = 0, this.crashlyticsTip = false, this.crashlytics = false, this.minimizeOnExit = true, this.hidden = false, this.developerMode = false, this.smartRoutingDiagnostics = false, this.restoreStrategy = RestoreStrategy.compatible, this.showTrayTitle = true, this.checkCertificate = true, @JsonKey(readValue: _readUserAgents)  List<String> userAgents = defaultUserAgents, this.sendDeviceIdentity = false, this.iconVariant = 'default', this.reduceMotion = false,  List<String> serviceOrder = const [],  List<String> disabledServices = const [], this.currentService = '', this.hideIp = false}): _dashboardWidgets = dashboardWidgets,_userAgents = userAgents,_serviceOrder = serviceOrder,_disabledServices = disabledServices;
   factory _AppSettingProps.fromJson(Map<String, dynamic> json) => _$AppSettingPropsFromJson(json);
 
 @override final  String? locale;
@@ -3472,7 +3472,7 @@ as double,
 /// @nodoc
 mixin _$ThemeProps {
 
- int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; bool get scheduledTheme; String? get darkAt; String? get lightAt; DynamicSchemeVariant get schemeVariant; bool get pureBlack; double get contrastLevel; TextScale get textScale;@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps get wallpaper;
+ int? get primaryColor; List<int> get primaryColors; ThemeMode get themeMode; bool get scheduledTheme; String? get darkAt; String? get lightAt; DynamicSchemeVariant get schemeVariant; bool get pureBlack; bool get predictiveBack; double get contrastLevel; TextScale get textScale;@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps get wallpaper;
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3486,20 +3486,20 @@ $ThemePropsCopyWith<ThemeProps> get copyWith => _$ThemePropsCopyWithImpl<ThemePr
 @override
 bool operator ==(Object other) {
   final _this = this as ThemeProps;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, _this.primaryColor) || other.primaryColor == _this.primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _this.primaryColors)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.scheduledTheme, _this.scheduledTheme) || other.scheduledTheme == _this.scheduledTheme)&&(identical(other.darkAt, _this.darkAt) || other.darkAt == _this.darkAt)&&(identical(other.lightAt, _this.lightAt) || other.lightAt == _this.lightAt)&&(identical(other.schemeVariant, _this.schemeVariant) || other.schemeVariant == _this.schemeVariant)&&(identical(other.pureBlack, _this.pureBlack) || other.pureBlack == _this.pureBlack)&&(identical(other.contrastLevel, _this.contrastLevel) || other.contrastLevel == _this.contrastLevel)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.wallpaper, _this.wallpaper) || other.wallpaper == _this.wallpaper));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThemeProps&&(identical(other.primaryColor, _this.primaryColor) || other.primaryColor == _this.primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _this.primaryColors)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.scheduledTheme, _this.scheduledTheme) || other.scheduledTheme == _this.scheduledTheme)&&(identical(other.darkAt, _this.darkAt) || other.darkAt == _this.darkAt)&&(identical(other.lightAt, _this.lightAt) || other.lightAt == _this.lightAt)&&(identical(other.schemeVariant, _this.schemeVariant) || other.schemeVariant == _this.schemeVariant)&&(identical(other.pureBlack, _this.pureBlack) || other.pureBlack == _this.pureBlack)&&(identical(other.predictiveBack, _this.predictiveBack) || other.predictiveBack == _this.predictiveBack)&&(identical(other.contrastLevel, _this.contrastLevel) || other.contrastLevel == _this.contrastLevel)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.wallpaper, _this.wallpaper) || other.wallpaper == _this.wallpaper));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ThemeProps;
-  return Object.hash(runtimeType,_this.primaryColor,const DeepCollectionEquality().hash(_this.primaryColors),_this.themeMode,_this.scheduledTheme,_this.darkAt,_this.lightAt,_this.schemeVariant,_this.pureBlack,_this.contrastLevel,_this.textScale,_this.wallpaper);
+  return Object.hash(runtimeType,_this.primaryColor,const DeepCollectionEquality().hash(_this.primaryColors),_this.themeMode,_this.scheduledTheme,_this.darkAt,_this.lightAt,_this.schemeVariant,_this.pureBlack,_this.predictiveBack,_this.contrastLevel,_this.textScale,_this.wallpaper);
 }
 
 @override
 String toString() {
   final _this = this as ThemeProps;
-  return 'ThemeProps(primaryColor: ${_this.primaryColor}, primaryColors: ${_this.primaryColors}, themeMode: ${_this.themeMode}, scheduledTheme: ${_this.scheduledTheme}, darkAt: ${_this.darkAt}, lightAt: ${_this.lightAt}, schemeVariant: ${_this.schemeVariant}, pureBlack: ${_this.pureBlack}, contrastLevel: ${_this.contrastLevel}, textScale: ${_this.textScale}, wallpaper: ${_this.wallpaper})';
+  return 'ThemeProps(primaryColor: ${_this.primaryColor}, primaryColors: ${_this.primaryColors}, themeMode: ${_this.themeMode}, scheduledTheme: ${_this.scheduledTheme}, darkAt: ${_this.darkAt}, lightAt: ${_this.lightAt}, schemeVariant: ${_this.schemeVariant}, pureBlack: ${_this.pureBlack}, predictiveBack: ${_this.predictiveBack}, contrastLevel: ${_this.contrastLevel}, textScale: ${_this.textScale}, wallpaper: ${_this.wallpaper})';
 }
 
 
@@ -3510,7 +3510,7 @@ abstract mixin class $ThemePropsCopyWith<$Res>  {
   factory $ThemePropsCopyWith(ThemeProps value, $Res Function(ThemeProps) _then) = _$ThemePropsCopyWithImpl;
 @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, bool predictiveBack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
 });
 
 
@@ -3527,7 +3527,7 @@ class _$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? predictiveBack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
   return _then(ThemeProps(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self.primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -3537,6 +3537,7 @@ as bool,darkAt: freezed == darkAt ? _self.darkAt : darkAt // ignore: cast_nullab
 as String?,lightAt: freezed == lightAt ? _self.lightAt : lightAt // ignore: cast_nullable_to_non_nullable
 as String?,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
+as bool,predictiveBack: null == predictiveBack ? _self.predictiveBack : predictiveBack // ignore: cast_nullable_to_non_nullable
 as bool,contrastLevel: null == contrastLevel ? _self.contrastLevel : contrastLevel // ignore: cast_nullable_to_non_nullable
 as double,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
 as TextScale,wallpaper: null == wallpaper ? _self.wallpaper : wallpaper // ignore: cast_nullable_to_non_nullable
@@ -3643,10 +3644,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   return orElse();
 
 }
@@ -3664,10 +3665,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps():
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3684,10 +3685,10 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? primaryColor,  List<int> primaryColors,  ThemeMode themeMode,  bool scheduledTheme,  String? darkAt,  String? lightAt,  DynamicSchemeVariant schemeVariant,  bool pureBlack,  bool predictiveBack,  double contrastLevel,  TextScale textScale, @JsonKey(fromJson: WallpaperProps.safeFromJson)  WallpaperProps wallpaper)?  $default,) {final _that = this;
 switch (_that) {
 case _ThemeProps() when $default != null:
-return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
+return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.scheduledTheme,_that.darkAt,_that.lightAt,_that.schemeVariant,_that.pureBlack,_that.predictiveBack,_that.contrastLevel,_that.textScale,_that.wallpaper);case _:
   return null;
 
 }
@@ -3699,7 +3700,7 @@ return $default(_that.primaryColor,_that.primaryColors,_that.themeMode,_that.sch
 @JsonSerializable()
 
 class _ThemeProps implements ThemeProps {
-  const _ThemeProps({this.primaryColor,  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.dark, this.scheduledTheme = false, this.darkAt, this.lightAt, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.contrastLevel = 0, this.textScale = const TextScale(), @JsonKey(fromJson: WallpaperProps.safeFromJson) this.wallpaper = const WallpaperProps()}): _primaryColors = primaryColors;
+  const _ThemeProps({this.primaryColor,  List<int> primaryColors = defaultPrimaryColors, this.themeMode = ThemeMode.dark, this.scheduledTheme = false, this.darkAt, this.lightAt, this.schemeVariant = DynamicSchemeVariant.content, this.pureBlack = false, this.predictiveBack = true, this.contrastLevel = 0, this.textScale = const TextScale(), @JsonKey(fromJson: WallpaperProps.safeFromJson) this.wallpaper = const WallpaperProps()}): _primaryColors = primaryColors;
   factory _ThemeProps.fromJson(Map<String, dynamic> json) => _$ThemePropsFromJson(json);
 
 @override final  int? primaryColor;
@@ -3716,6 +3717,7 @@ class _ThemeProps implements ThemeProps {
 @override final  String? lightAt;
 @override@JsonKey() final  DynamicSchemeVariant schemeVariant;
 @override@JsonKey() final  bool pureBlack;
+@override@JsonKey() final  bool predictiveBack;
 @override@JsonKey() final  double contrastLevel;
 @override@JsonKey() final  TextScale textScale;
 @override@JsonKey(fromJson: WallpaperProps.safeFromJson) final  WallpaperProps wallpaper;
@@ -3733,18 +3735,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.scheduledTheme, scheduledTheme) || other.scheduledTheme == scheduledTheme)&&(identical(other.darkAt, darkAt) || other.darkAt == darkAt)&&(identical(other.lightAt, lightAt) || other.lightAt == lightAt)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.contrastLevel, contrastLevel) || other.contrastLevel == contrastLevel)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.wallpaper, wallpaper) || other.wallpaper == wallpaper));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThemeProps&&(identical(other.primaryColor, primaryColor) || other.primaryColor == primaryColor)&&const DeepCollectionEquality().equals(other.primaryColors, _primaryColors)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.scheduledTheme, scheduledTheme) || other.scheduledTheme == scheduledTheme)&&(identical(other.darkAt, darkAt) || other.darkAt == darkAt)&&(identical(other.lightAt, lightAt) || other.lightAt == lightAt)&&(identical(other.schemeVariant, schemeVariant) || other.schemeVariant == schemeVariant)&&(identical(other.pureBlack, pureBlack) || other.pureBlack == pureBlack)&&(identical(other.predictiveBack, predictiveBack) || other.predictiveBack == predictiveBack)&&(identical(other.contrastLevel, contrastLevel) || other.contrastLevel == contrastLevel)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.wallpaper, wallpaper) || other.wallpaper == wallpaper));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,scheduledTheme,darkAt,lightAt,schemeVariant,pureBlack,contrastLevel,textScale,wallpaper);
+    return Object.hash(runtimeType,primaryColor,const DeepCollectionEquality().hash(_primaryColors),themeMode,scheduledTheme,darkAt,lightAt,schemeVariant,pureBlack,predictiveBack,contrastLevel,textScale,wallpaper);
 }
 
 @override
 String toString() {
-    return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, scheduledTheme: $scheduledTheme, darkAt: $darkAt, lightAt: $lightAt, schemeVariant: $schemeVariant, pureBlack: $pureBlack, contrastLevel: $contrastLevel, textScale: $textScale, wallpaper: $wallpaper)';
+    return 'ThemeProps(primaryColor: $primaryColor, primaryColors: $primaryColors, themeMode: $themeMode, scheduledTheme: $scheduledTheme, darkAt: $darkAt, lightAt: $lightAt, schemeVariant: $schemeVariant, pureBlack: $pureBlack, predictiveBack: $predictiveBack, contrastLevel: $contrastLevel, textScale: $textScale, wallpaper: $wallpaper)';
 }
 
 
@@ -3755,7 +3757,7 @@ abstract mixin class _$ThemePropsCopyWith<$Res> implements $ThemePropsCopyWith<$
   factory _$ThemePropsCopyWith(_ThemeProps value, $Res Function(_ThemeProps) _then) = __$ThemePropsCopyWithImpl;
 @override @useResult
 $Res call({
- int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
+ int? primaryColor, List<int> primaryColors, ThemeMode themeMode, bool scheduledTheme, String? darkAt, String? lightAt, DynamicSchemeVariant schemeVariant, bool pureBlack, bool predictiveBack, double contrastLevel, TextScale textScale,@JsonKey(fromJson: WallpaperProps.safeFromJson) WallpaperProps wallpaper
 });
 
 
@@ -3772,7 +3774,7 @@ class __$ThemePropsCopyWithImpl<$Res>
 
 /// Create a copy of ThemeProps
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? primaryColor = freezed,Object? primaryColors = null,Object? themeMode = null,Object? scheduledTheme = null,Object? darkAt = freezed,Object? lightAt = freezed,Object? schemeVariant = null,Object? pureBlack = null,Object? predictiveBack = null,Object? contrastLevel = null,Object? textScale = null,Object? wallpaper = null,}) {
   return _then(_ThemeProps(
 primaryColor: freezed == primaryColor ? _self.primaryColor : primaryColor // ignore: cast_nullable_to_non_nullable
 as int?,primaryColors: null == primaryColors ? _self._primaryColors : primaryColors // ignore: cast_nullable_to_non_nullable
@@ -3782,6 +3784,7 @@ as bool,darkAt: freezed == darkAt ? _self.darkAt : darkAt // ignore: cast_nullab
 as String?,lightAt: freezed == lightAt ? _self.lightAt : lightAt // ignore: cast_nullable_to_non_nullable
 as String?,schemeVariant: null == schemeVariant ? _self.schemeVariant : schemeVariant // ignore: cast_nullable_to_non_nullable
 as DynamicSchemeVariant,pureBlack: null == pureBlack ? _self.pureBlack : pureBlack // ignore: cast_nullable_to_non_nullable
+as bool,predictiveBack: null == predictiveBack ? _self.predictiveBack : predictiveBack // ignore: cast_nullable_to_non_nullable
 as bool,contrastLevel: null == contrastLevel ? _self.contrastLevel : contrastLevel // ignore: cast_nullable_to_non_nullable
 as double,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
 as TextScale,wallpaper: null == wallpaper ? _self.wallpaper : wallpaper // ignore: cast_nullable_to_non_nullable
@@ -4117,7 +4120,7 @@ as bool,
 /// @nodoc
 mixin _$Config {
 
- int? get currentProfileId; bool get overrideDns;@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps get milestoneProps; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps;@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps get desyncProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
+ int? get currentProfileId; bool get overrideDns; bool get overrideNtp;@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps get milestoneProps; List<HotKeyAction> get hotKeyActions;@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps get appSettingProps; DAVProps? get davProps; NetworkProps get networkProps; VpnProps get vpnProps; SmartRoutingProps get smartRoutingProps;@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps get desyncProps;@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps get themeProps; ProxiesStyleProps get proxiesStyleProps; WindowProps get windowProps; PatchClashConfig get patchClashConfig;
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -4131,20 +4134,20 @@ $ConfigCopyWith<Config> get copyWith => _$ConfigCopyWithImpl<Config>(this as Con
 @override
 bool operator ==(Object other) {
   final _this = this as Config;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.milestoneProps, _this.milestoneProps) || other.milestoneProps == _this.milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.desyncProps, _this.desyncProps) || other.desyncProps == _this.desyncProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Config&&(identical(other.currentProfileId, _this.currentProfileId) || other.currentProfileId == _this.currentProfileId)&&(identical(other.overrideDns, _this.overrideDns) || other.overrideDns == _this.overrideDns)&&(identical(other.overrideNtp, _this.overrideNtp) || other.overrideNtp == _this.overrideNtp)&&(identical(other.milestoneProps, _this.milestoneProps) || other.milestoneProps == _this.milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _this.hotKeyActions)&&(identical(other.appSettingProps, _this.appSettingProps) || other.appSettingProps == _this.appSettingProps)&&(identical(other.davProps, _this.davProps) || other.davProps == _this.davProps)&&(identical(other.networkProps, _this.networkProps) || other.networkProps == _this.networkProps)&&(identical(other.vpnProps, _this.vpnProps) || other.vpnProps == _this.vpnProps)&&(identical(other.smartRoutingProps, _this.smartRoutingProps) || other.smartRoutingProps == _this.smartRoutingProps)&&(identical(other.desyncProps, _this.desyncProps) || other.desyncProps == _this.desyncProps)&&(identical(other.themeProps, _this.themeProps) || other.themeProps == _this.themeProps)&&(identical(other.proxiesStyleProps, _this.proxiesStyleProps) || other.proxiesStyleProps == _this.proxiesStyleProps)&&(identical(other.windowProps, _this.windowProps) || other.windowProps == _this.windowProps)&&(identical(other.patchClashConfig, _this.patchClashConfig) || other.patchClashConfig == _this.patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Config;
-  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,_this.milestoneProps,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.desyncProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
+  return Object.hash(runtimeType,_this.currentProfileId,_this.overrideDns,_this.overrideNtp,_this.milestoneProps,const DeepCollectionEquality().hash(_this.hotKeyActions),_this.appSettingProps,_this.davProps,_this.networkProps,_this.vpnProps,_this.smartRoutingProps,_this.desyncProps,_this.themeProps,_this.proxiesStyleProps,_this.windowProps,_this.patchClashConfig);
 }
 
 @override
 String toString() {
   final _this = this as Config;
-  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, milestoneProps: ${_this.milestoneProps}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, desyncProps: ${_this.desyncProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
+  return 'Config(currentProfileId: ${_this.currentProfileId}, overrideDns: ${_this.overrideDns}, overrideNtp: ${_this.overrideNtp}, milestoneProps: ${_this.milestoneProps}, hotKeyActions: ${_this.hotKeyActions}, appSettingProps: ${_this.appSettingProps}, davProps: ${_this.davProps}, networkProps: ${_this.networkProps}, vpnProps: ${_this.vpnProps}, smartRoutingProps: ${_this.smartRoutingProps}, desyncProps: ${_this.desyncProps}, themeProps: ${_this.themeProps}, proxiesStyleProps: ${_this.proxiesStyleProps}, windowProps: ${_this.windowProps}, patchClashConfig: ${_this.patchClashConfig})';
 }
 
 
@@ -4155,7 +4158,7 @@ abstract mixin class $ConfigCopyWith<$Res>  {
   factory $ConfigCopyWith(Config value, $Res Function(Config) _then) = _$ConfigCopyWithImpl;
 @useResult
 $Res call({
- int? currentProfileId, bool overrideDns,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns, bool overrideNtp,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
@@ -4172,10 +4175,11 @@ class _$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
+as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
 as bool,milestoneProps: null == milestoneProps ? _self.milestoneProps : milestoneProps // ignore: cast_nullable_to_non_nullable
 as MilestoneProps,hotKeyActions: null == hotKeyActions ? _self.hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
 as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
@@ -4375,10 +4379,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  bool overrideNtp, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return orElse();
 
 }
@@ -4396,10 +4400,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? currentProfileId,  bool overrideDns,  bool overrideNtp, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)  $default,) {final _that = this;
 switch (_that) {
 case _Config():
-return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4416,10 +4420,10 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? currentProfileId,  bool overrideDns,  bool overrideNtp, @JsonKey(fromJson: MilestoneProps.safeFromJson)  MilestoneProps milestoneProps,  List<HotKeyAction> hotKeyActions, @JsonKey(fromJson: AppSettingProps.safeFromJson)  AppSettingProps appSettingProps,  DAVProps? davProps,  NetworkProps networkProps,  VpnProps vpnProps,  SmartRoutingProps smartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson)  DesyncProps desyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson)  ThemeProps themeProps,  ProxiesStyleProps proxiesStyleProps,  WindowProps windowProps,  PatchClashConfig patchClashConfig)?  $default,) {final _that = this;
 switch (_that) {
 case _Config() when $default != null:
-return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
+return $default(_that.currentProfileId,_that.overrideDns,_that.overrideNtp,_that.milestoneProps,_that.hotKeyActions,_that.appSettingProps,_that.davProps,_that.networkProps,_that.vpnProps,_that.smartRoutingProps,_that.desyncProps,_that.themeProps,_that.proxiesStyleProps,_that.windowProps,_that.patchClashConfig);case _:
   return null;
 
 }
@@ -4431,11 +4435,12 @@ return $default(_that.currentProfileId,_that.overrideDns,_that.milestoneProps,_t
 @JsonSerializable()
 
 class _Config implements Config {
-  const _Config({this.currentProfileId, this.overrideDns = false, @JsonKey(fromJson: MilestoneProps.safeFromJson) this.milestoneProps = const MilestoneProps(),  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson) this.desyncProps = defaultDesyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
+  const _Config({this.currentProfileId, this.overrideDns = false, this.overrideNtp = false, @JsonKey(fromJson: MilestoneProps.safeFromJson) this.milestoneProps = const MilestoneProps(),  List<HotKeyAction> hotKeyActions = const [], @JsonKey(fromJson: AppSettingProps.safeFromJson) this.appSettingProps = defaultAppSettingProps, this.davProps, this.networkProps = defaultNetworkProps, this.vpnProps = defaultVpnProps, this.smartRoutingProps = defaultSmartRoutingProps, @JsonKey(fromJson: DesyncProps.safeFromJson) this.desyncProps = defaultDesyncProps, @JsonKey(fromJson: ThemeProps.safeFromJson) required this.themeProps, this.proxiesStyleProps = defaultProxiesStyleProps, this.windowProps = defaultWindowProps, this.patchClashConfig = defaultClashConfig}): _hotKeyActions = hotKeyActions;
   factory _Config.fromJson(Map<String, dynamic> json) => _$ConfigFromJson(json);
 
 @override final  int? currentProfileId;
 @override@JsonKey() final  bool overrideDns;
+@override@JsonKey() final  bool overrideNtp;
 @override@JsonKey(fromJson: MilestoneProps.safeFromJson) final  MilestoneProps milestoneProps;
  final  List<HotKeyAction> _hotKeyActions;
 @override@JsonKey() List<HotKeyAction> get hotKeyActions {
@@ -4468,18 +4473,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.milestoneProps, milestoneProps) || other.milestoneProps == milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.desyncProps, desyncProps) || other.desyncProps == desyncProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Config&&(identical(other.currentProfileId, currentProfileId) || other.currentProfileId == currentProfileId)&&(identical(other.overrideDns, overrideDns) || other.overrideDns == overrideDns)&&(identical(other.overrideNtp, overrideNtp) || other.overrideNtp == overrideNtp)&&(identical(other.milestoneProps, milestoneProps) || other.milestoneProps == milestoneProps)&&const DeepCollectionEquality().equals(other.hotKeyActions, _hotKeyActions)&&(identical(other.appSettingProps, appSettingProps) || other.appSettingProps == appSettingProps)&&(identical(other.davProps, davProps) || other.davProps == davProps)&&(identical(other.networkProps, networkProps) || other.networkProps == networkProps)&&(identical(other.vpnProps, vpnProps) || other.vpnProps == vpnProps)&&(identical(other.smartRoutingProps, smartRoutingProps) || other.smartRoutingProps == smartRoutingProps)&&(identical(other.desyncProps, desyncProps) || other.desyncProps == desyncProps)&&(identical(other.themeProps, themeProps) || other.themeProps == themeProps)&&(identical(other.proxiesStyleProps, proxiesStyleProps) || other.proxiesStyleProps == proxiesStyleProps)&&(identical(other.windowProps, windowProps) || other.windowProps == windowProps)&&(identical(other.patchClashConfig, patchClashConfig) || other.patchClashConfig == patchClashConfig));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,currentProfileId,overrideDns,milestoneProps,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,desyncProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
+    return Object.hash(runtimeType,currentProfileId,overrideDns,overrideNtp,milestoneProps,const DeepCollectionEquality().hash(_hotKeyActions),appSettingProps,davProps,networkProps,vpnProps,smartRoutingProps,desyncProps,themeProps,proxiesStyleProps,windowProps,patchClashConfig);
 }
 
 @override
 String toString() {
-    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, milestoneProps: $milestoneProps, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, desyncProps: $desyncProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
+    return 'Config(currentProfileId: $currentProfileId, overrideDns: $overrideDns, overrideNtp: $overrideNtp, milestoneProps: $milestoneProps, hotKeyActions: $hotKeyActions, appSettingProps: $appSettingProps, davProps: $davProps, networkProps: $networkProps, vpnProps: $vpnProps, smartRoutingProps: $smartRoutingProps, desyncProps: $desyncProps, themeProps: $themeProps, proxiesStyleProps: $proxiesStyleProps, windowProps: $windowProps, patchClashConfig: $patchClashConfig)';
 }
 
 
@@ -4490,7 +4495,7 @@ abstract mixin class _$ConfigCopyWith<$Res> implements $ConfigCopyWith<$Res> {
   factory _$ConfigCopyWith(_Config value, $Res Function(_Config) _then) = __$ConfigCopyWithImpl;
 @override @useResult
 $Res call({
- int? currentProfileId, bool overrideDns,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
+ int? currentProfileId, bool overrideDns, bool overrideNtp,@JsonKey(fromJson: MilestoneProps.safeFromJson) MilestoneProps milestoneProps, List<HotKeyAction> hotKeyActions,@JsonKey(fromJson: AppSettingProps.safeFromJson) AppSettingProps appSettingProps, DAVProps? davProps, NetworkProps networkProps, VpnProps vpnProps, SmartRoutingProps smartRoutingProps,@JsonKey(fromJson: DesyncProps.safeFromJson) DesyncProps desyncProps,@JsonKey(fromJson: ThemeProps.safeFromJson) ThemeProps themeProps, ProxiesStyleProps proxiesStyleProps, WindowProps windowProps, PatchClashConfig patchClashConfig
 });
 
 
@@ -4507,10 +4512,11 @@ class __$ConfigCopyWithImpl<$Res>
 
 /// Create a copy of Config
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentProfileId = freezed,Object? overrideDns = null,Object? overrideNtp = null,Object? milestoneProps = null,Object? hotKeyActions = null,Object? appSettingProps = null,Object? davProps = freezed,Object? networkProps = null,Object? vpnProps = null,Object? smartRoutingProps = null,Object? desyncProps = null,Object? themeProps = null,Object? proxiesStyleProps = null,Object? windowProps = null,Object? patchClashConfig = null,}) {
   return _then(_Config(
 currentProfileId: freezed == currentProfileId ? _self.currentProfileId : currentProfileId // ignore: cast_nullable_to_non_nullable
 as int?,overrideDns: null == overrideDns ? _self.overrideDns : overrideDns // ignore: cast_nullable_to_non_nullable
+as bool,overrideNtp: null == overrideNtp ? _self.overrideNtp : overrideNtp // ignore: cast_nullable_to_non_nullable
 as bool,milestoneProps: null == milestoneProps ? _self.milestoneProps : milestoneProps // ignore: cast_nullable_to_non_nullable
 as MilestoneProps,hotKeyActions: null == hotKeyActions ? _self._hotKeyActions : hotKeyActions // ignore: cast_nullable_to_non_nullable
 as List<HotKeyAction>,appSettingProps: null == appSettingProps ? _self.appSettingProps : appSettingProps // ignore: cast_nullable_to_non_nullable
