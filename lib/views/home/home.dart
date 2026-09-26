@@ -3,6 +3,7 @@ import 'package:reclash/enum/enum.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/start_button.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -78,10 +79,19 @@ class _HomeShell extends ConsumerWidget {
           ),
         );
     final showStart = isMobile && onClassicDashboard && hasStartControl;
+    // The hoisted wallpaper paints one backdrop for the whole content region;
+    // a solid shell surface here would cover it, so go transparent when active.
+    final wallpaperActive =
+        ref.watch(
+          themeSettingProvider.select((state) => state.wallpaper.enabled),
+        ) &&
+        ref.watch(wallpaperImageProvider).asData?.value != null;
     // The bar is only collapsed in desktop view, never unmounted: one tree
     // shape across view modes.
     return Material(
-      color: context.colorScheme.surface,
+      color: wallpaperActive
+          ? Colors.transparent
+          : context.colorScheme.surface,
       child: Stack(
         children: [
           Positioned.fill(

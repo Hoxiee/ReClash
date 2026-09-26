@@ -111,13 +111,13 @@ class _ExternalControllerDialogState
           spacing: 16,
           children: [
             ListItem.toggle(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               title: Text(appLocalizations.enableExternalController),
               value: _enabled,
               onChanged: (value) => setState(() => _enabled = value),
             ),
             ListItem.toggle(
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               title: Text(appLocalizations.allowLanAccess),
               subtitle: Text(appLocalizations.allowLanAccessDesc),
               value: _allowLan,
