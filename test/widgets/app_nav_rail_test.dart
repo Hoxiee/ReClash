@@ -58,7 +58,6 @@ void main() {
     bool showLabel = false,
     double height = 500,
     Locale? locale,
-    VoidCallback? onAbout,
   }) async {
     tester.view.physicalSize = Size(viewWidth, 600);
     tester.view.devicePixelRatio = 1;
@@ -89,10 +88,7 @@ void main() {
           child: Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
-              child: SizedBox(
-                height: height,
-                child: AppNavRail(onAbout: onAbout),
-              ),
+              child: SizedBox(height: height, child: const AppNavRail()),
             ),
           ),
         ),
@@ -113,7 +109,9 @@ void main() {
     await pumpRail(tester);
     final start = highlightRect(tester);
 
-    goTo(PageLabel.tools);
+    // Tools is pinned and carries no indicator, so the stretch is measured
+    // against a scrollable slot instead.
+    goTo(PageLabel.logs);
     await tester.pump();
     expect(highlightRect(tester).top, closeTo(start.top, 0.5));
 
@@ -129,7 +127,9 @@ void main() {
     expect(end.height, closeTo(start.height, 0.5));
   });
 
-  testWidgets('tools follow logs with a group divider', (tester) async {
+  testWidgets('group dividers separate the scrollable sections', (
+    tester,
+  ) async {
     await pumpRail(tester);
 
     final dashboardY = tester
@@ -141,7 +141,7 @@ void main() {
     final requestsY = tester
         .getCenter(find.byGlyph(AppGlyphs.requests).first)
         .dy;
-    final toolsY = tester.getCenter(find.byGlyph(AppGlyphs.tools).first).dy;
+    final logsY = tester.getCenter(find.byGlyph(AppGlyphs.logs).first).dy;
 
     expect(
       profilesY - dashboardY,
@@ -151,87 +151,55 @@ void main() {
       requestsY - profilesY,
       greaterThan(NavRailMetrics.stackedSlotHeight),
     );
-    final logsY = tester.getCenter(find.byGlyph(AppGlyphs.logs).first).dy;
+    // Requests and logs share a group, so no divider stretches the gap.
     expect(logsY - requestsY, NavRailMetrics.stackedSlotHeight);
-    expect(
-      toolsY - logsY,
-      NavRailMetrics.stackedSlotHeight + NavRailMetrics.dividerExtent,
-    );
+
+    // Tools is pinned outside the scroll body, so only the two intra-list
+    // group boundaries render as Positioned hairlines.
     final divider = find.byWidgetPredicate(
       (widget) =>
           widget is Positioned && widget.height == NavRailMetrics.hairline,
     );
-    expect(divider, findsNWidgets(3));
-    final dividerY = tester.getCenter(divider.last).dy;
-    expect(dividerY, greaterThan(logsY));
-    expect(dividerY, lessThan(toolsY));
+    expect(divider, findsNWidgets(2));
   });
 
-  testWidgets('about sits at the bottom separate from tools', (tester) async {
-    var aboutCalls = 0;
-    await pumpRail(tester, onAbout: () => aboutCalls++);
+  testWidgets('tools sits pinned at the rail bottom', (tester) async {
+    await pumpRail(tester);
 
+    final logsY = tester.getCenter(find.byGlyph(AppGlyphs.logs).first).dy;
     final tools = find.byGlyph(AppGlyphs.tools).first;
-    final about = find.byGlyph(AppGlyphs.info);
-    final toolsButton = find.ancestor(
-      of: tools,
-      matching: find.byType(InkWell),
-    );
-    final aboutButton = find.ancestor(
-      of: about,
-      matching: find.byType(InkWell),
-    );
-    expect(tester.getSize(aboutButton), tester.getSize(toolsButton));
-    expect(tester.getCenter(about).dx, tester.getCenter(tools).dx);
-    expect(
-      tester.getCenter(about).dy - tester.getCenter(tools).dy,
-      greaterThan(NavRailMetrics.stackedSlotHeight),
-    );
-    expect(
-      tester.widget<InkWell>(aboutButton).customBorder,
-      tester.widget<InkWell>(toolsButton).customBorder,
-    );
+    final toolsY = tester.getCenter(tools).dy;
+    expect(toolsY, greaterThan(logsY));
 
     final railBottom = tester.getRect(find.byType(AppNavRail)).bottom;
-    expect(
-      railBottom - tester.getCenter(about).dy,
-      lessThan(NavRailMetrics.stackedSlotHeight),
-    );
+    expect(railBottom - toolsY, lessThan(NavRailMetrics.stackedSlotHeight));
 
-    await tester.tap(about);
+    // Selecting the pinned slot removes the sliding indicator entirely.
+    goTo(PageLabel.tools);
     await tester.pumpAndSettle();
-    expect(aboutCalls, 1);
-    expect(container.read(currentPageLabelProvider), PageLabel.dashboard);
+    expect(find.byKey(AppNavRail.highlightKey), findsNothing);
+
+    goTo(PageLabel.dashboard);
+    await tester.pumpAndSettle();
+    await tester.tap(tools);
+    await tester.pumpAndSettle();
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
   });
 
-  testWidgets('about stays fixed while the rail scrolls', (tester) async {
-    var aboutCalls = 0;
-    await pumpRail(tester, height: 180, onAbout: () => aboutCalls++);
+  testWidgets('tools stays pinned while the rail scrolls', (tester) async {
+    await pumpRail(tester, height: 180);
 
-    final aboutCenter = tester.getCenter(find.byGlyph(AppGlyphs.info));
+    final toolsCenter = tester.getCenter(find.byGlyph(AppGlyphs.tools).first);
     await tester.drag(
       find.byType(SingleChildScrollView),
       const Offset(0, -400),
     );
     await tester.pumpAndSettle();
-    expect(tester.getCenter(find.byGlyph(AppGlyphs.info)), aboutCenter);
-    await tester.tap(find.byGlyph(AppGlyphs.info));
-    await tester.pumpAndSettle();
-    expect(aboutCalls, 1);
+    expect(tester.getCenter(find.byGlyph(AppGlyphs.tools).first), toolsCenter);
 
-    final toolsButton = tester.widget<InkWell>(
-      find.ancestor(
-        of: find.byGlyph(AppGlyphs.tools).first,
-        matching: find.byType(InkWell),
-      ),
-    );
-    toolsButton.focusNode!.requestFocus();
-    await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.tap(find.byGlyph(AppGlyphs.tools).first);
     await tester.pumpAndSettle();
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
-    expect(aboutCalls, 2);
+    expect(container.read(currentPageLabelProvider), PageLabel.tools);
     expect(tester.takeException(), isNull);
   });
 
@@ -286,7 +254,7 @@ void main() {
     });
   }
 
-  testWidgets('short windows preserve labels and scroll to tools', (
+  testWidgets('short windows preserve labels and keep tools reachable', (
     tester,
   ) async {
     await pumpRail(tester, showLabel: true, height: 340);
@@ -298,6 +266,7 @@ void main() {
       const Offset(0, -200),
     );
     await tester.pumpAndSettle();
+    // Tools is pinned, so it is tappable without scrolling the list.
     await tester.tap(find.byGlyph(AppGlyphs.tools).first);
     await tester.pumpAndSettle();
     expect(container.read(currentPageLabelProvider), PageLabel.tools);

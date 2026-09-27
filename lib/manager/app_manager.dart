@@ -431,7 +431,6 @@ class AppSidebarContainer extends ConsumerWidget {
                         child: AppNavRail(
                           leading: navigationPort?.buildStatusMark(),
                           onToPage: (label) => _handleToPage(ref, label),
-                          onAbout: () => navigationPort?.openAbout(context),
                         ),
                       ),
                     ),

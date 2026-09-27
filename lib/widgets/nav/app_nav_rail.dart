@@ -13,7 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final _itemShape = AppShape.all(NavRailMetrics.itemCorner);
 
 class AppNavRail extends ConsumerWidget {
-  const AppNavRail({super.key, this.leading, this.onToPage, this.onAbout});
+  const AppNavRail({super.key, this.leading, this.onToPage});
 
   @visibleForTesting
   static const Key highlightKey = Key('nav-rail-highlight');
@@ -23,7 +23,6 @@ class AppNavRail extends ConsumerWidget {
 
   final Widget? leading;
   final void Function(PageLabel label)? onToPage;
-  final VoidCallback? onAbout;
 
   static int _indexOf(PageLabel label, List<NavigationItem> items) {
     final index = items.indexWhere((item) => item.label == label);
@@ -41,8 +40,21 @@ class AppNavRail extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(currentNavigationItemsStateProvider).value;
-    final selectedIndex = _indexOf(ref.watch(currentPageLabelProvider), items);
+    final allItems = ref.watch(currentNavigationItemsStateProvider).value;
+    final currentLabel = ref.watch(currentPageLabelProvider);
+    // Tools is lifted out of the scrolling group and pinned to the foot of the
+    // rail, where About used to sit; About stays reachable from inside Tools.
+    NavigationItem? toolsItem;
+    final items = <NavigationItem>[];
+    for (final item in allItems) {
+      if (item.label == PageLabel.tools) {
+        toolsItem = item;
+      } else {
+        items.add(item);
+      }
+    }
+    final toolsSelected = currentLabel == PageLabel.tools;
+    final selectedIndex = toolsSelected ? -1 : _indexOf(currentLabel, items);
     final leading = this.leading;
     return SizedBox(
       width: NavRailMetrics.width,
@@ -57,7 +69,8 @@ class AppNavRail extends ConsumerWidget {
               items: items,
               selectedIndex: selectedIndex,
               onToPage: (label) => _handleTap(ref, label),
-              onAbout: onAbout,
+              toolsItem: toolsItem,
+              toolsSelected: toolsSelected,
             ),
           ),
         ],
@@ -71,13 +84,15 @@ class _RailBody extends StatelessWidget {
     required this.items,
     required this.selectedIndex,
     required this.onToPage,
-    this.onAbout,
+    this.toolsItem,
+    this.toolsSelected = false,
   });
 
   final List<NavigationItem> items;
   final int selectedIndex;
   final void Function(PageLabel label) onToPage;
-  final VoidCallback? onAbout;
+  final NavigationItem? toolsItem;
+  final bool toolsSelected;
 
   static int _groupOf(PageLabel label) => switch (label) {
     PageLabel.dashboard => 0,
@@ -156,12 +171,13 @@ class _RailBody extends StatelessWidget {
                       colors: colors,
                       onToPage: onToPage,
                     ),
-                    _SelectionIndicator(
-                      key: AppNavRail.highlightKey,
-                      color: colors.indicator,
-                      index: selectedIndex,
-                      centers: centers,
-                    ),
+                    if (selectedIndex >= 0)
+                      _SelectionIndicator(
+                        key: AppNavRail.highlightKey,
+                        color: colors.indicator,
+                        index: selectedIndex,
+                        centers: centers,
+                      ),
                   ],
                 );
 
@@ -178,36 +194,38 @@ class _RailBody extends StatelessWidget {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: NavRailMetrics.pillInsetX + 4,
-            ),
-            child: ColoredBox(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.6),
-              child: const SizedBox(
-                height: NavRailMetrics.hairline,
-                width: double.infinity,
+          if (toolsItem case final tools?) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: NavRailMetrics.pillInsetX + 4,
               ),
-            ),
-          ),
-          const SizedBox(height: NavRailMetrics.groupGap),
-          Padding(
-            padding: EdgeInsets.only(bottom: NavRailMetrics.padding.bottom),
-            child: SizedBox(
-              height: slotHeight,
-              width: double.infinity,
-              child: FocusTraversalOrder(
-                order: NumericFocusOrder(items.length.toDouble()),
-                child: _RailSlot(
-                  glyph: AppGlyphs.info,
-                  label: context.appLocalizations.about,
-                  colors: colors,
-                  selected: false,
-                  onToPage: onAbout,
+              child: ColoredBox(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+                child: const SizedBox(
+                  height: NavRailMetrics.hairline,
+                  width: double.infinity,
                 ),
               ),
             ),
-          ),
+            const SizedBox(height: NavRailMetrics.groupGap),
+            Padding(
+              padding: EdgeInsets.only(bottom: NavRailMetrics.padding.bottom),
+              child: SizedBox(
+                height: slotHeight,
+                width: double.infinity,
+                child: FocusTraversalOrder(
+                  order: NumericFocusOrder(items.length.toDouble()),
+                  child: _RailSlot(
+                    glyph: tools.glyph,
+                    label: tools.label.label,
+                    colors: colors,
+                    selected: toolsSelected,
+                    onToPage: () => onToPage(tools.label),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
