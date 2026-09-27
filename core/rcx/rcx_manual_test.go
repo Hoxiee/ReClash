@@ -111,13 +111,38 @@ func TestRecoveryCanReplaceTrafficThatStoppedBeforeTheWave(t *testing.T) {
 	runtime := newFakeRuntime()
 	engine := newTestEngine(runtime, "ru")
 	engine.incumbent = "current"
-	engine.ledger.NoteTrafficProgress("current", engine.envKey, true, runtime.Now())
+	engine.ledger.NoteTrafficProgress("current", engine.envKey, false, runtime.Now())
 	runtime.advance(time.Second)
 	engine.probeLaunchedAt = runtime.Now()
 	engine.probeKind = rcxWaveIncident
 	engine.probeResults = []rcxProbeResult{{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail}}
 	if !engine.recoveryCanReplace(runtime.Now()) {
 		t.Fatal("traffic predating the failed check prevented recovery")
+	}
+}
+
+func TestRecoveryHoldsFreshOpenIncumbentUntilDurableDisproof(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = foreignMembers("current", "spare")
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent, runtime.selected = "current", "current"
+	engine.ledger.NoteTrafficProgress("current", engine.envKey, true, runtime.Now())
+	runtime.advance(time.Second)
+	engine.probeLaunchedAt = runtime.Now()
+	engine.probeKind = rcxWaveIncident
+	engine.probeResults = []rcxProbeResult{{Node: "current", Role: rcxRoleOpen, Outcome: rcxProbeFail}}
+	if engine.recoveryCanReplace(runtime.Now()) {
+		t.Fatal("a reactive marker miss evicted a node still holding a live open proof")
+	}
+	now := runtime.Now()
+	const first, second = "m1", "m2"
+	markers := []string{first, second}
+	engine.ledger.NoteMarkerProbe("current", engine.envKey, rcxRoleOpen, first, rcxProbeFail, 0, now)
+	engine.ledger.RecomputeRole("current", engine.envKey, rcxRoleOpen, markers, now)
+	engine.ledger.NoteMarkerProbe("current", engine.envKey, rcxRoleOpen, second, rcxProbeStatusMismatch, 40, now)
+	engine.ledger.RecomputeRole("current", engine.envKey, rcxRoleOpen, markers, now)
+	if !engine.recoveryCanReplace(now) {
+		t.Fatal("durable open-world disproof did not release the incumbent")
 	}
 }
 

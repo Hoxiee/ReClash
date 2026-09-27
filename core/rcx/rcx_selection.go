@@ -20,6 +20,13 @@ func (e *rcxEngine) probeRefutesIncumbent(now time.Time) bool {
 	if e.trafficSince(e.key(e.incumbent), e.probeLaunchedAt, now) {
 		return false
 	}
+	// A node that still holds a live open-world proof is frozen under DPI, not
+	// dead: reactive marker misses do not refute it, so the park never marches
+	// off a working proven node. Eviction waits for the proof itself to lapse
+	// into durable disproof (recoveryCanReplace's Transit==Disproven clause).
+	if e.incumbentHoldsFreshOpen(e.key(e.incumbent), now) {
+		return false
+	}
 	for _, r := range e.probeResults {
 		if r.Node == e.incumbent && r.Role == rcxRoleOpen && (r.Outcome == rcxProbeFail || r.Outcome == rcxProbeStatusMismatch) {
 			return true
