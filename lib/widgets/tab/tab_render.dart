@@ -408,6 +408,37 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
     );
   }
 
+  Rect _flowingThumbRect(Rect honest) {
+    final Animatable<Rect?>? tween = state.thumbAnimatable;
+    if (!state.thumbController.isAnimating || tween == null) {
+      return honest;
+    }
+    final Rect? begin = tween.transform(0);
+    final Rect? end = tween.transform(1);
+    if (begin == null || end == null || begin.center.dx == end.center.dx) {
+      return honest;
+    }
+
+    final double p = clampDouble(
+      (honest.center.dx - begin.center.dx) / (end.center.dx - begin.center.dx),
+      0,
+      1,
+    );
+    final double lead = Curves.easeOutCubic.transform(p);
+    final double trail = Curves.easeInCubic.transform(p);
+
+    final double left;
+    final double right;
+    if (end.center.dx > begin.center.dx) {
+      right = begin.right + (end.right - begin.right) * lead;
+      left = begin.left + (end.left - begin.left) * trail;
+    } else {
+      left = begin.left + (end.left - begin.left) * lead;
+      right = begin.right + (end.right - begin.right) * trail;
+    }
+    return Rect.fromLTRB(left, honest.top, right, honest.bottom);
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final List<RenderBox> children = getChildrenAsList();
@@ -450,6 +481,14 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
           newThumbRect;
       currentThumbRect = unscaledThumbRect;
 
+      // Liquid bridge: while travelling, the thumb's leading edge races ahead
+      // (easeOut) and its trailing edge lags (easeIn), so the pill stretches
+      // across both segments mid-flight and pulls itself together at the
+      // target. isAnimating is already false under reduced motion, so the
+      // resting thumb stays at its exact rect. currentThumbRect keeps the
+      // honest position for hit-testing and interrupt continuity.
+      final Rect flowingThumbRect = _flowingThumbRect(unscaledThumbRect);
+
       final _SegmentLocation childLocation;
       if (highlightedChildIndex == 0) {
         childLocation = _SegmentLocation.leftmost;
@@ -460,15 +499,15 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       }
       final double delta = switch (childLocation) {
         _SegmentLocation.leftmost =>
-          unscaledThumbRect.width - unscaledThumbRect.width * thumbScale,
+          flowingThumbRect.width - flowingThumbRect.width * thumbScale,
         _SegmentLocation.rightmost =>
-          unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
+          flowingThumbRect.width * thumbScale - flowingThumbRect.width,
         _SegmentLocation.inbetween => 0,
       };
       final Rect thumbRect = Rect.fromCenter(
-        center: unscaledThumbRect.center - Offset(delta / 2, 0),
-        width: unscaledThumbRect.width * thumbScale,
-        height: unscaledThumbRect.height * thumbScale,
+        center: flowingThumbRect.center - Offset(delta / 2, 0),
+        width: flowingThumbRect.width * thumbScale,
+        height: flowingThumbRect.height * thumbScale,
       );
 
       _paintThumb(context, offset, thumbRect);
