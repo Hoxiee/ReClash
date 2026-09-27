@@ -68,8 +68,7 @@ class _ConnectionsCardState extends ConsumerState<ConnectionsCard>
   void _openConnections(BuildContext context) {
     showSnapSheet(
       context,
-      builder: (_, controller) =>
-          ConnectionsView(scrollController: controller),
+      builder: (_, controller) => ConnectionsView(scrollController: controller),
     );
   }
 
