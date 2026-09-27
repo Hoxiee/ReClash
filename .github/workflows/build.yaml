@@ -361,7 +361,11 @@ jobs:
                 echo "::endgroup::"
               done
               amd=(/dist/ReClash-*-linux-amd64.pkg.tar.xz)
-              pacman -U --noconfirm --nodeps "${amd[0]}"
+              # A single --nodeps only skips version checks; the dep names must
+              # still resolve, and this bare container has empty sync DBs. Double
+              # it to skip dep checks entirely -- pacman -Qi still reports the
+              # declared "Depends On", which is what the gtk3 assertion reads.
+              pacman -U --noconfirm --nodeps --nodeps "${amd[0]}"
               info="$(pacman -Qi reclash)"
               echo "$info"
               grep -q gtk3 <<<"$info" \
