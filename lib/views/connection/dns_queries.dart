@@ -48,7 +48,9 @@ class DnsQueryListController extends ValueNotifier<DnsQueriesState> {
 }
 
 class DnsQueriesView extends ConsumerStatefulWidget {
-  const DnsQueriesView({super.key});
+  const DnsQueriesView({super.key, this.scrollController});
+
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<DnsQueriesView> createState() => _DnsQueriesViewState();
@@ -61,7 +63,9 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController(initialScrollOffset: double.maxFinite);
+    _scrollController =
+        widget.scrollController ??
+        ScrollController(initialScrollOffset: double.maxFinite);
     _listController.setDnsQueries(ref.read(dnsQueriesProvider).list);
     ref.listenManual(dnsQueriesProvider.select((state) => state.revision), (
       _,
@@ -74,7 +78,9 @@ class _DnsQueriesViewState extends ConsumerState<DnsQueriesView> {
   @override
   void dispose() {
     _listController.dispose();
-    _scrollController.dispose();
+    if (widget.scrollController == null) {
+      _scrollController.dispose();
+    }
     super.dispose();
   }
 

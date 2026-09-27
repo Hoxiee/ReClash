@@ -15,7 +15,8 @@ class DnsQueriesCard extends StatelessWidget {
     showSnapSheet(
       context,
       initialScrollOffset: double.maxFinite,
-      builder: (_, _) => const DnsQueriesView(),
+      builder: (_, controller) =>
+          DnsQueriesView(scrollController: controller),
     );
   }
 

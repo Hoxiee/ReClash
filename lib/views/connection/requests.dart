@@ -8,7 +8,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RequestsView extends ConsumerStatefulWidget {
-  const RequestsView({super.key});
+  const RequestsView({super.key, this.scrollController});
+
+  final ScrollController? scrollController;
 
   @override
   ConsumerState<RequestsView> createState() => _RequestsViewState();
@@ -21,7 +23,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController(initialScrollOffset: double.maxFinite);
+    _scrollController =
+        widget.scrollController ??
+        ScrollController(initialScrollOffset: double.maxFinite);
     _listController.setTrackerInfos(ref.read(requestsProvider).list);
     ref.listenManual(requestsProvider.select((state) => state.revision), (
       _,
@@ -34,7 +38,9 @@ class _RequestsViewState extends ConsumerState<RequestsView> {
   @override
   void dispose() {
     _listController.dispose();
-    _scrollController.dispose();
+    if (widget.scrollController == null) {
+      _scrollController.dispose();
+    }
     super.dispose();
   }
 

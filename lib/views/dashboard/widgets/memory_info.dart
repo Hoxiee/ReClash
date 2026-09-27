@@ -131,12 +131,13 @@ class _MemoryInfoState extends ConsumerState<MemoryInfo>
   }
 
   void _showDetail() {
-    showSheet(
-      context: context,
-      builder: (_) {
+    showSnapSheet(
+      context,
+      builder: (_, controller) {
         return MemoryDetailSheet(
           snapshot: _memoryStateNotifier,
           onRelease: _releaseMemory,
+          scrollController: controller,
         );
       },
     );
@@ -214,12 +215,15 @@ class MemoryDetailSheet extends StatefulWidget {
     super.key,
     required this.snapshot,
     required this.onRelease,
+    this.scrollController,
   });
 
   final ValueListenable<MemorySnapshot> snapshot;
 
   /// Resolves to the bytes freed.
   final Future<int> Function() onRelease;
+
+  final ScrollController? scrollController;
 
   @override
   State<MemoryDetailSheet> createState() => _MemoryDetailSheetState();
@@ -327,6 +331,7 @@ class _MemoryDetailSheetState extends State<MemoryDetailSheet> {
         valueListenable: widget.snapshot,
         builder: (context, snapshot, _) {
           return ListView(
+            controller: widget.scrollController,
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
             ).copyWith(top: context.contentTopPadding, bottom: 20),

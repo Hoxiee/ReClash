@@ -13,8 +13,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ConnectionsView extends ConsumerStatefulWidget {
   final Future<List<TrackerInfo>> Function()? connectionsReader;
+  final ScrollController? scrollController;
 
-  const ConnectionsView({super.key, @visibleForTesting this.connectionsReader});
+  const ConnectionsView({
+    super.key,
+    this.scrollController,
+    @visibleForTesting this.connectionsReader,
+  });
 
   @override
   ConsumerState<ConnectionsView> createState() => _ConnectionsViewState();
@@ -25,7 +30,7 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   CoreController get _core => ref.read(coreHandlerProvider);
 
   final _listController = TrackerInfoListController();
-  final ScrollController _scrollController = ScrollController();
+  late final ScrollController _scrollController;
   final Map<String, ({int up, int down, DateTime at})> _samples = {};
 
   @override
@@ -80,6 +85,12 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
         },
       ),
     ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = widget.scrollController ?? ScrollController();
   }
 
   @override
@@ -139,7 +150,9 @@ class _ConnectionsViewState extends ConsumerState<ConnectionsView>
   @override
   void dispose() {
     _listController.dispose();
-    _scrollController.dispose();
+    if (widget.scrollController == null) {
+      _scrollController.dispose();
+    }
     super.dispose();
   }
 
