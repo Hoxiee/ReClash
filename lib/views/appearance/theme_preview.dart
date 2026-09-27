@@ -481,66 +481,173 @@ class _MiniPageContent extends StatelessWidget {
   final int seed;
   final double unit;
 
-  List<Widget> _heroBody(Color card, Color line) {
-    return [
-      _MiniCard(
-        color: card,
-        height: unit * 9,
-        unit: unit,
-        child: Row(
-          spacing: unit * 1.4,
-          children: [
-            _MiniRing(
-              ring: colorScheme.primary,
-              center: colorScheme.primary,
-              size: unit * 6,
-              stroke: unit * 0.9,
-            ),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: unit * 0.7,
+  Widget _heroColumn() {
+    final card = colorScheme.surfaceContainer;
+    final subtle = colorScheme.onSurface.withValues(alpha: 0.72);
+    final line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: unit * 2),
+        Center(
+          child: _MiniRing(
+            ring: colorScheme.primary,
+            center: colorScheme.primary,
+            size: unit * 9,
+            stroke: unit * 0.7,
+          ),
+        ),
+        SizedBox(height: unit * 1.6),
+        Center(
+          child: _MiniLine(color: subtle, width: unit * 7, height: unit * 1.3),
+        ),
+        SizedBox(height: unit * 0.8),
+        Center(
+          child: _MiniLine(color: line, width: unit * 5, height: unit * 0.8),
+        ),
+        SizedBox(height: unit * 2),
+        _MiniCard(
+          color: card,
+          height: unit * 6,
+          unit: unit,
+          child: Row(
+            spacing: unit,
+            children: [
+              _MiniDot(color: colorScheme.tertiaryContainer, size: unit * 3),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: unit * 0.6,
+                  children: [
+                    _MiniLine(
+                      color: subtle,
+                      width: unit * 4.5,
+                      height: unit * 0.9,
+                    ),
+                    _MiniLine(color: line, width: unit * 3, height: unit * 0.7),
+                  ],
+                ),
+              ),
+              _signalBars(colorScheme.primary),
+            ],
+          ),
+        ),
+        SizedBox(height: unit),
+        _MiniCard(
+          color: card,
+          height: unit * 8,
+          unit: unit,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: unit * 0.9,
+            children: [
+              Row(
+                spacing: unit * 0.8,
                 children: [
+                  _MiniDot(color: colorScheme.primary, size: unit * 1.6),
                   _MiniLine(
-                    color: colorScheme.onSurface.withValues(alpha: 0.72),
-                    width: unit * 5,
-                    height: unit,
+                    color: subtle,
+                    width: unit * 3.5,
+                    height: unit * 0.9,
                   ),
-                  _MiniLine(color: line, width: unit * 4, height: unit * 0.8),
-                  _MiniLine(
-                    color: line.withValues(alpha: 0.5),
-                    width: unit * 3,
-                    height: unit * 0.7,
+                  const Spacer(),
+                  Container(
+                    width: unit * 4.5,
+                    height: unit * 1.8,
+                    decoration: ShapeDecoration(
+                      color: colorScheme.tertiaryContainer,
+                      shape: AppShape.full,
+                    ),
                   ),
                 ],
               ),
-            ),
+              _MiniLine(color: subtle, width: unit * 6, height: unit * 1.5),
+              _progressBar(0.98),
+            ],
+          ),
+        ),
+        SizedBox(height: unit * 1.2),
+        Row(
+          spacing: unit,
+          children: [
+            Expanded(child: _pillButton(card)),
+            Expanded(child: _pillButton(card)),
+            _MiniDot(color: card, size: unit * 3.4),
           ],
         ),
-      ),
-      Row(
-        spacing: unit,
-        children: [
-          Expanded(
-            child: _MiniCard(
-              color: colorScheme.secondaryContainer,
-              height: unit * 4,
-              unit: unit,
+      ],
+    );
+  }
+
+  Widget _signalBars(Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (var i = 1; i <= 4; i++) ...[
+          if (i > 1) SizedBox(width: unit * 0.35),
+          Container(
+            width: unit * 0.5,
+            height: unit * (0.5 + i * 0.4),
+            decoration: ShapeDecoration(
+              color: color.withValues(alpha: 0.3 + i * 0.16),
+              shape: AppShape.all(AppCorner.fit(unit)),
             ),
           ),
-          Expanded(
-            child: _MiniCard(color: card, height: unit * 4, unit: unit),
+        ],
+      ],
+    );
+  }
+
+  Widget _progressBar(double ratio) {
+    return SizedBox(
+      height: unit * 0.9,
+      child: Stack(
+        children: [
+          DecoratedBox(
+            decoration: ShapeDecoration(
+              color: colorScheme.onSurface.withValues(alpha: 0.15),
+              shape: AppShape.full,
+            ),
+            child: const SizedBox.expand(),
+          ),
+          FractionallySizedBox(
+            widthFactor: ratio,
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                color: colorScheme.primary,
+                shape: AppShape.full,
+              ),
+            ),
           ),
         ],
       ),
-      for (var i = 0; i < 2; i++)
-        _MiniCard(color: card, height: unit * 4.5, unit: unit),
-    ];
+    );
+  }
+
+  Widget _pillButton(Color color) {
+    return SizedBox(
+      height: unit * 3.4,
+      child: DecoratedBox(
+        decoration: ShapeDecoration(color: color, shape: AppShape.full),
+        child: Center(
+          child: _MiniLine(
+            color: colorScheme.onSurface.withValues(alpha: 0.6),
+            width: unit * 3,
+            height: unit * 0.9,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (hero) {
+      return _heroColumn();
+    }
     final card = colorScheme.surfaceContainer;
     final line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
     return Column(
@@ -555,30 +662,80 @@ class _MiniPageContent extends StatelessWidget {
             height: unit * 1.1,
           ),
         ),
-        if (hero)
-          ..._heroBody(card, line)
-        else
-          ...switch (page) {
-            _MiniPage.cards => [
-              _MiniCard(
-                color: card,
-                height: unit * 5,
-                unit: unit,
+        ...switch (page) {
+          _MiniPage.cards => [
+            _MiniCard(
+              color: card,
+              height: unit * 5,
+              unit: unit,
+              child: Row(
+                spacing: unit,
+                children: [
+                  _MiniDot(color: colorScheme.primary, size: unit * 2.2),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: unit * 0.6,
+                      children: [
+                        _MiniLine(color: line, width: unit * 6, height: unit),
+                        _MiniLine(
+                          color: line,
+                          width: unit * 3.5,
+                          height: unit * 0.8,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              spacing: unit,
+              children: [
+                Expanded(
+                  child: _MiniCard(color: card, height: unit * 4, unit: unit),
+                ),
+                Expanded(
+                  child: _MiniCard(
+                    color: colorScheme.secondaryContainer,
+                    height: unit * 4,
+                    unit: unit,
+                  ),
+                ),
+              ],
+            ),
+            for (var i = 0; i < 3; i++)
+              _MiniCard(color: card, height: unit * 4.5, unit: unit),
+          ],
+          _MiniPage.list => [
+            for (var i = 0; i < 7; i++)
+              SizedBox(
+                height: unit * 2.6,
                 child: Row(
                   spacing: unit,
                   children: [
-                    _MiniDot(color: colorScheme.primary, size: unit * 2.2),
+                    _MiniDot(
+                      color: i == 0
+                          ? colorScheme.tertiaryContainer
+                          : colorScheme.secondaryContainer,
+                      size: unit * 2.2,
+                    ),
                     Expanded(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: unit * 0.6,
+                        spacing: unit * 0.5,
                         children: [
-                          _MiniLine(color: line, width: unit * 6, height: unit),
                           _MiniLine(
                             color: line,
-                            width: unit * 3.5,
+                            width: unit * (8 - (i + seed) % 3 * 1.5),
                             height: unit * 0.8,
+                          ),
+                          _MiniLine(
+                            color: line.withValues(alpha: 0.2),
+                            width: unit * 4,
+                            height: unit * 0.6,
                           ),
                         ],
                       ),
@@ -586,61 +743,8 @@ class _MiniPageContent extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
-                spacing: unit,
-                children: [
-                  Expanded(
-                    child: _MiniCard(color: card, height: unit * 4, unit: unit),
-                  ),
-                  Expanded(
-                    child: _MiniCard(
-                      color: colorScheme.secondaryContainer,
-                      height: unit * 4,
-                      unit: unit,
-                    ),
-                  ),
-                ],
-              ),
-              for (var i = 0; i < 3; i++)
-                _MiniCard(color: card, height: unit * 4.5, unit: unit),
-            ],
-            _MiniPage.list => [
-              for (var i = 0; i < 7; i++)
-                SizedBox(
-                  height: unit * 2.6,
-                  child: Row(
-                    spacing: unit,
-                    children: [
-                      _MiniDot(
-                        color: i == 0
-                            ? colorScheme.tertiaryContainer
-                            : colorScheme.secondaryContainer,
-                        size: unit * 2.2,
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: unit * 0.5,
-                          children: [
-                            _MiniLine(
-                              color: line,
-                              width: unit * (8 - (i + seed) % 3 * 1.5),
-                              height: unit * 0.8,
-                            ),
-                            _MiniLine(
-                              color: line.withValues(alpha: 0.2),
-                              width: unit * 4,
-                              height: unit * 0.6,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          },
+          ],
+        },
       ],
     );
   }
