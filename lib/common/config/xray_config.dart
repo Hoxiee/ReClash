@@ -800,7 +800,7 @@ Map<String, Object?>? _convertWireguardOutbound(
   final presharedKey = (peers?['presharedKey'] ?? settings['presharedKey'])
       ?.toString();
 
-  final split = _splitHostPort(endpoint);
+  final split = splitHostPort(endpoint);
   if (split == null) return null;
   final (server, port) = split;
 
@@ -1092,14 +1092,4 @@ int? _toInt(Object? value) {
   if (value is String) return int.tryParse(value);
   if (value is num) return value.toInt();
   return null;
-}
-
-(String, int)? _splitHostPort(String hostPort) {
-  if (hostPort.isEmpty) return null;
-  final colonIdx = hostPort.lastIndexOf(':');
-  if (colonIdx <= 0) return null;
-  final server = hostPort.substring(0, colonIdx);
-  final port = int.tryParse(hostPort.substring(colonIdx + 1));
-  if (server.isEmpty || port == null) return null;
-  return (server, port);
 }
