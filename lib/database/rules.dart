@@ -324,7 +324,7 @@ class RulesDao extends DatabaseAccessor<Database> with _$RulesDaoMixin {
     Iterable<Rule> rules, {
     int? profileId,
     RuleScene? scene,
-  }) async {
+  }) {
     b.insertAllOnConflictUpdate(
       this.rules,
       rules.map((item) => item.toCompanion()),

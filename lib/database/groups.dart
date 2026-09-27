@@ -116,7 +116,7 @@ class ProxyGroupsDao extends DatabaseAccessor<Database>
     int? profileId,
     Batch batch,
     Iterable<ProxyGroup> proxyGroups,
-  ) async {
+  ) {
     final keys = indexing.generateNKeys(proxyGroups.length);
     this.proxyGroups.setAll(
       batch,
