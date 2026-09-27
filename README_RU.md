@@ -16,11 +16,14 @@
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Последний релиз" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="Лицензия GPL-3.0" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
   <a href="https://t.me/ReClashApp"><img alt="Новости в Telegram" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://reclash.pages.dev"><img alt="Сайт" src="https://img.shields.io/badge/Website-reclash.pages.dev-F38020?style=flat-square&logo=cloudflarepages&logoColor=white"></a>
 </p>
 
 ReClash — кроссплатформенное приложение для Android, Windows, macOS и Linux. Добавляйте и обновляйте подписки, быстро переключайте узлы, контролируйте соединения и трафик, используйте системный прокси или TUN/VPN. Настройки, резервные копии и инструменты диагностики доступны в одном интерфейсе.
 
 Проект основан на [FlClash](https://github.com/chen08209/FlClash).
+
+Загрузки, пошаговый старт для новых пользователей и инструментарий для провайдеров собраны на сайте проекта: **[reclash.pages.dev](https://reclash.pages.dev)**.
 
 ## Возможности
 
@@ -75,6 +78,8 @@ sha256sum -c SHA256SUMS --ignore-missing
 3. Используйте переопределения профиля, если локальные DNS, правила маршрутизации, HTTP-заголовки или скрипты должны отличаться от конфигурации провайдера.
 4. Для диагностики проверяйте **Соединения**, **Трафик**, **Логи** и задержку. Перед крупными изменениями создавайте локальную резервную копию; синхронизация через WebDAV включается отдельно.
 
+На сайте есть [пошаговый старт и FAQ](https://reclash.pages.dev/ru/start) и браузерный конструктор ссылок: вставьте URL подписки и получите ссылку `reclash://`, сам URL при этом не покидает браузер.
+
 ReClash не продаёт доступ к прокси, не выдаёт подписки и не рекомендует провайдеров. URL подписки обычно содержит данные доступа, поэтому не публикуйте его в логах и issue.
 
 ## Интеграция с системой
@@ -124,6 +129,8 @@ dart setup.dart linux
 Провайдер может передавать в HTTP-ответе подписки сведения о трафике и сроке действия, интервал обновления, ссылки поддержки, оформление, состав dashboard и данные для смены домена. Полный контракт, совместимые имена, примеры, список виджетов, поведение HWID и замечания по безопасности приведены в документе [Subscription response headers](PROVIDER_HEADERS.md).
 
 Пространство имён `reclash-*` имеет приоритет над заголовками совместимости. Эти значения дополняют тело подписки, но не забирают управление у пользователя: сохранённые настройки остаются пользовательскими, а стартовые значения приложения применяются только при добавлении профиля.
+
+Инструменты для провайдеров доступны онлайн на [reclash.pages.dev](https://reclash.pages.dev/ru/): [конструктор заголовков](https://reclash.pages.dev/ru/headers#builder) с живым превью того, как перекрашивается клиент, [документация](https://reclash.pages.dev/ru/docs), полный [справочник заголовков](https://reclash.pages.dev/ru/reference), [тестовые подписки](https://reclash.pages.dev/ru/mock-subs) и [декодер отчёта о подписке](https://reclash.pages.dev/ru/report).
 
 ## Локализация
 

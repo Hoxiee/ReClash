@@ -16,11 +16,14 @@
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="最新版本" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="GPL-3.0 许可证" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
   <a href="https://t.me/ReClashApp"><img alt="Telegram 频道" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://reclash.pages.dev"><img alt="官网" src="https://img.shields.io/badge/Website-reclash.pages.dev-F38020?style=flat-square&logo=cloudflarepages&logoColor=white"></a>
 </p>
 
 ReClash 是面向 Android、Windows、macOS 和 Linux 的跨平台应用。添加和更新订阅、快速切换代理、监控连接与流量，并通过系统代理或 TUN/VPN 连接。设置、备份和诊断工具集中在同一个界面中。
 
 项目基于 [FlClash](https://github.com/chen08209/FlClash)。
+
+下载、面向用户的分步入门以及面向服务商的工具集都在项目网站上：**[reclash.pages.dev](https://reclash.pages.dev)**。
 
 ## 功能
 
@@ -75,6 +78,8 @@ sha256sum -c SHA256SUMS --ignore-missing
 3. 如果本地 DNS、路由规则、HTTP 请求头或脚本需要与服务商配置不同，请使用配置覆写。
 4. 排查线路问题时可查看**连接**、**流量**、**日志**和延迟测试。进行较大修改前建议创建本地备份；WebDAV 同步是可选功能。
 
+网站上提供[分步入门与常见问题](https://reclash.pages.dev/en/start)，以及浏览器内的链接生成器：粘贴订阅 URL 即可得到 `reclash://` 链接，且该 URL 不会离开你的浏览器。
+
 ReClash 不出售代理服务、不提供订阅，也不推荐服务商。订阅 URL 通常包含访问凭据，请勿将其发布到日志或 issue 中。
 
 ## 系统集成
@@ -124,6 +129,8 @@ dart setup.dart linux
 服务商可以通过订阅 HTTP 响应头传递流量与到期时间、更新间隔、支持链接、品牌样式、dashboard 布局和域名迁移信息。完整协议、兼容别名、示例、可用小组件、HWID 行为及安全说明见 [Subscription response headers](PROVIDER_HEADERS.md)。
 
 `reclash-*` 命名空间优先于兼容响应头。这些值用于补充订阅正文，但不会夺走用户控制权：用户保存的设置仍由用户管理，应用初始设置只会在添加配置时应用一次。
+
+面向服务商的工具已在线提供，位于 [reclash.pages.dev](https://reclash.pages.dev/en/)：带实时预览（展示客户端如何随之改变外观）的[请求头构建器](https://reclash.pages.dev/en/headers#builder)、[文档](https://reclash.pages.dev/en/docs)、完整的[请求头参考](https://reclash.pages.dev/en/reference)、用于测试的[模拟订阅](https://reclash.pages.dev/en/mock-subs)，以及[订阅报告解码器](https://reclash.pages.dev/en/report)。
 
 ## 支持与贡献
 

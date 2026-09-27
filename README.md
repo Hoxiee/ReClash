@@ -16,11 +16,14 @@
   <a href="https://github.com/Hoxiee/ReClash/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/Hoxiee/ReClash?include_prereleases&style=flat-square"></a>
   <a href="LICENSE"><img alt="GPL-3.0 license" src="https://img.shields.io/github/license/Hoxiee/ReClash?style=flat-square"></a>
   <a href="https://t.me/ReClashApp"><img alt="Telegram news" src="https://img.shields.io/badge/Telegram-ReClashApp-2AABEE?style=flat-square&logo=telegram&logoColor=white"></a>
+  <a href="https://reclash.pages.dev"><img alt="Website" src="https://img.shields.io/badge/Website-reclash.pages.dev-F38020?style=flat-square&logo=cloudflarepages&logoColor=white"></a>
 </p>
 
 ReClash is a cross-platform application for Android, Windows, macOS, and Linux. Add and update subscriptions, switch proxies, monitor connections and traffic, and connect through system proxy or TUN/VPN. Settings, backups, and diagnostic tools are available in one interface.
 
 The project is based on [FlClash](https://github.com/chen08209/FlClash).
+
+Downloads, a guided setup for new users, and the provider toolkit are on the project website: **[reclash.pages.dev](https://reclash.pages.dev)**.
 
 ## Features
 
@@ -75,6 +78,8 @@ On Windows, calculate the package hash with `Get-FileHash <file> -Algorithm SHA2
 3. Use profile overrides when local DNS, routing rules, request headers, or scripts must differ from the provider configuration.
 4. Check **Connections**, **Traffic**, **Logs**, and delay tests when diagnosing a route. Back up the local configuration before larger changes; WebDAV synchronization is optional.
 
+The website has a [step-by-step start and FAQ](https://reclash.pages.dev/en/start) and an in-browser link builder that turns a subscription URL into a `reclash://` link without the URL ever leaving your browser.
+
 ReClash does not sell proxy access, provide subscriptions, or recommend providers. Subscription URLs commonly contain credentials, so do not publish them in logs or issue reports.
 
 ## Platform integration
@@ -124,6 +129,8 @@ The setup tool writes packages to `dist/`. Linux packaging may request administr
 Providers can attach usage, expiration, update policy, support links, branding, dashboard layout, and migration metadata to subscription HTTP responses. The complete wire contract, supported aliases, examples, widget names, HWID behavior, and security notes are documented in [Subscription response headers](PROVIDER_HEADERS.md).
 
 The `reclash-*` namespace takes priority over compatibility headers. These values are suggestions around the subscription body: user-owned settings stay under user control, and initial application defaults are applied only when a profile is added.
+
+Provider tooling is available online at [reclash.pages.dev](https://reclash.pages.dev/en/): a [header builder](https://reclash.pages.dev/en/headers#builder) with a live preview of how the client repaints, [documentation](https://reclash.pages.dev/en/docs), the full [header reference](https://reclash.pages.dev/en/reference), [mock subscriptions](https://reclash.pages.dev/en/mock-subs) for testing, and the [subscription-report decoder](https://reclash.pages.dev/en/report).
 
 ## Localization
 
