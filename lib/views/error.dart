@@ -24,7 +24,7 @@ class InitErrorScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: AppInsets.lg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -636,7 +636,7 @@ class AppIcon extends StatelessWidget {
         color: context.colorScheme.surfaceContainerHighest,
         shape: AppShape.md,
       ),
-      padding: const EdgeInsets.all(8),
+      padding: AppInsets.sm,
       child: Transform.translate(
         offset: const Offset(0, -1),
         child: Image.asset('assets/images/icon.png', width: 34, height: 34),
