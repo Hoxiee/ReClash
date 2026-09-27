@@ -17,11 +17,13 @@ void main() {
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   final commands = <String>[];
+  var commandStatus = 'succeeded';
 
   setUp(() {
     system.isTVForTesting = true;
     FocusHighlightVisibility.visibleForTesting = true;
     commands.clear();
+    commandStatus = 'succeeded';
     messenger.setMockMethodCallHandler(channel, (call) async {
       switch (call.method) {
         case 'readState':
@@ -68,7 +70,7 @@ void main() {
           commands.add(args['kind'] as String);
           return {
             'ok': true,
-            'data': {'status': 'succeeded', 'effectState': 'applied'},
+            'data': {'status': commandStatus, 'effectState': 'applied'},
           };
         default:
           return null;
@@ -164,13 +166,17 @@ void main() {
     await pump(tester);
     await focusUntil(tester, LogicalKeyboardKey.arrowDown, modes.contains);
     final seen = <String?>{focusedText()};
-    for (var i = 0; i < 4; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      seen.add(focusedText());
-    }
-    for (var i = 0; i < 4; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    const walk = [
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.arrowUp,
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.arrowLeft,
+    ];
+    for (final key in walk) {
+      await tester.sendKeyEvent(key);
       await tester.pump();
       seen.add(focusedText());
     }
@@ -180,9 +186,14 @@ void main() {
   testWidgets('select on a mode chip sends the command', (tester) async {
     await pump(tester);
     await focusUntil(tester, LogicalKeyboardKey.arrowDown, modes.contains);
-    await focusUntil(tester, LogicalKeyboardKey.arrowLeft, (t) => t == 'Auto');
-    await focusUntil(tester, LogicalKeyboardKey.arrowRight, (t) => t == 'Global');
-    expect(focusedText(), 'Global');
+    // The snapshot is on Auto, so step to any other chip and activate it.
+    await focusUntil(
+      tester,
+      LogicalKeyboardKey.arrowRight,
+      (t) => t != null && modes.contains(t) && t != 'Auto',
+    );
+    final chip = focusedText();
+    expect(chip != null && modes.contains(chip) && chip != 'Auto', isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.pumpAndSettle();
     expect(commands, contains('settings.setOutboundMode'));
@@ -193,8 +204,26 @@ void main() {
   ) async {
     await pump(tester);
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    // A pending toggle keeps the hero medallion spinning until a poll confirms it, so pump a bounded
+    // window instead of settling, then assert the command went out.
+    for (var i = 0; i < 6 && commands.isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(commands, contains('connection.setRunning'));
+  });
+
+  testWidgets('an unknown toggle outcome rolls the switch back', (
+    tester,
+  ) async {
+    commandStatus = 'outcomeUnknown';
+    await pump(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.pumpAndSettle();
     expect(commands, contains('connection.setRunning'));
+    // The snapshot stays on; an unconfirmed toggle must not leave the switch stuck on its
+    // optimistic off value (I13).
+    final toggle = tester.widget<Switch>(find.byType(Switch));
+    expect(toggle.value, isTrue);
   });
 
   testWidgets('tapping an inactive profile sends profiles.select', (

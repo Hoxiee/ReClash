@@ -42,6 +42,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
   CompanionReachability _reachability = CompanionReachability.checking;
   int? _lastOkAtMs;
   bool _busy = false;
+  String? _busyTag;
   bool? _pendingRunning;
 
   @override
@@ -86,11 +87,17 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
     setState(() => _profiles = profiles);
   }
 
+  // _busyTag names the in-flight target so the tapped control shows its own spinner, not just the
+  // far-off app-bar one; the global _busy still gates every other action for the round-trip.
   Future<void> _run(
     Future<CompanionCommandOutcome> Function() action, {
     String? successMessage,
+    String? tag,
   }) async {
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _busyTag = tag;
+    });
     final outcome = await action();
     if (!mounted) return;
     final l = context.appLocalizations;
@@ -104,7 +111,12 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
       context.showNotifier(successMessage);
     }
     restartPolling();
-    if (mounted) setState(() => _busy = false);
+    if (mounted) {
+      setState(() {
+        _busy = false;
+        _busyTag = null;
+      });
+    }
   }
 
   // The switch flips once and locks; the value only settles when a poll confirms it, and a failed or
@@ -139,6 +151,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
       arguments: {'mode': mode.name},
     ),
     successMessage: context.appLocalizations.companionCommandDone,
+    tag: 'mode:${mode.name}',
   );
 
   Future<void> _selectNodeByName(String groupName) async {
@@ -155,6 +168,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
         'groups.select',
         arguments: {'groupName': group.name, 'proxyName': picked},
       ),
+      tag: 'node',
     );
   }
 
@@ -166,6 +180,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
         arguments: {'id': id},
       ),
       successMessage: context.appLocalizations.companionCommandDone,
+      tag: 'profile:$id',
     );
     await _loadProfiles();
   }
@@ -174,6 +189,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
     await _run(
       () => _client.command(widget.deviceId, 'profiles.updateCurrent'),
       successMessage: context.appLocalizations.companionCommandDone,
+      tag: 'update',
     );
     await _loadProfiles();
   }
@@ -204,6 +220,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
         arguments: {'url': profile.url, 'name': profile.label},
       ),
       successMessage: context.appLocalizations.companionCommandDone,
+      tag: 'set',
     );
     await _loadProfiles();
   }
@@ -226,6 +243,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
         arguments: {'url': url.trim()},
       ),
       successMessage: l.companionCommandDone,
+      tag: 'set',
     );
     await _loadProfiles();
   }
@@ -257,19 +275,23 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
         _StaleBanner(reachability: _reachability, lastOkAtMs: _lastOkAtMs),
       _HeroStatusCard(
         running: running,
-        title: widget.title,
+        busy: _pendingRunning != null,
         onChanged: (_busy || _pendingRunning != null)
             ? null
             : (value) => unawaited(_toggle(value)),
       ),
       _ModeCard(
         current: state.outboundMode,
+        busyMode: _busyTag,
         onSelect: _busy ? null : (mode) => unawaited(_setMode(mode)),
       ),
       if (state.groupName != null)
         _NodeCard(
           nodeName: state.nodeName,
-          onTap: _busy ? null : () => unawaited(_selectNodeByName(state.groupName!)),
+          busy: _busyTag == 'node',
+          onTap: _busy
+              ? null
+              : () => unawaited(_selectNodeByName(state.groupName!)),
         ),
       _TrafficCard(state: state),
       if (state.subscription != null && state.subscription!.hasFacts)
@@ -277,6 +299,7 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
       _ProfilesCard(
         profiles: _profiles,
         fallbackLabel: state.profileLabel,
+        busyTag: _busyTag,
         onSelect: _busy ? null : (id) => unawaited(_selectProfile(id)),
         onUpdate: _busy ? null : () => unawaited(_updateCurrent()),
         onSet: _busy ? null : () => unawaited(_setSubscription()),
@@ -300,12 +323,12 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
 class _HeroStatusCard extends StatelessWidget {
   const _HeroStatusCard({
     required this.running,
-    required this.title,
+    required this.busy,
     required this.onChanged,
   });
 
   final bool running;
-  final String title;
+  final bool busy;
   final ValueChanged<bool>? onChanged;
 
   @override
@@ -325,6 +348,7 @@ class _HeroStatusCard extends StatelessWidget {
             icon: AppGlyphs.shield,
             tone: tone,
             size: 52,
+            busy: busy,
           ),
           const SizedBox(width: AppSpacing.lg),
           Expanded(
@@ -363,14 +387,36 @@ class _HeroStatusCard extends StatelessWidget {
 }
 
 class _ModeCard extends StatelessWidget {
-  const _ModeCard({required this.current, required this.onSelect});
+  const _ModeCard({
+    required this.current,
+    required this.busyMode,
+    required this.onSelect,
+  });
 
   final String? current;
+  final String? busyMode;
   final ValueChanged<UiOutboundMode>? onSelect;
 
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    const modes = UiOutboundMode.values;
+    // Two-by-two instead of four-across: four equal columns truncate the longer localized labels
+    // (e.g. "Глобально") on a phone, so a wider two-column grid keeps every label whole on both
+    // phone and D-pad.
+    Widget chip(UiOutboundMode mode) => _ModeChip(
+      mode: mode,
+      selected: mode.name == current,
+      busy: busyMode == 'mode:${mode.name}',
+      onTap: onSelect == null ? null : () => onSelect!(mode),
+    );
+    Widget row(UiOutboundMode left, UiOutboundMode right) => Row(
+      spacing: AppSpacing.sm,
+      children: [
+        Expanded(child: chip(left)),
+        Expanded(child: chip(right)),
+      ],
+    );
     return CommonCard(
       type: CommonCardType.filled,
       radius: AppCorner.xl,
@@ -382,18 +428,9 @@ class _ModeCard extends StatelessWidget {
           AppSpacing.lg,
           AppSpacing.lg,
         ),
-        child: Row(
+        child: Column(
           spacing: AppSpacing.sm,
-          children: [
-            for (final mode in UiOutboundMode.values)
-              Expanded(
-                child: _ModeChip(
-                  mode: mode,
-                  selected: mode.name == current,
-                  onTap: onSelect == null ? null : () => onSelect!(mode),
-                ),
-              ),
-          ],
+          children: [row(modes[0], modes[1]), row(modes[2], modes[3])],
         ),
       ),
     );
@@ -404,11 +441,13 @@ class _ModeChip extends StatelessWidget {
   const _ModeChip({
     required this.mode,
     required this.selected,
+    required this.busy,
     required this.onTap,
   });
 
   final UiOutboundMode mode;
   final bool selected;
+  final bool busy;
   final VoidCallback? onTap;
 
   @override
@@ -423,11 +462,20 @@ class _ModeChip extends StatelessWidget {
       radius: AppCorner.full,
       isSelected: selected,
       onPressed: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 10,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (smart) ...[
+          if (busy) ...[
+            SizedBox.square(
+              dimension: 14,
+              child: CommonCircleLoading(color: fg),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ] else if (smart) ...[
             GlyphIcon(AppGlyphs.autoMode, size: 14, color: fg),
             const SizedBox(width: AppSpacing.xs),
           ],
@@ -449,9 +497,14 @@ class _ModeChip extends StatelessWidget {
 }
 
 class _NodeCard extends StatelessWidget {
-  const _NodeCard({required this.nodeName, required this.onTap});
+  const _NodeCard({
+    required this.nodeName,
+    required this.busy,
+    required this.onTap,
+  });
 
   final String? nodeName;
+  final bool busy;
   final VoidCallback? onTap;
 
   @override
@@ -496,10 +549,16 @@ class _NodeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          GlyphIcon(
-            AppGlyphs.chevronForward,
-            color: colorScheme.onSurfaceVariant,
-          ),
+          if (busy)
+            SizedBox.square(
+              dimension: 18,
+              child: CommonCircleLoading(color: colorScheme.onSurfaceVariant),
+            )
+          else
+            GlyphIcon(
+              AppGlyphs.chevronForward,
+              color: colorScheme.onSurfaceVariant,
+            ),
         ],
       ),
     );
@@ -608,6 +667,7 @@ class _ProfilesCard extends StatelessWidget {
   const _ProfilesCard({
     required this.profiles,
     required this.fallbackLabel,
+    required this.busyTag,
     required this.onSelect,
     required this.onUpdate,
     required this.onSet,
@@ -615,6 +675,7 @@ class _ProfilesCard extends StatelessWidget {
 
   final List<CompanionProfileView> profiles;
   final String fallbackLabel;
+  final String? busyTag;
   final ValueChanged<int>? onSelect;
   final VoidCallback? onUpdate;
   final VoidCallback? onSet;
@@ -640,6 +701,7 @@ class _ProfilesCard extends StatelessWidget {
               _ProfileRow(
                 label: fallbackLabel.isEmpty ? '-' : fallbackLabel,
                 active: true,
+                busy: false,
                 onTap: null,
               )
             else
@@ -649,6 +711,7 @@ class _ProfilesCard extends StatelessWidget {
                   child: _ProfileRow(
                     label: profile.label,
                     active: profile.active,
+                    busy: busyTag == 'profile:${profile.id}',
                     onTap: (profile.active || onSelect == null)
                         ? null
                         : () => onSelect!(profile.id),
@@ -660,7 +723,12 @@ class _ProfilesCard extends StatelessWidget {
                 Expanded(
                   child: FilledButton.tonalIcon(
                     onPressed: onUpdate,
-                    icon: const GlyphIcon(AppGlyphs.refresh, size: 18),
+                    icon: busyTag == 'update'
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CommonCircleLoading(),
+                          )
+                        : const GlyphIcon(AppGlyphs.refresh, size: 18),
                     label: Text(l.companionUpdateSubscription),
                   ),
                 ),
@@ -668,7 +736,12 @@ class _ProfilesCard extends StatelessWidget {
                 Expanded(
                   child: FilledButton.tonalIcon(
                     onPressed: onSet,
-                    icon: const GlyphIcon(AppGlyphs.link, size: 18),
+                    icon: busyTag == 'set'
+                        ? const SizedBox.square(
+                            dimension: 18,
+                            child: CommonCircleLoading(),
+                          )
+                        : const GlyphIcon(AppGlyphs.link, size: 18),
                     label: Text(l.companionSetSubscription),
                   ),
                 ),
@@ -685,11 +758,13 @@ class _ProfileRow extends StatelessWidget {
   const _ProfileRow({
     required this.label,
     required this.active,
+    required this.busy,
     required this.onTap,
   });
 
   final String label;
   final bool active;
+  final bool busy;
   final VoidCallback? onTap;
 
   @override
@@ -722,7 +797,12 @@ class _ProfileRow extends StatelessWidget {
               ),
             ),
           ),
-          if (active)
+          if (busy)
+            SizedBox.square(
+              dimension: 18,
+              child: CommonCircleLoading(color: colorScheme.primary),
+            )
+          else if (active)
             GlyphIcon(AppGlyphs.check, size: 18, color: colorScheme.primary),
         ],
       ),
