@@ -1630,9 +1630,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ереже мазмұнын енгізіңіз",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Жаңартуды орнату"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Қолданбалар тізіміне рұқсат берілмегендіктен орнатылған қолданбалар көрінбейді. Рұқсатты жүйе баптауларынан қолмен беріңіз.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Бұл жүйе рұқсат берілмейінше орнатылған қолданбалар тізімін жасырады. Қолданба сайын прокси баптау үшін рұқсат беріңіз.",
     ),
@@ -2447,6 +2448,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "QR кодын сканерлеу арқылы профиль алу",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Жылдам қосу"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Жылдам өңдеу"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Жылдам толтыру"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Кемпірқосақ"),
@@ -2689,6 +2691,29 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Ереже бос"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Ереже атауы"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent тікелей",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS бөгеу",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("QUIC бөгеу"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("STUN бөгеу"),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "Қытай қызметтері тікелей",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "Иран қызметтері тікелей",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage(
+      "Жергілікті желі тікелей",
+    ),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "Ресей қызметтері тікелей",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple және Microsoft тікелей",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("Ереже жинағы"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Ереже нысаны"),
     "rules": MessageLookupByLibrary.simpleMessage("Ережелер"),

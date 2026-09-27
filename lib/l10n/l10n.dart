@@ -55,6 +55,101 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `Quick add`
+  String get quickAdd {
+    return Intl.message('Quick add', name: 'quickAdd', desc: '', args: []);
+  }
+
+  /// `Russian services direct`
+  String get rulePresetRussiaDirect {
+    return Intl.message(
+      'Russian services direct',
+      name: 'rulePresetRussiaDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Iranian services direct`
+  String get rulePresetIranDirect {
+    return Intl.message(
+      'Iranian services direct',
+      name: 'rulePresetIranDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chinese services direct`
+  String get rulePresetChinaDirect {
+    return Intl.message(
+      'Chinese services direct',
+      name: 'rulePresetChinaDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block QUIC`
+  String get rulePresetBlockQuic {
+    return Intl.message(
+      'Block QUIC',
+      name: 'rulePresetBlockQuic',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block STUN`
+  String get rulePresetBlockStun {
+    return Intl.message(
+      'Block STUN',
+      name: 'rulePresetBlockStun',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block DNS over TLS`
+  String get rulePresetBlockDot {
+    return Intl.message(
+      'Block DNS over TLS',
+      name: 'rulePresetBlockDot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LAN direct`
+  String get rulePresetLanDirect {
+    return Intl.message(
+      'LAN direct',
+      name: 'rulePresetLanDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apple and Microsoft direct`
+  String get rulePresetSystemServicesDirect {
+    return Intl.message(
+      'Apple and Microsoft direct',
+      name: 'rulePresetSystemServicesDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `BitTorrent direct`
+  String get rulePresetBittorrentDirect {
+    return Intl.message(
+      'BitTorrent direct',
+      name: 'rulePresetBittorrentDirect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `DNS queries`
   String get dnsQueries {
     return Intl.message('DNS queries', name: 'dnsQueries', desc: '', args: []);

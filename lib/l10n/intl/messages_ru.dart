@@ -1626,9 +1626,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Установить обновление",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Разрешение на список приложений отклонено, поэтому установленные приложения недоступны. Предоставьте его вручную в системных настройках.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Эта система не выдаёт список установленных приложений без разрешения. Предоставьте его, чтобы настроить прокси для отдельных приложений.",
     ),
@@ -2449,6 +2450,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Сканируйте QR-код, чтобы получить профиль",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Быстрое добавление"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Быстрое редактирование"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Быстрое заполнение"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Радуга"),
@@ -2691,6 +2693,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Правило пусто"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Название правила"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent напрямую",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "Блокировать DNS over TLS",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage(
+      "Блокировать QUIC",
+    ),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage(
+      "Блокировать STUN",
+    ),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "Китайские сервисы напрямую",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "Иранские сервисы напрямую",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage(
+      "Локальная сеть напрямую",
+    ),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "Российские сервисы напрямую",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple и Microsoft напрямую",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("Набор правил"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Цель правила"),
     "rules": MessageLookupByLibrary.simpleMessage("Правила"),

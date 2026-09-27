@@ -29,6 +29,16 @@ class _StandardContentState extends ConsumerState<StandardContent> {
     ref.read(profileAddedRulesProvider(_profileId).notifier).put(res);
   }
 
+  void _handleQuickAdd() {
+    showSheet<void>(
+      context: context,
+      props: const SheetProps(isScrollControlled: true),
+      builder: (_) => RulePresetSheet(
+        onAdd: ref.read(profileAddedRulesProvider(_profileId).notifier).putAll,
+      ),
+    );
+  }
+
   void _handleSelected(int ruleId) {
     ref.read(itemsProvider(_key).notifier).update((selectedRules) {
       final newSelectedRules = Set<int>.from(selectedRules)
@@ -111,6 +121,16 @@ class _StandardContentState extends ConsumerState<StandardContent> {
                             _handleDelete();
                           },
                           icon: const GlyphIcon(AppGlyphs.delete),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    if (selectedRules.isEmpty) ...[
+                      CommonMinIconButtonTheme(
+                        child: IconButton.filledTonal(
+                          tooltip: appLocalizations.quickAdd,
+                          onPressed: _handleQuickAdd,
+                          icon: const GlyphIcon(AppGlyphs.bolt),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),

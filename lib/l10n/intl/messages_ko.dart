@@ -1968,6 +1968,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "qrcode": MessageLookupByLibrary.simpleMessage("QR 코드"),
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage("QR 코드를 스캔해 프로필을 추가합니다"),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("빠른 추가"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("빠른 편집"),
     "quickFill": MessageLookupByLibrary.simpleMessage("빠른 입력"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("무지개"),
@@ -2164,6 +2165,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("규칙이 비어 있습니다"),
     "ruleName": MessageLookupByLibrary.simpleMessage("규칙 이름"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent 직접 연결",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS 차단",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("QUIC 차단"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("STUN 차단"),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "중국 서비스 직접 연결",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "이란 서비스 직접 연결",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("LAN 직접 연결"),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "러시아 서비스 직접 연결",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple 및 Microsoft 직접 연결",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("규칙 세트"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("규칙 대상"),
     "rules": MessageLookupByLibrary.simpleMessage("규칙"),

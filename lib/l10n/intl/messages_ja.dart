@@ -1989,6 +1989,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "QRコードをスキャンしてプロファイルを取得します",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("クイック追加"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("クイック編集"),
     "quickFill": MessageLookupByLibrary.simpleMessage("クイック入力"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("レインボー"),
@@ -2181,6 +2182,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("ルールが空です"),
     "ruleName": MessageLookupByLibrary.simpleMessage("ルール名"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent を直接接続",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS をブロック",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("QUIC をブロック"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("STUN をブロック"),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "中国のサービスを直接接続",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "イランのサービスを直接接続",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("LAN を直接接続"),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "ロシアのサービスを直接接続",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple と Microsoft を直接接続",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("ルールセット"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("ルールターゲット"),
     "rules": MessageLookupByLibrary.simpleMessage("ルール"),

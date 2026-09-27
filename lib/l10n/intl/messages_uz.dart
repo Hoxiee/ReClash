@@ -1675,9 +1675,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "installUpdate": MessageLookupByLibrary.simpleMessage(
       "Yangilanishni oʻrnatish",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Ilovalar roʻyxati ruxsati rad etildi, shuning uchun oʻrnatilgan ilovalarni koʻrsatib boʻlmaydi. Ruxsatni tizim sozlamalaridan qoʻlda bering.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ruxsat berilmaguncha tizim oʻrnatilgan ilovalar roʻyxatini yashiradi. Ilovalar boʻyicha proksini sozlash uchun ruxsat bering.",
     ),
@@ -2508,6 +2509,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Profil olish uchun QR kodni skanerlang",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Tez qoʻshish"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Tezkor tahrirlash"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Tez toʻldirish"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Kamalak"),
@@ -2750,6 +2752,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Qoida boʻsh"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Qoida nomi"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent toʻgʻridan-toʻgʻri",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS ni bloklash",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage(
+      "QUIC ni bloklash",
+    ),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage(
+      "STUN ni bloklash",
+    ),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "Xitoy xizmatlari toʻgʻridan-toʻgʻri",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "Eron xizmatlari toʻgʻridan-toʻgʻri",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage(
+      "LAN toʻgʻridan-toʻgʻri",
+    ),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "Rossiya xizmatlari toʻgʻridan-toʻgʻri",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple va Microsoft toʻgʻridan-toʻgʻri",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("Qoida toʻplami"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Qoida moʻljali"),
     "rules": MessageLookupByLibrary.simpleMessage("Qoidalar"),

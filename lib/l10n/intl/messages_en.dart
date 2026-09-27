@@ -1568,9 +1568,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter the rule content",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Install update"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -2349,6 +2350,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Scan a QR code to obtain a profile",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Quick add"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Quick edit"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Quick fill"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Rainbow"),
@@ -2577,6 +2579,27 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Rule is empty"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Rule name"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent direct",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "Block DNS over TLS",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage("Block QUIC"),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage("Block STUN"),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "Chinese services direct",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "Iranian services direct",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage("LAN direct"),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "Russian services direct",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple and Microsoft direct",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("Rule set"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Rule target"),
     "rules": MessageLookupByLibrary.simpleMessage("Rules"),

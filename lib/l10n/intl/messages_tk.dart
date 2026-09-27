@@ -1637,9 +1637,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Düzgüniň mazmunyny giriziň",
     ),
     "installUpdate": MessageLookupByLibrary.simpleMessage("Täzelenmäni gur"),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "Programma sanawy rugsaty ret edildi, şonuň üçin gurnalýan programmalary görkezip bolmaýar. Ony ulgam sazlamalarynda el bilen beriň.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Bu ulgam rugsat berilmese, gurnalýan programmalaryň sanawyny gizleýär. Rugsat beriň, şonda her programma üçin wekil sazlap bilersiňiz.",
     ),
@@ -2446,6 +2447,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "qrcodeDesc": MessageLookupByLibrary.simpleMessage(
       "Profil almak üçin QR kody skanerläň",
     ),
+    "quickAdd": MessageLookupByLibrary.simpleMessage("Çalt goşmak"),
     "quickEdit": MessageLookupByLibrary.simpleMessage("Çalt redaktirlemek"),
     "quickFill": MessageLookupByLibrary.simpleMessage("Çalt doldur"),
     "rainbowScheme": MessageLookupByLibrary.simpleMessage("Älemgoşar"),
@@ -2680,6 +2682,33 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "ruleEmpty": MessageLookupByLibrary.simpleMessage("Düzgün boş"),
     "ruleName": MessageLookupByLibrary.simpleMessage("Düzgüniň ady"),
+    "rulePresetBittorrentDirect": MessageLookupByLibrary.simpleMessage(
+      "BitTorrent göni",
+    ),
+    "rulePresetBlockDot": MessageLookupByLibrary.simpleMessage(
+      "DNS over TLS petiklemek",
+    ),
+    "rulePresetBlockQuic": MessageLookupByLibrary.simpleMessage(
+      "QUIC petiklemek",
+    ),
+    "rulePresetBlockStun": MessageLookupByLibrary.simpleMessage(
+      "STUN petiklemek",
+    ),
+    "rulePresetChinaDirect": MessageLookupByLibrary.simpleMessage(
+      "Hytaý hyzmatlary göni",
+    ),
+    "rulePresetIranDirect": MessageLookupByLibrary.simpleMessage(
+      "Eýran hyzmatlary göni",
+    ),
+    "rulePresetLanDirect": MessageLookupByLibrary.simpleMessage(
+      "Ýerli tor göni",
+    ),
+    "rulePresetRussiaDirect": MessageLookupByLibrary.simpleMessage(
+      "Rus hyzmatlary göni",
+    ),
+    "rulePresetSystemServicesDirect": MessageLookupByLibrary.simpleMessage(
+      "Apple we Microsoft göni",
+    ),
     "ruleSet": MessageLookupByLibrary.simpleMessage("Düzgünler toplumy"),
     "ruleTarget": MessageLookupByLibrary.simpleMessage("Düzgüniň nyşany"),
     "rules": MessageLookupByLibrary.simpleMessage("Düzgünler"),

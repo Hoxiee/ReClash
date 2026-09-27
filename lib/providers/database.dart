@@ -402,6 +402,26 @@ mixin RuleListMixin on OptimisticMixin<List<Rule>> {
     );
   }
 
+  void putAll(List<Rule> rules) {
+    if (rules.isEmpty) {
+      return;
+    }
+    final orders = indexing.generateNKeysBetween(
+      null,
+      value.firstOrNull?.order,
+      rules.length,
+    );
+    final newRules = [
+      for (final (index, rule) in rules.indexed)
+        rule.copyWith(order: orders[index]),
+    ];
+    optimistic([...newRules, ...value], () async {
+      for (final rule in newRules) {
+        await persistRule(rule);
+      }
+    });
+  }
+
   void delAll(Iterable<int> ruleIds) {
     optimistic(
       value.where((item) => !ruleIds.contains(item.id)).toList(),

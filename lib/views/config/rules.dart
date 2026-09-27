@@ -28,6 +28,15 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
     ref.read(globalRulesProvider.notifier).put(res);
   }
 
+  void _handleQuickAdd() {
+    showSheet<void>(
+      context: context,
+      props: const SheetProps(isScrollControlled: true),
+      builder: (_) =>
+          RulePresetSheet(onAdd: ref.read(globalRulesProvider.notifier).putAll),
+    );
+  }
+
   void _handleSelected(int ruleId) {
     ref.read(itemsProvider(_key).notifier).update((selectedRules) {
       final newSelectedRules = Set<int>.from(selectedRules)
@@ -84,6 +93,12 @@ class _AddedRulesViewState extends ConsumerState<AddedRulesView> {
               tooltip: context.appLocalizations.delete,
               onPressed: _handleDelete,
               icon: const GlyphIcon(AppGlyphs.delete),
+            ),
+          if (selectedRules.isEmpty)
+            IconButton.filledTonal(
+              tooltip: appLocalizations.quickAdd,
+              onPressed: _handleQuickAdd,
+              icon: const GlyphIcon(AppGlyphs.bolt),
             ),
           selectedRules.isNotEmpty
               ? FilledButton(
