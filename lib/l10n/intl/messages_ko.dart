@@ -556,6 +556,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "creditFlClash": MessageLookupByLibrary.simpleMessage(
       "FlClash — 이 앱의 기반이 된 클라이언트",
     ),
+    "creditFlClashPatched": MessageLookupByLibrary.simpleMessage(
+      "FlClash-Patched — 추가 기능",
+    ),
     "creditFlClashX": MessageLookupByLibrary.simpleMessage(
       "FlClashX — 프로바이더 기능과 아이디어",
     ),

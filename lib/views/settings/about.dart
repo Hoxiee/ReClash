@@ -71,6 +71,12 @@ class AboutView extends ConsumerWidget {
         link: 'https://github.com/pluralplay/FlClashX',
       ),
       Credit(
+        avatar: 'assets/images/avatar/chenx-dust.jpg',
+        name: 'chenx-dust',
+        role: appLocalizations.creditFlClashPatched,
+        link: 'https://github.com/chenx-dust/FlClash-Patched',
+      ),
+      Credit(
         avatar: 'assets/images/avatar/metacubex.jpg',
         name: 'MetaCubeX',
         role: appLocalizations.creditMihomo,

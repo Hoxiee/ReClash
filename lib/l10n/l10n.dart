@@ -1525,6 +1525,16 @@ class AppLocalizations {
     );
   }
 
+  /// `FlClash-Patched — extra features`
+  String get creditFlClashPatched {
+    return Intl.message(
+      'FlClash-Patched — extra features',
+      name: 'creditFlClashPatched',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `mihomo — the proxy core`
   String get creditMihomo {
     return Intl.message(
