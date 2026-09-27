@@ -929,11 +929,11 @@ class _PrimaryActionFab extends StatelessWidget {
       ignoring: isLoading,
       child: AnimatedScale(
         scale: isLoading ? 0 : 1,
-        duration: _duration,
-        curve: Curves.easeInOutBack,
+        duration: context.motionDuration(_duration),
+        curve: AppSpringCurves.morph,
         child: AnimatedOpacity(
           opacity: isLoading ? 0 : 1,
-          duration: _duration,
+          duration: context.motionDuration(_duration),
           child: CommonFloatingActionButton(
             onPressed: data.onPressed,
             icon: GlyphIcon(data.glyph, fill: 1),
