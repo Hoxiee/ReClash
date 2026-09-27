@@ -15,6 +15,7 @@ void main() {
   for (final (name, box) in [
     ('FadeSlideEnterBox', const FadeSlideEnterBox(child: SizedBox())),
     ('FadeScaleEnterBox', const FadeScaleEnterBox(child: SizedBox())),
+    ('DissolveIn', const DissolveIn(child: SizedBox())),
   ]) {
     testWidgets('$name animates its entrance', (tester) async {
       await tester.pumpWidget(host(box, disableAnimations: false));
@@ -93,4 +94,30 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('DissolveIn blurs while revealing then drops the filter', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(const DissolveIn(child: SizedBox()), disableAnimations: false),
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.byType(ImageFiltered), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(ImageFiltered), findsNothing);
+    expect(find.byType(SizedBox), findsOneWidget);
+  });
+
+  testWidgets('DissolveIn shows a bare child when animations are disabled', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      host(const DissolveIn(child: SizedBox()), disableAnimations: true),
+    );
+
+    expect(find.byType(ImageFiltered), findsNothing);
+    expect(find.byType(SizedBox), findsOneWidget);
+  });
 }

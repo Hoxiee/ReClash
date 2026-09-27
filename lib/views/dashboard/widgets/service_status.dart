@@ -277,9 +277,11 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
                                 flex: 3,
                                 child: FadeThroughBox(
                                   child: !loading && outboundIp != null
-                                      ? _OutboundIp(
-                                          ipInfo: outboundIp,
-                                          style: title,
+                                      ? DissolveIn(
+                                          child: _OutboundIp(
+                                            ipInfo: outboundIp,
+                                            style: title,
+                                          ),
                                         )
                                       : loading || ipPending
                                       ? SkeletonText(width: 104, style: title)
@@ -307,12 +309,14 @@ class _ServiceStatusCardState extends ConsumerState<ServiceStatusCard> {
                               else if (showNode && node != null)
                                 Expanded(
                                   flex: 2,
-                                  child: Text(
-                                    node,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.end,
-                                    style: secondary,
+                                  child: DissolveIn(
+                                    child: Text(
+                                      node,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.end,
+                                      style: secondary,
+                                    ),
                                   ),
                                 ),
                             ],

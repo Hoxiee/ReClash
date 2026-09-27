@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:animations/animations.dart';
 import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
@@ -174,6 +176,69 @@ class _FadeScaleEnterBoxState extends State<FadeScaleEnterBox>
       return widget.child;
     }
     return FadeScaleEnterTransition(animation: _animation, child: widget.child);
+  }
+}
+
+/// Reveals its child once, resolving it out of a blur as it fades in, so
+/// content condensing out of a skeleton placeholder melts into focus instead
+/// of snapping. The blur layer is dropped the moment the reveal finishes, so
+/// nothing lingers on a card that keeps repainting.
+class DissolveIn extends StatefulWidget {
+  const DissolveIn({super.key, required this.child, this.sigma = 5});
+
+  final Widget child;
+  final double sigma;
+
+  @override
+  State<DissolveIn> createState() => _DissolveInState();
+}
+
+class _DissolveInState extends State<DissolveIn>
+    with SingleTickerProviderStateMixin, _EnterAnimation {
+  @override
+  late final AnimationController _controller;
+  late final Animation<double> _reveal;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: commonDuration);
+    _reveal = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.disableAnimations) {
+      return widget.child;
+    }
+    return AnimatedBuilder(
+      animation: _reveal,
+      child: widget.child,
+      builder: (_, child) {
+        final t = _reveal.value;
+        if (t >= 1) {
+          return child!;
+        }
+        final sigma = widget.sigma * (1 - t);
+        return Opacity(
+          opacity: t,
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: sigma,
+              sigmaY: sigma,
+              tileMode: TileMode.decal,
+            ),
+            child: child,
+          ),
+        );
+      },
+    );
   }
 }
 
