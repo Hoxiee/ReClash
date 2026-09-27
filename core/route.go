@@ -51,12 +51,6 @@ func routeStateLocked() RouteState {
 	}
 }
 
-func routeState() RouteState {
-	currentRoute.mu.Lock()
-	defer currentRoute.mu.Unlock()
-	return routeStateLocked()
-}
-
 func routeStamp() (epoch, picksVersion uint64) {
 	currentRoute.mu.Lock()
 	defer currentRoute.mu.Unlock()

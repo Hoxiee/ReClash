@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"runtime"
 	"sync/atomic"
@@ -27,7 +28,7 @@ func dispatchMethodCall(call *MethodCall, response MethodResponse) {
 
 func (call MethodCall) decodeArguments(target any) error {
 	if len(call.Arguments) == 0 || string(call.Arguments) == "null" {
-		return fmt.Errorf("missing arguments")
+		return errors.New("missing arguments")
 	}
 	return json.Unmarshal(call.Arguments, target)
 }

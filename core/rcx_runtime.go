@@ -478,10 +478,6 @@ func rcxCountryCode(text string) string {
 
 // The handshake is driven here rather than left to the transport: mihomo builds
 // against its own TLS fork, whose config the standard transport will not take.
-func rcxEchoAddress(ctx context.Context, proxy *adapter.Proxy, echo string) netip.Addr {
-	return rcxParseEchoIP(rcxEchoBody(ctx, proxy, echo))
-}
-
 func rcxEchoBody(ctx context.Context, proxy *adapter.Proxy, echo string) []byte {
 	metadata, err := rcxEchoMetadata(echo)
 	if err != nil {

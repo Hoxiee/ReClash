@@ -356,9 +356,9 @@ func handleGetActiveServer(groupHint string) *ActiveServer {
 }
 
 var (
-	errGroupNotFound    = errors.New("Not found group")
-	errGroupInvalidType = errors.New("Group has invalid proxy type")
-	errGroupNotSelect   = errors.New("Group is not selectable")
+	errGroupNotFound    = errors.New("group not found")
+	errGroupInvalidType = errors.New("group has invalid proxy type")
+	errGroupNotSelect   = errors.New("group is not selectable")
 )
 
 func lookupProxy(name string) constant.Proxy {

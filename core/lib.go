@@ -29,8 +29,8 @@ import (
 )
 
 var (
-	eventListenerLock sync.RWMutex
-	eventListener     unsafe.Pointer
+	eventListenerMu sync.RWMutex
+	eventListener   unsafe.Pointer
 )
 
 type TunHandler struct {
@@ -237,7 +237,7 @@ func (th *TunHandler) removeHook() {
 }
 
 var (
-	tunLock           sync.Mutex
+	tunMu             sync.Mutex
 	errBlocked        = errors.New("blocked: the process is out of file descriptors")
 	errTunNotReady    = errors.New("blocked: the tun listener is not ready")
 	errProtectRefused = errors.New("blocked: VpnService.protect refused the socket")
@@ -260,8 +260,8 @@ func handleCancelDoctorProbe(probeID string) {
 }
 
 func handleStopTun() {
-	tunLock.Lock()
-	defer tunLock.Unlock()
+	tunMu.Lock()
+	defer tunMu.Unlock()
 	stopTunLocked()
 }
 
@@ -274,8 +274,8 @@ func stopTunLocked() {
 }
 
 func handleStartTun(callback unsafe.Pointer, fd int, stack, address, dns string) bool {
-	tunLock.Lock()
-	defer tunLock.Unlock()
+	tunMu.Lock()
+	defer tunMu.Unlock()
 	stopTunLocked()
 	if fd == 0 {
 		if callback != nil {
@@ -395,8 +395,8 @@ func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar
 
 //export setEventListener
 func setEventListener(listener unsafe.Pointer) {
-	eventListenerLock.Lock()
-	defer eventListenerLock.Unlock()
+	eventListenerMu.Lock()
+	defer eventListenerMu.Unlock()
 	if eventListener != nil {
 		releaseObject(eventListener)
 	}
@@ -428,8 +428,8 @@ func marshalResult(value any) string {
 }
 
 func deliverEvent(data []byte) {
-	eventListenerLock.RLock()
-	defer eventListenerLock.RUnlock()
+	eventListenerMu.RLock()
+	defer eventListenerMu.RUnlock()
 	if eventListener == nil {
 		return
 	}

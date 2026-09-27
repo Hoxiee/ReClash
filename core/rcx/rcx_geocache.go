@@ -129,7 +129,7 @@ func loadGeoSection(
 
 	whole, err := os.ReadFile(asset)
 	if err != nil {
-		return fmt.Errorf("failed to read geodata file: %s, base error: %w", filename, err)
+		return fmt.Errorf("read geodata file %s: %w", filename, err)
 	}
 	entry, err := findEntry(whole)
 	if err != nil {
