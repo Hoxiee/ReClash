@@ -23,8 +23,22 @@ class FocusHighlightVisibility {
       return;
     }
     _installed = true;
+    _syncHighlightMode();
+    _visible.addListener(_syncHighlightMode);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointer);
     HardwareKeyboard.instance.addHandler(_handleKey);
+  }
+
+  // Material's own focus overlay (the InkWell fill) ignores our ring and paints
+  // whenever a node holds focus in `traditional` mode — which a desktop mouse
+  // forces — so a click that parks focus on a tile leaves a grey fill stuck
+  // until the window blurs. Pin the highlight mode to our `:focus-visible`
+  // verdict so that overlay follows the same rule; hover is gated separately
+  // and stays intact.
+  static void _syncHighlightMode() {
+    FocusManager.instance.highlightStrategy = _visible.value
+        ? FocusHighlightStrategy.alwaysTraditional
+        : FocusHighlightStrategy.alwaysTouch;
   }
 
   static void _handlePointer(PointerEvent event) {
