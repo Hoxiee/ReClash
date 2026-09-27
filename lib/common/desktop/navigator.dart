@@ -6,7 +6,9 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 const _desktopRouteDuration = Duration(milliseconds: 320);
 
-const _mobileRouteDuration = Duration(milliseconds: 440);
+const _mobileRouteDuration = Duration(milliseconds: 300);
+
+const _mobileRouteReverseDuration = Duration(milliseconds: 240);
 
 class BaseNavigator {
   static Future<T?> push<T>(BuildContext context, Widget child) async {
@@ -25,7 +27,9 @@ class BaseNavigator {
       CommonRoute(
         builder: (context) => child,
         transitionDuration: context.motionDuration(_mobileRouteDuration),
-        reverseTransitionDuration: context.motionDuration(_mobileRouteDuration),
+        reverseTransitionDuration: context.motionDuration(
+          _mobileRouteReverseDuration,
+        ),
       ),
     );
   }
@@ -90,7 +94,7 @@ class CommonRoute<T> extends PageRoute<T> {
   CommonRoute({
     required this.builder,
     this.transitionDuration = _mobileRouteDuration,
-    this.reverseTransitionDuration = _mobileRouteDuration,
+    this.reverseTransitionDuration = _mobileRouteReverseDuration,
   });
 
   final Widget Function(BuildContext context) builder;
@@ -117,33 +121,19 @@ class CommonRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget result = builder(context);
-    // A full-bleed slide would bare a screen-edge gap, so the curve stays damped.
-    final incoming = Directionality.of(context) == TextDirection.rtl
-        ? -0.14
-        : 0.14;
     return Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
-      child: SlideTransition(
-        position: secondaryAnimation.drive(
-          Tween<Offset>(
-            begin: Offset.zero,
-            end: Offset(-incoming * 0.43, 0),
-          ).chain(CurveTween(curve: Curves.easeInToLinear)),
-        ),
-        child: SlideTransition(
-          position: animation.drive(
-            Tween<Offset>(
-              begin: Offset(incoming, 0),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: AppSpringCurves.route)),
+      child: FadeTransition(
+        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
+        child: ScaleTransition(
+          scale: animation.drive(
+            Tween<double>(
+              begin: 0.98,
+              end: 1,
+            ).chain(CurveTween(curve: AppSpringCurves.morph)),
           ),
-          child: FadeTransition(
-            opacity: animation.drive(
-              CurveTween(curve: AppSpringCurves.route),
-            ),
-            child: result,
-          ),
+          child: result,
         ),
       ),
     );

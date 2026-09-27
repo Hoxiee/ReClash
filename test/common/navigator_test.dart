@@ -54,7 +54,7 @@ void main() {
       expect(find.text('pushed page'), findsOneWidget);
     });
 
-    testWidgets('uses the spring slide route on a mobile view', (tester) async {
+    testWidgets('uses the morph route on a mobile view', (tester) async {
       setViewWidth(400);
       await pumpHost(tester);
 
@@ -64,7 +64,7 @@ void main() {
       expect(find.text('pushed page'), findsOneWidget);
     });
 
-    testWidgets('drives a spring slide and fade on a mobile push', (
+    testWidgets('drives a spring fade and scale on a mobile push', (
       tester,
     ) async {
       setViewWidth(400);
@@ -74,8 +74,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 120));
 
-      expect(find.byType(SlideTransition), findsWidgets);
       expect(find.byType(FadeTransition), findsWidgets);
+      expect(find.byType(ScaleTransition), findsWidgets);
 
       await tester.pumpAndSettle();
       expect(find.text('pushed page'), findsOneWidget);
@@ -111,16 +111,16 @@ void main() {
       );
     });
 
-    test('mobile route uses the longer spring duration', () {
+    test('mobile route snaps quicker on the way back', () {
       final route = CommonRoute<void>(builder: (_) => const SizedBox());
 
       expect(route.barrierColor, isNull);
       expect(route.barrierLabel, isNull);
       expect(route.maintainState, isTrue);
-      expect(route.transitionDuration, const Duration(milliseconds: 440));
+      expect(route.transitionDuration, const Duration(milliseconds: 300));
       expect(
         route.reverseTransitionDuration,
-        const Duration(milliseconds: 440),
+        const Duration(milliseconds: 240),
       );
     });
   });
@@ -343,7 +343,7 @@ void main() {
       await tester.pump();
 
       final route = ModalRoute.of(tester.element(find.text('pushed page')));
-      expect(route!.transitionDuration, const Duration(milliseconds: 440));
+      expect(route!.transitionDuration, const Duration(milliseconds: 300));
       expect(route.animation!.isCompleted, isFalse);
       await tester.pumpAndSettle();
     });

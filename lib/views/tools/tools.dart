@@ -13,6 +13,7 @@ import 'package:reclash/views/config/config.dart';
 import 'package:reclash/views/settings/hotkey.dart';
 import 'package:reclash/views/settings/locale.dart';
 import 'package:reclash/widgets/widgets.dart';
+import 'package:animations/animations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show dirname, join;
@@ -220,20 +221,15 @@ class _ToolViewState extends ConsumerState<ToolsView> {
         ),
       );
     }
-    return AnimatedSwitcher(
+    return PageTransitionSwitcher(
       duration: context.motionDuration(_toolsPaneSwapDuration),
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
-        child: ScaleTransition(
-          scale: animation.drive(
-            Tween<double>(
-              begin: 0.98,
-              end: 1,
-            ).chain(CurveTween(curve: AppSpringCurves.morph)),
+      transitionBuilder: (child, animation, secondaryAnimation) =>
+          FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            fillColor: Colors.transparent,
+            child: child,
           ),
-          child: child,
-        ),
-      ),
       child: content,
     );
   }
