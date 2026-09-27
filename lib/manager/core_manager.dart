@@ -63,9 +63,13 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       _scheduleProfileSetup(next);
     });
     ref.listenManual(updateParamsProvider, (prev, next) {
-      if (prev != next) {
-        ref.read(setupActionProvider.notifier).updateConfigDebounce();
-      }
+      if (prev == next) return;
+      // Live patches need an applied config; until the core is connected the
+      // change is already persisted and reapplied on start, so pushing it now
+      // only earns a "config is not applied" error (and a stray TUN elevation
+      // prompt in the setup wizard) on a fresh install or stopped core.
+      if (ref.read(coreStatusProvider) != CoreStatus.connected) return;
+      ref.read(setupActionProvider.notifier).updateConfigDebounce();
     });
     ref.listenManual(smartRoutingSettingProvider, (prev, next) {
       if (prev == next) {

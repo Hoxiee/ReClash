@@ -30,11 +30,17 @@ class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
 class _RecordingSetupAction extends SetupAction {
   int fullSetupCalls = 0;
+  int updateConfigCalls = 0;
 
   @override
   Future<bool> fullSetup() async {
     fullSetupCalls++;
     return true;
+  }
+
+  @override
+  Future<void> updateConfigDebounce() async {
+    updateConfigCalls++;
   }
 }
 
@@ -362,6 +368,36 @@ void main() {
     await tester.pump();
 
     expect(find.text('core failure'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a live config patch waits for the core to connect', (
+    tester,
+  ) async {
+    final coreInterface = _coreInterface();
+    final container = await _pumpCoreManager(
+      tester,
+      coreInterface,
+      overrides: [setupActionProvider.overrideWith(_RecordingSetupAction.new)],
+    );
+    final setup =
+        container.read(setupActionProvider.notifier) as _RecordingSetupAction;
+
+    // Disconnected: the change is already persisted and reapplied on start, so
+    // pushing it now would only earn a "config is not applied" error.
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(allowLan: true));
+    await tester.pump();
+    expect(setup.updateConfigCalls, 0);
+
+    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+    container
+        .read(patchClashConfigProvider.notifier)
+        .update((state) => state.copyWith(allowLan: false));
+    await tester.pump();
+    expect(setup.updateConfigCalls, 1);
 
     await tester.pumpWidget(const SizedBox.shrink());
   });
