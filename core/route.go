@@ -12,8 +12,9 @@ import (
 )
 
 // mihomo has no hook for a health check moving a URLTest or Fallback pick, so
-// the picks are re-read on this timer while the host watches.
-const routePollInterval = time.Second
+// the picks are re-read on this timer while the host watches. The readout is
+// advisory, so a coarse period keeps the idle wake cheap.
+const routePollInterval = 2 * time.Second
 
 type pickableGroup interface {
 	outboundgroup.ProxyGroup
@@ -97,8 +98,13 @@ func refreshRouteLocked(structural bool) {
 		currentRoute.picksVersion++
 		changed = true
 	}
-	state := routeStateLocked()
 	watched := currentRoute.watched
+	// The clone in routeStateLocked is only worth paying for when a watcher
+	// will actually receive it; an unchanged tick skips it entirely.
+	var state RouteState
+	if changed && watched {
+		state = routeStateLocked()
+	}
 	currentRoute.mu.Unlock()
 
 	if changed && watched {
