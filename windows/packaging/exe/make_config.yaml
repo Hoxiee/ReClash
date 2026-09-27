@@ -1,5 +1,5 @@
 script_template: inno_setup.iss
-app_id: 728B3532-C74B-4870-9068-BE70FE12A3E6
+app_id: E642C6C1-B712-41C2-969E-3C2049CA883F
 app_name: ReClash
 publisher: Hoxiee
 publisher_url: https://github.com/Hoxiee/ReClash
@@ -9,10 +9,15 @@ output_base_file_name: ReClash.exe
 # Resolved against the project root: flutter_distributor turns this into an
 # absolute path via Directory.current.
 setup_icon_file: windows\runner\resources\app_icon.ico
+create_desktop_icon: true
 locales:
-  # Written into the .iss verbatim, so this one stays relative to the generated
-  # script in dist/.
+  # A locale with a `file:` is emitted into the .iss verbatim (path relative to
+  # the generated script in dist/); one without it is kept only when the maker
+  # finds the stock .isl next to ISCC. en/ru ship with Inno; zh/ko are vendored.
+  - lang: en
+  - lang: ru
   - lang: zh
     file: ..\windows\packaging\exe\ChineseSimplified.isl
-  - lang: en
+  - lang: ko
+    file: ..\windows\packaging\exe\Korean.isl
 privileges_required: admin
