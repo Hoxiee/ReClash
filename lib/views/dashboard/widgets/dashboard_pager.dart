@@ -135,8 +135,8 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
       ..addPosition(event.timeStamp, event.position);
   }
 
-  // A hero button that owns its vertical drag (the action chips) marks its
-  // hit region so a small drag there presses the button instead of paging.
+  // The orb owns its own drag (hold to charge, tap to connect), so it marks
+  // its hit region: a drag that starts on the orb works the orb, not the page.
   bool _reservesGesture(PointerDownEvent event) {
     final result = HitTestResult();
     GestureBinding.instance.hitTestInView(result, event.position, event.viewId);

@@ -252,16 +252,14 @@ class _HeroActionRow extends ConsumerWidget {
         const ElasticPress(strength: _heroChipElastic, child: _PauseChip()),
       const ElasticPress(strength: _heroChipElastic, child: _ModeChip()),
     ];
-    return HeroReserveGesture(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (var i = 0; i < chips.length; i++) ...[
-            if (i > 0) const SizedBox(width: 10),
-            chips[i],
-          ],
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var i = 0; i < chips.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          chips[i],
         ],
-      ),
+      ],
     );
   }
 }

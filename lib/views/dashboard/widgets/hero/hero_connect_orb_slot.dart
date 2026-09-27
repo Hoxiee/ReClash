@@ -41,16 +41,18 @@ class _OrbSlot extends ConsumerWidget {
     return HeroOrbSlot(
       min: heroOrbMinSize,
       max: heroOrbMaxSize,
-      builder: (context, size) => HeroOrb(
-        size: size,
-        enabled: isReady,
-        health: health,
-        activity: activity,
-        serviceLogo: serviceLogo,
-        heroRing: heroRing,
-        subscriptionExpired: subscriptionExpired,
-        variant: variant,
-        onPhaseChanged: onPhaseChanged,
+      builder: (context, size) => HeroReserveGesture(
+        child: HeroOrb(
+          size: size,
+          enabled: isReady,
+          health: health,
+          activity: activity,
+          serviceLogo: serviceLogo,
+          heroRing: heroRing,
+          subscriptionExpired: subscriptionExpired,
+          variant: variant,
+          onPhaseChanged: onPhaseChanged,
+        ),
       ),
     );
   }
