@@ -488,44 +488,48 @@ class _MiniPageContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: unit * 2),
+        SizedBox(height: unit * 1.2),
         Center(
           child: _MiniRing(
             ring: colorScheme.primary,
             center: colorScheme.primary,
-            size: unit * 9,
-            stroke: unit * 0.7,
+            size: unit * 6.5,
+            stroke: unit * 0.6,
           ),
         ),
-        SizedBox(height: unit * 1.6),
+        SizedBox(height: unit),
         Center(
-          child: _MiniLine(color: subtle, width: unit * 7, height: unit * 1.3),
+          child: _MiniLine(color: subtle, width: unit * 6, height: unit * 1.1),
         ),
-        SizedBox(height: unit * 0.8),
+        SizedBox(height: unit * 0.5),
         Center(
-          child: _MiniLine(color: line, width: unit * 5, height: unit * 0.8),
+          child: _MiniLine(color: line, width: unit * 4, height: unit * 0.7),
         ),
-        SizedBox(height: unit * 2),
+        SizedBox(height: unit * 1.4),
         _MiniCard(
           color: card,
-          height: unit * 6,
+          height: unit * 5,
           unit: unit,
           child: Row(
-            spacing: unit,
+            spacing: unit * 0.9,
             children: [
-              _MiniDot(color: colorScheme.tertiaryContainer, size: unit * 3),
+              _MiniDot(color: colorScheme.tertiaryContainer, size: unit * 2.6),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: unit * 0.6,
+                  spacing: unit * 0.5,
                   children: [
                     _MiniLine(
                       color: subtle,
-                      width: unit * 4.5,
-                      height: unit * 0.9,
+                      width: unit * 4,
+                      height: unit * 0.8,
                     ),
-                    _MiniLine(color: line, width: unit * 3, height: unit * 0.7),
+                    _MiniLine(
+                      color: line,
+                      width: unit * 2.6,
+                      height: unit * 0.6,
+                    ),
                   ],
                 ),
               ),
@@ -533,29 +537,25 @@ class _MiniPageContent extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: unit),
+        SizedBox(height: unit * 0.8),
         _MiniCard(
           color: card,
-          height: unit * 8,
+          height: unit * 6,
           unit: unit,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: unit * 0.9,
+            spacing: unit * 0.7,
             children: [
               Row(
-                spacing: unit * 0.8,
+                spacing: unit * 0.7,
                 children: [
-                  _MiniDot(color: colorScheme.primary, size: unit * 1.6),
-                  _MiniLine(
-                    color: subtle,
-                    width: unit * 3.5,
-                    height: unit * 0.9,
-                  ),
+                  _MiniDot(color: colorScheme.primary, size: unit * 1.4),
+                  _MiniLine(color: subtle, width: unit * 3, height: unit * 0.8),
                   const Spacer(),
                   Container(
-                    width: unit * 4.5,
-                    height: unit * 1.8,
+                    width: unit * 4,
+                    height: unit * 1.6,
                     decoration: ShapeDecoration(
                       color: colorScheme.tertiaryContainer,
                       shape: AppShape.full,
@@ -563,18 +563,18 @@ class _MiniPageContent extends StatelessWidget {
                   ),
                 ],
               ),
-              _MiniLine(color: subtle, width: unit * 6, height: unit * 1.5),
+              _MiniLine(color: subtle, width: unit * 5, height: unit * 1.3),
               _progressBar(0.98),
             ],
           ),
         ),
-        SizedBox(height: unit * 1.2),
+        SizedBox(height: unit * 0.9),
         Row(
           spacing: unit,
           children: [
             Expanded(child: _pillButton(card)),
             Expanded(child: _pillButton(card)),
-            _MiniDot(color: card, size: unit * 3.4),
+            _MiniDot(color: card, size: unit * 3),
           ],
         ),
       ],
@@ -629,7 +629,7 @@ class _MiniPageContent extends StatelessWidget {
 
   Widget _pillButton(Color color) {
     return SizedBox(
-      height: unit * 3.4,
+      height: unit * 3,
       child: DecoratedBox(
         decoration: ShapeDecoration(color: color, shape: AppShape.full),
         child: Center(
