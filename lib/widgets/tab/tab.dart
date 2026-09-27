@@ -6,7 +6,6 @@ import 'package:reclash/common/ui/focus_visibility.dart';
 import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/common/ui/spacing.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:reclash/widgets/nav/app_nav_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -37,15 +36,6 @@ const double _kSeparatorWidth = 1;
 
 const double _kMinThumbScale = 0.95;
 
-// Liquid travel: while the thumb is in flight its leading edge runs ahead of
-// its trailing edge in proportion to speed, so it stretches at mid-flight and
-// settles back to width when the spring stops. Gain turns px/frame of thumb
-// speed into leading-edge overhang; the fraction caps that overhang so a jank
-// spike can never balloon the thumb.
-const double _kThumbFlowGain = 3.0;
-
-const double _kThumbFlowMaxFraction = 0.35;
-
 const double _kSegmentMinPadding = 10;
 
 const double _kTouchYDistanceThreshold = 50.0 * 50.0;
@@ -72,8 +62,6 @@ const Duration _kSpringAnimationDuration = Duration(milliseconds: 412);
 const Duration _kOpacityAnimationDuration = Duration(milliseconds: 470);
 
 const Duration _kContentPressFadeDuration = Duration(milliseconds: 140);
-
-const double _kSegmentPressStrength = 0.4;
 
 const Duration _kHighlightAnimationDuration = Duration(milliseconds: 200);
 
