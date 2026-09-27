@@ -115,6 +115,7 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final byeDpi = ref.watch(byeDpiSupportedProvider);
     final profiles = ref.watch(profilesProvider);
     final currentProfile = ref.watch(currentProfileProvider);
     final selected = currentProfile ?? profiles.firstOrNull;
@@ -190,7 +191,12 @@ class _SetupSubscriptionStepState extends ConsumerState<SetupSubscriptionStep> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Text(appLocalizations.setupContinueWithoutProfileDesc),
+                    Text(
+                      byeDpi
+                          ? appLocalizations.setupContinueWithoutProfileDesc
+                          : appLocalizations
+                                .setupContinueWithoutProfileDescPlain,
+                    ),
                   ],
                 ),
               ),

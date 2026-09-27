@@ -13448,6 +13448,16 @@ class AppLocalizations {
     );
   }
 
+  /// `VPN stays off. You can add a profile later.`
+  String get setupContinueWithoutProfileDescPlain {
+    return Intl.message(
+      'VPN stays off. You can add a profile later.',
+      name: 'setupContinueWithoutProfileDescPlain',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, =1{1 profile ready} other{{count} profiles ready}}`
   String setupProfilesReady(num count) {
     return Intl.plural(
@@ -13555,6 +13565,16 @@ class AppLocalizations {
     return Intl.message(
       'No VPN profile — VPN remains off; ByeDPI-only is available',
       name: 'setupSummaryNoProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No VPN profile — VPN remains off`
+  String get setupSummaryNoProfilePlain {
+    return Intl.message(
+      'No VPN profile — VPN remains off',
+      name: 'setupSummaryNoProfilePlain',
       desc: '',
       args: [],
     );

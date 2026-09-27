@@ -2826,6 +2826,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN останется выключен. Профиль можно добавить позже или использовать режим «Только ByeDPI» без VPN-провайдера.",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage(
+          "VPN останется выключен. Профиль можно добавить позже.",
+        ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "Отправлять необязательные отчёты о сбоях",
     ),
@@ -2958,6 +2962,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "Профиля VPN нет — VPN останется выключен; доступен режим «Только ByeDPI»",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "Профиля VPN нет — VPN останется выключен",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

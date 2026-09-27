@@ -2815,6 +2815,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN öçük galar. Profili soň goşup ýa-da VPN üpjün edijisiz diňe ByeDPI tertibini ulanyp bolýar.",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage(
+          "VPN öçük galar. Profili soň goşup bolýar.",
+        ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "Meýletin näsazlyk hasabatlaryny iber",
     ),
@@ -2947,6 +2951,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "VPN profili ýok — VPN öçük galar; diňe ByeDPI tertibi elýeterli",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "VPN profili ýok — VPN öçük galar",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

@@ -2285,6 +2285,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN はオフのままです。後から追加するか、VPN プロバイダー不要の ByeDPI 専用モードを利用できます。",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage("VPN はオフのままです。プロファイルは後から追加できます。"),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "任意のクラッシュレポートを送信",
     ),
@@ -2375,6 +2377,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryAutoRunOn": MessageLookupByLibrary.simpleMessage("自動接続：オン"),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "VPN プロファイルなし — VPN はオフ。ByeDPI 専用モードは利用できます",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "VPN プロファイルなし — VPN はオフ",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

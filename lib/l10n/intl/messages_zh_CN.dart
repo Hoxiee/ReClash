@@ -1998,6 +1998,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN 将保持关闭。你可以稍后添加配置，也可以在没有 VPN 服务商的情况下使用“仅 ByeDPI”模式。",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage("VPN 将保持关闭。你可以稍后添加配置。"),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage("发送可选的崩溃报告"),
     "setupDataCollectionDesc": MessageLookupByLibrary.simpleMessage(
       "用于排查应用崩溃。除非你主动开启，否则不会发送。",
@@ -2078,6 +2080,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryAutoRunOn": MessageLookupByLibrary.simpleMessage("自动连接：开启"),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "没有 VPN 配置 — VPN 将保持关闭；可使用“仅 ByeDPI”模式",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "没有 VPN 配置 — VPN 将保持关闭",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

@@ -2702,6 +2702,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN stays off. You can add a profile later or use ByeDPI-only mode without a VPN provider.",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage(
+          "VPN stays off. You can add a profile later.",
+        ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "Send optional crash reports",
     ),
@@ -2838,6 +2842,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "No VPN profile — VPN remains off; ByeDPI-only is available",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "No VPN profile — VPN remains off",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

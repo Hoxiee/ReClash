@@ -227,6 +227,7 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
   @override
   Widget build(BuildContext context) {
     final appLocalizations = context.appLocalizations;
+    final byeDpi = ref.watch(byeDpiSupportedProvider);
     final routing = ref.watch(smartRoutingSettingProvider);
     final appSetting = ref.watch(appSettingProvider);
     final profiles = ref.watch(profilesProvider);
@@ -406,7 +407,9 @@ class _SetupFinishStepState extends ConsumerState<SetupFinishStep>
                   children: [
                     Text(
                       profile == null
-                          ? appLocalizations.setupSummaryNoProfile
+                          ? (byeDpi
+                                ? appLocalizations.setupSummaryNoProfile
+                                : appLocalizations.setupSummaryNoProfilePlain)
                           : appLocalizations.setupSummaryProfile(
                               profile.label.takeFirstValid([
                                 appLocalizations.profile,

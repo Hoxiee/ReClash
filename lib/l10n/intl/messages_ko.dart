@@ -2266,6 +2266,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN은 꺼진 상태로 유지됩니다. 나중에 프로필을 추가하거나 VPN 제공업체 없이 ByeDPI 전용 모드를 사용할 수 있습니다.",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage(
+          "VPN은 꺼진 상태로 유지됩니다. 나중에 프로필을 추가할 수 있습니다.",
+        ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "선택적 충돌 보고서 보내기",
     ),
@@ -2358,6 +2362,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupSummaryAutoRunOn": MessageLookupByLibrary.simpleMessage("자동 연결: 켜짐"),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "VPN 프로필 없음 — VPN은 꺼짐, ByeDPI 전용 모드는 사용 가능",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "VPN 프로필 없음 — VPN은 꺼짐",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,

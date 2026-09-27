@@ -788,14 +788,30 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('no-profile path explains VPN and ByeDPI-only mode', (
+  testWidgets('no-profile path explains ByeDPI-only where it is offered', (
     tester,
   ) async {
-    await _pump(tester);
+    await _pump(
+      tester,
+      overrides: [byeDpiSupportedProvider.overrideWithValue(true)],
+    );
     await _toSubscription(tester);
 
     expect(find.textContaining('VPN stays off'), findsOneWidget);
     expect(find.textContaining('ByeDPI-only'), findsOneWidget);
+  });
+
+  testWidgets('no-profile path omits ByeDPI where it is unavailable', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      overrides: [byeDpiSupportedProvider.overrideWithValue(false)],
+    );
+    await _toSubscription(tester);
+
+    expect(find.textContaining('VPN stays off'), findsOneWidget);
+    expect(find.textContaining('ByeDPI'), findsNothing);
   });
 
   testWidgets('multiple profiles show active profile and total count', (

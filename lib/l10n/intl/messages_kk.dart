@@ -2822,6 +2822,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "setupContinueWithoutProfileDesc": MessageLookupByLibrary.simpleMessage(
       "VPN өшірулі қалады. Профильді кейін қосуға немесе VPN провайдерінсіз тек ByeDPI режимін пайдалануға болады.",
     ),
+    "setupContinueWithoutProfileDescPlain":
+        MessageLookupByLibrary.simpleMessage(
+          "VPN өшірулі қалады. Профильді кейін қосуға болады.",
+        ),
     "setupDataCollection": MessageLookupByLibrary.simpleMessage(
       "Қосымша ақау есептерін жіберу",
     ),
@@ -2960,6 +2964,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "setupSummaryNoProfile": MessageLookupByLibrary.simpleMessage(
       "VPN профилі жоқ — VPN өшірулі қалады; тек ByeDPI режимі қолжетімді",
+    ),
+    "setupSummaryNoProfilePlain": MessageLookupByLibrary.simpleMessage(
+      "VPN профилі жоқ — VPN өшірулі қалады",
     ),
     "setupSummaryProfile": m76,
     "setupSummaryRouting": m77,
