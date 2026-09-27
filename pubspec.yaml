@@ -81,6 +81,7 @@ dependencies:
   setup:
     path: plugins/setup
   webview_flutter: ^4.14.1
+  meta: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
