@@ -173,9 +173,18 @@ class _LayoutChoice extends ConsumerWidget {
         (state) => (themeMode: state.themeMode, pureBlack: state.pureBlack),
       ),
     );
+    final brightness = switch (themeMode) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+    };
     final scheme = ref
-        .watch(genColorSchemeProvider(liveBrightness(context, themeMode)))
+        .watch(genColorSchemeProvider(brightness))
         .toPureBlack(pureBlack);
+    Widget thumb(bool value) => MiniScreenThumb(
+      alignment: Alignment.topCenter,
+      screen: MiniScreen(colorScheme: scheme, hero: value),
+    );
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup<bool>(
         info: Info(
@@ -187,12 +196,12 @@ class _LayoutChoice extends ConsumerWidget {
           PreviewChoice(
             value: false,
             label: appLocalizations.classicDashboard,
-            pictogram: SketchThumb(colorScheme: scheme, hero: false),
+            pictogram: thumb(false),
           ),
           PreviewChoice(
             value: true,
             label: appLocalizations.newDashboardTitle,
-            pictogram: SketchThumb(colorScheme: scheme, hero: true),
+            pictogram: thumb(true),
           ),
         ],
         onChanged: (value) => ref
@@ -216,8 +225,14 @@ class _ThemeModeChoice extends ConsumerWidget {
             (themeMode: state.themeMode, scheduledTheme: state.scheduledTheme),
       ),
     );
-    final light = ref.watch(genColorSchemeProvider(Brightness.light));
-    final dark = ref.watch(genColorSchemeProvider(Brightness.dark));
+    final light = MiniScreen(
+      colorScheme: ref.watch(genColorSchemeProvider(Brightness.light)),
+      hero: hero,
+    );
+    final dark = MiniScreen(
+      colorScheme: ref.watch(genColorSchemeProvider(Brightness.dark)),
+      hero: hero,
+    );
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup<ThemeMode?>(
         info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
@@ -226,17 +241,19 @@ class _ThemeModeChoice extends ConsumerWidget {
           PreviewChoice(
             value: ThemeMode.system,
             label: appLocalizations.auto,
-            pictogram: SketchSplitThumb(light: light, dark: dark, hero: hero),
+            pictogram: MiniScreenThumb(
+              screen: MiniSplitScreen(light: light, dark: dark),
+            ),
           ),
           PreviewChoice(
             value: ThemeMode.light,
             label: appLocalizations.light,
-            pictogram: SketchThumb(colorScheme: light, hero: hero),
+            pictogram: MiniScreenThumb(screen: light),
           ),
           PreviewChoice(
             value: ThemeMode.dark,
             label: appLocalizations.dark,
-            pictogram: SketchThumb(colorScheme: dark, hero: hero),
+            pictogram: MiniScreenThumb(screen: dark),
           ),
         ],
         onChanged: (value) {
@@ -266,6 +283,12 @@ class _PureBlackChoice extends ConsumerWidget {
       themeSettingProvider.select((state) => state.pureBlack),
     );
     final darkScheme = ref.watch(genColorSchemeProvider(Brightness.dark));
+    Widget preview(bool value) => MiniScreenThumb(
+      screen: MiniScreen(
+        colorScheme: darkScheme.toPureBlack(value),
+        hero: hero,
+      ),
+    );
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup<bool>(
         info: Info(
@@ -277,18 +300,12 @@ class _PureBlackChoice extends ConsumerWidget {
           PreviewChoice(
             value: false,
             label: appLocalizations.standard,
-            pictogram: SketchThumb(
-              colorScheme: darkScheme.toPureBlack(false),
-              hero: hero,
-            ),
+            pictogram: preview(false),
           ),
           PreviewChoice(
             value: true,
             label: appLocalizations.pureBlack,
-            pictogram: SketchThumb(
-              colorScheme: darkScheme.toPureBlack(true),
-              hero: hero,
-            ),
+            pictogram: preview(true),
           ),
         ],
         onChanged: (value) => ref

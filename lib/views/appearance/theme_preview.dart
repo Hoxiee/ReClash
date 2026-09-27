@@ -1,20 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/widgets/theme/wallpaper.dart' show WallpaperLayer;
-import 'package:reclash/widgets/theme/wallpaper_scope.dart';
 import 'package:reclash/widgets/widgets.dart';
 
-// Every sketch is drawn on this canvas — a phone at roughly 0.29 of the real
-// dashboard, so card spans and heights keep their ratios — then scaled to fit.
-const _previewSize = Size(112, 170);
-const _screenInset = 6.0;
-const _gap = 4.0;
-const _tallCard = 44.0;
-const _shortCard = 20.0;
+// ReClash's shell always floats its navigation pill, so previews draw it that
+// way; the docked branch stays for correctness should that ever change.
+const bool _floatingBar = true;
 
 class PreviewChoice<T> {
   const PreviewChoice({
@@ -115,84 +107,49 @@ class _ChoiceButton extends StatelessWidget {
   }
 }
 
-/// The real dashboard, drawn in the ambient [ColorScheme]: the classic tile
-/// grid or, with [hero], the connection ring. Pass [wallpaper] so card, hero
-/// and orb surfaces dim by the same readability knobs the live app applies.
-class DashboardSketch extends StatelessWidget {
-  const DashboardSketch({super.key, required this.hero, this.wallpaper});
-
-  final bool hero;
-  final WallpaperProps? wallpaper;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(_screenInset),
-      child: hero ? _HeroBody(wallpaper: wallpaper) : const _ClassicBody(),
-    );
-  }
-}
-
-/// A phone frame rendering a [DashboardSketch] in [colorScheme], optionally
-/// behind a wallpaper drawn exactly as the app would.
-class PreviewDevice extends StatelessWidget {
-  const PreviewDevice({
+/// The foot of a [MiniScreen], where the options differ, drawn at the size of
+/// an icon.
+class MiniScreenThumb extends StatelessWidget {
+  const MiniScreenThumb({
     super.key,
-    required this.colorScheme,
-    required this.hero,
-    this.wallpaperImage,
-    this.wallpaperSettings,
-    this.width = 172,
+    required this.screen,
+    this.alignment = Alignment.bottomCenter,
   });
 
-  final ColorScheme colorScheme;
-  final bool hero;
-  final ImageProvider? wallpaperImage;
-  final WallpaperProps? wallpaperSettings;
-  final double width;
+  static const Size _screenSize = Size(96, 128);
+  static const double _shownHeight = 66;
+  static const double _height = 30;
+
+  final Widget screen;
+
+  /// Which slice of the taller [screen] the fixed-height thumbnail reveals.
+  /// The hero layout differs at the top, so its chooser crops from there.
+  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
-    final corner = AppCorner.fit(width);
-    final settings = wallpaperImage == null ? null : wallpaperSettings;
-    Widget sketch = SizedBox.fromSize(
-      size: _previewSize,
-      child: DashboardSketch(hero: hero, wallpaper: settings),
+    final shape = AppShape.sm.copyWith(
+      side: BorderSide(color: context.colorScheme.outlineVariant),
     );
-    if (settings != null) {
-      sketch = WallpaperSurfaceScope(
-        opacity: settings.cardOpacity,
-        child: sketch,
-      );
-    }
-    return Theme(
-      data: ThemeData(colorScheme: colorScheme, useMaterial3: true),
-      child: SizedBox(
-        width: width,
-        height: width * _previewSize.height / _previewSize.width,
-        child: DecoratedBox(
-          position: DecorationPosition.foreground,
-          decoration: ShapeDecoration(
-            shape: AppShape.all(
-              corner,
-            ).copyWith(side: BorderSide(color: colorScheme.outlineVariant)),
-          ),
-          child: ClipRSuperellipse(
-            borderRadius: AppRadius.all(corner),
-            child: ColoredBox(
-              color: colorScheme.surfaceContainerHighest,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (settings != null)
-                    Positioned.fill(
-                      child: WallpaperLayer(
-                        image: wallpaperImage!,
-                        settings: settings,
-                      ),
-                    ),
-                  FittedBox(child: sketch),
-                ],
+    return SizedBox(
+      height: _height,
+      width: _height * _screenSize.width / _shownHeight,
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: ShapeDecoration(shape: shape),
+        child: ClipRSuperellipse(
+          borderRadius: AppRadius.sm,
+          child: FittedBox(
+            child: SizedBox(
+              width: _screenSize.width,
+              height: _shownHeight,
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: alignment,
+                  minHeight: _screenSize.height,
+                  maxHeight: _screenSize.height,
+                  child: screen,
+                ),
               ),
             ),
           ),
@@ -200,125 +157,6 @@ class PreviewDevice extends StatelessWidget {
       ),
     );
   }
-}
-
-const double _thumbHeight = 34;
-double get _thumbWidth =>
-    _thumbHeight * _previewSize.width / _previewSize.height;
-
-/// A dashboard sketch shrunk to icon size, for a choice's pictogram.
-class SketchThumb extends StatelessWidget {
-  const SketchThumb({super.key, required this.colorScheme, required this.hero});
-
-  final ColorScheme colorScheme;
-  final bool hero;
-
-  @override
-  Widget build(BuildContext context) {
-    return _ThumbFrame(
-      outline: context.colorScheme.outlineVariant,
-      child: _ThumbSketch(colorScheme: colorScheme, hero: hero),
-    );
-  }
-}
-
-/// The "follow system" pictogram: light and dark sketches split on a diagonal.
-class SketchSplitThumb extends StatelessWidget {
-  const SketchSplitThumb({
-    super.key,
-    required this.light,
-    required this.dark,
-    required this.hero,
-  });
-
-  final ColorScheme light;
-  final ColorScheme dark;
-  final bool hero;
-
-  @override
-  Widget build(BuildContext context) {
-    return _ThumbFrame(
-      outline: context.colorScheme.outlineVariant,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _ThumbSketch(colorScheme: light, hero: hero),
-          ClipPath(
-            clipper: _DiagonalClipper(),
-            child: _ThumbSketch(colorScheme: dark, hero: hero),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ThumbSketch extends StatelessWidget {
-  const _ThumbSketch({required this.colorScheme, required this.hero});
-
-  final ColorScheme colorScheme;
-  final bool hero;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(colorScheme: colorScheme, useMaterial3: true),
-      child: ColoredBox(
-        color: colorScheme.surfaceContainerHighest,
-        child: FittedBox(
-          child: SizedBox.fromSize(
-            size: _previewSize,
-            child: DashboardSketch(hero: hero),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ThumbFrame extends StatelessWidget {
-  const _ThumbFrame({required this.outline, required this.child});
-
-  final Color outline;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: _thumbWidth,
-      height: _thumbHeight,
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: ShapeDecoration(
-          shape: AppShape.sm.copyWith(side: BorderSide(color: outline)),
-        ),
-        child: ClipRSuperellipse(borderRadius: AppRadius.sm, child: child),
-      ),
-    );
-  }
-}
-
-class _DiagonalClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    return Path()
-      ..moveTo(size.width * 0.62, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width * 0.38, size.height)
-      ..close();
-  }
-
-  @override
-  bool shouldReclip(_DiagonalClipper oldClipper) => false;
-}
-
-Brightness liveBrightness(BuildContext context, ThemeMode themeMode) {
-  return switch (themeMode) {
-    ThemeMode.light => Brightness.light,
-    ThemeMode.dark => Brightness.dark,
-    ThemeMode.system => MediaQuery.platformBrightnessOf(context),
-  };
 }
 
 class _ColorSchemeTween extends Tween<ColorScheme> {
@@ -328,13 +166,63 @@ class _ColorSchemeTween extends Tween<ColorScheme> {
   ColorScheme lerp(double t) => ColorScheme.lerp(begin!, end!, t);
 }
 
-/// The home page as the settings would render it: the live theme colours over
-/// the currently chosen layout, morphing whenever either changes.
-class ThemeLivePreview extends ConsumerWidget {
+/// The home page as the theme settings will draw it; its destinations can be
+/// tapped to try the page-switch animation.
+class ThemeLivePreview extends ConsumerStatefulWidget {
   const ThemeLivePreview({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ThemeLivePreview> createState() => _ThemeLivePreviewState();
+}
+
+class _ThemeLivePreviewState extends ConsumerState<ThemeLivePreview>
+    with SingleTickerProviderStateMixin {
+  static const double _phoneWidth = 168;
+  static const _duration = Duration(milliseconds: 300);
+
+  late final AnimationController _slide = AnimationController(
+    vsync: this,
+    duration: kTabScrollDuration,
+  );
+  late final CurvedAnimation _slideCurve = CurvedAnimation(
+    parent: _slide,
+    curve: Curves.easeOut,
+  );
+  int _selected = 0;
+  int? _previous;
+
+  Future<void> _select(int index) async {
+    if (index == _selected) {
+      return;
+    }
+    final animate = ref.read(appSettingProvider).isAnimateToPage;
+    if (!animate) {
+      setState(() {
+        _previous = null;
+        _selected = index;
+      });
+      _slide.value = 1;
+      return;
+    }
+    setState(() {
+      _previous = _selected;
+      _selected = index;
+    });
+    await _slide.forward(from: 0).orCancel.catchError((_) {});
+    if (mounted && _selected == index) {
+      setState(() => _previous = null);
+    }
+  }
+
+  @override
+  void dispose() {
+    _slideCurve.dispose();
+    _slide.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(
       themeSettingProvider.select((state) => state.themeMode),
     );
@@ -342,640 +230,599 @@ class ThemeLivePreview extends ConsumerWidget {
       themeSettingProvider.select((state) => state.pureBlack),
     );
     final hero = ref.watch(newDashboardEnabledProvider);
+    final brightness = switch (themeMode) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+    };
     final colorScheme = ref
-        .watch(genColorSchemeProvider(liveBrightness(context, themeMode)))
+        .watch(genColorSchemeProvider(brightness))
         .toPureBlack(pureBlack);
+    final corner = AppCorner.fit(_phoneWidth);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 24),
       alignment: Alignment.center,
       decoration: ShapeDecoration(
         color: context.colorScheme.surfaceContainerLow,
         shape: AppShape.xxl,
       ),
-      child: TweenAnimationBuilder<ColorScheme>(
-        tween: _ColorSchemeTween(end: colorScheme),
-        duration: const Duration(milliseconds: 300),
-        builder: (context, scheme, _) => AnimatedSwitcher(
-          duration: const Duration(milliseconds: 350),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: ScaleTransition(
-              scale: Tween(begin: 0.96, end: 1.0).animate(animation),
-              child: child,
+      child: SizedBox(
+        width: _phoneWidth,
+        child: AspectRatio(
+          aspectRatio: 9 / 17,
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: ShapeDecoration(
+              shape: AppShape.all(corner).copyWith(
+                side: BorderSide(color: context.colorScheme.outlineVariant),
+              ),
+            ),
+            child: ClipRSuperellipse(
+              borderRadius: AppRadius.all(corner),
+              child: TweenAnimationBuilder<ColorScheme>(
+                tween: _ColorSchemeTween(end: colorScheme),
+                duration: _duration,
+                builder: (_, colorScheme, _) => AnimatedBuilder(
+                  animation: _slideCurve,
+                  builder: (_, _) => MiniScreen(
+                    colorScheme: colorScheme,
+                    hero: hero,
+                    selected: _selected,
+                    previous: _previous,
+                    progress: _previous == null ? 1 : _slideCurve.value,
+                    onSelect: _select,
+                  ),
+                ),
+              ),
             ),
           ),
-          child: PreviewDevice(
-            key: ValueKey(hero),
-            colorScheme: scheme,
-            hero: hero,
+        ),
+      ),
+    );
+  }
+}
+
+enum _MiniPage { cards, list }
+
+/// A phone-shaped sketch of the home page, drawn in [colorScheme].
+///
+/// With [previous], the page is caught [progress] of the way through a slide
+/// switch from it toward [selected].
+class MiniScreen extends StatelessWidget {
+  const MiniScreen({
+    super.key,
+    required this.colorScheme,
+    this.hero = false,
+    this.selected = 0,
+    this.previous,
+    this.progress = 1,
+    this.onSelect,
+  });
+
+  static const int destinationCount = 4;
+
+  final ColorScheme colorScheme;
+  final bool hero;
+  final int selected;
+  final int? previous;
+  final double progress;
+  final ValueChanged<int>? onSelect;
+
+  static _MiniPage _pageOf(int index) =>
+      index.isEven ? _MiniPage.cards : _MiniPage.list;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        final width = constraints.maxWidth;
+        final unit = width / 20;
+        final margin = unit * 1.5;
+        final barHeight = _floatingBar ? unit * 3.2 : unit * 3.6;
+        final fabSize = unit * 3.2;
+        final previous = this.previous;
+        final hasFab = previous == null || progress > 0.5
+            ? selected == 0
+            : previous == 0;
+        final pageBottom = _floatingBar ? 0.0 : barHeight;
+        final direction = previous != null && previous > selected ? -1 : 1;
+        Widget pageAt(int index, double offset) {
+          return Positioned(
+            left: offset,
+            width: width,
+            top: 0,
+            bottom: pageBottom,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(margin, margin, margin, 0),
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  maxHeight: double.infinity,
+                  child: _MiniPageContent(
+                    colorScheme: colorScheme,
+                    page: _pageOf(index),
+                    hero: hero && index == 0,
+                    seed: index,
+                    unit: unit,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final destinations = _MiniDestinations(
+          colorScheme: colorScheme,
+          selected: selected,
+          unit: unit,
+          onSelect: onSelect,
+        );
+        return ColoredBox(
+          color: colorScheme.surface,
+          child: Stack(
+            children: [
+              if (previous == null)
+                pageAt(selected, 0)
+              else ...[
+                pageAt(previous, -direction * width * progress),
+                pageAt(selected, direction * width * (1 - progress)),
+              ],
+              if (hasFab && !_floatingBar)
+                Positioned(
+                  right: margin,
+                  bottom: barHeight + margin,
+                  width: fabSize * 1.6,
+                  height: fabSize,
+                  child: _MiniBlock(
+                    color: colorScheme.primaryContainer,
+                    extent: fabSize,
+                  ),
+                ),
+              if (_floatingBar)
+                Positioned(
+                  left: margin,
+                  right: margin + (hasFab ? fabSize + unit * 0.6 : 0),
+                  bottom: margin,
+                  height: barHeight,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      color: colorScheme.surfaceContainer,
+                      shape: AppShape.full,
+                      shadows: [
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.12),
+                          blurRadius: unit,
+                          offset: Offset(0, unit * 0.3),
+                        ),
+                      ],
+                    ),
+                    child: destinations,
+                  ),
+                )
+              else
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: barHeight,
+                  child: ColoredBox(
+                    color: colorScheme.surfaceContainer,
+                    child: destinations,
+                  ),
+                ),
+              if (hasFab && _floatingBar)
+                Positioned(
+                  right: margin,
+                  bottom: margin,
+                  width: fabSize,
+                  height: fabSize,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      color: colorScheme.primaryContainer,
+                      shape: AppShape.full,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Two [MiniScreen]s split on a diagonal, for the "follow system" thumbnail.
+class MiniSplitScreen extends StatelessWidget {
+  const MiniSplitScreen({super.key, required this.light, required this.dark});
+
+  final Widget light;
+  final Widget dark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        light,
+        ClipPath(clipper: _DiagonalClipper(), child: dark),
+      ],
+    );
+  }
+}
+
+class _DiagonalClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..moveTo(size.width * 0.7, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width * 0.3, size.height)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(_DiagonalClipper oldClipper) => false;
+}
+
+class _MiniPageContent extends StatelessWidget {
+  const _MiniPageContent({
+    required this.colorScheme,
+    required this.page,
+    required this.hero,
+    required this.seed,
+    required this.unit,
+  });
+
+  final ColorScheme colorScheme;
+  final _MiniPage page;
+  final bool hero;
+  final int seed;
+  final double unit;
+
+  List<Widget> _heroBody(Color card, Color line) {
+    return [
+      _MiniCard(
+        color: card,
+        height: unit * 9,
+        unit: unit,
+        child: Row(
+          spacing: unit * 1.4,
+          children: [
+            _MiniRing(
+              ring: colorScheme.primary,
+              center: colorScheme.primary,
+              size: unit * 6,
+              stroke: unit * 0.9,
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: unit * 0.7,
+                children: [
+                  _MiniLine(
+                    color: colorScheme.onSurface.withValues(alpha: 0.72),
+                    width: unit * 5,
+                    height: unit,
+                  ),
+                  _MiniLine(color: line, width: unit * 4, height: unit * 0.8),
+                  _MiniLine(
+                    color: line.withValues(alpha: 0.5),
+                    width: unit * 3,
+                    height: unit * 0.7,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      Row(
+        spacing: unit,
+        children: [
+          Expanded(
+            child: _MiniCard(
+              color: colorScheme.secondaryContainer,
+              height: unit * 4,
+              unit: unit,
+            ),
+          ),
+          Expanded(
+            child: _MiniCard(color: card, height: unit * 4, unit: unit),
+          ),
+        ],
+      ),
+      for (var i = 0; i < 2; i++)
+        _MiniCard(color: card, height: unit * 4.5, unit: unit),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final card = colorScheme.surfaceContainer;
+    final line = colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: unit,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: unit * 0.5),
+          child: _MiniLine(
+            color: colorScheme.onSurface.withValues(alpha: 0.72),
+            width: unit * 7,
+            height: unit * 1.1,
           ),
         ),
-      ),
+        if (hero)
+          ..._heroBody(card, line)
+        else
+          ...switch (page) {
+            _MiniPage.cards => [
+              _MiniCard(
+                color: card,
+                height: unit * 5,
+                unit: unit,
+                child: Row(
+                  spacing: unit,
+                  children: [
+                    _MiniDot(color: colorScheme.primary, size: unit * 2.2),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: unit * 0.6,
+                        children: [
+                          _MiniLine(color: line, width: unit * 6, height: unit),
+                          _MiniLine(
+                            color: line,
+                            width: unit * 3.5,
+                            height: unit * 0.8,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                spacing: unit,
+                children: [
+                  Expanded(
+                    child: _MiniCard(color: card, height: unit * 4, unit: unit),
+                  ),
+                  Expanded(
+                    child: _MiniCard(
+                      color: colorScheme.secondaryContainer,
+                      height: unit * 4,
+                      unit: unit,
+                    ),
+                  ),
+                ],
+              ),
+              for (var i = 0; i < 3; i++)
+                _MiniCard(color: card, height: unit * 4.5, unit: unit),
+            ],
+            _MiniPage.list => [
+              for (var i = 0; i < 7; i++)
+                SizedBox(
+                  height: unit * 2.6,
+                  child: Row(
+                    spacing: unit,
+                    children: [
+                      _MiniDot(
+                        color: i == 0
+                            ? colorScheme.tertiaryContainer
+                            : colorScheme.secondaryContainer,
+                        size: unit * 2.2,
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: unit * 0.5,
+                          children: [
+                            _MiniLine(
+                              color: line,
+                              width: unit * (8 - (i + seed) % 3 * 1.5),
+                              height: unit * 0.8,
+                            ),
+                            _MiniLine(
+                              color: line.withValues(alpha: 0.2),
+                              width: unit * 4,
+                              height: unit * 0.6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          },
+      ],
     );
   }
 }
 
-/// Stand-in for a line of text.
-class _Bar extends StatelessWidget {
-  const _Bar({this.width, this.height = 3, this.color});
+class _MiniDestinations extends StatelessWidget {
+  const _MiniDestinations({
+    required this.colorScheme,
+    required this.selected,
+    required this.unit,
+    required this.onSelect,
+  });
 
-  final double? width;
+  final ColorScheme colorScheme;
+  final int selected;
+  final double unit;
+  final ValueChanged<int>? onSelect;
+
+  Widget _buildDestination(int index) {
+    if (index != selected) {
+      return _MiniDot(color: colorScheme.onSurfaceVariant, size: unit * 0.9);
+    }
+    return Container(
+      width: unit * 2.8,
+      height: unit * 1.6,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        color: colorScheme.secondaryContainer,
+        shape: AppShape.full,
+      ),
+      child: _MiniDot(
+        color: colorScheme.onSecondaryContainer,
+        size: unit * 0.9,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final onSelect = this.onSelect;
+    return Row(
+      children: [
+        for (var i = 0; i < MiniScreen.destinationCount; i++)
+          Expanded(
+            child: onSelect == null
+                ? Center(child: _buildDestination(i))
+                : MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onSelect(i),
+                      child: Center(child: _buildDestination(i)),
+                    ),
+                  ),
+          ),
+      ],
+    );
+  }
+}
+
+class _MiniCard extends StatelessWidget {
+  const _MiniCard({
+    required this.color,
+    required this.height,
+    required this.unit,
+    this.child,
+  });
+
+  final Color color;
   final double height;
-  final Color? color;
+  final double unit;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
+    return SizedBox(
       height: height,
-      decoration: BoxDecoration(
-        color: color ?? context.colorScheme.onSurfaceVariant.opacity30,
-        borderRadius: AppRadius.full,
+      width: double.infinity,
+      child: _MiniBlock(
+        color: color,
+        extent: height,
+        padding: EdgeInsets.symmetric(horizontal: unit),
+        child: child,
       ),
     );
   }
 }
 
-class _Dot extends StatelessWidget {
-  const _Dot({required this.size, this.color, this.borderWidth});
+class _MiniBlock extends StatelessWidget {
+  const _MiniBlock({
+    required this.color,
+    required this.extent,
+    this.padding,
+    this.child,
+  });
 
-  final double size;
-  final Color? color;
-  final double? borderWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = this.color ?? context.colorScheme.onSurfaceVariant.opacity30;
-    final borderWidth = this.borderWidth;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: borderWidth == null ? color : null,
-        border: borderWidth == null
-            ? null
-            : Border.all(color: color, width: borderWidth),
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-}
-
-/// One dashboard card; its surface dims under a [WallpaperSurfaceScope].
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child, this.height});
-
-  final double? height;
-  final Widget child;
+  final Color color;
+  final double extent;
+  final EdgeInsets? padding;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
-      padding: AppInsets.xs,
-      decoration: BoxDecoration(
-        color: WallpaperSurfaceScope.colorOf(
-          context,
-          context.colorScheme.surface,
-        ),
-        borderRadius: AppRadius.all(AppCorner.xs + 2),
+      padding: padding,
+      decoration: ShapeDecoration(
+        color: color,
+        shape: AppShape.all(AppCorner.fit(extent)),
       ),
       child: child,
     );
   }
 }
 
-/// Icon plus label, the header every classic card carries.
-class _PanelHeader extends StatelessWidget {
-  const _PanelHeader({required this.labelWidth, this.trailing});
-
-  final double labelWidth;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      spacing: 3,
-      children: [
-        const _Dot(size: 4),
-        _Bar(width: labelWidth),
-        if (trailing != null) ...[const Spacer(), trailing!],
-      ],
-    );
-  }
-}
-
-/// Classic dashboard: app bar, the default widget mosaic — one full-width
-/// speed card over a two-column grid whose tall and short cards alternate —
-/// and the start button floating over it.
-class _ClassicBody extends StatelessWidget {
-  const _ClassicBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Stack(
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: _gap,
-          children: [
-            _TitleBar(),
-            _SpeedPanel(),
-            Row(
-              spacing: _gap,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    spacing: _gap,
-                    children: [_ModePanel(), _ValuePanel(labelWidth: 13)],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    spacing: _gap,
-                    children: [_ValuePanel(labelWidth: 17), _TrafficPanel()],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        Positioned(right: 0, bottom: 3, child: _StartButton()),
-      ],
-    );
-  }
-}
-
-class _TitleBar extends StatelessWidget {
-  const _TitleBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 14,
-      child: Row(
-        children: [
-          _Bar(width: 24, height: 4),
-          Spacer(),
-          _Dot(size: 4),
-          SizedBox(width: 5),
-          _Dot(size: 4),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpeedPanel extends StatelessWidget {
-  const _SpeedPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = context.colorScheme.primary;
-    return _Panel(
-      height: _tallCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 3,
-        children: [
-          _PanelHeader(
-            labelWidth: 21,
-            trailing: _Bar(width: 11, color: primary.opacity60),
-          ),
-          Expanded(
-            child: CustomPaint(painter: _SparkPainter(color: primary)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModePanel extends StatelessWidget {
-  const _ModePanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = context.colorScheme.primary;
-    return _Panel(
-      height: _tallCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 3,
-        children: [
-          const _PanelHeader(labelWidth: 15),
-          for (final (index, width) in const [13.0, 16.0, 11.0].indexed)
-            Row(
-              spacing: 3,
-              children: [
-                _Dot(
-                  size: 4,
-                  color: index == 0 ? primary : null,
-                  borderWidth: index == 0 ? null : 1,
-                ),
-                _Bar(width: width),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A short card: header on top, its value pinned to the bottom.
-class _ValuePanel extends StatelessWidget {
-  const _ValuePanel({required this.labelWidth});
-
-  final double labelWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return _Panel(
-      height: _shortCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _PanelHeader(labelWidth: labelWidth),
-          const Spacer(),
-          _Bar(
-            width: 22,
-            height: 3.5,
-            color: context.colorScheme.onSurface.opacity30,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TrafficPanel extends StatelessWidget {
-  const _TrafficPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return _Panel(
-      height: _tallCard,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 3,
-        children: [
-          const _PanelHeader(labelWidth: 17),
-          Row(
-            spacing: 4,
-            children: [
-              _Dot(
-                size: 13,
-                color: colorScheme.primary.opacity60,
-                borderWidth: 3.5,
-              ),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 3,
-                children: [
-                  _Bar(width: 10, height: 2.5),
-                  _Bar(width: 7, height: 2.5),
-                ],
-              ),
-            ],
-          ),
-          for (final color in [
-            colorScheme.primary.opacity60,
-            colorScheme.secondary.opacity60,
-          ])
-            Row(
-              spacing: 3,
-              children: [
-                _Dot(size: 3, color: color),
-                const _Bar(width: 14, height: 2.5),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StartButton extends StatelessWidget {
-  const _StartButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Container(
-      width: 16,
-      height: 16,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colorScheme.primary,
-        borderRadius: AppRadius.all(AppCorner.xs + 1),
-      ),
-      child: GlyphIcon(AppGlyphs.play, size: 11, color: colorScheme.onPrimary),
-    );
-  }
-}
-
-/// The speed card's line chart: a smoothed spark line with the same gradient
-/// fill underneath.
-class _SparkPainter extends CustomPainter {
-  const _SparkPainter({required this.color});
+class _MiniLine extends StatelessWidget {
+  const _MiniLine({
+    required this.color,
+    required this.width,
+    required this.height,
+  });
 
   final Color color;
-
-  static const _values = [0.3, 0.52, 0.28, 0.66, 0.46, 0.82, 0.6];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final step = size.width / (_values.length - 1);
-    double y(int index) => size.height * (1 - _values[index]);
-    final line = Path()..moveTo(0, y(0));
-    for (var index = 1; index < _values.length; index++) {
-      final x = step * index;
-      line.cubicTo(
-        x - step / 2,
-        y(index - 1),
-        x - step / 2,
-        y(index),
-        x,
-        y(index),
-      );
-    }
-    final fill = Path.from(line)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(
-      fill,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [color.opacity30, color.opacity0],
-        ).createShader(Offset.zero & size),
-    );
-    canvas.drawPath(
-      line,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2
-        ..strokeCap = StrokeCap.round
-        ..color = color,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_SparkPainter oldDelegate) => oldDelegate.color != color;
-}
-
-/// New dashboard: no app bar and no start button, the orb carries the state
-/// and the server card, subscription and action pills stack under it. The
-/// stacked panels dim by the hero readability knob, the orb by its own.
-class _HeroBody extends StatelessWidget {
-  const _HeroBody({this.wallpaper});
-
-  final WallpaperProps? wallpaper;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final wallpaper = this.wallpaper;
-    const panels = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _HeroServerPanel(),
-        SizedBox(height: _gap),
-        _HeroTrafficPanel(),
-        SizedBox(height: _gap),
-        _HeroActionRow(),
-      ],
+    return Container(
+      width: width,
+      height: height,
+      decoration: ShapeDecoration(color: color, shape: AppShape.full),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: AppSpacing.xxs),
-        Center(child: _Orb(orbOpacity: wallpaper?.orbOpacity)),
-        const SizedBox(height: 5),
-        Center(
-          child: _Bar(
-            width: 44,
-            height: 5,
-            color: colorScheme.onSurface.opacity30,
-          ),
+  }
+}
+
+class _MiniDot extends StatelessWidget {
+  const _MiniDot({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: ShapeDecoration(color: color, shape: AppShape.circle),
+    );
+  }
+}
+
+class _MiniRing extends StatelessWidget {
+  const _MiniRing({
+    required this.ring,
+    required this.center,
+    required this.size,
+    required this.stroke,
+  });
+
+  final Color ring;
+  final Color center;
+  final double size;
+  final double stroke;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        shape: CircleBorder(
+          side: BorderSide(color: ring, width: stroke),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        const Center(child: _Bar(width: 28)),
-        const SizedBox(height: 5),
-        const _HeroSpeedRow(),
-        const SizedBox(height: 5),
-        if (wallpaper != null)
-          WallpaperSurfaceScope(opacity: wallpaper.heroOpacity, child: panels)
-        else
-          panels,
-      ],
-    );
-  }
-}
-
-class _Orb extends StatelessWidget {
-  const _Orb({this.orbOpacity});
-
-  static const _size = 52.0;
-
-  final double? orbOpacity;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final face = orbOpacity == null
-        ? colorScheme.surface
-        : colorScheme.surface.withValues(alpha: orbOpacity!);
-    return SizedBox.square(
-      dimension: _size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  colorScheme.primary.opacity0,
-                  colorScheme.primary.opacity15,
-                ],
-              ),
-            ),
-            child: const SizedBox.square(dimension: _size),
-          ),
-          Container(
-            width: _size,
-            height: _size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.primary, width: 2.4),
-            ),
-          ),
-          Container(
-            width: 42,
-            height: 42,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: face,
-              shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.outlineVariant.opacity60),
-            ),
-            child: GlyphIcon(
-              AppGlyphs.power,
-              size: 19,
-              color: colorScheme.primary,
-            ),
-          ),
-        ],
       ),
-    );
-  }
-}
-
-class _HeroSpeedRow extends StatelessWidget {
-  const _HeroSpeedRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: 7,
-      children: [
-        for (final color in [colorScheme.primary, colorScheme.secondary])
-          Row(
-            spacing: 2,
-            children: [
-              _Dot(size: 3.5, color: color.opacity60),
-              const _Bar(width: 13),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-class _HeroServerPanel extends StatelessWidget {
-  const _HeroServerPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return _Panel(
-      height: 22,
-      child: Row(
-        spacing: 4,
-        children: [
-          _Dot(size: 10, color: colorScheme.primary.opacity30),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 3,
-              children: [
-                _Bar(
-                  width: 24,
-                  height: 3.5,
-                  color: colorScheme.onSurface.opacity30,
-                ),
-                Row(
-                  spacing: 3,
-                  children: [
-                    _Dot(size: 3, color: colorScheme.primary),
-                    const _Bar(width: 15, height: 2.5),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const _Bar(width: 8),
-        ],
+      child: SizedBox(
+        width: size * 0.4,
+        height: size * 0.4,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(color: center, shape: AppShape.circle),
+        ),
       ),
-    );
-  }
-}
-
-class _HeroTrafficPanel extends StatelessWidget {
-  const _HeroTrafficPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return _Panel(
-      height: 24,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 2,
-        children: [
-          Row(
-            children: [
-              const _Bar(width: 15),
-              const Spacer(),
-              _Bar(width: 11, height: 4, color: colorScheme.primary.opacity30),
-            ],
-          ),
-          _Bar(width: 22, height: 4, color: colorScheme.onSurface.opacity30),
-          ClipRSuperellipse(
-            borderRadius: AppRadius.full,
-            child: Stack(
-              children: [
-                Container(
-                  height: 3,
-                  color: colorScheme.surfaceContainerHighest,
-                ),
-                FractionallySizedBox(
-                  widthFactor: 0.58,
-                  child: Container(
-                    height: 3,
-                    color: colorScheme.primary.opacity60,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroActionRow extends StatelessWidget {
-  const _HeroActionRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return Row(
-      spacing: 3,
-      children: [
-        for (var index = 0; index < 3; index++)
-          Expanded(
-            child: Container(
-              height: 11,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: WallpaperSurfaceScope.colorOf(
-                  context,
-                  colorScheme.surface,
-                ),
-                borderRadius: AppRadius.full,
-              ),
-              child: _Bar(
-                width: 9,
-                height: 2.5,
-                color: index == 2
-                    ? colorScheme.primary.opacity60
-                    : colorScheme.onSurfaceVariant.opacity30,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }
