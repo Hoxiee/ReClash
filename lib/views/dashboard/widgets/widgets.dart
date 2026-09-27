@@ -22,7 +22,6 @@ export 'memory_info.dart';
 export 'meta_info.dart';
 export 'network_detection.dart';
 export 'network_speed.dart';
-export 'outbound_mode.dart';
 export 'profiles.dart';
 export 'proxy_groups.dart';
 export 'quick_options.dart';

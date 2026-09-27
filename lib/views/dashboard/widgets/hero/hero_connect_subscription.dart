@@ -84,14 +84,14 @@ class _SubscriptionStrip extends StatelessWidget {
                       ),
                     ),
                     if (expired)
-                      _SubscriptionPill(
+                      SubscriptionPill(
                         color: colorScheme.error,
                         label: context
                             .appLocalizations
                             .dashboardSubscriptionExpired,
                       )
                     else if (daysLeft != null)
-                      _SubscriptionPill(
+                      SubscriptionPill(
                         color: daysColor,
                         label:
                             '${context.appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
@@ -144,7 +144,7 @@ class _SubscriptionStrip extends StatelessWidget {
             ),
           if (!unlimited) ...[
             const SizedBox(height: AppSpacing.md),
-            _SubscriptionBar(
+            SubscriptionBar(
               progress: progress <= 0 ? 0.0 : progress,
               color: barColor,
             ),
@@ -173,111 +173,6 @@ class _SubscriptionStrip extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SubscriptionPill extends StatelessWidget {
-  const _SubscriptionPill({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(heroPillRadius),
-      color: color.withValues(alpha: 0.14),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GlyphIcon(AppGlyphs.calendar, size: 14, color: color),
-        const SizedBox(width: 5),
-        Flexible(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _SubscriptionBar extends StatelessWidget {
-  const _SubscriptionBar({required this.progress, required this.color});
-
-  final double progress;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final trackColor = context.colorScheme.surfaceContainerHighest;
-    final gradient = LinearGradient(
-      colors: [color.withValues(alpha: 0.7), color],
-    );
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(heroInlayRadius),
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: progress, end: progress),
-        duration: context.motionDuration(const Duration(milliseconds: 420)),
-        curve: Easing.standard,
-        builder: (context, value, _) => CustomPaint(
-          size: const Size(double.infinity, 8),
-          painter: _SubscriptionBarPainter(
-            progress: value,
-            trackColor: trackColor,
-            gradient: gradient,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SubscriptionBarPainter extends CustomPainter {
-  const _SubscriptionBarPainter({
-    required this.progress,
-    required this.trackColor,
-    required this.gradient,
-  });
-
-  final double progress;
-  final Color trackColor;
-  final Gradient gradient;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final paint = Paint()..color = trackColor;
-    canvas.drawRSuperellipse(
-      RSuperellipse.fromRectAndRadius(
-        rect,
-        const Radius.circular(heroInlayRadius),
-      ),
-      paint,
-    );
-    if (progress <= 0) return;
-    final fillPaint = Paint()..shader = gradient.createShader(rect);
-    canvas.drawRSuperellipse(
-      RSuperellipse.fromRectAndRadius(
-        Offset.zero & Size(size.width * progress, size.height),
-        const Radius.circular(heroInlayRadius),
-      ),
-      fillPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_SubscriptionBarPainter old) =>
-      old.progress != progress ||
-      old.trackColor != trackColor ||
-      old.gradient != gradient;
 }
 
 class _BuyChip extends StatelessWidget {

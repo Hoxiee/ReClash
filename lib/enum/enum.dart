@@ -463,7 +463,6 @@ const _byedpiOnly = [DashboardMode.byedpi];
 
 enum DashboardWidget {
   networkSpeed,
-  outboundModeV2(modes: _vpnOnly),
   trafficUsage,
   networkDetection,
   tunButton(platforms: desktopPlatforms),

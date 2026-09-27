@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
@@ -8,13 +6,11 @@ import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
-import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_offers.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_bits.dart';
 import 'package:reclash/views/dashboard/widgets/hero/subscription_sheet.dart';
-import 'package:reclash/widgets/theme/wallpaper_scope.dart';
 import 'package:reclash/widgets/widgets.dart';
-
-const _expiringSoonDays = 3;
 
 class MetaInfo extends ConsumerWidget {
   const MetaInfo({super.key});
@@ -58,323 +54,187 @@ class _SubscriptionCard extends StatelessWidget {
     final info = subscriptionInfo;
 
     final expire = info?.expire ?? 0;
-    final expireDate = expire == 0
+    final now = DateTime.now();
+    final expired =
+        info != null && subscriptionIsExpired(expire: expire, now: now);
+    final expireDate = subscriptionExpireDate(expire);
+    final expiresInDays = expireDate?.difference(now).inDays;
+    final daysLeft = expiresInDays == null
         ? null
-        : DateTime.fromMillisecondsSinceEpoch(expire * 1000);
-    final isPerpetual =
-        expire == 0 || (expireDate?.year ?? 0) >= perpetualExpireYear;
-    var daysLeft = expireDate?.difference(DateTime.now()).inDays;
-    if (daysLeft != null && daysLeft < 0) daysLeft = 0;
-    final status = isPerpetual
-        ? appLocalizations.perpetualSubscription
-        : daysLeft == null
-        ? appLocalizations.infiniteTime
-        : appLocalizations.daysLeft(daysLeft);
-    final urgent =
-        !isPerpetual && daysLeft != null && daysLeft <= _expiringSoonDays;
-    final statusColor = urgent ? colorScheme.error : colorScheme.onSurface;
+        : expiresInDays > 0
+        ? expiresInDays
+        : 0;
+    final daysUrgent = daysLeft != null && daysLeft <= heroRenewDaysThreshold;
 
-    final hasQuota = info != null && !info.unlimited;
+    final unlimited = info == null || info.unlimited;
     final used = info?.used ?? 0;
-    final usedFraction = hasQuota
-        ? (used / info.total).clamp(0.0, 1.0).toDouble()
-        : 0.0;
-    final free = hasQuota ? (info.total - used).clamp(0, info.total) : 0;
-    final freePercent = hasQuota ? ((1 - usedFraction) * 100).round() : 0;
-    final ringColor = usedFraction > 0.9
+    final total = info?.total ?? 0;
+    final progress = unlimited
+        ? 0.0
+        : (used / total).clamp(0.0, 1.0).toDouble();
+    final free = unlimited ? 0 : (total - used).clamp(0, total);
+    final barColor = progress > 0.9
         ? colorScheme.error
-        : usedFraction > 0.7
+        : progress > 0.7
         ? cautionColor
         : colorScheme.primary;
-
-    final trafficCaption = info == null || hasQuota
-        ? appLocalizations.remainingTraffic
-        : appLocalizations.usedTraffic;
-    final trafficValue = info == null
-        ? '—'
-        : hasQuota
-        ? '${free.traffic.show} / ${info.total.traffic.show}'
-        : used.traffic.show;
 
     final offers = heroBuyOffers(
       hasPlanUrl: buyPlanUrl?.isNotEmpty ?? false,
       hasTrafficUrl: buyTrafficUrl?.isNotEmpty ?? false,
-      daysLeft: isPerpetual ? null : daysLeft,
-      total: hasQuota ? info.total : 0,
+      daysLeft: daysLeft,
+      total: total,
       used: used,
     );
 
     final label = profileLabel.isEmpty
         ? appLocalizations.metaInfo
         : profileLabel;
-    final logo = serviceLogo;
-    final profile = this.profile;
+    final valueStyle = context.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      fontFamily: FontFamily.jetBrainsMono.value,
+    );
 
-    return DashboardInfoCard(
-      height: DashboardWidgetMetrics.heightOf(context, 2),
-      icon: AppGlyphs.calendar,
-      label: label,
-      leading: logo == null || logo.isEmpty
-          ? null
-          : SizedBox.square(
-              dimension: 24,
-              child: ImageCacheWidget(
-                src: logo,
-                defaultWidget: GlyphIcon(
-                  AppGlyphs.calendar,
-                  size: 20,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+    final Widget? pill;
+    if (info == null) {
+      pill = null;
+    } else if (expired) {
+      pill = SubscriptionPill(
+        color: colorScheme.error,
+        label: appLocalizations.dashboardSubscriptionExpired,
+      );
+    } else if (daysLeft != null) {
+      pill = SubscriptionPill(
+        color: daysUrgent ? colorScheme.error : colorScheme.primary,
+        label:
+            '${appLocalizations.remaining} $daysLeft ${heroDaysWord(daysLeft)}',
+      );
+    } else {
+      pill = SubscriptionPill(
+        color: colorScheme.primary,
+        label: appLocalizations.perpetualSubscription,
+      );
+    }
+
+    final logo = serviceLogo;
+    final currentProfile = profile;
+
+    final Widget value;
+    if (info == null) {
+      value = Text(
+        '—',
+        style: valueStyle?.copyWith(color: colorScheme.onSurfaceVariant),
+      );
+    } else if (unlimited) {
+      value = Text(
+        used.traffic.show,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: valueStyle,
+      );
+    } else {
+      value = Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: free.traffic.show, style: valueStyle),
+            const TextSpan(text: ' '),
+            TextSpan(
+              text: appLocalizations.trafficFreeOfTotal(total.traffic.show),
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-      action: profile != null && profile.type == ProfileType.url
-          ? _UpdateAction(profile: profile)
-          : const GlyphIcon(AppGlyphs.chevronForward, size: 20),
-      onPressed: () => showSubscriptionSheet(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (_, constraints) {
-                final side = constraints.maxHeight.isFinite
-                    ? constraints.maxHeight.clamp(0.0, 104.0)
-                    : 88.0;
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          status,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.headlineSmall?.copyWith(
-                            color: statusColor,
-                            fontWeight: FontWeight.w700,
+          ],
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    return RepaintBoundary(
+      child: CommonCard(
+        radius: DashboardWidgetMetrics.radiusOf(context),
+        padding: DashboardWidgetMetrics.paddingOf(context),
+        onPressed: () => showSubscriptionSheet(context),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                logo == null || logo.isEmpty
+                    ? GlyphIcon(
+                        AppGlyphs.calendar,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      )
+                    : SizedBox.square(
+                        dimension: 24,
+                        child: ImageCacheWidget(
+                          src: logo,
+                          defaultWidget: GlyphIcon(
+                            AppGlyphs.calendar,
+                            size: 20,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.lg),
-                    ExcludeSemantics(
-                      child: SizedBox.square(
-                        dimension: side,
-                        child: hasQuota
-                            ? _QuotaRing(
-                                fraction: (1 - usedFraction).clamp(0.0, 1.0),
-                                percent: freePercent,
-                                color: ringColor,
-                              )
-                            : _StatusMedallion(
-                                color: colorScheme.primary,
-                                child: info == null
-                                    ? GlyphIcon(
-                                        AppGlyphs.calendar,
-                                        size: 20,
-                                        color: colorScheme.onSurfaceVariant,
-                                      )
-                                    : Text(
-                                        '∞',
-                                        style: context.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              color: colorScheme.primary,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                              ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 10),
-          _Footer(
-            offers: offers,
-            trafficCaption: trafficCaption,
-            trafficValue: trafficValue,
-            buyPlanUrl: buyPlanUrl,
-            buyTrafficUrl: buyTrafficUrl,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  const _Footer({
-    required this.offers,
-    required this.trafficCaption,
-    required this.trafficValue,
-    required this.buyPlanUrl,
-    required this.buyTrafficUrl,
-  });
-
-  final List<HeroBuyOffer> offers;
-  final String trafficCaption;
-  final String trafficValue;
-  final String? buyPlanUrl;
-  final String? buyTrafficUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: offers.isEmpty
-              ? Text(
-                  trafficCaption,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
+                      ?pill,
+                    ],
                   ),
-                )
-              // The caption only names the number beside it; an offer that is
-              // live right now is worth more than the repetition.
-              : _BuyOfferRow(
-                  offers: offers,
-                  buyPlanUrl: buyPlanUrl,
-                  buyTrafficUrl: buyTrafficUrl,
                 ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Text(
-          trafficValue,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: context.textTheme.titleSmall?.copyWith(
-            fontFamily: FontFamily.jetBrainsMono.value,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _QuotaRing extends StatelessWidget {
-  const _QuotaRing({
-    required this.fraction,
-    required this.percent,
-    required this.color,
-  });
-
-  /// Remaining quota, 0..1. The arc depletes as the subscription is spent.
-  final double fraction;
-  final int percent;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final trackColor = WallpaperSurfaceScope.colorOf(
-      context,
-      colorScheme.onSurface.withValues(alpha: 0.10),
-    );
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: fraction),
-      duration: context.motionDuration(const Duration(milliseconds: 640)),
-      curve: Easing.standard,
-      builder: (context, value, child) => CustomPaint(
-        key: const ValueKey('subscription-ring'),
-        painter: _QuotaRingPainter(
-          fraction: value,
-          color: color,
-          trackColor: trackColor,
-        ),
-        child: child,
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: FittedBox(
-            child: Text(
-              '$percent%',
-              style: context.textTheme.titleMedium?.copyWith(
-                fontFamily: FontFamily.jetBrainsMono.value,
-                fontWeight: FontWeight.w700,
-                color: colorScheme.onSurface,
-              ),
+                const SizedBox(width: AppSpacing.xs),
+                currentProfile != null && currentProfile.type == ProfileType.url
+                    ? _UpdateAction(profile: currentProfile)
+                    : GlyphIcon(
+                        AppGlyphs.chevronForward,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+              ],
             ),
-          ),
+            const SizedBox(height: AppSpacing.md),
+            value,
+            if (info != null && !unlimited) ...[
+              const SizedBox(height: AppSpacing.sm),
+              SubscriptionBar(
+                progress: progress <= 0 ? 0.0 : progress,
+                color: barColor,
+              ),
+            ],
+            if (offers.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _BuyOfferRow(
+                    offers: offers,
+                    buyPlanUrl: buyPlanUrl,
+                    buyTrafficUrl: buyTrafficUrl,
+                  ),
+                ],
+              ),
+            ],
+          ],
         ),
       ),
-    );
-  }
-}
-
-class _QuotaRingPainter extends CustomPainter {
-  const _QuotaRingPainter({
-    required this.fraction,
-    required this.color,
-    required this.trackColor,
-  });
-
-  final double fraction;
-  final Color color;
-  final Color trackColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stroke = (size.shortestSide * 0.12).clamp(5.0, 11.0);
-    final center = size.center(Offset.zero);
-    final radius = (size.shortestSide - stroke) / 2;
-    if (radius <= 0) return;
-    final track = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..color = trackColor;
-    canvas.drawCircle(center, radius, track);
-    if (fraction <= 0) return;
-    final rect = Rect.fromCircle(center: center, radius: radius);
-    final arc = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        colors: [color.withValues(alpha: 0.6), color],
-        transform: const GradientRotation(-pi / 2),
-      ).createShader(rect);
-    canvas.drawArc(
-      rect,
-      -pi / 2,
-      2 * pi * fraction.clamp(0.0, 1.0),
-      false,
-      arc,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_QuotaRingPainter oldDelegate) =>
-      oldDelegate.fraction != fraction ||
-      oldDelegate.color != color ||
-      oldDelegate.trackColor != trackColor;
-}
-
-class _StatusMedallion extends StatelessWidget {
-  const _StatusMedallion({required this.color, required this.child});
-
-  final Color color;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final trackColor = WallpaperSurfaceScope.colorOf(
-      context,
-      color.withValues(alpha: 0.28),
-    );
-    return CustomPaint(
-      painter: _QuotaRingPainter(
-        fraction: 0,
-        color: color,
-        trackColor: trackColor,
-      ),
-      child: Center(child: FittedBox(child: child)),
     );
   }
 }

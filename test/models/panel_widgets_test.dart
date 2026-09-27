@@ -8,13 +8,13 @@ void main() {
       final widgets = parsePanelWidgets([
         'announce',
         'MetaInfo',
-        'outboundModeV2',
+        'trafficUsage',
       ], platform: SupportPlatform.Linux);
 
       expect(widgets, [
         DashboardWidget.announce,
         DashboardWidget.metaInfo,
-        DashboardWidget.outboundModeV2,
+        DashboardWidget.trafficUsage,
       ]);
     });
 

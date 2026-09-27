@@ -10,11 +10,6 @@ extension DashboardWidgetView on DashboardWidget {
       crossAxisCellCount: 8,
       child: NetworkSpeed(),
     ),
-    DashboardWidget.outboundModeV2 => const GridItem(
-      key: ValueKey(DashboardWidget.outboundModeV2),
-      crossAxisCellCount: 8,
-      child: OutboundModeV2(),
-    ),
     DashboardWidget.trafficUsage => const GridItem(
       key: ValueKey(DashboardWidget.trafficUsage),
       crossAxisCellCount: 4,

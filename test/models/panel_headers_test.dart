@@ -179,7 +179,7 @@ void main() {
         'reclash-serverinfo': ['Selector'],
         'reclash-background': ['https://example.com/background.webp,18'],
         'reclash-heroring': ['35B5FF,3657FF,A638F4'],
-        'reclash-widgets': ['announce, metainfo, outboundModeV2'],
+        'reclash-widgets': ['announce, metainfo, trafficUsage'],
         'reclash-custom': ['update'],
       });
 
@@ -188,7 +188,7 @@ void main() {
       expect(meta.serverInfoGroup, 'Selector');
       expect(meta.background, 'https://example.com/background.webp,18');
       expect(meta.heroRing, '35B5FF,3657FF,A638F4');
-      expect(meta.widgets, ['announce', 'metainfo', 'outboundModeV2']);
+      expect(meta.widgets, ['announce', 'metainfo', 'trafficUsage']);
       expect(meta.widgetsApplyMode, PanelWidgetsApplyMode.update);
       expect(meta.hasContent, isTrue);
     });

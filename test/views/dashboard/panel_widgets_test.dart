@@ -8,6 +8,7 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
 import 'package:reclash/views/dashboard/widgets/announce.dart';
 import 'package:reclash/views/dashboard/widgets/change_server_button.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_bits.dart';
 import 'package:reclash/views/dashboard/widgets/meta_info.dart';
 import 'package:reclash/views/dashboard/widgets/service_info.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -144,7 +145,7 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.text('5 days left'), findsOneWidget);
+      expect(find.text('Remaining 5 days'), findsOneWidget);
     });
 
     testWidgets('shows the traffic progress for metered subscriptions', (
@@ -161,8 +162,8 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.byKey(const ValueKey('subscription-ring')), findsOneWidget);
-      expect(find.text('50B / 100B'), findsOneWidget);
+      expect(find.byType(SubscriptionBar), findsOneWidget);
+      expect(find.text('50B free of 100B'), findsOneWidget);
     });
 
     testWidgets('hides the traffic progress for unlimited subscriptions', (
@@ -181,7 +182,7 @@ void main() {
       );
       await pumpWidget(tester, const MetaInfo());
 
-      expect(find.byKey(const ValueKey('subscription-ring')), findsNothing);
+      expect(find.byType(SubscriptionBar), findsNothing);
     });
 
     testWidgets('fits long localized subscription values', (tester) async {

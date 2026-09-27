@@ -113,7 +113,6 @@ const developerSubscriptions = <DeveloperSubscription>[
         'serviceInfo',
         'changeServerButton',
         'announce',
-        'outboundModeV2',
         'networkDetection',
         'memoryInfo',
         'metaInfo',

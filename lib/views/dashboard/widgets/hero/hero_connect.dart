@@ -25,6 +25,7 @@ import 'package:reclash/views/dashboard/widgets/hero/hero_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_surface.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
+import 'package:reclash/views/dashboard/widgets/hero/subscription_bits.dart';
 import 'package:reclash/views/dashboard/widgets/hero/subscription_sheet.dart';
 import 'package:reclash/views/dashboard/widgets/provider_summary_page.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';

@@ -373,7 +373,7 @@ void main() {
           const DashboardState(
             dashboardWidgets: [
               DashboardWidget.networkSpeed,
-              DashboardWidget.outboundModeV2,
+              DashboardWidget.trafficUsage,
               DashboardWidget.desyncStrategy,
             ],
           ),
@@ -414,14 +414,14 @@ void main() {
           .items
           .map(dashboardWidgetOf)
           .toList(),
-      [DashboardWidget.outboundModeV2],
+      [DashboardWidget.trafficUsage],
     );
     await tester.binding.handlePopRoute();
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byKey(const ValueKey('edit-icon')), findsOneWidget);
     expect(container.read(appSettingProvider).dashboardWidgets, [
-      DashboardWidget.outboundModeV2,
+      DashboardWidget.trafficUsage,
       DashboardWidget.desyncStrategy,
     ]);
   });

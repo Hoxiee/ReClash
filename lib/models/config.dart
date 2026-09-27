@@ -102,7 +102,6 @@ const List<DashboardWidget> defaultDashboardWidgets = [
   DashboardWidget.networkSpeed,
   DashboardWidget.systemProxyButton,
   DashboardWidget.tunButton,
-  DashboardWidget.outboundModeV2,
   DashboardWidget.networkDetection,
   DashboardWidget.trafficUsage,
   DashboardWidget.intranetIp,
@@ -123,10 +122,10 @@ List<DashboardWidget> dashboardWidgetsSafeFormJson(
     final seen = <DashboardWidget>{};
     final result = <DashboardWidget>[];
     for (final e in raw) {
-      // The classic outboundMode tile folded into outboundModeV2; upgrade saved
-      // layouts in place so a retired key does not reset the whole list.
-      final key = e == 'outboundMode' ? 'outboundModeV2' : e;
-      final widget = $enumDecode(_$DashboardWidgetEnumMap, key);
+      // The classic outboundMode tile and its outboundModeV2 successor were both
+      // retired; skip the keys so a saved layout listing them is not reset.
+      if (e == 'outboundMode' || e == 'outboundModeV2') continue;
+      final widget = $enumDecode(_$DashboardWidgetEnumMap, e);
       if (seen.add(widget)) {
         result.add(widget);
       }
