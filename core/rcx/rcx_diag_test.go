@@ -9,7 +9,7 @@ func diagDecision(node string) rcxDiagEntry {
 		Msg:  "hold",
 		Ctx:  &rcxDiagContext{Incumbent: node, Eligible: 1, Candidates: 1},
 		Cands: []rcxCandidateReport{
-			{Node: node, Order: 0, DelayMs: 10, Current: true},
+			{Node: node, Order: 0, MedianMs: 10, Current: true},
 		},
 	}
 }

@@ -625,8 +625,8 @@ class RoutingCandidateRow extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final muted = colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
     final eligible = candidate.eligible;
-    final hosted = candidate.delay <= 0 && candidate.hostDelay > 0;
-    final delay = hosted ? candidate.hostDelay : candidate.delay;
+    final hosted = candidate.medianMs <= 0 && candidate.hostDelay > 0;
+    final delay = hosted ? candidate.hostDelay : candidate.medianMs;
     final tags = <String>[
       if (candidate.breaker) appLocalizations.smartRoutingBreaker,
       if (candidate.degraded) appLocalizations.smartRoutingDegraded,

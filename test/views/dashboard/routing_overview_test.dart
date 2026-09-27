@@ -43,14 +43,14 @@ const _report = RcxReport(
       country: 'NL',
       verdict: 'preferred',
       evidence: 'live',
-      delay: 112,
+      medianMs: 112,
       current: true,
     ),
     RcxCandidateReport(
       node: 'Frankfurt #1',
       verdict: 'viable',
       evidence: 'fresh',
-      delay: 240,
+      medianMs: 240,
     ),
     RcxCandidateReport(
       node: 'Paris #7',

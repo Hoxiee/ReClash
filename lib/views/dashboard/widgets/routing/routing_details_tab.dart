@@ -305,7 +305,7 @@ class RoutingEvidenceCard extends StatelessWidget {
     final canaries = report.canaries;
     final answered = canaries.where((canary) => canary.answered).length;
     final probed = report.candidates
-        .where((candidate) => candidate.delay > 0)
+        .where((candidate) => candidate.medianMs > 0)
         .toList();
     if (canaries.isEmpty && report.candidates.isEmpty) {
       return RoutingNotice(

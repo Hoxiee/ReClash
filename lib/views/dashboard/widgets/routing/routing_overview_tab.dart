@@ -65,7 +65,7 @@ class RoutingVerdictCard extends StatelessWidget {
     final tone = failed
         ? colorScheme.error
         : routingFormatAccent(context, routingFormatOf(report));
-    final ours = status.delay > 0 ? status.delay : chosen?.delay ?? 0;
+    final ours = status.delay > 0 ? status.delay : chosen?.medianMs ?? 0;
     final delay = ours > 0 ? ours : chosen?.hostDelay ?? 0;
     final counts = routingCountsOf(report);
     return RoutingCard(

@@ -6250,7 +6250,7 @@ as List<RcxLaneStatus>,
 /// @nodoc
 mixin _$RcxCandidateReport {
 
- String get node; String get country; String get exit; String get origin; String get verdict; String get evidence; String get block; int get delay; int get hostDelay; int get band; int get latencyMs; bool get unproven; int get order; bool get degraded; int get homeRisk; int get recurrence; bool get confirmed; bool get breaker; bool get udp; int get fails; int get coolFor; bool get current; String get trust; String get confidence;
+ String get node; String get country; String get exit; String get origin; String get verdict; String get evidence; String get block; int get medianMs; int get hostDelay; int get band; int get latencyMs; bool get unproven; int get order; bool get degraded; int get homeRisk; int get recurrence; bool get confirmed; bool get breaker; bool get udp; int get fails; int get coolFor; bool get current; String get trust; String get confidence;
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6264,20 +6264,20 @@ $RcxCandidateReportCopyWith<RcxCandidateReport> get copyWith => _$RcxCandidateRe
 @override
 bool operator ==(Object other) {
   final _this = this as RcxCandidateReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCandidateReport&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.country, _this.country) || other.country == _this.country)&&(identical(other.exit, _this.exit) || other.exit == _this.exit)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.evidence, _this.evidence) || other.evidence == _this.evidence)&&(identical(other.block, _this.block) || other.block == _this.block)&&(identical(other.delay, _this.delay) || other.delay == _this.delay)&&(identical(other.hostDelay, _this.hostDelay) || other.hostDelay == _this.hostDelay)&&(identical(other.band, _this.band) || other.band == _this.band)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.unproven, _this.unproven) || other.unproven == _this.unproven)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.degraded, _this.degraded) || other.degraded == _this.degraded)&&(identical(other.homeRisk, _this.homeRisk) || other.homeRisk == _this.homeRisk)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&(identical(other.confirmed, _this.confirmed) || other.confirmed == _this.confirmed)&&(identical(other.breaker, _this.breaker) || other.breaker == _this.breaker)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.fails, _this.fails) || other.fails == _this.fails)&&(identical(other.coolFor, _this.coolFor) || other.coolFor == _this.coolFor)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.trust, _this.trust) || other.trust == _this.trust)&&(identical(other.confidence, _this.confidence) || other.confidence == _this.confidence));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RcxCandidateReport&&(identical(other.node, _this.node) || other.node == _this.node)&&(identical(other.country, _this.country) || other.country == _this.country)&&(identical(other.exit, _this.exit) || other.exit == _this.exit)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.verdict, _this.verdict) || other.verdict == _this.verdict)&&(identical(other.evidence, _this.evidence) || other.evidence == _this.evidence)&&(identical(other.block, _this.block) || other.block == _this.block)&&(identical(other.medianMs, _this.medianMs) || other.medianMs == _this.medianMs)&&(identical(other.hostDelay, _this.hostDelay) || other.hostDelay == _this.hostDelay)&&(identical(other.band, _this.band) || other.band == _this.band)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.unproven, _this.unproven) || other.unproven == _this.unproven)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.degraded, _this.degraded) || other.degraded == _this.degraded)&&(identical(other.homeRisk, _this.homeRisk) || other.homeRisk == _this.homeRisk)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&(identical(other.confirmed, _this.confirmed) || other.confirmed == _this.confirmed)&&(identical(other.breaker, _this.breaker) || other.breaker == _this.breaker)&&(identical(other.udp, _this.udp) || other.udp == _this.udp)&&(identical(other.fails, _this.fails) || other.fails == _this.fails)&&(identical(other.coolFor, _this.coolFor) || other.coolFor == _this.coolFor)&&(identical(other.current, _this.current) || other.current == _this.current)&&(identical(other.trust, _this.trust) || other.trust == _this.trust)&&(identical(other.confidence, _this.confidence) || other.confidence == _this.confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RcxCandidateReport;
-  return Object.hashAll([runtimeType,_this.node,_this.country,_this.exit,_this.origin,_this.verdict,_this.evidence,_this.block,_this.delay,_this.hostDelay,_this.band,_this.latencyMs,_this.unproven,_this.order,_this.degraded,_this.homeRisk,_this.recurrence,_this.confirmed,_this.breaker,_this.udp,_this.fails,_this.coolFor,_this.current,_this.trust,_this.confidence]);
+  return Object.hashAll([runtimeType,_this.node,_this.country,_this.exit,_this.origin,_this.verdict,_this.evidence,_this.block,_this.medianMs,_this.hostDelay,_this.band,_this.latencyMs,_this.unproven,_this.order,_this.degraded,_this.homeRisk,_this.recurrence,_this.confirmed,_this.breaker,_this.udp,_this.fails,_this.coolFor,_this.current,_this.trust,_this.confidence]);
 }
 
 @override
 String toString() {
   final _this = this as RcxCandidateReport;
-  return 'RcxCandidateReport(node: ${_this.node}, country: ${_this.country}, exit: ${_this.exit}, origin: ${_this.origin}, verdict: ${_this.verdict}, evidence: ${_this.evidence}, block: ${_this.block}, delay: ${_this.delay}, hostDelay: ${_this.hostDelay}, band: ${_this.band}, latencyMs: ${_this.latencyMs}, unproven: ${_this.unproven}, order: ${_this.order}, degraded: ${_this.degraded}, homeRisk: ${_this.homeRisk}, recurrence: ${_this.recurrence}, confirmed: ${_this.confirmed}, breaker: ${_this.breaker}, udp: ${_this.udp}, fails: ${_this.fails}, coolFor: ${_this.coolFor}, current: ${_this.current}, trust: ${_this.trust}, confidence: ${_this.confidence})';
+  return 'RcxCandidateReport(node: ${_this.node}, country: ${_this.country}, exit: ${_this.exit}, origin: ${_this.origin}, verdict: ${_this.verdict}, evidence: ${_this.evidence}, block: ${_this.block}, medianMs: ${_this.medianMs}, hostDelay: ${_this.hostDelay}, band: ${_this.band}, latencyMs: ${_this.latencyMs}, unproven: ${_this.unproven}, order: ${_this.order}, degraded: ${_this.degraded}, homeRisk: ${_this.homeRisk}, recurrence: ${_this.recurrence}, confirmed: ${_this.confirmed}, breaker: ${_this.breaker}, udp: ${_this.udp}, fails: ${_this.fails}, coolFor: ${_this.coolFor}, current: ${_this.current}, trust: ${_this.trust}, confidence: ${_this.confidence})';
 }
 
 
@@ -6288,7 +6288,7 @@ abstract mixin class $RcxCandidateReportCopyWith<$Res>  {
   factory $RcxCandidateReportCopyWith(RcxCandidateReport value, $Res Function(RcxCandidateReport) _then) = _$RcxCandidateReportCopyWithImpl;
 @useResult
 $Res call({
- String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
+ String node, String country, String exit, String origin, String verdict, String evidence, String block, int medianMs, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
 });
 
 
@@ -6305,7 +6305,7 @@ class _$RcxCandidateReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? medianMs = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
   return _then(RcxCandidateReport(
 node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -6314,7 +6314,7 @@ as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullabl
 as String,verdict: null == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
 as String,evidence: null == evidence ? _self.evidence : evidence // ignore: cast_nullable_to_non_nullable
 as String,block: null == block ? _self.block : block // ignore: cast_nullable_to_non_nullable
-as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as String,medianMs: null == medianMs ? _self.medianMs : medianMs // ignore: cast_nullable_to_non_nullable
 as int,hostDelay: null == hostDelay ? _self.hostDelay : hostDelay // ignore: cast_nullable_to_non_nullable
 as int,band: null == band ? _self.band : band // ignore: cast_nullable_to_non_nullable
 as int,latencyMs: null == latencyMs ? _self.latencyMs : latencyMs // ignore: cast_nullable_to_non_nullable
@@ -6416,10 +6416,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int medianMs,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport() when $default != null:
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.medianMs,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   return orElse();
 
 }
@@ -6437,10 +6437,10 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int medianMs,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)  $default,) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport():
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.medianMs,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6457,10 +6457,10 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int delay,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String node,  String country,  String exit,  String origin,  String verdict,  String evidence,  String block,  int medianMs,  int hostDelay,  int band,  int latencyMs,  bool unproven,  int order,  bool degraded,  int homeRisk,  int recurrence,  bool confirmed,  bool breaker,  bool udp,  int fails,  int coolFor,  bool current,  String trust,  String confidence)?  $default,) {final _that = this;
 switch (_that) {
 case _RcxCandidateReport() when $default != null:
-return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.delay,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
+return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_that.evidence,_that.block,_that.medianMs,_that.hostDelay,_that.band,_that.latencyMs,_that.unproven,_that.order,_that.degraded,_that.homeRisk,_that.recurrence,_that.confirmed,_that.breaker,_that.udp,_that.fails,_that.coolFor,_that.current,_that.trust,_that.confidence);case _:
   return null;
 
 }
@@ -6472,7 +6472,7 @@ return $default(_that.node,_that.country,_that.exit,_that.origin,_that.verdict,_
 @JsonSerializable()
 
 class _RcxCandidateReport implements RcxCandidateReport {
-  const _RcxCandidateReport({this.node = '', this.country = '', this.exit = '', this.origin = 'unknown', this.verdict = 'reject', this.evidence = 'none', this.block = '', this.delay = 0, this.hostDelay = 0, this.band = 0, this.latencyMs = 0, this.unproven = false, this.order = 0, this.degraded = false, this.homeRisk = 0, this.recurrence = 0, this.confirmed = false, this.breaker = false, this.udp = false, this.fails = 0, this.coolFor = 0, this.current = false, this.trust = 'unknown', this.confidence = 'none'});
+  const _RcxCandidateReport({this.node = '', this.country = '', this.exit = '', this.origin = 'unknown', this.verdict = 'reject', this.evidence = 'none', this.block = '', this.medianMs = 0, this.hostDelay = 0, this.band = 0, this.latencyMs = 0, this.unproven = false, this.order = 0, this.degraded = false, this.homeRisk = 0, this.recurrence = 0, this.confirmed = false, this.breaker = false, this.udp = false, this.fails = 0, this.coolFor = 0, this.current = false, this.trust = 'unknown', this.confidence = 'none'});
   factory _RcxCandidateReport.fromJson(Map<String, dynamic> json) => _$RcxCandidateReportFromJson(json);
 
 @override@JsonKey() final  String node;
@@ -6482,7 +6482,7 @@ class _RcxCandidateReport implements RcxCandidateReport {
 @override@JsonKey() final  String verdict;
 @override@JsonKey() final  String evidence;
 @override@JsonKey() final  String block;
-@override@JsonKey() final  int delay;
+@override@JsonKey() final  int medianMs;
 @override@JsonKey() final  int hostDelay;
 @override@JsonKey() final  int band;
 @override@JsonKey() final  int latencyMs;
@@ -6513,18 +6513,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCandidateReport&&(identical(other.node, node) || other.node == node)&&(identical(other.country, country) || other.country == country)&&(identical(other.exit, exit) || other.exit == exit)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.evidence, evidence) || other.evidence == evidence)&&(identical(other.block, block) || other.block == block)&&(identical(other.delay, delay) || other.delay == delay)&&(identical(other.hostDelay, hostDelay) || other.hostDelay == hostDelay)&&(identical(other.band, band) || other.band == band)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.unproven, unproven) || other.unproven == unproven)&&(identical(other.order, order) || other.order == order)&&(identical(other.degraded, degraded) || other.degraded == degraded)&&(identical(other.homeRisk, homeRisk) || other.homeRisk == homeRisk)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed)&&(identical(other.breaker, breaker) || other.breaker == breaker)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.fails, fails) || other.fails == fails)&&(identical(other.coolFor, coolFor) || other.coolFor == coolFor)&&(identical(other.current, current) || other.current == current)&&(identical(other.trust, trust) || other.trust == trust)&&(identical(other.confidence, confidence) || other.confidence == confidence));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RcxCandidateReport&&(identical(other.node, node) || other.node == node)&&(identical(other.country, country) || other.country == country)&&(identical(other.exit, exit) || other.exit == exit)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.verdict, verdict) || other.verdict == verdict)&&(identical(other.evidence, evidence) || other.evidence == evidence)&&(identical(other.block, block) || other.block == block)&&(identical(other.medianMs, medianMs) || other.medianMs == medianMs)&&(identical(other.hostDelay, hostDelay) || other.hostDelay == hostDelay)&&(identical(other.band, band) || other.band == band)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.unproven, unproven) || other.unproven == unproven)&&(identical(other.order, order) || other.order == order)&&(identical(other.degraded, degraded) || other.degraded == degraded)&&(identical(other.homeRisk, homeRisk) || other.homeRisk == homeRisk)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed)&&(identical(other.breaker, breaker) || other.breaker == breaker)&&(identical(other.udp, udp) || other.udp == udp)&&(identical(other.fails, fails) || other.fails == fails)&&(identical(other.coolFor, coolFor) || other.coolFor == coolFor)&&(identical(other.current, current) || other.current == current)&&(identical(other.trust, trust) || other.trust == trust)&&(identical(other.confidence, confidence) || other.confidence == confidence));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,node,country,exit,origin,verdict,evidence,block,delay,hostDelay,band,latencyMs,unproven,order,degraded,homeRisk,recurrence,confirmed,breaker,udp,fails,coolFor,current,trust,confidence]);
+    return Object.hashAll([runtimeType,node,country,exit,origin,verdict,evidence,block,medianMs,hostDelay,band,latencyMs,unproven,order,degraded,homeRisk,recurrence,confirmed,breaker,udp,fails,coolFor,current,trust,confidence]);
 }
 
 @override
 String toString() {
-    return 'RcxCandidateReport(node: $node, country: $country, exit: $exit, origin: $origin, verdict: $verdict, evidence: $evidence, block: $block, delay: $delay, hostDelay: $hostDelay, band: $band, latencyMs: $latencyMs, unproven: $unproven, order: $order, degraded: $degraded, homeRisk: $homeRisk, recurrence: $recurrence, confirmed: $confirmed, breaker: $breaker, udp: $udp, fails: $fails, coolFor: $coolFor, current: $current, trust: $trust, confidence: $confidence)';
+    return 'RcxCandidateReport(node: $node, country: $country, exit: $exit, origin: $origin, verdict: $verdict, evidence: $evidence, block: $block, medianMs: $medianMs, hostDelay: $hostDelay, band: $band, latencyMs: $latencyMs, unproven: $unproven, order: $order, degraded: $degraded, homeRisk: $homeRisk, recurrence: $recurrence, confirmed: $confirmed, breaker: $breaker, udp: $udp, fails: $fails, coolFor: $coolFor, current: $current, trust: $trust, confidence: $confidence)';
 }
 
 
@@ -6535,7 +6535,7 @@ abstract mixin class _$RcxCandidateReportCopyWith<$Res> implements $RcxCandidate
   factory _$RcxCandidateReportCopyWith(_RcxCandidateReport value, $Res Function(_RcxCandidateReport) _then) = __$RcxCandidateReportCopyWithImpl;
 @override @useResult
 $Res call({
- String node, String country, String exit, String origin, String verdict, String evidence, String block, int delay, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
+ String node, String country, String exit, String origin, String verdict, String evidence, String block, int medianMs, int hostDelay, int band, int latencyMs, bool unproven, int order, bool degraded, int homeRisk, int recurrence, bool confirmed, bool breaker, bool udp, int fails, int coolFor, bool current, String trust, String confidence
 });
 
 
@@ -6552,7 +6552,7 @@ class __$RcxCandidateReportCopyWithImpl<$Res>
 
 /// Create a copy of RcxCandidateReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? delay = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? node = null,Object? country = null,Object? exit = null,Object? origin = null,Object? verdict = null,Object? evidence = null,Object? block = null,Object? medianMs = null,Object? hostDelay = null,Object? band = null,Object? latencyMs = null,Object? unproven = null,Object? order = null,Object? degraded = null,Object? homeRisk = null,Object? recurrence = null,Object? confirmed = null,Object? breaker = null,Object? udp = null,Object? fails = null,Object? coolFor = null,Object? current = null,Object? trust = null,Object? confidence = null,}) {
   return _then(_RcxCandidateReport(
 node: null == node ? _self.node : node // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -6561,7 +6561,7 @@ as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullabl
 as String,verdict: null == verdict ? _self.verdict : verdict // ignore: cast_nullable_to_non_nullable
 as String,evidence: null == evidence ? _self.evidence : evidence // ignore: cast_nullable_to_non_nullable
 as String,block: null == block ? _self.block : block // ignore: cast_nullable_to_non_nullable
-as String,delay: null == delay ? _self.delay : delay // ignore: cast_nullable_to_non_nullable
+as String,medianMs: null == medianMs ? _self.medianMs : medianMs // ignore: cast_nullable_to_non_nullable
 as int,hostDelay: null == hostDelay ? _self.hostDelay : hostDelay // ignore: cast_nullable_to_non_nullable
 as int,band: null == band ? _self.band : band // ignore: cast_nullable_to_non_nullable
 as int,latencyMs: null == latencyMs ? _self.latencyMs : latencyMs // ignore: cast_nullable_to_non_nullable

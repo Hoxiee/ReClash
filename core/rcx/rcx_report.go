@@ -49,7 +49,7 @@ type rcxCandidateReport struct {
 	Verdict    string `json:"verdict"`
 	Evidence   string `json:"evidence"`
 	Block      string `json:"block"`
-	DelayMs    int    `json:"delay"`
+	MedianMs   int    `json:"medianMs"`
 	HostMs     int    `json:"hostDelay"`
 	Band       int    `json:"band"`
 	LatencyMs  int    `json:"latencyMs"`
@@ -222,7 +222,7 @@ func (e *rcxEngine) candidateReports(
 			Verdict:    rcxAdmit(input.Terrain, candidate.Facts).String(),
 			Evidence:   candidate.Evidence.String(),
 			Block:      string(row.Block),
-			DelayMs:    candidate.MedianMs,
+			MedianMs:   candidate.MedianMs,
 			HostMs:     candidate.HostMs,
 			Band:       int(row.Key.latBucket),
 			LatencyMs:  rcxDiscoveryLatency(candidate),

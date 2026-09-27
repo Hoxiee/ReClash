@@ -215,7 +215,7 @@ func (entry rcxDiagEntry) signature() uint64 {
 		diagHashString(h, c.Block)
 		diagHashString(h, c.Verdict)
 		diagHashString(h, strconv.Itoa(c.Order))
-		diagHashString(h, strconv.Itoa(c.DelayMs))
+		diagHashString(h, strconv.Itoa(c.MedianMs))
 		diagHashString(h, strconv.FormatBool(c.Current))
 	}
 	return h.Sum64()
@@ -390,8 +390,8 @@ func (e *rcxEngine) recordWave(kind rcxWaveKind, lane string, size int) {
 	})
 }
 
-func (e *rcxEngine) SetDiag(on bool)              { e.diag.setEnabled(on) }
-func (e *rcxEngine) DiagEnabled() bool            { return e.diag.enabled() }
+func (e *rcxEngine) SetDiag(on bool)   { e.diag.setEnabled(on) }
+func (e *rcxEngine) DiagEnabled() bool { return e.diag.enabled() }
 func (e *rcxEngine) DiagLog(since uint64, limit int) rcxDiagBatch {
 	return e.diag.since(since, limit)
 }

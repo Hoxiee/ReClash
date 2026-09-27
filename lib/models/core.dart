@@ -349,7 +349,7 @@ abstract class RcxCandidateReport with _$RcxCandidateReport {
     @Default('reject') String verdict,
     @Default('none') String evidence,
     @Default('') String block,
-    @Default(0) int delay,
+    @Default(0) int medianMs,
     @Default(0) int hostDelay,
     @Default(0) int band,
     @Default(0) int latencyMs,

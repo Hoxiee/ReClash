@@ -715,7 +715,7 @@ class _CandidateRow extends StatelessWidget {
       'homeRisk=${candidate.homeRisk}',
       'recurrence=${candidate.recurrence}',
       'band=${candidate.band}',
-      'delay=${candidate.delay}',
+      'median=${candidate.medianMs}',
       'hostDelay=${candidate.hostDelay}',
       'fails=${candidate.fails}',
       'coolFor=${candidate.coolFor}',
