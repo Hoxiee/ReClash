@@ -6,10 +6,12 @@ import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/wallpaper.dart';
-import 'package:reclash/providers/config.dart';
+import 'package:reclash/providers/providers.dart';
 import 'package:reclash/providers/wallpaper.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/widgets.dart';
+
+import 'theme_preview.dart';
 
 const _tileSpacing = 10.0;
 const _tileMaxWidth = 132.0;
@@ -68,6 +70,9 @@ class AppearanceBackgroundTab extends ConsumerWidget {
           slivers: [
             if (busy)
               const SliverToBoxAdapter(child: LinearProgressIndicator()),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
+            const SliverToBoxAdapter(child: _WallpaperPreview()),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
             SettingSection.sliver(
               title: l10n.wallpaperTitle,
               subTitle: l10n.wallpaperDescription,
@@ -185,6 +190,44 @@ class AppearanceBackgroundTab extends ConsumerWidget {
             const SettingBottomInset.sliver(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _WallpaperPreview extends ConsumerWidget {
+  const _WallpaperPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final (:wallpaper, :themeMode, :pureBlack) = ref.watch(
+      themeSettingProvider.select(
+        (value) => (
+          wallpaper: value.wallpaper,
+          themeMode: value.themeMode,
+          pureBlack: value.pureBlack,
+        ),
+      ),
+    );
+    final hero = ref.watch(newDashboardEnabledProvider);
+    final scheme = ref
+        .watch(genColorSchemeProvider(liveBrightness(context, themeMode)))
+        .toPureBlack(pureBlack);
+    final image = ref.watch(wallpaperImageProvider).asData?.value;
+    final showWallpaper = wallpaper.enabled && image != null;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      alignment: Alignment.center,
+      decoration: ShapeDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        shape: AppShape.xxl,
+      ),
+      child: PreviewDevice(
+        colorScheme: scheme,
+        hero: hero,
+        wallpaperImage: showWallpaper ? image : null,
+        wallpaperSettings: showWallpaper ? wallpaper : null,
       ),
     );
   }

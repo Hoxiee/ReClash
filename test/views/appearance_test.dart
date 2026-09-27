@@ -142,6 +142,9 @@ void main() {
     await pumpAppearanceView(tester);
     await focusTabBar(tester);
 
+    // The layout chooser now lives on the Theme tab (index 0).
+    expect(find.text('Dashboard style'), findsOneWidget);
+
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
     expect(find.text('Dashboard style'), findsNothing);
@@ -149,11 +152,12 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pumpAndSettle();
-    expect(find.text('Dashboard style'), findsOneWidget);
+    expect(find.text('Choose image'), findsNothing);
+    expect(find.text('Reduce motion'), findsOneWidget);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
-    expect(find.text('Dashboard style'), findsNothing);
+    expect(find.text('Reduce motion'), findsNothing);
     expect(find.text('Choose image'), findsOneWidget);
   });
 
@@ -364,7 +368,6 @@ void main() {
       tester,
     ) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Other');
 
       expect(container.read(appSettingProvider).newDashboard, isTrue);
 

@@ -72,6 +72,8 @@ class AppearanceThemeTab extends ConsumerWidget {
         const SliverToBoxAdapter(child: SizedBox(height: 12)),
         const SliverToBoxAdapter(child: ThemeLivePreview()),
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        const _LayoutChoice(),
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
         const _ThemeModeChoice(),
         SettingSection.sliver(
           items: [
@@ -159,24 +161,63 @@ class AppearanceThemeTab extends ConsumerWidget {
   }
 }
 
+class _LayoutChoice extends ConsumerWidget {
+  const _LayoutChoice();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appLocalizations = context.appLocalizations;
+    final hero = ref.watch(newDashboardEnabledProvider);
+    final (themeMode: themeMode, pureBlack: pureBlack) = ref.watch(
+      themeSettingProvider.select(
+        (state) => (themeMode: state.themeMode, pureBlack: state.pureBlack),
+      ),
+    );
+    final scheme = ref
+        .watch(genColorSchemeProvider(liveBrightness(context, themeMode)))
+        .toPureBlack(pureBlack);
+    return SliverToBoxAdapter(
+      child: PreviewChoiceGroup<bool>(
+        info: Info(
+          label: appLocalizations.dashboardStyle,
+          glyph: AppGlyphs.dashboard,
+        ),
+        value: hero,
+        choices: [
+          PreviewChoice(
+            value: false,
+            label: appLocalizations.classicDashboard,
+            pictogram: SketchThumb(colorScheme: scheme, hero: false),
+          ),
+          PreviewChoice(
+            value: true,
+            label: appLocalizations.newDashboardTitle,
+            pictogram: SketchThumb(colorScheme: scheme, hero: true),
+          ),
+        ],
+        onChanged: (value) => ref
+            .read(appSettingProvider.notifier)
+            .update((state) => state.copyWith(newDashboard: value)),
+      ),
+    );
+  }
+}
+
 class _ThemeModeChoice extends ConsumerWidget {
   const _ThemeModeChoice();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final hero = ref.watch(newDashboardEnabledProvider);
     final (themeMode: themeMode, scheduledTheme: scheduled) = ref.watch(
       themeSettingProvider.select(
         (state) =>
             (themeMode: state.themeMode, scheduledTheme: state.scheduledTheme),
       ),
     );
-    final light = MiniScreen(
-      colorScheme: ref.watch(genColorSchemeProvider(Brightness.light)),
-    );
-    final dark = MiniScreen(
-      colorScheme: ref.watch(genColorSchemeProvider(Brightness.dark)),
-    );
+    final light = ref.watch(genColorSchemeProvider(Brightness.light));
+    final dark = ref.watch(genColorSchemeProvider(Brightness.dark));
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup<ThemeMode?>(
         info: Info(label: appLocalizations.themeMode, glyph: AppGlyphs.sun),
@@ -185,19 +226,17 @@ class _ThemeModeChoice extends ConsumerWidget {
           PreviewChoice(
             value: ThemeMode.system,
             label: appLocalizations.auto,
-            pictogram: MiniScreenThumb(
-              screen: MiniSplitScreen(light: light, dark: dark),
-            ),
+            pictogram: SketchSplitThumb(light: light, dark: dark, hero: hero),
           ),
           PreviewChoice(
             value: ThemeMode.light,
             label: appLocalizations.light,
-            pictogram: MiniScreenThumb(screen: light),
+            pictogram: SketchThumb(colorScheme: light, hero: hero),
           ),
           PreviewChoice(
             value: ThemeMode.dark,
             label: appLocalizations.dark,
-            pictogram: MiniScreenThumb(screen: dark),
+            pictogram: SketchThumb(colorScheme: dark, hero: hero),
           ),
         ],
         onChanged: (value) {
@@ -215,19 +254,18 @@ class _ThemeModeChoice extends ConsumerWidget {
     );
   }
 }
+
 class _PureBlackChoice extends ConsumerWidget {
   const _PureBlackChoice();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
+    final hero = ref.watch(newDashboardEnabledProvider);
     final pureBlack = ref.watch(
       themeSettingProvider.select((state) => state.pureBlack),
     );
     final darkScheme = ref.watch(genColorSchemeProvider(Brightness.dark));
-    Widget preview(bool value) => MiniScreenThumb(
-      screen: MiniScreen(colorScheme: darkScheme.toPureBlack(value)),
-    );
     return SliverToBoxAdapter(
       child: PreviewChoiceGroup<bool>(
         info: Info(
@@ -239,12 +277,18 @@ class _PureBlackChoice extends ConsumerWidget {
           PreviewChoice(
             value: false,
             label: appLocalizations.standard,
-            pictogram: preview(false),
+            pictogram: SketchThumb(
+              colorScheme: darkScheme.toPureBlack(false),
+              hero: hero,
+            ),
           ),
           PreviewChoice(
             value: true,
             label: appLocalizations.pureBlack,
-            pictogram: preview(true),
+            pictogram: SketchThumb(
+              colorScheme: darkScheme.toPureBlack(true),
+              hero: hero,
+            ),
           ),
         ],
         onChanged: (value) => ref
@@ -254,6 +298,7 @@ class _PureBlackChoice extends ConsumerWidget {
     );
   }
 }
+
 class _TextScaleItem extends ConsumerStatefulWidget {
   const _TextScaleItem();
 
@@ -285,8 +330,8 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
         .toDouble();
     final scale = _draft ?? (textScale.enable ? textScale.scale : systemScale);
     final percent = '${(scale * 100).round()}%';
-    final divisions =
-        ((maxTextScale - minTextScale) / _TextScaleItem._step).round();
+    final divisions = ((maxTextScale - minTextScale) / _TextScaleItem._step)
+        .round();
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,6 +493,7 @@ class _TextScaleItemState extends ConsumerState<_TextScaleItem> {
     );
   }
 }
+
 class _SegmentedToggle extends StatelessWidget {
   const _SegmentedToggle({
     required this.value,
@@ -539,6 +585,7 @@ class _SegmentedToggle extends StatelessWidget {
     );
   }
 }
+
 String _percent(double value) {
   final percent = (value * 100).round();
   return percent > 0 ? '+$percent%' : '$percent%';
