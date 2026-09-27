@@ -130,7 +130,7 @@ dart setup.dart linux
 
 `reclash-*` 命名空间优先于兼容响应头。这些值用于补充订阅正文，但不会夺走用户控制权：用户保存的设置仍由用户管理，应用初始设置只会在添加配置时应用一次。
 
-面向服务商的工具已在线提供，位于 [reclash.pages.dev](https://reclash.pages.dev/en/)：带实时预览（展示客户端如何随之改变外观）的[请求头构建器](https://reclash.pages.dev/en/headers#builder)、[文档](https://reclash.pages.dev/en/docs)、完整的[请求头参考](https://reclash.pages.dev/en/reference)、用于测试的[模拟订阅](https://reclash.pages.dev/en/mock-subs)，以及[订阅报告解码器](https://reclash.pages.dev/en/report)。
+面向服务商的工具已在线提供，位于 [reclash.pages.dev](https://reclash.pages.dev/en/)：带实时预览（展示客户端如何随之改变外观）的[请求头构建器](https://reclash.pages.dev/en/builder#builder)、[文档](https://reclash.pages.dev/en/docs)、完整的[请求头参考](https://reclash.pages.dev/en/reference)、用于测试的[模拟订阅](https://reclash.pages.dev/en/mock-subs)，以及[订阅报告解码器](https://reclash.pages.dev/en/report)。
 
 ## 支持与贡献
 

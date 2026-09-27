@@ -130,7 +130,7 @@ dart setup.dart linux
 
 Пространство имён `reclash-*` имеет приоритет над заголовками совместимости. Эти значения дополняют тело подписки, но не забирают управление у пользователя: сохранённые настройки остаются пользовательскими, а стартовые значения приложения применяются только при добавлении профиля.
 
-Инструменты для провайдеров доступны онлайн на [reclash.pages.dev](https://reclash.pages.dev/ru/): [конструктор заголовков](https://reclash.pages.dev/ru/headers#builder) с живым превью того, как перекрашивается клиент, [документация](https://reclash.pages.dev/ru/docs), полный [справочник заголовков](https://reclash.pages.dev/ru/reference), [тестовые подписки](https://reclash.pages.dev/ru/mock-subs) и [декодер отчёта о подписке](https://reclash.pages.dev/ru/report).
+Инструменты для провайдеров доступны онлайн на [reclash.pages.dev](https://reclash.pages.dev/ru/): [конструктор заголовков](https://reclash.pages.dev/ru/builder#builder) с живым превью того, как перекрашивается клиент, [документация](https://reclash.pages.dev/ru/docs), полный [справочник заголовков](https://reclash.pages.dev/ru/reference), [тестовые подписки](https://reclash.pages.dev/ru/mock-subs) и [декодер отчёта о подписке](https://reclash.pages.dev/ru/report).
 
 ## Локализация
 

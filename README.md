@@ -130,7 +130,7 @@ Providers can attach usage, expiration, update policy, support links, branding, 
 
 The `reclash-*` namespace takes priority over compatibility headers. These values are suggestions around the subscription body: user-owned settings stay under user control, and initial application defaults are applied only when a profile is added.
 
-Provider tooling is available online at [reclash.pages.dev](https://reclash.pages.dev/en/): a [header builder](https://reclash.pages.dev/en/headers#builder) with a live preview of how the client repaints, [documentation](https://reclash.pages.dev/en/docs), the full [header reference](https://reclash.pages.dev/en/reference), [mock subscriptions](https://reclash.pages.dev/en/mock-subs) for testing, and the [subscription-report decoder](https://reclash.pages.dev/en/report).
+Provider tooling is available online at [reclash.pages.dev](https://reclash.pages.dev/en/): a [header builder](https://reclash.pages.dev/en/builder#builder) with a live preview of how the client repaints, [documentation](https://reclash.pages.dev/en/docs), the full [header reference](https://reclash.pages.dev/en/reference), [mock subscriptions](https://reclash.pages.dev/en/mock-subs) for testing, and the [subscription-report decoder](https://reclash.pages.dev/en/report).
 
 ## Localization
 
