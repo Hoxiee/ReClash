@@ -232,7 +232,7 @@ class _RailBody extends StatelessWidget {
   }
 }
 
-/// FlClash's sidebar palette: selection reads as a soft [selectedFill] tint
+/// Sidebar palette: selection reads as a soft [selectedFill] tint
 /// plus the primary edge [indicator], and hover/press/focus ride the same
 /// low-alpha [overlay] rather than an ink splash.
 class _RailColors {
@@ -468,7 +468,7 @@ class _RailSlotState extends State<_RailSlot> {
   }
 }
 
-/// FlClash's selection bar: it moves by stretching toward the new slot before
+/// The selection bar moves by stretching toward the new slot before
 /// its trailing edge catches up, rather than sliding at a fixed height.
 class _SelectionIndicator extends StatefulWidget {
   const _SelectionIndicator({
