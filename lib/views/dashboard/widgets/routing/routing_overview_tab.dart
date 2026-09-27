@@ -1,12 +1,12 @@
 import 'package:collection/collection.dart';
-import 'package:reclash/icons/icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/config/smart_routing.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_words.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview_parts.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 /// The friendly half: what you are on, what the network is, which services have
 /// a route, how much of the park is alive. Every measurement that produced an

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/common/desktop/window.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/desktop/window.dart';
 
 class _FakeNativeWindow {
   final List<String> calls = [];

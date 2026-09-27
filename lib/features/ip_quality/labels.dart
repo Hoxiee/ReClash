@@ -1,6 +1,6 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:material_ui/material_ui.dart';
 
 extension IpTypeLabel on IpType {
   String label(BuildContext context) {

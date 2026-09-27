@@ -1,7 +1,7 @@
-import 'package:reclash/common/desktop/window.dart';
-import 'package:reclash/models/config.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/desktop/window.dart';
+import 'package:reclash/models/config.dart';
 
 const _windowChannel = MethodChannel('window');
 

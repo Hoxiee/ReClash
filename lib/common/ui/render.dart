@@ -1,6 +1,6 @@
+import 'package:flutter/scheduler.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter/scheduler.dart';
 
 class Render {
   static Render? _instance;

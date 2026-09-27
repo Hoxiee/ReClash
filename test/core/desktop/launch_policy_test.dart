@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/desktop/model.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('reads the OS error the Helper reports in the response details', () {

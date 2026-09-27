@@ -1,20 +1,21 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/models/common.dart';
-import 'package:reclash/providers/providers.dart';
-import 'package:reclash/widgets/feedback/dialog.dart';
-import 'package:reclash/widgets/base/inherited.dart';
-import 'package:reclash/widgets/feedback/null_status.dart';
-import 'package:reclash/widgets/base/pop_scope.dart';
-import 'package:reclash/widgets/layout/scaffold.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/models/common.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/base/pop_scope.dart';
+import 'package:reclash/widgets/feedback/dialog.dart';
+import 'package:reclash/widgets/feedback/null_status.dart';
+import 'package:reclash/widgets/layout/scaffold.dart';
 
 import '../effect/effect.dart';
 import '../list/list.dart';
 import 'reorder_menu.dart';
+
 part 'input_pages.dart';
 
 class OptionsDialog<T> extends StatelessWidget {

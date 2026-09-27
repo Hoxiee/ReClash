@@ -1,22 +1,22 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:path/path.dart' show dirname, join;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
+import 'package:reclash/views/config/config.dart';
 import 'package:reclash/views/settings/about.dart';
 import 'package:reclash/views/settings/access.dart';
 import 'package:reclash/views/settings/application_setting.dart';
 import 'package:reclash/views/settings/backup_and_restore.dart';
-import 'package:reclash/views/config/config.dart';
 import 'package:reclash/views/settings/hotkey.dart';
 import 'package:reclash/views/settings/locale.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:animations/animations.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' show dirname, join;
 
 import '../appearance/appearance.dart';
 import '../config/advanced.dart';

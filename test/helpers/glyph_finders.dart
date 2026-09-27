@@ -1,5 +1,5 @@
-import 'package:reclash/icons/icons.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/icons/icons.dart';
 
 extension GlyphFinders on CommonFinders {
   Finder byGlyph(Glyph glyph) => byWidgetPredicate(

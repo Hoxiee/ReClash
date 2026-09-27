@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/companion/companion_protocol.dart';
 import 'package:reclash/common/util/string.dart';
 import 'package:reclash/models/companion.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final fixtures =

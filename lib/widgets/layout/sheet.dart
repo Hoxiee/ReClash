@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/common.dart';
 import 'package:reclash/models/state.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/widgets/base/inherited.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../base/focus.dart';
 import 'popup.dart';

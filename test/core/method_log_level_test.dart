@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('coreFailureLogLevel', () {

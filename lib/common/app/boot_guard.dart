@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:reclash/common/app/boot_record.dart';
+import 'package:reclash/common/desktop/system.dart';
 import 'package:reclash/common/storage/preferences.dart';
 import 'package:reclash/common/util/print.dart';
-import 'package:reclash/common/desktop/system.dart';
 import 'package:reclash/enum/enum.dart';
 
 class BootGuard {

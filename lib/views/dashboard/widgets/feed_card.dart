@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A card for one of the live feeds: a label, its glyph and a single figure
 /// over a tap that opens the feed's own list.

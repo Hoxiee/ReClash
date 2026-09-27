@@ -2,12 +2,12 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show Image;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/rendering.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 
 typedef PopupAnchorResolver = Rect? Function();
 

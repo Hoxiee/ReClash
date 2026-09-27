@@ -1,9 +1,9 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/application.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 const _leaf = SizedBox.shrink();
 

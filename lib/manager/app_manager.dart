@@ -1,7 +1,11 @@
 import 'dart:async';
 
-import 'package:reclash/common/common.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/permission.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/common/net/system_dns.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
@@ -10,10 +14,6 @@ import 'package:reclash/state.dart';
 import 'package:reclash/widgets/effect/animated_visibility.dart';
 import 'package:reclash/widgets/nav/app_nav_rail.dart';
 import 'package:reclash/widgets/theme/wallpaper.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AppStateManager extends ConsumerStatefulWidget {
   final Widget child;

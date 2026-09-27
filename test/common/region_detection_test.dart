@@ -1,8 +1,8 @@
 import 'dart:ui';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('an English locale still yields Russia from a Moscow time zone', () {

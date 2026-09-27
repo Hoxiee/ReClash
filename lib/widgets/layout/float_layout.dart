@@ -1,5 +1,5 @@
-import 'package:reclash/common/desktop/system.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/desktop/system.dart';
 
 import '../base/inherited.dart';
 

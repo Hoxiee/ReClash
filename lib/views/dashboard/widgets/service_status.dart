@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/features/ip_quality/ip_quality_text.dart';
@@ -10,14 +15,9 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/outbound_ip.dart';
 import 'package:reclash/providers/routed_probe.dart';
 import 'package:reclash/providers/service_status.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 String _statusLabel(AppLocalizations l, ServiceProbeStatus status) {
   return switch (status) {

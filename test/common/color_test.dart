@@ -1,6 +1,6 @@
-import 'package:reclash/common/ui/color.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/ui/color.dart';
 
 void main() {
   test('opacity extensions use their named alpha values', () {

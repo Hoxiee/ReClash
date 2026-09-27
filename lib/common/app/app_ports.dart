@@ -1,6 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:reclash/common/util/provider_reader.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter/widgets.dart';
 
 abstract interface class WindowPort {
   Future<WindowProps?> captureNormalGeometry(WindowProps current);

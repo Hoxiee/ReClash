@@ -1,10 +1,10 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/views/connection/requests.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 import 'feed_card.dart';
 

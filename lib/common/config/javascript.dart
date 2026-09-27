@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:reclash/common/util/exception.dart';
 import 'package:flutter/foundation.dart';
+import 'package:reclash/common/util/exception.dart';
 import 'package:rust_api/rust_api.dart';
 
 typedef ScriptEvaluator =

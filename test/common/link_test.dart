@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:reclash/common/util/link.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/util/link.dart';
 
 void main() {
   late StreamController<Uri> links;

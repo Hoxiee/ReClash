@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:reclash/common/util/constant.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/net/http.dart';
+import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 
 class _FakeCertificate implements X509Certificate {

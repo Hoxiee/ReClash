@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'common/common.dart';
-import 'enum/enum.dart';
-import 'models/models.dart';
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/common/ui/theme.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/config.dart';
-import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+
+import 'common/common.dart';
+import 'enum/enum.dart';
+import 'models/models.dart';
 
 class GlobalState {
   static GlobalState? _instance;

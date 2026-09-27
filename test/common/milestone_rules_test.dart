@@ -1,6 +1,6 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/milestones/milestone_rules.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const day = 24 * 60 * 60 * 1000;

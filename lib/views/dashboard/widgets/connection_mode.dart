@@ -1,9 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// ByeDPI-only is a separate engine rather than a switch inside the tunnel, so
 /// every dashboard surface reads which one it is describing from here.

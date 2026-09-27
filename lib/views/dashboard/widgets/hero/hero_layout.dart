@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:reclash/views/dashboard/widgets/hero/hero_orb.dart';
 import 'package:flutter/widgets.dart';
+import 'package:reclash/views/dashboard/widgets/hero/hero_orb.dart';
 
 const double heroOrbMinSize = 120;
 const double heroOrbMaxSize = 280;

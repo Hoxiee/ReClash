@@ -1,7 +1,7 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/widgets/feedback/dialog.dart';
-import 'package:material_ui/material_ui.dart';
 
 class ExperimentalNoticeDialog extends StatelessWidget {
   const ExperimentalNoticeDialog({

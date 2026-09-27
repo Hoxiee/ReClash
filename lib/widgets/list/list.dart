@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/base/inherited.dart';
-import 'package:material_ui/material_ui.dart';
 
 import '../base/card.dart';
 import '../base/focus.dart';

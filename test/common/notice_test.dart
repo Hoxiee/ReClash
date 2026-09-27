@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/ui/notice.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/ui/notice.dart';
 
 const _notice = NoticeRequest(
   channelName: 'Subscription reminders',

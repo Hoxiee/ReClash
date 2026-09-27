@@ -1,15 +1,15 @@
 import 'dart:math';
 
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/state.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 
 import '../effect/fade_box.dart';
-import 'text.dart';
 import '../theme/wallpaper_scope.dart';
+import 'text.dart';
 
 const commonCardIconSize = 20.0;
 

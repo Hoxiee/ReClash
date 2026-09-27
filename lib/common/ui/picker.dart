@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:reclash/common/common.dart';
-import 'package:reclash/common/companion/companion_protocol.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/companion/companion_protocol.dart';
 
 class Picker {
   Future<PlatformFile?> pickerFile() async {

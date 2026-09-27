@@ -1,14 +1,14 @@
 import 'dart:math';
-import 'package:reclash/icons/icons.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/finding_preview.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 class TrafficUsage extends StatelessWidget {
   const TrafficUsage({super.key, this.preview = false});

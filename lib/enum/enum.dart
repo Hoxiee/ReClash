@@ -2,11 +2,11 @@
 
 import 'dart:io';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 
 /// Whitelisted decorative overlay a subscription panel may request on the
 /// dashboard. The panel only ever names one of these; it can never ship code.

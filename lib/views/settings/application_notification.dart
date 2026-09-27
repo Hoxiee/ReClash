@@ -1,8 +1,11 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart';
 
+import 'package:flutter/semantics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
@@ -11,12 +14,9 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/views/profiles/overwrite/overwrite_selection_sheet.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter/semantics.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_ui/material_ui.dart';
 
-part 'application_notification/components.dart';
 part 'application_notification/component_editor.dart';
+part 'application_notification/components.dart';
 part 'application_notification/delivery.dart';
 
 class NotificationSettingsView extends ConsumerStatefulWidget {

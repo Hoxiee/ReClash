@@ -1,12 +1,12 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/widgets/effect/fade_box.dart';
-import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/effect/fade_box.dart';
 
 enum NullStatusIllustration {
   data,

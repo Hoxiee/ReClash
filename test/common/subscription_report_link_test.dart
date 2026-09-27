@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 // Mirror of the site fixture gen/report_demo.py: the exact JSON the decoder's
 // report.js reads. Keeping it here pins app toJson() to the decoder contract.

@@ -1,11 +1,10 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:yaml/yaml.dart';
 
 part 'generated/clash_config.freezed.dart';
-
 part 'generated/clash_config.g.dart';
 
 const defaultClashConfig = PatchClashConfig();

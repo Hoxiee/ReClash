@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 // Phone pairing progress: submit the scanned offer, show the confirmation code to compare against
 // the TV, then poll until the TV owner approves. A lost approval response never forces a re-pair —

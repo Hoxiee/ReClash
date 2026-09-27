@@ -1,6 +1,6 @@
 import 'package:animations/animations.dart';
-import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 

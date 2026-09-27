@@ -1,10 +1,10 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/app_ports.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status_mark.dart';
 import 'package:reclash/views/views.dart';
-import 'package:material_ui/material_ui.dart';
 
 class Navigation implements NavigationPort {
   static Navigation? _instance;

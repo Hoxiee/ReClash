@@ -1,19 +1,19 @@
 import 'dart:convert';
-import 'package:reclash/icons/icons.dart';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/providers/app.dart';
-import 'package:reclash/state.dart';
-import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:re_highlight/languages/javascript.dart';
 import 'package:re_highlight/languages/json.dart';
 import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/styles/atom-one-light.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 class EditorPage extends ConsumerStatefulWidget {
   final String title;

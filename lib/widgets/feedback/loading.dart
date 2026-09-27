@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:reclash/common/common.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 
 enum LoadingIndicatorM3EVariant { defaultStyle, contained }
 

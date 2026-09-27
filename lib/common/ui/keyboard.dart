@@ -1,10 +1,9 @@
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:uni_platform/uni_platform.dart';
 
 import '../desktop/system.dart';
-
-import 'package:flutter/widgets.dart';
 
 final Map<PhysicalKeyboardKey, String> _knownKeyLabels =
     <PhysicalKeyboardKey, String>{

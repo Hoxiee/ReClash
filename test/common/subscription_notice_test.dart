@@ -1,5 +1,5 @@
-import 'package:reclash/common/subscription/subscription_notice.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/subscription/subscription_notice.dart';
 
 int _epochSeconds(DateTime date) => date.millisecondsSinceEpoch ~/ 1000;
 

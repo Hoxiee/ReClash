@@ -1,12 +1,12 @@
-import 'package:reclash/icons/icons.dart';
-import '../helpers/glyph_finders.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/manager/status_manager.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/app.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 Future<StatusManagerState> _pumpStatusManager(

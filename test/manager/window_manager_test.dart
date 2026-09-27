@@ -1,21 +1,21 @@
-import 'package:reclash/icons/icons.dart'
-    hide CaptionGlyph, CaptionIcon, captionGlyphSize;
-import '../helpers/glyph_finders.dart';
 import 'dart:async';
 
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/app_localizations.dart';
 import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/icons/icons.dart'
+    hide CaptionGlyph, CaptionIcon, captionGlyphSize;
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:window/window.dart' show WindowListener, desktopWindow;
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:mocktail/mocktail.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/interface.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}

@@ -1,11 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/providers/providers.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -13,6 +8,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/providers/providers.dart';
 
 const double _barHeight = 64;
 const double _barPadding = 4;

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:reclash/common/subscription/panel_naming.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/subscription/panel_naming.dart';
 
 void main() {
   group('decodePanelTitle', () {

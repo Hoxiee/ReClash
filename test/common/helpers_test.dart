@@ -1,6 +1,6 @@
+import 'package:flutter/widgets.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,7 +1,7 @@
-import 'package:reclash/common/util/constant.dart';
-import 'package:reclash/plugins/tile.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/plugins/tile.dart';
 
 class _RecordingListener with TileListener {
   final calls = <String>[];

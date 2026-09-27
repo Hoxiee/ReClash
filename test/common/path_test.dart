@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 import 'package:yaml/yaml.dart';
 
 class _FakePathProvider extends PathProviderPlatform {

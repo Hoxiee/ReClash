@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter/foundation.dart';
 
 typedef DAVClientFactory = DAVClient Function(DAVProps props);
 

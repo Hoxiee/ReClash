@@ -1,11 +1,11 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/providers/providers.dart';
-import 'package:reclash/state.dart';
-import 'package:reclash/views/devices/control_panel.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/devices/control_panel.dart';
 
 import '../../helpers/test_app.dart';
 import '../../helpers/test_profiles.dart';

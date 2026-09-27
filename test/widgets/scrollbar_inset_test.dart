@@ -1,9 +1,9 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/inherited.dart';
 import 'package:reclash/widgets/base/scroll.dart';
 import 'package:reclash/widgets/layout/sheet.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
 

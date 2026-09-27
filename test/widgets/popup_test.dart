@@ -1,10 +1,10 @@
-import 'package:reclash/icons/icons.dart';
-import '../helpers/glyph_finders.dart';
-import 'package:reclash/widgets/layout/popup.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/layout/popup.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 void main() {

@@ -1,7 +1,7 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
 int _double(int value) => value * 2;

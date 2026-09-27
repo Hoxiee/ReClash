@@ -1,11 +1,10 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-
-import 'dart:math';
 
 class SearchMatcher {
   final String query;

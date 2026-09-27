@@ -2,18 +2,19 @@ import 'dart:math' as math;
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/ui/focus_visibility.dart';
 import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/common/ui/spacing.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/physics.dart';
-import 'package:flutter/rendering.dart';
-part 'tab_segment.dart';
+
 part 'tab_render.dart';
+part 'tab_segment.dart';
 
 const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(
   vertical: 2,

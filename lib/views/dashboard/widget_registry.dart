@@ -1,7 +1,7 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/views/dashboard/widgets/widgets.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 extension DashboardWidgetView on DashboardWidget {
   GridItem get widget => switch (this) {

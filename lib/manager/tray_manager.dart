@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/tray.dart';
 import 'package:reclash/common/desktop/window.dart';
@@ -8,8 +10,6 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/state.dart';
 import 'package:reclash/providers/tray_delays.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tray/tray.dart';
 
 class TrayManager extends ConsumerStatefulWidget {

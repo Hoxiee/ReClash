@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
@@ -9,8 +11,6 @@ import 'package:reclash/views/dashboard/widgets/dns_queries.dart';
 import 'package:reclash/views/dashboard/widgets/memory_info.dart';
 import 'package:reclash/views/dashboard/widgets/requests.dart';
 import 'package:reclash/views/dashboard/widgets/service_status.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProviderSummaryPage extends ConsumerWidget {
   const ProviderSummaryPage({super.key, required this.scrollController});

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
@@ -8,8 +10,6 @@ import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class _QuickSwitchCard extends StatelessWidget {
   const _QuickSwitchCard({

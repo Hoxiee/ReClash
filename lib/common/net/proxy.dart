@@ -1,6 +1,6 @@
+import 'package:proxy/proxy.dart';
 import 'package:reclash/common/desktop/system.dart';
 import 'package:reclash/common/util/constant.dart';
-import 'package:proxy/proxy.dart';
 
 final proxy = system.isDesktop && !safeModeBuild ? Proxy() : null;
 

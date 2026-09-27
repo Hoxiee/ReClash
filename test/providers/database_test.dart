@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
+import 'package:flutter_test/flutter_test.dart';
 // `Profiles`, `Scripts` and `ProxyGroups` name both a drift table and a
 // notifier, so the schema side is imported behind a prefix.
 import 'package:reclash/database/database.dart' as db;
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/database.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart' show ProviderListenable;
-import 'package:flutter_test/flutter_test.dart';
 
 /// Every notifier in `lib/providers/database.dart` writes optimistically: the
 /// in-memory state is mutated first and the row is persisted afterwards through

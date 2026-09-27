@@ -1,11 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart' hide FileInfo;
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/profiles/overwrite/custom/name_add_picker.dart';
 import 'package:reclash/views/profiles/overwrite/custom/name_list_editor.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EditProxyProvidersView extends ConsumerWidget {
   const EditProxyProvidersView({super.key});

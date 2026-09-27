@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:reclash/models/changelog.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/models/changelog.dart';
 
 const _payload = '''
 {

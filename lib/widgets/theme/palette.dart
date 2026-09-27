@@ -1,12 +1,12 @@
 import 'dart:math';
 
+import 'package:material_color_utilities/hct/hct.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/card.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:material_color_utilities/hct/hct.dart';
 
-import 'color_scheme_box.dart';
 import '../base/focus.dart';
+import 'color_scheme_box.dart';
 import 'theme.dart';
 
 @immutable

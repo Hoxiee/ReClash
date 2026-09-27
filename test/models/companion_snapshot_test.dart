@@ -1,5 +1,5 @@
-import 'package:reclash/models/companion.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/models/companion.dart';
 
 void main() {
   // Gson decodes every JSON number as a double, so the bridge map arrives with doubles where the

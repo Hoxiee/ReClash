@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/models/models.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/models/models.dart';
 
 void main() {
   test('partial SOCKS replies yield while waiting for more data', () async {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/common/common.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/common.dart';
 
 void main() {
   test('never runs more than the configured number of tasks at once', () async {

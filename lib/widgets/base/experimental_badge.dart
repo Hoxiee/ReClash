@@ -1,6 +1,6 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/tag.dart';
-import 'package:material_ui/material_ui.dart';
 
 class ExperimentalBadge extends StatelessWidget {
   const ExperimentalBadge({super.key, this.label});

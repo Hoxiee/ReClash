@@ -1,19 +1,17 @@
 import 'dart:async';
-
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/providers/app.dart';
-import 'package:reclash/providers/action.dart';
-import 'package:reclash/models/models.dart';
-import 'package:reclash/state.dart';
-import 'package:reclash/views/profiles/add.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:reclash/widgets/widgets.dart';
-
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/action.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/state.dart';
+import 'package:reclash/views/profiles/add.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import '../helpers/test_app.dart';
 

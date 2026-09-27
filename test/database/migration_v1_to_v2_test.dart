@@ -1,7 +1,7 @@
 import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/database/database.dart' as fl;
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 /// Rebuilds [raw] into the shape schema version 1 left behind: no

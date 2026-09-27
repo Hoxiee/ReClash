@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/app_localizations.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/plugins/tile.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TileManager extends ConsumerStatefulWidget {
   final Widget child;

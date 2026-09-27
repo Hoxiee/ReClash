@@ -1,8 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/routing/smart_routing.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final activeServerProvider = Provider<ActiveServerInfo>((ref) {
   final mode = ref.watch(

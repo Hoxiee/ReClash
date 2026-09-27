@@ -1,10 +1,10 @@
-import 'package:reclash/widgets/feedback/activate_box.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/widgets/base/builder.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/feedback/activate_box.dart';
 import 'package:reclash/widgets/feedback/disabled_mask.dart';
 import 'package:reclash/widgets/input/button.dart';
-import 'package:reclash/widgets/base/inherited.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ActivateBox blocks pointer events when inactive', (

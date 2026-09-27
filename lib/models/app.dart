@@ -1,7 +1,7 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 
 import 'common.dart';
 import 'core.dart';

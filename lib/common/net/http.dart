@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/state.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 String redactUrlForLog(Uri url) => Uri(
   scheme: url.scheme,

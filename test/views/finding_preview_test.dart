@@ -1,16 +1,16 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/milestones/seasonal.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/misc/finding_preview.dart';
 import 'package:reclash/views/config/desync.dart';
-import 'package:reclash/views/tools/connection_doctor.dart';
 import 'package:reclash/views/dashboard/widgets/traffic_usage.dart';
+import 'package:reclash/views/misc/finding_preview.dart';
+import 'package:reclash/views/tools/connection_doctor.dart';
 import 'package:reclash/views/tools/findings.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/test_app.dart';
 

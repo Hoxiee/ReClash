@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/scroll.dart';
-import 'package:material_ui/material_ui.dart';
 
 class BaseScrollBehavior extends MaterialScrollBehavior {
   const BaseScrollBehavior({this.scrollbarPadding = EdgeInsets.zero});

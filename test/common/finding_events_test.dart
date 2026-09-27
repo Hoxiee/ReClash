@@ -1,6 +1,6 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/milestones/finding_events.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('New Year requires a continuous session across midnight', () {

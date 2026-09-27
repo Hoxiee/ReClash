@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/boot_record.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
 
 const _platformProbeTimeout = Duration(seconds: 2);
 

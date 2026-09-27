@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/core/desktop/rpc_client.dart';
 import 'package:reclash/core/event.dart';
 import 'package:reclash/core/method.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
 

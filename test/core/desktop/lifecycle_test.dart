@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/core/desktop/lifecycle.dart';
 import 'package:reclash/core/desktop/model.dart';
 import 'package:reclash/core/desktop/transport.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
 

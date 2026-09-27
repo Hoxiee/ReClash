@@ -1,5 +1,5 @@
-import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
 
 void main() {
   test('new year window runs from December 28 through January 3', () {

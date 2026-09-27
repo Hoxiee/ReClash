@@ -1,5 +1,5 @@
-import 'package:reclash/common/ui/nav_bar_metrics.dart';
 import 'package:flutter/widgets.dart';
+import 'package:reclash/common/ui/nav_bar_metrics.dart';
 
 abstract final class NavRailMetrics {
   static const double width = 80;

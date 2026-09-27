@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/app/app_ports.dart';
 import 'package:reclash/common/storage/preferences.dart';
 import 'package:reclash/models/config.dart';
@@ -7,7 +8,6 @@ import 'package:reclash/providers/action.dart';
 import 'package:reclash/providers/actions/system_exit.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/state.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:ui' show lerpDouble;
 
-import 'package:reclash/icons/glyph.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/icons/glyph.dart';
 
 const _grid = Rect.fromLTWH(0, 0, Glyph.size, Glyph.size);
 const _fillStart = Glyph.strokeWidth / 2;

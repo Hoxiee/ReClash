@@ -1,11 +1,11 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:material_ui/material_ui.dart';
 
-import 'app_localizations.dart';
 import '../routing/connection_answer.dart';
 import '../routing/routing_overview.dart';
 import '../tasks/task.dart';
+import 'app_localizations.dart';
 
 /// The engine's group name is wire detail, not a label to decode.
 String groupDisplayName(String groupName) {

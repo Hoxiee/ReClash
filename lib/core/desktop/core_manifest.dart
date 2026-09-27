@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reclash/common/util/constant.dart';
 import 'package:path/path.dart' as p;
+import 'package:reclash/common/util/constant.dart';
 
 final class CoreManifest {
   const CoreManifest._();

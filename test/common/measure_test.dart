@@ -1,6 +1,6 @@
-import 'package:reclash/common/util/measure.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/util/measure.dart';
 
 Future<Measure> _measureIn(WidgetTester tester, {double scale = 1}) async {
   late Measure measure;

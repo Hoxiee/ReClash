@@ -1,7 +1,7 @@
-import 'package:reclash/views/error.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/views/error.dart';
 
 final _stack = StackTrace.fromString('#0 boot (package:reclash/main.dart:1)');
 

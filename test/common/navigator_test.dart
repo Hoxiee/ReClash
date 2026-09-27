@@ -1,8 +1,8 @@
-import 'package:reclash/common/desktop/navigator.dart';
-import 'package:reclash/providers/app.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/desktop/navigator.dart';
+import 'package:reclash/providers/app.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

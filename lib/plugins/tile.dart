@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
 
 abstract mixin class TileListener {
   void onStart() {}

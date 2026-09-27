@@ -1,6 +1,6 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 const double heroPillRadius = AppCorner.full;
 const double heroCardRadius = AppCorner.lg;

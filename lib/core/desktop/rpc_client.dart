@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/event.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'transport.dart';
 

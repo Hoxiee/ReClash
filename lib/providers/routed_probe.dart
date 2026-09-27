@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/method.dart';
-import 'package:flutter/foundation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import 'route_state.dart';

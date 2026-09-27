@@ -1,5 +1,5 @@
-import 'package:reclash/common/util/exception.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/util/exception.dart';
 
 void main() {
   test('MessageException renders as the bare message', () {

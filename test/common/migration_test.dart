@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/app/migration.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Migration', () {

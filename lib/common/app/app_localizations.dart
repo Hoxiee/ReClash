@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:reclash/common/util/exception.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/subscription/incy_links.dart';
+import 'package:reclash/common/util/exception.dart';
 import 'package:reclash/core/desktop/launch_policy.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/profile.dart';
-import 'package:material_ui/material_ui.dart';
 
 final currentAppLocalizations = AppLocalizations.current;
 

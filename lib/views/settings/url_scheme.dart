@@ -1,10 +1,10 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/l10n/l10n.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/l10n/l10n.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 class _SchemeCommand {
   const _SchemeCommand({

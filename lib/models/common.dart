@@ -3,16 +3,15 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'clash_config.dart';
 
 part 'generated/common.freezed.dart';
-
 part 'generated/common.g.dart';
 
 @freezed

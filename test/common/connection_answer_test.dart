@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 const _evidence = 'core/doctor/doctor_evidence.go';
 const _flow = 'core/mihomo/tunnel/evidence.go';

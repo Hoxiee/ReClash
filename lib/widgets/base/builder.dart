@@ -1,6 +1,6 @@
-import 'package:reclash/widgets/list/active_polling.dart';
-import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/widgets/base/inherited.dart';
+import 'package:reclash/widgets/list/active_polling.dart';
 
 typedef TickWidgetBuilder = Widget Function(BuildContext context, int tick);
 

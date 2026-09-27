@@ -1,12 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/misc.dart' show ProviderListenable;
 
-import 'input.dart';
-import '../list/list.dart';
 import '../feedback/null_status.dart';
+import '../list/list.dart';
+import 'input.dart';
 
 export 'package:riverpod/misc.dart' show ProviderListenable;
 

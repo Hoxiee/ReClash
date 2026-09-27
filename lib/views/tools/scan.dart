@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:reclash/icons/icons.dart';
 import 'dart:math';
 
+import 'package:material_ui/material_ui.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/companion/companion_protocol.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 
 enum ScanMode { profileImport, companionPairing }
 

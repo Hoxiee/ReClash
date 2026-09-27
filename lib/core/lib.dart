@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/plugins/service.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'desktop/model.dart';
 import 'interface.dart';

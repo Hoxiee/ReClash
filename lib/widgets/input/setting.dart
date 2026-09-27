@@ -1,11 +1,11 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
-import 'package:material_ui/material_ui.dart';
 
 import '../base/card.dart';
-import '../effect/fade_box.dart';
 import '../base/focus.dart';
 import '../base/inherited.dart';
+import '../effect/fade_box.dart';
 import '../list/list.dart';
 import '../theme/theme.dart';
 

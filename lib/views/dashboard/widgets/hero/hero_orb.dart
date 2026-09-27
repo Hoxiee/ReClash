@@ -1,21 +1,21 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:reclash/common/milestones/finding_events.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show kTouchSlop;
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
+import 'package:reclash/common/milestones/finding_events.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/focusable_tap.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
-import 'package:reclash/views/dashboard/widgets/seasonal_spark.dart';
 import 'package:reclash/views/dashboard/widgets/seasonal_overlay.dart';
+import 'package:reclash/views/dashboard/widgets/seasonal_spark.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show kTouchSlop;
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'hero_orb_painters.dart';
 

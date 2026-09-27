@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/core/desktop/process_probe.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/core/desktop/process_probe.dart';
 
 void main() {
   test('the current process is alive', () async {

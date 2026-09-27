@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/app/l10n_labels.dart';
 import 'package:reclash/l10n/l10n.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 const _arbDir = 'arb';
 const _libDir = 'lib';

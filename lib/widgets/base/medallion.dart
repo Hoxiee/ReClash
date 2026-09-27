@@ -1,7 +1,7 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/widgets/feedback/loading.dart';
-import 'package:material_ui/material_ui.dart';
 
 /// A tinted rounded square holding one state-coloured glyph: the app's single
 /// way to mark a thing with a status, so every medallion reads as one family.

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:reclash/common/util/exception.dart';
-import 'package:reclash/common/config/javascript.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/config/javascript.dart';
+import 'package:reclash/common/util/exception.dart';
 
 void main() {
   late List<({String script, String config})> calls;

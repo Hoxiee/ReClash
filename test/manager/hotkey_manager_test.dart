@@ -1,15 +1,15 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/manager/hotkey_manager.dart';
-import 'package:reclash/models/models.dart';
-import 'package:reclash/providers/providers.dart';
-import 'package:reclash/state.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hotkey_manager/hotkey_manager.dart' show HotKeyModifier;
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/manager/hotkey_manager.dart';
+import 'package:reclash/models/models.dart';
+import 'package:reclash/providers/providers.dart';
+import 'package:reclash/state.dart';
 
 void main() {
   group('KeyboardModifierExt', () {

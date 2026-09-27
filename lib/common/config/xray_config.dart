@@ -4,9 +4,9 @@ library;
 
 import 'dart:convert';
 
-import 'amnezia_config.dart';
 import '../routing/skipped_node.dart';
 import '../subscription/subscription_links.dart';
+import 'amnezia_config.dart';
 
 bool isXrayConfigInput(String body) {
   final trimmed = body.trimLeft();

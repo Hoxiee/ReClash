@@ -1,5 +1,5 @@
-import 'package:reclash/enum/enum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:reclash/enum/enum.dart';
 
 part 'generated/ip_quality.freezed.dart';
 

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart';
+import 'package:reclash/common/storage/path.dart';
 import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/common/util/datetime.dart';
-import 'package:reclash/common/storage/path.dart';
-import 'package:path/path.dart';
 
 /// Persistent on-disk log sink under `<home>/logs`, so the log stream survives
 /// a crash/ANR/restart that wipes the in-memory `logsProvider`. Writes drain

@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 
 /// A pulsing bar that holds the place of one line of [style] text.
 class SkeletonText extends StatefulWidget {

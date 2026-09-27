@@ -4,10 +4,10 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:material_ui/material_ui.dart';
 
 const appName = 'ReClash';
 const appHelperService = 'ReClashHelperService';

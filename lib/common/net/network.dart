@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/common.dart';
 import 'package:flutter/foundation.dart';
+import 'package:reclash/common/common.dart';
 
 typedef NetworkInterfaceLister =
     Future<List<NetworkInterface>> Function({bool includeLoopback});

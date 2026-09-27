@@ -4,9 +4,9 @@ import 'dart:typed_data' show ByteData;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/config/amnezia_config.dart';
+import 'package:reclash/common/config/xray_config.dart';
 import 'package:reclash/common/routing/skipped_node.dart';
 import 'package:reclash/common/subscription/subscription_links.dart';
-import 'package:reclash/common/config/xray_config.dart';
 
 const _privateKey = '6FYeSwQ3LHkaHK7XR/yM4CBrLr46tr6d4lSCBdOJvlw=';
 const _publicKey = '2RbYMI7eFt4OEEnHfil3Idn4HmRmc3hBQvR1ysYzQWc=';

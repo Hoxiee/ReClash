@@ -1,6 +1,6 @@
-import 'package:reclash/common/common.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/common.dart';
 
 import '../helpers/test_app.dart';
 

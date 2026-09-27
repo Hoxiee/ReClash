@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart' hide captionGlyphSize;
 import 'dart:ui' show ClipOp;
 
+import 'package:flutter/foundation.dart' show ValueListenable;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart' hide captionGlyphSize;
 import 'package:reclash/models/config.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:flutter/foundation.dart' show ValueListenable;
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window/window.dart';
 
 const _windowGeometryDelay = Duration(milliseconds: 120);

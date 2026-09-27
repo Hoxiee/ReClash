@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/enum/enum.dart';
 
 import 'app.dart';
 import 'capability.dart';

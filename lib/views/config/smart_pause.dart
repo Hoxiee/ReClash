@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/permission.dart';
+import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/config/smart_pause_network_picker.dart';
 import 'package:reclash/views/profiles/overwrite/custom/widgets.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
 
 const _togglePadding = EdgeInsets.only(left: 16, right: 8);

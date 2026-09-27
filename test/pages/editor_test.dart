@@ -1,12 +1,12 @@
-import 'package:reclash/icons/icons.dart';
-import '../helpers/glyph_finders.dart';
-import 'package:reclash/views/config/editor.dart';
-import 'package:reclash/providers/app.dart';
-import 'package:reclash/providers/database.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:re_editor/re_editor.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/providers/app.dart';
+import 'package:reclash/providers/database.dart';
+import 'package:reclash/views/config/editor.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 

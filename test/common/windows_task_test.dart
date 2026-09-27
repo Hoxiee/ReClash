@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:reclash/common/desktop/windows_task.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/desktop/windows_task.dart';
 
 ProcessResult _result(int exitCode, String stdout) =>
     ProcessResult(0, exitCode, stdout, '');

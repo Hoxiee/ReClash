@@ -1,15 +1,14 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/hero/hero_status.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A whitelisted decorative overlay a panel switches on by preset name, never
 /// by code. Mirrors [SeasonalDashboardOverlay]'s gating and never-remount Stack.

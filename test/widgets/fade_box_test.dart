@@ -1,6 +1,6 @@
-import 'package:reclash/widgets/effect/fade_box.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/widgets/effect/fade_box.dart';
 
 void main() {
   Widget host(Widget child, {required bool disableAnimations}) {

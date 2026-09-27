@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 const _decide = 'core/rcx/rcx_decide.go';
 

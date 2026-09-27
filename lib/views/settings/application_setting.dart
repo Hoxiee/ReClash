@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/launch.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/config.dart';
 import 'package:reclash/views/settings/application_notification.dart';
 import 'package:reclash/views/setup/setup.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 ConfigToggleItem _appSettingToggle({
   required ConfigLabel title,

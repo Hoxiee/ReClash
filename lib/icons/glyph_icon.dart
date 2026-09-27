@@ -1,6 +1,6 @@
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/icons/glyph.dart';
 import 'package:reclash/icons/glyph_painter.dart';
-import 'package:material_ui/material_ui.dart';
 
 class GlyphIcon extends StatelessWidget {
   const GlyphIcon(this.glyph, {super.key, this.fill, this.size, this.color});

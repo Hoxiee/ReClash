@@ -1,26 +1,26 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/app/app_ports.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/icons/icons.dart'
     hide CaptionGlyph, CaptionIcon, captionGlyphSize;
-import '../helpers/glyph_finders.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/app_manager.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/theme_manager.dart';
 import 'package:reclash/manager/window_manager.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/views/home/home.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
+import 'package:reclash/views/home/home.dart';
 import 'package:reclash/views/settings/application_setting.dart';
+import 'package:reclash/views/settings/navigation.dart';
 import 'package:reclash/views/tools/tools.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:reclash/views/settings/navigation.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 
 void main() {

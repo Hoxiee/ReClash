@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:reclash/common/util/constant.dart';
-import 'package:reclash/common/storage/preferences.dart';
-import 'package:reclash/common/util/print.dart';
-import 'package:reclash/common/desktop/system.dart';
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:reclash/common/desktop/system.dart';
+import 'package:reclash/common/storage/preferences.dart';
+import 'package:reclash/common/util/constant.dart';
+import 'package:reclash/common/util/print.dart';
+import 'package:reclash/enum/enum.dart';
 
 class SystemDnsRecord {
   final String service;

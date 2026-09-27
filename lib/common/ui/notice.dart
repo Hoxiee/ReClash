@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 
 const _maxNoticeTitleLength = 80;
 

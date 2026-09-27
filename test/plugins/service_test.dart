@@ -1,12 +1,12 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/util/constant.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/service.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 class _RecordingListener with ServiceListener {
   final events = <CoreEvent>[];

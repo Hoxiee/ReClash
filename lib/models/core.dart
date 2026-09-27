@@ -1,6 +1,6 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'generated/core.freezed.dart';
 part 'generated/core.g.dart';

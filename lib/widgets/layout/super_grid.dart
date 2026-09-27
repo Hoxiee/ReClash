@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
-import 'package:reclash/widgets/feedback/activate_box.dart';
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:reclash/widgets/layout/motion_grid.dart';
-import 'package:reclash/widgets/nav/app_nav_bar.dart';
-import 'package:reclash/widgets/layout/grid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/feedback/activate_box.dart';
+import 'package:reclash/widgets/layout/grid.dart';
+import 'package:reclash/widgets/layout/motion_grid.dart';
+import 'package:reclash/widgets/nav/app_nav_bar.dart';
 
 /// Keeps its own order while the user edits and reports each committed change
 /// to [onChanged]; a list from the parent replaces it only when its keys

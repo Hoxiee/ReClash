@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/services.dart';
 import 'package:reclash/common/app/boot_record.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/net/system_dns.dart';
@@ -10,8 +12,6 @@ import 'package:reclash/core/desktop/helper_client.dart';
 import 'package:reclash/core/desktop/linux_helper.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
-import 'package:flutter/services.dart';
 
 typedef ProcessRunner =
     Future<ProcessResult> Function(String executable, List<String> arguments);

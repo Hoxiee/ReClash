@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:reclash/common/util/print.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/util/print.dart';
 
 void main() {
   test('compactError compacts DioException to type and status code', () {

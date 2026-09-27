@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/state.dart';
 import 'package:win32_registry/win32_registry.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
 
 const _coreVersionTimeout = Duration(seconds: 2);
 

@@ -1,3 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
@@ -6,13 +9,10 @@ import 'package:reclash/state.dart';
 import 'package:reclash/views/connection/requests.dart';
 import 'package:reclash/widgets/base/scroll.dart';
 import 'package:reclash/widgets/feedback/null_status.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
-import '../helpers/glyph_finders.dart';
 
 TrackerInfo _tracker({required String id, String host = 'example.com'}) {
   return TrackerInfo(

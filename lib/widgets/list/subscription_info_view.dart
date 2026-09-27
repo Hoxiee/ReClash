@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/models.dart';
-import 'package:material_ui/material_ui.dart';
 
+import '../base/text.dart';
 import '../feedback/dialog.dart';
 import 'list.dart';
-import '../base/text.dart';
 
 const _expireGap = 12.0;
 const _unlimitedGlyph = '\u221E';

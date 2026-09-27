@@ -1,18 +1,18 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:reclash/views/settings/about.dart';
 import 'package:reclash/views/config/scripts.dart';
+import 'package:reclash/views/profiles/overwrite/overwrite_editor.dart';
 import 'package:reclash/views/profiles/overwrite/standard.dart';
 import 'package:reclash/views/proxies/setting.dart';
+import 'package:reclash/views/settings/about.dart';
 import 'package:reclash/widgets/base/inherited.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../helpers/test_app.dart';

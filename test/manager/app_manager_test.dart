@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/core/interface.dart';
@@ -12,10 +16,6 @@ import 'package:reclash/providers/config.dart';
 import 'package:reclash/providers/connection_doctor.dart';
 import 'package:reclash/providers/core.dart';
 import 'package:reclash/providers/state.dart';
-import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 

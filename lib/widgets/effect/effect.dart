@@ -1,9 +1,9 @@
 import 'dart:ui';
-import 'package:reclash/icons/icons.dart';
 
-import 'package:reclash/common/common.dart';
-import 'package:reclash/widgets/base/inherited.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
+import 'package:reclash/widgets/base/inherited.dart';
 
 class EffectGestureDetector extends StatefulWidget {
   final Widget child;

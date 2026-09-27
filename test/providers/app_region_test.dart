@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:ui' show Locale;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 ProviderContainer _container([
   Config config = const Config(themeProps: defaultThemeProps),

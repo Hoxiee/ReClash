@@ -1,9 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/tasks/task.dart';
 import 'package:reclash/models/profile.dart';
-import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/providers/action.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reclash/views/config/editor.dart';
 
 class PreviewProfileView extends ConsumerStatefulWidget {
   final Profile profile;

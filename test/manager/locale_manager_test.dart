@@ -1,9 +1,9 @@
-import 'package:reclash/manager/locale_manager.dart';
-import 'package:reclash/providers/app.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/manager/locale_manager.dart';
+import 'package:reclash/providers/app.dart';
 
 import '../helpers/test_app.dart';
 

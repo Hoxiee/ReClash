@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter/foundation.dart';
 
 /// Keeps two processes off one data directory. Raising the running window is
 /// the platform's job: LaunchServices reopen, GApplication activation, or the

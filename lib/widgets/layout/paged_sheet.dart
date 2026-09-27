@@ -1,8 +1,8 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:navigator_resizable/navigator_resizable.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/widgets/base/inherited.dart';
 import 'package:reclash/widgets/layout/sheet.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:navigator_resizable/navigator_resizable.dart';
 
 Color _sheetColorOf(BuildContext context) {
   return SheetProvider.of(context)?.type == SheetType.bottomSheet

@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:reclash/common/storage/cache.dart';
-import 'package:reclash/common/common.dart';
-import 'package:reclash/database/database.dart';
-import 'package:reclash/plugins/app.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/common/storage/cache.dart';
+import 'package:reclash/database/database.dart';
+import 'package:reclash/plugins/app.dart';
 
 const _maxDecodedIcons = 64;
 const _assetSourcePrefix = 'asset:';

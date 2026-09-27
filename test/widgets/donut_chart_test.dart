@@ -1,6 +1,6 @@
-import 'package:reclash/widgets/chart/donut_chart.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/widgets/chart/donut_chart.dart';
 
 import '../helpers/test_app.dart';
 

@@ -1,14 +1,14 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/icons/icons.dart';
-import '../../helpers/glyph_finders.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_details_tab.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_overview.dart';
 import 'package:reclash/views/dashboard/widgets/routing/routing_ranking_tab.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_app.dart';
 
 const _report = RcxReport(

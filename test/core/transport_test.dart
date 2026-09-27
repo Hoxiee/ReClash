@@ -1,5 +1,5 @@
-import 'package:reclash/common/util/constant.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/util/constant.dart';
 
 void main() {
   test('Windows Core pipe uses a 128-bit random suffix', () {

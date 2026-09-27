@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/models/companion.dart';
-import 'package:flutter/services.dart';
 
 // Typed facades over the two native method channels: the TV receiver (enable/pair/approve/revoke)
 // and the phone client (scan/pair/poll/forget). No token or secret crosses these boundaries in a

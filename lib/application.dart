@@ -3,20 +3,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/desktop/window.dart';
-import 'package:reclash/enum/enum.dart';
-import 'package:reclash/bootstrap.dart';
 import 'package:reclash/common/net/system_dns.dart';
+import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/manager/hotkey_manager.dart';
 import 'package:reclash/manager/manager.dart';
 import 'package:reclash/plugins/app.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'views/views.dart';
 

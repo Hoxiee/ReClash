@@ -1,6 +1,6 @@
-import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:reclash/common/common.dart';
 
 /// Telegram-style QR: connected corner-rounded modules over a theme gradient.
 /// Always encoded at level H so the blanked region under [logo] stays decodable.

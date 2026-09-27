@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter/foundation.dart';
 
 List<CoreEvent> coreEventsFromData(Object? data) {
   final items = data is List ? data : [data];

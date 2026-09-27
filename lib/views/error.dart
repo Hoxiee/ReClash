@@ -1,9 +1,9 @@
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/ui/color.dart';
-import 'package:reclash/icons/icons.dart';
 import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/common/ui/spacing.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
+import 'package:reclash/icons/icons.dart';
 
 class InitErrorScreen extends StatelessWidget {
   final Object error;

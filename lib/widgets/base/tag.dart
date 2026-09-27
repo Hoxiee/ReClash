@@ -1,5 +1,5 @@
-import 'package:reclash/common/common.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
 
 /// The app's single small labelled tag: colour is caller-supplied (it carries
 /// role/tone/level meaning) while the chrome is fixed so tags read as one family.

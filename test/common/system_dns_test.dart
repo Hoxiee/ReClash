@@ -1,5 +1,5 @@
-import 'package:reclash/common/net/system_dns.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/net/system_dns.dart';
 
 class _FakePort implements SystemDnsPort {
   _FakePort({List<String>? servers}) : servers = servers ?? ['1.1.1.1'];

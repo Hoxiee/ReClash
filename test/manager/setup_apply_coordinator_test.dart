@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/manager/setup_apply_coordinator.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/manager/setup_apply_coordinator.dart';
 
 void main() {
   test('applies without a frame, purely on the event loop', () async {

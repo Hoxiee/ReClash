@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('profile and script generated data classes preserve all fields', () {

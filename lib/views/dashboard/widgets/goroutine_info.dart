@@ -1,15 +1,15 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
-import 'package:reclash/icons/icons.dart';
 import 'package:reclash/core/controller.dart';
 import 'package:reclash/core/method.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/core.dart';
+import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/views/dashboard/widgets/dashboard_info_card.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:reclash/views/dashboard/widget_metrics.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GoroutineInfo extends ConsumerStatefulWidget {
   final Future<int> Function()? countReader;

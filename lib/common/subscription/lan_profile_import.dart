@@ -5,8 +5,8 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/net/network.dart';
-import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/common/subscription/subscription_import.dart';
+import 'package:reclash/common/ui/shape.dart';
 import 'package:reclash/l10n/l10n.dart';
 
 const lanProfileImportBodyLimit = 8192;

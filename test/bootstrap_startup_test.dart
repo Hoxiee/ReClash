@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:reclash/bootstrap.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/bootstrap.dart';
 
 void main() {
   group('StartupCoordinator', () {

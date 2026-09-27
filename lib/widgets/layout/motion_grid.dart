@@ -1,7 +1,7 @@
-import 'package:reclash/common/common.dart';
-import 'package:reclash/widgets/layout/grid.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:reclash/common/common.dart';
+import 'package:reclash/widgets/layout/grid.dart';
 
 /// A [Grid] whose children glide to their new slot whenever the layout moves
 /// them, and fade out in place when they leave.

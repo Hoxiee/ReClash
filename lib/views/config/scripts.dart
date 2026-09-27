@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'package:reclash/icons/icons.dart';
 import 'dart:io';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/models.dart';
-import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/providers/app.dart';
 import 'package:reclash/providers/database.dart';
+import 'package:reclash/views/config/editor.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ScriptsView extends ConsumerStatefulWidget {
   const ScriptsView({super.key});

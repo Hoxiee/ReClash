@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 
-import 'print.dart';
 import '../config/protocol.dart';
+import 'print.dart';
 
 typedef IncomingLinkCallback = void Function(Uri uri);
 

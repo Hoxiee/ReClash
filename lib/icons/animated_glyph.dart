@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/icons/glyph.dart';
 import 'package:reclash/icons/glyph_icon.dart';
-import 'package:material_ui/material_ui.dart';
 
 const _fillDuration = Duration(milliseconds: 350);
 const _popScale = 0.1;

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reclash/common/net/doh.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/common/net/doh.dart';
 
 String _answer(String data, {int type = 1, int ttl = 300}) => json.encode({
   'Status': 0,

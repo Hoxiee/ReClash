@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/config.dart';
@@ -5,12 +7,10 @@ import 'package:reclash/views/config/desync.dart';
 import 'package:reclash/views/config/dns.dart';
 import 'package:reclash/views/config/network.dart';
 import 'package:reclash/views/config/ntp.dart';
+import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/views/config/smart_pause.dart';
 import 'package:reclash/views/config/smart_routing.dart';
-import 'package:reclash/views/config/scripts.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'rules.dart';
 

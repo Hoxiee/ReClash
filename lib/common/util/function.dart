@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
-import 'package:flutter/foundation.dart';
 
 void _applyAndReport(dynamic tag, Function func, List<dynamic>? args) {
   void report(Object error, StackTrace stackTrace) {

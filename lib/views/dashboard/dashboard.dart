@@ -1,22 +1,22 @@
 import 'package:defer_pointer/defer_pointer.dart';
-import 'package:reclash/icons/icons.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/core/core.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
-import 'package:reclash/widgets/widgets.dart';
 import 'package:reclash/widgets/theme/wallpaper.dart';
 import 'package:reclash/widgets/theme/wallpaper_scope.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:reclash/widgets/widgets.dart';
 
 import 'widget_metrics.dart';
 import 'widget_registry.dart';
 import 'widgets/connection_mode.dart';
-import 'widgets/dashboard_pager.dart';
-import 'widgets/seasonal_overlay.dart';
-import 'widgets/provider_effect_overlay.dart';
 import 'widgets/core_status_button.dart';
+import 'widgets/dashboard_pager.dart';
+import 'widgets/provider_effect_overlay.dart';
+import 'widgets/seasonal_overlay.dart';
 
 typedef _IsEditWidgetBuilder = Widget Function(bool isEdit);
 

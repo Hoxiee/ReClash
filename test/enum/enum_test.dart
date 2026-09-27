@@ -1,6 +1,6 @@
-import 'package:reclash/enum/enum.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reclash/enum/enum.dart';
 
 void main() {
   group('GroupType', () {

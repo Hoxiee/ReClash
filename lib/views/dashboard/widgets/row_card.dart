@@ -1,10 +1,10 @@
 import 'dart:math';
 
+import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/dashboard/widget_metrics.dart';
 import 'package:reclash/widgets/widgets.dart';
-import 'package:material_ui/material_ui.dart';
 
 const _rowGap = 8.0;
 const _rowSpacing = 4.0;

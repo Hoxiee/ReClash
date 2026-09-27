@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/message_lookup_by_library.dart';
 import 'package:reclash/l10n/intl/messages_en.dart' as messages_en;
 import 'package:reclash/l10n/intl/messages_ja.dart' as messages_ja;
 import 'package:reclash/l10n/intl/messages_kk.dart' as messages_kk;
 import 'package:reclash/l10n/intl/messages_ko.dart' as messages_ko;
+import 'package:reclash/l10n/intl/messages_ru.dart' as messages_ru;
 import 'package:reclash/l10n/intl/messages_tk.dart' as messages_tk;
 import 'package:reclash/l10n/intl/messages_uz.dart' as messages_uz;
-import 'package:reclash/l10n/intl/messages_ru.dart' as messages_ru;
 import 'package:reclash/l10n/intl/messages_zh_CN.dart' as messages_zh_cn;
-import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/message_lookup_by_library.dart';
 
 void main() {
   final lookups = <String, MessageLookupByLibrary>{

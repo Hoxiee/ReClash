@@ -1,7 +1,7 @@
-import 'package:reclash/common/desktop/launch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
+import 'package:reclash/common/desktop/launch.dart';
 
 class _FakeLauncher implements LaunchAtStartup {
   bool enabled = false;

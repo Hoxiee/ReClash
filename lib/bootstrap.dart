@@ -2,17 +2,22 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_color_utilities/palettes/tonal_palette.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:reclash/common/app/boot_guard.dart';
 import 'package:reclash/common/app/boot_record.dart';
+import 'package:reclash/common/app/migration.dart';
+import 'package:reclash/common/app/permission.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/common/companion/companion_bridge.dart';
 import 'package:reclash/common/companion/companion_gate_probe.dart';
 import 'package:reclash/common/desktop/launch.dart';
-import 'package:reclash/common/app/migration.dart';
-import 'package:reclash/common/app/permission.dart';
-import 'package:reclash/common/subscription/subscription_reminder.dart';
 import 'package:reclash/common/desktop/tray.dart';
 import 'package:reclash/common/desktop/window.dart';
+import 'package:reclash/common/subscription/subscription_reminder.dart';
 import 'package:reclash/database/database.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/l10n/l10n.dart';
@@ -22,11 +27,6 @@ import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/settings/navigation.dart';
 import 'package:reclash/views/views.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_color_utilities/palettes/tonal_palette.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 enum StartupOutcome { completed, exitRequested }
 
