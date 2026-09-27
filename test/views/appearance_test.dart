@@ -346,15 +346,14 @@ void main() {
   group('pure black', () {
     testWidgets('toggles both ways', (tester) async {
       await pumpAppearanceView(tester);
-      final toggle = switchOf('Pure black mode');
 
       expect(readTheme().pureBlack, isFalse);
 
-      await tester.tap(toggle);
+      await tester.tap(find.text('Pure black'));
       await tester.pumpAndSettle();
       expect(readTheme().pureBlack, isTrue);
 
-      await tester.tap(toggle);
+      await tester.tap(find.text('Standard'));
       await tester.pumpAndSettle();
       expect(readTheme().pureBlack, isFalse);
     });
@@ -380,30 +379,31 @@ void main() {
   });
 
   group('text scale', () {
-    testWidgets('hides the slider until its toggle is enabled', (tester) async {
+    Finder scaleSlider() =>
+        find.byWidgetPredicate((w) => w is Slider && w.min == minTextScale);
+
+    testWidgets('keeps the slider inert until custom scaling is chosen', (
+      tester,
+    ) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Other');
 
       expect(readTheme().textScale.enable, isFalse);
-      expect(find.byType(Slider), findsNothing);
+      expect(tester.widget<Slider>(scaleSlider()).onChanged, isNull);
 
-      await tester.tap(switchOf('Text scaling'));
+      await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.enable, isTrue);
-      expect(find.byType(Slider), findsOneWidget);
+      expect(tester.widget<Slider>(scaleSlider()).onChanged, isNotNull);
     });
 
     testWidgets('the slider writes a new scale once enabled', (tester) async {
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Other');
-      await tester.tap(switchOf('Text scaling'));
+      await tester.tap(find.text('Custom'));
       await tester.pumpAndSettle();
       final before = readTheme().textScale.scale;
 
-      final slider = find.byType(Slider);
-      expect(slider, findsOneWidget);
-      await tester.drag(slider, const Offset(120, 0));
+      await tester.drag(scaleSlider(), const Offset(120, 0));
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.scale, isNot(before));
@@ -417,7 +417,6 @@ void main() {
           );
 
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Other');
 
       expect(find.text('120%'), findsOneWidget);
     });
@@ -430,8 +429,7 @@ void main() {
           );
 
       await pumpAppearanceView(tester);
-      await openTab(tester, 'Other');
-      await tester.tap(find.byGlyph(AppGlyphs.replay));
+      await tester.tap(find.byGlyph(AppGlyphs.reset));
       await tester.pumpAndSettle();
 
       expect(readTheme().textScale.scale, 1);

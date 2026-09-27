@@ -1367,6 +1367,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("Relics"),
     "followProfile": MessageLookupByLibrary.simpleMessage("Follow profile"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Follow system"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Font family"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to force restart the core?",
@@ -2345,6 +2346,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proxy type"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Prune cache"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Pure black"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Pure black mode"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "Scanning QR codes isn\'t supported on this device.",
@@ -3977,6 +3979,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("Test URL"),
     "testWhenUsed": MessageLookupByLibrary.simpleMessage("Test when used"),
     "textScale": MessageLookupByLibrary.simpleMessage("Text scaling"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "This is how text will look",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Theme"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Theme color"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

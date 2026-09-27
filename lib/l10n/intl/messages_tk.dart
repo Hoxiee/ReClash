@@ -1432,6 +1432,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("Ýadygärlikler"),
     "followProfile": MessageLookupByLibrary.simpleMessage("Profile laýyk"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Ulgama görä"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Şrift maşgalasy"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Çekirdegi zorlap täzeden işletmek isleýärsiňizmi?",
@@ -2442,6 +2443,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proksiniň görnüşi"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Keşi arassala"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Doly gara"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Doly gara usuly"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "Bu enjamda QR kodlary skanirlemek goldanylmaýar.",
@@ -4128,6 +4130,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("Synag URL"),
     "testWhenUsed": MessageLookupByLibrary.simpleMessage("Ulananda synag"),
     "textScale": MessageLookupByLibrary.simpleMessage("Tekstiň ululygy"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Tekst şeýle görner",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Tema"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Tema reňki"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

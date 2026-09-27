@@ -1147,6 +1147,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("유물"),
     "followProfile": MessageLookupByLibrary.simpleMessage("프로필 따르기"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("시스템 설정 따름"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("글꼴"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "코어를 강제로 다시 시작하시겠습니까?",
@@ -1965,6 +1966,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("프록시 유형"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("캐시 정리"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("퓨어 블랙"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("퓨어 블랙 모드"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "이 기기에서는 QR 코드 스캔을 지원하지 않습니다.",
@@ -3315,6 +3317,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("테스트 URL"),
     "testWhenUsed": MessageLookupByLibrary.simpleMessage("사용 시 테스트"),
     "textScale": MessageLookupByLibrary.simpleMessage("텍스트 배율"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage("텍스트가 이렇게 표시됩니다"),
     "theme": MessageLookupByLibrary.simpleMessage("테마"),
     "themeColor": MessageLookupByLibrary.simpleMessage("테마 색상"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("다크 모드와 색상을 설정합니다"),

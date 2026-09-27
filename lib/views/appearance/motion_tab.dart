@@ -30,9 +30,6 @@ class AppearanceMotionTab extends ConsumerWidget {
     );
     final milestones = ref.watch(milestoneSettingProvider);
     final newDashboard = ref.watch(newDashboardEnabledProvider);
-    final textScale = ref.watch(
-      themeSettingProvider.select((state) => state.textScale),
-    );
     return SettingsScrollView(
       slivers: [
         SettingSection.sliver(
@@ -73,29 +70,6 @@ class AppearanceMotionTab extends ConsumerWidget {
                 ],
               ),
             ),
-          ],
-        ),
-        SettingSection.sliver(
-          items: [
-            DecorationListItem.toggle(
-              leading: const GlyphIcon(AppGlyphs.textShort),
-              title: Text(appLocalizations.textScale),
-              value: textScale.enable,
-              onChanged: (value) => ref
-                  .read(themeSettingProvider.notifier)
-                  .update((state) => state.copyWith.textScale(enable: value)),
-            ),
-            if (textScale.enable)
-              SettingSliderItem(
-                valueLabel: '${(textScale.scale * 100).round()}%',
-                min: minTextScale,
-                max: maxTextScale,
-                value: textScale.scale,
-                resetValue: 1,
-                onChanged: (value) => ref
-                    .read(themeSettingProvider.notifier)
-                    .update((state) => state.copyWith.textScale(scale: value)),
-              ),
           ],
         ),
         SettingSection.sliver(

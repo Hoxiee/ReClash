@@ -3320,6 +3320,31 @@ class AppLocalizations {
     return Intl.message('Standard', name: 'standard', desc: '', args: []);
   }
 
+  /// `Pure black`
+  String get pureBlack {
+    return Intl.message('Pure black', name: 'pureBlack', desc: '', args: []);
+  }
+
+  /// `Follow system`
+  String get followSystem {
+    return Intl.message(
+      'Follow system',
+      name: 'followSystem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is how text will look`
+  String get textScalePreview {
+    return Intl.message(
+      'This is how text will look',
+      name: 'textScalePreview',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Loose`
   String get loose {
     return Intl.message('Loose', name: 'loose', desc: '', args: []);

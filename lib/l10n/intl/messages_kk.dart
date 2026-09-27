@@ -1423,6 +1423,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("Жәдігерлер"),
     "followProfile": MessageLookupByLibrary.simpleMessage("Профиль бойынша"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Жүйе бойынша"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Қаріп отбасы"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Ядро мәжбүрлеп қайта іске қосылсын ба?",
@@ -2443,6 +2444,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Прокси түрі"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Кэшті тазарту"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Таза қара"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Таза қара режим"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "Бұл құрылғыда QR-кодтарды сканерлеуге қолдау көрсетілмейді.",
@@ -4135,6 +4137,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Қолданған кезде сынау",
     ),
     "textScale": MessageLookupByLibrary.simpleMessage("Мәтін масштабы"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Мәтін осылай көрінеді",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Тақырып"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Тақырып түсі"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

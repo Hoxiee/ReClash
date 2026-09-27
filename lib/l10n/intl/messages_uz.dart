@@ -1456,6 +1456,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("Yodgorliklar"),
     "followProfile": MessageLookupByLibrary.simpleMessage("Profildagidek"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Tizim boʻyicha"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Shrift turi"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Yadro majburan qayta ishga tushirilsinmi?",
@@ -2504,6 +2505,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Proksi turi"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Keshni tozalash"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Toʻliq qora"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("Toʻliq qora rejim"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "Bu qurilmada QR kodlarni skanerlash qo\'llab-quvvatlanmaydi.",
@@ -4234,6 +4236,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Ishlatilganda sinash",
     ),
     "textScale": MessageLookupByLibrary.simpleMessage("Matn oʻlchami"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Matn shunday koʻrinadi",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Mavzu"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Mavzu rangi"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

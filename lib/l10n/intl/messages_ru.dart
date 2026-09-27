@@ -1421,6 +1421,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("Реликвии"),
     "followProfile": MessageLookupByLibrary.simpleMessage("Как в профиле"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("Как в системе"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("Шрифт"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "Принудительно перезапустить ядро?",
@@ -2443,6 +2444,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("Тип прокси"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("Очистить кэш"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("Истинно чёрный"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage(
       "Истинно чёрный режим",
     ),
@@ -4147,6 +4149,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Тестировать при использовании",
     ),
     "textScale": MessageLookupByLibrary.simpleMessage("Масштаб текста"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "Так будет выглядеть текст",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("Тема"),
     "themeColor": MessageLookupByLibrary.simpleMessage("Цвет темы"),
     "themeDesc": MessageLookupByLibrary.simpleMessage(

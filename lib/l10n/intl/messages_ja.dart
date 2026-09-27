@@ -1156,6 +1156,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "findingsNextMilestone": m38,
     "findingsRelics": MessageLookupByLibrary.simpleMessage("遺物"),
     "followProfile": MessageLookupByLibrary.simpleMessage("プロファイルに従う"),
+    "followSystem": MessageLookupByLibrary.simpleMessage("システムに従う"),
     "fontFamily": MessageLookupByLibrary.simpleMessage("フォント"),
     "forceRestartCoreTip": MessageLookupByLibrary.simpleMessage(
       "コアを強制再起動してもよろしいですか？",
@@ -1984,6 +1985,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "proxyType": MessageLookupByLibrary.simpleMessage("プロキシタイプ"),
     "pruneCache": MessageLookupByLibrary.simpleMessage("キャッシュを整理"),
+    "pureBlack": MessageLookupByLibrary.simpleMessage("ピュアブラック"),
     "pureBlackMode": MessageLookupByLibrary.simpleMessage("ピュアブラックモード"),
     "qrScanUnsupported": MessageLookupByLibrary.simpleMessage(
       "このデバイスではQRコードのスキャンに対応していません。",
@@ -3342,6 +3344,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "testUrl": MessageLookupByLibrary.simpleMessage("テストURL"),
     "testWhenUsed": MessageLookupByLibrary.simpleMessage("使用時にテスト"),
     "textScale": MessageLookupByLibrary.simpleMessage("テキストの拡大縮小"),
+    "textScalePreview": MessageLookupByLibrary.simpleMessage(
+      "テキストはこのように表示されます",
+    ),
     "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
     "themeColor": MessageLookupByLibrary.simpleMessage("テーマカラー"),
     "themeDesc": MessageLookupByLibrary.simpleMessage("ダークモードの設定と色の調整"),
