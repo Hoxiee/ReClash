@@ -26,13 +26,10 @@ class ClientPresetSelector extends StatelessWidget {
     final chips = [
       for (final client in SubscriptionClient.values)
         TvFocusOutline(
-          child: ChoiceChip(
-            label: Text(subscriptionClientLabel(client, appLocalizations)),
+          child: CommonChoiceChip(
+            label: subscriptionClientLabel(client, appLocalizations),
             selected: selected == client,
-            onSelected: (_) => onChanged(client),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            side: BorderSide(color: Theme.of(context).dividerColor.opacity15),
-            labelStyle: Theme.of(context).textTheme.bodyMedium,
+            onSelected: () => onChanged(client),
           ),
         ),
     ];

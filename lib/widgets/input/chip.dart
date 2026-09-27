@@ -74,6 +74,64 @@ class CommonChip extends StatelessWidget {
   }
 }
 
+class CommonChoiceChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+  final Glyph? icon;
+
+  const CommonChoiceChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final foregroundColor = selected
+        ? colorScheme.onSecondaryContainer
+        : colorScheme.onSurfaceVariant;
+    return Material(
+      animationDuration: context.motionDuration(commonDuration),
+      color: selected
+          ? colorScheme.secondaryContainer
+          : colorScheme.surfaceContainerHighest,
+      shape: AppShape.full.copyWith(
+        side: BorderSide(
+          color: selected ? Colors.transparent : colorScheme.outlineVariant,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onSelected,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 6,
+            children: [
+              if (icon != null)
+                GlyphIcon(icon!, size: 15, color: foregroundColor),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.labelLarge?.copyWith(
+                  color: foregroundColor,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class MetaChip extends StatelessWidget {
   final String label;
 
