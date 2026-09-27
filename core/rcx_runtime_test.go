@@ -113,32 +113,6 @@ func TestMmdbGuardIsSpacedOutButNotAnsweredOnce(t *testing.T) {
 	}
 }
 
-func TestNodeKeyIgnoresTheNameAndSeparatesSharedEndpoints(t *testing.T) {
-	stable := rcxNodeKey("Vless", "nl-1.example:443", "")
-	if renamed := rcxNodeKey("Vless", "nl-1.example:443", ""); renamed != stable {
-		t.Errorf("key = %q, want %q: a display name must not be part of the identity", renamed, stable)
-	}
-	if moved := rcxNodeKey("Vless", "nl-1.example:8443", ""); moved == stable {
-		t.Error("two ports on one host share a key: they are separate egresses")
-	}
-	if nested := rcxNodeKey("Selector", "", ""); nested != "" {
-		t.Errorf("key = %q for a node with no endpoint, want the name to take over", nested)
-	}
-
-	members := rcxSeparateCollisions([]rcx.Member{
-		{Name: "account-a", ID: stable},
-		{Name: "account-b", ID: stable},
-		{Name: "alone", ID: rcxNodeKey("Vless", "de-1.example:443", "")},
-	})
-
-	if members[0].ID != "" || members[1].ID != "" {
-		t.Error("two accounts on one endpoint kept one key: their measurements would pool")
-	}
-	if members[2].ID == "" {
-		t.Error("an uncontested endpoint lost its key")
-	}
-}
-
 func rcxClosedServerURL(t *testing.T) string {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
@@ -184,7 +158,7 @@ func TestHostDelayTreatsAForeignFailureAsSilence(t *testing.T) {
 		t.Fatal("the setup needs the node to fail under the foreign URL")
 	}
 
-	if _, dead := rcxHostDelay(node, ours); dead {
+	if _, dead, _ := rcxHostDelayInfo(node, ours); dead {
 		t.Error("a failure under another test URL condemned the node: mihomo's global alive flag is not a record under ours")
 	}
 }
@@ -197,14 +171,14 @@ func TestHostDelayCondemnsOnlyUnderItsOwnURL(t *testing.T) {
 	if _, err := node.URLTest(context.Background(), ours, nil); err == nil {
 		t.Fatal("the setup needs the node to fail under our own URL")
 	}
-	if _, dead := rcxHostDelay(node, ours); !dead {
+	if _, dead, _ := rcxHostDelayInfo(node, ours); !dead {
 		t.Error("a failed record under our own URL must stay a verdict")
 	}
 
 	if _, err := node.URLTest(context.Background(), foreign, nil); err != nil {
 		t.Fatalf("the node must answer under the foreign URL: %v", err)
 	}
-	if _, dead := rcxHostDelay(node, ours); !dead {
+	if _, dead, _ := rcxHostDelayInfo(node, ours); !dead {
 		t.Error("a foreign success masked the failed record under our URL")
 	}
 }

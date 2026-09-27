@@ -78,14 +78,6 @@ void main() {
     });
   });
 
-  group('StringExtension.compareToLower', () {
-    test('case insensitive comparison', () {
-      expect('abc'.compareToLower('ABC'), 0);
-      expect('a'.compareToLower('b'), lessThan(0));
-      expect('b'.compareToLower('a'), greaterThan(0));
-    });
-  });
-
   group('StringExtension.safeSubstring', () {
     test('returns empty for empty string', () {
       expect(''.safeSubstring(0), '');
@@ -130,18 +122,6 @@ void main() {
       expect('icon.svg'.isSvg, isTrue);
       expect('icon.PNG'.isSvg, isFalse);
       expect('icon.svg.bak'.isSvg, isFalse);
-    });
-  });
-
-  group('StringExtension.isRegex', () {
-    test('valid regex', () {
-      expect(r'\d+'.isRegex, isTrue);
-      expect(r'[a-z]+'.isRegex, isTrue);
-    });
-
-    test('invalid regex', () {
-      expect(r'['.isRegex, isFalse);
-      expect(r'(unclosed'.isRegex, isFalse);
     });
   });
 

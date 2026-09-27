@@ -66,10 +66,6 @@ extension StringExtension on String {
     return parts.length > 1 ? parts : this;
   }
 
-  int compareToLower(String other) {
-    return toLowerCase().compareTo(other.toLowerCase());
-  }
-
   String safeSubstring(int start, [int? end]) {
     if (isEmpty) return '';
     final safeStart = start.clamp(0, length);
@@ -110,16 +106,6 @@ extension StringExtension on String {
 
   bool get isSvg {
     return endsWith('.svg');
-  }
-
-  bool get isRegex {
-    try {
-      RegExp(this);
-      return true;
-    } catch (error) {
-      commonPrint.log(error.toString());
-      return false;
-    }
   }
 
   String toMd5() {

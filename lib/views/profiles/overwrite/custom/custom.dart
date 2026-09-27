@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:reclash/common/common.dart';
@@ -86,8 +85,7 @@ class CustomContent extends ConsumerWidget {
         ),
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxxl)),
         if ((proxyGroupNum == 0 && hasDefaultGroups) ||
-            (ruleNum == 0 && hasDefaultRules) ||
-            kDebugMode)
+            (ruleNum == 0 && hasDefaultRules))
           SliverFillRemaining(
             hasScrollBody: false,
             child: _QuickFillBanner(

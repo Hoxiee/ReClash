@@ -97,24 +97,6 @@ void main() {
     });
   });
 
-  group('ListExt.batch', () {
-    test('splits into batches', () {
-      final result = [1, 2, 3, 4, 5].batch(2);
-      expect(result, [
-        [1, 2],
-        [3, 4],
-        [5],
-      ]);
-    });
-
-    test('single batch when size >= length', () {
-      final result = [1, 2].batch(5);
-      expect(result, [
-        [1, 2],
-      ]);
-    });
-  });
-
   group('ListExt.copyAndPut', () {
     test('replaces matching element', () {
       final result = [1, 2, 3].copyAndPut(99, (e) => e == 2);

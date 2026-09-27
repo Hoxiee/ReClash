@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -184,11 +182,6 @@ func (rcxCoreRuntime) Members() []rcx.Member {
 // The delay test the user runs by hand already covers the whole park, which no
 // probe budget can. A missing entry is silence, not a verdict: mihomo folds
 // every test URL into one global alive flag, so only a record here condemns.
-func rcxHostDelay(node constant.Proxy, url string) (int, bool) {
-	delay, dead, _ := rcxHostDelayInfo(node, url)
-	return delay, dead
-}
-
 func rcxHostDelayInfo(node constant.Proxy, url string) (int, bool, time.Time) {
 	state, recorded := node.ExtraDelayHistories()[url]
 	if !node.AliveForTestUrl(url) {
@@ -210,32 +203,6 @@ func rcxHostDelayValue(delay uint16) (int, bool) {
 		return 0, false
 	}
 	return int(delay), false
-}
-
-// A refresh renames the whole park, and a name-keyed identity loses every proof.
-func rcxNodeKey(kind, address, salt string) string {
-	host := rcx.HostOf(address)
-	if host == "" {
-		return ""
-	}
-	sum := sha1.Sum([]byte(kind + "|" + host + "|" + strconv.Itoa(rcxPortOf(address)) + "|" + salt))
-	return hex.EncodeToString(sum[:])[:12]
-}
-
-// Two accounts on one endpoint are one key, which would pool their measurements.
-func rcxSeparateCollisions(members []rcx.Member) []rcx.Member {
-	seen := make(map[string]int, len(members))
-	for _, member := range members {
-		if member.ID != "" {
-			seen[member.ID]++
-		}
-	}
-	for i := range members {
-		if members[i].ID != "" && seen[members[i].ID] > 1 {
-			members[i].ID = ""
-		}
-	}
-	return members
 }
 
 func rcxPortOf(address string) int {

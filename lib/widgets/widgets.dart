@@ -11,7 +11,6 @@ export 'base/tag.dart';
 export 'base/text.dart';
 export 'chart/donut_chart.dart';
 export 'chart/line_chart.dart';
-export 'chart/wave.dart';
 export 'effect/animated_visibility.dart';
 export 'effect/dismissible.dart';
 export 'effect/effect.dart';
