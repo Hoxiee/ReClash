@@ -161,12 +161,12 @@ class Request {
         );
         currentUri = nextUri;
       }
-    } catch (e) {
-      if (e is DioException && receivedResponse) {
-        e.requestOptions.extra['subscriptionReceivedResponse'] = true;
+    } catch (error) {
+      if (error is DioException && receivedResponse) {
+        error.requestOptions.extra['subscriptionReceivedResponse'] = true;
       }
       commonPrint.log(
-        'getFileResponseForUrl error ${compactError(e)}',
+        'getFileResponseForUrl error ${compactError(error)}',
         logLevel: LogLevel.warning,
       );
       rethrow;
@@ -179,9 +179,9 @@ class Request {
         url,
         options: Options(responseType: ResponseType.plain),
       );
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getTextResponseForUrl error ${compactError(e)}',
+        'getTextResponseForUrl error ${compactError(error)}',
         logLevel: LogLevel.warning,
       );
       rethrow;
@@ -203,7 +203,7 @@ class Request {
       );
       if (!hasUpdate) return null;
       return data;
-    } catch (e) {
+    } catch (error) {
       commonPrint.log('checkForUpdate failed', logLevel: LogLevel.warning);
       return null;
     }

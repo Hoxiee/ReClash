@@ -93,23 +93,23 @@ class ProxiesAction extends _$ProxiesAction {
               delayMap: delayMap,
               defaultTestUrl: testUrl,
             );
-          } catch (e) {
+          } catch (error) {
             commonPrint.log(
-              'updateGroups error: $e',
-              logLevel: coreFailureLogLevel(e),
+              'updateGroups error: $error',
+              logLevel: coreFailureLogLevel(error),
             );
             return [];
           }
         },
         retryIf: (res) => res.isEmpty,
       );
-    } catch (e) {
+    } catch (error) {
       // The Core failure path already runs inside the retry task above; a
       // throw here only means ref.read hit a disposed container or the
       // groupsProvider write itself failed.
       commonPrint.log(
-        'updateGroups failed: $e',
-        logLevel: coreFailureLogLevel(e),
+        'updateGroups failed: $error',
+        logLevel: coreFailureLogLevel(error),
       );
     }
   }

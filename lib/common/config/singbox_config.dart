@@ -55,8 +55,8 @@ SingboxConfigResult? tryConvertSingboxConfig(String body) {
     final Map<String, Object?>? proxy;
     try {
       proxy = _convertOutbound(outbound);
-    } on _UnsupportedOutbound catch (e) {
-      skipped.add(e.node);
+    } on _UnsupportedOutbound catch (error) {
+      skipped.add(error.node);
       continue;
     }
     if (proxy == null) continue;

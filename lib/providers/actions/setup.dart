@@ -81,8 +81,8 @@ class SetupAction extends _$SetupAction {
     ref.read(requestCountProvider.notifier).value = 0;
     try {
       return await setupResult;
-    } catch (e, s) {
-      commonPrint.log('fullSetup ===> ${compactError(e)}, $s');
+    } catch (error, stackTrace) {
+      commonPrint.log('fullSetup ===> ${compactError(error)}, $stackTrace');
       return false;
     }
   }
@@ -555,8 +555,8 @@ class SetupAction extends _$SetupAction {
         patchConfig: patchClashConfig,
       );
       return res.yaml;
-    } catch (e) {
-      dialogs.showNotifier(e.toString(), level: MessageLevel.error);
+    } catch (error) {
+      dialogs.showNotifier(error.toString(), level: MessageLevel.error);
     }
     return '';
   }
@@ -836,10 +836,10 @@ class SetupAction extends _$SetupAction {
           if (message.isNotEmpty) {
             throw MessageException(message);
           }
-        } catch (e, s) {
+        } catch (error, stackTrace) {
           setupFailed = true;
           if (preloadInvoke != null) {
-            handoffFailure = (e, s);
+            handoffFailure = (error, stackTrace);
           }
           rethrow;
         }

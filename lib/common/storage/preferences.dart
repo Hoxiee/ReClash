@@ -58,9 +58,9 @@ class Preferences {
       if (configString == null) return null;
       final Map<String, Object?>? configMap = json.decode(configString);
       return configMap;
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getConfigMap error ${e.toString()}',
+        'getConfigMap error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -73,9 +73,9 @@ class Preferences {
       final clashConfigString = preferences?.getString(clashConfigKey);
       if (clashConfigString == null) return null;
       return json.decode(clashConfigString);
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getClashConfigMap error ${e.toString()}',
+        'getClashConfigMap error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -87,9 +87,9 @@ class Preferences {
       final preferences = await sharedPreferencesCompleter.future;
       await preferences?.remove(clashConfigKey);
       return;
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'clearClashConfig error ${e.toString()}',
+        'clearClashConfig error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return;
@@ -117,9 +117,9 @@ class Preferences {
         return null;
       }
       return SystemDnsRecord.fromJson(json.decode(raw));
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getSystemDnsRecord error ${e.toString()}',
+        'getSystemDnsRecord error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -147,9 +147,9 @@ class Preferences {
         return null;
       }
       return BootRecord.fromJson(json.decode(raw));
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getBootRecord error ${e.toString()}',
+        'getBootRecord error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return null;
@@ -169,9 +169,9 @@ class Preferences {
         return const SubscriptionNoticeRecord();
       }
       return SubscriptionNoticeRecord.fromJson(json.decode(raw));
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getSubscriptionNoticeRecord error ${e.toString()}',
+        'getSubscriptionNoticeRecord error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return const SubscriptionNoticeRecord();
@@ -196,9 +196,9 @@ class Preferences {
         return const SubscriptionHostRecord();
       }
       return SubscriptionHostRecord.fromJson(json.decode(raw));
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getSubscriptionHostRecord error ${e.toString()}',
+        'getSubscriptionHostRecord error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return const SubscriptionHostRecord();
@@ -226,9 +226,9 @@ class Preferences {
       final raw = sharedPreferencesIns?.getString(subscriptionUpdateReportKey);
       if (raw == null) return null;
       return SubscriptionUpdateReport.fromJson(json.decode(raw));
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'getSubscriptionUpdateReport error ${e.toString()}',
+        'getSubscriptionUpdateReport error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return null;

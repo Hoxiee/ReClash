@@ -21,9 +21,9 @@ class DAVClient {
     try {
       await client.options('/');
       return true;
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'dav ping error ${e.toString()}',
+        'dav ping error ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return false;

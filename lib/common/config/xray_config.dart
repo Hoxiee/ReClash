@@ -104,8 +104,8 @@ XrayConfigResult? tryConvertXrayConfig(String body) {
       final Map<String, Object?>? proxy;
       try {
         proxy = _convertOutbound(outbound, fallbackName: remarks);
-      } on _UnsupportedOutbound catch (e) {
-        recordSkipped(e.node);
+      } on _UnsupportedOutbound catch (error) {
+        recordSkipped(error.node);
         continue;
       }
       if (proxy == null) continue;

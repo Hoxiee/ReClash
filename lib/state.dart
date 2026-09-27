@@ -88,14 +88,14 @@ class GlobalState {
     try {
       onStart?.call();
       return await futureFunction();
-    } catch (e, s) {
+    } catch (error, stackTrace) {
       commonPrint.log(
         title == null
-            ? '${compactError(e)}, $s'
-            : '$title ===> ${compactError(e)}, $s',
+            ? '${compactError(error)}, $stackTrace'
+            : '$title ===> ${compactError(error)}, $stackTrace',
         logLevel: LogLevel.warning,
       );
-      final message = userFacingErrorMessage(e, currentAppLocalizations);
+      final message = userFacingErrorMessage(error, currentAppLocalizations);
       if (silence) {
         dialogs.showNotifier(message, level: MessageLevel.error);
       } else {

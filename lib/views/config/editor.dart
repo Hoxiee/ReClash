@@ -159,13 +159,13 @@ class _EditorPageState extends ConsumerState<EditorPage> {
         return;
       }
       _controller.text = res.data ?? '';
-    } catch (e) {
+    } catch (error) {
       if (!mounted) {
         return;
       }
       final appLocalizations = context.appLocalizations;
       context.showSnackBar(
-        networkErrorMessage(e, appLocalizations) ??
+        networkErrorMessage(error, appLocalizations) ??
             appLocalizations.unknownNetworkError,
       );
     }

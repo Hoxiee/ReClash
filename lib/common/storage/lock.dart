@@ -29,11 +29,11 @@ class SingleInstanceLock {
       _accessFile = await lockFile.open(mode: FileMode.write);
       await _accessFile?.lock();
       return true;
-    } catch (e) {
+    } catch (error) {
       await _accessFile?.close();
       _accessFile = null;
       commonPrint.log(
-        'single instance lock acquire failed ${e.toString()}',
+        'single instance lock acquire failed ${error.toString()}',
         logLevel: LogLevel.warning,
       );
       return false;

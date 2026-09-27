@@ -112,8 +112,8 @@ List<SkippedNode> probeUnsupportedShareLinks(String raw) {
           continue;
         }
         addProxy(_parseUri(trimmed));
-      } on _UnsupportedLink catch (e) {
-        skipped.add(e.node);
+      } on _UnsupportedLink catch (error) {
+        skipped.add(error.node);
       } catch (_) {
         continue;
       }

@@ -19,9 +19,9 @@ Future<void> withRollback<T>({
 }) async {
   try {
     await action();
-  } catch (e, s) {
+  } catch (error, stackTrace) {
     rollback(snapshot);
-    Error.throwWithStackTrace(e, s);
+    Error.throwWithStackTrace(error, stackTrace);
   }
 }
 
@@ -35,11 +35,11 @@ Future<void> _persistOptimistically<T>(
   write(next);
   try {
     await action();
-  } catch (e, s) {
+  } catch (error, stackTrace) {
     if (identical(read(), next)) {
       write(previous);
     }
-    Error.throwWithStackTrace(e, s);
+    Error.throwWithStackTrace(error, stackTrace);
   }
 }
 

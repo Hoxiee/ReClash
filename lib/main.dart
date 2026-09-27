@@ -39,10 +39,10 @@ void main(List<String> args) {
             child: const Application(),
           ),
         );
-      } catch (e, s) {
+      } catch (error, stackTrace) {
         runApp(
           MaterialApp(
-            home: InitErrorScreen(error: e, stack: s),
+            home: InitErrorScreen(error: error, stack: stackTrace),
           ),
         );
         unawaited(window?.showInitFailure());

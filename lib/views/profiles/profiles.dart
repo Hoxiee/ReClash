@@ -62,11 +62,11 @@ class _ProfilesViewState extends ConsumerState<ProfilesView> {
       if (profile.type == ProfileType.file) return;
       try {
         await profilesAction.updateProfile(profile, showLoading: true);
-      } catch (e) {
+      } catch (error) {
         messages.add(
           UpdatingMessage(
             label: profile.realLabel,
-            message: userFacingErrorMessage(e, appLocalizations),
+            message: userFacingErrorMessage(error, appLocalizations),
           ),
         );
       }

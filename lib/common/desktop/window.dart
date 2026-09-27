@@ -140,9 +140,9 @@ class Window implements WindowPort {
       await desktopWindow.center();
       await desktopWindow.show();
       await desktopWindow.focus();
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'show init failure window failed ${e.toString()}',
+        'show init failure window failed ${error.toString()}',
         logLevel: LogLevel.warning,
       );
     }

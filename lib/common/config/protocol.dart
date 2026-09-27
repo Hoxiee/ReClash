@@ -170,8 +170,8 @@ class Protocol {
     try {
       await file.parent.create(recursive: true);
       await file.writeAsString(plan.desktopEntry);
-    } catch (e) {
-      commonPrint.log('linux protocol registration failed: $e');
+    } catch (error) {
+      commonPrint.log('linux protocol registration failed: $error');
       return;
     }
     await _run('xdg-mime', plan.xdgMimeArguments);
@@ -185,8 +185,8 @@ class Protocol {
       if (result.exitCode != 0) {
         commonPrint.log('$executable failed: ${result.stderr}'.trim());
       }
-    } catch (e) {
-      commonPrint.log('$executable is unavailable: $e');
+    } catch (error) {
+      commonPrint.log('$executable is unavailable: $error');
     }
   }
 }

@@ -167,11 +167,11 @@ class _GeoResourceListItemState extends ConsumerState<_GeoResourceListItem> {
         ref
             .read(geoResourceActionProvider.notifier)
             .updateGeoResourceUrl(widget.type, newUrl);
-      } catch (e) {
+      } catch (error) {
         unawaited(
           dialogs.showMessage(
             title: widget.type.name,
-            message: TextSpan(text: e.toString()),
+            message: TextSpan(text: error.toString()),
           ),
         );
       }

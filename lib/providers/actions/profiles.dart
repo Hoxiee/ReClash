@@ -160,8 +160,8 @@ class ProfilesAction extends _$ProfilesAction {
           'dialable nodes',
           logLevel: LogLevel.info,
         );
-      } catch (e) {
-        commonPrint.log(compactError(e), logLevel: LogLevel.warning);
+      } catch (error) {
+        commonPrint.log(compactError(error), logLevel: LogLevel.warning);
       }
     }
   }

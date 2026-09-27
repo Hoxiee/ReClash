@@ -99,9 +99,9 @@ extension StringExtension on String {
     }
     try {
       return base64.decode(realValue);
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'invalid base64 data ${e.toString()}',
+        'invalid base64 data ${error.toString()}',
         logLevel: LogLevel.debug,
       );
       return null;
@@ -116,8 +116,8 @@ extension StringExtension on String {
     try {
       RegExp(this);
       return true;
-    } catch (e) {
-      commonPrint.log(e.toString());
+    } catch (error) {
+      commonPrint.log(error.toString());
       return false;
     }
   }

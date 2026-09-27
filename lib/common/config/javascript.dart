@@ -23,8 +23,8 @@ Future<Map<String, dynamic>> handleEvaluate(
       script: scriptContent,
       config: json.encode(config),
     );
-  } catch (e) {
-    throw MessageException(e.toString());
+  } catch (error) {
+    throw MessageException(error.toString());
   }
   final decoded = json.decode(result);
   if (decoded is! Map<String, dynamic>) {

@@ -80,9 +80,9 @@ class CoreController {
         final List<int> bytes = data.buffer.asUint8List();
         await geoFile.writeAsBytes(bytes, flush: true);
       }
-    } catch (e) {
+    } catch (error) {
       commonPrint.log(
-        'Failed to initialize geo data: $e',
+        'Failed to initialize geo data: $error',
         logLevel: LogLevel.error,
       );
       rethrow;

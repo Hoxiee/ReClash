@@ -128,9 +128,9 @@ class Permissions {
           final ssid = await WifiSsidManager.instance.getSsid();
           read(currentSSIDProvider.notifier).value = ssid;
         }
-      } on PlatformException catch (e) {
+      } on PlatformException catch (error) {
         commonPrint.log(
-          'requestPermission error ${e.toString()}',
+          'requestPermission error ${error.toString()}',
           logLevel: LogLevel.warning,
         );
       } finally {

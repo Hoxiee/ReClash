@@ -30,9 +30,9 @@ extension CacheManagerExt on CacheManager {
       if (cacheFile != null) {
         streamController.add(cacheFile);
       }
-    } on Object catch (e) {
+    } on Object catch (error) {
       cacheLogger.log(
-        'CacheManager: Failed to load cached file for $url with error:\n$e',
+        'CacheManager: Failed to load cached file for $url with error:\n$error',
         CacheManagerLogLevel.debug,
       );
     }
@@ -43,9 +43,9 @@ extension CacheManagerExt on CacheManager {
         if (cacheFile == null) {
           onRemoteNewLoaded?.call();
         }
-      } on Object catch (e) {
+      } on Object catch (error) {
         cacheLogger.log(
-          'CacheManager: Failed to download file from $url with error:\n$e',
+          'CacheManager: Failed to download file from $url with error:\n$error',
           CacheManagerLogLevel.debug,
         );
       }
