@@ -11,6 +11,283 @@
           "type": "feat",
           "entries": [
             {
+              "id": "fad4b47",
+              "scope": "ui",
+              "text": "Polish notifications, smart-routing unlock, popup menus and empty states"
+            },
+            {
+              "id": "2f71f80",
+              "scope": "profiles",
+              "text": "Add open-link menu action and fix dead report decoder url"
+            },
+            {
+              "id": "49aa7b6",
+              "text": "Land subscription, RCX, NTP work and restore green CI"
+            },
+            {
+              "id": "ce12c41",
+              "scope": "ui",
+              "text": "Dock sheet search bars and move access select-all to toolbar"
+            },
+            {
+              "id": "f32ed3a",
+              "scope": "dashboard",
+              "text": "Rework hero subscription panel and surface opacity"
+            },
+            {
+              "id": "939ebdf",
+              "scope": "experimental",
+              "text": "Add reusable notice dialog and badge, gate smart routing"
+            },
+            {
+              "id": "bcdab73",
+              "scope": "dashboard",
+              "text": "Expand the announcement on mobile, hint more on desktop"
+            },
+            {
+              "id": "0c7edeb",
+              "scope": "dashboard",
+              "text": "Share native status cards across pager and split"
+            },
+            {
+              "id": "f2b1659",
+              "scope": "ui",
+              "text": "Port empty-state glyphs to all pages and replay entrance on reopen"
+            },
+            {
+              "id": "113487e",
+              "scope": "ui",
+              "text": "Add styled QR and animate the scanner overlay"
+            },
+            {
+              "id": "5642ec4",
+              "scope": "theme",
+              "text": "Unify button shape with the app squircle language"
+            },
+            {
+              "id": "13055b4",
+              "scope": "config",
+              "text": "Port managed user-agent list from FlClash"
+            },
+            {
+              "id": "16320d6",
+              "scope": "subscription-report",
+              "text": "Hug the sheet, inline exports, add provider report URL"
+            },
+            {
+              "id": "cafcf87",
+              "scope": "window",
+              "text": "Replace the window_manager fork with a bundled plugin"
+            },
+            {
+              "id": "61aa373",
+              "scope": "subscription-report",
+              "text": "Redesign the report sheet and fold exports into a menu"
+            },
+            {
+              "id": "09552b3",
+              "scope": "dashboard",
+              "text": "Unify widgets on the flclash visual language"
+            },
+            {
+              "id": "8edb0cb",
+              "scope": "subscription-report",
+              "text": "Export a decoder-link and coarsen leaked env"
+            },
+            {
+              "id": "5fe4f61",
+              "text": "Floating-bar sheet polish, service status, and rcx work"
+            },
+            {
+              "id": "53d4c37",
+              "scope": "ui",
+              "text": "Port the FlClash app-bar action API"
+            },
+            {
+              "id": "ba17d49",
+              "scope": "ui",
+              "text": "Extend the floating-bar scroll-under to all nested pages"
+            },
+            {
+              "id": "723b7ea",
+              "scope": "dashboard",
+              "text": "Add a region-aware service status widget"
+            },
+            {
+              "id": "f4fa84f",
+              "scope": "ui",
+              "text": "Let content scroll under a floating app bar across pages"
+            },
+            {
+              "id": "4704d34",
+              "scope": "dns",
+              "text": "Port the DNS queries view"
+            },
+            {
+              "id": "fced84d",
+              "scope": "dashboard",
+              "text": "Expand the memory widget with a breakdown sheet and release action"
+            },
+            {
+              "id": "9dd9779",
+              "scope": "ui",
+              "text": "Dock the start button on every tab but the hero page"
+            },
+            {
+              "id": "0fcc3c3",
+              "scope": "ui",
+              "text": "Port FlClash navbar start control, shortcuts, rail, and pure-black tones"
+            },
+            {
+              "id": "cb19fd1",
+              "text": "Floating mobile nav bar, animated empty states, and more hotkey actions"
+            },
+            {
+              "id": "b159367",
+              "scope": "desync",
+              "text": "Gate ByeDPI behind a master feature toggle"
+            },
+            {
+              "id": "3dacccc",
+              "scope": "smart-routing",
+              "text": "Add region help card and searchable country picker"
+            },
+            {
+              "id": "c065656",
+              "text": "Anonymized subscription report for providers"
+            },
+            {
+              "id": "e7d7da9",
+              "scope": "release",
+              "text": "Publish installable Arch/pacman packages"
+            },
+            {
+              "id": "6018ac1",
+              "scope": "smart-routing",
+              "text": "Rework settings surface and wire live pacing knobs to the core"
+            },
+            {
+              "id": "b650286",
+              "scope": "app",
+              "text": "Auto-detect region from device signals"
+            },
+            {
+              "id": "82cf069",
+              "scope": "app",
+              "text": "Make AppRegion the single source of regional truth"
+            },
+            {
+              "id": "936d819",
+              "scope": "app",
+              "text": "Let a transient effect recoil the whole UI"
+            },
+            {
+              "id": "f32c6c3",
+              "scope": "smart-routing",
+              "text": "Add exit rules, latency bands, and country-echo ranking"
+            },
+            {
+              "id": "e48eb58",
+              "scope": "doctor",
+              "text": "Make the connection path a live diagnostic hero"
+            },
+            {
+              "id": "13531cd",
+              "scope": "tools",
+              "text": "Show settings as a two-pane list-detail on desktop"
+            },
+            {
+              "id": "9f66e58",
+              "scope": "rcx",
+              "text": "Hard-check RU-named nodes and brand ones that cannot open"
+            },
+            {
+              "id": "a955789",
+              "scope": "rcx",
+              "text": "Escape slow incumbents and carry the working node across a handoff"
+            },
+            {
+              "id": "7b9ec5b",
+              "scope": "notification",
+              "text": "Fix lock-screen flash, one channel, honest turn-off"
+            },
+            {
+              "id": "35fa958",
+              "scope": "rcx",
+              "text": "Add country/trust locator that brands censored-side nodes"
+            },
+            {
+              "id": "791cce3",
+              "text": "Advance dashboard, findings, panel and failover work"
+            },
+            {
+              "id": "36aeada",
+              "scope": "rcx",
+              "text": "Let providers define routing classes with roles and groups"
+            },
+            {
+              "id": "44b8b82",
+              "text": "Add file logger and desktop process icons"
+            },
+            {
+              "id": "d22302b",
+              "scope": "profiles",
+              "text": "Add import-mode choice for happ links"
+            },
+            {
+              "id": "5efdd4f",
+              "scope": "widgets",
+              "text": "Rework Android widgets into Switch, Status and Route"
+            },
+            {
+              "id": "b3cd6c3",
+              "text": "Harden qr scanner and refresh dashboard and tracker"
+            },
+            {
+              "id": "cd7415a",
+              "scope": "theme",
+              "text": "Support Android predictive back gesture"
+            },
+            {
+              "id": "4435fd4",
+              "scope": "autostart",
+              "text": "Add high-priority Windows autostart via Task Scheduler"
+            },
+            {
+              "id": "97d8faa",
+              "scope": "tray",
+              "text": "Dark context menu on Windows 11"
+            },
+            {
+              "id": "87c4339",
+              "scope": "dashboard",
+              "text": "Show uptime in days past 24 hours"
+            },
+            {
+              "id": "ef637f0",
+              "scope": "logs",
+              "text": "Add regex search and source/level filters"
+            },
+            {
+              "id": "9a52bb4",
+              "scope": "desktop",
+              "text": "Support portable mode via config dir next to executable"
+            },
+            {
+              "id": "ee0e77f",
+              "scope": "models",
+              "text": "Add log source/level filters, regex search, autostart and predictive-back settings"
+            },
+            {
+              "id": "e9c695b",
+              "scope": "dashboard",
+              "text": "Report Core-only memory and add goroutine card"
+            },
+            {
+              "id": "03db262",
+              "text": "Show focus ring only for keyboard and remote input"
+            },
+            {
               "id": "3692383",
               "scope": "appearance",
               "text": "Custom background image with focus and dashboard polish"
@@ -272,6 +549,157 @@
           "type": "fix",
           "entries": [
             {
+              "id": "6865b7a",
+              "scope": "smart-routing",
+              "text": "Migrate imported config through the unlock split"
+            },
+            {
+              "id": "9e4f91f",
+              "scope": "rcx",
+              "text": "Gate routing on tunnel state and unblind cold start"
+            },
+            {
+              "id": "b1c8e6f",
+              "scope": "ui",
+              "text": "Restore wallpaper backdrop and inset controller dialog toggles"
+            },
+            {
+              "id": "729b024",
+              "scope": "rcx",
+              "text": "Hold manual pins through blips and curb switch cascades"
+            },
+            {
+              "id": "ea1d46b",
+              "scope": "dashboard",
+              "text": "Open subscription sheet on tap and spring hero chips"
+            },
+            {
+              "id": "c2f182d",
+              "scope": "scan",
+              "text": "Stop denied-camera flicker and offer retry"
+            },
+            {
+              "id": "f62a97c",
+              "scope": "ui",
+              "text": "Repair sheet notify and align scanner, loaders, colors to theme"
+            },
+            {
+              "id": "5555f76",
+              "scope": "sheet",
+              "text": "Stop detail bodies overlapping the toolbar on desktop"
+            },
+            {
+              "id": "528f263",
+              "scope": "routing",
+              "text": "Make smart routing log usable under live updates"
+            },
+            {
+              "id": "576518f",
+              "scope": "traffic-usage",
+              "text": "Honor reduce-motion for the odometer switcher"
+            },
+            {
+              "id": "d1f48a2",
+              "scope": "design-tokens",
+              "text": "Close greenAccent and CircleBorder gaps in the guards"
+            },
+            {
+              "id": "2727666",
+              "scope": "dashboard",
+              "text": "Route the last raw status colors through tokens"
+            },
+            {
+              "id": "8622d17",
+              "scope": "icons",
+              "text": "Redraw pause as two bars to match the play glyph"
+            },
+            {
+              "id": "4c459bc",
+              "scope": "dashboard",
+              "text": "Drop the doubled top inset in quick-option sheets"
+            },
+            {
+              "id": "bc27fe7",
+              "scope": "icons",
+              "text": "Reshape the doctor glyph into a framed heart monitor"
+            },
+            {
+              "id": "a3d0d76",
+              "scope": "core",
+              "text": "Keep the core running while Windows sleeps with the app suspended"
+            },
+            {
+              "id": "c9c02ef",
+              "text": "Enforce profile FK cascades, default find-process-mode off, refresh geo info on completion"
+            },
+            {
+              "id": "815d8a4",
+              "scope": "dashboard",
+              "text": "Polish the hero orb overlay and its final frame"
+            },
+            {
+              "id": "89b22b7",
+              "scope": "bootstrap",
+              "text": "Seed regional defaults into config before providers exist"
+            },
+            {
+              "id": "d80e6fe",
+              "scope": "l10n",
+              "text": "Add smart routing rule keys to remaining locales"
+            },
+            {
+              "id": "9595759",
+              "scope": "rcx",
+              "text": "Defer screen-off probe waves so the radio sleeps"
+            },
+            {
+              "id": "4c6f0e2",
+              "scope": "rcx",
+              "text": "Keep aged foreign proofs in tier and defuse the permanent brand"
+            },
+            {
+              "id": "046d8fd",
+              "text": "Mirror routing homeRisk rung and unblock the test suite"
+            },
+            {
+              "id": "5edc4aa",
+              "scope": "rcx",
+              "text": "Keep probing live nodes that never proved they open the censored world"
+            },
+            {
+              "id": "4b5211d",
+              "scope": "rcx",
+              "text": "Stop autopilot drifting to slow nodes when open markers quarantine"
+            },
+            {
+              "id": "deda7f8",
+              "scope": "rcx",
+              "text": "Stop cold start from latching an unmeasured domestic node"
+            },
+            {
+              "id": "5d446f8",
+              "text": "Harden launch, profile parsing and lifecycle for pre.1"
+            },
+            {
+              "id": "259b93b",
+              "text": "Incorrect scan gesture behavior"
+            },
+            {
+              "id": "981a4be",
+              "scope": "smart-route",
+              "text": "Stop ranking fronted home nodes as foreign exits"
+            },
+            {
+              "id": "3f34873",
+              "scope": "http",
+              "text": "Restrict bad-certificate bypass to loopback hosts"
+            },
+            {
+              "id": "0c15b74",
+              "scope": "core",
+              "text": "Drop stale connections on wake from Doze"
+            },
+            {
               "id": "7895580",
               "scope": "setup",
               "text": "Confirm HWID disable only for the Russia region"
@@ -391,15 +819,18 @@
               "text": "Override scripts can declare main with const/let arrow functions"
             }
           ]
+        },
+        {
+          "type": "perf",
+          "entries": [
+            {
+              "id": "8918051",
+              "scope": "core",
+              "text": "Stop idle background wake-ups from HC, odometer, and wake lock"
+            }
+          ]
         }
       ]
-    },
-    {
-      "version": "0.8.96",
-      "tag": "v0.8.96",
-      "date": "2026-08-17",
-      "prerelease": false,
-      "groups": []
     }
   ]
 }
