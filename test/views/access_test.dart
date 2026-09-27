@@ -244,6 +244,30 @@ void main() {
       await teardownView(tester);
     });
 
+    testWidgets('keeps the search field visible when nothing matches', (
+      tester,
+    ) async {
+      seedAccessControl(const AccessControlProps(enable: true));
+      await pumpAccessView(tester);
+
+      final searchField = find.byKey(const ValueKey('access-search-field'));
+      await tester.enterText(searchField, 'zzz-no-such-app');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 301));
+
+      expect(find.text('Browser'), findsNothing);
+      expect(find.text('Chat'), findsNothing);
+      expect(searchField, findsOneWidget);
+
+      await tester.tap(find.byTooltip('Clear search'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 301));
+      expect(find.text('Browser'), findsOneWidget);
+      expect(find.text('Chat'), findsOneWidget);
+
+      await teardownView(tester);
+    });
+
     testWidgets('keeps compact filters on one row', (tester) async {
       seedAccessControl(const AccessControlProps(enable: true));
       await pumpAccessView(tester, size: const Size(420, 900));

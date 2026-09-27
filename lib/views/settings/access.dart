@@ -658,9 +658,13 @@ class _AccessViewState extends ConsumerState<AccessView> {
     final valueSet = currentList.toSet().intersection(viewPackageNameSet);
     final needsInstalledAppsPermission =
         packages.isEmpty && !_installedAppsPermissionGranted;
+    // A query with no matches empties viewPackageNameSet; keep the bar while a
+    // search is active so the user can clear it instead of getting stuck.
     final showDockedSearch =
-        !needsInstalledAppsPermission && viewPackageNameSet.isNotEmpty;
-    final showSelectionActions = showDockedSearch && accessControl.enable;
+        !needsInstalledAppsPermission &&
+        (viewPackageNameSet.isNotEmpty || query.isNotEmpty);
+    final showSelectionActions =
+        viewPackageNameSet.isNotEmpty && accessControl.enable;
     final selectAllButton = showSelectionActions
         ? _buildSelectAllButton(
             isSelectedAll: valueSet.length == viewPackageNameSet.length,
