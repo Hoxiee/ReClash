@@ -191,7 +191,7 @@ class _HomePageView extends ConsumerStatefulWidget {
 
 class _HomePageViewState extends ConsumerState<_HomePageView>
     with SingleTickerProviderStateMixin {
-  static const _switchDuration = Duration(milliseconds: 140);
+  static const _switchDuration = Duration(milliseconds: 300);
 
   late PageController _pageController;
   late final AnimationController _switchController;
@@ -210,7 +210,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
     );
     _switchIn = CurvedAnimation(
       parent: _switchController,
-      curve: Easing.standardDecelerate,
+      curve: AppSpringCurves.route,
     );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {

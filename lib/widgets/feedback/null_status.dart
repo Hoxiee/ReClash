@@ -71,8 +71,6 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
     return AnimatedSwitcher(
       duration: context.motionDuration(commonDuration),
       reverseDuration: context.motionDuration(_exitDuration),
-      switchInCurve: Easing.emphasizedDecelerate,
-      switchOutCurve: Curves.easeIn,
       layoutBuilder: (currentChild, previousChildren) => Align(
         alignment: Alignment.center,
         child: Stack(
@@ -82,9 +80,14 @@ class _NullStatusSwitcherState extends State<NullStatusSwitcher> {
         ),
       ),
       transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
+        opacity: animation.drive(CurveTween(curve: AppSpringCurves.route)),
         child: ScaleTransition(
-          scale: animation.drive(Tween(begin: 0.92, end: 1.0)),
+          scale: animation.drive(
+            Tween<double>(
+              begin: 0.92,
+              end: 1,
+            ).chain(CurveTween(curve: AppSpringCurves.morph)),
+          ),
           child: child,
         ),
       ),
