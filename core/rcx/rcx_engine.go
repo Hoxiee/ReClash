@@ -96,6 +96,9 @@ type rcxEngine struct {
 	screenFailedOver bool
 	conns            map[string]int64
 	upConns          map[string]int64
+	connsSpare       map[string]int64
+	upConnsSpare     map[string]int64
+	answeredKeys     []string
 	keys             map[string]string
 	names            map[string]string
 	direct           string
@@ -166,7 +169,7 @@ type rcxEngine struct {
 
 func newRcxEngine(runtime rcxRuntime) *rcxEngine {
 	return &rcxEngine{
-		runtime:       runtime,
+		runtime: runtime,
 		// Tests drive reconsider() directly, bypassing the loop; Start() lowers this to
 		// false so production stays idle until the listener reports the tunnel up.
 		running:       true,

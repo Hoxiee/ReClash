@@ -669,13 +669,16 @@ func (rcxCoreRuntime) Sweep(ctx context.Context, nodes []string) {
 		if !ok {
 			continue
 		}
+		// Take the slot before spawning, so at most delayTestConcurrency probe
+		// goroutines ever exist: a thousand-node park otherwise spawned a
+		// thousand goroutines that all parked on the semaphore at once.
+		if !acquireDelayTestSlot(ctx) {
+			break
+		}
 		probes.Add(1)
 		node := proxy
 		safeGoDetached("rcx host probe", func() {
 			defer probes.Done()
-			if !acquireDelayTestSlot(ctx) {
-				return
-			}
 			defer releaseDelayTestSlot()
 			probeCtx, cancel := context.WithTimeout(ctx, rcxHostProbeDial)
 			defer cancel()

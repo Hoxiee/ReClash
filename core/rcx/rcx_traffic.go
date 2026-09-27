@@ -105,12 +105,21 @@ func (e *rcxEngine) sampleTraffic() {
 	conns := e.runtime.Connections()
 	previous := e.conns
 	previousUp := e.upConns
-	e.conns = make(map[string]int64, len(conns))
-	e.upConns = make(map[string]int64, len(conns))
+	// Ping-pong two buffer pairs so a 5s sample of a park with hundreds of live
+	// connections rewrites the delta maps in place instead of allocating two fresh ones.
+	if e.connsSpare == nil {
+		e.connsSpare = make(map[string]int64, len(conns))
+		e.upConnsSpare = make(map[string]int64, len(conns))
+	}
+	e.conns, e.connsSpare = e.connsSpare, e.conns
+	e.upConns, e.upConnsSpare = e.upConnsSpare, e.upConns
+	clear(e.conns)
+	clear(e.upConns)
 	e.mu.RLock()
 	markers := e.openHosts
 	e.mu.RUnlock()
 	flows := make(map[string]*rcxNodeFlow, len(conns))
+	answeredKeys := e.answeredKeys[:0]
 	alive := false
 	for _, conn := range conns {
 		answered := conn.Down > previous[conn.Key]
@@ -132,6 +141,9 @@ func (e *rcxEngine) sampleTraffic() {
 		case answered:
 			flow.progress = true
 			flow.open = flow.open || rcxMarkerRelated(markers, conn.Host)
+			if conn.Node == e.incumbent {
+				answeredKeys = append(answeredKeys, conn.Key)
+			}
 		// Growing Up is a live link (§1.9); only payload never answered nor still uploading accuses.
 		case conn.Down == 0 && conn.Up > 0 && !uploading && now.Sub(conn.Start) >= rcxConnStallAge:
 			flow.stalled++
@@ -140,6 +152,7 @@ func (e *rcxEngine) sampleTraffic() {
 			}
 		}
 	}
+	e.answeredKeys = answeredKeys
 	if alive {
 		e.noteLinkAlive(now)
 	}
@@ -148,10 +161,8 @@ func (e *rcxEngine) sampleTraffic() {
 		case flow.progress:
 			e.notePayload(node, flow.open, now)
 			if node == e.incumbent {
-				for _, conn := range conns {
-					if conn.Node == node && conn.Down > previous[conn.Key] {
-						delete(e.incidentConns, conn.Key)
-					}
+				for _, key := range answeredKeys {
+					delete(e.incidentConns, key)
 				}
 			}
 		case flow.stalled*2 > flow.live:

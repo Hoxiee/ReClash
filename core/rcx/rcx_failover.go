@@ -8,14 +8,12 @@ func (e *rcxEngine) applyProbeResult(event rcxEvent) {
 		return
 	}
 	result := event.Results[0]
-	currentKey := ""
-	for _, member := range e.runtime.Members() {
-		if member.Name == result.Node {
-			currentKey = member.key()
-			break
-		}
+	e.ensureIdentity()
+	if !e.isMember(result.Node) {
+		return
 	}
-	if currentKey == "" || result.Key != "" && result.Key != currentKey {
+	currentKey := e.key(result.Node)
+	if result.Key != "" && result.Key != currentKey {
 		return
 	}
 	now := e.runtime.Now()
