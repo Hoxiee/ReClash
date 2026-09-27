@@ -749,13 +749,14 @@ func handleScreenOff(off bool) {
 
 func handleSuspend(suspended bool) bool {
 	wasSuspended := isSuspended.Swap(suspended)
+	// Doze parks our own probing (screenOff gates + RCX OnSuspend) but must not
+	// suspend the data plane: a suspended tunnel would drop the high-priority
+	// push a woken app fetches while device idle still holds.
 	if suspended {
-		tunnel.OnSuspend()
 		rcxEngineInstance.OnSuspend(true)
 		return true
 	}
 
-	tunnel.OnRunning()
 	// A real wake (screen back, listeners up), not a Doze maintenance window.
 	// Sockets from before the sleep point at a gateway the far end has dropped;
 	// the routing engine reselects nodes but never touches those app sessions.
