@@ -27,8 +27,12 @@ keywords:
 
 generic_name: ReClash
 
+# The bundled appimagetool enforces the freedesktop rule that a string-list
+# key ends with ';'. The maker joins with ';' but omits the terminator, so the
+# empty tail element supplies it, yielding Categories=Network;.
 categories:
   - Network
+  - ""
 
 startup_notify: true
 # Should equal the app id (com.reclash). NOTE: the current flutter_distributor

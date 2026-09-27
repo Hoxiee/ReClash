@@ -276,8 +276,10 @@ void WifiSsidPlugin::ListSsid(
     }
 
     PWLAN_AVAILABLE_NETWORK_LIST network_list = nullptr;
+    // 0 flags lists the networks in range now, not saved hidden profiles,
+    // which is what this picker wants; the reserved arg is always nullptr.
     result_code = wlan.get_network_list(
-        client.get(), &interface_info.InterfaceGuid, &network_list);
+        client.get(), &interface_info.InterfaceGuid, 0, nullptr, &network_list);
     if (result_code != ERROR_SUCCESS || network_list == nullptr) {
       continue;
     }
