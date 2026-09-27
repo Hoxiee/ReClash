@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "Tasdiqlash kodi: ${code}";
 
+  static String m3(when) => "Oxirgi bog‘lanish ${when}";
+
   static String m4(seconds) => "Kod ${seconds} soniyada tugaydi";
 
   static String m5(host) => "${host} manzilida juftlashga tayyor";
@@ -644,13 +646,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionControlPanel": MessageLookupByLibrary.simpleMessage(
       "Masofadan boshqarish",
     ),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "Siz ushbu qurilmani boshqaryapsiz",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage("Joriy tugun"),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "Bu televizorda ishonchli telefonlarning maksimal soni allaqachon mavjud",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("Qurilma nomi"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage(
       "Telefondan boshqarishga ruxsat berish",
     ),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("URL kiriting"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage(
       "Ushbu televizorni unutish",
     ),
@@ -660,11 +667,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionLanHelp": MessageLookupByLibrary.simpleMessage(
       "Ikkala qurilma ham bir xil mahalliy tarmoqda bo‘lishi kerak.",
     ),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage(
+      "Hali ulanmagan",
+    ),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage(
       "Obuna havolasi",
     ),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "Avval televizorni Wi-Fi yoki Ethernet’ga ulang",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage(
+      "O‘lchov yo‘q",
+    ),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("Oflayn"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("Onlayn"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "Tasdiqlab bo‘lmadi — joriy holatni tekshiring",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("Juftlandi"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -674,16 +693,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage(
       "Juftlash rad etildi",
     ),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("Faol"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("Profillar"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "Qabul qilish yoqilganda, ushbu tarmoqdagi telefonlar bu televizorni boshqara oladi.",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "Qabul qilish yoqilganda, ushbu tarmoqdagi boshqa telefonlar bu telefonni boshqara oladi.",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage(
       "Telefondan boshqarish o‘chirilgan",
     ),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage("Qayta ulanish"),
+    "companionReject": MessageLookupByLibrary.simpleMessage("Rad etish"),
     "companionReload": MessageLookupByLibrary.simpleMessage("Yangilash"),
+    "companionRename": MessageLookupByLibrary.simpleMessage(
+      "Nomini o‘zgartirish",
+    ),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage(
       "Juftlash identifikatorini tiklash",
     ),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "Barcha juftlangan telefonlarni va televizorning xavfsizlik kalitini o‘chiradi.",
+    ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage(
+      "Qo‘llash uchun ulanishni qayta ishga tushiring",
     ),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage(
       "Ushbu telefonni bekor qilish",
@@ -691,17 +726,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage(
       "Televizorda ko‘rsatilgan kodni skanerlang",
     ),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "Telefoningizda ReClash’ni oching va ushbu kodni skanerlang",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage(
       "Tugunni tanlash",
     ),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage(
+      "Ushbu telefondan yuborish",
+    ),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage(
+      "Ushbu telefondan profil yuborish",
+    ),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage(
       "Obunani o‘rnatish",
+    ),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage(
+      "Oxirgi ma’lum holat ko‘rsatilmoqda",
+    ),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage(
+      "Tekshirilmoqda…",
     ),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage(
       "Himoya o‘chirilgan",
     ),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage(
       "Himoya yoqilgan",
+    ),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage(
+      "Ushbu profilga o‘tish",
     ),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage(
       "Ishonchli telefonlar",

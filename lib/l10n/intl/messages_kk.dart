@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "Растау коды: ${code}";
 
+  static String m3(when) => "Соңғы байланыс ${when}";
+
   static String m4(seconds) => "Код ${seconds} секундтан кейін жарамсыз болады";
 
   static String m5(host) => "${host} мекенжайында жұптасуға дайын";
@@ -619,15 +621,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionControlPanel": MessageLookupByLibrary.simpleMessage(
       "Қашықтан басқару",
     ),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "Сіз осы құрылғыны басқарып жатырсыз",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage(
       "Ағымдағы түйін",
     ),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "Бұл теледидарда сенімді телефондардың саны шегіне жетті",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("Құрылғы аты"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage(
       "Телефоннан басқаруға рұқсат ету",
     ),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("Сілтеме енгізу"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage(
       "Осы теледидарды ұмыту",
     ),
@@ -637,11 +644,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionLanHelp": MessageLookupByLibrary.simpleMessage(
       "Екі құрылғы да бір жергілікті желіде болуы керек.",
     ),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage(
+      "Әлі қосылмаған",
+    ),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage(
       "Жазылым сілтемесі",
     ),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "Алдымен теледидарды Wi-Fi немесе Ethernet желісіне қосыңыз",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage("Өлшеу жоқ"),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("Желіде емес"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("Желіде"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "Растау мүмкін болмады — күйді тексеріңіз",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("Жұптасты"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -651,16 +668,30 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage(
       "Жұптасу қабылданбады",
     ),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("Белсенді"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("Профильдер"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "Қабылдау қосулы кезде осы желідегі телефондар бұл теледидарды басқара алады.",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "Қабылдау қосулы кезде осы желідегі басқа телефондар бұл телефонды басқара алады.",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage(
       "Телефоннан басқару өшірулі",
     ),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage("Қайта қосылу"),
+    "companionReject": MessageLookupByLibrary.simpleMessage("Қабылдамау"),
     "companionReload": MessageLookupByLibrary.simpleMessage("Жаңарту"),
+    "companionRename": MessageLookupByLibrary.simpleMessage("Атын өзгерту"),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage(
       "Жұптасу сәйкестендіргішін қалпына келтіру",
     ),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "Барлық жұптасқан телефондарды және теледидардың қауіпсіздік кілтін жояды.",
+    ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage(
+      "Қолдану үшін қосылымды қайта іске қосыңыз",
     ),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage(
       "Осы телефонды кері қайтару",
@@ -668,17 +699,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage(
       "Теледидарда көрсетілген кодты сканерлеңіз",
     ),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "Телефоныңызда ReClash ашып, осы кодты сканерлеңіз",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage(
       "Түйінді таңдау",
     ),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage(
+      "Осы телефоннан жіберу",
+    ),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage(
+      "Осы телефоннан профиль жіберу",
+    ),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage(
       "Жазылымды орнату",
+    ),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage(
+      "Соңғы белгілі күй көрсетілген",
+    ),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage(
+      "Тексерілуде…",
     ),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage(
       "Қорғаныс өшірулі",
     ),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage(
       "Қорғаныс қосулы",
+    ),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage(
+      "Осы профильге ауысу",
     ),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage(
       "Сенімді телефондар",

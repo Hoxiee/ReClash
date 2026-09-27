@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "Tassyklama kody: ${code}";
 
+  static String m3(when) => "Iň soňky baglanyşyk ${when}";
+
   static String m4(seconds) => "Kod ${seconds} sekuntdan soň möhleti gutarýar";
 
   static String m5(host) => "${host} salgysynda jübütleşmäge taýýar";
@@ -622,15 +624,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionControlPanel": MessageLookupByLibrary.simpleMessage(
       "Uzakdan dolandyrmak",
     ),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "Bu enjamy dolandyrýarsyňyz",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage(
       "Häzirki düwün",
     ),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "Bu telewizorda ynamdar telefonlaryň iň köp sany eýýäm bar",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("Enjam ady"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage(
       "Telefondan dolandyrmaga rugsat ber",
     ),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("Salgy giriziň"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage(
       "Bu telewizory unut",
     ),
@@ -640,11 +647,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionLanHelp": MessageLookupByLibrary.simpleMessage(
       "Iki enjam hem bir ýerli tora birikmeli.",
     ),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage(
+      "Heniz birleşilmedi",
+    ),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage(
       "Abunalyk salgysy",
     ),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "Ilki telewizory Wi-Fi ýa-da Ethernet-e birikdiriň",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage("Ölçeg ýok"),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("Aragatnaşyksyz"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("Aragatnaşykda"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "Tassyklap bolmady — häzirki ýagdaýy barlaň",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("Jübütleşdi"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -654,16 +671,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage(
       "Jübütleşme ret edildi",
     ),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("Işjeň"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("Profiller"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "Kabul ediş açykka, bu tordaky telefonlar bu telewizory dolandyryp biler.",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "Kabul ediş açykka, bu tordaky beýleki telefonlar bu telefony dolandyryp biler.",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage(
       "Telefondan dolandyrmak öçürilen",
     ),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage(
+      "Täzeden birleşmek",
+    ),
+    "companionReject": MessageLookupByLibrary.simpleMessage("Ret etmek"),
     "companionReload": MessageLookupByLibrary.simpleMessage("Täzelemek"),
+    "companionRename": MessageLookupByLibrary.simpleMessage("Adyny üýtgetmek"),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage(
       "Jübütleşme kimligini täzeden düzmek",
     ),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "Ähli jübütleşen telefonlary we telewizoryň howpsuzlyk açaryny aýyrýar.",
+    ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage(
+      "Ulanmak üçin baglanyşygy täzeden başladyň",
     ),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage(
       "Bu telefony yzyna al",
@@ -671,14 +704,32 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage(
       "Telewizorda görkezilen kody skanerläň",
     ),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "Telefonyňyzda ReClash açyp, şu kody skanirläň",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage(
       "Düwün saýlamak",
+    ),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage(
+      "Şu telefondan ibermek",
+    ),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage(
+      "Şu telefondan profil ibermek",
     ),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage(
       "Abunalygy bellemek",
     ),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage(
+      "Iň soňky belli ýagdaý görkezilýär",
+    ),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage(
+      "Barlanýar…",
+    ),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage("Goranmak öçük"),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage("Goranmak açyk"),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage(
+      "Şu profile geçmek",
+    ),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage(
       "Ynamdar telefonlar",
     ),

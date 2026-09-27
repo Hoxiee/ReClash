@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "확인 코드: ${code}";
 
+  static String m3(when) => "마지막 연결 ${when}";
+
   static String m4(seconds) => "코드가 ${seconds}초 후에 만료됩니다";
 
   static String m5(host) => "${host}에서 페어링 준비 완료";
@@ -513,13 +515,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 휴대전화를 확인하시겠습니까?",
     ),
     "companionControlPanel": MessageLookupByLibrary.simpleMessage("원격 제어"),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "이 기기를 제어하고 있습니다",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage("현재 노드"),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "이 TV에는 이미 최대 개수의 신뢰할 수 있는 휴대전화가 등록되어 있습니다",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("기기 이름"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage(
       "휴대전화에서 제어 허용",
     ),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("URL 입력"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage("이 TV 삭제"),
     "companionIdentityChanged": MessageLookupByLibrary.simpleMessage(
       "이 TV의 ID가 변경되었습니다. 제거한 후 다시 페어링하세요.",
@@ -527,11 +534,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionLanHelp": MessageLookupByLibrary.simpleMessage(
       "두 기기가 같은 로컬 네트워크에 있어야 합니다.",
     ),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage(
+      "아직 연결되지 않음",
+    ),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage(
       "구독 링크",
     ),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "먼저 TV를 Wi-Fi 또는 이더넷에 연결하세요",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage("측정 없음"),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("오프라인"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("온라인"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "확인할 수 없습니다 — 현재 상태를 확인하세요",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("페어링됨"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -541,25 +558,53 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage(
       "페어링이 거부되었습니다",
     ),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("활성"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("프로필"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "수신이 켜져 있으면 이 네트워크의 휴대전화에서 이 TV를 제어할 수 있습니다.",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "수신이 켜져 있으면 이 네트워크의 다른 휴대전화에서 이 휴대전화를 제어할 수 있습니다.",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage(
       "휴대전화 제어가 꺼져 있습니다",
     ),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage("다시 연결"),
+    "companionReject": MessageLookupByLibrary.simpleMessage("거부"),
     "companionReload": MessageLookupByLibrary.simpleMessage("새로고침"),
+    "companionRename": MessageLookupByLibrary.simpleMessage("이름 변경"),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage(
       "페어링 ID 재설정",
     ),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "페어링된 모든 휴대전화와 TV의 보안 키를 삭제합니다.",
     ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage(
+      "적용하려면 연결을 다시 시작하세요",
+    ),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage("이 휴대전화 취소"),
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage(
       "TV에 표시된 코드를 스캔하세요",
     ),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "휴대전화에서 ReClash를 열고 이 코드를 스캔하세요",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage("노드 선택"),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage(
+      "이 휴대전화에서 보내기",
+    ),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage(
+      "이 휴대전화에서 프로필 보내기",
+    ),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage("구독 설정"),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage(
+      "마지막으로 확인된 상태를 표시 중",
+    ),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage("확인 중…"),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage("보호가 꺼져 있음"),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage("보호가 켜져 있음"),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage("이 프로필로 전환"),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage(
       "신뢰할 수 있는 휴대전화",
     ),

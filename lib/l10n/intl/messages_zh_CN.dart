@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "确认码：${code}";
 
+  static String m3(when) => "最后连接 ${when}";
+
   static String m4(seconds) => "验证码将在 ${seconds} 秒后失效";
 
   static String m5(host) => "已可在 ${host} 上配对";
@@ -465,19 +467,32 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "companionConfirmPhone": MessageLookupByLibrary.simpleMessage("确认此手机？"),
     "companionControlPanel": MessageLookupByLibrary.simpleMessage("远程控制"),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "您正在控制此设备",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage("当前节点"),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "此电视的受信任手机数量已达上限",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage("允许通过手机控制"),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("输入链接"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage("忘记此电视"),
     "companionIdentityChanged": MessageLookupByLibrary.simpleMessage(
       "此电视的身份已更改。请移除后重新配对。",
     ),
     "companionLanHelp": MessageLookupByLibrary.simpleMessage("两台设备必须在同一局域网内。"),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage("尚未连接"),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage("订阅链接"),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "请先将电视连接到 Wi-Fi 或以太网",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage("无测量"),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("离线"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("在线"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "无法确认 — 请检查当前状态",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("已配对"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -485,19 +500,39 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "companionPairingExpires": m4,
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage("配对已被拒绝"),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("已启用"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("配置"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "接收开启时，此网络中的手机可以控制此电视。",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "接收开启时，此网络中的其他手机可以控制此手机。",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage("手机控制已关闭"),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage("重新连接"),
+    "companionReject": MessageLookupByLibrary.simpleMessage("拒绝"),
     "companionReload": MessageLookupByLibrary.simpleMessage("刷新"),
+    "companionRename": MessageLookupByLibrary.simpleMessage("重命名"),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage("重置配对身份"),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "移除所有已配对的手机以及电视的安全密钥。",
     ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage("重启连接以应用"),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage("撤销此手机"),
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage("扫描电视上显示的二维码"),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "在手机上打开 ReClash 并扫描此二维码",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage("选择节点"),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage("从此手机发送"),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage("从此手机发送配置"),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage("设置订阅"),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage("正在显示最后已知状态"),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage("正在检查…"),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage("防护已关闭"),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage("防护已开启"),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage("切换到此配置"),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage("受信任的手机"),
     "companionTurnOff": MessageLookupByLibrary.simpleMessage("关闭"),
     "companionTurnOn": MessageLookupByLibrary.simpleMessage("开启"),

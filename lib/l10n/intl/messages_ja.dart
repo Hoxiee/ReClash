@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m2(code) => "確認コード: ${code}";
 
+  static String m3(when) => "最終接続 ${when}";
+
   static String m4(seconds) => "コードは ${seconds} 秒で失効します";
 
   static String m5(host) => "${host} でペアリングの準備ができました";
@@ -498,13 +500,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "この電話を確認しますか？",
     ),
     "companionControlPanel": MessageLookupByLibrary.simpleMessage("リモート操作"),
+    "companionControllingHint": MessageLookupByLibrary.simpleMessage(
+      "この端末を操作しています",
+    ),
     "companionCurrentNode": MessageLookupByLibrary.simpleMessage("現在のノード"),
     "companionDeviceLimit": MessageLookupByLibrary.simpleMessage(
       "このテレビには信頼済みの電話がすでに上限まで登録されています",
     ),
+    "companionDeviceName": MessageLookupByLibrary.simpleMessage("デバイス名"),
     "companionEnableReceiver": MessageLookupByLibrary.simpleMessage(
       "電話からの操作を許可",
     ),
+    "companionEnterUrl": MessageLookupByLibrary.simpleMessage("URL を入力"),
     "companionForgetDevice": MessageLookupByLibrary.simpleMessage("このテレビを削除"),
     "companionIdentityChanged": MessageLookupByLibrary.simpleMessage(
       "このテレビの識別情報が変わりました。削除して再度ペアリングしてください。",
@@ -512,11 +519,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionLanHelp": MessageLookupByLibrary.simpleMessage(
       "両方のデバイスが同じローカルネットワークにある必要があります。",
     ),
+    "companionLastSeen": m3,
+    "companionNeverConnected": MessageLookupByLibrary.simpleMessage(
+      "まだ接続していません",
+    ),
     "companionNewSubscriptionUrl": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションのリンク",
     ),
     "companionNoLan": MessageLookupByLibrary.simpleMessage(
       "先にテレビを Wi-Fi またはイーサネットに接続してください",
+    ),
+    "companionNoMeasurement": MessageLookupByLibrary.simpleMessage("測定なし"),
+    "companionOffline": MessageLookupByLibrary.simpleMessage("オフライン"),
+    "companionOnline": MessageLookupByLibrary.simpleMessage("オンライン"),
+    "companionOutcomeUnknown": MessageLookupByLibrary.simpleMessage(
+      "確認できませんでした — 現在の状態を確認してください",
     ),
     "companionPaired": MessageLookupByLibrary.simpleMessage("ペアリング済み"),
     "companionPairingExpired": MessageLookupByLibrary.simpleMessage(
@@ -526,27 +543,55 @@ class MessageLookup extends MessageLookupByLibrary {
     "companionPairingRejected": MessageLookupByLibrary.simpleMessage(
       "ペアリングが拒否されました",
     ),
+    "companionProfileActive": MessageLookupByLibrary.simpleMessage("有効"),
+    "companionProfiles": MessageLookupByLibrary.simpleMessage("プロファイル"),
+    "companionReceiverExplain": MessageLookupByLibrary.simpleMessage(
+      "受信をオンにすると、このネットワークの電話からこのテレビを操作できます。",
+    ),
+    "companionReceiverExplainPhone": MessageLookupByLibrary.simpleMessage(
+      "受信をオンにすると、このネットワークの他の電話からこの電話を操作できます。",
+    ),
     "companionReceiverRunning": m5,
     "companionReceiverStopped": MessageLookupByLibrary.simpleMessage(
       "電話からの操作はオフです",
     ),
+    "companionReconnect": MessageLookupByLibrary.simpleMessage("再接続"),
+    "companionReject": MessageLookupByLibrary.simpleMessage("拒否"),
     "companionReload": MessageLookupByLibrary.simpleMessage("更新"),
+    "companionRename": MessageLookupByLibrary.simpleMessage("名前を変更"),
     "companionResetIdentity": MessageLookupByLibrary.simpleMessage(
       "ペアリング識別情報をリセット",
     ),
     "companionResetIdentityDesc": MessageLookupByLibrary.simpleMessage(
       "ペアリング済みのすべての電話とテレビのセキュリティキーを削除します。",
     ),
+    "companionRestartRequired": MessageLookupByLibrary.simpleMessage(
+      "適用するには接続を再起動してください",
+    ),
     "companionRevokePhone": MessageLookupByLibrary.simpleMessage("この電話を取り消す"),
     "companionScanTvQr": MessageLookupByLibrary.simpleMessage(
       "テレビに表示されたコードをスキャンしてください",
     ),
+    "companionScanWithPhone": MessageLookupByLibrary.simpleMessage(
+      "電話で ReClash を開いてこのコードをスキャンしてください",
+    ),
     "companionSelectNode": MessageLookupByLibrary.simpleMessage("ノードを選択"),
+    "companionSendFromPhone": MessageLookupByLibrary.simpleMessage("この電話から送信"),
+    "companionSendProfile": MessageLookupByLibrary.simpleMessage(
+      "この電話からプロファイルを送信",
+    ),
     "companionSetSubscription": MessageLookupByLibrary.simpleMessage(
       "サブスクリプションを設定",
     ),
+    "companionStaleState": MessageLookupByLibrary.simpleMessage(
+      "最後に確認した状態を表示しています",
+    ),
+    "companionStatusChecking": MessageLookupByLibrary.simpleMessage("確認中…"),
     "companionStatusOff": MessageLookupByLibrary.simpleMessage("保護は無効です"),
     "companionStatusOn": MessageLookupByLibrary.simpleMessage("保護は有効です"),
+    "companionSwitchProfile": MessageLookupByLibrary.simpleMessage(
+      "このプロファイルに切り替える",
+    ),
     "companionTrustedPhones": MessageLookupByLibrary.simpleMessage("信頼済みの電話"),
     "companionTurnOff": MessageLookupByLibrary.simpleMessage("オフにする"),
     "companionTurnOn": MessageLookupByLibrary.simpleMessage("オンにする"),
