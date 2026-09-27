@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/widgets/widgets.dart';
@@ -91,27 +92,37 @@ class _CompanionPairingViewState extends State<CompanionPairingView> {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
+    final colorScheme = context.colorScheme;
     return CommonScaffold(
       title: l.companionAddTelevision,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppInsets.xxl,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 20,
+            spacing: AppSpacing.xl,
             children: [
               switch (_stage) {
                 _Stage.submitting || _Stage.waiting =>
-                  const CircularProgressIndicator(),
-                _Stage.approved =>
-                  Icon(Icons.check_circle, size: 64, color: context.colorScheme.primary),
-                _Stage.failed =>
-                  Icon(Icons.error_outline, size: 64, color: context.colorScheme.error),
+                  const SizedBox.square(
+                    dimension: 64,
+                    child: CommonCircleLoading(),
+                  ),
+                _Stage.approved => AppMedallion(
+                  icon: AppGlyphs.checkCircle,
+                  tone: colorScheme.primary,
+                  size: 64,
+                ),
+                _Stage.failed => AppMedallion(
+                  icon: AppGlyphs.error,
+                  tone: colorScheme.error,
+                  size: 64,
+                ),
               },
               switch (_stage) {
                 _Stage.submitting => Text(l.companionWaitingApproval),
                 _Stage.waiting => Column(
-                  spacing: 8,
+                  spacing: AppSpacing.sm,
                   children: [
                     if (_confirmationCode != null)
                       Text(

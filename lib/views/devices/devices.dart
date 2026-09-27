@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:reclash/common/common.dart';
+import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/l10n/l10n.dart';
 import 'package:reclash/models/companion.dart';
 import 'package:reclash/views/tools/scan.dart';
@@ -108,17 +110,17 @@ class _DevicesViewState extends ConsumerState<DevicesView>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListItem(
-              leading: const Icon(Icons.drive_file_rename_outline_rounded),
+              leading: const GlyphIcon(AppGlyphs.edit),
               title: Text(l.companionRename),
               onTap: () => Navigator.of(context).pop('rename'),
             ),
             ListItem(
-              leading: const Icon(Icons.refresh_rounded),
+              leading: const GlyphIcon(AppGlyphs.refresh),
               title: Text(l.companionReconnect),
               onTap: () => Navigator.of(context).pop('reconnect'),
             ),
             ListItem(
-              leading: const Icon(Icons.delete_outline_rounded),
+              leading: const GlyphIcon(AppGlyphs.delete),
               title: Text(l.companionForgetDevice),
               onTap: () => Navigator.of(context).pop('forget'),
             ),
@@ -166,13 +168,13 @@ class _DevicesViewState extends ConsumerState<DevicesView>
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final receiver = _ActionCard(
-      icon: Icons.cast_rounded,
+      icon: AppGlyphs.tethering,
       title: l.companionAddPhone,
       subtitle: l.companionEnableReceiver,
       onTap: () => unawaited(_openReceiver()),
     );
     final addTv = _ActionCard(
-      icon: Icons.add_to_queue_rounded,
+      icon: AppGlyphs.add,
       title: l.companionAddTelevision,
       subtitle: l.companionScanTvQr,
       onTap: () => unawaited(_addTelevision()),
@@ -192,9 +194,14 @@ class _DevicesViewState extends ConsumerState<DevicesView>
       ],
     ];
     final list = ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+      ),
       itemCount: children.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (_, index) => children[index],
     );
     return CommonScaffold(title: l.devices, body: CompanionPage(child: list));
@@ -209,7 +216,7 @@ class _GroupLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 4),
+      padding: const EdgeInsets.only(left: AppSpacing.xs, top: AppSpacing.xs),
       child: Text(
         label,
         style: context.textTheme.titleSmall?.copyWith(
@@ -229,7 +236,7 @@ class _ActionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -237,12 +244,15 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    return CompanionCard(
-      onTap: onTap,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: AppInsets.lg,
+      onPressed: onTap,
       child: Row(
         children: [
-          CompanionIconBadge(icon: icon, tone: colorScheme.primary),
-          const SizedBox(width: 14),
+          AppMedallion(icon: icon, tone: colorScheme.primary),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +263,7 @@ class _ActionCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   subtitle,
                   style: context.textTheme.bodySmall?.copyWith(
@@ -263,8 +273,11 @@ class _ActionCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right_rounded, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          GlyphIcon(
+            AppGlyphs.chevronForward,
+            color: colorScheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -295,8 +308,8 @@ class _DeviceCard extends StatelessWidget {
         : colorScheme.tertiary;
     final info = Row(
       children: [
-        CompanionIconBadge(icon: Icons.devices_other_rounded, tone: dotColor),
-        const SizedBox(width: 14),
+        AppMedallion(icon: AppGlyphs.devices, tone: dotColor),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +329,7 @@ class _DeviceCard extends StatelessWidget {
                     color: dotColor,
                     pulsing: reachability == CompanionReachability.reachable,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       statusLine,
@@ -338,10 +351,18 @@ class _DeviceCard extends StatelessWidget {
     // stops instead of one that swallows the other.
     return Row(
       children: [
-        Expanded(child: CompanionCard(onTap: onOpen, child: info)),
-        const SizedBox(width: 8),
+        Expanded(
+          child: CommonCard(
+            type: CommonCardType.filled,
+            radius: AppCorner.xl,
+            padding: AppInsets.lg,
+            onPressed: onOpen,
+            child: info,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
         IconButton(
-          icon: const Icon(Icons.more_vert_rounded),
+          icon: const GlyphIcon(AppGlyphs.more),
           tooltip: l.edit,
           onPressed: onMenu,
         ),

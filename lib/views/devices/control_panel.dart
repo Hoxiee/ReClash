@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/companion.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/views/dashboard/widgets/active_server.dart';
-import 'package:reclash/widgets/theme/wallpaper_scope.dart';
 import 'package:reclash/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -236,11 +236,12 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
     final state = _state;
     return CommonScaffold(
       title: widget.title,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh_rounded),
+      iconActions: [
+        IconButtonData(
+          glyph: AppGlyphs.refresh,
           tooltip: l.companionReload,
-          onPressed: _busy ? null : restartPolling,
+          isLoading: _busy,
+          onPressed: restartPolling,
         ),
       ],
       body: state == null
@@ -282,9 +283,14 @@ class _CompanionControlPanelState extends ConsumerState<CompanionControlPanel>
       ),
     ];
     final list = ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+      ),
       itemCount: children.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (_, index) => children[index],
     );
     return CompanionPage(child: list);
@@ -307,18 +313,20 @@ class _HeroStatusCard extends StatelessWidget {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final tone = running ? colorScheme.primary : colorScheme.onSurfaceVariant;
-    return CompanionCard(
-      tone: running ? colorScheme.primary : null,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      accent: running ? colorScheme.primary : null,
       padding: const EdgeInsets.all(18),
-      onTap: onChanged == null ? null : () => onChanged!(!running),
+      onPressed: onChanged == null ? null : () => onChanged!(!running),
       child: Row(
         children: [
-          CompanionIconBadge(
-            icon: running ? Icons.shield_rounded : Icons.shield_outlined,
+          AppMedallion(
+            icon: AppGlyphs.shield,
             tone: tone,
             size: 52,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +338,7 @@ class _HeroStatusCard extends StatelessWidget {
                     color: running ? colorScheme.primary : colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   l.companionControllingHint,
                   maxLines: 1,
@@ -342,7 +350,7 @@ class _HeroStatusCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           ExcludeFocus(
             child: IgnorePointer(
               child: Switch(value: running, onChanged: (_) {}),
@@ -363,29 +371,30 @@ class _ModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return CompanionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CompanionSectionTitle(
-            icon: Icons.call_split_rounded,
-            label: l.outboundMode,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            spacing: 8,
-            children: [
-              for (final mode in UiOutboundMode.values)
-                Expanded(
-                  child: _ModeChip(
-                    mode: mode,
-                    selected: mode.name == current,
-                    onTap: onSelect == null ? null : () => onSelect!(mode),
-                  ),
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      info: Info(label: l.outboundMode, glyph: AppGlyphs.split),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Row(
+          spacing: AppSpacing.sm,
+          children: [
+            for (final mode in UiOutboundMode.values)
+              Expanded(
+                child: _ModeChip(
+                  mode: mode,
+                  selected: mode.name == current,
+                  onTap: onSelect == null ? null : () => onSelect!(mode),
                 ),
-            ],
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -406,60 +415,34 @@ class _ModeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final smart = mode == UiOutboundMode.auto;
-    final base = selected
-        ? colorScheme.primary
-        : colorScheme.surfaceContainerHighest;
-    final fg = selected ? colorScheme.onPrimary : colorScheme.onSurface;
-    return ValueListenableBuilder<bool>(
-      valueListenable: FocusHighlightVisibility.visible,
-      builder: (context, _, _) => FilledButton(
-        onPressed: onTap,
-        style:
-            FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              shape: AppShape.all(AppCorner.full),
-              elevation: 0,
-              side: BorderSide.none,
-              foregroundColor: fg,
-            ).copyWith(
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                var color = base;
-                if (!selected && companionFocusVisible(states)) {
-                  color = Color.alphaBlend(
-                    colorScheme.primary.withValues(alpha: 0.18),
-                    color,
-                  );
-                }
-                return WallpaperSurfaceScope.colorOf(context, color);
-              }),
-              overlayColor: WidgetStateProperty.resolveWith(
-                (states) => companionFocusOverlay(context, states),
-              ),
-              side: WidgetStateProperty.resolveWith(
-                (states) => companionFocusSide(context, states),
-              ),
-            ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (smart)
-              Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: Icon(Icons.auto_awesome_rounded, size: 14, color: fg),
-              ),
-            Flexible(
-              child: Text(
-                _modeLabel(context, mode.name),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: fg,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+    final fg = selected
+        ? colorScheme.onSecondaryContainer
+        : colorScheme.onSurfaceVariant;
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.full,
+      isSelected: selected,
+      onPressed: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (smart) ...[
+            GlyphIcon(AppGlyphs.autoMode, size: 14, color: fg),
+            const SizedBox(width: AppSpacing.xs),
           ],
-        ),
+          Flexible(
+            child: Text(
+              _modeLabel(context, mode.name),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.labelLarge?.copyWith(
+                color: fg,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -478,15 +461,18 @@ class _NodeCard extends StatelessWidget {
     final name = nodeName ?? '-';
     final flag = flagToCountryCode(name);
     final emoji = flag == null ? null : countryCodeToEmoji(flag);
-    return CompanionCard(
-      onTap: onTap,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: AppInsets.lg,
+      onPressed: onTap,
       child: Row(
         children: [
           if (emoji != null)
             Text(emoji, style: const TextStyle(fontSize: 26))
           else
-            CompanionIconBadge(icon: Icons.dns_rounded, tone: colorScheme.primary),
-          const SizedBox(width: 14),
+            AppMedallion(icon: AppGlyphs.dns, tone: colorScheme.primary, size: 40),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,7 +483,7 @@ class _NodeCard extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   stripLeadingEmoji(name),
                   maxLines: 1,
@@ -509,8 +495,11 @@ class _NodeCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right_rounded, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          GlyphIcon(
+            AppGlyphs.chevronForward,
+            color: colorScheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -526,37 +515,38 @@ class _TrafficCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    return CompanionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CompanionSectionTitle(
-            icon: Icons.swap_vert_rounded,
-            label: l.trafficUsage,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: CompanionMetric(
-                  icon: Icons.north_rounded,
-                  label: l.upload,
-                  value: state.trafficUp.traffic.show,
-                  tone: colorScheme.primary,
-                ),
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      info: Info(label: l.trafficUsage, glyph: AppGlyphs.swap),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: CompanionMetric(
+                icon: AppGlyphs.arrowUp,
+                label: l.upload,
+                value: state.trafficUp.traffic.show,
+                tone: colorScheme.primary,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CompanionMetric(
-                  icon: Icons.south_rounded,
-                  label: l.download,
-                  value: state.trafficDown.traffic.show,
-                  tone: colorScheme.tertiary,
-                ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: CompanionMetric(
+                icon: AppGlyphs.arrowDown,
+                label: l.download,
+                value: state.trafficDown.traffic.show,
+                tone: colorScheme.tertiary,
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -575,34 +565,40 @@ class _SubscriptionCard extends StatelessWidget {
     final fraction = total > 0 ? used / total : 0.0;
     final expireDate = subscriptionExpireDate(info.expire);
     final perpetual = info.expire > 0 && expireDate == null;
-    return CompanionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CompanionSectionTitle(
-            icon: Icons.data_usage_rounded,
-            label: l.companionActiveProfile,
-          ),
-          const SizedBox(height: 14),
-          if (!info.unlimited) ...[
-            CompanionQuotaBar(fraction: fraction),
-            const SizedBox(height: 10),
-            _DetailRow(
-              label: l.usedTraffic,
-              value: '${used.traffic.show} / ${total.traffic.show}',
-            ),
-          ] else
-            _DetailRow(label: l.usedTraffic, value: used.traffic.show),
-          if (info.expire > 0) ...[
-            const SizedBox(height: 8),
-            _DetailRow(
-              label: l.expireTime,
-              value: perpetual
-                  ? l.perpetualSubscription
-                  : expireDate!.showFull,
-            ),
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      info: Info(label: l.companionActiveProfile, glyph: AppGlyphs.dataUsage),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!info.unlimited) ...[
+              CompanionQuotaBar(fraction: fraction),
+              const SizedBox(height: AppSpacing.sm),
+              _DetailRow(
+                label: l.usedTraffic,
+                value: '${used.traffic.show} / ${total.traffic.show}',
+              ),
+            ] else
+              _DetailRow(label: l.usedTraffic, value: used.traffic.show),
+            if (info.expire > 0) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _DetailRow(
+                label: l.expireTime,
+                value: perpetual
+                    ? l.perpetualSubscription
+                    : expireDate!.showFull,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -626,54 +622,60 @@ class _ProfilesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
-    return CompanionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CompanionSectionTitle(
-            icon: Icons.cloud_sync_rounded,
-            label: l.companionProfiles,
-          ),
-          const SizedBox(height: 12),
-          if (profiles.isEmpty)
-            _ProfileRow(
-              label: fallbackLabel.isEmpty ? '-' : fallbackLabel,
-              active: true,
-              onTap: null,
-            )
-          else
-            for (final profile in profiles)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _ProfileRow(
-                  label: profile.label,
-                  active: profile.active,
-                  onTap: (profile.active || onSelect == null)
-                      ? null
-                      : () => onSelect!(profile.id),
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      info: Info(label: l.companionProfiles, glyph: AppGlyphs.cloudSync),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (profiles.isEmpty)
+              _ProfileRow(
+                label: fallbackLabel.isEmpty ? '-' : fallbackLabel,
+                active: true,
+                onTap: null,
+              )
+            else
+              for (final profile in profiles)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _ProfileRow(
+                    label: profile.label,
+                    active: profile.active,
+                    onTap: (profile.active || onSelect == null)
+                        ? null
+                        : () => onSelect!(profile.id),
+                  ),
                 ),
-              ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: onUpdate,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: Text(l.companionUpdateSubscription),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: onUpdate,
+                    icon: const GlyphIcon(AppGlyphs.refresh, size: 18),
+                    label: Text(l.companionUpdateSubscription),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: onSet,
-                  icon: const Icon(Icons.link_rounded, size: 18),
-                  label: Text(l.companionSetSubscription),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    onPressed: onSet,
+                    icon: const GlyphIcon(AppGlyphs.link, size: 18),
+                    label: Text(l.companionSetSubscription),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -693,59 +695,36 @@ class _ProfileRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final row = Row(
-      children: [
-        Icon(
-          active ? Icons.cloud_done_rounded : Icons.folder_outlined,
-          size: 20,
-          color: active ? colorScheme.primary : colorScheme.onSurfaceVariant,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodyMedium?.copyWith(
-              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.md,
+      isSelected: active,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
+      onPressed: onTap,
+      child: Row(
+        children: [
+          GlyphIcon(
+            active ? AppGlyphs.cloudSync : AppGlyphs.folder,
+            size: 20,
+            color: active ? colorScheme.primary : colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+              ),
             ),
           ),
-        ),
-        if (active)
-          Icon(Icons.check_rounded, size: 18, color: colorScheme.primary),
-      ],
-    );
-    if (onTap == null) return row;
-    return ValueListenableBuilder<bool>(
-      valueListenable: FocusHighlightVisibility.visible,
-      builder: (context, _, _) => FilledButton(
-        onPressed: onTap,
-        style:
-            FilledButton.styleFrom(
-              padding: EdgeInsets.zero,
-              shape: AppShape.md,
-              elevation: 0,
-              side: BorderSide.none,
-              backgroundColor: Colors.transparent,
-              foregroundColor: colorScheme.onSurface,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ).copyWith(
-              backgroundColor: WidgetStateProperty.resolveWith(
-                (states) => companionFocusVisible(states)
-                    ? WallpaperSurfaceScope.colorOf(
-                        context,
-                        colorScheme.primary.withValues(alpha: 0.10),
-                      )
-                    : Colors.transparent,
-              ),
-              overlayColor: WidgetStateProperty.resolveWith(
-                (states) => companionFocusOverlay(context, states),
-              ),
-              side: WidgetStateProperty.resolveWith(
-                (states) => companionFocusSide(context, states),
-              ),
-            ),
-        child: row,
+          if (active)
+            GlyphIcon(AppGlyphs.check, size: 18, color: colorScheme.primary),
+        ],
       ),
     );
   }
@@ -771,7 +750,7 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Flexible(
           child: Text(
             value,
@@ -801,13 +780,19 @@ class _StaleBanner extends StatelessWidget {
         : DateTime.fromMillisecondsSinceEpoch(
             lastOkAtMs!,
           ).getLastUpdateTimeDesc(context);
-    return CompanionCard(
-      tone: tone,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+      decoration: ShapeDecoration(
+        shape: AppShape.lg,
+        color: tone.withValues(alpha: 0.10),
+      ),
       child: Row(
         children: [
-          Icon(Icons.cloud_off_rounded, size: 18, color: tone),
-          const SizedBox(width: 10),
+          GlyphIcon(AppGlyphs.cloudOff, size: 18, color: tone),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               '${_reachabilityMessage(context, reachability)} · $seen',
@@ -828,21 +813,19 @@ class _Placeholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (reachability == CompanionReachability.checking) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: SizedBox.square(dimension: 48, child: CommonCircleLoading()),
+      );
     }
     final tone = companionReachabilityColor(context, reachability);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: AppInsets.xxxl,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CompanionIconBadge(
-              icon: Icons.cloud_off_rounded,
-              tone: tone,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
+            AppMedallion(icon: AppGlyphs.cloudOff, tone: tone, size: 64),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               _reachabilityMessage(context, reachability),
               textAlign: TextAlign.center,
@@ -894,7 +877,7 @@ class _SubscriptionSourceDialog extends StatelessWidget {
           children: [
             for (final profile in profiles)
               ListItem(
-                leading: const Icon(Icons.cloud_outlined),
+                leading: const GlyphIcon(AppGlyphs.cloud),
                 title: Text(
                   profile.label,
                   maxLines: 1,
@@ -908,9 +891,9 @@ class _SubscriptionSourceDialog extends StatelessWidget {
                 onTap: () =>
                     Navigator.of(context).pop((profile: profile, manual: false)),
               ),
-            const Divider(height: 8),
+            const Divider(height: AppSpacing.sm),
             ListItem(
-              leading: Icon(Icons.link_rounded, color: colorScheme.primary),
+              leading: GlyphIcon(AppGlyphs.link, color: colorScheme.primary),
               title: Text(l.companionEnterUrl),
               onTap: () =>
                   Navigator.of(context).pop((profile: null, manual: true)),
@@ -955,24 +938,25 @@ class _NodePickerPageState extends State<_NodePickerPage> {
         : (options.isEmpty ? null : options.first.name);
     final list = ListView(
       controller: _scrollController,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+      ),
       children: [
         TextField(
           decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search_rounded),
+            prefixIcon: const GlyphIcon(AppGlyphs.search),
             hintText: l.companionSelectNode,
             filled: true,
-            border: const OutlineInputBorder(
-              borderRadius: AppRadius.md,
-              borderSide: BorderSide.none,
-            ),
           ),
           onChanged: (value) => setState(() => _keyword = value),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         for (final node in options)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: _NodeOption(
               node: node,
               selected: node.name == widget.group.selected,
@@ -1009,20 +993,42 @@ class _NodeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final flag = flagToCountryCode(node.name);
     final emoji = flag == null ? null : countryCodeToEmoji(flag);
-    return CompanionCard(
-      tone: selected ? colorScheme.primary : null,
+    final delay = node.delayMs;
+    final Widget delayWidget;
+    if (delay == null || delay <= 0) {
+      delayWidget = Text(
+        l.companionNoMeasurement,
+        style: context.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      );
+    } else {
+      final color = colorScheme.delayColor(delay) ?? colorScheme.onSurfaceVariant;
+      delayWidget = AppTag(
+        '$delay ms',
+        mono: true,
+        foreground: color,
+        background: color.withValues(alpha: 0.14),
+      );
+    }
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      isSelected: selected,
       autofocus: autofocus,
-      onTap: onTap,
+      padding: AppInsets.lg,
+      onPressed: onTap,
       child: Row(
         children: [
           if (emoji != null)
             Text(emoji, style: const TextStyle(fontSize: 24))
           else
-            Icon(Icons.dns_outlined, color: colorScheme.onSurfaceVariant),
-          const SizedBox(width: 14),
+            GlyphIcon(AppGlyphs.dns, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1045,11 +1051,11 @@ class _NodeOption extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          CompanionDelayPill(delayMs: node.delayMs),
+          const SizedBox(width: AppSpacing.sm),
+          delayWidget,
           if (selected) ...[
-            const SizedBox(width: 8),
-            Icon(Icons.check_rounded, size: 18, color: colorScheme.primary),
+            const SizedBox(width: AppSpacing.sm),
+            GlyphIcon(AppGlyphs.check, size: 18, color: colorScheme.primary),
           ],
         ],
       ),

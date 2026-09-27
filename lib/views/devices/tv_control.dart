@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:reclash/common/common.dart';
 import 'package:reclash/enum/enum.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/models/companion.dart';
 import 'package:reclash/plugins/companion.dart';
 import 'package:reclash/state.dart';
@@ -123,7 +124,7 @@ class _TvControlViewState extends ConsumerState<TvControlView>
       ),
       if (_running)
         _ActionCard(
-          icon: Icons.qr_code_2_rounded,
+          icon: AppGlyphs.qrCode,
           title: l.companionAddPhone,
           subtitle: l.companionScanTvQr,
           onTap: () => unawaited(_addPhone()),
@@ -139,7 +140,7 @@ class _TvControlViewState extends ConsumerState<TvControlView>
           ),
       if (_running)
         _ActionCard(
-          icon: Icons.restart_alt_rounded,
+          icon: AppGlyphs.reset,
           title: l.companionResetIdentity,
           subtitle: l.companionResetIdentityDesc,
           tone: context.colorScheme.error,
@@ -147,9 +148,14 @@ class _TvControlViewState extends ConsumerState<TvControlView>
         ),
     ];
     final list = ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xxl,
+      ),
       itemCount: children.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (_, index) => children[index],
     );
     return CommonScaffold(
@@ -170,21 +176,23 @@ class _ReceiverHeroCard extends StatelessWidget {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
     final tone = running ? colorScheme.primary : colorScheme.onSurfaceVariant;
-    return CompanionCard(
-      tone: running ? colorScheme.primary : null,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      accent: running ? colorScheme.primary : null,
       padding: const EdgeInsets.all(18),
-      onTap: onChanged == null ? null : () => onChanged!(!running),
+      onPressed: onChanged == null ? null : () => onChanged!(!running),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CompanionIconBadge(
-                icon: running ? Icons.cast_connected_rounded : Icons.cast_rounded,
+              AppMedallion(
+                icon: AppGlyphs.tethering,
                 tone: tone,
                 size: 52,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Text(
                   l.companionEnableReceiver,
@@ -194,7 +202,7 @@ class _ReceiverHeroCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               ExcludeFocus(
                 child: IgnorePointer(
                   child: Switch(value: running, onChanged: (_) {}),
@@ -202,7 +210,7 @@ class _ReceiverHeroCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
             running
                 ? l.companionLanHelp
@@ -227,7 +235,7 @@ class _GroupLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, top: 4),
+      padding: const EdgeInsets.only(left: AppSpacing.xs, top: AppSpacing.xs),
       child: Text(
         label,
         style: context.textTheme.titleSmall?.copyWith(
@@ -246,11 +254,14 @@ class _EmptyPhonesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    return CompanionCard(
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: AppInsets.lg,
       child: Row(
         children: [
-          Icon(Icons.smartphone_rounded, color: colorScheme.onSurfaceVariant),
-          const SizedBox(width: 12),
+          GlyphIcon(AppGlyphs.devices, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               l.companionLanHelp,
@@ -275,14 +286,14 @@ class _TrustedPhoneCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.appLocalizations;
     final colorScheme = context.colorScheme;
-    return CompanionCard(
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: AppInsets.lg,
       child: Row(
         children: [
-          CompanionIconBadge(
-            icon: Icons.smartphone_rounded,
-            tone: colorScheme.primary,
-          ),
-          const SizedBox(width: 14),
+          AppMedallion(icon: AppGlyphs.devices, tone: colorScheme.primary),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,7 +306,7 @@ class _TrustedPhoneCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   DateTime.fromMillisecondsSinceEpoch(
                     phone.lastSeenAtMs,
@@ -323,7 +334,7 @@ class _ActionCard extends StatelessWidget {
     this.tone,
   });
 
-  final IconData icon;
+  final Glyph icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -333,12 +344,15 @@ class _ActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final accent = tone ?? colorScheme.primary;
-    return CompanionCard(
-      onTap: onTap,
+    return CommonCard(
+      type: CommonCardType.filled,
+      radius: AppCorner.xl,
+      padding: AppInsets.lg,
+      onPressed: onTap,
       child: Row(
         children: [
-          CompanionIconBadge(icon: icon, tone: accent),
-          const SizedBox(width: 14),
+          AppMedallion(icon: icon, tone: accent),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,7 +363,7 @@ class _ActionCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   subtitle,
                   style: context.textTheme.bodySmall?.copyWith(
@@ -359,8 +373,11 @@ class _ActionCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right_rounded, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: AppSpacing.sm),
+          GlyphIcon(
+            AppGlyphs.chevronForward,
+            color: colorScheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -515,8 +532,8 @@ class _QrBody extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.timer_outlined,
+              GlyphIcon(
+                AppGlyphs.hourglass,
                 size: 16,
                 color: low ? colorScheme.error : colorScheme.primary,
               ),
@@ -536,8 +553,8 @@ class _QrBody extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.wifi_rounded,
+            GlyphIcon(
+              AppGlyphs.wifi,
               size: 15,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -570,19 +587,19 @@ class _PendingBody extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        CompanionIconBadge(
-          icon: Icons.smartphone_rounded,
+        AppMedallion(
+          icon: AppGlyphs.devices,
           tone: colorScheme.primary,
           size: 56,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(
           pending.clientName,
           style: context.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: ShapeDecoration(
@@ -599,7 +616,7 @@ class _PendingBody extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
         Text(l.companionConfirmOnTv, textAlign: TextAlign.center),
       ],
     );

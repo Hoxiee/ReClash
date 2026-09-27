@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/devices/tv_control.dart';
@@ -137,7 +138,11 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    await tester.tap(find.byIcon(Icons.qr_code_2_rounded));
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is GlyphIcon && w.glyph == AppGlyphs.qrCode,
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(focusedText(), 'Cancel');

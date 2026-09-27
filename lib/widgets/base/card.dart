@@ -111,6 +111,7 @@ class CommonCard extends StatelessWidget {
     this.isError = false,
     this.enterActionsOnRight = false,
     this.skipTraversal = false,
+    this.autofocus = false,
     this.accent,
     this.minimumSize,
     this.visualDensity,
@@ -121,6 +122,7 @@ class CommonCard extends StatelessWidget {
   final bool enterAnimated;
   final bool enterActionsOnRight;
   final bool skipTraversal;
+  final bool autofocus;
   final bool isSelected;
   final bool isError;
   final void Function()? onPressed;
@@ -280,6 +282,7 @@ class CommonCard extends StatelessWidget {
     return switch (type == CommonCardType.filled) {
       true => FilledButton(
         focusNode: focusNode,
+        autofocus: autofocus,
         onLongPress: onLongPress,
         clipBehavior: clipBehavior,
         style:
@@ -314,6 +317,7 @@ class CommonCard extends StatelessWidget {
       ),
       false => OutlinedButton(
         focusNode: focusNode,
+        autofocus: autofocus,
         onLongPress: onLongPress,
         clipBehavior: clipBehavior,
         style:

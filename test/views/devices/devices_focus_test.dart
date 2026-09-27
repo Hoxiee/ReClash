@@ -1,4 +1,5 @@
 import 'package:reclash/common/common.dart';
+import 'package:reclash/icons/icons.dart';
 import 'package:reclash/providers/providers.dart';
 import 'package:reclash/state.dart';
 import 'package:reclash/views/devices/devices.dart';
@@ -111,6 +112,10 @@ void main() {
     return trail;
   }
 
+  final menuButton = find.byWidgetPredicate(
+    (w) => w is GlyphIcon && w.glyph == AppGlyphs.more,
+  );
+
   testWidgets('opens with a focused control, not nothing', (tester) async {
     await pump(tester);
     expect(focusedText(), isNotNull);
@@ -128,7 +133,7 @@ void main() {
 
   testWidgets('the action menu opens focused on its first row', (tester) async {
     await pump(tester);
-    await tester.tap(find.byIcon(Icons.more_vert_rounded).first);
+    await tester.tap(menuButton.first);
     await tester.pumpAndSettle();
     expect(focusedText(), isNotNull);
     expect(find.text('Rename'), findsOneWidget);
@@ -136,7 +141,7 @@ void main() {
 
   testWidgets('focus survives forgetting the focused device', (tester) async {
     await pump(tester);
-    await tester.tap(find.byIcon(Icons.more_vert_rounded).first);
+    await tester.tap(menuButton.first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Forget this device'));
     await tester.pumpAndSettle();
