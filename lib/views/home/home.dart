@@ -191,11 +191,12 @@ class _HomePageView extends ConsumerStatefulWidget {
 
 class _HomePageViewState extends ConsumerState<_HomePageView>
     with SingleTickerProviderStateMixin {
-  static const _switchDuration = Duration(milliseconds: 300);
+  static const _switchDuration = Duration(milliseconds: 220);
 
   late PageController _pageController;
   late final AnimationController _switchController;
   late final CurvedAnimation _switchIn;
+  late final CurvedAnimation _switchPop;
 
   double _incomingDirection = 0;
 
@@ -211,6 +212,10 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
     _switchIn = CurvedAnimation(
       parent: _switchController,
       curve: AppSpringCurves.route,
+    );
+    _switchPop = CurvedAnimation(
+      parent: _switchController,
+      curve: AppSpringCurves.morph,
     );
     ref.listenManual(currentPageLabelProvider, (prev, next) {
       if (prev != next) {
@@ -282,6 +287,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
   @override
   void dispose() {
     _switchIn.dispose();
+    _switchPop.dispose();
     _switchController.dispose();
     _pageController.dispose();
     super.dispose();
@@ -293,13 +299,19 @@ class _HomePageViewState extends ConsumerState<_HomePageView>
       currentNavigationItemsStateProvider.select((state) => state.value.length),
     );
     return AnimatedBuilder(
-      animation: _switchIn,
+      animation: _switchController,
       builder: (context, child) {
         final t = _switchIn.value;
-        final slide = _incomingDirection * (1 - t) * 0.08;
+        final slide = _incomingDirection * (1 - t) * 0.12;
+        // Morph overshoots >1, so the incoming page pops past full size and
+        // settles rather than fading in place.
+        final scale = 0.96 + _switchPop.value * 0.04;
         return Transform.translate(
           offset: Offset(slide * MediaQuery.sizeOf(context).width, 0),
-          child: Opacity(opacity: 0.4 + 0.6 * t, child: child),
+          child: Transform.scale(
+            scale: scale,
+            child: Opacity(opacity: 0.4 + 0.6 * t, child: child),
+          ),
         );
       },
       child: PageView.builder(
