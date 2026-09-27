@@ -409,7 +409,7 @@ class _DashboardPagerState extends ConsumerState<DashboardPager> {
 
 /// Two columns instead of two pages: the orb keeps the left half, everything
 /// the second page used to hide sits in one scroll on the right.
-class _SplitBoard extends StatelessWidget {
+class _SplitBoard extends ConsumerWidget {
   const _SplitBoard({
     required this.heroScrollController,
     required this.detailsScrollController,
@@ -419,38 +419,55 @@ class _SplitBoard extends StatelessWidget {
   final ScrollController detailsScrollController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomInset = BottomInsetScope.of(context);
+    final byedpiMode = ref.watch(
+      effectiveDesyncSettingProvider.select(
+        (state) => state.enabled && state.onlyDpi,
+      ),
+    );
+    final hasProfile = ref.watch(
+      currentProfileProvider.select((state) => state != null),
+    );
+    // With no active profile the right column has nothing but a placeholder
+    // server panel, so drop it and centre the lone empty-state card instead of
+    // pinning it to the left half.
+    final collapsed = !hasProfile && !byedpiMode;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 8, 20, bottomInset + 8),
       child: BottomInsetScope(
         inset: 0,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth:
-                  heroSplitLeftMaxWidth + heroSplitGap + heroSplitRightMaxWidth,
+            constraints: BoxConstraints(
+              maxWidth: collapsed
+                  ? heroSplitLeftMaxWidth
+                  : heroSplitLeftMaxWidth +
+                        heroSplitGap +
+                        heroSplitRightMaxWidth,
             ),
-            child: Row(
-              key: const ValueKey('dashboard-split-board'),
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: HeroConnect(
-                    scrollController: heroScrollController,
-                    mode: HeroLayoutMode.splitLeft,
+            child: collapsed
+                ? HeroConnect(scrollController: heroScrollController)
+                : Row(
+                    key: const ValueKey('dashboard-split-board'),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: HeroConnect(
+                          scrollController: heroScrollController,
+                          mode: HeroLayoutMode.splitLeft,
+                        ),
+                      ),
+                      const SizedBox(width: heroSplitGap),
+                      Expanded(
+                        flex: 6,
+                        child: HeroSplitDetails(
+                          scrollController: detailsScrollController,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: heroSplitGap),
-                Expanded(
-                  flex: 6,
-                  child: HeroSplitDetails(
-                    scrollController: detailsScrollController,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

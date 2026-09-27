@@ -300,6 +300,17 @@ void main() {
     }
   });
 
+  testWidgets('the empty board drops the detail column and centres the card', (
+    tester,
+  ) async {
+    await pumpBoard(tester, size: const Size(1280, 800));
+
+    expect(find.byType(HeroConnect), findsOneWidget);
+    expect(find.byKey(_splitBoard), findsNothing);
+    expect(find.byType(HeroSplitDetails), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('the detail column keeps one edge for every card', (
     tester,
   ) async {
