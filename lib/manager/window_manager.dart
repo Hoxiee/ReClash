@@ -156,6 +156,8 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     commonPrint.log('minimize');
     render?.pause();
     ref.read(routeTrackerProvider.notifier).setVisible(false);
+    ref.read(setupActionProvider.notifier).setVisible(false);
+    unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(false));
     super.onWindowMinimize();
   }
 
@@ -164,6 +166,8 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     commonPrint.log('restore');
     render?.resume();
     ref.read(routeTrackerProvider.notifier).setVisible(true);
+    ref.read(setupActionProvider.notifier).setVisible(true);
+    unawaited(ref.read(connectionDoctorProvider.notifier).setVisible(true));
     super.onWindowRestore();
     _scheduleWindowGeometryCapture();
   }

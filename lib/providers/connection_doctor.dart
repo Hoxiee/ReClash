@@ -40,11 +40,21 @@ class ConnectionDoctor extends _$ConnectionDoctor {
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
   }) {
+    if (!isAndroid) {
+      return Future.value(state);
+    }
     final enabled =
-        !isAndroid ||
         lifecycleState == null ||
         lifecycleState == AppLifecycleState.resumed ||
         lifecycleState == AppLifecycleState.inactive;
+    return _setUpdatesEnabled(enabled);
+  }
+
+  // A minimized desktop window has no live connection to examine: its lifecycle
+  // stays resumed, so the window manager toggles this to sleep active probes.
+  Future<DoctorSnapshot> setVisible(bool visible) => _setUpdatesEnabled(visible);
+
+  Future<DoctorSnapshot> _setUpdatesEnabled(bool enabled) {
     final resumed = !_updatesEnabled && enabled;
     _updatesEnabled = enabled;
     if (resumed && _statusRefreshPending) {

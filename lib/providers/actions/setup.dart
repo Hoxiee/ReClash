@@ -106,11 +106,21 @@ class SetupAction extends _$SetupAction {
     required AppLifecycleState? lifecycleState,
     required bool isAndroid,
   }) {
+    if (!isAndroid) {
+      return;
+    }
     final enabled =
-        !isAndroid ||
         lifecycleState == null ||
         lifecycleState == AppLifecycleState.resumed ||
         lifecycleState == AppLifecycleState.inactive;
+    _setRuntimeEnabled(enabled);
+  }
+
+  // A minimized desktop window has no readout to refresh: its lifecycle stays
+  // resumed, so the window manager toggles this to sleep the 1 Hz traffic poll.
+  void setVisible(bool visible) => _setRuntimeEnabled(visible);
+
+  void _setRuntimeEnabled(bool enabled) {
     if (_runtimeUpdatesEnabled == enabled) {
       return;
     }

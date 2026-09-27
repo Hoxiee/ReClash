@@ -308,7 +308,11 @@ class _HeroOrbState extends ConsumerState<HeroOrb>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    // Off-screen (pager/inactive route) is as motionless as reduce-motion: both
+    // fold into `_still` so the ambient loops stop instead of burning frames.
+    final still =
+        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+        !PageActivityScope.isActiveOf(context);
     if (still == _still) return;
     _still = still;
     if (still) {
