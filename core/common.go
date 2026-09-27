@@ -305,16 +305,29 @@ func currentTestURL() string {
 }
 
 func acquireDelayTestSlot(ctx context.Context) bool {
+	return acquireSlot(ctx, delayTestSlots)
+}
+
+func releaseDelayTestSlot() {
+	releaseSlot(delayTestSlots)
+}
+
+// acquireSlot takes one token from a bounded semaphore, refusing an
+// already-cancelled request before it ever queues; releaseSlot returns a token.
+func acquireSlot(ctx context.Context, slots chan struct{}) bool {
+	if ctx.Err() != nil {
+		return false
+	}
 	select {
-	case delayTestSlots <- struct{}{}:
+	case slots <- struct{}{}:
 		return true
 	case <-ctx.Done():
 		return false
 	}
 }
 
-func releaseDelayTestSlot() {
-	<-delayTestSlots
+func releaseSlot(slots chan struct{}) {
+	<-slots
 }
 
 func routeConfig(cfg *config.Config) *route.Config {

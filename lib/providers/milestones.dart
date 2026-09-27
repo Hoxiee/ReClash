@@ -14,7 +14,7 @@ Future<List<RcxSwitchReport>> milestoneRoutingHistory(Ref ref) async {
       snapshot == null) {
     return const [];
   }
-  final report = await ref.read(coreHandlerProvider).smartRoutingReport();
+  final report = await ref.watch(rcxReportProvider.future);
   if (report == null) return const [];
   final cutoff = report.at - const Duration(days: 1).inMilliseconds;
   return report.history.reversed

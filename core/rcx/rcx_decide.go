@@ -372,14 +372,13 @@ type rcxCandidate struct {
 }
 
 type rcxPolicy struct {
-	LatencyBands        []int
-	Strategy            string
-	RequireUDP          bool
-	AllowDomesticLast   bool
-	Censoring           bool
-	DwellSeconds        int
-	DegradedBandPenalty uint8
-	AbsCeilingMs        int
+	LatencyBands      []int
+	Strategy          string
+	RequireUDP        bool
+	AllowDomesticLast bool
+	Censoring         bool
+	DwellSeconds      int
+	AbsCeilingMs      int
 }
 
 type rcxDecisionInput struct {
@@ -435,6 +434,20 @@ func rcxEligible(c rcxCandidate, in rcxDecisionInput) bool {
 		return false
 	}
 	return true
+}
+
+// eligibleInScreen reports whether node, as built into candidates, clears the
+// decision input's eligibility gate. requireOpen additionally demands proof the
+// node reaches the open world; every screen wants that except lane probe
+// replacement, which only needs the node routable.
+func eligibleInScreen(candidates []rcxCandidate, in rcxDecisionInput, node string, requireOpen bool) bool {
+	for _, candidate := range candidates {
+		if candidate.Name == node {
+			return rcxEligible(candidate, in) &&
+				(!requireOpen || candidate.Facts.OpenWorld == rcxProofProven)
+		}
+	}
+	return false
 }
 
 func rcxKeyOf(c rcxCandidate, in rcxDecisionInput) rcxKey {

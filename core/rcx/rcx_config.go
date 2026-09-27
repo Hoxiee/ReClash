@@ -216,7 +216,6 @@ const (
 	rcxProbeStaggerMs     = 250
 	rcxLiveWindowSeconds  = 60
 	rcxFreshWindowSeconds = 1800
-	rcxDegradedPenalty    = 2
 )
 
 func rcxDefaultLatencyBands() []int {
@@ -384,14 +383,13 @@ func (c rcxConfig) operable() bool {
 
 func (c rcxConfig) policy() rcxPolicy {
 	return rcxPolicy{
-		LatencyBands:        c.latencyBands(),
-		Strategy:            c.Strategy,
-		RequireUDP:          c.RequireUDP,
-		AllowDomesticLast:   c.AllowDomesticLastResort,
-		Censoring:           len(c.CensorCountries) > 0,
-		DwellSeconds:        c.DwellSeconds,
-		DegradedBandPenalty: rcxDegradedPenalty,
-		AbsCeilingMs:        c.AbsCeilingMs,
+		LatencyBands:      c.latencyBands(),
+		Strategy:          c.Strategy,
+		RequireUDP:        c.RequireUDP,
+		AllowDomesticLast: c.AllowDomesticLastResort,
+		Censoring:         len(c.CensorCountries) > 0,
+		DwellSeconds:      c.DwellSeconds,
+		AbsCeilingMs:      c.AbsCeilingMs,
 	}
 }
 

@@ -31,7 +31,7 @@ UpdateParams updateParams(Ref ref) {
 
 @riverpod
 TrayState trayState(Ref ref) {
-  final isStart = ref.watch(runTimeProvider.select((state) => state != null));
+  final isStart = ref.watch(isStartProvider);
   final systemProxy = ref.watch(
     networkSettingProvider.select((state) => state.systemProxy),
   );
@@ -153,7 +153,7 @@ bool shouldPatchSystemDns(Ref ref) {
   if (!autoSetSystemDns) {
     return false;
   }
-  final isStart = ref.watch(runTimeProvider.select((state) => state != null));
+  final isStart = ref.watch(isStartProvider);
   final tunEnable = ref.watch(
     patchClashConfigProvider.select((state) => state.tun.enable),
   );

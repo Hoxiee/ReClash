@@ -345,7 +345,7 @@ class _ProxyDelay extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return Text(
-      delay > 0 ? '$delay' : 'Timeout',
+      context.delayText(delay, suffix: ''),
       maxLines: 1,
       style: context.textTheme.labelSmall?.copyWith(
         color: context.colorScheme.delayColor(delay),

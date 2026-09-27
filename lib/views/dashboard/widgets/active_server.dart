@@ -1,3 +1,4 @@
+import 'package:reclash/common/routing/smart_routing.dart';
 import 'package:reclash/enum/enum.dart';
 import 'package:reclash/models/models.dart';
 import 'package:reclash/providers/providers.dart';
@@ -28,7 +29,11 @@ final activeServerProvider = Provider<ActiveServerInfo>((ref) {
       return _selectServerInfo(displayGroups, groupHint);
     }),
   );
-  final serverName = engineDecided ? engineNode : selected.serverName;
+  final serverName = resolveCurrentNode(
+    engineDecided: engineDecided,
+    engineNode: engineNode,
+    fallback: selected.serverName,
+  );
   final testUrl = selected.testUrl;
   final delay = engineDecided
       ? (routingStatus!.delay > 0 ? routingStatus.delay : null)

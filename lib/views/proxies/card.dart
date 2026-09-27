@@ -64,7 +64,7 @@ class ProxyCard extends ConsumerWidget {
                     child: InkWell(
                       onTap: () => _handleTestCurrentDelay(ref),
                       child: Text(
-                        delay > 0 ? '$delay ms' : 'Timeout',
+                        context.delayText(delay),
                         maxLines: 1,
                         style: context.textTheme.labelSmall?.copyWith(
                           overflow: TextOverflow.ellipsis,

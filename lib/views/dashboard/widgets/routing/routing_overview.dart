@@ -49,7 +49,7 @@ class _RoutingOverviewViewState extends ConsumerState<RoutingOverviewView>
     final reader = widget.reportReader;
     final report = reader != null
         ? await reader()
-        : await _core.smartRoutingReport();
+        : await ref.refresh(rcxReportProvider.future);
     if (report == null || !isCurrent()) {
       return;
     }

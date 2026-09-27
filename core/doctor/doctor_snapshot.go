@@ -65,12 +65,19 @@ func (actor *doctorActor) Snapshot() doctorSnapshot {
 	copy.Incidents = append([]doctorIncident(nil), stored.Incidents...)
 	copy.Stages = append([]doctorStage(nil), stored.Stages...)
 	if copy.State != doctorExamining && copy.FreshUntil != 0 && actor.now().UnixMilli() >= copy.FreshUntil {
-		copy.Health = doctorUnknown
-		copy.Confidence = doctorInsufficient
-		copy.Severity = doctorSeverityInfo
-		copy.CauseCode = "staleEvidence"
-		copy.Layer = ""
+		doctorBlankStaleVerdict(&copy)
 		copy.Actions = doctorActionsFor(copy)
 	}
 	return copy
+}
+
+// doctorBlankStaleVerdict resets a settled verdict to the unknown/stale readout
+// once its evidence has aged out. Snapshot applies it to the value it returns;
+// expireFreshness applies it to the live snapshot before republishing.
+func doctorBlankStaleVerdict(snapshot *doctorSnapshot) {
+	snapshot.Health = doctorUnknown
+	snapshot.Confidence = doctorInsufficient
+	snapshot.Severity = doctorSeverityInfo
+	snapshot.CauseCode = "staleEvidence"
+	snapshot.Layer = ""
 }

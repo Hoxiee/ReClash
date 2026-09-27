@@ -81,12 +81,7 @@ func (e *rcxEngine) screenTargetEligible(node, incumbent string, lane *rcxLaneSt
 		Terrain: e.terrainCurrent(), Incumbent: incumbent, Candidates: candidates,
 		Policy: policy, Now: now,
 	}
-	for _, candidate := range candidates {
-		if candidate.Name == node {
-			return rcxEligible(candidate, input) && candidate.Facts.OpenWorld == rcxProofProven
-		}
-	}
-	return false
+	return eligibleInScreen(candidates, input, node, true)
 }
 
 func (e *rcxEngine) tryAutomaticMainSelect(to string, reason rcxReason, now time.Time) bool {

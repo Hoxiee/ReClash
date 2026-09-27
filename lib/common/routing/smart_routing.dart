@@ -494,3 +494,13 @@ bool routingPinHolds(RcxStatus? status, String node) =>
     status.enabled &&
     status.pinNode.isNotEmpty &&
     status.pinNode == node;
+
+/// The node to surface now: the engine's pick when smart routing has decided
+/// one, otherwise the group's own fallback. Each call site keeps its own gate
+/// for [engineDecided]; only this final selection is shared. Generic over the
+/// fallback so a nullable pick stays nullable and a non-null one stays String.
+T resolveCurrentNode<T extends String?>({
+  required bool engineDecided,
+  required String engineNode,
+  required T fallback,
+}) => engineDecided ? engineNode as T : fallback;

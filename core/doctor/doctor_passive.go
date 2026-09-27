@@ -118,11 +118,7 @@ func (actor *doctorActor) expireFreshness(token uint64) {
 	if (token != 0 && token != actor.freshnessToken) || !actor.freshnessExpired() {
 		return
 	}
-	actor.snapshot.Health = doctorUnknown
-	actor.snapshot.Confidence = doctorInsufficient
-	actor.snapshot.Severity = doctorSeverityInfo
-	actor.snapshot.CauseCode = "staleEvidence"
-	actor.snapshot.Layer = ""
+	doctorBlankStaleVerdict(&actor.snapshot)
 	actor.snapshot.FreshUntil = 0
 	actor.changed()
 }

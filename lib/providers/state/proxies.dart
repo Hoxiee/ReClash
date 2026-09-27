@@ -48,7 +48,7 @@ List<Group> _rcxFirst(List<Group> groups) {
 
 @riverpod
 ProxyState proxyState(Ref ref) {
-  final isStart = ref.watch(runTimeProvider.select((state) => state != null));
+  final isStart = ref.watch(isStartProvider);
   final systemProxySelector = ref.watch(
     networkSettingProvider.select(
       (state) => SystemProxySelectorState(
@@ -259,7 +259,11 @@ String? selectedProxyName(Ref ref, String groupName) {
         (state) => state?.enabled == true ? state!.node : '',
       ),
     );
-    return engineNode.isNotEmpty ? engineNode : group?.realNow;
+    return resolveCurrentNode(
+      engineDecided: engineNode.isNotEmpty,
+      engineNode: engineNode,
+      fallback: group?.realNow,
+    );
   }
   final proxyName = ref.watch(proxyNameProvider(groupName));
   return group?.getCurrentSelectedName(proxyName ?? '');

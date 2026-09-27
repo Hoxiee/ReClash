@@ -333,7 +333,7 @@ class _ServerZone extends ConsumerWidget {
                   if (delay != null && delay > 0) ...[
                     const SizedBox(height: 3),
                     Text(
-                      '$delay ms',
+                      context.delayText(delay),
                       textAlign: TextAlign.center,
                       style: context.textTheme.labelSmall?.copyWith(
                         color:
@@ -535,11 +535,11 @@ class _SignalBars extends StatelessWidget {
       color = dim;
     } else {
       color = colorScheme.delayColor(delay) ?? colorScheme.success;
-      level = delay! < 150
+      level = delay! < delayGoodThreshold
           ? 4
-          : delay! < 300
+          : delay! < delayFairThreshold
           ? 3
-          : delay! < 600
+          : delay! < delayDegradedThreshold
           ? 2
           : 1;
     }

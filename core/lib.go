@@ -18,7 +18,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"syscall"
-	"time"
 	"unsafe"
 
 	"github.com/metacubex/mihomo/component/dialer"
@@ -385,12 +384,10 @@ func quickSetup(callback unsafe.Pointer, initParamsChar *C.char, setupParamsChar
 			invokeResult(callback, err.Error())
 			return
 		}
-		odometerInstance.NoteUp(time.Now(), takeOdoStartReason())
-		isRunning.Store(true)
+		noteSessionUp()
 		message := handleSetupConfig(setupParams)
 		if message != "" {
-			odometerInstance.NoteDown(time.Now(), false)
-			isRunning.Store(false)
+			noteSessionDown()
 		}
 		invokeResult(callback, message)
 	}()

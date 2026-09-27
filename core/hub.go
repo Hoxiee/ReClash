@@ -62,9 +62,7 @@ func handleInitClash(params *InitParams) bool {
 func handleStartListener() bool {
 	configMu.Lock()
 	defer configMu.Unlock()
-	odometerInstance.NoteUp(time.Now(), takeOdoStartReason())
-	isRunning.Store(true)
-	rcxEngineInstance.OnRunning(true)
+	noteSessionUp()
 	updateListeners(currentConfig)
 	syncTunUp()
 	resolver.ResetConnection()
@@ -72,12 +70,26 @@ func handleStartListener() bool {
 	return requestedTunError() == nil
 }
 
-func handleStopListener() bool {
-	configMu.Lock()
-	defer configMu.Unlock()
+// noteSessionUp flips the flags that updateListeners and the RCX engine gate
+// on. isRunning must be set before listeners are (re)created, and OnRunning
+// tells the engine it may start switching; quickSetup shares this so its
+// Android start path does not silently leave the engine thinking it is down.
+func noteSessionUp() {
+	odometerInstance.NoteUp(time.Now(), takeOdoStartReason())
+	isRunning.Store(true)
+	rcxEngineInstance.OnRunning(true)
+}
+
+func noteSessionDown() {
 	odometerInstance.NoteDown(time.Now(), false)
 	isRunning.Store(false)
 	rcxEngineInstance.OnRunning(false)
+}
+
+func handleStopListener() bool {
+	configMu.Lock()
+	defer configMu.Unlock()
+	noteSessionDown()
 	tunPaused.Store(false)
 	stopListeners()
 	resolver.ResetConnection()

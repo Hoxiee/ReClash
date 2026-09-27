@@ -122,7 +122,7 @@ extension ColorSchemeExtension on ColorScheme {
   Color? delayColor(int? delay) {
     if (delay == null) return null;
     if (delay < 0) return error;
-    if (delay < 600) return success;
+    if (delay < delayDegradedThreshold) return success;
     return cautionColor;
   }
 
@@ -155,3 +155,10 @@ extension ColorSchemeExtension on ColorScheme {
 // Fixed caution amber for the mid-tier between primary and error (slow delay,
 // quota 70-90%); a set hex, not scheme-derived, so it reads on light and dark.
 const cautionColor = Color(0xFFC57F0A);
+
+// Shared latency thresholds (ms). A delay at or above [delayDegradedThreshold]
+// is the caution/degraded tier that [delayColor] and the hero health band key
+// off; the good/fair bounds split the healthy range for the signal bars.
+const delayGoodThreshold = 150;
+const delayFairThreshold = 300;
+const delayDegradedThreshold = 600;

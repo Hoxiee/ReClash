@@ -404,10 +404,15 @@ func (rcxCoreRuntime) Country(node string) string {
 		return ""
 	}
 	address := rcxResolveHost(rcx.HostOf(proxy.Addr()))
-	if !address.IsValid() {
-		return ""
-	}
-	if !rcxMmdbUsable(time.Now()) {
+	return rcxMmdbCountry(address)
+}
+
+// rcxMmdbCountry reads the uppercase ISO country for address from the local
+// mmdb, or "" when the address is invalid, the database is unusable, or it has
+// no answer. It guards mmdb.IPInstance(), which log.Fatalln's behind a
+// sync.Once when the file is missing or truncated.
+func rcxMmdbCountry(address netip.Addr) string {
+	if !address.IsValid() || !rcxMmdbUsable(time.Now()) {
 		return ""
 	}
 	codes := mmdb.IPInstance().LookupCode(address.AsSlice())
@@ -436,14 +441,7 @@ func (rcxCoreRuntime) Locate(ctx context.Context, node, echo string) string {
 		return country
 	}
 	address := rcxParseEchoIP(body)
-	if !address.IsValid() || !rcxMmdbUsable(time.Now()) {
-		return ""
-	}
-	codes := mmdb.IPInstance().LookupCode(address.AsSlice())
-	if len(codes) == 0 {
-		return ""
-	}
-	return strings.ToUpper(codes[0])
+	return rcxMmdbCountry(address)
 }
 
 func rcxParseEchoCountry(body []byte) string {
@@ -498,32 +496,20 @@ func rcxEchoBody(ctx context.Context, proxy *adapter.Proxy, echo string) []byte 
 	if err != nil {
 		return nil
 	}
-	transport := &http.Transport{
-		DialContext: func(context.Context, string, string) (net.Conn, error) {
-			return conn, nil
-		},
-		DisableKeepAlives: true,
-	}
+	var tlsConn net.Conn
 	if req.URL.Scheme == "https" {
 		tlsConfig, err := ca.GetTLSConfig(ca.Option{})
 		if err != nil {
 			return nil
 		}
 		tlsConfig.ServerName = req.URL.Hostname()
-		tlsConn := mihomoTLS.Client(conn, tlsConfig)
-		if err := tlsConn.HandshakeContext(ctx); err != nil {
+		wrapped := mihomoTLS.Client(conn, tlsConfig)
+		if err := wrapped.HandshakeContext(ctx); err != nil {
 			return nil
 		}
-		transport.DialTLSContext = func(context.Context, string, string) (net.Conn, error) {
-			return tlsConn, nil
-		}
+		tlsConn = wrapped
 	}
-	client := http.Client{
-		Transport: transport,
-		CheckRedirect: func(*http.Request, []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
+	client := rcxPinnedClient(conn, tlsConn)
 	defer client.CloseIdleConnections()
 	resp, err := client.Do(req)
 	if err != nil {
@@ -538,6 +524,30 @@ func rcxEchoBody(ctx context.Context, proxy *adapter.Proxy, echo string) []byte 
 		return nil
 	}
 	return body
+}
+
+// rcxPinnedClient serves a single request over a connection we dialed ourselves:
+// the dial hooks always hand it back, keep-alive is off so it is not pooled, and
+// redirects are surfaced rather than followed. A non-nil tlsConn is the completed
+// mihomo-TLS handshake and carries HTTPS; conn alone carries plaintext.
+func rcxPinnedClient(conn, tlsConn net.Conn) http.Client {
+	transport := &http.Transport{
+		DialContext: func(context.Context, string, string) (net.Conn, error) {
+			return conn, nil
+		},
+		DisableKeepAlives: true,
+	}
+	if tlsConn != nil {
+		transport.DialTLSContext = func(context.Context, string, string) (net.Conn, error) {
+			return tlsConn, nil
+		}
+	}
+	return http.Client{
+		Transport: transport,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 func rcxEchoMetadata(echo string) (constant.Metadata, error) {
@@ -703,17 +713,7 @@ func rcxVerifyTLS(ctx context.Context, conn net.Conn, address string) rcx.ProbeO
 		return rcx.ProbeOverloaded
 	}
 	req = req.WithContext(ctx)
-	client := http.Client{
-		Transport: &http.Transport{
-			DialTLSContext: func(context.Context, string, string) (net.Conn, error) {
-				return tlsConn, nil
-			},
-			DisableKeepAlives: true,
-		},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
+	client := rcxPinnedClient(conn, tlsConn)
 	defer client.CloseIdleConnections()
 	resp, err := client.Do(req)
 	if err != nil {

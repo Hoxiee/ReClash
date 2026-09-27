@@ -96,6 +96,15 @@ extension BuildContextExtension on BuildContext {
 
   AppLocalizations get appLocalizations => AppLocalizations.of(this);
 
+  // A positive delay renders as the number plus its unit (optionally with the
+  // approximate marker); anything else is a timeout and localizes rather than
+  // hardcoding 'Timeout'. `suffix` keeps each call site's unit intact ('' for
+  // no unit, ' ms' for the common case).
+  String delayText(int delay, {String suffix = ' ms', bool approx = false}) =>
+      delay > 0
+      ? '${approx ? '≈' : ''}$delay$suffix'
+      : appLocalizations.timeout;
+
   T? findLastStateOfType<T extends State>() {
     T? state;
 

@@ -429,7 +429,7 @@ class RoutingDelayPill extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
         child: Text(
-          approx ? '≈$delay ms' : '$delay ms',
+          context.delayText(delay, approx: approx),
           style: context.textTheme.labelMedium?.copyWith(
             fontWeight: approx ? FontWeight.w500 : FontWeight.w700,
             color: color,
@@ -698,8 +698,8 @@ class RoutingCandidateRow extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Text(
             switch (delay) {
-              > 0 when hosted => '≈$delay ms',
-              > 0 => '$delay ms',
+              > 0 when hosted => context.delayText(delay, approx: true),
+              > 0 => context.delayText(delay),
               _ when candidate.block == 'disproven' || candidate.coolFor > 0 =>
                 appLocalizations.smartRoutingNoAnswer,
               _ => appLocalizations.smartRoutingUntested,

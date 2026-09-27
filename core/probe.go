@@ -345,17 +345,9 @@ func readProbeBody(body io.Reader, maxBody int64, until func(string) bool) strin
 }
 
 func acquireProbeSlot(ctx context.Context) bool {
-	if ctx.Err() != nil {
-		return false
-	}
-	select {
-	case probeSlots <- struct{}{}:
-		return true
-	case <-ctx.Done():
-		return false
-	}
+	return acquireSlot(ctx, probeSlots)
 }
 
 func releaseProbeSlot() {
-	<-probeSlots
+	releaseSlot(probeSlots)
 }

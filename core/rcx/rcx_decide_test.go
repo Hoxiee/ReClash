@@ -10,11 +10,10 @@ var rcxTestBands = []int{150, 300, 600, 1200}
 
 func rcxTestPolicy() rcxPolicy {
 	return rcxPolicy{
-		LatencyBands:        rcxTestBands,
-		AllowDomesticLast:   true,
-		DwellSeconds:        90,
-		DegradedBandPenalty: 2,
-		AbsCeilingMs:        500,
+		LatencyBands:      rcxTestBands,
+		AllowDomesticLast: true,
+		DwellSeconds:      90,
+		AbsCeilingMs:      500,
 	}
 }
 
@@ -1319,5 +1318,23 @@ func TestDecideDoesNotStrandTrafficHomeWhenAForeignExitDies(t *testing.T) {
 
 	if got.Switch || got.Reason != rcxReasonStranded {
 		t.Fatalf("decision = %+v, want a censored foreign death held, not surfaced at home", got)
+	}
+}
+
+func TestDiscoveryLatencyIgnoresADeadHostPing(t *testing.T) {
+	cases := []struct {
+		name string
+		cand rcxCandidate
+		want int
+	}{
+		{"median wins over host", rcxCandidate{MedianMs: 200, HostMs: 30}, 200},
+		{"live host ping when unmeasured", rcxCandidate{HostMs: 30}, 30},
+		{"dead host ping never ranks", rcxCandidate{HostMs: 30, HostDead: true}, 0},
+		{"nothing known", rcxCandidate{}, 0},
+	}
+	for _, tc := range cases {
+		if got := rcxDiscoveryLatency(tc.cand); got != tc.want {
+			t.Errorf("%s: rcxDiscoveryLatency = %d, want %d", tc.name, got, tc.want)
+		}
 	}
 }

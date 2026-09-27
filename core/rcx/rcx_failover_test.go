@@ -590,3 +590,43 @@ func TestStallHoldsAnIncumbentThatStillAnswers(t *testing.T) {
 		t.Fatalf("selected = %q, want a stalled-but-unrefuted incumbent held, not walked off on an idle pause", runtime.selected)
 	}
 }
+
+func TestStandbysBarALastResortCappedNode(t *testing.T) {
+	runtime := newFakeRuntime()
+	runtime.members = []rcxMember{
+		{Name: "current", ID: "current-id", Provider: "zero", Transport: "ws", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "good", ID: "good-id", Provider: "one", Transport: "ws", Type: "Vless", Port: 443, SupportsUDP: true},
+		{Name: "capped", ID: "capped-id", Provider: "two", Transport: "grpc", Type: "Vless", Port: 443, SupportsUDP: true},
+	}
+	engine := newTestEngine(runtime, "ru")
+	engine.incumbent = "current"
+
+	good := rcxNode("good", foreignProven())
+	capped := rcxNode("capped", foreignProven())
+	capped.RuleLastResort = true
+	// Whitelist terrain admits the last-resort row instead of blocking it, so the
+	// capped node clears the Block gate and only the standby verdict guard can bar
+	// it — the exact line the shared pickStandbys must keep for lanes too.
+	input := rcxDecisionInput{
+		Terrain:    rcxTerrainWhitelist,
+		Incumbent:  "current",
+		Candidates: []rcxCandidate{good, capped},
+		Policy:     rcxTestPolicy(),
+		Now:        runtime.Now(),
+	}
+
+	engine.rebuildStandbys(rcxRank(input))
+
+	got := engine.snapshot.Standbys[engine.envKey]
+	hasGood, hasCapped := false, false
+	for _, key := range got {
+		hasGood = hasGood || key == "good-id"
+		hasCapped = hasCapped || key == "capped-id"
+	}
+	if !hasGood {
+		t.Fatalf("standbys = %v, want the proven node kept as a spare", got)
+	}
+	if hasCapped {
+		t.Fatalf("standbys = %v, want a last-resort-capped node barred from the spare set", got)
+	}
+}

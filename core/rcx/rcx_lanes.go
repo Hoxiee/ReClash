@@ -219,12 +219,7 @@ func (e *rcxEngine) laneProbeReplacement(lane *rcxLaneState, node string, now ti
 		Policy:         e.lanePolicy(lane.config),
 		Now:            now,
 	}
-	for _, candidate := range candidates {
-		if candidate.Name == node {
-			return rcxEligible(candidate, input)
-		}
-	}
-	return false
+	return eligibleInScreen(candidates, input, node, false)
 }
 
 func (e *rcxEngine) queueLaneRecovery() {

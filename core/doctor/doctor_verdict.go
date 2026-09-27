@@ -7,16 +7,23 @@ import (
 
 func (actor *doctorActor) updateExamVerdict() {
 	verdict := reduceDoctorEvidence(actor.snapshot.Evidence, false, actor.pathContext(), actor.requiresAppIngressProof())
+	actor.assignVerdict(verdict, false)
+	actor.snapshot.Progress.Completed = doctorCompletedProbeCount(actor.snapshot.Evidence, actor.requireAppIngressProof)
+}
+
+// assignVerdict writes the fields the mid-exam refresh and the final verdict
+// both derive from: the health readout, the offending layer's consequences,
+// and the staged path. terminal selects the terminal stage view.
+func (actor *doctorActor) assignVerdict(verdict doctorVerdict, terminal bool) {
 	actor.snapshot.Health = verdict.Health
 	actor.snapshot.Confidence = verdict.Confidence
 	actor.snapshot.CauseCode = verdict.CauseCode
 	actor.snapshot.Layer = verdict.Layer
 	actor.snapshot.Severity = doctorSeverityFor(verdict.Health)
-	actor.snapshot.Progress.Completed = doctorCompletedProbeCount(actor.snapshot.Evidence, actor.requireAppIngressProof)
 	if verdict.Layer != "" {
 		markDoctorConsequences(actor.snapshot.Evidence, verdict.Layer)
 	}
-	actor.snapshot.Stages = doctorStages(actor.snapshot.Evidence, actor.pathContext(), false)
+	actor.snapshot.Stages = doctorStages(actor.snapshot.Evidence, actor.pathContext(), terminal)
 }
 
 func doctorCompletedProbeCount(evidence []doctorEvidence, requireAppIngressProof bool) int {
@@ -59,15 +66,7 @@ func (actor *doctorActor) requiresAppIngressProof() bool {
 func (actor *doctorActor) applyVerdict(terminal bool) {
 	verdict := reduceDoctorEvidence(actor.snapshot.Evidence, terminal, actor.pathContext(), actor.requiresAppIngressProof())
 	actor.snapshot.State = verdict.State
-	actor.snapshot.Health = verdict.Health
-	actor.snapshot.Confidence = verdict.Confidence
-	actor.snapshot.CauseCode = verdict.CauseCode
-	actor.snapshot.Layer = verdict.Layer
-	actor.snapshot.Severity = doctorSeverityFor(verdict.Health)
-	if verdict.Layer != "" {
-		markDoctorConsequences(actor.snapshot.Evidence, verdict.Layer)
-	}
-	actor.snapshot.Stages = doctorStages(actor.snapshot.Evidence, actor.pathContext(), terminal)
+	actor.assignVerdict(verdict, terminal)
 	if terminal {
 		actor.snapshot.Progress.Phase = "complete"
 		actor.snapshot.Progress.Completed = actor.snapshot.Progress.Total

@@ -208,12 +208,7 @@ func (e *rcxEngine) provesOpenRecovery(node string, now time.Time) bool {
 		Policy:         e.cfg.policy(),
 		Now:            now,
 	}
-	for _, candidate := range candidates {
-		if candidate.Name == node {
-			return rcxEligible(candidate, input) && candidate.Facts.OpenWorld == rcxProofProven
-		}
-	}
-	return false
+	return eligibleInScreen(candidates, input, node, true)
 }
 
 func (e *rcxEngine) finishProbe() {
