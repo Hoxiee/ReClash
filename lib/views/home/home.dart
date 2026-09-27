@@ -89,9 +89,7 @@ class _HomeShell extends ConsumerWidget {
     // The bar is only collapsed in desktop view, never unmounted: one tree
     // shape across view modes.
     return Material(
-      color: wallpaperActive
-          ? Colors.transparent
-          : context.colorScheme.surface,
+      color: wallpaperActive ? Colors.transparent : context.colorScheme.surface,
       child: Stack(
         children: [
           Positioned.fill(

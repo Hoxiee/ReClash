@@ -604,9 +604,7 @@ class _AccessViewState extends ConsumerState<AccessView> {
         ref.watch(wallpaperImageProvider).asData?.value != null;
     return Material(
       key: const ValueKey('access-control-panel'),
-      color: wallpaperActive
-          ? Colors.transparent
-          : context.colorScheme.surface,
+      color: wallpaperActive ? Colors.transparent : context.colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: Column(

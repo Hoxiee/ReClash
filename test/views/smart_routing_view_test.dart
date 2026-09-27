@@ -62,7 +62,11 @@ Future<ProviderContainer> _pump(
   container
       .read(viewSizeProvider.notifier)
       .update((_) => const Size(1000, 800));
-  container.read(smartRoutingSettingProvider.notifier).value = props;
+  // The view gates its tuning sections on `unlocked`; an active config always
+  // migrates enabled⇒unlocked, so mirror that invariant for in-memory props.
+  container.read(smartRoutingSettingProvider.notifier).value = props.copyWith(
+    unlocked: props.unlocked || props.enabled,
+  );
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -154,12 +158,12 @@ void main() {
       );
 
       await _openAdvanced(tester);
-      await _reveal(
-        tester,
-        find.text(title),
-        delta: 300,
-        scrollable: find.byType(Scrollable).last,
-      );
+      final sheet = find.byType(Scrollable).last;
+      await _reveal(tester, find.text(title), delta: 300, scrollable: sheet);
+      // scrollUntilVisible parks a deep item flush under the floating app bar,
+      // where the blur overlay eats the tap; nudge it clear before tapping.
+      await tester.drag(sheet, const Offset(0, 140));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(title), warnIfMissed: false);
       await tester.pumpAndSettle();
 
@@ -590,8 +594,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final props = container.read(smartRoutingSettingProvider);
-    expect(props.enabled, isTrue);
-    expect(props.rcxParams.enabled, isTrue);
+    expect(props.unlocked, isTrue);
+    expect(props.enabled, isFalse);
     expect(props.preset, SmartRoutingPreset.off);
     expect(props.openMarkers, isNotEmpty);
     expect(props.canaryForeign, isNotEmpty);
@@ -622,6 +626,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Enable anyway'));
     await tester.pumpAndSettle();
-    expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
+    expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
   });
 }

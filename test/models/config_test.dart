@@ -619,6 +619,32 @@ void main() {
     });
   });
 
+  group('SmartRoutingProps migration', () {
+    test('safeFromJson lifts a pre-split enabled config to unlocked', () {
+      final restored = SmartRoutingProps.safeFromJson({'enabled': true});
+
+      expect(restored.enabled, isTrue);
+      expect(restored.unlocked, isTrue);
+    });
+
+    test('safeFromJson leaves a disabled legacy config locked', () {
+      final restored = SmartRoutingProps.safeFromJson({'enabled': false});
+
+      expect(restored.enabled, isFalse);
+      expect(restored.unlocked, isFalse);
+    });
+
+    test('safeFromJson keeps an explicit unlocked flag over enabled', () {
+      final restored = SmartRoutingProps.safeFromJson({
+        'enabled': false,
+        'unlocked': true,
+      });
+
+      expect(restored.enabled, isFalse);
+      expect(restored.unlocked, isTrue);
+    });
+  });
+
   group('Config composite serialization', () {
     test('DAVProps obfuscates and restores its password', () {
       const props = DAVProps(

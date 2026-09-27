@@ -179,7 +179,7 @@ void main() {
       await tester.tap(find.text('Enable anyway'));
       await tester.pumpAndSettle();
       final props = container.read(smartRoutingSettingProvider);
-      expect(props.enabled, isTrue);
+      expect(props.unlocked, isTrue);
       expect(props.rcxParams.openMarkers, isNotEmpty);
       expect(props.rcxParams.canaryForeign, isNotEmpty);
       expect(props.censorCountries, isEmpty);
@@ -187,9 +187,9 @@ void main() {
 
       await _show(tester, container, _subscription());
       await _select(tester, 'Iran');
-      expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
+      expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
       await _select(tester, 'Other');
-      expect(container.read(smartRoutingSettingProvider).enabled, isTrue);
+      expect(container.read(smartRoutingSettingProvider).unlocked, isTrue);
       expect(
         container.read(smartRoutingSettingProvider).openMarkers,
         isNotEmpty,

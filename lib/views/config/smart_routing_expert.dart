@@ -356,7 +356,10 @@ Future<void> _handleImport(BuildContext context, WidgetRef ref) async {
   SmartRoutingProps imported;
   try {
     final decoded = jsonDecode(utf8.decode(await file.readBytes()));
-    imported = SmartRoutingProps.fromJson(decoded as Map<String, Object?>);
+    // safeFromJson, not fromJson: a file exported before the unlocked/enabled
+    // split has no `unlocked` key, and a raw parse would leave an Auto config
+    // enabled yet locked, which the view gates on.
+    imported = SmartRoutingProps.safeFromJson(decoded as Map<String, Object?>);
   } catch (_) {
     dialogs.showNotifier(
       appLocalizations.smartRoutingImportFailed,
