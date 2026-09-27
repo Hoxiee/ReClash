@@ -302,7 +302,7 @@ class _TrafficDataItem extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Flexible(
                 flex: 1,
-                child: _RollingTrafficValue(
+                child: RollingDigits(
                   value: value.traffic.value,
                   rolling: rolling,
                 ),
@@ -312,69 +312,6 @@ class _TrafficDataItem extends StatelessWidget {
         ),
         Text(value.traffic.unit, style: context.textTheme.bodySmall?.toLighter),
       ],
-    );
-  }
-}
-
-class _RollingTrafficValue extends StatelessWidget {
-  const _RollingTrafficValue({required this.value, required this.rolling});
-
-  final String value;
-  final bool rolling;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Text(
-      value,
-      key: ValueKey(value),
-      style: context.textTheme.bodySmall,
-      maxLines: 1,
-    );
-    if (!rolling || context.disableAnimations) return text;
-    return Semantics(
-      label: value,
-      excludeSemantics: true,
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.centerLeft,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var index = 0; index < value.length; index++)
-              ClipRect(
-                key: ValueKey(value.length - index),
-                child: AnimatedSwitcher(
-                  duration: context.motionDuration(
-                    const Duration(milliseconds: 280),
-                  ),
-                  transitionBuilder: (child, animation) {
-                    final offset =
-                        Tween<Offset>(
-                          begin: const Offset(0, 0.9),
-                          end: Offset.zero,
-                        ).animate(
-                          CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOut,
-                          ),
-                        );
-                    return SlideTransition(
-                      position: offset,
-                      child: FadeTransition(opacity: animation, child: child),
-                    );
-                  },
-                  child: Text(
-                    value[index],
-                    key: ValueKey(value[index]),
-                    style: context.textTheme.bodySmall?.copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

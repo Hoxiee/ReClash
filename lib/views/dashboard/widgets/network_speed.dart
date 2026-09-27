@@ -70,8 +70,8 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          _getLastTraffic(traffics).speedText,
+                        _SpeedReadout(
+                          traffic: _getLastTraffic(traffics),
                           style: context.textTheme.bodySmall?.copyWith(
                             color: color,
                           ),
@@ -98,6 +98,49 @@ class _NetworkSpeedState extends State<NetworkSpeed> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SpeedReadout extends StatelessWidget {
+  const _SpeedReadout({required this.traffic, required this.style});
+
+  final Traffic traffic;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SpeedSide(arrow: '↑', show: traffic.up.traffic, style: style),
+        const SizedBox(width: AppSpacing.md),
+        _SpeedSide(arrow: '↓', show: traffic.down.traffic, style: style),
+      ],
+    );
+  }
+}
+
+class _SpeedSide extends StatelessWidget {
+  const _SpeedSide({
+    required this.arrow,
+    required this.show,
+    required this.style,
+  });
+
+  final String arrow;
+  final TrafficShow show;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('$arrow ', style: style),
+        RollingDigits(value: show.value, style: style),
+        Text('${show.unit}/s', style: style),
+      ],
     );
   }
 }

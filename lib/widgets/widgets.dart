@@ -29,6 +29,7 @@ export 'base/medallion.dart';
 export 'input/input.dart';
 export 'list/keep_scope.dart';
 export 'effect/keyed_animated_list.dart';
+export 'effect/rolling_digits.dart';
 export 'chart/line_chart.dart';
 export 'list/list.dart';
 export 'feedback/loading.dart';
