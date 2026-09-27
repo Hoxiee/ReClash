@@ -70,12 +70,12 @@ func (l *rcxLedger) NoteRoleQualitySample(node, envKey, marker string, role rcxR
 	state.QualitySamples = mergeQualitySamples(state.QualitySamples, []rcxQualitySample{sample})
 }
 
-func (l *rcxLedger) QualityMedian(node, envKey, marker string, epoch uint64, now time.Time) (ms, count int) {
+func (l *rcxLedger) QualityMedian(node, envKey, marker string, epoch uint64, now time.Time, ttl time.Duration) (ms, count int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	// Ranking keeps a median as long as the open proof it rode in on: a tighter
-	// window would blank MedianMs between probes and drop ranking to host-ping.
-	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, l.policy.ProofTTL)
+	// The median must ride the same freshness window the open proof does (the
+	// scaled proof TTL, passed in) so a proven node never blanks to host-ping.
+	fresh := l.qualitySamplesLocked(node, envKey, marker, epoch, now, ttl)
 	if len(fresh) == 0 {
 		return 0, 0
 	}

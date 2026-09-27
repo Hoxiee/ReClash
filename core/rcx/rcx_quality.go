@@ -107,9 +107,9 @@ func (e *rcxEngine) finishQuality(now time.Time) {
 
 func (e *rcxEngine) qualityEpoch() uint64 { return uint64(e.envSince.UnixNano()) ^ e.sessionEpoch }
 
-func (e *rcxEngine) comparableMedian(key string, now time.Time) int {
+func (e *rcxEngine) comparableMedian(key string, now time.Time, proofTTL time.Duration) int {
 	for _, marker := range e.activeMarkers(rcxRoleOpen, now) {
-		if ms, count := e.ledger.QualityMedian(key, e.envKey, rcxMarkerID(rcxRoleOpen, marker), e.qualityEpoch(), now); count > 0 {
+		if ms, count := e.ledger.QualityMedian(key, e.envKey, rcxMarkerID(rcxRoleOpen, marker), e.qualityEpoch(), now, proofTTL); count > 0 {
 			return ms
 		}
 	}

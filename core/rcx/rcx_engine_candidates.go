@@ -144,7 +144,7 @@ func (e *rcxEngine) candidatesFor(members []rcxMember, incumbent string) []rcxCa
 			Order:            e.orderOf(key, member.Order),
 			Facts:            facts,
 			Evidence:         e.ledger.Evidence(key, e.envKey, now, live, fresh),
-			MedianMs:         e.comparableMedian(key, now),
+			MedianMs:         e.comparableMedian(key, now, proofTTL),
 			Recurrence:       e.ledger.Recurrence(key, e.envKey, now),
 			QualityConfirmed: e.qualityConfirmed(key, now),
 			HostMs:           member.HostMs,

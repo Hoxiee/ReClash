@@ -204,7 +204,7 @@ func TestLedgerQualityRejectsMixedRoleMarkerEpochAndOldSamples(t *testing.T) {
 	ledger.NoteRoleQualitySample("node", "env", "marker", rcxRoleDomestic, 7, 10, now)
 	ledger.NoteQualitySample("node", "env", "marker", 7, 90, now.Add(-rcxLedgerProofTTL+time.Minute))
 	ledger.NoteQualitySample("node", "env", "marker", 7, 100, now)
-	if ms, count := ledger.QualityMedian("node", "env", "marker", 7, now); ms != 100 || count != 2 {
+	if ms, count := ledger.QualityMedian("node", "env", "marker", 7, now, rcxLedgerProofTTL); ms != 100 || count != 2 {
 		t.Fatalf("quality median/count = %d/%d, want 100/2", ms, count)
 	}
 	latest, ok := ledger.LatestQualitySample("node", "env", "marker", 7, now)
@@ -212,7 +212,7 @@ func TestLedgerQualityRejectsMixedRoleMarkerEpochAndOldSamples(t *testing.T) {
 		t.Fatalf("latest comparable sample = %+v, %v", latest, ok)
 	}
 	ledger.SetFingerprints("changed", "legacy")
-	if ms, count := ledger.QualityMedian("node", "env", "marker", 7, now); ms != 0 || count != 0 {
+	if ms, count := ledger.QualityMedian("node", "env", "marker", 7, now, rcxLedgerProofTTL); ms != 0 || count != 0 {
 		t.Fatalf("quality survived marker semantics change: %d/%d", ms, count)
 	}
 }
@@ -266,7 +266,7 @@ func TestLedgerQualityMigrationMergesRecurrenceAndProvenance(t *testing.T) {
 	if got := ledger.Recurrence("node", "new", now.Add(10*time.Second)); got != 2 {
 		t.Fatalf("migration lost recurrence: %d", got)
 	}
-	if _, count := ledger.QualityMedian("node", "new", "marker", 7, now.Add(10*time.Second)); count != 2 {
+	if _, count := ledger.QualityMedian("node", "new", "marker", 7, now.Add(10*time.Second), rcxLedgerProofTTL); count != 2 {
 		t.Fatalf("migration quality count = %d", count)
 	}
 }
