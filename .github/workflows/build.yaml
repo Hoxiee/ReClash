@@ -315,7 +315,9 @@ jobs:
               exit 1
             fi
             rm -rf "$extracted"
-          done < <(find dist -maxdepth 1 -type f \( -iname '*.zip' -o -iname '*-setup.exe' \) -print0)
+          # The Inno -setup.exe is not a 7z-readable archive; it wraps the same
+          # payload as the .zip, so scanning the zip already covers it.
+          done < <(find dist -maxdepth 1 -type f -iname '*.zip' -print0)
 
       - name: Upload
         uses: actions/upload-artifact@v4
