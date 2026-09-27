@@ -549,6 +549,21 @@
           "type": "fix",
           "entries": [
             {
+              "id": "1977170",
+              "scope": "dashboard",
+              "text": "Grow the connection and memory sheets as their content scrolls"
+            },
+            {
+              "id": "c183856",
+              "scope": "dashboard",
+              "text": "Reserve the page swipe for the hero orb, not the action chips"
+            },
+            {
+              "id": "acf4308",
+              "scope": "access",
+              "text": "Keep the search bar visible when no apps match"
+            },
+            {
               "id": "6865b7a",
               "scope": "smart-routing",
               "text": "Migrate imported config through the unlock split"

@@ -126,6 +126,9 @@
 
 **Bug Fixes**
 
+- **dashboard** Grow the connection and memory sheets as their content scrolls (1977170)
+- **dashboard** Reserve the page swipe for the hero orb, not the action chips (c183856)
+- **access** Keep the search bar visible when no apps match (acf4308)
 - **smart-routing** Migrate imported config through the unlock split (6865b7a)
 - **rcx** Gate routing on tunnel state and unblind cold start (9e4f91f)
 - **ui** Restore wallpaper backdrop and inset controller dialog toggles (b1c8e6f)
