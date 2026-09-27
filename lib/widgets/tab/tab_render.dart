@@ -445,10 +445,39 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
         state.thumbAnimatable = null;
       }
 
+      final Rect? previousThumbRect = currentThumbRect;
       final Rect unscaledThumbRect =
           state.thumbAnimatable?.evaluate(state.thumbController) ??
           newThumbRect;
       currentThumbRect = unscaledThumbRect;
+
+      // isAnimating is already false under reduced motion (the thumb jumps
+      // straight to its end), so this leaves the resting thumb at its exact
+      // rect and only stretches it while the spring is actually travelling.
+      Rect flowingThumbRect = unscaledThumbRect;
+      if (state.thumbController.isAnimating && previousThumbRect != null) {
+        final double velocity =
+            unscaledThumbRect.center.dx - previousThumbRect.center.dx;
+        final double overhang = math.min(
+          velocity.abs() * _kThumbFlowGain,
+          unscaledThumbRect.width * _kThumbFlowMaxFraction,
+        );
+        if (velocity > 0) {
+          flowingThumbRect = Rect.fromLTRB(
+            unscaledThumbRect.left,
+            unscaledThumbRect.top,
+            unscaledThumbRect.right + overhang,
+            unscaledThumbRect.bottom,
+          );
+        } else if (velocity < 0) {
+          flowingThumbRect = Rect.fromLTRB(
+            unscaledThumbRect.left - overhang,
+            unscaledThumbRect.top,
+            unscaledThumbRect.right,
+            unscaledThumbRect.bottom,
+          );
+        }
+      }
 
       final _SegmentLocation childLocation;
       if (highlightedChildIndex == 0) {
@@ -460,15 +489,15 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
       }
       final double delta = switch (childLocation) {
         _SegmentLocation.leftmost =>
-          unscaledThumbRect.width - unscaledThumbRect.width * thumbScale,
+          flowingThumbRect.width - flowingThumbRect.width * thumbScale,
         _SegmentLocation.rightmost =>
-          unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
+          flowingThumbRect.width * thumbScale - flowingThumbRect.width,
         _SegmentLocation.inbetween => 0,
       };
       final Rect thumbRect = Rect.fromCenter(
-        center: unscaledThumbRect.center - Offset(delta / 2, 0),
-        width: unscaledThumbRect.width * thumbScale,
-        height: unscaledThumbRect.height * thumbScale,
+        center: flowingThumbRect.center - Offset(delta / 2, 0),
+        width: flowingThumbRect.width * thumbScale,
+        height: flowingThumbRect.height * thumbScale,
       );
 
       _paintThumb(context, offset, thumbRect);
